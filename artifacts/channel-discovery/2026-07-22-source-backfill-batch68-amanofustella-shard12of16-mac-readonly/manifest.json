@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-increment",
+  "batchId": "2026-07-22-source-backfill-batch68-amanofustella-shard12of16-mac-readonly",
+  "generatedAt": "2026-07-23T04:28:00.108Z",
+  "status": "success",
+  "statusMarker": "CODEX_BATCH68_SOURCE_BACKFILL_SUCCESS",
+  "result": {
+    "imported": 13,
+    "skipped": 0,
+    "failed": 0,
+    "success": true,
+    "accepted": 13,
+    "failureReason": ""
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "runnerCodeModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 12,
+    "inspectShardCount": 16
+  },
+  "precheck": {
+    "macRepo": "/Users/be/daily-song-list",
+    "macRepoHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "branch": "main",
+    "sourceFilterPath": "assets/source-filter.js",
+    "sourceFilterSizeBytes": 60415,
+    "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "node": "v20.20.2",
+    "npm": "10.8.2"
+  },
+  "discovery": {
+    "candidateCount": 225,
+    "inspectedCount": 14,
+    "usableVideoCount": 13,
+    "occurrenceCount": 167,
+    "reachedEnd": true,
+    "detailPublishedCoverage": "13/13",
+    "detailThumbnailCoverage": "13/13",
+    "discoveryThumbnailCoverage": "225/225",
+    "publishedTimestampRange": {
+      "min": 1690172679996,
+      "max": 1764044679996
+    },
+    "occurrenceSecondsRange": {
+      "min": 0,
+      "max": 21459
+    }
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 13,
+    "occurrences": 166,
+    "songs": 166,
+    "uniqueSongs": 147,
+    "publishedTimestampCoverage": "13/13",
+    "occurrenceTimeCoverage": "166/166",
+    "occurrenceSecondsCoverage": "166/166",
+    "acceptedIncrementThumbnailFieldCoverage": "13/13",
+    "publishedTimestampRange": {
+      "min": 1690172679996,
+      "max": 1764044679996
+    },
+    "occurrenceSecondsRange": {
+      "min": 0,
+      "max": 21459
+    }
+  },
+  "dirtyAudit": {
+    "inputVideoCount": 13,
+    "inputOccurrenceCount": 166,
+    "keptVideoCount": 13,
+    "keptOccurrenceCount": 166,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "stageLog": [
+    {
+      "stage": "windows-start-marker",
+      "status": "ok"
+    },
+    {
+      "raw": "2026-07-23T04:22:59Z stage=mac-precheck status=ok repo=/Users/be/daily-song-list"
+    },
+    {
+      "raw": "2026-07-23T04:22:59Z stage=discovery status=started start=2026-07-23T04:22:59Z"
+    },
+    {
+      "raw": "2026-07-23T04:24:59Z stage=discovery status=checkpoint checkpointMtime=1784780695"
+    },
+    {
+      "raw": "2026-07-23T04:25:29Z stage=discovery status=checkpoint checkpointMtime=1784780723"
+    },
+    {
+      "raw": "2026-07-23T04:25:59Z stage=discovery status=checkpoint checkpointMtime=1784780755"
+    },
+    {
+      "raw": "2026-07-23T04:26:29Z stage=discovery status=checkpoint checkpointMtime=1784780781"
+    },
+    {
+      "raw": "2026-07-23T04:26:59Z stage=discovery status=checkpoint checkpointMtime=1784780802"
+    },
+    {
+      "raw": "2026-07-23T04:27:29Z stage=discovery status=checkpoint checkpointMtime=1784780845"
+    },
+    {
+      "raw": "2026-07-23T04:27:59Z stage=discovery status=ok CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=225 inspected=14 videos=13 occurrences=167 elapsedSeconds=277 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery\""
+    },
+    {
+      "raw": "2026-07-23T04:27:59Z stage=export status=started start=2026-07-23T04:27:59Z"
+    },
+    {
+      "raw": "2026-07-23T04:28:00Z stage=export status=ok CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=13 usableVideos=13 acceptedVideos=13 skippedRegressions=0 occurrences=166 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/candidate-increment-unfiltered.json\""
+    },
+    {
+      "stage": "dirty-audit",
+      "status": "ok"
+    },
+    {
+      "stage": "mac-cleanup",
+      "status": "ok",
+      "marker": "CODEX_MAC_CLEANUP_OK removed=true"
+    },
+    {
+      "stage": "windows-cleanup",
+      "status": "ok",
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK"
+    }
+  ],
+  "markers": {
+    "discovery": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=225 inspected=14 videos=13 occurrences=167 elapsedSeconds=277 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery\"",
+    "export": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=13 usableVideos=13 acceptedVideos=13 skippedRegressions=0 occurrences=166 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/candidate-increment-unfiltered.json\""
+  },
+  "timings": {
+    "discoveryElapsedSeconds": 300
+  },
+  "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly",
+  "requiredFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "cleanup": {
+    "mac": {
+      "marker": "CODEX_MAC_CLEANUP_OK",
+      "tempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly",
+      "removed": true,
+      "dfH": [
+        "CODEX_MAC_CLEANUP_OK removed=true",
+        "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+        "/dev/disk3s5   926Gi   196Gi   691Gi    23%    613k  7.2G    0%   /System/Volumes/Data",
+        "/dev/disk3s5   926Gi   196Gi   691Gi    23%    613k  7.2G    0%   /System/Volumes/Data"
+      ]
+    },
+    "windows": {
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK",
+      "drives": {
+        "G": {
+          "root": "G:\\",
+          "usedBytes": 1362022121472,
+          "freeBytes": 686052659200,
+          "tempUsed": true,
+          "tempCleaned": true
+        },
+        "D": {
+          "root": "D:\\",
+          "usedBytes": 470181728256,
+          "freeBytes": 9903546368,
+          "artifactWritten": true
+        },
+        "C": {
+          "root": "C:\\",
+          "usedBytes": 255727706112,
+          "freeBytes": 65411272704,
+          "tempUsed": true,
+          "accidentalTempCleaned": true
+        }
+      }
+    }
+  }
+}

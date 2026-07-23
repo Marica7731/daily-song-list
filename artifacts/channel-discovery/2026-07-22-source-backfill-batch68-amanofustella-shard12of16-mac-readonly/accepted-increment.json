@@ -1,0 +1,2502 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T04:28:00.108Z",
+  "inputs": [
+    "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "videoDetails": 13,
+    "usableVideos": 13,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 166,
+    "rawSongs": 167,
+    "acceptedSongs": 166,
+    "droppedSongs": 1,
+    "suspiciousSongs": 0,
+    "skippedAllSongsRejected": 0,
+    "importAudit": {
+      "schemaVersion": 1,
+      "dropped": [
+        {
+          "channel": {
+            "name": "天ノ譜ステラ",
+            "id": "",
+            "handle": "/@AmanofuStella",
+            "url": "https://www.youtube.com/@AmanofuStella"
+          },
+          "video": {
+            "id": "nQAR14Gpars",
+            "title": "【 #歌枠 /#karaoke and #talking 】歌雑縦型はいしん！少しだけ！ #新人VSinger【#天ノ譜ステラ 】 サウンドハウス公認VSinger #耐久 #初見様大歓迎"
+          },
+          "sourceText": "7. Let It Go / イディナ・メンゼル　2:01:07",
+          "title": "Let It Go",
+          "artist": "イディナ・メンゼル 2:01:07",
+          "reason": "residual_timestamp",
+          "action": "drop",
+          "time": "2:01:07",
+          "seconds": 7267,
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb"
+        }
+      ],
+      "suspicious": []
+    },
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": [],
+    "dirtyAudit": {
+      "inputVideoCount": 13,
+      "inputOccurrenceCount": 166,
+      "keptVideoCount": 13,
+      "keptOccurrenceCount": 166,
+      "droppedVideoCount": 0,
+      "droppedOccurrenceCount": 0,
+      "suspiciousVideoCount": 0
+    }
+  },
+  "videoCount": 13,
+  "occurrenceCount": 166,
+  "videos": [
+    {
+      "videoId": "hlwsfTpHGVc",
+      "title": "【#歌枠 #KARAOKE】歌雑！！！神音質！！！【#ステラと一緒 】サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1764044679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/hlwsfTpHGVc/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBZfr8fGAIOrpIVPjDcsbzguKmtiw",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=hlwsfTpHGVc"
+      ],
+      "selectedSourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+      "selectedSourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:15:29",
+          "seconds": 929,
+          "title": "花瓶に触れた",
+          "artist": "須田景凪(バルーン)",
+          "raw": "0:15:29 \t花瓶に触れた / 須田景凪(バルーン)",
+          "rawHash": "dc89d6b25ef3480f2c3292b45b717263977c66eba3dc2cb92e142ce270d0f892",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:21:38",
+          "seconds": 1298,
+          "title": "from Y to Y",
+          "artist": "ジミーサムP",
+          "raw": "0:21:38 \tfrom Y to Y / ジミーサムP",
+          "rawHash": "40cecbf23a5d13b2809affc981d89a27d920575397d2026016fed8977fa8feb1",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:34:18",
+          "seconds": 2058,
+          "title": "側にいて",
+          "artist": "阿部真央",
+          "raw": "0:34:18 \t側にいて / 阿部真央",
+          "rawHash": "2bb17723bc84a3cff1a14feeadd902a86685677b5bf28c8c5443467c4a608900",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:43:11",
+          "seconds": 2591,
+          "title": "となりのトトロ",
+          "artist": "井上あずみ",
+          "raw": "0:43:11 \tとなりのトトロ / 井上あずみ",
+          "rawHash": "d4d47143818e7a1cd630a551a4298052869fcd5887b832d35c4989a41dfabf2e",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:53:02",
+          "seconds": 3182,
+          "title": "最後の雨",
+          "artist": "中西保志",
+          "raw": "0:53:02 \t最後の雨 / 中西保志",
+          "rawHash": "bfe143c83630cb28b71beaec1aac7b38b7ea6c434b1735d0743aff77c2a03c75",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:10:55",
+          "seconds": 4255,
+          "title": "堕天ダンス",
+          "artist": "天ノ譜ステラ",
+          "raw": "1:10:55 \t堕天ダンス / 天ノ譜ステラ",
+          "rawHash": "01364a12c69593c1d1d6aa7c331941790a5740e75df0f5b3653b504bcdb2df93",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:23:02",
+          "seconds": 4982,
+          "title": "堕天ダンス",
+          "artist": "天ノ譜ステラ",
+          "raw": "1:23:02 \t堕天ダンス / 天ノ譜ステラ",
+          "rawHash": "1249f2e3611c5a65c7f92abe0dab9acc19ee6c2ef57a1a01d01cb0990416cba2",
+          "sourceId": "UgxBC7yj4lZJejLHWkV4AaABAg",
+          "sourceHash": "67099c15ba920033d9dfd4eef6fb0316fb463182bc2777f14a51fc1f523a6e23",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.036Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "aOXHTvB16a8",
+      "title": "【#歌枠 #KARAOKE】喉ガラガラ鼻声注意⚠️初出し2曲【#ステラと一緒 】サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1758860679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/aOXHTvB16a8/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBeE8VA-IOPS3xYtJLhdK3ZLM02Ww",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=aOXHTvB16a8"
+      ],
+      "selectedSourceId": "UgzdqyUXP5o-FpvBxSB4AaABAg",
+      "selectedSourceHash": "384e6eb926ceb560c5e34058bc27ebcad58f1ca296b63c4ad3e11336d95bcb6a",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:12:32",
+          "seconds": 752,
+          "title": "Myra",
+          "artist": "Tani Yuuki",
+          "raw": "12:32\tMyra / Tani Yuuki",
+          "rawHash": "282f0ced89cbcc45da75c8b3c90010e480047d25399bf30715ac0f94f900456e",
+          "sourceId": "UgzdqyUXP5o-FpvBxSB4AaABAg",
+          "sourceHash": "384e6eb926ceb560c5e34058bc27ebcad58f1ca296b63c4ad3e11336d95bcb6a",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:46:47",
+          "seconds": 2807,
+          "title": "廻廻奇譚",
+          "artist": "Eve - Piano Ver. (ワンコーラス)",
+          "raw": "46:47\t廻廻奇譚 / Eve - Piano Ver. (ワンコーラス)",
+          "rawHash": "13d8a5a77cca885810415b318e71f224afbbcffa289187686bfe90c591343fa6",
+          "sourceId": "UgzdqyUXP5o-FpvBxSB4AaABAg",
+          "sourceHash": "384e6eb926ceb560c5e34058bc27ebcad58f1ca296b63c4ad3e11336d95bcb6a",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:54:56",
+          "seconds": 3296,
+          "title": "Overdose",
+          "artist": "なとり - Piano Ver.",
+          "raw": "54:56\tOverdose / なとり - Piano Ver.",
+          "rawHash": "96caf3758f8f81af34e5c29e20ab6dac7990bdaca3f8761259783096ea7ce253",
+          "sourceId": "UgzdqyUXP5o-FpvBxSB4AaABAg",
+          "sourceHash": "384e6eb926ceb560c5e34058bc27ebcad58f1ca296b63c4ad3e11336d95bcb6a",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.037Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "_eNKcgI0px4",
+      "title": "【#Divaが魅了する歌枠リレー 】君の歌姫、すてぴ✨【#天ノ譜ステラ 】 サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1753244679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/_eNKcgI0px4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAssODvOnLGDLnhjWwSwVQddjikOA",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=_eNKcgI0px4"
+      ],
+      "selectedSourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+      "selectedSourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:01:00",
+          "seconds": 60,
+          "title": "Departures ~あなたにおくるアイの歌~",
+          "artist": "EGOIST Piano Ver",
+          "raw": "1 01:00\tDepartures ~あなたにおくるアイの歌~/EGOIST\tPiano Ver.",
+          "rawHash": "914dc30fb86c309864a5b5dd902c73d6cc2fe598d625c2304ded580a066d1c8a",
+          "sourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+          "sourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:07:54",
+          "seconds": 474,
+          "title": "君の知らない物語",
+          "artist": "supercell Piano Ver",
+          "raw": "2 07:54\t君の知らない物語/supercell\tPiano Ver.",
+          "rawHash": "4fa6bdc0d69e89f5ed72e18ba21ab718606a578403a391753b71b0ebd6009ed8",
+          "sourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+          "sourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:15:50",
+          "seconds": 950,
+          "title": "愛・おぼえていますか",
+          "artist": "飯島真理",
+          "raw": "3 15:50\t愛・おぼえていますか/飯島真理\tワンコーラス",
+          "rawHash": "0072c0e818611f7ce22cdc3fc3433f8b82a48e3531850576a1660d2de99139f6",
+          "sourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+          "sourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:17:55",
+          "seconds": 1075,
+          "title": "ダイアモンド クレバス",
+          "artist": "シェリル・ノーム",
+          "raw": "4 17:55\tダイアモンド クレバス/シェリル・ノーム(May'n)",
+          "rawHash": "3dd871d37cabd60175879a6089517464ebf845b45e0325587a9441fa72ec5081",
+          "sourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+          "sourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:26:28",
+          "seconds": 1588,
+          "title": "アイドル",
+          "artist": "YOASOBI",
+          "raw": "5 26:28\tアイドル/YOASOBI",
+          "rawHash": "c326775beed2dbdad8db8795270fd4a8123088ea5629dd6f1f3bc22ad94d5a4f",
+          "sourceId": "Ugxc-aiU1eJT8ZVfLqt4AaABAg",
+          "sourceHash": "e7689454e8fee46314a9bba785fa0b3aa45573ec8b1a57e3c2acce333b8d79cb",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.044Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌",
+          "リレー"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "b5f17ORByjY",
+      "title": "【#歌枠 #KARAOKE】アニソンでチルしよ🎶【#天ノ譜ステラ 】縦型！サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1753244679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/b5f17ORByjY/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAzDmz83xDACfzute9awuZe8QKfdQ",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=b5f17ORByjY"
+      ],
+      "selectedSourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+      "selectedSourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:12:14",
+          "seconds": 734,
+          "title": "新時代",
+          "artist": "Ado",
+          "raw": "0:12:14　新時代 / Ado",
+          "rawHash": "82d4f8b1019c81e9c6ab41e6307d3f227c1919e6755d9e4589e70194403f5006",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:17:02",
+          "seconds": 1022,
+          "title": "星間飛行",
+          "artist": "ランカ・リー(中島愛)",
+          "raw": "0:17:02　星間飛行 / ランカ・リー(中島愛)",
+          "rawHash": "3ce49b960ecf5644b3f30df994959c4d27291733b840ed31450655f9234647a8",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:29:44",
+          "seconds": 1784,
+          "title": "一度だけの恋なら",
+          "artist": "ワルキューレ",
+          "raw": "0:29:44　一度だけの恋なら / ワルキューレ (ワンコーラス)",
+          "rawHash": "38d41230b5bf3880ac7e68aef82d1ca58dcf10d71cd9495b15643b8b368d7e75",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:35:35",
+          "seconds": 2135,
+          "title": "一度だけの恋なら",
+          "artist": "ワルキューレ",
+          "raw": "0:35:35　一度だけの恋なら / ワルキューレ",
+          "rawHash": "48c66de32cda85a6fa4dc4ff0d9672150e30ae8b3d83509c0febb0ed3bcbb7f6",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:42:10",
+          "seconds": 2530,
+          "title": "ライオン",
+          "artist": "シェリル・ノーム(May'n) ランカ・リー(中島愛)",
+          "raw": "0:42:10　ライオン / シェリル・ノーム(May'n) ランカ・リー(中島愛)",
+          "rawHash": "f6df644abbeb6bd3d3780effe13d60437cdf6fefd158dcacabfa875faa4d55a2",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:50:13",
+          "seconds": 3013,
+          "title": "君の知らない物語",
+          "artist": "supercell",
+          "raw": "0:50:13　君の知らない物語 / supercell",
+          "rawHash": "7d5ac265de9868dc6d4574b6326daf07197bd45c209cdb43672ac5011df52808",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:00:34",
+          "seconds": 3634,
+          "title": "secret base～君がくれたもの～",
+          "artist": "ZONE",
+          "raw": "1:00:34　secret base～君がくれたもの～ / ZONE",
+          "rawHash": "47bf81260e3a83b4bae88ed46abbaa1a39dc6397dda3264dc9c5b8ba9f6fc085",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:11:20",
+          "seconds": 4280,
+          "title": "ブルーバード",
+          "artist": "いきものがかり",
+          "raw": "1:11:20　ブルーバード / いきものがかり",
+          "rawHash": "a1b087da1de09e0934f7071162eb7b6b71adc17591f383a1f6316222db38dc65",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:17:52",
+          "seconds": 4672,
+          "title": "私は最強",
+          "artist": "Ado",
+          "raw": "1:17:52　私は最強 / Ado",
+          "rawHash": "5e6b6f6a83b8c70eff0a6f8f09422c7e50a6056aeee2f19a8716d33a0360a9e5",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:28:23",
+          "seconds": 5303,
+          "title": "DAN DAN 心魅かれてく",
+          "artist": "FIELD OF VIEW (サビのみ)",
+          "raw": "1:28:23　DAN DAN 心魅かれてく / FIELD OF VIEW (サビのみ)",
+          "rawHash": "9312780f1692841dbf4289b5964c054caf74602a5c75432eec8eea2ee64a8670",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:31:45",
+          "seconds": 5505,
+          "title": "ウタカタララバイ",
+          "artist": "Ado",
+          "raw": "1:31:45　ウタカタララバイ / Ado",
+          "rawHash": "e32e437715d2aeffb3514f7adeb8baa986c7799568eeba9a31e83208e86a9161",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:40:10",
+          "seconds": 6010,
+          "title": "メフィスト",
+          "artist": "女王蜂",
+          "raw": "1:40:10　メフィスト / 女王蜂",
+          "rawHash": "e15a638bc9b0eb8fe4e88c3dacc73ede68ce217eabd97384450f802b956321fb",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:45:37",
+          "seconds": 6337,
+          "title": "A Whole New World",
+          "artist": "Peabo Bryson,Regina Belle",
+          "raw": "1:45:37　A Whole New World / Peabo Bryson,Regina Belle",
+          "rawHash": "5164f2819cac2c8fe18ba3b02e299a52676cc7745abf2695b104365ad5a3846a",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:59:20",
+          "seconds": 7160,
+          "title": "革命デュアリズム",
+          "artist": "水樹奈々×T.M.Revolution",
+          "raw": "1:59:20　革命デュアリズム / 水樹奈々×T.M.Revolution",
+          "rawHash": "a865daf0b4b9188da821278c17edf5a1a668855347796d840a6bfc8dfd489f5b",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:05:48",
+          "seconds": 7548,
+          "title": "コネクト",
+          "artist": "ClariS",
+          "raw": "2:05:48　コネクト / ClariS",
+          "rawHash": "a968e5f7c06b544a0b591d10c64514c783fd20e7b9a905d82c000c53b2d081a5",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "2:12:12",
+          "seconds": 7932,
+          "title": "God knows",
+          "artist": "涼宮ハルヒ(平野綾)",
+          "raw": "2:12:12　God knows... / 涼宮ハルヒ(平野綾)",
+          "rawHash": "bdce28353e5ba4735a2aa2ef44f19c495bb1c7cd91c5032a3e13193daecd253e",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "2:21:23",
+          "seconds": 8483,
+          "title": "そばかす",
+          "artist": "JUDY AND MARY",
+          "raw": "2:21:23　そばかす / JUDY AND MARY",
+          "rawHash": "d79304426347d3fbc3c310b174362c5f4f9ef1bc1a2826643c454767e963aad9",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "2:43:08",
+          "seconds": 9788,
+          "title": "only my railgun",
+          "artist": "FripSide",
+          "raw": "2:43:08　only my railgun / FripSide",
+          "rawHash": "d81e699dca85ab9774eff4ad7645b7a6c30bacc940946cabeff67d0833a90b75",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "3:03:05",
+          "seconds": 10985,
+          "title": "The Bravery",
+          "artist": "supercell (ワンコーラス)",
+          "raw": "3:03:05　The Bravery / supercell (ワンコーラス)",
+          "rawHash": "1973f6b0d74085e1bf2096708b89af2d8210485932a14b5d4652741310a2d115",
+          "sourceId": "UgwRpoFT5hGDHHY2u594AaABAg",
+          "sourceHash": "01e837de204cd27bf207e7b27ab30c97d9d8ac8b916d9cdc2d75ae67d3dfa91f",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.046Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "eEZLMpvylCo",
+      "title": "【#歌枠 #KARAOKE】バレンタイン💝恋の歌枠×シチュボ【#天ノ譜ステラ 】サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1753244679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/eEZLMpvylCo/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDFgq3uacTCfPjPF2grsEm4ceFtmA",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=eEZLMpvylCo"
+      ],
+      "selectedSourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+      "selectedSourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:20:33",
+          "seconds": 1233,
+          "title": "おちゃめ機能",
+          "artist": "ゴジマジP - Piano Ver.",
+          "raw": "0:20:33 \tおちゃめ機能 / ゴジマジP\t - Piano Ver.",
+          "rawHash": "0ff7925a8a7df3144d6d9bd06f3afccf735b981e6bf6c7916ee3b865a0b10bef",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:26:33",
+          "seconds": 1593,
+          "title": "バレンタイン・キッス",
+          "artist": "国生さゆり",
+          "raw": "0:26:33 \tバレンタイン・キッス / 国生さゆり",
+          "rawHash": "8cff757c9d08154063b954db500024911e3bf20e9cee6bac32418c541faccbba",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:33:27",
+          "seconds": 2007,
+          "title": "トゥインクル",
+          "artist": "Junky - Piano Ver.",
+          "raw": "0:33:27 \tトゥインクル / Junky\t - Piano Ver.",
+          "rawHash": "a987ce7892a7ab0833911aa9227f21692301b1c0e59ac77dd1db57f544bf9158",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:37:35",
+          "seconds": 2255,
+          "title": "メランコリック",
+          "artist": "Junky - Piano Ver.",
+          "raw": "0:37:35 \tメランコリック / Junky\t - Piano Ver.",
+          "rawHash": "3f3ddef7d6b56cc21ad5984c20707f2b056bec3dd64f3b75c7453d2ce6772403",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:56:21",
+          "seconds": 3381,
+          "title": "告白予行練習",
+          "artist": "HoneyWorks",
+          "raw": "0:56:21 \t告白予行練習 / HoneyWorks",
+          "rawHash": "6d2c6f93fe5d596334a11e3f523be91ab527ef8e872df708c15200b4fa7fca7c",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:02:25",
+          "seconds": 3745,
+          "title": "今好きになる",
+          "artist": "HoneyWorks",
+          "raw": "1:02:25 \t今好きになる。 / HoneyWorks",
+          "rawHash": "c1f60eedb8a3e8144b830fdfbac12ea985a857b7dd2b23287c30f1f44f8dfa0a",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:21:06",
+          "seconds": 4866,
+          "title": "First Love",
+          "artist": "宇多田ヒカル",
+          "raw": "1:21:06 \tFirst Love / 宇多田ヒカル",
+          "rawHash": "2816b07e5144449cf7de61747942cfbe14b978e61d9efdcdf9993ba393a6345f",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:30:33",
+          "seconds": 5433,
+          "title": "初恋の絵本",
+          "artist": "HoneyWorks",
+          "raw": "1:30:33 \t初恋の絵本 / HoneyWorks",
+          "rawHash": "bf3015b9862893739fde353edeccdf2f907e48c303b863ebabfd14d18586e04f",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:39:58",
+          "seconds": 5998,
+          "title": "病名恋ワズライ",
+          "artist": "HoneyWorks",
+          "raw": "1:39:58 \t病名恋ワズライ / HoneyWorks",
+          "rawHash": "801b533656e2c7c88d984c0973a96552b0b43c546f7edcf480012dae7815f200",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:53:59",
+          "seconds": 6839,
+          "title": "愛・おぼえていますか",
+          "artist": "飯島真理",
+          "raw": "1:53:59 \t愛・おぼえていますか / 飯島真理 (ワンコーラス)",
+          "rawHash": "5eb2ac173ed9b507150dd14dcb74888f83f05a23b837b17d7ab9c5430d400ed9",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:15:52",
+          "seconds": 8152,
+          "title": "ロミオとシンデレラ",
+          "artist": "doriko - Piano Ver.",
+          "raw": "2:15:52 \tロミオとシンデレラ / doriko - Piano Ver.",
+          "rawHash": "f439e59b16bfac98519f52fd7c76be9dec05a288296d99ebe029054ab0cd9817",
+          "sourceId": "Ugxlmv-xgzLYXHHEDKh4AaABAg",
+          "sourceHash": "2c36cae6aaa9a5f8dea25766954cef2b0059bb00c39bcfeded932b1e5293e297",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.049Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "4x9rZp9e-vU",
+      "title": "【#歌枠 #KARAOKE】設定変えたら音響神になった！！【#天ノ譜ステラ 】 サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1753244679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/4x9rZp9e-vU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC5pjjOJFmXcb_wiQ-8rctuPH6rsg",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=4x9rZp9e-vU"
+      ],
+      "selectedSourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+      "selectedSourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:11:24",
+          "seconds": 684,
+          "title": "なんでもないや",
+          "artist": "RADWIMPS",
+          "raw": "0:11:24 \tなんでもないや (movie ver.) / RADWIMPS",
+          "rawHash": "92a15fe17ee868f4f6478093c1a8834ff824d5d029f6d3c6f83abe142d13024d",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:28:10",
+          "seconds": 1690,
+          "title": "Wherever you are",
+          "artist": "ONE OK ROCK",
+          "raw": "0:28:10 \tWherever you are / ONE OK ROCK",
+          "rawHash": "e5e7f86617d03652858859e722f59f7a2f3bc9cf28e741ddbc2aa957f81fa0ad",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:42:52",
+          "seconds": 2572,
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "0:42:52 \t怪獣の花唄 / Vaundy",
+          "rawHash": "f4f75dff166c2668d6eeb31128f13e6762af144a25adf037aeaf74d0fbd0e0b5",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:59:22",
+          "seconds": 3562,
+          "title": "First Love",
+          "artist": "宇多田ヒカル",
+          "raw": "0:59:22 \tFirst Love / 宇多田ヒカル",
+          "rawHash": "d081e0cd757659d006aa2154e6d464f6260bb5473a0492a270dfb154c979762c",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:12:34",
+          "seconds": 4354,
+          "title": "secret base〜君がくれたもの〜",
+          "artist": "ZONE",
+          "raw": "1:12:34 \tsecret base〜君がくれたもの〜 / ZONE",
+          "rawHash": "a76013288df5f1695dd7851fa0be60f6b11464c600e65a4185b12e39e127d5ef",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:23:32",
+          "seconds": 5012,
+          "title": "炎",
+          "artist": "LiSA",
+          "raw": "1:23:32 \t炎 / LiSA",
+          "rawHash": "1a73d952630c117895868e9e77003cb963538faba1a54e50a82009eba571d989",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:32:18",
+          "seconds": 5538,
+          "title": "花になって",
+          "artist": "緑黄色社会",
+          "raw": "1:32:18 \t花になって / 緑黄色社会 (ワンコーラス)",
+          "rawHash": "b7c878ec73b0ed0475c74de34991de1990346d25c1b9285d3085bd1b2b5365cb",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:39:47",
+          "seconds": 5987,
+          "title": "君の知らない物語",
+          "artist": "supercell",
+          "raw": "1:39:47 \t君の知らない物語 / supercell",
+          "rawHash": "dbb1523d7b54ab9fd541e0f51f52dc1e1b901cd9638a2718cc9078ac0a32499b",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:52:56",
+          "seconds": 6776,
+          "title": "たばこ",
+          "artist": "コレサワ - Piano Ver.",
+          "raw": "1:52:56 \tたばこ / コレサワ - Piano Ver.",
+          "rawHash": "762db3c7c7d13292a040545f1e3546cec7624370cca32a2d04fc9674dda9701e",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:03:54",
+          "seconds": 7434,
+          "title": "奏(かなで)",
+          "artist": "スキマスイッチ - Piano Ver.",
+          "raw": "2:03:54 \t奏(かなで) / スキマスイッチ - Piano Ver.",
+          "rawHash": "f8432d8176ef2e35f68eb41da13cafb60c469c31c5111bd74b67ede60a294475",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:21:17",
+          "seconds": 8477,
+          "title": "クリスマスソング",
+          "artist": "back number - Piano Ver.",
+          "raw": "2:21:17 \tクリスマスソング / back number - Piano Ver.",
+          "rawHash": "7f2372fa455cccbd077fc0cb1c0689deb668d65e9a30849fe1d687a1ef0e3139",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:30:12",
+          "seconds": 9012,
+          "title": "魔法の絨毯",
+          "artist": "川崎鷹也 - Piano Ver.",
+          "raw": "2:30:12 \t魔法の絨毯 / 川崎鷹也 - Piano Ver.",
+          "rawHash": "d538f0d8e2273d3dcbf6dbdc551751369d3415c56d7247f581af0f71cfd9d53b",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:39:30",
+          "seconds": 9570,
+          "title": "ドライフラワー",
+          "artist": "優里 - Piano Ver.",
+          "raw": "2:39:30 \tドライフラワー / 優里 - Piano Ver.",
+          "rawHash": "49fdfd3bb44f0b223e8541917b64a64c9544034a27973be82ad6ba87045d9b4b",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:49:16",
+          "seconds": 10156,
+          "title": "Overdose",
+          "artist": "なとり - Piano Ver.",
+          "raw": "2:49:16 \tOverdose / なとり - Piano Ver.",
+          "rawHash": "7a951d9c6a5d4f6852599f848e3119441561a1c5a3f59efcb1961a67f5f8a129",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:54:46",
+          "seconds": 10486,
+          "title": "愛をこめて花束を",
+          "artist": "Superfly - Piano Ver.",
+          "raw": "2:54:46 \t愛をこめて花束を / Superfly - Piano Ver.",
+          "rawHash": "635a992da817a21852c2a29cc887438dc443bd1536e6d29c7bd11eae067c6bfe",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "3:05:33",
+          "seconds": 11133,
+          "title": "高嶺の花子さん",
+          "artist": "back number - Piano Ver.",
+          "raw": "3:05:33 \t高嶺の花子さん / back number - Piano Ver.",
+          "rawHash": "35e34dd3c06515c9bb58279b4b93208df2dd397193b8bcc69fb8bf9827365e75",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "3:11:46",
+          "seconds": 11506,
+          "title": "さよならミッドナイト",
+          "artist": "もじゃ - Piano Ver.",
+          "raw": "3:11:46 \tさよならミッドナイト / もじゃ - Piano Ver.",
+          "rawHash": "18a8ee42cc837bcb49de9eb3bbcbe78fa34a4804b7f27c7e9d8e9703c8793016",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "3:21:19",
+          "seconds": 12079,
+          "title": "変わらないもの",
+          "artist": "奥華子 - Piano Ver.",
+          "raw": "3:21:19 \t変わらないもの / 奥華子 - Piano Ver.",
+          "rawHash": "ae1c228fdeee9d74fa1793a993104d11fb29a6ac1b3088bb322b085b9459b17d",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "3:29:18",
+          "seconds": 12558,
+          "title": "曖昧劣情Lover",
+          "artist": "電ポルP - Piano Ver.",
+          "raw": "3:29:18 \t曖昧劣情Lover / 電ポルP - Piano Ver.",
+          "rawHash": "6e3c5013528fc84cd18968c39921102dd8f1a8ccdf35b50f5aa3ad67641b67e2",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 20,
+          "time": "3:41:01",
+          "seconds": 13261,
+          "title": "KING",
+          "artist": "Kanaria",
+          "raw": "3:41:01 \tKING / Kanaria",
+          "rawHash": "626beafd07cf55b0349239abf6dd26fc2a058db3de4ad81a379558747e2d2b86",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 21,
+          "time": "3:46:05",
+          "seconds": 13565,
+          "title": "恋愛サーキュレーション",
+          "artist": "千石撫子(花澤香菜)",
+          "raw": "3:46:05 \t恋愛サーキュレーション / 千石撫子(花澤香菜)",
+          "rawHash": "b73fb06456ab1568ccba4b6fff9f04ddeb2deeea70ed62688cf1d1aebfac2a8e",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 22,
+          "time": "3:51:46",
+          "seconds": 13906,
+          "title": "ブルーバード",
+          "artist": "いきものがかり",
+          "raw": "3:51:46 \tブルーバード / いきものがかり",
+          "rawHash": "89bce957d5e8775491e08228cc6323c59db4741f3852ffcd6b7e75b3890fa562",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 23,
+          "time": "4:07:52",
+          "seconds": 14872,
+          "title": "マトリョシカ",
+          "artist": "ハチ - Piano Ver.",
+          "raw": "4:07:52 \tマトリョシカ / ハチ - Piano Ver.",
+          "rawHash": "1c5a576c52ea2e7d509e00e2a037e7ac01dc9d6dd1d2d1189741c0cb001cbb73",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 24,
+          "time": "4:12:15",
+          "seconds": 15135,
+          "title": "恋愛裁判",
+          "artist": "40mP - Piano Ver.",
+          "raw": "4:12:15 \t恋愛裁判 / 40mP - Piano Ver.",
+          "rawHash": "67f6b8b771b278d0e1dfd0327117806c9a041d6cd0a1ab46a73d855074fe9b62",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 25,
+          "time": "4:17:23",
+          "seconds": 15443,
+          "title": "アイロニ",
+          "artist": "すこっぷ - Piano Ver.",
+          "raw": "4:17:23 \tアイロニ / すこっぷ - Piano Ver.",
+          "rawHash": "4907d414e8ba815088ebddcf10ef817722ff96e5c15fb5f2b679e832c2f25e52",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 26,
+          "time": "4:24:06",
+          "seconds": 15846,
+          "title": "わたしのアール",
+          "artist": "くらげP - Piano Ver.",
+          "raw": "4:24:06 \tわたしのアール / くらげP - Piano Ver.",
+          "rawHash": "3ff3815bb242979701e9fd4d6779c4e614e91c9319be0561c5dd05b8566aebf9",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 27,
+          "time": "4:41:27",
+          "seconds": 16887,
+          "title": "心做し",
+          "artist": "蝶々P - Piano Ver.",
+          "raw": "4:41:27 \t心做し / 蝶々P - Piano Ver.",
+          "rawHash": "8b7befcde51de7df1291428464d36408d350f54793c7a8143094b3883bfd1003",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 28,
+          "time": "4:47:06",
+          "seconds": 17226,
+          "title": "からくりピエロ",
+          "artist": "40mP - Piano Ver.",
+          "raw": "4:47:06 \tからくりピエロ / 40mP - Piano Ver.",
+          "rawHash": "a382559ec97acf254bfd475c9c87ed5f24b5614ce52887a5ef414abb4352a853",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 29,
+          "time": "4:52:41",
+          "seconds": 17561,
+          "title": "新時代",
+          "artist": "Ado",
+          "raw": "4:52:41 \t新時代 / Ado",
+          "rawHash": "526c8f2bac621066a23f6f00e18309c211a5aa28d4d56017615f03eddca78314",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 30,
+          "time": "4:57:23",
+          "seconds": 17843,
+          "title": "酔いどれ知らず",
+          "artist": "Kanaria",
+          "raw": "4:57:23 \t酔いどれ知らず / Kanaria",
+          "rawHash": "39f248680c8bbf270fff1b938f85c0d91de986b44a3b14ab07a2595634a21952",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 31,
+          "time": "5:02:47",
+          "seconds": 18167,
+          "title": "フォニイ",
+          "artist": "ツミキ",
+          "raw": "5:02:47 \tフォニイ / ツミキ",
+          "rawHash": "e07d9eeef0f18a76dacec5b01477ff31bc4eb0badbd7d18c30bc702a3b141073",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 32,
+          "time": "5:08:52",
+          "seconds": 18532,
+          "title": "唱",
+          "artist": "Ado",
+          "raw": "5:08:52 \t唱 / Ado",
+          "rawHash": "273b10e58d58bbdfcf9b06a565b09c29e3798bc577a018aefaf967ac12f0a9b1",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 33,
+          "time": "5:14:14",
+          "seconds": 18854,
+          "title": "アイドル",
+          "artist": "YOASOBI",
+          "raw": "5:14:14 \tアイドル / YOASOBI",
+          "rawHash": "3557c28420b29906217abc384f5514655fd01a8a57bd0baf196fb250773e12c7",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 34,
+          "time": "5:25:11",
+          "seconds": 19511,
+          "title": "ハートシェイカー・ドキュメンタリー",
+          "artist": "天ノ譜ステラ",
+          "raw": "5:25:11 \tハートシェイカー・ドキュメンタリー / 天ノ譜ステラ",
+          "rawHash": "aadca6f8a65708b0c8bb29c977fb4909d79095e1d49443030e8f036cc47b4a72",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 35,
+          "time": "5:47:14",
+          "seconds": 20834,
+          "title": "きゅうくらりん",
+          "artist": "いよわ - Piano Ver.",
+          "raw": "5:47:14 \tきゅうくらりん / いよわ - Piano Ver.",
+          "rawHash": "430c3ad683cf292a1c5a335a5141c998a43576539452e511943ba3320363e7e8",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 36,
+          "time": "5:53:28",
+          "seconds": 21208,
+          "title": "トゥインクル",
+          "artist": "Junky - Piano Ver.",
+          "raw": "5:53:28 \tトゥインクル / Junky - Piano Ver.",
+          "rawHash": "096160da2bb99e08ef8bc805d9f133bd239c622f4ade95c9acd715b7ee31307c",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        },
+        {
+          "index": 37,
+          "time": "5:57:39",
+          "seconds": 21459,
+          "title": "from Y to Y",
+          "artist": "ジミーサムP - Piano Ver.",
+          "raw": "5:57:39 \tfrom Y to Y / ジミーサムP - Piano Ver.",
+          "rawHash": "0567c146dd11695197b14c9eaf40b55d6d75b7963d68cf0a1a9cf0e5ed504581",
+          "sourceId": "Ugwy4dVhZ3maIQb6XiJ4AaABAg",
+          "sourceHash": "31c190c387b73fdc9eccc3cf3521afc62c528dd30ec3dd86e4330182b4b49db5",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.053Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "YkNPfc9bmJA",
+      "title": "【 #なみだ歌枠リレー 】#あまあまこらぼ ♡素敵な時間過ごそうねっ【サウンドハウス公認VSinger 】#新人VSinger #初見様大歓迎 #歌枠リレー #天ノ譜ステラ #天絆ささは",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/YkNPfc9bmJA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBfSgIMUPAH3FXd-VGoyspyHVH1PA",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=YkNPfc9bmJA"
+      ],
+      "selectedSourceId": "UgwSEcPxSl2K3qXhRYt4AaABAg",
+      "selectedSourceHash": "874673309320f3a129500a64e8f36970a7ad2bade5ca0da3a9e96799fc9bd160",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:00:04",
+          "seconds": 4,
+          "title": "ロキ",
+          "artist": "みきとP",
+          "raw": "00:04\tロキ / みきとP",
+          "rawHash": "8e4e4f1cc34f9461e5937c18cc30cd7cdd2c2c7fbdd67442e6ef0f34aae95278",
+          "sourceId": "UgwSEcPxSl2K3qXhRYt4AaABAg",
+          "sourceHash": "874673309320f3a129500a64e8f36970a7ad2bade5ca0da3a9e96799fc9bd160",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:06:44",
+          "seconds": 404,
+          "title": "ライオン",
+          "artist": "May'n/中島愛",
+          "raw": "06:44\tライオン / May'n/中島愛",
+          "rawHash": "9cfb01458637d366fee0f70245c3e5ffe9c7641807e36e9946bd42fa1e09f472",
+          "sourceId": "UgwSEcPxSl2K3qXhRYt4AaABAg",
+          "sourceHash": "874673309320f3a129500a64e8f36970a7ad2bade5ca0da3a9e96799fc9bd160",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:13:43",
+          "seconds": 823,
+          "title": "不可思議のカルテ",
+          "artist": "桜島麻衣(CV:瀬戸麻沙美)、古賀朋絵(CV:東山奈央)、 双葉理央(CV:種﨑敦美)、豊浜のどか(CV:内田真礼)、 梓川かえで(CV:久保ユリカ)、牧之原翔子(CV:水瀬いのり)",
+          "raw": "13:43\t不可思議のカルテ / 桜島麻衣(CV:瀬戸麻沙美)、古賀朋絵(CV:東山奈央)、 双葉理央(CV:種﨑敦美)、豊浜のどか(CV:内田真礼)、 梓川かえで(CV:久保ユリカ)、牧之原翔子(CV:水瀬いのり)",
+          "rawHash": "e3221a48ebe6044fd8c1636395564a30e4bf2223b0d4617870b5f99bf3a25d92",
+          "sourceId": "UgwSEcPxSl2K3qXhRYt4AaABAg",
+          "sourceHash": "874673309320f3a129500a64e8f36970a7ad2bade5ca0da3a9e96799fc9bd160",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:22:05",
+          "seconds": 1325,
+          "title": "Butter-Fly",
+          "artist": "和田光司",
+          "raw": "22:05\tButter-Fly / 和田光司",
+          "rawHash": "4c2e7c86adb387fbf62798f5825612ae66fd5552ee516a433212639464692597",
+          "sourceId": "UgwSEcPxSl2K3qXhRYt4AaABAg",
+          "sourceHash": "874673309320f3a129500a64e8f36970a7ad2bade5ca0da3a9e96799fc9bd160",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.053Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌",
+          "リレー"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "TNjC6Ucw5SE",
+      "title": "【 #歌枠 /#karaoke 】久しぶり～！横型おうた！#新人VSinger【#天ノ譜ステラ 】 サウンドハウス公認VSinger #初見様大歓迎",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/TNjC6Ucw5SE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCFbE9kUqiwDJj6KSJt-PwKU7rBLQ",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=TNjC6Ucw5SE"
+      ],
+      "selectedSourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+      "selectedSourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:06:38",
+          "seconds": 398,
+          "title": "変わらないもの",
+          "artist": "奥華子",
+          "raw": "0:06:38 \t変わらないもの / 奥華子",
+          "rawHash": "70cf6005a0506ae8690abfb9d2257918e1db81520f8ac718ea8991057fee940d",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:12:24",
+          "seconds": 744,
+          "title": "気まぐれロマンティック",
+          "artist": "いきものがかり",
+          "raw": "0:12:24 \t気まぐれロマンティック / いきものがかり",
+          "rawHash": "9d279752fe48ba687fc9d8c8e7c435142159ae591bd9e38ec70508afa493c78b",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:18:45",
+          "seconds": 1125,
+          "title": "打上花火",
+          "artist": "DAOKO×米津玄師",
+          "raw": "0:18:45 \t打上花火 / DAOKO×米津玄師",
+          "rawHash": "68c863c30782793ac2c854cb89298b4e490f9dbb0b65dd97d6793496d29bf6af",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:23:50",
+          "seconds": 1430,
+          "title": "Catch You Catch Me",
+          "artist": "グミ",
+          "raw": "0:23:50 \tCatch You Catch Me / グミ",
+          "rawHash": "dcb1e492bc41bd98e669778070ae944a4a39033a13ad4eadb2baf2868e417c03",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:31:14",
+          "seconds": 1874,
+          "title": "プラチナ",
+          "artist": "坂本真綾",
+          "raw": "0:31:14 \tプラチナ / 坂本真綾",
+          "rawHash": "9a6e05047d565a4eef17c12afb69547c250b48b3013f74dc12e77d0540d409cd",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:39:50",
+          "seconds": 2390,
+          "title": "sweets parade",
+          "artist": "髏々宮カルタ(花澤香菜)",
+          "raw": "0:39:50 \tsweets parade / 髏々宮カルタ(花澤香菜)",
+          "rawHash": "7a671924377e463c120ec322377ac89ff596b5f547b922d6a69900fba393c898",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:48:03",
+          "seconds": 2883,
+          "title": "ぼなぺてぃーと♡S (サビのみ)",
+          "artist": "ブレンド・A",
+          "raw": "0:48:03 \tぼなぺてぃーと♡S (サビのみ) / ブレンド・A",
+          "rawHash": "2a10c36e9724fb4240bd63375ac2ec3bc4435ee758c1ea85ac179cbca082140e",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:51:25",
+          "seconds": 3085,
+          "title": "ようこそジャパリパークへ",
+          "artist": "どうぶつビスケッツ×PPP",
+          "raw": "0:51:25 \tようこそジャパリパークへ / どうぶつビスケッツ×PPP",
+          "rawHash": "e82b974896940c0de6f840252f90b879481a686c84924a046e59482e299eb5c1",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:01:18",
+          "seconds": 3678,
+          "title": "恋",
+          "artist": "星野源",
+          "raw": "1:01:18 \t恋 (short) / 星野源",
+          "rawHash": "1b99b9ca210acc4e3de1efed816ffda2fe6c1d60bc5dc920b9cebbb039c4a034",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:05:42",
+          "seconds": 3942,
+          "title": "First Love",
+          "artist": "宇多田ヒカル",
+          "raw": "1:05:42 \tFirst Love / 宇多田ヒカル",
+          "rawHash": "06af10182ad5cba21dc1b918986ed4747438b19cf2a25e0e0c35c70a7e43c8ee",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:12:43",
+          "seconds": 4363,
+          "title": "Booo!",
+          "artist": "TOKOTOKO(西沢さんP)",
+          "raw": "1:12:43 \tBooo! / TOKOTOKO(西沢さんP)",
+          "rawHash": "b28e6760682ab1520904cf792391e5a28435df187614190d39dd64f84653c7c9",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:16:51",
+          "seconds": 4611,
+          "title": "曖昧劣情Lover - Piano Ver",
+          "artist": "電ポルP",
+          "raw": "1:16:51 \t曖昧劣情Lover - Piano Ver. / koyori(電ポルP)",
+          "rawHash": "2c292c71c62c829320beda424be45455be32395d6f53f91d2e9570bff2a7a0b5",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:22:55",
+          "seconds": 4975,
+          "title": "愛をこめて花束を",
+          "artist": "Superfly",
+          "raw": "1:22:55 \t愛をこめて花束を / Superfly",
+          "rawHash": "4c4674a0d157fb71fce13af9f1cfa36c18f46b53cd3c94bd63ac9da6bf9d1c30",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:30:52",
+          "seconds": 5452,
+          "title": "花瓶に触れた - Piano Ver",
+          "artist": "須田景凪(バルーン)",
+          "raw": "1:30:52 \t花瓶に触れた - Piano Ver. / 須田景凪(バルーン)",
+          "rawHash": "191b2fafa8ec443a71c4f0a8f159a5ae787cc51d2d9886bd77818a545d9eb790",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "1:37:05",
+          "seconds": 5825,
+          "title": "天ノ弱 - Piano Ver",
+          "artist": "164",
+          "raw": "1:37:05 \t天ノ弱 - Piano Ver. / 164",
+          "rawHash": "7a27e0b97482b623bdb56da5940a28d587732dedf328c99579c3f5fc1fa5673c",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "1:44:45",
+          "seconds": 6285,
+          "title": "ヒロイン育成計画",
+          "artist": "HoneyWorks",
+          "raw": "1:44:45 \tヒロイン育成計画 / HoneyWorks",
+          "rawHash": "ce6bda1dea56b460251f4b4c731b63a1c6214fbe7bb0690d53ca6987f5341bf6",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "1:50:57",
+          "seconds": 6657,
+          "title": "カヌレ",
+          "artist": "CHiCO with HoneyWorks",
+          "raw": "1:50:57 \tカヌレ / CHiCO with HoneyWorks",
+          "rawHash": "66548cb64a60c8f475df109382ac9323c0d0b9211ddf1ed2c4aa637ea6b5db51",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "2:45:35",
+          "seconds": 9935,
+          "title": "そばかす",
+          "artist": "JUDY AND MARY",
+          "raw": "2:45:35 \tそばかす / JUDY AND MARY",
+          "rawHash": "b8da8ec1660bf2a9de034827d9ac0dc51ee20d85c516ab4f066df6aace502d9c",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "2:50:33",
+          "seconds": 10233,
+          "title": "晩餐歌",
+          "artist": "tuki.",
+          "raw": "2:50:33 \t晩餐歌 / tuki.",
+          "rawHash": "08f712ead6e3e8da4f5fcf0a65b87dbae3345783ce9f42aae095fa1a6ce4993e",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 20,
+          "time": "2:55:24",
+          "seconds": 10524,
+          "title": "メルト",
+          "artist": "ryo",
+          "raw": "2:55:24 \tメルト / ryo",
+          "rawHash": "22d6c778ad36682e56c6e226e16b222cd0b1c52af2c893bacc26685ae5bdcc41",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 21,
+          "time": "3:01:33",
+          "seconds": 10893,
+          "title": "告白予行練習",
+          "artist": "HoneyWorks",
+          "raw": "3:01:33 \t告白予行練習 / HoneyWorks",
+          "rawHash": "7da3ab43aebdcd83e1002830bddd2c8aad2847d0f79b1e2cc2292b915cf1eecb",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 22,
+          "time": "3:08:41",
+          "seconds": 11321,
+          "title": "接吻 kiss",
+          "artist": "Original Love",
+          "raw": "3:08:41 \t接吻 kiss (short) / Original Love",
+          "rawHash": "b5c1d955d02713a1d1835bac760b2e91a6729ece888e1c080847ce7113929d6e",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 23,
+          "time": "3:26:40",
+          "seconds": 12400,
+          "title": "星間飛行",
+          "artist": "ランカ・リー(中島愛)",
+          "raw": "3:26:40 \t星間飛行 / ランカ・リー(中島愛)",
+          "rawHash": "94264708cadd3fc5d6b4b4ac4c239b80fd683f41b36a5469f0ca19ee1d8b1dd2",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        },
+        {
+          "index": 24,
+          "time": "3:38:02",
+          "seconds": 13082,
+          "title": "ルンがピカッと光ったら",
+          "artist": "ワルキューレ",
+          "raw": "3:38:02 \tルンがピカッと光ったら / ワルキューレ",
+          "rawHash": "5dcc2854b0501b6991c2885d293b5e4784b9393cde3a2b30aafb058c2872888d",
+          "sourceId": "UgxYx2e8K5glTQPtBJN4AaABAg",
+          "sourceHash": "53ab6c06419b221e681a2ce2a4a686a7a1db1a69d5e89e4d6d96be2d2db9f5a9",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.055Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "nQAR14Gpars",
+      "title": "【 #歌枠 /#karaoke and #talking 】歌雑縦型はいしん！少しだけ！ #新人VSinger【#天ノ譜ステラ 】 サウンドハウス公認VSinger #耐久 #初見様大歓迎",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/nQAR14Gpars/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDcdL-LUL7gS5VUqBCLLq86e9ImZw",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=nQAR14Gpars"
+      ],
+      "selectedSourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+      "selectedSourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:20:06",
+          "seconds": 1206,
+          "title": "香水",
+          "artist": "瑛人",
+          "raw": "1. 香水 / 瑛人　20:06",
+          "rawHash": "ab66c9287152b0f8084d260ca8f41c57215d930b7c0865735afac80bd70da86e",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:30:25",
+          "seconds": 1825,
+          "title": "ハートシェイカー・ドキュメンタリー",
+          "artist": "天ノ譜ステラ",
+          "raw": "2. ハートシェイカー・ドキュメンタリー / 天ノ譜ステラ　30:25",
+          "rawHash": "4e07191bd1c471bf7f12dab1548a5cbeeefe2f41bee584bb494907ad50ddcf46",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:42:36",
+          "seconds": 2556,
+          "title": "夜明けと蛍",
+          "artist": "N-buna",
+          "raw": "3. 夜明けと蛍 / N-buna　42:36",
+          "rawHash": "228a9b533dea644580e3c2b906289118e0309a6c83aa6959a696a39933e2a12b",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:49:48",
+          "seconds": 2988,
+          "title": "おにいちゃん",
+          "artist": "未記載",
+          "raw": "49:48　おにいちゃん",
+          "rawHash": "57a58b64762de986757cb8be0ef700b7ad9b072671b721e09c14810752f2cfb9",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:56:02",
+          "seconds": 3362,
+          "title": "せんぱい",
+          "artist": "未記載",
+          "raw": "56:02　せんぱい",
+          "rawHash": "47f32f5e1ca0a74015ebd2f54164871abe25a0d45ae7f98aab140f404fc3f928",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:05:42",
+          "seconds": 3942,
+          "title": "クリスマスソング",
+          "artist": "Back number",
+          "raw": "4. クリスマスソング / Back number　1:05:42",
+          "rawHash": "228c1c45f74835d60be0de4d7bdc988c8eb20500396350bd5be16efd1ed12fad",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:36:17",
+          "seconds": 5777,
+          "title": "なんでもないや",
+          "artist": "RADWIMPS",
+          "raw": "5. なんでもないや / RADWIMPS　1:36:17",
+          "rawHash": "9c484de5b906cc0711ff27d5e1e0b269860a4288a1eac4a0a613bcf7509e572f",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:48:24",
+          "seconds": 6504,
+          "title": "星街すいせい",
+          "artist": "Stellar Stellar",
+          "raw": "6. 星街すいせい / Stellar Stellar　1:48:24",
+          "rawHash": "a9503a176b2656f09683db0a3cca26ff658d0f489612a70d8d09da6f912e92c5",
+          "sourceId": "UgxPsvGBXho8NMRoStd4AaABAg",
+          "sourceHash": "1aaad4040c42d4dbce8980a2ce0139b67a472fb533e79c8927bfd46cf21866fb",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.061Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "279SLENguLw",
+      "title": "【#歌枠 /#karaoke 】 #歌うまＶ歌枠リレー 振り返り配信 #新人VSinger 🎤💫【サウンドハウス公認Vtuber】#初見様大歓迎",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/279SLENguLw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBvhTncqiGNacQ07Gdzga8ni7n3vw",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=279SLENguLw"
+      ],
+      "selectedSourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+      "selectedSourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:21:48",
+          "seconds": 1308,
+          "title": "心拍数#0822",
+          "artist": "Piano Ver",
+          "raw": "0:21:48 \t心拍数#0822 - Piano Ver.",
+          "rawHash": "cf617bd760cfbe2dd680bb0f83391ab31d86e3496c03f1672ad594dff506ffc3",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:36:01",
+          "seconds": 2161,
+          "title": "曖昧劣情Lover",
+          "artist": "Piano Ver",
+          "raw": "0:36:01 \t曖昧劣情Lover - Piano Ver.",
+          "rawHash": "90f81a97c331e58b87064cad3f4148713f983fe5f15a70728a34e8ff8596b6c9",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:50:13",
+          "seconds": 3013,
+          "title": "ハートシェイカー・ドキュメンタリー",
+          "artist": "未記載",
+          "raw": "0:50:13 \tハートシェイカー・ドキュメンタリー",
+          "rawHash": "f4ed11cfb9d530498a5b72facf10aa562313cfe264ffae4e50200887581cba7f",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:04:48",
+          "seconds": 3888,
+          "title": "シザーハンズ",
+          "artist": "未記載",
+          "raw": "1:04:48 \tシザーハンズ",
+          "rawHash": "a6155b36810d92bebf07f0b38da200829cb7368c2fbd6e30d0a0c5f7067c799f",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:34:13",
+          "seconds": 5653,
+          "title": "クリスマスソング",
+          "artist": "未記載",
+          "raw": "1:34:13 \tクリスマスソング",
+          "rawHash": "b72ac36bf4769c83624125f9fdfdf7c26252fd78d608b55f9419d2a80275c0ba",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:47:41",
+          "seconds": 6461,
+          "title": "First Love",
+          "artist": "未記載",
+          "raw": "1:47:41 \tFirst Love",
+          "rawHash": "dae5cb443d515966ae50b6dbfe8357fe990dd3501a0264e5d84c3a5527e61640",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "2:03:56",
+          "seconds": 7436,
+          "title": "創聖のアクエリオン",
+          "artist": "short",
+          "raw": "2:03:56 \t創聖のアクエリオン - short",
+          "rawHash": "c15ba5d3a0fb4077c28342be381c8a63fb1705bfea1c5e5c65928b490961faee",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "2:09:32",
+          "seconds": 7772,
+          "title": "会いたくて 会いたくて",
+          "artist": "未記載",
+          "raw": "2:09:32 \t会いたくて 会いたくて",
+          "rawHash": "b7ae0aa4c4cba630f7b46765e8a9450706b0eb9c473e909e3582f5bb7bb54260",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "2:29:26",
+          "seconds": 8966,
+          "title": "心做し",
+          "artist": "Piano Ver",
+          "raw": "2:29:26 \t心做し - Piano Ver.",
+          "rawHash": "33842f466bd466bf4bbee4d6c3fc25e37fe07e75fcdf2812ec0a2dc2c2cc6be3",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:53:12",
+          "seconds": 10392,
+          "title": "コネクト",
+          "artist": "未記載",
+          "raw": "2:53:12 \tコネクト",
+          "rawHash": "0f7c6a53897b83501bd04bdaeca6dab9cd0ddb50d691edea6f0e063dd7b6a9d4",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "3:11:08",
+          "seconds": 11468,
+          "title": "エイリアンエイリアン",
+          "artist": "未記載",
+          "raw": "3:11:08 \tエイリアンエイリアン",
+          "rawHash": "ee6beb7c1d420eb5047130f90a7ea8e45810496b6a5aa0d85d1a248c167ef318",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "3:16:24",
+          "seconds": 11784,
+          "title": "不可思議のカルテ",
+          "artist": "アカペラ/short",
+          "raw": "3:16:24 \t不可思議のカルテ - アカペラ/short",
+          "rawHash": "a133689251e7ef108ac7f72ee1e40d6465a08e5463634b8e9c4af065ea134a22",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "3:29:38",
+          "seconds": 12578,
+          "title": "ピースサイン",
+          "artist": "未記載",
+          "raw": "3:29:38 \tピースサイン",
+          "rawHash": "f6d7ff13b8f5951891c92c50dc1210397c2a3259032bccce80c1ecad2c6c25b2",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "3:50:01",
+          "seconds": 13801,
+          "title": "風のゆくえ",
+          "artist": "未記載",
+          "raw": "3:50:01 \t風のゆくえ",
+          "rawHash": "4233cba1bd97e77ee4f9f90f32071f74b439291991e730c4b2844e52688a808b",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "4:04:55",
+          "seconds": 14695,
+          "title": "粛聖!! ロリ神レクイエム☆",
+          "artist": "未記載",
+          "raw": "4:04:55 \t粛聖!! ロリ神レクイエム☆",
+          "rawHash": "8d1d74c2684afb612414443f076e00b5170d2e291ff6e3b158c3a59546a8334b",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "4:16:21",
+          "seconds": 15381,
+          "title": "アイドル",
+          "artist": "未記載",
+          "raw": "4:16:21 \tアイドル",
+          "rawHash": "79247f64b1da6f56c2cfbe6e49955f86bd0aae6f07435bbe943e15af04ec6c56",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "4:26:56",
+          "seconds": 16016,
+          "title": "宇宙戦艦ヤマト",
+          "artist": "未記載",
+          "raw": "4:26:56 \t宇宙戦艦ヤマト",
+          "rawHash": "3e79ceeff5eb6eab55c25bf84d1702729089fc466d4750943fc2c9777e30afb2",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "4:32:23",
+          "seconds": 16343,
+          "title": "サムライハート",
+          "artist": "未記載",
+          "raw": "4:32:23 \tサムライハート(Some Like It Hot!!)",
+          "rawHash": "776b95dd8802a743926c87954d409e25180b5458b36db805676b98242d2a97b4",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "4:54:02",
+          "seconds": 17642,
+          "title": "たばこ",
+          "artist": "未記載",
+          "raw": "4:54:02 \tたばこ",
+          "rawHash": "8fa39d8175ed6c39ee84294f883e209e3fdcf537a41bbf0cbc9bb2207917eaf0",
+          "sourceId": "UgyJtsQVAgiM2gEE0Yh4AaABAg",
+          "sourceHash": "8e9fd1c56db2c993b9c09fed4ea540e9e2504a33c629c1c9f9a69e5995e0e528",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.065Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌",
+          "リレー"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "wdl6XZHfRgw",
+      "title": "【歌枠/Karaoke】ゲリラ初見様大歓迎 SingingStream #新人VSinger 🎤💫【サウンドハウス公認Vtuber】",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/wdl6XZHfRgw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBbuNRSuNQdlfEKS96zri0rKM5qRQ",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=wdl6XZHfRgw"
+      ],
+      "selectedSourceId": "UgwunNWBAohn6YQcN014AaABAg",
+      "selectedSourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:19:40",
+          "seconds": 1180,
+          "title": "太陽系デスコ",
+          "artist": "Piano Ver",
+          "raw": "0:19:40 \t太陽系デスコ - Piano Ver.",
+          "rawHash": "b4b3033cc6c14af89c8ed43855c3aba3b00a65806db16a81983933c993066897",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:35:28",
+          "seconds": 2128,
+          "title": "アイネクライネ",
+          "artist": "Piano Ver",
+          "raw": "0:35:28 \tアイネクライネ - Piano Ver.",
+          "rawHash": "d2e83520745d1d0c5636c9fb0ccaee42408fcddb056db0ac07aa7fc431b96da1",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "1:04:04",
+          "seconds": 3844,
+          "title": "ドライフラワー",
+          "artist": "未記載",
+          "raw": "1:04:04 \tドライフラワー",
+          "rawHash": "e60e7cc5265e5ff23823e6b6701231025aa8bd469c1d1ca44e34037eb5fe3c50",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:19:59",
+          "seconds": 4799,
+          "title": "ヴァンパイア",
+          "artist": "未記載",
+          "raw": "1:19:59 \tヴァンパイア",
+          "rawHash": "55bed1445da9ac3857008d06ab8cabf168db9b47999fd9cf127a1fa06c6cf2e4",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:32:01",
+          "seconds": 5521,
+          "title": "罪と罰",
+          "artist": "未記載",
+          "raw": "1:32:01 \t罪と罰",
+          "rawHash": "3292b3ba59c5ec55cb9ca93555e872361cb5e37470ed8ee3d724c5161cba9d11",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:41:36",
+          "seconds": 6096,
+          "title": "バレリーコ",
+          "artist": "Piano Ver",
+          "raw": "1:41:36 \tバレリーコ - Piano Ver.",
+          "rawHash": "5b8ab51d2c1bbf4461a502610c0cbc01bc9eae5e5d1c942b554daf22a6ed6dae",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:55:12",
+          "seconds": 6912,
+          "title": "脳内革命ガール",
+          "artist": "未記載",
+          "raw": "1:55:12 \t脳内革命ガール",
+          "rawHash": "00979157124154c17016fe5ad05dd832ed4a224ff0764720b15e09d610a94da1",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "2:05:07",
+          "seconds": 7507,
+          "title": "マリーゴールド",
+          "artist": "未記載",
+          "raw": "2:05:07 \tマリーゴールド",
+          "rawHash": "ffde24ba93c4ced9f8c004971ec00f9002ce78cfbf28b719037b126c49c041fa",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "2:13:56",
+          "seconds": 8036,
+          "title": "おさかな天国",
+          "artist": "歌のお姉さん風",
+          "raw": "2:13:56 \tおさかな天国(歌のお姉さん風)",
+          "rawHash": "2e7ac6cde34cccbddedb63f30e953232edc632b8ce670f2ca0cc28fac6a205f1",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:26:14",
+          "seconds": 8774,
+          "title": "ECHO",
+          "artist": "未記載",
+          "raw": "2:26:14 \tECHO",
+          "rawHash": "2f01a6244fe141fe62f77572762700e1e656805c26cf6949880bd789b35e033e",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:33:53",
+          "seconds": 9233,
+          "title": "だんご3兄弟",
+          "artist": "short",
+          "raw": "2:33:53 \tだんご3兄弟 - short",
+          "rawHash": "271c284929fc5a0cbab6ab0933908deaa1a504350e42942673e2c7142c024850",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:41:03",
+          "seconds": 9663,
+          "title": "ロマンスの神様",
+          "artist": "short",
+          "raw": "2:41:03 \tロマンスの神様 - short",
+          "rawHash": "ab033417e4f7a9daeabd3399a760cfa315ea66479f92a770e6bb5309008d2544",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:44:53",
+          "seconds": 9893,
+          "title": "丸の内サディスティック",
+          "artist": "未記載",
+          "raw": "2:44:53 \t丸の内サディスティック",
+          "rawHash": "4d37a540baa1cd53e85bb3f7a27b34055779aeaadcaf3dc63893229b1ec02cc7",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:51:40",
+          "seconds": 10300,
+          "title": "ハートシェイカー・ドキュメンタリー",
+          "artist": "未記載",
+          "raw": "2:51:40 \tハートシェイカー・ドキュメンタリー",
+          "rawHash": "4a0513d9920a85bb07fc2706bd35057fd9af544603c116c23cd7704186becbf3",
+          "sourceId": "UgwunNWBAohn6YQcN014AaABAg",
+          "sourceHash": "6811a7beb28c4fde0c0ebb46f0b9c461787b74e316e01985996d113420381e1a",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.067Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "Pm1SMIQQ4-E",
+      "title": "角煮神回【 #ホラゲ / #gaming 】爆速クリアからの歌とおじランデブー🏆コンプ８番出口【#天ノ譜ステラ 】 サウンドハウス公認VSinger #初見様大歓迎 #ゲーム実況",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1721708679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/Pm1SMIQQ4-E/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCdLm16tOIU6NsvLreg7jGYldtjfQ",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=Pm1SMIQQ4-E"
+      ],
+      "selectedSourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+      "selectedSourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+      "songs": [
+        {
+          "index": 1,
+          "time": "1:31:30",
+          "seconds": 5490,
+          "title": "rain stops, good-bye",
+          "artist": "Piano Ver",
+          "raw": "1:31:30 \train stops, good-bye - Piano Ver.",
+          "rawHash": "98893300b5aca66ceddbdb08a01708f9d1cb4e5a6169d6b1fe9fcdfe3dc92cce",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "1:40:36",
+          "seconds": 6036,
+          "title": "奏(かなで)",
+          "artist": "Piano Ver",
+          "raw": "1:40:36 \t奏(かなで) - Piano Ver.",
+          "rawHash": "38d28412e892c27c0d4327be38bbb225accd5f96a668a1961f0944daf4c8018e",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "2:01:02",
+          "seconds": 7262,
+          "title": "ドライフラワー",
+          "artist": "Piano Ver",
+          "raw": "2:01:02 \tドライフラワー - Piano Ver.",
+          "rawHash": "df75dfa27ca895e568442443de65cb067e8930b0e4c745368f1146cf04158dc0",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "2:07:39",
+          "seconds": 7659,
+          "title": "クリスマスソング",
+          "artist": "Piano Ver",
+          "raw": "2:07:39 \tクリスマスソング - Piano Ver.",
+          "rawHash": "5c2b180f70ccfec323550e3eb0660f1d034959e7512770d4512354cfdd702af1",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "2:14:45",
+          "seconds": 8085,
+          "title": "ひまわりの約束",
+          "artist": "Piano Ver",
+          "raw": "2:14:45 \tひまわりの約束 - Piano Ver.",
+          "rawHash": "6307b2e87b1850d812df8cd2e738d677a8975308e5535d88003732db41dee9cd",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "2:23:36",
+          "seconds": 8616,
+          "title": "高嶺の花子さん",
+          "artist": "Piano Ver",
+          "raw": "2:23:36 \t高嶺の花子さん - Piano Ver.",
+          "rawHash": "bc4f44a8ff0367252fd1940710a8c9ac7293157f1863dae699e9ff1541d02bc2",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "2:30:21",
+          "seconds": 9021,
+          "title": "Departures ～あなたにおくるアイの歌～",
+          "artist": "Piano Ver",
+          "raw": "2:30:21 \tDepartures ～あなたにおくるアイの歌～ - Piano Ver.",
+          "rawHash": "62f1f2adc84f262af8f6a73edf10baa7a1a03763aac5f860db155fa60dadc6eb",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "2:36:27",
+          "seconds": 9387,
+          "title": "Lemon",
+          "artist": "Piano Ver",
+          "raw": "2:36:27 \tLemon - Piano Ver.",
+          "rawHash": "fd728b8cbf04978f0a83168db41df6748a77cf7b1f466f350d7cae4512176ee5",
+          "sourceId": "UgwIpbzIZ0X2_bRSguR4AaABAg",
+          "sourceHash": "dc0ee8a0915f5dd78518ccaff520a6beeae58dd4aaf0a718d8052f1a14f20af7",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.068Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "kYzRKbnRAgI",
+      "title": "【初配信】サウンドハウス公認VTuberの天ノ譜ステラです♩【歌もあるよっ】",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1690172679996,
+      "thumbnailUrl": "https://i.ytimg.com/vi/kYzRKbnRAgI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDf4gnyDKCseaDxXvXahKDKvg0YEA",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=kYzRKbnRAgI"
+      ],
+      "selectedSourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+      "selectedSourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:00:00",
+          "seconds": 0,
+          "title": "(waiting)",
+          "artist": "未記載",
+          "raw": "00:00 (waiting)",
+          "rawHash": "a46ee7eb93cbce8f04403e02a9f22aaf414ef3bf78826b9751d685ef6dad378e",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:11:15",
+          "seconds": 675,
+          "title": "新時代",
+          "artist": "Ado",
+          "raw": "11:15 新時代  / Ado / アニメ映画 ONE PIECE FILM RED(2022)",
+          "rawHash": "06ed31d2207dceb97b0b4221fa5467c36c1a8b0e03772e1b72488edae6a1cdd4",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "1:08:57",
+          "seconds": 4137,
+          "title": "私、アイドル宣言",
+          "artist": "CHiCO with HoneyWorks(2018)",
+          "raw": "1:08:57 私、アイドル宣言 / CHiCO with HoneyWorks(2018)",
+          "rawHash": "4030dfc50a4840a55c825daae0a5e7af2d4d5b193412ddc2c522d4c71426980e",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:15:24",
+          "seconds": 4524,
+          "title": "丸の内サディスティック",
+          "artist": "椎名林檎(1999)",
+          "raw": "1:15:24 丸の内サディスティック / 椎名林檎(1999)",
+          "rawHash": "df2d5067111ab9b51a34f11934137d4fe0560a93bc5e937e55012eaef2bdd1cc",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:22:48",
+          "seconds": 4968,
+          "title": "My Heart Will Go On",
+          "artist": "Céline Dion/セリーヌ・ディオン / 映画 Titanic/タイタニック(1997)",
+          "raw": "1:22:48 My Heart Will Go On / Céline Dion/セリーヌ・ディオン / 映画 Titanic/タイタニック(1997)",
+          "rawHash": "6d6a97bad8bef154b3103e220723a0169f6d1b91071191a170f07b003c209131",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:33:56",
+          "seconds": 5636,
+          "title": "Femme Fatale",
+          "artist": "ヒプノシスマイク(2020)",
+          "raw": "1:33:56 Femme Fatale / ヒプノシスマイク(2020)",
+          "rawHash": "9c95dbbf8cef5009e856c626383e64e724b0dc0f83964e6c695868d4aaf876e3",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:48:11",
+          "seconds": 6491,
+          "title": "炎",
+          "artist": "LiSA",
+          "raw": "1:48:11 炎 / LiSA / アニメ映画 鬼滅の刃 無限列車編(2020)",
+          "rawHash": "858f9d01ae33de1f22275b6be5e8edc8402a30086c3d1942bede26722bd6ed75",
+          "sourceId": "UgzPlObdLDLK4G6vHCV4AaABAg",
+          "sourceHash": "7a57ade24f23cc0fba67cc9e9fa060ba42a1399efc7d58709311731bef9eaa6c",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T04:28:00.069Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch68-amanofustella-shard12of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    }
+  ]
+}
