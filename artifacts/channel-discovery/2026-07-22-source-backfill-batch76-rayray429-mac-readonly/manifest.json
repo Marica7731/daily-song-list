@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-worker-status",
+  "status": "skipped_duplicate",
+  "success": true,
+  "batch": "batch76",
+  "sourceUrl": "https://www.youtube.com/@rayray_429",
+  "sourceHandle": "@rayray_429",
+  "artifactGeneratedAt": "2026-07-23T14:25:39.1224240+08:00",
+  "artifactDir": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch76-rayray429-mac-readonly",
+  "windowsRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "windowsHead": "465bf42f4b4233ca46821b1a124dd420f39642b9",
+  "macRepo": "/Users/be/daily-song-list",
+  "macHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+  "toolEvidence": {
+    "discoveryScript": "scripts/youtube-channel-discovery.js",
+    "exportScript": "scripts/export-channel-discovery-increment.js",
+    "sourceFilterPath": "assets/source-filter.js",
+    "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "sourceFilterBytes": 60415
+  },
+  "counters": {
+    "imported": 0,
+    "skipped": 1,
+    "failed": 0,
+    "candidateCount": 0,
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "uniqueSongs": 0
+  },
+  "duplicateEvidence": {
+    "duplicateOf": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+    "sourceType": "youtube-channel-discovery accepted increment artifact (self-crawled/manual backfill), not moment-only and not queue-only manifest evidence",
+    "evidenceMarker": "CODEX_BATCH5_RAY_ACCEPTED_OK videos=9 occurrences=155 uniqueSongs=154 videoCount=13 occurrenceCount=170",
+    "existingVideos": 9,
+    "existingOccurrences": 155,
+    "existingUniqueSongs": 154,
+    "existingPublishedTimestampCoverage": "9/9",
+    "existingOccurrenceTimeCoverage": "155/155",
+    "existingOccurrenceSecondsCoverage": "155/155",
+    "existingAcceptedThumbnailUrlCoverage": "0/9",
+    "existingDiscoveryThumbnailCoverage": "9/9",
+    "existingCandidateCount": 31,
+    "existingInspectedCount": 31,
+    "existingUsableVideoCount": 9,
+    "existingDiscoveryOccurrenceCount": 155,
+    "existingReachedEnd": true,
+    "existingFailure": "",
+    "videoIds": [
+      "fyE0O1-VOrE",
+      "0Wj4jrV2Kdk",
+      "_Ieb3LINrSA",
+      "XkVhVREdUhU",
+      "X0gLxVt9sDg",
+      "W3PKtuD2UOg",
+      "3kG4a7Oazsk",
+      "_A45Ew8leWU",
+      "q2CaDCmosWM"
+    ]
+  },
+  "coverage": {
+    "publishedTimestamp": "not_applicable_skipped_duplicate",
+    "occurrenceTime": "not_applicable_skipped_duplicate",
+    "occurrenceSeconds": "not_applicable_skipped_duplicate",
+    "acceptedThumbnailUrl": "not_applicable_skipped_duplicate",
+    "discoveryThumbnail": "not_applicable_skipped_duplicate",
+    "reachedEnd": null
+  },
+  "failureReason": "",
+  "stageLog": [
+    "Windows repo/root verified at D:\\Projects\\daily_song_list_worker_source_backfill_20260720; branch codex/source-backfill-20260720-v2; HEAD 465bf42f4b4233ca46821b1a124dd420f39642b9",
+    "Windows startup marker worker-started.marker.txt created before discovery/duplicate checks",
+    "Mac preflight retried with safe single-quoted ssh command after one untrusted Windows-expanded attempt; verified repo /Users/be/daily-song-list, HEAD f1b0e8423e755b2c3b38a5288c98bca3e5d092cc, source-filter sha256 bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103, size 60415 bytes; CODEX_PREFLIGHT_OK",
+    "Duplicate check found batch1-batch8 queue manifest mentions, but these were not used as skip evidence by themselves",
+    "Verified concrete duplicate artifact: artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json contains rayray_429 accepted videos and occurrences; CODEX_BATCH5_RAY_ACCEPTED_OK",
+    "Skipped rerun for batch76 because same channel already has an accepted youtube-channel-discovery increment from batch5; no data/external, runner/tool code, commit, push, deploy, or other artifact was modified",
+    "Mac temp directory /Users/be/codex-temp/daily-song-list-source-backfill-batch76-rayray429-mac-readonly removed; CODEX_REMOTE_BATCH76_CLEANUP_OK",
+    "G:\\codex-temp was not used for this run; no G temp artifact to remove",
+    "Final skipped/duplicate five-file artifact written on Windows; worker-started.marker.txt removed"
+  ],
+  "cleanup": {
+    "macTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch76-rayray429-mac-readonly",
+    "macCleanupMarker": "CODEX_REMOTE_BATCH76_CLEANUP_OK",
+    "macPathAfter": "REMOVED",
+    "macDfSummary": [
+      "before=/dev/disk3s5 926Gi Used 268Gi Avail 620Gi Capacity 31% mounted /System/Volumes/Data",
+      "after=/dev/disk3s5 926Gi Used 268Gi Avail 620Gi Capacity 31% mounted /System/Volumes/Data"
+    ],
+    "gTemp": "G:\\codex-temp not used; no batch76 temp directory created",
+    "windowsDrives": [
+      {
+        "Name": "C",
+        "Used": 255765045248,
+        "Free": 65373933568,
+        "Root": "C:\\"
+      },
+      {
+        "Name": "D",
+        "Used": 470183972864,
+        "Free": 9901301760,
+        "Root": "D:\\"
+      },
+      {
+        "Name": "G",
+        "Used": 1362036060160,
+        "Free": 686038720512,
+        "Root": "G:\\"
+      }
+    ]
+  }
+}

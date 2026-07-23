@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "status": "skipped_duplicate",
+  "generatedAt": "2026-07-23T14:25:39.1224240+08:00",
+  "inputs": [],
+  "readStats": {
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedDuplicateExisting": 9,
+    "songs": 0
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "duplicateOf": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+    "sourceType": "youtube-channel-discovery accepted increment artifact (self-crawled/manual backfill), not moment-only and not queue-only manifest evidence",
+    "evidenceMarker": "CODEX_BATCH5_RAY_ACCEPTED_OK videos=9 occurrences=155 uniqueSongs=154 videoCount=13 occurrenceCount=170",
+    "existingVideos": 9,
+    "existingOccurrences": 155,
+    "existingUniqueSongs": 154,
+    "existingPublishedTimestampCoverage": "9/9",
+    "existingOccurrenceTimeCoverage": "155/155",
+    "existingOccurrenceSecondsCoverage": "155/155",
+    "existingAcceptedThumbnailUrlCoverage": "0/9",
+    "existingDiscoveryThumbnailCoverage": "9/9",
+    "existingCandidateCount": 31,
+    "existingInspectedCount": 31,
+    "existingUsableVideoCount": 9,
+    "existingDiscoveryOccurrenceCount": 155,
+    "existingReachedEnd": true,
+    "existingFailure": "",
+    "videoIds": [
+      "fyE0O1-VOrE",
+      "0Wj4jrV2Kdk",
+      "_Ieb3LINrSA",
+      "XkVhVREdUhU",
+      "X0gLxVt9sDg",
+      "W3PKtuD2UOg",
+      "3kG4a7Oazsk",
+      "_A45Ew8leWU",
+      "q2CaDCmosWM"
+    ]
+  }
+}
