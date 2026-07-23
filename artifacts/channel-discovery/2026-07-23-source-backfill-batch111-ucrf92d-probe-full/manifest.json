@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batch": "2026-07-23-source-backfill-batch111",
+  "generatedAt": "2026-07-23T12:07:32.384Z",
+  "strategy": "candidate-only probe; full discovery only when reachedEndAllTabs=true and candidateCount<=20",
+  "outputDir": "D:/Projects/daily_song_list_worker_source_backfill_20260720/artifacts/channel-discovery/2026-07-23-source-backfill-batch111-ucrf92d-probe-full",
+  "acceptedFile": "accepted/2026-07-23-source-backfill-batch111.accepted.json",
+  "channels": [
+    {
+      "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+      "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+      "singerName": "UCrF92dEkXiTtexol0yg4Gmw",
+      "status": "pending_partial",
+      "candidateIncrement": 114,
+      "videoIncrement": 0,
+      "occurrenceIncrement": 0,
+      "songIncrement": 0,
+      "acceptedVideoCount": 0,
+      "acceptedOccurrenceCount": 0,
+      "publishedTimestampCoverage": {
+        "candidatesWithPublishedTimestamp": 114,
+        "candidateCount": 114,
+        "percent": 100
+      },
+      "occurrenceTimeCoverage": {
+        "occurrencesWithTimestampText": 0,
+        "occurrencesWithSeconds": 0,
+        "occurrenceCount": 0,
+        "percentTimestampText": null,
+        "percentSeconds": null
+      },
+      "thumbnailCoverCoverage": {
+        "candidatesWithThumbnail": 114,
+        "candidateCount": 114,
+        "percentCandidates": 100,
+        "acceptedVideosWithThumbnail": 0,
+        "acceptedVideoCount": 0,
+        "percentAccepted": null
+      },
+      "failureReason": "probe_reached_end_all_tabs_false;candidate_count_gt_20",
+      "reachedEnd": false,
+      "reachedEndAllTabs": false,
+      "completeForImport": false,
+      "fullDiscoveryRun": false,
+      "exportRun": false,
+      "probe": {
+        "generatedAt": "2026-07-23T12:05:43.325Z",
+        "candidateOnly": true,
+        "maxChannelPages": 5,
+        "maxCandidates": 120,
+        "maxInspect": 20,
+        "pageSummaries": [
+          {
+            "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/streams?hl=ja&persist_hl=1",
+            "status": 200,
+            "pageCount": 5,
+            "rawItemCount": 58,
+            "candidateCount": 52,
+            "continuationRounds": 4,
+            "reachedEnd": false,
+            "fromCache": false,
+            "bytes": 1183980
+          },
+          {
+            "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/videos?hl=ja&persist_hl=1",
+            "status": 200,
+            "pageCount": 5,
+            "rawItemCount": 147,
+            "candidateCount": 62,
+            "continuationRounds": 4,
+            "reachedEnd": false,
+            "fromCache": false,
+            "bytes": 1122618
+          }
+        ],
+        "requestStats": {
+          "requestCount": 2,
+          "networkRequestCount": 2,
+          "cacheHitCount": 0,
+          "totalBytes": 2306598,
+          "totalElapsedMs": 539,
+          "statuses": {
+            "200": 2
+          }
+        }
+      },
+      "dirtyAudit": {
+        "droppedCount": 0,
+        "suspiciousCount": 21
+      }
+    }
+  ],
+  "totals": {
+    "channelCount": 1,
+    "imported": 0,
+    "skipped": 0,
+    "failed": 0,
+    "pendingPartial": 1,
+    "probeOnly": 0,
+    "candidateIncrement": 114,
+    "videoIncrement": 0,
+    "occurrenceIncrement": 0,
+    "songIncrement": 0,
+    "acceptedVideoCount": 0,
+    "acceptedOccurrenceCount": 0
+  }
+}

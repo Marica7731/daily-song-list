@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-23-source-backfill-batch111",
+  "generatedAt": "2026-07-23T12:07:32.384Z",
+  "status": "pending_partial",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+  "probeOk": true,
+  "probeCandidateCount": 114,
+  "probeReachedEndAllTabs": false,
+  "completeForImport": false,
+  "fullDiscoveryRun": false,
+  "exportRun": false,
+  "acceptedFile": "accepted/2026-07-23-source-backfill-batch111.accepted.json",
+  "acceptedVideoCount": 0,
+  "acceptedOccurrenceCount": 0,
+  "dirtyAudit": {
+    "droppedCount": 0,
+    "suspiciousCount": 21,
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousTerms": [
+      "live/ライブ"
+    ]
+  },
+  "failureReason": "probe_reached_end_all_tabs_false;candidate_count_gt_20",
+  "cleanup": {
+    "status": "removed",
+    "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch111-ucrf92d-probe-full",
+    "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch111-ucrf92d-probe-full",
+    "dfAfter": "/dev/disk3s5 926Gi 335Gi 553Gi 38% /System/Volumes/Data"
+  }
+}

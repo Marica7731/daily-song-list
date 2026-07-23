@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-23-source-backfill-batch111",
+  "generatedAt": "2026-07-23T12:07:32.384Z",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+  "candidateCount": 114,
+  "status": "pending_partial",
+  "rules": {
+    "hardDrop": [
+      {
+        "rule": "hard_drop_flute",
+        "term": "フルート"
+      },
+      {
+        "rule": "hard_drop_live_performance",
+        "term": "生演奏"
+      },
+      {
+        "rule": "hard_drop_clarinet",
+        "term": "クラリネット"
+      },
+      {
+        "rule": "hard_drop_piano_streaming_exact",
+        "term": "piano streaming"
+      },
+      {
+        "rule": "hard_drop_piano_performance_exact",
+        "term": "ピアノ演奏"
+      }
+    ],
+    "suspiciousOnly": [
+      {
+        "rule": "suspicious_live_or_live_jp",
+        "term": "live/ライブ",
+        "action": "suspicious_only",
+        "note": "Do not blind-drop explicit song-frame titles such as 歌枠."
+      }
+    ]
+  },
+  "droppedCount": 0,
+  "suspiciousCount": 21,
+  "dropped": [],
+  "suspicious": [
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "oAc0Vt7Ylbc",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oAc0Vt7Ylbc",
+      "videoTitle": "【絶叫事件｜即興ピアノ｜ライブ情報】弾き語り配信｜初見さんも大歓迎です！（2026/7/11アーカイブ）",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "J83FQF2jAhc",
+      "youtubeUrl": "https://www.youtube.com/watch?v=J83FQF2jAhc",
+      "videoTitle": "【弾き語り】まにこ - 初恋/冷めたアールグレイ【ライブ映像】",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "oD10sI0NVW4",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oD10sI0NVW4",
+      "videoTitle": "【ライブ欲／新曲一部披露／桜話】弾き語り配信（2026/4/5アーカイブ）",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "cYI3x_dpybM",
+      "youtubeUrl": "https://www.youtube.com/watch?v=cYI3x_dpybM",
+      "videoTitle": "【旅行の思い出／映画トーク／ライブ告知】弾き語り配信（2026/4/4アーカイブ）",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "gv_VMFaKNYU",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gv_VMFaKNYU",
+      "videoTitle": "【4K LIVE映像】またね。-manico",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "r3Sz0D_IkVc",
+      "youtubeUrl": "https://www.youtube.com/watch?v=r3Sz0D_IkVc",
+      "videoTitle": "【LIVE映像】頑張るあなたへ届けたい新曲「22」",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Olk6krAw_PU",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Olk6krAw_PU",
+      "videoTitle": "【LIVE映像】帰宅部トリオ主題歌「僕らのアオハル」【オリジナル】",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "CrVLN-DztjQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=CrVLN-DztjQ",
+      "videoTitle": "【LIVE映像】神戸みなとHANABIで歌う 僕は-manico【オリジナル】",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Pmw9gC8WGOs",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Pmw9gC8WGOs",
+      "videoTitle": "【Street Live】3月9日-レミオロメン(covered by manico)",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "GWFkkvcSoxk",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GWFkkvcSoxk",
+      "videoTitle": "【Street Live】ヒロイン - back number (covered by manico)",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "J4X3m2pqh2Q",
+      "youtubeUrl": "https://www.youtube.com/watch?v=J4X3m2pqh2Q",
+      "videoTitle": "【Street Live】愛の花-あいみょん(covered by manico)",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "lpNL2psjOyU",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lpNL2psjOyU",
+      "videoTitle": "【Street Live】地元の神戸で歌いました！(君がくれた夏 - 家入レオ)",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Luk5bMMmJmg",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Luk5bMMmJmg",
+      "videoTitle": "【VLOG】20歳 歌い人の東京遠征編｜路上ライブ",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Msx2WtfHjAI",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Msx2WtfHjAI",
+      "videoTitle": "【ライブ映像】ライブの最後に歌う曲「またね。」",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "My_2-zNdi8Q",
+      "youtubeUrl": "https://www.youtube.com/watch?v=My_2-zNdi8Q",
+      "videoTitle": "【初ワンマン】ダイジェストムービー（manico's 1st one-man live Digest Movie)",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "OJ-7jIU36Zo",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OJ-7jIU36Zo",
+      "videoTitle": "【ライブ映像】ライブで『3月9日』歌ってきたよ！楽しかった！",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Aatwk3E_Whk",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Aatwk3E_Whk",
+      "videoTitle": "【ライブ映像】優里さんの『ドライフラワー』を歌いました！",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Z4xZxedXdFI",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Z4xZxedXdFI",
+      "videoTitle": "【路上ライブ】RADWIMPSさんの『スパークル』を歌わせていただきました！",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "IGFZXbASQ5g",
+      "youtubeUrl": "https://www.youtube.com/watch?v=IGFZXbASQ5g",
+      "videoTitle": "【路上ライブ】スピッツさんの｢ロビンソン｣を歌いました！",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "0M0EwrAOwyo",
+      "youtubeUrl": "https://www.youtube.com/watch?v=0M0EwrAOwyo",
+      "videoTitle": "ひまわりの約束-秦基博 - Street Live",
+      "note": "review if full discovery is later allowed"
+    },
+    {
+      "rule": "suspicious_live_or_live_jp",
+      "term": "live/ライブ",
+      "youtubeVideoId": "Hcg8zR2LsUs",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Hcg8zR2LsUs",
+      "videoTitle": "【歌うま女子大生 生歌】Tried singing Live / まにこ【LIVE映像】",
+      "note": "review if full discovery is later allowed"
+    }
+  ]
+}
