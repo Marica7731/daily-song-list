@@ -39,7 +39,7 @@ concurrency:
 jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 180
     env:
       VPS2_HOST: "192.255.151.75"
@@ -68,20 +68,21 @@ jobs:
             test/runtime-api.test.js
             test/runtime-db.test.js
 
+      - name: Configure Mac toolchain
+        run: |
+          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+
       - name: Resolve deploy revision
         id: revision
         run: |
           git fetch --depth=1 origin main --prune
           git checkout -B main FETCH_HEAD
           commit_sha="$(git rev-parse HEAD)"
-          latest_sha256="$(sha256sum data/latest.json | awk '{print $1}')"
+          latest_sha256="$(shasum -a 256 data/latest.json | awk '{print $1}')"
           echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
           echo "latest_sha256=${latest_sha256}" >> "$GITHUB_OUTPUT"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
 
       - name: Install dependencies
         run: npm install --no-package-lock
@@ -98,8 +99,8 @@ jobs:
       - name: Write database manifest
         id: manifest
         run: |
-          sha256="$(sha256sum artifacts/runtime/song-rank.sqlite | awk '{print $1}')"
-          bytes="$(stat -c%s artifacts/runtime/song-rank.sqlite)"
+          sha256="$(shasum -a 256 artifacts/runtime/song-rank.sqlite | awk '{print $1}')"
+          bytes="$(stat -f%z artifacts/runtime/song-rank.sqlite)"
           built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           cat > artifacts/runtime/song-rank.sqlite.manifest.json <<JSON
           {
@@ -158,7 +159,7 @@ jobs:
           fi
           npm run check:published:api -- http://127.0.0.1:8765/
 
-      - name: Install sshpass
+      - name: Prepare password SSH helper
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
@@ -166,15 +167,22 @@ jobs:
             echo "::error::Missing VPS2_PASSWORD secret."
             exit 1
           fi
-          sudo apt-get update
-          sudo apt-get install -y rsync sshpass
+          mkdir -p "${RUNNER_TEMP}/ssh-askpass"
+          cat > "${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          printf '%s\n' "${VPS2_PASSWORD}"
+          SH
+          chmod 700 "${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh"
+          echo "SSH_ASKPASS=${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh" >> "$GITHUB_ENV"
+          echo "SSH_ASKPASS_REQUIRE=force" >> "$GITHUB_ENV"
+          echo "DISPLAY=codex:0" >> "$GITHUB_ENV"
 
       - name: Prepare VPS2 runtime checkout
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
-          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
             apt-get update
@@ -214,20 +222,20 @@ jobs:
           set -Eeuo pipefail
           remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           direct_mode=0
-          db_bytes="$(stat -c%s artifacts/runtime/song-rank.sqlite)"
+          db_bytes="$(stat -f%z artifacts/runtime/song-rank.sqlite)"
           candidate_min_free_bytes="$((db_bytes + 1073741824))"
           cleanup_remote_candidate() {
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
           }
           handle_upload_error() {
             cleanup_remote_candidate
             if [ "${direct_mode}" = "1" ]; then
               echo "CODEX_RUNTIME_DB_UPLOAD_ERROR direct-mode-failed service-left-stopped-to-avoid-serving-partial-db"
-              sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "systemctl stop song-rank-api || true; systemctl status song-rank-api --no-pager -l || true" || true
+              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "systemctl stop song-rank-api || true; systemctl status song-rank-api --no-pager -l || true" || true
             fi
           }
           trap handle_upload_error ERR
-          remote_stats="$(sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+          remote_stats="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p '${REMOTE_STATE_DIR}'
             rm -f '${remote_db}' '${remote_db}.manifest.json' '${REMOTE_DB_PATH}.previous'
@@ -252,29 +260,28 @@ jobs:
           echo "CODEX_RUNTIME_DB_UPLOAD_PLAN dbBytes=${db_bytes} activeBytes=${remote_active_bytes} remoteFreeBytes=${remote_free_bytes} candidateMinFreeBytes=${candidate_min_free_bytes} directMinFreeBytes=${direct_min_free_bytes}"
           if [ "${remote_free_bytes}" -ge "${candidate_min_free_bytes}" ]; then
             echo "CODEX_RUNTIME_DB_UPLOAD_MODE candidate"
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               if [ -f '${REMOTE_DB_PATH}' ]; then
                 cp -f '${REMOTE_DB_PATH}' '${remote_db}'
               fi
               df -h '${REMOTE_STATE_DIR}'
             "
-            sshpass -p "${VPS2_PASSWORD}" rsync \
+            rsync \
               --inplace \
               --partial \
               --compress \
-              --info=stats2 \
-              -e "ssh -o StrictHostKeyChecking=no" \
+              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
-            sshpass -p "${VPS2_PASSWORD}" rsync \
+            rsync \
               --inplace \
               --partial \
               --compress \
-              -e "ssh -o StrictHostKeyChecking=no" \
+              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
               systemctl disable --now song-rank-runtime-update.timer || true
@@ -287,7 +294,7 @@ jobs:
               exit 1
             fi
             direct_mode=1
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               systemctl disable --now song-rank-runtime-update.timer || true
               systemctl stop song-rank-api
@@ -302,27 +309,26 @@ jobs:
               echo 'CODEX_RUNTIME_DB_DIRECT_STOP_OK'
               df -h '${REMOTE_STATE_DIR}'
             "
-            sshpass -p "${VPS2_PASSWORD}" rsync \
+            rsync \
               --inplace \
               --partial \
               --compress \
-              --info=stats2 \
-              -e "ssh -o StrictHostKeyChecking=no" \
+              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}"
-            sshpass -p "${VPS2_PASSWORD}" rsync \
+            rsync \
               --inplace \
               --partial \
               --compress \
-              -e "ssh -o StrictHostKeyChecking=no" \
+              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}.manifest.json"
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1 EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${REMOTE_DB_PATH}' /usr/local/bin/song-rank-db-activate.sh
             "
             direct_mode=0
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               systemctl reload nginx
             "
@@ -339,7 +345,7 @@ jobs:
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
         run: |
           set -Eeuo pipefail
-          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             cd '${REMOTE_PROJECT_DIR}'
             DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' npm run check:published:api -- http://127.0.0.1:8765/
