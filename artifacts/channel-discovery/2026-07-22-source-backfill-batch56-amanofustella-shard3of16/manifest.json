@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-increment",
+  "batchId": "2026-07-22-source-backfill-batch56-amanofustella-shard3of16",
+  "generatedAt": "2026-07-23T01:11:22.427Z",
+  "status": "success",
+  "result": {
+    "imported": 0,
+    "skipped": 0,
+    "failed": 0,
+    "success": true,
+    "failureReason": null
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 3,
+    "inspectShardCount": 16
+  },
+  "discovery": {
+    "candidateCount": 241,
+    "inspectedCount": 15,
+    "usableVideoCount": 11,
+    "occurrenceCount": 83,
+    "reachedEnd": true,
+    "rawPublishedCoverage": "241/241",
+    "detailPublishedCoverage": "11/11",
+    "detailThumbnailCoverage": "11/11",
+    "occurrenceTimeCoverage": "83/83",
+    "occurrenceSecondsCoverage": "83/83",
+    "publishedTimestampRange": {
+      "min": 1690160503485,
+      "max": 1784163711210
+    },
+    "occurrenceSecondsRange": {
+      "min": 170,
+      "max": 41430
+    },
+    "elapsedSeconds": 359
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 11,
+    "occurrences": 83,
+    "songs": 83,
+    "uniqueSongs": 78,
+    "publishedTimestampCoverage": "11/11",
+    "occurrenceTimeCoverage": "83/83",
+    "occurrenceSecondsCoverage": "83/83",
+    "acceptedIncrementThumbnailFieldCoverage": "0/11",
+    "occurrenceSecondsRange": {
+      "min": 170,
+      "max": 41430
+    }
+  },
+  "dirtyAudit": {
+    "policy": {
+      "hardDropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "singingSignals": [
+        "歌枠",
+        "歌",
+        "弾き語り",
+        "karaoke",
+        "歌ってみた"
+      ],
+      "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+    },
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "remoteExecution": {
+    "usedHost": "Mac",
+    "hostname": "bedeMacBook-Air.local",
+    "remoteDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16",
+    "repoDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo",
+    "discoveryDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16-discovery",
+    "precheck": {
+      "sourceFilterExists": true,
+      "marker": "2026-07-23T00:59:45Z stage=precheck_source_filter CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a"
+    },
+    "commandSummary": "watchdog 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@AmanofuStella --singer-name 天ノ譜ステラ --inspect-shard-count 16 --inspect-shard-index 3 --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "discoveryMarker": "stdout_tail: CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=241 inspected=15 videos=11 occurrences=83 elapsedSeconds=359 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16-discovery\"",
+    "exportMarker": "stdout_tail: CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=11 usableVideos=11 acceptedVideos=11 skippedRegressions=0 occurrences=83 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16/candidate-increment-unfiltered.json\"",
+    "postprocessMarker": "CODEX_BATCH56_POSTPROCESS_OK",
+    "lastStage": "2026-07-23T01:06:45Z stage=remote_runner_done status=success CODEX_REMOTE_BATCH56_RUN_OK",
+    "stageLogTail": [
+      "2026-07-23T00:59:44Z stage=remote_runner_start batch=2026-07-22-source-backfill-batch56-amanofustella-shard3of16",
+      "2026-07-23T00:59:44Z stage=env_precheck CODEX_REMOTE_ENV_OK node=v20.20.2 npm=10.8.2",
+      "2026-07-23T00:59:44Z stage=archive_extract_done repo=/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo",
+      "2026-07-23T00:59:45Z stage=precheck_source_filter CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a",
+      "2026-07-23T00:59:45Z stage=discovery_start host=bedeMacBook-Air.local",
+      "2026-07-23T00:59:45Z stage=heartbeat discovery elapsed=0s",
+      "2026-07-23T01:00:45Z stage=heartbeat discovery elapsed=60s",
+      "2026-07-23T01:01:45Z stage=heartbeat discovery elapsed=120s",
+      "2026-07-23T01:02:45Z stage=heartbeat discovery elapsed=180s",
+      "2026-07-23T01:03:45Z stage=heartbeat discovery elapsed=240s",
+      "2026-07-23T01:04:45Z stage=heartbeat discovery elapsed=300s",
+      "2026-07-23T01:05:45Z stage=discovery_done exit=0",
+      "stdout_tail: ",
+      "stdout_tail: > daily-song-list@1.0.0 youtube:discover-channel",
+      "stdout_tail: > node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@AmanofuStella --singer-name 天ノ譜ステラ --output-dir /Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16-discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 3 --request-interval-ms 3500 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword クラリネット --keyword サックス --keyword サクソフォン --keyword sax --keyword saxophone --keyword piano streaming --keyword piano performance --keyword ピアノ演奏 --keyword live --keyword ライブ --keyword 歌 --keyword 歌枠 --keyword 弾き語り --keyword karaoke --keyword 歌ってみた --keyword 3D Live",
+      "stdout_tail: ",
+      "stdout_tail: CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=241 inspected=15 videos=11 occurrences=83 elapsedSeconds=359 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16-discovery\"",
+      "2026-07-23T01:05:45Z stage=export_start host=bedeMacBook-Air.local",
+      "2026-07-23T01:05:45Z stage=heartbeat export elapsed=0s",
+      "2026-07-23T01:06:45Z stage=export_done exit=0",
+      "stdout_tail: ",
+      "stdout_tail: > daily-song-list@1.0.0 youtube:export-channel-increment",
+      "stdout_tail: > node scripts/export-channel-discovery-increment.js --input-dir /Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16-discovery --output /Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16/candidate-increment-unfiltered.json --allow-empty",
+      "stdout_tail: ",
+      "stdout_tail: CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=11 usableVideos=11 acceptedVideos=11 skippedRegressions=0 occurrences=83 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16/candidate-increment-unfiltered.json\"",
+      "2026-07-23T01:06:45Z stage=remote_runner_done status=success CODEX_REMOTE_BATCH56_RUN_OK"
+    ],
+    "sourceCommit": "feb76a2fb0eb25daeb8743cbaa01b6b244f2f61d",
+    "archiveStrategy": "minimal git archive from Windows HEAD transferred to Mac temp; final artifacts only copied back to D:.",
+    "cleanupStatus": "removed",
+    "remoteTempExistsAfterCleanup": false,
+    "postCleanupDfH": "/dev/disk3s5   926Gi   135Gi   752Gi    16%    562k  7.9G    0%   /System/Volumes/Data",
+    "cleanupMarker": "CODEX_REMOTE_BATCH56_CLEANUP_OK",
+    "cleanupRaw": "cleanupStatus=removed target=/Users/be/codex-temp/daily-song-list-source-backfill-batch56-amanofustella-shard3of16\r\nremoteTempExistsAfterCleanup=false\r\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\r\n/dev/disk3s5   926Gi   135Gi   752Gi    16%    562k  7.9G    0%   /System/Volumes/Data\r\nCODEX_REMOTE_BATCH56_CLEANUP_OK\r\n"
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "files": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "storageAudit": {
+    "windowsDNewLargeFiles": false,
+    "windowsCNewLargeFiles": false,
+    "windowsDNote": "D: final output is limited to the batch56 artifact directory and the five required small files.",
+    "windowsCNote": "C: was not used for temp/cache/package files.",
+    "localTempDir": "G:\\codex-temp\\daily-song-list-source-backfill-batch56-amanofustella-shard3of16",
+    "localTempCleanupStatus": "removed",
+    "finalArtifactDir": "D:/Projects/daily_song_list_worker_source_backfill_20260720/artifacts/channel-discovery/2026-07-22-source-backfill-batch56-amanofustella-shard3of16",
+    "localTempExistsAfterCleanup": false,
+    "finalArtifactFiles": {
+      "candidate-increment-unfiltered.json": 58543,
+      "accepted-increment.json": 58616,
+      "dirty-audit.json": 1117,
+      "manifest.json": 11124,
+      "report.md": 3926
+    },
+    "finalArtifactTotalBytes": 133326
+  },
+  "artifactHashes": {
+    "candidate-increment-unfiltered.json": {
+      "bytes": 58543,
+      "sha256": "0167415b9afe8c448f890e1d282c2402477bb5bf2949d741a07f6358440cea60"
+    },
+    "accepted-increment.json": {
+      "bytes": 58616,
+      "sha256": "efdcc86a14f35a31a12ed2ae1e9bf2385d8438255afe7465c698fc5df1541c2e"
+    },
+    "dirty-audit.json": {
+      "bytes": 1117,
+      "sha256": "e74892e613440cc8f95f4ec0ec4faa338ab73be9efa2e2953adce915c73aa9d9"
+    },
+    "report.md": {
+      "bytes": 3926,
+      "sha256": "3595e9e5b5ab55f303630359e9fca048855a03a6410c7a12d92568fb06481595"
+    }
+  }
+}

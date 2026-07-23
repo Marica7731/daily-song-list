@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "batchId": "2026-07-22-source-backfill-batch56-amanofustella-shard3of16",
+  "generatedAt": "2026-07-23T01:11:22.427Z",
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "singingSignals": [
+      "歌枠",
+      "歌",
+      "弾き語り",
+      "karaoke",
+      "歌ってみた"
+    ],
+    "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+  },
+  "result": {
+    "inputVideoCount": 11,
+    "inputOccurrenceCount": 83,
+    "keptVideoCount": 11,
+    "keptOccurrenceCount": 83,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "dropped": [],
+  "suspicious": []
+}
