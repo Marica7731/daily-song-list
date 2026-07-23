@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment-status-only",
+  "generatedAt": "2026-07-23T02:56:57.357Z",
+  "status": "interrupted",
+  "statusMarker": "CODEX_BATCH61_STATUS_ONLY_INTERRUPTED",
+  "failureReason": "Interrupted by main session while the Windows to Mac source archive transfer was still in progress. Remote setup was not executed, discovery/export/postprocess never started, and no candidate checkpoint could exist because discovery never launched.",
+  "inputs": [],
+  "readStats": {
+    "inputDirs": 0,
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 0,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": []
+}

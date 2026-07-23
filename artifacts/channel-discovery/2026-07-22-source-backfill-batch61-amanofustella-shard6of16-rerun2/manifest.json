@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-increment-status-only",
+  "batchId": "2026-07-22-source-backfill-batch61-amanofustella-shard6of16-rerun2",
+  "generatedAt": "2026-07-23T02:56:57.357Z",
+  "status": "interrupted",
+  "statusMarker": "CODEX_BATCH61_STATUS_ONLY_INTERRUPTED",
+  "result": {
+    "imported": 0,
+    "skipped": 0,
+    "failed": 1,
+    "success": false,
+    "failureReason": "Interrupted by main session while the Windows to Mac source archive transfer was still in progress. Remote setup was not executed, discovery/export/postprocess never started, and no candidate checkpoint could exist because discovery never launched."
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 6,
+    "inspectShardCount": 16
+  },
+  "discovery": {
+    "candidateCount": 0,
+    "candidateCountStatus": "not_started_source_archive_transfer_interrupted_before_remote_setup",
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "occurrenceCount": 0,
+    "reachedEnd": false,
+    "reachedEndStatus": "not_reached_discovery_not_started",
+    "detailPublishedCoverage": "0/0",
+    "detailThumbnailCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "publishedTimestampRange": {
+      "min": null,
+      "max": null
+    },
+    "occurrenceSecondsRange": {
+      "min": null,
+      "max": null
+    },
+    "elapsedSecondsBeforeInterruption": 0,
+    "checkpointWritten": false,
+    "checkpointStatus": "not_written_discovery_never_started",
+    "discoveryStarted": false,
+    "exportCompleted": false,
+    "postprocessCompleted": false
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 0,
+    "occurrences": 0,
+    "songs": 0,
+    "uniqueSongs": 0,
+    "publishedTimestampCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "acceptedIncrementThumbnailFieldCoverage": "0/0",
+    "occurrenceSecondsRange": {
+      "min": null,
+      "max": null
+    }
+  },
+  "dirtyAudit": {
+    "policy": {
+      "hardDropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "singingSignals": [
+        "歌枠",
+        "歌",
+        "弾き語り",
+        "karaoke",
+        "歌ってみた"
+      ],
+      "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+    },
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "suspiciousOccurrenceCount": 0
+  },
+  "execution": {
+    "host": "Windows orchestration with Mac SSH target",
+    "sourceCommit": "db432af6",
+    "localSourceArchiveBytes": 10882242560,
+    "remotePartialArchiveBytesBeforeCleanup": 10719461376,
+    "runnerReached": false,
+    "discoveryReached": false,
+    "exportReached": false,
+    "postprocessReached": false
+  },
+  "remoteExecution": {
+    "usedHost": "Mac",
+    "hostname": "192.168.1.13",
+    "remoteDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch61-amanofustella-shard6of16-rerun2",
+    "repoDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch61-amanofustella-shard6of16-rerun2/repo",
+    "discoveryDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch61-amanofustella-shard6of16-rerun2/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch61-amanofustella-shard6of16-rerun2-discovery",
+    "archiveStrategy": "git archive from Windows HEAD was being transferred to Mac /tmp; transfer was interrupted before remote setup/extract.",
+    "precheck": {
+      "sourceFilterExists": true,
+      "remoteSourceFilterPrecheckRun": false,
+      "marker": "local-only: CODEX_SOURCE_FILTER_LOCAL_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a; remote precheck not reached because setup did not run"
+    },
+    "commandSummary": "No discovery/export command was launched. Planned discovery watchdog was 3600s; install/export/postprocess watchdogs were 600s.",
+    "discoveryMarker": null,
+    "exportMarker": null,
+    "postprocessMarker": null,
+    "interruptMarker": "CODEX_BATCH61_INTERRUPTED_DURING_SOURCE_ARCHIVE_TRANSFER",
+    "stageLogTail": [
+      "2026-07-23T02:40:00Z stage=windows_precheck repo=D:\\Projects\\daily_song_list_worker_source_backfill_20260720 branch=codex/source-backfill-20260720-v2 head=db432af6 targetDirAbsent=true",
+      "2026-07-23T02:40:00Z stage=local_source_filter_precheck CODEX_SOURCE_FILTER_LOCAL_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a",
+      "2026-07-23T02:46:27Z stage=scp_source_archive_start localBytes=10882242560 remoteTmp=/tmp/codex-batch61-amanofustella-shard6of16-rerun2-source.tar",
+      "2026-07-23T02:51:31Z stage=scp_source_archive_timeout firstAttemptRemoteBytes=7379320832 timeout=300s",
+      "2026-07-23T02:52:03Z stage=scp_source_archive_retry_start localBytes=10882242560",
+      "2026-07-23T02:56:14Z stage=main_session_interrupt_stop_requested remotePartialBytesBeforeCleanup=10719461376",
+      "2026-07-23T02:56:45Z stage=stop_local_long_processes scpStopped=true sshStopped=true",
+      "2026-07-23T02:56:50Z stage=remote_cleanup CODEX_REMOTE_BATCH61_CLEANUP_OK remoteTempExistsAfterCleanup=false remoteTmpTransferFragmentsAfterCleanup=false",
+      "2026-07-23T02:56:57Z stage=status_only_artifact_write accepted=0 discoveryStarted=false"
+    ],
+    "cleanupStatus": "removed",
+    "remoteTempExistsAfterCleanup": false,
+    "remoteTmpTransferFragmentsAfterCleanup": false,
+    "postCleanupDfH": "/dev/disk3s5   926Gi   146Gi   741Gi    17%    565k  7.8G    0%   /System/Volumes/Data",
+    "cleanupMarker": "CODEX_REMOTE_BATCH61_CLEANUP_OK",
+    "cleanupRaw": "cleanupStatus=removed target=/Users/be/codex-temp/daily-song-list-source-backfill-batch61-amanofustella-shard6of16-rerun2\nremoteTempExistsAfterCleanup=false\nremoteTmpTransferFragmentsAfterCleanup=false\n/dev/disk3s5   926Gi   146Gi   741Gi    17%    565k  7.8G    0%   /System/Volumes/Data\nCODEX_REMOTE_BATCH61_CLEANUP_OK"
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "files": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "storageAudit": {
+    "windowsDNewLargeFiles": false,
+    "windowsCNewLargeFiles": false,
+    "windowsDNote": "D: final output is limited to the batch61 status-only artifact directory and five small files.",
+    "windowsCNote": "C: was not used for temp/cache/package files.",
+    "localTempDir": "G:\\codex-temp\\daily-song-list-source-backfill-batch61-amanofustella-shard6of16-rerun2",
+    "localTempCleanupStatus": "removed",
+    "localTempExistsAfterCleanup": false,
+    "finalArtifactDir": "D:/Projects/daily_song_list_worker_source_backfill_20260720/artifacts/channel-discovery/2026-07-22-source-backfill-batch61-amanofustella-shard6of16-rerun2",
+    "finalArtifactFiles": {
+      "candidate-increment-unfiltered.json": 904,
+      "accepted-increment.json": 615,
+      "dirty-audit.json": 1128,
+      "manifest.json": 8813,
+      "report.md": 5194
+    },
+    "finalArtifactTotalBytes": 16654
+  },
+  "artifactHashes": {
+    "candidate-increment-unfiltered.json": {
+      "bytes": 904,
+      "sha256": "c5a7f99de8150f817a301c84f0369c8c7dbaf4adf28980df680b4a93a349d441"
+    },
+    "accepted-increment.json": {
+      "bytes": 615,
+      "sha256": "cb93be6090a3f4881475d4e0ffe0c80011c48605ee390f166a6941d01c615a53"
+    },
+    "dirty-audit.json": {
+      "bytes": 1128,
+      "sha256": "044ef116a41a775993f523b3af7106f8779c4dc3a71560bc3cbadaf710a7646f"
+    },
+    "report.md": {
+      "bytes": 5194,
+      "sha256": "9e2898dd90422aa67def03e35e2ad5c6b315f6f7f4a67af615eac1e9adb682e5"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-22-source-backfill-batch61-amanofustella-shard6of16-rerun2",
+  "generatedAt": "2026-07-23T02:56:57.357Z",
+  "status": "interrupted",
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "singingSignals": [
+      "歌枠",
+      "歌",
+      "弾き語り",
+      "karaoke",
+      "歌ってみた"
+    ],
+    "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+  },
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "droppedVideos": [],
+  "suspiciousVideos": [],
+  "note": "No videos were evaluated because discovery did not start."
+}
