@@ -1,0 +1,19 @@
+{
+  "source": "UtenHiyori",
+  "channelUrl": "https://www.youtube.com/@UtenHiyori",
+  "status": "failed",
+  "startedAt": "2026-07-23T18:23:00+08:00",
+  "finishedAt": "2026-07-23T18:23:12+08:00",
+  "recordedAt": "2026-07-23T18:24:58+08:00",
+  "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@UtenHiyori --singer-name UtenHiyori --output-dir artifacts/channel-discovery/2026-07-23-source-backfill-batch105-utenhiyori-discovery-attempt-retry2 --candidate-only --max-channel-pages 1 --max-candidates 20 --request-interval-ms 3000 --request-jitter-ms 1000",
+  "timeoutMs": 180000,
+  "timedOut": false,
+  "exitCode": 1,
+  "marker": null,
+  "errorSummary": "VsingerHttpError: Request failed for https://www.youtube.com/@UtenHiyori/streams?hl=ja&persist_hl=1: fetch failed",
+  "manifestExists": false,
+  "videoDetailsExists": false,
+  "occurrencesExists": false,
+  "completeForImport": false,
+  "note": "Second bounded retry used candidate-only and max one channel page; it failed at the same YouTube streams fetch step."
+}
