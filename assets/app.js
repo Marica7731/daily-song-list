@@ -4112,9 +4112,30 @@ function hydrateRequestVideoRecord(record) {
 function hydrateRequestVtuberRecord(record) {
   return {
     ...record,
-    songs: hydrateCountMap(record.songs),
+    songs: normalizeVtuberSongCountMap(hydrateCountMap(record.songs)),
     occurrences: hydrateOccurrences(record.occurrences),
   };
+}
+
+function normalizeVtuberSongCountMap(map) {
+  const normalized = new Map();
+  for (const entry of map?.values?.() || []) {
+    const name = cleanText(entry?.name);
+    if (!name || !shouldShowSongGroupTitle(name)) continue;
+    const key = songWorkKeyForTitle(name) || normalizeEntityKey(name);
+    if (!key) continue;
+    const existing = normalized.get(key);
+    if (existing) {
+      existing.count += Math.max(0, Number(entry.count) || 0);
+      continue;
+    }
+    normalized.set(key, {
+      key,
+      name,
+      count: Math.max(0, Number(entry.count) || 0),
+    });
+  }
+  return normalized;
 }
 
 function hydrateOccurrences(occurrences) {
@@ -4948,7 +4969,6 @@ function renderVtuberRank(group, rangeCache, selection) {
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songGroups,
-        songPreview: songGroups.slice(0, 2).map((group) => group.title),
         getSongGroups: () => getVtuberSongGroups(record),
         priorityInlineMedia: index < 8,
       }),
@@ -5726,7 +5746,7 @@ function buildVtuberRecords(occurrences) {
     if (videoKey) record.videos.add(videoKey);
     record.count += 1;
     record.occurrences.push(occurrence);
-    incrementCount(record.songs, cleanText(song.title));
+    incrementCanonicalSongCount(record.songs, cleanText(song.title));
   }
   return addRecordRuntimeFields(Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
@@ -6064,6 +6084,7 @@ function rankCountUnit() {
 }
 
 function songCountForRecord(record) {
+  if (record?.type === "vtuber" && record?.songs instanceof Map) return record.songs.size;
   const explicit = Number(record?.songCount ?? record?.uniqueSongCount ?? record?.songsCount);
   if (Number.isFinite(explicit) && explicit >= 0) return explicit;
   if (record?.songs instanceof Map) return record.songs.size;
@@ -6084,10 +6105,21 @@ function incrementCount(map, name) {
   map.get(key).count += 1;
 }
 
+function incrementCanonicalSongCount(map, title) {
+  const name = cleanText(title);
+  if (!name || !shouldShowSongGroupTitle(name)) return;
+  const key = window.RankingUtils?.songWorkTitleKey?.(name) || normalizeEntityKey(name);
+  if (!key) return;
+  if (!map.has(key)) map.set(key, { key, name, count: 0 });
+  map.get(key).count += 1;
+}
+
 function songMeta(record) {
   const artists = sortedCountEntries(record.artists);
+  const knownArtists = artists.filter((entry) => !window.RankingUtils.isUnknownArtistName(entry.name));
+  const dominantArtist = (knownArtists.length ? knownArtists : artists)[0]?.name || "";
   return {
-    primary: record.displayArtist || (artists.length ? artists.slice(0, 2).map(formatCountEntry).join("、") : "待补歌手"),
+    primary: dominantArtist || "待补歌手",
     missingPrimary: !artists.length,
     badges: isNicheRecord(record) ? ["小众"] : [],
   };
@@ -6227,6 +6259,7 @@ function renderRankRecord({
       songPreview,
       videoCount,
       sourceDetailPath,
+      priorityMedia: priorityInlineMedia,
     }),
   );
   row.append(
@@ -6387,12 +6420,13 @@ function renderRecordContent(title, meta, options) {
     videoCount,
     sourceDetailPath = "",
     headingLevel = 2,
+    priorityMedia = false,
   } = options;
   const content = document.createElement("div");
   content.className = "rank-content";
 
   if (mode === "vtuber") {
-    const media = renderVtuberDisplayImage(record || {});
+    const media = renderVtuberDisplayImage(record || {}, { priority: priorityMedia });
     if (media) content.append(wrapVtuberChannelLink(media, record || {}, "vtuber-display-link"));
   }
 
@@ -6428,6 +6462,8 @@ function renderRecordContent(title, meta, options) {
   } else if (mode === "vtuber") {
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) metaLine.append(collectedBadge);
+    const handle = renderVtuberHandle(record);
+    if (handle) appendSublineNode(metaLine, handle);
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, sourceVideoCountSubline(record, videoCount, sourceDetailPath), "subline-video-count");
@@ -6438,6 +6474,21 @@ function renderRecordContent(title, meta, options) {
   }
 
   return content;
+}
+
+function renderVtuberHandle(record = {}) {
+  const rawHandle = cleanVtuberChannelHandle(record.channelHandle) || vtuberHandleFromChannelUrl(record.channelUrl);
+  const handle = rawHandle.replace(/^\/+/u, "");
+  if (!handle) return null;
+  const link = window.FrontendUtils.youtubeChannelLink(record);
+  const anchor = document.createElement("a");
+  anchor.className = "vtuber-handle";
+  anchor.href = link.href;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.textContent = handle;
+  anchor.setAttribute("aria-label", link.isFallbackSearch ? `搜索频道：${handle}` : `打开频道：${handle}`);
+  return anchor;
 }
 
 function renderVtuberChannelTextLink(record, title) {
@@ -6472,7 +6523,7 @@ function sourceVideoCountSubline(record, videoCount, sourceDetailPath = "") {
   return `${count} 个视频`;
 }
 
-function renderVtuberDisplayImage(record) {
+function renderVtuberDisplayImage(record, options = {}) {
   const media = window.FrontendUtils.vtuberDisplayImageModel(record || {});
   if (!media.src) {
     const marker = document.createElement("span");
@@ -6489,7 +6540,9 @@ function renderVtuberDisplayImage(record) {
       : "vtuber-display-image vtuber-display-image-thumbnail";
   img.dataset.displayImageKind = media.kind;
   img.alt = "";
-  img.loading = "lazy";
+  const priority = Boolean(options.priority);
+  img.loading = priority ? "eager" : "lazy";
+  img.fetchPriority = priority ? "high" : "low";
   img.decoding = "async";
   img.width = 44;
   img.height = 44;
@@ -7587,9 +7640,9 @@ function renderSourceVideoGroup(group, options = {}) {
 
 function sourcePublishedText(group = {}, item = {}) {
   const explicit = cleanText(item.publishedText || group.publishedText);
-  if (explicit) return explicit;
   const value = item.publishedAt || group.publishedAt || item.publishedTimestamp || group.publishedTimestamp;
-  return value ? formatDate(value) : "";
+  if (value) return formatCalendarDate(value);
+  return /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/u.test(explicit) ? explicit.replaceAll("/", "-") : "";
 }
 
 function uniqueSourceTimeOccurrences(occurrences = []) {
@@ -7962,6 +8015,18 @@ function renderArtistSongGroup(group) {
     artist.textContent = artistLabel;
     titleWrap.append(artist);
   }
+  const publishedDate = formatCalendarDate(
+    previewItem.publishedAt ||
+      previewItem.publishedTimestamp ||
+      group.publishedAt ||
+      group.publishedTimestamp,
+  );
+  if (publishedDate && group.sourceMode === "vtuber") {
+    const date = document.createElement("span");
+    date.className = "artist-song-date";
+    date.textContent = publishedDate;
+    titleWrap.append(date);
+  }
   header.append(titleWrap);
 
   const meta = document.createElement("div");
@@ -8043,22 +8108,20 @@ function buildSearchUrlForSongGroup(group) {
 }
 
 function artistLabelForSongGroup(group) {
-  const displayArtist = cleanText(group?.displayArtist);
-  if (displayArtist && !window.RankingUtils.isUnknownArtistName(displayArtist)) return displayArtist;
-
   const counts = new Map();
   for (const occurrence of group?.occurrences || []) {
-    const name = cleanText(occurrence?.song?.artist);
+    const rawName = cleanText(occurrence?.song?.artist);
+    const name = window.RankingUtils.canonicalizeArtistName(rawName) || rawName;
     if (!name) continue;
     counts.set(name, (counts.get(name) || 0) + 1);
   }
   const entries = Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]));
   const knownEntries = entries.filter(([name]) => !window.RankingUtils.isUnknownArtistName(name));
-  return (knownEntries.length ? knownEntries : entries)
-    .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
-    .slice(0, 2)
-    .map(([name]) => name)
-    .join("、");
+  if (knownEntries.length) return knownEntries[0][0];
+  if (entries.length) return entries[0][0];
+  const displayArtist = cleanText(group?.displayArtist);
+  if (!displayArtist || window.RankingUtils.isUnknownArtistName(displayArtist)) return "";
+  return displayArtist.split(/[、，]/u)[0].replace(/\s*\(\d+\)\s*$/u, "").trim();
 }
 
 function artistSongCountLabel(group) {
@@ -8783,7 +8846,9 @@ function latestOccurrenceByVideoDate(occurrences) {
   let latest = null;
   let latestValue = -1;
   for (const occurrence of occurrences || []) {
-    const value = Number(occurrence?.item?.publishedTimestamp) || 0;
+    const item = occurrence?.item || {};
+    const numeric = Number(item.publishedTimestamp);
+    const value = Number.isFinite(numeric) && numeric > 0 ? numeric : Date.parse(item.publishedAt || "") || 0;
     if (!latest || value >= latestValue) {
       latest = occurrence;
       latestValue = value;
@@ -9372,6 +9437,12 @@ function formatDate(value) {
   return `${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
 
+function formatCalendarDate(value) {
+  const parts = dateParts(value);
+  if (!parts) return "";
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
 function formatTime(value) {
   const parts = dateParts(value);
   if (!parts) return value ? String(value) : "未知";
@@ -9380,7 +9451,10 @@ function formatTime(value) {
 
 function dateParts(value) {
   if (!value) return null;
-  const date = new Date(value);
+  const numeric = Number(value);
+  const date = Number.isFinite(numeric) && numeric > 0
+    ? new Date(numeric < 100000000000 ? numeric * 1000 : numeric)
+    : new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   const parts = new Intl.DateTimeFormat("zh-CN", {
     timeZone: DISPLAY_TIME_ZONE,

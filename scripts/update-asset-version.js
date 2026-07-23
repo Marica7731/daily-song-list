@@ -26,9 +26,15 @@ console.log(`[asset-version] ${version}`);
 function updateHtmlAssetVersions(filePath, version) {
   let html = fs.readFileSync(filePath, "utf8");
   for (const assetPath of VERSIONED_ASSETS) {
-    const escaped = escapeRegExp(assetPath);
+    const extension = path.extname(assetPath);
+    const assetStem = assetPath.slice(0, -extension.length);
+    const escapedStem = escapeRegExp(assetStem);
+    const escapedExtension = escapeRegExp(extension);
     const versionedPath = versionedAssetPath(assetPath, version);
-    html = html.replace(new RegExp(`${escaped}(?:-[^/"']+)?(?:\\?v=[^"']+)?`, "g"), versionedPath);
+    html = html.replace(
+      new RegExp(`${escapedStem}(?:-h[0-9a-f]+)?${escapedExtension}(?:\\?v=[^"']+)?`, "g"),
+      versionedPath,
+    );
     removeOldVersionedAssetCopies(assetPath, versionedPath);
     fs.copyFileSync(path.join(ROOT, assetPath), path.join(ROOT, versionedPath));
   }

@@ -1352,18 +1352,15 @@
     if (mode === "artist") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       return {
-        text: isExpanded ? "收起" : `${songCount}首曲目`,
+        text: isExpanded ? "收起" : "展开",
         ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
       };
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       const videoCount = Math.max(0, Number(options.videoCount) || 0);
-      const textParts = [];
-      if (songCount) textParts.push(`${songCount}首`);
-      if (videoCount) textParts.push(`${videoCount}视频`);
       return {
-        text: isExpanded ? "收起" : textParts.join("\n") || "展开",
+        text: isExpanded ? "收起" : "展开",
         ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲${videoCount ? `、${videoCount} 个视频` : ""}`,
       };
     }

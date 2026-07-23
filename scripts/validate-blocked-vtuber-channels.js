@@ -37,10 +37,12 @@ function main() {
 
 function assertHtml(errors, hash) {
   const html = fs.readFileSync(INDEX_PATH, "utf8");
-  if (!html.includes("assets/blocked-vtuber-meta.js")) errors.push("index.html missing blocked-vtuber-meta.js");
+  const metaAssetPattern = /assets\/blocked-vtuber-meta(?:-h[0-9a-f]+)?\.js(?:\?v=[^"']+)?/u;
+  const versionedMetaPattern = /assets\/blocked-vtuber-meta-h[0-9a-f]+\.js|assets\/blocked-vtuber-meta\.js\?v=/u;
+  if (!metaAssetPattern.test(html)) errors.push("index.html missing blocked-vtuber-meta.js");
   if (html.includes("assets/blocked-vtuber-channels.js")) errors.push("index.html must not load full blocked-vtuber-channels.js on first screen");
   if (html.includes("assets/source-filter.js")) errors.push("index.html must not load source-filter.js on first screen");
-  if (!html.includes(`assets/blocked-vtuber-meta.js?v=`)) errors.push("blocked-vtuber meta asset must be versioned");
+  if (!versionedMetaPattern.test(html)) errors.push("blocked-vtuber meta asset must be versioned");
   const generated = fs.readFileSync(DEFAULT_GENERATED_ASSET_PATH, "utf8");
   if (!generated.includes(`blocklistHash: "${hash}"`)) errors.push("generated asset hash mismatch");
   const meta = fs.readFileSync(DEFAULT_GENERATED_META_ASSET_PATH, "utf8");

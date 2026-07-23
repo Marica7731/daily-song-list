@@ -200,11 +200,11 @@ test("source preview defaults to one inline source and counts hidden sources", (
 
 test("artist rank toggle uses unique song count", () => {
   const collapsed = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, hiddenCount: 12 });
-  assert.equal(collapsed.text, "5首曲目");
+  assert.equal(collapsed.text, "展开");
   assert.equal(collapsed.ariaLabel, "查看该歌手的 5 首歌曲");
 
   const compact = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, compact: true });
-  assert.equal(compact.text, "5首曲目");
+  assert.equal(compact.text, "展开");
   assert.equal(compact.ariaLabel, "查看该歌手的 5 首歌曲");
 
   const expanded = rankToggleModel({ mode: "artist", isExpanded: true, songCount: 5 });
@@ -212,13 +212,13 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
-test("VTuber channel rank toggle exposes song and video counts in one compact button", () => {
+test("VTuber channel rank toggle keeps counts in accessible text and the button action-only", () => {
   const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, rankCount: 21, videoCount: 4 });
-  assert.equal(collapsed.text, "7首\n4视频");
+  assert.equal(collapsed.text, "展开");
   assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲、4 个视频");
 
   const songMetric = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, occurrenceCount: 21, rankMetric: "songs", rankCount: 7 });
-  assert.equal(songMetric.text, "7首");
+  assert.equal(songMetric.text, "展开");
   assert.equal(songMetric.ariaLabel, "查看该频道的 7 首歌曲");
 
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, rankCount: 21, videoCount: 4 });
@@ -226,7 +226,7 @@ test("VTuber channel rank toggle exposes song and video counts in one compact bu
   assert.equal(expanded.ariaLabel, "收起该频道歌曲");
 
   const compact = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 123, compact: true });
-  assert.equal(compact.text, "123首");
+  assert.equal(compact.text, "展开");
 });
 
 test("VTuber collection badge model tolerates missing backend fields", () => {
