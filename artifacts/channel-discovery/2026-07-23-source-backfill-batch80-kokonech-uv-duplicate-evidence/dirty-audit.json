@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-dirty-audit",
+  "batchId": "2026-07-23-source-backfill-batch80-kokonech-uv-duplicate-evidence",
+  "generatedAt": "2026-07-23T06:59:53.964Z",
+  "source": "https://www.youtube.com/@KOKONEch_uv/streams",
+  "channel": "KOKONEch_uv",
+  "status": "skipped_duplicate",
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ is not a standalone hard exclude; mark suspicious/drop only when no singing signal exists"
+  },
+  "thisBatch": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "suspicious": [],
+    "dropped": [],
+    "note": "No new crawl/export was run in batch80."
+  },
+  "duplicateAcceptedEvidence": {
+    "dirtyAuditFile": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\dirty-audit.json",
+    "priorDroppedVideoCount": 0,
+    "priorDroppedOccurrenceCount": 0,
+    "priorSuspiciousCount": 0,
+    "priorTermHitCounts": {}
+  }
+}

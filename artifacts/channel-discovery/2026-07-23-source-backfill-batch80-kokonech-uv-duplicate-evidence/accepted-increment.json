@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-accepted-increment",
+  "batchId": "2026-07-23-source-backfill-batch80-kokonech-uv-duplicate-evidence",
+  "generatedAt": "2026-07-23T06:59:53.964Z",
+  "source": "https://www.youtube.com/@KOKONEch_uv/streams",
+  "channel": "KOKONEch_uv",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "verified_concrete_accepted_artifact",
+    "artifactDir": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8",
+    "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.accepted.json",
+    "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.raw-export.json",
+    "manifest": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\manifest.json",
+    "report": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\report.md",
+    "dirtyAudit": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\dirty-audit.json",
+    "channelUrl": "https://www.youtube.com/@KOKONEch_uv/streams",
+    "channelHandle": "/@KOKONEch_uv",
+    "sourceType": "youtube_channel_discovery accepted increment",
+    "existingStatus": "imported",
+    "existingVideos": 9,
+    "existingOccurrences": 72,
+    "existingUniqueSongs": 66,
+    "candidateCount": 30,
+    "inspectedCount": 30,
+    "usableVideoCount": 11,
+    "discoveryOccurrenceCount": 130,
+    "reachedEnd": true,
+    "elapsedSeconds": 464,
+    "publishedTimestampCoverage": "9/9",
+    "publishedTimestampRange": {
+      "minTimestamp": 1782082948438,
+      "maxTimestamp": 1784156548438,
+      "minIso": "2026-06-21T23:02:28.438Z",
+      "maxIso": "2026-07-15T23:02:28.438Z"
+    },
+    "occurrenceTimeCoverage": "72/72",
+    "occurrenceSecondsCoverage": "72/72",
+    "thumbnailOrCoverCoverage": "0/9",
+    "discoveryThumbnailCoverage": "9/9",
+    "skippedExistingRegressionVideoIds": [
+      "6u2__SPJvR4",
+      "8xXlGcSWNR0",
+      "Tg0gjRzj5ew",
+      "ob2cN6E_tBo",
+      "zJEa2XSxky4"
+    ],
+    "evidenceNotes": [
+      "Queue/pending files were not used as duplicate evidence.",
+      "Batch74 was reviewed as status-only interrupted and was not used as accepted evidence.",
+      "Batch8 accepted file contains concrete KOKONEch_uv accepted video rows and song occurrences."
+    ]
+  },
+  "note": "No new accepted increment is emitted because batch8 already contains concrete accepted KOKONEch_uv rows."
+}

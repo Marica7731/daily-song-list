@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-worker-manifest",
+  "batchId": "2026-07-23-source-backfill-batch80-kokonech-uv-duplicate-evidence",
+  "generatedAt": "2026-07-23T06:59:53.964Z",
+  "targetRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "branchConfirmed": "codex/source-backfill-20260720-v2",
+  "source": "https://www.youtube.com/@KOKONEch_uv/streams",
+  "channel": "KOKONEch_uv",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "imported": 0,
+  "skipped": 1,
+  "failed": 0,
+  "failureReason": null,
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "stats": {
+    "candidateCount": 30,
+    "inspectedCount": 30,
+    "acceptedVideosThisBatch": 0,
+    "acceptedOccurrencesThisBatch": 0,
+    "acceptedUniqueSongsThisBatch": 0,
+    "duplicateAcceptedVideos": 9,
+    "duplicateAcceptedOccurrences": 72,
+    "duplicateAcceptedUniqueSongs": 66,
+    "publishedTimestampCoverage": "9/9",
+    "occurrenceTimeCoverage": "72/72",
+    "occurrenceSecondsCoverage": "72/72",
+    "thumbnailOrCoverCoverage": "0/9",
+    "reachedEnd": true,
+    "elapsedSeconds": 0,
+    "duplicateDiscoveryElapsedSeconds": 464
+  },
+  "coverage": {
+    "publishedTimestamp": "9/9",
+    "publishedTimestampRange": {
+      "minTimestamp": 1782082948438,
+      "maxTimestamp": 1784156548438,
+      "minIso": "2026-06-21T23:02:28.438Z",
+      "maxIso": "2026-07-15T23:02:28.438Z"
+    },
+    "occurrenceTime": "72/72",
+    "occurrenceSeconds": "72/72",
+    "thumbnailOrCover": "0/9"
+  },
+  "duplicateEvidence": {
+    "status": "verified_concrete_accepted_artifact",
+    "artifactDir": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8",
+    "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.accepted.json",
+    "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.raw-export.json",
+    "manifest": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\manifest.json",
+    "report": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\report.md",
+    "dirtyAudit": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\dirty-audit.json",
+    "channelUrl": "https://www.youtube.com/@KOKONEch_uv/streams",
+    "channelHandle": "/@KOKONEch_uv",
+    "sourceType": "youtube_channel_discovery accepted increment",
+    "existingStatus": "imported",
+    "existingVideos": 9,
+    "existingOccurrences": 72,
+    "existingUniqueSongs": 66,
+    "candidateCount": 30,
+    "inspectedCount": 30,
+    "usableVideoCount": 11,
+    "discoveryOccurrenceCount": 130,
+    "reachedEnd": true,
+    "elapsedSeconds": 464,
+    "publishedTimestampCoverage": "9/9",
+    "publishedTimestampRange": {
+      "minTimestamp": 1782082948438,
+      "maxTimestamp": 1784156548438,
+      "minIso": "2026-06-21T23:02:28.438Z",
+      "maxIso": "2026-07-15T23:02:28.438Z"
+    },
+    "occurrenceTimeCoverage": "72/72",
+    "occurrenceSecondsCoverage": "72/72",
+    "thumbnailOrCoverCoverage": "0/9",
+    "discoveryThumbnailCoverage": "9/9",
+    "skippedExistingRegressionVideoIds": [
+      "6u2__SPJvR4",
+      "8xXlGcSWNR0",
+      "Tg0gjRzj5ew",
+      "ob2cN6E_tBo",
+      "zJEa2XSxky4"
+    ],
+    "evidenceNotes": [
+      "Queue/pending files were not used as duplicate evidence.",
+      "Batch74 was reviewed as status-only interrupted and was not used as accepted evidence.",
+      "Batch8 accepted file contains concrete KOKONEch_uv accepted video rows and song occurrences."
+    ]
+  },
+  "batch74Review": {
+    "manifest": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch74-kokonech-uv-mac-readonly\\manifest.json",
+    "status": "interrupted",
+    "reason": "status-only interrupted artifact reviewed; not used as duplicate accepted evidence"
+  },
+  "dirtyAuditRules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ is not a standalone hard exclude; mark suspicious/drop only when no singing signal exists"
+  },
+  "runtime": {
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "macStatus": "Mac not used",
+    "remoteTempCreated": false,
+    "remoteStatus": "remote temp not created",
+    "elapsedSeconds": 0
+  },
+  "cleanup": {
+    "localTempDir": "G:\\codex-temp",
+    "localTempScript": "G:\\codex-temp\\batch80-kokonech-duplicate-artifact.js",
+    "localTempScriptRemovedAfterRun": true,
+    "windowsLargeFileNote": "No large C/D/G cache, checkout, runtime DB, or source export was created; only five small artifact files are written under this batch artifact directory."
+  },
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}
