@@ -2633,7 +2633,7 @@ function runtimePathPattern(range) {
 
 function runtimeRequestPattern(range) {
   return new RegExp(
-    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/summary\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/views/.+/(?:manifest|index|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/records/(?:song|artist|video)/shard-\\d{4}\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/search/(?:manifest\\.[0-9a-f]{12}\\.json|[^/]+/page-\\d{4}\\.[0-9a-f]{12}\\.json)|data/ui/ranges/${range}/sources/(?:manifest|shard-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
+    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/summary\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/views/.+/(?:manifest|index|index-page-\\d{4}|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/records/(?:song|artist|video)/shard-\\d{4}\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/search/(?:manifest\\.[0-9a-f]{12}\\.json|[^/]+/page-\\d{4}\\.[0-9a-f]{12}\\.json)|data/ui/ranges/${range}/sources/(?:manifest|shard-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
     "u",
   );
 }

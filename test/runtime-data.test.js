@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const test = require("node:test");
 
 const {
@@ -13,6 +15,7 @@ const {
   CURRENT_FILTER_VERSION,
   requestSearchBucketId,
   requestSearchBuckets,
+  writeRequestViewIndex,
 } = require("../scripts/build-runtime-data");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 
@@ -556,6 +559,51 @@ test("request search shards split by estimated payload bytes without repeated fu
 
   assert.equal(chunks.length, 3);
   assert.deepEqual(chunks.map((chunk) => chunk.map((record) => record.key)), [["a"], ["b"], ["c"]]);
+});
+
+test("request view index writes a slim manifest and sharded records", () => {
+  const baseDir = `data/ui/test-request-view-index-${process.pid}`;
+  const absoluteDir = path.join(__dirname, "..", baseDir);
+  fs.rmSync(absoluteDir, { recursive: true, force: true });
+  try {
+    const result = writeRequestViewIndex({
+      rangeId: "all",
+      dataVersion: "test-version",
+      generatedAt: "2026-07-23T00:00:00.000Z",
+      capturedAt: "2026-07-23T00:00:00.000Z",
+      viewName: "songRank",
+      baseDir,
+      node: {
+        metric: "occurrences",
+        scopeKey: "all",
+        missingArtistCount: 2,
+        indexEntries: Array.from({ length: 2001 }, (_, index) => ({
+          type: "song",
+          key: `song-${index}`,
+          detailKey: `all:song-${index}`,
+          rank: index + 1,
+          rankValue: 2001 - index,
+          searchText: `song ${index}`,
+        })),
+      },
+    });
+
+    const indexPayload = JSON.parse(fs.readFileSync(path.join(__dirname, "..", result.path), "utf8"));
+    assert.equal(indexPayload.kind, "request-view-index");
+    assert.equal(indexPayload.totalCount, 2001);
+    assert.equal(indexPayload.missingArtistCount, 2);
+    assert.equal(indexPayload.records, undefined);
+    assert.equal(indexPayload.pageCount, 2);
+    assert.equal(indexPayload.pages.length, 2);
+    assert.deepEqual(indexPayload.pages.map((page) => page.itemCount), [2000, 1]);
+
+    const pagePayload = JSON.parse(fs.readFileSync(path.join(__dirname, "..", indexPayload.pages[0].path), "utf8"));
+    assert.equal(pagePayload.kind, "request-view-index-page");
+    assert.equal(pagePayload.itemCount, 2000);
+    assert.equal(pagePayload.records.length, 2000);
+  } finally {
+    fs.rmSync(absoluteDir, { recursive: true, force: true });
+  }
 });
 
 test("compact rank diff removes unchanged entries and detailed fields", () => {

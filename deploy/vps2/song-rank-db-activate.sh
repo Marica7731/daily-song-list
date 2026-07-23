@@ -23,8 +23,29 @@ restart_and_check_api() {
     systemctl status song-rank-api --no-pager -l || true
     journalctl -u song-rank-api -n 80 --no-pager || true
     echo "CODEX_RUNTIME_DB_ACTIVATE_ERROR api-health-timeout url=${API_HEALTH_URL}"
-    exit 1
+    return 1
   fi
+}
+
+verify_sqlite_database() {
+  local db_path="$1"
+  python3 - "${db_path}" <<'PY'
+import sqlite3
+import sys
+
+db_path = sys.argv[1]
+conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+try:
+    result = conn.execute("PRAGMA quick_check").fetchone()
+    if not result or result[0] != "ok":
+        detail = result[0] if result else "no-result"
+        print(f"CODEX_RUNTIME_DB_ACTIVATE_ERROR sqlite-quick-check-failed detail={detail}", file=sys.stderr)
+        sys.exit(1)
+    conn.execute("SELECT COUNT(*) FROM sqlite_master").fetchone()
+finally:
+    conn.close()
+print(f"CODEX_RUNTIME_DB_SQLITE_CHECK_OK db={db_path}")
+PY
 }
 
 if [[ ! -f "${CANDIDATE_DB}" ]]; then
@@ -41,6 +62,7 @@ if [[ -n "${EXPECTED_SHA256}" ]]; then
 fi
 
 cd "${PROJECT_DIR}"
+verify_sqlite_database "${CANDIDATE_DB}"
 python3 scripts/db/query-runtime-db.py --db "${CANDIDATE_DB}" --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
 mkdir -p "${STATE_DIR}"
@@ -61,13 +83,21 @@ if [[ "${DIRECT_ACTIVATE}" == "1" ]]; then
 fi
 
 previous_db="${DB_PATH}.previous"
+previous_manifest="${DB_PATH}.manifest.json.previous"
 rm -f "${previous_db}"
+rm -f "${previous_manifest}"
 if [[ -f "${DB_PATH}" ]]; then
   mv -f "${DB_PATH}" "${previous_db}"
+fi
+if [[ -f "${DB_PATH}.manifest.json" ]]; then
+  mv -f "${DB_PATH}.manifest.json" "${previous_manifest}"
 fi
 if ! mv -f "${CANDIDATE_DB}" "${DB_PATH}"; then
   if [[ -f "${previous_db}" && ! -f "${DB_PATH}" ]]; then
     mv -f "${previous_db}" "${DB_PATH}"
+  fi
+  if [[ -f "${previous_manifest}" && ! -f "${DB_PATH}.manifest.json" ]]; then
+    mv -f "${previous_manifest}" "${DB_PATH}.manifest.json"
   fi
   echo "CODEX_RUNTIME_DB_ACTIVATE_ERROR replace-failed db=${DB_PATH} candidate=${CANDIDATE_DB}"
   exit 1
@@ -81,7 +111,24 @@ if [[ -f "${CANDIDATE_DB}.manifest.json" ]]; then
   chown www-data:www-data "${DB_PATH}.manifest.json"
 fi
 
-restart_and_check_api
+if ! restart_and_check_api; then
+  bad_db="${DB_PATH}.bad.$(date -u +%Y%m%dT%H%M%SZ)"
+  mv -f "${DB_PATH}" "${bad_db}" || true
+  if [[ -f "${previous_db}" ]]; then
+    mv -f "${previous_db}" "${DB_PATH}"
+    chown www-data:www-data "${DB_PATH}"
+  fi
+  if [[ -f "${previous_manifest}" ]]; then
+    mv -f "${previous_manifest}" "${DB_PATH}.manifest.json"
+    chown www-data:www-data "${DB_PATH}.manifest.json"
+  else
+    rm -f "${DB_PATH}.manifest.json"
+  fi
+  systemctl restart song-rank-api || true
+  echo "CODEX_RUNTIME_DB_ACTIVATE_ERROR rollback-after-health-failure badDb=${bad_db} restoredPrevious=$([[ -f "${DB_PATH}" ]] && echo 1 || echo 0)"
+  exit 1
+fi
+rm -f "${previous_manifest}"
 
 commit_sha="$(git rev-parse HEAD)"
 db_size="$(stat -c%s "${DB_PATH}")"

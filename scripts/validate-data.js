@@ -32,6 +32,7 @@ const RUNTIME_VIDEO_FIELDS = new Set([
   "channelName",
   "channelId",
   "channelHandle",
+  "channelAliases",
   "channelUrl",
   "avatarUrl",
   "sourceUrl",

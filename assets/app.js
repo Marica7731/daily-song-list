@@ -3795,7 +3795,22 @@ async function loadRequestViewManifest(path, signal) {
 
 async function loadRequestViewIndex(manifest, signal) {
   if (!manifest?.indexPath) throw new Error("request view index missing");
-  return readCachedRequestJson(state.requestRuntime.viewIndexCache, manifest.indexPath, signal);
+  const payload = await readCachedRequestJson(state.requestRuntime.viewIndexCache, manifest.indexPath, signal);
+  if (Array.isArray(payload?.records)) return payload;
+  const pages = Array.isArray(payload?.pages) && payload.pages.length ? payload.pages : manifest.indexPages || [];
+  if (!pages.length) return { ...payload, records: [] };
+  const records = [];
+  const pagePayloads = await Promise.all(
+    pages.map((page) => readCachedRequestJson(state.requestRuntime.viewIndexCache, page.path, signal)),
+  );
+  for (const pagePayload of pagePayloads) {
+    if (Array.isArray(pagePayload?.records)) records.push(...pagePayload.records);
+  }
+  return {
+    ...payload,
+    records,
+    totalCount: Number(payload?.totalCount) || records.length,
+  };
 }
 
 async function readCachedRequestJson(cache, path, signal) {
@@ -3811,8 +3826,8 @@ async function filterRequestIndexEntries(entries, options = {}) {
   let result = entries;
   if (query) {
     const candidates = await loadRequestSearchCandidates(query, filters, options.signal);
-    const allowEntryTextFallback = searchUsesAllFields(filters);
-    result = result.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || (allowEntryTextFallback && searchTextMatchesQuery(entry.searchText, query)));
+    const allowEntryTextFallback = candidates === null || searchUsesAllFields(filters);
+    result = result.filter((entry) => (candidates?.has?.(`${entry.type}:${entry.detailKey}`) || false) || (allowEntryTextFallback && searchTextMatchesQuery(entry.searchText, query)));
   }
   if (options.view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) {
     result = result.filter((entry) => entry.bucket === filters.indexBucket);
@@ -3871,6 +3886,7 @@ function compareRequestRankEntries(a, b) {
 
 async function loadRequestSearchCandidates(query, filters = {}, signal) {
   const records = await loadRequestSearchRecords(query, signal);
+  if (records === null) return null;
   const candidates = new Set();
   for (const record of records) {
     if (!requestSearchRecordMatchesFields(record, filters)) continue;
@@ -3899,6 +3915,7 @@ async function buildRequestSearchSuggestions(query, options = {}) {
   const filterKey = normalizeSearch(query);
   if (!filterKey) return [];
   const records = await loadRequestSearchRecords(filterKey, options.signal);
+  if (records === null) return [];
   const groups = {
     songs: [],
     artists: [],
@@ -3971,8 +3988,9 @@ async function loadRequestSearchRecords(query, signal) {
   }
   const requestMeta = requestRuntimeMeta(range);
   const manifestPath = requestMeta?.search?.manifestPath;
-  if (!manifestPath) return [];
+  if (!manifestPath) return null;
   const manifest = await readCachedRequestJson(state.requestRuntime.searchManifestCache, manifestPath, signal);
+  if (manifest?.disabled) return null;
   const bucketIds = Array.from(requestSearchBuckets(query));
   const bucketMetas = bucketIds.map((bucket) => manifest.buckets?.[bucket]).filter((bucketMeta) => bucketMeta?.pages?.length);
   if (!bucketMetas.length && manifest.buckets?._?.pages?.length) bucketMetas.push(manifest.buckets._);
@@ -8725,7 +8743,7 @@ function cacheModeForPath(path) {
   if (/^data\/ui\/(?:ranges|source-details|search)\/(?:7d|all)\/(?:manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/(?:ranges|source-details|search)\/(?:7d|all)\/manifest\.json$/u.test(path)) return "no-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/summary\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
-  if (/^data\/ui\/ranges\/(?:7d|all)\/views\/.+\/(?:index|manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/ranges\/(?:7d|all)\/views\/.+\/(?:index|index-page-\d{4}|manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/records\/(?:song|artist|video)\/shard-\d{4}\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/sources\/[^/]+\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/search\/.+\/page-\d{4}\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";

@@ -34,9 +34,13 @@ const REQUEST_DETAIL_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST
 const REQUEST_SOURCE_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_SIZE, 48);
 const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 2000);
 const REQUEST_SEARCH_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_MAX_BYTES, 8 * 1024 * 1024);
+const REQUEST_STATIC_SEARCH_ENABLED = process.env.DAILY_SONG_REQUEST_STATIC_SEARCH === "1";
+const REQUEST_STATIC_SOURCE_DETAILS_ENABLED = process.env.DAILY_SONG_REQUEST_STATIC_SOURCE_DETAILS === "1";
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
 const REQUEST_DETAIL_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_MAX_BYTES, 8 * 1024 * 1024);
 const REQUEST_SOURCE_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_MAX_BYTES, 8 * 1024 * 1024);
+const REQUEST_VIEW_INDEX_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_VIEW_INDEX_SHARD_SIZE, 2000);
+const REQUEST_VIEW_INDEX_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_VIEW_INDEX_SHARD_MAX_BYTES, 8 * 1024 * 1024);
 
 if (require.main === module) {
   main();
@@ -844,17 +848,21 @@ function registerRequestDetailRecord({ type, record, scopeKey, detailRecords, so
   if (recordMap.has(detailKey)) return detailKey;
   if (type === "song") {
     const sourceDetailKey = stableRequestKey(`song:${scopeKey}:${record.key}`);
-    sourceRecords.push({
-      key: sourceDetailKey,
-      occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeSongs: true })),
-    });
+    if (REQUEST_STATIC_SOURCE_DETAILS_ENABLED) {
+      sourceRecords.push({
+        key: sourceDetailKey,
+        occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeSongs: true })),
+      });
+    }
     recordMap.set(detailKey, serializeSongRequestRecord(record, { detailKey, sourceDetailKey }));
   } else if (type === "artist") {
     const sourceDetailKey = stableRequestKey(`artist:${scopeKey}:${record.key}`);
-    sourceRecords.push({
-      key: sourceDetailKey,
-      occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
-    });
+    if (REQUEST_STATIC_SOURCE_DETAILS_ENABLED) {
+      sourceRecords.push({
+        key: sourceDetailKey,
+        occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+      });
+    }
     recordMap.set(detailKey, serializeArtistRequestRecord(record, { detailKey, sourceDetailKey }));
   } else if (type === "vtuber") {
     recordMap.set(detailKey, serializeVtuberRequestRecord(record, { detailKey }));
@@ -981,25 +989,15 @@ function writeRequestViewNode(options) {
 function writeRequestViewVariant(options) {
   const { rangeId, dataVersion, generatedAt, capturedAt, viewName, node, baseParts, detailRecords } = options;
   const baseDir = baseParts.join("/");
-  const indexPayload = {
-    schemaVersion: RUNTIME_SCHEMA_VERSION,
-    kind: "request-view-index",
+  const index = writeRequestViewIndex({
     rangeId,
-    view: viewName,
-    metric: node.metric,
-    scopeKey: node.scopeKey,
     dataVersion,
     generatedAt,
     capturedAt,
-    pageSize: node.pageSize,
-    totalCount: node.indexEntries.length,
-    missingArtistCount: node.missingArtistCount || 0,
-    records: node.indexEntries,
-  };
-  const indexText = stringifyRuntimeJson(indexPayload);
-  const indexSha256 = sha256Text(indexText);
-  const indexPath = `${baseDir}/index.${indexSha256.slice(0, 12)}.json`;
-  writeRuntimeJsonText(path.join(ROOT, indexPath), indexText);
+    viewName,
+    node,
+    baseDir,
+  });
 
   const pages = chunkArray(node.indexEntries, node.pageSize).map((entries, index) => {
     const pageIndex = index + 1;
@@ -1045,7 +1043,9 @@ function writeRequestViewVariant(options) {
     pageSize: node.pageSize,
     totalCount: node.indexEntries.length,
     pageCount: pages.length,
-    indexPath,
+    indexPath: index.path,
+    indexPages: index.pages,
+    indexPageCount: index.pageCount,
     bootstrapPath: pages[0]?.path || "",
     pages,
   };
@@ -1060,13 +1060,92 @@ function writeRequestViewVariant(options) {
     view: viewName,
     metric: node.metric,
     scopeKey: node.scopeKey,
-    indexPath,
+    indexPath: index.path,
+    indexPages: index.pages,
+    indexPageCount: index.pageCount,
     bootstrapPath: pages[0]?.path || "",
     sha256: manifestSha256,
     bytes: Buffer.byteLength(manifestText, "utf8"),
     pageSize: node.pageSize,
     totalCount: node.indexEntries.length,
     pageCount: pages.length,
+    pages,
+  };
+}
+
+function writeRequestViewIndex(options) {
+  const { rangeId, dataVersion, generatedAt, capturedAt, viewName, node, baseDir } = options;
+  const basePayload = {
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
+    kind: "request-view-index-page",
+    rangeId,
+    view: viewName,
+    metric: node.metric,
+    scopeKey: node.scopeKey,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    pageSize: REQUEST_VIEW_INDEX_SHARD_SIZE,
+    totalCount: node.indexEntries.length,
+    missingArtistCount: node.missingArtistCount || 0,
+    itemCount: 999999,
+  };
+  const chunks = chunkRecordsByPayloadBytes(node.indexEntries, {
+    pageSize: REQUEST_VIEW_INDEX_SHARD_SIZE,
+    maxBytes: REQUEST_VIEW_INDEX_SHARD_MAX_BYTES,
+    payloadBase: basePayload,
+    recordName: "records",
+  });
+  if (!chunks.length) chunks.push([]);
+  const pageCount = chunks.length || 1;
+  const pages = chunks.map((entries, index) => {
+    const pageIndex = index + 1;
+    const pagePayload = {
+      ...basePayload,
+      page: pageIndex,
+      pageCount,
+      itemCount: entries.length,
+      records: entries,
+    };
+    const text = stringifyRuntimeJson(pagePayload);
+    const sha256 = sha256Text(text);
+    const pagePath = `${baseDir}/index-page-${String(pageIndex).padStart(4, "0")}.${sha256.slice(0, 12)}.json`;
+    writeRuntimeJsonText(path.join(ROOT, pagePath), text);
+    return {
+      index: pageIndex,
+      path: pagePath,
+      sha256,
+      bytes: Buffer.byteLength(text, "utf8"),
+      itemCount: entries.length,
+    };
+  });
+  const indexPayload = {
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
+    kind: "request-view-index",
+    rangeId,
+    view: viewName,
+    metric: node.metric,
+    scopeKey: node.scopeKey,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    pageSize: REQUEST_VIEW_INDEX_SHARD_SIZE,
+    totalCount: node.indexEntries.length,
+    missingArtistCount: node.missingArtistCount || 0,
+    pageCount,
+    pages,
+  };
+  const indexText = stringifyRuntimeJson(indexPayload);
+  const indexSha256 = sha256Text(indexText);
+  const indexPath = `${baseDir}/index.${indexSha256.slice(0, 12)}.json`;
+  writeRuntimeJsonText(path.join(ROOT, indexPath), indexText);
+  return {
+    path: indexPath,
+    sha256: indexSha256,
+    bytes: Buffer.byteLength(indexText, "utf8"),
+    pageSize: REQUEST_VIEW_INDEX_SHARD_SIZE,
+    totalCount: node.indexEntries.length,
+    pageCount,
     pages,
   };
 }
@@ -1107,6 +1186,33 @@ function summarizeRequestSearch(search) {
 
 function writeRequestSearch(options) {
   const { rangeId, dataVersion, generatedAt, capturedAt, records } = options;
+  if (!REQUEST_STATIC_SEARCH_ENABLED) {
+    const manifestPayload = {
+      schemaVersion: RUNTIME_SCHEMA_VERSION,
+      kind: "request-search-manifest",
+      rangeId,
+      dataVersion,
+      generatedAt,
+      capturedAt,
+      bucketCount: 0,
+      buckets: {},
+      disabled: true,
+      fallback: "view-index",
+      recordCount: records.length,
+    };
+    const manifestText = stringifyRuntimeJson(manifestPayload);
+    const sha256 = sha256Text(manifestText);
+    const manifestPath = `data/ui/ranges/${rangeId}/search/manifest.${sha256.slice(0, 12)}.json`;
+    writeRuntimeJsonText(path.join(ROOT, manifestPath), manifestText);
+    writeRuntimeJsonText(path.join(ROOT, `data/ui/ranges/${rangeId}/search/manifest.json`), manifestText);
+    return {
+      manifestPath,
+      manifestLegacyPath: `data/ui/ranges/${rangeId}/search/manifest.json`,
+      sha256,
+      bytes: Buffer.byteLength(manifestText, "utf8"),
+      bucketCount: 0,
+    };
+  }
   const buckets = new Map();
   for (const record of records) {
     for (const bucket of requestSearchBuckets(record.searchText)) {
@@ -1244,19 +1350,17 @@ function writeKeyedRequestShardSet(options) {
     ? chunkRecordsByPayloadBytes(records, {
         maxBytes,
         pageSize,
-        buildPayload: (chunk, pageIndex, pageCount) => ({
+        payloadBase: {
           schemaVersion: RUNTIME_SCHEMA_VERSION,
           kind,
           rangeId,
           dataVersion,
           generatedAt,
           capturedAt,
-          page: pageIndex,
-          pageCount,
           pageSize,
-          itemCount: chunk.length,
-          [recordName]: chunk,
-        }),
+          itemCount: 999999,
+        },
+        recordName,
       })
     : chunkArray(records, pageSize);
   const pageCount = chunks.length || 1;
@@ -2269,5 +2373,6 @@ module.exports = {
   SOURCE_DETAIL_PAGE_SIZE,
   RUNTIME_PAGE_SIZE,
   sha256Text,
+  writeRequestViewIndex,
   writeRuntimeJson,
 };

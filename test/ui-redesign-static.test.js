@@ -9,6 +9,7 @@ const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "u
 const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 const vtuberLayoutSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-vtuber-expand-layout.js"), "utf8");
+const runtimeBuildSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "build-runtime-data.js"), "utf8");
 
 function cssBlock(selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -84,6 +85,17 @@ test("VTuber view hides song-field search controls and keeps channel search sema
   assert.match(appSource, /function requestFiltersForView\(view = state\.view, filters = \{\}\)[\s\S]*searchScope: searchScopeForView\(view, filters\),[\s\S]*searchFields: searchFieldsForView\(view, filters\)/u);
   assert.match(functionBody("function occurrenceSearchTextForCurrentView"), /if \(state\.view === "vtuberRank"\) return vtuberOccurrenceSearchText\(occurrence\);/u);
   assert.match(functionBody("function occurrenceSearchTextForCurrentView"), /if \(state\.view === "songRank" \|\| state\.view === "songAz"\) return songOccurrenceSearchText\(occurrence, state\.searchFields \|\| DEFAULT_SEARCH_FIELDS\);/u);
+});
+
+test("request runtime view indexes are sharded instead of writing one full records file", () => {
+  const runtimeSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "build-runtime-data.js"), "utf8");
+  assert.match(runtimeSource, /const REQUEST_VIEW_INDEX_SHARD_MAX_BYTES/u);
+  assert.match(runtimeSource, /function writeRequestViewIndex/u);
+  assert.match(runtimeSource, /kind: "request-view-index-page"/u);
+  assert.match(runtimeSource, /indexPages: index\.pages/u);
+  assert.doesNotMatch(runtimeSource, /kind: "request-view-index"[\s\S]{0,500}records: node\.indexEntries/u);
+  assert.match(functionBody("async function loadRequestViewIndex"), /payload\?\.pages/u);
+  assert.match(functionBody("async function loadRequestViewIndex"), /Promise\.all/u);
 });
 
 test("source drawer is inline, grouped, and visible on mobile", () => {
@@ -320,6 +332,7 @@ test("search suggestions highlight safely without assigning untrusted innerHTML"
 });
 
 test("latest runtime uses request pagination instead of loading every page shard", () => {
+  const requestViewPageBody = functionBody("async function requestViewPage");
   assert.match(appSource, /function requestRuntimeMeta/u);
   assert.match(appSource, /function canUseRequestRuntime/u);
   assert.match(appSource, /async function requestViewPage/u);
@@ -331,9 +344,19 @@ test("latest runtime uses request pagination instead of loading every page shard
   assert.match(functionBody("function requestSearchBuckets"), /FrontendUtils\.searchTokens\(query\)/u);
   assert.match(appSource, /loadRequestDetailRecords/u);
   assert.match(appSource, /sourceDetailKey/u);
-  assert.doesNotMatch(appSource, /Promise\.all\(\s*pages\.map/u);
-  assert.doesNotMatch(appSource, /pagePayloads\.flatMap/u);
+  assert.doesNotMatch(requestViewPageBody, /Promise\.all\(\s*pages\.map/u);
+  assert.doesNotMatch(requestViewPageBody, /pagePayloads\.flatMap/u);
   assert.doesNotMatch(appSource, /complete all runtime/i);
+});
+
+test("request static search degrades to view-index fallback instead of huge bucket shards", () => {
+  assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SEARCH/u);
+  assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SOURCE_DETAILS/u);
+  assert.match(runtimeBuildSource, /disabled:\s*true/u);
+  assert.match(runtimeBuildSource, /fallback:\s*"view-index"/u);
+  assert.match(runtimeBuildSource, /REQUEST_STATIC_SOURCE_DETAILS_ENABLED/u);
+  assert.match(appSource, /manifest\?\.disabled\) return null/u);
+  assert.match(appSource, /candidates === null/u);
 });
 
 test("range cache song records are lazy getters", () => {
