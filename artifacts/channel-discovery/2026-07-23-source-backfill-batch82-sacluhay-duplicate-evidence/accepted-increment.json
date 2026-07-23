@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T15:14:59+08:00",
+  "status": "skipped_duplicate",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/accepted/2026-07-22-source-backfill-batch12.accepted.json"
+  ],
+  "readStats": {
+    "inputDirs": 0,
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 1,
+    "songs": 0,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "acceptedFile": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/accepted/2026-07-22-source-backfill-batch12.accepted.json",
+    "acceptedVideoIds": [
+      "2mFMDi9gf_k"
+    ],
+    "acceptedOccurrenceCount": 2,
+    "uniqueSongs": [
+      "lulu",
+      "ただ君に晴れ"
+    ],
+    "channelHandle": "/@saclayui",
+    "channelUrl": "https://www.youtube.com/@saclayui/streams"
+  },
+  "review": {
+    "note": "No new accepted rows are emitted for batch82 because saclayui was already imported by batch12."
+  }
+}

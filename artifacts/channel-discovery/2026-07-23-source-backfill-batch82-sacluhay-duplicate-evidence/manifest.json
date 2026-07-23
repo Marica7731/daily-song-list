@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:14:59+08:00",
+  "status": "skipped_duplicate",
+  "scope": "single-source duplicate evidence review only; not a full 1000+ channel scan",
+  "source": {
+    "handle": "saclayui",
+    "url": "https://www.youtube.com/@saclayui/streams",
+    "status": "skipped_duplicate",
+    "reason": "batch12 accepted evidence already imported this channel"
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "artifacts/channel-discovery/2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence/candidate-increment-unfiltered.json",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence/accepted-increment.json",
+    "dirtyAudit": "artifacts/channel-discovery/2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence/dirty-audit.json",
+    "report": "artifacts/channel-discovery/2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence/report.md"
+  },
+  "duplicateEvidence": {
+    "evidenceStatus": "accepted_file_confirmed",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/accepted/2026-07-22-source-backfill-batch12.accepted.json",
+    "batchManifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/manifest.json",
+    "batchReport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/report.md",
+    "remoteManifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/remote-download/vps5/remote/saclayui/manifest.json",
+    "acceptedOnlyContainsSource": true,
+    "acceptedVideoIds": [
+      "2mFMDi9gf_k"
+    ],
+    "omaruPianoStatusInBatch12": "failed; not mixed into this batch's success evidence"
+  },
+  "stats": {
+    "candidateCount": 179,
+    "inspectedCount": 179,
+    "rawVideos": 20,
+    "rawOccurrences": 124,
+    "acceptedVideos": 1,
+    "acceptedOccurrences": 2,
+    "uniqueSongs": 2,
+    "publishedTimestampCoverage": "1/1",
+    "publishedTimestampMin": 1782094358262,
+    "publishedTimestampMax": 1782094358262,
+    "occurrenceTimeCoverage": "2/2",
+    "occurrenceSecondsCoverage": "2/2",
+    "occurrenceSecondsMin": 580,
+    "occurrenceSecondsMax": 1051,
+    "thumbnailCoverage": "1/1",
+    "coverCoverage": "1/1",
+    "reachedEnd": true,
+    "droppedVideos": 19,
+    "droppedOccurrences": 122,
+    "suspiciousVideos": 1
+  },
+  "dirtyAuditRules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseExcludes": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "broadSuspiciousOnly": [
+      "live",
+      "ライブ"
+    ],
+    "note": "live/ライブ is not an independent hard exclude; it is suspicious/drop only when there is no singing signal."
+  },
+  "execution": {
+    "startedYoutubeDiscovery": false,
+    "macUsed": false,
+    "remoteTempCreated": false,
+    "elapsedSeconds": 0,
+    "failureReason": "",
+    "cleanup": {
+      "localTempCreated": false,
+      "localTempCleanupStatus": "no temp files created by this batch",
+      "gTempCleanupStatus": "not used by this batch",
+      "remoteCleanupStatus": "Mac not used / remote temp not created"
+    },
+    "largeFileAudit": {
+      "createdLargeFilesOnC": false,
+      "createdLargeFilesOnD": false,
+      "createdLargeFilesOnG": false,
+      "note": "this batch wrote only five small files in the specified artifact directory"
+    }
+  }
+}

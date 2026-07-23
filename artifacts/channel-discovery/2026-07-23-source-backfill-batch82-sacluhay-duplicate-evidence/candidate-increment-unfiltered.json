@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:14:59+08:00",
+  "status": "skipped_duplicate",
+  "batchId": "2026-07-23-source-backfill-batch82-sacluhay-duplicate-evidence",
+  "scope": "duplicate evidence only for https://www.youtube.com/@saclayui/streams; no YouTube discovery was started",
+  "source": {
+    "handle": "saclayui",
+    "url": "https://www.youtube.com/@saclayui/streams"
+  },
+  "currentBatch": {
+    "candidateCount": 0,
+    "inspectedCount": 0,
+    "rawVideoCount": 0,
+    "occurrenceCount": 0,
+    "reachedEnd": null,
+    "reason": "skipped because prior accepted evidence exists in batch12"
+  },
+  "duplicateEvidence": {
+    "batchId": "2026-07-22-source-backfill-batch12",
+    "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/manifest.json",
+    "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/report.md",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/accepted/2026-07-22-source-backfill-batch12.accepted.json",
+    "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/accepted/2026-07-22-source-backfill-batch12.raw-export.json",
+    "remoteManifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/remote-download/vps5/remote/saclayui/manifest.json",
+    "candidateCount": 179,
+    "inspectedCount": 179,
+    "rawVideoCount": 20,
+    "rawOccurrenceCount": 124,
+    "reachedEnd": true,
+    "status": "imported",
+    "acceptedVideos": 1,
+    "acceptedOccurrences": 2,
+    "uniqueSongs": 2
+  },
+  "notes": [
+    "queue or pending entries were not used as duplicate evidence",
+    "omaru_piano in batch12 is failed and is not counted for this batch",
+    "candidate-increment-unfiltered intentionally does not copy batch12 raw export to avoid creating duplicate import input"
+  ]
+}

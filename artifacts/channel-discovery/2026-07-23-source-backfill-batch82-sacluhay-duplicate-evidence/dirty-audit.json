@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:14:59+08:00",
+  "status": "skipped_duplicate",
+  "source": {
+    "handle": "saclayui",
+    "url": "https://www.youtube.com/@saclayui/streams"
+  },
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseExcludes": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "broadSuspiciousOnly": [
+      "live",
+      "ライブ"
+    ],
+    "broadRuleNote": "live/ライブ is not an independent hard exclude; it is suspicious/drop only when there is no singing signal."
+  },
+  "batch12AuditEvidence": {
+    "dirtyAuditFile": "artifacts/channel-discovery/2026-07-22-source-backfill-batch12/dirty-audit.json",
+    "rawVideos": 20,
+    "rawOccurrences": 124,
+    "keptVideos": 1,
+    "keptOccurrences": 2,
+    "keptUniqueSongs": 2,
+    "droppedVideoCount": 19,
+    "droppedOccurrenceCount": 122,
+    "suspiciousCount": 1,
+    "termHitCounts": {
+      "clarinet": 16,
+      "manual:non-song-frame": 3,
+      "live_performance": 1,
+      "live": 1
+    },
+    "droppedVideoIds": [
+      "gvvmloTbTY4",
+      "F8H32XV4zNM",
+      "ZC763fnW01k",
+      "MfgR12hxe-s",
+      "MldF8nWFFFI",
+      "CEpqydBp2XI",
+      "B7-6Ic9pjZ4",
+      "4NfYim9xKqM",
+      "P--PEhhlTNM",
+      "XHe9n1ZaGmw",
+      "gf5SnTTM7nk",
+      "dyy2yAhfIc8",
+      "6Ex02pxOWS4",
+      "Ttv335CP7jA",
+      "YTWa3QN8Oes",
+      "nS1BEjyPQ_8",
+      "CYFmJQ2RGo4",
+      "QLy9wiGZHbI",
+      "BotaDwTiX_I"
+    ],
+    "suspicious": [
+      {
+        "youtubeVideoId": "2mFMDi9gf_k",
+        "reason": "title has live signal but also explicit #歌枠 singing signal, so kept by batch12",
+        "occurrences": 2
+      }
+    ]
+  },
+  "currentBatchAudit": {
+    "startedDiscovery": false,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousCount": 0,
+    "reason": "duplicate evidence path only; no new scrape or long inspection was run"
+  }
+}
