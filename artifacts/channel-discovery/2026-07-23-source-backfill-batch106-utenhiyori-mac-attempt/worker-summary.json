@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "status": "success",
+  "source": {
+    "singerName": "UtenHiyori",
+    "channelUrl": "https://www.youtube.com/@UtenHiyori"
+  },
+  "workerRole": "bounded-discovery-retry",
+  "localArtifactCreatedAt": "2026-07-23T18:33:55.7771980+08:00",
+  "mac": {
+    "host": "be@192.168.1.13",
+    "repo": "/Users/be/daily-song-list",
+    "tempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt",
+    "tempDirLeftForMainSessionCleanup": true
+  },
+  "command": "source ~/.daily-song-list-build-env; cd /Users/be/daily-song-list; npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@UtenHiyori --singer-name UtenHiyori --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt --max-channel-pages 3 --max-candidates 60 --max-inspect 20 --request-interval-ms 3000 --request-jitter-ms 1000",
+  "sshTimeoutMs": 600000,
+  "exitCode": 0,
+  "timedOut": false,
+  "marker": {
+    "present": true,
+    "text": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=60 inspected=20 videos=7 occurrences=105 elapsedSeconds=231 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt\""
+  },
+  "stderrSummary": "",
+  "stdoutSummary": {
+    "elapsedSeconds": 231,
+    "candidates": 60,
+    "inspected": 20,
+    "videos": 7,
+    "occurrences": 105
+  },
+  "macTempFiles": [
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/audits.json"
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/checkpoint.json"
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/manifest.json",
+      "bytes": 1819
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/occurrences.json"
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/raw-videos.json"
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/report.md"
+    },
+    {
+      "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt/video-details.json"
+    }
+  ],
+  "macTempFileSizes": {
+    "raw-videos.json": 62465,
+    "checkpoint.json": 169628,
+    "video-details.json": 63172,
+    "manifest.json": 1819,
+    "occurrences.json": 157022,
+    "audits.json": 97945
+  },
+  "manifest": {
+    "generatedAt": "2026-07-23T10:32:37.753Z",
+    "candidateCount": 60,
+    "inspectedInLatestRun": 20,
+    "usableVideoCount": 7,
+    "occurrenceCount": 105,
+    "maxChannelPages": 3,
+    "maxCandidates": 60,
+    "maxInspect": 20,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@UtenHiyori/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 3,
+        "rawItemCount": 90,
+        "candidateCount": 58,
+        "continuationRounds": 2,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1162398
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@UtenHiyori/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 36,
+        "candidateCount": 11,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1180665
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2343063,
+      "totalElapsedMs": 518,
+      "statuses": {
+        "200": 2
+      }
+    }
+  },
+  "videoDetailsTimeCoverage": {
+    "total": 7,
+    "publishedTimestampCount": 7,
+    "publishedTextCount": 7,
+    "minPublishedIso": "2026-03-25T10:29:01Z",
+    "maxPublishedIso": "2026-05-24T10:29:01Z",
+    "publishedTextValues": [
+      "2 か月前 に配信済み",
+      "3 か月前 に配信済み",
+      "4 か月前 に配信済み"
+    ]
+  },
+  "completeForImport": true,
+  "completeForImportReason": "Discovery exited 0 with CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK, all expected discovery output files exist in the Mac temp directory, manifest reports 7 usable videos and 105 occurrences, and video-details has published timestamp/text coverage for all 7 videos. This is bounded discovery output; streams reachedEnd=false because max-channel-pages=3 was reached."
+}

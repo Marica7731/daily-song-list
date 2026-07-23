@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_pending_partial_manifest",
+  "batchId": "2026-07-23-source-backfill-batch106-utenhiyori-mac-attempt",
+  "generatedAt": "2026-07-23T18:51:02+08:00",
+  "status": "pending_partial",
+  "reason": "mac_resume_timed_out_before_complete_manifest",
+  "scope": "pending partial Mac discovery checkpoint; no accepted rows, no data/external write",
+  "source": {
+    "handle": "UtenHiyori",
+    "url": "https://www.youtube.com/@UtenHiyori",
+    "status": "pending_partial",
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "uniqueSongs": 0,
+    "publishedTimestampCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "discoveryThumbnailCoverage": "0/0",
+    "failure": "resume timed out and was terminated before complete manifest"
+  },
+  "firstAttempt": {
+    "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=60 inspected=20 videos=7 occurrences=105 elapsedSeconds=231 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt\"",
+    "candidateCount": 60,
+    "inspectedInLatestRun": 20,
+    "usableVideoCount": 7,
+    "occurrenceCount": 105,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@UtenHiyori/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 3,
+        "rawItemCount": 90,
+        "candidateCount": 58,
+        "continuationRounds": 2,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1162398
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@UtenHiyori/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 36,
+        "candidateCount": 11,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1180665
+      }
+    ],
+    "completeForImport": false,
+    "completeForImportReason": "Initial marker succeeded, but streams reachedEnd=false and max caps were hit."
+  },
+  "resumeCheckpoint": {
+    "schemaVersion": 1,
+    "kind": "youtube_channel_discovery_checkpoint_summary",
+    "batchId": "2026-07-23-source-backfill-batch106-utenhiyori-mac-attempt",
+    "generatedAt": "2026-07-23T18:51:02+08:00",
+    "source": "UtenHiyori",
+    "status": "pending_partial",
+    "macTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt",
+    "checkpointFile": "mac-checkpoint.json",
+    "candidateCount": 207,
+    "detailCount": 27,
+    "inspectedInLatestRun": 61,
+    "completedVideoIdsCount": 27,
+    "auditsCount": 81,
+    "occurrenceCount": 378,
+    "publishedTimestampCoverage": "27/27",
+    "occurrenceTimeCoverage": "378/378",
+    "occurrenceSecondsCoverage": "378/378",
+    "minPublishedIso": "2025-07-23T10:37:20Z",
+    "maxPublishedIso": "2026-05-24T10:29:01Z",
+    "updatedAt": "2026-07-23T10:48:03.47Z",
+    "note": "Resume timed out and was terminated before the discovery script rewrote manifest/video-details/occurrences. This checkpoint is retained for a later bounded continuation."
+  },
+  "attempts": [
+    {
+      "name": "mac-initial-bounded",
+      "timeoutMs": 600000,
+      "exitCode": 0,
+      "timedOut": false,
+      "markerPresent": true,
+      "elapsedSeconds": 231
+    },
+    {
+      "name": "mac-resume-bounded",
+      "timeoutMs": 600000,
+      "exitCode": 124,
+      "timedOut": true,
+      "markerPresent": false,
+      "terminated": true,
+      "checkpointUpdated": true
+    }
+  ],
+  "outputFiles": [
+    "worker-summary.json",
+    "mac-manifest.json",
+    "mac-report.md",
+    "mac-video-details.json",
+    "mac-checkpoint.json",
+    "checkpoint-summary.json",
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch106-utenhiyori-mac-attempt",
+    "didNotModifyRunnerTools": true,
+    "didNotModifyDataExternal": true,
+    "didNotStartUnboundedFetch": true,
+    "usedMac": true,
+    "macTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch106-utenhiyori-mac-attempt",
+    "macTempDirCleanedByMainSession": true,
+    "didNotUseLargeTempCacheOnCOrD": true,
+    "didNotPushOrDeploy": true,
+    "completeForImport": false,
+    "commitCreated": false,
+    "macCleanupMarker": "CODEX_MAC_BATCH106_CLEANUP_OK",
+    "macDfAfterCleanup": "/dev/disk3s5 926Gi 326Gi 562Gi 37% /System/Volumes/Data"
+  }
+}

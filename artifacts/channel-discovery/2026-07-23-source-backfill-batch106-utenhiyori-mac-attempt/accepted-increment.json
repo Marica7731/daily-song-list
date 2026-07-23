@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "batchId": "2026-07-23-source-backfill-batch106-utenhiyori-mac-attempt",
+  "generatedAt": "2026-07-23T18:51:02+08:00",
+  "status": "pending_partial",
+  "reason": "mac_resume_timed_out_before_complete_manifest",
+  "note": "Empty accepted increment. The Mac retry produced useful checkpoint progress, but streams reachedEnd=false and the resume timed out before a complete manifest was emitted.",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": []
+}
