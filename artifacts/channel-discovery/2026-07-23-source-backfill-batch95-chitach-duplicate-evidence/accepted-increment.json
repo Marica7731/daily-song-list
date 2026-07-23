@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch95-chitach-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:16:00.000Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch3",
+    "source": {
+      "handle": "ChitaCh",
+      "channelHandle": "/@ChitaCh.%E5%A0%95%E5%A4%A9%E3%81%A1%E3%81%9F",
+      "channelUrl": "https://www.youtube.com/@ChitaCh.%E5%A0%95%E5%A4%A9%E3%81%A1%E3%81%9F",
+      "acceptedMatchRule": "accepted.videos matched where discoveryImport.discoverySingerName == ChitaCh or channelHandle == /@ChitaCh.%E5%A0%95%E5%A4%A9%E3%81%A1%E3%81%9F",
+      "manifestMatchRule": "manifest.sources matched where handle == ChitaCh or url == https://www.youtube.com/@ChitaCh.%E5%A0%95%E5%A4%A9%E3%81%A1%E3%81%9F"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/accepted/2026-07-22-source-backfill-batch3.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 16,
+      "acceptedOccurrences": 181,
+      "uniqueSongs": 156,
+      "note": "This accepted increment is intentionally empty because batch3 already contains the concrete accepted rows for ChitaCh."
+    },
+    "coverage": {
+      "publishedTimestamp": "16/16",
+      "occurrenceTime": "181/181",
+      "occurrenceSeconds": "181/181",
+      "discoveryThumbnailCoverage": "16/16",
+      "coverCoverage": "16/16"
+    },
+    "manifestSourceEntry": {
+      "discoveryCandidateCount": 24,
+      "discoveryInspectedCount": 24,
+      "discoveryUsableVideoCount": 16,
+      "discoveryOccurrenceCount": 181,
+      "elapsedSeconds": 437,
+      "reachedEnd": null
+    },
+    "dirtyAudit": {
+      "filter": "Only ChitaCh is filtered from the batch3 concrete accepted artifact and batch3 source manifest.",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "sourceBatchSuspiciousCount": 11,
+      "sourceBatchSuspiciousRetained": true,
+      "filteredChitaChSuspiciousCount": 1,
+      "note": "Batch3 dirty audit dropped 0/0. The 11 broad live hits were retained after manual audit and are not dirty dropped; the 24 candidate to 16 usable difference is not dirty dropped."
+    }
+  }
+}
