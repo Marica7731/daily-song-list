@@ -211,12 +211,16 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
-            apt-get update
-            apt-get install -y git nginx python3 curl ca-certificates rsync
-            if ! command -v node >/dev/null 2>&1 || ! node -e 'process.exit(Number(process.versions.node.split(\".\")[0]) >= 20 ? 0 : 1)'; then
-              curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-              apt-get install -y nodejs
-            fi
+            for required_cmd in git nginx python3 curl rsync node npm; do
+              command -v \"\${required_cmd}\" >/dev/null 2>&1 || {
+                echo \"CODEX_RUNTIME_DB_DEPLOY_ERROR missing-command=\${required_cmd}\"
+                exit 1
+              }
+            done
+            node -e 'process.exit(Number(process.versions.node.split(\".\")[0]) >= 20 ? 0 : 1)' || {
+              echo 'CODEX_RUNTIME_DB_DEPLOY_ERROR node-version-too-old'
+              exit 1
+            }
             if [ ! -d '${REMOTE_PROJECT_DIR}/.git' ]; then
               git clone --filter=blob:none https://github.com/Marica7731/daily-song-list.git '${REMOTE_PROJECT_DIR}'
             fi
