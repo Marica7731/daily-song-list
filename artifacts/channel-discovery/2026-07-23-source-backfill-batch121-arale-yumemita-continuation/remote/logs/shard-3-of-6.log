@@ -1,0 +1,9 @@
+CODEX_REMOTE_SHARD_START shard=3/6 startedAt=2026-07-23T13:23:20Z
+CODEX_REMOTE_REPO branch=main commit=f1b0e8423e755b2c3b38a5288c98bca3e5d092cc
+CODEX_REMOTE_COMMAND_TIMEOUT seconds=1100
+
+> daily-song-list@1.0.0 youtube:discover-channel
+> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@arale_yumemita --singer-name arale_yumemita --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-3-of-6 --cache-dir /tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/cache/shard-3-of-6 --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-index 3 --inspect-shard-count 6 --request-interval-ms 2500 --request-jitter-ms 1000
+
+CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel="https://www.youtube.com/@arale_yumemita" candidates=152 inspected=25 videos=18 occurrences=168 elapsedSeconds=366 outputDir="/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-3-of-6"
+CODEX_REMOTE_SHARD_EXIT shard=3/6 rc=0 finishedAt=2026-07-23T13:29:26Z

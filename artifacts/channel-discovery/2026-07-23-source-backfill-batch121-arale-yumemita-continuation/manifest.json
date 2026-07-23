@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_channel_manifest",
+  "batchId": "2026-07-23-source-backfill-batch121-arale-yumemita-continuation",
+  "generatedAt": "2026-07-23T13:45:34.189Z",
+  "status": "imported",
+  "source": {
+    "handle": "arale_yumemita",
+    "url": "https://www.youtube.com/@arale_yumemita",
+    "imported": true,
+    "skipped": false,
+    "failed": false,
+    "pending": false,
+    "reachedEnd": true,
+    "acceptedVideos": 117,
+    "acceptedOccurrences": 991,
+    "acceptedSongs": 618,
+    "publishedTimestampCoverage": "117/117",
+    "occurrenceTimeCoverage": "991/991",
+    "occurrenceSecondsCoverage": "991/991",
+    "thumbnailOrCoverCoverage": "119/119",
+    "failureReason": "",
+    "dirtyAudit": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/dirty-audit.json",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/accepted/arale-yumemita-accepted-increment.json",
+    "acceptedJsonThumbnailOrCoverCoverage": "0/117"
+  },
+  "remoteExecution": {
+    "host": "be@192.168.1.13",
+    "repoPath": "/Users/be/daily-song-list",
+    "remoteTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation",
+    "timeoutSecondsPerShard": 1100,
+    "outerTimeoutSecondsPerCommand": 1200,
+    "shardCount": 6,
+    "markers": [
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-0-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=26 videos=17 occurrences=165 elapsedSeconds=361 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-0-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=0/6 rc=0 finishedAt=2026-07-23T13:11:28Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-1-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=26 videos=23 occurrences=179 elapsedSeconds=349 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-1-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=1/6 rc=0 finishedAt=2026-07-23T13:17:27Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-2-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=21 occurrences=164 elapsedSeconds=333 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-2-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=2/6 rc=0 finishedAt=2026-07-23T13:23:12Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-3-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=18 occurrences=168 elapsedSeconds=366 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-3-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=3/6 rc=0 finishedAt=2026-07-23T13:29:26Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-4-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=22 occurrences=180 elapsedSeconds=361 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-4-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=4/6 rc=0 finishedAt=2026-07-23T13:35:34Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-5-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=18 occurrences=155 elapsedSeconds=351 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-5-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=5/6 rc=0 finishedAt=2026-07-23T13:41:31Z"
+      }
+    ],
+    "codeHashComparison": {
+      "windowsCommit": "334d47cfa7adef3441853c7b315b9a80dc5dbabf",
+      "remoteCommit": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+      "discoveryEntryAndCoreMatched": true,
+      "exportScriptMatched": true,
+      "updateSonglistDiffered": true
+    }
+  },
+  "remoteCleanup": {
+    "status": "removed",
+    "evidenceFile": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote-cleanup.txt",
+    "dfSummary": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   553Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   553Gi    38%    710k  5.8G    0%   /System/Volumes/Data"
+  },
+  "acceptedIncrementStats": {
+    "videos": 117,
+    "occurrences": 991,
+    "songs": 618,
+    "readStats": {
+      "inputDirs": 1,
+      "videoDetails": 119,
+      "usableVideos": 119,
+      "skippedNoSongs": 0,
+      "skippedInvalidVideoId": 0,
+      "duplicateVideoIds": 0,
+      "songs": 1007,
+      "skippedExistingRegressions": 2,
+      "skippedExistingRegressionVideoIds": [
+        "eeJdib6MAgo",
+        "w4egjjJHOuc"
+      ]
+    },
+    "output": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/accepted/arale-yumemita-accepted-increment.json"
+  },
+  "outputFiles": [
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/accepted/arale-yumemita-accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/checkpoint-summary.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote-cleanup.txt",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-0-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-0-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-1-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-1-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-2-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-2-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-3-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-3-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-4-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-4-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-5-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-5-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-0-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-1-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-2-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-3-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-4-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-5-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation",
+    "didNotModifyRunnerTools": true,
+    "didNotModifyDataExternal": true,
+    "didNotPushOrDeploy": true,
+    "commitCreated": false,
+    "prunedLargeRawFilesBeforeCommit": true,
+    "retainedRawCache": false
+  }
+}

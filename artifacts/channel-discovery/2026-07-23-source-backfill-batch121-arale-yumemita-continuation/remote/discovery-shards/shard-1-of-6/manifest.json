@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-23T13:17:27.067Z",
+  "channelUrl": "https://www.youtube.com/@arale_yumemita",
+  "singerName": "arale_yumemita",
+  "keywords": [
+    "LIVE",
+    "歌",
+    "弾き語",
+    "リレー"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@arale_yumemita/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@arale_yumemita/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 1,
+  "inspectShardCount": 6,
+  "candidateOnly": false,
+  "candidateCount": 152,
+  "inspectedInLatestRun": 26,
+  "usableVideoCount": 23,
+  "occurrenceCount": 179,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@arale_yumemita/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 18,
+      "rawItemCount": 457,
+      "candidateCount": 141,
+      "continuationRounds": 17,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1179657
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@arale_yumemita/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 11,
+      "candidateCount": 11,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 907089
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2086746,
+    "totalElapsedMs": 511,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T13:45:34.189Z",
+  "channelUrl": "https://www.youtube.com/@arale_yumemita",
+  "shardCount": 6,
+  "candidateCountByShard": [
+    152,
+    152,
+    152,
+    152,
+    152,
+    152
+  ],
+  "maxCandidateCount": 152,
+  "inspectedLatestRunTotal": 152,
+  "usableVideoTotalAcrossShards": 119,
+  "occurrenceTotalAcrossShards": 1011,
+  "uniqueUsableVideos": 119,
+  "uniqueOccurrencesFromDetails": 1011,
+  "allReachedEnd": true,
+  "allMarkersOk": true,
+  "shardSummaries": [
+    {
+      "shard": "0/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 26,
+      "usableVideoCount": 17,
+      "occurrenceCount": 165,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:11:28.830Z",
+      "elapsedMs": 710,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-0-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=26 videos=17 occurrences=165 elapsedSeconds=361 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-0-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=0/6 rc=0 finishedAt=2026-07-23T13:11:28Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-0-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 17,
+        "detailCount": 17,
+        "updatedAt": "2026-07-23T13:11:28.830Z"
+      }
+    },
+    {
+      "shard": "1/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 26,
+      "usableVideoCount": 23,
+      "occurrenceCount": 179,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:17:27.067Z",
+      "elapsedMs": 511,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-1-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=26 videos=23 occurrences=179 elapsedSeconds=349 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-1-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=1/6 rc=0 finishedAt=2026-07-23T13:17:27Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-1-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 23,
+        "detailCount": 23,
+        "updatedAt": "2026-07-23T13:17:27.067Z"
+      }
+    },
+    {
+      "shard": "2/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 25,
+      "usableVideoCount": 21,
+      "occurrenceCount": 164,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:23:12.392Z",
+      "elapsedMs": 650,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-2-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=21 occurrences=164 elapsedSeconds=333 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-2-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=2/6 rc=0 finishedAt=2026-07-23T13:23:12Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-2-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 21,
+        "detailCount": 21,
+        "updatedAt": "2026-07-23T13:23:12.392Z"
+      }
+    },
+    {
+      "shard": "3/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 25,
+      "usableVideoCount": 18,
+      "occurrenceCount": 168,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:29:26.199Z",
+      "elapsedMs": 1405,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-3-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=18 occurrences=168 elapsedSeconds=366 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-3-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=3/6 rc=0 finishedAt=2026-07-23T13:29:26Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-3-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 18,
+        "detailCount": 18,
+        "updatedAt": "2026-07-23T13:29:26.199Z"
+      }
+    },
+    {
+      "shard": "4/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 25,
+      "usableVideoCount": 22,
+      "occurrenceCount": 180,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:35:34.835Z",
+      "elapsedMs": 707,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-4-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=22 occurrences=180 elapsedSeconds=361 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-4-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=4/6 rc=0 finishedAt=2026-07-23T13:35:34Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-4-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 22,
+        "detailCount": 22,
+        "updatedAt": "2026-07-23T13:35:34.835Z"
+      }
+    },
+    {
+      "shard": "5/6",
+      "candidateCount": 152,
+      "inspectedInLatestRun": 25,
+      "usableVideoCount": 18,
+      "occurrenceCount": 155,
+      "pageReachedEnd": [
+        true,
+        true
+      ],
+      "generatedAt": "2026-07-23T13:41:31.825Z",
+      "elapsedMs": 638,
+      "marker": {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/logs/shard-5-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@arale_yumemita\" candidates=152 inspected=25 videos=18 occurrences=155 elapsedSeconds=351 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch121-arale-yumemita-continuation/discovery-shards/shard-5-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=5/6 rc=0 finishedAt=2026-07-23T13:41:31Z"
+      },
+      "checkpoint": {
+        "file": "artifacts/channel-discovery/2026-07-23-source-backfill-batch121-arale-yumemita-continuation/remote/discovery-shards/shard-5-of-6/checkpoint.json",
+        "candidateCount": 152,
+        "completedVideoIds": 18,
+        "detailCount": 18,
+        "updatedAt": "2026-07-23T13:41:31.825Z"
+      }
+    }
+  ]
+}
