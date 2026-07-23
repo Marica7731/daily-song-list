@@ -1753,6 +1753,7 @@ def filtered_occurrence_payloads(
             "OR lower(trim(COALESCE(json_extract(o.payload_json, '$.video.channelName'), ''))) = lower(trim(?)))"
         )
         key_params = (key, key, channel_name)
+    limit_sql = "LIMIT 21" if key_column == "song" else ""
     rows = conn.execute(
         f"""
         SELECT o.payload_json
@@ -1761,7 +1762,7 @@ def filtered_occurrence_payloads(
           AND {key_clause}
           AND {occurrence_filter}
         ORDER BY o.rowid
-        LIMIT 21
+        {limit_sql}
         """,
         (range_id, *key_params),
     ).fetchall()
