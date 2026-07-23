@@ -223,12 +223,15 @@ jobs:
           echo "DISPLAY=codex:0" >> "$GITHUB_ENV"
 
       - name: Prepare VPS2 runtime checkout
+        timeout-minutes: 8
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
+          echo "CODEX_RUNTIME_DB_VPS_PREP_BEGIN host=${VPS2_HOST} sha=${DEPLOY_SHA}"
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_REMOTE_BEGIN'
             mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
             for required_cmd in git nginx python3 curl rsync gzip node npm; do
               command -v \"\${required_cmd}\" >/dev/null 2>&1 || {
@@ -245,10 +248,13 @@ jobs:
             fi
             cd '${REMOTE_PROJECT_DIR}'
             test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_BEGIN'
             git fetch --quiet origin main --prune
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_OK'
             git checkout main
             git reset --hard --quiet origin/main
             git merge-base --is-ancestor '${DEPLOY_SHA}' HEAD
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_RESET_OK'
             install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
             install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
             install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
@@ -261,9 +267,12 @@ jobs:
             systemctl daemon-reload
             systemctl enable song-rank-api
             systemctl reload nginx || systemctl restart nginx
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_REMOTE_OK'
           "
+          echo "CODEX_RUNTIME_DB_VPS_PREP_OK"
 
       - name: Upload and activate database
+        timeout-minutes: 90
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
