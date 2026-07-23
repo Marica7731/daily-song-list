@@ -5511,7 +5511,11 @@ function renderPageSelectControl(pageInfo, options) {
   submit.className = "pagination-button page-select-submit";
   submit.type = "button";
   submit.textContent = "选页";
+  submit.dataset.page = String(pageInfo.page);
   submit.setAttribute("aria-label", "跳转到输入页码");
+  input.addEventListener("input", () => {
+    submit.dataset.page = input.value || "1";
+  });
   submit.addEventListener("click", () => submitPageFromForm(label));
   label.addEventListener("submit", (event) => handlePaginationFormSubmit(event, label));
   label.append(text, input, total, submit);
@@ -5542,6 +5546,10 @@ function renderPageJumpControl(pageInfo) {
   button.className = "pagination-button page-jump-button";
   button.type = "button";
   button.textContent = "跳转";
+  button.dataset.page = String(pageInfo.page);
+  input.addEventListener("input", () => {
+    button.dataset.page = input.value || "1";
+  });
   button.addEventListener("click", () => submitPageFromForm(form));
   form.addEventListener("submit", (event) => handlePaginationFormSubmit(event, form));
   form.append(label, button);
