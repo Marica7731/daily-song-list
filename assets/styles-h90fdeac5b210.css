@@ -3254,7 +3254,7 @@ mark {
 .back-to-top {
   position: fixed;
   right: 18px;
-  bottom: var(--space-6);
+  bottom: calc(var(--space-6) + 56px);
   z-index: 45;
   display: inline-flex;
   align-items: center;
@@ -4885,7 +4885,7 @@ mark {
   }
 
   .back-to-top {
-    bottom: var(--space-6);
+    bottom: calc(60px + env(safe-area-inset-bottom));
   }
 
   .toast,

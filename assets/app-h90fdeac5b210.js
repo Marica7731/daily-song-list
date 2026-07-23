@@ -589,13 +589,6 @@ function bindEvents() {
       return;
     }
 
-    const pageJumpButton = event.target.closest("[data-page-jump-form] button");
-    if (pageJumpButton) {
-      event.preventDefault();
-      submitPageFromForm(pageJumpButton.closest("[data-page-jump-form]"));
-      return;
-    }
-
     const pageButton = event.target.closest("[data-page]");
     if (pageButton) {
       const nextPage = Number.parseInt(pageButton.dataset.page || "1", 10);
@@ -5509,15 +5502,11 @@ function renderPageSelectControl(pageInfo, options) {
   total.textContent = `/ ${pageInfo.pageCount}`;
   const submit = document.createElement("button");
   submit.className = "pagination-button page-select-submit";
-  submit.type = "button";
+  submit.type = "submit";
   submit.textContent = "选页";
-  submit.dataset.page = String(pageInfo.page);
   submit.setAttribute("aria-label", "跳转到输入页码");
-  input.addEventListener("input", () => {
-    submit.dataset.page = input.value || "1";
-  });
-  submit.addEventListener("click", () => submitPageFromForm(label));
-  label.addEventListener("submit", (event) => handlePaginationFormSubmit(event, label));
+  submit.addEventListener("click", handlePaginationFormSubmit);
+  label.addEventListener("submit", handlePaginationFormSubmit);
   label.append(text, input, total, submit);
   return label;
 }
@@ -5544,14 +5533,10 @@ function renderPageJumpControl(pageInfo) {
 
   const button = document.createElement("button");
   button.className = "pagination-button page-jump-button";
-  button.type = "button";
+  button.type = "submit";
   button.textContent = "跳转";
-  button.dataset.page = String(pageInfo.page);
-  input.addEventListener("input", () => {
-    button.dataset.page = input.value || "1";
-  });
-  button.addEventListener("click", () => submitPageFromForm(form));
-  form.addEventListener("submit", (event) => handlePaginationFormSubmit(event, form));
+  button.addEventListener("click", handlePaginationFormSubmit);
+  form.addEventListener("submit", handlePaginationFormSubmit);
   form.append(label, button);
   return form;
 }
@@ -5565,16 +5550,12 @@ function bindPaginationInput(input) {
   });
 }
 
-function handlePaginationFormSubmit(event, formOverride) {
-  const form = formOverride || (event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
+function handlePaginationFormSubmit(event) {
+  const form = event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
     ? event.currentTarget
-    : event.target?.closest?.("[data-page-form], [data-page-jump-form]"));
+    : event.target?.closest?.("[data-page-form], [data-page-jump-form]");
   if (!form) return;
   event.preventDefault();
-  submitPageFromForm(form);
-}
-
-function submitPageFromForm(form) {
   const input = form.querySelector("[data-page-input]");
   const page = Number.parseInt(input?.value || "1", 10);
   setPage(page);

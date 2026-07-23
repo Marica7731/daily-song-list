@@ -332,6 +332,7 @@ test("desktop and tablet contracts use explicit responsive layout", () => {
   assert.match(appSource, /input\.dataset\.pageInput = "true"/u);
   assert.match(appSource, /dataPageJumpForm|data-page-jump-form|pageJumpForm/u);
   assert.match(cssSource, /\.page-jump\s*\{[\s\S]*display: inline-flex;/u);
+  assert.match(cssSource, /\.back-to-top\s*\{[\s\S]*bottom: calc\(var\(--space-6\) \+ 56px\);/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
@@ -388,23 +389,16 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function currentPageSize"), /defaultListPageSizeForMode\(\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
-  assert.match(functionBody("function renderPageSelectControl"), /submit\.type = "button"/u);
-  assert.match(functionBody("function renderPageSelectControl"), /submit\.dataset\.page = String\(pageInfo\.page\)/u);
-  assert.match(functionBody("function renderPageSelectControl"), /submit\.dataset\.page = input\.value \|\| "1"/u);
-  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", \(event\) => handlePaginationFormSubmit\(event, label\)\)/u);
-  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("click", \(\) => submitPageFromForm\(label\)\)/u);
-  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("submit", \(event\) => handlePaginationFormSubmit\(event, form\)\)/u);
-  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("click", \(\) => submitPageFromForm\(form\)\)/u);
-  assert.match(functionBody("function renderPageJumpControl"), /button\.type = "button"/u);
-  assert.match(functionBody("function renderPageJumpControl"), /button\.dataset\.page = String\(pageInfo\.page\)/u);
-  assert.match(functionBody("function renderPageJumpControl"), /button\.dataset\.page = input\.value \|\| "1"/u);
-  assert.match(appSource, /function handlePaginationFormSubmit\(event, formOverride\)/u);
-  assert.match(appSource, /function submitPageFromForm\(form\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /submit\.type = "submit"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
+  assert.match(appSource, /function handlePaginationFormSubmit\(event\)/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
   assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
-  assert.match(functionBody("function bindEvents"), /event\.target\.closest\("\[data-page-jump-form\] button"\)/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("hideUnknownArtist", "1"\)/u);
   assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.nicheOnly/u);
