@@ -34,6 +34,11 @@ jobs:
           fetch-depth: 1
           filter: blob:none
 
+      - name: Ensure full workspace checkout
+        run: |
+          git sparse-checkout disable || true
+          git checkout --force
+
       - name: Configure Mac toolchain
         run: |
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
