@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-candidate-increment-unfiltered",
+  "batchId": "2026-07-23-source-backfill-batch87-inori-hw8-duplicate-evidence",
+  "generatedAt": "2026-07-23T08:03:41.657Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "source": {
+    "channelHandle": "/@inori_hw8",
+    "channelUrl": "https://www.youtube.com/@inori_hw8"
+  },
+  "candidates": [],
+  "candidateCount": 0,
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "source": {
+      "channelHandle": "/@inori_hw8",
+      "channelUrl": "https://www.youtube.com/@inori_hw8"
+    },
+    "duplicateOf": {
+      "batchId": "2026-07-22-source-backfill-batch6",
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/accepted/2026-07-22-source-backfill-batch6.accepted.json",
+      "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/accepted/2026-07-22-source-backfill-batch6.raw-export.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/dirty-audit.json",
+      "auditSummary": "artifacts/channel-discovery/2026-07-22-source-backfill-batch6/audit-summary.json"
+    },
+    "existingAccepted": {
+      "videos": 26,
+      "occurrences": 313,
+      "uniqueSongs": 184,
+      "uniqueSongKey": "normalized title+artist",
+      "uniqueSongsAlignment": "direct accepted JSON normalized title+artist count is 184; batch6 manifest/report recorded 185",
+      "manifestUniqueSongs": 185,
+      "reportUniqueSongs": 185,
+      "publishedTimestampCoverage": "26/26",
+      "occurrenceTimeCoverage": "313/313",
+      "occurrenceSecondsCoverage": "313/313",
+      "acceptedThumbnailOrCoverFieldCoverage": "0/26",
+      "acceptedFileHasThumbnailOrCoverFields": false,
+      "discoveryThumbnailCoverage": "26/26",
+      "discoveryThumbnailCoverageSource": "batch6 manifest/report"
+    },
+    "discoverySourceEntry": {
+      "candidateCount": 30,
+      "inspectedCount": 30,
+      "usableVideoCount": 26,
+      "discoveryOccurrenceCount": 313,
+      "reachedEnd": true,
+      "elapsedSeconds": 365
+    },
+    "dirtyAudit": {
+      "literalDirtyDroppedVideoCount": 0,
+      "literalDirtyDroppedOccurrenceCount": 0,
+      "literalDirtyDroppedNote": "batch6 dirty-audit dropped array is empty for this channel; not inferred from candidate-to-usable gap",
+      "suspiciousVideoCount": 6,
+      "suspiciousOccurrenceCount": 80,
+      "hits": {
+        "live_ja": 6
+      },
+      "suspicious": [
+        {
+          "videoId": "vg8jrhEbBJ0",
+          "occurrences": 20,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #歌枠 ✧ #カラオケ 〗ライブに向けてアチチになるぞ～❕🔥〖 幸世いのり 〗",
+          "title": "〖 #歌枠 ✧ #カラオケ 〗ライブに向けてアチチになるぞ～❕🔥〖 幸世いのり 〗"
+        },
+        {
+          "videoId": "-Dc1dErJARc",
+          "occurrences": 12,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #歌枠 ✧ #カラオケ 〗明日は大阪でライブ‼一緒に盛り上がってくれますか❔🔥〖 幸世いのり 〗",
+          "title": "〖 #歌枠 ✧ #カラオケ 〗明日は大阪でライブ‼一緒に盛り上がってくれますか❔🔥〖 幸世いのり 〗"
+        },
+        {
+          "videoId": "csH8tscp_CQ",
+          "occurrences": 18,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #歌枠 ✧ #カラオケ 〗明日のライブに向けて‼〖 幸世いのり 〗",
+          "title": "〖 #歌枠 ✧ #カラオケ 〗明日のライブに向けて‼〖 幸世いのり 〗"
+        },
+        {
+          "videoId": "rTjTZ2IRPlQ",
+          "occurrences": 16,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #歌枠 ✧ #カラオケ 〗週末はライブ‼一緒に楽しみましょう🌸〖 幸世いのり 〗",
+          "title": "〖 #歌枠 ✧ #カラオケ 〗週末はライブ‼一緒に楽しみましょう🌸〖 幸世いのり 〗"
+        },
+        {
+          "videoId": "CMr4SI1fjT8",
+          "occurrences": 13,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #歌枠 ✧ #カラオケ 〗ライブ前日！！明日に向けて盛り上がりましょう🎶〖幸世いのり 〗",
+          "title": "〖 #歌枠 ✧ #カラオケ 〗ライブ前日！！明日に向けて盛り上がりましょう🎶〖幸世いのり 〗"
+        },
+        {
+          "videoId": "KfGIOe_on2s",
+          "occurrences": 1,
+          "hits": [
+            "live_ja"
+          ],
+          "titleShort": "〖 #振り返り ✧ #雑談 〗楽しかったライブの振り返りをさせてください✨〖 幸世いのり 〗",
+          "title": "〖 #振り返り ✧ #雑談 〗楽しかったライブの振り返りをさせてください✨〖 幸世いのり 〗"
+        }
+      ]
+    },
+    "controls": {
+      "usedExistingBatch6ArtifactsOnly": true,
+      "youtubeFetchStarted": false,
+      "usedMac": false,
+      "usedVps": false,
+      "remoteTempDirectoryCreated": false,
+      "modifiedDataExternal": false,
+      "pushed": false,
+      "deployed": false
+    }
+  }
+}
