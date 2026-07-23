@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch109-asaxmayo-hazukihina",
+  "generatedAt": "2026-07-23T11:51:30.079Z",
+  "status": "pending_partial",
+  "completeForImport": false,
+  "reason": "main_session_timeout_interrupt_before_complete_discovery",
+  "remoteRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch109-asaxmayo-hazukihina",
+  "remotePreflight": [
+    "CODEX_REMOTE_REPO=/Users/be/daily-song-list",
+    "CODEX_REMOTE_BRANCH=main",
+    "CODEX_REMOTE_COMMIT=f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "CODEX_REMOTE_STARTED_AT=2026-07-23T11:33:20Z",
+    "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+    "/dev/disk3s5   926Gi   335Gi   553Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+    "/dev/disk3s5   926Gi   335Gi   553Gi    38%    710k  5.8G    0%   /System/Volumes/Data"
+  ],
+  "workerStatusAtStop": {
+    "state": "discovering",
+    "message": "asaxmayo",
+    "updatedAt": "2026-07-23T11:33:20Z"
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch109.accepted.json",
+  "exportMarker": null,
+  "exportRan": false,
+  "acceptedVideos": 0,
+  "acceptedOccurrences": 0,
+  "acceptedUniqueSongs": 0,
+  "sources": [
+    {
+      "handle": "asaxmayo",
+      "status": "pending_partial",
+      "completeForImport": false,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedUniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverCoverage": "0/0",
+      "failureReason": "main_session_timeout_interrupt_before_complete_discovery_marker",
+      "reachedEnd": false,
+      "checkpointSummary": {
+        "checkpointExists": true,
+        "checkpointBytes": 925098,
+        "checkpointUpdatedAt": "2026-07-23T11:49:51.796Z",
+        "candidateCount": 53,
+        "completedVideoIdsCount": 17,
+        "detailCount": 17,
+        "occurrenceCount": 99
+      }
+    },
+    {
+      "handle": "HazukiHina",
+      "status": "failed",
+      "completeForImport": false,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedUniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverCoverage": "0/0",
+      "failureReason": "main_session_timeout_interrupt_before_complete_discovery_marker",
+      "reachedEnd": false,
+      "checkpointSummary": {
+        "checkpointExists": false,
+        "checkpointBytes": 0,
+        "checkpointUpdatedAt": null,
+        "candidateCount": null,
+        "completedVideoIdsCount": 0,
+        "detailCount": 0,
+        "occurrenceCount": 0
+      }
+    }
+  ],
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}

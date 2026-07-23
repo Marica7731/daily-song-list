@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T11:51:30.079Z",
+  "status": "not_run",
+  "reason": "export was not run because no channel completed discovery",
+  "rulesPlanned": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット"
+    ],
+    "hardDropExactPhrases": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousBroadTerms": [
+      "live",
+      "ライブ"
+    ],
+    "note": "live/ライブ would be suspicious only, not a blind hard drop."
+  },
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 0
+}

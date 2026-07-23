@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T11:51:30.079Z",
+  "batchId": "2026-07-23-source-backfill-batch109-asaxmayo-hazukihina",
+  "status": "pending_partial",
+  "stoppedBy": "main_session_timeout_interrupt",
+  "remoteRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch109-asaxmayo-hazukihina",
+  "exportRan": false,
+  "exportMarker": null,
+  "completeForImport": false,
+  "sourceStatuses": [
+    {
+      "handle": "asaxmayo",
+      "status": "pending_partial",
+      "completeForImport": false,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedUniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverCoverage": "0/0",
+      "failureReason": "main_session_timeout_interrupt_before_complete_discovery_marker",
+      "reachedEnd": false,
+      "checkpointSummary": {
+        "checkpointExists": true,
+        "checkpointBytes": 925098,
+        "checkpointUpdatedAt": "2026-07-23T11:49:51.796Z",
+        "candidateCount": 53,
+        "completedVideoIdsCount": 17,
+        "detailCount": 17,
+        "occurrenceCount": 99
+      }
+    },
+    {
+      "handle": "HazukiHina",
+      "status": "failed",
+      "completeForImport": false,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedUniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverCoverage": "0/0",
+      "failureReason": "main_session_timeout_interrupt_before_complete_discovery_marker",
+      "reachedEnd": false,
+      "checkpointSummary": {
+        "checkpointExists": false,
+        "checkpointBytes": 0,
+        "checkpointUpdatedAt": null,
+        "candidateCount": null,
+        "completedVideoIdsCount": 0,
+        "detailCount": 0,
+        "occurrenceCount": 0
+      }
+    }
+  ],
+  "files": {
+    "manifest": "manifest.json",
+    "report": "report.md",
+    "accepted": "accepted/2026-07-23-source-backfill-batch109.accepted.json",
+    "checkpointSummary": "checkpoint-summary.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}
