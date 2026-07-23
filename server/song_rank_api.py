@@ -93,6 +93,7 @@ def make_handler(db_path: Path):
 def connect(db_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA temp_store=MEMORY")
     return conn
 
 
@@ -122,6 +123,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     search_scope = normalize_search_scope(first(query, "searchScope", first(query, "searchField", "all")))
     search_fields = normalize_search_fields(first(query, "searchFields", ""))
     effective_search_scope = search_scope_from_fields(search_fields) if search_fields is not None and search_scope == "all" else search_scope
+    ranking_search_scope = ranking_search_scope_for_source_fields(effective_search_scope, search_fields)
     metric = normalize_metric(view, first(query, "metric", "count"))
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
     if range_id not in {"7d", "all"}:
@@ -157,56 +159,11 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
                 "channel",
                 search_fields,
             )
-    if q and view in {"songs", "songIndex", "vsingerSongs"} and effective_search_scope == "all" and search_fields == []:
-        source_payload = source_matched_rankings_payload(
-            db_path,
-            range_id,
-            view,
-            metric,
-            q,
-            "all",
-            page,
-            page_size,
-            min_count,
-            search_fields,
-        )
-        if source_payload["totalCount"] > 0:
-            return source_payload
-        with connect(db_path) as conn:
-            base_total = base_total_for_view(conn, range_id, view, metric)
-            vtuber_payload = vtuber_song_fallback_payload(
-                conn,
-                range_id,
-                q,
-                view,
-                page,
-                page_size,
-                min_count,
-                base_total,
-                "all",
-                search_fields,
-            )
-            if vtuber_payload["totalCount"] > 0:
-                return vtuber_payload
-            video_payload = video_song_fallback_payload(
-                conn,
-                range_id,
-                q,
-                view,
-                page,
-                page_size,
-                min_count,
-                base_total,
-                "all",
-                search_fields,
-            )
-            if video_payload["totalCount"] > 0:
-                return video_payload
     if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {
         "source",
         "video",
         "channel",
-    }:
+    } and ranking_search_scope == effective_search_scope:
         return source_matched_rankings_payload(db_path, range_id, view, metric, q, effective_search_scope, page, page_size, min_count, search_fields)
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
@@ -217,7 +174,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         where.append(f"{column} >= ?")
         params.append(min_count)
     if q:
-        clause, values = search_filter_for_view(view, q, effective_search_scope)
+        clause, values = search_filter_for_view(view, q, ranking_search_scope)
         where.append(clause)
         params.extend(values)
     where_sql = " AND ".join(where)
@@ -250,11 +207,29 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             q
             and view == "songs"
             and metric == "count"
-            and effective_search_scope == "all"
-            and search_fields == []
+            and (effective_search_scope == "all" or is_mixed_entity_source_search_fields(search_fields))
             and total == 0
         ):
-            return vtuber_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total)
+            source_payload = source_matched_rankings_payload(
+                db_path,
+                range_id,
+                view,
+                metric,
+                q,
+                effective_search_scope,
+                page,
+                page_size,
+                min_count,
+                search_fields,
+            )
+            if source_payload["totalCount"] > 0:
+                return source_payload
+            vtuber_payload = vtuber_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total, effective_search_scope, search_fields)
+            if vtuber_payload["totalCount"] > 0:
+                return vtuber_payload
+            video_payload = video_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total, effective_search_scope, search_fields)
+            if video_payload["totalCount"] > 0:
+                return video_payload
         if (
             q
             and view in {"songs", "songIndex"}
@@ -935,7 +910,12 @@ def source_occurrence_fts_table(
         return ""
     requested = set(search_fields or [])
     table = ""
-    if search_fields == [] or requested == {"source"} or (not requested and scope == "source"):
+    if (
+        search_fields == []
+        or requested == {"source"}
+        or is_mixed_entity_source_search_fields(search_fields)
+        or (not requested and scope == "source")
+    ):
         table = "source_occurrences_fts"
     elif requested == {"channel"} or (not requested and scope == "channel"):
         table = "source_occurrences_channel_fts"
@@ -999,13 +979,15 @@ def source_occurrence_search_fields(scope: str, search_fields: list[str] | None 
     requested = set(search_fields or [])
     if requested:
         fields: list[str] = []
+        if any(field in requested for field in ("title", "artist")):
+            fields.append("lower(so.search_text)")
         if "channel" in requested:
             fields.extend(["lower(so.channel_name)", "lower(so.channel_id)", "lower(so.channel_handle)", "lower(so.channel_url)"])
         if "video" in requested:
             fields.extend(["lower(so.title)", "lower(so.video_id)"])
         if "source" in requested:
             fields.append("lower(so.search_text)")
-        return fields or ["lower(so.search_text)"]
+        return unique_fields(fields) or ["lower(so.search_text)"]
     if scope == "channel":
         return ["lower(so.channel_name)", "lower(so.channel_id)", "lower(so.channel_handle)", "lower(so.channel_url)"]
     if scope == "video":
@@ -1206,6 +1188,28 @@ def search_fields_for_scope(scope: str) -> list[str]:
     if scope == "song":
         return ["title", "artist"]
     return []
+
+
+def ranking_search_scope_for_source_fields(scope: str, fields: list[str] | None) -> str:
+    if not is_mixed_entity_source_search_fields(fields):
+        return scope
+    entity_fields = [field for field in fields or [] if field in {"title", "artist"}]
+    return search_scope_from_fields(entity_fields)
+
+
+def is_mixed_entity_source_search_fields(fields: list[str] | None) -> bool:
+    if not fields:
+        return False
+    requested = set(fields)
+    return bool(requested & {"title", "artist"}) and bool(requested & {"channel", "video", "source"})
+
+
+def unique_fields(fields: list[str]) -> list[str]:
+    result: list[str] = []
+    for field in fields:
+        if field not in result:
+            result.append(field)
+    return result
 
 
 def search_filter_for_view(view: str, query: str, scope: str = "all") -> tuple[str, list[str]]:

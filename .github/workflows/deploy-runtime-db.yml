@@ -109,9 +109,9 @@ jobs:
             elif [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
               git fetch --depth=50 origin main --prune >/dev/null 2>&1 || true
               if git cat-file -e "${db_commit_sha}^{commit}" 2>/dev/null; then
-                changed_db_inputs="$(git diff --name-only "${db_commit_sha}" "${EXPECTED_COMMIT_SHA}" -- assets config data/latest.json data/status.json data/external package.json scripts server || true)"
+                changed_db_inputs="$(git diff --name-only "${db_commit_sha}" "${EXPECTED_COMMIT_SHA}" -- assets config data/latest.json data/status.json data/external package.json scripts ':(exclude)scripts/check-published-runtime.js' || true)"
                 if [ -z "${changed_db_inputs}" ]; then
-                  reuse_reason="workflow-only-commit"
+                  reuse_reason="source-data-unchanged"
                 else
                   echo "CODEX_RUNTIME_DB_REUSE_SKIP changedDbInputs=${changed_db_inputs}"
                 fi
@@ -120,11 +120,8 @@ jobs:
               fi
             fi
             if [ -n "${reuse_reason}" ] && [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
-              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE reason=${reuse_reason} commitSha=${db_commit_sha} latestSha256=${db_latest_sha256}"
+              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE reason=${reuse_reason} sourceCommitSha=${db_commit_sha} deployCommitSha=${EXPECTED_COMMIT_SHA} latestSha256=${db_latest_sha256}"
               cp -f "${cached_db}" artifacts/runtime/song-rank.sqlite
-              if [ "${db_commit_sha}" != "${EXPECTED_COMMIT_SHA}" ]; then
-                sqlite3 artifacts/runtime/song-rank.sqlite "UPDATE meta SET value='${EXPECTED_COMMIT_SHA}' WHERE key='source_commit_sha';"
-              fi
               if python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only; then
                 echo "CODEX_RUNTIME_DB_REUSE_OK"
                 exit 0
@@ -182,6 +179,7 @@ jobs:
         env:
           DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+          DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH: "1"
         run: |
           python3 server/song_rank_api.py --db artifacts/runtime/song-rank.sqlite --host 127.0.0.1 --port 8765 > artifacts/runtime/api-smoke.log 2>&1 &
           api_pid="$!"
@@ -271,7 +269,80 @@ jobs:
           "
           echo "CODEX_RUNTIME_DB_VPS_PREP_OK"
 
+      - name: Check remote database data identity
+        id: remote_db
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
+          EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+        run: |
+          set -Eeuo pipefail
+          echo "reuse=0" >> "$GITHUB_OUTPUT"
+          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            cd '${REMOTE_PROJECT_DIR}'
+            if [ ! -f '${REMOTE_DB_PATH}' ]; then
+              echo 'CODEX_RUNTIME_DB_REMOTE_REUSE_SKIP reason=missing-db'
+              exit 0
+            fi
+            db_meta=\$(python3 deploy/vps2/read-runtime-db-meta.py --db '${REMOTE_DB_PATH}' source_commit_sha source_latest_sha256 schema_version)
+            db_commit_sha=\$(printf '%s\n' \"\${db_meta}\" | sed -n '1p')
+            db_latest_sha256=\$(printf '%s\n' \"\${db_meta}\" | sed -n '2p')
+            db_schema_version=\$(printf '%s\n' \"\${db_meta}\" | sed -n '3p')
+            changed_db_input_count='unknown'
+            if [ -n \"\${db_commit_sha}\" ] && git cat-file -e \"\${db_commit_sha}^{commit}\" 2>/dev/null; then
+              changed_db_inputs=\$(git diff --name-only \"\${db_commit_sha}\" '${DEPLOY_SHA}' -- assets config data/latest.json data/status.json data/external package.json scripts ':(exclude)scripts/check-published-runtime.js' || true)
+              if [ -z \"\${changed_db_inputs}\" ]; then
+                changed_db_input_count=0
+              else
+                changed_db_input_count=\$(printf '%s\n' \"\${changed_db_inputs}\" | wc -l | tr -d '[:space:]')
+              fi
+            fi
+            if [ \"\${db_latest_sha256}\" = '${EXPECTED_LATEST_SHA256}' ] && [ \"\${db_schema_version}\" = '2' ] && [ \"\${changed_db_input_count}\" = '0' ]; then
+              python3 scripts/db/query-runtime-db.py --db '${REMOTE_DB_PATH}' --range all --view songs --q '少女レイ' --page-size 5 --summary-only
+              db_bytes=\$(stat -c%s '${REMOTE_DB_PATH}')
+              echo \"CODEX_RUNTIME_DB_REMOTE_REUSE_OK sourceCommitSha=\${db_commit_sha} deployCommitSha='${DEPLOY_SHA}' latestSha256=\${db_latest_sha256} bytes=\${db_bytes}\"
+            else
+              echo \"CODEX_RUNTIME_DB_REMOTE_REUSE_SKIP sourceCommitSha=\${db_commit_sha:-missing} deployCommitSha='${DEPLOY_SHA}' expectedLatestSha256='${EXPECTED_LATEST_SHA256}' dbLatestSha256=\${db_latest_sha256:-missing} dbSchemaVersion=\${db_schema_version:-missing} changedDbInputCount=\${changed_db_input_count}\"
+            fi
+          ")"
+          printf '%s\n' "${remote_probe}"
+          if printf '%s\n' "${remote_probe}" | grep -q '^CODEX_RUNTIME_DB_REMOTE_REUSE_OK '; then
+            echo "reuse=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restart API with current remote database
+        if: steps.remote_db.outputs.reuse == '1'
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            systemctl disable --now song-rank-runtime-update.timer || true
+            systemctl restart song-rank-api
+            ready=0
+            for attempt in \$(seq 1 30); do
+              if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            if [ \"\${ready}\" != '1' ]; then
+              systemctl status song-rank-api --no-pager -l || true
+              journalctl -u song-rank-api -n 80 --no-pager || true
+              echo 'CODEX_RUNTIME_DB_RESTART_ERROR api-health-timeout'
+              exit 1
+            fi
+            systemctl reload nginx
+            echo 'CODEX_RUNTIME_DB_UPLOAD_SKIPPED reason=remote-data-current restart=ok'
+          "
+
       - name: Upload and activate database
+        if: steps.remote_db.outputs.reuse != '1'
         timeout-minutes: 90
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
@@ -379,6 +450,7 @@ jobs:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+          DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH: "1"
         run: |
           set -Eeuo pipefail
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "

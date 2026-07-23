@@ -9,6 +9,7 @@ const checkMode = options.mode || process.env.DAILY_SONG_PUBLISHED_CHECK_MODE ||
 const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
 const expectedApiCommitSha = options.expectedCommitSha || process.env.DAILY_SONG_EXPECTED_COMMIT_SHA || "";
 const expectedApiLatestSha256 = options.expectedLatestSha256 || process.env.DAILY_SONG_EXPECTED_LATEST_SHA256 || "";
+const allowApiSourceCommitMismatch = isTruthy(options.allowSourceCommitMismatch || process.env.DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH || "");
 const errors = [];
 
 main().catch((error) => {
@@ -134,11 +135,21 @@ async function checkApiRuntime(checkedAt) {
   assert(Number(meta.schemaVersion) >= 1, "api meta schemaVersion missing");
   assert(Number(meta.counts?.ranking_rows) > 0, "api meta ranking_rows must be positive");
   assert(Number(meta.counts?.source_occurrences) > 0, "api meta source_occurrences must be positive");
-  if (expectedApiCommitSha) {
-    assert(meta.meta?.source_commit_sha === expectedApiCommitSha, `api source_commit_sha ${meta.meta?.source_commit_sha || "missing"} must match expected ${expectedApiCommitSha}`);
+  const apiSourceCommitSha = meta.meta?.source_commit_sha || "";
+  const apiSourceLatestSha256 = meta.meta?.source_latest_sha256 || "";
+  const apiCommitMatches = expectedApiCommitSha ? apiSourceCommitSha === expectedApiCommitSha : false;
+  const apiLatestMatches = expectedApiLatestSha256 ? apiSourceLatestSha256 === expectedApiLatestSha256 : false;
+  if (expectedApiCommitSha && !apiCommitMatches) {
+    if (allowApiSourceCommitMismatch && apiLatestMatches) {
+      console.warn(
+        `[published-runtime-api] source_commit_sha ${apiSourceCommitSha || "missing"} differs from expected ${expectedApiCommitSha}; accepting matching source_latest_sha256 ${expectedApiLatestSha256}`,
+      );
+    } else {
+      assert(false, `api source_commit_sha ${apiSourceCommitSha || "missing"} must match expected ${expectedApiCommitSha}`);
+    }
   }
   if (expectedApiLatestSha256) {
-    assert(meta.meta?.source_latest_sha256 === expectedApiLatestSha256, `api source_latest_sha256 ${meta.meta?.source_latest_sha256 || "missing"} must match expected ${expectedApiLatestSha256}`);
+    assert(apiSourceLatestSha256 === expectedApiLatestSha256, `api source_latest_sha256 ${apiSourceLatestSha256 || "missing"} must match expected ${expectedApiLatestSha256}`);
   }
 
   const rankingsResponse = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&searchFields=title,artist&pageSize=5");
@@ -228,7 +239,7 @@ async function checkApiRuntime(checkedAt) {
       `naretanVtuberResults=${naretanVtuber.json.totalCount}`,
       `hanonSongCount=${hanonSongMetric.json.records?.[0]?.songCount || 0}`,
       `staticMeta=${staticMetaMode}`,
-      `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
+      `expectedCommit=${expectedApiCommitSha ? apiCommitMatches ? "matched" : allowApiSourceCommitMismatch && apiLatestMatches ? "same-latest" : "mismatched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),
   );
@@ -444,6 +455,10 @@ function positiveInteger(value, fallback = 1) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function isTruthy(value) {
+  return ["1", "true", "yes", "on"].includes(String(value || "").trim().toLocaleLowerCase());
+}
+
 function parseArgs(args) {
   const result = { baseUrl: "" };
   for (let index = 0; index < args.length; index += 1) {
@@ -462,6 +477,8 @@ function parseArgs(args) {
     } else if (arg === "--expected-latest-sha256") {
       result.expectedLatestSha256 = args[index + 1] || "";
       index += 1;
+    } else if (arg === "--allow-source-commit-mismatch") {
+      result.allowSourceCommitMismatch = "1";
     } else if (!result.baseUrl) {
       result.baseUrl = arg;
     }

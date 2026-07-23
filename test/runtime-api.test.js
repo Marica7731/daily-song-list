@@ -28,6 +28,10 @@ test("runtime API all-field source search prioritizes entity matches by global c
   assert.match(SERVER_SOURCE, /CASE WHEN entity_match_order = 0 THEN \{global_order_column\} ELSE \{order_column\} END DESC/u);
 });
 
+test("runtime API keeps source-search temp data in memory", () => {
+  assert.match(SERVER_SOURCE, /PRAGMA temp_store=MEMORY/u);
+});
+
 test("runtime API merges indexed unknown artist song variants into the known song result", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-indexed-unknown-"));
   const latestPath = path.join(dir, "latest.json");
@@ -153,6 +157,22 @@ test("runtime API all-field source search sorts by matched occurrence count", as
     });
 
     await waitForReady(child, port);
+    const entitySearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Known%20Artist&pageSize=5`);
+    assert.equal(entitySearch.searchScope, "all");
+    assert.deepEqual(entitySearch.searchFields, []);
+    assert.deepEqual(entitySearch.records.map((record) => record.title), ["Global Heavy", "Search Strong"]);
+    assert.deepEqual(entitySearch.records.map((record) => record.count), [5, 3]);
+    assert.equal(entitySearch.records.some((record) => record.matchedBySource), false);
+
+    const mixedEntitySearch = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Known%20Artist&searchFields=title,artist,channel&pageSize=5`,
+    );
+    assert.equal(mixedEntitySearch.searchScope, "source");
+    assert.deepEqual(mixedEntitySearch.searchFields, ["title", "artist", "channel"]);
+    assert.deepEqual(mixedEntitySearch.records.map((record) => record.title), ["Global Heavy", "Search Strong"]);
+    assert.deepEqual(mixedEntitySearch.records.map((record) => record.count), [5, 3]);
+    assert.equal(mixedEntitySearch.records.some((record) => record.matchedBySource), false);
+
     const sourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=needle&searchFields=all&pageSize=5`);
     assert.equal(sourceSearch.searchScope, "all");
     assert.deepEqual(sourceSearch.searchFields, []);
@@ -160,6 +180,14 @@ test("runtime API all-field source search sorts by matched occurrence count", as
     assert.deepEqual(sourceSearch.records.map((record) => record.count), [3, 1]);
     assert.deepEqual(sourceSearch.records.map((record) => record.globalCount), [3, 5]);
     assert.equal(sourceSearch.records[0].matchedBySource, true);
+
+    const mixedSourceSearch = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=needle&searchFields=title,artist,channel&pageSize=5`,
+    );
+    assert.equal(mixedSourceSearch.searchScope, "source");
+    assert.deepEqual(mixedSourceSearch.searchFields, ["title", "artist", "channel"]);
+    assert.deepEqual(mixedSourceSearch.records.map((record) => record.title), ["Search Strong", "Global Heavy"]);
+    assert.equal(mixedSourceSearch.records[0].matchedBySource, true);
   } finally {
     if (child) {
       child.kill();
@@ -330,9 +358,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
 
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
     assert.equal(channelSongSearch.searchScope, "all");
-    assert.equal(channelSongSearch.totalCount, 0);
-    assert.equal(channelSongSearch.totalOccurrenceCount, 0);
-    assert.deepEqual(channelSongSearch.records, []);
+    assert.deepEqual(channelSongSearch.searchFields, []);
+    assert.equal(channelSongSearch.totalCount, 3);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 3);
+    assert.deepEqual(channelSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
+    assert.equal(channelSongSearch.records[0].matchedBySource, true);
 
     const allFieldSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchFields=all&pageSize=5`);
     assert.equal(allFieldSongSearch.searchScope, "all");
@@ -405,7 +435,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(escapedWildcardSearch.totalCount, 0);
 
     const videoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&pageSize=5`);
-    assert.equal(videoTitleSongSearch.totalCount, 0);
+    assert.equal(videoTitleSongSearch.searchScope, "all");
+    assert.deepEqual(videoTitleSongSearch.searchFields, []);
+    assert.equal(videoTitleSongSearch.totalCount, 2);
+    assert.deepEqual(videoTitleSongSearch.records.map((record) => record.title), ["Song One", "Song Two"]);
+    assert.equal(videoTitleSongSearch.records[0].matchedBySource, true);
 
     const scopedVideoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&searchScope=video&pageSize=5`);
     assert.equal(scopedVideoTitleSongSearch.totalCount, 2);
