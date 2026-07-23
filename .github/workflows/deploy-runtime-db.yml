@@ -230,7 +230,7 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
-            for required_cmd in git nginx python3 curl rsync node npm; do
+            for required_cmd in git nginx python3 curl rsync gzip node npm; do
               command -v \"\${required_cmd}\" >/dev/null 2>&1 || {
                 echo \"CODEX_RUNTIME_DB_DEPLOY_ERROR missing-command=\${required_cmd}\"
                 exit 1
@@ -316,22 +316,9 @@ jobs:
               fi
               df -h '${REMOTE_STATE_DIR}'
             "
-            rsync \
-              --inplace \
-              --partial \
-              --whole-file \
-              --ignore-times \
-              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
-              artifacts/runtime/song-rank.sqlite \
-              "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
-            rsync \
-              --inplace \
-              --partial \
-              --whole-file \
-              --ignore-times \
-              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
-              artifacts/runtime/song-rank.sqlite.manifest.json \
-              "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
+            echo "CODEX_RUNTIME_DB_UPLOAD_TRANSPORT gzip-stream target=${remote_db}"
+            gzip -1 -c artifacts/runtime/song-rank.sqlite | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "gzip -dc > '${remote_db}'"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "cat > '${remote_db}.manifest.json'" < artifacts/runtime/song-rank.sqlite.manifest.json
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
@@ -360,22 +347,9 @@ jobs:
               echo 'CODEX_RUNTIME_DB_DIRECT_STOP_OK'
               df -h '${REMOTE_STATE_DIR}'
             "
-            rsync \
-              --inplace \
-              --partial \
-              --whole-file \
-              --ignore-times \
-              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
-              artifacts/runtime/song-rank.sqlite \
-              "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}"
-            rsync \
-              --inplace \
-              --partial \
-              --whole-file \
-              --ignore-times \
-              -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
-              artifacts/runtime/song-rank.sqlite.manifest.json \
-              "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}.manifest.json"
+            echo "CODEX_RUNTIME_DB_UPLOAD_TRANSPORT gzip-stream target=${REMOTE_DB_PATH}"
+            gzip -1 -c artifacts/runtime/song-rank.sqlite | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "gzip -dc > '${REMOTE_DB_PATH}'"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "cat > '${REMOTE_DB_PATH}.manifest.json'" < artifacts/runtime/song-rank.sqlite.manifest.json
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1 EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${REMOTE_DB_PATH}' /usr/local/bin/song-rank-db-activate.sh
