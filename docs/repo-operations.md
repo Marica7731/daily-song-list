@@ -219,3 +219,31 @@ VPS2 空间不足时，不要直接手工覆盖 DB。优先修 GitHub Actions �
 - Mac 是否在跑构建或来源补跑
 - 线上 API 关键探针结果
 - 哪些需求已上线，哪些只是本地完成
+
+## 来源 checkpoint 续跑补充
+
+来源发现只生成候选 artifact，不直接修改 runtime DB。当前来源工作树和 Mac 临时目录可以使用：
+
+```text
+D:\\Projects\\daily_song_list_worker_source_backfill_20260720
+/tmp/ytb-song-rank-source-backfill-20260720
+```
+
+续跑前保留同一输出目录中的 `manifest.json`、`checkpoint.json`、`raw-videos.json`、`video-details.json`、`occurrences.json` 和 `audits.json`。使用相同频道、相同参数和相同输出目录再次运行，默认不要加 `--fresh`；脚本会从 checkpoint 跳过已完成视频。只有明确重置频道时才使用 `--fresh`，不要因为会话额度中断就创建新目录。
+
+标准命令形态如下，实际参数以来源会话保存的 runner/checkpoint 为准：
+
+```sh
+npm run youtube:discover-channel -- --channel-url <url> --singer-name <name> --output-dir <dir> --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500
+```
+
+使用 bounded watchdog（例如 20 分钟）。边界到达后先收 checkpoint、summary、heartbeat 和日志；`reachedEnd=false` 只能说明本轮是部分结果，必须记录候选数、详情数、accepted 数、时间字段覆盖和错误信息。来源 worker 不自动 import、push `main` 或 deploy；主会话审核 accepted 增量后再统一导入、构建、提交和发布。
+
+来源完成后至少保存：频道/URL、批次名、checkpoint、去重后的新增视频和 occurrence 数、published timestamp/occurrence 时间/封面覆盖率、过滤原因、产物 SHA 和测试输出。续跑后比较新增 ID，确认没有重复 imported 视频。
+
+## 磁盘边界
+
+- C 盘不放构建产物、SQLite、来源原始数据或压缩包。
+- D 盘只保留仍在使用的来源工作树；空间不足时改用 G 盘或 Mac。
+- 大构建、来源原始数据和 SQLite 优先放 Mac 或 `G:\\codex-temp`。
+- 清理前确认目录不是当前 worker 的输出目录，并检查绝对路径仍在允许目录内。
