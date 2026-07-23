@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_manifest",
+  "batchId": "2026-07-23-source-backfill-batch88-toamall-duplicate-evidence",
+  "generatedAt": "2026-07-23T08:22:14.487Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "sourceEvidence": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.raw-export.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+  ],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOf": {
+      "batchId": "2026-07-22-source-backfill-batch2",
+      "sourceArtifactDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2",
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+      "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.raw-export.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+      "auditSummary": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+    },
+    "source": {
+      "handle": "toamall",
+      "channelHandle": "/@toamall",
+      "channelUrl": "https://www.youtube.com/@toamall",
+      "acceptedMatchRule": "accepted.videos matched where channelHandle == /@toamall or channelUrl == https://www.youtube.com/@toamall",
+      "manifestMatchRule": "manifest.sources matched where handle == toamall or url == https://www.youtube.com/@toamall"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 104,
+      "uniqueSongs": 90,
+      "uniqueSongKey": "Normalize(FormKC).ToLowerInvariant(title) + \"|\" + Normalize(FormKC).ToLowerInvariant(artist), whitespace collapsed",
+      "batch2ManifestUniqueSongs": 90,
+      "uniqueSongNote": "Computed normalized title+artist unique song count matches batch2 manifest/report."
+    },
+    "coverage": {
+      "publishedTimestamp": {
+        "present": 9,
+        "total": 9,
+        "ratio": "9/9"
+      },
+      "occurrenceTime": {
+        "present": 104,
+        "total": 104,
+        "ratio": "104/104"
+      },
+      "occurrenceSeconds": {
+        "present": 104,
+        "total": 104,
+        "ratio": "104/104"
+      },
+      "acceptedThumbnailOrCoverTopLevelFields": {
+        "present": 0,
+        "total": 9,
+        "ratio": "0/9"
+      },
+      "acceptedFileHasThumbnailOrCoverFields": false,
+      "batch2DiscoveryThumbnailCoverage": "9/9",
+      "coverNote": "Batch2 accepted videos have no top-level thumbnail/cover fields; using batch2 discovery thumbnail coverage as source discovery evidence."
+    },
+    "manifestSourceEntry": {
+      "candidateCount": 44,
+      "inspectedCount": 44,
+      "usableVideoCount": 9,
+      "discoveryOccurrenceCount": 104,
+      "elapsedSeconds": 1401,
+      "reachedEnd": null,
+      "reachedEndInterpretation": "unknown"
+    },
+    "rawExportStats": {
+      "rawMatchedVideos": 9,
+      "rawOccurrenceRowsForMatchedVideos": 104
+    },
+    "dirtyAudit": {
+      "filter": "channelHandle == /@toamall or channelUrl == https://www.youtube.com/@toamall",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "suspiciousVideos": 0,
+      "suspiciousOccurrences": 0,
+      "note": "Filtered by channelHandle/channelUrl; source dirty-audit has no toamall dropped or suspicious entries. Dirty counts are not inferred from candidate-to-usable difference."
+    },
+    "operationalScope": {
+      "didNotUseMacOrVps": true,
+      "didNotCreateRemoteTempDirectory": true,
+      "didNotStartYouTubeFetch": true,
+      "didNotModifyDataExternal": true,
+      "didNotPushOrDeploy": true,
+      "commitCreated": false,
+      "outputVideosOrCandidatesRepeated": false
+    },
+    "batch2RemoteCleanupEvidence": {
+      "source": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+      "reportLines": [
+        "- VPS3 `/opt/ytb-song-rank-source-backfill-20260722-batch2-vps3`: removed; `df -h /` => `/dev/sda1 99G 11G 89G 11% /`.",
+        "- VPS5 `/opt/ytb-song-rank-source-backfill-20260722-batch2-vps5`: removed; `df -h /` => `/dev/vda1 10G 2.6G 7.0G 27% /`."
+      ]
+    }
+  },
+  "outputFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch88-toamall-duplicate-evidence",
+    "didNotModifyDataExternal": true,
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotPushOrDeploy": true
+  },
+  "temporaryScript": {
+    "path": "G:\\codex-temp\\generate_toamall_duplicate_evidence.ps1",
+    "created": true,
+    "deletedBeforeManifestWrite": true,
+    "deletionVerified": true
+  }
+}
