@@ -1,0 +1,48 @@
+{
+  "index": 5,
+  "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Laz_Furuto/streams --singer-name Laz_Furuto --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch122-laz-furuto-continuation/shards/shard-5 --cache-dir /tmp/ytb-song-rank-source-backfill-20260720/batch122-laz-furuto-continuation/cache --tab streams --max-channel-pages 2 --max-candidates 36 --max-inspect 6 --inspect-shard-index 5 --inspect-shard-count 6 --request-interval-ms 2500 --request-jitter-ms 750",
+  "startedAt": "2026-07-23T13:33:26.505Z",
+  "finishedAt": "2026-07-23T13:34:29.062Z",
+  "timeoutMs": 1000000,
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "elapsedMs": 62555,
+  "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Laz_Furuto/streams\" candidates=34 inspected=5 videos=3 occurrences=23 elapsedSeconds=62 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch122-laz-furuto-continuation/shards/shard-5\"",
+  "manifest": {
+    "candidateCount": 34,
+    "inspectedInLatestRun": 5,
+    "usableVideoCount": 3,
+    "occurrenceCount": 23,
+    "reachedEnd": false,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@Laz_Furuto/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 60,
+        "candidateCount": 34,
+        "continuationRounds": 1,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1182190
+      }
+    ],
+    "requestStats": {
+      "requestCount": 1,
+      "networkRequestCount": 1,
+      "cacheHitCount": 0,
+      "totalBytes": 1182190,
+      "totalElapsedMs": 558,
+      "statuses": {
+        "200": 1
+      }
+    }
+  },
+  "checkpoint": {
+    "candidateCount": 34,
+    "detailCount": 3,
+    "audits": 5,
+    "updatedAt": "2026-07-23T13:34:29.045Z"
+  }
+}

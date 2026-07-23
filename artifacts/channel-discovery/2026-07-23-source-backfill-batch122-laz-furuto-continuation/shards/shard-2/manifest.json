@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-23T13:31:14.226Z",
+  "channelUrl": "https://www.youtube.com/@Laz_Furuto/streams",
+  "singerName": "Laz_Furuto",
+  "keywords": [
+    "LIVE",
+    "歌",
+    "弾き語",
+    "リレー"
+  ],
+  "tabs": [
+    "streams"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@Laz_Furuto/streams?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 2,
+  "maxCandidates": 36,
+  "maxInspect": 6,
+  "inspectShardIndex": 2,
+  "inspectShardCount": 6,
+  "candidateOnly": false,
+  "candidateCount": 34,
+  "inspectedInLatestRun": 6,
+  "usableVideoCount": 2,
+  "occurrenceCount": 8,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@Laz_Furuto/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 60,
+      "candidateCount": 34,
+      "continuationRounds": 1,
+      "reachedEnd": false,
+      "fromCache": false,
+      "bytes": 1188314
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 1,
+    "networkRequestCount": 1,
+    "cacheHitCount": 0,
+    "totalBytes": 1188314,
+    "totalElapsedMs": 1681,
+    "statuses": {
+      "200": 1
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_batch_manifest",
+  "batchId": "2026-07-23-source-backfill-batch122-laz-furuto-continuation",
+  "generatedAt": "2026-07-23T13:36:53.440Z",
+  "scope": {
+    "channelUrl": "https://www.youtube.com/@Laz_Furuto/streams",
+    "singerName": "Laz_Furuto",
+    "tabs": [
+      "streams"
+    ],
+    "onlySpecifiedStreamsUrlProcessed": true,
+    "excludedOtherChannels": true
+  },
+  "localRepo": {
+    "root": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+    "branchStatus": "## codex/source-backfill-20260720-v2...origin/main [ahead 420, behind 1]",
+    "dataExternalDiff": "none",
+    "wroteDataExternal": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "deployed": false
+  },
+  "execution": {
+    "host": "ssh be@192.168.1.13",
+    "macRoot": "/Users/be/daily-song-list",
+    "macEnvCommand": "source ~/.daily-song-list-build-env",
+    "macTempRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch122-laz-furuto-continuation",
+    "strategy": {
+      "tabs": [
+        "streams"
+      ],
+      "shardCount": 6,
+      "maxInspect": 6,
+      "maxCandidates": 36,
+      "maxChannelPages": 2,
+      "commandTimeoutMs": 1000000
+    },
+    "allShardCommandsFinished": true,
+    "markers": {
+      "init": true,
+      "shardDoneCount": 6,
+      "summary": true,
+      "dirtyAudit": true,
+      "exportIncrement": true,
+      "cleanup": true
+    }
+  },
+  "source": {
+    "handle": "Laz_Furuto",
+    "channelUrl": "https://www.youtube.com/@Laz_Furuto/streams",
+    "status": "skipped_dirty_audit",
+    "statuses": {
+      "imported": false,
+      "skipped": true,
+      "failed": false,
+      "pending": true
+    },
+    "imported": false,
+    "skipped": true,
+    "failed": false,
+    "pending": true,
+    "fullComplete": false,
+    "completeForImport": false,
+    "acceptedIncrementReadyForReview": false,
+    "reachedEnd": false,
+    "failureReason": "streams-only bounded discovery stopped at maxChannelPages=2; reachedEnd=false, so this is not full channel completion",
+    "candidateCount": 34,
+    "inspectedCandidates": 34,
+    "checkpointDetails": 16,
+    "checkpointAudits": 34,
+    "discoveredDetailVideos": 16,
+    "discoveredOccurrences": 109,
+    "dirtyAudit": {
+      "inputVideos": 16,
+      "acceptedVideos": 0,
+      "droppedVideos": 16,
+      "hardExcludeTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "吹奏楽"
+      ],
+      "hardExcludeExactPhrases": [
+        "piano streaming",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ]
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "songs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "coverCoverage": "0/0",
+      "thumbnailOrCoverCoverage": "0/0"
+    },
+    "acceptedVideos": []
+  },
+  "remoteCleanup": {
+    "status": "removed",
+    "marker": "CODEX_BATCH122_STREAMS_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch122-laz-furuto-continuation",
+    "dfBefore": [
+      "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+      "/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+      "/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data"
+    ],
+    "dfAfter": [
+      "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+      "/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+      "/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data"
+    ]
+  }
+}
