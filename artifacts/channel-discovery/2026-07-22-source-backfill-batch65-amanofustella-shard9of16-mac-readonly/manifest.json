@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-increment",
+  "batchId": "2026-07-22-source-backfill-batch65-amanofustella-shard9of16-mac-readonly",
+  "generatedAt": "2026-07-23T03:51:29.278Z",
+  "status": "success",
+  "statusMarker": "CODEX_BATCH65_SOURCE_BACKFILL_SUCCESS",
+  "result": {
+    "imported": 2,
+    "skipped": 0,
+    "failed": 0,
+    "success": true,
+    "failureReason": ""
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "runnerCodeModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 9,
+    "inspectShardCount": 16
+  },
+  "precheck": {
+    "windowsRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+    "windowsHead": "dd3bdc123148",
+    "branch": "codex/source-backfill-20260720-v2",
+    "macRepo": "/Users/be/daily-song-list",
+    "macRepoHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "sourceFilterPath": "assets/source-filter.js",
+    "sourceFilterSizeBytes": 60415,
+    "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "node": "v20.20.2",
+    "npm": "10.8.2"
+  },
+  "discovery": {
+    "candidateCount": 49,
+    "inspectedCount": 3,
+    "usableVideoCount": 2,
+    "occurrenceCount": 10,
+    "reachedEnd": false,
+    "detailPublishedCoverage": "2/2",
+    "detailThumbnailCoverage": "2/2",
+    "discoveryThumbnailCoverage": "49/49",
+    "publishedTimestampRange": {
+      "min": 1766634486650,
+      "max": 1782186486650
+    },
+    "occurrenceSecondsRange": {
+      "min": 1196,
+      "max": 4317
+    }
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 2,
+    "occurrences": 10,
+    "songs": 10,
+    "uniqueSongs": 10,
+    "publishedTimestampCoverage": "2/2",
+    "occurrenceTimeCoverage": "10/10",
+    "occurrenceSecondsCoverage": "10/10",
+    "acceptedIncrementThumbnailFieldCoverage": "2/2",
+    "publishedTimestampRange": {
+      "min": 1766634486650,
+      "max": 1782186486650
+    },
+    "occurrenceSecondsRange": {
+      "min": 1196,
+      "max": 4317
+    }
+  },
+  "dirtyAudit": {
+    "inputVideoCount": 2,
+    "inputOccurrenceCount": 10,
+    "keptVideoCount": 2,
+    "keptOccurrenceCount": 10,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "stageLog": [
+    {
+      "stage": "windows-start-marker",
+      "status": "ok",
+      "file": "worker-started.marker"
+    },
+    {
+      "stage": "mac-precheck",
+      "status": "ok",
+      "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103"
+    },
+    {
+      "stage": "discovery",
+      "status": "ok",
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=49 inspected=3 videos=2 occurrences=10 elapsedSeconds=42 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly/discovery\"",
+      "start": "2026-07-23T03:47:53Z",
+      "end": "2026-07-23T03:48:35.636Z"
+    },
+    {
+      "stage": "export",
+      "status": "ok",
+      "marker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=2 usableVideos=2 acceptedVideos=2 skippedRegressions=0 occurrences=10 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly/candidate-increment-unfiltered.json\"",
+      "start": "2026-07-23T03:49:43Z",
+      "end": "2026-07-23T03:49:44Z"
+    },
+    {
+      "stage": "dirty-audit",
+      "status": "ok",
+      "droppedVideos": 0,
+      "suspiciousVideos": 0
+    },
+    {
+      "stage": "mac-cleanup",
+      "status": "ok",
+      "marker": "CODEX_MAC_CLEANUP_OK removed=true"
+    },
+    {
+      "stage": "windows-cleanup",
+      "status": "ok",
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK"
+    }
+  ],
+  "timings": {
+    "discoveryElapsedSeconds": 42
+  },
+  "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly",
+  "requiredFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "cleanup": {
+    "mac": {
+      "marker": "CODEX_MAC_CLEANUP_OK",
+      "tempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly",
+      "removed": true,
+      "dfH": [
+        "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+        "/dev/disk3s5   926Gi   151Gi   736Gi    18%    584k  7.7G    0%   /System/Volumes/Data",
+        "/dev/disk3s5   926Gi   151Gi   736Gi    18%    584k  7.7G    0%   /System/Volumes/Data"
+      ]
+    },
+    "windows": {
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK",
+      "drives": {
+        "D": {
+          "root": "D:\\",
+          "usedBytes": 470180900864,
+          "freeBytes": 9904373760,
+          "artifactWritten": true
+        },
+        "C": {
+          "root": "C:\\",
+          "usedBytes": 255958552576,
+          "freeBytes": 65180426240,
+          "tempUsed": false,
+          "accidentalTempCleaned": true
+        },
+        "G": {
+          "root": "G:\\",
+          "usedBytes": 1354955927552,
+          "freeBytes": 693118853120,
+          "tempUsed": true,
+          "tempCleaned": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T03:49:43.936Z",
+  "inputs": [
+    "/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly/discovery"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "videoDetails": 2,
+    "usableVideos": 2,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 10,
+    "rawSongs": 10,
+    "acceptedSongs": 10,
+    "droppedSongs": 0,
+    "suspiciousSongs": 0,
+    "skippedAllSongsRejected": 0,
+    "importAudit": {
+      "schemaVersion": 1,
+      "dropped": [],
+      "suspicious": []
+    },
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 2,
+  "occurrenceCount": 10,
+  "videos": [
+    {
+      "videoId": "UPczVJp2H_E",
+      "title": "【木曜22⌚定期配信】 #歌枠 歌うぞおお【#ステラと一緒 】サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ Stella Ch.【VSinger】",
+      "channelId": "UC7WtdrXXd9_wl5nEGbt12Yw",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1782186486650,
+      "thumbnailUrl": "https://i.ytimg.com/vi/UPczVJp2H_E/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDUUbuIUmld8vRc8A0OLDXsq_Yqwg",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=UPczVJp2H_E"
+      ],
+      "selectedSourceId": "UgyNGi6E2rwI7CC_T1l4AaABAg",
+      "selectedSourceHash": "0d2a06aaed4fbfd38eab1b1338aff14516f3482e7f5e396d3b493728fae47390",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:19:56",
+          "seconds": 1196,
+          "title": "丸ノ内サディスティック",
+          "artist": "椎名林檎",
+          "raw": "0:19:56 \t丸ノ内サディスティック / 椎名林檎",
+          "rawHash": "fb826c7a21af985114c0a4b4220565e923589ba54d3282b609b0eb138bc8a831",
+          "sourceId": "UgyNGi6E2rwI7CC_T1l4AaABAg",
+          "sourceHash": "0d2a06aaed4fbfd38eab1b1338aff14516f3482e7f5e396d3b493728fae47390",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:30:31",
+          "seconds": 1831,
+          "title": "IRIS OUT",
+          "artist": "米津玄師",
+          "raw": "0:30:31 \tIRIS OUT / 米津玄師",
+          "rawHash": "4ab21acd3c85ea51388c3229d0882ec6822e3a1ed71aefee537b3490a5f68b67",
+          "sourceId": "UgyNGi6E2rwI7CC_T1l4AaABAg",
+          "sourceHash": "0d2a06aaed4fbfd38eab1b1338aff14516f3482e7f5e396d3b493728fae47390",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:36:39",
+          "seconds": 2199,
+          "title": "主演",
+          "artist": "天ノ譜ステラ",
+          "raw": "0:36:39 \t主演 / 天ノ譜ステラ",
+          "rawHash": "1278d21f4b768ab3c38648db23f3d293c6d7f5bebca456f56e76ea42f777c543",
+          "sourceId": "UgyNGi6E2rwI7CC_T1l4AaABAg",
+          "sourceHash": "0d2a06aaed4fbfd38eab1b1338aff14516f3482e7f5e396d3b493728fae47390",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:11:57",
+          "seconds": 4317,
+          "title": "夜もすがら君想ふ",
+          "artist": "TOKOTOKO (西沢さんP)",
+          "raw": "1:11:57 \t夜もすがら君想ふ / TOKOTOKO (西沢さんP)",
+          "rawHash": "57d837561ae42677413cd8ba2acdd5ebae3daed39c6cebfd051b0017d81325e0",
+          "sourceId": "UgyNGi6E2rwI7CC_T1l4AaABAg",
+          "sourceHash": "0d2a06aaed4fbfd38eab1b1338aff14516f3482e7f5e396d3b493728fae47390",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T03:49:44.055Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    },
+    {
+      "videoId": "-WiEjEir7rk",
+      "title": "【#歌枠 #KARAOKE】リハビリ歌枠【#ステラと一緒 】サウンドハウス公認VSinger",
+      "channelName": "天ノ譜ステラ",
+      "channelId": "UC7WtdrXXd9_wl5nEGbt12Yw",
+      "channelHandle": "/@AmanofuStella",
+      "channelUrl": "https://www.youtube.com/@AmanofuStella",
+      "publishedTimestamp": 1766634486650,
+      "thumbnailUrl": "https://i.ytimg.com/vi/-WiEjEir7rk/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCiWiMqlCwLu6j-ZgTJ5iNpwdY-Pg",
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@AmanofuStella/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=-WiEjEir7rk"
+      ],
+      "selectedSourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+      "selectedSourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:22:01",
+          "seconds": 1321,
+          "title": "First Love",
+          "artist": "宇多田ヒカル",
+          "raw": "0:22:01 \tFirst Love / 宇多田ヒカル",
+          "rawHash": "f003ae725d3cc1c60b462d32d8a32aac3d0cfc07485fcb2eb76a231fc9d86cb0",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:31:03",
+          "seconds": 1863,
+          "title": "ただ君に晴れ",
+          "artist": "ヨルシカ",
+          "raw": "0:31:03 \tただ君に晴れ / ヨルシカ",
+          "rawHash": "640449e561fb319cc764564224d7805acfab7d73b484717e48dadd9b74667c34",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:38:40",
+          "seconds": 2320,
+          "title": "パート・オブ・ユア・ワールド",
+          "artist": "Disney",
+          "raw": "0:38:40 \tパート・オブ・ユア・ワールド / Disney",
+          "rawHash": "181dcf5caf44f6015bacfdc12c7ec1fa8b5186d0ec435522d07e6c8e5eb05b3f",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:47:52",
+          "seconds": 2872,
+          "title": "A Whole New World",
+          "artist": "Disney",
+          "raw": "0:47:52 \tA Whole New World / Disney",
+          "rawHash": "62bae68c9952d36a7488c2caaf9019199a199d18551c00722baf42ed5f280a8c",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:53:37",
+          "seconds": 3217,
+          "title": "いのちの名前",
+          "artist": "木村弓",
+          "raw": "0:53:37 \tいのちの名前 / 木村弓",
+          "rawHash": "0f7a1786da68a1e2a5d7c9d6838f905b60503ac8a3e6ca50bf49b9381da835bc",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:07:46",
+          "seconds": 4066,
+          "title": "小夜子",
+          "artist": "みきとP",
+          "raw": "1:07:46 \t小夜子 / みきとP",
+          "rawHash": "80173d8004b80096d3dec190ea8a727bfbb266f33cd3b2362e3d102c80e18b88",
+          "sourceId": "UgwKG9MQbh9KS1Bogud4AaABAg",
+          "sourceHash": "a2524670a5f6e108967a9d143ff13ad75ba3ac87624beb1b0686ada02de5d50c",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T03:49:44.062Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch65-amanofustella-shard9of16-mac-readonly/discovery",
+        "discoverySingerName": "天ノ譜ステラ",
+        "discoveryChannelUrl": "https://www.youtube.com/@AmanofuStella",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:01f92f65a8ab",
+      "curationHash": "01f92f65a8abcd816fdef4e3fbc4cd5930214160bfe128b79f69cb7bd9d4e181"
+    }
+  ]
+}
