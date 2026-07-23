@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 100
     env:
       DAILY_SONG_SEARCH_LIMIT: "500"
@@ -63,12 +63,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 50
+          filter: blob:none
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
+      - name: Configure Mac toolchain
+        run: |
+          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
       - name: Record run start
         id: runmeta
         run: |
