@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "generatedAt": "2026-07-23T04:43:11.531Z",
+  "status": "success",
+  "rules": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ only drops when missing singing signals",
+    "singingSignals": [
+      "歌枠",
+      "歌",
+      "弾き語り",
+      "karaoke",
+      "歌ってみた"
+    ]
+  },
+  "inputVideoCount": 14,
+  "inputOccurrenceCount": 134,
+  "keptVideoCount": 14,
+  "keptOccurrenceCount": 134,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 0,
+  "dropped": [],
+  "suspicious": []
+}
