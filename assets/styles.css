@@ -76,11 +76,15 @@
 
 html {
   scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  max-width: 100%;
   min-width: 320px;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--ink);
   font-family:
@@ -116,7 +120,7 @@ button {
 
 .layout {
   width: min(var(--page-max), calc(100% - (var(--page-x) * 2)));
-  margin: 0 0 40px var(--page-x);
+  margin: 0 auto 40px;
 }
 
 .status[hidden] {
@@ -142,7 +146,7 @@ button {
   align-items: center;
   gap: var(--space-2);
   width: min(var(--page-max), calc(100vw - var(--page-x) * 2));
-  margin: 0;
+  margin: 0 auto;
   min-width: 0;
 }
 
@@ -1395,8 +1399,7 @@ mark {
   grid-template-columns: 44px minmax(0, 1fr);
   grid-template-areas:
     "image title"
-    "image badge"
-    "image subline";
+    "image badge";
   column-gap: 10px;
   row-gap: 2px;
   align-items: center;
@@ -1448,19 +1451,6 @@ mark {
 
 .rank-row-vtuber .rank-subline {
   grid-area: subline;
-}
-
-.vtuber-expand-summary {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  color: var(--accent-strong);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rank-row-vtuber.is-expanded .vtuber-expand-summary {
-  display: none;
 }
 
 .vtuber-display-image {
@@ -3405,8 +3395,7 @@ mark {
     grid-template-columns: 38px minmax(0, 1fr);
     grid-template-areas:
       "image title"
-      "image badge"
-      "image subline";
+      "image badge";
     column-gap: 7px;
     row-gap: 2px;
     align-items: center;
@@ -3444,10 +3433,6 @@ mark {
 
   .rank-row-vtuber .rank-meta-line {
     align-items: center;
-  }
-
-  .rank-row-vtuber .artist-song-preview {
-    flex: 1 1 auto;
   }
 
   .artist-song-header {

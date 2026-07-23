@@ -316,8 +316,8 @@ test("mobile source preview contract matches compact documentation", () => {
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {
-  assert.match(cssBlock(".layout"), /margin: 0 0 40px var\(--page-x\);/u);
-  assert.match(cssBlock(".controls-inner"), /margin: 0;/u);
+  assert.match(cssBlock(".layout"), /margin: 0 auto 40px;/u);
+  assert.match(cssBlock(".controls-inner"), /margin: 0 auto;/u);
   assert.match(cssSource, /--content-gutter:\s*var\(--page-x\);/u);
   assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(360px, 1fr\);/u);
   assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.query-search-form\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-template-columns: minmax\(260px, 1fr\) auto;/u);
@@ -464,13 +464,11 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(appSource, /function filterOccurrencesForSongKey\(occurrences = \[\], songKey = "", songTitle = ""\)[\s\S]*songMatchKeys\(songKey, songTitle\)/u);
   assert.match(appSource, /function songMatchKeys\([\s\S]*window\.RankingUtils\?\.songWorkTitleKey\?\.\(text\)/u);
   assert.match(functionBody("function hydrateArtistSongGroup"), /filterOccurrencesForSongKey\(filterDisplaySongOccurrences\(record\.occurrences \|\| \[\]\), key, group\.title\)/u);
-  const vtuberSublineStart = appSource.indexOf("function appendVtuberSubline");
-  const vtuberSublineEnd = appSource.indexOf("function renderVtuberAvatar", vtuberSublineStart);
-  const vtuberSublineBody = appSource.slice(vtuberSublineStart, vtuberSublineEnd);
-  assert.match(vtuberSublineBody, /songPreview \|\| \[\]\)\.slice\(0, 2\)\.join\("、"\)/u);
-  assert.match(vtuberSublineBody, /vtuberExpandSummaryText\(songCount, videoCount\)/u);
-  assert.match(vtuberSublineBody, /展开显示 \$\{songText\}/u);
-  assert.match(cssSource, /\.rank-row-vtuber\.is-expanded \.vtuber-expand-summary\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(appSource, /function appendVtuberSubline/u);
+  assert.doesNotMatch(appSource, /展开显示/u);
+  assert.match(functionBody("function renderRecordContent"), /if \(metaLine\.childNodes\.length\) \{[\s\S]*content\.append\(subline\);/u);
+  assert.match(cssSource, /\.rank-row-vtuber \.rank-content\s*\{[\s\S]*grid-template-areas:[\s\S]*"image title"[\s\S]*"image badge"/u);
+  assert.doesNotMatch(cssSource, /vtuber-expand-summary/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(functionBody("function artistLabelForSongGroup"), /displayArtist = cleanText\(group\?\.displayArtist\)/u);

@@ -6428,13 +6428,14 @@ function renderRecordContent(title, meta, options) {
   } else if (mode === "vtuber") {
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) metaLine.append(collectedBadge);
-    appendVtuberSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, sourceVideoCountSubline(record, videoCount, sourceDetailPath), "subline-video-count");
   }
-  if (metaLine.childNodes.length) subline.append(metaLine);
-  content.append(subline);
+  if (metaLine.childNodes.length) {
+    subline.append(metaLine);
+    content.append(subline);
+  }
 
   return content;
 }
@@ -6554,25 +6555,6 @@ function shouldReplaceVtuberKnownSourceType(current, next) {
 function isMomentKnownSourceType(value) {
   const type = cleanText(value).toLocaleLowerCase();
   return type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
-}
-
-function appendVtuberSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
-  appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
-  appendSublinePart(metaContainer, vtuberExpandSummaryText(songCount, videoCount), "vtuber-expand-summary");
-  if (videoCount === 1 && occurrences.length === 1) {
-    appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
-  }
-}
-
-function vtuberExpandSummaryText(songCount, videoCount) {
-  const totalSongs = Math.max(0, Number(songCount) || 0);
-  const totalVideos = Math.max(0, Number(videoCount) || 0);
-  if (!totalSongs && !totalVideos) return "";
-  const visibleSongs = totalSongs ? Math.min(vtuberSongGroupPageSizeForMode(), totalSongs) : 0;
-  const songText = totalSongs > visibleSongs ? `${visibleSongs}/${totalSongs} 首歌` : `${totalSongs} 首歌`;
-  const parts = [`展开显示 ${songText}`];
-  if (totalVideos) parts.push(`${totalVideos} 个视频`);
-  return parts.join(" · ");
 }
 
 function renderVtuberAvatar(record) {
