@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-worker-manifest",
+  "batchId": "2026-07-23-source-backfill-batch84-nurojunk-official-duplicate-evidence",
+  "generatedAt": "2026-07-23T07:29:27.111Z",
+  "targetRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "branchConfirmed": "codex/source-backfill-20260720-v2",
+  "source": "https://www.youtube.com/@NUROJUNK_OFFICIAL",
+  "channel": "NUROJUNK_OFFICIAL",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "imported": 0,
+  "skipped": 1,
+  "failed": 0,
+  "failureReason": null,
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "stats": {
+    "candidateCount": 10,
+    "inspectedCount": 10,
+    "acceptedVideosThisBatch": 0,
+    "acceptedOccurrencesThisBatch": 0,
+    "acceptedUniqueSongsThisBatch": 0,
+    "duplicateAcceptedVideos": 7,
+    "duplicateAcceptedOccurrences": 61,
+    "duplicateAcceptedUniqueSongs": 60,
+    "directAcceptedRowsMatched": 7,
+    "directAcceptedOccurrencesMatched": 61,
+    "directAcceptedUniqueSongsMatched": 60,
+    "publishedTimestampCoverage": "7/7",
+    "occurrenceTimeCoverage": "61/61",
+    "occurrenceSecondsCoverage": "61/61",
+    "acceptedThumbnailOrCoverCoverage": "0/7",
+    "discoveryThumbnailCoverage": "7/7",
+    "reachedEnd": true,
+    "elapsedSeconds": 0,
+    "duplicateDiscoveryElapsedSeconds": 124
+  },
+  "coverage": {
+    "publishedTimestamp": "7/7",
+    "publishedTimestampRange": {
+      "minTimestamp": 1782082923252,
+      "maxTimestamp": 1784638923252,
+      "minIso": "2026-06-21T23:02:03.252Z",
+      "maxIso": "2026-07-21T13:02:03.252Z"
+    },
+    "occurrenceTime": "61/61",
+    "occurrenceSeconds": "61/61",
+    "acceptedThumbnailOrCover": "0/7",
+    "discoveryThumbnail": "7/7",
+    "thumbnailNote": "Accepted JSON has no thumbnail/cover field coverage for matched rows; discovery thumbnail coverage is cited separately from batch8 manifest."
+  },
+  "duplicateEvidence": {
+    "status": "verified_concrete_accepted_artifact",
+    "artifactDir": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8",
+    "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.accepted.json",
+    "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\accepted\\2026-07-22-source-backfill-batch8.raw-export.json",
+    "manifest": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\manifest.json",
+    "report": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\report.md",
+    "dirtyAudit": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch8\\dirty-audit.json",
+    "channelUrl": "https://www.youtube.com/@NUROJUNK_OFFICIAL",
+    "channelHandle": "/@NUROJUNK_OFFICIAL",
+    "sourceType": "youtube_channel_discovery accepted increment",
+    "existingStatus": "imported",
+    "existingVideos": 7,
+    "existingOccurrences": 61,
+    "existingUniqueSongs": 60,
+    "directAcceptedRowsMatched": 7,
+    "directAcceptedOccurrencesMatched": 61,
+    "directAcceptedUniqueSongsMatched": 60,
+    "candidateCount": 10,
+    "inspectedCount": 10,
+    "usableVideoCount": 8,
+    "discoveryOccurrenceCount": 74,
+    "reachedEnd": true,
+    "elapsedSeconds": 124,
+    "publishedTimestampCoverage": "7/7",
+    "publishedTimestampRange": {
+      "minTimestamp": 1782082923252,
+      "maxTimestamp": 1784638923252,
+      "minIso": "2026-06-21T23:02:03.252Z",
+      "maxIso": "2026-07-21T13:02:03.252Z"
+    },
+    "occurrenceTimeCoverage": "61/61",
+    "occurrenceSecondsCoverage": "61/61",
+    "acceptedThumbnailOrCoverCoverage": "0/7",
+    "discoveryThumbnailCoverage": "7/7",
+    "acceptedFileHasThumbnailOrCoverFields": false,
+    "dirtyAuditDroppedVideoCount": 0,
+    "dirtyAuditDroppedOccurrenceCount": 0,
+    "dirtyAuditSuspiciousCount": 0,
+    "evidenceNotes": [
+      "Queue/pending files were not used as duplicate evidence.",
+      "Batch8 accepted file was parsed directly and matched NUROJUNK_OFFICIAL concrete accepted rows and song occurrences.",
+      "Batch8 manifest imported source stats matched the direct accepted JSON counts.",
+      "Batch8 dirty audit reported dropped 0 and suspicious 0."
+    ]
+  },
+  "dirtyAuditRules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ is not a standalone hard exclude; mark suspicious/drop only when no singing signal exists"
+  },
+  "runtime": {
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "macStatus": "Mac not used",
+    "remoteTempCreated": false,
+    "remoteStatus": "remote temp not created",
+    "elapsedSeconds": 0
+  },
+  "cleanup": {
+    "localTempDir": "G:\\codex-temp",
+    "localTempScript": "G:\\codex-temp\\generate-batch84-artifact.ps1",
+    "localTempScriptRemovedAfterRun": true,
+    "windowsLargeFileNote": "No large C/D/G cache, checkout, runtime DB, or source export was created; only five small artifact files are written under this batch artifact directory."
+  },
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}

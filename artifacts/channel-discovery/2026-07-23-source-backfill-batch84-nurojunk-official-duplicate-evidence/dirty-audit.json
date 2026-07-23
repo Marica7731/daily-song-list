@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "batchId": "2026-07-23-source-backfill-batch84-nurojunk-official-duplicate-evidence",
+  "generatedAt": "2026-07-23T07:29:27.111Z",
+  "source": "https://www.youtube.com/@NUROJUNK_OFFICIAL",
+  "channel": "NUROJUNK_OFFICIAL",
+  "status": "skipped_duplicate",
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ is not a standalone hard exclude; mark suspicious/drop only when no singing signal exists"
+  },
+  "batch8DirtyAudit": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 0,
+    "suspicious": [],
+    "termHitCounts": {},
+    "note": "Broad live/live terms are audited manually and are not applied blindly."
+  },
+  "thisBatch": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 0,
+    "suspicious": [],
+    "note": "No YouTube fetch or new candidate audit was started; batch8 dirty audit was reviewed for duplicate evidence."
+  }
+}
