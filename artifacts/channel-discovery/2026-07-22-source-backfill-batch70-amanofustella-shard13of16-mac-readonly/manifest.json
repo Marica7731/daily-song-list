@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-increment",
+  "batchId": "2026-07-22-source-backfill-batch70-amanofustella-shard13of16-mac-readonly",
+  "generatedAt": "2026-07-23T04:57:04.558Z",
+  "status": "success",
+  "statusMarker": "CODEX_BATCH70_SOURCE_BACKFILL_SUCCESS",
+  "result": {
+    "imported": 12,
+    "skipped": 0,
+    "failed": 0,
+    "success": true,
+    "accepted": 12,
+    "failureReason": ""
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "runnerCodeModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 13,
+    "inspectShardCount": 16
+  },
+  "precheck": {
+    "macRepo": "/Users/be/daily-song-list",
+    "macRepoHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "branch": "main",
+    "sourceFilterPath": "assets/source-filter.js",
+    "sourceFilterSizeBytes": 60415,
+    "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "node": "v20.20.2",
+    "npm": "10.8.2"
+  },
+  "discovery": {
+    "candidateCount": 225,
+    "inspectedCount": 14,
+    "usableVideoCount": 12,
+    "occurrenceCount": 114,
+    "reachedEnd": true,
+    "detailPublishedCoverage": "12/12",
+    "detailThumbnailCoverage": "12/12",
+    "discoveryThumbnailCoverage": "225/225",
+    "publishedTimestampRange": {
+      "min": 1690174389915,
+      "max": 1777006389915
+    },
+    "occurrenceSecondsRange": {
+      "min": 170,
+      "max": 22358
+    }
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 12,
+    "occurrences": 114,
+    "songs": 114,
+    "uniqueSongs": 107,
+    "publishedTimestampCoverage": "12/12",
+    "occurrenceTimeCoverage": "114/114",
+    "occurrenceSecondsCoverage": "114/114",
+    "acceptedIncrementThumbnailFieldCoverage": "12/12",
+    "publishedTimestampRange": {
+      "min": 1690174389915,
+      "max": 1777006389915
+    },
+    "occurrenceSecondsRange": {
+      "min": 170,
+      "max": 22358
+    }
+  },
+  "dirtyAudit": {
+    "schemaVersion": 1,
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": "live/ライブ is suspicious/drop only when missing singing signals: 歌枠, 歌, 弾き語り, karaoke, 歌ってみた",
+    "inputVideoCount": 12,
+    "inputOccurrenceCount": 114,
+    "keptVideoCount": 12,
+    "keptOccurrenceCount": 114,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "dropped": [],
+    "suspicious": []
+  },
+  "stageLog": [
+    {
+      "raw": "2026-07-23T04:51:28Z stage=mac-precheck status=started repo=/Users/be/daily-song-list"
+    },
+    {
+      "raw": "2026-07-23T04:51:29Z stage=mac-precheck status=ok repo=/Users/be/daily-song-list head=f1b0e8423e755b2c3b38a5288c98bca3e5d092cc branch=main sourceFilterSha256=bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103 sourceFilterSizeBytes=60415 node=v20.20.2 npm=10.8.2"
+    },
+    {
+      "raw": "2026-07-23T04:51:29Z stage=discovery status=started start=2026-07-23T04:51:29Z"
+    },
+    {
+      "raw": "2026-07-23T04:51:59Z stage=discovery status=waiting checkpoint=missing"
+    },
+    {
+      "raw": "2026-07-23T04:52:29Z stage=discovery status=waiting checkpoint=missing"
+    },
+    {
+      "raw": "2026-07-23T04:52:59Z stage=discovery status=waiting checkpoint=missing"
+    },
+    {
+      "raw": "2026-07-23T04:53:29Z stage=discovery status=checkpoint checkpointMtime=1784782407"
+    },
+    {
+      "raw": "2026-07-23T04:53:59Z stage=discovery status=checkpoint checkpointMtime=1784782417"
+    },
+    {
+      "raw": "2026-07-23T04:54:29Z stage=discovery status=checkpoint checkpointMtime=1784782466"
+    },
+    {
+      "raw": "2026-07-23T04:54:59Z stage=discovery status=checkpoint checkpointMtime=1784782480"
+    },
+    {
+      "raw": "2026-07-23T04:55:29Z stage=discovery status=checkpoint checkpointMtime=1784782525"
+    },
+    {
+      "raw": "2026-07-23T04:55:59Z stage=discovery status=checkpoint checkpointMtime=1784782550"
+    },
+    {
+      "raw": "2026-07-23T04:56:29Z stage=discovery status=checkpoint checkpointMtime=1784782587"
+    },
+    {
+      "raw": "2026-07-23T04:56:59Z stage=discovery status=checkpoint checkpointMtime=1784782605"
+    },
+    {
+      "raw": "2026-07-23T04:56:59Z stage=discovery status=ok CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=225 inspected=14 videos=12 occurrences=114 elapsedSeconds=317 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly/discovery\""
+    },
+    {
+      "raw": "2026-07-23T04:56:59Z stage=export status=started start=2026-07-23T04:56:59Z"
+    },
+    {
+      "raw": "2026-07-23T04:57:04Z stage=export status=ok CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=12 usableVideos=12 acceptedVideos=12 skippedRegressions=0 occurrences=114 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly/candidate-increment-unfiltered.json\""
+    },
+    {
+      "raw": "2026-07-23T04:57:04Z stage=postprocess status=started"
+    },
+    {
+      "stage": "dirty-audit",
+      "status": "ok"
+    },
+    {
+      "stage": "mac-copyback-staging-cleanup",
+      "status": "ok",
+      "marker": "CODEX_MAC_ALL_TEMP_CLEANED_OK originalRemoved=true stagingRemoved=true"
+    },
+    {
+      "stage": "windows-cleanup",
+      "status": "ok",
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK"
+    },
+    {
+      "stage": "candidate-only-reached-end-check",
+      "status": "ok",
+      "marker": "CODEX_REACHED_END_CHECK_OK candidateCount=225 reachedEnd=true pageSummaries=2"
+    },
+    {
+      "stage": "candidate-only-reached-end-cleanup",
+      "status": "ok",
+      "marker": "CODEX_REACHED_END_CHECK_CLEANUP_OK removed=true"
+    }
+  ],
+  "markers": {
+    "discovery": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@AmanofuStella\" candidates=225 inspected=14 videos=12 occurrences=114 elapsedSeconds=317 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly/discovery\"",
+    "export": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=12 usableVideos=12 acceptedVideos=12 skippedRegressions=0 occurrences=114 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly/candidate-increment-unfiltered.json\""
+  },
+  "timings": {
+    "discoveryElapsedSeconds": 337
+  },
+  "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly",
+  "requiredFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "cleanup": {
+    "mac": {
+      "marker": "CODEX_MAC_CLEANUP_OK",
+      "tempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch70-amanofustella-shard13of16-mac-readonly",
+      "removed": true,
+      "dfH": [
+        "CODEX_MAC_CLEANUP_OK removed=true",
+        "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+        "/dev/disk3s5   926Gi   202Gi   685Gi    23%    626k  7.2G    0%   /System/Volumes/Data",
+        "/dev/disk3s5   926Gi   202Gi   685Gi    23%    626k  7.2G    0%   /System/Volumes/Data"
+      ],
+      "copybackStagingRemoved": true,
+      "finalDfH": [
+        "CODEX_MAC_ALL_TEMP_CLEANED_OK originalRemoved=true stagingRemoved=true",
+        "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+        "/dev/disk3s5   926Gi   202Gi   685Gi    23%    626k  7.2G    0%   /System/Volumes/Data",
+        "/dev/disk3s5   926Gi   202Gi   685Gi    23%    626k  7.2G    0%   /System/Volumes/Data"
+      ],
+      "reachedEndCheck": {
+        "marker": "CODEX_REACHED_END_CHECK_CLEANUP_OK",
+        "removed": true,
+        "dfH": [
+          "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+          "/dev/disk3s5   926Gi   201Gi   686Gi    23%    622k  7.2G    0%   /System/Volumes/Data",
+          "/dev/disk3s5   926Gi   201Gi   686Gi    23%    622k  7.2G    0%   /System/Volumes/Data"
+        ]
+      }
+    },
+    "windows": {
+      "marker": "CODEX_WINDOWS_DISK_STATUS_OK",
+      "drives": {
+        "C": {
+          "root": "C:\\",
+          "usedBytes": 255745855488,
+          "freeBytes": 65393123328,
+          "tempUsed": false,
+          "accidentalTempCleaned": true
+        },
+        "D": {
+          "root": "D:\\",
+          "usedBytes": 470182408192,
+          "freeBytes": 9902866432,
+          "artifactWritten": true
+        },
+        "G": {
+          "root": "G:\\",
+          "usedBytes": 1362023006208,
+          "freeBytes": 686051774464,
+          "tempUsed": true,
+          "tempCleaned": true
+        }
+      }
+    }
+  }
+}

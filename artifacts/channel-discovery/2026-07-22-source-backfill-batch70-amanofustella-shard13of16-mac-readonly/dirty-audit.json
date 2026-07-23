@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "サクソフォン",
+    "sax",
+    "saxophone"
+  ],
+  "exactPhraseDropTerms": [
+    "piano streaming",
+    "piano performance",
+    "ピアノ演奏"
+  ],
+  "liveRule": "live/ライブ is suspicious/drop only when missing singing signals: 歌枠, 歌, 弾き語り, karaoke, 歌ってみた",
+  "inputVideoCount": 12,
+  "inputOccurrenceCount": 114,
+  "keptVideoCount": 12,
+  "keptOccurrenceCount": 114,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 0,
+  "dropped": [],
+  "suspicious": []
+}
