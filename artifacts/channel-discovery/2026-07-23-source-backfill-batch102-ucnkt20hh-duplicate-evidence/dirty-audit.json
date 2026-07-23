@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch102-ucnkt20hh-duplicate-evidence",
+  "generatedAt": "2026-07-23T18:10:33+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch10",
+  "filter": {
+    "handle": "UCnKt20HH_BiuID0FDHGMcvw",
+    "channelId": "UCnKt20HH_BiuID0FDHGMcvw",
+    "channelUrl": "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+    "rule": "Only UCnKt20HH_BiuID0FDHGMcvw is filtered from the batch10 dirty audit."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch10/dirty-audit.json",
+  "sourceBatchDroppedVideoCount": 54,
+  "sourceBatchDroppedOccurrenceCount": 840,
+  "sourceBatchSuspiciousCount": 5,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 1,
+  "suspiciousOccurrenceCount": 13,
+  "suspicious": [
+    {
+      "youtubeVideoId": "wRuvaDjDEs0",
+      "channel": "UCnKt20HH_BiuID0FDHGMcvw",
+      "videoTitle": "✦IMIバースデー3Dライブ2026✦お知らせ有り【IMI/RKMusic】#IMIBD2026",
+      "hits": [],
+      "broadHits": [
+        "ライブ"
+      ],
+      "occurrences": 13
+    }
+  ],
+  "termHitCounts": {
+    "flute": 54,
+    "live": 57,
+    "ライブ": 1
+  },
+  "suspiciousRetainedAfterManualAudit": true,
+  "note": "Batch10 dirty audit dropped 0 videos / 0 occurrences for this channel. One broad ライブ suspicious row was retained after manual audit."
+}
