@@ -4885,7 +4885,7 @@ mark {
   }
 
   .back-to-top {
-    bottom: calc(60px + env(safe-area-inset-bottom));
+    bottom: calc(var(--space-6) + 56px);
   }
 
   .toast,
