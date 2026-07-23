@@ -1,0 +1,117 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch83-omaru-piano-duplicate-evidence",
+  "generatedAt": "2026-07-23T07:21:25.7636489Z",
+  "status": "skipped_duplicate",
+  "reason": "batch22_imported_artifact_ready_already_exists",
+  "purpose": "duplicate/import-ready evidence for omaru_piano without starting YouTube discovery",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "onlyArtifactDirectoryModified": true,
+    "noCommit": true,
+    "noPush": true,
+    "noDeploy": true
+  },
+  "evidence": {
+    "batch22Status": "imported_artifact_ready",
+    "batch22AcceptedReadyForReview": true,
+    "batch22AcceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/accepted-increment.json",
+    "batch22Manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/manifest.json",
+    "batch22DirtyAuditSummary": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/dirty-audit-summary.json",
+    "batch22Report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/report.md"
+  },
+  "discovery": {
+    "candidatesAcrossShardRuns": 444,
+    "inspectedAcrossShardRuns": 111,
+    "candidateCountNote": "Shard-run repeated count, not unique channel candidates.",
+    "reachedEnd": true,
+    "completedShards": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "failedShards": [],
+    "pendingShards": []
+  },
+  "accepted": {
+    "videos": 18,
+    "occurrences": 64,
+    "uniqueSongs": 55,
+    "uniqueSongsNote": "Uses batch22 acceptedAfterDirtyAudit.songs reviewed consolidation count; local title-only/title+artist variants are not used as the reporting authority.",
+    "publishedTimestampCoverage": "18/18",
+    "publishedTimestampRange": {
+      "min": 1721630304044,
+      "max": 1779520570780
+    },
+    "occurrenceTimeCoverage": "64/64",
+    "occurrenceSecondsCoverage": "64/64",
+    "occurrenceSecondsRange": {
+      "min": 70,
+      "max": 6105
+    },
+    "acceptedIncrementThumbnailFieldCoverage": "0/18",
+    "discoveryThumbnailCoverage": "18/18"
+  },
+  "dirtyAudit": {
+    "sourceSummaryPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/dirty-audit-summary.json",
+    "droppedVideos": 20,
+    "droppedOccurrences": 64,
+    "suspiciousDroppedVideos": 4,
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "livePolicy": "live/ライブ is not a standalone hard exclusion; suspicious/drop only when no singing signal is present.",
+    "contextualDrops": [
+      "Session",
+      "セッション",
+      "合奏",
+      "雑談",
+      "ピアノ演奏リレー"
+    ]
+  },
+  "resolutionHistory": {
+    "earlierFailedBatches": [
+      "2026-07-22-source-backfill-batch12",
+      "2026-07-22-source-backfill-batch17"
+    ],
+    "resolvedByShards": [
+      "2026-07-22-source-backfill-batch18",
+      "2026-07-22-source-backfill-batch19",
+      "2026-07-22-source-backfill-batch20",
+      "2026-07-22-source-backfill-batch21"
+    ],
+    "consolidatedBy": "2026-07-22-source-backfill-batch22",
+    "note": "batch18 shard0 429 gap was resolved by batch21."
+  },
+  "runtime": {
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "remoteTempCreated": false,
+    "duration": "local evidence-only artifact generation; no discovery runtime",
+    "failureReason": null,
+    "tempCleanup": "No G:\\codex-temp working files retained after cleanup; no Mac or remote temp created.",
+    "largeFilePolicy": "No new large files intentionally created on Windows C:, D:, or G:; only small files in this artifact directory."
+  },
+  "artifacts": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  }
+}

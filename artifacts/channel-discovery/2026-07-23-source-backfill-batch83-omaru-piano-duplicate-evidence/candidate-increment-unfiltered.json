@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-candidate-increment-unfiltered",
+  "generatedAt": "2026-07-23T07:21:25.7636489Z",
+  "status": "skipped_duplicate",
+  "reason": "batch22_imported_artifact_ready_already_exists",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "youtubeFetchStarted": false,
+  "macUsed": false,
+  "remoteTempCreated": false,
+  "evidence": {
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/accepted-increment.json",
+    "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/manifest.json",
+    "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/report.md",
+    "dirtyAuditSummary": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/dirty-audit-summary.json"
+  },
+  "discoveryCountsFromBatch22": {
+    "candidatesAcrossShardRuns": 444,
+    "inspectedAcrossShardRuns": 111,
+    "usableVideoCount": 38,
+    "occurrenceCount": 128,
+    "note": "Candidate count is per shard run and repeats the same discovered candidate set; it is not unique channel candidates."
+  },
+  "shardStatus": {
+    "shardCount": 4,
+    "completedShards": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "failedShards": [],
+    "pendingShards": [],
+    "reachedEnd": true,
+    "completed": true
+  }
+}

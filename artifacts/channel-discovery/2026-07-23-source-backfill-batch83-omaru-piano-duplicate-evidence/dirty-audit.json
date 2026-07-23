@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T07:21:25.7636489Z",
+  "status": "skipped_duplicate",
+  "reason": "normalized_from_batch22_dirty_audit_summary",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "sourceSummaryPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/dirty-audit-summary.json",
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "Session",
+      "セッション",
+      "合奏",
+      "雑談",
+      "ピアノ演奏リレー"
+    ]
+  },
+  "policyNotes": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveTerms": "live/ライブ are not standalone hard exclusions; they are suspicious/drop only when there is no singing signal.",
+    "contextualDrops": [
+      "Session",
+      "セッション",
+      "合奏",
+      "雑談",
+      "ピアノ演奏リレー"
+    ]
+  },
+  "counts": {
+    "discoveryVideos": 38,
+    "discoveryOccurrences": 128,
+    "acceptedVideos": 18,
+    "acceptedOccurrences": 64,
+    "acceptedSongs": 55,
+    "droppedVideos": 20,
+    "droppedOccurrences": 64
+  },
+  "perBatch": [
+    {
+      "batch": 18,
+      "acceptedVideos": 8,
+      "droppedVideos": 6,
+      "unfilteredVideos": 14,
+      "unfilteredOccurrences": 50
+    },
+    {
+      "batch": 19,
+      "acceptedVideos": 6,
+      "droppedVideos": 5,
+      "unfilteredVideos": 11,
+      "unfilteredOccurrences": 38
+    },
+    {
+      "batch": 20,
+      "acceptedVideos": 3,
+      "droppedVideos": 5,
+      "unfilteredVideos": 8,
+      "unfilteredOccurrences": 15
+    },
+    {
+      "batch": 21,
+      "acceptedVideos": 1,
+      "droppedVideos": 4,
+      "unfilteredVideos": 5,
+      "unfilteredOccurrences": 25
+    }
+  ],
+  "droppedVideos": [
+    {
+      "videoId": "yG43hWSzETo",
+      "title": "【 虹をかけよう🌈#ライドリフェス歌枠リレー2026 】 開会式はこちらですーーーーー！！！【#澄音緒まる】",
+      "publishedTimestamp": 1782887904044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "opening ceremony for a song-relay event; not itself a clear singing stream",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "GA-MUVMan_I",
+      "title": "【#シェルまる奏】海月シェルクラファン応援ライブ／ストレッチゴールでライブ決定！！【#海月シェル #澄音緒まる 】",
+      "publishedTimestamp": 1776926304044,
+      "songCount": 6,
+      "status": "suspicious_dropped",
+      "reason": "promotional support live; title lacks explicit song stream signal",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "gTliXKmSFYw",
+      "title": "【#Vmusician演奏リレー 21:00~】ラストランナーおまる！皆を笑顔にするゾ！広がれVmusicianの輪！ゲスト：紅茶々丸(ピアノ)/柴音(フルート)/YAY(バンド)【#おまぴあ 】",
+      "publishedTimestamp": 1766558304044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "instrument performance relay with explicit フルート guest signal",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "4XyLxGkmwog",
+      "title": "【#Vtuber冬めく生演奏リレー】あなたを笑顔にするピアノ演奏／夢の共演もあるよ！！天音なみだ・姫宮レーニャ・紫吹真雪【#vtuber #おまる 】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "生演奏 relay and exact ピアノ演奏 phrase",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "HU8H2j8no-g",
+      "title": "【#コラボ】フルート＆ピアノ／#葉月ひな #おまる【#生演奏#Rainy season Concert】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 6,
+      "status": "dropped",
+      "reason": "フルート and 生演奏 signals indicate instrumental/performance content",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "WDNV26_OEsk",
+      "title": "【3Dライブ】星詠みの海／E.S TIKAL２【#cluster】",
+      "publishedTimestamp": 1690094333858,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "3Dライブ without explicit 歌枠 or singing signal in title",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "ABwvzd4R9RE",
+      "title": "【虹をかけよう🌈#ライドリフェス歌枠リレー2026 】ゲストあり？！ちょっとここらで合奏聴いていきませんか？【#澄音緒まる】",
+      "publishedTimestamp": 1782890170780,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "song-relay title but this stream asks viewers to listen to ensemble performance; not a clear singing frame",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "KsSGdH62b6o",
+      "title": "いよいよ明日！！クレリエールライブ前夜祭！！",
+      "publishedTimestamp": 1782112570780,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "live-eve event title without explicit song stream or singing signal",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "iT0KO80icjo",
+      "title": "【#ピアノ演奏】#色彩迎春2026 まであと4日／みんなの知ってるクラシック曲って何？【#おまぴあ】",
+      "publishedTimestamp": 1769152570780,
+      "songCount": 7,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; classical piano/instrument prompt",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "q1ALF90-b9Q",
+      "title": "【#記念】ついに！達成！！！1.5万人登録感謝します！【#relaxmusic #ピアノ演奏 #おまぴあ】",
+      "publishedTimestamp": 1753168570780,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; registration thank-you stream with relaxmusic/piano performance signal",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "9HYJIBqF1Vg",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】クラリネット＆ピアノ／昼間さな・おまる【コラボ】",
+      "publishedTimestamp": 1721632570780,
+      "songCount": 4,
+      "status": "dropped",
+      "reason": "instrument/non-song drop term: クラリネット",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "IEwi_xfMly8",
+      "title": "【#ピアノ演奏】おはようのかたもおやすみのかたも🎵ピアノ聴いていってください♡【#おまぴあ】",
+      "publishedTimestamp": 1771746647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; title asks listeners to hear piano",
+      "sourceBatch": 20
+    },
+    {
+      "videoId": "7NMH61hQFCU",
+      "title": "【#ピアノ演奏】#色彩迎春2026 まであと1日／いよいよ明日がコンサートです。チケットのご用意はいいですか？？【#おまぴあ】",
+      "publishedTimestamp": 1769154647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; concert countdown/piano content",
+      "sourceBatch": 20
+    },
+    {
+      "videoId": "bCKDWTMY_bY",
+      "title": "【#Vtuberピアノ演奏リレー Vol.3】澄みわたる空に響くピアノ～ラ・カンパネラ【#おまる #vtuber #おまぴあ 】",
+      "publishedTimestamp": 1761378647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "piano performance relay, not a singing frame",
+      "sourceBatch": 20
+    },
+    {
+      "videoId": "gtmIwbNRVpE",
+      "title": "【フルート＆ピアノ生演奏】桐朋×藝大Vtuberが贈る✨名曲だらけの夢コンサート 第一部【#おまる #かっぴー #vtuber】",
+      "publishedTimestamp": 1756194647178,
+      "songCount": 5,
+      "status": "dropped",
+      "reason": "フルート and 生演奏 signals indicate instrumental/performance content",
+      "sourceBatch": 20
+    },
+    {
+      "videoId": "50oAOJAx5Uw",
+      "title": "【#ピアノ#雑談】雑談が８割だからこそピアノ演奏の瞬間がトクベツなんだなって【#おまぴあ】",
+      "publishedTimestamp": 1753170647178,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "雑談-heavy stream with ピアノ演奏 signal; not a song frame",
+      "sourceBatch": 20
+    },
+    {
+      "videoId": "d5qKpkCaBrE",
+      "title": "【#vmusicianクレリエール 】ライブお疲れさまでした！ありがとうの会【#澄音緒まる 】",
+      "publishedTimestamp": 1782116995676,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "post-live thank-you event without explicit song stream signal",
+      "sourceBatch": 21
+    },
+    {
+      "videoId": "mhIJc6CBrUQ",
+      "title": "【#ピアノ演奏】piano performance🎶ピアノの音聴きませんか？？【#おまぴあ】",
+      "publishedTimestamp": 1771748995676,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: piano performance / ピアノ演奏",
+      "sourceBatch": 21
+    },
+    {
+      "videoId": "Yelk-d-9HNI",
+      "title": "【#まるまよの】 歌×サックス×ピアノSession🎶叫べ、アオハル！！！夏の曲！！！【#おまる #朔栖まよ #ヨノ】",
+      "publishedTimestamp": 1753172995676,
+      "songCount": 10,
+      "status": "dropped",
+      "reason": "サックス and Session signal; mixed performance/session rather than clear song frame",
+      "sourceBatch": 21
+    },
+    {
+      "videoId": "nv5zH2e5biw",
+      "title": "【#Vtuber初夏の生演奏リレー 】目指せトレンド入り！気分爽快なクラシックなどなどいろんな曲をお届けします♪【おまる /#ピアノ #vtuber 】",
+      "publishedTimestamp": 1721636995676,
+      "songCount": 7,
+      "status": "dropped",
+      "reason": "生演奏 relay and classical/instrument performance framing",
+      "sourceBatch": 21
+    }
+  ],
+  "suspicious": [
+    {
+      "videoId": "GA-MUVMan_I",
+      "title": "【#シェルまる奏】海月シェルクラファン応援ライブ／ストレッチゴールでライブ決定！！【#海月シェル #澄音緒まる 】",
+      "publishedTimestamp": 1776926304044,
+      "songCount": 6,
+      "status": "suspicious_dropped",
+      "reason": "promotional support live; title lacks explicit song stream signal",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "WDNV26_OEsk",
+      "title": "【3Dライブ】星詠みの海／E.S TIKAL２【#cluster】",
+      "publishedTimestamp": 1690094333858,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "3Dライブ without explicit 歌枠 or singing signal in title",
+      "sourceBatch": 18
+    },
+    {
+      "videoId": "KsSGdH62b6o",
+      "title": "いよいよ明日！！クレリエールライブ前夜祭！！",
+      "publishedTimestamp": 1782112570780,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "live-eve event title without explicit song stream or singing signal",
+      "sourceBatch": 19
+    },
+    {
+      "videoId": "d5qKpkCaBrE",
+      "title": "【#vmusicianクレリエール 】ライブお疲れさまでした！ありがとうの会【#澄音緒まる 】",
+      "publishedTimestamp": 1782116995676,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "post-live thank-you event without explicit song stream signal",
+      "sourceBatch": 21
+    }
+  ]
+}
