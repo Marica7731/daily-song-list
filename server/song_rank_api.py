@@ -1761,6 +1761,7 @@ def filtered_occurrence_payloads(
           AND {key_clause}
           AND {occurrence_filter}
         ORDER BY o.rowid
+        LIMIT 21
         """,
         (range_id, *key_params),
     ).fetchall()

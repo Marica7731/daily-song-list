@@ -301,6 +301,7 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           is_niche INTEGER NOT NULL DEFAULT 0,
           payload_json TEXT NOT NULL
         );
+        CREATE INDEX idx_songs_title_artist ON songs(title, artist, song_key);
 
         CREATE TABLE occurrences (
           occurrence_id TEXT PRIMARY KEY,
