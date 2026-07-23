@@ -209,8 +209,8 @@ function buildClientVideo(item) {
     videoId: item.videoId || "",
     title: item.title || "",
     channelName: item.channelName || "",
-    channelId: item.channelId || "",
-    channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
+    channelId: item.channelId || channelIdFromChannelText(item.channelName),
+    channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelName) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
     channelUrl: item.channelUrl || item.authorUrl || item.ownerUrl || "",
     avatarUrl: item.avatarUrl || item.channelAvatarUrl || "",
     sourceUrl: item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl || "",
@@ -1624,13 +1624,23 @@ function channelRecordKey(item, identityLookup = null) {
 }
 
 function directChannelRecordKey(item) {
-  const channelId = cleanText(item?.channelId);
+  const channelId = cleanText(item?.channelId) || channelIdFromChannelText(item?.channelName);
   if (channelId) return channelId;
-  const handle = cleanChannelHandle(item?.channelHandle).replace(/^\/+/, "");
+  const handle = (cleanChannelHandle(item?.channelHandle) || cleanChannelHandle(item?.channelName)).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
   const urlHandle = handleFromChannelUrl(item?.channelUrl || item?.authorUrl || item?.ownerUrl);
   if (urlHandle) return normalizeSearchText(urlHandle);
   return "";
+}
+
+function channelIdFromChannelText(value) {
+  const text = cleanText(value);
+  const direct = text.match(/^UC[A-Za-z0-9_-]{20,}$/u);
+  if (direct) return direct[0];
+  const path = text.match(/^\/channel\/(UC[A-Za-z0-9_-]{20,})$/u);
+  if (path) return path[1];
+  const url = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/channel\/(UC[A-Za-z0-9_-]{20,})(?:[/?#]|$)/iu);
+  return url ? url[1] : "";
 }
 
 function handleFromChannelUrl(value) {
@@ -1645,8 +1655,8 @@ function channelNameIdentityKey(item) {
 
 function mergeChannelRecordIdentity(record, item) {
   const channelName = cleanText(item.channelName);
-  const channelId = cleanText(item.channelId);
-  const channelHandle = cleanChannelHandle(item.channelHandle);
+  const channelId = cleanText(item.channelId) || channelIdFromChannelText(channelName);
+  const channelHandle = cleanChannelHandle(item.channelHandle) || cleanChannelHandle(channelName);
   const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
   const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);

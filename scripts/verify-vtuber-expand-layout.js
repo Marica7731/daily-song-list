@@ -6,8 +6,8 @@ const path = require("node:path");
 const rootDir = process.cwd();
 const externalBaseUrl = process.argv.slice(2).find((arg) => /^https?:\/\//u.test(arg));
 const viewports = [
-  { name: "mobile-390", width: 390, height: 844, expectedColumns: 1, expectedPageSize: 20 },
-  { name: "mobile-320", width: 320, height: 700, expectedColumns: 1, expectedPageSize: 20 },
+  { name: "mobile-390", width: 390, height: 844, expectedColumns: 2, expectedPageSize: 20 },
+  { name: "mobile-320", width: 320, height: 700, expectedColumns: 2, expectedPageSize: 20 },
   { name: "desktop-1365", width: 1365, height: 768, expectedColumns: 3, expectedPageSize: 30 },
 ];
 

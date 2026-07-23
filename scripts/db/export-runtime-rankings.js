@@ -595,7 +595,7 @@ function hydrateRuntimeItemChannelIdentity(item, identityLookup) {
   const record = key ? identityLookup.keyToRecord.get(key) : null;
   if (!record) return item;
   const channelName = preferredChannelDisplayName(item.channelName, record.channelName || record.name);
-  const channelHandle = cleanChannelHandle(item.channelHandle) || record.channelHandle || "";
+  const channelHandle = cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelName) || record.channelHandle || "";
   const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl) || record.channelUrl || "";
   const recordAliases = record.aliases instanceof Set ? Array.from(record.aliases.values()) : record.aliases || [];
   return {
@@ -768,13 +768,23 @@ function channelRecordKey(item, identityLookup = null) {
 }
 
 function directChannelRecordKey(item) {
-  const channelId = RankingUtils.cleanText(item.channelId);
+  const channelId = RankingUtils.cleanText(item.channelId) || channelIdFromChannelText(item.channelName);
   if (channelId) return channelId;
-  const handle = cleanChannelHandle(item.channelHandle).replace(/^\/+/, "");
+  const handle = (cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelName)).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
   const urlHandle = handleFromChannelUrl(item.channelUrl || item.authorUrl || item.ownerUrl);
   if (urlHandle) return normalizeSearchText(urlHandle);
   return "";
+}
+
+function channelIdFromChannelText(value) {
+  const text = RankingUtils.cleanText(value);
+  const direct = text.match(/^UC[A-Za-z0-9_-]{20,}$/u);
+  if (direct) return direct[0];
+  const path = text.match(/^\/channel\/(UC[A-Za-z0-9_-]{20,})$/u);
+  if (path) return path[1];
+  const url = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/channel\/(UC[A-Za-z0-9_-]{20,})(?:[/?#]|$)/iu);
+  return url ? url[1] : "";
 }
 
 function handleFromChannelUrl(value) {
@@ -795,8 +805,8 @@ function isCompositeChannelName(value) {
 
 function mergeChannelRecordIdentity(record, item) {
   const channelName = RankingUtils.cleanText(item.channelName);
-  const channelId = RankingUtils.cleanText(item.channelId);
-  const channelHandle = cleanChannelHandle(item.channelHandle);
+  const channelId = RankingUtils.cleanText(item.channelId) || channelIdFromChannelText(channelName);
+  const channelHandle = cleanChannelHandle(item.channelHandle) || cleanChannelHandle(channelName);
   const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
   const avatarUrl = RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);

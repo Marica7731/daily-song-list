@@ -383,7 +383,7 @@ test("top filter chips and search box avoid duplicate clear controls and empty c
   assert.match(functionBody("function syncQueryClearButton"), /els\.querySearchForm\?\.classList\.toggle\("has-query-text", hasQuery\)/u);
   assert.match(stylesSource, /\.query-search-form \{[\s\S]*grid-template-columns: minmax\(240px, 1fr\) auto;/u);
   assert.match(stylesSource, /\.query-input-shell \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) 28px;/u);
-  assert.match(stylesSource, /\.query-input-shell input\[type="search"\]::-ms-clear/u);
+  assert.doesNotMatch(stylesSource, /\.query-input-shell input\[type="search"\]/u);
   assert.match(stylesSource, /\.active-query-chip-close \{[\s\S]*flex: 0 0 auto;/u);
   assert.doesNotMatch(stylesSource, /query-count|query-field-menu/u);
   assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-input-shell\s*\{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px;/u);

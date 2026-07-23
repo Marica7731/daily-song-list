@@ -98,6 +98,31 @@ test("buildClientGroup removes channel URL paths from handles and aliases", () =
   assert.deepEqual(group.items[0].channelAliases, ["Channel Alias"]);
 });
 
+test("buildClientGroup derives channel identity fields from bare channel-name paths", () => {
+  const channelId = "UCnKt20HH_BiuID0FDHGMcvw";
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "HANDLEPATH1",
+        title: "handle path video",
+        channelName: "/@real_handle",
+        songs: [{ seconds: 1, title: "Song A", artist: "Artist A" }],
+      },
+      {
+        videoId: "CHANNELPATH",
+        title: "channel path video",
+        channelName: `/channel/${channelId}`,
+        songs: [{ seconds: 2, title: "Song B", artist: "Artist B" }],
+      },
+    ],
+  });
+
+  assert.equal(group.items[0].channelHandle, "/@real_handle");
+  assert.equal(group.items[1].channelId, channelId);
+});
+
 test("buildClientGroup treats moment sources as not collected even with stale flags", () => {
   const group = buildClientGroup({
     id: "all",

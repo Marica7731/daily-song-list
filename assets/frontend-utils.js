@@ -935,9 +935,11 @@
   function groupOccurrencesByVideo(occurrences) {
     const sourceOccurrences = Array.isArray(occurrences) ? occurrences : [];
     const channelIdentityLookup = buildChannelIdentityLookup(sourceOccurrences);
+    const songArtistLookup = buildSourceSongArtistLookup(sourceOccurrences);
     const groups = new Map();
     for (let occurrence of sourceOccurrences) {
       if (!occurrence) continue;
+      occurrence = hydrateSourceOccurrenceSongArtist(occurrence, songArtistLookup);
       const item = hydrateSourceItemChannelIdentity(occurrence.item || {}, channelIdentityLookup);
       const key = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}` || "unknown";
       if (!groups.has(key)) {
@@ -1010,6 +1012,56 @@
     return lookup;
   }
 
+  function buildSourceSongArtistLookup(occurrences) {
+    const records = new Map();
+    for (const occurrence of occurrences || []) {
+      const song = occurrence?.song || {};
+      const artist = cleanText(song.artist);
+      if (!artist || isUnknownArtistKey(normalizeSongSearchText(artist))) continue;
+      for (const key of sourceSongTitleKeys(song.title)) {
+        if (!records.has(key)) records.set(key, new Map());
+        const artists = records.get(key);
+        const artistKey = normalizeSongSearchText(artist);
+        if (!artists.has(artistKey)) artists.set(artistKey, { name: artist, count: 0 });
+        artists.get(artistKey).count += 1;
+      }
+    }
+    const lookup = new Map();
+    for (const [key, artists] of records) {
+      const winner = Array.from(artists.values())
+        .sort((a, b) => b.count - a.count || compareValues(a.name, b.name))[0];
+      if (winner?.name) lookup.set(key, winner.name);
+    }
+    return lookup;
+  }
+
+  function hydrateSourceOccurrenceSongArtist(occurrence, lookup) {
+    if (!lookup?.size) return occurrence;
+    const song = occurrence?.song || {};
+    const artist = cleanText(song.artist);
+    if (!isUnknownArtistKey(normalizeSongSearchText(artist))) return occurrence;
+    const fallbackArtist = sourceSongTitleKeys(song.title).map((key) => lookup.get(key)).find(Boolean);
+    if (!fallbackArtist) return occurrence;
+    return {
+      ...occurrence,
+      song: {
+        ...song,
+        artist: fallbackArtist,
+      },
+    };
+  }
+
+  function sourceSongTitleKeys(title) {
+    const keys = new Set();
+    const rankingTitleKey = globalThis.RankingUtils?.normalizeSongTitleKey?.(title);
+    if (rankingTitleKey) keys.add(rankingTitleKey);
+    for (const candidate of songSearchTitleTextCandidates(title)) {
+      const key = normalizeSongSearchText(candidate);
+      if (key) keys.add(key);
+    }
+    return Array.from(keys);
+  }
+
   function hydrateSourceItemChannelIdentity(item, lookup) {
     const name = cleanText(item.channelName);
     const identity = channelIdentityKeysForItem(item).map((key) => lookup?.get?.(key)).find(Boolean);
@@ -1053,12 +1105,17 @@
   }
 
   function channelIdentityKeysForItem(item = {}) {
-    return channelIdentityKeysForIdentity({
-      channelName: cleanText(item.channelName),
-      channelId: cleanText(item.channelId),
-      channelHandle: cleanChannelHandle(item.channelHandle),
+    return channelIdentityKeysForIdentity(channelIdentityForItem(item));
+  }
+
+  function channelIdentityForItem(item = {}) {
+    const channelName = cleanText(item.channelName);
+    return {
+      channelName,
+      channelId: cleanText(item.channelId) || channelIdFromChannelText(channelName),
+      channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(channelName),
       channelUrl: youtubeChannelSourceUrl(item),
-    });
+    };
   }
 
   function channelIdentityKeysForIdentity(identity = {}) {
@@ -1090,6 +1147,16 @@
   function isChannelPathAlias(value) {
     const text = cleanText(value).toLocaleLowerCase();
     return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
+  }
+
+  function channelIdFromChannelText(value) {
+    const text = cleanText(value);
+    const direct = text.match(/^UC[A-Za-z0-9_-]{20,}$/u);
+    if (direct) return direct[0];
+    const path = text.match(/^\/channel\/(UC[A-Za-z0-9_-]{20,})$/u);
+    if (path) return path[1];
+    const url = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/channel\/(UC[A-Za-z0-9_-]{20,})(?:[/?#]|$)/iu);
+    return url ? url[1] : "";
   }
 
   function uniqueCleanTexts(values) {
@@ -1291,9 +1358,11 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
+      const videoCount = Math.max(0, Number(options.videoCount) || 0);
+      const text = videoCount ? `${songCount}首\n${videoCount}视频` : `${songCount}首歌`;
       return {
-        text: isExpanded ? "收起" : "展开",
-        ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲`,
+        text: isExpanded ? "收起" : text,
+        ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲${videoCount ? `、${videoCount} 个视频` : ""}`,
       };
     }
 

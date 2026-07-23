@@ -6692,12 +6692,18 @@ function renderRankSide({
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount, videoCount, rankCount, rankMetric }));
     } else {
-      side.append(renderStaticSideChip(mode === "vtuber" ? `${songCount}首歌` : `${songCount}首曲目`));
+      side.append(renderStaticSideChip(mode === "vtuber" ? vtuberSideSummaryText(songCount, videoCount) : `${songCount}首曲目`));
     }
     return side;
   }
 
   return side;
+}
+
+function vtuberSideSummaryText(songCount = 0, videoCount = 0) {
+  const songs = Math.max(0, Number(songCount) || 0);
+  const videos = Math.max(0, Number(videoCount) || 0);
+  return videos ? `${songs}首\n${videos}视频` : `${songs}首歌`;
 }
 
 function renderStaticSideChip(text) {

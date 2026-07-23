@@ -294,27 +294,6 @@ button {
   color: var(--muted);
 }
 
-.query-input-shell input[type="search"] {
-  -webkit-appearance: none;
-  appearance: textfield;
-}
-
-.query-input-shell input[type="search"]::-webkit-search-cancel-button,
-.query-input-shell input[type="search"]::-webkit-search-decoration,
-.query-input-shell input[type="search"]::-webkit-search-results-button,
-.query-input-shell input[type="search"]::-webkit-search-results-decoration {
-  -webkit-appearance: none;
-  appearance: none;
-  display: none;
-}
-
-.query-input-shell input[type="search"]::-ms-clear,
-.query-input-shell input[type="search"]::-ms-reveal {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
 .query-search-form .clear-query-button {
   position: static;
   width: 28px;
@@ -4270,6 +4249,15 @@ mark {
     font-weight: 700;
   }
 
+  .rank-row-vtuber .rank-expand {
+    min-height: 34px;
+    padding: 3px 5px;
+    gap: 3px;
+    white-space: pre-line;
+    line-height: 1.12;
+    font-size: 10.5px;
+  }
+
   .rank-expand:hover,
   .is-expanded .rank-expand {
     border-color: transparent;
@@ -4383,30 +4371,33 @@ mark {
 
   .artist-song-drawer[data-source-mode="vtuber"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 98px;
-    gap: 7px;
+    grid-auto-rows: 78px;
+    gap: 6px;
   }
 
   .artist-song-group-vtuber {
-    min-height: 98px;
-    padding: 7px;
+    min-height: 0;
+    height: 100%;
+    padding: 6px;
   }
 
   .artist-song-group-vtuber:last-child {
-    padding: 7px;
+    padding: 6px;
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr);
     grid-template-areas:
       "thumb title"
       "thumb actions";
     align-items: start;
-    gap: 4px 6px;
+    gap: 3px 6px;
+    min-height: 0;
+    height: 100%;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 44px;
+    width: 46px;
     align-self: start;
   }
 
@@ -4419,8 +4410,8 @@ mark {
 
   .artist-song-group-vtuber .artist-song-title {
     display: -webkit-box;
-    font-size: 12px;
-    line-height: 1.25;
+    font-size: 11.5px;
+    line-height: 1.22;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     white-space: normal;
@@ -4428,7 +4419,7 @@ mark {
 
   .artist-song-group-vtuber .artist-song-artist {
     display: block;
-    font-size: 10.5px;
+    font-size: 10px;
     text-align: left;
   }
 
@@ -4445,11 +4436,11 @@ mark {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    min-height: 22px;
+    min-height: 18px;
     border-radius: 0;
     background: transparent;
     color: var(--muted);
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     line-height: 1.2;
   }
@@ -4805,6 +4796,13 @@ mark {
     font-size: 11px;
   }
 
+  .rank-row-vtuber .rank-expand {
+    min-height: 32px;
+    padding: 3px 4px;
+    gap: 2px;
+    font-size: 10px;
+  }
+
   .source-inline-item {
     grid-template-columns: 40px minmax(0, 1fr) 24px;
   }
@@ -4910,12 +4908,12 @@ mark {
   }
 
   .artist-song-drawer[data-source-mode="vtuber"] {
-    grid-auto-rows: 96px;
+    grid-auto-rows: 74px;
     gap: 5px;
   }
 
   .artist-song-group-vtuber {
-    min-height: 96px;
+    min-height: 0;
     padding: 6px;
   }
 

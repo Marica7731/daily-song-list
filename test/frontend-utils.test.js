@@ -213,12 +213,12 @@ test("artist rank toggle uses unique song count", () => {
 });
 
 test("VTuber channel rank toggle shows singing and unique song counts", () => {
-  const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, rankCount: 21 });
-  assert.equal(collapsed.text, "展开");
-  assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲");
+  const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, rankCount: 21, videoCount: 4 });
+  assert.equal(collapsed.text, "7首\n4视频");
+  assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲、4 个视频");
 
   const songMetric = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, occurrenceCount: 21, rankMetric: "songs", rankCount: 7 });
-  assert.equal(songMetric.text, "展开");
+  assert.equal(songMetric.text, "7首歌");
   assert.equal(songMetric.ariaLabel, "查看该频道的 7 首歌曲");
 
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, rankCount: 21, videoCount: 4 });
@@ -226,7 +226,7 @@ test("VTuber channel rank toggle shows singing and unique song counts", () => {
   assert.equal(expanded.ariaLabel, "收起该频道歌曲");
 
   const compact = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 123, compact: true });
-  assert.equal(compact.text, "展开");
+  assert.equal(compact.text, "123首歌");
 });
 
 test("VTuber collection badge model tolerates missing backend fields", () => {
@@ -519,6 +519,39 @@ test("groups source occurrences do not promote bare channel ids as display names
   assert.deepEqual(groups.map((group) => group.channelName), ["IMI", "IMI"]);
   assert.equal(groups.every((group) => group.item.channelId === channelId), true);
   assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), channelId).length, 2);
+});
+
+test("groups source occurrences infer unknown artists from same-title known songs", () => {
+  const rawOccurrences = [
+    occurrence("FLOWER00001", "Flower Ch.", { title: "花になって", artist: "未記載", seconds: 20 }),
+    occurrence("FLOWER00002", "Flower Ch.", { title: "花になって", artist: "緑黄色社会", seconds: 10 }),
+  ];
+
+  const groups = groupOccurrencesByVideo(rawOccurrences);
+  const repaired = groups
+    .flatMap((group) => group.occurrences)
+    .find((groupOccurrence) => groupOccurrence.item.videoId === "FLOWER00001");
+
+  assert.equal(repaired.song.artist, "緑黄色社会");
+  assert.equal(rawOccurrences[0].song.artist, "未記載");
+});
+
+test("groups source occurrences treat bare handle names as channel identities", () => {
+  const groups = groupOccurrencesByVideo([
+    occurrence("HANDLE00001", "/@real_handle", { seconds: 30 }, {
+      channelId: "",
+      channelHandle: "",
+      channelUrl: "",
+    }),
+    occurrence("HANDLE00002", "Real Channel", { seconds: 60 }, {
+      channelHandle: "/@real_handle",
+      channelUrl: "https://www.youtube.com/@real_handle",
+    }),
+  ]);
+
+  assert.deepEqual(groups.map((group) => group.channelName), ["Real Channel", "Real Channel"]);
+  assert.equal(groups.every((group) => group.item.channelHandle === "/@real_handle"), true);
+  assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), "@real_handle").length, 2);
 });
 
 test("builds whole-video setlist text from original songs", () => {

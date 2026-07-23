@@ -8,6 +8,7 @@ const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.c
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
+const vtuberLayoutSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-vtuber-expand-layout.js"), "utf8");
 
 function cssBlock(selector) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -32,9 +33,8 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title" checked[\s\S]*name="searchField" value="artist" checked[\s\S]*name="searchField" value="channel" checked[\s\S]*name="searchField" value="video"/u);
   assert.doesNotMatch(indexSource, /queryCountBadge|query-field-menu|query-count/u);
   assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
-  assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
-  assert.match(cssSource, /\.query-input-shell input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
-  assert.match(cssSource, /\.query-input-shell input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;/u);
+  assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="text"[\s\S]*id="clearQueryButton"/u);
+  assert.doesNotMatch(cssSource, /\.query-input-shell input\[type="search"\]/u);
   assert.match(cssSource, /\.query-submit-button\s*\{[\s\S]*cursor: pointer;/u);
   assert.match(cssSource, /\.query-search-form \.clear-query-button\s*\{[\s\S]*position: static;[\s\S]*width: 28px;[\s\S]*height: 28px;/u);
   assert.match(cssBlock(".query-field-bar"), /grid-template-columns: repeat\(4, minmax\(48px, auto\)\)/u);
@@ -180,6 +180,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
+  assert.match(indexSource, /<input id="queryInput" type="text" autocomplete="off"/u);
+  assert.doesNotMatch(indexSource, /<input id="queryInput" type="search"/u);
   assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"/u);
   assert.match(cssSource, /\.query-field-toggle\.is-selected,[\s\S]*\.query-field-toggle:has\(input:checked\)\s*\{[\s\S]*background: var\(--accent-soft\);/u);
   assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
@@ -222,12 +224,19 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(functionBody("function sourceSongKeyForGroup"), /canonicalWorkTitleKey/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /function vtuberSideSummaryText/u);
+  assert.match(appSource, /vtuberSideSummaryText\(songCount, videoCount\)/u);
   const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
   assert.match(vtuberTitleLineBlock, /display: contents;/u);
   assert.doesNotMatch(vtuberTitleLineBlock, /grid-template-columns/u);
   assert.match(cssSource, /\.vtuber-display-image\s*\{[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-display-link\s*\{[\s\S]*grid-area: image;[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-title-link:hover\s*\{[\s\S]*text-decoration: underline;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: 78px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: 74px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*white-space: pre-line;[\s\S]*line-height: 1\.12;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*font-size: 10px;/u);
+  assert.match(vtuberLayoutSource, /mobile-390[\s\S]*expectedColumns: 2[\s\S]*mobile-320[\s\S]*expectedColumns: 2/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
