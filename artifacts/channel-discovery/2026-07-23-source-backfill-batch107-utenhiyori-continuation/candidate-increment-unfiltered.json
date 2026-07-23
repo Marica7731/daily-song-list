@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_pending_candidate_increment",
+  "batchId": "2026-07-23-source-backfill-batch107-utenhiyori-continuation",
+  "generatedAt": "2026-07-23T19:11:24+08:00",
+  "status": "pending_partial",
+  "reason": "mac_continuation_timed_out_before_complete_manifest",
+  "candidateCount": 337,
+  "inspectedCheckpointCount": 45,
+  "usableCheckpointDetails": 30,
+  "occurrenceCheckpointCount": 631,
+  "candidates": [],
+  "videos": [],
+  "note": "Candidate rows are not duplicated here; use mac-checkpoint.json to resume."
+}

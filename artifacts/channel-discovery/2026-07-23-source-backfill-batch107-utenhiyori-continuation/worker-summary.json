@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-07-23T11:08:43.188Z",
+  "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@UtenHiyori --singer-name UtenHiyori --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch107-utenhiyori-continuation --max-channel-pages 20 --max-candidates 0 --max-inspect 260 --request-interval-ms 3000 --request-jitter-ms 1000",
+  "timeoutMs": 600000,
+  "exitCode": 124,
+  "timedOut": true,
+  "marker": null,
+  "status": "pending_partial",
+  "completeForImport": false,
+  "macTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch107-utenhiyori-continuation",
+  "needsMainSessionCleanup": true,
+  "cleanupPerformed": false,
+  "processCheck": {
+    "checkedAfterStop": true,
+    "discoveryStillRunning": false
+  },
+  "outputFiles": {
+    "manifestPresent": false,
+    "videoDetailsPresent": false,
+    "checkpointSnapshotPath": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-23-source-backfill-batch107-utenhiyori-continuation\\checkpoint.snapshot.json"
+  },
+  "checkpoint": {
+    "schemaVersion": 1,
+    "channelUrl": "https://www.youtube.com/@UtenHiyori",
+    "singerName": "UtenHiyori",
+    "updatedAt": "2026-07-23T11:06:22.963Z",
+    "candidateCount": 337,
+    "detailCount": 30,
+    "inspectedInLatestRun": 45,
+    "completedVideoIdsCount": 30,
+    "completedVideoIds": [
+      "0JDod4XngPU",
+      "2WniPKx-UXA",
+      "4JM7U5rs0WE",
+      "4O72ABrckAo",
+      "5i_noKo66Xo",
+      "5oHQA3CLx7Y",
+      "7xFiNc-4_eE",
+      "C4Tz0BJ6XyQ",
+      "EJLvkYtOyYA",
+      "F6H_HEr3Q1s",
+      "Ib40Ct24vBU",
+      "KcwPl2fwz3E",
+      "NZjX_zjg0-w",
+      "P9bqG9VeVu8",
+      "TpSZdd-3Yc0",
+      "VmU3qlqcDHY",
+      "a0d38H21g4Y",
+      "bGs6J2RimB4",
+      "cYBsHUsgPWg",
+      "edtOjGKceNs",
+      "i7C1Nk0Acbw",
+      "lABLoKn4WTU",
+      "nr_9cBNPz4c",
+      "rBlDs-dT9LQ",
+      "vBTf17YQTFo",
+      "viYIB3yHr50",
+      "vo2Oi6DzfQQ",
+      "w9ZcC7rssM8",
+      "xQyp8JuF3nU",
+      "yuFN2agJ5zc"
+    ],
+    "detailsArrayCount": 30,
+    "occurrenceCount": 635,
+    "sourceCount": 30,
+    "sourceUrlCount": 1,
+    "publishedCoverage": {
+      "count": 30,
+      "min": 1753267040980,
+      "max": 1779618541256,
+      "minIso": "2025-07-23T10:37:20.980Z",
+      "maxIso": "2026-05-24T10:29:01.256Z"
+    },
+    "durationSecondsCoverage": {
+      "count": 30,
+      "min": 2418,
+      "max": 42845
+    },
+    "occurrenceSecondsCoverage": {
+      "count": 635,
+      "min": 160,
+      "max": 42360
+    }
+  }
+}

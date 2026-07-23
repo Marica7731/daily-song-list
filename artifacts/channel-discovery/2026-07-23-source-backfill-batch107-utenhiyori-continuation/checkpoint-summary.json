@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube_channel_discovery_checkpoint_summary",
+  "batchId": "2026-07-23-source-backfill-batch107-utenhiyori-continuation",
+  "generatedAt": "2026-07-23T19:11:24+08:00",
+  "source": "UtenHiyori",
+  "status": "pending_partial",
+  "macTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch107-utenhiyori-continuation",
+  "checkpointFile": "mac-checkpoint.json",
+  "candidateCount": 337,
+  "detailCount": 30,
+  "inspectedInLatestRun": 45,
+  "completedVideoIdsCount": 30,
+  "occurrenceCount": 631,
+  "publishedTimestampCoverage": "30/30",
+  "occurrenceTimeCoverage": "631/631",
+  "occurrenceSecondsCoverage": "631/631",
+  "minPublishedIso": "2025-07-23T10:37:20.98Z",
+  "maxPublishedIso": "2026-05-24T10:29:01.256Z",
+  "updatedAt": "2026-07-23T11:06:22.963Z",
+  "note": "Bounded continuation timed out before final discovery marker or manifest; checkpoint retained for a later continuation. Worker summary reported 635 occurrences, but direct mac-checkpoint details sum to 631 and are authoritative here."
+}
