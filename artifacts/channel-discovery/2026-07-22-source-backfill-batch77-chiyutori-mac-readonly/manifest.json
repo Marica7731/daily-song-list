@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T06:33:39.692Z",
+  "batchId": "2026-07-22-source-backfill-batch77-chiyutori-mac-readonly",
+  "channelUrl": "https://www.youtube.com/@Chiyutori",
+  "singerName": "Chiyutori",
+  "status": "skipped_duplicate",
+  "imported": 0,
+  "skipped": 1,
+  "failed": 0,
+  "failureReason": "",
+  "skipReason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateEvidence": {
+    "status": "verified_concrete_accepted_artifact",
+    "artifactDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/accepted/2026-07-22-source-backfill-batch7.accepted.json",
+    "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/accepted/2026-07-22-source-backfill-batch7.raw-export.json",
+    "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/report.md",
+    "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/manifest.json",
+    "channelUrl": "https://www.youtube.com/@Chiyutori",
+    "channelHandle": "/@Chiyutori",
+    "sourceType": "youtube_channel_discovery accepted increment",
+    "existingStatus": "imported",
+    "existingVideos": 27,
+    "existingOccurrences": 909,
+    "existingUniqueSongs": 459,
+    "candidateCount": 29,
+    "inspectedCount": 29,
+    "usableVideoCount": 28,
+    "discoveryOccurrenceCount": 967,
+    "reachedEnd": true,
+    "elapsedSeconds": 439,
+    "publishedTimestampCoverage": "27/27",
+    "occurrenceTimeCoverage": "909/909",
+    "occurrenceSecondsCoverage": "909/909",
+    "acceptedThumbnailUrlCoverage": "0/27",
+    "discoveryThumbnailCoverage": "27/27",
+    "skippedExistingRegressionVideoIds": [
+      "XMTT-zzGBqw"
+    ],
+    "note": "Batch1-8 queue-manifest hits were not used as skip evidence; this skip is based on batch7 concrete accepted export plus report and discovery manifest."
+  },
+  "kind": "source-backfill-batch-manifest",
+  "scope": "batch77 bounded single-channel worker for Chiyutori; skipped because batch7 already contains a concrete accepted artifact",
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "report": "report.md"
+  },
+  "stats": {
+    "imported": 0,
+    "skipped": 1,
+    "failed": 0,
+    "candidateCount": 0,
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "uniqueSongs": 0,
+    "publishedTimestampCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "acceptedThumbnailUrlCoverage": "0/0",
+    "discoveryThumbnailCoverage": "0/0",
+    "reachedEnd": null,
+    "elapsedSeconds": 0,
+    "failureReason": ""
+  },
+  "duplicateStats": {
+    "status": "verified_concrete_accepted_artifact",
+    "artifactDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/accepted/2026-07-22-source-backfill-batch7.accepted.json",
+    "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/accepted/2026-07-22-source-backfill-batch7.raw-export.json",
+    "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/report.md",
+    "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch7/manifest.json",
+    "channelUrl": "https://www.youtube.com/@Chiyutori",
+    "channelHandle": "/@Chiyutori",
+    "sourceType": "youtube_channel_discovery accepted increment",
+    "existingStatus": "imported",
+    "existingVideos": 27,
+    "existingOccurrences": 909,
+    "existingUniqueSongs": 459,
+    "candidateCount": 29,
+    "inspectedCount": 29,
+    "usableVideoCount": 28,
+    "discoveryOccurrenceCount": 967,
+    "reachedEnd": true,
+    "elapsedSeconds": 439,
+    "publishedTimestampCoverage": "27/27",
+    "occurrenceTimeCoverage": "909/909",
+    "occurrenceSecondsCoverage": "909/909",
+    "acceptedThumbnailUrlCoverage": "0/27",
+    "discoveryThumbnailCoverage": "27/27",
+    "skippedExistingRegressionVideoIds": [
+      "XMTT-zzGBqw"
+    ],
+    "note": "Batch1-8 queue-manifest hits were not used as skip evidence; this skip is based on batch7 concrete accepted export plus report and discovery manifest."
+  },
+  "stageLog": [
+    "started marker written in Windows artifact directory",
+    "checked artifacts for Chiyutori concrete accepted exports",
+    "verified batch7 accepted export, dirty audit, report, and discovery manifest",
+    "skipped remote crawl to avoid duplicate accepted increment",
+    "Mac temp cleanup checked and removed target directory",
+    "Windows D/C/G disk usage recorded"
+  ],
+  "cleanup": {
+    "mac": {
+      "command": "scp LF cleanup script to Mac target temp dir, then ssh /bin/zsh cleanup-check.sh",
+      "stdout": "host=bedeMacBook-Air.local\ntmp=/Users/be/codex-temp/daily-song-list-source-backfill-batch77-chiyutori-mac-readonly\ncleanup=removed\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   270Gi   618Gi    31%    669k  6.5G    0%   /System/Volumes/Data\nCODEX_BATCH77_MAC_CLEANUP_OK",
+      "marker": "CODEX_BATCH77_MAC_CLEANUP_OK",
+      "df": "/dev/disk3s5 926Gi 270Gi 618Gi 31% /System/Volumes/Data",
+      "status": "removed"
+    },
+    "windows": {
+      "probe": "Get-PSDrive -Name C,D,G",
+      "c": {
+        "usedBytes": 255743836160,
+        "freeBytes": 65395339264,
+        "root": "C:\\"
+      },
+      "d": {
+        "usedBytes": 470184071168,
+        "freeBytes": 9901203456,
+        "root": "D:\\"
+      },
+      "g": {
+        "usedBytes": 1362037301248,
+        "freeBytes": 686037479424,
+        "root": "G:\\"
+      },
+      "gTempFilesCreated": [
+        "G:\\codex-temp\\batch77-mac-cleanup-check.sh",
+        "G:\\codex-temp\\batch77-generate-duplicate-artifact.js"
+      ],
+      "cleanupStatus": "removed after artifact generation; verified by G:\\codex-temp probe",
+      "finalProbe": "C free 65395339264 bytes; D free 9901203456 bytes; G free 686037479424 bytes"
+    }
+  },
+  "validation": {
+    "jsonAndFiveFileMarker": "CODEX_BATCH77_ARTIFACT_VALIDATE_OK files=5 json=4 status=skipped_duplicate",
+    "macTempMarker": "CODEX_BATCH77_MAC_TEMP_ABSENT",
+    "macDf": "/dev/disk3s5 926Gi 270Gi 618Gi 31% /System/Volumes/Data"
+  }
+}
