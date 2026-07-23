@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-candidate-increment",
+  "generatedAt": "2026-07-23T06:42:52.846Z",
+  "status": "skipped_duplicate",
+  "source": {
+    "batch": "batch78",
+    "handle": "Kamisatoniina",
+    "channelUrl": "https://www.youtube.com/@Kamisatoniina",
+    "channelId": "UC1nBh6p6w53rAOhN5gwF3iQ"
+  },
+  "videos": [],
+  "stats": {
+    "imported": 0,
+    "skipped": 22,
+    "failed": 0,
+    "candidateCount": 0,
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "accepted": {
+      "videos": 0,
+      "occurrences": 0,
+      "songs": 0,
+      "uniqueSongs": 0
+    },
+    "coverage": {
+      "publishedTimestamp": {
+        "present": 0,
+        "total": 0
+      },
+      "occurrenceTime": {
+        "present": 0,
+        "total": 0
+      },
+      "occurrenceSeconds": {
+        "present": 0,
+        "total": 0
+      },
+      "acceptedThumbnail": {
+        "present": 0,
+        "total": 0,
+        "field": "thumbnailUrl"
+      },
+      "discoveryThumbnail": {
+        "present": 0,
+        "total": 0
+      }
+    },
+    "duplicateEvidence": {
+      "sourceType": "self-crawled concrete accepted increment",
+      "momentOnly": false,
+      "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "rawExportEvidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.raw-export.json",
+      "existingAcceptedVideos": 22,
+      "existingAcceptedOccurrences": 327,
+      "existingAcceptedSongs": 327,
+      "existingUniqueSongs": 179,
+      "existingPublishedTimestampCoverage": {
+        "present": 22,
+        "total": 22
+      },
+      "existingOccurrenceTimeCoverage": {
+        "present": 327,
+        "total": 327
+      },
+      "existingOccurrenceSecondsCoverage": {
+        "present": 327,
+        "total": 327
+      },
+      "existingAcceptedThumbnailCoverage": {
+        "present": 0,
+        "total": 22,
+        "field": "thumbnailUrl"
+      },
+      "existingDiscoveryThumbnailCoverage": {
+        "present": 0,
+        "total": 22
+      },
+      "rawVideoCountForChannel": 22,
+      "rawOccurrenceCountForChannel": 327
+    },
+    "reachedEnd": null,
+    "elapsedMs": 0,
+    "failureReason": ""
+  },
+  "duplicateEvidence": {
+    "sourceType": "self-crawled concrete accepted increment",
+    "momentOnly": false,
+    "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+    "rawExportEvidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.raw-export.json",
+    "existingAcceptedVideos": 22,
+    "existingAcceptedOccurrences": 327,
+    "existingAcceptedSongs": 327,
+    "existingUniqueSongs": 179,
+    "existingPublishedTimestampCoverage": {
+      "present": 22,
+      "total": 22
+    },
+    "existingOccurrenceTimeCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingOccurrenceSecondsCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingAcceptedThumbnailCoverage": {
+      "present": 0,
+      "total": 22,
+      "field": "thumbnailUrl"
+    },
+    "existingDiscoveryThumbnailCoverage": {
+      "present": 0,
+      "total": 22
+    },
+    "rawVideoCountForChannel": 22,
+    "rawOccurrenceCountForChannel": 327
+  },
+  "stageLog": [
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "startup-marker",
+      "status": "ok"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "repo-check",
+      "status": "ok",
+      "repo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+      "branch": "codex/source-backfill-20260720-v2",
+      "expectedHead": "21413738"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "duplicate-discovery",
+      "status": "ok",
+      "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "sourceType": "self-crawled concrete accepted increment"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "mac-crawl",
+      "status": "skipped",
+      "reason": "duplicate concrete accepted increment already exists for this channel"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "mac-cleanup",
+      "status": "not-needed",
+      "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch78-kamisatoniina-mac-readonly",
+      "reason": "no Mac temp dir created by this worker"
+    }
+  ]
+}

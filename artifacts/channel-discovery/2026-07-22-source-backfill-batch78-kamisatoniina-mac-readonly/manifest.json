@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T06:42:52.846Z",
+  "status": "skipped_duplicate",
+  "batch": "batch78",
+  "source": {
+    "batch": "batch78",
+    "handle": "Kamisatoniina",
+    "channelUrl": "https://www.youtube.com/@Kamisatoniina",
+    "channelId": "UC1nBh6p6w53rAOhN5gwF3iQ"
+  },
+  "outputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch78-kamisatoniina-mac-readonly",
+  "files": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "stats": {
+    "imported": 0,
+    "skipped": 22,
+    "failed": 0,
+    "candidateCount": 0,
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "accepted": {
+      "videos": 0,
+      "occurrences": 0,
+      "songs": 0,
+      "uniqueSongs": 0
+    },
+    "coverage": {
+      "publishedTimestamp": {
+        "present": 0,
+        "total": 0
+      },
+      "occurrenceTime": {
+        "present": 0,
+        "total": 0
+      },
+      "occurrenceSeconds": {
+        "present": 0,
+        "total": 0
+      },
+      "acceptedThumbnail": {
+        "present": 0,
+        "total": 0,
+        "field": "thumbnailUrl"
+      },
+      "discoveryThumbnail": {
+        "present": 0,
+        "total": 0
+      }
+    },
+    "duplicateEvidence": {
+      "sourceType": "self-crawled concrete accepted increment",
+      "momentOnly": false,
+      "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "rawExportEvidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.raw-export.json",
+      "existingAcceptedVideos": 22,
+      "existingAcceptedOccurrences": 327,
+      "existingAcceptedSongs": 327,
+      "existingUniqueSongs": 179,
+      "existingPublishedTimestampCoverage": {
+        "present": 22,
+        "total": 22
+      },
+      "existingOccurrenceTimeCoverage": {
+        "present": 327,
+        "total": 327
+      },
+      "existingOccurrenceSecondsCoverage": {
+        "present": 327,
+        "total": 327
+      },
+      "existingAcceptedThumbnailCoverage": {
+        "present": 0,
+        "total": 22,
+        "field": "thumbnailUrl"
+      },
+      "existingDiscoveryThumbnailCoverage": {
+        "present": 0,
+        "total": 22
+      },
+      "rawVideoCountForChannel": 22,
+      "rawOccurrenceCountForChannel": 327
+    },
+    "reachedEnd": null,
+    "elapsedMs": 0,
+    "failureReason": ""
+  },
+  "duplicateEvidence": {
+    "sourceType": "self-crawled concrete accepted increment",
+    "momentOnly": false,
+    "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+    "rawExportEvidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.raw-export.json",
+    "existingAcceptedVideos": 22,
+    "existingAcceptedOccurrences": 327,
+    "existingAcceptedSongs": 327,
+    "existingUniqueSongs": 179,
+    "existingPublishedTimestampCoverage": {
+      "present": 22,
+      "total": 22
+    },
+    "existingOccurrenceTimeCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingOccurrenceSecondsCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingAcceptedThumbnailCoverage": {
+      "present": 0,
+      "total": 22,
+      "field": "thumbnailUrl"
+    },
+    "existingDiscoveryThumbnailCoverage": {
+      "present": 0,
+      "total": 22
+    },
+    "rawVideoCountForChannel": 22,
+    "rawOccurrenceCountForChannel": 327
+  },
+  "cleanup": {
+    "windows": {
+      "drivesBeforeFinalArtifact": {
+        "D": {
+          "Name": "D",
+          "Used": 470184132608,
+          "Free": 9901142016,
+          "Root": "D:\\"
+        },
+        "C": {
+          "Name": "C",
+          "Used": 255776448512,
+          "Free": 65362530304,
+          "Root": "C:\\"
+        },
+        "G": {
+          "Name": "G",
+          "Used": 1362037882880,
+          "Free": 686036897792,
+          "Root": "G:\\"
+        }
+      },
+      "tempRoot": "G:\\codex-temp",
+      "tempCleanupStatus": "ok",
+      "wroteOnlyFinalSmallArtifactOnD": true,
+      "usedCDriveForTemp": false,
+      "drivesAfterCleanup": {
+        "D": {
+          "Name": "D",
+          "Used": 470184148992,
+          "Free": 9901125632,
+          "Root": "D:\\"
+        },
+        "C": {
+          "Name": "C",
+          "Used": 255784116224,
+          "Free": 65354862592,
+          "Root": "C:\\"
+        },
+        "G": {
+          "Name": "G",
+          "Used": 1362037944320,
+          "Free": 686036836352,
+          "Root": "G:\\"
+        }
+      },
+      "cWorkspaceTempArtifactCleanup": {
+        "path": "C:\\Users\\终焉\\Documents\\Codex\\2026-07-20\\daily-song-list-source-backfill-dispatch\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch78-kamisatoniina-mac-readonly",
+        "status": "removed"
+      }
+    },
+    "mac": {
+      "attempted": true,
+      "remoteHost": "be@192.168.1.13",
+      "remoteRepo": "/Users/be/daily-song-list",
+      "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch78-kamisatoniina-mac-readonly",
+      "cleanupStatus": "not_present",
+      "dfH": "Filesystem Size Used Avail Capacity iused ifree %iused Mounted on; /dev/disk3s5 926Gi 270Gi 618Gi 31% 669k 6.5G 0% /System/Volumes/Data"
+    }
+  },
+  "stageLog": [
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "startup-marker",
+      "status": "ok"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "repo-check",
+      "status": "ok",
+      "repo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+      "branch": "codex/source-backfill-20260720-v2",
+      "expectedHead": "21413738"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "duplicate-discovery",
+      "status": "ok",
+      "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "sourceType": "self-crawled concrete accepted increment"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "mac-crawl",
+      "status": "skipped",
+      "reason": "duplicate concrete accepted increment already exists for this channel"
+    },
+    {
+      "time": "2026-07-23T06:42:52.846Z",
+      "stage": "mac-cleanup",
+      "status": "not-needed",
+      "remoteTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch78-kamisatoniina-mac-readonly",
+      "reason": "no Mac temp dir created by this worker"
+    },
+    {
+      "time": "2026-07-23T06:43:23.589Z",
+      "stage": "windows-temp-cleanup",
+      "status": "ok",
+      "path": "C:\\Users\\终焉\\Documents\\Codex\\2026-07-20\\daily-song-list-source-backfill-dispatch\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch78-kamisatoniina-mac-readonly"
+    },
+    {
+      "time": "2026-07-23T14:44:20.6618921+08:00",
+      "stage": "mac-cleanup-check",
+      "status": "ok",
+      "cleanup": "not_present",
+      "dfH": "Filesystem Size Used Avail Capacity iused ifree %iused Mounted on; /dev/disk3s5 926Gi 270Gi 618Gi 31% 669k 6.5G 0% /System/Volumes/Data"
+    }
+  ],
+  "failureReason": ""
+}

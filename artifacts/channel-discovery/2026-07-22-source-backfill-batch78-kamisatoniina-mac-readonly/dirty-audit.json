@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T06:42:52.846Z",
+  "status": "skipped_duplicate",
+  "source": {
+    "batch": "batch78",
+    "handle": "Kamisatoniina",
+    "channelUrl": "https://www.youtube.com/@Kamisatoniina",
+    "channelId": "UC1nBh6p6w53rAOhN5gwF3iQ"
+  },
+  "dirtyFilterPolicy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveRule": {
+      "liveTerms": [
+        "live",
+        "ライブ"
+      ],
+      "dropOnlyWhenMissingSingingSignal": true,
+      "singingSignals": [
+        "歌枠",
+        "歌",
+        "弾き語り",
+        "karaoke",
+        "歌ってみた"
+      ]
+    }
+  },
+  "inspectedCount": 0,
+  "dropped": [],
+  "suspicious": [],
+  "kept": [],
+  "duplicateEvidence": {
+    "sourceType": "self-crawled concrete accepted increment",
+    "momentOnly": false,
+    "evidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+    "rawExportEvidencePath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.raw-export.json",
+    "existingAcceptedVideos": 22,
+    "existingAcceptedOccurrences": 327,
+    "existingAcceptedSongs": 327,
+    "existingUniqueSongs": 179,
+    "existingPublishedTimestampCoverage": {
+      "present": 22,
+      "total": 22
+    },
+    "existingOccurrenceTimeCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingOccurrenceSecondsCoverage": {
+      "present": 327,
+      "total": 327
+    },
+    "existingAcceptedThumbnailCoverage": {
+      "present": 0,
+      "total": 22,
+      "field": "thumbnailUrl"
+    },
+    "existingDiscoveryThumbnailCoverage": {
+      "present": 0,
+      "total": 22
+    },
+    "rawVideoCountForChannel": 22,
+    "rawOccurrenceCountForChannel": 327
+  },
+  "failureReason": ""
+}
