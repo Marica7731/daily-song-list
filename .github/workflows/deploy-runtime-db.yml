@@ -55,6 +55,7 @@ jobs:
           ref: main
           fetch-depth: 1
           filter: blob:none
+          clean: false
           sparse-checkout: |
             assets
             config
@@ -91,8 +92,23 @@ jobs:
         env:
           CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS: "1"
           CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "5000"
+          EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
         run: |
           mkdir -p artifacts/runtime
+          if [ -f artifacts/runtime/song-rank.sqlite ] && [ -f artifacts/runtime/song-rank.sqlite.manifest.json ]; then
+            manifest_latest_sha256="$(sed -n 's/.*"source_latest_sha256": "\([^"]*\)".*/\1/p' artifacts/runtime/song-rank.sqlite.manifest.json | head -n 1)"
+            if [ "${manifest_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ]; then
+              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE latestSha256=${manifest_latest_sha256}"
+              if python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only; then
+                echo "CODEX_RUNTIME_DB_REUSE_OK"
+                exit 0
+              fi
+              echo "CODEX_RUNTIME_DB_REUSE_INVALID query-failed"
+            else
+              echo "CODEX_RUNTIME_DB_REUSE_SKIP expectedLatestSha256=${EXPECTED_LATEST_SHA256} manifestLatestSha256=${manifest_latest_sha256}"
+            fi
+            rm -f artifacts/runtime/song-rank.sqlite artifacts/runtime/song-rank.sqlite.manifest.json
+          fi
           python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
           python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
@@ -270,14 +286,14 @@ jobs:
             rsync \
               --inplace \
               --partial \
-              --compress \
+              --checksum \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
             rsync \
               --inplace \
               --partial \
-              --compress \
+              --checksum \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
@@ -312,14 +328,14 @@ jobs:
             rsync \
               --inplace \
               --partial \
-              --compress \
+              --checksum \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}"
             rsync \
               --inplace \
               --partial \
-              --compress \
+              --checksum \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}.manifest.json"
