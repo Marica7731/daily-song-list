@@ -5505,6 +5505,7 @@ function renderPageSelectControl(pageInfo, options) {
   submit.type = "submit";
   submit.textContent = "选页";
   submit.setAttribute("aria-label", "跳转到输入页码");
+  submit.addEventListener("click", handlePaginationFormSubmit);
   label.addEventListener("submit", handlePaginationFormSubmit);
   label.append(text, input, total, submit);
   return label;
@@ -5534,6 +5535,7 @@ function renderPageJumpControl(pageInfo) {
   button.className = "pagination-button page-jump-button";
   button.type = "submit";
   button.textContent = "跳转";
+  button.addEventListener("click", handlePaginationFormSubmit);
   form.addEventListener("submit", handlePaginationFormSubmit);
   form.append(label, button);
   return form;

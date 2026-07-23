@@ -389,7 +389,9 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
   assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
   assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
