@@ -1,0 +1,49 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch137-kohanalam-continuation2",
+  "generatedAt": "2026-07-23T15:29:46.380Z",
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams"
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "livePolicy": "live and ライブ are retained as suspicious only unless another hard drop term matches",
+    "seedExclusion": "Batch32 and batch129 accepted videoIds are excluded before export."
+  },
+  "counts": {
+    "unfilteredVideoCount": 1,
+    "unfilteredOccurrenceCount": 2,
+    "acceptedVideoCount": 1,
+    "acceptedOccurrenceCount": 2,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "suspiciousOccurrenceCount": 0
+  },
+  "videos": [
+    {
+      "videoId": "H5aQ0sId9CA",
+      "title": "こはならむ『神様の秒針を壊した』MUSIC VIDEO / 劇場版「僕の心のヤバイやつ」挿入歌",
+      "publishedTimestamp": 1774451749392,
+      "songCount": 2,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": [],
+      "suspiciousTerms": []
+    }
+  ]
+}

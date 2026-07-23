@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T15:35:13.9335256Z",
+  "marker": "CODEX_VALIDATE_BATCH136_139_OK",
+  "artifacts": [
+    {
+      "handle": "SoraOtoha",
+      "status": "pending_partial",
+      "newVideos": 22,
+      "newOccurrences": 422,
+      "newSongs": 422,
+      "publishedCoverage": "22/22",
+      "occurrenceTimeCoverage": "422/422",
+      "occurrenceSecondsCoverage": "422/422",
+      "workerReportedThumbnailCoverage": "22/22",
+      "acceptedJsonThumbnailOrCoverCoverage": "0/22",
+      "droppedVideos": 0,
+      "suspiciousVideos": 7,
+      "reachedEnd": false
+    },
+    {
+      "handle": "KohanaLam",
+      "status": "skipped_dirty_audit",
+      "newVideosBeforeManualAudit": 1,
+      "newOccurrencesBeforeManualAudit": 2,
+      "newSongsBeforeManualAudit": 2,
+      "newVideosAfterManualAudit": 0,
+      "newOccurrencesAfterManualAudit": 0,
+      "newSongsAfterManualAudit": 0,
+      "publishedCoverage": "1/1",
+      "occurrenceTimeCoverage": "2/2",
+      "occurrenceSecondsCoverage": "2/2",
+      "acceptedJsonThumbnailOrCoverCoverage": "0/1",
+      "droppedVideos": 1,
+      "droppedOccurrences": 2,
+      "droppedReason": "MV/video description informational rows are not songs",
+      "suspiciousVideos": 0,
+      "reachedEnd": true,
+      "sourceManifestStatus": "skipped",
+      "statusNote": "worker manifest status means import skipped by instruction; queue records manual non-song MV metadata drop"
+    }
+  ],
+  "queueTotals": {
+    "acceptedVideos": 979,
+    "acceptedOccurrences": 15737,
+    "acceptedSongs": 10082
+  },
+  "dataExternalModified": false,
+  "rawPruned": true
+}

@@ -1,0 +1,60 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch137-kohanalam-continuation2",
+  "generatedAt": "2026-07-23T15:29:46.846Z",
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams"
+  },
+  "checkpoint": {
+    "candidateCount": 75,
+    "completedVideoIds": 31,
+    "detailCount": 1,
+    "auditCount": 53,
+    "updatedAt": "2026-07-23T15:25:43.615Z",
+    "completedMinusDetails": 30
+  },
+  "seed": {
+    "excludedAcceptedVideoIds": [
+      "1_scZU0bCgQ",
+      "2ftB3kU_tc0",
+      "4D74-9T7TyU",
+      "7y17_1Sp-Es",
+      "A-EBqe2tWLM",
+      "A3JLHeq2Vzc",
+      "BVIh2pkDE9E",
+      "BhTwmsUZglc",
+      "GB0yDLo9AsQ",
+      "HDz2ybgAfok",
+      "HQQCWQ3w31c",
+      "IcQgWocGEB8",
+      "LEFtG4PDHOE",
+      "MXKo5-a3XQI",
+      "NZpaiwFx29c",
+      "OaR-Rv6dT-A",
+      "OxKWh2I__zU",
+      "VSXdl6a5NeI",
+      "WCwoKhpTBOE",
+      "WK0inhlmvzA",
+      "WdH5NOalOLU",
+      "X9gtw7q1rQM",
+      "_Nd7tNWDu7k",
+      "am8uDeAipy4",
+      "bCpkFlcHuaU",
+      "d8IlRDCH5Vs",
+      "mbAecMcw1aI",
+      "nuCo_40aI1E",
+      "t3b7ruDHKiw",
+      "tM9Ooz70wds"
+    ]
+  },
+  "increment": {
+    "newDetailCount": 1,
+    "newVideoIds": [
+      "H5aQ0sId9CA"
+    ],
+    "newOccurrenceCountFromDetails": 2,
+    "dirtyDroppedVideoIds": []
+  },
+  "status": "skipped",
+  "note": "No full checkpoint is retained in this artifact; this summary was generated from checkpoint.full.tmp.json before cleanup."
+}

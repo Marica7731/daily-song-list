@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch136-soraotoha-continuation2",
+  "handle": "SoraOtoha",
+  "status": "pending_partial",
+  "evaluatedVideoCount": 22,
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "吹奏楽"
+  ],
+  "hardDropExactPhrases": [
+    "piano streaming",
+    "ピアノ演奏"
+  ],
+  "suspiciousOnlyTerms": [
+    "live",
+    "ライブ"
+  ],
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 7,
+  "termHitCounts": {
+    "フルート": 0,
+    "生演奏": 0,
+    "クラリネット": 0,
+    "サックス": 0,
+    "吹奏楽": 0,
+    "piano streaming": 0,
+    "ピアノ演奏": 0,
+    "live": 7,
+    "ライブ": 7
+  },
+  "dropped": [],
+  "suspicious": [
+    {
+      "youtubeVideoId": "oepIQDX29po",
+      "videoTitle": "【定期ライブ歌枠🌟】31th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 20,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "2XNZiPKZpGM",
+      "videoTitle": "【定期ライブ歌枠🌟】32th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 18,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "Oj_pjrFlcaE",
+      "videoTitle": "【定期ライブ歌枠🌟】28th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 17,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "vHk_WlEDp_Q",
+      "videoTitle": "【定期ライブ歌枠🌟】23th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 20,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "lX-A3yrsef0",
+      "videoTitle": "【定期ライブ歌枠🌟】25th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 20,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "nn1XoJUbcsI",
+      "videoTitle": "【定期ライブ歌枠🌟】26th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 18,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "djh7BZxnbQg",
+      "videoTitle": "【定期ライブ歌枠🌟】27h Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "hardHits": [],
+      "exactPhraseHits": [],
+      "broadHits": [
+        "live",
+        "ライブ"
+      ],
+      "occurrenceCount": 13,
+      "action": "suspicious_only_not_dropped"
+    }
+  ],
+  "note": "live/ライブ is suspicious-only; hard instrumental terms and exact phrases are dropped."
+}

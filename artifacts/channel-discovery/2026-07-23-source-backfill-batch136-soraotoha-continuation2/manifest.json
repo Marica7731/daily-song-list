@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch136-soraotoha-continuation2",
+  "generatedAt": "2026-07-23T15:28:35.977Z",
+  "status": "pending_partial",
+  "completeForImport": false,
+  "imported": false,
+  "fullComplete": false,
+  "source": {
+    "handle": "SoraOtoha",
+    "url": "https://www.youtube.com/@SoraOtoha",
+    "status": "pending_partial",
+    "acceptedIncrementReadyForReview": true,
+    "fullSourceStillPending": true,
+    "candidateCount": 128,
+    "checkpointDetailCount": 22,
+    "previouslyAcceptedVideosExcluded": 35,
+    "acceptedVideos": 22,
+    "acceptedOccurrences": 422,
+    "acceptedSongs": 422,
+    "publishedTimestampCoverage": "22/22",
+    "occurrenceTimeCoverage": "422/422",
+    "occurrenceSecondsCoverage": "422/422",
+    "thumbnailCoverage": "22/22",
+    "droppedVideos": 0,
+    "droppedOccurrences": 0,
+    "suspiciousVideos": 7,
+    "reachedEnd": false,
+    "failureReason": "user interrupted at bounded window boundary; discovery process was terminated and only checkpoint details were exported"
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch136-soraotoha-continuation2.partial.accepted.json",
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 7
+  },
+  "scopeVerification": {
+    "onlyChannelProcessed": "https://www.youtube.com/@SoraOtoha",
+    "excludedBatch115AndBatch128AcceptedVideoIds": 35,
+    "didNotModifyRunnerOrToolCode": true,
+    "didNotWriteDataExternal": true,
+    "didNotCommit": true,
+    "didNotPushOrDeploy": true
+  },
+  "exportRan": true,
+  "exportMarker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=22 usableVideos=22 acceptedVideos=22 skippedRegressions=0 occurrences=422"
+}
