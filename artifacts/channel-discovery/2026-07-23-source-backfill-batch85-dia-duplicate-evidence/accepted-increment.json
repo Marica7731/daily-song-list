@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "batchId": "2026-07-23-source-backfill-batch85-dia-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:39:07.0049678+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "target": {
+    "channelHandle": "/@Dia-%E3%83%87%E3%82%A3%E3%82%A2",
+    "channelUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2"
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "note": "No accepted video rows are emitted in this duplicate-evidence batch; batch8 already contains the concrete accepted rows for this source.",
+  "duplicateEvidence": {
+    "existingConcreteAcceptedArtifact": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/accepted/2026-07-22-source-backfill-batch8.accepted.json",
+    "matchRule": "Directly parsed batch8 accepted JSON and matched video.channelHandle == '/@Dia-%E3%83%87%E3%82%A3%E3%82%A2' or video.channelUrl == 'https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2'.",
+    "existingAcceptedVideos": 18,
+    "existingAcceptedOccurrences": 339,
+    "existingUniqueSongs": 251,
+    "coverage": {
+      "publishedTimestamp": "18/18",
+      "occurrenceTime": "339/339",
+      "occurrenceSeconds": "339/339",
+      "acceptedThumbnailOrCoverFields": "0/18",
+      "acceptedFileHasThumbnailOrCoverFields": false,
+      "discoveryThumbnailFromBatch8Manifest": "18/18",
+      "discoveryThumbnailFromBatch8Report": "18/18"
+    },
+    "existingVideoIds": [
+      "e4R5rXAMvu0",
+      "pLv2zLoXZUM",
+      "pByVvw95upU",
+      "pJqfpYaav4U",
+      "kOmAKXehvTU",
+      "0eqJqS88ngg",
+      "84eWdmrQD4E",
+      "88GMj3_Z7sM",
+      "MVTkvKsAia0",
+      "WV5oOHb2gT8",
+      "LuT0JJBfKys",
+      "3RLCvOZQfD4",
+      "YuYWbhbMf78",
+      "F-zryuM4NOc",
+      "pt9iUBdxwwY",
+      "2HI-7dPPu7A",
+      "wWvSzWxDo5E",
+      "F61u3_ZNlew"
+    ],
+    "discoveryRunStatsFromBatch8Manifest": {
+      "candidateCount": 27,
+      "inspectedCount": 27,
+      "usableVideoCount": 20,
+      "occurrenceCount": 370,
+      "reachedEnd": true,
+      "elapsedSeconds": 346
+    },
+    "dirtyAuditFromBatch8": {
+      "droppedVideoCount": 0,
+      "droppedOccurrenceCount": 0,
+      "suspiciousCount": 0,
+      "hasDiaSpecificDroppedOrSuspicious": false,
+      "note": "Batch8 dirty audit is empty: dropped arrays are empty and suspicious array is empty."
+    }
+  },
+  "constraintsObserved": {
+    "usedExistingLocalArtifactsOnly": true,
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "vpsUsed": false,
+    "remoteTemporaryDirectoryCreated": false,
+    "dataExternalModified": false,
+    "pushed": false,
+    "deployed": false
+  }
+}

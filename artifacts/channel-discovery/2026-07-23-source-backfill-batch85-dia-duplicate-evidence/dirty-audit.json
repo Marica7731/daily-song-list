@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-dirty-audit",
+  "batchId": "2026-07-23-source-backfill-batch85-dia-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:39:07.0049678+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "target": {
+    "channelHandle": "/@Dia-%E3%83%87%E3%82%A3%E3%82%A2",
+    "channelUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2"
+  },
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspicious": [],
+  "termHitCounts": {},
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/dirty-audit.json",
+  "sourceDirtyAuditSummary": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousCount": 0,
+    "termHitCounts": {},
+    "note": "Broad live/live terms are audited manually and are not applied blindly."
+  },
+  "diaSpecificDirtyEvidence": {
+    "hasDiaSpecificDroppedOrSuspicious": false,
+    "note": "Batch8 dirty-audit.json has empty dropped and suspicious arrays, so there are no Dia-specific dropped or suspicious entries."
+  },
+  "constraintsObserved": {
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "vpsUsed": false,
+    "remoteTemporaryDirectoryCreated": false,
+    "dataExternalModified": false,
+    "pushed": false,
+    "deployed": false
+  }
+}

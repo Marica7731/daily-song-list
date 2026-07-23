@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-duplicate-evidence-manifest",
+  "batchId": "2026-07-23-source-backfill-batch85-dia-duplicate-evidence",
+  "generatedAt": "2026-07-23T15:39:07.0049678+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "scope": "Single-source duplicate-evidence artifact for Dia; no candidate or accepted video rows are re-emitted.",
+  "target": {
+    "channelHandle": "/@Dia-%E3%83%87%E3%82%A3%E3%82%A2",
+    "channelUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2"
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "artifacts/channel-discovery/2026-07-23-source-backfill-batch85-dia-duplicate-evidence/candidate-increment-unfiltered.json",
+    "acceptedIncrement": "artifacts/channel-discovery/2026-07-23-source-backfill-batch85-dia-duplicate-evidence/accepted-increment.json",
+    "dirtyAudit": "artifacts/channel-discovery/2026-07-23-source-backfill-batch85-dia-duplicate-evidence/dirty-audit.json",
+    "manifest": "artifacts/channel-discovery/2026-07-23-source-backfill-batch85-dia-duplicate-evidence/manifest.json",
+    "report": "artifacts/channel-discovery/2026-07-23-source-backfill-batch85-dia-duplicate-evidence/report.md"
+  },
+  "sourceArtifacts": {
+    "accepted": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/accepted/2026-07-22-source-backfill-batch8.accepted.json",
+    "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/accepted/2026-07-22-source-backfill-batch8.raw-export.json",
+    "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/manifest.json",
+    "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/report.md",
+    "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch8/dirty-audit.json"
+  },
+  "duplicateEvidence": {
+    "acceptedMatchRule": "Directly parsed batch8 accepted JSON and matched video.channelHandle == '/@Dia-%E3%83%87%E3%82%A3%E3%82%A2' or video.channelUrl == 'https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2'.",
+    "acceptedVideos": 18,
+    "acceptedOccurrences": 339,
+    "uniqueSongs": 251,
+    "publishedTimestampCoverage": "18/18",
+    "occurrenceTimeCoverage": "339/339",
+    "occurrenceSecondsCoverage": "339/339",
+    "acceptedThumbnailOrCoverFieldCoverage": "0/18",
+    "acceptedFileHasThumbnailOrCoverFields": false,
+    "acceptedThumbnailOrCoverFieldsNote": "Matched accepted video objects do not contain top-level thumbnail/cover fields.",
+    "discoveryThumbnailCoverageFromBatch8Manifest": "18/18",
+    "discoveryThumbnailCoverageFromBatch8Report": "18/18",
+    "batch8Discovery": {
+      "candidateCount": 27,
+      "inspectedCount": 27,
+      "usableVideoCount": 20,
+      "occurrenceCount": 370,
+      "reachedEnd": true,
+      "elapsedSeconds": 346,
+      "fieldSource": "batch8 manifest source entry for handle Dia, cross-checked against batch8 report imported and candidate-probe lines"
+    },
+    "batch8DirtyAudit": {
+      "droppedVideoCount": 0,
+      "droppedOccurrenceCount": 0,
+      "suspiciousCount": 0,
+      "termHitCounts": {},
+      "hasDiaSpecificDroppedOrSuspicious": false,
+      "fieldSource": "batch8 dirty-audit.json and report Dirty Audit section"
+    },
+    "unknownFields": []
+  },
+  "generationControls": {
+    "usedExistingLocalArtifactsOnly": true,
+    "youtubeFetchStarted": false,
+    "dataExternalModified": false,
+    "macUsed": false,
+    "vpsUsed": false,
+    "remoteTemporaryDirectoryCreated": false,
+    "temporaryScriptsCreated": [
+      "G:/codex-temp/batch85_dia_duplicate_stats_20260723.ps1"
+    ],
+    "temporaryScriptsDeletedBeforeFinal": true,
+    "commitCreated": false,
+    "pushed": false,
+    "deployed": false
+  }
+}
