@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:39:24.3874088+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "note": "Empty accepted increment by design. AmakusaAroma already exists in the batch2 concrete accepted artifact, so this batch does not duplicate accepted rows.",
+    "evidenceSource": [
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+    ],
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch2",
+    "batch2DirectEvidence": {
+      "acceptedVideos": 2,
+      "acceptedOccurrences": 14,
+      "uniqueSongs": 14,
+      "publishedTimestampCoverage": "2/2",
+      "occurrenceTimeCoverage": "14/14",
+      "occurrenceSecondsCoverage": "14/14",
+      "discoveryThumbnailCoverage": "2/2"
+    }
+  }
+}

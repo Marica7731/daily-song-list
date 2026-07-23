@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_manifest",
+  "batchId": "2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:39:24.3874088+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "scope": "Small duplicate-evidence artifact for AmakusaAroma. No YouTube fetch, no runner code changes, no data/external writes, no push, no deploy.",
+  "evidenceSource": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+  ],
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch2",
+  "acceptedIncrement": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence/accepted-increment.json",
+    "videoCount": 0,
+    "occurrenceCount": 0,
+    "note": "Empty accepted increment; batch2 already contains the concrete accepted rows."
+  },
+  "candidateIncrementUnfiltered": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence/candidate-increment-unfiltered.json",
+    "candidateCount": 0,
+    "videoCount": 0
+  },
+  "dirtyAudit": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence/dirty-audit.json",
+    "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+    "filter": "channelHandle == /@AmakusaAroma or channelUrl == https://www.youtube.com/@AmakusaAroma",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousCount": 0,
+    "suspiciousOccurrenceCount": 0,
+    "note": "No AmakusaAroma dropped or suspicious entries exist in batch2 dirty-audit. Candidate-to-usable difference is not counted as dirty dropped."
+  },
+  "batch2ManifestSourceFields": {
+    "discoveryCandidateCount": 3,
+    "discoveryInspectedCount": 3,
+    "discoveryUsableVideoCount": 2,
+    "discoveryOccurrenceCount": 14,
+    "elapsedSeconds": 86,
+    "reachedEnd": null
+  },
+  "batch2DirectEvidence": {
+    "acceptedVideos": 2,
+    "acceptedOccurrences": 14,
+    "uniqueSongs": 14,
+    "publishedTimestampCoverage": "2/2",
+    "occurrenceTimeCoverage": "14/14",
+    "occurrenceSecondsCoverage": "14/14",
+    "discoveryThumbnailCoverage": "2/2"
+  },
+  "remoteCleanup": {
+    "source": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+    "vps3": {
+      "cleanup": "removed",
+      "df": "/dev/sda1 99G 11G 89G 11% /"
+    },
+    "vps5": {
+      "cleanup": "removed",
+      "df": "/dev/vda1 10G 2.6G 7.0G 27% /"
+    }
+  },
+  "sources": [
+    {
+      "handle": "AmakusaAroma",
+      "url": "https://www.youtube.com/@AmakusaAroma",
+      "channelHandle": "/@AmakusaAroma",
+      "status": "skipped_duplicate",
+      "reason": "duplicate_concrete_accepted_artifact_exists",
+      "acceptedVideos": 2,
+      "acceptedOccurrences": 14,
+      "uniqueSongs": 14,
+      "publishedTimestampCoverage": "2/2",
+      "occurrenceTimeCoverage": "14/14",
+      "occurrenceSecondsCoverage": "14/14",
+      "coverage": {
+        "publishedTimestamp": "2/2",
+        "occurrenceTime": "14/14",
+        "occurrenceSeconds": "14/14"
+      },
+      "discoveryThumbnailCoverage": "2/2",
+      "coverCoverage": "2/2",
+      "discoveryCandidateCount": 3,
+      "discoveryInspectedCount": 3,
+      "discoveryUsableVideoCount": 2,
+      "discoveryOccurrenceCount": 14,
+      "elapsedSeconds": 86,
+      "reachedEnd": null,
+      "failure": "",
+      "evidenceSource": [
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+      ],
+      "duplicateOfBatch": "2026-07-22-source-backfill-batch2",
+      "remoteCleanup": {
+        "vps3": "/dev/sda1 99G 11G 89G 11% /",
+        "vps5": "/dev/vda1 10G 2.6G 7.0G 27% /"
+      }
+    }
+  ],
+  "statusCounts": {
+    "skipped_duplicate": 1
+  },
+  "outputFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence",
+    "didNotModifyRunnerToolCode": true,
+    "didNotModifyDataExternal": true,
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotPushOrDeploy": true,
+    "commitCreated": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch90-amakusaaroma-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:39:24.3874088+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+  "filter": "channelHandle == /@AmakusaAroma or channelUrl == https://www.youtube.com/@AmakusaAroma",
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "note": "Filtered only to AmakusaAroma. Batch2 dirty-audit has no dropped or suspicious entries for this channel. Candidate 3 to usable 2 is not treated as dirty dropped evidence."
+}
