@@ -257,3 +257,26 @@
 - carry-forward：累计/7d 旧记录若缺 `publishedTimestamp`，下一轮保持可重新检查；已有发布时间的稳定记录仍按现有 checkpoint 跳过，避免每小时重复抓全库。
 - 本地回归：`node --test test/update-songlist.test.js` 36/36 通过；新增观看页 metadata 回填与缺时间 carry-forward 回归。
 - 发布顺序：当前旧 runtime DB 发布 run `30075852096` 仍在 Mac 上执行上传/激活，完成前不触发新的 runtime 发布；字段代码推送后，待自动 core 回归成功，再由 `workflow_run` 构建包含字段补强的 runtime DB。
+
+## H5 展开卡紧凑布局补充（2026-07-24 17:46 +08:00）
+
+- 用户截图反馈展开后的歌曲卡留白过大，标题/歌手占用两行且日期与封面之间有空白；本轮已按“标题一行、歌手一行、日期紧跟文字区、统计/收起控制靠右”的规则调整，不改变既有桌面/H5 两列网格与分页上限。
+- `assets/styles.css`：VTuber 展开卡改为 `height:auto`，标题/歌手使用单行省略，标题字号约 `12px`、歌手字号约 `10.5px`；网格改成 `thumb/title/actions` 与 `thumb/date/actions` 两行，日期不再占用独立空白列。H5 和窄屏继续收紧缩略图、字号与间距。
+- `assets/app.js`：展开工具栏原有右侧 `收起` 控件保持在工具栏最右；VTuber 仍按既有桌面 30、H5 20 首分页展开，不提前截断歌曲列表。
+- `docs/ui-spec.md`、`test/ui-redesign-static.test.js` 同步记录和锁定上述布局契约。
+- 本地验收：`node --test test/ui-redesign-static.test.js test/app-static-performance.test.js test/workflow-static.test.js` 49/49；`node scripts/check-js-syntax.js` 114/114；`git diff --check` 通过；`npm run version:assets` 生成 `h95090fdb1212`。
+- 发布：提交 `b5ab2ed4 fix: 压缩 H5 频道歌曲卡空白` 已推送 `main`；VPS 静态发布 run `30083332950` 成功，Pages run `30083332740` 成功；公开首页 HTTP 200，当前指向 `app-h95090fdb1212.js` / `styles-h95090fdb1212.css`。
+- 真实浏览器复测（2026-07-24 17:46）：线上 VTuber 页面能看到视频/歌曲/次数三项和右侧展开按钮；点击首行展开后，旧 runtime API 返回 `来源读取失败：Failed to fetch`，因此本次无法把展开歌曲卡的线上视觉结果写成已验证。该失败与静态 CSS 发布分离，根因是 runtime DB 发布仍被远端磁盘空间门禁阻断。
+- Windows 本地视觉脚本 `npm run check:vtuber-expand-layout` 未执行成功，原因是工作树没有 `playwright` 模块；没有在 Windows/C 盘安装依赖。静态结构测试和线上浏览器 DOM/截图检查已完成，最终展开卡视觉仍需 runtime 发布成功后在 Mac/CI 浏览器环境复测。
+
+## Runtime 发布阻塞与当前线上事实（2026-07-24 17:46 +08:00）
+
+- `deploy-runtime-db.yml` run `30082008988`：Mac 构建、DB manifest、artifact 校验和远程 checkout 均成功；上传前安全门禁失败：`dbBytes=13434011648`、`activeBytes=13470294016`、`remoteFreeBytes=0`、`candidateMinFreeBytes=14507753472`、`directMinFreeBytes=1073741824`，随后 `insufficient-direct-space`。未停止旧服务、未覆盖线上 active DB。
+- 线上 `https://ytb-song-rank.culua.com/healthz` 当前仍 HTTP 200，但返回旧构建时间 `builtAt=2026-07-24T07:33:41Z`、旧 `latestGeneratedAt=2026-07-23T13:27:07.854Z` 和旧 runtime source commit；因此筛选语义、收录 tag、7d 字段补强和新 DB 数据尚未在线生效。
+- 不在 Windows 主线程 SSH 清理或删除 VPS 文件；需要运维先在目标挂载点释放至少直接上传所需空间或扩容，再按既有 workflow 重新发布，禁止使用 `--fresh`，发布后必须重新验证 `/healthz`、`/api/meta`、`/api/rankings`、收录 tag 和展开 drawer。
+- `Check code` run `30083332721` 当前仍排队；静态发布不等于 runtime 发布。最近 7d Mac 自动更新 run `30082525209` 仍在执行，完成后应单独核对是否产生 accepted core commit，再决定后续 runtime workflow。
+
+## WSL 工作目录约定
+
+- Windows 上的代码审查和轻量测试继续使用 G 工作树；WSL 对应路径固定为 `/mnt/g/codex-work/daily-song-list-runtime-fix-20260723`。大 SQLite/source build 仍优先 Mac/self-hosted runner，不在 Windows 或 `/mnt/c` 放置项目数据。
+- 本约定只约束本任务命令路径，没有擅自修改用户 WSL 全局启动目录或 profile。
