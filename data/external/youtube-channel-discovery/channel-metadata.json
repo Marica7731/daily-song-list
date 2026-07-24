@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-23T13:27:53.420Z",
+  "generatedAt": "2026-07-24T08:37:52.956Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-23T13:27:53.420Z",
+    "fetchedAt": "2026-07-24T08:37:52.956Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-23T13:27:53.420Z",
+    "generatedAt": "2026-07-24T08:37:52.956Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7967,6 +7967,13 @@
         "channelId": "UCgSEzhNM3Aqj55oh5rpIjaQ",
         "displayName": "夜凪よな-Yonagi Yona-",
         "sourceUrl": "https://www.youtube.com/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@kokona_miko",
+        "channelId": "UC7O0stCdkTxnDJK0dgs_llw",
+        "displayName": "心奏みこ",
+        "sourceUrl": "https://www.youtube.com/@kokona_miko",
         "reason": "batch_limit_reached"
       },
       {
@@ -8120,13 +8127,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "みなとん。は歌う",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "Devilith Violustre【黛比】",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
