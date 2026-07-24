@@ -386,6 +386,12 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.records[0].matchedBySource, undefined);
     assert.equal(songTitleSearch.records[0].globalCount, undefined);
 
+    const missingAllFieldSearch = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=NoSuchSong%20NoSuchArtist&searchFields=all&pageSize=5`,
+    );
+    assert.equal(missingAllFieldSearch.totalCount, 0);
+    assert.deepEqual(missingAllFieldSearch.records, []);
+
     const combinedSongArtistSearch = await fetchJson(
       `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20One%20Singer%20A&searchFields=all&pageSize=5`,
     );

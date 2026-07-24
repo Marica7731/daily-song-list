@@ -243,22 +243,25 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             and (effective_search_scope == "all" or is_mixed_entity_source_search_fields(search_fields))
             and total == 0
         ):
-            source_payload = source_matched_rankings_payload(
-                db_path,
-                range_id,
-                view,
-                metric,
-                q,
-                effective_search_scope,
-                page,
-                page_size,
-                min_count,
-                search_fields,
-                niche_only,
-                hide_unknown_artist,
-            )
-            if source_payload["totalCount"] > 0:
-                return source_payload
+            if source_occurrence_matches_exist(
+                conn, range_id, q, effective_search_scope, search_fields, niche_only, hide_unknown_artist,
+            ):
+                source_payload = source_matched_rankings_payload(
+                    db_path,
+                    range_id,
+                    view,
+                    metric,
+                    q,
+                    effective_search_scope,
+                    page,
+                    page_size,
+                    min_count,
+                    search_fields,
+                    niche_only,
+                    hide_unknown_artist,
+                )
+                if source_payload["totalCount"] > 0:
+                    return source_payload
             vtuber_payload = vtuber_song_fallback_payload(
                 conn, range_id, q, view, page, page_size, min_count, base_total,
                 effective_search_scope, search_fields, niche_only, hide_unknown_artist,
@@ -966,6 +969,25 @@ def source_occurrence_match_rows_sql(
         """,
         [range_id, *source_values, *source_filter_values],
     )
+
+
+def source_occurrence_matches_exist(
+    conn: sqlite3.Connection,
+    range_id: str,
+    query: str,
+    scope: str,
+    search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
+) -> bool:
+    source_rows_sql, source_values = source_occurrence_match_rows_sql(
+        conn, range_id, query, scope, search_fields, niche_only, hide_unknown_artist,
+    )
+    row = conn.execute(
+        f"SELECT 1 FROM ({source_rows_sql}) source_matches LIMIT 1",
+        source_values,
+    ).fetchone()
+    return row is not None
 
 
 def source_occurrence_fts_table(
