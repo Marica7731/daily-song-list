@@ -1901,6 +1901,7 @@ function updateQueryAnchorPosition() {
 function handleResponsiveResize() {
   updateViewportVars();
   updateQueryAnchorPosition();
+  if (document.activeElement?.matches?.('[data-page-input="true"]')) return;
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
@@ -5465,6 +5466,16 @@ function renderPageJumpControl(pageInfo) {
 }
 
 function bindPaginationInput(input) {
+  bindPageInputInteraction(input);
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.stopPropagation();
+    handlePaginationFormSubmit(event);
+  });
+}
+
+function bindPageInputInteraction(input) {
   input.autocomplete = "off";
   input.spellcheck = false;
   const stopPageInputPropagation = (event) => event.stopPropagation();
@@ -5473,12 +5484,6 @@ function bindPaginationInput(input) {
   input.addEventListener("touchstart", stopPageInputPropagation, { passive: true });
   input.addEventListener("click", stopPageInputPropagation);
   bindPageInputSelection(input);
-  input.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    event.stopPropagation();
-    handlePaginationFormSubmit(event);
-  });
 }
 
 function bindPageInputSelection(input) {
@@ -7614,7 +7619,7 @@ function renderSourcePageSummary(pageInfo, drawerId) {
   input.pattern = "[0-9]*";
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
-  bindPageInputSelection(input);
+  bindPageInputInteraction(input);
 
   const total = document.createElement("span");
   total.className = "source-page-total";
