@@ -116,6 +116,7 @@ const PAGE_SIZES = {
 const INDEX_ALL_BUCKET = "全部";
 const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
+let pageInputRestoreToken = 0;
 
 const KANA_BUCKETS = [
   { label: "あ", pattern: /^[ぁ-お]/u },
@@ -1900,6 +1901,7 @@ function updateQueryAnchorPosition() {
 function handleResponsiveResize() {
   updateViewportVars();
   updateQueryAnchorPosition();
+  if (document.activeElement?.matches?.('[data-page-input="true"]')) return;
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
@@ -3063,7 +3065,7 @@ function renderStatus(status) {
     alerts.push(warning.message);
   }
   const displayAt = freshnessAt || rebuiltDerivedAt || attemptedAt;
-  const statusText = currentStatus.status === "success" ? `${formatTime(displayAt)}更新` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
+  const statusText = currentStatus.status === "success" ? `${formatUpdatedAt(displayAt)}更新` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
   setStatusSummary({
     text: statusText,
     kind: currentStatus.status === "success" ? "success" : "fallback",
@@ -3192,8 +3194,10 @@ function renderDebugPanel() {
 }
 
 function render(options = {}) {
+  const preservedPageInputState = options.preservePageInput === false ? null : capturePageInputState();
+  if (options.preservePageInput === false) cancelPageInputRestore();
   if (canUseRequestRuntime(state.range)) {
-    renderRequestedRuntime(options);
+    renderRequestedRuntime(options, preservedPageInputState);
     return;
   }
   const renderMark = perfMark("render-dom:start");
@@ -3231,6 +3235,7 @@ function render(options = {}) {
   updateQueryAvailability();
   cleanSharedUrlAfterRender();
   updateBackToTopVisibility();
+  restorePageInputState(preservedPageInputState);
   if (!state.firstContentMeasured) {
     state.firstContentMeasured = true;
     perfMeasure("first-content", renderMark);
@@ -3239,7 +3244,7 @@ function render(options = {}) {
   scheduleCurrentRankDiffLoad();
 }
 
-async function renderRequestedRuntime(options = {}) {
+async function renderRequestedRuntime(options = {}, preservedPageInputState = null) {
   const renderMark = perfMark("render-request:start");
   const revision = ++state.requestRuntime.revision;
   if (state.requestRuntime.activeController) state.requestRuntime.activeController.abort();
@@ -3270,6 +3275,7 @@ async function renderRequestedRuntime(options = {}) {
     if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
     state.requestRuntime.lastResult = result;
     renderRequestedPageResult(result);
+    restorePageInputState(preservedPageInputState);
     setSnapshotBusy(false);
     if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
     if (options.focusAfterPageChange) schedulePageChangeFocus();
@@ -3290,6 +3296,7 @@ async function renderRequestedRuntime(options = {}) {
     if (previousResult) {
       setSnapshotBusy(false);
       renderRequestedPageResult(previousResult, { staleError: error });
+      restorePageInputState(preservedPageInputState);
     } else {
       try {
         const rangeId = canonicalRangeId(state.range);
@@ -3300,6 +3307,7 @@ async function renderRequestedRuntime(options = {}) {
           syncUrl: options.syncUrl !== false,
           urlMode: options.urlMode || "replace",
         });
+        restorePageInputState(preservedPageInputState);
       } catch (fallbackError) {
         setSnapshotBusy(false);
         renderEmpty(`页面读取失败：${fallbackError.message || error.message}`, { reloadable: true, role: "alert" });
@@ -5458,13 +5466,24 @@ function renderPageJumpControl(pageInfo) {
 }
 
 function bindPaginationInput(input) {
-  bindPageInputSelection(input);
+  bindPageInputInteraction(input);
   input.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
     event.stopPropagation();
     handlePaginationFormSubmit(event);
   });
+}
+
+function bindPageInputInteraction(input) {
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  const stopPageInputPropagation = (event) => event.stopPropagation();
+  input.addEventListener("pointerdown", stopPageInputPropagation);
+  input.addEventListener("mousedown", stopPageInputPropagation);
+  input.addEventListener("touchstart", stopPageInputPropagation, { passive: true });
+  input.addEventListener("click", stopPageInputPropagation);
+  bindPageInputSelection(input);
 }
 
 function bindPageInputSelection(input) {
@@ -5480,6 +5499,46 @@ function bindPageInputSelection(input) {
   input.addEventListener("click", () => window.requestAnimationFrame(selectValue));
 }
 
+function capturePageInputState() {
+  const active = document.activeElement;
+  if (!active?.matches?.('[data-page-input="true"]')) return null;
+  const form = active.closest("[data-page-form], [data-page-jump-form]");
+  if (!form) return null;
+  const forms = Array.from(document.querySelectorAll("[data-page-form], [data-page-jump-form]"));
+  return {
+    formIndex: forms.indexOf(form),
+    value: active.value,
+    selectionStart: active.selectionStart,
+    selectionEnd: active.selectionEnd,
+    selectionDirection: active.selectionDirection || "none",
+  };
+}
+
+function cancelPageInputRestore() {
+  pageInputRestoreToken += 1;
+}
+
+function restorePageInputState(snapshot) {
+  if (!snapshot || snapshot.formIndex < 0) return;
+  const token = ++pageInputRestoreToken;
+  window.requestAnimationFrame(() => {
+    if (token !== pageInputRestoreToken) return;
+    const forms = Array.from(document.querySelectorAll("[data-page-form], [data-page-jump-form]"));
+    const input = forms[snapshot.formIndex]?.querySelector('[data-page-input="true"]');
+    if (!input) return;
+    input.value = snapshot.value;
+    try {
+      input.focus({ preventScroll: true });
+      const valueLength = input.value.length;
+      const start = Math.min(valueLength, Math.max(0, Number(snapshot.selectionStart) || 0));
+      const end = Math.min(valueLength, Math.max(start, Number(snapshot.selectionEnd) || start));
+      input.setSelectionRange(start, end, snapshot.selectionDirection);
+    } catch {
+      // Some embedded browsers do not expose focus or selection APIs consistently.
+    }
+  });
+}
+
 function handlePaginationFormSubmit(event) {
   const form = event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
     ? event.currentTarget
@@ -5489,7 +5548,7 @@ function handlePaginationFormSubmit(event) {
   const input = form.querySelector("[data-page-input]");
   const page = Number.parseInt(input?.value || "1", 10);
   setPage(page);
-  render({ focusAfterPageChange: true, urlMode: "push" });
+  render({ focusAfterPageChange: true, preservePageInput: false, urlMode: "push" });
 }
 
 function schedulePageChangeFocus() {
@@ -7560,7 +7619,7 @@ function renderSourcePageSummary(pageInfo, drawerId) {
   input.pattern = "[0-9]*";
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
-  bindPageInputSelection(input);
+  bindPageInputInteraction(input);
 
   const total = document.createElement("span");
   total.className = "source-page-total";
@@ -9629,6 +9688,12 @@ function formatTime(value) {
   const parts = dateParts(value);
   if (!parts) return value ? String(value) : "未知";
   return `${parts.hour}:${parts.minute}`;
+}
+
+function formatUpdatedAt(value) {
+  const parts = dateParts(value);
+  if (!parts) return value ? String(value) : "未知";
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
 
 function dateParts(value) {
