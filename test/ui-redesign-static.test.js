@@ -261,7 +261,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
   assert.match(
     cssSource,
-    /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-header\s*\{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\) 34px;[\s\S]*"thumb title title"[\s\S]*"thumb date actions"/u,
+    /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-header\s*\{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\);[\s\S]*"thumb title"[\s\S]*"thumb actions"/u,
   );
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-summary-actions\s*\{[\s\S]*overflow: visible;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 0;[\s\S]*min-height: 22px;[\s\S]*margin: 0;/u);
@@ -522,12 +522,15 @@ test("VTuber cards expose explicit statistics and only trusted channel identitie
   assert.ok(appSource.includes('["ByaypQqmirQ", "/@FujiotoKanade"]'));
 
   const compactHeaderBlock = cssBlock(".artist-song-group-vtuber .artist-song-header");
-  assert.match(compactHeaderBlock, /"thumb title actions"[\s\S]*"thumb date actions"/u);
-  assert.match(compactHeaderBlock, /grid-template-rows: auto auto;/u);
+  assert.match(compactHeaderBlock, /grid-template-areas: "thumb title actions";/u);
+  assert.match(compactHeaderBlock, /grid-template-rows: auto;/u);
   assert.match(cssBlock(".artist-song-group-vtuber .artist-song-title"), /font-size: 12px;[\s\S]*white-space: nowrap;/u);
   assert.match(cssBlock(".artist-song-group-vtuber .artist-song-artist"), /font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
-  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-date"), /grid-area: date;/u);
-  assert.match(songGroupBody, /date\.className = "artist-song-date"[\s\S]*header\.append\(date\)/u);
+  assert.match(
+    cssSource,
+    /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*justify-content: space-between;/u,
+  );
+  assert.match(songGroupBody, /date\.className = "artist-song-date"[\s\S]*meta\.append\(date\)/u);
   assert.doesNotMatch(songGroupBody, /titleWrap\.append\(date\)/u);
 });
 

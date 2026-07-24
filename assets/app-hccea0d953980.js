@@ -8239,16 +8239,16 @@ function renderArtistSongGroup(group) {
       group.publishedTimestamp,
   );
   header.append(titleWrap);
-  if (publishedDate && group.sourceMode === "vtuber") {
-    const date = document.createElement("span");
-    date.className = "artist-song-date";
-    date.textContent = publishedDate;
-    header.append(date);
-  }
 
   const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
   const meta = document.createElement("div");
   meta.className = "artist-song-summary-actions";
+  if (publishedDate && group.sourceMode === "vtuber") {
+    const date = document.createElement("span");
+    date.className = "artist-song-date";
+    date.textContent = publishedDate;
+    meta.append(date);
+  }
 
   const count = document.createElement(group.sourceMode === "vtuber" ? "button" : "span");
   count.className = "artist-song-count";
