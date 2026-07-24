@@ -3274,6 +3274,8 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     }));
     if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
     state.requestRuntime.lastResult = result;
+    await waitForPageInputToSettle({ allowActive: options.preservePageInput === false });
+    if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
     const pageInputStateAtResponse = capturePageInputState() || preservedPageInputState;
     renderRequestedPageResult(result);
     restorePageInputState(pageInputStateAtResponse);
@@ -3296,11 +3298,15 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     if (error?.name === "AbortError" || revision !== state.requestRuntime.revision) return;
     if (previousResult) {
       setSnapshotBusy(false);
+      await waitForPageInputToSettle({ allowActive: options.preservePageInput === false });
+      if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
       const pageInputStateAtError = capturePageInputState() || preservedPageInputState;
       renderRequestedPageResult(previousResult, { staleError: error });
       restorePageInputState(pageInputStateAtError);
     } else {
       try {
+        await waitForPageInputToSettle({ allowActive: options.preservePageInput === false });
+        if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
         const pageInputStateBeforeFallback = capturePageInputState() || preservedPageInputState;
         const rangeId = canonicalRangeId(state.range);
         state.requestRuntime.disabledRanges.add(rangeId);
@@ -5539,6 +5545,25 @@ function restorePageInputState(snapshot) {
     } catch {
       // Some embedded browsers do not expose focus or selection APIs consistently.
     }
+  });
+}
+
+function activePageInputElement() {
+  const active = document.activeElement;
+  return active?.matches?.('[data-page-input="true"]') ? active : null;
+}
+
+async function waitForPageInputToSettle(options = {}) {
+  if (options.allowActive === true) return;
+  const input = activePageInputElement();
+  if (!input) return;
+  await new Promise((resolve) => {
+    const finish = () => {
+      input.removeEventListener("blur", finish);
+      resolve();
+    };
+    input.addEventListener("blur", finish, { once: true });
+    if (document.activeElement !== input) finish();
   });
 }
 
