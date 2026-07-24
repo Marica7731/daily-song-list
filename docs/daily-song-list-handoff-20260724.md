@@ -31,6 +31,13 @@
 - H5 390×844：顶部和底部各有一个页码输入；输入框可命中且可聚焦，真实 `Ctrl+A` 后输入 `5` 同样变为 `15`。用真实坐标点击“选页”后摘要进入第 15 页，说明提交动作存在，但选中/替换当前值的语义仍不可靠。
 - H5 线上实际计算尺寸曾为约 `94×38`，左右翻页按钮约 `28×28`；根因审计发现通用 `input:not([type="checkbox"]):not([type="radio"])` 的 specificity 覆盖了 `.page-select input` / `.page-jump input` 的宽高和 padding。页码输入必须恢复为与分页控件同级的尺寸，保留输入加“选页”，不能改成下拉。
 
+### 发布后复测证据（2026-07-24 10:46 +08:00）
+
+- `6b14d2fd` 已推送到 `main`；VPS 静态发布 workflow `30062331363` 成功，远端 checkout、nginx reload 和 index 资源引用校验均通过。GitHub runner 对公开静态文件的探针有 warning，但 VPS checkout verification 通过，不能把 warning 误记为发布失败。
+- 线上 index 已引用新版本化资源 `h989054f8a263`。Desktop 页码输入实际为 `type=text`、约 `52×30`；真实点击后输入 `5` 并按 Enter，URL 为 `?range=all&page=5`，摘要为 `第 5 / 1316 页 · 121-150 / 39475 首歌曲`。
+- H5 `390×844` 顶部和底部页码输入均约 `46×28`，pointer 命中正常；真实点击后输入 `5` 并点击“选页”进入 `第 5 / 1974 页 · 81-100 / 39475 首歌曲`。重新打开第 1 页后，真实 `Ctrl+A` 输入 `6` 的值为 `6`，不再追加为 `16`。
+- 收录 tag 线上样本：`youtube_channel_discovery` 记录显示 `已收录`；`vsinger_moment_http` 的 `水沢オペラ / Opera Ch.`、`もかん ch / Mokan`、`みたにみく- VTuber -` 不显示 tag。顶层样本符合语义，但展开 drawer、来源卡片和静态 fallback 的全路径一致性仍需后续用明确 counterexample 收口。
+
 ### 来源会话并行状态（用户截图回报，未在本轮独立查询）
 
 - ebakyouka batch142 已生成可复核 accepted increment：32 个视频、692 个 occurrence/song 记录，时间字段覆盖；无时间候选/无歌曲来源未进入 accepted。该会话已清理 vps-shadow 与 G staging，只保留 D 侧 accepted increment、manifest、audit/validation/report 和小型远程证据。

@@ -27,7 +27,7 @@
 
 - [ ] 歌手全局归并：官方名称、括号罗马字、emoji、`feat.` 边界和同名歌手的真实身份需要数据规则与人工审查配合，不能只靠这次展示兜底解决。
 - [ ] `未記載` 的全量数据回填：已合并的歌曲应使用主歌手，外部 VSinger Moment 来源不能自动标记为 `已收录`。
-- [ ] 页码输入交互重新收口：修复通用输入 CSS 覆盖分页控件尺寸的问题，并为 focus/click 增加选中当前值的兜底；Web/H5 真实 CUA 验证不得只用 `fill()`。
+- [x] 页码输入交互重新收口：改用可选中的文本型数字输入（保留 numeric keyboard/pattern），修复通用输入 CSS 覆盖分页控件尺寸的问题，并为 focus/click 增加选中当前值的兜底；Web/H5 已完成真实 CUA 点击、输入、提交和 Ctrl+A 复测，发布证据见交接文档。
 - [ ] 收录 tag 语义重新收口：检查 top-level、drawer、source card、静态 fallback 的数据来源，避免把外部来源或任意 occurrence 误认为已导入曲库。
 - [ ] 日期补全任务：缺日期视频继续由 Mac/VPS 的 checkpoint 任务补齐，再重建 runtime DB。
 - [ ] 来源补跑产物：先审查 `reachedEnd=false` 的 partial manifest，再统一导入、构建和发布。
