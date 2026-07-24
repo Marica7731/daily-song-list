@@ -177,7 +177,7 @@ curl.exe -sS "https://ytb-song-rank.culua.com/api/rankings?range=all&view=vtuber
 - `/api/meta` 计数合理，`source_occurrences`、`ranking_rows` 为正数
 - 关键 `/api/rankings` 查询不返回 500/504
 - 带 `q` 的列表请求最多返回 50 条；仅由单字符字母、数字或文字组成的短查询返回 400，避免触发无界大 LIKE。两字符及以上查询（例如 `晴る`）以及包含有效长词的组合查询仍可用，完整来源通过 `/api/sources/{sourceDetailKey}?page=...` 分页读取。
-- `nicheOnly` / `hideUnknownArtist` 的歌曲筛选按歌曲标题+歌手索引定位 occurrence，列表只保留有界预览；不要把筛选列表响应当作完整来源，完整来源仍走分页 source API。
+- `nicheOnly` / `hideUnknownArtist` 的歌曲筛选使用 occurrence 的持久化标记和 `(range_id,title,artist,filter flags)` 索引定位，保留同一歌曲不同 occurrence 的筛选语义；列表只保留有界预览，不要把筛选列表响应当作完整来源，完整来源仍走分页 source API。
 - GitHub Actions 对应 run 是 `completed/success`
 - 用户可见页面不再依赖静态兜底错误状态
 

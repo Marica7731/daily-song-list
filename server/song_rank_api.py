@@ -1028,12 +1028,9 @@ def source_occurrence_scope_sql(niche_only: bool, hide_unknown_artist: bool) -> 
 def occurrence_scope_sql(alias: str, niche_only: bool, hide_unknown_artist: bool) -> tuple[str, list[object]]:
     clauses = []
     if niche_only:
-        clauses.append(f"json_extract({alias}.payload_json, '$.song.isNiche') = 1")
+        clauses.append(f"{alias}.is_niche = 1")
     if hide_unknown_artist:
-        clauses.append(
-            f"lower(trim(COALESCE(json_extract({alias}.payload_json, '$.song.artist'), ''))) NOT IN "
-            "('', 'unknown', '未記載', '未记载', '待补歌手', '待補歌手')"
-        )
+        clauses.append(f"{alias}.is_unknown_artist = 0")
     return " AND ".join(clauses) or "1 = 1", []
 
 
@@ -1583,8 +1580,8 @@ def ranking_filter_sql(view: str, niche_only: bool, hide_unknown_artist: bool) -
         if niche_only or hide_unknown_artist:
             occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
             clauses.append(
-                "EXISTS (SELECT 1 FROM occurrences o JOIN songs s ON s.song_key = o.song_key "
-                "WHERE o.range_id = r.range_id AND s.title = r.title AND s.artist = r.artist "
+                "EXISTS (SELECT 1 FROM occurrences o "
+                "WHERE o.range_id = r.range_id AND o.title = r.title AND o.artist = r.artist "
                 f"AND {occurrence_filter})"
             )
     elif view == "artists":
@@ -1623,9 +1620,9 @@ def ranking_row_count_sql(
         return "r.count", "r.song_count", "r.video_count", "r.timestamp_count"
     occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
     if view in {"songs", "songIndex"}:
-        where_sql = f"o.range_id = r.range_id AND s.title = r.title AND s.artist = r.artist AND {occurrence_filter}"
-        count_sql = f"(SELECT COUNT(*) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
-        video_count_sql = f"(SELECT COUNT(DISTINCT o.video_id) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        where_sql = f"o.range_id = r.range_id AND o.title = r.title AND o.artist = r.artist AND {occurrence_filter}"
+        count_sql = f"(SELECT COUNT(*) FROM occurrences o WHERE {where_sql})"
+        video_count_sql = f"(SELECT COUNT(DISTINCT o.video_id) FROM occurrences o WHERE {where_sql})"
         return count_sql, "r.song_count", video_count_sql, count_sql
     if view == "artists":
         where_sql = f"o.range_id = r.range_id AND lower(trim(s.artist)) = lower(trim(r.name)) AND {occurrence_filter}"
@@ -1736,7 +1733,8 @@ def filtered_occurrence_payloads(
     if key_column in {"song", "artist"}:
         from_sql = "occurrences o JOIN songs s ON s.song_key = o.song_key"
         if key_column == "song":
-            key_clause = "s.title = ? AND s.artist = ?"
+            from_sql = "occurrences o"
+            key_clause = "o.title = ? AND o.artist = ?"
             key_params = (title, artist)
         else:
             key_clause = "lower(trim(s.artist)) = lower(trim(?))"

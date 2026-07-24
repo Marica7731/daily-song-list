@@ -313,9 +313,14 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           source_id TEXT NOT NULL DEFAULT '',
           title TEXT NOT NULL DEFAULT '',
           artist TEXT NOT NULL DEFAULT '',
+          is_niche INTEGER NOT NULL DEFAULT 0,
+          is_unknown_artist INTEGER NOT NULL DEFAULT 0,
           payload_json TEXT NOT NULL
         );
         CREATE INDEX idx_occurrences_range_song ON occurrences(range_id, song_key);
+        CREATE INDEX idx_occurrences_range_song_filter ON occurrences(range_id, song_key, is_niche, is_unknown_artist);
+        CREATE INDEX idx_occurrences_range_title_artist_filter
+          ON occurrences(range_id, title, artist, is_niche, is_unknown_artist);
         CREATE INDEX idx_occurrences_range_video ON occurrences(range_id, video_id);
 
         CREATE TABLE ranking_rows (
@@ -380,11 +385,14 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           channel_url TEXT NOT NULL DEFAULT '',
           published_timestamp INTEGER,
           seconds INTEGER,
+          is_niche INTEGER NOT NULL DEFAULT 0,
+          is_unknown_artist INTEGER NOT NULL DEFAULT 0,
           search_text TEXT NOT NULL DEFAULT '',
           payload_json TEXT NOT NULL,
           PRIMARY KEY (source_key, position)
         );
         CREATE INDEX idx_source_occurrences_lookup ON source_occurrences(source_key, position);
+        CREATE INDEX idx_source_occurrences_filter ON source_occurrences(source_key, is_niche, is_unknown_artist, position);
         CREATE INDEX idx_source_occurrences_range ON source_occurrences(range_id, source_key);
         CREATE INDEX idx_source_occurrences_range_source_video_pos ON source_occurrences(range_id, source_key, video_id, position);
 
@@ -1736,9 +1744,10 @@ def insert_occurrence(
     conn.execute(
         """
         INSERT OR IGNORE INTO occurrences(
-          occurrence_id, range_id, video_id, song_key, seconds, source_system, source_id, title, artist, payload_json
+          occurrence_id, range_id, video_id, song_key, seconds, source_system, source_id, title, artist,
+          is_niche, is_unknown_artist, payload_json
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             occurrence_id,
@@ -1750,6 +1759,8 @@ def insert_occurrence(
             clean_text(song.get("sourceId") or song.get("sourceHash")),
             clean_text(song.get("title")),
             clean_text(song.get("artist")),
+            1 if song.get("isNiche") is True else 0,
+            1 if is_unknown_artist(song.get("artist")) else 0,
             dumps_json(payload),
         ),
     )
@@ -2085,9 +2096,9 @@ def insert_source_occurrence(
         """
         INSERT OR REPLACE INTO source_occurrences(
           source_key, range_id, position, video_id, title, channel_name, channel_id, channel_handle, channel_url,
-          published_timestamp, seconds, search_text, payload_json
+          published_timestamp, seconds, is_niche, is_unknown_artist, search_text, payload_json
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             source_key,
@@ -2101,6 +2112,8 @@ def insert_source_occurrence(
             clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             int_or_none(item.get("publishedTimestamp")),
             int_or_none(song.get("seconds")),
+            1 if song.get("isNiche") is True else 0,
+            1 if is_unknown_artist(song.get("artist")) else 0,
             occurrence_search_text,
             dumps_json(clean_payload),
         ),

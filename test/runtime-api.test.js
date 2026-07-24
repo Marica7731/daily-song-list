@@ -341,6 +341,14 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(nicheOnlyRankings.records[0].occurrences.length, 1);
     assert.equal(nicheOnlyRankings.records[0].occurrences[0].item.videoId, "video-a");
 
+    const combinedRuntimeFilters = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20One&searchFields=title,artist&nicheOnly=1&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(combinedRuntimeFilters.totalCount, 1);
+    assert.equal(combinedRuntimeFilters.totalOccurrenceCount, 1);
+    assert.equal(combinedRuntimeFilters.records[0].title, "Song One");
+    assert.equal(combinedRuntimeFilters.records[0].count, 1);
+
     const hideUnknownArtistRankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&hideUnknownArtist=1&pageSize=5`);
     assert.equal(hideUnknownArtistRankings.totalCount, 4);
     assert.equal(hideUnknownArtistRankings.totalOccurrenceCount, 5);
