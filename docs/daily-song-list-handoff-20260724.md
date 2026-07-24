@@ -318,3 +318,10 @@
 - 禁止动作：不把 accepted JSON 当原始证据；不直接删除上述七条、不写 title override；不对 `feat.flower`、括号、emoji 或英文文本做全库宽正则剥离；不提前让 `未記載` 参与歌手胜出；不在人工复核前生成生产数据 diff；不导入 partial 或 `reachedEnd=false` 来源。
 - 后续必须在 Mac self-hosted 或 G 盘用 bounded timeout：先定位七个 videoId 的原始完整材料并检查 manifest 完整性；再运行 `node scripts/audit-accepted-cleaning-impact.js`（期待 `CODEX_ACCEPTED_CLEANING_IMPACT_OK`，仅作汇总）；补建只读 singleton 报告，至少输出 canonical title、occurrence/distinct video 数、videoId、source file/type、频道、歌手、time/seconds、raw、sourceId/sourceHash 和疑似原因；最后以 `フィナーレ。` 的原始标点、canonical 前后键、全部视频 ID、API/detail 数量及全库两个视频对照作为验收。
 - 结论：Naraetan 只读审计交接已完成；Naraetan 清洗、singleton 处置、`フィナーレ。` 修正和生产导入均未完成。
+
+## 静态发布磁盘阻塞续证（2026-07-24）
+
+- 前端专项由 `gpt-5.6-sol / xhigh` 完成复核并提交 `8e216da7`：歌曲次数复制优先使用歌曲级来源容器，再按当前歌曲过滤，避免混入同频道其他歌曲；触控区域保持至少 44×44px。其本地回归为 UI/工具 81/81、前端结构/性能 29/29、JS 语法 114 个文件通过；尚未线上发布。
+- `deploy-vps-static.yml` 的直接 tar 发布 run `30086153380` 在写入新 hash 资源时失败：`No space left on device`，新 `app-hf5c3011a09fc.js` 被线上读到 HTTP 200、`Content-Length: 0`。随后 `30086439264` 因 runner 浅克隆取旧首页失败，`30086546128` 旧首页写入只能完成 8192/9728 bytes，`30086858574` 因 sparse checkout 漏回滚脚本失败，`30086908576` 因浅克隆无 `b108c956` 对象失败，最终 `30086984430` 使用 8733-byte 压缩旧首页仍只能写 8192 bytes 后失败。
+- 最后线上读取（约 2026-07-24 18:41 +08）：主域名 `index.html` HTTP 200、下载 9397 bytes、`Last-Modified=2026-07-24 10:41:01 GMT`，引用旧 `styles-h95090fdb1212.css`，正文在 query dialog 的 `<button ... typ` 处截断且没有 app 脚本；旧 `app-h95090fdb1212.js` 仍为 371674 bytes，新 `app-hf5c3011a09fc.js` 仍为 0 bytes。`/healthz` 仍 HTTP 200，但返回旧 runtime `builtAt=2026-07-24T07:33:41Z`，不能作为静态页恢复证据。
+- 当前交付状态：主域名静态页损坏，H5/Web 新 UI、复制和跳转不能写成已上线；runtime DB、7d 自动入库、收录 tag 和 API 筛选也仍未线上验收。已停止所有远端写入、删除和清理；下一步必须由运维先释放或扩容 VPS2 磁盘，再运行受控恢复/发布 workflow，并核对完整首页、所有 hash 资源、`healthz`、`meta`、rankings、来源详情和 H5 交互。
