@@ -1986,6 +1986,20 @@ mark {
   text-align: center;
 }
 
+.page-select input[data-page-input="true"] {
+  width: 46px;
+  min-height: var(--chip-height);
+  height: var(--chip-height);
+  padding: 0 6px;
+}
+
+.page-jump input[data-page-input="true"] {
+  width: 52px;
+  min-height: var(--chip-height);
+  height: var(--chip-height);
+  padding: 0 var(--space-2);
+}
+
 .page-jump-button {
   min-width: 48px;
 }
@@ -2472,6 +2486,13 @@ mark {
   font-size: 12px;
   font-weight: 700;
   text-align: center;
+}
+
+.source-page-jump input[data-page-input="true"] {
+  width: 52px;
+  min-height: var(--chip-height);
+  height: var(--chip-height);
+  padding: 0 var(--space-2);
 }
 
 .source-page-total {

@@ -388,6 +388,9 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function vtuberSongGroupPageSizeForMode"), /sourceDrawerPageSizeForMode\(mode\)/u);
   assert.match(functionBody("function currentPageSize"), /defaultListPageSizeForMode\(\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.type = "text"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.inputMode = "numeric"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.pattern = "\[0-9\]\*"/u);
   assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
   assert.match(functionBody("function renderPageSelectControl"), /submit\.type = "submit"/u);
   assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
@@ -397,6 +400,10 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function handlePaginationFormSubmit\(event\)/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
+  assert.match(appSource, /function bindPageInputSelection\(input\)/u);
+  assert.match(functionBody("function bindPageInputSelection"), /input\.select\(\)/u);
+  assert.match(functionBody("function bindPageInputSelection"), /addEventListener\("click"/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /bindPageInputSelection\(input\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
   assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
@@ -444,6 +451,9 @@ test("mobile summary and pagination have compact rules", () => {
   assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
   assert.doesNotMatch(cssSource, /\.page-select-compact select|\.page-select-compact span::after/u);
   assert.match(cssSource, /\.page-select input\s*\{[\s\S]*width: 46px;[\s\S]*text-align: center;/u);
+  assert.match(cssSource, /\.page-select input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
+  assert.match(cssSource, /\.page-jump input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
+  assert.match(cssSource, /\.source-page-jump input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
   assert.match(cssSource, /\.page-select-compact input\s*\{[\s\S]*width: 38px;/u);
   assert.match(cssSource, /\.page-jump input\s*\{[\s\S]*width: 52px;/u);
 });

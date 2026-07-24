@@ -5488,12 +5488,13 @@ function renderPageSelectControl(pageInfo, options) {
   text.className = "page-select-label";
   text.textContent = options.compact ? "第" : "跳至";
   const input = document.createElement("input");
-  input.type = "number";
+  input.type = "text";
   input.min = "1";
   input.max = String(pageInfo.pageCount);
   input.step = "1";
   input.value = String(pageInfo.page);
   input.inputMode = "numeric";
+  input.pattern = "[0-9]*";
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
   bindPaginationInput(input);
@@ -5521,8 +5522,9 @@ function renderPageJumpControl(pageInfo) {
   const text = document.createElement("span");
   text.textContent = "跳至";
   const input = document.createElement("input");
-  input.type = "number";
+  input.type = "text";
   input.inputMode = "numeric";
+  input.pattern = "[0-9]*";
   input.min = "1";
   input.max = String(pageInfo.pageCount);
   input.value = String(pageInfo.page);
@@ -5542,12 +5544,26 @@ function renderPageJumpControl(pageInfo) {
 }
 
 function bindPaginationInput(input) {
+  bindPageInputSelection(input);
   input.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
     event.stopPropagation();
     handlePaginationFormSubmit(event);
   });
+}
+
+function bindPageInputSelection(input) {
+  const selectValue = () => {
+    if (document.activeElement !== input) return;
+    try {
+      input.select();
+    } catch {
+      // Embedded browsers may not expose a selectable range consistently.
+    }
+  };
+  input.addEventListener("focus", () => window.requestAnimationFrame(selectValue));
+  input.addEventListener("click", () => window.requestAnimationFrame(selectValue));
 }
 
 function handlePaginationFormSubmit(event) {
@@ -7508,14 +7524,16 @@ function renderSourcePageSummary(pageInfo, drawerId) {
   form.setAttribute("aria-label", `跳至曲目页码，当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
 
   const input = document.createElement("input");
-  input.type = "number";
+  input.type = "text";
   input.min = "1";
   input.max = String(pageInfo.pageCount);
   input.step = "1";
   input.value = String(pageInfo.page);
   input.inputMode = "numeric";
+  input.pattern = "[0-9]*";
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
+  bindPageInputSelection(input);
 
   const total = document.createElement("span");
   total.className = "source-page-total";

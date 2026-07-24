@@ -6,9 +6,35 @@
 
 - 仓库：`https://github.com/Marica7731/daily-song-list.git`
 - Windows 轻量编辑和 Git 收口：`G:\\codex-work\\daily-song-list-runtime-fix-20260723`
-- 当前分支/HEAD：`main` / `a157d403`，工作树只有未跟踪的 `.workbuddy/`，不要触碰或提交。
+- 当前分支/HEAD：`main` / `c7610a34`（已与 `origin/main` 对齐）。工作树已有未跟踪的 `.workbuddy/`、`scripts/db/__pycache__/`、`server/__pycache__/`，均不要触碰或提交。
 - 大 SQLite、来源抓取、来源合并和长时间构建优先交给 Mac；不要使用 C 盘。Mac 路径、SSH、self-hosted runner 和断点续跑规则见 `docs/repo-operations.md`。
 - 用户要求：先修可验证的搜索/交互热路径，再处理脏数据；截图矩阵暂缓到目标集中完成，不能让截图阻塞代码检查。
+
+## 截图、真实浏览器复现与交接补充（2026-07-24）
+
+本节把用户截图中的原始要求和本轮实际线上复现写成可执行验收，不把旧的自动化填值结果当成交互已通过。
+
+### 用户截图中的未关闭问题
+
+- 收录 tag 仍被用户确认“线上问题仍在”。必须重新审计榜单顶层、展开 drawer、来源卡片和静态 fallback；外部 VSinger Moment 证据不能显示 `已收录`，只有本地基线、人工补录或明确来源会话已导入 runtime 的记录可以显示。
+- Web 与 H5 的页码输入框仍无法可靠完成“点击、聚焦、选中、清空、输入、提交”。用户截图引用的现场图片为 `file:///D:/Download/剪贴板图片 (22).jpg`；该路径只作为用户提供的证据定位，不代表当前 Windows 工作树可以访问或应被复制。
+- Naraetan 脏曲目现场证据引用 `file:///D:/Download/剪贴板文本 (55).txt`、`file:///D:/Download/剪贴板图片 (23).jpg`、`file:///D:/Download/剪贴板图片 (24).jpg`。疑似条目包括：`魔法少女ごっこ遊び`、`32]「ニャーーーーー`（方括号/引号的确切字节必须以原始 JSON/HTML 为准）、`feat.flower`、`龍角散 高音を出すとおでこが痒くなる`、`飾り棚`、`風邪気味かもしれない`。这些是待核对的原始解析结果，不是可直接写入生产清洗表的规范名称。
+- 用户要求先扫描全库只出现 1 次的歌曲，输出 video ID、原始 JSON/HTML、频道、歌手和时间点，再决定是否处理；未记录歌手的歌曲必须后置合并，不能先删除或批量改名。
+- 同名歌曲有多个歌手时，按 occurrence 次数降序取第一个已知歌手，`未記載` 只能最后兜底。用户举例 `逆光`、`逆光 - Ado`、`逆光 - Ado（Ado）`，但括号、emoji、`feat.` 边界和官方歌手名必须保守处理，不能对全库做无条件正则清洗。
+- `フィナーレ` 必须先由原始证据确认标准标题并检查是否应为 `フィナーレ。`；“只有两个来源视频”要分别核对原始数据、canonical merge、过滤规则和预览上限，并扫描是否还有其他只有两个视频的歌曲，不能把它当成特殊 UI 规则。
+
+### 本轮线上交互证据
+
+查询时间约为 `2026-07-24 10:35 +08:00`，入口为 `https://ytb-song-rank.culua.com` 的真实浏览器页面，使用了 DOM 命中检查和 CUA 坐标输入；截图矩阵仍暂缓，但真实交互验证不能暂缓。
+
+- Desktop `?range=all&view=songs`：页码输入可被命中并聚焦，但执行真实 `Ctrl+A` 后输入 `5`，值实际变为 `15`；按 Enter 后进入第 15 页。这证明此前仅使用 Playwright `fill("5")` 的通过结果不能作为选中/清空验收。
+- H5 390×844：顶部和底部各有一个页码输入；输入框可命中且可聚焦，真实 `Ctrl+A` 后输入 `5` 同样变为 `15`。用真实坐标点击“选页”后摘要进入第 15 页，说明提交动作存在，但选中/替换当前值的语义仍不可靠。
+- H5 线上实际计算尺寸曾为约 `94×38`，左右翻页按钮约 `28×28`；根因审计发现通用 `input:not([type="checkbox"]):not([type="radio"])` 的 specificity 覆盖了 `.page-select input` / `.page-jump input` 的宽高和 padding。页码输入必须恢复为与分页控件同级的尺寸，保留输入加“选页”，不能改成下拉。
+
+### 来源会话并行状态（用户截图回报，未在本轮独立查询）
+
+- ebakyouka batch142 已生成可复核 accepted increment：32 个视频、692 个 occurrence/song 记录，时间字段覆盖；无时间候选/无歌曲来源未进入 accepted。该会话已清理 vps-shadow 与 G staging，只保留 D 侧 accepted increment、manifest、audit/validation/report 和小型远程证据。
+- 该会话随后继续处理 UCrF92，使用第二台 `vps-jp`，先验证 45-ID seed 再上传轻量运行包；主会话不得重复启动同来源或导入 partial 产物。来源续跑仍遵守 checkpoint 不加 `--fresh`、大任务放 Mac/self-hosted runner、生产导入前人工审查。
 
 ## 线上事实（2026-07-24 本轮查询）
 
