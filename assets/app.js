@@ -573,7 +573,6 @@ function bindEvents() {
     const link = event.target.closest("a[href]");
     if (
       link?.dataset.rankSearchLink === "true" &&
-      event.button === 0 &&
       !event.metaKey &&
       !event.ctrlKey &&
       !event.shiftKey &&
