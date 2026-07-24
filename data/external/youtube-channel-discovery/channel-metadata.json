@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-24T14:06:52.514Z",
+  "generatedAt": "2026-07-24T15:46:46.819Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-24T14:06:52.514Z",
+    "fetchedAt": "2026-07-24T15:46:46.819Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-24T14:06:52.514Z",
+    "generatedAt": "2026-07-24T15:46:46.819Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,25 +7272,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 970,
-      "parseableChannels": 752,
+      "totalChannels": 971,
+      "parseableChannels": 753,
       "realAvatar": 642,
-      "thumbnailFallback": 328,
+      "thumbnailFallback": 329,
       "missingDisplayImage": 0,
-      "missingAvatar": 328,
+      "missingAvatar": 329,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 338
+      "skipped_collected_evidence": 339
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 120,
+      "batch_limit_reached": 121,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
+      {
+        "handle": "/@OokamiMio",
+        "channelId": "UCp-5t9SrOQwXMU7iIjQfARg",
+        "displayName": "Mio Channel 大神ミオ",
+        "sourceUrl": "https://www.youtube.com/@OokamiMio",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Luciaaa_Sings",
         "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
@@ -7456,13 +7463,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "結栞そまり~Yuika Somari~",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "-Liza Channel-",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
