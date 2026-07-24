@@ -102,8 +102,10 @@ jobs:
             fi
           fi
           node scripts/check-js-syntax.js
+          ui_proof_ok=0
           if [ "${run_ui_proof}" = "1" ]; then
             if npm run check:ui-proof; then
+              ui_proof_ok=1
               echo "CODEX_UI_PROOF_OK"
             else
               echo "::warning::UI proof is deferred until the planned screenshot matrix refresh; code and contract checks remain blocking."
@@ -113,7 +115,7 @@ jobs:
             echo "CODEX_UI_PROOF_SKIPPED reason=no-ui-proof-input-changes"
           fi
           npm run blocklist:validate
-          if [ "${run_ui_proof}" = "1" ]; then
+          if [ "${run_ui_proof}" = "1" ] && [ "${ui_proof_ok}" = "1" ]; then
             npm test
           else
             test_files="$(git ls-files 'test/*.test.js' 'test/**/*.test.js' | grep -v '^test/ui-proof\.test\.js$' | sort -u)"
