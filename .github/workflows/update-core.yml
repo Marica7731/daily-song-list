@@ -122,7 +122,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/external/youtube-channel-discovery/channel-metadata.json data/snapshots data/diff data/ui data/catalog-segments
+          # The Mac runner uses sparse checkout, while the generated runtime shards,
+          # diffs, snapshots, and catalog segments intentionally live outside its
+          # sparse patterns. --sparse is required to stage those generated paths.
+          git add --sparse data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/external/youtube-channel-discovery/channel-metadata.json data/snapshots data/diff data/ui data/catalog-segments
           if git diff --cached --quiet; then
             echo "No core data changes to commit."
             exit 0

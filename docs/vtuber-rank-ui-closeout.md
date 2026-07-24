@@ -28,7 +28,7 @@
 - [ ] 歌手全局归并：官方名称、括号罗马字、emoji、`feat.` 边界和同名歌手的真实身份需要数据规则与人工审查配合，不能只靠这次展示兜底解决。
 - [ ] `未記載` 的全量数据回填：已合并的歌曲应使用主歌手，外部 VSinger Moment 来源不能自动标记为 `已收录`。
 - [x] 页码输入交互重新收口：改用可选中的文本型数字输入（保留 numeric keyboard/pattern），修复通用输入 CSS 覆盖分页控件尺寸的问题，并为 focus/click 增加选中当前值的兜底；Web/H5 已完成真实 CUA 点击、输入、提交和 Ctrl+A 复测，发布证据见交接文档。
-- [ ] 收录 tag 语义重新收口：检查 top-level、drawer、source card、静态 fallback 的数据来源，避免把外部来源或任意 occurrence 误认为已导入曲库。
+- [x] 收录 tag 语义重新收口：线上首屏与展开 drawer 已复测；本地/人工频道保留 `已收录`，外部 Moment 证据频道及其来源卡不显示，静态 fallback/runtime 测试覆盖 trusted source type 与权威 `isCollected=false`。
 - [ ] 日期补全任务：缺日期视频继续由 Mac/VPS 的 checkpoint 任务补齐，再重建 runtime DB。
 - [ ] 来源补跑产物：先审查 `reachedEnd=false` 的 partial manifest，再统一导入、构建和发布。
 - [ ] 头像全量质量检查：本批只优化首屏加载和版式，截图矩阵按用户要求延后到目标需求集中验收。
@@ -65,7 +65,7 @@ npm run check
 
 ## 2026-07-24 H5/API/tag 修复补充
 
-本轮并行修复已在 G 盘工作树完成本地实现，尚未发布前不得视为线上完成：
+本轮并行修复先在 G 盘工作树完成本地实现；线上交付证据见下方“发布后验收补充”：
 
 - 频道卡新增视觉可见的 `视频 / 歌曲 / 次数` 三字段；H5 不再只从展开按钮无障碍文本读取歌曲数和视频数。
 - 缺少可靠频道身份时隐藏 handle；已用真实 YouTube 视频页核对 `@mizusawa_opera`、`@mokankamo`、`@mikumitani`、`@FujiotoKanade` 四个线上样例，并在前端做保守的来源身份派生。
@@ -73,4 +73,11 @@ npm run check
 - Runtime API 的 `nicheOnly` / `hideUnknownArtist` 现在覆盖 fallback、视频混合 occurrence、source detail 和前端 source cache；坏布尔值保持可诊断 400。
 - 收录 tag presentation model 已统一 trusted source type 与 Moment 外部证据：Moment 不能单独显示 `已收录`，`isCollected=false` 具有优先级；顶层/展开/source/fallback 的真实线上复测仍是发布门禁。
 
-本地验收：117/117 相关 Node 测试通过，114 个 JS 文件语法检查通过，`git diff --check` 通过；资产版本化后 hash 为 `h54a3b4d4ad6b`。待完成：只 stage 本轮文件、commit/push、按既有静态发布 workflow 发布，并在 390px H5 与桌面线上确认三个字段、handle、展开紧凑布局、页码交互和 tag 语义未回退。
+本地验收：117/117 相关 Node 测试通过，114 个 JS 文件语法检查通过，`git diff --check` 通过；资产版本化后 hash 为 `h54a3b4d4ad6b`。发布前门禁已由下方“发布后验收补充”关闭。
+## 发布后验收补充（2026-07-24 15:42 +08:00）
+
+- `ecb86ca5` 已推送 `main`，静态发布 workflow run `30075859093` 成功；VPS checkout/index 校验通过。
+- 真实站点 `https://ytb-song-rank.culua.com/` 已返回 `h54a3b4d4ad6b` 资产；`/healthz` 为 200，`builtAt=2026-07-24T00:40:17Z`，`songs=44416`、`occurrences=595180`；`/api/meta` 的 `schemaVersion=1`、`meta.built_at` 与之相符。
+- 390px H5 已实测三个统计字段、四个外部 handle、两列紧凑展开卡和页码输入提交；页码从 `1` 输入 `5` 后显示 `第 5 / 58 页`。
+- 线上首屏与 drawer 已核对 tag：UTANO 等本地/人工频道有 `已收录`；水沢オペラ、もかん、みたにみく、藤音カナデ 等外部 Moment 证据无 tag，水沢展开的来源卡同样无 tag。
+- 这次 UI/API 发布不包含 Naraetan 数据清洗、`フィナーレ。`/两视频调查或来源增量导入；最近 7 天→总数据同步是新增的只读审计事项，待独立审计给出根因。

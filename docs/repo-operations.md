@@ -103,6 +103,8 @@ git push origin main
 .github/workflows/update-core.yml
 ```
 
+自动落库链路是：`update-core.yml` 在 Mac runner 生成并提交 `data/latest.json`、`data/7d.json`、`data/all.json` 及其 runtime 分片；该 workflow 成功后由 `deploy-runtime-db.yml` 的 `workflow_run` 触发 Mac 构建 SQLite、上传并激活 VPS2 runtime DB。`update-core.yml` 使用 sparse checkout，但生成的 `data/diff`、`data/ui`、`data/catalog-segments` 和部分 snapshots 仍必须用 `git add --sparse` 暂存；如果提交步骤失败，最近数据即使生成成功也不会进入累计数据库，后续 runtime workflow 会被跳过。
+
 来源补跑：
 
 ```text

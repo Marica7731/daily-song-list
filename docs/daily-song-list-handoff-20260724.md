@@ -200,7 +200,7 @@
 ### 收录 tag 语义
 
 - `assets/frontend-utils.js` 统一 trusted source type 与 Moment source type 判断：本地/人工/明确 `youtube_channel_discovery` 等来源可显示 `已收录`，`vsinger_moment_http`、`vsinger-moment`、`moment` 外部证据不能单独打 tag；权威 `isCollected=false` 优先。
-- 已补充顶层/静态 fallback 的 presentation model 测试；线上展开 drawer/source card 仍须在发布后用真实页面复测，未复测前不能写成完全收口。
+- 已补充顶层/静态 fallback 的 presentation model 测试；线上展开 drawer/source card 已在发布后用真实页面复测，具体证据见本文“发布后线上验收”。
 
 ### 本轮本地验收（发布前）
 
@@ -209,3 +209,26 @@
 - `git diff --check`：通过。
 - `npm run version:assets`：生成 `h54a3b4d4ad6b`，`index.html` 已指向对应 hashed CSS/JS；线上发布和 H5 复测仍待主会话统一完成。
 - Naraetan 清洗本轮保持只读；不把原始/partial 来源直接导入生产。之前已知的原始 JSON/HTML 审计结论仍按 D 节执行，Naraetan、`フィナーレ。` 和“只有两个视频”不属于本次 H5/API 发布范围。
+## 发布后线上验收（2026-07-24 15:42 +08:00）
+
+以上“待完成”已由主会话统一验收，结论只适用于本次 `ecb86ca5` 发布，不代表 Naraetan 清洗或来源补录已完成：
+
+- 提交：`ecb86ca5 feat: 完善 H5 频道统计与筛选语义`，已推送 `main`。
+- 发布：`deploy-vps-static.yml` run [30075859093](https://github.com/Marica7731/daily-song-list/actions/runs/30075859093) 成功；VPS checkout/index 校验通过。Runner 的公网探针有 warning，但不影响 VPS 发布步骤成功，仍以真实站点/API 复测为准。
+- 线上数据源：`https://ytb-song-rank.culua.com/healthz` 返回 200，`builtAt=2026-07-24T00:40:17Z`，`songs=44416`、`occurrences=595180`；`/api/meta` 返回 `schemaVersion=1` 且 `meta.built_at=2026-07-24T00:40:17Z`；公开 `index.html` 指向 `h54a3b4d4ad6b` 资产。
+- 线上 API：`q=晴る` 返回 20 条；`q=晴る ヨルシカ` 返回 8 条；`channel=@UTANOch` 返回 `UTANO ch. 白玖ウタノ`；带 `nicheOnly`/`hideUnknownArtist` 的过滤请求返回 `total=1, occurrences=1`。这些查询均在本次验收时间执行，错误字段/范围回归由本地 runtime API 测试覆盖。
+- H5 真实页面：390px 页面加载 `.vtuber-card-stats`，首屏可见 `视频 432 / 歌曲 1393 / 次数 8848`；外部频道水沢オペラ显示 `@mizusawa_opera`、`视频 373 / 歌曲 689 / 次数 6330`，其余四个已核对的外部 handle 也不再显示脏值。展开卡日期处于底部独立网格行；实测首卡约 `169x74`，日期在底部，未见封面下方的大块空白。
+- H5 页码真实交互：使用页面可见输入框执行点击、`Ctrl+A`、输入 `5`、点击“选页”，URL 进入 `page=5`，页面显示 `第 5 / 58 页`；第二个响应式分页输入同步为 `5`，确认不是把 `1` 追加成 `15`。
+- 收录 tag：线上首屏 DOM 中本地/人工频道如 UTANO 有 `已收录`，外部证据频道水沢オペラ、もかん、みたにみく、藤音カナデ没有；展开水沢的 20 首来源卡也没有 tag，展开 UTANO 仍保留 `已收录`。Moment 外部证据不会单独打 tag 的静态模型和 runtime 路径已由测试覆盖。
+- 浏览器缓存注意：验收页首次复用旧 tab 时仍命中旧的 `h989054f8a263` 资产，追加 `__cb=ecb86ca5-*` 后加载新 hash；无缓存直接读取公开 index 已确认指向新 hash。若用户仍看到旧 UI，应先硬刷新/清理旧 HTML 缓存。
+- Naraetan：本轮仍为只读审计，没有导入原始/partial 来源；`フィナーレ。`、只有两个视频和全库单次歌曲仍保留在后续数据审计范围。
+- 新增待查事项：用户反馈“最近 7 天数据没有同步到总数据”。已派 `gpt-5.6-sol/ultra` 只读审计，重点检查 `range=7d`/`range=all`、accepted increment、构建合并、workflow/runner 与线上 `healthz/meta`，未得到根因前不得写成已修复。
+
+## 最近 7 天自动并入累计库审计与修复（2026-07-24）
+
+- 线上复现（查询时间 2026-07-24 15:42 +08:00）：`/api/rankings?range=7d&view=songs&metric=count&pageSize=5` 返回 HTTP 200、`rangeId=7d`、`totalCount=2818`；`range=7d&view=vtubers` 返回 HTTP 200、`totalCount=301`。因此最近范围不是空数据，也不能先把问题归咎于前端 tab。
+- Actions 证据：`update-core` run `30072564852` 的 `Update compact runtime data` 成功，结束摘要为 `updated=true`，但 `Commit core data or failure status` 失败；日志明确显示 sparse checkout 拒绝更新 `data/diff`、`data/catalog-segments`、`data/snapshots` 和 `data/ui`，提示使用 `git add --sparse`。紧接的 `deploy-runtime-db` workflow_run `30073150542` 为 `skipped`。更早的 `update-core` runs `30068044447`、`30064593894` 也失败，说明不是单次偶发。
+- 断点结论：此前“最近数据生成成功”并不等于“累计 runtime DB 已构建/发布”；失败发生在自动提交门禁，导致 `workflow_run` 链路无法启动。现有证据支持自动落库链路缺口，尚无证据证明 `song_rank_api.py` 给 `range=all` 错加了七天时间边界。
+- 修复：`.github/workflows/update-core.yml` 的生成数据暂存命令改为 `git add --sparse ...`，并在 `test/workflow-static.test.js` 固定该门禁；`docs/repo-operations.md` 已记录自动链路和 sparse checkout 注意事项。提交/推送后必须手动触发一次 `update-core.yml` 做 Mac runner 真实回归，不能把 workflow 文件修复写成数据已恢复。
+- 验收不变量：选择最近 3–10 个明确 `videoId`，统一 `searchFields`、频道条件和分页，检查 `videoIds(7d) ⊆ videoIds(all)`；确认 accepted increment 只在 canonical merge/全量 DB build 后进入累计库，拒绝 `partial`/`reachedEnd=false` 来源；发布后验证 `/healthz`、`/api/meta` 构建时间和 `/api/rankings` 两个范围。
+- 脏数据、头像和 handle：自动链路恢复不绕过现有非歌曲规则、curation overrides、channel avatar cache 和可靠频道身份规则；不需要 DeepSeek API key 才能修复本次根因。模型只能作为后续离线边界样本复核，不能直接决定生产导入或替代原始 JSON/HTML 证据。
