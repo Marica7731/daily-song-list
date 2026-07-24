@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-24T10:49:40.121Z",
+  "generatedAt": "2026-07-24T11:59:07.660Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-24T10:49:40.121Z",
+    "fetchedAt": "2026-07-24T11:59:07.660Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-24T10:49:40.121Z",
+    "generatedAt": "2026-07-24T11:59:07.660Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,22 +7272,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 968,
-      "parseableChannels": 750,
+      "totalChannels": 969,
+      "parseableChannels": 751,
       "realAvatar": 642,
-      "thumbnailFallback": 326,
+      "thumbnailFallback": 327,
       "missingDisplayImage": 0,
-      "missingAvatar": 326,
+      "missingAvatar": 327,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 336
+      "skipped_collected_evidence": 337
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 118,
+      "batch_limit_reached": 119,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
@@ -7317,6 +7317,13 @@
         "channelId": "UC7O0stCdkTxnDJK0dgs_llw",
         "displayName": "心奏みこ",
         "sourceUrl": "https://www.youtube.com/@kokona_miko",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KummaNOTE",
+        "channelId": "UCUMwanMztK0Y-T-ns3bMR0g",
+        "displayName": "庫麻Kumma Channel",
+        "sourceUrl": "https://www.youtube.com/@KummaNOTE",
         "reason": "batch_limit_reached"
       },
       {
@@ -7458,13 +7465,6 @@
         "displayName": "リンドウネイロ -RindoNeiro-",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "/@Nijyuuu7",
-        "channelId": "UCpJc-f0Xs-u3QrkBQr5QiEQ",
-        "displayName": "にじゅな",
-        "sourceUrl": "https://www.youtube.com/@Nijyuuu7/streams",
-        "reason": "batch_limit_reached"
       }
     ]
   }
