@@ -68,7 +68,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui\/meta\.json data\/diff/u);
   assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
   assert.match(staticDeploy, /restore-previous-index/u);
-  assert.match(staticDeploy, /git show b108c956:index\.html/u);
+  assert.match(staticDeploy, /raw\.githubusercontent\.com\/Marica7731\/daily-song-list\/b108c95646f250526cbf9f08618657ff156608ec\/index\.html/u);
   assert.match(staticDeploy, /node scripts\/compact-static-index\.js rollback-index\.html/u);
   assert.match(staticDeploy, /tar -czf - --transform='s\|\^rollback-index\\\.html\$\|index\.html\|'/u);
   assert.doesNotMatch(staticDeploy, /git fetch --quiet .*origin main/u);

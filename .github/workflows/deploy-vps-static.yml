@@ -56,8 +56,9 @@ jobs:
         if: inputs.action == 'restore-previous-index'
         run: |
           set -Eeuo pipefail
-          git fetch --depth=10 --filter=blob:none --no-tags origin main
-          git show b108c956:index.html > rollback-index.html
+          curl -fsSL --retry 3 --retry-delay 2 \
+            "https://raw.githubusercontent.com/Marica7731/daily-song-list/b108c95646f250526cbf9f08618657ff156608ec/index.html" \
+            -o rollback-index.html
           node scripts/compact-static-index.js rollback-index.html
 
       - name: Install sshpass
