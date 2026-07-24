@@ -55,8 +55,8 @@ jobs:
         if: inputs.action == 'restore-previous-index'
         run: |
           set -Eeuo pipefail
-          git fetch --depth=2 --filter=blob:none --no-tags origin be647bb9
-          git show be647bb9^:index.html > rollback-index.html
+          git fetch --depth=10 --filter=blob:none --no-tags origin main
+          git show b108c956:index.html > rollback-index.html
           test "$(wc -c < rollback-index.html)" -eq 13928
           grep -q 'assets/app-h95090fdb1212.js' rollback-index.html
 
