@@ -254,9 +254,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.vtuber-display-link\s*\{[\s\S]*grid-area: image;[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-title-link:hover\s*\{[\s\S]*text-decoration: underline;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: auto;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: 74px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: auto;/u);
-  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: 72px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*white-space: nowrap;[\s\S]*line-height: 1\.12;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*font-size: 10px;/u);
   assert.match(vtuberLayoutSource, /mobile-390[\s\S]*expectedColumns: 2[\s\S]*mobile-320[\s\S]*expectedColumns: 2/u);
@@ -511,8 +511,10 @@ test("VTuber cards expose explicit statistics and only trusted channel identitie
   assert.ok(appSource.includes('["ByaypQqmirQ", "/@FujiotoKanade"]'));
 
   const compactHeaderBlock = cssBlock(".artist-song-group-vtuber .artist-song-header");
-  assert.match(compactHeaderBlock, /"thumb title title"[\s\S]*"date date actions"/u);
-  assert.match(compactHeaderBlock, /grid-template-rows: minmax\(0, 1fr\) auto;/u);
+  assert.match(compactHeaderBlock, /"thumb title actions"[\s\S]*"thumb date actions"/u);
+  assert.match(compactHeaderBlock, /grid-template-rows: auto auto;/u);
+  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-title"), /font-size: 12px;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-artist"), /font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
   assert.match(cssBlock(".artist-song-group-vtuber .artist-song-date"), /grid-area: date;/u);
   assert.match(songGroupBody, /date\.className = "artist-song-date"[\s\S]*header\.append\(date\)/u);
   assert.doesNotMatch(songGroupBody, /titleWrap\.append\(date\)/u);
