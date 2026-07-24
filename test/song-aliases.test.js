@@ -7,6 +7,7 @@ const {
   createSongAliasContext,
   validateSongAliasConfig,
 } = require("../scripts/song-aliases");
+const RankingUtils = require("../assets/ranking-utils");
 
 function kakurenboContext() {
   return createSongAliasContext({
@@ -129,7 +130,25 @@ test("canonicalizes eill Finale to the official punctuation", () => {
 
   const repaired = canonicalizeSongIdentity({ title: "フィナーレ", artist: "eill" }, context);
   assert.equal(repaired.title, "フィナーレ。");
+  assert.equal(repaired.canonicalTitle, "フィナーレ。");
   assert.equal(repaired.originalTitle, "フィナーレ");
+});
+
+test("ranking records preserve official punctuation from song aliases", () => {
+  const context = createSongAliasContext({
+    schemaVersion: 1,
+    records: [{
+      artist: "eill",
+      canonicalTitle: "フィナーレ。",
+      aliases: ["フィナーレ"],
+      reason: "official_title_punctuation",
+    }],
+  });
+  const song = canonicalizeSongIdentity({ title: "フィナーレ", artist: "eill", seconds: 12 }, context);
+  const records = RankingUtils.buildSongRecords([{ item: { videoId: "AAAAAAAAAAA", channelName: "test" }, song }]);
+
+  assert.equal(records[0].title, "フィナーレ。");
+  assert.equal(records[0].workTitle, "フィナーレ。");
 });
 
 test("canonicalizes aliases across payload groups and exposes alias summary", () => {

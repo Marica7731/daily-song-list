@@ -61,13 +61,15 @@
     for (const occurrence of occurrences || []) {
       const title = clean(occurrence?.song?.title);
       const work = normalizeSongWorkTitle(title);
+      const explicitCanonicalTitle = clean(occurrence?.song?.canonicalTitle || occurrence?.song?.alias?.canonicalTitle);
+      const displayWorkTitle = explicitCanonicalTitle || work.workTitle;
       const titleKey = normalizeTitle(work.workTitle);
       if (!titleKey) continue;
 
       if (!titleGroups.has(titleKey)) {
         titleGroups.set(titleKey, {
           titleKey,
-          title: work.workTitle,
+          title: displayWorkTitle,
           titleCounts: new Map(),
           rawTitleCounts: new Map(),
           knownArtists: new Map(),
@@ -76,7 +78,7 @@
       }
 
       const titleGroup = titleGroups.get(titleKey);
-      incrementTitleCount(titleGroup.titleCounts, work.workTitle);
+      incrementTitleCount(titleGroup.titleCounts, displayWorkTitle);
       incrementTitleCount(titleGroup.rawTitleCounts, title);
       const artist = canonicalizeArtistName(clean(occurrence?.song?.artist));
       const rawArtistKey = normalize(artist);
@@ -89,8 +91,8 @@
             artistKey,
             artistTitleKey: normalizeTitle(artist),
             artistBaseKeys: artistBaseKeys(artist, normalizeArtist),
-            title: work.workTitle,
-            workTitle: work.workTitle,
+            title: displayWorkTitle,
+            workTitle: displayWorkTitle,
             canonicalWorkTitleKey: titleKey,
             sortKey: makeSortKey(title),
             count: 0,

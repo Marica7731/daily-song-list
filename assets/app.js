@@ -3274,8 +3274,9 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     }));
     if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
     state.requestRuntime.lastResult = result;
+    const pageInputStateAtResponse = capturePageInputState() || preservedPageInputState;
     renderRequestedPageResult(result);
-    restorePageInputState(preservedPageInputState);
+    restorePageInputState(pageInputStateAtResponse);
     setSnapshotBusy(false);
     if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
     if (options.focusAfterPageChange) schedulePageChangeFocus();
@@ -3295,10 +3296,12 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     if (error?.name === "AbortError" || revision !== state.requestRuntime.revision) return;
     if (previousResult) {
       setSnapshotBusy(false);
+      const pageInputStateAtError = capturePageInputState() || preservedPageInputState;
       renderRequestedPageResult(previousResult, { staleError: error });
-      restorePageInputState(preservedPageInputState);
+      restorePageInputState(pageInputStateAtError);
     } else {
       try {
+        const pageInputStateBeforeFallback = capturePageInputState() || preservedPageInputState;
         const rangeId = canonicalRangeId(state.range);
         state.requestRuntime.disabledRanges.add(rangeId);
         const fallbackPayload = await loadRuntimeRange(rangeId);
@@ -3307,7 +3310,7 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
           syncUrl: options.syncUrl !== false,
           urlMode: options.urlMode || "replace",
         });
-        restorePageInputState(preservedPageInputState);
+        restorePageInputState(pageInputStateBeforeFallback);
       } catch (fallbackError) {
         setSnapshotBusy(false);
         renderEmpty(`页面读取失败：${fallbackError.message || error.message}`, { reloadable: true, role: "alert" });

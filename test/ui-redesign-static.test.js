@@ -430,6 +430,7 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function handleResponsiveResize"), /document\.activeElement\?\.matches\?\.\('\[data-page-input="true"\]'\)/u);
   assert.match(appSource, /function capturePageInputState\(\)/u);
   assert.match(appSource, /function restorePageInputState\(snapshot\)/u);
+  assert.match(appSource, /const pageInputStateAtResponse = capturePageInputState\(\) \|\| preservedPageInputState/u);
   assert.match(functionBody("function restorePageInputState"), /input\.focus\(\{ preventScroll: true \}\)/u);
   assert.match(functionBody("function restorePageInputState"), /setSelectionRange/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /preservePageInput: false/u);

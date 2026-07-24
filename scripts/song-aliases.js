@@ -72,6 +72,8 @@ function canonicalizeSongIdentity(song, aliasContext = null) {
   const next = {
     ...song,
     title: match.canonicalTitle,
+    canonicalTitle: match.canonicalTitle,
+    canonicalArtist: match.artist,
     alias: {
       ...(song.alias || {}),
       changed,
