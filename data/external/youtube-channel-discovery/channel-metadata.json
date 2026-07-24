@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-24T19:48:19.647Z",
+  "generatedAt": "2026-07-24T21:21:16.443Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-24T19:48:19.647Z",
+    "fetchedAt": "2026-07-24T21:21:16.443Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-24T19:48:19.647Z",
+    "generatedAt": "2026-07-24T21:21:16.443Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,22 +7272,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 971,
-      "parseableChannels": 753,
+      "totalChannels": 972,
+      "parseableChannels": 754,
       "realAvatar": 642,
-      "thumbnailFallback": 329,
+      "thumbnailFallback": 330,
       "missingDisplayImage": 0,
-      "missingAvatar": 329,
+      "missingAvatar": 330,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 339
+      "skipped_collected_evidence": 340
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 121,
+      "batch_limit_reached": 122,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
@@ -7317,6 +7317,13 @@
         "channelId": "UCgSEzhNM3Aqj55oh5rpIjaQ",
         "displayName": "夜凪よな-Yonagi Yona-",
         "sourceUrl": "https://www.youtube.com/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@seina_koyori",
+        "channelId": "UCwi2a2NOXWr6M5Sk_5L1tyA",
+        "displayName": "心寄せいな / Seina Koyori",
+        "sourceUrl": "https://www.youtube.com/@seina_koyori",
         "reason": "batch_limit_reached"
       },
       {
@@ -7456,13 +7463,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "小恋乃ほの / Kokono Hono Ch.",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "結栞そまり~Yuika Somari~",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
