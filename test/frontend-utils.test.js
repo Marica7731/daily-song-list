@@ -7,6 +7,7 @@ const {
   activeQueryConditionItems,
   buildSetlistText,
   buildSongSourceLinksText,
+  vtuberSongSearchQueryModel,
   buildIndexBucketModel,
   buildInlineSourceModel,
   buildSourcePreview,
@@ -798,6 +799,57 @@ test("builds same-song source link text from unique source videos", () => {
   assert.equal(links.split("\n").length, 6);
   assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)&t=(\d+)s/u)?.[0])).size, 6);
   assert.equal(links.endsWith("\n"), false);
+});
+
+test("builds URL-only same-song occurrence text for compact VTuber copy", () => {
+  const links = buildSongSourceLinksText(
+    [
+      occurrence("VideoA", "Channel A", { seconds: 75, title: "夜行" }),
+      occurrence("VideoA", "Channel A", { seconds: 180, title: "夜行" }),
+      occurrence("VideoA", "Channel A", { seconds: 75, title: "夜行" }),
+      occurrence("VideoB", "Channel A", { seconds: 12, title: "夜行" }),
+    ],
+    { urlsOnly: true },
+  );
+
+  assert.equal(
+    links,
+    [
+      "https://www.youtube.com/watch?v=VideoA&t=75s",
+      "https://www.youtube.com/watch?v=VideoA&t=180s",
+      "https://www.youtube.com/watch?v=VideoB&t=12s",
+    ].join("\n"),
+  );
+  assert.equal(links.split("\n").every((line) => /^https:\/\/www\.youtube\.com\/watch\?v=/u.test(line)), true);
+});
+
+test("VTuber song search prefers handle and only falls back to artist without channel identity", () => {
+  assert.deepEqual(
+    vtuberSongSearchQueryModel({
+      title: "夜行",
+      channelHandle: "/@noa_polaris",
+      channelName: "ノア・ポラリス",
+      artist: "ヨルシカ",
+    }),
+    {
+      q: "@noa_polaris 夜行",
+      searchFields: ["title", "channel"],
+      identity: "handle",
+    },
+  );
+  assert.deepEqual(
+    vtuberSongSearchQueryModel({ title: "夜行", channelName: "ノア・ポラリス", artist: "ヨルシカ" }),
+    {
+      q: "ノア・ポラリス 夜行",
+      searchFields: ["title", "channel"],
+      identity: "channel",
+    },
+  );
+  assert.deepEqual(vtuberSongSearchQueryModel({ title: "夜行", artist: "ヨルシカ" }), {
+    q: "夜行 ヨルシカ",
+    searchFields: ["title", "artist"],
+    identity: "artist",
+  });
 });
 
 test("inline source timestamp link points to YouTube watch time", () => {

@@ -1304,9 +1304,10 @@
     };
   }
 
-  function buildSongSourceLinksText(occurrences) {
+  function buildSongSourceLinksText(occurrences, options = {}) {
     const rows = [];
     const seen = new Set();
+    const urlsOnly = Boolean(options.urlsOnly);
     for (const group of groupOccurrencesByVideo(occurrences)) {
       const item = group.item || group.occurrences?.[0]?.item || {};
       const videoId = cleanText(item.videoId || group.videoId);
@@ -1319,10 +1320,44 @@
         if (seen.has(key)) continue;
         seen.add(key);
         const channelName = cleanText(occurrenceItem.channelName || item.channelName || group.channelName) || "未知频道";
-        rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
+        const url = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`;
+        rows.push(urlsOnly ? url : `${channelName} ${url}`);
       }
     }
     return rows.join("\n");
+  }
+
+  function vtuberSongSearchQueryModel(options = {}) {
+    const title = cleanText(options.title);
+    const handle = cleanText(options.channelHandle).replace(/^\/+/u, "");
+    const channelName = cleanText(options.channelName);
+    const artist = cleanText(options.artist);
+    if (/^@[A-Za-z0-9._~-]{3,64}$/u.test(handle)) {
+      return {
+        q: cleanText(`${handle} ${title}`),
+        searchFields: ["title", "channel"],
+        identity: "handle",
+      };
+    }
+    if (channelName) {
+      return {
+        q: cleanText(`${channelName} ${title}`),
+        searchFields: ["title", "channel"],
+        identity: "channel",
+      };
+    }
+    if (artist) {
+      return {
+        q: cleanText(`${title} ${artist}`),
+        searchFields: ["title", "artist"],
+        identity: "artist",
+      };
+    }
+    return {
+      q: title,
+      searchFields: ["title"],
+      identity: "title",
+    };
   }
 
   function buildInlineSourceModel(occurrence) {
@@ -1986,6 +2021,7 @@
     buildSetlistText,
     sourceGroupSetlistItem,
     buildSongSourceLinksText,
+    vtuberSongSearchQueryModel,
     buildIndexBucketModel,
     buildInlineSourceModel,
     buildSourcePreview,

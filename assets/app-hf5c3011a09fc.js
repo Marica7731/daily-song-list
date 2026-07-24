@@ -756,7 +756,7 @@ function switchView(nextView, options = {}) {
 }
 
 function handleContentLinkNavigation(event, link) {
-  if (!link || event.defaultPrevented || !isSourceOrVideoContentLink(link)) return false;
+  if (!link || link.dataset.rankSearchLink === "true" || event.defaultPrevented || !isSourceOrVideoContentLink(link)) return false;
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
   event.preventDefault();
   window.open(link.href, "_blank", "noopener,noreferrer");
@@ -8164,10 +8164,16 @@ function renderArtistSongGroup(group) {
   const previewOccurrence = latestOccurrenceByVideoDate(group.occurrences) || firstOccurrence;
   const previewItem = previewOccurrence?.item || group._record || {};
   const previewSong = previewOccurrence?.song || { seconds: 0, title: group.title };
-  const thumbTag = previewItem.videoId ? "a" : "span";
+  const rankSearchUrl = group.sourceMode === "vtuber" ? buildSearchUrlForSongGroup(group) : "";
+  const thumbTag = rankSearchUrl || previewItem.videoId ? "a" : "span";
   const thumb = document.createElement(thumbTag);
-  thumb.className = previewItem.videoId ? "artist-song-thumb source-link" : "artist-song-thumb artist-song-thumb-static";
-  if (previewItem.videoId) {
+  thumb.className =
+    rankSearchUrl || previewItem.videoId ? "artist-song-thumb source-link" : "artist-song-thumb artist-song-thumb-static";
+  if (rankSearchUrl) {
+    thumb.href = rankSearchUrl;
+    thumb.dataset.rankSearchLink = "true";
+    thumb.setAttribute("aria-label", `在歌曲榜搜索：${group.title}`);
+  } else if (previewItem.videoId) {
     thumb.href = youtubeTimeUrl(previewItem.videoId, previewSong.seconds);
     thumb.target = "_blank";
     thumb.rel = "noopener noreferrer";
@@ -8187,7 +8193,11 @@ function renderArtistSongGroup(group) {
   const title = document.createElement("a");
   title.className = "artist-song-title";
   title.textContent = group.title;
-  if (firstOccurrence?.item?.videoId) {
+  if (rankSearchUrl) {
+    title.href = rankSearchUrl;
+    title.dataset.rankSearchLink = "true";
+    title.setAttribute("aria-label", `在歌曲榜搜索：${group.title}`);
+  } else if (firstOccurrence?.item?.videoId) {
     title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
     title.target = "_blank";
     title.rel = "noopener noreferrer";
@@ -8225,13 +8235,23 @@ function renderArtistSongGroup(group) {
     header.append(date);
   }
 
+  const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
   const meta = document.createElement("div");
   meta.className = "artist-song-summary-actions";
 
-  const count = document.createElement("span");
+  const count = document.createElement(group.sourceMode === "vtuber" ? "button" : "span");
   count.className = "artist-song-count";
   count.textContent =
     group.sourceMode === "vtuber" ? vtuberSongGroupMetaLabel(group) : artistSongCountLabel(group);
+  if (group.sourceMode === "vtuber") {
+    count.type = "button";
+    count.dataset.copySongLinks = "true";
+    count.dataset.copyUrlsOnly = "true";
+    count._sourceOccurrences = group.occurrences || [];
+    count.title = `复制《${group.title}》全部场次链接`;
+    count.setAttribute("aria-label", `复制《${group.title}》全部场次链接`);
+    if (!hasOccurrences && !sourceDetailPath) count.disabled = true;
+  }
   meta.append(count);
   if (group.sourceMode !== "vtuber" && group.videoCount > 0) {
     const videoCount = document.createElement("span");
@@ -8250,7 +8270,6 @@ function renderArtistSongGroup(group) {
   sources.hidden = true;
   section._artistSongSources = sources;
 
-  const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
   const expectedSourceCount =
     group.sourceMode === "vtuber" && !(Number(group.videoCount) > 0)
       ? Math.max(0, Number(group.count) || 0)
@@ -8296,10 +8315,32 @@ function renderArtistSongGroup(group) {
 
 function buildSearchUrlForSongGroup(group) {
   const params = new URLSearchParams(window.location.search);
-  params.set("view", "songs");
-  params.set("q", group?.title || "");
-  params.set("searchScope", "song");
+  const record = group?._record || {};
+  const occurrenceItem = group?.occurrences?.[0]?.item || {};
+  const handle = vtuberReliableHandle(record) || cleanVtuberChannelHandle(occurrenceItem.channelHandle);
+  const channelName = vtuberReliableDisplayName(record) || cleanText(occurrenceItem.channelName);
+  const artist = artistLabelForSongGroup(group);
+  const query = window.FrontendUtils.vtuberSongSearchQueryModel({
+    title: group?.title,
+    channelHandle: handle,
+    channelName,
+    artist: artist && !window.RankingUtils.isUnknownArtistName(artist) ? artist : "",
+  });
+  params.set("view", "songRank");
+  params.set("metric", "occurrences");
+  params.set("q", query.q);
+  params.set("searchFields", query.searchFields.join(","));
+  params.delete("searchScope");
   params.delete("page");
+  params.delete("bucket");
+  params.delete("layout");
+  params.delete("outside");
+  params.delete("libraryOutside");
+  params.delete("hideUnknown");
+  params.delete("showUnknown");
+  params.delete("trend");
+  params.delete("minCount");
+  params.delete("shared");
   return `${window.location.pathname}?${params.toString()}`;
 }
 
@@ -8330,9 +8371,6 @@ function artistSongCountLabel(group) {
 
 function vtuberSongGroupMetaLabel(group) {
   const count = Math.max(0, Number(group?.count) || 0);
-  const videoCount = Math.max(0, Number(group?.videoCount) || uniqueVideoCount(group?.occurrences || []));
-  if (videoCount > 0 && videoCount !== count) return `${count}次 · ${videoCount}视频`;
-  if (videoCount > 0) return `${count}次`;
   return `${count}次`;
 }
 
@@ -9388,8 +9426,10 @@ function setlistSongCount(item) {
   return Array.isArray(songs) ? songs.length : 0;
 }
 
-async function copySongSourceLinks(occurrences) {
-  const text = window.FrontendUtils.buildSongSourceLinksText(occurrences);
+async function copySongSourceLinks(occurrences, options = {}) {
+  const text = window.FrontendUtils.buildSongSourceLinksText(occurrences, {
+    urlsOnly: Boolean(options.urlsOnly),
+  });
   if (!text) {
     showToast("当前歌曲没有可复制的来源链接");
     return;
@@ -9400,22 +9440,35 @@ async function copySongSourceLinks(occurrences) {
 }
 
 async function copySongSourceLinksFromButton(button) {
-  const group = button.closest(".artist-song-group");
-  const container =
-    button.closest(".rank-row, .index-row, .artist-song-sources") ||
-    group?._artistSongSources ||
-    group?.querySelector(".artist-song-sources");
-  let occurrences =
-    button._sourceOccurrences ||
-    container?._sourceDetailOccurrences ||
-    container?._sourceOccurrences ||
-    container?._songSourceOccurrences ||
-    [];
-  if (container) {
-    occurrences = await sourceDetailOccurrencesForContainer(container, occurrences);
+  if (button.getAttribute("aria-busy") === "true") return;
+  button.setAttribute("aria-busy", "true");
+  try {
+    const group = button.closest(".artist-song-group");
+    const container =
+      button.closest(".rank-row, .index-row, .artist-song-sources") ||
+      group?._artistSongSources ||
+      group?.querySelector(".artist-song-sources");
+    let occurrences =
+      button._sourceOccurrences ||
+      container?._sourceDetailOccurrences ||
+      container?._sourceOccurrences ||
+      container?._songSourceOccurrences ||
+      [];
+    if (container) {
+      occurrences = await sourceDetailOccurrencesForContainer(container, occurrences);
+      const songKey = cleanText(container._sourceSongKey);
+      const songTitle = cleanText(container._sourceSongTitle);
+      if (songKey || songTitle) {
+        occurrences = filterOccurrencesForSongKey(occurrences, songKey, songTitle);
+      }
+    }
+    button._sourceOccurrences = occurrences || [];
+    await copySongSourceLinks(button._sourceOccurrences, {
+      urlsOnly: button.dataset.copyUrlsOnly === "true",
+    });
+  } finally {
+    button.removeAttribute("aria-busy");
   }
-  button._sourceOccurrences = occurrences || [];
-  await copySongSourceLinks(button._sourceOccurrences);
 }
 
 async function writeClipboardText(text) {

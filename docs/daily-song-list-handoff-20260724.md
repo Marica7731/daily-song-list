@@ -280,3 +280,13 @@
 
 - Windows 上的代码审查和轻量测试继续使用 G 工作树；WSL 对应路径固定为 `/mnt/g/codex-work/daily-song-list-runtime-fix-20260723`。大 SQLite/source build 仍优先 Mac/self-hosted runner，不在 Windows 或 `/mnt/c` 放置项目数据。
 - 本约定只约束本任务命令路径，没有擅自修改用户 WSL 全局启动目录或 profile。
+
+## H5 歌曲卡复制与歌曲榜跳转补充（2026-07-24 18:00 +08:00）
+
+- 用户进一步收紧交互：不增加单独的“复制”按钮；VTuber 展开歌曲卡右侧原有“次数”文本本身改为可触控、可键盘访问的复制入口，复制该歌曲全部场次的 YouTube 时间码 URL，纯 URL、每行一个。
+- `assets/app.js`：`renderArtistSongGroup` 为 VTuber 次数渲染 button；点击后加载可用完整 source detail，并按当前歌曲 key/title 过滤，避免复制同频道其它歌曲；按 `videoId + seconds` 去重。复制成功、无可用时间码和失败继续使用现有 `role=status` toast 反馈。
+- `assets/frontend-utils.js`：`buildSongSourceLinksText(occurrences, { urlsOnly: true })` 输出纯链接；新增 `vtuberSongSearchQueryModel`。若有可靠 handle，封面/歌名跳到 `view=songRank`，查询为 `@handle 歌名`、`searchFields=title,channel`，不追加歌手；缺 handle 时优先频道名，频道身份也缺失才用已知歌手兜底。这样可在歌曲榜继续展开完整来源，避免同名歌曲仅靠歌手误命中。
+- `assets/styles.css`：次数按钮保持透明文本外观，不引入额外按钮；最小触控尺寸 44px，提供 `hover/focus-visible/aria-busy` 状态。
+- `docs/ui-spec.md`、`test/frontend-utils.test.js`、`test/ui-redesign-static.test.js` 已同步更新，覆盖 URL-only 输出、重复时间点去重、handle 优先/歌手兜底、路由参数、按钮可访问性。
+- 本地验收：`node --test test/frontend-utils.test.js test/ui-redesign-static.test.js test/app-static-performance.test.js test/workflow-static.test.js` 113/113；`node scripts/check-js-syntax.js` 114/114；`git diff --check` 通过。完整 `npm test` 在稀疏工作树为 404/411，7 项仅因缺失既有 review/UI-proof 夹具（`data/review/*`、`docs/data-architecture.md`），未触及 C 盘补齐。
+- 当前这组改动尚未发布：必须先由主会话审核 diff、commit/push，再运行既有静态部署并用公开首页/真实 H5 页面验收；runtime API/DB 仍受上一节远端磁盘 `remoteFreeBytes=0` 阻塞，不能把本次静态发布写成 runtime 已生效。

@@ -2402,6 +2402,41 @@ mark {
   text-overflow: ellipsis;
 }
 
+.artist-song-group-vtuber button.artist-song-count {
+  position: relative;
+  min-width: 44px;
+  min-height: 32px;
+  margin: -4px -2px;
+  border: 0;
+  border-radius: 7px;
+  padding: 4px 2px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  touch-action: manipulation;
+  appearance: none;
+}
+
+.artist-song-group-vtuber button.artist-song-count:hover,
+.artist-song-group-vtuber button.artist-song-count:focus-visible {
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.artist-song-group-vtuber button.artist-song-count:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.artist-song-group-vtuber button.artist-song-count:disabled,
+.artist-song-group-vtuber button.artist-song-count[aria-busy="true"] {
+  cursor: default;
+  opacity: 0.55;
+}
+
 .artist-song-source-toggle {
   display: inline-flex;
   align-items: center;
