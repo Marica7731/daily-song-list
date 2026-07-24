@@ -571,6 +571,18 @@ function bindEvents() {
 
   els.content.addEventListener("click", (event) => {
     const link = event.target.closest("a[href]");
+    if (
+      link?.dataset.rankSearchLink === "true" &&
+      event.button === 0 &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.shiftKey &&
+      !event.altKey
+    ) {
+      event.preventDefault();
+      window.location.assign(link.href);
+      return;
+    }
     if (link && handleContentLinkNavigation(event, link)) return;
 
     const copySetlist = event.target.closest("[data-copy-setlist]");

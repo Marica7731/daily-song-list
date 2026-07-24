@@ -230,6 +230,10 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"sources sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(appSource, /const VIEW_RANK_METRIC_ORDER = \{[\s\S]*vtuberRank: \["occurrences", "songs", "videos"\]/u);
   assert.match(appSource, /function renderVtuberAvatar/u);
+  assert.match(
+    appSource,
+    /link\?\.dataset\.rankSearchLink === "true"[\s\S]*event\.preventDefault\(\)[\s\S]*window\.location\.assign\(link\.href\)/u,
+  );
   assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberChannelTextLink/u);
   assert.match(appSource, /wrapVtuberChannelLink\(media, record \|\| \{\}, "vtuber-display-link", channelIdentity\)/u);
