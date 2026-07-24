@@ -299,6 +299,15 @@
 - runtime workflow `30088657269` 已成功完成 Mac 构建和 VPS2 direct-inplace 激活；只读探针确认 `song-rank-api=active`、内网 `/healthz=200`，活动 DB 约 13.44 GB，可用空间约 6.85 GB，未发现 `.next`/`.previous` 临时库。
 - 严格线上复测（2026-07-24，`https://ytb-song-rank.culua.com`）：`index`、`/healthz`、`/api/meta`、7d rankings、`q=晴る&searchFields=all`、同筛选加 `nicheOnly=1&hideUnknownArtist=1`、`/api/sources/82488b92c02b5a8f?page=1&pageSize=20` 全部 HTTP 200；筛选与未筛选响应不同，来源响应约 654 KB。此前截图中的 HTTP 502 与 runtime direct-inplace 停 API 的发布窗口一致，当前未复现。
 - 注意：错误探针曾使用未被服务端识别的 `limit=10`，导致回退默认大页；正式验收已改用 API 合约的 `pageSize`。该探针问题不能写成线上服务故障。
+
+## H5 紧凑卡第三行留白线上验收（2026-07-24）
+
+- `assets/styles.css` 在 `<=720px` 的 VTuber 歌曲卡隐藏重复的小众徽标，避免它在标题和歌手之间撑出第三行；标题、歌手、日期、次数仍按紧凑网格渲染。`docs/ui-spec.md` 和 `test/ui-redesign-static.test.js` 已同步该契约。
+- 本地回归：`node --test test/runtime-db.test.js test/runtime-api.test.js test/ui-redesign-static.test.js test/frontend-utils.test.js` 为 96/96；`node scripts/check-js-syntax.js` 检查 115 个 JavaScript 文件通过；`git diff --check` 通过。
+- 提交 `ba0d65d9 fix: 收紧 H5 歌曲卡第三行留白` 已在 rebase 远端 `881de3a5` 后推送 `main`；资源版本为 `h730da7e8fd2a`。静态发布 workflow [30092231417](https://github.com/Marica7731/daily-song-list/actions/runs/30092231417) 成功，VPS checkout、无 Git fetch 上传、index 验证均通过。
+- 公开 H5 `390px` 实测：首个频道展开后 20 张歌曲卡全部约 `61.7px` 高，未再出现上一版约 `80.7px` 的徽标第三行；标题可用宽约 `109.5px`，长标题保持单行省略，歌手约 `10.79px`、日期约 `12.6px`、次数复制入口约 `22px`。
+- 真实交互复测：歌名跳到 `view=songRank`，查询保留 `@Hao_RKMusic + カタオモイ` 和 `searchFields=title,channel`；点击次数复制得到 2 条纯 YouTube 时间码 URL。严格公开探针确认首页、`/healthz`、`/api/meta`、7d rankings、搜索、加 `nicheOnly=1&hideUnknownArtist=1` 的筛选和 `/api/sources/82488b92c02b5a8f?page=1&pageSize=20` 全部 HTTP 200，首页引用 `app-h730da7e8fd2a.js`。
+- 本节只收口 H5/UI 和已在线的 runtime/API 验收；Naraetan 清洗、全库 singleton 审计、`フィナーレ。` 修正、只有两个视频的全库调查和来源续接仍未完成，不能因本次 UI 发布将它们写成完成。
 - 本节 UI 改动仍需由主会话提交、推送并运行既有 `deploy-vps-static.yml`，之后重新用 390px 真实页面测量卡片高度和长标题；在静态发布前不得写成用户已经看到新布局。
 
 ### 追加发布记录（2026-07-24 18:08 +08:00）
