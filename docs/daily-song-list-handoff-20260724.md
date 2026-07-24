@@ -362,3 +362,14 @@
 - 通过 `D:\Download\racknerd账密.txt` 建立有界 Paramiko SSH 只读审计；未回显密码。VPS2 `/dev/vda2` 总容量约 35.8 GB、`df -B1` 可用为 0。目录占用约为：`/opt/culua/ytb-song-rank` 16--18 GB（其中 `data` 约 9.2 GB、`.git` 清理前约 8.1 GB）、active `/var/lib/culua/ytb-song-rank/song-rank.sqlite` 约 13.47 GB、日志约 20 KB，journal 约 105 MB；没有历史 runtime candidate DB。
 - 已确认没有远端 `git`/`rsync`/`tar`/`gzip` 上传进程后，按用户授权只删除失败 fetch 遗留的 `/opt/culua/ytb-song-rank/.git/objects/pack/tmp_pack_lwIbrT`，大小 `1,459,449,856` bytes；删除后该文件不存在，`.git` 从约 8.1 GB 降至约 6.8 GB。active DB、`data`、首页和日志未删除，线上 `/healthz?probe=post-cleanup` 仍 HTTP 200。
 - 由于用户要求继续清理整个远端 `.git`，先修改 `deploy-runtime-db.yml`、`deploy/vps2/song-rank-db-activate.sh`、`deploy/vps2/song-rank-runtime-update.sh`：Mac runner 上传约 2 MB 必要支持文件；VPS2 无 `.git` 时跳过 clone/fetch，激活使用 runner `SOURCE_COMMIT_SHA`，并保留手动 runtime update 的无 Git fallback。该保护尚未 commit/push，整个 `.git` 尚未删除。
+
+## H5 日期/次数同排与二次收紧验收（2026-07-24 20:37 +08:00）
+
+- 用户反馈日期和次数分列、卡片空白仍过大。本轮保留“标题一行、歌手一行、日期与次数同一底部信息行”的结构，并把 H5 VTuber 歌曲卡内边距从 `6px` 收紧到 `3px`；次数仍是可访问的复制按钮，不新增独立复制控件。
+- 代码和契约文件：`assets/styles.css`（H5 卡片密度）、`test/ui-redesign-static.test.js`（3px 内边距与同排布局契约）、`docs/ui-spec.md`（移动卡片规则），静态资源由 `npm run version:assets` 生成 `h2945f5bf72b4` 并更新 `index.html`。
+- 本地验收：`node --test test/ui-redesign-static.test.js test/app-static-performance.test.js test/frontend-utils.test.js` 为 110/110；`node scripts/check-js-syntax.js` 检查 115 个 JavaScript 文件通过；`git diff --check` 通过。
+- 提交 `f8696830 fix: 收紧 H5 歌曲卡内边距` 已推送 `main`。静态发布 run [`30093530950`](https://github.com/Marica7731/daily-song-list/actions/runs/30093530950) 成功，VPS checkout、无远端 Git fetch 上传和 index 验证通过；GitHub runner 对公开 data 探针的既有 warning 不影响 VPS 校验结论。
+- 公开 H5 `390px × 844px` 实测使用 `app-h2945f5bf72b4.js`：首个频道展开后的前 20 张卡全部约 `55.7px` 高（上一版约 `61.7px`），日期和次数的 `y` 坐标逐卡一致，卡片网格为 `"thumb title" / "thumb actions"`，无高度异常。
+- 真实交互复测：次数复制得到 2 条纯 YouTube 时间码 URL；歌名跳转到 `view=songRank`，查询为 `@Hao_RKMusic カタオモイ`，`searchFields=title,channel`。公开 API 有界探针返回：`/healthz=200`、`/api/meta=200`、短词/组合词/频道/双筛选查询均 `200`、坏字段和坏范围均 `400`、未知 `/api/...` 路由 `404`；未知 source key 按服务契约返回 `200 {found:false}`，不是静默成功详情。
+- runtime DB workflow [`30092532069`](https://github.com/Marica7731/daily-song-list/actions/runs/30092532069) 当前仍在 Mac self-hosted 的 `Build runtime database` 阶段；本轮未在 Windows 构建大 DB，也未改动来源数据。该 workflow 结束后仍需重新验收 `/healthz`、`/api/meta`、`/api/rankings` 和 source detail，不能把当前 UI 发布写成 runtime DB 已完成。
+- Naraetan 只读审计交接、singleton/`フィナーレ。`/只有两个视频全库调查、来源续接和 7d runtime 入库仍按前文状态保留，未因本轮 UI 发布而宣称完成。
