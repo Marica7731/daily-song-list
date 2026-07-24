@@ -382,3 +382,15 @@
 - 真实 H5 `390x844` 复测：页码输入可聚焦、填入 `5` 并提交，地址变为 `?page=5`；频道页为 `?view=vtuberRank`，频道卡透出视频数量、歌曲数量、次数；展开后的歌曲卡为紧凑双列，日期和次数同排；歌曲链接包含 `@handle + 歌名` 且使用 `searchFields=title,channel`；来源 tag 仅在已有收录证据的频道显示。
 - Runtime API 有界探针完成标记：`CODEX_GOAL_API_AUDIT_OK`。`/healthz`、`/api/meta`、短词、歌手加歌曲组合词、频道 handle 查询、`nicheOnly=1&hideUnknownArtist=1` 均返回 200；坏字段和坏 range 返回 400；未知 `/api/...` 路由返回 404；缺失 source key 按契约返回 `200 {found:false}`。
 - 以下事项仍明确未完成，不能由本节的 UI/API 发布证据代替：Naraetan 脏曲目清洗、全库 singleton/`フィナーレ。`/只有两个视频调查、来源续接表中的剩余抓取，以及 7d 自动入库到 runtime DB 的最终线上验收。来源数据未以 partial 结果直接导入生产。
+
+## 页码输入竞态修复与 2026-07-25 线上验收
+
+- 本轮工作树为 `G:/codex-work/daily-song-list-runtime-fix-20260723`，未触碰 `.workbuddy/`。提交 `d44b09e29`（`fix: 阻止页码请求重绘抢走输入焦点`）已通过 WSL SSH 推送到 `main`。
+- 主要改动：`assets/app.js` 在运行时请求成功、旧结果错误和首次失败/备用路径三条 DOM 重绘出口前等待当前页码输入的真实 blur，并在重绘后恢复值、焦点和选区；`test/ui-redesign-static.test.js` 增加该竞态契约。`npm run version:assets` 生成资源版本 `h9841b9bdeb96` 并同步 `index.html`。
+- 本地验收：UI/标题/来源布局测试 `27/27`、`PYTHON=python3 node --test test/runtime-api.test.js` `10/10`、`node scripts/check-js-syntax.js` 检查 `117` 个 JS 文件通过、`git diff --check` 通过。
+- 发布证据：GitHub Pages run `30109456353` 成功；VPS 静态 run `30109590647` 成功，线上 `index.html` 已引用 `assets/app-h9841b9bdeb96.js`。runtime DB run `30107877162` 在 Mac 构建后完成 VPS2 上传、激活、health 和 API contract，最终成功。
+- 线上 API 验收（2026-07-25 +08:00）：`https://ytb-song-rank.culua.com/healthz` HTTP 200，`builtAt=2026-07-24T16:08:53Z`；`/api/meta` HTTP 200，`source_commit_sha=a5ee858873ca0089c3de8d16c902131ff79f63c2`，`source_latest_sha256=06a9e1e1fabaa24a05b2edc075fce5dab3aed7ff647828bd5b84d7af2571811a`；7d 和 all rankings 均 HTTP 200；项目脚本输出 `PUBLISHED_RUNTIME_API_OK`（`checkedAt=2026-07-24T16:53:20.860Z`）。这次 runtime 发布已把最新 7d 构建结果带入数据库验证链路。
+- 真实页面验收：线上 H5 `390x844` 触摸事件点击顶部输入框，等待 `1.2s` 后仍为 active、选区为全选；填入 `3` 回车后 URL 为 `?range=all&page=3`，两个输入框值均为 `3`。桌面 `1440x900` 点击底部输入框，等待 `1.2s` 后仍 active 且全选；填入 `2` 回车后 URL 为 `?range=all&page=2`。浏览器事件读取为空，无 console error/warning。
+- 运行时发布中曾在 2026-07-25 00:37 左右短暂返回 `database disk image is malformed`（health/meta HTTP 500）；未手工覆盖生产 DB，待 workflow 完成后 00:48 起恢复 HTTP 200，并以最终 workflow health/API contract 和上述线上复测为准。
+- `Check code` run `30109456498` 已完成但因 `data/diff/latest-1m.json` 与 `data/diff/latest-all.json` gzip 超过既有 budget 失败；UI proof 按 workflow 既有规则输出 `CODEX_UI_PROOF_DEFERRED`。这两项不是本次页码代码测试失败，仍需单独处理/刷新 proof 矩阵，不能写成全绿。
+- 本轮仍未执行 Naraetan 脏数据改写；只读报告保留在 `G:/codex-work/daily-song-list-naraetan-audit-20260724/audit-report.md`。来源继续抓取、全库 singleton 审计和仅两个视频调查仍按前节待办处理，未将 partial 来源导入生产。
