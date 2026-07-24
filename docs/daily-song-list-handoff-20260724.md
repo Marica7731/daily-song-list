@@ -373,3 +373,12 @@
 - 真实交互复测：次数复制得到 2 条纯 YouTube 时间码 URL；歌名跳转到 `view=songRank`，查询为 `@Hao_RKMusic カタオモイ`，`searchFields=title,channel`。公开 API 有界探针返回：`/healthz=200`、`/api/meta=200`、短词/组合词/频道/双筛选查询均 `200`、坏字段和坏范围均 `400`、未知 `/api/...` 路由 `404`；未知 source key 按服务契约返回 `200 {found:false}`，不是静默成功详情。
 - runtime DB workflow [`30092532069`](https://github.com/Marica7731/daily-song-list/actions/runs/30092532069) 当前仍在 Mac self-hosted 的 `Build runtime database` 阶段；本轮未在 Windows 构建大 DB，也未改动来源数据。该 workflow 结束后仍需重新验收 `/healthz`、`/api/meta`、`/api/rankings` 和 source detail，不能把当前 UI 发布写成 runtime DB 已完成。
 - Naraetan 只读审计交接、singleton/`フィナーレ。`/只有两个视频全库调查、来源续接和 7d runtime 入库仍按前文状态保留，未因本轮 UI 发布而宣称完成。
+
+## 静态分片收口与当前线上验收（2026-07-24）
+
+- 当前 G 盘主工作树为 `G:/codex-work/daily-song-list-runtime-fix-20260723`。静态分片收口提交为 `c1ef3bbae1fd2fb76f32f1a6b58a47b3533316fe`（`fix: 严格使用静态分片并移除全量回退`），已通过 WSL SSH 推送到 `main`；没有触碰 `.workbuddy/`、`scripts/db/__pycache__/`、`server/__pycache__/`。
+- 既有静态发布 workflow [`30098482180`](https://github.com/Marica7731/daily-song-list/actions/runs/30098482180) 已成功完成。部署只展开当前 `meta.json` 指向的 runtime/source/search 分片，移除根级全量和 legacy 静态回退；线上 `index.html` 引用 `app-h1c125c17275d.js`。
+- 公开静态探针完成标记：`CODEX_STATIC_SHARD_AUDIT_OK app=assets/app-h1c125c17275d.js ranges=2 manifests=6 pages=6 status=present diffAll=true diff7d=true healthz=true`。`meta.json`、`status.json`、all/7d diff、6 个 manifest、6 个首分页和 `/healthz` 均为有效 HTTP 200 响应；线上 `builtAt=2026-07-24T12:24:03Z`。
+- 真实 H5 `390x844` 复测：页码输入可聚焦、填入 `5` 并提交，地址变为 `?page=5`；频道页为 `?view=vtuberRank`，频道卡透出视频数量、歌曲数量、次数；展开后的歌曲卡为紧凑双列，日期和次数同排；歌曲链接包含 `@handle + 歌名` 且使用 `searchFields=title,channel`；来源 tag 仅在已有收录证据的频道显示。
+- Runtime API 有界探针完成标记：`CODEX_GOAL_API_AUDIT_OK`。`/healthz`、`/api/meta`、短词、歌手加歌曲组合词、频道 handle 查询、`nicheOnly=1&hideUnknownArtist=1` 均返回 200；坏字段和坏 range 返回 400；未知 `/api/...` 路由返回 404；缺失 source key 按契约返回 `200 {found:false}`。
+- 以下事项仍明确未完成，不能由本节的 UI/API 发布证据代替：Naraetan 脏曲目清洗、全库 singleton/`フィナーレ。`/只有两个视频调查、来源续接表中的剩余抓取，以及 7d 自动入库到 runtime DB 的最终线上验收。来源数据未以 partial 结果直接导入生产。
