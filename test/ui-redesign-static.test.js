@@ -214,6 +214,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
   assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
+  assert.match(appSource, /const RANK_METRICS = \{[\s\S]*occurrences: "次数",[\s\S]*songs: "歌曲数",[\s\S]*videos: "视频数"/u);
+  assert.match(appSource, /function rankMetricButtonText\(value\)[\s\S]*value === "songs"\) return "按歌曲数"[\s\S]*value === "videos"\) return "按视频数"[\s\S]*return "按次数"/u);
+  assert.match(indexSource, /value="occurrences" checked \/>按次数[\s\S]*value="songs" disabled \/>按歌曲数[\s\S]*value="videos" \/>按视频数/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-top: 8px;[\s\S]*padding-bottom: 12px;/u);
   assert.match(cssSource, /\.query-panel-body\s*\{[\s\S]*display: grid;[\s\S]*gap: var\(--space-3\);/u);

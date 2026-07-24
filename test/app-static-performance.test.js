@@ -94,11 +94,13 @@ test("record videoCount is used for rank values and row rendering", () => {
   assert.match(appSource, /videoCount:\s*record\.videoCount/u);
 });
 
-test("VTuber collected badge requires trusted non-moment source", () => {
-  assert.match(functionBody("function renderVtuberCollectionBadge"), /!model\.isCollected \|\| !isTrustedVtuberCollectionSource\(record, model\)/u);
-  assert.match(functionBody("function isTrustedVtuberCollectionSource"), /isMomentKnownSourceType\(type\)/u);
-  assert.match(functionBody("function isTrustedVtuberCollectionSource"), /youtube_channel_discovery/u);
-  assert.match(functionBody("function mergeVtuberRecordMetadata"), /badge\.isCollected && isTrustedVtuberCollectionSource\(item, badge\)/u);
+test("VTuber collected badge delegates collection evidence to the shared presentation model", () => {
+  assert.match(functionBody("function renderVtuberCollectionBadge"), /if \(!model\.isCollected\) return null/u);
+  assert.doesNotMatch(appSource, /function isTrustedVtuberCollectionSource/u);
+  const mergeBody = functionBody("function mergeVtuberRecordMetadata");
+  assert.match(mergeBody, /occurrences: \[\{ item, song \}\]/u);
+  assert.match(mergeBody, /if \(badge\.isCollected\)/u);
+  assert.doesNotMatch(mergeBody, /knownSourceType:\s*record\.knownSourceType/u);
 });
 
 test("runtime API errors preserve status-specific diagnostics", () => {

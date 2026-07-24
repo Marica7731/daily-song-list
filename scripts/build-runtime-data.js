@@ -327,32 +327,42 @@ function knownSourceTypeForVideo(item) {
 }
 
 function isCollectedSource(item) {
-  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  const sourceGroups = (Array.isArray(item.sourceGroups) ? item.sourceGroups : [])
+    .map((value) => String(value || "").trim().toLocaleLowerCase())
+    .filter(Boolean);
   const knownType = String(item.knownSourceType || knownSourceTypeForVideo(item) || "").trim().toLocaleLowerCase();
-  const sourceSystem = String(item.sourceQuality?.sourceSystem || "").trim().toLocaleLowerCase();
-  const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
-  if (isMomentSource(item)) return sourceGroups.includes("youtube_channel_discovery");
-  if (
-    sourceGroups.includes("youtube_channel_discovery") ||
-    trueTypes.has(knownType) ||
-    (item.sourceQuality?.sourceType === "external" && !isMomentSourceType(sourceSystem))
-  ) {
-    return true;
+  const explicit = explicitCollectionFlag(item);
+  if (explicit === false) return false;
+
+  const discoveryTypes = new Set([
+    "youtube_channel_discovery",
+    "youtube-channel-discovery",
+    "youtube_discovery",
+    "youtube-discovery",
+  ]);
+  const importedTypes = new Set([
+    "library",
+    "manual",
+    "song-search",
+    "song_search",
+    "verified",
+    "daily_song_list",
+    "daily-song-list",
+  ]);
+  const sourceTypes = [knownType, ...sourceGroups];
+  if (sourceTypes.some((type) => importedTypes.has(type))) return true;
+  if (sourceTypes.some((type) => discoveryTypes.has(type))) {
+    return explicit === true || sourceGroups.some((type) => discoveryTypes.has(type));
   }
-  const explicit = item.isCollected;
-  return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
+  return false;
 }
 
-function isMomentSource(item) {
-  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
-  const sourceSystem = String(item.sourceQuality?.sourceSystem || "").trim().toLocaleLowerCase();
-  const knownType = String(item.knownSourceType || sourceSystem || "").trim().toLocaleLowerCase();
-  return sourceGroups.includes("vsinger-moment") || isMomentSourceType(sourceSystem) || isMomentSourceType(knownType);
-}
-
-function isMomentSourceType(value) {
-  const type = String(value || "").trim().toLocaleLowerCase();
-  return type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
+function explicitCollectionFlag(item) {
+  const explicit = item?.isCollected;
+  const normalized = String(explicit ?? "").trim().toLocaleLowerCase();
+  if (explicit === true || explicit === 1 || normalized === "true") return true;
+  if (explicit === false || explicit === 0 || normalized === "false") return false;
+  return null;
 }
 
 function timestampToIso(value) {

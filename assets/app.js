@@ -64,8 +64,8 @@ const VTUBER_SONG_GROUP_INITIAL_LIMIT = MOBILE_PAGE_SIZE;
 const VTUBER_SONG_GROUP_BATCH_SIZE = MOBILE_PAGE_SIZE;
 const CURRENT_FILTER_VERSION = 4;
 const RANK_METRICS = {
-  occurrences: "歌唱次数",
-  songs: "首歌",
+  occurrences: "次数",
+  songs: "歌曲数",
   videos: "视频数",
 };
 const VTUBER_CHANNEL_EVIDENCE_BY_VIDEO_ID = new Map([
@@ -1462,9 +1462,9 @@ function rankMetricEntriesForView(view = state.view) {
 }
 
 function rankMetricButtonText(value) {
-  if (value === "songs") return "按曲目";
-  if (value === "videos") return "按视频";
-  return state.view === "vtuberRank" ? "按歌唱" : "按收录";
+  if (value === "songs") return "按歌曲数";
+  if (value === "videos") return "按视频数";
+  return "按次数";
 }
 
 function syncQueryMetricOptions() {
@@ -5755,7 +5755,6 @@ function buildVtuberRecords(occurrences) {
     const key = vtuberRecordKey(item, identityLookup);
     if (!key) continue;
     if (!records.has(key)) {
-      const collectionBadge = window.FrontendUtils.vtuberCollectionBadgeModel(item);
       records.set(key, {
         type: "vtuber",
         key,
@@ -5768,7 +5767,7 @@ function buildVtuberRecords(occurrences) {
         avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl),
         channelAvatarUrl: cleanText(item.channelAvatarUrl),
         knownSourceType: cleanText(item.knownSourceType || item.sourceType || item.collectionType),
-        isCollected: collectionBadge.isCollected && isTrustedVtuberCollectionSource(item, collectionBadge),
+        isCollected: false,
         thumbnailUrl: vtuberThumbnailCandidate(item),
         videoThumbnailUrl: vtuberThumbnailCandidate(item),
         displayImageUrl: "",
@@ -6546,10 +6545,10 @@ function renderRankHeader(mode = "song") {
   const countLabel =
     mode === "vtuber"
       ? state.rankMetric === "songs"
-        ? "曲目"
+        ? "歌曲数"
         : state.rankMetric === "videos"
-          ? "视频"
-          : "歌唱次数"
+          ? "视频数"
+          : "次数"
       : state.rankMetric === "videos"
         ? "歌曲收录 / 趋势"
         : "次数 / 趋势";
@@ -6774,15 +6773,13 @@ function mergeVtuberRecordMetadata(record, item, song = {}) {
     }
   }
   const badge = window.FrontendUtils.vtuberCollectionBadgeModel({
-    ...item,
-    knownSourceType: record.knownSourceType,
-    sourceGroups: item.sourceGroups,
-    sourceQuality: item.sourceQuality,
-    isCollected: item.isCollected ?? item.collected ?? item.isKnownSource ?? song.isCollected ?? song.collected,
+    occurrences: [{ item, song }],
   });
-  if (badge.isCollected && isTrustedVtuberCollectionSource(item, badge)) {
+  if (badge.isCollected) {
+    if (!record.isCollected || shouldReplaceVtuberKnownSourceType(record.knownSourceType, badge.sourceType)) {
+      record.knownSourceType = badge.sourceType;
+    }
     record.isCollected = true;
-    if (!record.knownSourceType && badge.sourceType) record.knownSourceType = badge.sourceType;
   }
 }
 
@@ -6805,44 +6802,12 @@ function renderVtuberAvatar(record) {
 
 function renderVtuberCollectionBadge(record) {
   const model = window.FrontendUtils.vtuberCollectionBadgeModel(record || {});
-  if (!model.isCollected || !isTrustedVtuberCollectionSource(record, model)) return null;
+  if (!model.isCollected) return null;
   const badge = document.createElement("span");
   badge.className = "vtuber-collected-badge";
   badge.textContent = model.text;
   if (model.sourceType) badge.title = `收录来源：${model.sourceType}`;
   return badge;
-}
-
-function isTrustedVtuberCollectionSource(record = {}, model = {}) {
-  const type = [
-    model.sourceType,
-    record.knownSourceType,
-    record.sourceType,
-    record.collectionType,
-    record.knownSource?.type,
-    record.source?.knownSourceType,
-  ]
-    .map(cleanText)
-    .find(Boolean)
-    ?.toLocaleLowerCase() || "";
-  if (isMomentKnownSourceType(type)) return false;
-  const trustedTypes = new Set([
-    "library",
-    "manual",
-    "song-search",
-    "song_search",
-    "youtube_channel_discovery",
-    "youtube-channel-discovery",
-    "youtube_discovery",
-    "youtube-discovery",
-    "daily_song_list",
-    "daily-song-list",
-  ]);
-  if (trustedTypes.has(type)) return true;
-  const groups = Array.isArray(record.sourceGroups) ? record.sourceGroups : [];
-  if (groups.map((group) => cleanText(group).toLocaleLowerCase()).some((group) => trustedTypes.has(group))) return true;
-  const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem || record.sourceSystem).toLocaleLowerCase();
-  return trustedTypes.has(sourceSystem);
 }
 
 function appendSublinePart(container, text, className = "") {

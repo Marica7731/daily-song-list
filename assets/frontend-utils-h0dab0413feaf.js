@@ -1402,18 +1402,20 @@
     };
   }
 
-  const TRUSTED_COLLECTION_SOURCE_TYPES = new Set([
+  const IMPORTED_COLLECTION_SOURCE_TYPES = new Set([
     "library",
     "manual",
     "song-search",
     "song_search",
     "verified",
+    "daily_song_list",
+    "daily-song-list",
+  ]);
+  const DISCOVERY_COLLECTION_SOURCE_TYPES = new Set([
     "youtube_channel_discovery",
     "youtube-channel-discovery",
     "youtube_discovery",
     "youtube-discovery",
-    "daily_song_list",
-    "daily-song-list",
   ]);
   const MOMENT_SOURCE_TYPES = new Set(["vsinger_moment_http", "vsinger-moment", "moment"]);
 
@@ -1428,7 +1430,7 @@
       };
     }
 
-    const sourceType = candidates.map(trustedCollectionSourceType).find(Boolean) || "";
+    const sourceType = candidates.map(collectionEvidenceSourceType).find(Boolean) || "";
     if (!sourceType) {
       return {
         text: "",
@@ -1471,15 +1473,21 @@
     return collectionSourceType(record) || collectionSourceGroupTypes(record)[0] || "";
   }
 
-  function trustedCollectionSourceType(record = {}) {
+  function collectionEvidenceSourceType(record = {}) {
     if (explicitCollectionFlag(record) === false) return "";
     const type = collectionSourceType(record);
-    if (isMomentSourceType(type)) return "";
-    if (TRUSTED_COLLECTION_SOURCE_TYPES.has(type)) return type;
-
     const groups = collectionSourceGroupTypes(record);
-    if (groups.some(isMomentSourceType)) return "";
-    return groups.find((group) => TRUSTED_COLLECTION_SOURCE_TYPES.has(group)) || "";
+    const sourceTypes = [type, ...groups].filter((value) => !isMomentSourceType(value));
+    const importedType = sourceTypes.find((value) => IMPORTED_COLLECTION_SOURCE_TYPES.has(value));
+    if (importedType) return importedType;
+    const discoveryType = sourceTypes.find((value) => DISCOVERY_COLLECTION_SOURCE_TYPES.has(value));
+    if (
+      discoveryType &&
+      (explicitCollectionFlag(record) === true || groups.some((value) => DISCOVERY_COLLECTION_SOURCE_TYPES.has(value)))
+    ) {
+      return discoveryType;
+    }
+    return "";
   }
 
   function collectionSourceType(record = {}) {

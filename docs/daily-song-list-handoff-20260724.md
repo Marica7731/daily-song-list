@@ -103,6 +103,23 @@
 - [ ] 同一歌曲混有 Moment 和本地/来源会话记录时，tag 按歌曲或记录的收录来源判定，不能把整首歌粗暴标为已收录。
 - [ ] 检查榜单顶层、展开 drawer、来源卡片和静态 fallback 是否各自重复计算 tag；统一到一个可测试的 presentation model。
 
+#### 2026-07-24 收录 tag 本地修复（尚未发布）
+
+- `data/external/youtube-channel-discovery/channel-metadata.json` 只允许作为频道名称、ID、handle、头像和缩略图缓存；即使旧记录带有 `knownSourceType=youtube_channel_discovery`，构建器也不得把它当作 accepted/canonical 证据。
+- `youtube_channel_discovery` 只有在单条记录含 accepted loader 生成的 `sourceGroups` 标记，或同时具有显式 `isCollected=true` 时成立；仅有同名文本、metadata 行、普通 catalog/today/month 记录、partial/reachedEnd=false discovery manifest 均不成立。
+- `manual`、`verified`、`song-search`、`library`、`daily_song_list` 等明确人工/来源会话类型仍可成立，但显式 `isCollected=false` 优先否决；任意非 Moment `sourceQuality.sourceType=external` 不再自动成立。
+- 频道顶层可以聚合同频道至少一条有效收录记录；单视频、歌曲 occurrence、来源卡片不得继承频道聚合后的 `knownSourceType`。VSinger Moment 本身始终不是收录证据，与真实 accepted/manual 证据并存时只由后者成立。
+- 本地回归入口：
+  - `node --test test/channel-metadata-cache.test.js test/frontend-utils.test.js test/runtime-data.test.js test/app-static-performance.test.js`
+  - `node --test test/runtime-db.test.js test/runtime-api.test.js`
+  - `node scripts/check-js-syntax.js`
+- 发布仍需按既有流程重新生成 runtime SQLite 与静态 runtime、执行 `npm run version:assets`、部署静态资源和 runtime DB，然后在线复验白玖ウタノ榜单及 `/api/sources/{sourceDetailKey}` 均不再返回伪造的 discovery 收录状态，同时确认真实 accepted 频道仍显示“已收录”。
+
+#### 2026-07-24 排序文案统一（尚未发布）
+
+- 用户可见排序统一显示为“按次数 / 按歌曲数 / 按视频数”，不再使用容易误解的“按收录 / 按歌唱 / 按曲目 / 按视频”混合文案。
+- 保留现有 API metric key 和视图能力边界：`occurrences`、`songs`、`videos`；`songs` 仍只在 VTuber 频道榜开放，歌曲榜/歌手榜不虚构无意义的歌曲数排序。
+
 ### D. 脏数据和歌手归并
 
 - [ ] 新增只读审计：扫描全库只出现 1 次的歌曲，先输出歌曲、出现的 video ID、原始 JSON/HTML 证据、频道、歌手、时间点和疑似脏数据原因，不直接删除。

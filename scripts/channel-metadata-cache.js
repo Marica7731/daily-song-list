@@ -3,7 +3,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const SOURCE_GROUP = "youtube_channel_discovery";
 const DEFAULT_METADATA_PATH = path.join(__dirname, "..", "data", "external", "youtube-channel-discovery", "channel-metadata.json");
 
 function loadChannelMetadataCache(filePath = DEFAULT_METADATA_PATH) {
@@ -66,7 +65,6 @@ function hydrateVideoWithChannelMetadata(item, lookup) {
     channelUrl: item.channelUrl || metadata.channelUrl || metadata.sourceUrl || "",
     avatarUrl: realAvatarUrl(item.avatarUrl || item.channelAvatarUrl) || metadata.avatarUrl || "",
     sourceUrl: item.sourceUrl || metadata.sourceUrl || metadata.channelUrl || "",
-    knownSourceType: item.knownSourceType || metadata.knownSourceType || "",
   };
   return withDisplayThumbnail(hydrated, metadata.thumbnailUrl);
 }
@@ -106,7 +104,6 @@ function metadataFromVideo(item = {}) {
     sourceUrl: stringValue(item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl),
     avatarUrl: realAvatarUrl(item.avatarUrl || item.channelAvatarUrl),
     thumbnailUrl: imageUrl(item.thumbnailUrl || item.thumbnail || thumbnailUrlForVideo(item)),
-    knownSourceType: stringValue(item.knownSourceType),
   };
 }
 
@@ -123,7 +120,6 @@ function normalizeChannelMetadata(metadata = {}) {
     sourceUrl,
     avatarUrl: realAvatarUrl(metadata.avatarUrl || metadata.channelAvatarUrl || metadata.authorAvatarUrl || metadata.profileImageUrl),
     thumbnailUrl: imageUrl(metadata.thumbnailUrl || metadata.videoThumbnail || metadata.videoThumbnailUrl || metadata.thumbnail),
-    knownSourceType: stringValue(metadata.knownSourceType || SOURCE_GROUP),
   };
 }
 
@@ -137,7 +133,6 @@ function mergeChannelMetadata(existing, incoming) {
     sourceUrl: existing.sourceUrl || incoming.sourceUrl,
     avatarUrl: existing.avatarUrl || incoming.avatarUrl,
     thumbnailUrl: existing.thumbnailUrl || incoming.thumbnailUrl,
-    knownSourceType: existing.knownSourceType || incoming.knownSourceType,
   };
 }
 

@@ -18,6 +18,7 @@ test("channel metadata hydration prefers Japanese display names and preserves al
           handle: "@IsshikiIS",
           displayName: "一色イズ◇Isshiki IS",
           channelUrl: "https://www.youtube.com/@IsshikiIS",
+          knownSourceType: "youtube_channel_discovery",
         },
         {
           channelId: "UCnKt20HH_BiuID0FDHGMcvw",
@@ -51,6 +52,16 @@ test("channel metadata hydration prefers Japanese display names and preserves al
               channelHandle: "/channel/UCnKt20HH_BiuID0FDHGMcvw",
               songs: [{ title: "song", artist: "artist", seconds: 2 }],
             },
+            {
+              videoId: "ISSHIKI0002",
+              title: "accepted karaoke",
+              channelName: "Isshiki Izu",
+              channelId: "UCisshiki",
+              knownSourceType: "youtube_channel_discovery",
+              isCollected: true,
+              sourceGroups: ["youtube_channel_discovery"],
+              songs: [{ title: "song", artist: "artist", seconds: 3 }],
+            },
           ],
         },
       },
@@ -62,7 +73,18 @@ test("channel metadata hydration prefers Japanese display names and preserves al
   assert.equal(item.channelName, "一色イズ◇Isshiki IS");
   assert.equal(item.channelHandle, "/@IsshikiIS");
   assert.deepEqual(item.channelAliases, ["Isshiki Izu", "一色イズ◇Isshiki IS", "/@IsshikiIS"]);
+  assert.equal(item.knownSourceType, undefined);
+  assert.equal(item.isCollected, undefined);
   const imiItem = payload.groups.all.items[1];
   assert.equal(imiItem.channelName, "IMI");
   assert.equal(imiItem.channelHandle, "");
+  const acceptedItem = payload.groups.all.items[2];
+  assert.equal(acceptedItem.knownSourceType, "youtube_channel_discovery");
+  assert.equal(acceptedItem.isCollected, true);
+  assert.deepEqual(acceptedItem.sourceGroups, ["youtube_channel_discovery"]);
+});
+
+test("channel avatar metadata producer remains identity-only", () => {
+  const producerSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "fetch-channel-avatar-cache.js"), "utf8");
+  assert.doesNotMatch(producerSource, /knownSourceType/u);
 });

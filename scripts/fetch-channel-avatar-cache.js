@@ -281,7 +281,6 @@ function collectCandidates({ acceptedDir, channels, priorityHandles, runtimeInpu
       avatarUrl: channel.avatarUrl,
       thumbnailUrl: channel.thumbnailUrl || channel.videoThumbnailUrl,
       avatarFetchedAt: channel.avatarFetchedAt,
-      knownSourceType: channel.knownSourceType || SOURCE_GROUP,
       evidence: ["channel-metadata.json"],
     });
   }
@@ -289,7 +288,6 @@ function collectCandidates({ acceptedDir, channels, priorityHandles, runtimeInpu
     addCandidate(candidates, {
       channelHandle: normalizeHandle(handle),
       sourceUrl: handleToUrl(handle),
-      knownSourceType: SOURCE_GROUP,
       evidence: ["priority-handle-list"],
     });
   }
@@ -313,7 +311,6 @@ function collectCandidates({ acceptedDir, channels, priorityHandles, runtimeInpu
             sourceUrls.find((url) => /youtube\.com\/(?:@|channel\/)/iu.test(String(url))),
           avatarUrl: video.avatarUrl || video.channelAvatarUrl,
           thumbnailUrl: thumbnailUrlForVideo(video),
-          knownSourceType: video.knownSourceType || SOURCE_GROUP,
           evidence: [`accepted/${file}`],
         });
       }
@@ -337,7 +334,6 @@ function addRuntimeCandidates(candidates, runtimeInput, runtimeRange) {
       sourceUrl: item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl,
       avatarUrl: item.avatarUrl || item.channelAvatarUrl,
       thumbnailUrl: thumbnailUrlForVideo(item),
-      knownSourceType: item.knownSourceType || knownSourceTypeForItem(item),
       evidence: [`runtime:${path.relative(ROOT, runtimeInput).replace(/\\/g, "/")}#${runtimeRange}`],
       runtimeCandidate: true,
     });
@@ -398,7 +394,6 @@ function mergeChannel(target, incoming, options = {}) {
     ["sourceUrl", normalized.sourceUrl],
     ["thumbnailUrl", normalized.thumbnailUrl],
     ["avatarFetchedAt", normalized.avatarFetchedAt],
-    ["knownSourceType", normalized.knownSourceType || SOURCE_GROUP],
   ];
   for (const [key, value] of assignments) {
     if (!target[key] && value) target[key] = value;
@@ -459,7 +454,6 @@ function parseChannelPage(html, finalUrl) {
     channelUrl,
     sourceUrl: handle ? handleToUrl(handle) : finalUrl,
     avatarUrl: cleanAvatarUrl(avatarUrl),
-    knownSourceType: SOURCE_GROUP,
   };
 }
 
@@ -518,7 +512,6 @@ function normalizeMetadata(metadata, results, options, context) {
       sourceUrl: normalized.sourceUrl,
       avatarUrl: normalized.avatarUrl,
       thumbnailUrl: normalized.thumbnailUrl,
-      knownSourceType: normalized.knownSourceType || SOURCE_GROUP,
     };
     if (normalized.avatarFetchedAt) result.avatarFetchedAt = normalized.avatarFetchedAt;
     if (channel.avatarFetchStatus) result.avatarFetchStatus = stringValue(channel.avatarFetchStatus);
@@ -696,7 +689,6 @@ function mergeNormalizedChannels(primary, fallback) {
     avatarUrl: primary.avatarUrl || fallback.avatarUrl,
     thumbnailUrl: primary.thumbnailUrl || fallback.thumbnailUrl,
     avatarFetchedAt: primary.avatarFetchedAt || fallback.avatarFetchedAt,
-    knownSourceType: primary.knownSourceType || fallback.knownSourceType || SOURCE_GROUP,
     runtimeCandidate: primary.runtimeCandidate === true || fallback.runtimeCandidate === true,
     evidence: uniqueValues([...(primary.evidence || []), ...(fallback.evidence || [])]),
   };
@@ -716,7 +708,6 @@ function normalizeChannel(value = {}) {
     avatarUrl: cleanAvatarUrl(value.avatarUrl || value.channelAvatarUrl || value.authorAvatarUrl || value.profileImageUrl),
     thumbnailUrl: cleanImageUrl(value.thumbnailUrl || value.videoThumbnail || value.videoThumbnailUrl || value.thumbnail),
     avatarFetchedAt: stringValue(value.avatarFetchedAt),
-    knownSourceType: stringValue(value.knownSourceType) || SOURCE_GROUP,
     evidence: Array.isArray(value.evidence) ? value.evidence : [],
     runtimeCandidate: value.runtimeCandidate === true,
   };
@@ -805,13 +796,6 @@ function isStale(value, staleDays) {
   const parsed = Date.parse(value || "");
   if (!Number.isFinite(parsed)) return false;
   return Date.now() - parsed > staleDays * 24 * 60 * 60 * 1000;
-}
-
-function knownSourceTypeForItem(item) {
-  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
-  if (sourceGroups.includes(SOURCE_GROUP)) return SOURCE_GROUP;
-  if (sourceGroups.includes("vsinger-moment")) return "vsinger_moment_http";
-  return item.sourceQuality?.sourceSystem || "";
 }
 
 function updateCheckpoint(checkpoint, key, result, options) {

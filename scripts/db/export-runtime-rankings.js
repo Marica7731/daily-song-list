@@ -608,7 +608,6 @@ function hydrateRuntimeItemChannelIdentity(item, identityLookup) {
     channelUrl,
     avatarUrl: RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl) || record.avatarUrl || "",
     sourceUrl: RankingUtils.cleanText(item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl) || record.sourceUrl || record.channelUrl || "",
-    knownSourceType: RankingUtils.cleanText(item.knownSourceType) || record.knownSourceType || "",
     thumbnailUrl: RankingUtils.cleanText(item.thumbnailUrl || item.thumbnail) || record.thumbnailUrl || record.videoThumbnailUrl || "",
   };
 }
@@ -852,8 +851,15 @@ function mergeChannelRecordIdentity(record, item) {
     record.videoThumbnailUrl = thumbnailUrl;
   }
   if (sourceUrl && !record.sourceUrl) record.sourceUrl = sourceUrl;
-  if (shouldReplaceKnownSourceType(record.knownSourceType, knownSourceType)) record.knownSourceType = knownSourceType;
-  record.isCollected = record.isCollected === true || isCollectedSource(item);
+  const itemIsCollected = isCollectedSource(item);
+  if (
+    (!record.isCollected && itemIsCollected) ||
+    (!record.knownSourceType && knownSourceType) ||
+    (itemIsCollected && shouldReplaceKnownSourceType(record.knownSourceType, knownSourceType))
+  ) {
+    record.knownSourceType = knownSourceType;
+  }
+  record.isCollected = record.isCollected === true || itemIsCollected;
   for (const alias of knownChannelSearchAliases(channelName)) record.aliases.add(alias);
 }
 
@@ -896,31 +902,42 @@ function isMomentSourceType(value) {
 }
 
 function isCollectedSource(item) {
-  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  const sourceGroups = (Array.isArray(item.sourceGroups) ? item.sourceGroups : [])
+    .map((value) => RankingUtils.cleanText(value).toLocaleLowerCase())
+    .filter(Boolean);
   const knownType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item)).toLocaleLowerCase();
-  const sourceSystem = RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase();
-  const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
-  if (isMomentSource(item)) return sourceGroups.includes("youtube_channel_discovery");
-  if (
-    sourceGroups.includes("youtube_channel_discovery") ||
-    trueTypes.has(knownType) ||
-    (item.sourceQuality?.sourceType === "external" && !isMomentSourceType(sourceSystem))
-  ) {
-    return true;
+  const explicit = explicitCollectionFlag(item);
+  if (explicit === false) return false;
+
+  const discoveryTypes = new Set([
+    "youtube_channel_discovery",
+    "youtube-channel-discovery",
+    "youtube_discovery",
+    "youtube-discovery",
+  ]);
+  const importedTypes = new Set([
+    "library",
+    "manual",
+    "song-search",
+    "song_search",
+    "verified",
+    "daily_song_list",
+    "daily-song-list",
+  ]);
+  const sourceTypes = [knownType, ...sourceGroups];
+  if (sourceTypes.some((type) => importedTypes.has(type))) return true;
+  if (sourceTypes.some((type) => discoveryTypes.has(type))) {
+    return explicit === true || sourceGroups.some((type) => discoveryTypes.has(type));
   }
-  const explicit = item.isCollected;
-  return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
+  return false;
 }
 
-function isMomentSource(item) {
-  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
-  const sourceSystem = RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase();
-  const knownType = RankingUtils.cleanText(item.knownSourceType || sourceSystem).toLocaleLowerCase();
-  return (
-    sourceGroups.includes("vsinger-moment") ||
-    sourceSystem === "vsinger_moment_http" ||
-    isMomentSourceType(knownType)
-  );
+function explicitCollectionFlag(item) {
+  const explicit = item?.isCollected;
+  const normalized = String(explicit ?? "").trim().toLocaleLowerCase();
+  if (explicit === true || explicit === 1 || normalized === "true") return true;
+  if (explicit === false || explicit === 0 || normalized === "false") return false;
+  return null;
 }
 
 function knownChannelSearchAliases(channelName) {

@@ -127,7 +127,7 @@ test("buildClientGroup derives channel identity fields from bare channel-name pa
   assert.equal(group.items[1].channelId, channelId);
 });
 
-test("buildClientGroup treats moment sources as not collected even with stale flags", () => {
+test("buildClientGroup requires imported or accepted collection evidence", () => {
   const group = buildClientGroup({
     id: "all",
     title: "all",
@@ -189,6 +189,39 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
         sourceGroups: ["vsinger-moment", "youtube_channel_discovery"],
         songs: [{ seconds: 4, title: "Mixed Song", artist: "Mixed Artist" }],
       },
+      {
+        videoId: "UTANOMETA01",
+        title: "metadata-only catalog video",
+        channelName: "UTANO ch. 白玖ウタノ",
+        knownSourceType: "youtube_channel_discovery",
+        sourceGroups: ["today", "month", "mygit_today_snapshot"],
+        songs: [{ seconds: 8, title: "Metadata Only Song", artist: "Metadata Artist" }],
+      },
+      {
+        videoId: "SCANFALSE01",
+        title: "rejected discovery video",
+        channelName: "Rejected Discovery Ch.",
+        knownSourceType: "youtube_channel_discovery",
+        isCollected: false,
+        sourceGroups: ["youtube_channel_discovery"],
+        songs: [{ seconds: 9, title: "Rejected Song", artist: "Rejected Artist" }],
+      },
+      {
+        videoId: "EXTERNAL001",
+        title: "arbitrary external video",
+        channelName: "External Ch.",
+        isCollected: true,
+        sourceQuality: { sourceType: "external", sourceSystem: "catalog_probe" },
+        songs: [{ seconds: 10, title: "External Song", artist: "External Artist" }],
+      },
+      {
+        videoId: "MANFALSE001",
+        title: "rejected manual video",
+        channelName: "Rejected Manual Ch.",
+        knownSourceType: "manual",
+        isCollected: false,
+        songs: [{ seconds: 11, title: "Rejected Manual Song", artist: "Manual Artist" }],
+      },
     ],
   });
 
@@ -202,6 +235,10 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
       ["SCAN0000001", "youtube_channel_discovery", true],
       ["MANUAL00001", "manual", true],
       ["MIXED000001", "vsinger_moment_http", true],
+      ["UTANOMETA01", "youtube_channel_discovery", false],
+      ["SCANFALSE01", "youtube_channel_discovery", false],
+      ["EXTERNAL001", "catalog_probe", false],
+      ["MANFALSE001", "manual", false],
     ],
   );
 });

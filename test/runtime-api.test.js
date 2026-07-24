@@ -361,6 +361,8 @@ test("runtime API vtuber and video fallbacks preserve occurrence filters", async
     assert.equal(videoNiche.totalOccurrenceCount, 1);
     assert.equal(videoNiche.records[0].title, "Niche Fixture Song");
     assert.equal(videoNiche.records[0].matchedBySource, true);
+    assert.equal(videoNiche.records[0].occurrences[0].item.knownSourceType, "youtube_channel_discovery");
+    assert.equal(videoNiche.records[0].occurrences[0].item.isCollected, false);
 
     const videoHideUnknown = await fetchJson(
       `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Needle&searchFields=all&hideUnknownArtist=1&pageSize=5`,
@@ -1028,6 +1030,8 @@ function writeFallbackFilterFixture(latestPath) {
               channelId: "UC-fallback",
               channelHandle: "/@fallback_ch",
               channelUrl: "https://www.youtube.com/@fallback_ch",
+              knownSourceType: "youtube_channel_discovery",
+              isCollected: false,
               thumbnailUrl: "https://i.ytimg.com/vi/fallback-mixed-video/hqdefault.jpg",
               publishedTimestamp: 1784851200000,
               publishedText: "2026-07-24",

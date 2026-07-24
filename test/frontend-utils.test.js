@@ -249,12 +249,33 @@ test("VTuber collection badge model tolerates missing backend fields", () => {
     }).isCollected,
     true,
   );
-  assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "youtube_channel_discovery" }).isCollected, true);
+  assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "youtube_channel_discovery" }).isCollected, false);
+  assert.equal(vtuberCollectionBadgeModel({ sourceGroups: ["youtube_channel_discovery"] }).isCollected, true);
+  assert.equal(
+    vtuberCollectionBadgeModel({
+      isCollected: true,
+      occurrences: [{ item: { knownSourceType: "youtube_channel_discovery" } }],
+    }).isCollected,
+    false,
+  );
   assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "unknown" }).isCollected, false);
   assert.equal(vtuberCollectionBadgeModel({}).text, "");
 });
 
 test("VTuber collection badge model preserves runtime and static fallback source semantics", () => {
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      name: "UTANO ch. 白玖ウタノ",
+      knownSourceType: "youtube_channel_discovery",
+      sourceGroups: ["today", "month", "mygit_today_snapshot"],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "youtube_channel_discovery",
+    },
+  );
+
   assert.deepEqual(
     vtuberCollectionBadgeModel({
       name: "水沢オペラ / Opera Ch.",
@@ -315,7 +336,7 @@ test("VTuber collection badge model preserves runtime and static fallback source
   );
 });
 
-test("VTuber collection badge model rejects authoritative false and ambiguous Moment aggregates", () => {
+test("VTuber collection badge model rejects authoritative false but accepts independent trusted evidence", () => {
   assert.deepEqual(
     vtuberCollectionBadgeModel({
       isCollected: false,
@@ -336,9 +357,9 @@ test("VTuber collection badge model rejects authoritative false and ambiguous Mo
       sourceGroups: ["youtube_channel_discovery"],
     }),
     {
-      text: "",
-      isCollected: false,
-      sourceType: "vsinger_moment_http",
+      text: "已收录",
+      isCollected: true,
+      sourceType: "youtube_channel_discovery",
     },
   );
 
@@ -348,9 +369,9 @@ test("VTuber collection badge model rejects authoritative false and ambiguous Mo
       sourceGroups: ["vsinger-moment", "manual"],
     }),
     {
-      text: "",
-      isCollected: false,
-      sourceType: "vsinger-moment",
+      text: "已收录",
+      isCollected: true,
+      sourceType: "manual",
     },
   );
 

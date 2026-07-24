@@ -627,11 +627,18 @@ test("runtime DB builder treats moment source aliases as not collected", () => {
             },
             {
               videoId: "MANUALALIAS",
-              title: "Manual source karaoke",
-              channelName: "Manual Alias Ch.",
+              title: "Rejected manual source karaoke",
+              channelName: "Rejected Manual Alias Ch.",
               knownSourceType: "manual",
               isCollected: false,
               songs: [{ title: "Manual Alias Song", artist: "Manual Alias Artist", seconds: 30, time: "0:30" }],
+            },
+            {
+              videoId: "MANUALOK001",
+              title: "Imported manual source karaoke",
+              channelName: "Imported Manual Alias Ch.",
+              knownSourceType: "manual",
+              songs: [{ title: "Imported Manual Song", artist: "Manual Artist", seconds: 40, time: "0:40" }],
             },
           ],
         },
@@ -678,8 +685,10 @@ test("runtime DB builder treats moment source aliases as not collected", () => {
     assert.equal(byName.get("Moment Alias Ch.").isCollected, false, rankingSource);
     assert.equal(byName.get("VSinger Moment Alias Ch.").knownSourceType, "vsinger-moment", rankingSource);
     assert.equal(byName.get("VSinger Moment Alias Ch.").isCollected, false, rankingSource);
-    assert.equal(byName.get("Manual Alias Ch.").knownSourceType, "manual", rankingSource);
-    assert.equal(byName.get("Manual Alias Ch.").isCollected, true, rankingSource);
+    assert.equal(byName.get("Rejected Manual Alias Ch.").knownSourceType, "manual", rankingSource);
+    assert.equal(byName.get("Rejected Manual Alias Ch.").isCollected, false, rankingSource);
+    assert.equal(byName.get("Imported Manual Alias Ch.").knownSourceType, "manual", rankingSource);
+    assert.equal(byName.get("Imported Manual Alias Ch.").isCollected, true, rankingSource);
   }
 });
 
@@ -858,6 +867,28 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "Calc Alias Song", artist: "Calc", time: "1:07:00", seconds: 4020 },
                 { title: "No Logic", artist: "ジミーサムP", time: "1:08:00", seconds: 4080 },
               ],
+            },
+            {
+              videoId: "ZTllfu3tcCw",
+              title: "UTANO metadata-only karaoke",
+              channelName: "UTANO ch. 白玖ウタノ",
+              channelId: "UCNskpCCH661BeRJkN8n8d-A",
+              channelHandle: "/@UTANOch",
+              channelUrl: "https://www.youtube.com/@UTANOch",
+              sourceGroups: ["today", "month", "mygit_today_snapshot"],
+              catalogFirstSeenAt: "2026-07-01T00:00:00.000Z",
+              catalogLastSeenAt: "2026-07-19T00:00:00.000Z",
+              songs: [{ title: "UTANO Metadata Only Song", artist: "UTANO", time: "1:00", seconds: 60 }],
+            },
+            {
+              videoId: "HanonBase01",
+              title: "Hanon catalog-only karaoke",
+              channelName: "Hanon Ch. 香鳴ハノン【パレプロ】",
+              channelId: "UCay6Y3oEoiC6ZEE2G0UZu_A",
+              channelHandle: "/@kanaruhanon",
+              channelUrl: "https://www.youtube.com/@kanaruhanon",
+              sourceGroups: ["today"],
+              songs: [{ title: "Hanon Catalog Only Song", artist: "Hanon", time: "1:00", seconds: 60 }],
             },
             {
               videoId: "naretan0001",
@@ -1102,6 +1133,15 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
           avatarUrl: "https://yt3.googleusercontent.com/hanon-avatar=s900-c-k-c0x00ffffff-no-rj",
           knownSourceType: "youtube_channel_discovery",
         },
+        {
+          handle: "/@UTANOch",
+          displayName: "UTANO ch. 白玖ウタノ",
+          channelId: "UCNskpCCH661BeRJkN8n8d-A",
+          channelUrl: "https://www.youtube.com/channel/UCNskpCCH661BeRJkN8n8d-A",
+          sourceUrl: "https://www.youtube.com/@UTANOch",
+          avatarUrl: "https://yt3.googleusercontent.com/utano-avatar=s900-c-k-c0x00ffffff-no-rj",
+          knownSourceType: "youtube_channel_discovery",
+        },
       ],
     }),
     "utf8",
@@ -1123,6 +1163,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  assertCollectionEvidenceBoundaries(dbPath, "js");
 
   const queryOutput = execFileSync(
     PYTHON,
@@ -1407,7 +1448,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoUrlSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(videoUrlSearchOutput, /"totalCount": 1/);
+  assert.match(videoUrlSearchOutput, /"totalCount": 2/);
 
   const vtuberSongMetricOutput = execFileSync(
     PYTHON,
@@ -1429,12 +1470,12 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(vtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vtuberSongMetricOutput, /"metric": "songs"/);
   assert.match(vtuberSongMetricOutput, /"name": "Hanon Ch\. 香鳴ハノン【パレプロ】"/);
-  assert.match(vtuberSongMetricOutput, /"songCount": 7/);
+  assert.match(vtuberSongMetricOutput, /"songCount": 8/);
   assert.match(vtuberSongMetricOutput, /"isCollected": true/);
   const vtuberSongMetricPayload = parseDbQueryOutput(vtuberSongMetricOutput);
   assert.deepEqual(
-    vtuberSongMetricPayload.records[0].songs.map((song) => song.name),
-    ["Overlay Song", "ENDLESS STORY", "Never Ending Story", "START:DASH!!", "Pretender", "spending", "Opening"],
+    vtuberSongMetricPayload.records[0].songs.map((song) => song.name).sort(),
+    ["Overlay Song", "ENDLESS STORY", "Never Ending Story", "START:DASH!!", "Pretender", "spending", "Opening", "Hanon Catalog Only Song"].sort(),
   );
 
   const flowerVtuberSongMetricOutput = execFileSync(
@@ -1497,6 +1538,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(pythonBuildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  assertCollectionEvidenceBoundaries(dbPathPython, "python");
   const pythonArtistAliasOutput = execFileSync(
     PYTHON,
     [
@@ -1747,6 +1789,101 @@ function parseDbQueryOutput(output) {
   const markerIndex = output.lastIndexOf("\nCODEX_RUNTIME_DB_QUERY_OK");
   assert.notEqual(markerIndex, -1, output);
   return JSON.parse(output.slice(0, markerIndex));
+}
+
+function assertCollectionEvidenceBoundaries(dbPath, rankingSource) {
+  const utanoOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "UTANOch",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  const utanoPayload = parseDbQueryOutput(utanoOutput);
+  assert.equal(utanoPayload.totalCount, 1, rankingSource);
+  assert.equal(utanoPayload.records[0].isCollected, false, rankingSource);
+  assert.equal(utanoPayload.records[0].knownSourceType, "", rankingSource);
+  const utanoPreviewItem = utanoPayload.records[0].occurrences[0].item;
+  if (utanoPreviewItem) {
+    assert.equal(utanoPreviewItem.isCollected, false, rankingSource);
+    assert.equal(utanoPreviewItem.knownSourceType, "", rankingSource);
+  }
+
+  const catalogSongOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "Hanon Catalog Only Song",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  const catalogSongPayload = parseDbQueryOutput(catalogSongOutput);
+  assert.equal(catalogSongPayload.totalCount, 1, rankingSource);
+  const catalogOccurrence = catalogSongPayload.records[0].occurrences.find(
+    (occurrence) => (occurrence.item?.videoId || occurrence.videoId) === "HanonBase01",
+  );
+  assert.ok(catalogOccurrence, rankingSource);
+  if (catalogOccurrence.item) {
+    assert.equal(catalogOccurrence.item.isCollected, false, rankingSource);
+    assert.equal(catalogOccurrence.item.knownSourceType, "", rankingSource);
+  }
+
+  const sourceItems = sourceOccurrenceCollectionProbe(dbPath, ["ZTllfu3tcCw", "HanonBase01"]);
+  assert.equal(sourceItems.get("ZTllfu3tcCw").isCollected, false, rankingSource);
+  assert.equal(sourceItems.get("ZTllfu3tcCw").knownSourceType || "", "", rankingSource);
+  assert.equal(sourceItems.get("HanonBase01").isCollected, false, rankingSource);
+  assert.equal(sourceItems.get("HanonBase01").knownSourceType || "", "", rankingSource);
+}
+
+function sourceOccurrenceCollectionProbe(dbPath, videoIds) {
+  const probePath = path.join(path.dirname(dbPath), `collection-evidence-probe-${path.basename(dbPath)}.py`);
+  fs.writeFileSync(
+    probePath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "wanted = set(sys.argv[2:])",
+      "found = {}",
+      "for (payload_json,) in conn.execute(\"SELECT payload_json FROM source_occurrences WHERE range_id = 'all'\"):",
+      "    payload = json.loads(payload_json)",
+      "    item = payload.get('item') if isinstance(payload, dict) else None",
+      "    if isinstance(item, dict) and item.get('videoId') in wanted:",
+      "        found[item['videoId']] = item",
+      "conn.close()",
+      "print(json.dumps(found, ensure_ascii=True))",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  try {
+    const payload = JSON.parse(execFileSync(PYTHON, [probePath, dbPath, ...videoIds], { cwd: ROOT, encoding: "utf8" }));
+    return new Map(Object.entries(payload));
+  } finally {
+    fs.rmSync(probePath, { force: true });
+  }
 }
 
 function sha256Json(value) {
