@@ -297,3 +297,24 @@
 - GitHub Pages run `30084887706` 成功并生成了 `be647bb9` 的新哈希资源；但公开主域名由 VPS2/Cloudflare 当前 origin 提供，实际首页仍 HTTP 200 且 `Last-Modified=2026-07-24 09:39:35 GMT`，仍指向旧 `app-h95090fdb1212.js` / `styles-h95090fdb1212.css`。不能用 Pages 成功代替 VPS 主域名上线证据。
 - `deploy-vps-static.yml` run `30084893774` 在远端 `git fetch` 阶段失败：`fatal: write error: No space left on device`、`fetch-pack: invalid index-pack output`；未 fast-forward、未重启 nginx、未改变主域名。新的 `app-hf5c3011a09fc.js` 在主域名返回 404，确认本次 H5 交互尚未在线。
 - 本次前端代码/测试/推送已完成，但真实主域名发布未完成；待 VPS2 释放磁盘或扩容后，必须重跑静态 workflow，再用主域名核对 hash、次数复制、歌曲榜跳转和来源展开。runtime DB run `30084768492` 也仍在 Mac 构建，不能绕过空间门禁。
+
+## Naraetan 只读审计交接（2026-07-24）
+
+- 只读审计限定在 G 工作树完成，未访问 C/D、未写入数据、未导入来源、未 commit/push/deploy。当前 accepted 证据为 [`2026-07-19-naraetanV-full.json`](../data/external/youtube-channel-discovery/accepted/2026-07-19-naraetanV-full.json)，约 3.28 MB；它是处理后的 accepted JSON，不是原始 HTML/评论 JSON，不能替代原始证据。
+- 用户截图中的疑似条目在 accepted 结果中对应七个不同视频，不能按“同一视频整体错误”直接清洗：
+
+| accepted 解析结果 | videoId / 时间 | sourceId |
+| --- | --- | --- |
+| `魔法少女ごっこ遊び / Playing Pretend Magical Girl` | `FmZAKo9Aq-Q` / `00:42:54` | `Ugx6uoYtG987xxyKXRp4AaABAg` |
+| `【8.32】「ニャーーーーー」 / 未記載` | `6JLr7xQRC2U` / `01:36:12` | `Ugz5GSYKgSm4vABQuYJ4AaABAg` |
+| `8.32 feat.flower / *Luna` | `yBwvUMnjdGs` / `02:10:05` | `UgwX_usBCxl0ADk5s2V4AaABAg` |
+| `龍角散 / Ryukakusan` | `4xWoeTde_jQ` / `00:10:46` | `UgwQi_FDMM7CuX7XM954AaABAg` |
+| `高音を出すとおでこが痒くなる / My forehead itches when I sing high notes` | `0vhXHIpOfGA` / `02:34:20` | `UgwGC5N9MDY8Td1vQ_h4AaABAg` |
+| `飾り棚 / Display Shelf` | `djUTHk00yYU` / `02:02:10` | `Ugw4nEbTvFzStqyFX7R4AaABAg` |
+| `風邪気味かもしれない / 昨日はエリンちゃんと夜まで遊んでた` | `YgLAn9M4beY` / `00:07:50` | `UgyW1OovM1_KUK8Ed0V4AaABAg` |
+
+- `feat.flower` 在 accepted JSON 中是完整曲目 `8.32 feat.flower / *Luna` 的一部分，不能把它当作独立噪声删除；`【8.32】「ニャーーーーー」` 前面存在正常的 `8.32 / *Luna` 记录，可能是演唱后的评论标记，但没有原始评论 HTML，暂不定案。其余条目虽然呈现话题/聊天句式，仍只能列入人工复核，不可只凭 accepted 结果清洗。
+- 当前仍缺：七个视频的原始评论正文/HTML/JSON、accepted 前后逐字段 diff、完整 runtime DB 的 singleton 导出、`フィナーレ` 标点原字节及全部 distinct video ID、全库其他恰好两个视频歌曲对照清单。现有 `scripts/audit-accepted-cleaning-impact.js` 只有汇总和有限样本，不等于完整 singleton 审计。
+- 禁止动作：不把 accepted JSON 当原始证据；不直接删除上述七条、不写 title override；不对 `feat.flower`、括号、emoji 或英文文本做全库宽正则剥离；不提前让 `未記載` 参与歌手胜出；不在人工复核前生成生产数据 diff；不导入 partial 或 `reachedEnd=false` 来源。
+- 后续必须在 Mac self-hosted 或 G 盘用 bounded timeout：先定位七个 videoId 的原始完整材料并检查 manifest 完整性；再运行 `node scripts/audit-accepted-cleaning-impact.js`（期待 `CODEX_ACCEPTED_CLEANING_IMPACT_OK`，仅作汇总）；补建只读 singleton 报告，至少输出 canonical title、occurrence/distinct video 数、videoId、source file/type、频道、歌手、time/seconds、raw、sourceId/sourceHash 和疑似原因；最后以 `フィナーレ。` 的原始标点、canonical 前后键、全部视频 ID、API/detail 数量及全库两个视频对照作为验收。
+- 结论：Naraetan 只读审计交接已完成；Naraetan 清洗、singleton 处置、`フィナーレ。` 修正和生产导入均未完成。

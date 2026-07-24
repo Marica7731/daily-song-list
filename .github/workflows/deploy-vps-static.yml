@@ -38,7 +38,7 @@ jobs:
       - name: Resolve deploy revision
         id: revision
         run: |
-          git fetch --depth=1 origin main --prune
+          git fetch --depth=1 --filter=blob:none --no-tags origin main --prune
           git checkout -B main FETCH_HEAD
           commit_sha="$(git rev-parse HEAD)"
           echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
@@ -62,7 +62,7 @@ jobs:
           sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             cd '${REMOTE_PROJECT_DIR}'
-            git fetch --quiet origin main --prune
+            git fetch --quiet --filter=blob:none --no-tags origin main --prune
             git checkout main
             if git config --bool core.sparseCheckout | grep -qx true; then
               git sparse-checkout add data/status.json data/ui data/diff

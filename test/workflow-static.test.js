@@ -12,6 +12,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   const check = readWorkflow("check-code.yml");
   const watchdog = readWorkflow("update-watchdog.yml");
   const backfill = readWorkflow("update-backfill.yml");
+  const staticDeploy = readWorkflow("deploy-vps-static.yml");
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
 
   assert.match(core, /name:\s*Update core song-list data/u);
@@ -64,6 +65,8 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.equal(pkg.scripts["watchdog:update"], "node scripts/watchdog-update.js");
   assert.equal(pkg.scripts["backfill:inbox"], "node scripts/run-backfill-update.js");
   assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
+  assert.match(staticDeploy, /git fetch --depth=1 --filter=blob:none --no-tags origin main --prune/u);
+  assert.match(staticDeploy, /git fetch --quiet --filter=blob:none --no-tags origin main --prune/u);
 });
 
 test("legacy combined update workflow is removed", () => {

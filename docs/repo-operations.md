@@ -155,6 +155,8 @@ SQLite runtime DB/API 发布：
 .github/workflows/deploy-vps-static.yml
 ```
 
+静态 workflow 在 VPS2 sparse checkout 上使用 `--filter=blob:none --no-tags` 拉取 main，避免因 core commit 携带大数据 blob 而在页面/运行时小文件发布前耗尽 VPS2 磁盘。它只减少 Git 同步对象，不替代 runtime DB 的上传空间门禁；runtime DB 仍必须走 `deploy-runtime-db.yml` 的安全上传/激活流程。
+
 以上大任务应运行在 self-hosted Mac runner：
 
 ```yaml
