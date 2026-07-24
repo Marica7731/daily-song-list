@@ -22,14 +22,14 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
       REMOTE_PROJECT_DIR: "/opt/culua/ytb-song-rank"
       DEPLOY_ACTION: ${{ inputs.action || 'deploy' }}
     steps:
-      - name: Checkout
+      - name: Checkout static shell and metadata
         uses: actions/checkout@v4
         with:
           ref: main
@@ -40,11 +40,26 @@ jobs:
             index.html
             assets
             data/status.json
-            data/ui
-            data/diff
+            data/ui/meta.json
+            data/diff/latest-7d.json
+            data/diff/latest-all.json
             scripts/compact-static-index.js
+            scripts/resolve-static-deploy-paths.js
             .nojekyll
             CNAME
+
+      - name: Expand current static payload paths
+        run: |
+          set -Eeuo pipefail
+          node scripts/resolve-static-deploy-paths.js data/ui/meta.json > static-sparse-paths.txt
+          git sparse-checkout set --no-cone --stdin < static-sparse-paths.txt
+          node scripts/resolve-static-deploy-paths.js --include-manifest-paths data/ui/meta.json > static-sparse-paths-expanded.txt
+          git sparse-checkout set --no-cone --stdin < static-sparse-paths-expanded.txt
+          test -s data/ui/meta.json
+          test -s data/ui/7d.*.json
+          test -s data/ui/all.*.json
+          test -s data/diff/latest-7d.json
+          test -s data/diff/latest-all.json
 
       - name: Resolve deploy revision
         id: revision
@@ -79,7 +94,7 @@ jobs:
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           set -Eeuo pipefail
-          bundle_bytes="$(du -sb -- index.html assets data/status.json data/ui data/diff | awk '{sum += $1} END {print sum}')"
+          bundle_bytes="$(du -sb -- index.html assets data/status.json data/ui data/diff/latest-7d.json data/diff/latest-all.json | awk '{sum += $1} END {print sum}')"
           required_kb=$(( (bundle_bytes + 1023) / 1024 + 1024 ))
           remote_free_kb="$(
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
@@ -89,7 +104,7 @@ jobs:
             echo "CODEX_STATIC_DEPLOY_BLOCKED free_kb=${remote_free_kb} required_kb=${required_kb} bundle_bytes=${bundle_bytes}"
             exit 1
           fi
-          tar -czf - -- index.html assets data/status.json data/ui data/diff |
+          tar -czf - -- index.html assets data/status.json data/ui data/diff/latest-7d.json data/diff/latest-all.json |
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               tar -xzf - -C '${REMOTE_PROJECT_DIR}'

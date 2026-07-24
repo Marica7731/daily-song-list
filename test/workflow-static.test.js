@@ -65,8 +65,10 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.equal(pkg.scripts["watchdog:update"], "node scripts/watchdog-update.js");
   assert.equal(pkg.scripts["backfill:inbox"], "node scripts/run-backfill-update.js");
   assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
-  assert.match(staticDeploy, /data\/ui\s+data\/diff/u);
-  assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui data\/diff/u);
+  assert.match(staticDeploy, /data\/ui\/meta\.json/u);
+  assert.match(staticDeploy, /scripts\/resolve-static-deploy-paths\.js/u);
+  assert.match(staticDeploy, /git sparse-checkout set --no-cone --stdin/u);
+  assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui data\/diff\/latest-7d\.json data\/diff\/latest-all\.json/u);
   assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
   assert.match(staticDeploy, /CODEX_STATIC_DEPLOY_BLOCKED/u);
   assert.match(staticDeploy, /CODEX_STATIC_RECOVERY_BLOCKED/u);
