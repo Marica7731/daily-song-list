@@ -512,13 +512,6 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
       record.count += 1;
       record.timestampCount += 1;
       incrementVtuberSongCount(record.songs, song, songIdentityLookup);
-      if (record.occurrences.length < REQUEST_PREVIEW_SOURCE_LIMIT) {
-        record.occurrences.push({
-          item,
-          song,
-          searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
-        });
-      }
       record.sourceOccurrences.push({
         item,
         song,
@@ -529,6 +522,7 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
   const result = Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
     record.songCount = record.songs.size;
+    record.occurrences = previewOccurrences(record.sourceOccurrences, REQUEST_PREVIEW_SOURCE_LIMIT);
     record.aliases = Array.from(record.aliases.values());
     record.searchText = requestRecordSearchText(record, "vtuber");
     return record;
@@ -1021,7 +1015,7 @@ function addRequestRecordFields(records) {
 }
 
 function serializeSongRequestRecord(record, options = {}) {
-  const occurrences = record.occurrences || [];
+  const occurrences = previewOccurrences(record.occurrences || [], REQUEST_PREVIEW_SOURCE_LIMIT);
   return {
     type: "song",
     detailKey: options.detailKey || "",
@@ -1044,7 +1038,7 @@ function serializeSongRequestRecord(record, options = {}) {
 }
 
 function serializeArtistRequestRecord(record, options = {}) {
-  const occurrences = record.occurrences || [];
+  const occurrences = previewOccurrences(record.occurrences || [], REQUEST_PREVIEW_SOURCE_LIMIT);
   return {
     type: "artist",
     detailKey: options.detailKey || "",
@@ -1078,7 +1072,7 @@ function serializeVideoRequestRecord(record, options = {}) {
 }
 
 function serializeVtuberRequestRecord(record, options = {}) {
-  const occurrences = record.occurrences || [];
+  const occurrences = previewOccurrences(record.occurrences || [], REQUEST_PREVIEW_SOURCE_LIMIT);
   return {
     type: "vtuber",
     detailKey: options.detailKey || "",
@@ -1126,6 +1120,21 @@ function serializeOccurrence(occurrence, options = {}) {
       occurrence.searchText ||
       normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
   };
+}
+
+function previewOccurrences(occurrences, limit) {
+  const sourceOccurrences = Array.isArray(occurrences) ? occurrences.filter(Boolean) : [];
+  const maxItems = Math.max(1, Number(limit) || 1);
+  const preview = [];
+  const seenVideos = new Set();
+  for (const occurrence of sourceOccurrences) {
+    const videoKey = RankingUtils.cleanText(occurrence?.item?.videoId);
+    if (videoKey && seenVideos.has(videoKey)) continue;
+    if (videoKey) seenVideos.add(videoKey);
+    preview.push(occurrence);
+    if (preview.length >= maxItems) return preview;
+  }
+  return preview;
 }
 
 function serializeCountMap(value) {

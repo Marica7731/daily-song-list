@@ -116,6 +116,22 @@ test("canonicalizes high-confidence romanized and translated title aliases", () 
   assert.equal(canonicalizeSongIdentity({ title: "Idol", artist: "BTS" }, context).title, "Idol");
 });
 
+test("canonicalizes eill Finale to the official punctuation", () => {
+  const context = createSongAliasContext({
+    schemaVersion: 1,
+    records: [{
+      artist: "eill",
+      canonicalTitle: "フィナーレ。",
+      aliases: ["フィナーレ"],
+      reason: "official_title_punctuation",
+    }],
+  });
+
+  const repaired = canonicalizeSongIdentity({ title: "フィナーレ", artist: "eill" }, context);
+  assert.equal(repaired.title, "フィナーレ。");
+  assert.equal(repaired.originalTitle, "フィナーレ");
+});
+
 test("canonicalizes aliases across payload groups and exposes alias summary", () => {
   const payload = canonicalizePayloadSongAliases(
     {

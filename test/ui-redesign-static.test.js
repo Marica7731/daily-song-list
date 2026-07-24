@@ -375,6 +375,12 @@ test("latest runtime uses request pagination instead of loading every page shard
   assert.doesNotMatch(appSource, /complete all runtime/i);
 });
 
+test("status update label includes the calendar year", () => {
+  assert.match(appSource, /function formatUpdatedAt\(value\)/u);
+  assert.match(appSource, /formatUpdatedAt\(displayAt\)/u);
+  assert.match(functionBody("function formatUpdatedAt"), /parts\.year/u);
+});
+
 test("request static search degrades to view-index fallback instead of huge bucket shards", () => {
   assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SEARCH/u);
   assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SOURCE_DETAILS/u);
@@ -414,9 +420,17 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function handlePaginationFormSubmit\(event\)/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
   assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
+  assert.match(functionBody("function bindPaginationInput"), /addEventListener\("pointerdown"/u);
+  assert.match(functionBody("function bindPaginationInput"), /addEventListener\("mousedown"/u);
+  assert.match(functionBody("function bindPaginationInput"), /addEventListener\("touchstart"/u);
   assert.match(appSource, /function bindPageInputSelection\(input\)/u);
   assert.match(functionBody("function bindPageInputSelection"), /input\.select\(\)/u);
   assert.match(functionBody("function bindPageInputSelection"), /addEventListener\("click"/u);
+  assert.match(appSource, /function capturePageInputState\(\)/u);
+  assert.match(appSource, /function restorePageInputState\(snapshot\)/u);
+  assert.match(functionBody("function restorePageInputState"), /input\.focus\(\{ preventScroll: true \}\)/u);
+  assert.match(functionBody("function restorePageInputState"), /setSelectionRange/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /preservePageInput: false/u);
   assert.match(functionBody("function renderSourcePageSummary"), /bindPageInputSelection\(input\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
   assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
