@@ -4525,7 +4525,7 @@ mark {
   .artist-song-group-vtuber .artist-song-header {
     grid-template-columns: 42px minmax(0, 1fr) 34px;
     grid-template-areas:
-      "thumb title actions"
+      "thumb title title"
       "thumb date actions";
     grid-template-rows: auto auto;
     align-items: center;
