@@ -220,6 +220,17 @@ jobs:
           echo "SSH_ASKPASS_REQUIRE=force" >> "$GITHUB_ENV"
           echo "DISPLAY=codex:0" >> "$GITHUB_ENV"
 
+      - name: Upload runtime support files without remote Git checkout
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          tar -czf - -- package.json server scripts/check-published-runtime.js scripts/db/query-runtime-db.py deploy/vps2 |
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
+              "mkdir -p '${REMOTE_PROJECT_DIR}'; tar -xzf - -C '${REMOTE_PROJECT_DIR}'"
+          echo "CODEX_RUNTIME_DB_SUPPORT_FILES_UPLOAD_OK sha=${{ steps.revision.outputs.commit_sha }}"
+
       - name: Prepare VPS2 runtime checkout
         timeout-minutes: 8
         env:
@@ -241,18 +252,26 @@ jobs:
               echo 'CODEX_RUNTIME_DB_DEPLOY_ERROR node-version-too-old'
               exit 1
             }
-            if [ ! -d '${REMOTE_PROJECT_DIR}/.git' ]; then
-              git clone --filter=blob:none https://github.com/Marica7731/daily-song-list.git '${REMOTE_PROJECT_DIR}'
-            fi
             cd '${REMOTE_PROJECT_DIR}'
-            test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
-            echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_BEGIN'
-            git fetch --quiet origin main --prune
-            echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_OK'
-            git checkout main
-            git reset --hard --quiet origin/main
-            git merge-base --is-ancestor '${DEPLOY_SHA}' HEAD
-            echo 'CODEX_RUNTIME_DB_VPS_PREP_RESET_OK'
+            if [ -d .git ]; then
+              test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_BEGIN'
+              git fetch --quiet origin main --prune
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_OK'
+              git checkout main
+              git reset --hard --quiet origin/main
+              git merge-base --is-ancestor '${DEPLOY_SHA}' HEAD
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_RESET_OK'
+            else
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_SKIPPED reason=runner-support-files'
+            fi
+            for required_file in package.json server/song_rank_api.py scripts/check-published-runtime.js scripts/db/query-runtime-db.py deploy/vps2/song-rank-api.service deploy/vps2/song-rank-db-activate.sh; do
+              test -f \"\${required_file}\" || {
+                echo \"CODEX_RUNTIME_DB_DEPLOY_ERROR missing-file=\${required_file}\"
+                exit 1
+              }
+            done
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_FILES_OK'
             install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
             install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
             install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
@@ -291,7 +310,7 @@ jobs:
             db_latest_sha256=\$(printf '%s\n' \"\${db_meta}\" | sed -n '2p')
             db_schema_version=\$(printf '%s\n' \"\${db_meta}\" | sed -n '3p')
             changed_db_input_count='unknown'
-            if [ -n \"\${db_commit_sha}\" ] && git cat-file -e \"\${db_commit_sha}^{commit}\" 2>/dev/null; then
+            if [ -d .git ] && [ -n \"\${db_commit_sha}\" ] && git cat-file -e \"\${db_commit_sha}^{commit}\" 2>/dev/null; then
               changed_db_inputs=\$(git diff --name-only \"\${db_commit_sha}\" '${DEPLOY_SHA}' -- assets config data/latest.json data/status.json data/external package.json scripts ':(exclude)scripts/check-published-runtime.js' || true)
               if [ -z \"\${changed_db_inputs}\" ]; then
                 changed_db_input_count=0

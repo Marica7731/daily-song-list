@@ -9,6 +9,14 @@ API_HEALTH_URL="${API_HEALTH_URL:-http://127.0.0.1:8765/healthz}"
 EXPECTED_SHA256="${EXPECTED_SHA256:-}"
 DIRECT_ACTIVATE="${CODEX_RUNTIME_DB_DIRECT_ACTIVATE:-0}"
 
+current_source_commit() {
+  if git rev-parse HEAD >/dev/null 2>&1; then
+    git rev-parse HEAD
+  else
+    printf '%s\n' "${SOURCE_COMMIT_SHA:-unknown}"
+  fi
+}
+
 restart_and_check_api() {
   systemctl restart song-rank-api
   health_ok=0
@@ -76,7 +84,7 @@ if [[ "${DIRECT_ACTIVATE}" == "1" ]]; then
     chown www-data:www-data "${DB_PATH}.manifest.json"
   fi
   restart_and_check_api
-  commit_sha="$(git rev-parse HEAD)"
+  commit_sha="$(current_source_commit)"
   db_size="$(stat -c%s "${DB_PATH}")"
   echo "CODEX_RUNTIME_DB_ACTIVATE_OK mode=direct commit=${commit_sha} db=${DB_PATH} bytes=${db_size}"
   exit 0
@@ -130,6 +138,6 @@ if ! restart_and_check_api; then
 fi
 rm -f "${previous_manifest}"
 
-commit_sha="$(git rev-parse HEAD)"
+commit_sha="$(current_source_commit)"
 db_size="$(stat -c%s "${DB_PATH}")"
 echo "CODEX_RUNTIME_DB_ACTIVATE_OK commit=${commit_sha} db=${DB_PATH} bytes=${db_size}"

@@ -328,3 +328,9 @@
 - runtime DB run `30084768492` 已于 2026-07-24 10:25Z 结束为 failure：Mac 端数据库构建和 manifest/artifact 校验成功，但 `Prepare VPS2 runtime checkout` 在远端 `git fetch` 处返回 `No space left on device` / `invalid index-pack output`，没有上传或激活新 DB；不能把 7d 自动入库、筛选 tag 或 API 修复写成线上生效。
 - 前端源码修复随后运行既有 `npm run version:assets` 并提交 `c0d9e18f`，生成 `app-hd1e5d36ddcde.js` / `styles-hd1e5d36ddcde.css` 等哈希资源；本地 113 项前端/工作流测试和 115 个 JS 语法检查通过。该新包尚未进入主域名，运维恢复顺序应是先释放/扩容 VPS2，执行 `action=restore-previous-index` 让旧首页和旧 app 恢复可用，再执行默认静态发布将 `c0d9e18f` 的完整新包上传并验收。
 - 新增磁盘预检后的静态 run `30087530560` 已在上传前安全退出：远端 `free_kb=0`、所需 `required_kb=5891`、静态 bundle `bundle_bytes=4983213`，日志为 `CODEX_STATIC_DEPLOY_BLOCKED`；本次没有再写入或截断远端文件。
+
+## VPS2 存量清理与无 Git checkout 发布（2026-07-24）
+
+- 通过 `D:\Download\racknerd账密.txt` 建立有界 Paramiko SSH 只读审计；未回显密码。VPS2 `/dev/vda2` 总容量约 35.8 GB、`df -B1` 可用为 0。目录占用约为：`/opt/culua/ytb-song-rank` 16--18 GB（其中 `data` 约 9.2 GB、`.git` 清理前约 8.1 GB）、active `/var/lib/culua/ytb-song-rank/song-rank.sqlite` 约 13.47 GB、日志约 20 KB，journal 约 105 MB；没有历史 runtime candidate DB。
+- 已确认没有远端 `git`/`rsync`/`tar`/`gzip` 上传进程后，按用户授权只删除失败 fetch 遗留的 `/opt/culua/ytb-song-rank/.git/objects/pack/tmp_pack_lwIbrT`，大小 `1,459,449,856` bytes；删除后该文件不存在，`.git` 从约 8.1 GB 降至约 6.8 GB。active DB、`data`、首页和日志未删除，线上 `/healthz?probe=post-cleanup` 仍 HTTP 200。
+- 由于用户要求继续清理整个远端 `.git`，先修改 `deploy-runtime-db.yml`、`deploy/vps2/song-rank-db-activate.sh`、`deploy/vps2/song-rank-runtime-update.sh`：Mac runner 上传约 2 MB 必要支持文件；VPS2 无 `.git` 时跳过 clone/fetch，激活使用 runner `SOURCE_COMMIT_SHA`，并保留手动 runtime update 的无 Git fallback。该保护尚未 commit/push，整个 `.git` 尚未删除。

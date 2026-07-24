@@ -189,7 +189,7 @@ curl.exe -sS "https://ytb-song-rank.culua.com/api/rankings?range=all&view=vtuber
 
 ## VPS2 注意事项
 
-VPS2 是低内存/低磁盘生产机，只做代码同步、DB 激活、健康检查和小查询。不要在 VPS2 上跑全量 DB build、全量 source backfill 或大 JSON 生成。
+VPS2 是低内存/低磁盘生产机，只做小型部署文件同步、DB 激活、健康检查和小查询。runtime workflow 从 Mac runner 上传必要的 API/query/activation/service 文件，不再把 VPS2 的 `.git` 历史作为发布前提；不要在 VPS2 上跑全量 DB build、全量 source backfill 或大 JSON 生成。
 
 生产目录：
 

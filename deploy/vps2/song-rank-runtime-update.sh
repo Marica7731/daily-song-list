@@ -20,18 +20,22 @@ fi
 
 cd "${PROJECT_DIR}"
 
-if ! git diff --quiet -- . || ! git diff --cached --quiet -- .; then
-  echo "CODEX_RUNTIME_UPDATE_ERROR dirty-worktree"
-  git status --short
-  exit 1
-fi
+if [[ -d .git ]]; then
+  if ! git diff --quiet -- . || ! git diff --cached --quiet -- .; then
+    echo "CODEX_RUNTIME_UPDATE_ERROR dirty-worktree"
+    git status --short
+    exit 1
+  fi
 
-git fetch origin "${BRANCH}" --prune
-current_branch="$(git branch --show-current)"
-if [[ "${current_branch}" != "${BRANCH}" ]]; then
-  git checkout "${BRANCH}"
+  git fetch origin "${BRANCH}" --prune
+  current_branch="$(git branch --show-current)"
+  if [[ "${current_branch}" != "${BRANCH}" ]]; then
+    git checkout "${BRANCH}"
+  fi
+  git pull --ff-only origin "${BRANCH}"
+else
+  echo "CODEX_RUNTIME_UPDATE_GIT_SYNC_SKIPPED reason=runner-support-files"
 fi
-git pull --ff-only origin "${BRANCH}"
 
 if [[ ! -d node_modules ]]; then
   if [[ -f package-lock.json ]]; then
@@ -74,6 +78,10 @@ fi
 systemctl restart song-rank-api
 curl -fsS "${API_HEALTH_URL}" >/dev/null
 
-commit_sha="$(git rev-parse HEAD)"
+if [[ -d .git ]] && git rev-parse HEAD >/dev/null 2>&1; then
+  commit_sha="$(git rev-parse HEAD)"
+else
+  commit_sha="${SOURCE_COMMIT_SHA:-unknown}"
+fi
 db_size="$(stat -c%s "${DB_PATH}")"
 echo "CODEX_RUNTIME_UPDATE_OK commit=${commit_sha} db=${DB_PATH} bytes=${db_size} buildDbOnVps=${BUILD_DB_ON_VPS}"
