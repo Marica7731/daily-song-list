@@ -329,6 +329,14 @@
 - 前端源码修复随后运行既有 `npm run version:assets` 并提交 `c0d9e18f`，生成 `app-hd1e5d36ddcde.js` / `styles-hd1e5d36ddcde.css` 等哈希资源；本地 113 项前端/工作流测试和 115 个 JS 语法检查通过。该新包尚未进入主域名，运维恢复顺序应是先释放/扩容 VPS2，执行 `action=restore-previous-index` 让旧首页和旧 app 恢复可用，再执行默认静态发布将 `c0d9e18f` 的完整新包上传并验收。
 - 新增磁盘预检后的静态 run `30087530560` 已在上传前安全退出：远端 `free_kb=0`、所需 `required_kb=5891`、静态 bundle `bundle_bytes=4983213`，日志为 `CODEX_STATIC_DEPLOY_BLOCKED`；本次没有再写入或截断远端文件。
 
+## 本轮清理后的 UI 与 runtime 状态（2026-07-24）
+
+- 用户授权的远端清理已实际完成：失败临时 pack `/opt/culua/ytb-song-rank/.git/objects/pack/tmp_pack_lwIbrT` 删除 `1,459,449,856` bytes；随后整个 `/opt/culua/ytb-song-rank/.git` 删除，删除前后均未触碰 active DB、`data`、首页和日志。删除后 VPS2 `/dev/vda2` 可用约 `6.36 GiB`、使用率约 `80%`；远端项目后续依赖无 Git checkout 发布保护。
+- 前端歌曲卡跳转修复提交：`3bb83bf0`、`ecfd0721`；资源 hash 更新提交：`1d59d586`；静态发布 run `30089822274` 成功。线上真实 H5 点击封面/歌名已跳到 `view=songRank`，保留 `@hide_ch + 歌名` 和 `searchFields=title,channel`。
+- H5 标题布局提交：`d3e3765c`、`294b982e`、`b6ba3ab3`、`f49abf4d`；静态发布 run `30090553071` 成功，公开首页指向 `app-hf0686508b2b4.js`。390px 线上实测展开卡标题可用宽约 `109.5px`，次数按钮仍为 `44px × 44px`；标题/歌手跨右侧动作轨道，次数落在日期行右侧，长歌名不再被次数列过早截断。相关 UI/frontend 测试 `81/81`，JS 语法 `115` 个文件通过。
+- runtime DB run `30088657269` 已在 Mac 完成构建并进入 `Upload and activate database`，截至本节记录时仍在进行；该阶段 direct-inplace 会暂时停止 API，因此外部严格探针在同一窗口得到 `/healthz`、`/api/meta`、`/api/rankings` 均 HTTP 502。不能把这段 502 写成已修复或永久故障；workflow 结束后必须重新检查 API 服务、`healthz`、`meta`、rankings 和截图中的 `/api/sources/{key}`。
+- 严格探针使用 bounded PowerShell 脚本并校验退出码/完成标记，已删除临时脚本；未把错误响应伪装成成功。未触碰 `.workbuddy/`、两个 `__pycache__` 未跟踪目录仍保留不动。
+
 ## VPS2 存量清理与无 Git checkout 发布（2026-07-24）
 
 - 通过 `D:\Download\racknerd账密.txt` 建立有界 Paramiko SSH 只读审计；未回显密码。VPS2 `/dev/vda2` 总容量约 35.8 GB、`df -B1` 可用为 0。目录占用约为：`/opt/culua/ytb-song-rank` 16--18 GB（其中 `data` 约 9.2 GB、`.git` 清理前约 8.1 GB）、active `/var/lib/culua/ytb-song-rank/song-rank.sqlite` 约 13.47 GB、日志约 20 KB，journal 约 105 MB；没有历史 runtime candidate DB。
