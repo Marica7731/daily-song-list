@@ -578,8 +578,19 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(songGroupBody, /title\.dataset\.rankSearchLink = "true"/u);
   assert.match(functionBody("function handleContentLinkNavigation"), /link\.dataset\.rankSearchLink === "true"/u);
   const copySongLinksBody = functionBody("async function copySongSourceLinksFromButton");
+  const copySongContainerBody = functionBody("function songSourceContainerForCopyButton");
+  assert.match(copySongLinksBody, /songSourceContainerForCopyButton\(button\)/u);
   assert.match(copySongLinksBody, /filterOccurrencesForSongKey\(occurrences, songKey, songTitle\)/u);
   assert.match(copySongLinksBody, /urlsOnly: button\.dataset\.copyUrlsOnly === "true"/u);
+  assert.match(
+    copySongContainerBody,
+    /group\?\._artistSongSources[\s\S]*group\?\.querySelector\("\.artist-song-sources"\)[\s\S]*button\.closest\("\.artist-song-sources"\)[\s\S]*button\.closest\("\.rank-row, \.index-row"\)/u,
+  );
+  assert.ok(
+    copySongContainerBody.indexOf("group?._artistSongSources") <
+      copySongContainerBody.indexOf('button.closest(".rank-row, .index-row")'),
+    "song-scoped source metadata must win over the outer channel row",
+  );
   assert.doesNotMatch(appSource, /来源明细待重建/u);
   assert.doesNotMatch(appSource, /次歌唱/u);
   assert.doesNotMatch(requestedPageBody.match(/result\.view === "vtuberRank"[\s\S]*?\}\);[\s\S]*?\}/u)?.[0] || "", /次歌唱/u);
@@ -595,7 +606,7 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(cssSource, /@media \(min-width: 920px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
   assert.match(cssSource, /\.artist-song-group-vtuber\s*\{[\s\S]*overflow: hidden;/u);
-  assert.match(cssSource, /\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 44px;[\s\S]*touch-action: manipulation;/u);
+  assert.match(cssSource, /\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 44px;[\s\S]*min-height: 44px;[\s\S]*touch-action: manipulation;/u);
   assert.match(cssSource, /\.artist-song-group-vtuber button\.artist-song-count:focus-visible\s*\{[\s\S]*outline:/u);
   assert.doesNotMatch(cssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);
   assert.doesNotMatch(lastCssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);

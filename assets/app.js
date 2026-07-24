@@ -9443,11 +9443,7 @@ async function copySongSourceLinksFromButton(button) {
   if (button.getAttribute("aria-busy") === "true") return;
   button.setAttribute("aria-busy", "true");
   try {
-    const group = button.closest(".artist-song-group");
-    const container =
-      button.closest(".rank-row, .index-row, .artist-song-sources") ||
-      group?._artistSongSources ||
-      group?.querySelector(".artist-song-sources");
+    const container = songSourceContainerForCopyButton(button);
     let occurrences =
       button._sourceOccurrences ||
       container?._sourceDetailOccurrences ||
@@ -9469,6 +9465,16 @@ async function copySongSourceLinksFromButton(button) {
   } finally {
     button.removeAttribute("aria-busy");
   }
+}
+
+function songSourceContainerForCopyButton(button) {
+  const group = button.closest(".artist-song-group");
+  return (
+    group?._artistSongSources ||
+    group?.querySelector(".artist-song-sources") ||
+    button.closest(".artist-song-sources") ||
+    button.closest(".rank-row, .index-row")
+  );
 }
 
 async function writeClipboardText(text) {
