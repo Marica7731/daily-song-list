@@ -1002,6 +1002,7 @@ def source_occurrence_fts_table(
     table = ""
     if (
         search_fields == []
+        or (search_fields is None and scope == "all")
         or requested == {"source"}
         or is_mixed_entity_source_search_fields(search_fields)
         or (not requested and scope == "source")
