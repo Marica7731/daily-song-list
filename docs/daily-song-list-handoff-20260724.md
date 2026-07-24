@@ -327,3 +327,4 @@
 - 当前交付状态：主域名静态页损坏，H5/Web 新 UI、复制和跳转不能写成已上线；runtime DB、7d 自动入库、收录 tag 和 API 筛选也仍未线上验收。已停止所有远端写入、删除和清理；下一步必须由运维先释放或扩容 VPS2 磁盘，再运行受控恢复/发布 workflow，并核对完整首页、所有 hash 资源、`healthz`、`meta`、rankings、来源详情和 H5 交互。
 - runtime DB run `30084768492` 已于 2026-07-24 10:25Z 结束为 failure：Mac 端数据库构建和 manifest/artifact 校验成功，但 `Prepare VPS2 runtime checkout` 在远端 `git fetch` 处返回 `No space left on device` / `invalid index-pack output`，没有上传或激活新 DB；不能把 7d 自动入库、筛选 tag 或 API 修复写成线上生效。
 - 前端源码修复随后运行既有 `npm run version:assets` 并提交 `c0d9e18f`，生成 `app-hd1e5d36ddcde.js` / `styles-hd1e5d36ddcde.css` 等哈希资源；本地 113 项前端/工作流测试和 115 个 JS 语法检查通过。该新包尚未进入主域名，运维恢复顺序应是先释放/扩容 VPS2，执行 `action=restore-previous-index` 让旧首页和旧 app 恢复可用，再执行默认静态发布将 `c0d9e18f` 的完整新包上传并验收。
+- 新增磁盘预检后的静态 run `30087530560` 已在上传前安全退出：远端 `free_kb=0`、所需 `required_kb=5891`、静态 bundle `bundle_bytes=4983213`，日志为 `CODEX_STATIC_DEPLOY_BLOCKED`；本次没有再写入或截断远端文件。
