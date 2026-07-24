@@ -2,6 +2,15 @@ name: Deploy VPS static files
 
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Static deployment action"
+        required: true
+        default: deploy
+        type: choice
+        options:
+          - deploy
+          - restore-previous-index
 
 permissions:
   contents: read
@@ -18,6 +27,7 @@ jobs:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
       REMOTE_PROJECT_DIR: "/opt/culua/ytb-song-rank"
+      DEPLOY_ACTION: ${{ inputs.action || 'deploy' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,6 +51,15 @@ jobs:
           commit_sha="$(git rev-parse HEAD)"
           echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare previous static index for emergency recovery
+        if: inputs.action == 'restore-previous-index'
+        run: |
+          set -Eeuo pipefail
+          git fetch --depth=2 --filter=blob:none --no-tags origin be647bb9
+          git show be647bb9^:index.html > rollback-index.html
+          test "$(wc -c < rollback-index.html)" -eq 13928
+          grep -q 'assets/app-h95090fdb1212.js' rollback-index.html
+
       - name: Install sshpass
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
@@ -53,6 +72,7 @@ jobs:
           sudo apt-get install -y sshpass
 
       - name: Upload static bundle without remote Git fetch
+        if: inputs.action != 'restore-previous-index'
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
@@ -73,13 +93,33 @@ jobs:
               systemctl reload nginx
             "
 
+      - name: Restore previous index without remote Git fetch
+        if: inputs.action == 'restore-previous-index'
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          tar -czf - --transform='s|^rollback-index\.html$|index.html|' -- rollback-index.html |
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              tar -xzf - -C '${REMOTE_PROJECT_DIR}'
+              test -s '${REMOTE_PROJECT_DIR}/index.html'
+              grep -q 'assets/app-h95090fdb1212.js' '${REMOTE_PROJECT_DIR}/index.html'
+              nginx -t
+              systemctl reload nginx
+            "
+
       - name: Verify deployed index
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           EXPECTED_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           set -Eeuo pipefail
-          expected_app="$(grep -o 'assets/app-[^"]*\.js' index.html | head -1)"
+          if [ "${DEPLOY_ACTION}" = "restore-previous-index" ]; then
+            expected_app="$(grep -o 'assets/app-[^"]*\.js' rollback-index.html | head -1)"
+          else
+            expected_app="$(grep -o 'assets/app-[^"]*\.js' index.html | head -1)"
+          fi
           if [ -z "${expected_app}" ]; then
             echo "::error::could not resolve expected app asset from index.html"
             exit 1

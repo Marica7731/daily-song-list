@@ -67,6 +67,9 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
   assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui\/meta\.json data\/diff/u);
   assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
+  assert.match(staticDeploy, /restore-previous-index/u);
+  assert.match(staticDeploy, /git show be647bb9\^:index\.html/u);
+  assert.match(staticDeploy, /tar -czf - --transform='s\|\^rollback-index\\\.html\$\|index\.html\|'/u);
   assert.doesNotMatch(staticDeploy, /git fetch .*origin main/u);
   assert.doesNotMatch(staticDeploy, /git merge --ff-only/u);
 });
