@@ -69,6 +69,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
   assert.match(staticDeploy, /restore-previous-index/u);
   assert.match(staticDeploy, /git show b108c956:index\.html/u);
+  assert.match(staticDeploy, /node scripts\/compact-static-index\.js rollback-index\.html/u);
   assert.match(staticDeploy, /tar -czf - --transform='s\|\^rollback-index\\\.html\$\|index\.html\|'/u);
   assert.doesNotMatch(staticDeploy, /git fetch --quiet .*origin main/u);
   assert.doesNotMatch(staticDeploy, /git merge --ff-only/u);
