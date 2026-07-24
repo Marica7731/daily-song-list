@@ -49,6 +49,7 @@ jobs:
             CNAME
 
       - name: Expand current static payload paths
+        if: inputs.action != 'restore-previous-index'
         run: |
           set -Eeuo pipefail
           node scripts/resolve-static-deploy-paths.js data/ui/meta.json > static-sparse-paths.txt
@@ -56,10 +57,17 @@ jobs:
           node scripts/resolve-static-deploy-paths.js --include-manifest-paths data/ui/meta.json > static-sparse-paths-expanded.txt
           git sparse-checkout set --no-cone --stdin < static-sparse-paths-expanded.txt
           test -s data/ui/meta.json
-          test -s data/ui/7d.*.json
-          test -s data/ui/all.*.json
           test -s data/diff/latest-7d.json
           test -s data/diff/latest-all.json
+          if find data/ui -maxdepth 1 -type f \( -name '7d*.json' -o -name 'all*.json' \) -print -quit | grep -q .; then
+            echo "::error::static payload contains a full root range JSON"
+            exit 1
+          fi
+          while IFS= read -r path; do
+            case "${path}" in
+              data/ui/*) test -s "${path}" ;;
+            esac
+          done < static-sparse-paths-expanded.txt
 
       - name: Resolve deploy revision
         id: revision
@@ -104,17 +112,20 @@ jobs:
             echo "CODEX_STATIC_DEPLOY_BLOCKED free_kb=${remote_free_kb} required_kb=${required_kb} bundle_bytes=${bundle_bytes}"
             exit 1
           fi
-          tar -czf - -- index.html assets data/status.json data/ui data/diff/latest-7d.json data/diff/latest-all.json |
+          tar -czf - --exclude='data/ui/meta.json' -- index.html assets data/status.json data/ui data/diff/latest-7d.json data/diff/latest-all.json |
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               tar -xzf - -C '${REMOTE_PROJECT_DIR}'
               test -s '${REMOTE_PROJECT_DIR}/index.html'
               test -s '${REMOTE_PROJECT_DIR}/data/status.json'
-              test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
-              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name '7d.*.json' -print -quit | grep -q .
-              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name 'all.*.json' -print -quit | grep -q .
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
+            "
+          tar -czf - -- data/ui/meta.json |
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              tar -xzf - -C '${REMOTE_PROJECT_DIR}'
+              test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
               if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
                 systemctl restart song-rank-api
               fi
@@ -163,18 +174,31 @@ jobs:
             echo "::error::could not resolve expected app asset from index.html"
             exit 1
           fi
-          remote_app="$(
-            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-              set -Eeuo pipefail
-              test -s '${REMOTE_PROJECT_DIR}/data/status.json'
-              test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
-              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name '7d.*.json' -print -quit | grep -q .
-              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name 'all.*.json' -print -quit | grep -q .
-              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
-              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
-              grep -o 'assets/app-[^\"]*\.js' '${REMOTE_PROJECT_DIR}/index.html' | head -1
-            "
-          )"
+          if [ "${DEPLOY_ACTION}" = "restore-previous-index" ]; then
+            remote_app="$(
+              sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+                set -Eeuo pipefail
+                test -s '${REMOTE_PROJECT_DIR}/index.html'
+                grep -o 'assets/app-[^\"]*\.js' '${REMOTE_PROJECT_DIR}/index.html' | head -1
+              "
+            )"
+          else
+            {
+              echo "set -Eeuo pipefail"
+              echo "test -s '${REMOTE_PROJECT_DIR}/index.html'"
+              echo "test -s '${REMOTE_PROJECT_DIR}/data/status.json'"
+              echo "test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'"
+              echo "test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'"
+              echo "test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'"
+              while IFS= read -r path; do
+                case "${path}" in
+                  data/ui/*) printf "test -s '%s/%s'\n" "${REMOTE_PROJECT_DIR}" "${path}" ;;
+                esac
+              done < static-sparse-paths-expanded.txt
+              echo "grep -o 'assets/app-[^\"]*\\.js' '${REMOTE_PROJECT_DIR}/index.html' | head -1"
+            } > remote-verify.sh
+            remote_app="$(sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "bash -s" < remote-verify.sh)"
+          fi
           if [ "${remote_app}" != "${expected_app}" ]; then
             echo "::error::VPS checkout references ${remote_app}, expected ${expected_app}"
             exit 1

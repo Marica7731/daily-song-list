@@ -1724,7 +1724,7 @@
 
   function runtimeRangePath(rangeId, meta, options = {}) {
     if (!meta && options.requireMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
-    return runtimeRangeMeta(rangeId, meta, options)?.path || `data/ui/${normalizeRangeId(rangeId, options) || rangeId}.json`;
+    return runtimeRangeMeta(rangeId, meta, options)?.path || "";
   }
 
   function runtimeRangeMeta(rangeId, meta, options = {}) {

@@ -18,7 +18,14 @@ const STATIC_COMMON_PATHS = [
 ];
 
 function addDataUiPath(value, paths) {
-  if (typeof value === "string" && value.startsWith("data/ui/")) paths.add(value);
+  if (typeof value !== "string" || !value.startsWith("data/ui/")) return;
+  if (/^data\/ui\/(?:7d|all)(?:\.[^/]+)?\.json$/u.test(value)) {
+    throw new Error(`full range JSON is forbidden in static deploy: ${value}`);
+  }
+  if (value.includes("..") || !/^data\/ui\/[A-Za-z0-9._/-]+$/u.test(value)) {
+    throw new Error(`unsafe static deploy path: ${value}`);
+  }
+  paths.add(value);
 }
 
 function collectDataUiPaths(value, paths, key = "") {
@@ -38,7 +45,27 @@ function collectDataUiPaths(value, paths, key = "") {
 
 function collectStaticPaths(meta) {
   const paths = new Set(["data/ui/meta.json"]);
-  collectDataUiPaths(meta?.ranges, paths);
+  for (const [rangeId, rangeMeta] of Object.entries(meta?.ranges || {})) {
+    if (/legacy/i.test(rangeId)) continue;
+    for (const key of [
+      "runtime",
+      "sourceDetail",
+      "sourceDetails",
+      "search",
+      "pageShard",
+      "pageShards",
+      "pages",
+      "sourceDetailShard",
+      "sourceDetailShards",
+      "sourceDetails",
+      "searchShard",
+      "searchShards",
+      "search",
+    ]) {
+      const value = rangeMeta?.[key] || rangeMeta?.shards?.[key];
+      collectDataUiPaths(value, paths, key);
+    }
+  }
   return [...paths].sort();
 }
 
@@ -51,7 +78,7 @@ function collectManifestPaths(repoRoot, paths) {
   for (const relativePath of paths) {
     if (!/(?:^|\/)manifest(?:\.[^/]+)?\.json$/u.test(relativePath)) continue;
     const absolutePath = path.join(repoRoot, relativePath);
-    if (!fs.existsSync(absolutePath)) continue;
+    if (!fs.existsSync(absolutePath)) throw new Error(`manifest path is missing from checkout: ${relativePath}`);
     collectDataUiPaths(readJson(repoRoot, relativePath), expanded);
   }
   return [...expanded].sort();

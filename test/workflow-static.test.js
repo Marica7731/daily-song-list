@@ -68,7 +68,10 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(staticDeploy, /data\/ui\/meta\.json/u);
   assert.match(staticDeploy, /scripts\/resolve-static-deploy-paths\.js/u);
   assert.match(staticDeploy, /git sparse-checkout set --no-cone --stdin/u);
-  assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui data\/diff\/latest-7d\.json data\/diff\/latest-all\.json/u);
+  assert.match(staticDeploy, /if: inputs\.action != 'restore-previous-index'/u);
+  assert.match(staticDeploy, /tar -czf - --exclude='data\/ui\/meta\.json' -- index\.html assets data\/status\.json data\/ui data\/diff\/latest-7d\.json data\/diff\/latest-all\.json/u);
+  assert.match(staticDeploy, /tar -czf - -- data\/ui\/meta\.json/u);
+  assert.doesNotMatch(staticDeploy, /-name '7d\.\*\.json'|-name 'all\.\*\.json'/u);
   assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
   assert.match(staticDeploy, /CODEX_STATIC_DEPLOY_BLOCKED/u);
   assert.match(staticDeploy, /CODEX_STATIC_RECOVERY_BLOCKED/u);

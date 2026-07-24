@@ -2300,10 +2300,6 @@ async function loadRuntimeRange(rangeId) {
   return promise;
 }
 
-function runtimeRangePath(rangeId) {
-  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta, { requireMeta: true, ...runtimeRangeOptions() });
-}
-
 function runtimeRangeMeta(rangeId) {
   return window.FrontendUtils.runtimeRangeMeta(canonicalRangeId(rangeId), state.runtimeMeta, runtimeRangeOptions());
 }
@@ -2357,9 +2353,7 @@ function runtimeMetaFromApiMeta(apiMeta, fallbackMeta = null) {
 function canUseRequestRuntime(rangeId = state.range) {
   if (!isLatestSnapshot()) return false;
   if (state.requestRuntime.disabledRanges.has(canonicalRangeId(rangeId))) return false;
-  if (state.runtimeApi.available) return true;
-  const request = requestRuntimeMeta(rangeId);
-  return Boolean(request?.summary?.path && request?.views?.songRank);
+  return state.runtimeApi.available;
 }
 
 function applyRequestRuntimeShell() {
@@ -2400,50 +2394,27 @@ function runtimeRangeIdCandidates(rangeId) {
   return [canonical, ...(LEGACY_RANGE_IDS[canonical] || [])].filter(Boolean);
 }
 
-function runtimeRangeInitialPath(rangeId) {
-  const shards = runtimeRangeShards(rangeId);
-  return shardInitialPath(shards.page) || runtimeRangePath(rangeId);
-}
-
-function shardInitialPath(shard) {
-  if (!shard) return "";
-  if (typeof shard === "string") return shard;
-  if (Array.isArray(shard)) return shardInitialPath(shard[0]);
-  return cleanText(shard.path || shard.initialPath || shard.indexPath || shard.manifestPath);
-}
-
 async function loadRuntimeRangeStrict(rangeId) {
   rangeId = canonicalRangeId(rangeId);
   const shards = runtimeRangeShards(rangeId);
-  const shardErrors = [];
-  if (shards.hasPageShard) {
-    const shardResult = await loadRuntimeRangeFromShards(rangeId).catch((error) => ({ error }));
-    if (!shardResult.error) {
+  if (!shards.hasPageShard) {
+    const error = new Error(`${rangeId} 范围缺少 page shard，已阻止读取完整 range JSON`);
+    state.runtimeWarnings.set(rangeId, { message: error.message, attempts: [error.message] });
+    throw error;
+  }
+  const errors = [];
+  const manifestPath = shardManifestPath(shards.page);
+  for (const cache of [cacheModeForPath(manifestPath), "reload"]) {
+    try {
+      const payload = await loadRuntimeRangeFromShards(rangeId, { cache });
       state.runtimeWarnings.delete(rangeId);
-      return shardResult;
+      return payload;
+    } catch (error) {
+      errors.push(error);
+      console.warn(`[runtime] shard load failed for ${rangeId}: ${error?.message || error}`);
     }
-    shardErrors.push(shardResult.error);
-    console.warn(`[runtime] shard load failed for ${rangeId}: ${shardResult.error?.message || shardResult.error}`);
   }
-  if (shouldRejectFullAllRuntimeLoad(rangeId)) {
-    throw new Error("all 范围缺少 page shard，已阻止读取完整 all JSON");
-  }
-  const primaryPath = runtimeRangeInitialPath(rangeId);
-  const allowPartial = primaryPath !== runtimeRangePath(rangeId) || Boolean(runtimeRangeShards(rangeId).hasPageShard);
-  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath), allowPartial });
-  if (primaryError.ok) {
-    state.runtimeWarnings.delete(rangeId);
-    return primaryError.payload;
-  }
-
-  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload", allowPartial });
-  if (retry.ok) {
-    state.runtimeWarnings.delete(rangeId);
-    return retry.payload;
-  }
-
-  const errors = [...shardErrors, primaryError.error, retry.error].filter(Boolean);
-  const diagnostic = errors.map((error) => error?.message || String(error)).join(" | ") || primaryPath;
+  const diagnostic = errors.map((error) => error?.message || String(error)).join(" | ") || rangeId;
   const error = new Error(`运行时范围读取失败：${diagnostic}`);
   error.rangeId = rangeId;
   error.attempts = errors.map((entry) => entry?.message || String(entry));
@@ -2454,18 +2425,19 @@ async function loadRuntimeRangeStrict(rangeId) {
   throw error;
 }
 
-async function loadRuntimeRangeFromShards(rangeId) {
+async function loadRuntimeRangeFromShards(rangeId, options = {}) {
   const rangeMeta = runtimeRangeMeta(rangeId);
   const shards = runtimeRangeShards(rangeId);
   const runtimeShard = shards.page;
   const manifestPath = shardManifestPath(runtimeShard);
   if (!manifestPath) throw new Error(`runtime shard manifest missing for ${rangeId}`);
-  const manifest = await readJson(manifestPath, { cache: cacheModeForPath(manifestPath) });
+  const cache = options.cache || cacheModeForPath(manifestPath);
+  const manifest = await readJson(manifestPath, { cache });
   const pages = Array.isArray(manifest.pages) ? manifest.pages : [];
   if (!pages.length) throw new Error(`runtime shard manifest has no pages for ${rangeId}`);
   const firstPage = pages[0];
   if (!firstPage?.path) throw new Error(`runtime shard first page missing for ${rangeId}`);
-  const firstPagePayload = await readJson(firstPage.path, { cache: cacheModeForPath(firstPage.path) });
+  const firstPagePayload = await readJson(firstPage.path, { cache });
   const items = Array.isArray(firstPagePayload.items) ? firstPagePayload.items : [];
   const payload = {
     schemaVersion: 1,
@@ -2495,30 +2467,6 @@ function shardManifestPath(shard) {
   if (typeof shard === "string") return shard;
   if (Array.isArray(shard)) return shardManifestPath(shard[0]);
   return cleanText(shard.manifestPath || shard.manifestLegacyPath || shard.path || shard.indexPath);
-}
-
-function shouldRejectFullAllRuntimeLoad(rangeId) {
-  const rangeMeta = runtimeRangeMeta(rangeId);
-  return canonicalRangeId(rangeId) === "all" && rangeMeta?.id === "all" && !runtimeRangeShards(rangeId).hasPageShard;
-}
-
-async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
-  try {
-    const payload = await readJson(path, options);
-    const allowPartial = Boolean(options.allowPartial || isPartialRuntimePayload(payload));
-    return {
-      ok: true,
-      payload: normalizeRuntimeRangePayload(window.FrontendUtils.validateRuntimeRangePayload(payload, {
-        rangeId,
-        meta: state.runtimeMeta,
-        path,
-        allowPartial,
-        ...runtimeRangeOptions(),
-      }), rangeId),
-    };
-  } catch (error) {
-    return { ok: false, error };
-  }
 }
 
 function normalizeRuntimeRangePayload(payload, rangeId) {

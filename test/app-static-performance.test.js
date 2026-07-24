@@ -30,10 +30,11 @@ test("range cache and trend Map are wired into rendering", () => {
 
 test("runtime range load validates meta-bound payloads and stops after a bounded retry", () => {
   assert.match(functionBody("async function loadRuntimeRange"), /runtime meta missing/u);
-  assert.match(appSource, /async function tryRuntimeRangeLoad[\s\S]*validateRuntimeRangePayload/u);
-  assert.match(appSource, /async function loadRuntimeRangeStrict[\s\S]*cache: "reload"/u);
+  assert.match(appSource, /async function loadRuntimeRangeFromShards[\s\S]*cache/u);
+  assert.match(appSource, /async function loadRuntimeRangeStrict[\s\S]*缺少 page shard/u);
+  assert.match(functionBody("async function loadRuntimeRangeStrict"), /"reload"/u);
   assert.match(functionBody("async function loadRuntimeRangeStrict"), /state\.runtimeWarnings\.set/u);
-  assert.doesNotMatch(appSource, /loadRuntimeRangeFallback|fallbackFrom|当前使用备用数据|备用数据/u);
+  assert.doesNotMatch(appSource, /tryRuntimeRangeLoad|loadRuntimeRangeFallback|fallbackFrom|当前使用备用数据|备用数据/u);
 });
 
 test("status display separates capture time from derived rebuild time", () => {

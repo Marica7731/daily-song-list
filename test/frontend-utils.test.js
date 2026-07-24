@@ -1621,7 +1621,7 @@ test("runtime range path follows URL range and meta paths", () => {
     }),
     "data/ui/all.abcdef123456.json",
   );
-  assert.equal(runtimeRangePath("72h", null), "data/ui/72h.json");
+  assert.equal(runtimeRangePath("72h", null), "");
   assert.throws(() => runtimeRangePath("72h", null, { requireMeta: true }), /runtime meta missing/u);
 });
 
