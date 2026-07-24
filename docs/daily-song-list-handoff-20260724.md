@@ -294,6 +294,7 @@
 ## H5 歌曲卡留白二次修正与 runtime 来源复测（2026-07-24）
 
 - 用户反馈上一版为放宽歌名长度而保留了过大的卡片空白。本次在 `assets/styles.css` 的 H5 规则中保留标题/歌手跨右侧动作轨道，但把次数复制入口从会撑高第二行的 44px 视觉按钮收紧为约 22px 的紧凑按钮；不增加独立复制按钮，不改变次数点击复制全部时间码 URL 的行为。
+- 线上 390px 实测又发现带“小众”徽标的个别歌曲卡会在标题与歌手之间多出一行；本次紧凑 H5 歌曲卡隐藏该重复徽标，保持榜单筛选和详情语义不变，使歌曲卡高度统一。
 - `test/ui-redesign-static.test.js` 新增紧凑次数按钮契约；`node --test test/runtime-db.test.js test/runtime-api.test.js test/ui-redesign-static.test.js test/frontend-utils.test.js` 为 96/96，`node scripts/check-js-syntax.js`、`git diff --check` 均通过。
 - runtime workflow `30088657269` 已成功完成 Mac 构建和 VPS2 direct-inplace 激活；只读探针确认 `song-rank-api=active`、内网 `/healthz=200`，活动 DB 约 13.44 GB，可用空间约 6.85 GB，未发现 `.next`/`.previous` 临时库。
 - 严格线上复测（2026-07-24，`https://ytb-song-rank.culua.com`）：`index`、`/healthz`、`/api/meta`、7d rankings、`q=晴る&searchFields=all`、同筛选加 `nicheOnly=1&hideUnknownArtist=1`、`/api/sources/82488b92c02b5a8f?page=1&pageSize=20` 全部 HTTP 200；筛选与未筛选响应不同，来源响应约 654 KB。此前截图中的 HTTP 502 与 runtime direct-inplace 停 API 的发布窗口一致，当前未复现。
