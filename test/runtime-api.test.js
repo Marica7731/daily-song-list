@@ -12,12 +12,15 @@ const PYTHON = process.env.PYTHON || "python";
 const SERVER_SOURCE = fs.readFileSync(path.join(ROOT, "server", "song_rank_api.py"), "utf8");
 const APP_SOURCE = fs.readFileSync(path.join(ROOT, "assets", "app.js"), "utf8");
 const RUNTIME_EXPORT_SOURCE = fs.readFileSync(path.join(ROOT, "scripts", "db", "export-runtime-rankings.js"), "utf8");
+const RUNTIME_BUILD_SOURCE = fs.readFileSync(path.join(ROOT, "scripts", "build-runtime-data.js"), "utf8");
 
 test("runtime source previews prefer distinct videos before applying the preview limit", () => {
   assert.match(RUNTIME_EXPORT_SOURCE, /function previewOccurrences\(occurrences, limit\)/u);
   assert.match(RUNTIME_EXPORT_SOURCE, /seenVideos\.has\(videoKey\)/u);
   assert.match(RUNTIME_EXPORT_SOURCE, /record\.occurrences = previewOccurrences\(record\.sourceOccurrences, REQUEST_PREVIEW_SOURCE_LIMIT\)/u);
   assert.match(RUNTIME_EXPORT_SOURCE, /const occurrences = previewOccurrences\(record\.occurrences \|\| \[\], REQUEST_PREVIEW_SOURCE_LIMIT\)/u);
+  assert.match(RUNTIME_BUILD_SOURCE, /function previewOccurrences\(occurrences, limit\)/u);
+  assert.match(RUNTIME_BUILD_SOURCE, /const occurrences = previewOccurrences\(record\.occurrences \|\| \[\], REQUEST_PREVIEW_SOURCE_LIMIT\)/u);
 });
 
 test("runtime API vtuber fallback uses normalized song title lookup for source enrichment", () => {
