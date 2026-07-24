@@ -1399,7 +1399,8 @@ mark {
   grid-template-columns: 44px minmax(0, 1fr);
   grid-template-areas:
     "image title"
-    "image subline";
+    "image subline"
+    "stats stats";
   column-gap: 10px;
   row-gap: 2px;
   align-items: center;
@@ -1467,6 +1468,48 @@ mark {
   color: var(--accent-strong);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.vtuber-card-stats {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.vtuber-card-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.vtuber-card-stat-label {
+  flex: 0 0 auto;
+  color: var(--muted-2);
+  font-weight: 600;
+}
+
+.vtuber-card-stat-value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-overflow: ellipsis;
+}
+
+.vtuber-card-stat.is-active .vtuber-card-stat-label,
+.vtuber-card-stat.is-active .vtuber-card-stat-value {
+  color: var(--accent-strong);
 }
 
 .vtuber-display-image {
@@ -2286,8 +2329,11 @@ mark {
 
 .artist-song-group-vtuber .artist-song-header {
   grid-template-columns: 62px minmax(0, 1fr) minmax(44px, auto);
-  grid-template-areas: "thumb title actions";
-  gap: 8px;
+  grid-template-areas:
+    "thumb title title"
+    "date date actions";
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 4px 8px;
   align-items: start;
   min-height: 100%;
 }
@@ -2332,8 +2378,14 @@ mark {
   text-align: left;
 }
 
+.artist-song-group-vtuber .artist-song-date {
+  grid-area: date;
+  align-self: center;
+  justify-self: start;
+}
+
 .artist-song-group-vtuber .artist-song-summary-actions {
-  align-self: start;
+  align-self: center;
   justify-self: end;
   justify-content: flex-end;
   gap: 4px;
@@ -3445,7 +3497,8 @@ mark {
     grid-template-columns: 38px minmax(0, 1fr);
     grid-template-areas:
       "image title"
-      "image subline";
+      "image subline"
+      "stats stats";
     column-gap: 7px;
     row-gap: 2px;
     align-items: center;
@@ -4435,12 +4488,13 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr) auto;
     grid-template-areas:
-      "thumb title"
-      "thumb actions";
+      "thumb title title"
+      "date date actions";
+    grid-template-rows: minmax(0, 1fr) auto;
     align-items: start;
-    gap: 3px 6px;
+    gap: 2px 6px;
     min-height: 0;
     height: 100%;
   }
@@ -4473,25 +4527,34 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-summary-actions {
-    align-self: start;
-    justify-self: start;
-    justify-content: flex-start;
+    align-self: center;
+    justify-self: end;
+    justify-content: flex-end;
     gap: 3px;
     max-width: 100%;
-    text-align: left;
+    text-align: right;
   }
 
   .artist-song-group-vtuber .artist-song-count {
     display: inline-flex;
     align-items: center;
-    justify-content: flex-start;
-    min-height: 18px;
+    justify-content: flex-end;
+    min-height: 16px;
     border-radius: 0;
     background: transparent;
     color: var(--muted);
     font-size: 10px;
     font-weight: 700;
     line-height: 1.2;
+  }
+
+  .vtuber-card-stats {
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .vtuber-card-stat {
+    gap: 2px;
   }
 
   .source-drawer-toolbar {
@@ -4877,8 +4940,10 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 50px minmax(0, 1fr) minmax(38px, auto);
-    grid-template-areas: "thumb title actions";
+    grid-template-columns: 50px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb title title"
+      "date date actions";
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
@@ -4972,7 +5037,7 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-columns: 38px minmax(0, 1fr) auto;
     gap: 4px;
   }
 
@@ -4987,6 +5052,15 @@ mark {
   .artist-song-group-vtuber .artist-song-artist,
   .artist-song-group-vtuber .artist-song-count {
     font-size: 10px;
+  }
+
+  .artist-song-group-vtuber .artist-song-date {
+    font-size: 9.5px;
+  }
+
+  .vtuber-card-stats {
+    gap: 3px;
+    font-size: 9.5px;
   }
 }
 

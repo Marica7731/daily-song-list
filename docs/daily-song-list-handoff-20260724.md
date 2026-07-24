@@ -175,3 +175,37 @@
 - 子智能体只能只读审计或在明确分支实现；主任务统一审核 diff、commit、push、deploy。
 - 不要触碰 `.workbuddy/`、C 盘、未确认仍在运行的来源输出目录和用户未提交改动。
 - 未完成项不能写成已上线；如果只完成代码/测试而未发布，必须明确“交付未完成”。
+
+## 本轮 H5/API/tag 并行修复补充（2026-07-24）
+
+本轮以 G 盘工作树 `G:\\codex-work\\daily-song-list-runtime-fix-20260723` 为唯一代码操作目录；未触碰 `.workbuddy/`、D 盘失效 worktree、C 盘项目数据，也没有导入来源数据。
+
+### H5 目标与实现范围
+
+- 频道卡新增明确的三个统计字段：`视频`、`歌曲`、`次数`，不再只把歌曲数/视频数藏在展开按钮的无障碍名称里。
+- 对无可靠身份的频道不显示脏 handle；可靠的频道元数据优先，当前线上视频页核对的补充证据为：
+  - `27ciaztchCQ` 水沢オペラ → `@mizusawa_opera`
+  - `P9HZGLHFi5c` もかん → `@mokankamo`
+  - `jOzbHf8nHYA` みたにみく → `@mikumitani`
+  - `ByaypQqmirQ` 藤音カナデ → `@FujiotoKanade`
+- 展开歌曲卡将日期从标题列移到独立的紧凑网格行，减少日期右侧和封面下方的空白；桌面/H5 两列规则保持不变。
+- 主要文件：`assets/app.js`、`assets/styles.css`、`test/ui-redesign-static.test.js`。
+
+### Runtime API 筛选语义
+
+- `nicheOnly` / `hideUnknownArtist` 已补充 fallback 聚合、视频混合 occurrence、来源详情和前端来源详情缓存回归覆盖；服务端现有主查询/来源 scope 与新增 fallback 统一过滤。
+- 错误布尔值仍必须返回可诊断的 HTTP 400；本轮没有提高 Nginx timeout，也没有放大短词查询 payload。
+- 主要文件：`server/song_rank_api.py`、`test/runtime-api.test.js`；前端来源请求参数和缓存 key 使用当前筛选状态。
+
+### 收录 tag 语义
+
+- `assets/frontend-utils.js` 统一 trusted source type 与 Moment source type 判断：本地/人工/明确 `youtube_channel_discovery` 等来源可显示 `已收录`，`vsinger_moment_http`、`vsinger-moment`、`moment` 外部证据不能单独打 tag；权威 `isCollected=false` 优先。
+- 已补充顶层/静态 fallback 的 presentation model 测试；线上展开 drawer/source card 仍须在发布后用真实页面复测，未复测前不能写成完全收口。
+
+### 本轮本地验收（发布前）
+
+- `node --test test/frontend-utils.test.js test/runtime-api.test.js test/ui-redesign-static.test.js test/app-static-performance.test.js`：117/117 通过。
+- `node scripts/check-js-syntax.js`：114 个 JavaScript 文件通过。
+- `git diff --check`：通过。
+- `npm run version:assets`：生成 `h54a3b4d4ad6b`，`index.html` 已指向对应 hashed CSS/JS；线上发布和 H5 复测仍待主会话统一完成。
+- Naraetan 清洗本轮保持只读；不把原始/partial 来源直接导入生产。之前已知的原始 JSON/HTML 审计结论仍按 D 节执行，Naraetan、`フィナーレ。` 和“只有两个视频”不属于本次 H5/API 发布范围。

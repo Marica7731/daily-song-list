@@ -344,6 +344,22 @@ def vtuber_song_fallback_payload(
         """,
         [range_id, *values],
     ).fetchall()
+    if niche_only or hide_unknown_artist:
+        return filtered_vtuber_song_fallback_payload(
+            conn,
+            rows,
+            range_id,
+            q,
+            view,
+            page,
+            page_size,
+            min_count,
+            base_total,
+            search_scope,
+            search_fields,
+            niche_only,
+            hide_unknown_artist,
+        )
     songs_by_key: dict[str, dict] = {}
     total_videos = 0
     for row in rows:
@@ -353,8 +369,6 @@ def vtuber_song_fallback_payload(
         match_terms = vtuber_fallback_match_terms(vtuber, row, q)
         total_videos += as_non_negative_int(vtuber.get("videoCount"))
         for song in vtuber.get("songs") or []:
-            if not song_passes_runtime_filters(song, niche_only, hide_unknown_artist):
-                continue
             title = str(song.get("name") or song.get("title") or song.get("key") or "").strip()
             if not title:
                 continue
@@ -431,6 +445,239 @@ def vtuber_song_fallback_payload(
     }
 
 
+def filtered_vtuber_song_fallback_payload(
+    conn: sqlite3.Connection,
+    rows: list[sqlite3.Row],
+    range_id: str,
+    q: str,
+    view: str,
+    page: int,
+    page_size: int,
+    min_count: int,
+    base_total: int,
+    search_scope: str,
+    search_fields: list[str] | None,
+    niche_only: bool,
+    hide_unknown_artist: bool,
+) -> dict:
+    songs_by_key: dict[str, dict] = {}
+    global_counts: dict[str, int] = {}
+    for row in rows:
+        vtuber = decode_row(row)
+        channel_name = str(vtuber.get("name") or vtuber.get("channelName") or row["name"] or "").strip()
+        channel_key = str(
+            vtuber.get("channelId")
+            or vtuber.get("channelHandle")
+            or vtuber.get("key")
+            or row["detail_key"]
+            or channel_name
+        ).strip()
+        canonical_titles: dict[str, str] = {}
+        for song in vtuber.get("songs") or []:
+            title = str(song.get("name") or song.get("title") or song.get("key") or "").strip()
+            title_key = song_title_lookup_key(title)
+            if not title_key:
+                continue
+            canonical_titles.setdefault(title_key, title)
+            global_counts[compact_text(title)] = global_counts.get(compact_text(title), 0) + as_non_negative_int(song.get("count"))
+        channel_clause, channel_params = vtuber_video_identity_sql(vtuber, row)
+        if not channel_params:
+            continue
+        occurrence_filter, occurrence_filter_params = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+        occurrence_rows = conn.execute(
+            f"""
+            SELECT
+              o.title,
+              o.artist,
+              o.video_id,
+              o.is_unknown_artist,
+              COUNT(*) AS occurrence_count
+            FROM occurrences o
+            JOIN videos v ON v.video_id = o.video_id
+            WHERE o.range_id = ?
+              AND ({channel_clause})
+              AND {occurrence_filter}
+            GROUP BY o.title, o.artist, o.video_id, o.is_unknown_artist
+            """,
+            [range_id, *channel_params, *occurrence_filter_params],
+        ).fetchall()
+        for occurrence_row in occurrence_rows:
+            raw_title = str(occurrence_row["title"] or "").strip()
+            title = canonical_titles.get(song_title_lookup_key(raw_title), raw_title)
+            if not title:
+                continue
+            key = compact_text(title)
+            count = as_non_negative_int(occurrence_row["occurrence_count"])
+            record = songs_by_key.get(key)
+            if record is None:
+                record = {
+                    "type": "song",
+                    "key": key,
+                    "title": title,
+                    "displayArtist": "",
+                    "artists": {},
+                    "channels": {},
+                    "occurrences": [],
+                    "count": 0,
+                    "videoCount": 0,
+                    "timestampCount": 0,
+                    "matchedByVtuber": True,
+                    "sourceFilterQuery": q,
+                    "searchText": compact_text(f"{title} {channel_name} {q}"),
+                    "_artistUnknown": {},
+                    "_channelSelectors": [],
+                    "_rawTitles": set(),
+                    "_videoIds": set(),
+                }
+                songs_by_key[key] = record
+            record["count"] += count
+            record["timestampCount"] += count
+            record["_rawTitles"].add(raw_title)
+            record["_videoIds"].add(str(occurrence_row["video_id"] or ""))
+            artist = str(occurrence_row["artist"] or "").strip()
+            if artist:
+                record["artists"][artist] = record["artists"].get(artist, 0) + count
+                record["_artistUnknown"][artist] = bool(occurrence_row["is_unknown_artist"])
+            if channel_key:
+                channel = record["channels"].setdefault(
+                    channel_key,
+                    {"key": channel_key, "name": channel_name, "count": 0},
+                )
+                channel["count"] += count
+            selector = (channel_clause, tuple(channel_params))
+            if selector not in record["_channelSelectors"]:
+                record["_channelSelectors"].append(selector)
+
+    records = []
+    for record in songs_by_key.values():
+        if record["count"] < min_count:
+            continue
+        record["globalCount"] = global_counts.get(record["key"], record["count"])
+        record["videoCount"] = len({video_id for video_id in record.pop("_videoIds") if video_id})
+        artist_unknown = record.pop("_artistUnknown")
+        record["artists"] = [
+            {"key": compact_text(name), "name": name, "count": count}
+            for name, count in sorted(
+                record["artists"].items(),
+                key=lambda item: (artist_unknown.get(item[0], False), -item[1], item[0]),
+            )
+        ]
+        record["channels"] = sorted(
+            record["channels"].values(),
+            key=lambda item: (-item["count"], item["name"]),
+        )
+        if record["artists"]:
+            record["displayArtist"] = record["artists"][0]["name"]
+        records.append(record)
+    records.sort(key=lambda item: (-item["count"], item["title"]))
+    previous_count: int | None = None
+    current_rank = 0
+    for index, record in enumerate(records):
+        if record["count"] != previous_count:
+            current_rank = index + 1
+            previous_count = record["count"]
+        record["rank"] = current_rank
+    total = len(records)
+    offset = (max(1, page) - 1) * page_size
+    page_records = records[offset : offset + page_size]
+    for record in page_records:
+        record["occurrences"] = filtered_vtuber_fallback_occurrences(
+            conn,
+            range_id,
+            record["_rawTitles"],
+            record["_channelSelectors"],
+            niche_only,
+            hide_unknown_artist,
+        )
+        record["occurrencePreviewLimited"] = record["count"] > len(record["occurrences"])
+    for record in records:
+        record.pop("_rawTitles", None)
+        record.pop("_channelSelectors", None)
+    return {
+        "schemaVersion": 1,
+        "rangeId": range_id,
+        "view": view,
+        "metric": response_metric("count"),
+        "searchScope": search_scope,
+        "searchFields": search_fields if search_fields is not None else search_fields_for_scope(search_scope),
+        "page": max(1, page),
+        "pageSize": page_size,
+        "totalCount": total,
+        "filteredBaseCount": base_total,
+        "totalOccurrenceCount": sum(record["count"] for record in records),
+        "totalSongCount": total,
+        "totalVideoCount": sum(record["videoCount"] for record in records),
+        "pageCount": (total + page_size - 1) // page_size,
+        "records": page_records,
+    }
+
+
+def vtuber_video_identity_sql(vtuber: dict, row: sqlite3.Row) -> tuple[str, list[object]]:
+    candidates = [
+        ("v.channel_id", vtuber.get("channelId")),
+        ("v.channel_handle", vtuber.get("channelHandle")),
+        ("v.channel_name", vtuber.get("channelName")),
+        ("v.channel_name", vtuber.get("name")),
+        ("v.channel_name", row["name"]),
+        ("v.channel_url", vtuber.get("channelUrl")),
+        ("v.channel_url", vtuber.get("sourceUrl")),
+    ]
+    detail_key = str(row["detail_key"] or "").strip()
+    if detail_key.lower().startswith("uc"):
+        candidates.append(("v.channel_id", detail_key))
+    elif detail_key.lstrip("/").startswith("@"):
+        candidates.append(("v.channel_handle", detail_key))
+    elif detail_key:
+        candidates.append(("v.channel_name", detail_key))
+    clauses: list[str] = []
+    params: list[object] = []
+    seen: set[tuple[str, str]] = set()
+    for column, raw_value in candidates:
+        value = str(raw_value or "").strip()
+        identity = (column, compact_text(value))
+        if not value or identity in seen:
+            continue
+        seen.add(identity)
+        if column == "v.channel_handle":
+            clauses.append("lower(trim(replace(v.channel_handle, '/', ''))) = lower(trim(replace(?, '/', '')))")
+        else:
+            clauses.append(f"lower(trim({column})) = lower(trim(?))")
+        params.append(value)
+    return " OR ".join(clauses) or "0 = 1", params
+
+
+def filtered_vtuber_fallback_occurrences(
+    conn: sqlite3.Connection,
+    range_id: str,
+    raw_titles: set[str],
+    channel_selectors: list[tuple[str, tuple[object, ...]]],
+    niche_only: bool,
+    hide_unknown_artist: bool,
+) -> list[dict]:
+    titles = sorted(title for title in raw_titles if title)
+    if not titles or not channel_selectors:
+        return []
+    title_placeholders = ",".join("?" for _ in titles)
+    channel_sql = " OR ".join(f"({clause})" for clause, _ in channel_selectors)
+    channel_params = [value for _, values in channel_selectors for value in values]
+    occurrence_filter, occurrence_filter_params = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+    rows = conn.execute(
+        f"""
+        SELECT o.payload_json
+        FROM occurrences o
+        JOIN videos v ON v.video_id = o.video_id
+        WHERE o.range_id = ?
+          AND o.title IN ({title_placeholders})
+          AND ({channel_sql})
+          AND {occurrence_filter}
+        ORDER BY o.rowid
+        LIMIT 20
+        """,
+        [range_id, *titles, *channel_params, *occurrence_filter_params],
+    ).fetchall()
+    return [client_occurrence_payload(json.loads(row["payload_json"])) for row in rows]
+
+
 def video_song_fallback_payload(
     conn: sqlite3.Connection,
     range_id: str,
@@ -460,6 +707,17 @@ def video_song_fallback_payload(
         """,
         [range_id, *values],
     ).fetchall()
+    filtered_occurrences_by_video = (
+        filtered_video_fallback_occurrences(
+            conn,
+            range_id,
+            [str(row["detail_key"] or "") for row in rows],
+            niche_only,
+            hide_unknown_artist,
+        )
+        if niche_only or hide_unknown_artist
+        else None
+    )
     songs_by_key: dict[str, dict] = {}
     for row in rows:
         video = decode_row(row)
@@ -475,9 +733,17 @@ def video_song_fallback_payload(
             "publishedTimestamp": video.get("publishedTimestamp"),
             "publishedText": video.get("publishedText") or "",
         }
-        for song in video.get("songs") or []:
-            if not song_passes_runtime_filters(song, niche_only, hide_unknown_artist):
-                continue
+        if filtered_occurrences_by_video is None:
+            occurrences = [
+                {"item": item, "song": song, "videoId": video_id}
+                for song in video.get("songs") or []
+            ]
+        else:
+            occurrences = filtered_occurrences_by_video.get(video_id, [])
+        for occurrence in occurrences:
+            occurrence_item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}
+            occurrence_item = {**item, **occurrence_item}
+            song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
             title = str(song.get("title") or song.get("name") or "").strip()
             if not title:
                 continue
@@ -508,10 +774,17 @@ def video_song_fallback_payload(
             record["_videoIds"].add(video_id)
             if artist:
                 record["artists"][artist] = record["artists"].get(artist, 0) + 1
-            channel_name = str(item["channelName"] or "").strip()
+            channel_name = str(occurrence_item.get("channelName") or "").strip()
             if channel_name:
                 record["channels"][channel_name] = record["channels"].get(channel_name, 0) + 1
-            record["occurrences"].append({"item": item, "song": song, "videoId": video_id})
+            record["occurrences"].append(
+                {
+                    **occurrence,
+                    "item": occurrence_item,
+                    "song": song,
+                    "videoId": video_id,
+                }
+            )
     records = [
         record
         for record in songs_by_key.values()
@@ -558,6 +831,37 @@ def video_song_fallback_payload(
         "pageCount": (total + page_size - 1) // page_size,
         "records": page_records,
     }
+
+
+def filtered_video_fallback_occurrences(
+    conn: sqlite3.Connection,
+    range_id: str,
+    video_ids: list[str],
+    niche_only: bool,
+    hide_unknown_artist: bool,
+) -> dict[str, list[dict]]:
+    unique_video_ids = sorted({video_id for video_id in video_ids if video_id})
+    if not unique_video_ids:
+        return {}
+    placeholders = ",".join("?" for _ in unique_video_ids)
+    occurrence_filter, occurrence_filter_params = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+    rows = conn.execute(
+        f"""
+        SELECT o.video_id, o.payload_json
+        FROM occurrences o
+        WHERE o.range_id = ?
+          AND o.video_id IN ({placeholders})
+          AND {occurrence_filter}
+        ORDER BY o.rowid
+        """,
+        [range_id, *unique_video_ids, *occurrence_filter_params],
+    ).fetchall()
+    by_video: dict[str, list[dict]] = {}
+    for row in rows:
+        by_video.setdefault(str(row["video_id"] or ""), []).append(
+            client_occurrence_payload(json.loads(row["payload_json"]))
+        )
+    return by_video
 
 
 def base_total_for_view(conn: sqlite3.Connection, range_id: str, view: str, metric: str) -> int:
@@ -1829,16 +2133,6 @@ def occurrence_channel_counts(occurrences: list[dict]) -> list[dict]:
         {"name": name, "count": count}
         for name, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
     ]
-
-
-def song_passes_runtime_filters(song: dict, niche_only: bool, hide_unknown_artist: bool) -> bool:
-    if niche_only and not bool(song.get("isNiche") or song.get("is_niche")):
-        return False
-    if hide_unknown_artist:
-        artist = str(song.get("artist") or "").strip().lower()
-        if artist in {"", "unknown", "未記載", "未记载", "待补歌手", "待補歌手"}:
-            return False
-    return True
 
 
 def as_non_negative_int(value: object) -> int:

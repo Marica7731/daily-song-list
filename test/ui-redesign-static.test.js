@@ -229,7 +229,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /function renderVtuberAvatar/u);
   assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberChannelTextLink/u);
-  assert.match(appSource, /wrapVtuberChannelLink\(media, record \|\| \{\}, "vtuber-display-link"\)/u);
+  assert.match(appSource, /wrapVtuberChannelLink\(media, record \|\| \{\}, "vtuber-display-link", channelIdentity\)/u);
   assert.match(appSource, /function vtuberChannelUrlCandidate/u);
   assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrl/u);
   assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrls/u);
@@ -475,6 +475,46 @@ test("rank summaries keep metrics to entity count and song collections", () => {
   assert.match(appSource, /function summaryNote\(selection, extra = "", rangeCache = null\)[\s\S]*summaryVideoVisibilityNote\(rangeCache, selection\)/u);
 });
 
+test("VTuber cards expose explicit statistics and only trusted channel identities", () => {
+  const contentBody = functionBody("function renderRecordContent");
+  const statsBody = sourceBetween("function renderVtuberStats", "function renderVtuberHandle");
+  const identityBody = sourceBetween("function vtuberChannelIdentity", "function vtuberReliableDisplayName");
+  const displayNameBody = sourceBetween("function vtuberReliableDisplayName", "function vtuberChannelMetadataRecords");
+  const displayNameGuardBody = sourceBetween("function isReliableVtuberDisplayName", "function vtuberReliableHandle");
+  const handleBody = sourceBetween("function vtuberReliableHandle", "function isReliableVtuberHandle");
+  const renderHandleBody = sourceBetween("function renderVtuberHandle", "function renderVtuberChannelTextLink");
+  const songGroupBody = functionBody("function renderArtistSongGroup");
+
+  assert.match(contentBody, /const channelIdentity = mode === "vtuber" \? vtuberChannelIdentity\(record \|\| \{\}\) : null/u);
+  assert.match(contentBody, /channelIdentity\.displayName \|\| "未知频道"/u);
+  assert.match(contentBody, /content\.append\(renderVtuberStats\(\{ songCount, videoCount, occurrenceCount, rankMetric \}\)\)/u);
+  assert.match(statsBody, /\{ metric: "videos", label: "视频", value: videoCount, ariaLabel: "视频数量" \}/u);
+  assert.match(statsBody, /\{ metric: "songs", label: "歌曲", value: songCount, ariaLabel: "歌曲数量" \}/u);
+  assert.match(statsBody, /\{ metric: "occurrences", label: "次数", value: occurrenceCount, ariaLabel: "次数" \}/u);
+  assert.match(statsBody, /rankMetric === item\.metric \? " is-active" : ""/u);
+  assert.match(cssBlock(".vtuber-card-stats"), /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
+  assert.match(cssBlock(".vtuber-card-stat-value"), /font-variant-numeric: tabular-nums;/u);
+
+  assert.match(identityBody, /displayName \? vtuberReliableHandle\(record\) : ""/u);
+  assert.match(displayNameBody, /const metadata = vtuberChannelMetadataRecords\(record\)/u);
+  assert.match(displayNameBody, /metadata\.flatMap\(\(item\) => \[item\.displayName, item\.channelDisplayName, item\.channelName, item\.name, item\.title\]\)/u);
+  assert.match(displayNameGuardBody, /\^\\\/\?@/u);
+  assert.match(displayNameGuardBody, /channel\\\/\)\?UC/u);
+  assert.match(handleBody, /return vtuberEvidenceHandle\(record\)/u);
+  assert.match(renderHandleBody, /if \(!identity\.displayName \|\| !handle\) return null/u);
+  assert.ok(appSource.includes('["27ciaztchCQ", "/@mizusawa_opera"]'));
+  assert.ok(appSource.includes('["P9HZGLHFi5c", "/@mokankamo"]'));
+  assert.ok(appSource.includes('["jOzbHf8nHYA", "/@mikumitani"]'));
+  assert.ok(appSource.includes('["ByaypQqmirQ", "/@FujiotoKanade"]'));
+
+  const compactHeaderBlock = cssBlock(".artist-song-group-vtuber .artist-song-header");
+  assert.match(compactHeaderBlock, /"thumb title title"[\s\S]*"date date actions"/u);
+  assert.match(compactHeaderBlock, /grid-template-rows: minmax\(0, 1fr\) auto;/u);
+  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-date"), /grid-area: date;/u);
+  assert.match(songGroupBody, /date\.className = "artist-song-date"[\s\S]*header\.append\(date\)/u);
+  assert.doesNotMatch(songGroupBody, /titleWrap\.append\(date\)/u);
+});
+
 test("VTuber channel expansion renders paged song groups before source pages", () => {
   const vtuberRankBody = functionBody("function renderVtuberRank");
   const requestedPageStart = appSource.indexOf("function renderRequestedPageResult");
@@ -551,4 +591,12 @@ function functionBody(signature) {
     if (depth === 0) return appSource.slice(braceStart, index + 1);
   }
   throw new Error(`unterminated ${signature}`);
+}
+
+function sourceBetween(startSignature, endSignature) {
+  const start = appSource.indexOf(startSignature);
+  const end = appSource.indexOf(endSignature, start + startSignature.length);
+  assert.notEqual(start, -1, `missing ${startSignature}`);
+  assert.notEqual(end, -1, `missing ${endSignature}`);
+  return appSource.slice(start, end);
 }

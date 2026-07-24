@@ -10,6 +10,7 @@ const test = require("node:test");
 const ROOT = path.resolve(__dirname, "..");
 const PYTHON = process.env.PYTHON || "python";
 const SERVER_SOURCE = fs.readFileSync(path.join(ROOT, "server", "song_rank_api.py"), "utf8");
+const APP_SOURCE = fs.readFileSync(path.join(ROOT, "assets", "app.js"), "utf8");
 
 test("runtime API vtuber fallback uses normalized song title lookup for source enrichment", () => {
   assert.match(SERVER_SOURCE, /def song_title_lookup_key/u);
@@ -30,6 +31,16 @@ test("runtime API all-field source search prioritizes entity matches by global c
 
 test("runtime API keeps source-search temp data in memory", () => {
   assert.match(SERVER_SOURCE, /PRAGMA temp_store=MEMORY/u);
+});
+
+test("runtime API filters are inherited by frontend ranking and source-detail caches", () => {
+  const nicheParamMatches = APP_SOURCE.match(/if \(filters\.nicheOnly\) params\.set\("nicheOnly", "1"\);/gu) || [];
+  const hideUnknownParamMatches = APP_SOURCE.match(/if \(filters\.hideUnknownArtist\) params\.set\("hideUnknownArtist", "1"\);/gu) || [];
+  assert.ok(nicheParamMatches.length >= 2);
+  assert.ok(hideUnknownParamMatches.length >= 2);
+  assert.match(APP_SOURCE, /const requestPath = sourceDetailPagePath\(path, page, pageSize, options\.filters\);/u);
+  assert.match(APP_SOURCE, /const cacheKey = key \? `page:\$\{requestPath\}#\$\{key\}` : `page:\$\{requestPath\}`;/u);
+  assert.match(APP_SOURCE, /function sourceDetailFiltersForCurrentView\(\)/u);
 });
 
 test("runtime API merges indexed unknown artist song variants into the known song result", async () => {
@@ -268,6 +279,109 @@ test("runtime API excludes blocked VTuber source occurrences from channel search
   }
 });
 
+test("runtime API vtuber and video fallbacks preserve occurrence filters", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-filter-fallback-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  let child = null;
+  let stderr = "";
+
+  try {
+    writeFallbackFilterFixture(latestPath);
+    execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+        "--input",
+        latestPath,
+        "--output",
+        dbPath,
+        "--no-vsinger",
+        "--no-youtube-channel-discovery",
+      ],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+        env: { ...process.env, DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT: "2" },
+        timeout: 30000,
+      },
+    );
+    removeSourceSearchRows(dir, dbPath);
+
+    const port = await getFreePort();
+    child = spawn(
+      PYTHON,
+      [
+        path.join(ROOT, "server", "song_rank_api.py"),
+        "--db",
+        dbPath,
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+      ],
+      { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    await waitForReady(child, port);
+    const vtuberNiche = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Ch.&searchFields=channel&nicheOnly=1&pageSize=5`,
+    );
+    assert.equal(vtuberNiche.totalCount, 1);
+    assert.equal(vtuberNiche.totalOccurrenceCount, 1);
+    assert.equal(vtuberNiche.records[0].title, "Niche Fixture Song");
+    assert.equal(vtuberNiche.records[0].matchedByVtuber, true);
+    assert.equal(vtuberNiche.records[0].occurrences.length, 1);
+
+    const vtuberHideUnknown = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Ch.&searchFields=channel&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(vtuberHideUnknown.totalCount, 2);
+    assert.equal(vtuberHideUnknown.totalOccurrenceCount, 2);
+    assert.deepEqual(
+      new Set(vtuberHideUnknown.records.map((record) => record.title)),
+      new Set(["Common Fixture Song", "Niche Fixture Song"]),
+    );
+    assert.equal(vtuberHideUnknown.records.every((record) => record.matchedByVtuber === true), true);
+
+    const vtuberCombined = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Ch.&searchFields=channel&nicheOnly=1&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(vtuberCombined.totalCount, 1);
+    assert.equal(vtuberCombined.totalOccurrenceCount, 1);
+    assert.equal(vtuberCombined.records[0].title, "Niche Fixture Song");
+
+    const videoNiche = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Needle&searchFields=all&nicheOnly=1&pageSize=5`,
+    );
+    assert.equal(videoNiche.totalCount, 1);
+    assert.equal(videoNiche.totalOccurrenceCount, 1);
+    assert.equal(videoNiche.records[0].title, "Niche Fixture Song");
+    assert.equal(videoNiche.records[0].matchedBySource, true);
+
+    const videoHideUnknown = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Fallback%20Needle&searchFields=all&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(videoHideUnknown.totalCount, 2);
+    assert.equal(videoHideUnknown.totalOccurrenceCount, 2);
+    assert.deepEqual(
+      new Set(videoHideUnknown.records.map((record) => record.title)),
+      new Set(["Common Fixture Song", "Niche Fixture Song"]),
+    );
+    assert.equal(videoHideUnknown.records.every((record) => record.matchedBySource === true), true);
+  } finally {
+    if (child) {
+      child.kill();
+      await waitForExit(child);
+      assert.equal(stderr.includes("Traceback"), false, stderr);
+    }
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runtime API serves health and ranking rows from SQLite", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-"));
   const latestPath = path.join(dir, "latest.json");
@@ -361,6 +475,14 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(nicheSourceSearch.totalCount, 1);
     assert.equal(nicheSourceSearch.records[0].title, "Song One");
 
+    const hideUnknownVideoSourceSearch = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=video-b&searchFields=video&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(hideUnknownVideoSourceSearch.totalCount, 1);
+    assert.equal(hideUnknownVideoSourceSearch.totalOccurrenceCount, 1);
+    assert.equal(hideUnknownVideoSourceSearch.records[0].title, "Song One");
+    assert.equal(hideUnknownVideoSourceSearch.records[0].matchedBySource, true);
+
     const nicheArtists = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=artists&nicheOnly=1&pageSize=5`);
     assert.equal(nicheArtists.totalCount, 1);
     assert.equal(nicheArtists.totalOccurrenceCount, 1);
@@ -377,6 +499,24 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(nicheVtubers.records[0].songCount, 1);
     assert.equal(nicheVtubers.records[0].videoCount, 1);
     assert.equal(nicheVtubers.records[0].occurrences.length, 1);
+
+    const nicheVideos = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&nicheOnly=1&pageSize=5`);
+    assert.equal(nicheVideos.totalCount, 1);
+    assert.equal(nicheVideos.totalOccurrenceCount, 1);
+    assert.equal(nicheVideos.records[0].title, "Morning Karaoke");
+    assert.equal(nicheVideos.records[0].count, 1);
+    assert.equal(nicheVideos.records[0].songCount, 1);
+    assert.deepEqual(nicheVideos.records[0].songs.map((song) => song.title), ["Song One"]);
+
+    const hideUnknownMixedVideo = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=video-b&searchFields=video&hideUnknownArtist=1&pageSize=5`,
+    );
+    assert.equal(hideUnknownMixedVideo.totalCount, 1);
+    assert.equal(hideUnknownMixedVideo.totalOccurrenceCount, 1);
+    assert.equal(hideUnknownMixedVideo.records[0].title, "Night Karaoke");
+    assert.equal(hideUnknownMixedVideo.records[0].count, 1);
+    assert.equal(hideUnknownMixedVideo.records[0].songCount, 1);
+    assert.deepEqual(hideUnknownMixedVideo.records[0].songs.map((song) => song.title), ["Song One"]);
 
     const songTitleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20One&pageSize=5`);
     assert.equal(songTitleSearch.totalCount, 1);
@@ -555,6 +695,16 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
       ["Song One", "Song Two", "Song Three"],
     );
 
+    const vtuberNicheSource = await fetchJson(
+      `http://127.0.0.1:${port}/api/sources/${encodeURIComponent(vtubers.records[0].sourceDetailKey)}?page=1&pageSize=5&nicheOnly=1`,
+    );
+    assert.equal(vtuberNicheSource.totalCount, 1);
+    assert.equal(vtuberNicheSource.totalOccurrenceCount, 1);
+    assert.deepEqual(
+      vtuberNicheSource.record.occurrences.map((occurrence) => occurrence.song.title),
+      ["Song One"],
+    );
+
     const vtuberSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=Alpha&pageSize=5`);
     assert.equal(vtuberSearch.totalCount, 1);
     assert.equal(vtuberSearch.records[0].name, "Alpha Ch.");
@@ -612,6 +762,13 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(badBooleanResponse.status, 400, badBooleanBody);
     assert.match(badBooleanBody, /nicheOnly.*boolean/u);
 
+    const badHideUnknownResponse = await fetch(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&hideUnknownArtist=maybe`,
+    );
+    const badHideUnknownBody = await badHideUnknownResponse.text();
+    assert.equal(badHideUnknownResponse.status, 400, badHideUnknownBody);
+    assert.match(badHideUnknownBody, /hideUnknownArtist.*boolean/u);
+
     const badRangeResponse = await fetch(
       `http://127.0.0.1:${port}/api/rankings?range=tomorrow&view=songs`,
     );
@@ -661,6 +818,20 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songOneSourceNiche.totalCount, 1);
     assert.equal(songOneSourceNiche.totalOccurrenceCount, 1);
     assert.equal(songOneSourceNiche.record.occurrences[0].item.videoId, "video-a");
+
+    const songOneSourceCombined = await fetchJson(
+      `http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}?page=1&pageSize=5&nicheOnly=1&hideUnknownArtist=1`,
+    );
+    assert.equal(songOneSourceCombined.totalCount, 1);
+    assert.equal(songOneSourceCombined.totalOccurrenceCount, 1);
+    assert.equal(songOneSourceCombined.record.occurrences[0].item.videoId, "video-a");
+
+    const badSourceBooleanResponse = await fetch(
+      `http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}?hideUnknownArtist=maybe`,
+    );
+    const badSourceBooleanBody = await badSourceBooleanResponse.text();
+    assert.equal(badSourceBooleanResponse.status, 400, badSourceBooleanBody);
+    assert.match(badSourceBooleanBody, /hideUnknownArtist.*boolean/u);
   } finally {
     child.kill();
     await waitForExit(child);
@@ -813,6 +984,65 @@ function probeSourceOccurrenceFts(dir, dbPath, query) {
     "utf8",
   );
   return JSON.parse(execFileSync(PYTHON, [probePath, dbPath, query], { cwd: ROOT, encoding: "utf8" }));
+}
+
+function removeSourceSearchRows(dir, dbPath) {
+  const scriptPath = path.join(dir, "remove-source-search-rows.py");
+  fs.writeFileSync(
+    scriptPath,
+    [
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "for table in ('source_occurrences_fts', 'source_occurrences_channel_fts', 'source_occurrences'):",
+      "    try:",
+      "        conn.execute(f'DELETE FROM {table}')",
+      "    except sqlite3.OperationalError as exc:",
+      "        if 'no such table' not in str(exc):",
+      "            raise",
+      "conn.commit()",
+      "remaining = conn.execute('SELECT COUNT(*) FROM source_occurrences').fetchone()[0]",
+      "conn.close()",
+      "print(f'CODEX_FIXTURE_MUTATION_OK source_occurrences={remaining}')",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  const output = execFileSync(PYTHON, [scriptPath, dbPath], { cwd: ROOT, encoding: "utf8" });
+  assert.match(output, /CODEX_FIXTURE_MUTATION_OK source_occurrences=0/u);
+}
+
+function writeFallbackFilterFixture(latestPath) {
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-24T00:00:00.000Z",
+      capturedAt: "2026-07-24T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            {
+              videoId: "fallback-mixed-video",
+              title: "Fallback Needle Stream",
+              channelName: "Fallback Ch.",
+              channelId: "UC-fallback",
+              channelHandle: "/@fallback_ch",
+              channelUrl: "https://www.youtube.com/@fallback_ch",
+              thumbnailUrl: "https://i.ytimg.com/vi/fallback-mixed-video/hqdefault.jpg",
+              publishedTimestamp: 1784851200000,
+              publishedText: "2026-07-24",
+              songs: [
+                { title: "Niche Fixture Song", artist: "Known Singer", seconds: 10, time: "0:10", isNiche: true },
+                { title: "Common Fixture Song", artist: "Known Singer", seconds: 20, time: "0:20" },
+                { title: "Unknown Fixture Song", artist: "不明", seconds: 30, time: "0:30" },
+              ],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
 }
 
 function writeLatestFixture(latestPath) {

@@ -68,6 +68,12 @@ const RANK_METRICS = {
   songs: "首歌",
   videos: "视频数",
 };
+const VTUBER_CHANNEL_EVIDENCE_BY_VIDEO_ID = new Map([
+  ["27ciaztchCQ", "/@mizusawa_opera"],
+  ["P9HZGLHFi5c", "/@mokankamo"],
+  ["jOzbHf8nHYA", "/@mikumitani"],
+  ["ByaypQqmirQ", "/@FujiotoKanade"],
+]);
 const SEARCH_SCOPES = {
   all: "全部字段",
   song: "歌曲/歌手",
@@ -5931,6 +5937,116 @@ function cleanVtuberChannelHandle(value) {
   return match ? `/${match[1]}` : "";
 }
 
+function vtuberChannelIdentity(record = {}) {
+  const displayName = vtuberReliableDisplayName(record);
+  return {
+    displayName,
+    handle: displayName ? vtuberReliableHandle(record) : "",
+  };
+}
+
+function vtuberReliableDisplayName(record = {}) {
+  const metadata = vtuberChannelMetadataRecords(record);
+  const occurrenceItems = vtuberOccurrenceItems(record);
+  const candidateTiers = [
+    metadata.flatMap((item) => [item.displayName, item.channelDisplayName, item.channelName, item.name, item.title]),
+    [record.displayName, record.channelDisplayName, record.channelName, record.name],
+    occurrenceItems.flatMap((item) => [item.channelDisplayName, item.channelName, item.authorName, item.ownerName]),
+  ];
+  for (const candidates of candidateTiers) {
+    let selected = "";
+    for (const candidate of candidates) {
+      if (!isReliableVtuberDisplayName(candidate, record)) continue;
+      selected = preferredVtuberChannelName(selected, candidate);
+    }
+    if (selected) return selected;
+  }
+  return "";
+}
+
+function vtuberChannelMetadataRecords(record = {}) {
+  return [
+    record.channelMetadata,
+    record.channelMeta,
+    record.youtubeChannel,
+    record.metadata?.channel,
+    record._record?.channelMetadata,
+    record._record?.channelMeta,
+  ].filter((value) => value && typeof value === "object" && !Array.isArray(value));
+}
+
+function vtuberOccurrenceItems(record = {}) {
+  const values = [
+    record._record,
+    ...(Array.isArray(record.occurrences) ? record.occurrences.map((occurrence) => occurrence?.item) : []),
+    ...(Array.isArray(record.videos) ? record.videos : []),
+  ];
+  return values.filter((value) => value && typeof value === "object" && !Array.isArray(value));
+}
+
+function isReliableVtuberDisplayName(value, record = {}) {
+  const text = cleanText(value);
+  if (!text || text === "未知频道" || /^unknown channel$/iu.test(text)) return false;
+  if (text === cleanText(record.channelId)) return false;
+  if (/^https?:\/\//iu.test(text) || /^\/?@/u.test(text)) return false;
+  if (/^\/?(?:channel\/)?UC[A-Za-z0-9_-]{20,}$/iu.test(text)) return false;
+  if (isCompositeChannelName(text)) return false;
+  return true;
+}
+
+function vtuberReliableHandle(record = {}) {
+  const metadata = vtuberChannelMetadataRecords(record);
+  const occurrenceItems = vtuberOccurrenceItems(record);
+  const candidates = [
+    ...metadata.flatMap((item) => [item.handle, item.channelHandle, item.channelUrl, item.sourceUrl, item.url]),
+    record.channelHandle,
+    record.channelUrl,
+    record.authorUrl,
+    record.ownerUrl,
+    record.sourceUrl,
+    ...(Array.isArray(record.sourceUrls) ? record.sourceUrls : []),
+    ...occurrenceItems.flatMap((item) => [
+      item.channelHandle,
+      item.channelUrl,
+      item.authorUrl,
+      item.ownerUrl,
+      item.sourceUrl,
+      ...(Array.isArray(item.sourceUrls) ? item.sourceUrls : []),
+    ]),
+    ...(Array.isArray(record.aliases) ? record.aliases : []),
+  ];
+  for (const candidate of candidates) {
+    const handle = cleanVtuberChannelHandle(candidate) || vtuberHandleFromChannelUrl(candidate);
+    if (isReliableVtuberHandle(handle)) return handle;
+  }
+  return vtuberEvidenceHandle(record);
+}
+
+function isReliableVtuberHandle(value) {
+  const handle = cleanVtuberChannelHandle(value).replace(/^\/+/u, "");
+  if (!/^@[A-Za-z0-9._~-]{3,64}$/u.test(handle)) return false;
+  return !/^@UC[A-Za-z0-9_-]{20,}$/iu.test(handle);
+}
+
+function vtuberEvidenceHandle(record = {}) {
+  const candidates = [record, ...vtuberOccurrenceItems(record)];
+  for (const item of candidates) {
+    const videoId = cleanText(item?.videoId);
+    const handle = VTUBER_CHANNEL_EVIDENCE_BY_VIDEO_ID.get(videoId) || "";
+    if (isReliableVtuberHandle(handle)) return cleanVtuberChannelHandle(handle);
+  }
+  return "";
+}
+
+function vtuberChannelLinkModel(record = {}, identity = vtuberChannelIdentity(record)) {
+  if (!identity.displayName) return null;
+  return window.FrontendUtils.youtubeChannelLink({
+    ...record,
+    channelName: identity.displayName,
+    channelHandle: identity.handle,
+  });
+}
+
 function preferredVtuberChannelName(current, candidate) {
   const currentText = cleanText(current);
   const candidateText = cleanText(candidate);
@@ -6293,6 +6409,8 @@ function renderRankRecord({
       songCount,
       songPreview,
       videoCount,
+      occurrenceCount: totalOccurrenceCount,
+      rankMetric: state.rankMetric,
       sourceDetailPath,
       priorityMedia: priorityInlineMedia,
     }),
@@ -6453,25 +6571,29 @@ function renderRecordContent(title, meta, options) {
     songCount = songGroups.length,
     songPreview = songGroups.slice(0, 2).map((group) => group.title),
     videoCount,
+    occurrenceCount = occurrences?.length || 0,
+    rankMetric = state.rankMetric,
     sourceDetailPath = "",
     headingLevel = 2,
     priorityMedia = false,
   } = options;
   const content = document.createElement("div");
   content.className = "rank-content";
+  const channelIdentity = mode === "vtuber" ? vtuberChannelIdentity(record || {}) : null;
+  const displayTitle = mode === "vtuber" ? channelIdentity.displayName || "未知频道" : title;
 
   if (mode === "vtuber") {
     const media = renderVtuberDisplayImage(record || {}, { priority: priorityMedia });
-    if (media) content.append(wrapVtuberChannelLink(media, record || {}, "vtuber-display-link"));
+    if (media) content.append(wrapVtuberChannelLink(media, record || {}, "vtuber-display-link", channelIdentity));
   }
 
   const heading = document.createElement(`h${headingLevel}`);
   heading.className = mode === "vtuber" ? "rank-title vtuber-title" : "rank-title";
   if (mode === "vtuber") {
-    const titleLink = renderVtuberChannelTextLink(record || {}, title);
-    heading.append(titleLink || document.createTextNode(title));
+    const titleLink = renderVtuberChannelTextLink(record || {}, displayTitle, channelIdentity);
+    heading.append(titleLink || document.createTextNode(displayTitle));
   } else {
-    heading.append(document.createTextNode(title));
+    heading.append(document.createTextNode(displayTitle));
   }
   for (const badgeText of meta.badges || []) {
     const badge = document.createElement("span");
@@ -6497,7 +6619,7 @@ function renderRecordContent(title, meta, options) {
   } else if (mode === "vtuber") {
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) metaLine.append(collectedBadge);
-    const handle = renderVtuberHandle(record);
+    const handle = renderVtuberHandle(record, channelIdentity);
     if (handle) appendSublineNode(metaLine, handle);
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
@@ -6507,15 +6629,45 @@ function renderRecordContent(title, meta, options) {
     subline.append(metaLine);
     content.append(subline);
   }
+  if (mode === "vtuber") {
+    content.append(renderVtuberStats({ songCount, videoCount, occurrenceCount, rankMetric }));
+  }
 
   return content;
 }
 
-function renderVtuberHandle(record = {}) {
-  const rawHandle = cleanVtuberChannelHandle(record.channelHandle) || vtuberHandleFromChannelUrl(record.channelUrl);
-  const handle = rawHandle.replace(/^\/+/u, "");
-  if (!handle) return null;
-  const link = window.FrontendUtils.youtubeChannelLink(record);
+function renderVtuberStats({ songCount = 0, videoCount = 0, occurrenceCount = 0, rankMetric = "occurrences" } = {}) {
+  const container = document.createElement("div");
+  container.className = "vtuber-card-stats";
+  const items = [
+    { metric: "videos", label: "视频", value: videoCount, ariaLabel: "视频数量" },
+    { metric: "songs", label: "歌曲", value: songCount, ariaLabel: "歌曲数量" },
+    { metric: "occurrences", label: "次数", value: occurrenceCount, ariaLabel: "次数" },
+  ];
+  for (const item of items) {
+    const stat = document.createElement("span");
+    stat.className = `vtuber-card-stat${rankMetric === item.metric ? " is-active" : ""}`;
+    stat.dataset.metric = item.metric;
+    const value = Math.max(0, Number(item.value) || 0);
+    stat.setAttribute("aria-label", `${item.ariaLabel}：${value}`);
+
+    const label = document.createElement("span");
+    label.className = "vtuber-card-stat-label";
+    label.textContent = item.label;
+    const number = document.createElement("span");
+    number.className = "vtuber-card-stat-value";
+    number.textContent = String(value);
+    stat.append(label, number);
+    container.append(stat);
+  }
+  return container;
+}
+
+function renderVtuberHandle(record = {}, identity = vtuberChannelIdentity(record)) {
+  const handle = identity.handle.replace(/^\/+/u, "");
+  if (!identity.displayName || !handle) return null;
+  const link = vtuberChannelLinkModel(record, identity);
+  if (!link?.href || link.isFallbackSearch) return null;
   const anchor = document.createElement("a");
   anchor.className = "vtuber-handle";
   anchor.href = link.href;
@@ -6526,8 +6678,9 @@ function renderVtuberHandle(record = {}) {
   return anchor;
 }
 
-function renderVtuberChannelTextLink(record, title) {
-  const link = window.FrontendUtils.youtubeChannelLink(record || {});
+function renderVtuberChannelTextLink(record, title, identity = vtuberChannelIdentity(record || {})) {
+  if (!identity.displayName) return null;
+  const link = vtuberChannelLinkModel(record, identity);
   if (!link?.href || link.isFallbackSearch) return null;
   const anchor = document.createElement("a");
   anchor.className = "vtuber-title-link";
@@ -6538,8 +6691,9 @@ function renderVtuberChannelTextLink(record, title) {
   return anchor;
 }
 
-function wrapVtuberChannelLink(node, record, className) {
-  const link = window.FrontendUtils.youtubeChannelLink(record || {});
+function wrapVtuberChannelLink(node, record, className, identity = vtuberChannelIdentity(record || {})) {
+  if (!identity.displayName) return node;
+  const link = vtuberChannelLinkModel(record, identity);
   if (!node || !link?.href || link.isFallbackSearch) return node;
   const anchor = document.createElement("a");
   anchor.className = className;
@@ -8098,13 +8252,13 @@ function renderArtistSongGroup(group) {
       group.publishedAt ||
       group.publishedTimestamp,
   );
+  header.append(titleWrap);
   if (publishedDate && group.sourceMode === "vtuber") {
     const date = document.createElement("span");
     date.className = "artist-song-date";
     date.textContent = publishedDate;
-    titleWrap.append(date);
+    header.append(date);
   }
-  header.append(titleWrap);
 
   const meta = document.createElement("div");
   meta.className = "artist-song-summary-actions";

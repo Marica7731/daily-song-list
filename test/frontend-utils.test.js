@@ -254,6 +254,120 @@ test("VTuber collection badge model tolerates missing backend fields", () => {
   assert.equal(vtuberCollectionBadgeModel({}).text, "");
 });
 
+test("VTuber collection badge model preserves runtime and static fallback source semantics", () => {
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      name: "水沢オペラ / Opera Ch.",
+      isCollected: false,
+      knownSourceType: "vsinger_moment_http",
+      occurrences: [
+        {
+          item: {
+            isCollected: false,
+            knownSourceType: "vsinger_moment_http",
+          },
+        },
+      ],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "vsinger_moment_http",
+    },
+  );
+
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      name: "水沢オペラ / Opera Ch.",
+      occurrences: [
+        {
+          item: {
+            isCollected: false,
+            knownSourceType: "vsinger_moment_http",
+          },
+        },
+      ],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "vsinger_moment_http",
+    },
+  );
+
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      name: "ノア・ポラリス -Noa Polaris-",
+      occurrences: [
+        {
+          item: {
+            isCollected: true,
+            knownSourceType: "youtube_channel_discovery",
+          },
+        },
+      ],
+    }),
+    {
+      text: "已收录",
+      isCollected: true,
+      sourceType: "youtube_channel_discovery",
+    },
+  );
+});
+
+test("VTuber collection badge model rejects authoritative false and ambiguous Moment aggregates", () => {
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      isCollected: false,
+      knownSourceType: "youtube_channel_discovery",
+      occurrences: [{ item: { isCollected: true, knownSourceType: "manual" } }],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "youtube_channel_discovery",
+    },
+  );
+
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      isCollected: true,
+      knownSourceType: "vsinger_moment_http",
+      sourceGroups: ["youtube_channel_discovery"],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "vsinger_moment_http",
+    },
+  );
+
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      isCollected: true,
+      sourceGroups: ["vsinger-moment", "manual"],
+    }),
+    {
+      text: "",
+      isCollected: false,
+      sourceType: "vsinger-moment",
+    },
+  );
+
+  assert.deepEqual(
+    vtuberCollectionBadgeModel({
+      isCollected: true,
+      knownSourceType: "manual",
+      sourceGroups: ["vsinger-moment"],
+    }),
+    {
+      text: "已收录",
+      isCollected: true,
+      sourceType: "manual",
+    },
+  );
+});
+
 test("VTuber display image uses real avatar before thumbnail fallback", () => {
   const avatar = vtuberDisplayImageModel({
     avatarUrl: "https://yt3.googleusercontent.com/avatar=s900-c-k-c0x00ffffff-no-rj",

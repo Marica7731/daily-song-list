@@ -62,3 +62,15 @@ npm run check
 ```
 
 截图校验按当前交接要求延后；在代码、测试和线上部署稳定后，再运行 `npm run check:vtuber-expand-layout` 及完整 UI proof 矩阵。
+
+## 2026-07-24 H5/API/tag 修复补充
+
+本轮并行修复已在 G 盘工作树完成本地实现，尚未发布前不得视为线上完成：
+
+- 频道卡新增视觉可见的 `视频 / 歌曲 / 次数` 三字段；H5 不再只从展开按钮无障碍文本读取歌曲数和视频数。
+- 缺少可靠频道身份时隐藏 handle；已用真实 YouTube 视频页核对 `@mizusawa_opera`、`@mokankamo`、`@mikumitani`、`@FujiotoKanade` 四个线上样例，并在前端做保守的来源身份派生。
+- 展开歌曲卡日期改为独立紧凑行，减少日期右侧和封面下方空白，保持 H5 两列、桌面三列和固定卡高。
+- Runtime API 的 `nicheOnly` / `hideUnknownArtist` 现在覆盖 fallback、视频混合 occurrence、source detail 和前端 source cache；坏布尔值保持可诊断 400。
+- 收录 tag presentation model 已统一 trusted source type 与 Moment 外部证据：Moment 不能单独显示 `已收录`，`isCollected=false` 具有优先级；顶层/展开/source/fallback 的真实线上复测仍是发布门禁。
+
+本地验收：117/117 相关 Node 测试通过，114 个 JS 文件语法检查通过，`git diff --check` 通过；资产版本化后 hash 为 `h54a3b4d4ad6b`。待完成：只 stage 本轮文件、commit/push、按既有静态发布 workflow 发布，并在 390px H5 与桌面线上确认三个字段、handle、展开紧凑布局、页码交互和 tag 语义未回退。

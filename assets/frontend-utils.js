@@ -1402,76 +1402,109 @@
     };
   }
 
+  const TRUSTED_COLLECTION_SOURCE_TYPES = new Set([
+    "library",
+    "manual",
+    "song-search",
+    "song_search",
+    "verified",
+    "youtube_channel_discovery",
+    "youtube-channel-discovery",
+    "youtube_discovery",
+    "youtube-discovery",
+    "daily_song_list",
+    "daily-song-list",
+  ]);
+  const MOMENT_SOURCE_TYPES = new Set(["vsinger_moment_http", "vsinger-moment", "moment"]);
+
   function vtuberCollectionBadgeModel(record = {}) {
-    const candidates = [record];
-    if (Array.isArray(record.occurrences)) {
-      for (const occurrence of record.occurrences) {
-        if (occurrence?.item && typeof occurrence.item === "object") candidates.push(occurrence.item);
-        if (occurrence?.song && typeof occurrence.song === "object") candidates.push(occurrence.song);
-        if (occurrence?.source && typeof occurrence.source === "object") candidates.push(occurrence.source);
-      }
-    }
-    const trustedCandidate = candidates.find((candidate) => isTrustedCollectionCandidate(candidate));
-    const type = cleanText(firstNonEmpty(
-      trustedCandidate?.knownSourceType,
-      trustedCandidate?.sourceType,
-      trustedCandidate?.collectionType,
-      trustedCandidate?.knownSource?.type,
-      trustedCandidate?.source?.knownSourceType,
-      record.knownSourceType,
-      record.sourceType,
-      record.collectionType,
-      record.knownSource?.type,
-      record.source?.knownSourceType,
-    )).toLocaleLowerCase();
-    if (!trustedCandidate) {
+    const candidates = collectionBadgeCandidates(record);
+    const observedType = candidates.map(observedCollectionSourceType).find(Boolean) || "";
+    if (explicitCollectionFlag(record) === false) {
       return {
         text: "",
         isCollected: false,
-        sourceType: type,
+        sourceType: observedType,
+      };
+    }
+
+    const sourceType = candidates.map(trustedCollectionSourceType).find(Boolean) || "";
+    if (!sourceType) {
+      return {
+        text: "",
+        isCollected: false,
+        sourceType: observedType,
       };
     }
     return {
       text: "已收录",
       isCollected: true,
-      sourceType: type,
+      sourceType,
     };
   }
 
-  function isMomentSourceType(type, record = {}) {
-    if (type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment") return true;
-    const groups = Array.isArray(record.sourceGroups) ? record.sourceGroups : [];
-    if (groups.map((group) => cleanText(group).toLocaleLowerCase()).includes("vsinger-moment")) return true;
-    const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem).toLocaleLowerCase();
-    return sourceSystem === "vsinger_moment_http";
+  function collectionBadgeCandidates(record = {}) {
+    const candidates = [record];
+    if (!Array.isArray(record.occurrences)) return candidates;
+    for (const occurrence of record.occurrences) {
+      if (occurrence?.item && typeof occurrence.item === "object") candidates.push(occurrence.item);
+      if (occurrence?.song && typeof occurrence.song === "object") candidates.push(occurrence.song);
+      if (occurrence?.source && typeof occurrence.source === "object") candidates.push(occurrence.source);
+    }
+    return candidates;
   }
 
-  function isTrustedCollectionCandidate(record = {}) {
-    const type = cleanText(firstNonEmpty(
+  function explicitCollectionFlag(record = {}) {
+    for (const value of [
+      record.isCollected,
+      record.collected,
+      record.isKnownSource,
+      record.knownSource?.isCollected,
+      record.source?.isCollected,
+    ]) {
+      if (typeof value === "boolean") return value;
+    }
+    return null;
+  }
+
+  function observedCollectionSourceType(record = {}) {
+    return collectionSourceType(record) || collectionSourceGroupTypes(record)[0] || "";
+  }
+
+  function trustedCollectionSourceType(record = {}) {
+    if (explicitCollectionFlag(record) === false) return "";
+    const type = collectionSourceType(record);
+    if (isMomentSourceType(type)) return "";
+    if (TRUSTED_COLLECTION_SOURCE_TYPES.has(type)) return type;
+
+    const groups = collectionSourceGroupTypes(record);
+    if (groups.some(isMomentSourceType)) return "";
+    return groups.find((group) => TRUSTED_COLLECTION_SOURCE_TYPES.has(group)) || "";
+  }
+
+  function collectionSourceType(record = {}) {
+    return cleanText(firstNonEmpty(
       record.knownSourceType,
       record.sourceType,
       record.collectionType,
       record.knownSource?.type,
       record.source?.knownSourceType,
+      record.sourceQuality?.sourceSystem,
+      record.source?.sourceSystem,
+      record.sourceSystem,
     )).toLocaleLowerCase();
-    const trustedTypes = new Set([
-      "library",
-      "manual",
-      "song-search",
-      "song_search",
-      "verified",
-      "youtube_channel_discovery",
-      "youtube-channel-discovery",
-      "youtube_discovery",
-      "youtube-discovery",
-      "daily_song_list",
-      "daily-song-list",
-    ]);
-    if (trustedTypes.has(type)) return true;
-    const groups = Array.isArray(record.sourceGroups) ? record.sourceGroups : [];
-    if (groups.some((group) => trustedTypes.has(cleanText(group).toLocaleLowerCase()))) return true;
-    const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem || record.sourceSystem).toLocaleLowerCase();
-    return trustedTypes.has(sourceSystem);
+  }
+
+  function collectionSourceGroupTypes(record = {}) {
+    const groups = [];
+    for (const value of [record.sourceGroups, record.knownSource?.sourceGroups, record.source?.sourceGroups]) {
+      if (Array.isArray(value)) groups.push(...value);
+    }
+    return groups.map((group) => cleanText(group).toLocaleLowerCase()).filter(Boolean);
+  }
+
+  function isMomentSourceType(type) {
+    return MOMENT_SOURCE_TYPES.has(cleanText(type).toLocaleLowerCase());
   }
 
   function firstNonEmpty(...values) {
