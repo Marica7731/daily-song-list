@@ -38,8 +38,6 @@ jobs:
       - name: Resolve deploy revision
         id: revision
         run: |
-          git fetch --depth=1 --filter=blob:none --no-tags origin main --prune
-          git checkout -B main FETCH_HEAD
           commit_sha="$(git rev-parse HEAD)"
           echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
 
@@ -54,31 +52,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sshpass
 
-      - name: Fast-forward VPS checkout
+      - name: Upload static bundle without remote Git fetch
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
-          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-            set -Eeuo pipefail
-            cd '${REMOTE_PROJECT_DIR}'
-            git fetch --quiet --filter=blob:none --no-tags origin main --prune
-            git checkout main
-            if git config --bool core.sparseCheckout | grep -qx true; then
-              git sparse-checkout add data/status.json data/ui data/diff
-            fi
-            git merge --ff-only --quiet '${DEPLOY_SHA}'
-            test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
-            test -s data/status.json
-            test -s data/ui/meta.json
-            test -s data/diff/latest-all.json
-            test -s data/diff/latest-7d.json
-            if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
-              systemctl restart song-rank-api
-            fi
-            nginx -t
-            systemctl reload nginx
-          "
+          tar -czf - -- index.html assets data/status.json data/ui/meta.json data/diff |
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              tar -xzf - -C '${REMOTE_PROJECT_DIR}'
+              test -s '${REMOTE_PROJECT_DIR}/index.html'
+              test -s '${REMOTE_PROJECT_DIR}/data/status.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
+              if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
+                systemctl restart song-rank-api
+              fi
+              nginx -t
+              systemctl reload nginx
+            "
 
       - name: Verify deployed index
         env:
@@ -94,13 +87,11 @@ jobs:
           remote_app="$(
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
-              cd '${REMOTE_PROJECT_DIR}'
-              test \"\$(git rev-parse HEAD)\" = '${EXPECTED_SHA}'
-              test -s data/status.json
-              test -s data/ui/meta.json
-              test -s data/diff/latest-all.json
-              test -s data/diff/latest-7d.json
-              grep -o 'assets/app-[^\"]*\.js' index.html | head -1
+              test -s '${REMOTE_PROJECT_DIR}/data/status.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
+              test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
+              grep -o 'assets/app-[^\"]*\.js' '${REMOTE_PROJECT_DIR}/index.html' | head -1
             "
           )"
           if [ "${remote_app}" != "${expected_app}" ]; then

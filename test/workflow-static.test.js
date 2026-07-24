@@ -65,8 +65,10 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.equal(pkg.scripts["watchdog:update"], "node scripts/watchdog-update.js");
   assert.equal(pkg.scripts["backfill:inbox"], "node scripts/run-backfill-update.js");
   assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
-  assert.match(staticDeploy, /git fetch --depth=1 --filter=blob:none --no-tags origin main --prune/u);
-  assert.match(staticDeploy, /git fetch --quiet --filter=blob:none --no-tags origin main --prune/u);
+  assert.match(staticDeploy, /tar -czf - -- index\.html assets data\/status\.json data\/ui\/meta\.json data\/diff/u);
+  assert.match(staticDeploy, /tar -xzf - -C '\$\{REMOTE_PROJECT_DIR\}'/u);
+  assert.doesNotMatch(staticDeploy, /git fetch .*origin main/u);
+  assert.doesNotMatch(staticDeploy, /git merge --ff-only/u);
 });
 
 test("legacy combined update workflow is removed", () => {
