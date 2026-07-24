@@ -28,13 +28,12 @@ test("range cache and trend Map are wired into rendering", () => {
   assert.match(appSource, /function createRangeCacheObject[\s\S]*normalizedVideoSearchData/u);
 });
 
-test("runtime range load validates meta-bound payloads and has fallback paths", () => {
+test("runtime range load validates meta-bound payloads and stops after a bounded retry", () => {
   assert.match(functionBody("async function loadRuntimeRange"), /runtime meta missing/u);
   assert.match(appSource, /async function tryRuntimeRangeLoad[\s\S]*validateRuntimeRangePayload/u);
-  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*runtimeRangeIdCandidates\(rangeId\)\.map/u);
-  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*SNAPSHOT_LATEST_PATH/u);
-  assert.doesNotMatch(functionBody("async function loadRuntimeRangeFallback"), /state\.runtimeMeta\?\.filterVersion/u);
-  assert.match(functionBody("async function loadRuntimeRangeFallback"), /filterVersion: Number\.isInteger\(raw\.filterVersion\) \? raw\.filterVersion : 0/u);
+  assert.match(appSource, /async function loadRuntimeRangeStrict[\s\S]*cache: "reload"/u);
+  assert.match(functionBody("async function loadRuntimeRangeStrict"), /state\.runtimeWarnings\.set/u);
+  assert.doesNotMatch(appSource, /loadRuntimeRangeFallback|fallbackFrom|当前使用备用数据|备用数据/u);
 });
 
 test("status display separates capture time from derived rebuild time", () => {

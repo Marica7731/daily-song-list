@@ -40,7 +40,7 @@ jobs:
             index.html
             assets
             data/status.json
-            data/ui/meta.json
+            data/ui
             data/diff
             scripts/compact-static-index.js
             .nojekyll
@@ -79,7 +79,7 @@ jobs:
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           set -Eeuo pipefail
-          bundle_bytes="$(du -sb -- index.html assets data/status.json data/ui/meta.json data/diff | awk '{sum += $1} END {print sum}')"
+          bundle_bytes="$(du -sb -- index.html assets data/status.json data/ui data/diff | awk '{sum += $1} END {print sum}')"
           required_kb=$(( (bundle_bytes + 1023) / 1024 + 1024 ))
           remote_free_kb="$(
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
@@ -89,13 +89,15 @@ jobs:
             echo "CODEX_STATIC_DEPLOY_BLOCKED free_kb=${remote_free_kb} required_kb=${required_kb} bundle_bytes=${bundle_bytes}"
             exit 1
           fi
-          tar -czf - -- index.html assets data/status.json data/ui/meta.json data/diff |
+          tar -czf - -- index.html assets data/status.json data/ui data/diff |
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
               tar -xzf - -C '${REMOTE_PROJECT_DIR}'
               test -s '${REMOTE_PROJECT_DIR}/index.html'
               test -s '${REMOTE_PROJECT_DIR}/data/status.json'
               test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
+              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name '7d.*.json' -print -quit | grep -q .
+              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name 'all.*.json' -print -quit | grep -q .
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
               if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
@@ -151,6 +153,8 @@ jobs:
               set -Eeuo pipefail
               test -s '${REMOTE_PROJECT_DIR}/data/status.json'
               test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
+              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name '7d.*.json' -print -quit | grep -q .
+              find '${REMOTE_PROJECT_DIR}/data/ui' -maxdepth 1 -type f -name 'all.*.json' -print -quit | grep -q .
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-all.json'
               test -s '${REMOTE_PROJECT_DIR}/data/diff/latest-7d.json'
               grep -o 'assets/app-[^\"]*\.js' '${REMOTE_PROJECT_DIR}/index.html' | head -1

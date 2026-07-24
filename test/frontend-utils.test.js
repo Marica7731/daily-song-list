@@ -44,7 +44,6 @@ const {
   queryTriggerModel,
   rankToggleModel,
   runtimeRangeMeta,
-  runtimeRangePayloadFromGroup,
   runtimeRangePath,
   runtimeRangeShards,
   serializeUrlState,
@@ -1696,25 +1695,6 @@ test("runtime range validation accepts aliased partial shards", () => {
     }).id,
     "1m",
   );
-});
-
-test("runtime legacy group fallback converts to a validated runtime payload", () => {
-  const group = {
-    id: "1m",
-    title: "月度",
-    generatedAt: "2026-07-13T15:56:10.026Z",
-    items: [video("AAAAAAAAAAA", "video", "channel", [song("song", "artist", { isNiche: false })])],
-  };
-  const payload = runtimeRangePayloadFromGroup(group, {
-    rangeId: "1m",
-    capturedAt: "2026-07-13T15:56:10.026Z",
-    filterVersion: 4,
-    fallbackFrom: "data/1m.json",
-  });
-
-  assert.equal(payload.id, "1m");
-  assert.equal(payload.fallbackFrom, "data/1m.json");
-  assert.equal(validateRuntimeRangePayload(payload, { rangeId: "1m", allowLegacyDataVersion: true }), payload);
 });
 
 test("url state keeps rank metric and video layout only when relevant", () => {

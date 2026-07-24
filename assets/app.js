@@ -2288,7 +2288,7 @@ async function loadRuntimeRange(rangeId) {
   if (existing) return existing;
   if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
   if (!state.runtimeMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
-  const promise = loadRuntimeRangeWithFallback(rangeId)
+  const promise = loadRuntimeRangeStrict(rangeId)
     .then((payload) => {
       state.runtimeRangePayloads.set(rangeId, payload);
       return payload;
@@ -2412,15 +2412,17 @@ function shardInitialPath(shard) {
   return cleanText(shard.path || shard.initialPath || shard.indexPath || shard.manifestPath);
 }
 
-async function loadRuntimeRangeWithFallback(rangeId) {
+async function loadRuntimeRangeStrict(rangeId) {
   rangeId = canonicalRangeId(rangeId);
   const shards = runtimeRangeShards(rangeId);
+  const shardErrors = [];
   if (shards.hasPageShard) {
     const shardResult = await loadRuntimeRangeFromShards(rangeId).catch((error) => ({ error }));
     if (!shardResult.error) {
       state.runtimeWarnings.delete(rangeId);
       return shardResult;
     }
+    shardErrors.push(shardResult.error);
     console.warn(`[runtime] shard load failed for ${rangeId}: ${shardResult.error?.message || shardResult.error}`);
   }
   if (shouldRejectFullAllRuntimeLoad(rangeId)) {
@@ -2440,9 +2442,16 @@ async function loadRuntimeRangeWithFallback(rangeId) {
     return retry.payload;
   }
 
-  const fallback = await loadRuntimeRangeFallback(rangeId, [primaryError.error, retry.error]);
-  if (fallback) return fallback;
-  throw new Error(`运行时范围读取失败：${retry.error?.message || primaryError.error?.message || primaryPath}`);
+  const errors = [...shardErrors, primaryError.error, retry.error].filter(Boolean);
+  const diagnostic = errors.map((error) => error?.message || String(error)).join(" | ") || primaryPath;
+  const error = new Error(`运行时范围读取失败：${diagnostic}`);
+  error.rangeId = rangeId;
+  error.attempts = errors.map((entry) => entry?.message || String(entry));
+  state.runtimeWarnings.set(rangeId, {
+    message: error.message,
+    attempts: error.attempts,
+  });
+  throw error;
 }
 
 async function loadRuntimeRangeFromShards(rangeId) {
@@ -2512,51 +2521,6 @@ async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
   }
 }
 
-async function loadRuntimeRangeFallback(rangeId, errors) {
-  rangeId = canonicalRangeId(rangeId);
-  const attempts = [...runtimeRangeIdCandidates(rangeId).map((id) => `data/${id}.json`), SNAPSHOT_LATEST_PATH];
-  for (const fallbackPath of attempts) {
-    try {
-      const raw = await readJson(fallbackPath, { cache: "no-cache" });
-      const group = fallbackPath === SNAPSHOT_LATEST_PATH ? runtimeGroupFromPayload(raw, rangeId) : raw;
-      const payload = window.FrontendUtils.runtimeRangePayloadFromGroup(group, {
-        rangeId,
-        generatedAt: raw.generatedAt || group?.generatedAt || state.runtimeMeta?.generatedAt || "",
-        capturedAt: raw.capturedAt || state.runtimeMeta?.capturedAt || "",
-        filterVersion: Number.isInteger(raw.filterVersion) ? raw.filterVersion : 0,
-        blocklistVersion: raw.blocklistVersion || "",
-        blocklistHash: raw.blocklistHash || "",
-        fallbackFrom: fallbackPath,
-      });
-      window.FrontendUtils.validateRuntimeRangePayload(payload, {
-        rangeId,
-        path: fallbackPath,
-        allowLegacyDataVersion: true,
-        ...runtimeRangeOptions(),
-      });
-      const message = `${RANGE_LABELS[rangeId] || rangeId}精简数据读取失败，当前使用备用数据 ${fallbackPath}`;
-      state.runtimeWarnings.set(rangeId, {
-        message,
-        fallbackPath,
-        primaryError: errors.map((error) => error?.message || String(error)).filter(Boolean).join(" | "),
-      });
-      showToast(message);
-      return payload;
-    } catch {
-      // Try the next fallback source.
-    }
-  }
-  return null;
-}
-
-function runtimeGroupFromPayload(payload, rangeId) {
-  const groups = payload?.groups || {};
-  for (const id of runtimeRangeIdCandidates(rangeId)) {
-    if (groups[id]) return groups[id];
-  }
-  return null;
-}
-
 function normalizeRuntimeRangePayload(payload, rangeId) {
   const canonical = canonicalRangeId(rangeId || payload?.id);
   if (!payload || payload.id === canonical) return payload;
@@ -2580,14 +2544,12 @@ function isPartialRuntimePayload(payload) {
 }
 
 async function applyRuntimeRangePayload(rangePayload, options = {}) {
-  const isFallbackPayload = Boolean(rangePayload?.fallbackFrom);
   const rangeId = canonicalRangeId(rangePayload?.id || state.range);
   rangePayload = normalizeRuntimeRangePayload(rangePayload, rangeId);
   window.FrontendUtils.validateRuntimeRangePayload(rangePayload, {
     rangeId,
-    meta: isFallbackPayload ? null : state.runtimeMeta,
-    path: rangePayload?.fallbackFrom || runtimeRangeMeta(rangeId)?.path,
-    allowLegacyDataVersion: isFallbackPayload,
+    meta: state.runtimeMeta,
+    path: runtimeRangeMeta(rangeId)?.path,
     allowPartial: isPartialRuntimePayload(rangePayload),
     ...runtimeRangeOptions(),
   });
@@ -3149,9 +3111,8 @@ function renderStatus(status) {
     alerts.push(`最近更新失败${failureStage ? `：${failureStage}` : ""}，当前数据来自 ${formatDate(capturedAt)}`);
   }
   const warning = state.runtimeWarnings.get(state.range);
-  if (warning?.fallbackPath) {
-    parts.push("当前使用备用数据");
-    alerts.push("精简数据读取失败，当前使用备用数据");
+  if (warning?.message) {
+    alerts.push(warning.message);
   }
   const displayAt = freshnessAt || rebuiltDerivedAt || attemptedAt;
   const statusText = currentStatus.status === "success" ? `${formatTime(displayAt)}更新` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
@@ -3169,7 +3130,7 @@ function renderStatus(status) {
       `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
       state.runtimeApi.available ? `freshnessAt=${freshnessAt || ""}` : "",
       `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
-      warning?.primaryError ? `warning=${warning.primaryError}` : "",
+      warning?.message ? `warning=${warning.message}` : "",
     ]
       .filter(Boolean)
       .join("\n"),
@@ -5113,13 +5074,6 @@ function renderSummary(group, metrics, note = "") {
     snapshot.textContent = "历史快照";
     main.append(snapshot);
   }
-  if (state.runtimeWarnings.get(state.range)?.fallbackPath) {
-    const fallback = document.createElement("span");
-    fallback.className = "summary-chip summary-status-chip";
-    fallback.textContent = "备用数据";
-    main.append(fallback);
-  }
-
   const metricParts = compactSummaryMetrics(metrics);
   if (metricParts.length) {
     const metricNode = document.createElement("span");
@@ -5213,11 +5167,6 @@ function summaryVideoCountModel(rangeCache, selection) {
 function sourceVideoCountForSummary(rangeCache) {
   if (state.nicheOnly) return rangeCache.nicheVideoCount;
   return Array.isArray(rangeCache.items) ? rangeCache.items.length : rangeCache.allVideoCount;
-}
-
-function rangeFallbackNote() {
-  const warning = state.runtimeWarnings.get(state.range);
-  return warning?.fallbackPath ? `备用数据：${warning.fallbackPath}` : "";
 }
 
 function renderSummaryActions() {

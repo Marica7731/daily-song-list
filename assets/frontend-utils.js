@@ -1852,26 +1852,6 @@
     }
   }
 
-  function runtimeRangePayloadFromGroup(group, options = {}) {
-    const rangeId = options.rangeId || group?.id || "";
-    const items = Array.isArray(group?.items) ? group.items : [];
-    const payload = {
-      schemaVersion: 1,
-      id: rangeId,
-      title: group?.title || rangeId,
-      generatedAt: group?.generatedAt || options.generatedAt || "",
-      capturedAt: options.capturedAt || group?.capturedAt || group?.generatedAt || options.generatedAt || "",
-      dataVersion: options.dataVersion || "",
-      filterVersion: Number.isInteger(options.filterVersion) ? options.filterVersion : 0,
-      blocklistVersion: options.blocklistVersion || "",
-      blocklistHash: options.blocklistHash || "",
-      nicheAnnotated: items.some((item) => (item.songs || []).some((song) => typeof song.isNiche === "boolean")),
-      items,
-      fallbackFrom: options.fallbackFrom || "",
-    };
-    return payload;
-  }
-
   function runtimeRangeValidationError(message, details = {}) {
     const error = new Error(message);
     error.name = "RuntimeRangeValidationError";
@@ -2067,7 +2047,6 @@
     vtuberAvatarModel,
     vtuberCollectionBadgeModel,
     runtimeRangeMeta,
-    runtimeRangePayloadFromGroup,
     runtimeRangePath,
     runtimeRangeShards,
     serializeUrlState,
