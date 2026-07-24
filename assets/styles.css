@@ -4523,18 +4523,18 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 46px minmax(0, 1fr) auto;
+    grid-template-columns: 42px minmax(0, 1fr) 34px;
     grid-template-areas:
       "thumb title actions"
       "thumb date actions";
     grid-template-rows: auto auto;
     align-items: center;
-    gap: 2px 6px;
+    gap: 2px 4px;
     min-height: 0;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 46px;
+    width: 42px;
     align-self: start;
   }
 
@@ -4546,13 +4546,13 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-title {
-    font-size: 11.5px;
-    line-height: 1.18;
+    font-size: 11px;
+    line-height: 1.16;
   }
 
   .artist-song-group-vtuber .artist-song-artist {
     display: block;
-    font-size: 9.5px;
+    font-size: 9px;
     text-align: left;
   }
 
@@ -4562,6 +4562,7 @@ mark {
     justify-content: flex-end;
     gap: 3px;
     max-width: 100%;
+    overflow: visible;
     text-align: right;
   }
 
@@ -4576,6 +4577,10 @@ mark {
     font-size: 10px;
     font-weight: 700;
     line-height: 1.2;
+  }
+
+  .artist-song-group-vtuber button.artist-song-count {
+    margin-inline: -5px;
   }
 
   .vtuber-card-stats {
@@ -4970,18 +4975,23 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 50px minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr) 32px;
     grid-template-areas:
       "thumb title title"
       "date date actions";
+    gap: 2px 4px;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 50px;
+    width: 44px;
   }
 
   .artist-song-group-vtuber .artist-song-title {
-    font-size: 11.5px;
+    font-size: 10.5px;
+  }
+
+  .artist-song-group-vtuber .artist-song-summary-actions {
+    overflow: visible;
   }
 }
 
