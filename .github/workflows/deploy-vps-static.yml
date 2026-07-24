@@ -78,6 +78,17 @@ jobs:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
+          set -Eeuo pipefail
+          bundle_bytes="$(du -sb -- index.html assets data/status.json data/ui/meta.json data/diff | awk '{sum += $1} END {print sum}')"
+          required_kb=$(( (bundle_bytes + 1023) / 1024 + 1024 ))
+          remote_free_kb="$(
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
+              "df -Pk '${REMOTE_PROJECT_DIR}' | awk 'NR == 2 {print \$4}'"
+          )"
+          if [ "${remote_free_kb}" -lt "${required_kb}" ]; then
+            echo "CODEX_STATIC_DEPLOY_BLOCKED free_kb=${remote_free_kb} required_kb=${required_kb} bundle_bytes=${bundle_bytes}"
+            exit 1
+          fi
           tar -czf - -- index.html assets data/status.json data/ui/meta.json data/diff |
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail
@@ -100,6 +111,16 @@ jobs:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
           set -Eeuo pipefail
+          index_bytes="$(wc -c < rollback-index.html)"
+          required_kb=$(( (index_bytes + 1023) / 1024 + 256 ))
+          remote_free_kb="$(
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
+              "df -Pk '${REMOTE_PROJECT_DIR}' | awk 'NR == 2 {print \$4}'"
+          )"
+          if [ "${remote_free_kb}" -lt "${required_kb}" ]; then
+            echo "CODEX_STATIC_RECOVERY_BLOCKED free_kb=${remote_free_kb} required_kb=${required_kb} index_bytes=${index_bytes}"
+            exit 1
+          fi
           tar -czf - --transform='s|^rollback-index\.html$|index.html|' -- rollback-index.html |
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
               set -Eeuo pipefail

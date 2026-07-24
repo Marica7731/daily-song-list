@@ -155,7 +155,7 @@ SQLite runtime DB/API 发布：
 .github/workflows/deploy-vps-static.yml
 ```
 
-静态 workflow 不再要求 VPS2 本地 Git checkout fetch main，而是从 GitHub runner 将 index、assets 和静态 data 文件以 tar 流直接传到既有 web root，再执行文件完整性检查、nginx 检查和 reload；这样不会因为 core commit 携带大数据 blob 而在页面/运行时小文件发布前触发远端 Git 对象写盘。它仍需要 web root 有足够空间写入本次静态文件，也不替代 runtime DB 的上传空间门禁；runtime DB 仍必须走 `deploy-runtime-db.yml` 的安全上传/激活流程。
+静态 workflow 不再要求 VPS2 本地 Git checkout fetch main，而是从 GitHub runner 将 index、assets 和静态 data 文件以 tar 流直接传到既有 web root；写入前先用 `df -Pk` 只读检查远端空间，不足时输出 `CODEX_STATIC_DEPLOY_BLOCKED`/`CODEX_STATIC_RECOVERY_BLOCKED` 并退出，不再半写入首页。通过预检后才执行文件完整性检查、nginx 检查和 reload；它不替代 runtime DB 的上传空间门禁，runtime DB 仍必须走 `deploy-runtime-db.yml` 的安全上传/激活流程。
 
 若 tar 上传在远端零空间时失败并留下不完整新 hash 资源，静态 workflow 支持手动 `action=restore-previous-index`，只从公开 raw commit `b108c956` 取上一版 `index.html`，先用 `scripts/compact-static-index.js` 去掉不影响启动的 SVG、骨架占位和 HTML 空白，再写回既有首页文件；不删除远端文件。恢复后仍要以主域名实际资源字节数和页面交互重新验收。
 
