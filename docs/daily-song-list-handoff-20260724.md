@@ -290,3 +290,10 @@
 - `docs/ui-spec.md`、`test/frontend-utils.test.js`、`test/ui-redesign-static.test.js` 已同步更新，覆盖 URL-only 输出、重复时间点去重、handle 优先/歌手兜底、路由参数、按钮可访问性。
 - 本地验收：`node --test test/frontend-utils.test.js test/ui-redesign-static.test.js test/app-static-performance.test.js test/workflow-static.test.js` 113/113；`node scripts/check-js-syntax.js` 114/114；`git diff --check` 通过。完整 `npm test` 在稀疏工作树为 404/411，7 项仅因缺失既有 review/UI-proof 夹具（`data/review/*`、`docs/data-architecture.md`），未触及 C 盘补齐。
 - 当前这组改动尚未发布：必须先由主会话审核 diff、commit/push，再运行既有静态部署并用公开首页/真实 H5 页面验收；runtime API/DB 仍受上一节远端磁盘 `remoteFreeBytes=0` 阻塞，不能把本次静态发布写成 runtime 已生效。
+
+### 追加发布记录（2026-07-24 18:08 +08:00）
+
+- 前端实现提交已由主会话 rebase 到 Mac 自动产生的 core commit `b108c956`，当前前端提交为 `be647bb9 fix: 优化 VTuber 歌曲卡复制与跳转`，已推送 `main`。
+- GitHub Pages run `30084887706` 成功并生成了 `be647bb9` 的新哈希资源；但公开主域名由 VPS2/Cloudflare 当前 origin 提供，实际首页仍 HTTP 200 且 `Last-Modified=2026-07-24 09:39:35 GMT`，仍指向旧 `app-h95090fdb1212.js` / `styles-h95090fdb1212.css`。不能用 Pages 成功代替 VPS 主域名上线证据。
+- `deploy-vps-static.yml` run `30084893774` 在远端 `git fetch` 阶段失败：`fatal: write error: No space left on device`、`fetch-pack: invalid index-pack output`；未 fast-forward、未重启 nginx、未改变主域名。新的 `app-hf5c3011a09fc.js` 在主域名返回 404，确认本次 H5 交互尚未在线。
+- 本次前端代码/测试/推送已完成，但真实主域名发布未完成；待 VPS2 释放磁盘或扩容后，必须重跑静态 workflow，再用主域名核对 hash、次数复制、歌曲榜跳转和来源展开。runtime DB run `30084768492` 也仍在 Mac 构建，不能绕过空间门禁。
