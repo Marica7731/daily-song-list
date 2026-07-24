@@ -836,7 +836,11 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
   }
 
   if (!videos.size) return empty("no_carryable_previous_videos", from, ageHours);
-  const skipVideoIds = new Set([...videos.values()].filter((video) => !video.needsRefreshFromDirtyCarryForward).map((video) => video.videoId));
+  const skipVideoIds = new Set(
+    [...videos.values()]
+      .filter((video) => !video.needsRefreshFromDirtyCarryForward && !video.needsMetadataRefresh)
+      .map((video) => video.videoId),
+  );
   addKnownAuditSkipIds(skipVideoIds, previousAudit);
   for (const videoId of inspectionCacheSkipIds) skipVideoIds.add(videoId);
   for (const videoId of options.forceRefreshVideoIds || []) skipVideoIds.delete(videoId);
@@ -892,6 +896,7 @@ function normalizeCarryForwardItem(item, sourceGroups, from) {
     carriedFromPrevious: true,
     carriedFromSnapshot: from,
     needsRefreshFromDirtyCarryForward,
+    needsMetadataRefresh: !publishedTimestamp,
   };
 }
 
@@ -1027,9 +1032,12 @@ function mergeVideoMetadata(target, source) {
   target.keywords = uniqueValues([...listValues(target.keywords), ...listValues(source.keywords)]);
   target.keywordKeys = uniqueValues([...listValues(target.keywordKeys), ...listValues(source.keywordKeys)]);
   if (!target.publishedTimestamp && source.publishedTimestamp) target.publishedTimestamp = source.publishedTimestamp;
+  if (!target.publishedText && source.publishedText) target.publishedText = source.publishedText;
   if (!target.thumbnailUrl && source.thumbnailUrl) target.thumbnailUrl = source.thumbnailUrl;
   if (!target.durationText && source.durationText) target.durationText = source.durationText;
+  if (!target.channelName && source.channelName) target.channelName = source.channelName;
   if (!target.channelId && source.channelId) target.channelId = source.channelId;
+  if (!target.channelUrl && source.channelUrl) target.channelUrl = source.channelUrl;
   target.channelHandle = mergedChannelHandle(target.channelHandle, source.channelHandle || source.channelUrl);
 }
 
@@ -1201,6 +1209,7 @@ async function inspectCandidates(candidates, curationContext = loadCurationConte
 async function fetchVideoSongList(candidate, curationContext = loadCurationContext()) {
   curationContext = ensureInspectionContext(curationContext);
   const html = await fetchText(`https://www.youtube.com/watch?v=${candidate.videoId}&hl=ja&persist_hl=1`);
+  candidate = mergeCandidateWithWatchMetadata(candidate, extractWatchVideoMetadata(html));
   const apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
   const initialData = extractJsonAfter(html, "ytInitialData");
@@ -1311,6 +1320,38 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
       })),
     },
     audit,
+  };
+}
+
+function mergeCandidateWithWatchMetadata(candidate, metadata = {}) {
+  return {
+    ...candidate,
+    channelName: candidate.channelName || metadata.channelName || "",
+    channelId: candidate.channelId || metadata.channelId || "",
+    channelHandle: normalizeChannelHandle(candidate.channelHandle) || metadata.channelHandle || "",
+    channelUrl: candidate.channelUrl || metadata.channelUrl || "",
+    publishedText: candidate.publishedText || metadata.publishedText || "",
+    publishedTimestamp: finiteTimestamp(candidate.publishedTimestamp) || finiteTimestamp(metadata.publishedTimestamp) || null,
+    thumbnailUrl: candidate.thumbnailUrl || metadata.thumbnailUrl || "",
+  };
+}
+
+function extractWatchVideoMetadata(html) {
+  const player = tryExtractJsonAfter(html, "ytInitialPlayerResponse");
+  const videoDetails = player?.videoDetails || {};
+  const microformat = player?.microformat?.playerMicroformatRenderer || {};
+  const channelId = String(videoDetails.channelId || microformat.externalChannelId || "").trim();
+  const channelUrl = String(microformat.ownerProfileUrl || (channelId ? `https://www.youtube.com/channel/${channelId}` : "")).trim();
+  const publishedText = normalizeWhitespace(microformat.publishDate || microformat.uploadDate || "");
+  const publishedTimestamp = finiteTimestamp(Date.parse(publishedText));
+  return {
+    channelName: normalizeWhitespace(microformat.ownerChannelName || videoDetails.author || ""),
+    channelId,
+    channelHandle: normalizeChannelHandle(channelUrl),
+    channelUrl,
+    publishedText,
+    publishedTimestamp,
+    thumbnailUrl: bestThumbnail(videoDetails.thumbnail || microformat.thumbnail),
   };
 }
 
@@ -2993,6 +3034,14 @@ function extractJsonAfter(text, marker) {
   throw new Error(`${marker} object end not found`);
 }
 
+function tryExtractJsonAfter(text, marker) {
+  try {
+    return extractJsonAfter(text, marker);
+  } catch {
+    return null;
+  }
+}
+
 function extractRegex(text, regex) {
   return text.match(regex)?.[1] || "";
 }
@@ -3121,6 +3170,7 @@ module.exports = {
   createRequestLimiter,
   extractSearchItems,
   extractMygitTodaySnapshotItems,
+  extractWatchVideoMetadata,
   extractCommentTexts,
   filterBlockedVideos,
   filterArtistRichMixedSourceSongs,
@@ -3132,6 +3182,7 @@ module.exports = {
   matchBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
+  mergeCandidateWithWatchMetadata,
   matchKnownTitleArtistFromVideoTitle,
   normalizeMygitTodaySnapshotItem,
   networkRetryDelayMs,

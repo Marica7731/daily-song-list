@@ -18,6 +18,7 @@ const {
   createRequestLimiter,
   extractSearchItems,
   extractMygitTodaySnapshotItems,
+  extractWatchVideoMetadata,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
   fetchWithRetry,
@@ -25,6 +26,7 @@ const {
   isBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
+  mergeCandidateWithWatchMetadata,
   matchKnownTitleArtistFromVideoTitle,
   networkRetryDelayMs,
   parseOptionalLimit,
@@ -46,6 +48,25 @@ const SOURCE_URLS = {
   today: TODAY_SEARCH_URL,
   month: MONTH_SEARCH_URL,
 };
+
+test("watch-page metadata fills missing 7d publication and channel fields without overwriting search evidence", () => {
+  const html = `<script>var ytInitialPlayerResponse = {"videoDetails":{"channelId":"UCwatch123","author":"Watch Author","thumbnail":{"thumbnails":[{"url":"https://i.ytimg.com/watch.jpg","width":1280}] }},"microformat":{"playerMicroformatRenderer":{"externalChannelId":"UCwatch123","ownerChannelName":"Watch Author","ownerProfileUrl":"https://www.youtube.com/@watch_author","publishDate":"2026-07-17","uploadDate":"2026-07-17","thumbnail":{"thumbnails":[{"url":"https://i.ytimg.com/micro.jpg","width":640}]}}}};</script>`;
+  const metadata = extractWatchVideoMetadata(html);
+  assert.equal(metadata.channelId, "UCwatch123");
+  assert.equal(metadata.channelHandle, "@watch_author");
+  assert.equal(metadata.publishedText, "2026-07-17");
+  assert.equal(metadata.publishedTimestamp, Date.parse("2026-07-17"));
+  assert.equal(metadata.thumbnailUrl, "https://i.ytimg.com/watch.jpg");
+
+  const merged = mergeCandidateWithWatchMetadata(
+    { videoId: "WATCH000001", title: "watch", channelName: "Search Author", publishedTimestamp: null, thumbnailUrl: "" },
+    metadata,
+  );
+  assert.equal(merged.channelName, "Search Author");
+  assert.equal(merged.channelHandle, "@watch_author");
+  assert.equal(merged.publishedTimestamp, Date.parse("2026-07-17"));
+  assert.equal(merged.thumbnailUrl, "https://i.ytimg.com/watch.jpg");
+});
 
 test("carries fresh previous song lists and skips previously inspected stable videos", () => {
   const previous = {
@@ -133,6 +154,21 @@ test("dirty carried videos are normalized but left eligible for refresh", () => 
   assert.equal(carry.videos[0].songs.length, 1);
   assert.equal(carry.videos[0].songs[0].artist, "未記載");
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), false);
+});
+
+test("carried videos missing publication time stay eligible for watch-page metadata refresh", () => {
+  const previous = {
+    generatedAt: "2026-07-11T12:00:00Z",
+    groups: {
+      "72h": { items: [] },
+      "1m": { items: [video("MISSTIME001", 24, ["month"], { publishedTimestamp: null })] },
+    },
+  };
+
+  const carry = collectCarryForwardVideos(previous, { videos: [] }, NOW);
+
+  assert.equal(carry.videos[0].needsMetadataRefresh, true);
+  assert.equal(carry.skipVideoIds.has("MISSTIME001"), false);
 });
 
 test("inspection cache skips only aged no-progress videos using real mygit published timestamps", () => {

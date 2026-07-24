@@ -232,3 +232,11 @@
 - 修复：`.github/workflows/update-core.yml` 的生成数据暂存命令改为 `git add --sparse ...`，并在 `test/workflow-static.test.js` 固定该门禁；`docs/repo-operations.md` 已记录自动链路和 sparse checkout 注意事项。提交/推送后必须手动触发一次 `update-core.yml` 做 Mac runner 真实回归，不能把 workflow 文件修复写成数据已恢复。
 - 验收不变量：选择最近 3–10 个明确 `videoId`，统一 `searchFields`、频道条件和分页，检查 `videoIds(7d) ⊆ videoIds(all)`；确认 accepted increment 只在 canonical merge/全量 DB build 后进入累计库，拒绝 `partial`/`reachedEnd=false` 来源；发布后验证 `/healthz`、`/api/meta` 构建时间和 `/api/rankings` 两个范围。
 - 脏数据、头像和 handle：自动链路恢复不绕过现有非歌曲规则、curation overrides、channel avatar cache 和可靠频道身份规则；不需要 DeepSeek API key 才能修复本次根因。模型只能作为后续离线边界样本复核，不能直接决定生产导入或替代原始 JSON/HTML 证据。
+
+## 7d 字段覆盖补强（2026-07-24）
+
+- 字段结论：歌曲 `seconds/time` 由原始时间戳歌单解析；视频 `videoId/title/channelName/channelId/channelHandle/thumbnailUrl` 和 `publishedTimestamp/publishedAt` 由搜索结果进入候选，再由 runtime 派生输出。搜索 renderer 没有发布时间时，旧逻辑虽然已经抓了观看页，却没有利用观看页 metadata 回填，可能产生空 `publishedAt` 和 `timeMissingReason`。
+- 修复：`scripts/update-songlist.js` 在 `fetchVideoSongList` 读取观看页 `ytInitialPlayerResponse.videoDetails` 与 `microformat.playerMicroformatRenderer`，仅对候选缺失字段回填 `publishDate/uploadDate`、频道名/ID/handle/URL 和缩略图；搜索结果中的明确值优先，不使用模型猜测，也不把 partial 来源变成 accepted。
+- carry-forward：累计/7d 旧记录若缺 `publishedTimestamp`，下一轮保持可重新检查；已有发布时间的稳定记录仍按现有 checkpoint 跳过，避免每小时重复抓全库。
+- 本地回归：`node --test test/update-songlist.test.js` 36/36 通过；新增观看页 metadata 回填与缺时间 carry-forward 回归。
+- 发布顺序：当前旧 runtime DB 发布 run `30075852096` 仍在 Mac 上执行上传/激活，完成前不触发新的 runtime 发布；字段代码推送后，待自动 core 回归成功，再由 `workflow_run` 构建包含字段补强的 runtime DB。
