@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
   "video": {
     "videoId": "cNXIRo0xtV0",
@@ -15,15 +15,14 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 47,
-    "riskLevel": "medium",
+    "riskScore": 32,
+    "riskLevel": "low",
     "riskReasons": [
       "niche_unknown_artist",
       "short_unknown_title",
-      "source_multiple_unknown_artists",
       "source_multiple_niche_short_titles"
     ]
   },
@@ -44,8 +43,7 @@
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "short_unknown_title"
       ],
       "positiveEvidence": []
     },
@@ -109,26 +107,6 @@
     },
     {
       "status": "accepted",
-      "seconds": 3414,
-      "time": "0:56:54",
-      "title": "FA紹介コーナー！",
-      "artist": "未記載",
-      "raw": "56:54 FA紹介コーナー！",
-      "rawHash": "6d4f91d1add31a269c1a64ab9cb857d6d41dc41a7171f0fd6beab7f60c0bf6a9",
-      "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
-      "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
       "seconds": 4640,
       "time": "1:17:20",
       "title": "花に亡霊",
@@ -162,8 +140,7 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": []
     },

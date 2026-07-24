@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:3rZ1rLLRE0g:59e932f4f6ff2c05e2bc",
   "video": {
     "videoId": "3rZ1rLLRE0g",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 6,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_niche_short_titles",
       "niche_unknown_artist"
     ]
   },
@@ -111,7 +110,7 @@
       "seconds": 2770,
       "time": "0:46:10",
       "title": "残酷な夜に輝け",
-      "artist": "LISA",
+      "artist": "LiSA",
       "raw": "46:10 残酷な夜に輝け/LISA",
       "rawHash": "076813d0bc9ef2df0d6f04f4b499ad1f481e446eb62534ff4950cc8cbb3bfbc6",
       "sourceId": "Ugy4yosMPKxp1Yry1yl4AaABAg",
@@ -236,12 +235,13 @@
       "rawHash": "620d430c889776fc37944b5ae249918be4ec01ddf64b7db49e44056bb3e20a9c",
       "sourceId": "Ugy4yosMPKxp1Yry1yl4AaABAg",
       "sourceHash": "59e932f4f6ff2c05e2bcc374c7f538a6f66c402867ff95dfeb02dc474d78e66d",
-      "isNiche": true,
+      "isNiche": false,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ]
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:NUfimgdBOr0:960544c5593dc1c7e0cf",
   "video": {
     "videoId": "NUfimgdBOr0",
@@ -15,15 +15,14 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "niche_unknown_artist",
-      "source_multiple_niche_short_titles"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -192,46 +191,6 @@
         "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 2281,
-      "time": "0:38:01",
-      "title": "バッド・ダンス・ホール",
-      "artist": "未記載",
-      "raw": "38:01         バッド・ダンス・ホール",
-      "rawHash": "a2f5bab986b3462d557a86f646a649e21f8a0a800276d72ded79aabcabf024f1",
-      "sourceId": "UgwiGFIKK4oXSGF8qvh4AaABAg",
-      "sourceHash": "960544c5593dc1c7e0cf99352623cc532435022866c7858a1f24931199d5c912",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
-      "seconds": 2622,
-      "time": "0:43:42",
-      "title": "ダンスダンスデカダンス",
-      "artist": "未記載",
-      "raw": "43:42         ダンスダンスデカダンス",
-      "rawHash": "e1518c36813056c6f55c258cd72cbc21a067b74d008cc59a46bae29c5b0cbf16",
-      "sourceId": "UgwiGFIKK4oXSGF8qvh4AaABAg",
-      "sourceHash": "960544c5593dc1c7e0cf99352623cc532435022866c7858a1f24931199d5c912",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
     },
     {
       "status": "accepted",

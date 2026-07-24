@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:ZSNptWSG6i4:20467cb7df1d1d284931",
   "video": {
     "videoId": "ZSNptWSG6i4",
@@ -15,17 +15,16 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 77,
-    "riskLevel": "high",
+    "riskScore": 66,
+    "riskLevel": "medium",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles",
-      "short_unknown_title"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -65,27 +64,6 @@
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
-      "seconds": 2872,
-      "time": "0:47:52",
-      "title": "練習中",
-      "artist": "未記載",
-      "raw": "47:52 53:44 練習中",
-      "rawHash": "9de0a82184bf3e219e672d46f64b7472e4945bbf5be0dc43ff64633acef65758",
-      "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
-      "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": []

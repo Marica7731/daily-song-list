@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:fnm5-5hlij4:bbe40e90d865474e71e1",
   "video": {
     "videoId": "fnm5-5hlij4",
@@ -15,14 +15,15 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "niche_unknown_artist"
+      "niche_unknown_artist",
+      "short_unknown_title"
     ]
   },
   "entries": [
@@ -31,7 +32,7 @@
       "seconds": 154,
       "time": "0:02:34",
       "title": "新宝島",
-      "artist": "未記載",
+      "artist": "サカナクション",
       "raw": "2:34 新宝島",
       "rawHash": "15327a6a56209b08aad6561108334b53cefc96bb8b08e635f9b50447185c2544",
       "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
@@ -40,11 +41,10 @@
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
-      "riskReasons": [
-        "known_song_unknown_artist"
-      ],
+      "riskReasons": [],
       "positiveEvidence": [
-        "known_song"
+        "known_song",
+        "known_artist"
       ]
     },
     {
@@ -119,23 +119,23 @@
       "rawHash": "c21d2a091d675f0e3b6ad26c40838e0f1a980112fd5c6f8cb032c209b9a5f686",
       "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
       "sourceHash": "bbe40e90d865474e71e158da9d85c46e35cb4316447fd55b551b0589ad5b62a9",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
       "seconds": 1535,
       "time": "0:25:35",
       "title": "天体観測",
-      "artist": "未記載",
+      "artist": "BUMP OF CHICKEN",
       "raw": "25:35 天体観測",
       "rawHash": "40dc11873fee86449ad9a9e451b8cd7dd0bbb3890a766abdc5e20ad8b3666296",
       "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
@@ -144,11 +144,10 @@
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
-      "riskReasons": [
-        "known_song_unknown_artist"
-      ],
+      "riskReasons": [],
       "positiveEvidence": [
-        "known_song"
+        "known_song",
+        "known_artist"
       ]
     }
   ]

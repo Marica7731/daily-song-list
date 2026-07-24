@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:taW2z4dQFXI:ef6ff7d41f9851fd5f38",
   "video": {
     "videoId": "taW2z4dQFXI",
@@ -18,11 +18,10 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
       "niche_unknown_artist",
-      "source_multiple_unknown_artists",
       "source_multiple_niche_short_titles"
     ]
   },
@@ -102,28 +101,7 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
-      "seconds": 796,
-      "time": "0:13:16",
-      "title": "音楽活動でファンをどうやって作るのか…",
-      "artist": "未記載",
-      "raw": "00:13:16 音楽活動でファンをどうやって作るのか…",
-      "rawHash": "e2bb613f5907b0b8c9b056182b84f51039650c6c008cf0ab3bbb8c1448c4780e",
-      "sourceId": "UgxWOsNi0RH2tFm99h14AaABAg",
-      "sourceHash": "ef6ff7d41f9851fd5f38210320fc7ee12475399a9639e2d2d1021bdfca39ed9c",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": []
     },
@@ -167,26 +145,6 @@
     },
     {
       "status": "accepted",
-      "seconds": 1464,
-      "time": "0:24:24",
-      "title": "次のバトンは香鳴ハノンちゃん",
-      "artist": "未記載",
-      "raw": "00:24:24 次のバトンは香鳴ハノンちゃん",
-      "rawHash": "562550b2e592dcf4b3ba893116b622c470dea9030b8717f8ad10ff0b8d79438b",
-      "sourceId": "UgxWOsNi0RH2tFm99h14AaABAg",
-      "sourceHash": "ef6ff7d41f9851fd5f38210320fc7ee12475399a9639e2d2d1021bdfca39ed9c",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
       "seconds": 1501,
       "time": "0:25:01",
       "title": "来世で会おう",
@@ -204,26 +162,6 @@
         "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1777,
-      "time": "0:29:37",
-      "title": "次はウタノンの嫁ハノンちゃん",
-      "artist": "未記載",
-      "raw": "00:29:37 次はウタノンの嫁ハノンちゃん",
-      "rawHash": "33e75b13894591f192ec3ed4dba6191101730d264000522ae1bf7cdad5fe7fdd",
-      "sourceId": "UgxWOsNi0RH2tFm99h14AaABAg",
-      "sourceHash": "ef6ff7d41f9851fd5f38210320fc7ee12475399a9639e2d2d1021bdfca39ed9c",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
     }
   ]
 }

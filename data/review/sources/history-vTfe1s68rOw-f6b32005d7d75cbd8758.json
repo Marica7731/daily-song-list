@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:vTfe1s68rOw:f6b32005d7d75cbd8758",
   "video": {
     "videoId": "vTfe1s68rOw",
@@ -15,15 +15,13 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 30,
+    "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_niche_short_titles",
-      "niche_unknown_artist",
-      "short_unknown_title"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -367,35 +365,14 @@
       "rawHash": "8fe623f807688e0bd977375034c7b624cf5ea17643da051c73c65b693ceb052b",
       "sourceId": "UgyseEBIMe2J6XJ09yN4AaABAg",
       "sourceHash": "f6b32005d7d75cbd8758328acbc1187fca406666fe60bd293d785943b46011ab",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 4981,
-      "time": "1:23:01",
-      "title": "ここすき",
-      "artist": "未記載",
-      "raw": "1:23:01 ここすき",
-      "rawHash": "1a6da19ba4cf04f97b3ea08baf7a39d51e6fe9668d94cada3f20293214588992",
-      "sourceId": "UgyseEBIMe2J6XJ09yN4AaABAg",
-      "sourceHash": "f6b32005d7d75cbd8758328acbc1187fca406666fe60bd293d785943b46011ab",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title"
-      ],
-      "positiveEvidence": []
     },
     {
       "status": "accepted",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:QB2tT48CvOI:f62db69ee3c93d0d0933",
   "video": {
     "videoId": "QB2tT48CvOI",
@@ -15,14 +15,13 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
-    "riskScore": 50,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_niche_short_titles",
-      "activity_marker_title"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -43,27 +42,6 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 461,
-      "time": "0:07:41",
-      "title": "自己紹介",
-      "artist": "順番はじゃんけんで",
-      "raw": "7:41 自己紹介／順番はじゃんけんで",
-      "rawHash": "f05428e9e5c2a410073b10017531d9e5dc16ecb5451acae06b39f2bb3233143e",
-      "sourceId": "Ugxw6scQUx2kevkYqD94AaABAg",
-      "sourceHash": "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa",
-      "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "activity_marker_title"
-      ],
-      "positiveEvidence": [
         "known_artist"
       ]
     },

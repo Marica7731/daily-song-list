@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:cSY8e1Yt8R4:bf31ec5936b9673a5952",
   "video": {
     "videoId": "cSY8e1Yt8R4",
@@ -15,15 +15,15 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260719T140000Z"
+    "snapshotId": "20260724T080000Z"
   },
   "risk": {
     "riskScore": 34,
     "riskLevel": "low",
     "riskReasons": [
+      "source_multiple_niche_short_titles",
       "niche_unknown_artist",
-      "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "source_multiple_unknown_artists"
     ]
   },
   "entries": [
@@ -46,26 +46,6 @@
         "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 586,
-      "time": "0:09:46",
-      "title": "昨夜はしん様が3Dライブで歌唱されたメランコリーキッチン",
-      "artist": "未記載",
-      "raw": "9:46 昨夜はしん様が3Dライブで歌唱されたメランコリーキッチン",
-      "rawHash": "fbc31c80dad8ecdeb194e155598ff961b62ca5d1a2277e45c60b7c5e17b0db1a",
-      "sourceId": "UgyOzsg3HpvvQZcc2qJ4AaABAg",
-      "sourceHash": "bf31ec5936b9673a5952614c7849898ece24d590c8a748b14bc19c48fb9cec3d",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
     },
     {
       "status": "accepted",

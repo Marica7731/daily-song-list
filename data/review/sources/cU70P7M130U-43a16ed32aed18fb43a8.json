@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:cU70P7M130U:43a16ed32aed18fb43a8",
   "video": {
     "videoId": "cU70P7M130U",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
     "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "｡ﾟ🌟: *.⌛️ . SET LIST * :⌛️｡ﾟ🌟: .\n\nThe singer on this channel is Chrono-Shirahoshi \n　　　　　　　　　　　　　  白星クロノ🌟⏳️\n\n00:01:00  The diva takes the stage\n\n00:01:13 🎤Opening Talk\n\n00:03:11 🎧️ アカシア\n                           ↳BUMP OF CHICKEN　[2023年]\n00:10:18 🎧️ P.A.R.T.Y.~ﾕﾆﾊﾞｰｽ·ﾌｪｽﾃｨﾊﾞﾙ \n　　　　　　　　        　↳DA PUMP　[2019年] \n00:17:38 🎧️ 好きすぎて滅！ / MILK　[2025年]\n\n00:22:30 🎧️ 裸の勇者 / Vaundy　[2023年]\n\n00:28:10 🎧️ Five / 嵐　[2026年]\n\n00:34:52 🎧️ ｼｭｶﾞｰｿﾝｸﾞとﾋﾞﾀｰｽﾃｯﾌﾟ\n　　　　↳UNISON SQUARE GARDEN　[2016年]\n00:41:46 🎧️ 友よ~この先もずっと···\n　　　　　　　　　　   ↳ケツメイシ　[2016年]\n00:48:32 🎧️ Climax Jump / AAA　[2007年]\n\n00:56:37 🎧️ スタートライン！\n      ↳せな·りえ from AIKATU☆STARS　[2016年]\n01:04:32 🎧️ Be The One /\n　　　　　　↳PANDORA feat.Beverly　[2018年]\n01:11:15 🎧️ unravel\n　　　　　  ↳TK from 凛として時雨　[2014年]\n01:23:11 🎧️ イマジネーション\n　　　　　　　　　　　　↳ SPYAIR　[2014年]\n01:32:33 🎧️ ムーンライト伝説 / DALI　[1992年]\n\n01:38:51 🎧️ 完全感覚Dreamer\n　　　　　　　　　　↳ONE OK ROCK  [2010年]\n01:49:47 🎧️ オレンジ/ SPYAIR  [2024年]\n\n\n01:54:00 🎤 Ending Talk \n\n\n\n\n｡:.ﾟ🤍⋆*⌛️ Total live time 02:28:27 ･:*♬‧͙·*🤍",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 34,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "niche_unknown_artist",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -43,8 +45,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -57,16 +58,15 @@
       "rawHash": "6fba5b06ed2d0e1052924952b232150e389c018a9cae4e125b4b8785818bea76",
       "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
       "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -85,8 +85,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -106,8 +105,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -120,14 +118,13 @@
       "rawHash": "08403c5c58a51b2e9e9083d23dc26409187a0ecad41402f8179390155b14e8b2",
       "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
       "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -148,8 +145,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -162,16 +158,15 @@
       "rawHash": "3b524353a9b6fe41df8995d714aecf2eb5e8d9b45408584908173160c13b1e75",
       "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
       "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -190,8 +185,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -212,8 +206,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -234,8 +227,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -256,8 +248,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -277,8 +268,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -299,8 +289,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -320,93 +309,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 60,
-      "time": "0:01:00",
-      "title": "The diva takes the stage",
-      "artist": "未記載",
-      "raw": "00:01:00 The diva takes the stage",
-      "rawHash": "bff786ac770c0d931bc6742af7ba79127659c9a69fd5160b1abefdd26f4684dd",
-      "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
-      "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 73,
-      "time": "0:01:13",
-      "title": "Opening Talk",
-      "artist": "未記載",
-      "raw": "00:01:13 🎤Opening Talk",
-      "rawHash": "8bb88c8c4c0275723ccc9541e937e45546dce79d926072f4bcee384478442b33",
-      "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
-      "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 3397,
-      "time": "0:56:37",
-      "title": "スタートライン！",
-      "artist": "未記載",
-      "raw": "00:56:37 🎧️ スタートライン！",
-      "rawHash": "f7a6157490c3fb9f110b31567d94117b25511d9bff7ef789d02e05963ddb1a2c",
-      "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
-      "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 6840,
-      "time": "1:54:00",
-      "title": "Ending Talk",
-      "artist": "未記載",
-      "raw": "01:54:00 🎤 Ending Talk",
-      "rawHash": "7ee57ea3458e399b57e8337ae088a8e15e462dbd6df259024c687457463063bd",
-      "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
-      "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 8907,
-      "time": "2:28:27",
-      "title": "*♬‧͙·*🤍",
-      "artist": "未記載",
-      "raw": "｡:.ﾟ🤍⋆*⌛️ Total live time 02:28:27 ･:*♬‧͙·*🤍",
-      "rawHash": "884c0966dc8897cb52ef58c2a726fd6202fbbb4fc605bc28692d1dd2892a6d20",
-      "sourceId": "UgyF8-SU1nejtks2TMh4AaABAg",
-      "sourceHash": "43a16ed32aed18fb43a81b7517b5e61b72532851c66e49e742522aab866957d3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
+        "known_artist"
       ]
     }
   ]

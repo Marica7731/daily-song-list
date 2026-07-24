@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:xtkm7esReyk:7d0500f46db35257998d",
   "video": {
     "videoId": "xtkm7esReyk",
@@ -18,12 +18,10 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 6,
     "riskLevel": "low",
     "riskReasons": [
-      "niche_unknown_artist",
-      "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -49,26 +47,6 @@
     },
     {
       "status": "accepted",
-      "seconds": 852,
-      "time": "0:14:12",
-      "title": "ライブ振り返り①",
-      "artist": "未記載",
-      "raw": "0:14:12 ライブ振り返り①",
-      "rawHash": "8920d07b956300d796fbbc1274a4cdae1967fa932f0fdac8a6c8c8a8d1946e30",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
       "seconds": 1961,
       "time": "0:32:41",
       "title": "明日も",
@@ -86,26 +64,6 @@
         "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 2272,
-      "time": "0:37:52",
-      "title": "ライブ振り返り②",
-      "artist": "未記載",
-      "raw": "0:37:52 ライブ振り返り②",
-      "rawHash": "47f850e0404680c471efc815a28613ad58b0e52bfc9a2067e9a272695ac8ee37",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -148,45 +106,6 @@
     },
     {
       "status": "accepted",
-      "seconds": 3730,
-      "time": "1:02:10",
-      "title": "ダンスを基礎から学び直してる",
-      "artist": "ライブやグッズの話",
-      "raw": "1:02:10 ダンスを基礎から学び直してる / ライブやグッズの話",
-      "rawHash": "d499e4d77167db253a85392df37a75bb94108d6d58e897964e71081e1e50fcdd",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_artist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 4491,
-      "time": "1:14:51",
-      "title": "ライブ振り返り③",
-      "artist": "未記載",
-      "raw": "1:14:51 ライブ振り返り③",
-      "rawHash": "41b2cfd2c7a5e93fc6790a03da3f1ae9cc3108fbb917cddb44c63ddea213da63",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
-    },
-    {
-      "status": "accepted",
       "seconds": 5498,
       "time": "1:31:38",
       "title": "キラキラ",
@@ -204,26 +123,6 @@
         "known_song",
         "known_artist"
       ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 5863,
-      "time": "1:37:43",
-      "title": "ライブ振り返り④",
-      "artist": "未記載",
-      "raw": "1:37:43 ライブ振り返り④",
-      "rawHash": "89c19999899df273142a1b3c08eaac0effe865b06878e94fde4b9f3434fa2bfd",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -260,8 +159,7 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": []
     }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
+  "generatedAt": "2026-07-24T09:25:30.517Z",
   "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
   "video": {
     "videoId": "j8BuqM_a4g4",
@@ -18,33 +18,13 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "niche_unknown_artist",
       "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
-    {
-      "status": "accepted",
-      "seconds": 0,
-      "time": "0:00:00",
-      "title": "枠Start",
-      "artist": "未記載",
-      "raw": "00:00 枠Start",
-      "rawHash": "e3b70c78e69fa7abe945abb419d52954c9ab81f1dcb76ee7c3e7d2f9a5e2f242",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "niche_unknown_artist"
-      ],
-      "positiveEvidence": []
-    },
     {
       "status": "accepted",
       "seconds": 1402,
@@ -214,13 +194,12 @@
       "rawHash": "76b2975a004bddafcf13ae1407883970c36012f7da98891ca61d29c3a20d8dcd",
       "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
       "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ]
     },
@@ -373,10 +352,14 @@
       "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
       "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "tuki."
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"
