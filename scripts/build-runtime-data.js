@@ -15,6 +15,7 @@ const {
   groupForRange,
 } = require("./range-config");
 const { hydratePayloadWithChannelMetadata, thumbnailUrlForVideo } = require("./channel-metadata-cache");
+const { assertRecentAllContinuity } = require("./recent-all-continuity");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -48,6 +49,7 @@ if (require.main === module) {
 
 function main() {
   const payload = hydratePayloadWithChannelMetadata(augmentPayloadWithVsingerBackfill(readJson(LATEST_PATH)));
+  assertRecentAllContinuity(payload);
   const baseRangePayloads = Object.fromEntries(RANGES.map((rangeId) => [rangeId, buildRuntimeRangePayload(payload, rangeId)]));
   const dataVersion = computeRuntimeDataVersion(payload, baseRangePayloads);
   const rangePayloads = Object.fromEntries(

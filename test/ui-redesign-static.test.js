@@ -428,6 +428,12 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function bindPageInputSelection"), /input\.select\(\)/u);
   assert.match(functionBody("function bindPageInputSelection"), /addEventListener\("click"/u);
   assert.match(functionBody("function handleResponsiveResize"), /document\.activeElement\?\.matches\?\.\('\[data-page-input="true"\]'\)/u);
+  assert.match(functionBody("function handleResponsiveResize"), /pageInputPointerActive/u);
+  assert.match(functionBody("function handleResponsiveResize"), /cancelPendingResponsiveResize\(\)/u);
+  assert.match(appSource, /function protectPageInputFromResize\(input\)/u);
+  assert.match(functionBody("function protectPageInputFromResize"), /window\.setTimeout/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /protectPageInputFromResize\(input\)/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /releasePageInputResizeProtection\(input\)/u);
   assert.match(appSource, /function capturePageInputState\(\)/u);
   assert.match(appSource, /function restorePageInputState\(snapshot\)/u);
   assert.match(appSource, /function activePageInputElement\(\)/u);
@@ -439,6 +445,7 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function handlePaginationFormSubmit"), /preservePageInput: false/u);
   assert.match(functionBody("function renderSourcePageSummary"), /bindPageInputInteraction\(input\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /event\.stopPropagation\(\)/u);
   assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("hideUnknownArtist", "1"\)/u);

@@ -158,7 +158,6 @@ jobs:
             echo "::warning::Published API runtime check failed or is not cut over yet; static runtime check passed."
             return 0
           }
-          sleep 300
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if check_published_runtime; then
               exit 0

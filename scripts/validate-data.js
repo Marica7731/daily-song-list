@@ -8,6 +8,7 @@ const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, valid
 const { SUPPLEMENTAL_KNOWN_SONGS_PATH, loadSupplementalKnownSongs } = require("./song-search-index");
 const { CATALOG_RETENTION_POLICY, MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
 const { CANONICAL_RANGES, DIFF_RANGES, groupForRange } = require("./range-config");
+const { validateRecentAllContinuity } = require("./recent-all-continuity");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -92,6 +93,13 @@ for (const groupId of RANGES) {
       validateSongIdentity(groupId, videoIndex, songIndex, item, song, songAliasContext);
     }
   }
+}
+
+const recentAllContinuity = validateRecentAllContinuity(payload);
+if (!recentAllContinuity.ok) {
+  for (const videoId of recentAllContinuity.missingVideos) errors.push(`7d video missing from all: ${videoId}`);
+  for (const songKey of recentAllContinuity.missingSongs) errors.push(`7d song occurrence missing from all: ${songKey}`);
+  for (const fieldKey of recentAllContinuity.missingFields) errors.push(`7d field missing from all: ${fieldKey}`);
 }
 
 const index = readJson(INDEX_PATH);

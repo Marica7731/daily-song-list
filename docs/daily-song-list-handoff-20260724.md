@@ -394,3 +394,12 @@
 - 运行时发布中曾在 2026-07-25 00:37 左右短暂返回 `database disk image is malformed`（health/meta HTTP 500）；未手工覆盖生产 DB，待 workflow 完成后 00:48 起恢复 HTTP 200，并以最终 workflow health/API contract 和上述线上复测为准。
 - `Check code` run `30109456498` 已完成但因 `data/diff/latest-1m.json` 与 `data/diff/latest-all.json` gzip 超过既有 budget 失败；UI proof 按 workflow 既有规则输出 `CODEX_UI_PROOF_DEFERRED`。这两项不是本次页码代码测试失败，仍需单独处理/刷新 proof 矩阵，不能写成全绿。
 - 本轮仍未执行 Naraetan 脏数据改写；只读报告保留在 `G:/codex-work/daily-song-list-naraetan-audit-20260724/audit-report.md`。来源继续抓取、全库 singleton 审计和仅两个视频调查仍按前节待办处理，未将 partial 来源导入生产。
+
+## 页码输入竞态二次修复与 7d→all 连续性门禁（2026-07-25）
+
+- 用户最新反馈是“电脑手机点击页码输入后立即失焦，来不及输入”。当前线上桌面真实坐标点击在 50ms、2s 观察仍可保持焦点，但代码仍存在视口 resize 在 pointerdown 与 focus 之间排队重绘的竞态；本轮在 `assets/app.js` 的页码输入绑定和 `handleResponsiveResize` 增加保护：按下输入时取消 pending resize frame，焦点落定后解除；提交事件停止重复冒泡。
+- `scripts/recent-all-continuity.js` 新增 7d→all 硬校验：每个 7d 视频必须出现在 all，歌曲 occurrence 与关键视频字段不能丢失。`scripts/build-runtime-data.js`、`scripts/db/export-runtime-rankings.js` 在生成 runtime 前阻断，`scripts/validate-data.js` 也会报告具体 video/song/field 键；不会把缺失静默发布成累计库。
+- `.github/workflows/update-core.yml` 移除发布检查前无条件 `sleep 300`，避免 core commit 成功后延迟 5 分钟才进入 runtime workflow 的观察链路；保留有界的 12 次、每次 60 秒检查。`test/workflow-static.test.js` 固定该契约。
+- WSL 定向回归：`node --test test/recent-all-continuity.test.js test/ui-redesign-static.test.js test/workflow-static.test.js test/runtime-data.test.js` 为 `44/44`；`node scripts/check-js-syntax.js` 检查 `119` 个 JS 文件通过；`git diff --check` 通过。
+- 本次工作树是 `G:/codex-work/daily-song-list-runtime-fix-20260723`，未触碰未跟踪 `.workbuddy/`。G 盘稀疏工作树缺少 `data/snapshots/index.json`、`data/review/*` 与 `docs/data-architecture.md`，且 WSL 当前没有 `python`，因此完整 `npm test`/`validate-data --core` 不能作为全绿证据；不能把这部分环境阻断写成代码失败。
+- 本节修改尚未 commit、push 或发布；发布后必须重新做真实 Web/H5 页码点击/聚焦/选中/替换/Enter 与“选页”验收，并检查 `/healthz`、`/api/meta`、7d/all rankings。Naraetan 仍只读交给独立会话，不在本节导入 partial 来源。

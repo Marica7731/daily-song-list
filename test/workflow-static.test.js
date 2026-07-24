@@ -31,7 +31,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /git clean -fd -- data\/snapshots data\/diff data\/ui/u);
   assert.match(core, /git add --sparse data\/latest\.json/u);
   assert.match(core, /git pull --rebase origin main/u);
-  assert.match(core, /sleep 300/u);
+  assert.doesNotMatch(core, /sleep 300/u);
   assert.match(core, /for attempt in 1 2 3 4 5 6 7 8 9 10 11 12/u);
   assert.match(core, /sleep 60/u);
   assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\/ --expected-meta data\/ui\/meta\.json/u);

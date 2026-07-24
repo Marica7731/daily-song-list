@@ -117,6 +117,8 @@ const INDEX_ALL_BUCKET = "全部";
 const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 let pageInputRestoreToken = 0;
+let pageInputInteractionToken = 0;
+let pageInputPointerActive = false;
 
 const KANA_BUCKETS = [
   { label: "あ", pattern: /^[ぁ-お]/u },
@@ -1901,7 +1903,10 @@ function updateQueryAnchorPosition() {
 function handleResponsiveResize() {
   updateViewportVars();
   updateQueryAnchorPosition();
-  if (document.activeElement?.matches?.('[data-page-input="true"]')) return;
+  if (pageInputPointerActive || document.activeElement?.matches?.('[data-page-input="true"]')) {
+    cancelPendingResponsiveResize();
+    return;
+  }
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
@@ -5487,12 +5492,39 @@ function bindPaginationInput(input) {
 function bindPageInputInteraction(input) {
   input.autocomplete = "off";
   input.spellcheck = false;
-  const stopPageInputPropagation = (event) => event.stopPropagation();
+  const stopPageInputPropagation = (event) => {
+    protectPageInputFromResize(input);
+    event.stopPropagation();
+  };
   input.addEventListener("pointerdown", stopPageInputPropagation);
   input.addEventListener("mousedown", stopPageInputPropagation);
   input.addEventListener("touchstart", stopPageInputPropagation, { passive: true });
   input.addEventListener("click", stopPageInputPropagation);
+  input.addEventListener("focus", () => releasePageInputResizeProtection(input));
   bindPageInputSelection(input);
+}
+
+function cancelPendingResponsiveResize() {
+  if (!state.resizeRenderFrame) return;
+  window.cancelAnimationFrame(state.resizeRenderFrame);
+  state.resizeRenderFrame = 0;
+}
+
+function protectPageInputFromResize(input) {
+  pageInputPointerActive = true;
+  const token = ++pageInputInteractionToken;
+  cancelPendingResponsiveResize();
+  window.setTimeout(() => {
+    if (token !== pageInputInteractionToken || document.activeElement === input) return;
+    pageInputPointerActive = false;
+  }, 1000);
+}
+
+function releasePageInputResizeProtection(input) {
+  if (document.activeElement !== input) return;
+  pageInputInteractionToken += 1;
+  pageInputPointerActive = false;
+  cancelPendingResponsiveResize();
 }
 
 function bindPageInputSelection(input) {
@@ -5573,6 +5605,7 @@ function handlePaginationFormSubmit(event) {
     : event.target?.closest?.("[data-page-form], [data-page-jump-form]");
   if (!form) return;
   event.preventDefault();
+  event.stopPropagation();
   const input = form.querySelector("[data-page-input]");
   const page = Number.parseInt(input?.value || "1", 10);
   setPage(page);

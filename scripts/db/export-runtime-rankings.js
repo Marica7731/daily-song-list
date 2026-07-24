@@ -25,6 +25,7 @@ const { canonicalizeSongIdentity, loadSongAliasContext } = require("../song-alia
 const { repairParsedEntry } = require("../entry-repair");
 const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("../song-utils");
 const { dropSameSecondTranslatedAliasSongs, filterBlockedVideos, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
+const { assertRecentAllContinuity } = require("../recent-all-continuity");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -47,6 +48,7 @@ function main() {
     const payload = hydratePayloadWithChannelMetadata(readJson(args.input), {
       metadataPath: path.join(args.youtubeChannelDiscoveryDir, "channel-metadata.json"),
     });
+    assertRecentAllContinuity(payload);
     logPhase("payload_load_ok", {
       inputBytes: fileSize(args.input),
       groups: Object.keys(payload.groups || {}).length,
