@@ -264,6 +264,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
     /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-header\s*\{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\) 34px;[\s\S]*"thumb title title"[\s\S]*"thumb date actions"/u,
   );
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-summary-actions\s*\{[\s\S]*overflow: visible;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 0;[\s\S]*min-height: 22px;[\s\S]*margin: 0;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: auto;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*white-space: nowrap;[\s\S]*line-height: 1\.12;/u);

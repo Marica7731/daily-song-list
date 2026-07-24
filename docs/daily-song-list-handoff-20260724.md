@@ -291,6 +291,15 @@
 - 本地验收：`node --test test/frontend-utils.test.js test/ui-redesign-static.test.js test/app-static-performance.test.js test/workflow-static.test.js` 113/113；`node scripts/check-js-syntax.js` 114/114；`git diff --check` 通过。完整 `npm test` 在稀疏工作树为 404/411，7 项仅因缺失既有 review/UI-proof 夹具（`data/review/*`、`docs/data-architecture.md`），未触及 C 盘补齐。
 - 当前这组改动尚未发布：必须先由主会话审核 diff、commit/push，再运行既有静态部署并用公开首页/真实 H5 页面验收；runtime API/DB 仍受上一节远端磁盘 `remoteFreeBytes=0` 阻塞，不能把本次静态发布写成 runtime 已生效。
 
+## H5 歌曲卡留白二次修正与 runtime 来源复测（2026-07-24）
+
+- 用户反馈上一版为放宽歌名长度而保留了过大的卡片空白。本次在 `assets/styles.css` 的 H5 规则中保留标题/歌手跨右侧动作轨道，但把次数复制入口从会撑高第二行的 44px 视觉按钮收紧为约 22px 的紧凑按钮；不增加独立复制按钮，不改变次数点击复制全部时间码 URL 的行为。
+- `test/ui-redesign-static.test.js` 新增紧凑次数按钮契约；`node --test test/runtime-db.test.js test/runtime-api.test.js test/ui-redesign-static.test.js test/frontend-utils.test.js` 为 96/96，`node scripts/check-js-syntax.js`、`git diff --check` 均通过。
+- runtime workflow `30088657269` 已成功完成 Mac 构建和 VPS2 direct-inplace 激活；只读探针确认 `song-rank-api=active`、内网 `/healthz=200`，活动 DB 约 13.44 GB，可用空间约 6.85 GB，未发现 `.next`/`.previous` 临时库。
+- 严格线上复测（2026-07-24，`https://ytb-song-rank.culua.com`）：`index`、`/healthz`、`/api/meta`、7d rankings、`q=晴る&searchFields=all`、同筛选加 `nicheOnly=1&hideUnknownArtist=1`、`/api/sources/82488b92c02b5a8f?page=1&pageSize=20` 全部 HTTP 200；筛选与未筛选响应不同，来源响应约 654 KB。此前截图中的 HTTP 502 与 runtime direct-inplace 停 API 的发布窗口一致，当前未复现。
+- 注意：错误探针曾使用未被服务端识别的 `limit=10`，导致回退默认大页；正式验收已改用 API 合约的 `pageSize`。该探针问题不能写成线上服务故障。
+- 本节 UI 改动仍需由主会话提交、推送并运行既有 `deploy-vps-static.yml`，之后重新用 390px 真实页面测量卡片高度和长标题；在静态发布前不得写成用户已经看到新布局。
+
 ### 追加发布记录（2026-07-24 18:08 +08:00）
 
 - 前端实现提交已由主会话 rebase 到 Mac 自动产生的 core commit `b108c956`，当前前端提交为 `be647bb9 fix: 优化 VTuber 歌曲卡复制与跳转`，已推送 `main`。

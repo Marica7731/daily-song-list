@@ -4580,7 +4580,11 @@ mark {
   }
 
   .artist-song-group-vtuber button.artist-song-count {
-    margin-inline: -5px;
+    min-width: 0;
+    min-height: 22px;
+    margin: 0;
+    padding: 0 2px;
+    border-radius: 4px;
   }
 
   .vtuber-card-stats {
