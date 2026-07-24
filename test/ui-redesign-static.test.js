@@ -258,7 +258,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.vtuber-display-link\s*\{[\s\S]*grid-area: image;[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-title-link:hover\s*\{[\s\S]*text-decoration: underline;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: auto;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;[\s\S]*padding: 3px;/u);
   assert.match(
     cssSource,
     /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-header\s*\{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\);[\s\S]*"thumb title"[\s\S]*"thumb actions"/u,
