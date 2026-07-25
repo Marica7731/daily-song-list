@@ -73,6 +73,9 @@
   `runner.temp`），没有创建 run；已改为首个 step 写入 `GITHUB_ENV`。
 - 2026-07-26：Mac run `30174911838` 已按 head `7577f66` 创建。生产页预检发现
   VTuber 展开 songs 不提供 artist；已修正审计语义，不再把缺失字段误记为未知歌手。
+- 2026-07-26：浏览器只读预检发现 YOSHIKA 卡片 `songCount=627`，展开详情显示
+  628 首；审计改为记录 count mismatch，并由完整 DB `source_occurrences` 生成每频道
+  全部歌曲/歌手分组。
 
 ## 下一步
 

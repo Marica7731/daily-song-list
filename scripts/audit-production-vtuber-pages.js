@@ -128,12 +128,6 @@ function auditPagePayload(spec, response) {
   }
   const channels = records.map((record) => auditChannelRecord(record, spec));
   const incomplete = channels.filter((channel) => channel.expandedSongs !== channel.songCount);
-  if (incomplete.length) {
-    throw new Error(
-      `${spec.id} did not contain complete expanded songs: `
-        + incomplete.map((channel) => `${channel.name}:${channel.expandedSongs}/${channel.songCount}`).join(","),
-    );
-  }
   return {
     id: spec.id,
     metric: spec.metric,
@@ -145,6 +139,13 @@ function auditPagePayload(spec, response) {
     pageCount: Number(response.pageCount) || 0,
     channelCount: channels.length,
     expandedSongCount: channels.reduce((sum, channel) => sum + channel.expandedSongs, 0),
+    summaryCountMismatchCount: incomplete.length,
+    summaryCountMismatches: incomplete.map((channel) => ({
+      rank: channel.rank,
+      name: channel.name,
+      songCount: channel.songCount,
+      expandedSongs: channel.expandedSongs,
+    })),
     issueCounts: sumIssueCounts(channels),
     channels,
   };
@@ -198,6 +199,7 @@ function auditChannelRecord(record, spec = {}) {
     singletonSongCount: Number(record.singletonSongCount) || songs.filter((song) => song.occurrences === 1).length,
     expandedSongs: songs.length,
     issues: {
+      summaryCountMismatch: songs.length !== Number(record.songCount),
       obviousConversation,
       unknownArtist,
       unknownFillCandidates,
@@ -350,11 +352,12 @@ function renderMarkdown(report) {
       "",
       `Channels: ${page.channelCount}; expanded songs: ${page.expandedSongCount}.`,
       "",
-      "| Rank | Channel | Songs | Videos | Occurrences | Explicit unknown | Conversation/numeric | Spelling splits | Same-title conflicts |",
-      "| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+      "| Rank | Channel | Songs | Expanded | Videos | Occurrences | Count mismatch | Explicit unknown | Conversation/numeric | Spelling splits | Same-title conflicts |",
+      "| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
       ...page.channels.map((channel) => (
         `| ${channel.rank} | ${escapeMarkdown(channel.name || channel.handle || channel.key)} | `
-          + `${channel.songCount} | ${channel.videoCount} | ${channel.occurrences} | `
+          + `${channel.songCount} | ${channel.expandedSongs} | ${channel.videoCount} | ${channel.occurrences} | `
+          + `${channel.issues.summaryCountMismatch ? "yes" : ""} | `
           + `${channel.issues.unknownArtist.length} | ${channel.issues.obviousConversation.length} | `
           + `${channel.issues.possibleSpellingSplits.length} | ${channel.issues.sameTitleArtistConflicts.length} |`
       )),
@@ -364,6 +367,7 @@ function renderMarkdown(report) {
   lines.push(
     "The full expanded song rows are retained in `four-pages.json` and `four-pages.jsonl.gz`.",
     "The VTuber ranking expansion exposes song name/key/count but not artist; missing artist fields are not counted as unknown.",
+    "A ranking `songCount`/embedded-song mismatch is retained as an audit finding; source-level completeness is checked against the materialized SQLite report.",
     "Singleton rows are never marked for deletion from frequency alone.",
     "",
   );

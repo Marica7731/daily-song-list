@@ -95,10 +95,14 @@ test("page audit requires all 20 channels and complete expanded songs", () => {
     () => auditPagePayload(pageSpecs()[0], { records: records.slice(0, 19) }),
     /expected 20 channel records/u,
   );
-  assert.throws(
-    () => auditPagePayload(pageSpecs()[0], {
-      records: records.map((record, index) => (index === 0 ? { ...record, songCount: 2 } : record)),
-    }),
-    /complete expanded songs/u,
-  );
+  const mismatch = auditPagePayload(pageSpecs()[0], {
+    records: records.map((record, index) => (index === 0 ? { ...record, songCount: 2 } : record)),
+  });
+  assert.equal(mismatch.summaryCountMismatchCount, 1);
+  assert.deepEqual(mismatch.summaryCountMismatches[0], {
+    rank: 1,
+    name: "Channel 0",
+    songCount: 2,
+    expandedSongs: 1,
+  });
 });

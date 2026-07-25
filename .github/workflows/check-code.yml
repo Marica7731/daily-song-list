@@ -169,6 +169,7 @@ jobs:
           node --check scripts/audit-global-song-quality.js
           node --check scripts/audit-production-vtuber-pages.js
           python3 -m py_compile scripts/audit-runtime-db.py
+          python3 test/audit_runtime_db_test.py
           node --test \
             test/audit-global-song-quality.test.js \
             test/audit-production-vtuber-pages.test.js \

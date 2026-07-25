@@ -97,6 +97,11 @@ singleton 保留、可能错拼、未知歌手回填候选、同标题多歌手�
 错拼，未知歌手回填与同标题多歌手风险必须回到全库 inventory、source occurrence
 或完整 SQLite 证据判定。
 
+浏览器预检进一步发现 YOSHIKA 卡片显示 627 首，但展开详情显示“全部 628 首歌”。
+这类 `songCount`/embedded songs 不一致必须作为问题保留，不能让审计脚本提前退出。
+Mac SQLite 报告会按每个频道的 `sourceDetailKey` 分组完整 `source_occurrences`，以
+source 层的标题、歌手和次数作为完整性判断。
+
 ## 当前已知物化边界
 
 现有 runtime DB exporter 会对 runtime 导入执行 source filter、song alias 和未知歌手
