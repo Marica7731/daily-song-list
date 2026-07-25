@@ -107,6 +107,30 @@ test("global audit verifies the complete source selector and rejects near misses
   assert.equal(selectorMatchesSong({ ...selector, rawHash: "wrong" }, video, song), false);
 });
 
+test("global audit reports normalized title variants without auto-merging artists", () => {
+  const accumulator = createAccumulator("fixture");
+  addVideoToAccumulator(accumulator, {
+    videoId: "AAAAAAAAAAA",
+    channelName: "Fixture Channel",
+    songs: [
+      { seconds: 10, title: "Finale", artist: "Artist A", raw: "0:10 Finale / Artist A" },
+      { seconds: 20, title: "Finale.", artist: "Artist A", raw: "0:20 Finale. / Artist A" },
+      { seconds: 30, title: "Finale。", artist: "Artist B", raw: "0:30 Finale。 / Artist B" },
+    ],
+  });
+  const result = finalizeAccumulator(accumulator);
+  assert.equal(result.titleVariantCandidates.length, 1);
+  assert.deepEqual(
+    result.titleVariantCandidates[0].variants.map((variant) => variant.name),
+    ["Finale", "Finale.", "Finale。"],
+  );
+  assert.equal(result.conflictingArtistTitles.length, 1);
+  assert.deepEqual(
+    result.conflictingArtistTitles[0].knownArtists.map((artist) => artist.name),
+    ["Artist A", "Artist B"],
+  );
+});
+
 test("global audit title patterns remain conservative", () => {
   assert.equal(classifyTitlePattern("168000", "未記載"), "numeric_only");
   assert.equal(classifyTitlePattern("配信終了", "未記載"), "conversation_or_transition");

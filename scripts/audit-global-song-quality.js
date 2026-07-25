@@ -446,6 +446,7 @@ function createAccumulator(label) {
     channels: new Map(),
     titlePatterns: new Map(),
     titleArtists: new Map(),
+    variantGroups: new Map(),
     samples: {
       unknown: [],
       singletonCandidate: [],
@@ -464,6 +465,7 @@ function addVideoToAccumulator(accumulator, video) {
   accumulator.videos.add(video.videoId);
   channel.videos.add(video.videoId);
   for (const originalSong of songs) {
+    const sourceTitle = cleanText(originalSong.canonicalTitle || originalSong.title);
     const song = normalizeAuditSong(originalSong, video);
     const title = cleanText(song.canonicalTitle || song.title);
     if (!title) continue;
@@ -487,6 +489,7 @@ function addVideoToAccumulator(accumulator, video) {
     incrementChannel(channel, identity, unknown, pattern, evidence);
     incrementMap(accumulator.titlePatterns, pattern);
     recordTitleArtist(accumulator.titleArtists, titleKey, title, artist, unknown, evidence);
+    recordTitleVariant(accumulator.variantGroups, sourceTitle || title, artist, unknown);
 
     if (pattern === "numeric_only") pushSample(accumulator.samples.numeric, evidence, 100);
     if (pattern === "conversation_or_transition") pushSample(accumulator.samples.conversation, evidence, 100);
@@ -570,6 +573,23 @@ function recordTitleArtist(records, titleKey, title, artist, unknown, evidence) 
   }
 }
 
+function recordTitleVariant(records, title, artist, unknown) {
+  const key = titleVariantKey(title);
+  if (!key) return;
+  if (!records.has(key)) {
+    records.set(key, {
+      canonicalKey: key,
+      variants: new Map(),
+      knownArtists: new Map(),
+      unknownOccurrences: 0,
+    });
+  }
+  const record = records.get(key);
+  incrementMap(record.variants, title);
+  if (unknown) record.unknownOccurrences += 1;
+  else incrementMap(record.knownArtists, artist);
+}
+
 function finalizeAccumulator(accumulator) {
   const singletonIdentities = new Set(
     Array.from(accumulator.identities.entries()).filter(([, count]) => count === 1).map(([identity]) => identity),
@@ -583,9 +603,18 @@ function finalizeAccumulator(accumulator) {
   );
   const unknownFillCandidates = [];
   const conflictingArtistTitles = [];
+  const titleVariantCandidates = [];
   for (const record of accumulator.titleArtists.values()) {
-    if (!record.unknownCount || !record.knownArtists.size) continue;
     const artists = sortedCountEntries(record.knownArtists);
+    if (artists.length > 1) {
+      conflictingArtistTitles.push({
+        title: record.title,
+        unknownOccurrences: record.unknownCount,
+        knownArtists: artists,
+        unknownSamples: record.unknownSamples,
+      });
+    }
+    if (!record.unknownCount || !artists.length) continue;
     const candidate = {
       title: record.title,
       unknownOccurrences: record.unknownCount,
@@ -593,10 +622,24 @@ function finalizeAccumulator(accumulator) {
       unknownSamples: record.unknownSamples,
     };
     if (artists.length === 1 && artists[0].count >= 3) unknownFillCandidates.push(candidate);
-    else if (artists.length > 1) conflictingArtistTitles.push(candidate);
+  }
+  for (const record of accumulator.variantGroups.values()) {
+    const variants = sortedCountEntries(record.variants);
+    if (variants.length <= 1) continue;
+    titleVariantCandidates.push({
+      canonicalKey: record.canonicalKey,
+      variants,
+      knownArtists: sortedCountEntries(record.knownArtists),
+      unknownOccurrences: record.unknownOccurrences,
+    });
   }
   unknownFillCandidates.sort((a, b) => b.unknownOccurrences - a.unknownOccurrences || b.knownArtists[0].count - a.knownArtists[0].count);
   conflictingArtistTitles.sort((a, b) => b.unknownOccurrences - a.unknownOccurrences);
+  titleVariantCandidates.sort((a, b) => (
+    b.variants.reduce((sum, item) => sum + item.count, 0)
+      - a.variants.reduce((sum, item) => sum + item.count, 0)
+      || b.variants.length - a.variants.length
+  ));
 
   const singletonSamples = channels
     .flatMap((channel) => channel.samples)
@@ -622,6 +665,7 @@ function finalizeAccumulator(accumulator) {
     channels: channels.sort(compareChannelAuditRows),
     unknownFillCandidates: unknownFillCandidates.slice(0, 250),
     conflictingArtistTitles: conflictingArtistTitles.slice(0, 250),
+    titleVariantCandidates: titleVariantCandidates.slice(0, 500),
     samples: accumulator.samples,
   };
 }
@@ -746,6 +790,7 @@ function writeReportArtifacts(args, inventoryMeta, report) {
     after: report.after.samples,
     unknownFillCandidates: report.before.unknownFillCandidates,
     conflictingArtistTitles: report.before.conflictingArtistTitles,
+    titleVariantCandidates: report.before.titleVariantCandidates,
   });
   const artifactNames = [
     "global-before-after.json",
@@ -859,6 +904,13 @@ function songIdentity(title, artist) {
 
 function titleIdentity(title) {
   return RankingUtils.songWorkTitleKey(cleanText(title)) || RankingUtils.normalizeSongTitleKey(cleanText(title));
+}
+
+function titleVariantKey(title) {
+  return cleanText(title)
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦♪♫♬♩]/gu, "");
 }
 
 function normalizedArtist(value) {
