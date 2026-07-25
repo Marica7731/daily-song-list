@@ -135,7 +135,7 @@ function auditPagePayload(spec, response) {
     uiUrl: `${DEFAULT_API_BASE}/?${spec.uiQuery}`,
     apiPage: Number(response.page) || spec.page,
     pageSize: Number(response.pageSize) || PAGE_SIZE,
-    total: Number(response.total) || 0,
+    total: Number(response.totalCount ?? response.total) || 0,
     pageCount: Number(response.pageCount) || 0,
     channelCount: channels.length,
     expandedSongCount: channels.reduce((sum, channel) => sum + channel.expandedSongs, 0),

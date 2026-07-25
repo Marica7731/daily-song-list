@@ -84,12 +84,13 @@ test("page audit requires all 20 channels and complete expanded songs", () => {
   const audited = auditPagePayload(pageSpecs()[0], {
     page: 1,
     pageSize: 20,
-    total: 40,
+    totalCount: 1168,
     pageCount: 2,
     records,
   });
   assert.equal(audited.channelCount, 20);
   assert.equal(audited.expandedSongCount, 20);
+  assert.equal(audited.total, 1168);
 
   assert.throws(
     () => auditPagePayload(pageSpecs()[0], { records: records.slice(0, 19) }),

@@ -3,6 +3,7 @@ const test = require("node:test");
 
 const {
   addVideoToAccumulator,
+  aggregateMatchedChannels,
   classifyTitlePattern,
   createAccumulator,
   enrichVideoSelectors,
@@ -10,6 +11,51 @@ const {
   recordIncludesBatchTag,
   selectorMatchesSong,
 } = require("../scripts/audit-global-song-quality");
+
+test("YOSHIKA audit aggregates split historical channel identities", () => {
+  const result = aggregateMatchedChannels([
+    {
+      key: "channel-id",
+      name: "YOSHIKAâ‚Ch.",
+      channelId: "UC3xQCiEPSkco54WhuiDcngw",
+      handle: "",
+      videos: 2,
+      songs: 3,
+      occurrences: 4,
+      unknownArtistSongs: 1,
+      unknownArtistOccurrences: 1,
+      singletonSongs: 2,
+      singletonUnknownSongs: 1,
+      titlePatterns: { normal: 3, numeric_only: 1 },
+      flaggedSamples: { numeric: [{ title: "168000" }], conversationOrTransition: [], unknownArtist: [] },
+      samples: [],
+    },
+    {
+      key: "handle",
+      name: "",
+      channelId: "",
+      handle: "@yoshika-ch",
+      videos: 1,
+      songs: 2,
+      occurrences: 3,
+      unknownArtistSongs: 0,
+      unknownArtistOccurrences: 0,
+      singletonSongs: 1,
+      singletonUnknownSongs: 0,
+      titlePatterns: { normal: 3 },
+      flaggedSamples: { numeric: [], conversationOrTransition: [], unknownArtist: [] },
+      samples: [],
+    },
+  ], (row) => row.channelId === "UC3xQCiEPSkco54WhuiDcngw" || row.handle === "@yoshika-ch");
+
+  assert.deepEqual(result.keys, ["channel-id", "handle"]);
+  assert.equal(result.videos, 3);
+  assert.equal(result.songs, 5);
+  assert.equal(result.occurrences, 7);
+  assert.equal(result.singletonSongs, 3);
+  assert.equal(result.titlePatterns.normal, 6);
+  assert.equal(result.flaggedSamples.numeric.length, 1);
+});
 
 test("global audit treats singleton and unknown artist as candidates, not deletion rules", () => {
   const accumulator = createAccumulator("fixture");

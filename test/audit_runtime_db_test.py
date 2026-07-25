@@ -75,12 +75,72 @@ class AuditRuntimeDbTest(unittest.TestCase):
                 "fixture",
                 "all",
                 3,
+                "EEEEEEEEEEE",
+                "Known Song",
+                0,
+                {
+                    "item": {"videoId": "EEEEEEEEEEE"},
+                    "song": {"title": "Known Song", "artist": "Known Artist"},
+                },
+            ),
+            (
+                "fixture",
+                "all",
+                4,
+                "FFFFFFFFFFF",
+                "Known Song",
+                1,
+                {
+                    "item": {"videoId": "FFFFFFFFFFF"},
+                    "song": {"title": "Known Song", "artist": ""},
+                },
+            ),
+            (
+                "fixture",
+                "all",
+                5,
                 "DDDDDDDDDDD",
                 "168000",
                 1,
                 {
                     "item": {"videoId": "DDDDDDDDDDD"},
                     "song": {"title": "168000", "artist": ""},
+                },
+            ),
+            (
+                "fixture",
+                "all",
+                6,
+                "GGGGGGGGGGG",
+                "Shared Title",
+                0,
+                {
+                    "item": {"videoId": "GGGGGGGGGGG"},
+                    "song": {"title": "Shared Title", "artist": "Artist A"},
+                },
+            ),
+            (
+                "fixture",
+                "all",
+                7,
+                "HHHHHHHHHHH",
+                "Shared Title",
+                0,
+                {
+                    "item": {"videoId": "HHHHHHHHHHH"},
+                    "song": {"title": "Shared Title", "artist": "Artist A"},
+                },
+            ),
+            (
+                "fixture",
+                "all",
+                8,
+                "IIIIIIIIIII",
+                "Shared Title",
+                0,
+                {
+                    "item": {"videoId": "IIIIIIIIIII"},
+                    "song": {"title": "Shared Title", "artist": "Artist B"},
                 },
             ),
         ]
@@ -96,11 +156,21 @@ class AuditRuntimeDbTest(unittest.TestCase):
             conn, {"sourceDetailKey": "fixture"}
         )
         assert result is not None
-        self.assertEqual(result["occurrences"], 4)
-        self.assertEqual(result["songGroups"], 3)
-        self.assertEqual(result["singletonSongs"], 2)
-        self.assertEqual(result["singletonUnknownSongs"], 1)
+        self.assertEqual(result["occurrences"], 9)
+        self.assertEqual(result["songGroups"], 6)
+        self.assertEqual(result["singletonSongs"], 4)
+        self.assertEqual(result["singletonUnknownSongs"], 2)
         self.assertEqual(result["numericOnlySongs"], 1)
+        self.assertEqual(result["unknownFillCandidateCount"], 1)
+        self.assertEqual(
+            result["unknownFillCandidates"][0]["knownArtist"],
+            {"artist": "Known Artist", "occurrences": 3},
+        )
+        self.assertEqual(result["sameTitleArtistConflictCount"], 1)
+        self.assertEqual(
+            [row["artist"] for row in result["sameTitleArtistConflicts"][0]["knownArtists"]],
+            ["Artist A", "Artist B"],
+        )
         original = next(
             song
             for song in result["songs"]

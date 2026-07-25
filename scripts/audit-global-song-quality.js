@@ -152,7 +152,6 @@ function fileIdentity(filePath) {
     return {
       path: path.relative(ROOT, filePath).replace(/\\/gu, "/"),
       bytes: stat.size,
-      mtimeMs: Math.trunc(stat.mtimeMs),
       sha256: stat.size <= 10_000_000 ? sha256(fs.readFileSync(filePath)) : "",
     };
   } catch {
@@ -167,7 +166,7 @@ function directoryIdentity(directoryPath) {
       .sort()
       .map((name) => {
         const stat = fs.statSync(path.join(directoryPath, name));
-        return [name, stat.size, Math.trunc(stat.mtimeMs)];
+        return [name, stat.size];
       });
     return { path: path.relative(ROOT, directoryPath).replace(/\\/gu, "/"), files };
   } catch {
@@ -748,9 +747,9 @@ function buildYoshikaReport(report, handle) {
   ));
   return {
     handle: normalizeHandle(handle),
-    raw: report.raw.channels.find(match) || null,
-    before: report.before.channels.find(match) || null,
-    after: report.after.channels.find(match) || null,
+    raw: aggregateMatchedChannels(report.raw.channels, match),
+    before: aggregateMatchedChannels(report.before.channels, match),
+    after: aggregateMatchedChannels(report.after.channels, match),
     removedSamples: report.changes.removedSamples.filter((sample) => match({
       handle: sample.channelHandle,
       channelId: "",
@@ -763,6 +762,48 @@ function buildYoshikaReport(report, handle) {
     })),
     unknownFillCandidates,
   };
+}
+
+function aggregateMatchedChannels(channels, match) {
+  const rows = channels.filter(match);
+  if (!rows.length) return null;
+  const aggregated = {
+    key: rows[0].key,
+    keys: rows.map((row) => row.key),
+    name: rows.find((row) => row.name)?.name || "",
+    channelId: rows.find((row) => row.channelId)?.channelId || "",
+    handle: rows.find((row) => row.handle)?.handle || "",
+    titlePatterns: {},
+    flaggedSamples: {
+      numeric: [],
+      conversationOrTransition: [],
+      unknownArtist: [],
+    },
+    samples: [],
+  };
+  for (const field of [
+    "videos",
+    "songs",
+    "occurrences",
+    "unknownArtistSongs",
+    "unknownArtistOccurrences",
+    "singletonSongs",
+    "singletonUnknownSongs",
+  ]) {
+    aggregated[field] = rows.reduce((sum, row) => sum + (Number(row[field]) || 0), 0);
+  }
+  for (const row of rows) {
+    for (const [pattern, count] of Object.entries(row.titlePatterns || {})) {
+      aggregated.titlePatterns[pattern] = (aggregated.titlePatterns[pattern] || 0) + (Number(count) || 0);
+    }
+    for (const name of Object.keys(aggregated.flaggedSamples)) {
+      aggregated.flaggedSamples[name].push(...(row.flaggedSamples?.[name] || []));
+      aggregated.flaggedSamples[name] = aggregated.flaggedSamples[name].slice(0, 250);
+    }
+    aggregated.samples.push(...(row.samples || []));
+    aggregated.samples = aggregated.samples.slice(0, 100);
+  }
+  return aggregated;
 }
 
 function writeReportArtifacts(args, inventoryMeta, report) {
@@ -792,11 +833,13 @@ function writeReportArtifacts(args, inventoryMeta, report) {
     conflictingArtistTitles: report.before.conflictingArtistTitles,
     titleVariantCandidates: report.before.titleVariantCandidates,
   });
+  fs.writeFileSync(path.join(args.outputDir, "audit.md"), renderMarkdown(report), "utf8");
   const artifactNames = [
     "global-before-after.json",
     "selector-matches.json",
     "yoshika-before-after.json",
     "flagged-samples.json",
+    "audit.md",
   ];
   const manifest = {
     schemaVersion: REPORT_SCHEMA_VERSION,
@@ -808,7 +851,6 @@ function writeReportArtifacts(args, inventoryMeta, report) {
     artifacts: Object.fromEntries(artifactNames.map((name) => [name, fileDigest(path.join(args.outputDir, name))])),
   };
   writeJsonAtomic(path.join(args.outputDir, "manifest.json"), manifest);
-  fs.writeFileSync(path.join(args.outputDir, "audit.md"), renderMarkdown(report), "utf8");
 }
 
 function renderMarkdown(report) {
@@ -1005,6 +1047,7 @@ function logPhase(phase, fields = {}) {
 
 module.exports = {
   addVideoToAccumulator,
+  aggregateMatchedChannels,
   classifyTitlePattern,
   createAccumulator,
   enrichVideoSelectors,

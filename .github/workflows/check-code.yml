@@ -15,8 +15,22 @@ on:
       - "package.json"
       - "README.md"
   workflow_dispatch:
+    inputs:
+      expected_selector_count:
+        description: Exact number of selectors tagged for this cleanup batch
+        required: false
+        default: "0"
+      checkpoint_run_id:
+        description: Optional prior run ID containing a compatible inventory checkpoint
+        required: false
+        default: ""
+      checkpoint_artifact_name:
+        description: Optional exact checkpoint artifact name from that run
+        required: false
+        default: ""
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -131,7 +145,7 @@ jobs:
   curation_audit:
     if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - name: Checkout audit branch
         uses: actions/checkout@v4
@@ -162,6 +176,19 @@ jobs:
             "$audit_root/reports/pages" \
             "$audit_root/runtime-db"
 
+      - name: Restore compatible inventory checkpoint
+        if: inputs.checkpoint_run_id != '' && inputs.checkpoint_artifact_name != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECKPOINT_RUN_ID: ${{ inputs.checkpoint_run_id }}
+          CHECKPOINT_ARTIFACT_NAME: ${{ inputs.checkpoint_artifact_name }}
+        run: |
+          set -Eeuo pipefail
+          gh run download "$CHECKPOINT_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "$CHECKPOINT_ARTIFACT_NAME" \
+            --dir "$AUDIT_ROOT/checkpoint"
+
       - name: Run focused audit tests
         timeout-minutes: 5
         run: |
@@ -189,6 +216,7 @@ jobs:
             --youtube-dir data/external/youtube-channel-discovery \
             --require-vsinger \
             --require-youtube-channel-discovery \
+            --expected-selector-count "${{ inputs.expected_selector_count || '0' }}" \
             --checkpoint-dir "$AUDIT_ROOT/checkpoint/global" \
             --output-dir "$AUDIT_ROOT/reports/global"
 
@@ -231,6 +259,16 @@ jobs:
           esac
           rm -f -- "$db" "$tmp_db"
           echo "CODEX_CURATION_AUDIT_DB_REMOVED path=$db"
+
+      - name: Upload resumable inventory checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-singleton-curation-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}/checkpoint
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 0
 
       - name: Upload bounded audit reports
         if: always()

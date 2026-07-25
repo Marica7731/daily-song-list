@@ -81,10 +81,18 @@
   样本，而非只保留前 20 条普通样本。
 - 2026-07-26：新增只报告、不参与合并的 loose title variant 分层；同时列出所有
   同 canonical title 的多已知歌手冲突，避免把不同歌曲误合并。
+- 2026-07-26：生产数据更新在审计排队期间把 `origin/main` 前移到
+  `4649ebf3a87134ab258045ce14c10a1193b23726`；首轮旧基线 run 仅作探针，最终分支会
+  rebase 到该实时 main 并重新审计。
+- 2026-07-26：只读复核后补强审计证据：四页读取真实 `totalCount`，YOSHIKA 会合并
+  历史拆分身份，SQLite source 审计以完整 occurrence 计算 singleton、未知歌手可回填和
+  同标题多歌手冲突；Markdown 也纳入 artifact digest。
+- 2026-07-26：本地审计脚本测试 11/11、Python SQLite 单元测试 2/2 通过。Mac job
+  支持显式 selector 数量门禁，并可上传/恢复同一 head 的 inventory checkpoint。
 
 ## 下一步
 
-1. 提交并 push 首轮审计基础设施。
-2. 运行 Mac before 审计，下载并核对 manifest/selector/YOSHIKA/四页证据。
-3. 按真实 provenance 写入首批高置信 selector 与回归样本。
-4. 再跑 Mac after，更新最终文档、diff 审查、commit 与 push。
+1. 等待首轮 Mac 探针完成，下载并核对 manifest/YOSHIKA/四页证据。
+2. rebase 到最新 `origin/main`，按真实 provenance 写入首批高置信 selector 与回归样本。
+3. 以显式 selector 数量门禁再跑 Mac after，更新最终文档与 run/artifact digest。
+4. 完成 diff 审查、目标文档时间戳归档、commit 与 push。

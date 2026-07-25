@@ -171,6 +171,7 @@ def read_yoshika(conn: sqlite3.Connection) -> dict[str, Any] | None:
                     source_row["unknown_artist_occurrences"] or 0
                 ),
             }
+        source_audit = read_channel_source_audit(conn, payload)
         return {
             "rank": int(row["rank"]),
             "name": name,
@@ -180,10 +181,14 @@ def read_yoshika(conn: sqlite3.Connection) -> dict[str, Any] | None:
             "songs": int(row["song_count"]),
             "videos": int(row["video_count"]),
             "occurrences": int(row["count"]),
-            "singletonSongs": int(payload.get("singletonSongCount") or 0),
+            "singletonSongs": int(
+                (source_audit or {}).get("singletonSongs")
+                or payload.get("singletonSongCount")
+                or 0
+            ),
             "expandedSongs": len(payload.get("songs") or []),
             "source": source_counts,
-            "sourceAudit": read_channel_source_audit(conn, payload),
+            "sourceAudit": source_audit,
         }
     return None
 
@@ -236,7 +241,9 @@ def read_requested_pages(conn: sqlite3.Connection) -> list[dict[str, Any]]:
                         "videos": int(payload.get("videoCount") or 0),
                         "occurrences": int(payload.get("count") or 0),
                         "singletonSongs": int(
-                            payload.get("singletonSongCount") or 0
+                            (source_audit or {}).get("singletonSongs")
+                            or payload.get("singletonSongCount")
+                            or 0
                         ),
                         "sourceDetailKey": source_key,
                         "summaryExpandedSongs": len(summary_songs),
@@ -349,6 +356,67 @@ def read_channel_source_audit(
             normalize_key(song["artist"]),
         )
     )
+    title_groups: dict[str, dict[str, Any]] = {}
+    for song in songs:
+        title_group = title_groups.setdefault(
+            normalize_key(song["title"]),
+            {
+                "title": song["title"],
+                "knownArtists": {},
+                "unknownOccurrences": 0,
+            },
+        )
+        if song["unknownArtist"]:
+            title_group["unknownOccurrences"] += int(song["occurrences"])
+        else:
+            artist = clean_text(song["artist"])
+            title_group["knownArtists"][artist] = (
+                int(title_group["knownArtists"].get(artist) or 0)
+                + int(song["occurrences"])
+            )
+    same_title_artist_conflicts = []
+    unknown_fill_candidates = []
+    for title_group in title_groups.values():
+        known_artists = [
+            {"artist": artist, "occurrences": count}
+            for artist, count in sorted(
+                title_group["knownArtists"].items(),
+                key=lambda item: (-item[1], normalize_key(item[0])),
+            )
+        ]
+        if len(known_artists) > 1:
+            same_title_artist_conflicts.append(
+                {
+                    "title": title_group["title"],
+                    "knownArtists": known_artists,
+                    "unknownOccurrences": title_group["unknownOccurrences"],
+                }
+            )
+        if (
+            title_group["unknownOccurrences"] > 0
+            and len(known_artists) == 1
+            and known_artists[0]["occurrences"] >= 3
+        ):
+            unknown_fill_candidates.append(
+                {
+                    "title": title_group["title"],
+                    "knownArtist": known_artists[0],
+                    "unknownOccurrences": title_group["unknownOccurrences"],
+                }
+            )
+    same_title_artist_conflicts.sort(
+        key=lambda item: (
+            -int(item["unknownOccurrences"]),
+            normalize_key(item["title"]),
+        )
+    )
+    unknown_fill_candidates.sort(
+        key=lambda item: (
+            -int(item["unknownOccurrences"]),
+            -int(item["knownArtist"]["occurrences"]),
+            normalize_key(item["title"]),
+        )
+    )
     return {
         "sourceDetailKey": source_key,
         "occurrences": len(rows),
@@ -367,6 +435,10 @@ def read_channel_source_audit(
         "conversationOrTransitionSongs": sum(
             1 for song in songs if song["conversationOrTransition"]
         ),
+        "sameTitleArtistConflictCount": len(same_title_artist_conflicts),
+        "sameTitleArtistConflicts": same_title_artist_conflicts,
+        "unknownFillCandidateCount": len(unknown_fill_candidates),
+        "unknownFillCandidates": unknown_fill_candidates,
         "songs": songs,
     }
 

@@ -28,10 +28,14 @@ provenance 足以证明是杂谈、转场或解析错误时才可写 `drop_entry
 - `scripts/audit-runtime-db.py`
   - 只读打开 Mac 完整生成的 SQLite，执行 `PRAGMA quick_check(1)`。
   - 输出全库计数、YOSHIKA、四页频道列表和 DB SHA-256，不上传完整 DB。
+  - 每个频道从完整 `source_occurrences` 重新计算 singleton、未知歌手、可回填候选和
+    同标题多歌手冲突，不依赖排名 payload 中不存在的汇总字段。
 - `.github/workflows/check-code.yml`
   - 仅在手动 dispatch 且分支为
     `codex/global-singleton-cleanup-20260726` 时运行重型审计 job。
   - runner 临时目录独立于生产 DB cache；不含 SSH、VPS、commit、push 或部署步骤。
+  - 可用 workflow input 锁定本批 selector 数量；完成的 inventory checkpoint 会短期上传，
+    同一 head 的后续 run 可显式恢复，默认不使用 `--fresh`。
 
 ## 实时生产基线
 
