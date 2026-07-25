@@ -210,18 +210,20 @@ function auditChannelRecord(record, spec = {}) {
 }
 
 function normalizeSongRecord(song) {
-  const title = cleanText(song.canonicalTitle || song.title || song.displayTitle);
-  const artist = cleanText(song.canonicalArtist || song.displayArtist || song.artist) || "未記載";
+  const title = cleanText(song.canonicalTitle || song.title || song.displayTitle || song.name);
+  const artist = cleanText(song.canonicalArtist || song.displayArtist || song.artist);
+  const artistAvailable = Boolean(artist);
   const occurrences = Number(song.count ?? song.occurrences ?? song.occurrenceCount) || 0;
   return {
     key: cleanText(song.key),
     title,
     artist,
+    artistAvailable,
     occurrences,
     videoCount: Number(song.videoCount) || 0,
     isNiche: song.isNiche === true,
-    unknownArtist: isUnknownArtist(artist),
-    titlePattern: classifyTitlePattern(title, artist),
+    unknownArtist: artistAvailable && isUnknownArtist(artist),
+    titlePattern: classifyTitlePattern(title, artist || "未記載"),
   };
 }
 
@@ -348,7 +350,7 @@ function renderMarkdown(report) {
       "",
       `Channels: ${page.channelCount}; expanded songs: ${page.expandedSongCount}.`,
       "",
-      "| Rank | Channel | Songs | Videos | Occurrences | Unknown | Conversation/numeric | Spelling splits | Same-title conflicts |",
+      "| Rank | Channel | Songs | Videos | Occurrences | Explicit unknown | Conversation/numeric | Spelling splits | Same-title conflicts |",
       "| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
       ...page.channels.map((channel) => (
         `| ${channel.rank} | ${escapeMarkdown(channel.name || channel.handle || channel.key)} | `
@@ -361,6 +363,7 @@ function renderMarkdown(report) {
   }
   lines.push(
     "The full expanded song rows are retained in `four-pages.json` and `four-pages.jsonl.gz`.",
+    "The VTuber ranking expansion exposes song name/key/count but not artist; missing artist fields are not counted as unknown.",
     "Singleton rows are never marked for deletion from frequency alone.",
     "",
   );

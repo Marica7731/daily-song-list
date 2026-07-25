@@ -71,6 +71,8 @@
 - 2026-07-26：首轮审计基础设施 commit `51d3caf` 已 push。首次 workflow
   dispatch 在 GitHub YAML 解析阶段以 422 拒绝（job env 不允许使用
   `runner.temp`），没有创建 run；已改为首个 step 写入 `GITHUB_ENV`。
+- 2026-07-26：Mac run `30174911838` 已按 head `7577f66` 创建。生产页预检发现
+  VTuber 展开 songs 不提供 artist；已修正审计语义，不再把缺失字段误记为未知歌手。
 
 ## 下一步
 

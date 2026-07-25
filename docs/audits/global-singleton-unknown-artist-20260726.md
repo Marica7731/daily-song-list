@@ -92,6 +92,11 @@ provenance 足以证明是杂谈、转场或解析错误时才可写 `drop_entry
 singleton 保留、可能错拼、未知歌手回填候选、同标题多歌手冲突会以 Mac artifact
 为准回填到本文。
 
+生产 VTuber 排名页的展开歌曲契约只包含 `name/key/count`，不包含 artist。页面审计
+不得把“artist 字段未提供”误计为“未记载歌手”；页面层负责核对标题、次数和可能
+错拼，未知歌手回填与同标题多歌手风险必须回到全库 inventory、source occurrence
+或完整 SQLite 证据判定。
+
 ## 当前已知物化边界
 
 现有 runtime DB exporter 会对 runtime 导入执行 source filter、song alias 和未知歌手

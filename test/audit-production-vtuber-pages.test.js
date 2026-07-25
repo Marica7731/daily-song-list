@@ -45,6 +45,25 @@ test("channel audit preserves real singleton and flags only review candidates", 
   assert.equal(result.issues.sameTitleArtistConflicts[0].title, "Shared Title");
 });
 
+test("compact VTuber song rows without artist are not mislabeled as unknown artist", () => {
+  const result = auditChannelRecord({
+    rank: 1,
+    key: "fixture",
+    name: "Fixture Channel",
+    count: 2,
+    videoCount: 1,
+    songCount: 2,
+    songs: [
+      { key: "first-song", name: "First Song", count: 1 },
+      { key: "168000", name: "168000", count: 1 },
+    ],
+  });
+  assert.equal(result.songs[0].artistAvailable, false);
+  assert.equal(result.songs[0].unknownArtist, false);
+  assert.equal(result.issues.unknownArtist.length, 0);
+  assert.equal(result.issues.obviousConversation[0].title, "168000");
+});
+
 test("page audit requires all 20 channels and complete expanded songs", () => {
   const records = Array.from({ length: 20 }, (_, index) => ({
     rank: index + 1,
