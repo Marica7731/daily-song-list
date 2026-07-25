@@ -132,8 +132,6 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 120
-    env:
-      AUDIT_ROOT: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Checkout audit branch
         uses: actions/checkout@v4
@@ -155,12 +153,14 @@ jobs:
       - name: Prepare isolated audit directories
         run: |
           set -Eeuo pipefail
+          audit_root="$RUNNER_TEMP/daily-song-list-curation-audit/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "AUDIT_ROOT=$audit_root" >> "$GITHUB_ENV"
           mkdir -p \
-            "$AUDIT_ROOT/checkpoint/global" \
-            "$AUDIT_ROOT/checkpoint/pages" \
-            "$AUDIT_ROOT/reports/global" \
-            "$AUDIT_ROOT/reports/pages" \
-            "$AUDIT_ROOT/runtime-db"
+            "$audit_root/checkpoint/global" \
+            "$audit_root/checkpoint/pages" \
+            "$audit_root/reports/global" \
+            "$audit_root/reports/pages" \
+            "$audit_root/runtime-db"
 
       - name: Run focused audit tests
         timeout-minutes: 5
@@ -236,6 +236,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: global-singleton-curation-audit-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.AUDIT_ROOT }}/reports
+          path: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}/reports
           if-no-files-found: warn
           retention-days: 14
