@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-25T21:50:09.529Z",
+  "generatedAt": "2026-07-25T22:50:50.743Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-25T21:50:09.529Z",
+    "fetchedAt": "2026-07-25T22:50:50.743Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7275,7 +7275,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-25T21:08:04.220Z",
+    "generatedAt": "2026-07-25T22:50:50.743Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7283,22 +7283,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 982,
-      "parseableChannels": 764,
+      "totalChannels": 984,
+      "parseableChannels": 766,
       "realAvatar": 643,
-      "thumbnailFallback": 339,
+      "thumbnailFallback": 341,
       "missingDisplayImage": 0,
-      "missingAvatar": 339,
+      "missingAvatar": 341,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 349,
-      "already_cached": 664
+      "skipped_collected_evidence": 351,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 131,
+      "batch_limit_reached": 133,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
@@ -7338,6 +7338,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@KumanoBearTrice",
+        "channelId": "UCQEqMSX5YYpQ9-4pdMip-vg",
+        "displayName": "熊乃ベアトリーチェ / Kumano BearTrice",
+        "sourceUrl": "https://www.youtube.com/@KumanoBearTrice",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@ritsu_yumemita",
         "channelId": "UCxc0MrPoACKTFlV24GqX2sg",
         "displayName": "峰月律-Minetsuki Ritsu- / 夢限大みゅーたいぷ",
@@ -7370,6 +7377,13 @@
         "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
         "displayName": "Lucia",
         "sourceUrl": "https://www.youtube.com/@Luciaaa_Sings",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Myao_Mixstgirls",
+        "channelId": "UCc_r_D9M7BGFpwXZnFaxEww",
+        "displayName": "成海ミャオ / Myao Channel【ミクスト】",
+        "sourceUrl": "https://www.youtube.com/@Myao_Mixstgirls",
         "reason": "batch_limit_reached"
       },
       {
@@ -7462,20 +7476,6 @@
         "displayName": "柚羽まくら / Yuzuha Makura",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "むかいせな / Mukai Sena",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "/@Dia-",
-        "channelId": "UC80TduEq6Sp4n2DkiUH2eLQ",
-        "displayName": "Diα - ディア",
-        "sourceUrl": "https://www.youtube.com/@Dia-",
-        "reason": "batch_limit_reached"
       }
     ]
   }
