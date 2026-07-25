@@ -34,6 +34,13 @@
 
 ## 当前状态（2026-07-26）
 
+- Check code run `30175755772`：`430/430` 测试通过，失败仅来自
+  `data/diff/latest-1m.json` 与 `data/diff/latest-all.json` 各自 gzip 超预算约 120 KB。
+- 根因：Mac sparse checkout 缺少旧 snapshot 工作区文件时，rank diff 没有回退到运行开始前的
+  `data/latest.json`，导致全库 `10381` 首歌与 `4565` 位歌手被错误标为新上榜；snapshot index
+  同时会按 `fs.existsSync` 错误丢弃未展开的历史条目。
+- 当前修复分支：`codex/fix-rank-diff-snapshot-20260726`。计划补齐 previous payload 回退和
+  sparse-safe snapshot index 保留规则，通过测试后推送 main 并重跑 Check code/update-core。
 - 远端 `main`：`1d2bf94f6e69fbefc5a9e488d8fd77de1569f414`。
 - Naraetan 首批已合并：`6d2163c`。
 - `upsert_video` 已推送：`938bf7d`，文档提交 `7541a18`，示例修正 `1d2bf94`。

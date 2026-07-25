@@ -203,7 +203,7 @@ async function main() {
   if (totalItems <= 0) {
     throw new Error(`No usable timestamp song lists found after inspecting ${inspected.length} videos.`);
   }
-  const previousSnapshot = readPreviousSuccessfulSnapshot();
+  const previousSnapshot = selectPreviousSnapshotForDiff(readPreviousSuccessfulSnapshot(), previousPayload);
 
   let payload = {
     schemaVersion: 1,
@@ -2073,6 +2073,11 @@ function previousSnapshotPayload(previousSnapshot) {
   return previousSnapshot.groups ? previousSnapshot : null;
 }
 
+function selectPreviousSnapshotForDiff(previousSnapshot, previousPayload) {
+  if (previousSnapshotPayload(previousSnapshot)) return previousSnapshot;
+  return previousPayload?.groups ? previousPayload : null;
+}
+
 function previousSnapshotMetadata(previousSnapshot, curationContext = null) {
   const payload = previousSnapshotPayload(previousSnapshot);
   if (!payload) return null;
@@ -2159,11 +2164,7 @@ function writeSnapshot(payload, capturedAt) {
 
   const index = readJsonIfExists(SNAPSHOT_INDEX_PATH) || { snapshots: [] };
   const entries = new Map();
-  for (const entry of Array.isArray(index.snapshots) ? index.snapshots : []) {
-    if (!entry || !/^[0-9]{8}T[0-9]{4}00Z$/.test(entry.id)) continue;
-    const entryTime = Date.parse(entry.capturedAt || entry.generatedAt || entry.id);
-    if (!Number.isFinite(entryTime)) continue;
-    if (!fs.existsSync(path.join(SNAPSHOT_DIR, `${entry.id}.json`))) continue;
+  for (const entry of retainedSnapshotIndexEntries(index)) {
     entries.set(entry.id, entry);
   }
   entries.set(snapshotId, {
@@ -2190,6 +2191,13 @@ function writeSnapshot(payload, capturedAt) {
     snapshotCount: snapshots.length,
     shards: shardManifest,
     snapshots,
+  });
+}
+
+function retainedSnapshotIndexEntries(index) {
+  return (Array.isArray(index?.snapshots) ? index.snapshots : []).filter((entry) => {
+    if (!entry || !/^[0-9]{8}T[0-9]{4}00Z$/.test(entry.id)) return false;
+    return Number.isFinite(Date.parse(entry.capturedAt || entry.generatedAt || entry.id));
   });
 }
 
@@ -3193,8 +3201,10 @@ module.exports = {
   parseOptionalLimit,
   randomJitterMs,
   retryDelayMs,
+  retainedSnapshotIndexEntries,
   selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
+  selectPreviousSnapshotForDiff,
   selectBestSongs,
   sourceScore,
   writeRankDiffFiles,
