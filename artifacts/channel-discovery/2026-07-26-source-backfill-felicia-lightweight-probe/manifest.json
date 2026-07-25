@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_lightweight_probe_manifest",
+  "batchId": "2026-07-26-source-backfill-felicia-lightweight-probe",
+  "generatedAt": "2026-07-25T21:52:43Z",
+  "status": "checkpoint_only_no_usable_detail",
+  "source": {
+    "displayName": "\u3075\u3047\u308a\u3057\u3042 / Felicia Ch",
+    "channelId": "UClHap4tvcYZnyiqgAyEs0BQ",
+    "channelHandle": "/@FeliciaLulufleur",
+    "channelUrl": "https://www.youtube.com/@FeliciaLulufleur"
+  },
+  "identityEvidence": {
+    "officialPageHttpStatus": 200,
+    "officialPageChannelId": "UClHap4tvcYZnyiqgAyEs0BQ",
+    "metadataProbeMarker": "CODEX_CHANNEL_AVATAR_CACHE_OK",
+    "metadataProbeFetched": 1
+  },
+  "baseline": {
+    "mainCommit": "c0984812fb0645adba675f07be08ad78ca53885c",
+    "mainAcceptedVideos": 0,
+    "mainLatestVideos": 0,
+    "productionVideos": 239,
+    "productionOccurrences": 3293,
+    "productionMissingChannelId": 239,
+    "productionMissingChannelHandle": 239,
+    "productionMissingChannelUrl": 239,
+    "handleQueryMatches": 0,
+    "displayNameQueryMatches": 239
+  },
+  "metadataHydration": {
+    "cachePath": "data/external/youtube-channel-discovery/channel-metadata.json",
+    "beforeChannelCount": 664,
+    "afterChannelCount": 665,
+    "hydratedVideos": 239,
+    "hydratedChannelId": 239,
+    "hydratedChannelHandle": 239,
+    "hydratedChannelUrl": 239,
+    "handleQueryMatchesAfter": 239,
+    "displayNameQueryMatchesAfter": 239
+  },
+  "artifactAudit": {
+    "existingArtifactDirectories": 0,
+    "existingAcceptedIncrements": 0,
+    "usableDetailVideos": 0
+  },
+  "lightweightProbe": {
+    "pages": [
+      {
+        "url": "https://www.youtube.com/@FeliciaLulufleur/streams",
+        "videoIds": 28
+      },
+      {
+        "url": "https://www.youtube.com/@FeliciaLulufleur/videos",
+        "videoIds": 27
+      }
+    ],
+    "uniqueVideoIds": 55,
+    "productionOverlap": 11,
+    "productionMissingCandidates": 44,
+    "missingVideoIds": [
+      "0tthtHoK74U",
+      "4Ame30WoeJ4",
+      "5zzROsfdPjA",
+      "6V-TbwJh3uY",
+      "74WTWwNdMAE",
+      "BvyPUQ6JTGQ",
+      "DH_n1qeUQJ8",
+      "DNzu5OVtj4I",
+      "Dp9i_5TEmLw",
+      "EvhGO_i7tK0",
+      "H2166z08kds",
+      "Hgo5SM3fj9A",
+      "IxyGtepV5WE",
+      "J51D2PO2EqA",
+      "JM_rCfckFag",
+      "JVkRCvO89kY",
+      "JkHKP1-6mq0",
+      "LE9sfO_40kM",
+      "LMdURhlH1M4",
+      "LjKhyR9Gjb8",
+      "M7kah6BXL8k",
+      "MV19uET87PQ",
+      "MlGLCuSpZ_c",
+      "OeiwpsKGUjI",
+      "QJPeHwpI8bA",
+      "Qyz1OIYSaZQ",
+      "RWpHUAvxfmo",
+      "XNUTIPHYGoI",
+      "_7yTcY44YXE",
+      "aAkdYV-CXRI",
+      "gNXb6CDQRwA",
+      "itHLGPSV9JY",
+      "kh3rzoMF1QA",
+      "lnqKukppucM",
+      "mPiUKTi_XeU",
+      "nbC1i_P0llU",
+      "pp_qsY90lCw",
+      "tAWuU1Fxyt4",
+      "vUA5mVdjsYM",
+      "wS6m1iuKN4Y",
+      "xLJofSqFJVI",
+      "xXvpWzn79s0",
+      "z75z3oqRgHo",
+      "zIfrI7kgNTM"
+    ]
+  },
+  "acceptedIncrement": {
+    "generated": false,
+    "videos": 0,
+    "occurrences": 0,
+    "cleaner": "not_applicable",
+    "reason": "No existing artifact or usable song detail is available for the 44 production-missing first-page candidates."
+  },
+  "nextAction": "After the current main release settles, confirm the remaining production gap. If song detail is still required, resume on the Mac runner with a bounded checkpoint and without --fresh.",
+  "scopeVerification": {
+    "didNotStartWindowsCrawler": true,
+    "didNotUseMac": true,
+    "didNotWriteAcceptedIncrement": true,
+    "didNotMergeMain": true,
+    "didNotDeploy": true
+  }
+}
