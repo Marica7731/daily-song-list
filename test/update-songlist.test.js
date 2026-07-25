@@ -32,9 +32,11 @@ const {
   parseOptionalLimit,
   parseRetryAfterMs,
   randomJitterMs,
+  retainedSnapshotIndexEntries,
   retryDelayMs,
   selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
+  selectPreviousSnapshotForDiff,
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
   MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
 } = require("../scripts/update-songlist");
@@ -842,6 +844,50 @@ test("rank diffs compare current ranks and counts to previous snapshot", () => {
     countDelta: 2,
     isNew: false,
   });
+});
+
+test("rank diffs fall back to the previous latest payload when sparse checkout omits snapshot blobs", () => {
+  const previous = payloadWithItems({
+    "72h": [rankedItem("AAAAAAAAAAA", [...repeatedSongs("Alpha", "Artist A", 2)])],
+    "1m": [],
+  });
+  const current = payloadWithItems({
+    "72h": [rankedItem("BBBBBBBBBBB", [...repeatedSongs("Alpha", "Artist A", 3)])],
+    "1m": [],
+  });
+
+  const selected = selectPreviousSnapshotForDiff(null, previous);
+  const diff = buildRankDiffs(current, selected)["7d"];
+
+  assert.equal(diff.previous.capturedAt, previous.capturedAt);
+  assertRankDiff(diff.songRank, "Alpha", {
+    previousRank: 1,
+    currentRank: 1,
+    rankDelta: 0,
+    previousCount: 2,
+    currentCount: 3,
+    countDelta: 1,
+    isNew: false,
+  });
+});
+
+test("snapshot index retains valid entries even when sparse checkout omits their local files", () => {
+  const retained = retainedSnapshotIndexEntries({
+    snapshots: [
+      {
+        id: "20260725T210000Z",
+        path: "data/snapshots/20260725T210000Z.json",
+        capturedAt: "2026-07-25T21:07:46.905Z",
+      },
+      { id: "invalid", capturedAt: "2026-07-25T20:00:00.000Z" },
+      { id: "20260725T190000Z", capturedAt: "not-a-date" },
+    ],
+  });
+
+  assert.deepEqual(
+    retained.map((entry) => entry.id),
+    ["20260725T210000Z"],
+  );
 });
 
 test("rank diffs compare configured aliases using canonical song entity keys", () => {
