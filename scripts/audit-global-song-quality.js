@@ -130,11 +130,15 @@ function positiveInteger(value, fallback) {
 function computeInventoryKey(args) {
   return sha256Json({
     schemaVersion: INVENTORY_SCHEMA_VERSION,
-    headSha: gitHead(),
-    input: fileIdentity(args.input),
-    vsingerManifest: fileIdentity(path.join(args.vsingerDir, "manifest.json")),
-    youtubeManifest: fileIdentity(path.join(args.youtubeDir, "manifest.json")),
-    youtubeAccepted: directoryIdentity(path.join(args.youtubeDir, "accepted")),
+    input: contentIdentity(args.input),
+    vsingerDirectory: contentIdentity(args.vsingerDir),
+    youtubeDirectory: contentIdentity(args.youtubeDir),
+    inventoryCode: [
+      contentIdentity(__filename),
+      contentIdentity(path.join(__dirname, "range-config.js")),
+      contentIdentity(path.join(__dirname, "vsinger-http", "runtime-importer.js")),
+      contentIdentity(path.join(__dirname, "youtube-channel-discovery-runtime.js")),
+    ],
   });
 }
 
@@ -146,32 +150,89 @@ function gitHead() {
   }
 }
 
-function fileIdentity(filePath) {
+function contentIdentity(filePath) {
   try {
     const stat = fs.statSync(filePath);
+    const relativePath = path.relative(ROOT, filePath).replace(/\\/gu, "/");
+    const gitObject = gitObjectIdentity(relativePath);
+    if (gitObject) {
+      return {
+        path: relativePath,
+        kind: stat.isDirectory() ? "directory" : "file",
+        gitObject,
+      };
+    }
+    if (stat.isDirectory()) return directoryIdentity(filePath);
     return {
-      path: path.relative(ROOT, filePath).replace(/\\/gu, "/"),
+      path: relativePath,
       bytes: stat.size,
-      sha256: stat.size <= 10_000_000 ? sha256(fs.readFileSync(filePath)) : "",
+      sha256: sha256File(filePath),
     };
   } catch {
     return null;
   }
 }
 
+function gitObjectIdentity(relativePath) {
+  if (!relativePath || relativePath === ".." || relativePath.startsWith("../") || path.isAbsolute(relativePath)) {
+    return "";
+  }
+  try {
+    return execFileSync(
+      "git",
+      ["rev-parse", `HEAD:${relativePath}`],
+      { cwd: ROOT, encoding: "utf8", timeout: 10_000, stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+  } catch {
+    return "";
+  }
+}
+
 function directoryIdentity(directoryPath) {
   try {
-    const files = fs.readdirSync(directoryPath)
-      .filter((name) => name.endsWith(".json"))
-      .sort()
-      .map((name) => {
-        const stat = fs.statSync(path.join(directoryPath, name));
-        return [name, stat.size];
-      });
+    const files = [];
+    const pending = [""];
+    while (pending.length) {
+      const relativeDirectory = pending.pop();
+      const absoluteDirectory = path.join(directoryPath, relativeDirectory);
+      const entries = fs.readdirSync(absoluteDirectory, { withFileTypes: true })
+        .sort((left, right) => left.name.localeCompare(right.name));
+      for (const entry of entries) {
+        const relativeEntry = path.join(relativeDirectory, entry.name);
+        const absoluteEntry = path.join(directoryPath, relativeEntry);
+        if (entry.isDirectory()) {
+          pending.push(relativeEntry);
+        } else if (entry.isFile()) {
+          const stat = fs.statSync(absoluteEntry);
+          files.push([
+            relativeEntry.replace(/\\/gu, "/"),
+            stat.size,
+            sha256File(absoluteEntry),
+          ]);
+        }
+      }
+    }
+    files.sort((left, right) => left[0].localeCompare(right[0]));
     return { path: path.relative(ROOT, directoryPath).replace(/\\/gu, "/"), files };
   } catch {
     return null;
   }
+}
+
+function sha256File(filePath) {
+  const hash = crypto.createHash("sha256");
+  const descriptor = fs.openSync(filePath, "r");
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  try {
+    for (;;) {
+      const bytesRead = fs.readSync(descriptor, buffer, 0, buffer.length, null);
+      if (!bytesRead) break;
+      hash.update(buffer.subarray(0, bytesRead));
+    }
+  } finally {
+    fs.closeSync(descriptor);
+  }
+  return hash.digest("hex");
 }
 
 async function buildInventory(args, inventoryPath, inventoryKey) {
@@ -1055,6 +1116,7 @@ module.exports = {
   addVideoToAccumulator,
   aggregateMatchedChannels,
   classifyTitlePattern,
+  computeInventoryKey,
   createAccumulator,
   enrichVideoSelectors,
   finalizeAccumulator,

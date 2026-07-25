@@ -1,16 +1,46 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 
 const {
   addVideoToAccumulator,
   aggregateMatchedChannels,
   classifyTitlePattern,
+  computeInventoryKey,
   createAccumulator,
   enrichVideoSelectors,
   finalizeAccumulator,
   recordIncludesBatchTag,
   selectorMatchesSong,
 } = require("../scripts/audit-global-song-quality");
+
+test("inventory checkpoint key follows source content instead of the commit head", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-song-audit-key-"));
+  const input = path.join(root, "latest.json");
+  const vsingerDir = path.join(root, "vsinger");
+  const youtubeDir = path.join(root, "youtube");
+  fs.mkdirSync(vsingerDir);
+  fs.mkdirSync(youtubeDir);
+  fs.writeFileSync(input, "{\"value\":\"AA\"}\n");
+  fs.writeFileSync(path.join(vsingerDir, "manifest.json"), "{\"value\":\"AA\"}\n");
+  fs.writeFileSync(path.join(youtubeDir, "manifest.json"), "{\"value\":\"AA\"}\n");
+
+  try {
+    const args = { input, vsingerDir, youtubeDir };
+    const original = computeInventoryKey(args);
+    fs.writeFileSync(path.join(youtubeDir, "manifest.json"), "{\"value\":\"BB\"}\n");
+    const changedSameSize = computeInventoryKey(args);
+    fs.writeFileSync(path.join(youtubeDir, "manifest.json"), "{\"value\":\"AA\"}\n");
+    const restored = computeInventoryKey(args);
+
+    assert.notEqual(changedSameSize, original);
+    assert.equal(restored, original);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test("YOSHIKA audit aggregates split historical channel identities", () => {
   const result = aggregateMatchedChannels([
