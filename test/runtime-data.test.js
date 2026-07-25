@@ -17,7 +17,132 @@ const {
   requestSearchBuckets,
   writeRequestViewIndex,
 } = require("../scripts/build-runtime-data");
+const {
+  assertRuntimeImportContinuity,
+  buildMergedRangeGroup,
+  curateYoutubeChannelDiscoveryRuntime,
+} = require("../scripts/db/export-runtime-rankings");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
+
+test("accepted runtime videos use current curation once and remain authoritative after merge", () => {
+  const publishedTimestamp = Date.parse("2026-07-25T00:00:00Z");
+  const baseVideo = {
+    videoId: "UPSERT00001",
+    title: "base video",
+    channelName: "Base Channel",
+    publishedTimestamp,
+    songs: [
+      { time: "0:00:10", seconds: 10, title: "Stale Song", artist: "Stale Artist" },
+      { time: "0:00:20", seconds: 20, title: "Another Stale Song", artist: "Stale Artist" },
+    ],
+  };
+  const payload = {
+    generatedAt: "2026-07-26T00:00:00Z",
+    capturedAt: "2026-07-26T00:00:00Z",
+    groups: {
+      "7d": { id: "7d", items: [baseVideo] },
+      all: { id: "all", items: [baseVideo] },
+    },
+  };
+  const runtimeImports = {
+    vsinger: {
+      videos: [{
+        ...baseVideo,
+        songs: [{ time: "0:00:30", seconds: 30, title: "VSinger Song", artist: "VSinger Artist" }],
+      }],
+      summary: {},
+    },
+    youtubeChannelDiscovery: {
+      videos: [
+        {
+          ...baseVideo,
+          selectedSourceId: "accepted-source",
+          songs: [{ time: "0:00:40", seconds: 40, title: "Accepted Song", artist: "Accepted Artist", sourceId: "accepted-source" }],
+        },
+        {
+          videoId: "DROPENTRY01",
+          title: "drop fixture",
+          channelName: "Drop Channel",
+          publishedTimestamp,
+          selectedSourceId: "drop-source",
+          songs: [{
+            time: "0:00:50",
+            seconds: 50,
+            title: "Drop This",
+            artist: "Unknown",
+            sourceId: "drop-source",
+            rawHash: "drop-raw-hash",
+          }],
+        },
+      ],
+      summary: {},
+    },
+  };
+  const curationContext = {
+    version: "test-curation",
+    hash: "test-curation-hash",
+    nonSongRules: {},
+    overrides: {
+      records: [
+        {
+          action: "upsert_video",
+          videoId: "UPSERT00001",
+          songs: [{ seconds: 70, title: "Replacement Song", artist: "Replacement Artist" }],
+          reviewedAt: "2026-07-26T00:00:00Z",
+          reviewedBy: "test",
+        },
+        {
+          action: "drop_entry",
+          videoId: "DROPENTRY01",
+          sourceId: "drop-source",
+          seconds: 50,
+          rawHash: "drop-raw-hash",
+        },
+      ],
+    },
+  };
+
+  curateYoutubeChannelDiscoveryRuntime(payload, runtimeImports, curationContext);
+
+  assert.deepEqual(runtimeImports.youtubeChannelDiscovery.authoritativeVideoIds, ["DROPENTRY01", "UPSERT00001"]);
+  assert.equal(runtimeImports.youtubeChannelDiscovery.summary.curationStats.upsertedVideos, 1);
+  assert.equal(runtimeImports.youtubeChannelDiscovery.summary.curationStats.droppedEntries, 1);
+  assert.equal(runtimeImports.vsinger.videos.length, 0);
+
+  const allGroup = buildMergedRangeGroup(payload, "all", runtimeImports);
+  const upserted = allGroup.items.find((video) => video.videoId === "UPSERT00001");
+  assert.deepEqual(
+    upserted.songs.map((song) => [song.seconds, song.title, song.artist]),
+    [[70, "Replacement Song", "Replacement Artist"]],
+  );
+  assert.equal(allGroup.items.some((video) => video.videoId === "DROPENTRY01"), false);
+  assert.doesNotThrow(() => assertRuntimeImportContinuity(payload, runtimeImports));
+});
+
+test("runtime continuity gate rejects a final 7d video missing from all", () => {
+  const payload = {
+    generatedAt: "2026-07-26T00:00:00Z",
+    capturedAt: "2026-07-26T00:00:00Z",
+    groups: {
+      "7d": {
+        id: "7d",
+        items: [{
+          videoId: "MISSINGALL1",
+          title: "missing all",
+          channelName: "Channel",
+          publishedTimestamp: Date.parse("2026-07-25T00:00:00Z"),
+          songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+        }],
+      },
+      all: { id: "all", items: [] },
+    },
+  };
+
+  assert.throws(
+    () => assertRuntimeImportContinuity(payload, {}),
+    /7d-to-all continuity failed videos=MISSINGALL1/,
+  );
+});
 
 test("buildClientGroup keeps only runtime video and song fields", () => {
   const group = buildClientGroup({

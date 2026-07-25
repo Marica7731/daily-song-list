@@ -171,6 +171,31 @@ test("carried videos missing publication time stay eligible for watch-page metad
   assert.equal(carry.skipVideoIds.has("MISSTIME001"), false);
 });
 
+test("missing publication time wins after audit and inspection-cache skip sets are merged", () => {
+  const previous = {
+    generatedAt: "2026-07-11T12:00:00Z",
+    groups: {
+      "72h": { items: [] },
+      "1m": { items: [video("MISSTIME002", 24, ["month"], { publishedTimestamp: null })] },
+    },
+  };
+  const previousAudit = {
+    videos: [{ videoId: "MISSTIME002", result: "selected" }],
+  };
+  const inspectionCache = {
+    videos: [{
+      videoId: "MISSTIME002",
+      result: "fetch_error",
+      lastInspectedAt: "2026-07-11T13:30:00Z",
+    }],
+  };
+
+  const carry = collectCarryForwardVideos(previous, previousAudit, NOW, { inspectionCache });
+
+  assert.equal(carry.videos[0].needsMetadataRefresh, true);
+  assert.equal(carry.skipVideoIds.has("MISSTIME002"), false);
+});
+
 test("inspection cache skips only aged no-progress videos using real mygit published timestamps", () => {
   const realNowMs = Date.parse("2026-07-15T14:47:13Z");
   const cache = {

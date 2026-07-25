@@ -22,6 +22,11 @@ const {
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
 const { canonicalizeSongIdentity, loadSongAliasContext } = require("../song-aliases");
+const {
+  applyCurationToVideos,
+  buildTitleOccurrenceStats,
+  loadCurationContext,
+} = require("../curation");
 const { repairParsedEntry } = require("../entry-repair");
 const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("../song-utils");
 const { dropSameSecondTranslatedAliasSongs, filterBlockedVideos, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
@@ -58,9 +63,14 @@ function main() {
       youtubeChannelDiscovery: args.noYoutubeChannelDiscovery ? "disabled" : args.youtubeChannelDiscoveryDir,
     });
     const runtimeImports = loadRuntimeImports(args);
+    const curationContext = loadCurationContext();
+    curateYoutubeChannelDiscoveryRuntime(payload, runtimeImports, curationContext);
+    const finalContinuity = assertRuntimeImportContinuity(payload, runtimeImports);
     logPhase("runtime_imports_ok", {
       vsingerVideos: runtimeImports.vsinger?.videos?.length || 0,
       youtubeVideos: runtimeImports.youtubeChannelDiscovery?.videos?.length || 0,
+      recentVideos: finalContinuity.recentVideoCount,
+      allVideos: finalContinuity.allVideoCount,
     });
     const songAliasContext = loadSongAliasContext();
     if (songAliasContext.errors?.length) {
@@ -146,6 +156,70 @@ function loadRuntimeImports(args) {
       required: args.requireYoutubeChannelDiscovery,
     }),
   };
+}
+
+function curateYoutubeChannelDiscoveryRuntime(payload, runtimeImports, curationContext) {
+  const discovery = runtimeImports.youtubeChannelDiscovery;
+  if (!discovery) return null;
+
+  const authoritativeVideoIds = new Set(
+    (discovery.videos || []).map((video) => String(video?.videoId || "")).filter(Boolean),
+  );
+  const allBaseItems = groupForRange(payload?.groups, "all")?.items || [];
+  const matchingBaseItems = allBaseItems.filter((video) => authoritativeVideoIds.has(video?.videoId));
+  const matchingVsingerItems = (runtimeImports.vsinger?.videos || []).filter((video) => authoritativeVideoIds.has(video?.videoId));
+  const combinedAcceptedVideos = mergeVideoItems(
+    discovery.videos || [],
+    [...matchingBaseItems, ...matchingVsingerItems],
+  ).items;
+  const globalTitleStats = buildTitleOccurrenceStats([
+    ...allBaseItems.filter((video) => !authoritativeVideoIds.has(video?.videoId)),
+    ...(runtimeImports.vsinger?.videos || []).filter((video) => !authoritativeVideoIds.has(video?.videoId)),
+    ...combinedAcceptedVideos,
+  ]);
+  const scopedContext = {
+    ...curationContext,
+    titleStats: globalTitleStats,
+    overrides: {
+      ...(curationContext?.overrides || {}),
+      records: (curationContext?.overrides?.records || []).filter(
+        (record) => record.action !== "upsert_video" || authoritativeVideoIds.has(record.videoId),
+      ),
+    },
+  };
+  const curatedVideos = applyCurationToVideos(combinedAcceptedVideos, scopedContext);
+  const curationStats = curatedVideos.curationStats || {};
+
+  discovery.videos = curatedVideos;
+  discovery.authoritativeVideoIds = [...authoritativeVideoIds].sort();
+  discovery.summary = {
+    ...(discovery.summary || {}),
+    videoCount: curatedVideos.length,
+    occurrenceCount: curatedVideos.reduce(
+      (total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0),
+      0,
+    ),
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+    curationStats,
+  };
+  if (runtimeImports.vsinger) {
+    runtimeImports.vsinger.videos = (runtimeImports.vsinger.videos || []).filter(
+      (video) => !authoritativeVideoIds.has(video?.videoId),
+    );
+  }
+  return discovery;
+}
+
+function assertRuntimeImportContinuity(payload, runtimeImports) {
+  const recentGroup = buildMergedRangeGroup(payload, "7d", runtimeImports);
+  const allGroup = buildMergedRangeGroup(payload, "all", runtimeImports);
+  return assertRecentAllContinuity({
+    groups: {
+      "7d": recentGroup,
+      all: allGroup,
+    },
+  });
 }
 
 function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args, songAliasContext = null) {
@@ -335,10 +409,19 @@ function buildRangePayload(payload, rangeId, args, runtimeImports = {}) {
     return args.limitPerRange > 0 ? { ...base, items: (base.items || []).slice(0, args.limitPerRange) } : base;
   }
 
+  const group = buildMergedRangeGroup(payload, rangeId, runtimeImports);
+  const rangePayload = buildRuntimeRangePayload({ ...payload, groups: { ...(payload.groups || {}), [rangeId]: group } }, rangeId);
+  return args.limitPerRange > 0 ? { ...rangePayload, items: (rangePayload.items || []).slice(0, args.limitPerRange) } : rangePayload;
+}
+
+function buildMergedRangeGroup(payload, rangeId, runtimeImports = {}) {
   const sourceGroup = groupForRange(payload.groups, rangeId) || {};
   const capturedAt = new Date(payload.capturedAt || payload.generatedAt || Date.now());
   const capturedMs = capturedAt.getTime();
-  const baseItems = Array.isArray(sourceGroup.items) ? sourceGroup.items : [];
+  const authoritativeVideoIds = new Set(runtimeImports.youtubeChannelDiscovery?.authoritativeVideoIds || []);
+  const baseItems = Array.isArray(sourceGroup.items)
+    ? sourceGroup.items.filter((item) => !authoritativeVideoIds.has(item?.videoId))
+    : [];
   const importItems = [];
   if (runtimeImports.youtubeChannelDiscovery) {
     importItems.push(...runtimeImports.youtubeChannelDiscovery.videos.filter((item) => videoBelongsToRange(item, rangeId, capturedMs)));
@@ -352,7 +435,7 @@ function buildRangePayload(payload, rangeId, args, runtimeImports = {}) {
     runtimeImports.youtubeChannelDiscovery?.summary?.generatedAt,
     runtimeImports.vsinger?.summary?.generatedAt,
   ) || sourceGroup.generatedAt || payload.generatedAt || "";
-  const group = {
+  return {
     ...sourceGroup,
     id: rangeId,
     title: sourceGroup.title || RANGE_TITLES[rangeId] || rangeId,
@@ -360,8 +443,6 @@ function buildRangePayload(payload, rangeId, args, runtimeImports = {}) {
     updatedAt: latestIso(sourceGroup.updatedAt, generatedAt) || generatedAt,
     items: sortVideos(merged.items),
   };
-  const rangePayload = buildRuntimeRangePayload({ ...payload, groups: { ...(payload.groups || {}), [rangeId]: group } }, rangeId);
-  return args.limitPerRange > 0 ? { ...rangePayload, items: (rangePayload.items || []).slice(0, args.limitPerRange) } : rangePayload;
 }
 
 function computeExportDataVersion(payload, args, runtimeImports = {}, songAliasContext = null) {
@@ -1300,3 +1381,10 @@ function positiveInteger(value, fallback = 1) {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
+
+module.exports = {
+  assertRuntimeImportContinuity,
+  buildMergedRangeGroup,
+  buildRangePayload,
+  curateYoutubeChannelDiscoveryRuntime,
+};

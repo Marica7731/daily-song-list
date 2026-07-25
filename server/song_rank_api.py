@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 DEFAULT_DB_PATH = Path("artifacts/runtime/song-rank.sqlite")
 MAX_RUNTIME_PAGE_SIZE = 200
 MAX_RUNTIME_SEARCH_PAGE_SIZE = 50
+COMPACT_RANKING_PREVIEW_LIMIT = 3
 
 
 def configure_stdio() -> None:
@@ -132,6 +133,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
     niche_only = parse_bool(first(query, "nicheOnly", "0"), "nicheOnly")
     hide_unknown_artist = parse_bool(first(query, "hideUnknownArtist", "0"), "hideUnknownArtist")
+    compact = parse_bool(first(query, "compact", "0"), "compact")
     if range_id not in {"7d", "all"}:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
@@ -236,6 +238,8 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             )
             for row in rows
         ]
+        if compact:
+            records = [compact_ranking_record(record, view) for record in records]
         if (
             q
             and view == "songs"
@@ -311,8 +315,27 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
+        "compact": compact,
         "records": records,
     }
+
+
+def compact_ranking_record(record: dict, view: str) -> dict:
+    if view != "vtubers":
+        return record
+    compact_record = dict(record)
+    occurrences = compact_record.get("occurrences")
+    if isinstance(occurrences, list):
+        compact_record["occurrences"] = occurrences[:COMPACT_RANKING_PREVIEW_LIMIT]
+        compact_record["occurrencePreviewLimited"] = bool(
+            compact_record.get("occurrencePreviewLimited")
+            or len(occurrences) > COMPACT_RANKING_PREVIEW_LIMIT
+        )
+    songs = compact_record.get("songs")
+    if isinstance(songs, list):
+        compact_record["songs"] = songs[:COMPACT_RANKING_PREVIEW_LIMIT]
+        compact_record["songPreviewLimited"] = len(songs) > COMPACT_RANKING_PREVIEW_LIMIT
+    return compact_record
 
 
 def vtuber_song_fallback_payload(

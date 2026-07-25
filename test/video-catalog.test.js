@@ -10,6 +10,7 @@ const {
   mergeVideosIntoCatalog,
   rebuildVideoCatalogFromVideos,
 } = require("../scripts/video-catalog");
+const { applyCurationToVideos, normalizeOverrides } = require("../scripts/curation");
 
 const NOW = new Date("2026-07-13T13:00:00Z");
 
@@ -182,6 +183,53 @@ test("video catalog accepts refreshed song supersets", () => {
   assert.equal(entry.regressionAudit.reason, "incoming_song_superset");
   assert.equal(entry.regressionAudit.previousSongCount, 1);
   assert.equal(entry.regressionAudit.incomingSongCount, 2);
+});
+
+test("manual upsert survives catalog regression protection and the second curation pass", () => {
+  const previous = {
+    ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),
+    videos: [
+      {
+        ...video("AAAAAAAAAAA", 2, "old song"),
+        firstSeenAt: "2026-07-12T01:00:00Z",
+        lastSeenAt: "2026-07-12T01:00:00Z",
+        lastInspectedAt: "2026-07-12T01:00:00Z",
+        songs: [songAt("Old one", 950), songAt("Old two", 1166)],
+        curationVersion: "curation-v1:old",
+        qualityStatus: "usable",
+      },
+    ],
+  };
+  const context = {
+    overrides: normalizeOverrides({
+      schemaVersion: 1,
+      records: [
+        {
+          action: "upsert_video",
+          videoId: "AAAAAAAAAAA",
+          songs: [{ seconds: 120, title: "Verified replacement", artist: "Artist" }],
+          reason: "user_provided_setlist",
+          reviewedAt: "2026-07-26T04:00:00+08:00",
+          reviewedBy: "Marica7731",
+        },
+      ],
+    }),
+  };
+
+  const curatedIncoming = applyCurationToVideos(catalogToVideos(previous), context);
+  assert.equal(curatedIncoming[0].catalogReductionReason, "manual_curation");
+  const merged = mergeVideosIntoCatalog(previous, curatedIncoming, NOW, {
+    curationVersion: "curation-v1:upsert",
+  });
+  const curatedCatalog = applyCurationToVideos(catalogToVideos(merged.catalog), context);
+  const refreshed = rebuildVideoCatalogFromVideos(curatedCatalog, NOW, {
+    previousCatalog: merged.catalog,
+    curationVersion: "curation-v1:upsert",
+  });
+
+  assert.deepEqual(refreshed.catalog.videos[0].songs.map((entry) => entry.title), ["Verified replacement"]);
+  assert.equal(refreshed.catalog.videos[0].selectedSourceId, "manual-upsert:AAAAAAAAAAA");
+  assert.equal(refreshed.catalog.videos[0].curationVersion, "curation-v1:upsert");
 });
 
 test("video catalog summary reports month coverage", () => {

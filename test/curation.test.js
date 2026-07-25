@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  VIDEO_ACTIONS,
   applyCurationToSources,
   applyCurationToVideos,
   classifyEntry,
@@ -13,6 +14,9 @@ const {
   isParserCorruptionEntry,
   loadCurationContext,
   mergeCurationPatch,
+  normalizeOverrides,
+  normalizeUpsertSongs,
+  validateCurationOverrides,
 } = require("../scripts/curation");
 const { buildRankDiffs, extractCommentTexts, sourceScore } = require("../scripts/update-songlist");
 
@@ -637,6 +641,301 @@ test("rank diffs carry the same current curation version for previous snapshot",
 
   assert.equal(diffs["7d"].current.curationVersion, "curation-v1:test");
   assert.equal(diffs["7d"].previous.curationVersion, "curation-v1:test");
+});
+
+test("upsert_video fully replaces one existing stream and preserves video metadata", () => {
+  const context = {
+    overrides: {
+      records: normalizeOverrides({
+        schemaVersion: 1,
+        records: [
+          {
+            action: "upsert_video",
+            videoId: "AAAAAAAAAAA",
+            songs: [
+              { seconds: 300, title: "Second", artist: "Artist B" },
+              { seconds: 120, title: "First", artist: "Artist A", isNiche: true },
+              { seconds: 420, title: "自由記述の手動確認曲", artist: "未記載" },
+            ],
+            reason: "user_provided_setlist",
+            reviewedAt: "2026-07-26T04:00:00+08:00",
+            reviewedBy: "Marica7731",
+          },
+        ],
+      }).records,
+    },
+  };
+  const videos = [
+    {
+      videoId: "AAAAAAAAAAA",
+      title: "Original stream title",
+      publishedTimestamp: 123456789,
+      songs: [
+        { seconds: 10, title: "Old song", artist: "Old artist" },
+        { seconds: 20, title: "Talk segment", artist: "" },
+      ],
+    },
+    {
+      videoId: "BBBBBBBBBBB",
+      title: "Untouched stream",
+      songs: [{ seconds: 30, title: "Keep me", artist: "Artist" }],
+    },
+  ];
+
+  const curated = applyCurationToVideos(videos, context);
+  const target = curated.find((video) => video.videoId === "AAAAAAAAAAA");
+  const untouched = curated.find((video) => video.videoId === "BBBBBBBBBBB");
+
+  assert.equal(target.title, "Original stream title");
+  assert.equal(target.publishedTimestamp, 123456789);
+  assert.deepEqual(target.songs.map((entry) => entry.title), [
+    "First",
+    "Second",
+    "自由記述の手動確認曲",
+  ]);
+  assert.deepEqual(target.songs.map((entry) => entry.seconds), [120, 300, 420]);
+  assert.equal(target.songs[0].time, "0:02:00");
+  assert.equal(target.songs[0].isNiche, true);
+  assert.equal(target.songs.every((entry) => entry.upserted && entry.sourceId === "manual-upsert:AAAAAAAAAAA"), true);
+  assert.equal(target.songs[2].artist, "未記載");
+  assert.equal(target.selectedSourceId, "manual-upsert:AAAAAAAAAAA");
+  assert.equal(target.catalogReductionReason, "manual_curation");
+  assert.equal(target.curationAction, "upsert_video");
+  assert.equal(target.songs.some((entry) => entry.title === "Old song"), false);
+  assert.equal(untouched.songs[0].title, "Keep me");
+  assert.equal(curated.curationStats.upsertedVideos, 1);
+});
+
+test("drop_video takes precedence over upsert_video", () => {
+  const curated = applyCurationToVideos(
+    [{ videoId: "AAAAAAAAAAA", songs: [{ seconds: 1, title: "Old", artist: "Artist" }] }],
+    {
+      overrides: {
+        records: [
+          {
+            action: "upsert_video",
+            videoId: "AAAAAAAAAAA",
+            songs: [{ seconds: 2, title: "New", artist: "Artist" }],
+            reason: "user_provided_setlist",
+            reviewedAt: "2026-07-26T04:00:00+08:00",
+            reviewedBy: "Marica7731",
+          },
+          { action: "drop_video", videoId: "AAAAAAAAAAA" },
+        ],
+      },
+    },
+  );
+
+  assert.equal(curated.length, 0);
+  assert.equal(curated.curationStats.droppedVideos, 1);
+  assert.equal(curated.curationStats.upsertedVideos, 0);
+});
+
+test("upsert_video validation requires reviewed non-empty integer timestamps", () => {
+  const valid = validateCurationOverrides({
+    schemaVersion: 1,
+    records: [
+      {
+        action: "upsert_video",
+        videoId: "AAAAAAAAAAA",
+        songs: [{ seconds: 120, title: " Song ", artist: " Artist ", isNiche: false }],
+        reason: "user_provided_setlist",
+        reviewedAt: "2026-07-26T04:00:00+08:00",
+        reviewedBy: "Marica7731",
+      },
+    ],
+  });
+  assert.deepEqual(valid.errors, []);
+  assert.equal(valid.overrides.records[0].songs[0].title, "Song");
+  assert.equal(valid.overrides.records[0].songs[0].seconds, 120);
+  assert.equal(valid.overrides.records[0].songs[0].isNiche, false);
+
+  const invalid = validateCurationOverrides({
+    schemaVersion: 1,
+    records: [
+      {
+        action: "upsert_video",
+        videoId: "BBBBBBBBBBB",
+        songs: [
+          { seconds: "10", title: "String timestamp", artist: "Artist" },
+          { seconds: 10.5, title: "Fractional", artist: "Artist" },
+          { seconds: 20, title: "", artist: "" },
+          { seconds: 20, title: "Duplicate timestamp", artist: "Artist", isNiche: "false" },
+        ],
+        reason: "schema_documentation",
+      },
+    ],
+  });
+  assert.equal(invalid.valid, false);
+  assert.ok(invalid.errors.some((error) => error.includes("reason missing or reserved")));
+  assert.ok(invalid.errors.some((error) => error.includes("reviewedAt missing")));
+  assert.ok(invalid.errors.some((error) => error.includes("reviewedBy missing")));
+  assert.ok(invalid.errors.some((error) => error.includes("non-negative integer")));
+  assert.ok(invalid.errors.some((error) => error.includes("title missing")));
+  assert.ok(invalid.errors.some((error) => error.includes("artist missing")));
+  assert.ok(invalid.errors.some((error) => error.includes("isNiche must be a boolean")));
+  assert.ok(invalid.errors.some((error) => error.includes("duplicates 20")));
+});
+
+test("upsert_video merge is idempotent and updates one record per video", () => {
+  const record = {
+    action: "upsert_video",
+    videoId: "AAAAAAAAAAA",
+    songs: [{ seconds: 120, title: "Song", artist: "Artist" }],
+    reason: "user_provided_setlist",
+    reviewedAt: "2026-07-26T04:00:00+08:00",
+    reviewedBy: "Marica7731",
+  };
+  const duplicate = mergeCurationPatch(
+    { schemaVersion: 1, records: [record] },
+    { schemaVersion: 1, records: [record] },
+  );
+  assert.equal(duplicate.ok, true);
+  assert.equal(duplicate.counts.ignored, 1);
+
+  const updated = mergeCurationPatch(
+    duplicate.merged,
+    {
+      schemaVersion: 1,
+      records: [{ ...record, songs: [...record.songs, { seconds: 240, title: "Second", artist: "Artist" }] }],
+    },
+  );
+  assert.equal(updated.ok, true);
+  assert.equal(updated.counts.updated, 1);
+  assert.equal(updated.merged.records.length, 1);
+  assert.equal(updated.merged.records[0].songs.length, 2);
+
+  const reviewUpdated = mergeCurationPatch(
+    updated.merged,
+    {
+      schemaVersion: 1,
+      records: [
+        {
+          ...updated.merged.records[0],
+          note: "second human review",
+          reviewedAt: "2026-07-26T05:00:00+08:00",
+        },
+      ],
+    },
+  );
+  assert.equal(reviewUpdated.ok, true);
+  assert.equal(reviewUpdated.counts.updated, 1);
+  assert.equal(reviewUpdated.merged.records[0].note, "second human review");
+});
+
+test("normalizeUpsertSongs preserves invalid rows for validation", () => {
+  assert.equal(VIDEO_ACTIONS.has("upsert_video"), true);
+  assert.deepEqual(normalizeUpsertSongs([{ seconds: "120", title: " Missing time ", isNiche: "false" }, null]), [
+    { seconds: null, title: "Missing time", artist: "", isNiche: "false" },
+    null,
+  ]);
+});
+
+test("upsert_video reports a target video that is absent without creating a partial video", () => {
+  const curated = applyCurationToVideos(
+    [{ videoId: "BBBBBBBBBBB", songs: [{ seconds: 30, title: "Keep", artist: "Artist" }] }],
+    {
+      overrides: normalizeOverrides({
+        schemaVersion: 1,
+        records: [
+          {
+            action: "upsert_video",
+            videoId: "AAAAAAAAAAA",
+            songs: [{ seconds: 120, title: "Replacement", artist: "未記載" }],
+            reason: "user_provided_setlist",
+            reviewedAt: "2026-07-26T04:00:00+08:00",
+            reviewedBy: "Marica7731",
+          },
+        ],
+      }),
+    },
+  );
+
+  assert.equal(curated.length, 1);
+  assert.equal(curated[0].videoId, "BBBBBBBBBBB");
+  assert.equal(curated.curationStats.upsertedVideos, 0);
+  assert.deepEqual(curated.curationStats.unmatchedUpsertVideoIds, ["AAAAAAAAAAA"]);
+});
+
+test("Naraetan 8.32 feat.flower is retained and canonicalized instead of dropped", () => {
+  const context = loadCurationContext();
+  const record = context.overrides.records.find(
+    (entry) => entry.videoId === "yBwvUMnjdGs" && entry.seconds === 7805,
+  );
+  assert.equal(record.action, "replace_entry");
+  assert.equal(record.sourceId, "UgwX_usBCxl0ADk5s2V4AaABAg");
+  assert.equal(record.sourceHash, "e5718ef0f544447b15d35e5a345f2a87f035d5b4ec7e1436e977766c935b67e8");
+  assert.equal(record.replacement.title, "8.32");
+
+  const curated = applyCurationToVideos(
+    [
+      {
+        videoId: "yBwvUMnjdGs",
+        selectedSourceId: "UgwX_usBCxl0ADk5s2V4AaABAg",
+        selectedSourceHash: "e5718ef0f544447b15d35e5a345f2a87f035d5b4ec7e1436e977766c935b67e8",
+        songs: [
+          {
+            seconds: 7805,
+            title: "8.32 feat.flower",
+            artist: "*Luna",
+            raw: "2:10:05 8.32 feat.flower / *Luna",
+            rawHash: "5d0d9e2f64468fc935bb0da0ac40682c32e2c401905c243f73846cec9c8e0eac",
+            sourceId: "UgwX_usBCxl0ADk5s2V4AaABAg",
+            sourceHash: "e5718ef0f544447b15d35e5a345f2a87f035d5b4ec7e1436e977766c935b67e8",
+          },
+        ],
+      },
+    ],
+    context,
+  );
+
+  assert.equal(curated.length, 1);
+  assert.equal(curated[0].songs.length, 1);
+  assert.equal(curated[0].songs[0].title, "8.32");
+  assert.equal(curated[0].songs[0].artist, "*Luna");
+});
+
+test("Naraetan batch 1 selectors use real accepted comment identities", () => {
+  const context = loadCurationContext();
+  const records = context.overrides.records.filter(
+    (entry) => entry.reviewedAt === "2026-07-26T01:00:00+08:00",
+  );
+  const keys = new Set(
+    records.map(
+      (entry) =>
+        `${entry.videoId}:${entry.sourceId}:${entry.sourceHash}:${entry.seconds}:${entry.rawHash}`,
+    ),
+  );
+
+  assert.equal(records.length, 100);
+  assert.equal(keys.size, 100);
+  assert.equal(records.every((entry) => entry.sourceId && !entry.sourceId.startsWith("selected:")), true);
+  assert.equal(records.every((entry) => /^[0-9a-f]{64}$/u.test(entry.sourceHash)), true);
+});
+
+test("Naraetan batch 1 confirmed or conservatively retained songs are never dropped", () => {
+  const context = loadCurationContext();
+  const expectedTitlesByRawHash = new Map([
+    ["8dc11a038e2d5f709e947ee0b29de51628c4223fae063ecda9a24ca2b7222df3", "Habit"],
+    ["695ac09774554d332dd867bb6362d9b8c50f2bfe8c6fd42c85f870ba66bc011a", "経験値上昇中☆"],
+    ["76fb6eb7b39bc6ff953071a7c7ab1356fadf61758262932c2d13dcaf39c86e51", "Get チュー!"],
+    ["951f272bf9c77ec0d4a672f2b3ec81b6309b648c3adaa5a637a1c1c03af361c5", "Happy Happy Birthday!"],
+    ["37fc5b8ce6a074e168aeeebab3f3788b449e94f289e45d6229653d9ed33016ed", "Ne・Ni・Ge de Reset!"],
+    ["b8edc7695869c29d913cd095b2a810796e943685e396bbd858a6e2746065f8f5", "more more!"],
+    ["390396f1244a1cd9c824e4339b82ad5a87ffb1a6d3ae95eaa12614b9b1143596", "はなやか?あざやか?"],
+    ["c4c0d932de2326e4ea8f98a1d54d137cabc2c30addf6f6abfb2d38835ebf25e3", "わすれるなんてひどい!"],
+    ["02f8cd4e5b6fbb1e02a605b6cc828764b8791ff6584ebf778ad28a480d2238fe", "コットンキャンディえいえいおー!"],
+    ["f04c84e2ecf03b50d56bca035bb74d14218aa67c061797111556982438ce6cbf", "夢の続き"],
+    ["d9b79e92b5025661f3216a07f1fa25e260e9d34353b03666229bcf50e01e6cc8", "青と夏"],
+    ["b6782a7d08873b271d4d7f0885b8b22cf3bd2a1134dda0dda7a34ba4ee93d602", "恋"],
+  ]);
+
+  for (const [rawHash, expectedTitle] of expectedTitlesByRawHash) {
+    const record = context.overrides.records.find((entry) => entry.rawHash === rawHash);
+    assert.ok(record, `missing reviewed Naraetan record ${rawHash}`);
+    assert.equal(record.action, "replace_entry", `${expectedTitle} must not be dropped`);
+    assert.equal(record.replacement.title, expectedTitle);
+  }
 });
 
 function song(title, seconds, rawHash) {

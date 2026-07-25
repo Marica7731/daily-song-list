@@ -58,23 +58,10 @@ function normalizeOverrides(value) {
 }
 
 
-function normalizeUpsertSongs(songs) {
-  if (!Array.isArray(songs)) return [];
-  return songs
-    .map((song) => ({
-      seconds: Number(song.seconds) || 0,
-      title: String(song.title || "").trim(),
-      artist: String(song.artist || "").trim(),
-      isNiche: Boolean(song.isNiche),
-    }))
-    .filter((song) => song.title)
-    .sort((a, b) => a.seconds - b.seconds);
-}
-
 function normalizeOverrideRecord(record) {
   const action = String(record?.action || "").trim();
   const seconds = record?.seconds === "" || record?.seconds == null ? null : Number(record.seconds);
-  return {
+  const normalized = {
     action,
     videoId: String(record?.videoId || "").trim(),
     sourceId: String(record?.sourceId || "").trim(),
@@ -87,6 +74,22 @@ function normalizeOverrideRecord(record) {
     reviewedAt: String(record?.reviewedAt || "").trim(),
     reviewedBy: String(record?.reviewedBy || "").trim(),
   };
+  if (action === "upsert_video") normalized.songs = normalizeUpsertSongs(record?.songs);
+  return normalized;
+}
+
+function normalizeUpsertSongs(songs) {
+  if (!Array.isArray(songs)) return [];
+  return songs.map((song) => {
+    if (!song || typeof song !== "object" || Array.isArray(song)) return null;
+    const normalized = {
+      seconds: typeof song.seconds === "number" && Number.isFinite(song.seconds) ? song.seconds : null,
+      title: String(song.title || "").trim(),
+      artist: String(song.artist || "").trim(),
+    };
+    if (Object.prototype.hasOwnProperty.call(song, "isNiche")) normalized.isNiche = song.isNiche;
+    return normalized;
+  });
 }
 
 function normalizeReplacement(replacement) {
@@ -125,6 +128,35 @@ function validateCurationOverrides(value) {
         if ("seconds" in record.replacement && !hasSeconds) errors.push(`${label}.replacement.seconds invalid`);
       }
     }
+    if (record.action === "upsert_video") {
+      if (!record.reason || record.reason === "schema_documentation") errors.push(`${label}.reason missing or reserved`);
+      if (!record.reviewedAt) errors.push(`${label}.reviewedAt missing`);
+      if (!record.reviewedBy) errors.push(`${label}.reviewedBy missing`);
+      if (!Array.isArray(record.songs) || record.songs.length === 0) {
+        errors.push(`${label}.songs must be a non-empty array for upsert_video`);
+      } else {
+        const seenSeconds = new Set();
+        for (const [songIndex, song] of record.songs.entries()) {
+          const songLabel = `${label}.songs[${songIndex}]`;
+          if (!song || typeof song !== "object") {
+            errors.push(`${songLabel} must be an object`);
+            continue;
+          }
+          if (!song.title) errors.push(`${songLabel}.title missing`);
+          if (!song.artist) errors.push(`${songLabel}.artist missing; use 未記載 when unknown`);
+          if ("isNiche" in song && typeof song.isNiche !== "boolean") {
+            errors.push(`${songLabel}.isNiche must be a boolean`);
+          }
+          if (!Number.isInteger(song.seconds) || song.seconds < 0) {
+            errors.push(`${songLabel}.seconds must be a non-negative integer`);
+          } else if (seenSeconds.has(song.seconds)) {
+            errors.push(`${songLabel}.seconds duplicates ${song.seconds}`);
+          } else {
+            seenSeconds.add(song.seconds);
+          }
+        }
+      }
+    }
     if (record.reviewedAt && Number.isNaN(Date.parse(record.reviewedAt))) errors.push(`${label}.reviewedAt invalid`);
 
     const key = overrideConflictKey(record);
@@ -142,6 +174,7 @@ function overrideConflictKey(record) {
   if (!record.action || !record.videoId) return "";
   const sourceKey = record.sourceId || `hash:${record.sourceHash || ""}`;
   if (record.action === "drop_video") return `video:${record.videoId}`;
+  if (record.action === "upsert_video") return `upsert:${record.videoId}`;
   if (record.action === "force_refresh") return `refresh:${record.videoId}`;
   if (record.action === "reject_source") return `source:${record.videoId}:${sourceKey}`;
   if (!sourceKey || !Number.isInteger(record.seconds) || !record.rawHash) return "";
@@ -157,6 +190,16 @@ function stableRecordFingerprint(record) {
     seconds: record.seconds,
     rawHash: record.rawHash,
     replacement: record.replacement || null,
+    songs: Array.isArray(record.songs) ? record.songs : null,
+    upsertReview:
+      record.action === "upsert_video"
+        ? {
+            reason: record.reason,
+            note: record.note,
+            reviewedAt: record.reviewedAt,
+            reviewedBy: record.reviewedBy,
+          }
+        : null,
   });
 }
 
@@ -470,6 +513,14 @@ function applyCurationToSources(sources, context, candidate = {}) {
 function applyCurationToVideos(videos, context) {
   const overrides = context?.overrides?.records || [];
   const titleStats = context?.titleStats || buildTitleOccurrenceStats(videos);
+  const inputVideoIds = new Set((videos || []).map((video) => String(video?.videoId || "")).filter(Boolean));
+  const upsertVideoIds = [
+    ...new Set(
+      overrides
+        .filter((record) => record.action === "upsert_video" && record.videoId)
+        .map((record) => record.videoId),
+    ),
+  ].sort();
   const stats = {
     droppedVideos: 0,
     droppedEntries: 0,
@@ -478,6 +529,8 @@ function applyCurationToVideos(videos, context) {
     conversationDroppedEntries: 0,
     nearDuplicateDroppedEntries: 0,
     nearDuplicateGroups: 0,
+    upsertedVideos: 0,
+    unmatchedUpsertVideoIds: upsertVideoIds.filter((videoId) => !inputVideoIds.has(videoId)),
     forceRefreshVideoIds: collectForceRefreshVideoIds(context).size,
   };
   const result = [];
@@ -488,6 +541,43 @@ function applyCurationToVideos(videos, context) {
     }
     if (video.carriedFromPrevious && hasRejectSourceOverride(context, video.videoId)) {
       stats.droppedVideos += 1;
+      continue;
+    }
+    const upsert = findOverride(overrides, "upsert_video", { videoId: video.videoId });
+    if (upsert) {
+      const sourceId = `manual-upsert:${video.videoId}`;
+      const sourceHash = hashNormalizedText(JSON.stringify(upsert.songs || []));
+      const upsertSongs = (upsert.songs || [])
+        .map((song) => {
+          const seconds = Number(song.seconds);
+          const title = String(song.title || "");
+          const artist = String(song.artist || "");
+          const time = secondsToTime(seconds);
+          return {
+            seconds,
+            time,
+            title,
+            artist,
+            ...(song.isNiche === true ? { isNiche: true } : {}),
+            raw: `${time} ${title}${artist ? ` / ${artist}` : ""}`,
+            sourceId,
+            sourceHash,
+            rawHash: hashNormalizedText(`upsert:${video.videoId}:${seconds}:${title}:${artist}`),
+            upserted: true,
+            reviewedAt: upsert.reviewedAt,
+            reviewedBy: upsert.reviewedBy,
+          };
+        })
+        .sort((left, right) => left.seconds - right.seconds);
+      stats.upsertedVideos += 1;
+      result.push({
+        ...video,
+        selectedSourceId: sourceId,
+        selectedSourceHash: sourceHash,
+        catalogReductionReason: "manual_curation",
+        curationAction: "upsert_video",
+        songs: upsertSongs,
+      });
       continue;
     }
     const source = {
@@ -835,6 +925,7 @@ module.exports = {
   NON_SONG_RULES_PATH,
   OVERRIDES_PATH,
   VALID_ACTIONS,
+  VIDEO_ACTIONS,
   applyCurationToSources,
   applyCurationToVideos,
   buildTitleOccurrenceStats,
@@ -854,6 +945,7 @@ module.exports = {
   mergeCurationPatch,
   normalizeCurationTitle,
   normalizeOverrides,
+  normalizeUpsertSongs,
   riskLevel,
   riskScoreFromReasons,
   sourceRiskReasons,
