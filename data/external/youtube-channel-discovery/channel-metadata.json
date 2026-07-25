@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-25T17:19:03.800Z",
+  "generatedAt": "2026-07-25T21:08:04.220Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-25T17:19:03.800Z",
+    "fetchedAt": "2026-07-25T21:08:04.220Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-25T17:19:03.800Z",
+    "generatedAt": "2026-07-25T21:08:04.220Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,25 +7272,53 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 980,
-      "parseableChannels": 762,
+      "totalChannels": 982,
+      "parseableChannels": 764,
       "realAvatar": 643,
-      "thumbnailFallback": 337,
+      "thumbnailFallback": 339,
       "missingDisplayImage": 0,
-      "missingAvatar": 337,
+      "missingAvatar": 339,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 347,
+      "skipped_collected_evidence": 349,
       "already_cached": 664
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 129,
+      "batch_limit_reached": 131,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
+      {
+        "handle": "/@yuzu_zuyuzu",
+        "channelId": "UCA-dBOiqriMhZdRYP7t8Jjg",
+        "displayName": "のりまきゆずゆ",
+        "sourceUrl": "https://www.youtube.com/@yuzu_zuyuzu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@h-menma",
+        "channelId": "UC2gVj3bLfZgxi23gBNO8ZHg",
+        "displayName": "日向猫めんま / Hinatane Menma",
+        "sourceUrl": "https://www.youtube.com/@h-menma",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@H.Midori-Ch-",
+        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
+        "displayName": "H.Midori Ch🍃葉山翠",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
+        "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
+        "displayName": "Sakuna Ch. 結城さくな",
+        "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@ShikibuMeguri",
         "channelId": "UC0PGk7z_FV1FFj3avz7_38A",
@@ -7437,34 +7465,6 @@
         "displayName": "Diα - ディア",
         "sourceUrl": "https://www.youtube.com/@Dia-",
         "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "東雲 めう。 / Shinonome Meu.",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "甘兎るな@るみきゅー",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "ukuna ch.うくな",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "小向なのか / Komukai Nanoka",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
       }
     ]
   }
