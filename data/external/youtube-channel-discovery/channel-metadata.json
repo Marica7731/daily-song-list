@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-25T06:34:56.878Z",
+  "generatedAt": "2026-07-25T09:14:54.512Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-25T06:34:56.878Z",
+    "fetchedAt": "2026-07-25T09:14:54.512Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-25T06:34:56.878Z",
+    "generatedAt": "2026-07-25T09:14:54.512Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,25 +7272,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 973,
-      "parseableChannels": 755,
+      "totalChannels": 975,
+      "parseableChannels": 757,
       "realAvatar": 642,
-      "thumbnailFallback": 331,
+      "thumbnailFallback": 333,
       "missingDisplayImage": 0,
-      "missingAvatar": 331,
+      "missingAvatar": 333,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 341
+      "skipped_collected_evidence": 343
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 123,
+      "batch_limit_reached": 125,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
+      {
+        "handle": "/@AmazoraInori",
+        "channelId": "UCRHFjZWvlNfdn2ajZKM9G6A",
+        "displayName": "天空いのり / Amazora Inori",
+        "sourceUrl": "https://www.youtube.com/@AmazoraInori",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@OokamiMio",
         "channelId": "UCp-5t9SrOQwXMU7iIjQfARg",
@@ -7317,6 +7324,13 @@
         "channelId": "UCgSEzhNM3Aqj55oh5rpIjaQ",
         "displayName": "夜凪よな-Yonagi Yona-",
         "sourceUrl": "https://www.youtube.com/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E3%82%8C%E3%82%8C%E3%82%8A_n5",
+        "channelId": "UCJ1WR_fuf42LcPcfDTTJiWQ",
+        "displayName": "💜れれり🧪",
+        "sourceUrl": "https://www.youtube.com/@%E3%82%8C%E3%82%8C%E3%82%8A_n5",
         "reason": "batch_limit_reached"
       },
       {
@@ -7449,20 +7463,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "雅楽代ましろ\\UtashiroMashiro",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "百合乃めに",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "八乙女イオリ - Yaotome iori",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
