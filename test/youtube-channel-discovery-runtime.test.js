@@ -6,6 +6,20 @@ const test = require("node:test");
 
 const { loadYoutubeChannelDiscoveryRuntimeVideos, normalizeRuntimeVideo } = require("../scripts/youtube-channel-discovery-runtime");
 
+function acceptedFixture(payload) {
+  return {
+    ...payload,
+    videos: (payload.videos || []).map((video) => ({
+      ...video,
+      publishedTimestamp: video.publishedTimestamp || 1784937600000,
+      songs: (video.songs || []).map((song) => ({
+        ...song,
+        time: song.time || `0:00:${String(song.seconds).padStart(2, "0")}`,
+      })),
+    })),
+  };
+}
+
 test("runtime discovery rejects channel URL paths as handles", () => {
   const video = normalizeRuntimeVideo(
     {
@@ -15,7 +29,8 @@ test("runtime discovery rejects channel URL paths as handles", () => {
       channelId: "UC_RUNTIME",
       channelHandle: "/channel/UC_RUNTIME",
       channelUrl: "https://www.youtube.com/channel/UC_RUNTIME",
-      songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+      publishedTimestamp: 1784937600000,
+      songs: [{ time: "0:00:01", seconds: 1, title: "Song", artist: "Artist" }],
     },
     "runtime.json",
   );
@@ -32,12 +47,45 @@ test("runtime discovery recovers handles from channel urls", () => {
       channelName: "Runtime Channel",
       channelHandle: "/channel/UC_RUNTIME",
       channelUrl: "https://www.youtube.com/@runtime_handle",
-      songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+      publishedTimestamp: 1784937600000,
+      songs: [{ time: "0:00:01", seconds: 1, title: "Song", artist: "Artist" }],
     },
     "runtime.json",
   );
 
   assert.equal(video.channelHandle, "/@runtime_handle");
+});
+
+test("runtime discovery enforces accepted timestamp contracts without coercing zero seconds", () => {
+  const base = {
+    videoId: "CONTRACT001",
+    title: "Contract fixture",
+    channelName: "Contract Channel",
+    publishedTimestamp: 1784937600000,
+    songs: [{ time: "0:00:00", seconds: 0, title: "Song", artist: "Artist" }],
+  };
+
+  const valid = normalizeRuntimeVideo(base, "contract.json");
+  assert.equal(valid.publishedTimestamp, 1784937600000);
+  assert.equal(valid.songs[0].seconds, 0);
+  assert.equal(valid.songs[0].time, "0:00:00");
+
+  for (const publishedTimestamp of [null, undefined, "1784937600000", Number.NaN]) {
+    assert.throws(
+      () => normalizeRuntimeVideo({ ...base, publishedTimestamp }, "contract.json"),
+      /file=contract\.json videoId=CONTRACT001 field=publishedTimestamp/,
+    );
+  }
+  assert.throws(
+    () => normalizeRuntimeVideo({ ...base, songs: [{ ...base.songs[0], time: " " }] }, "contract.json"),
+    /file=contract\.json videoId=CONTRACT001 songIndex=0 field=time/,
+  );
+  for (const seconds of [-1, 0.5, "0", undefined]) {
+    assert.throws(
+      () => normalizeRuntimeVideo({ ...base, songs: [{ ...base.songs[0], seconds }] }, "contract.json"),
+      /file=contract\.json videoId=CONTRACT001 songIndex=0 field=seconds/,
+    );
+  }
 });
 
 test("runtime discovery hydrates one channel id to the preferred Japanese display name", () => {
@@ -65,7 +113,7 @@ test("runtime discovery hydrates one channel id to the preferred Japanese displa
   );
   fs.writeFileSync(
     path.join(acceptedDir, "isshiki.json"),
-    JSON.stringify({
+    JSON.stringify(acceptedFixture({
       generatedAt: "2026-07-22T00:00:00.000Z",
       videos: [
         {
@@ -88,7 +136,7 @@ test("runtime discovery hydrates one channel id to the preferred Japanese displa
           songs: [{ seconds: 20, title: "ノープラン", artist: "IMI" }],
         },
       ],
-    }),
+    })),
     "utf8",
   );
 
@@ -99,4 +147,30 @@ test("runtime discovery hydrates one channel id to the preferred Japanese displa
   assert.equal(payload.videos[0].channelAliases.includes("/channel/UCISSHIKI"), false);
   assert.equal(payload.videos[1].channelName, "IMI");
   assert.equal(payload.videos[1].channelHandle, "");
+});
+
+test("reviewed Hanon and Noa increments load with complete identity and timestamps", () => {
+  const importDir = path.join(
+    __dirname,
+    "..",
+    "data",
+    "external",
+    "youtube-channel-discovery",
+  );
+  const payload = loadYoutubeChannelDiscoveryRuntimeVideos({ importDir, required: true });
+  const expected = new Map([
+    ["aibg0-_tU6c", { channelHandle: "/@kanaruhanon", songCount: 4 }],
+    ["mt55aKAdYqM", { channelHandle: "/@kanaruhanon", songCount: 12 }],
+    ["HZ1q27Z5Pqc", { channelHandle: "/@noa_polaris", songCount: 14 }],
+    ["0bXKzDEk79E", { channelHandle: "/@noa_polaris", songCount: 5 }],
+  ]);
+
+  for (const [videoId, fixture] of expected) {
+    const video = payload.videos.find((candidate) => candidate.videoId === videoId);
+    assert.ok(video, `${videoId} must be loaded from the reviewed accepted increments`);
+    assert.equal(video.channelHandle, fixture.channelHandle);
+    assert.equal(video.songs.length, fixture.songCount);
+    assert.ok(Number.isFinite(video.publishedTimestamp) && video.publishedTimestamp > 0);
+    assert.equal(video.songs.every((song) => Number.isInteger(song.seconds) && song.time), true);
+  }
 });

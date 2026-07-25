@@ -70,6 +70,7 @@ Supported actions:
 - `replace_entry`: replace `title`, `artist`, and/or `seconds`.
 - `reject_source`: remove one comment/description/reply source from best-source scoring.
 - `drop_video`: remove the whole video from generated output.
+- `upsert_video`: fully replace the songs and timestamps for one existing video; song `seconds` must be a JSON non-negative integer, and unknown artists must be written explicitly as `未記載`. See `docs/curation-upsert-video.md`.
 - `force_keep`: keep a row that ordinary heuristics would otherwise reject.
 
 Entry actions must use stable identity: `videoId`, `sourceId` or `sourceHash`, `seconds`, and `rawHash`. `npm run validate` fails on invalid actions, missing `videoId`, invalid `seconds`, and conflicting duplicate rules.

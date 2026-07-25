@@ -11,6 +11,7 @@ const ROOT = path.resolve(__dirname, "..");
 const PYTHON = process.env.PYTHON || "python";
 const SERVER_SOURCE = fs.readFileSync(path.join(ROOT, "server", "song_rank_api.py"), "utf8");
 const APP_SOURCE = fs.readFileSync(path.join(ROOT, "assets", "app.js"), "utf8");
+const STYLES_SOURCE = fs.readFileSync(path.join(ROOT, "assets", "styles.css"), "utf8");
 const RUNTIME_EXPORT_SOURCE = fs.readFileSync(path.join(ROOT, "scripts", "db", "export-runtime-rankings.js"), "utf8");
 const RUNTIME_BUILD_SOURCE = fs.readFileSync(path.join(ROOT, "scripts", "build-runtime-data.js"), "utf8");
 
@@ -52,6 +53,25 @@ test("runtime API filters are inherited by frontend ranking and source-detail ca
   assert.match(APP_SOURCE, /const requestPath = sourceDetailPagePath\(path, page, pageSize, options\.filters\);/u);
   assert.match(APP_SOURCE, /const cacheKey = key \? `page:\$\{requestPath\}#\$\{key\}` : `page:\$\{requestPath\}`;/u);
   assert.match(APP_SOURCE, /function sourceDetailFiltersForCurrentView\(\)/u);
+});
+
+test("runtime VTuber lists request a compact preview payload", () => {
+  assert.match(APP_SOURCE, /if \(request\.view === "vtuberRank"\) params\.set\("compact", "1"\);/u);
+  assert.match(SERVER_SOURCE, /compact = parse_bool\(first\(query, "compact", "0"\), "compact"\)/u);
+  assert.match(SERVER_SOURCE, /records = \[compact_ranking_record\(record, view\) for record in records\]/u);
+  assert.match(SERVER_SOURCE, /songs\[:COMPACT_RANKING_PREVIEW_LIMIT\]/u);
+  assert.match(SERVER_SOURCE, /occurrences\[:COMPACT_RANKING_PREVIEW_LIMIT\]/u);
+});
+
+test("runtime request failures render a compact retryable diagnostic card", () => {
+  assert.match(APP_SOURCE, /数据暂时不可用，已保留当前内容/u);
+  assert.match(APP_SOURCE, /retry\.textContent = "重试"/u);
+  assert.match(APP_SOURCE, /summary\.textContent = "诊断详情"/u);
+  assert.match(APP_SOURCE, /requestErrorFriendlyMessage\(error\)/u);
+  assert.match(APP_SOURCE, /error\.requestPath = path/u);
+  assert.doesNotMatch(APP_SOURCE, /页面读取失败，已保留上一页：\$\{error\.message\}/u);
+  assert.match(STYLES_SOURCE, /\.content-warning-details/u);
+  assert.match(STYLES_SOURCE, /@media \(max-width: 640px\)[\s\S]*?\.content-warning/u);
 });
 
 test("runtime API merges indexed unknown artist song variants into the known song result", async () => {
@@ -697,6 +717,14 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtubers.records[0].occurrences.length, 2);
     assert.ok(vtubers.records[0].sourceDetailKey);
 
+    const compactVtubers = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&page=1&pageSize=1&compact=1`,
+    );
+    assert.equal(compactVtubers.compact, true);
+    assert.equal(compactVtubers.records.length, 1);
+    assert.ok(compactVtubers.records[0].occurrences.length <= 3);
+    assert.ok(compactVtubers.records[0].songs.length <= 3);
+
     const vtuberSource = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(vtubers.records[0].sourceDetailKey)}`);
     assert.equal(vtuberSource.found, true);
     assert.equal(vtuberSource.record.name, "Alpha Ch.");
@@ -781,6 +809,13 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const badHideUnknownBody = await badHideUnknownResponse.text();
     assert.equal(badHideUnknownResponse.status, 400, badHideUnknownBody);
     assert.match(badHideUnknownBody, /hideUnknownArtist.*boolean/u);
+
+    const badCompactResponse = await fetch(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&compact=maybe`,
+    );
+    const badCompactBody = await badCompactResponse.text();
+    assert.equal(badCompactResponse.status, 400, badCompactBody);
+    assert.match(badCompactBody, /compact.*boolean/u);
 
     const badRangeResponse = await fetch(
       `http://127.0.0.1:${port}/api/rankings?range=tomorrow&view=songs`,

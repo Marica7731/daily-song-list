@@ -843,6 +843,9 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
   );
   addKnownAuditSkipIds(skipVideoIds, previousAudit);
   for (const videoId of inspectionCacheSkipIds) skipVideoIds.add(videoId);
+  for (const video of videos.values()) {
+    if (video.needsMetadataRefresh) skipVideoIds.delete(video.videoId);
+  }
   for (const videoId of options.forceRefreshVideoIds || []) skipVideoIds.delete(videoId);
   return {
     enabled: true,

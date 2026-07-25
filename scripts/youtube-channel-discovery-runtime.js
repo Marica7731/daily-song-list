@@ -80,9 +80,13 @@ function loadChannelMetadata(filePath) {
 function normalizeRuntimeVideo(video, sourceFile) {
   const videoId = stringValue(video?.videoId);
   if (!videoId) return null;
+  const publishedTimestamp = requireAcceptedPublishedTimestamp(video.publishedTimestamp, {
+    sourceFile,
+    videoId,
+  });
   const songs = Array.isArray(video.songs)
     ? video.songs
-        .map((song, index) => normalizeRuntimeSong(song, index, video))
+        .map((song, index) => normalizeRuntimeSong(song, index, video, sourceFile))
         .filter(Boolean)
     : [];
   if (!songs.length) return null;
@@ -106,7 +110,7 @@ function normalizeRuntimeVideo(video, sourceFile) {
     sourceUrl: stringValue(video.sourceUrl || channelUrl || sourceUrls.find((url) => /youtube\.com\/(?:@|channel\/)/iu.test(url))),
     knownSourceType: stringValue(video.knownSourceType || SOURCE_GROUP),
     isCollected: video.isCollected === false ? false : true,
-    publishedTimestamp: finiteTimestamp(video.publishedTimestamp),
+    publishedTimestamp,
     publishedText: stringValue(video.publishedText),
     durationText: stringValue(video.durationText),
     thumbnailUrl: stringValue(video.thumbnailUrl),
@@ -124,7 +128,29 @@ function normalizeRuntimeVideo(video, sourceFile) {
   };
 }
 
-function normalizeRuntimeSong(song, index, video) {
+function normalizeRuntimeSong(song, index, video, sourceFile) {
+  const time = stringValue(song?.time);
+  if (!time) {
+    throw acceptedContractError({
+      sourceFile,
+      videoId: video?.videoId,
+      songIndex: index,
+      field: "time",
+      expected: "non-empty string",
+      actual: song?.time,
+    });
+  }
+  const seconds = song?.seconds;
+  if (typeof seconds !== "number" || !Number.isInteger(seconds) || seconds < 0) {
+    throw acceptedContractError({
+      sourceFile,
+      videoId: video?.videoId,
+      songIndex: index,
+      field: "seconds",
+      expected: "non-negative integer",
+      actual: seconds,
+    });
+  }
   const normalized = normalizeParsedSong(song || {});
   if (!normalized.title || isLikelyNonSongEntry(normalized)) return null;
   const title = stringValue(normalized.title);
@@ -132,8 +158,8 @@ function normalizeRuntimeSong(song, index, video) {
   return {
     ...song,
     index: Number.isFinite(Number(song.index)) && Number(song.index) > 0 ? Number(song.index) : index + 1,
-    time: stringValue(normalized.time),
-    seconds: Math.max(0, Number(normalized.seconds) || 0),
+    time,
+    seconds,
     title,
     artist: stringValue(normalized.artist),
     raw: stringValue(normalized.raw),
@@ -321,6 +347,24 @@ function isRicherVideo(candidate, existing) {
 function finiteTimestamp(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function requireAcceptedPublishedTimestamp(value, context) {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  throw acceptedContractError({
+    ...context,
+    field: "publishedTimestamp",
+    expected: "positive finite number",
+    actual: value,
+  });
+}
+
+function acceptedContractError({ sourceFile, videoId, songIndex, field, expected, actual }) {
+  const songPart = Number.isInteger(songIndex) ? ` songIndex=${songIndex}` : "";
+  const actualValue = actual === undefined ? "undefined" : JSON.stringify(actual);
+  return new Error(
+    `YouTube channel discovery accepted contract violation: file=${sourceFile || "<unknown>"} videoId=${videoId || "<unknown>"}${songPart} field=${field} expected=${expected} actual=${actualValue}`,
+  );
 }
 
 function uniqueValues(values) {

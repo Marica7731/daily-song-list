@@ -3521,6 +3521,7 @@ async function requestApiViewPage(request, range) {
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
   if (filters.nicheOnly) params.set("nicheOnly", "1");
   if (filters.hideUnknownArtist) params.set("hideUnknownArtist", "1");
+  if (request.view === "vtuberRank") params.set("compact", "1");
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: "no-cache",
     signal: request.signal,
@@ -4307,9 +4308,62 @@ function requestSummaryNote(result) {
 function renderRequestInlineWarning(error) {
   const warning = document.createElement("div");
   warning.className = "content-warning";
-  warning.setAttribute("role", "alert");
-  warning.textContent = `页面读取失败，已保留上一页：${error.message}`;
+  warning.setAttribute("role", "status");
+  warning.setAttribute("aria-live", "polite");
+
+  const copy = document.createElement("div");
+  copy.className = "content-warning-copy";
+  const title = document.createElement("strong");
+  title.className = "content-warning-title";
+  title.textContent = "数据暂时不可用，已保留当前内容";
+  const message = document.createElement("span");
+  message.className = "content-warning-message";
+  message.textContent = requestErrorFriendlyMessage(error);
+  copy.append(title, message);
+
+  const retry = document.createElement("button");
+  retry.type = "button";
+  retry.className = "content-warning-retry";
+  retry.textContent = "重试";
+  retry.addEventListener("click", async () => {
+    retry.disabled = true;
+    retry.textContent = "重试中…";
+    try {
+      await renderRequestedRuntime({ syncUrl: false, preservePageInput: true });
+    } finally {
+      retry.disabled = false;
+      retry.textContent = "重试";
+    }
+  });
+
+  const details = document.createElement("details");
+  details.className = "content-warning-details";
+  const summary = document.createElement("summary");
+  summary.textContent = "诊断详情";
+  const diagnostic = document.createElement("pre");
+  diagnostic.textContent = requestErrorDiagnostic(error);
+  details.append(summary, diagnostic);
+
+  warning.append(copy, retry, details);
   els.content.append(warning);
+}
+
+function requestErrorFriendlyMessage(error) {
+  const status = Number(error?.status) || 0;
+  if (status === 400) return "查询条件有误，请调整后重试。";
+  if (status === 404) return "请求的数据不存在或尚未生成。";
+  if (status === 502 || status === 503) return "数据服务暂时不可用，请稍后重试。";
+  if (status === 504) return "查询处理超时，请稍后重试。";
+  return "网络或数据服务发生异常，请稍后重试。";
+}
+
+function requestErrorDiagnostic(error) {
+  const lines = [];
+  if (Number(error?.status)) lines.push(`HTTP ${Number(error.status)}`);
+  if (error?.requestPath) lines.push(`请求：${error.requestPath}`);
+  const detail = cleanText(error?.diagnosticDetail || error?.body || "");
+  if (detail) lines.push(`详情：${detail.slice(0, 240)}`);
+  return lines.length ? lines.join("\n") : "暂无更多诊断信息";
 }
 
 function requestPageUnit(view) {
@@ -9072,11 +9126,15 @@ async function readJson(path, options = {}) {
       ? "请求参数错误"
       : response.status === 404
         ? "请求资源不存在"
+        : response.status === 502
+          ? "数据服务暂时不可用"
         : response.status === 504
           ? "查询超时"
           : "请求失败";
-    const error = new Error(`${path}: ${label}（HTTP ${response.status}）${detail ? `：${detail}` : ""}`);
+    const error = new Error(`${label}（HTTP ${response.status}）${detail ? `：${detail}` : ""}`);
     error.status = response.status;
+    error.requestPath = path;
+    error.diagnosticDetail = detail;
     error.body = text.slice(0, 512);
     throw error;
   }
