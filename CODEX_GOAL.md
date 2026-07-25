@@ -76,6 +76,9 @@
 - 2026-07-26：浏览器只读预检发现 YOSHIKA 卡片 `songCount=627`，展开详情显示
   628 首；审计改为记录 count mismatch，并由完整 DB `source_occurrences` 生成每频道
   全部歌曲/歌手分组。
+- 2026-07-26：四个 UI 目标均确认 20 个频道和正确 metric/page；YOSHIKA 展开可见
+  歌手及分页。全库 artifact 将为每个频道保留数字/杂谈/未知歌手的完整 selector
+  样本，而非只保留前 20 条普通样本。
 
 ## 下一步
 

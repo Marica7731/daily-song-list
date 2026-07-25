@@ -508,6 +508,11 @@ function getChannelAccumulator(channels, key, video) {
       unknownOccurrences: 0,
       patterns: new Map(),
       samples: [],
+      flaggedSamples: {
+        numeric: [],
+        conversationOrTransition: [],
+        unknownArtist: [],
+      },
     });
   }
   return channels.get(key);
@@ -519,8 +524,11 @@ function incrementChannel(channel, identity, unknown, pattern, evidence) {
   if (unknown) {
     channel.unknownOccurrences += 1;
     channel.unknownIdentities.add(identity);
+    pushSample(channel.flaggedSamples.unknownArtist, evidence, 250);
   }
   incrementMap(channel.patterns, pattern);
+  if (pattern === "numeric_only") pushSample(channel.flaggedSamples.numeric, evidence, 250);
+  if (pattern === "conversation_or_transition") pushSample(channel.flaggedSamples.conversationOrTransition, evidence, 250);
   pushSample(channel.samples, evidence, 20);
 }
 
@@ -637,6 +645,7 @@ function finalizeChannel(channel) {
     singletonSongs,
     singletonUnknownSongs,
     titlePatterns: Object.fromEntries(sortedCountEntries(channel.patterns).map(({ name, count }) => [name, count])),
+    flaggedSamples: channel.flaggedSamples,
     samples: channel.samples,
   };
 }
@@ -686,6 +695,13 @@ function buildYoshikaReport(report, handle) {
   const match = (row) => normalizeHandle(row.handle) === normalizeHandle(handle)
     || cleanText(row.channelId) === "UC3xQCiEPSkco54WhuiDcngw"
     || /YOSHIKA/u.test(cleanText(row.name));
+  const unknownFillCandidates = report.before.unknownFillCandidates.filter((candidate) => (
+    candidate.unknownSamples.some((sample) => match({
+      handle: sample.channelHandle,
+      channelId: "",
+      name: sample.channelName,
+    }))
+  ));
   return {
     handle: normalizeHandle(handle),
     raw: report.raw.channels.find(match) || null,
@@ -701,6 +717,7 @@ function buildYoshikaReport(report, handle) {
       channelId: "",
       name: sample.before?.channelName,
     })),
+    unknownFillCandidates,
   };
 }
 

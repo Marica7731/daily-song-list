@@ -45,6 +45,36 @@ test("global audit treats singleton and unknown artist as candidates, not deleti
   assert.equal(result.counts.singletonSongs, 2);
   assert.equal(result.counts.singletonUnknownSongs, 1);
   assert.equal(result.channels[0].occurrences, 2);
+  assert.equal(result.channels[0].flaggedSamples.unknownArtist.length, 1);
+});
+
+test("global audit retains exact selector evidence for numeric channel candidates", () => {
+  const accumulator = createAccumulator("fixture");
+  addVideoToAccumulator(accumulator, {
+    videoId: "AAAAAAAAAAA",
+    channelName: "YOSHIKA⁂Ch.",
+    channelHandle: "@YOSHIKA-Ch",
+    selectedSourceId: "vsinger-moment:fixture-video",
+    selectedSourceHash: "fixture-video-hash",
+    songs: [
+      {
+        seconds: 3477,
+        title: "168000",
+        artist: "未記載",
+        raw: "57:57 168000",
+        sourceId: "fixture-song-id",
+        sourceHash: "fixture-song-hash",
+        rawHash: "fixture-raw-hash",
+      },
+    ],
+  });
+  const result = finalizeAccumulator(accumulator);
+  const sample = result.channels[0].flaggedSamples.numeric[0];
+  assert.equal(sample.videoId, "AAAAAAAAAAA");
+  assert.equal(sample.sourceId, "fixture-song-id");
+  assert.equal(sample.sourceHash, "fixture-song-hash");
+  assert.equal(sample.rawHash, "fixture-raw-hash");
+  assert.equal(sample.seconds, 3477);
 });
 
 test("global audit verifies the complete source selector and rejects near misses", () => {
