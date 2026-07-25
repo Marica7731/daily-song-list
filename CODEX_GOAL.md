@@ -94,8 +94,14 @@ deploy.
 - KOTATSU source 40/420; main overlap 0, production overlap 1; selected 39/417.
 - Arale source 117/991; main overlap 0, production overlap 3; selected 114/963.
 - UCw0ty source 38/496; main overlap 0, production overlap 0; selected 38/496.
-- Accepted outputs complete: KOTATSU 39/417, Arale 114/963, and UCw0ty 38/496.
-- Cleaner write and stable dry-run complete for 191 videos / 1876 occurrences with zero drops.
+- Initial accepted selection: KOTATSU 39/417, Arale 114/963, and UCw0ty 38/496.
+- Content-level scan reviewed all 1876 `title`/`artist`/`raw` rows rather than treating a zero-change cleaner result as semantic proof.
+- High-confidence non-song curation removed KOTATSU 23, Arale 13, and UCw0ty 6 occurrences; 10 empty videos were also removed.
+- Final accepted outputs: KOTATSU 34/394, Arale 113/950, and UCw0ty 34/490; combined 181 videos / 1834 occurrences.
+- UCw0ty `Fzn_pF0G6uY` at 59:08 (`羽緒たんのモノマネ(似てない)`) and the other five explicit non-song chapters are absent.
+- Known songs `1.0 / amazarashiさん` and `HAPPYぱLUCKY / SoLaMi♡SMILE` remain protected.
+- Cleaner write retained all 181/1834 curated records; the second per-file dry-run reported `changedFiles=0`, `droppedVideos=0`, and `droppedSongs=0`.
+- Strict publishedTimestamp/time/seconds validation passed, and `test/source-filter.test.js` passed 11/11.
 - Strict field, usable-detail, duplicate, main-overlap, and production-overlap validation passed.
 - Amanofu, Kyoka, and Uten remain deferred; no Mac or Windows crawler is started in this batch.
 
