@@ -87,3 +87,35 @@
 - Lightweight WSL regression: 116/116 passed; syntax checks passed.
 - No commit, push, workflow dispatch, deployment, or live post-deploy acceptance yet.
 - Independent singleton/unknown-artist task remains active and owns YOSHIKA plus the four-page channel audit.
+
+## Release checkpoint (2026-07-26 07:20 +08:00)
+
+- `Update core song-list data` run `30176739632` generated commit
+  `a01cc8723692fda7a527c62812e97719399bd732` from parent
+  `149245d814899dffcbc7ebbff18fff4c09ebafd2`; its 4.67 GB generated-object
+  push is still active on the Mac runner and must not be cancelled while
+  `git-remote-https` is making CPU/network progress.
+- The regenerated rank diffs now retain a non-null previous snapshot and are
+  within budget: latest-all gzip 3,361 bytes, latest-1m gzip 3,370 bytes,
+  latest-7d gzip 9,025 bytes.
+- Generated continuity audit: all 136 recent videos are present in the base
+  all range; all 2,208 recent occurrences have seconds, time, sourceId and
+  rawHash. YouTube accepted increments are intentionally merged by the runtime
+  DB exporter rather than written into the base `data/all.json`.
+- Full channel identity hydration was rerun against current main metadata SHA
+  `e48502b0...f6c3b7`: 492 eligible candidates produced 486 additions, 4
+  unchanged identities, 2 duplicate-candidate consolidations and 0 conflicts.
+  Felicia plus 2 ambiguous and 2 unresolved groups remain excluded. Explicit
+  apply produced SHA `bc75b5b3...adebd28`; a second apply returned changed=0.
+- The current deployed index still references stale
+  `assets/app-ha7da65830b9d.js`, which does not send `compact=1`. The reviewed
+  source assets generate version `h50a70f4cceb4`; the new hashed app contains
+  compact VTuber requests and the retryable diagnostic card.
+- Local pre-publish verification: channel hydration suites 22/22 passed;
+  asset syntax passed; app gzip 79,149 bytes and CSS gzip 15,204 bytes are
+  within budget. After supplying a temporary G-drive `python` -> `python3`
+  test shim, the combined UI/runtime selection run passed 62/62; final Check
+  code on Mac remains authoritative.
+- No new metadata, hashed asset, runtime DB or static page has been published
+  at this checkpoint. Production still reports the old runtime source and
+  Felicia handle search returns zero; delivery remains incomplete.
