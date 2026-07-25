@@ -35,7 +35,8 @@ provenance 足以证明是杂谈、转场或解析错误时才可写 `drop_entry
     `codex/global-singleton-cleanup-20260726` 时运行重型审计 job。
   - runner 临时目录独立于生产 DB cache；不含 SSH、VPS、commit、push 或部署步骤。
   - 可用 workflow input 锁定本批 selector 数量；完成的 inventory checkpoint 会短期上传，
-    同一 head 的后续 run 可显式恢复，默认不使用 `--fresh`。
+    只要 base/accepted/VSinger 输入及 inventory 代码的内容指纹不变，后续 curation commit
+    可显式恢复；同尺寸内容变化也会使 checkpoint 失效，默认不使用 `--fresh`。
 
 ## 实时生产基线
 
@@ -106,16 +107,21 @@ singleton 保留、可能错拼、未知歌手回填候选、同标题多歌手�
 Mac SQLite 报告会按每个频道的 `sourceDetailKey` 分组完整 `source_occurrences`，以
 source 层的标题、歌手和次数作为完整性判断。
 
-## 当前已知物化边界
+## 当前物化边界
 
-现有 runtime DB exporter 会对 runtime 导入执行 source filter、song alias 和未知歌手
-fallback，但不会把 `config/curation-overrides.json` 应用到 accepted/VSinger 导入。
-本清洗分支受写集隔离限制，不修改核心 exporter；Mac 审计会同时提供：
+main 的 P0 提交 `c0984812fb0645adba675f07be08ad78ca53885c` 已把
+`config/curation-overrides.json` 接入 YouTube accepted runtime 导入，并补充
+drop/replace/upsert 的时间字段与回归测试。因此本批优先从
+`youtube_channel_discovery` 选择可核验记录；其 curation before/after 应与完整 SQLite
+物化结果一致。
+
+VSinger 导入是否覆盖相同 curation 路径仍由 Mac 报告逐项验证，不用 curation 层的理论
+delta 代替 runtime DB 证据。Mac 审计会同时提供：
 
 1. curation 层精确 before/after（证明 selector 与规则效果）；
 2. 当前核心 exporter 生成的完整 SQLite（证明实际分支运行时物化状态）。
 
-若两者不一致，报告必须明确标记为运行时接线缺口，不能声称生产已清洗。
+若两者不一致，报告必须明确标记为运行时接线缺口，不能声称生产或分支 DB 已清洗。
 
 ## 待回填
 
