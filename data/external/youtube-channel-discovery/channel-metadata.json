@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-25T09:14:54.512Z",
+  "generatedAt": "2026-07-25T10:50:36.837Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-25T09:14:54.512Z",
+    "fetchedAt": "2026-07-25T10:50:36.837Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-25T09:14:54.512Z",
+    "generatedAt": "2026-07-25T10:50:36.837Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,25 +7272,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 975,
-      "parseableChannels": 757,
+      "totalChannels": 977,
+      "parseableChannels": 759,
       "realAvatar": 642,
-      "thumbnailFallback": 333,
+      "thumbnailFallback": 335,
       "missingDisplayImage": 0,
-      "missingAvatar": 333,
+      "missingAvatar": 335,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 343
+      "skipped_collected_evidence": 345
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 125,
+      "batch_limit_reached": 127,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
+      {
+        "handle": "/@Kotoha_ktnh",
+        "channelId": "UC3ql_EU4JnaE3Rh3cqbHu6g",
+        "displayName": "Kotoha",
+        "sourceUrl": "https://www.youtube.com/@Kotoha_ktnh",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@AmazoraInori",
         "channelId": "UCRHFjZWvlNfdn2ajZKM9G6A",
@@ -7383,6 +7390,13 @@
         "reason": "missing_channel_url_or_handle"
       },
       {
+        "handle": "/@VPI_HanayuriChumi",
+        "channelId": "UCaRgPx8b0t6EjYwwzomXCpA",
+        "displayName": "花百合ちゅみ / Hanayuri Chumi",
+        "sourceUrl": "https://www.youtube.com/@VPI_HanayuriChumi",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "",
         "channelId": "",
         "displayName": "黒間タクト / Kuroma Takuto",
@@ -7449,20 +7463,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "戌峯 ひぐれ",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "鏡愛しゅくり",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "雅楽代ましろ\\UtashiroMashiro",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
