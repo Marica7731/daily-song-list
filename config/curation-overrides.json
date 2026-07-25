@@ -1230,6 +1230,26 @@
       "replacement": {
         "title": "紅蓮の弓矢"
       }
+    },
+    {
+      "action": "upsert_video",
+      "videoId": "EXAMPLE_VIDEO_ID",
+      "songs": [
+        {
+          "seconds": 120,
+          "title": "歌名示例1",
+          "artist": "歌手示例1"
+        },
+        {
+          "seconds": 300,
+          "title": "歌名示例2",
+          "artist": "歌手示例2"
+        }
+      ],
+      "reason": "schema_documentation",
+      "note": "示例记录，不会匹配任何真实视频。实际使用时替换 videoId 和 songs。",
+      "reviewedAt": "2026-07-26T03:00:00+08:00",
+      "reviewedBy": "workbuddy"
     }
   ]
 }
