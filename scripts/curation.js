@@ -10,7 +10,8 @@ const CONFIG_DIR = path.join(ROOT, "config");
 const OVERRIDES_PATH = path.join(CONFIG_DIR, "curation-overrides.json");
 const NON_SONG_RULES_PATH = path.join(CONFIG_DIR, "non-song-rules.json");
 const UNKNOWN_ARTIST_KEYS = new Set(["", "unknown", "n/a", "na", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手", "待補歌手", "待补", "待補", "-"]);
-const VALID_ACTIONS = new Set(["drop_entry", "replace_entry", "reject_source", "force_refresh", "drop_video", "force_keep"]);
+const VIDEO_ACTIONS = new Set(["drop_video", "upsert_video"]);
+const VALID_ACTIONS = new Set(["upsert_video", "drop_entry", "replace_entry", "reject_source", "force_refresh", "drop_video", "force_keep"]);
 const ENTRY_ACTIONS = new Set(["drop_entry", "replace_entry", "force_keep"]);
 const SOURCE_ACTIONS = new Set(["reject_source"]);
 const NEAR_DUPLICATE_WINDOW_SECONDS = 30;
@@ -54,6 +55,20 @@ function normalizeOverrides(value) {
     schemaVersion: Number(value.schemaVersion) || 1,
     records: Array.isArray(value.records) ? value.records.map(normalizeOverrideRecord) : [],
   };
+}
+
+
+function normalizeUpsertSongs(songs) {
+  if (!Array.isArray(songs)) return [];
+  return songs
+    .map((song) => ({
+      seconds: Number(song.seconds) || 0,
+      title: String(song.title || "").trim(),
+      artist: String(song.artist || "").trim(),
+      isNiche: Boolean(song.isNiche),
+    }))
+    .filter((song) => song.title)
+    .sort((a, b) => a.seconds - b.seconds);
 }
 
 function normalizeOverrideRecord(record) {
