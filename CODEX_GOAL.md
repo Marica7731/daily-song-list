@@ -47,3 +47,11 @@
 - Complete: canonical channelId and `/@ebakyouka` handle normalization.
 - Complete: cleaner write and stable dry-run produced 103 videos / 1476 occurrences with full timestamp/time/seconds coverage and 0 production overlap.
 - Next: commit/push A2, then quarantine-audit UCr full versus fresh without importing both.
+
+## Checkpoint: UCrF92d quarantine
+
+- Complete: fresh 38/731 is an exact content subset of full 79/774 and has no unique value.
+- Complete: production overlap is two videos / 41 occurrences; both files fail the current cleaner dry-run.
+- Decision: reject fresh; retain full only as a future selective-export source. Full must be production-deduplicated and cleaned to the expected 75 videos / 727 occurrences before it can become accepted.
+- No UCr accepted file was generated, and neither legacy file was modified.
+- Next: process Arale, KOTATSU, or UCw0ty from existing usable artifacts only; do not start Windows crawlers.

@@ -81,3 +81,15 @@ Final source distribution:
 - Final coverage: publishedTimestamp 103/103; occurrence.time 1476/1476; occurrence.seconds 1476/1476.
 - Final production videoId overlap remains 0/103 because cleaning only removed rows from the pre-clean zero-overlap set.
 - Accepted file: `data/external/youtube-channel-discovery/accepted/2026-07-26-source-backfill-ebakyouka-dedup.json`.
+
+## UCrF92d full/fresh quarantine audit
+
+- Full artifact: 79 videos / 774 occurrences, with complete publishedTimestamp, time, and seconds coverage.
+- Fresh artifact: 38 videos / 731 occurrences, with complete field coverage.
+- All 38 fresh videoIds are present in full, and their accepted song records are content-identical. Fresh contributes no unique video or occurrence and must not be imported.
+- Full contributes 41 additional videos / 43 occurrences; 40 of those videos contain one accepted occurrence and one contains three.
+- Production exact-channel overlap is two videos / 41 occurrences: `DEARp2hcPwY` and `FRYLDXX7FS8`.
+- Current cleaner dry-run on full: 79 -> 77 videos and 774 -> 768 occurrences. The six rejected rows are non-song commentary; neither production-overlap video is among the rejected videoIds.
+- Current cleaner dry-run on fresh: 38 -> 37 videos and 731 -> 726 occurrences.
+- Quarantine decision: reject the fresh file entirely. Do not import the full file directly. A future selective export may use full as the sole source, remove the two production videos, then run the cleaner; the deterministic expected result is 75 videos / 727 occurrences with zero production videoId overlap.
+- No UCr accepted file was created in this batch.
