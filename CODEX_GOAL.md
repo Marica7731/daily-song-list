@@ -39,4 +39,11 @@
 - Production built at: `2026-07-25T19:49:07Z`
 - Batch A1 complete: 19 videos / 241 occurrences after production dedup and accepted cleanup.
 - Batch A1 stable cleaner dry-run: 19 -> 19 videos, 241 -> 241 occurrences.
-- Next: commit A1, then extract and validate Ebakyouka batch A2.
+- Batch A1 commit/push complete: `dabb1b98` on `agent/source-backfill-selective-increments`.
+
+## Checkpoint: A2 Ebakyouka
+
+- Complete: exact production dedup selected 108 videos / 1498 occurrences from the existing 278-video accepted artifact.
+- Complete: canonical channelId and `/@ebakyouka` handle normalization.
+- Complete: cleaner write and stable dry-run produced 103 videos / 1476 occurrences with full timestamp/time/seconds coverage and 0 production overlap.
+- Next: commit/push A2, then quarantine-audit UCr full versus fresh without importing both.

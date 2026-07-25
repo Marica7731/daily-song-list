@@ -69,3 +69,15 @@ Final source distribution:
 - No `--fresh` run was used.
 - No frontend file was touched.
 - No database import, merge, or deployment was performed.
+
+## Batch A2: Ebakyouka production-deduplicated increment
+
+- Source accepted: 278 videos.
+- Exact production channel query: 217 videos; 170 source videoIds already present.
+- Pre-clean selective output: 108 videos / 1498 occurrences; production videoId overlap: 0.
+- Normalization: every selected video uses channelId `UChpkyQ3O21OnkcMcgCoNHCg`, handle `/@ebakyouka`, and canonical channel URL.
+- Cleaner write: 108 -> 103 videos; 1498 -> 1476 occurrences. The 22 removed rows were request instructions, likely non-song chat/start markers, or a bad artist field; five videos became empty and were removed.
+- Stable cleaner dry-run: 103 -> 103 videos; 1476 -> 1476 occurrences; changedFiles=0.
+- Final coverage: publishedTimestamp 103/103; occurrence.time 1476/1476; occurrence.seconds 1476/1476.
+- Final production videoId overlap remains 0/103 because cleaning only removed rows from the pre-clean zero-overlap set.
+- Accepted file: `data/external/youtube-channel-discovery/accepted/2026-07-26-source-backfill-ebakyouka-dedup.json`.
