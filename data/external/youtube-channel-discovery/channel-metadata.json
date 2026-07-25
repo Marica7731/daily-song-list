@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-24T23:18:16.489Z",
+  "generatedAt": "2026-07-25T03:33:01.410Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-24T23:18:16.489Z",
+    "fetchedAt": "2026-07-25T03:33:01.410Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7264,7 +7264,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-24T23:18:16.489Z",
+    "generatedAt": "2026-07-25T03:33:01.410Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7272,22 +7272,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 972,
-      "parseableChannels": 754,
+      "totalChannels": 973,
+      "parseableChannels": 755,
       "realAvatar": 642,
-      "thumbnailFallback": 330,
+      "thumbnailFallback": 331,
       "missingDisplayImage": 0,
-      "missingAvatar": 330,
+      "missingAvatar": 331,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 340
+      "skipped_collected_evidence": 341
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 122,
+      "batch_limit_reached": 123,
       "missing_channel_url_or_handle": 218
     },
     "skippedSamples": [
@@ -7331,6 +7331,13 @@
         "channelId": "UC7O0stCdkTxnDJK0dgs_llw",
         "displayName": "心奏みこ",
         "sourceUrl": "https://www.youtube.com/@kokona_miko",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@ykn0911v",
+        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
+        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
+        "sourceUrl": "https://www.youtube.com/@ykn0911v",
         "reason": "batch_limit_reached"
       },
       {
@@ -7456,13 +7463,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "八乙女イオリ - Yaotome iori",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "小恋乃ほの / Kokono Hono Ch.",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
