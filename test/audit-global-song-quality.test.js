@@ -166,6 +166,8 @@ test("global audit reports normalized title variants without auto-merging artist
   });
   const result = finalizeAccumulator(accumulator);
   assert.equal(result.titleVariantCandidates.length, 1);
+  assert.equal(result.titleVariantCandidates[0].variants[0].samples[0].videoId, "AAAAAAAAAAA");
+  assert.equal(result.titleVariantCandidates[0].variants[0].samples[0].seconds, 10);
   assert.deepEqual(
     result.titleVariantCandidates[0].variants.map((variant) => variant.name),
     ["Finale", "Finale.", "Finale。"],

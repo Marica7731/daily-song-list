@@ -488,7 +488,7 @@ function addVideoToAccumulator(accumulator, video) {
     incrementChannel(channel, identity, unknown, pattern, evidence);
     incrementMap(accumulator.titlePatterns, pattern);
     recordTitleArtist(accumulator.titleArtists, titleKey, title, artist, unknown, evidence);
-    recordTitleVariant(accumulator.variantGroups, sourceTitle || title, artist, unknown);
+    recordTitleVariant(accumulator.variantGroups, sourceTitle || title, artist, unknown, evidence);
 
     if (pattern === "numeric_only") pushSample(accumulator.samples.numeric, evidence, 100);
     if (pattern === "conversation_or_transition") pushSample(accumulator.samples.conversation, evidence, 100);
@@ -572,19 +572,22 @@ function recordTitleArtist(records, titleKey, title, artist, unknown, evidence) 
   }
 }
 
-function recordTitleVariant(records, title, artist, unknown) {
+function recordTitleVariant(records, title, artist, unknown, evidence) {
   const key = titleVariantKey(title);
   if (!key) return;
   if (!records.has(key)) {
     records.set(key, {
       canonicalKey: key,
       variants: new Map(),
+      variantSamples: new Map(),
       knownArtists: new Map(),
       unknownOccurrences: 0,
     });
   }
   const record = records.get(key);
   incrementMap(record.variants, title);
+  if (!record.variantSamples.has(title)) record.variantSamples.set(title, []);
+  pushSample(record.variantSamples.get(title), evidence, 5);
   if (unknown) record.unknownOccurrences += 1;
   else incrementMap(record.knownArtists, artist);
 }
@@ -623,7 +626,10 @@ function finalizeAccumulator(accumulator) {
     if (artists.length === 1 && artists[0].count >= 3) unknownFillCandidates.push(candidate);
   }
   for (const record of accumulator.variantGroups.values()) {
-    const variants = sortedCountEntries(record.variants);
+    const variants = sortedCountEntries(record.variants).map((variant) => ({
+      ...variant,
+      samples: record.variantSamples.get(variant.name) || [],
+    }));
     if (variants.length <= 1) continue;
     titleVariantCandidates.push({
       canonicalKey: record.canonicalKey,
