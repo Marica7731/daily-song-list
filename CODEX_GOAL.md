@@ -42,12 +42,18 @@
 - 当前修复分支：`codex/fix-rank-diff-snapshot-20260726`。计划补齐 previous payload 回退和
   sparse-safe snapshot index 保留规则，通过测试后推送 main 并重跑 Check code/update-core。
 - rank-diff 修复已推送 main：`0049dccca73203803ac19509560f5f5e9a338ad9`。
+- 已审查来源与 Felicia 身份整合已推送 main：`499f34585d77935770c7143118bab68295928128`。
 - 来源分支 `agent/source-backfill-usable-artifacts-20260726` 已完成内容级复核：
   KOTATSU、Arale、UCw0ty 合计 `181 videos / 1834 occurrences`，字段覆盖 100%，
   cleaner 二次 dry-run 为零变化，生产/main overlap 为零。
 - Felicia Lulufleur 已确认官方频道 `UClHap4tvcYZnyiqgAyEs0BQ` / `@FeliciaLulufleur`；
   metadata hydration 可回填生产既有 `239 videos / 3293 occurrences` 的 channelId/handle/url。
   另有 44 个生产缺失 videoId 仅保留 checkpoint，因无 usable song detail 尚未生成 accepted。
+- 全库频道身份 dry-run 审计已完成：生产 `45223` records 中 `16584` 条至少缺一个字段，
+  合并为 497 组；493 组 high-confidence，其中 Felicia 作为已单独交付正样本排除，
+  实际可交付 492 组。2 组 ambiguous、2 组 unresolved 保留人工复核。
+  候选预计把三字段覆盖提高至 `44843 / 45223`（99.16%）；本轮只交付审计脚本、测试和报告，
+  不自动写 metadata。
 - Naraetan 首批已合并：`6d2163c`。
 - `upsert_video` 已推送：`938bf7d`，文档提交 `7541a18`，示例修正 `1d2bf94`。
 - Check code run `30172044209` 失败：413 个测试通过，但 `validate-data` 报告 17 条 alias 尚未物化到静态核心数据。
