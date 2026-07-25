@@ -68,3 +68,47 @@
 - Lightweight WSL regression: 116/116 passed; syntax checks passed.
 - No commit, push, workflow dispatch, deployment, or live post-deploy acceptance yet.
 - Independent singleton/unknown-artist task remains active and owns YOSHIKA plus the four-page channel audit.
+
+## Source-backfill usable artifact batch (2026-07-26)
+
+### Goal
+
+Deliver only the existing concrete usable artifacts for Arale, KOTATSU, and
+UCw0ty from a new G-drive feature branch based on `c0984812`. Deduplicate by
+both current main accepted videoIds and the production rankings API, run the
+current accepted cleaner, and require complete publishedTimestamp/time/seconds
+coverage. Do not import partial artifacts, start a crawler, merge main, or
+deploy.
+
+### Acceptance
+
+1. Every source artifact is reached-end or consolidated and contains usable song detail.
+2. Every output videoId is absent from both current main accepted JSON and production.
+3. Cleaner write is followed by a stable dry-run with zero further changes.
+4. Every output has complete publishedTimestamp, occurrence.time, and occurrence.seconds coverage.
+5. Only this batch's accepted files, evidence document, and goal checkpoint are committed and pushed to the feature branch.
+
+### Current status
+
+- Baseline: `c0984812fb0645adba675f07be08ad78ca53885c`.
+- KOTATSU source 40/420; main overlap 0, production overlap 1; selected 39/417.
+- Arale source 117/991; main overlap 0, production overlap 3; selected 114/963.
+- UCw0ty source 38/496; main overlap 0, production overlap 0; selected 38/496.
+- Accepted outputs complete: KOTATSU 39/417, Arale 114/963, and UCw0ty 38/496.
+- Cleaner write and stable dry-run complete for 191 videos / 1876 occurrences with zero drops.
+- Strict field, usable-detail, duplicate, main-overlap, and production-overlap validation passed.
+- Amanofu, Kyoka, and Uten remain deferred; no Mac or Windows crawler is started in this batch.
+
+### Added source: Felicia Lulufleur
+
+- Official handle: `https://www.youtube.com/@FeliciaLulufleur`.
+- First confirm the unique official channelId from existing videos and the official channel page.
+- Audit current main and production by exact videoId; separately count records missing channelHandle/channelUrl.
+- Prefer the repository's existing channel metadata/hydration path so handle and display-name queries resolve existing records.
+- Only real videoId gaps may become an accepted increment. This Windows task is limited to existing artifacts or a bounded lightweight probe.
+- Any long continuation must use a Mac checkpoint without `--fresh`; this branch must not merge or deploy.
+- Identity confirmed from the official page: channelId `UClHap4tvcYZnyiqgAyEs0BQ`.
+- Production before hydration: 239 videos / 3293 occurrences; 239 missing channelId, handle, and URL.
+- Metadata hydration after: 239/239 records have channelId, handle, and URL; handle/display-name query simulation both match 239.
+- Lightweight page probe: 55 candidates, 11 already in production, 44 production-missing, but zero usable-detail videos.
+- No Felicia accepted increment was generated; the 44 IDs remain a checkpoint for a later bounded Mac continuation.
