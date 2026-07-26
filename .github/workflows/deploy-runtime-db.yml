@@ -369,7 +369,6 @@ jobs:
         run: |
           set -Eeuo pipefail
           remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
-          direct_mode=0
           db_bytes="$(stat -f%z artifacts/runtime/song-rank.sqlite)"
           candidate_min_free_bytes="$((db_bytes + 1073741824))"
           cleanup_remote_candidate() {
@@ -377,10 +376,6 @@ jobs:
           }
           handle_upload_error() {
             cleanup_remote_candidate
-            if [ "${direct_mode}" = "1" ]; then
-              echo "CODEX_RUNTIME_DB_UPLOAD_ERROR direct-mode-failed service-left-stopped-to-avoid-serving-partial-db"
-              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "systemctl stop song-rank-api || true; systemctl status song-rank-api --no-pager -l || true" || true
-            fi
           }
           trap handle_upload_error ERR
           remote_stats="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
@@ -400,12 +395,7 @@ jobs:
             echo "CODEX_RUNTIME_DB_UPLOAD_ERROR invalid-remote-stats value=${remote_stats}"
             exit 1
           fi
-          growth_bytes=0
-          if [ "${db_bytes}" -gt "${remote_active_bytes}" ]; then
-            growth_bytes="$((db_bytes - remote_active_bytes))"
-          fi
-          direct_min_free_bytes="$((growth_bytes + 1073741824))"
-          echo "CODEX_RUNTIME_DB_UPLOAD_PLAN dbBytes=${db_bytes} activeBytes=${remote_active_bytes} remoteFreeBytes=${remote_free_bytes} candidateMinFreeBytes=${candidate_min_free_bytes} directMinFreeBytes=${direct_min_free_bytes}"
+          echo "CODEX_RUNTIME_DB_UPLOAD_PLAN dbBytes=${db_bytes} activeBytes=${remote_active_bytes} remoteFreeBytes=${remote_free_bytes} candidateMinFreeBytes=${candidate_min_free_bytes}"
           if [ "${remote_free_bytes}" -ge "${candidate_min_free_bytes}" ]; then
             echo "CODEX_RUNTIME_DB_UPLOAD_MODE candidate"
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
@@ -425,39 +415,8 @@ jobs:
               systemctl reload nginx
             "
           else
-            echo "CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace"
-            if [ "${remote_free_bytes}" -lt "${direct_min_free_bytes}" ]; then
-              echo "CODEX_RUNTIME_DB_UPLOAD_ERROR insufficient-direct-space freeBytes=${remote_free_bytes} requiredBytes=${direct_min_free_bytes}"
-              exit 1
-            fi
-            direct_mode=1
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-              set -Eeuo pipefail
-              systemctl disable --now song-rank-runtime-update.timer || true
-              systemctl stop song-rank-api
-              if systemctl is-active --quiet song-rank-api; then
-                echo 'CODEX_RUNTIME_DB_UPLOAD_ERROR api-still-active-before-direct-upload'
-                exit 1
-              fi
-              if curl -fsS --max-time 3 http://127.0.0.1:8765/healthz >/dev/null; then
-                echo 'CODEX_RUNTIME_DB_UPLOAD_ERROR api-health-still-open-before-direct-upload'
-                exit 1
-              fi
-              echo 'CODEX_RUNTIME_DB_DIRECT_STOP_OK'
-              df -h '${REMOTE_STATE_DIR}'
-            "
-            echo "CODEX_RUNTIME_DB_UPLOAD_TRANSPORT gzip-stream target=${REMOTE_DB_PATH}"
-            gzip -1 -c artifacts/runtime/song-rank.sqlite | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "gzip -dc > '${REMOTE_DB_PATH}'"
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "cat > '${REMOTE_DB_PATH}.manifest.json'" < artifacts/runtime/song-rank.sqlite.manifest.json
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-              set -Eeuo pipefail
-              CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1 EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${REMOTE_DB_PATH}' /usr/local/bin/song-rank-db-activate.sh
-            "
-            direct_mode=0
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-              set -Eeuo pipefail
-              systemctl reload nginx
-            "
+            echo "CODEX_RUNTIME_DB_UPLOAD_ERROR insufficient-candidate-space freeBytes=${remote_free_bytes} requiredBytes=${candidate_min_free_bytes} keeping-current-api-online"
+            exit 1
           fi
           trap - ERR
 

@@ -88,6 +88,14 @@ test("legacy combined update workflow is removed", () => {
   assert.equal(fs.existsSync(path.join(workflowsDir, "update-songlist.yml")), false);
 });
 
+test("runtime DB deployment never falls back to direct in-place overwrite", () => {
+  const deploy = readWorkflow("deploy-runtime-db.yml");
+  assert.match(deploy, /insufficient-candidate-space/u);
+  assert.match(deploy, /keeping-current-api-online/u);
+  assert.doesNotMatch(deploy, /CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace/u);
+  assert.doesNotMatch(deploy, /CODEX_RUNTIME_DB_DIRECT_ACTIVATE/u);
+});
+
 test("README screenshot gallery is refreshable and references committed images", () => {
   const readme = fs.readFileSync(path.join(repoRoot, "README.md"), "utf8");
   const uiProof = fs.readFileSync(path.join(repoRoot, "docs", "ui-proof.md"), "utf8");
