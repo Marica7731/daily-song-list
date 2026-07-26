@@ -130,6 +130,7 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part'" || true
           if [ -n "${TASK_ROOT:-}" ] && [ -d "$TASK_ROOT" ]; then
             df -k / > "$TASK_ROOT/mac-df-cleanup.txt" 2>/dev/null || true
+            rm -rf -- ""
           fi
   migrate:
     if: ${{ inputs.mode != 'restore-sqlite' }}
