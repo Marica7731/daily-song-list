@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T16:20:31.438Z",
+  "generatedAt": "2026-07-26T17:46:55.853Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T16:20:31.438Z",
+    "fetchedAt": "2026-07-26T17:46:55.853Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T16:20:31.438Z",
+    "generatedAt": "2026-07-26T17:46:55.853Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1000,
-      "parseableChannels": 978,
+      "totalChannels": 1001,
+      "parseableChannels": 979,
       "realAvatar": 643,
-      "thumbnailFallback": 357,
+      "thumbnailFallback": 358,
       "missingDisplayImage": 0,
-      "missingAvatar": 357,
+      "missingAvatar": 358,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 550,
-      "already_cached": 665
+      "already_cached": 665,
+      "skipped_collected_evidence": 551
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 528,
+      "batch_limit_reached": 529,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11681,6 +11681,13 @@
         "channelId": "UCjvncTrq_44m3znLtmQk5pg",
         "displayName": "Roi Ch.猫崎ロイ",
         "sourceUrl": "https://www.youtube.com/@Nekozaki_Roi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Rei7_Y4T4",
+        "channelId": "UC_4QF0dL-9XI9VajsNkMtmQ",
+        "displayName": "Rei7 / Reina【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@Rei7_Y4T4",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCPmcUzR-kh8hGVbNdYU84EA",
         "displayName": "柘榴シロ@Zakuro shiro",
         "sourceUrl": "https://www.youtube.com/@Shiro_zakuro",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Luciaaa_Sings",
-        "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
-        "displayName": "Lucia",
-        "sourceUrl": "https://www.youtube.com/@Luciaaa_Sings",
         "reason": "batch_limit_reached"
       }
     ]
