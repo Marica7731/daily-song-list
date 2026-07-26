@@ -103,9 +103,8 @@ jobs:
             remaining=$(( EXPECTED_BYTES - base ))
             take=$chunk_bytes
             [ "$remaining" -lt "$take" ] && take="$remaining"
-            dd if="$SOURCE_DB" bs="$chunk_bytes" skip="$index" count=1 2>/dev/null | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "cat >> '$REMOTE_PART'"
+            remote_written="$(dd if="$SOURCE_DB" bs="$chunk_bytes" skip="$index" count=1 2>/dev/null | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "cat >> '$REMOTE_PART'; stat -c%s '$REMOTE_PART'")"
             written=$(( base + take ))
-            remote_written="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "stat -c%s '$REMOTE_PART'")"
             test "$remote_written" = "$written"
             printf 'chunk=%s/%s bytes=%s expected=%s\n' "$((index + 1))" "$chunk_count" "$remote_written" "$EXPECTED_BYTES" | tee -a "$TASK_ROOT/restore-checkpoint.log"
           done
