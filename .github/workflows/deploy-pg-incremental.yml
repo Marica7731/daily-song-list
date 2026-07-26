@@ -1,96 +1,123 @@
-name: Deploy PostgreSQL incremental candidate
+name: Deploy PostgreSQL accepted increment
 
 on:
   workflow_dispatch:
     inputs:
       patch_path:
-        description: "NDJSON accepted increment or curation patch"
+        description: "Curated accepted-increment NDJSON"
         required: true
         default: "artifacts/migration/candidate.ndjson"
       manifest_path:
-        description: "Source manifest JSON with provenance and hashes"
+        description: "Manifest with source/provenance/hash evidence"
         required: true
         default: "artifacts/migration/manifest.json"
-      api_base_url:
-        description: "PG-backed API base URL for health/meta/rankings contract checks"
+      activate:
+        description: "Activate only after candidate API gate (release window)"
         required: true
-        default: "https://ytb-song-rank.culua.com/"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/deploy-pg-incremental.yml"
-      - "scripts/migration/**"
-      - "artifacts/migration/**"
+        default: false
+        type: boolean
+  repository_dispatch:
+    types: [accepted-increment-ready]
 
 permissions:
   contents: read
 
 concurrency:
-  group: daily-song-list-pg-incremental
+  group: daily-song-list-pg-increment
   cancel-in-progress: false
 
 jobs:
   candidate:
-    # The variable is intentionally absent until a real PG target and API
-    # adapter are provisioned. The old SQLite workflow is gated separately.
-    if: vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1'
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
-      DAILY_SONG_POSTGRES_DSN: ${{ secrets.DAILY_SONG_POSTGRES_DSN }}
-      PATCH_PATH: ${{ inputs.patch_path || 'artifacts/migration/candidate.ndjson' }}
-      MANIFEST_PATH: ${{ inputs.manifest_path || 'artifacts/migration/manifest.json' }}
-      API_BASE_URL: ${{ inputs.api_base_url || vars.DAILY_SONG_PG_API_BASE_URL }}
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
+      PATCH_PATH: ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
+      MANIFEST_PATH: ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
+      ACTIVATE: ${{ inputs.activate || false }}
     steps:
-      - name: Checkout migration inputs only
+      - name: Checkout bounded migration inputs
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.sha }}
           fetch-depth: 1
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             scripts/migration
-            ${{ inputs.patch_path || 'artifacts/migration/candidate.ndjson' }}
-            ${{ inputs.manifest_path || 'artifacts/migration/manifest.json' }}
+            server/pg_adapter.py
+            server/pg_api_server.py
+            deploy/vps2/song-rank-pg-api.service
+            ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
+            ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
 
-      - name: Candidate compare health API activate gate
+      - name: Candidate compare health and optional activation
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
           set -Eeuo pipefail
-          export PATH="/Users/be/.local/bin:/Users/be/.local/codex-toolchains/node/bin:${PATH}"
-          test -n "${DAILY_SONG_POSTGRES_DSN:-}" || { echo "PRODUCTION_PG_BLOCKED missing DAILY_SONG_POSTGRES_DSN"; exit 78; }
-          test -n "${API_BASE_URL:-}" || { echo "PRODUCTION_PG_BLOCKED missing DAILY_SONG_PG_API_BASE_URL"; exit 78; }
-          test -f "${PATCH_PATH}" || { echo "PG_INCREMENTAL_BLOCKED missing patch=${PATCH_PATH}"; exit 78; }
-          test -f "${MANIFEST_PATH}" || { echo "PG_INCREMENTAL_BLOCKED missing manifest=${MANIFEST_PATH}"; exit 78; }
-          TMP_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-release.XXXXXX")"
+          test -n "$VPS2_PASSWORD"
+          test -f "$PATCH_PATH" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
+          test -f "$MANIFEST_PATH" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
+          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-increment.XXXXXX")"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+          patch_bytes="$(stat -f%z "$PATCH_PATH")"
+          manifest_bytes="$(stat -f%z "$MANIFEST_PATH")"
           expected_peak_bytes=$((512 * 1024 * 1024))
           hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
-          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+          printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
+          test "$patch_bytes" -lt "$hard_cap_bytes"
+          mkdir -p "$RUNNER_TEMP/ssh-askpass"
+          printf '%s\n' "$VPS2_PASSWORD" > "$RUNNER_TEMP/ssh-askpass/vps2.password"
+          chmod 600 "$RUNNER_TEMP/ssh-askpass/vps2.password"
+          cat > "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          exec cat "$RUNNER_TEMP/ssh-askpass/vps2.password"
+          SH
+          chmod 700 "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh"
+          export SSH_ASKPASS="$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=codex:0
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          REVISION="accepted_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
+          printf 'revision=%s\n' "$REVISION" >> "$TASK_ROOT/storage.txt"
           cleanup() {
             status=$?
-            node_pid="${NODE_PID:-}"
-            if [ -n "${node_pid}" ] && kill -0 "${node_pid}" 2>/dev/null; then kill -TERM "${node_pid}" 2>/dev/null || true; wait "${node_pid}" 2>/dev/null || true; fi
-            before_cleanup_bytes=0
-            if [ -d "${TMP_ROOT}" ]; then before_cleanup_bytes=$(( $(du -sk "${TMP_ROOT}" | awk '{print $1}') * 1024 )); fi
-            rm -rf "${TMP_ROOT}"
+            if [ -n "${CANDIDATE_PID:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "kill $CANDIDATE_PID 2>/dev/null || true" || true; fi
+            if [ "$status" -ne 0 ] && [ -n "${REVISION:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"delete from migration_revisions where revision_id='$REVISION';\"" || true; fi
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -f /tmp/import-pg-incremental.py /tmp/pg-schema.sql /tmp/activate-pg-candidate.py /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/pg-increment-manifest.json /tmp/pg-increment-candidate.log" || true
+            before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
+            rm -rf -- "$TASK_ROOT"
             after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-            echo "PG_INCREMENTAL_CLEANUP status=${status} beforeBytes=${before_cleanup_bytes} afterBytes=0 baselineFreeBytes=${baseline_free_bytes} afterFreeBytes=${after_free_bytes} retained=none"
-            exit "${status}"
+            echo "PG_INCREMENT_CLEANUP status=$status beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes retained=$(test "$ACTIVATE" = true && echo none || echo ready-candidate)"
+            exit "$status"
           }
           trap cleanup EXIT INT TERM
-          npm install --prefix "${TMP_ROOT}/node-env" --no-save --package-lock=false --no-audit --no-fund pg
-          actual_bytes=$(( $(du -sk "${TMP_ROOT}" | awk '{print $1}') * 1024 ))
-          if [ "${actual_bytes}" -gt "${hard_cap_bytes}" ] || [ "${actual_bytes}" -gt $((expected_peak_bytes * 120 / 100)) ]; then
-            echo "PG_INCREMENTAL_SPACE_GUARD pause actualBytes=${actual_bytes} expectedPeakBytes=${expected_peak_bytes} hardCapBytes=${hard_cap_bytes}"
-            exit 75
+          "${SCP[@]}" scripts/migration/pg-schema.sql scripts/migration/import-pg-incremental.py scripts/migration/activate-pg-candidate.py server/pg_adapter.py server/pg_api_server.py deploy/vps2/song-rank-pg-api.service "$VPS2_USER@$VPS2_HOST:/tmp/"
+          "${SCP[@]}" "$MANIFEST_PATH" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
+          remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
+          printf 'remoteFreeBefore=%s\n' "$remote_free" >> "$TASK_ROOT/storage.txt"
+          test "$remote_free" -ge "$patch_bytes"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO \"www-data\";'"
+          cat "$PATCH_PATH" | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
+          candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
+          test -n "$candidate_sha"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
+          CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
+          echo "candidatePid=$CANDIDATE_PID" >> "$TASK_ROOT/storage.txt"
+          ready=0
+          for n in $(seq 1 20); do
+            if "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/healthz' > "$TASK_ROOT/candidate-healthz.json"; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" != 1 ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'cat /tmp/pg-increment-candidate.log || true'; exit 1; fi
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
+          printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
+          if [ "$ACTIVATE" = true ]; then
+            "${SCP[@]}" scripts/migration/activate-pg-candidate.py "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'"
           fi
-          module="$(cd "${TMP_ROOT}/node-env" && node -p 'require.resolve("pg")')"
-          node scripts/migration/run-pg-incremental.mjs \
-            --patch="${PATCH_PATH}" \
-            --manifest="${MANIFEST_PATH}" \
-            --api-url="${API_BASE_URL}" \
-            --report="${TMP_ROOT}/release-report.json" \
-            --revision="rev_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}" \
-            --pg-module="${module}" &
-          NODE_PID=$!
-          wait "${NODE_PID}"

@@ -250,7 +250,17 @@ jobs:
           # The candidate server binds to loopback on VPS2; run the contract
           # probes there instead of probing the Mac runner's loopback.
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" 'set -Eeuo pipefail
-            curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/healthz" > /tmp/daily-song-list-pg-candidate-healthz.json
+            ready=0
+            for n in $(seq 1 20); do
+              if curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/healthz" > /tmp/daily-song-list-pg-candidate-healthz.json; then ready=1; break; fi
+              if test -f /tmp/daily-song-list-pg-candidate.pid && ! kill -0 "$(cat /tmp/daily-song-list-pg-candidate.pid)" 2>/dev/null; then break; fi
+              sleep 1
+            done
+            if test "$ready" != 1; then
+              echo "PG_CANDIDATE_START_FAILED"
+              cat /tmp/daily-song-list-pg-candidate.log 2>/dev/null || true
+              exit 1
+            fi
             curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/meta" > /tmp/daily-song-list-pg-candidate-api-meta.json
             curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" > /tmp/daily-song-list-pg-candidate-rankings.json'
           scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-healthz.json" "$TASK_ROOT/candidate-healthz.json"
