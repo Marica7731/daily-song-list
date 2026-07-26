@@ -167,3 +167,52 @@ test("ephemeral PostgreSQL candidate supports upsert, compare, activate and roll
     await db.close();
   }
 });
+
+test("runtime projection rows preserve source identity and tombstones", {
+  skip: !pgliteModulePath ? "set PGLITE_MODULE to run the real ephemeral PostgreSQL test" : false,
+}, async () => {
+  const { PGlite } = await import(pgliteModulePath);
+  const db = new PGlite("memory://daily-song-list-runtime-projection-test");
+  const client = { query: (sql, values) => db.query(sql, values) };
+  try {
+    await ensureSchema(client);
+    const base = await prepareCandidate(client, [{
+      kind: "runtime",
+      entityType: "channel_metadata",
+      entityKey: "channel-a",
+      sourceSystem: "runtime",
+      payload: {
+        channel_key: "channel-a",
+        channel_id: "UC000000001",
+        handle: "@channel-a",
+        display_name: "Channel A",
+        is_collected: 0,
+      },
+    }], { fixture: "runtime" }, { revisionId: "rev-runtime" });
+    const resolved = await resolveRevision(client, base.revisionId);
+    assert.deepEqual(resolved.runtimeRows.map(({ entity_type, entity_key, source_system, payload_json }) => ({
+      entity_type, entity_key, source_system, payload_json,
+    })), [{
+      entity_type: "channel_metadata",
+      entity_key: "channel-a",
+      source_system: "runtime",
+      payload_json: {
+        channel_key: "channel-a",
+        channel_id: "UC000000001",
+        handle: "@channel-a",
+        display_name: "Channel A",
+        is_collected: 0,
+      },
+    }]);
+    const tombstone = await prepareCandidate(client, [{
+      kind: "runtime",
+      entityType: "channel_metadata",
+      entityKey: "channel-a",
+      tombstone: true,
+      payload: { channel_key: "channel-a" },
+    }], { fixture: "runtime-tombstone" }, { revisionId: "rev-runtime-tombstone" });
+    assert.equal((await resolveRevision(client, tombstone.revisionId)).runtimeRows.length, 0);
+  } finally {
+    await db.close();
+  }
+});

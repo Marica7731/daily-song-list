@@ -77,6 +77,24 @@ function normalizeSong(song, index) {
   };
 }
 
+export function normalizeRuntimeRecord(record) {
+  const entityType = cleanText(record?.entityType ?? record?.entity_type);
+  const entityKey = preservedText(record?.entityKey ?? record?.entity_key);
+  if (!entityType || entityKey === null || entityKey === "") {
+    throw new Error("runtime record requires entityType and entityKey");
+  }
+  return {
+    entityType,
+    entityKey,
+    sourceSystem: preservedText(record?.sourceSystem ?? record?.source_system),
+    rangeId: preservedText(record?.rangeId ?? record?.range_id),
+    sourceId: preservedText(record?.sourceId ?? record?.source_id),
+    occurrenceId: preservedText(record?.occurrenceId ?? record?.occurrence_id),
+    tombstone: record?.deleted === true || record?.tombstone === true,
+    payload: record?.payload && typeof record.payload === "object" ? record.payload : record,
+  };
+}
+
 export function normalizeVideoRecord(record) {
   const videoId = cleanText(record?.videoId ?? record?.video_id ?? record?.item?.videoId);
   validateVideoId(videoId);
@@ -222,6 +240,34 @@ async function upsertVideo(client, revisionId, record) {
   return video;
 }
 
+async function upsertRuntime(client, revisionId, record) {
+  const runtime = normalizeRuntimeRecord(record);
+  await client.query(
+    `INSERT INTO migration_runtime_rows
+      (revision_id, entity_type, entity_key, source_system, range_id, source_id, occurrence_id, tombstone, payload_json)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
+     ON CONFLICT (revision_id, entity_type, entity_key) DO UPDATE SET
+       source_system = EXCLUDED.source_system,
+       range_id = EXCLUDED.range_id,
+       source_id = EXCLUDED.source_id,
+       occurrence_id = EXCLUDED.occurrence_id,
+       tombstone = EXCLUDED.tombstone,
+       payload_json = EXCLUDED.payload_json`,
+    [
+      revisionId,
+      runtime.entityType,
+      runtime.entityKey,
+      runtime.sourceSystem,
+      runtime.rangeId,
+      runtime.sourceId,
+      runtime.occurrenceId,
+      runtime.tombstone,
+      JSON.stringify(runtime.payload),
+    ],
+  );
+  return runtime;
+}
+
 async function revisionLineage(client, revisionId) {
   const lineage = [];
   const seen = new Set();
@@ -245,6 +291,7 @@ export async function resolveRevision(client, revisionId) {
   const videos = new Map();
   const occurrences = new Map();
   const audits = new Map();
+  const runtimeRows = new Map();
   for (const revision of await revisionLineage(client, revisionId)) {
     const videoRows = resultRows(await client.query(
        `SELECT video_id, title, channel_name, channel_id, channel_handle, channel_url, published_at, tombstone, payload_json
@@ -274,6 +321,17 @@ export async function resolveRevision(client, revisionId) {
       [revision],
     ));
     for (const row of auditRows) if (!audits.has(row.video_id)) audits.set(row.video_id, row);
+    const runtime = resultRows(await client.query(
+      `SELECT entity_type, entity_key, source_system, range_id, source_id,
+              occurrence_id, tombstone, payload_json
+       FROM migration_runtime_rows WHERE revision_id = $1
+       ORDER BY entity_type, entity_key`,
+      [revision],
+    ));
+    for (const row of runtime) {
+      const key = `${row.entity_type}\u0000${row.entity_key}`;
+      if (!runtimeRows.has(key)) runtimeRows.set(key, row);
+    }
   }
   const records = [...videos.values()].filter((video) => !video.tombstone).sort((left, right) => left.video_id.localeCompare(right.video_id)).map((video) => ({
     videoId: video.video_id,
@@ -300,9 +358,10 @@ export async function resolveRevision(client, revisionId) {
   return {
     revisionId: cleanText(revisionId),
     records,
+    runtimeRows: [...runtimeRows.values()].filter((row) => !row.tombstone),
     videoCount: records.length,
     occurrenceCount: records.reduce((sum, record) => sum + record.songs.length, 0),
-    contentSha256: sha256(stableJson(records)),
+    contentSha256: sha256(stableJson({ records, runtimeRows: [...runtimeRows.values()].filter((row) => !row.tombstone) })),
   };
 }
 
@@ -313,6 +372,7 @@ export async function compareRevisions(client, candidateRevisionId, activeId = u
     activeRevision ? resolveRevision(client, activeRevision) : {
       revisionId: "",
       records: [],
+      runtimeRows: [],
       videoCount: 0,
       occurrenceCount: 0,
       contentSha256: sha256(stableJson([])),
@@ -339,7 +399,11 @@ export async function prepareCandidate(client, records, manifest = {}, options =
     const revision = await createRevision(client, manifest, options.revisionId);
     let upserted = 0;
     for await (const record of records) {
-      await upsertVideo(client, revision.revisionId, record);
+      if (record?.kind === "runtime" || record?.entityType || record?.entity_type) {
+        await upsertRuntime(client, revision.revisionId, record);
+      } else {
+        await upsertVideo(client, revision.revisionId, record);
+      }
       upserted += 1;
     }
     const comparison = await compareRevisions(client, revision.revisionId, revision.parentRevisionId);

@@ -121,7 +121,7 @@ class EmptyCursor:
     def execute(self, sql, params):
         if "information_schema.tables" in sql:
             self.description = [("table_name",)]
-            self.rows = [(name,) for name in ("migration_revisions", "migration_video_rows", "migration_occurrence_rows", "migration_audit_rows", "migration_state")]
+            self.rows = [(name,) for name in ("migration_revisions", "migration_video_rows", "migration_occurrence_rows", "migration_audit_rows", "migration_state", "migration_runtime_rows")]
         elif "migration_state" in sql:
             self.description = [("state_value",)]
             self.rows = [("")]

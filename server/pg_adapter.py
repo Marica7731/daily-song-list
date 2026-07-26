@@ -30,6 +30,13 @@ REQUIRED_TABLES = (
     "migration_video_rows",
     "migration_occurrence_rows",
     "migration_state",
+    "migration_runtime_rows",
+)
+RUNTIME_TABLES = (
+    "runtime_meta", "runtime_videos", "runtime_occurrences", "runtime_songs",
+    "runtime_ranking_rows", "runtime_source_details", "runtime_source_occurrences",
+    "runtime_channel_metadata", "runtime_external_songs", "runtime_external_videos",
+    "runtime_external_occurrences",
 )
 SUPPORTED_RANGES = {"7d", "all"}
 SUPPORTED_VIEWS = {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}
@@ -163,6 +170,99 @@ def _json_object(value: Any) -> dict[str, Any]:
     return {}
 
 
+def _runtime_projection_revision(connection) -> tuple[str, dict[str, Any]] | None:
+    """Return the active full-runtime revision when the projection is ready."""
+
+    try:
+        rows = _rows(
+            connection,
+            """
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = ANY (current_schemas(false))
+              AND table_name = ANY (%s)
+            """,
+            [list(RUNTIME_TABLES)],
+        )
+        if {str(row.get("table_name")) for row in rows} != set(RUNTIME_TABLES):
+            return None
+        state = _one(connection, "SELECT state_value FROM migration_state WHERE state_key = 'active_revision_id'")
+        revision_id = _text(state.get("state_value")) if state else ""
+        if not revision_id:
+            return None
+        revision = _one(
+            connection,
+            "SELECT revision_id, parent_revision_id, status, manifest_json, source_manifest_sha256, content_sha256, activated_at, created_at FROM migration_revisions WHERE revision_id = %s",
+            [revision_id],
+        )
+        if not revision or not _json_object(revision.get("manifest_json")).get("runtimeProjection"):
+            return None
+        return revision_id, revision
+    except Exception:
+        # Prototype/test doubles and pre-projection databases remain supported.
+        return None
+
+
+def _load_runtime_snapshot(connection, revision_id: str, revision: Mapping[str, Any]) -> _Snapshot:
+    videos: dict[str, dict[str, Any]] = {}
+    occurrences: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    video_rows = _rows(
+        connection,
+        """
+        SELECT video_id, title, channel_name, channel_id, channel_handle,
+               channel_url, published_timestamp, published_text, duration_text,
+               thumbnail_url, payload_json
+        FROM runtime_videos WHERE revision_id = %s ORDER BY video_id
+        """,
+        [revision_id],
+    )
+    for row in video_rows:
+        payload = _json_object(row.get("payload_json"))
+        payload.update({
+            "videoId": payload.get("videoId") or row.get("video_id"),
+            "title": payload["title"] if "title" in payload else row.get("title"),
+            "channelName": payload["channelName"] if "channelName" in payload else row.get("channel_name"),
+            "channelId": payload["channelId"] if "channelId" in payload else row.get("channel_id"),
+            "channelHandle": payload["channelHandle"] if "channelHandle" in payload else row.get("channel_handle"),
+            "channelUrl": payload["channelUrl"] if "channelUrl" in payload else row.get("channel_url"),
+            "publishedAt": payload["publishedAt"] if "publishedAt" in payload else row.get("published_timestamp"),
+        })
+        videos[_text(row.get("video_id"))] = payload
+    occurrence_rows = _rows(
+        connection,
+        """
+        SELECT occurrence_id, range_id, video_id, song_key, seconds,
+               source_system, source_id, title, artist, is_niche,
+               is_unknown_artist, payload_json
+        FROM runtime_occurrences
+        WHERE revision_id = %s ORDER BY video_id, range_id, occurrence_id
+        """,
+        [revision_id],
+    )
+    positions: dict[str, int] = defaultdict(int)
+    for row in occurrence_rows:
+        payload = _json_object(row.get("payload_json"))
+        video_id = _text(row.get("video_id"))
+        position = positions[video_id]
+        positions[video_id] += 1
+        payload.update({
+            "occurrenceId": payload["occurrenceId"] if "occurrenceId" in payload else row.get("occurrence_id"),
+            "position": payload["position"] if "position" in payload else position,
+            "rangeId": payload["rangeId"] if "rangeId" in payload else row.get("range_id"),
+            "songKey": payload["songKey"] if "songKey" in payload else row.get("song_key"),
+            "seconds": payload["seconds"] if "seconds" in payload else row.get("seconds"),
+            "title": payload["title"] if "title" in payload else row.get("title"),
+            "artist": payload["artist"] if "artist" in payload else row.get("artist"),
+            "sourceId": payload["sourceId"] if "sourceId" in payload else row.get("source_id"),
+            "sourceSystem": payload["sourceSystem"] if "sourceSystem" in payload else row.get("source_system"),
+        })
+        occurrences[video_id].append(payload)
+    records = tuple(
+        {"video": video, "occurrences": tuple(occurrences.get(video_id, []))}
+        for video_id, video in sorted(videos.items())
+    )
+    return _Snapshot(revision_id, revision, records)
+
+
 def _text(value: Any) -> str:
     return "" if value is None else str(value).strip()
 
@@ -232,6 +332,9 @@ def _query_options(query: Mapping[str, Any] | None) -> dict[str, Any]:
 
 def _load_snapshot(connection) -> _Snapshot:
     ensure_schema(connection)
+    runtime = _runtime_projection_revision(connection)
+    if runtime:
+        return _load_runtime_snapshot(connection, runtime[0], runtime[1])
     state = _one(connection, "SELECT state_value FROM migration_state WHERE state_key = 'active_revision_id'")
     revision_id = _text(state.get("state_value")) if state else ""
     if not revision_id:
@@ -573,12 +676,95 @@ def source_payload_from_records(records: Iterable[Mapping[str, Any]], key: str, 
     return {"schemaVersion": 1, "found": False, "sourceKey": key}
 
 
+def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    options = _query_options(query)
+    db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    rows = _rows(
+        connection,
+        """
+        SELECT rank, row_count, song_count, video_count, timestamp_count,
+               payload_json, search_text, channel_search_text
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
+        ORDER BY rank
+        """,
+        [revision_id, options["range"], options["view"], db_metric],
+    )
+    if options["q"]:
+        needle = options["q"]
+        rows = [row for row in rows if needle in (_text(row.get("search_text")) + " " + _text(row.get("channel_search_text"))).casefold()]
+    rows = [row for row in rows if int(row.get("row_count") or 0) >= options["minCount"]]
+    total_occurrences = sum(int(row.get("row_count") or 0) for row in rows)
+    total_songs = sum(int(row.get("song_count") or 0) for row in rows)
+    total_videos = sum(int(row.get("video_count") or 0) for row in rows)
+    page_count = max(1, math.ceil(len(rows) / options["pageSize"]))
+    offset = (options["page"] - 1) * options["pageSize"]
+    records = []
+    for row in rows[offset : offset + options["pageSize"]]:
+        payload = _json_object(row.get("payload_json"))
+        payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
+        records.append(payload)
+    return {
+        "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
+        "metric": "occurrences" if options["metric"] == "count" else options["metric"],
+        "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+        "page": options["page"], "pageSize": options["pageSize"], "totalCount": len(rows),
+        "filteredBaseCount": len(rows), "totalOccurrenceCount": total_occurrences,
+        "totalSongCount": total_songs, "totalVideoCount": total_videos, "pageCount": page_count,
+        "compact": options["compact"], "records": records,
+    }
+
+
+def _runtime_source_payload(connection, revision_id: str, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    rows = _rows(
+        connection,
+        "SELECT payload_json FROM runtime_source_details WHERE revision_id = %s AND source_key = %s",
+        [revision_id, key],
+    )
+    if not rows:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
+    record = _json_object(rows[0].get("payload_json"))
+    query = query or {}
+    if any(field in query for field in ("page", "pageSize")) and isinstance(record.get("occurrences"), list):
+        options = _query_options(query)
+        occurrences = list(record["occurrences"])
+        if options["q"]:
+            occurrences = [item for item in occurrences if options["q"] in json.dumps(item, ensure_ascii=False).casefold()]
+        video_keys: list[str] = []
+        for item in occurrences:
+            video_key = _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId"))
+            if video_key not in video_keys:
+                video_keys.append(video_key)
+        page_count = max(1, math.ceil(len(video_keys) / options["pageSize"]))
+        page = min(options["page"], page_count)
+        selected = set(video_keys[(page - 1) * options["pageSize"] : page * options["pageSize"]])
+        record = dict(record)
+        record["occurrences"] = [item for item in occurrences if _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId")) in selected]
+        record["sourceFilterQuery"] = options["q"]
+        record["count"] = len(occurrences)
+        record["timestampCount"] = len(occurrences)
+        record["videoCount"] = len(video_keys)
+        return {
+            "schemaVersion": 1, "found": True, "sourceKey": key, "record": record,
+            "page": page, "pageSize": options["pageSize"], "pageCount": page_count,
+            "totalCount": len(video_keys), "totalVideoCount": len(video_keys),
+            "totalOccurrenceCount": len(occurrences),
+        }
+    return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
+
+
 def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    runtime = _runtime_projection_revision(connection)
+    if runtime:
+        return _runtime_rankings_payload(connection, runtime[0], query)
     snapshot = _load_snapshot(connection)
     return rankings_payload_from_records(snapshot.records, query)
 
 
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    runtime = _runtime_projection_revision(connection)
+    if runtime:
+        return _runtime_source_payload(connection, runtime[0], key, query)
     snapshot = _load_snapshot(connection)
     return source_payload_from_records(snapshot.records, key, query)
 
@@ -590,6 +776,40 @@ def _jsonable(value: Any) -> Any:
 
 
 def meta_payload(connection) -> dict[str, Any]:
+    runtime = _runtime_projection_revision(connection)
+    if runtime:
+        revision_id, revision = runtime
+        meta_rows = _rows(connection, "SELECT key, value FROM runtime_meta WHERE revision_id = %s", [revision_id])
+        meta = {str(row.get("key")): _jsonable(row.get("value")) for row in meta_rows}
+        manifest = _json_object(revision.get("manifest_json"))
+        meta.update({str(key): _jsonable(value) for key, value in manifest.items() if key not in meta and isinstance(value, (str, int, float, bool)) or value is None})
+        meta.update({
+            "active_revision_id": revision_id,
+            "migration_status": revision.get("status", ""),
+            "source_manifest_sha256": revision.get("source_manifest_sha256", ""),
+            "content_sha256": revision.get("content_sha256", ""),
+            "built_at": _jsonable(revision.get("activated_at") or revision.get("created_at") or ""),
+        })
+        def meta_int(*keys: str) -> int:
+            for key in keys:
+                value = meta.get(key)
+                try:
+                    return int(value)
+                except (TypeError, ValueError):
+                    continue
+            return 0
+        counts = {
+            "videos": meta_int("latest_videos"),
+            "songs": meta_int("latest_songs"),
+            "occurrences": meta_int("latest_occurrences"),
+            "ranking_rows": meta_int("latest_ranking_rows"),
+            "source_occurrences": meta_int("source_occurrences_rows", "latest_source_occurrences"),
+            "channel_metadata": meta_int("channel_metadata", "latest_channel_metadata"),
+            "external_songs": meta_int("external_songs", "latest_external_songs", "vsinger_songs"),
+            "external_videos": meta_int("external_videos", "latest_external_videos", "vsinger_videos"),
+            "external_occurrences": meta_int("external_occurrences", "latest_external_occurrences", "vsinger_occurrences"),
+        }
+        return {"schemaVersion": 1, "meta": meta, "counts": counts}
     snapshot = _load_snapshot(connection)
     records = list(snapshot.records)
     occurrence_count = sum(len(record["occurrences"]) for record in records)
