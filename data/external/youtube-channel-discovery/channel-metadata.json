@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T09:52:08.339Z",
+  "generatedAt": "2026-07-26T11:38:35.665Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T09:52:08.339Z",
+    "fetchedAt": "2026-07-26T11:38:35.665Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T09:52:08.339Z",
+    "generatedAt": "2026-07-26T11:38:35.665Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 990,
-      "parseableChannels": 968,
+      "totalChannels": 992,
+      "parseableChannels": 970,
       "realAvatar": 643,
-      "thumbnailFallback": 347,
+      "thumbnailFallback": 349,
       "missingDisplayImage": 0,
-      "missingAvatar": 347,
+      "missingAvatar": 349,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 542
+      "skipped_collected_evidence": 544
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 520,
+      "batch_limit_reached": 522,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11698,6 +11698,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@shirayone_genki",
+        "channelId": "UCShx4jFm-jnLX2N4kY_YZuw",
+        "displayName": "白米玄鬼",
+        "sourceUrl": "https://www.youtube.com/@shirayone_genki",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@Tirol_Tsukinoki",
         "channelId": "UCqskJ0nmw-_eweWfsKvbrzQ",
         "displayName": "Tirol Tsukinoki / Tirol Channel 【Nanashi-inc.】",
@@ -11709,6 +11716,20 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@sh1an",
+        "channelId": "UCTF6upqGU4yHduecX0Oy3Pg",
+        "displayName": "sh1an",
+        "sourceUrl": "https://www.youtube.com/@sh1an",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Sasanone_wapo",
+        "channelId": "UCjtNkDsKWsxnZ0-ssUCFp7A",
+        "displayName": "笹ノ音わぽ / Sasanone Wapo",
+        "sourceUrl": "https://www.youtube.com/@Sasanone_wapo",
         "reason": "batch_limit_reached"
       },
       {
@@ -11803,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@kaonya5",
+        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
+        "displayName": "訛音屋 / Kaonya",
+        "sourceUrl": "https://www.youtube.com/@kaonya5",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@YamagamiKaruta",
         "channelId": "UCllKI7VjyANuS1RXatizfLQ",
         "displayName": "山神 カルタ / Karuta Yamagami",
@@ -11821,34 +11849,6 @@
         "channelId": "UCJ1WR_fuf42LcPcfDTTJiWQ",
         "displayName": "💜れれり🧪",
         "sourceUrl": "https://www.youtube.com/@%E3%82%8C%E3%82%8C%E3%82%8A_n5",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E3%82%A2%E3%83%80%E3%83%A0AdamChannel",
-        "channelId": "UCmieQQu9_852Kt7r2AOOzrA",
-        "displayName": "アダム / Adam Channel 〈〉〈〉〈〉",
-        "sourceUrl": "https://www.youtube.com/@%E3%82%A2%E3%83%80%E3%83%A0AdamChannel",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@seina_koyori",
-        "channelId": "UCwi2a2NOXWr6M5Sk_5L1tyA",
-        "displayName": "心寄せいな / Seina Koyori",
-        "sourceUrl": "https://www.youtube.com/@seina_koyori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kokona_miko",
-        "channelId": "UC7O0stCdkTxnDJK0dgs_llw",
-        "displayName": "心奏みこ",
-        "sourceUrl": "https://www.youtube.com/@kokona_miko",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kohiponch",
-        "channelId": "UCJE9BZz0ld_yqc2ryoA3-GQ",
-        "displayName": "Pon Ch. 小日向ぽん",
-        "sourceUrl": "https://www.youtube.com/@kohiponch",
         "reason": "batch_limit_reached"
       }
     ]
