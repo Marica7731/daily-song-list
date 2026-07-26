@@ -131,6 +131,7 @@ def main() -> int:
                 current_rows.append(message)
                 if len(current_rows) >= 2000:
                     counts[current_name] += copy_table(conn, current_name, current_columns, args.revision, current_rows)
+                    print(f"RUNTIME_IMPORT_PROGRESS table={current_name} rows={counts[current_name]}", file=sys.stderr, flush=True)
                     current_rows = []
                 continue
             kind = message.get("type")
@@ -146,6 +147,7 @@ def main() -> int:
                 if current_name != message.get("name") or current_columns is None:
                     raise RuntimeError("invalid end frame")
                 counts[current_name] += copy_table(conn, current_name, current_columns, args.revision, current_rows)
+                print(f"RUNTIME_IMPORT_PROGRESS table={current_name} rows={counts[current_name]}", file=sys.stderr, flush=True)
                 current_name = None
                 current_columns = None
                 current_rows = []

@@ -230,7 +230,7 @@ jobs:
           REVISION: full_runtime_${{ github.run_id }}_${{ github.run_attempt }}
         run: |
           set -Eeuo pipefail
-          python3 "$MIGRATION_ROOT/scripts/migration/export-runtime-tables.py" --db "$SOURCE_DB" 2>"$TASK_ROOT/export-runtime.log" |
+          python3 "$MIGRATION_ROOT/scripts/migration/export-runtime-tables.py" --db "$SOURCE_DB" --progress-every 1000 2> >(tee "$TASK_ROOT/export-runtime.log" >&2) |
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-runtime-tables.py --revision=$REVISION --manifest-file=/tmp/daily-song-list-pg-manifest.json" | tee "$TASK_ROOT/import-result.json"
           echo "REVISION=$REVISION" >> "$GITHUB_ENV"
 

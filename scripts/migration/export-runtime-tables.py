@@ -35,7 +35,7 @@ def json_line(value: object) -> bytes:
     return (json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
 
 
-def stream(source: Path, selected: tuple[str, ...] = tuple(TABLES), limit: int = 0) -> tuple[dict[str, int], str]:
+def stream(source: Path, selected: tuple[str, ...] = tuple(TABLES), limit: int = 0, progress_every: int = 1000) -> tuple[dict[str, int], str]:
     connection = sqlite3.connect(f"file:{source.resolve()}?mode=ro", uri=True)
     counts: dict[str, int] = {}
     digest = hashlib.sha256()
@@ -56,6 +56,10 @@ def stream(source: Path, selected: tuple[str, ...] = tuple(TABLES), limit: int =
                 sys.stdout.buffer.write(encoded)
                 digest.update(encoded)
                 count += 1
+                if count % 100 == 0:
+                    sys.stdout.buffer.flush()
+                if progress_every and count % progress_every == 0:
+                    print(f"RUNTIME_EXPORT_PROGRESS table={table} rows={count}", file=sys.stderr, flush=True)
             sys.stdout.buffer.write(json_line({"type": "end", "name": table, "count": count}))
             counts[table] = count
             sys.stdout.buffer.flush()
@@ -71,6 +75,7 @@ def main() -> int:
     parser.add_argument("--db", type=Path, required=True)
     parser.add_argument("--tables", default=",".join(TABLES))
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--progress-every", type=int, default=1000)
     args = parser.parse_args()
     if not args.db.is_file():
         print(f"RUNTIME_EXPORT_ERROR missing-db={args.db}", file=sys.stderr)
@@ -79,7 +84,7 @@ def main() -> int:
         selected = tuple(name for name in args.tables.split(",") if name)
         if not selected or any(name not in TABLES for name in selected):
             raise ValueError("--tables contains an unknown table")
-        counts, digest = stream(args.db, selected, args.limit)
+        counts, digest = stream(args.db, selected, args.limit, args.progress_every)
         print(f"RUNTIME_EXPORT_OK sha256={digest} counts={json.dumps(counts, sort_keys=True)}", file=sys.stderr)
         return 0
     except Exception as exc:
