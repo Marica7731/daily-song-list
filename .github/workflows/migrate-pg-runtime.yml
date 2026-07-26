@@ -33,7 +33,6 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 1
-          filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             scripts/migration
@@ -141,7 +140,7 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'; systemctl reload nginx"
 
       - name: Upload bounded migration evidence
-        if: always()
+        if: ${{ always() && env.TASK_ROOT != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: pg-runtime-migration-${{ github.run_id }}
