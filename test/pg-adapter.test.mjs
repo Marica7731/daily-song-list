@@ -145,3 +145,39 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("adapter reads generic runtime video and occurrence overlays", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Cursor:
+    def execute(self, sql, params):
+        if "parent_revision_id" in sql:
+            self.description = [("revision_id",), ("parent_revision_id",)]
+            self.rows = [("rev-runtime", None)]
+        elif "migration_runtime_rows" in sql:
+            self.description = [("entity_type",), ("entity_key",), ("source_system",), ("range_id",), ("source_id",), ("occurrence_id",), ("tombstone",), ("payload_json",)]
+            self.rows = [
+                ("videos", "video-1", None, None, None, None, False, {"video_id": "AAAAAAAAAAA", "title": "Runtime video", "channel_name": "Channel"}),
+                ("occurrences", "video-1-0", "runtime", "all", "src", "occ-1", False, {"video_id": "AAAAAAAAAAA", "position": 0, "seconds": None, "title": "Song", "artist": "", "source_id": "", "range_id": "all"}),
+            ]
+        else:
+            self.description = []
+            self.rows = []
+    def fetchall(self): return self.rows
+    def close(self): pass
+class Connection:
+    def cursor(self): return Cursor()
+snapshot = module._load_generic_runtime_snapshot(Connection(), "rev-runtime", {"manifest_json": {}})
+assert len(snapshot.records) == 1
+song = snapshot.records[0]["occurrences"][0]
+assert song["seconds"] is None and song["artist"] == "" and song["sourceId"] == ""
+assert snapshot.records[0]["video"]["channelName"] == "Channel"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});

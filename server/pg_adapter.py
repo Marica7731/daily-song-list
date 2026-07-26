@@ -202,6 +202,138 @@ def _runtime_projection_revision(connection) -> tuple[str, dict[str, Any]] | Non
         return None
 
 
+def _generic_runtime_projection_revision(connection) -> tuple[str, dict[str, Any]] | None:
+    """Return a revision backed by the incremental generic runtime overlay."""
+
+    try:
+        state = _one(connection, "SELECT state_value FROM migration_state WHERE state_key = 'active_revision_id'")
+        revision_id = _text(state.get("state_value")) if state else ""
+        if not revision_id:
+            return None
+        revision = _one(
+            connection,
+            """
+            SELECT revision_id, parent_revision_id, status, manifest_json,
+                   source_manifest_sha256, content_sha256, activated_at, created_at
+            FROM migration_revisions WHERE revision_id = %s
+            """,
+            [revision_id],
+        )
+        if not revision:
+            return None
+        manifest = _json_object(revision.get("manifest_json"))
+        if manifest.get("runtimeProjection") is not True:
+            return None
+        return revision_id, revision
+    except Exception:
+        return None
+
+
+def _revision_lineage(connection, revision_id: str) -> list[str]:
+    lineage: list[str] = []
+    seen: set[str] = set()
+    current = _text(revision_id)
+    while current:
+        if current in seen:
+            raise PostgresAdapterError(f"revision parent cycle: {current}")
+        seen.add(current)
+        row = _one(
+            connection,
+            "SELECT revision_id, parent_revision_id FROM migration_revisions WHERE revision_id = %s",
+            [current],
+        )
+        if row is None:
+            raise PostgresAdapterError(f"active revision does not exist: {current}")
+        lineage.append(_text(row.get("revision_id")))
+        current = _text(row.get("parent_revision_id"))
+    return lineage
+
+
+def _runtime_payload_field(payload: Mapping[str, Any], row: Mapping[str, Any], *names: str) -> Any:
+    for name in names:
+        if name in payload:
+            return payload[name]
+        if name in row:
+            return row[name]
+    return None
+
+
+def _load_generic_runtime_snapshot(connection, revision_id: str, revision: Mapping[str, Any]) -> _Snapshot:
+    """Resolve video/occurrence rows from the incremental runtime overlay."""
+
+    rows_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for revision_key in _revision_lineage(connection, revision_id):
+        rows = _rows(
+            connection,
+            """
+            SELECT entity_type, entity_key, source_system, range_id, source_id,
+                   occurrence_id, tombstone, payload_json
+            FROM migration_runtime_rows
+            WHERE revision_id = %s ORDER BY entity_type, entity_key
+            """,
+            [revision_key],
+        )
+        for row in rows:
+            key = (_text(row.get("entity_type")), _text(row.get("entity_key")))
+            if key not in rows_by_key:
+                rows_by_key[key] = row
+
+    videos: dict[str, dict[str, Any]] = {}
+    occurrences: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    positions: dict[str, int] = defaultdict(int)
+    for row in rows_by_key.values():
+        if row.get("tombstone"):
+            continue
+        entity_type = _text(row.get("entity_type"))
+        payload = _json_object(row.get("payload_json"))
+        if isinstance(payload.get("payload"), Mapping):
+            payload = dict(payload["payload"])
+        if entity_type in {"videos", "runtime_videos"}:
+            video_id = _text(_runtime_payload_field(payload, row, "videoId", "video_id"))
+            if not video_id:
+                continue
+            payload.update({
+                "videoId": video_id,
+                "title": _runtime_payload_field(payload, row, "title"),
+                "channelName": _runtime_payload_field(payload, row, "channelName", "channel_name"),
+                "channelId": _runtime_payload_field(payload, row, "channelId", "channel_id"),
+                "channelHandle": _runtime_payload_field(payload, row, "channelHandle", "channel_handle"),
+                "channelUrl": _runtime_payload_field(payload, row, "channelUrl", "channel_url"),
+                "publishedAt": _runtime_payload_field(payload, row, "publishedAt", "published_at", "published_timestamp"),
+            })
+            videos[video_id] = payload
+        elif entity_type in {"occurrences", "runtime_occurrences"}:
+            video_id = _text(_runtime_payload_field(payload, row, "videoId", "video_id"))
+            if not video_id:
+                continue
+            position = _runtime_payload_field(payload, row, "position")
+            try:
+                position = int(position)
+            except (TypeError, ValueError):
+                position = positions[video_id]
+            positions[video_id] = max(positions[video_id], position + 1)
+            payload.update({
+                "occurrenceId": _runtime_payload_field(payload, row, "occurrenceId", "occurrence_id"),
+                "position": position,
+                "rangeId": _runtime_payload_field(payload, row, "rangeId", "range_id"),
+                "songKey": _runtime_payload_field(payload, row, "songKey", "song_key"),
+                "seconds": _runtime_payload_field(payload, row, "seconds"),
+                "title": _runtime_payload_field(payload, row, "title"),
+                "artist": _runtime_payload_field(payload, row, "artist"),
+                "sourceId": _runtime_payload_field(payload, row, "sourceId", "source_id"),
+                "sourceSystem": _runtime_payload_field(payload, row, "sourceSystem", "source_system"),
+            })
+            occurrences[video_id].append(payload)
+
+    records = tuple(
+        {"video": video, "occurrences": tuple(sorted(occurrences.get(video_id, []), key=lambda item: (int(item.get("position") or 0), _text(item.get("occurrenceId")))))}
+        for video_id, video in sorted(videos.items())
+    )
+    if not records:
+        raise PostgresAdapterError("active runtime projection has no video rows")
+    return _Snapshot(revision_id, revision, records)
+
+
 def _load_runtime_snapshot(connection, revision_id: str, revision: Mapping[str, Any]) -> _Snapshot:
     videos: dict[str, dict[str, Any]] = {}
     occurrences: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -335,6 +467,9 @@ def _load_snapshot(connection) -> _Snapshot:
     runtime = _runtime_projection_revision(connection)
     if runtime:
         return _load_runtime_snapshot(connection, runtime[0], runtime[1])
+    generic_runtime = _generic_runtime_projection_revision(connection)
+    if generic_runtime:
+        return _load_generic_runtime_snapshot(connection, generic_runtime[0], generic_runtime[1])
     state = _one(connection, "SELECT state_value FROM migration_state WHERE state_key = 'active_revision_id'")
     revision_id = _text(state.get("state_value")) if state else ""
     if not revision_id:
