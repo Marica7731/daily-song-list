@@ -261,8 +261,10 @@ CREATE TABLE IF NOT EXISTS runtime_external_occurrences (
 
 CREATE INDEX IF NOT EXISTS runtime_ranking_lookup
   ON runtime_ranking_rows (revision_id, range_id, view, metric, rank);
-CREATE INDEX IF NOT EXISTS runtime_ranking_search
-  ON runtime_ranking_rows (revision_id, search_text);
+-- Do not btree-index unbounded search text: PostgreSQL rejects rows larger
+-- than one third of a page. The adapter applies bounded filtering directly;
+-- the rank/identity index above remains the selective lookup path.
+DROP INDEX IF EXISTS runtime_ranking_search;
 CREATE INDEX IF NOT EXISTS runtime_occurrence_lookup
   ON runtime_occurrences (revision_id, range_id, video_id, song_key);
 CREATE INDEX IF NOT EXISTS runtime_source_occurrence_lookup

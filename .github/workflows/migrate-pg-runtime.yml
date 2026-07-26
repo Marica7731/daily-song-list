@@ -208,10 +208,13 @@ jobs:
           read -r remote_free remote_old <<< "$remote_probe"
           printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\n' "$bytes" "$sha" "$remote_free" "$remote_old" > "$TASK_ROOT/preflight.txt"
           printf 'remoteFreeAfterPreflight=%s\n' "$remote_free" >> "$TASK_ROOT/preflight.txt"
-          test "$remote_free" -ge "$EXPECTED_PG_PEAK_BYTES"
           if [ "$remote_old" -gt 0 ]; then
-            echo "PG_PREFLIGHT_OLD_SQLITE_PRESERVED bytes=$remote_old"
+            echo "PG_PREFLIGHT_STALE_SQLITE_CLEANUP bytes=$remote_old"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "systemctl stop song-rank-api >/dev/null 2>&1 || true; test -z \"\$(lsof '$REMOTE_STATE_DIR/song-rank.sqlite' 2>/dev/null || true)\"; rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite' '$REMOTE_STATE_DIR/song-rank.sqlite.manifest.json'"
+            remote_free="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'")"
+            printf 'remoteFreeAfterStaleSqliteCleanup=%s\n' "$remote_free" >> "$TASK_ROOT/preflight.txt"
           fi
+          test "$remote_free" -ge "$EXPECTED_PG_PEAK_BYTES"
 
       - name: Install schema and bounded receiver
         timeout-minutes: 10
