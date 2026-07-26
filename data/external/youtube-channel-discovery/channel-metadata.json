@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T13:50:50.429Z",
+  "generatedAt": "2026-07-26T16:20:31.438Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T13:50:50.429Z",
+    "fetchedAt": "2026-07-26T16:20:31.438Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T13:50:50.429Z",
+    "generatedAt": "2026-07-26T16:20:31.438Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 996,
-      "parseableChannels": 974,
+      "totalChannels": 1000,
+      "parseableChannels": 978,
       "realAvatar": 643,
-      "thumbnailFallback": 353,
+      "thumbnailFallback": 357,
       "missingDisplayImage": 0,
-      "missingAvatar": 353,
+      "missingAvatar": 357,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 547,
+      "skipped_collected_evidence": 550,
       "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 525,
+      "batch_limit_reached": 528,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@Nekozaki_Roi",
+        "channelId": "UCjvncTrq_44m3znLtmQk5pg",
+        "displayName": "Roi Ch.猫崎ロイ",
+        "sourceUrl": "https://www.youtube.com/@Nekozaki_Roi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@H.Midori-Ch-",
+        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
+        "displayName": "H.Midori Ch🍃葉山翠",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@HibachiMana",
         "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
@@ -11768,13 +11782,6 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
-        "reason": "batch_limit_reached"
-      },
-      {
         "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
         "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
         "displayName": "Sakuna Ch. 結城さくな",
@@ -11817,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@terryterryv",
+        "channelId": "UC1Fx5JBW4l9RFAfpqdvJVUQ",
+        "displayName": "テリー / Terry",
+        "sourceUrl": "https://www.youtube.com/@terryterryv",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@OokamiMio",
         "channelId": "UCp-5t9SrOQwXMU7iIjQfARg",
         "displayName": "Mio Channel 大神ミオ",
@@ -11835,20 +11849,6 @@
         "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
         "displayName": "Lucia",
         "sourceUrl": "https://www.youtube.com/@Luciaaa_Sings",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Myao_Mixstgirls",
-        "channelId": "UCc_r_D9M7BGFpwXZnFaxEww",
-        "displayName": "成海ミャオ / Myao Channel【ミクスト】",
-        "sourceUrl": "https://www.youtube.com/@Myao_Mixstgirls",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kaonya5",
-        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
-        "displayName": "訛音屋 / Kaonya",
-        "sourceUrl": "https://www.youtube.com/@kaonya5",
         "reason": "batch_limit_reached"
       }
     ]
