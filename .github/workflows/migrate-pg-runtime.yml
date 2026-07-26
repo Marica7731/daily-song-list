@@ -67,39 +67,53 @@ jobs:
         run: |
           set -Eeuo pipefail
           test -f "$SOURCE_DB"
-          test "$(stat -f%z "$SOURCE_DB")" = "$EXPECTED_BYTES"
-          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; printf '%s %s\\n' \"\$free\" \"\$old\"")"
-          read -r remote_free remote_old <<< "$remote_probe"
-          printf 'sourceBytes=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\n' "$EXPECTED_BYTES" "$remote_free" "$remote_old" > "$TASK_ROOT/preflight.txt"
+          source_bytes="$(stat -f%z "$SOURCE_DB")"
+          source_sha="$(shasum -a 256 "$SOURCE_DB" | cut -d' ' -f1)"
+          test "$source_bytes" = "$EXPECTED_BYTES"
+          test "$source_sha" = "$EXPECTED_SHA256"
+          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; part=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; test -f '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part' && part=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part') || true; printf '%s %s %s\\n' \"\$free\" \"\$old\" \"\$part\"")"
+          read -r remote_free remote_old remote_part <<< "$remote_probe"
+          printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\nremotePartBytes=%s\n' "$source_bytes" "$source_sha" "$remote_free" "$remote_old" "$remote_part" > "$TASK_ROOT/preflight.txt"
           test "$remote_old" = "0" || { echo "SQLITE_RESTORE_BLOCKED target_exists_bytes=$remote_old"; exit 78; }
+          test "$remote_part" = "0" || { echo "SQLITE_RESTORE_BLOCKED stale_part_bytes=$remote_part"; exit 78; }
           test "$remote_free" -ge "$EXPECTED_BYTES" || { echo "SQLITE_RESTORE_BLOCKED insufficient_remote_free=$remote_free"; exit 78; }
-
-      - name: Stream verified previous active to the empty target
-        timeout-minutes: 30
+      - name: Stream verified previous active in bounded chunks
+        timeout-minutes: 40
         run: |
           set -Eeuo pipefail
+          REMOTE_DB="$REMOTE_STATE_DIR/song-rank.sqlite"
+          REMOTE_PART="$REMOTE_DB.restore.part"
+          chunk_bytes=134217728
+          chunk_count=$(( (EXPECTED_BYTES + chunk_bytes - 1) / chunk_bytes ))
           cleanup() {
             status=$?
             if [ "$status" -ne 0 ]; then
-              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "systemctl stop song-rank-api >/dev/null 2>&1 || true; rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite'" || true
+              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "rm -f -- '$REMOTE_PART'" || true
             fi
             before_bytes=0
-            if [ -d "$TASK_ROOT" ]; then before_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 )); fi
+            if [ -d "$TASK_ROOT" ]; then before_bytes=$(( $(du -sk "$TASK_ROOT" | cut -f1) * 1024 )); fi
             df -k / > "$TASK_ROOT/mac-df-after.txt" 2>/dev/null || true
-            rm -rf -- "$TASK_ROOT"
             echo "SQLITE_RESTORE_CLEANUP status=$status beforeBytes=$before_bytes retained=none"
+            rm -rf -- "$TASK_ROOT"
             exit "$status"
           }
           trap cleanup EXIT INT TERM
-          cat "$SOURCE_DB" |
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "cat > '$REMOTE_STATE_DIR/song-rank.sqlite'"
-          remote_bytes="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite'")"
-          test "$remote_bytes" = "$EXPECTED_BYTES"
-          remote_sha="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sha256sum '$REMOTE_STATE_DIR/song-rank.sqlite' | awk '{print \$1}'")"
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "rm -f -- '$REMOTE_PART'; install -m 0600 /dev/null '$REMOTE_PART'"
+          for ((index=0; index<chunk_count; index++)); do
+            base=$(( index * chunk_bytes ))
+            remaining=$(( EXPECTED_BYTES - base ))
+            take=$chunk_bytes
+            [ "$remaining" -lt "$take" ] && take="$remaining"
+            dd if="$SOURCE_DB" bs="$chunk_bytes" skip="$index" count=1 2>/dev/null | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "cat >> '$REMOTE_PART'"
+            written=$(( base + take ))
+            remote_written="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "stat -c%s '$REMOTE_PART'")"
+            test "$remote_written" = "$written"
+            printf 'chunk=%s/%s bytes=%s expected=%s\n' "$((index + 1))" "$chunk_count" "$remote_written" "$EXPECTED_BYTES" | tee -a "$TASK_ROOT/restore-checkpoint.log"
+          done
+          remote_sha="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sha256sum '$REMOTE_PART' | cut -d' ' -f1")"
           test "$remote_sha" = "$EXPECTED_SHA256"
-          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "chown www-data:www-data '$REMOTE_STATE_DIR/song-rank.sqlite'; chmod 0644 '$REMOTE_STATE_DIR/song-rank.sqlite'; systemctl start song-rank-api; curl --fail --max-time 10 http://127.0.0.1:8765/healthz"
-          printf 'remoteBytes=%s\nremoteSha256=%s\nrestoredAt=%s\n' "$remote_bytes" "$remote_sha" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TASK_ROOT/restore-report.txt"
-
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "mv -- '$REMOTE_PART' '$REMOTE_DB'; chown www-data:www-data '$REMOTE_DB'; chmod 0644 '$REMOTE_DB'; systemctl start song-rank-api; curl --fail --max-time 10 http://127.0.0.1:8765/healthz; curl --fail --max-time 10 http://127.0.0.1:8765/api/meta >/dev/null; curl --fail --max-time 10 \"http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1\" >/dev/null"
+          printf 'remoteBytes=%s\nremoteSha256=%s\nchunkBytes=%s\nchunkCount=%s\nrestoredAt=%s\n' "$EXPECTED_BYTES" "$remote_sha" "$chunk_bytes" "$chunk_count" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TASK_ROOT/restore-report.txt"
       - name: Upload bounded restore evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -109,6 +123,16 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+
+      - name: Cleanup bounded restore root and partial target
+        if: always()
+        run: |
+          set +e
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part'" || true
+          if [ -n "${TASK_ROOT:-}" ] && [ -d "$TASK_ROOT" ]; then
+            df -k / > "$TASK_ROOT/mac-df-cleanup.txt" 2>/dev/null || true
+            rm -rf -- "$TASK_ROOT"
+          fi
   migrate:
     if: ${{ inputs.mode != 'restore-sqlite' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
