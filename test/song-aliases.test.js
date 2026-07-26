@@ -182,6 +182,7 @@ test("Ado GYAKKOU film annotations merge without touching similarly named songs"
     "逆光(ウタ from ONE PIECE FILM RED)",
     "逆光 (ウタ from ONE PIECE FILM RED)",
     "逆光（ウタ from ONE PIECE FILM RED）",
+    "⭐逆光（ウタfrom ONE PIECE FILM RED）",
   ];
 
   for (const title of variants) {
@@ -202,5 +203,9 @@ test("Ado GYAKKOU film annotations merge without touching similarly named songs"
   assert.equal(
     canonicalizeSongIdentity({ title: "逆光 (ウタ from ONE PIECE FILM RED)", artist: "Vaundy" }, context).title,
     "逆光 (ウタ from ONE PIECE FILM RED)",
+  );
+  assert.equal(
+    canonicalizeSongIdentity({ title: "⭐逆光（ウタfrom ONE PIECE FILM RED）", artist: "Vaundy" }, context).title,
+    "⭐逆光（ウタfrom ONE PIECE FILM RED）",
   );
 });
