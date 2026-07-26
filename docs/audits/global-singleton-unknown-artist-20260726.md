@@ -132,3 +132,150 @@ delta 代替 runtime DB 证据。Mac 审计会同时提供：
 - [ ] 明确保留的真实 singleton 样本
 - [ ] 待人工项和疑似错误同名合并
 - [ ] Mac run/job/artifact/digest 和完整 SQLite quick-check
+
+## 正式 before 审计（head `6fa10644`）
+
+本节取代上文较早的生产预检数字。正式 Mac self-hosted run
+[`30183655942`](https://github.com/Marica7731/daily-song-list/actions/runs/30183655942)
+在 2026-07-26 10:26（Asia/Taipei）完成 curation audit；job `89744468699`
+全部步骤成功。没有从该 workflow commit、push、部署或上传完整 SQLite。
+
+### Artifact 与完整性
+
+| Artifact | ID | Bytes | SHA-256 |
+| --- | ---: | ---: | --- |
+| `global-singleton-curation-audit-30183655942-1` | 8626607541 | 53,015,196 | `d09e66e89c2659aad76abb32bc01d4ffc47d865feb5f30c82e5fab1d34f506cd` |
+| `global-singleton-curation-checkpoint-30183655942-1` | 8626595119 | 76,377,039 | `2744e80eb1ade1383cb95c47166ba4fd9982f0bd66b34366b573c1dccc58b488` |
+
+Checkpoint inventory 为 45,571 videos / 603,623 occurrences，gzip SHA-256
+`70b1741be4ca419ed9dd62b0707b0e5ba9654977ece173163ca9f60a244a73a9`。
+完整 SQLite 大小 13,907,808,256 bytes，SHA-256
+`55f74ce6453c01668f4274288ce8698db475c7301bd5897109031085281f1391`，
+`PRAGMA quick_check(1)=ok`；审计后已从 runner 临时目录删除。
+
+### 全库总量
+
+原始合并 inventory 经现有 curation/alias 后、但尚未应用本批 selector 的 before：
+
+| Metric | Before |
+| --- | ---: |
+| videos | 45,484 |
+| songs（title/artist identity） | 51,576 |
+| occurrences | 588,259 |
+| unknown artist songs | 29,379 |
+| unknown artist occurrences | 278,129 |
+| singleton songs | 29,388 |
+| singleton unknown songs | 15,153 |
+
+由当前分支实际 exporter 物化的 runtime DB 口径：
+
+| Metric | Before |
+| --- | ---: |
+| videos | 45,521 |
+| songs | 45,325 |
+| occurrences | 594,097 |
+| unknown artist songs | 22,285 |
+| unknown artist occurrences | 56,146 |
+| singleton songs | 26,539 |
+| singleton unknown songs | 14,810 |
+
+两个口径不同是因为 runtime exporter 还会执行 canonical grouping、来源合并和已知歌手
+fallback；不得把 raw inventory 数字与 runtime ranking 数字互换。
+
+### YOSHIKA before
+
+| Metric | Inventory before | Runtime/source audit before |
+| --- | ---: | ---: |
+| videos | 237 | 237 |
+| songs / song groups | 723 | 627 ranking songs / 655 title-artist groups |
+| occurrences | 4,709 | 4,714 |
+| unknown artist songs | 460 | 151 |
+| unknown artist occurrences | 2,757 | 539 |
+| singleton songs | 242 | 186 |
+| singleton unknown songs | - | 81 |
+| same-title artist conflicts | - | 24 |
+
+本批仅回填两个有唯一高频已知歌手的 YOSHIKA occurrence：
+
+- `ココロのちず / 未記載` → `BOYSTYLE`：全库同 canonical title 仅一个已知歌手，
+  已知 30 次；selector `0K3ghcwE1EU@1509`。
+- `恋するフォーチュンクッキー / 未記載` → `AKB48`：全库同 canonical title
+  仅一个已知歌手，已知 32 次；selector `jd3zEkmOO68@1177`。
+
+未能由唯一可靠已知歌手支持的其余 537 条 source unknown occurrence 均保留。
+
+明确保留的 YOSHIKA singleton 真歌样本：
+
+- `IRIS OUT / 米津玄師`
+- `DIVE TO WORLD / CHERRYBLOSSOM`
+- `I'm Your Treasure Box / 宝鐘マリン`
+- `Realize / 玉置成実`
+- `だから僕は音楽を辞めた / ヨルシカ`
+
+短标题/数字也不是删除条件。例如 `3 / After the Rain` 有 26 次；纯数字候选仍须逐条
+回到 provenance，不能按模式删除。
+
+### Naraetan before 与首批决策
+
+Naraetan runtime/source before：292 videos、1,396 ranking songs、4,463 occurrences；
+完整 source occurrence 形成 1,593 个 title-artist groups，其中 singleton 917、
+unknown occurrence 73、unknown groups 71、singleton unknown 70、同标题多歌手冲突 140。
+
+用户截图与 accepted raw 共同确认的 12 个 non-song singleton 采用完整
+`videoId + sourceId + sourceHash + seconds + rawHash` selector：
+
+`音をねじる`、`頭→目→歯`、`頭痛`、`顔`、`風邪気味かもしれない`、`飛行機`、
+`飾り棚`、`餃子`、`高音を出すとおでこが痒くなる`、`魔法少女ごっこ遊び`、
+`鼻歌（Last Christmas）`、`龍角散`。
+
+`（音量注意）明日への勇気 / 吉成圭子` 是真歌，采用 exact `replace_entry`
+去除演唱警告，并与既有 `明日への勇気` occurrence 合并，绝不 drop。`飛行機` 与该真歌
+位于同一视频并共享 sourceId/sourceHash，回归测试要求 seconds/rawHash 不同时不能误命中。
+另一个视频中的 `鼻歌 / summertime` 不在本批 selector 内。
+
+本批 tag `global-singleton-20260726` 共 15 个 selector：
+12 `drop_entry`、1 个标题/注释修正、2 个可靠未知歌手回填。
+
+### 四页 80 个频道与全部展开歌曲
+
+Mac 生产 API 审计严格取得四页各 20 个频道，共 80 个排名位置、75,826 条展开歌曲。
+
+1. occurrences page 1：UTANO、Hanon、月城セシル、水沢オペラ、惑世いと、
+   もかん、江波キョウカ、むんもっしゅ、Shairu、小鳥遊ゆとは、茨むあん、
+   みたにみく、凰牙るき、戌月れん、蒼星すい、御神楽すずめ、春歌みこと、
+   苺咲べりぃ、藤音カナデ、YOSHIKA。
+2. occurrences page 2：Noa Polaris、音鍵めろ、渚沢シチ、五木つかさ、CYBILL、
+   Naraetan、汐音ベリー、音羽ララ、彷徨鈴、稍麦、狼朗ハツキ、白河しらせ、
+   時羽あいの、明日夢かなえ、氷々樹ノルン、ミナミイズミ、紅葉丸、MUS1CA、
+   バツ子、魔ノむえる。
+3. songs page 1：江波キョウカ、惑世いと、Naraetan、UTANO、まゆり、Hanon、
+   月城セシル、獅子神レオナ、keita、音羽ララ、戌月れん、明日夢かなえ、紅葉丸、
+   Ellise、MUS1CA、春歌みこと、Noa Polaris、久遠たま、藤音カナデ、茨むあん。
+4. songs page 2：小鳥遊ゆとは、ミナミイズミ、むんもっしゅ、稍麦、XIDEN、
+   バツ子、凛々咲、ひよりひよこ、ミソラソラ、香椎きなこ、鏡愛しゅくり、
+   苺咲べりぃ、空奏イト、凰牙るき、323、神崎メイサ、メーレ、三日月ちゆる、
+   蒼羽未音、Shairu。
+
+完整 JSON/JSONL artifact 保留每个频道的 sourceDetailKey、歌曲 key/count 与完整 source
+occurrence audit。页面紧凑 payload 不提供 artist，不能据此把歌手误记为 unknown。
+
+### 生产 UI/契约发现
+
+- 当前 in-app 浏览器加载的静态资源把所有频道卡显示成 `3 首歌`：
+  前端优先读取 compact preview Map 大小，而 API 只嵌入前三首。
+- YOSHIKA API 为 627 首、展开 UI 为 628；Naraetan API 为 1,396，本次浏览器展开为
+  1,395，而用户截图曾显示 1,397。API、展开聚合和不同客户端静态资源存在分歧。
+- `range=all` URL 下浏览器仍显示“本月”被选中。
+- 这些是独立前端/runtime 契约问题；本清洗分支不修改 `assets/`、`server/` 或
+  `test/runtime-api.test.js`。
+
+### 首批本地回归
+
+- `config/curation-overrides.json` JSON 校验通过。
+- curation、全库审计和四页审计 Node tests：46/46 通过。
+- runtime DB audit Python tests：2/2 通过。
+- `git diff --check` 通过。
+
+下一门禁是 Mac after：恢复 artifact `8626595119` 的 inventory checkpoint，
+传入 `expected_selector_count=15`。每条 selector 必须精确命中一条真实 inventory row；
+未得到该证据前不把本批写成完成。

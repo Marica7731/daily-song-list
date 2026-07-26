@@ -96,3 +96,19 @@
 2. rebase 到最新 `origin/main`，按真实 provenance 写入首批高置信 selector 与回归样本。
 3. 以显式 selector 数量门禁再跑 Mac after，更新最终文档与 run/artifact digest。
 4. 完成 diff 审查、目标文档时间戳归档、commit 与 push。
+
+## 2026-07-26 10:30 状态
+
+- 实时 `origin/main` 仍为 `aa346c86ae8d475f87f5160088ecf4c38a3c628d`；审计分支
+  head `6fa10644e321b3227ce4a054f2d916c94352fa76` 已包含该基线。
+- 正式 before run `30183655942` 的 curation audit job `89744468699` 成功；
+  完整 SQLite 13,907,808,256 bytes，SHA-256
+  `55f74ce6453c01668f4274288ce8698db475c7301bd5897109031085281f1391`，
+  `quick_check=ok`，已从 runner 临时目录删除。
+- before artifact ID `8626607541`；可恢复 inventory checkpoint ID `8626595119`。
+- 全库 runtime 口径：45,521 videos、45,325 songs、594,097 occurrences、
+  56,146 unknown-artist occurrences、26,539 singleton songs。
+- 首批已写入 15 个 exact selector：12 个用户确认的 Naraetan non-song drop、
+  `明日への勇気` 注释修正、2 个 YOSHIKA 唯一高频已知歌手回填。
+- 本地 Node 46/46、Python 2/2 通过；下一步 commit/push 后 dispatch Mac after，
+  `expected_selector_count=15` 并恢复 checkpoint，不使用 `--fresh`。

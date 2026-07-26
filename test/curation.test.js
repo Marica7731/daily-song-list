@@ -938,6 +938,95 @@ test("Naraetan batch 1 confirmed or conservatively retained songs are never drop
   }
 });
 
+test("global singleton cleanup batch uses exact selectors and conservative actions", () => {
+  const context = loadCurationContext();
+  const records = context.overrides.records.filter(
+    (entry) => `${entry.reason || ""} ${entry.note || ""}`.includes("global-singleton-20260726"),
+  );
+  const selectorKeys = new Set(
+    records.map(
+      (entry) =>
+        `${entry.videoId}:${entry.sourceId}:${entry.sourceHash}:${entry.seconds}:${entry.rawHash}`,
+    ),
+  );
+
+  assert.equal(records.length, 15);
+  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 12);
+  assert.equal(records.filter((entry) => entry.action === "replace_entry").length, 3);
+  assert.equal(selectorKeys.size, records.length);
+  assert.equal(records.every((entry) => entry.sourceId), true);
+  assert.equal(records.every((entry) => /^[0-9a-f]{64}$/u.test(entry.sourceHash)), true);
+  assert.equal(records.every((entry) => /^[0-9a-f]{64}$/u.test(entry.rawHash)), true);
+});
+
+test("global singleton cleanup drops only reviewed rows and keeps corrected songs", () => {
+  const context = loadCurationContext();
+  const records = context.overrides.records.filter(
+    (entry) => `${entry.reason || ""} ${entry.note || ""}`.includes("global-singleton-20260726"),
+  );
+  const originalByRawHash = new Map([
+    ["bed5304fddcba7aea348de5ff6c9248589fb9f39b2f9c6a131b07cc127624f7a", ["（音量注意）明日への勇気", "吉成圭子"]],
+    ["f84eda4112a7b18d75a26a54bd20183081dde0e72b71f09402b966f383baa4fb", ["ココロのちず", "未記載"]],
+    ["b4c9e75396e01c834daa8a8602b2713924b714a17727e56f336d379b01fe66b2", ["恋するフォーチュンクッキー", "未記載"]],
+  ]);
+  const videos = records.map((entry, index) => {
+    const [title, artist] = originalByRawHash.get(entry.rawHash) || [`Reviewed fixture ${index + 1}`, "Known Artist"];
+    return {
+      videoId: entry.videoId,
+      selectedSourceId: entry.sourceId,
+      selectedSourceHash: entry.sourceHash,
+      songs: [
+        {
+          seconds: entry.seconds,
+          title,
+          artist,
+          raw: `${entry.seconds} ${title}`,
+          rawHash: entry.rawHash,
+          sourceId: entry.sourceId,
+          sourceHash: entry.sourceHash,
+        },
+      ],
+    };
+  });
+
+  const curated = applyCurationToVideos(videos, context);
+  const kept = curated.flatMap((video) => video.songs || []);
+  assert.equal(kept.length, 3);
+  assert.deepEqual(
+    kept.map((entry) => `${entry.title} / ${entry.artist}`).sort(),
+    [
+      "ココロのちず / BOYSTYLE",
+      "恋するフォーチュンクッキー / AKB48",
+      "明日への勇気 / 吉成圭子",
+    ].sort(),
+  );
+
+  const target = records.find((entry) => entry.action === "drop_entry");
+  const nearMiss = applyCurationToVideos(
+    [
+      {
+        videoId: target.videoId,
+        selectedSourceId: target.sourceId,
+        selectedSourceHash: target.sourceHash,
+        songs: [
+          {
+            seconds: target.seconds,
+            title: "Regression Fixture Song",
+            artist: "Known Artist",
+            raw: "near miss",
+            rawHash: "0".repeat(64),
+            sourceId: target.sourceId,
+            sourceHash: target.sourceHash,
+          },
+        ],
+      },
+    ],
+    context,
+  );
+  assert.equal(nearMiss[0].songs.length, 1);
+  assert.equal(nearMiss[0].songs[0].title, "Regression Fixture Song");
+});
+
 function song(title, seconds, rawHash) {
   return {
     title,
