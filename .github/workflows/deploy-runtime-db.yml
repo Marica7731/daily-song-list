@@ -1,33 +1,13 @@
 name: Deploy SQLite runtime DB
 
 on:
-  workflow_run:
-    workflows:
-      - "Update core song-list data"
-    types:
-      - completed
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/deploy-runtime-db.yml"
-      - "assets/ranking-utils.js"
-      - "config/**"
-      - "data/status.json"
-      - "data/latest.json"
-      - "data/external/vsinger-http/backfill/**"
-      - "data/external/youtube-channel-discovery/**"
-      - "deploy/vps2/**"
-      - "package.json"
-      - "server/**"
-      - "scripts/check-published-runtime.js"
-      - "scripts/db/**"
-      - "scripts/export-channel-discovery-increment.js"
-      - "scripts/import-channel-discovery.js"
-      - "scripts/vsinger-http/**"
-      - "scripts/youtube-channel-discovery*.js"
-      - "test/runtime-db.test.js"
   workflow_dispatch:
+    inputs:
+      emergency_legacy_sqlite:
+        description: "Explicit emergency-only rollback; do not use for normal releases"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -41,7 +21,7 @@ jobs:
     # Legacy full SQLite deployment is disabled by default and is never
     # allowed to race or overwrite the PostgreSQL runtime. It requires an
     # explicit emergency variable and is mutually exclusive with PG.
-    if: (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && vars.DAILY_SONG_LEGACY_SQLITE_ENABLED == '1' && vars.DAILY_SONG_PG_INCREMENTAL_ENABLED != '1'
+    if: inputs.emergency_legacy_sqlite == true && vars.DAILY_SONG_LEGACY_SQLITE_ENABLED == '1' && vars.DAILY_SONG_PG_INCREMENTAL_ENABLED != '1'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 180
     env:
