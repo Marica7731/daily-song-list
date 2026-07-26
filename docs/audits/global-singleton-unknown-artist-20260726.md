@@ -283,3 +283,33 @@ occurrence audit。页面紧凑 payload 不提供 artist，不能据此把歌手
 最终门禁是在合入最新 main 后恢复 after checkpoint artifact `8627299029`，
 传入 `expected_selector_count=16`。每条 selector 必须精确命中一条真实 inventory row，
 并确认 Naraetan 目标标题只保留合并后的真歌 `明日への勇気`。
+
+## 最终 after（run 30187124442）
+
+- head：`56086ace1fbafb4d236aa87c22c0c7f2569cdfdf`；check job
+  `89753700350` 与 curation job `89753700366` 均 success。
+- checkpoint 从 `30184771010` 的 compatible inventory 恢复；16 个 selector 的
+  `matchCount` 全部严格为 1。
+- 最终 global curation：45,484 videos、51,563 songs、588,247 occurrences、
+  29,379 unknown-artist songs、278,127 unknown-artist occurrences、29,374
+  singleton songs、15,153 singleton-unknown songs。
+- Naraetan runtime/source after：292 videos、1,383 ranking/source songs、4,451
+  occurrences、1,580 title-artist groups、903 singleton、73 unknown occurrences、
+  71 unknown groups、70 singleton unknown、140 same-title conflicts。截图列出的
+  13 个 non-song provenance 均消失；唯一保留目标是 `明日への勇気 / 吉成圭子`
+  2 occurrences。`龍角散` 不再出现在 Naraetan source audit。
+- YOSHIKA inventory before/after 保持为 237 videos、723→724 songs、4,709
+  occurrences、2,757→2,755 unknown occurrences、242→243 singleton songs；
+  两条未知歌手回填分别为 `BOYSTYLE` 与 `AKB48`。
+- 最终 runtime SQLite：14,775,336,960 bytes，SHA-256
+  `ee8dfefdbcd3c2cf009040b953d640664ec86c7507f2263141a5b81626cad9fb`，
+  `quick_check=ok`；global runtime 为 45,521 videos、45,313 songs、594,085
+  occurrences。
+- 四页仍为 4×20 channels、75,828 expanded songs；final `four-pages.json` SHA-256
+  `b6474557c6e0fba2ccadef1ab0507107a36adcb81d45d262afe5b137dd0f70e0`。
+- final audit artifact：ID `8627686741`，53,023,672 bytes，SHA-256
+  `c93044d274072ec8f0e5cdd87262ff53eedeed11b994e164d07f7671e9b4c645`；
+  checkpoint artifact：ID `8627684550`，SHA-256
+  `3c6e8b1656a502061bd7130f3ad4def80553ded3c7330f98fd0eac94835fbaa5`。
+- final 本地复测：Node 56/56、Python 2/2、JSON、`git diff --check` 全部通过。
+  当前分支 `56086ace1` 已 push；未合并 main、未部署。

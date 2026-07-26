@@ -125,3 +125,16 @@
 - 本批现在是 16 个 selector：13 drop、3 replace。下一步本地复测、commit/push 后，
   恢复 checkpoint artifact `8627299029` 再跑最终 Mac after，并以
   `expected_selector_count=16` 严格验收。
+
+## 2026-07-26 最终完成审计
+
+- final run `30187124442` 使用 head `56086ace1fbafb4d236aa87c22c0c7f2569cdfdf`，
+  `check` 与 `curation_audit` 均 success；16 个 exact selector 每条恰好命中 1 条。
+- inventory、四页生产 API、完整 runtime SQLite、DB quick check、临时 DB 清理与 bounded
+  artifact upload 均成功；Naraetan 的 12 个已确认 non-song 片段（含两份同秒
+  `龍角散` provenance）全部清理，`明日への勇気` 保留并合并为 2 次。
+- YOSHIKA before/after、未知歌手回填、真实 singleton 保留样本、四页 80 个频道及
+  全部展开歌曲均已写入审计文档与 final artifact；拼写拆分和同标题多歌手冲突仅报告，
+  没有按低频或标题自动删除/合并。
+- 分支 `codex/global-singleton-cleanup-20260726` 已 push 到 `56086ace1`；main 未被
+  修改，未部署。建议保留该分支供主任务 review，待其独立决定是否合并。
