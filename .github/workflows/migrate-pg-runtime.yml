@@ -71,17 +71,8 @@ jobs:
           source_sha="$(shasum -a 256 "$SOURCE_DB" | cut -d' ' -f1)"
           test "$source_bytes" = "$EXPECTED_BYTES"
           test "$source_sha" = "$EXPECTED_SHA256"
-          remote_probe="$(
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" sh -s -- "$REMOTE_STATE_DIR" <<'REMOTE_PROBE'
-          state_dir="$1"
-          free="$(df -B1 --output=avail "$state_dir" | tail -n 1 | tr -d '[:space:]')"
-          old=0
-          part=0
-          test -f "$state_dir/song-rank.sqlite" && old="$(stat -c%s "$state_dir/song-rank.sqlite")" || true
-          test -f "$state_dir/song-rank.sqlite.restore.part" && part="$(stat -c%s "$state_dir/song-rank.sqlite.restore.part")" || true
-          printf '%s %s %s\n' "$free" "$old" "$part"
-          REMOTE_PROBE
-          )"
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; part=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; test -f '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part' && part=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite.restore.part') || true; printf '%s %s %s\\n' \"\$free\" \"\$old\" \"\$part\"" > "$TASK_ROOT/remote-probe.txt"
+          read -r remote_free remote_old remote_part < "$TASK_ROOT/remote-probe.txt"
           read -r remote_free remote_old remote_part <<< "$remote_probe"
           printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\nremotePartBytes=%s\n' "$source_bytes" "$source_sha" "$remote_free" "$remote_old" "$remote_part" > "$TASK_ROOT/preflight.txt"
           test "$remote_old" = "0" || { echo "SQLITE_RESTORE_BLOCKED target_exists_bytes=$remote_old"; exit 78; }
