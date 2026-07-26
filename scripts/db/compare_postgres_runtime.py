@@ -21,6 +21,9 @@ TABLE_PAIRS = (
     ("source_details", "source_details"),
     ("source_occurrences", "source_occurrences"),
     ("ranking_rows", "ranking_rows"),
+    ("external_songs", "external_songs"),
+    ("external_videos", "external_videos"),
+    ("external_occurrences", "external_occurrences"),
 )
 
 

@@ -182,6 +182,52 @@ IMPORTS = [
         """,
         "count": "SELECT COUNT(*) FROM ranking_rows",
     },
+    {
+        "name": "external_songs",
+        "source": "external_songs",
+        "columns": ["source_system", "external_song_id", "canonical_song_id", "title", "artist", "source_url", "payload_json"],
+        "select": "SELECT source_system, external_song_id, canonical_song_id, title, artist, source_url, payload_json FROM external_songs",
+        "insert": """
+            INSERT INTO external_songs(source_system, external_song_id, canonical_song_id, title, artist, source_url, payload_json)
+            SELECT source_system, external_song_id, canonical_song_id, title, artist, source_url, COALESCE(NULLIF(payload_json, '')::jsonb, '{{}}'::jsonb)
+            FROM {stage}
+            ON CONFLICT(source_system, external_song_id) DO UPDATE SET
+              canonical_song_id=EXCLUDED.canonical_song_id, title=EXCLUDED.title, artist=EXCLUDED.artist,
+              source_url=EXCLUDED.source_url, payload_json=external_songs.payload_json || EXCLUDED.payload_json
+        """,
+        "count": "SELECT COUNT(*) FROM external_songs",
+    },
+    {
+        "name": "external_videos",
+        "source": "external_videos",
+        "columns": ["source_system", "external_video_id", "youtube_video_id", "title", "singer_name", "streamed_at", "source_url", "payload_json"],
+        "select": "SELECT source_system, external_video_id, youtube_video_id, title, singer_name, streamed_at, source_url, payload_json FROM external_videos",
+        "insert": """
+            INSERT INTO external_videos(source_system, external_video_id, youtube_video_id, title, singer_name, streamed_at, source_url, payload_json)
+            SELECT source_system, external_video_id, youtube_video_id, title, singer_name, streamed_at, source_url, COALESCE(NULLIF(payload_json, '')::jsonb, '{{}}'::jsonb)
+            FROM {stage}
+            ON CONFLICT(source_system, external_video_id) DO UPDATE SET
+              youtube_video_id=EXCLUDED.youtube_video_id, title=EXCLUDED.title, singer_name=EXCLUDED.singer_name,
+              streamed_at=EXCLUDED.streamed_at, source_url=EXCLUDED.source_url, payload_json=external_videos.payload_json || EXCLUDED.payload_json
+        """,
+        "count": "SELECT COUNT(*) FROM external_videos",
+    },
+    {
+        "name": "external_occurrences",
+        "source": "external_occurrences",
+        "columns": ["source_system", "occurrence_id", "canonical_song_id", "external_song_id", "external_video_id", "youtube_video_id", "seconds", "payload_json"],
+        "select": "SELECT source_system, occurrence_id, canonical_song_id, external_song_id, external_video_id, youtube_video_id, seconds, payload_json FROM external_occurrences",
+        "insert": """
+            INSERT INTO external_occurrences(source_system, occurrence_id, canonical_song_id, external_song_id, external_video_id, youtube_video_id, seconds, payload_json)
+            SELECT source_system, occurrence_id, canonical_song_id, external_song_id, external_video_id, youtube_video_id, NULLIF(seconds, '')::integer, COALESCE(NULLIF(payload_json, '')::jsonb, '{{}}'::jsonb)
+            FROM {stage}
+            ON CONFLICT(source_system, occurrence_id) DO UPDATE SET
+              canonical_song_id=EXCLUDED.canonical_song_id, external_song_id=EXCLUDED.external_song_id,
+              external_video_id=EXCLUDED.external_video_id, youtube_video_id=EXCLUDED.youtube_video_id,
+              seconds=EXCLUDED.seconds, payload_json=external_occurrences.payload_json || EXCLUDED.payload_json
+        """,
+        "count": "SELECT COUNT(*) FROM external_occurrences",
+    },
 ]
 
 
@@ -242,7 +288,7 @@ def main() -> int:
             with pg_conn.cursor() as pg_cur:
                 pg_cur.execute(args.schema_file.read_text(encoding="utf-8"))
                 if args.replace:
-                    pg_cur.execute("TRUNCATE TABLE source_occurrences, source_details, occurrences, ranking_rows, videos, songs, channels, meta CASCADE")
+                    pg_cur.execute("TRUNCATE TABLE external_occurrences, external_videos, external_songs, source_occurrences, source_details, occurrences, ranking_rows, videos, songs, channels, meta CASCADE")
                 counts = {}
                 for definition in IMPORTS:
                     counts[definition["name"]] = copy_table(pg_cur, sqlite_conn, definition, args.batch_size)
