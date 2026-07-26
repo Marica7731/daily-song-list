@@ -950,8 +950,8 @@ test("global singleton cleanup batch uses exact selectors and conservative actio
     ),
   );
 
-  assert.equal(records.length, 16);
-  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 13);
+  assert.equal(records.length, 17);
+  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 14);
   assert.equal(records.filter((entry) => entry.action === "replace_entry").length, 3);
   assert.equal(selectorKeys.size, records.length);
   assert.equal(records.every((entry) => entry.sourceId), true);
@@ -1038,6 +1038,50 @@ test("global singleton cleanup drops only reviewed rows and keeps corrected song
   );
   assert.equal(nearMiss[0].songs.length, 1);
   assert.equal(nearMiss[0].songs[0].title, "Regression Fixture Song");
+});
+
+test("Naraetan translated commentary follow-up drops only the reviewed timestamp", () => {
+  const context = loadCurationContext();
+  const record = context.overrides.records.find(
+    (entry) =>
+      entry.videoId === "lUDCE3zZmuQ"
+      && entry.seconds === 9463
+      && entry.rawHash === "66cb9e129f135600d5b881595110822a7e7bb01175eeb5d7d138763768188f1e",
+  );
+  assert.ok(record);
+  assert.equal(record.action, "drop_entry");
+  assert.equal(record.reason, "verified_translated_commentary_not_song");
+  assert.equal(record.sourceId, "Ugxw2-DEUVx0aNsvVyR4AaABAg");
+  assert.equal(record.sourceHash, "5a84ddcb0ff7c6f66409f9d5b93f1c0c258769dbe6ad300a6b27a1907a37c07f");
+
+  const exact = {
+    seconds: 9463,
+    title: "辛いことがある人生でも",
+    artist: "Even in a life full of hardships",
+    raw: "02:37:43 辛いことがある人生でも... / Even in a life full of hardships...",
+    rawHash: record.rawHash,
+    sourceId: record.sourceId,
+    sourceHash: record.sourceHash,
+  };
+  const applyFixture = (songs) => applyCurationToVideos(
+    [
+      {
+        videoId: record.videoId,
+        selectedSourceId: record.sourceId,
+        selectedSourceHash: record.sourceHash,
+        songs,
+      },
+    ],
+    context,
+  );
+
+  assert.equal(applyFixture([exact]).length, 0);
+  const differentSecond = applyFixture([{ ...exact, seconds: 9464 }]);
+  assert.equal(differentSecond[0].songs.length, 1);
+  assert.equal(differentSecond[0].songs[0].seconds, 9464);
+  const differentRaw = applyFixture([{ ...exact, rawHash: "0".repeat(64) }]);
+  assert.equal(differentRaw[0].songs.length, 1);
+  assert.equal(differentRaw[0].songs[0].rawHash, "0".repeat(64));
 });
 
 function song(title, seconds, rawHash) {

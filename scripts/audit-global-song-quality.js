@@ -413,7 +413,7 @@ async function forEachInventoryVideo(inventoryPath, callback) {
   const lines = readline.createInterface({ input, crlfDelay: Infinity });
   for await (const line of lines) {
     if (!line.trim()) continue;
-    callback(JSON.parse(line));
+    await callback(JSON.parse(line));
   }
 }
 
@@ -1063,7 +1063,7 @@ function pushSample(target, value, limit) {
 }
 
 function recordIncludesBatchTag(record, batchTag) {
-  const haystack = `${record.reason || ""} ${record.note || ""}`;
+  const haystack = `${record.batchTag || ""} ${record.reason || ""} ${record.note || ""}`;
   return Boolean(batchTag && haystack.includes(batchTag));
 }
 
@@ -1115,13 +1115,19 @@ function logPhase(phase, fields = {}) {
 module.exports = {
   addVideoToAccumulator,
   aggregateMatchedChannels,
+  auditSourceForVideo,
   classifyTitlePattern,
+  canonicalizeVideo,
   computeInventoryKey,
   createAccumulator,
   enrichVideoSelectors,
   finalizeAccumulator,
+  forEachInventoryVideo,
   normalizeHandle,
+  normalizeAuditSong,
   recordIncludesBatchTag,
+  selectorEvidence,
   selectorMatchesSong,
   songIdentity,
+  stableSongSelector,
 };

@@ -221,5 +221,9 @@ test("batch selection is explicit and does not include unrelated overrides", () 
     recordIncludesBatchTag({ reason: "confirmed_noise", note: "global-singleton-20260726 YOSHIKA" }, "global-singleton-20260726"),
     true,
   );
+  assert.equal(
+    recordIncludesBatchTag({ batchTag: "global-singleton-followup-20260726" }, "global-singleton-followup-20260726"),
+    true,
+  );
   assert.equal(recordIncludesBatchTag({ reason: "confirmed_noise", note: "another batch" }, "global-singleton-20260726"), false);
 });

@@ -40,7 +40,7 @@ concurrency:
 jobs:
   check:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,7 +143,7 @@ jobs:
           npm run check:budget
 
   curation_audit:
-    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
+    if: github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || github.ref_name == 'codex/global-singleton-cleanup-20260726' || github.ref_name == 'codex/global-singleton-audit-20260726')
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 150
     steps:
@@ -201,7 +201,9 @@ jobs:
             test/audit-global-song-quality.test.js \
             test/audit-production-vtuber-pages.test.js \
             test/curation.test.js \
-            test/song-aliases.test.js
+            test/song-aliases.test.js \
+            test/export-global-quality-candidates.test.js
+          python3 test/export_runtime_singleton_index_test.py
 
       - name: Build resumable global inventory and before-after audit
         timeout-minutes: 35
@@ -246,6 +248,23 @@ jobs:
           python3 scripts/audit-runtime-db.py \
             --db "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
             --output "$AUDIT_ROOT/reports/runtime-db-audit.json"
+
+      - name: Export complete singleton and unknown-artist candidate manifest
+        timeout-minutes: 25
+        run: |
+          set -Eeuo pipefail
+          python3 -u scripts/export-runtime-singleton-index.py \
+            --db "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
+            --output "$AUDIT_ROOT/checkpoint/global/runtime-singletons.jsonl.gz" \
+            --meta-output "$AUDIT_ROOT/checkpoint/global/runtime-singletons.meta.json" \
+            --db-audit "$AUDIT_ROOT/reports/runtime-db-audit.json"
+          node --max-old-space-size=12288 scripts/export-global-quality-candidates.js \
+            --inventory "$AUDIT_ROOT/checkpoint/global/inventory.jsonl.gz" \
+            --inventory-meta "$AUDIT_ROOT/checkpoint/global/inventory-meta.json" \
+            --runtime-singletons "$AUDIT_ROOT/checkpoint/global/runtime-singletons.jsonl.gz" \
+            --runtime-meta "$AUDIT_ROOT/checkpoint/global/runtime-singletons.meta.json" \
+            --output-dir "$AUDIT_ROOT/reports/global-quality" \
+            --checkpoint-dir "$AUDIT_ROOT/checkpoint/global-quality"
 
       - name: Remove full temporary DB
         if: always()
