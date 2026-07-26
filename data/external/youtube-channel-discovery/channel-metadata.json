@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T11:38:35.665Z",
+  "generatedAt": "2026-07-26T13:50:50.429Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T11:38:35.665Z",
+    "fetchedAt": "2026-07-26T13:50:50.429Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T11:38:35.665Z",
+    "generatedAt": "2026-07-26T13:50:50.429Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 992,
-      "parseableChannels": 970,
+      "totalChannels": 996,
+      "parseableChannels": 974,
       "realAvatar": 643,
-      "thumbnailFallback": 349,
+      "thumbnailFallback": 353,
       "missingDisplayImage": 0,
-      "missingAvatar": 349,
+      "missingAvatar": 353,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 544
+      "skipped_collected_evidence": 547,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 522,
+      "batch_limit_reached": 525,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@HibachiMana",
+        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
+        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@HibachiMana",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@nanasehikage",
+        "channelId": "UCu5yCEYvYDz020eKXzFCH9g",
+        "displayName": "奈々瀬ひかげ / Nanase Hikage",
+        "sourceUrl": "https://www.youtube.com/@nanasehikage",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@ShiroseIsumi",
+        "channelId": "UCHVSA2OScyef9W7OwPGgJ9w",
+        "displayName": "城瀬いすみ / Shirose Isumi【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@ShiroseIsumi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@teikobonbonch3548",
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
@@ -11730,13 +11751,6 @@
         "channelId": "UCjtNkDsKWsxnZ0-ssUCFp7A",
         "displayName": "笹ノ音わぽ / Sasanone Wapo",
         "sourceUrl": "https://www.youtube.com/@Sasanone_wapo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@HibachiMana",
-        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
-        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@HibachiMana",
         "reason": "batch_limit_reached"
       },
       {
@@ -11810,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Shiro_zakuro",
+        "channelId": "UCPmcUzR-kh8hGVbNdYU84EA",
+        "displayName": "柘榴シロ@Zakuro shiro",
+        "sourceUrl": "https://www.youtube.com/@Shiro_zakuro",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@Luciaaa_Sings",
         "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
         "displayName": "Lucia",
@@ -11828,27 +11849,6 @@
         "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
         "displayName": "訛音屋 / Kaonya",
         "sourceUrl": "https://www.youtube.com/@kaonya5",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YamagamiKaruta",
-        "channelId": "UCllKI7VjyANuS1RXatizfLQ",
-        "displayName": "山神 カルタ / Karuta Yamagami",
-        "sourceUrl": "https://www.youtube.com/@YamagamiKaruta",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
-        "channelId": "UCgSEzhNM3Aqj55oh5rpIjaQ",
-        "displayName": "夜凪よな-Yonagi Yona-",
-        "sourceUrl": "https://www.youtube.com/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E3%82%8C%E3%82%8C%E3%82%8A_n5",
-        "channelId": "UCJ1WR_fuf42LcPcfDTTJiWQ",
-        "displayName": "💜れれり🧪",
-        "sourceUrl": "https://www.youtube.com/@%E3%82%8C%E3%82%8C%E3%82%8A_n5",
         "reason": "batch_limit_reached"
       }
     ]
