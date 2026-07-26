@@ -13,7 +13,13 @@ const {
 const {
   loadYoutubeChannelDiscoveryRuntimeVideos,
 } = require("../youtube-channel-discovery-runtime");
-const { hydratePayloadWithChannelMetadata, thumbnailUrlForVideo } = require("../channel-metadata-cache");
+const {
+  buildChannelMetadataLookup,
+  hydratePayloadWithChannelMetadata,
+  hydrateVideoWithChannelMetadata,
+  loadChannelMetadataCache,
+  thumbnailUrlForVideo,
+} = require("../channel-metadata-cache");
 const { groupForRange, RANGE_TITLES } = require("../range-config");
 const {
   RANGES,
@@ -50,9 +56,8 @@ function main() {
   try {
     const args = parseArgs(process.argv.slice(2));
     logPhase("payload_load_start", { input: args.input });
-    const payload = hydratePayloadWithChannelMetadata(readJson(args.input), {
-      metadataPath: path.join(args.youtubeChannelDiscoveryDir, "channel-metadata.json"),
-    });
+    const metadataPath = path.join(args.youtubeChannelDiscoveryDir, "channel-metadata.json");
+    const payload = hydratePayloadWithChannelMetadata(readJson(args.input), { metadataPath });
     assertRecentAllContinuity(payload);
     logPhase("payload_load_ok", {
       inputBytes: fileSize(args.input),
@@ -63,6 +68,7 @@ function main() {
       youtubeChannelDiscovery: args.noYoutubeChannelDiscovery ? "disabled" : args.youtubeChannelDiscoveryDir,
     });
     const runtimeImports = loadRuntimeImports(args);
+    hydrateVsingerRuntimeImportsWithChannelMetadata(runtimeImports, { metadataPath });
     const curationContext = loadCurationContext();
     curateYoutubeChannelDiscoveryRuntime(payload, runtimeImports, curationContext);
     const finalContinuity = assertRuntimeImportContinuity(payload, runtimeImports);
@@ -156,6 +162,15 @@ function loadRuntimeImports(args) {
       required: args.requireYoutubeChannelDiscovery,
     }),
   };
+}
+
+function hydrateVsingerRuntimeImportsWithChannelMetadata(runtimeImports, options = {}) {
+  const metadata = loadChannelMetadataCache(options.metadataPath);
+  const lookup = buildChannelMetadataLookup(metadata.channels);
+  const source = runtimeImports?.vsinger;
+  if (!source || !Array.isArray(source.videos)) return runtimeImports;
+  source.videos = source.videos.map((video) => hydrateVideoWithChannelMetadata(video, lookup));
+  return runtimeImports;
 }
 
 function curateYoutubeChannelDiscoveryRuntime(payload, runtimeImports, curationContext) {
@@ -1387,4 +1402,5 @@ module.exports = {
   buildMergedRangeGroup,
   buildRangePayload,
   curateYoutubeChannelDiscoveryRuntime,
+  hydrateVsingerRuntimeImportsWithChannelMetadata,
 };
