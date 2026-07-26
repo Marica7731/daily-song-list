@@ -52,9 +52,11 @@ jobs:
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD"
           mkdir -p "$RUNNER_TEMP/ssh-askpass"
+          printf '%s\n' "$VPS2_PASSWORD" > "$RUNNER_TEMP/ssh-askpass/vps2.password"
+          chmod 600 "$RUNNER_TEMP/ssh-askpass/vps2.password"
           cat > "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" <<'SH'
           #!/bin/sh
-          printf '%s\n' "${VPS2_PASSWORD}"
+          exec cat "$RUNNER_TEMP/ssh-askpass/vps2.password"
           SH
           chmod 700 "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh"
           {
