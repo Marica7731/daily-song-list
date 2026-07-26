@@ -99,6 +99,43 @@ test("curation overrides drop, replace, force keep, and carry forward videos", (
   );
 });
 
+test("keeps Urameshi original Restart separate from Ririsya same-title song", () => {
+  const context = loadCurationContext();
+  const curated = applyCurationToVideos(
+    [
+      {
+        videoId: "W0bZCSUyIy0",
+        selectedSourceId: "vsinger-moment:050501d2-d0e0-40e9-8da9-1975605e6b64",
+        songs: [{
+          sourceId: "cf324cae-38b0-400f-bf6e-2422c27fa577",
+          sourceHash: "e991a26d5083d706667d652ebcd1e755d9e7c6bbb39313d0d7f55d26badd9d80",
+          seconds: 12382,
+          title: "リスタート",
+          artist: "",
+          raw: "3:26:22 リスタート",
+        }],
+      },
+      {
+        videoId: "tiAklt6gOoo",
+        selectedSourceId: "UgzHF1V5GTh_2_MVK194AaABAg",
+        songs: [{
+          sourceId: "UgzHF1V5GTh_2_MVK194AaABAg",
+          sourceHash: "2d88c52c513e9b33f03504731f438e6bd43eb6fe13eb5ec31d1c7d76d2d9e4a1",
+          rawHash: "f16aa0fb3ee0719e9f90686afebc049a2f0734a2166cd7ddc0cfcd54f04083d2",
+          seconds: 689,
+          title: "リスタート",
+          artist: "凛々咲",
+        }],
+      },
+    ],
+    context,
+  );
+
+  assert.equal(curated[0].songs[0].artist, "うら飯 紺汰");
+  assert.equal(curated[1].songs[0].artist, "凛々咲");
+  assert.equal(curated.curationStats.replacedEntries, 1);
+});
+
 test("curation classifies parser corruptions and conversation-only rows", () => {
   assert.equal(
     isParserCorruptionEntry({
