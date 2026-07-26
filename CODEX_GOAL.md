@@ -1,147 +1,109 @@
-# daily-song-list 清洗与 upsert 上线收口
+# daily-song-list 主线：增量数据库与安全发布迁移
+
+## 本会话 Goal（2026-07-27，G 盘正式入口）
+
+由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
+
+当前执行门：旧 SQLite 已按用户授权在有 Mac rollback hash 与定量空间预算后预删除，当前 VPS 不保留完整 SQLite，PG 仍只有 schema/空 state，外部 API 待 PG candidate 接管前不可宣称可用。`migrate-pg-runtime.yml` 负责 Mac 单目录全量 SQLite→PG candidate、compare、API gate 和可选 atomic activate；`deploy-pg-incremental.yml` 负责后续 accepted increment/curation patch，避免旧 SQLite workflow 抢回生产。7D 必须在同一发布链路完成：先固定搜索链接完整 `reachedEnd=true`，再详情/三天规则/curation，最后生成 accepted increment 并经 PG candidate gate；PID=5282 已停止，陈旧 checkpoint 只作审计证据。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过真实线上切换、迁移后清洗和 7D 验收前保持 pending，不得标记 complete。
 
 ## 目标
 
-接管并完成 daily-song-list 的 curation 清洗与 `upsert_video` 工作，先验收 Naraetan，再形成可继续扩展到其他频道的保守清洗流程；最终通过既有 GitHub Actions 发布到生产并做真实线上验证。
+在唯一正式入口 `G:\codex-work\daily-song-list` 完成可审计的数据库/发布架构迁移，并在迁移完成前保持当前 active 版本可服务。目标链路是：增量 upsert -> 候选版本构建与校验 -> active 原子切换 -> 可验证 rollback -> 真实线上验收。
 
-## 范围
+## 当前阶段
 
-- 验收 Naraetan 首批 curation：只删除有原始证据的非歌曲，歌曲别名合并必须保守。
-- 修复 Naraetan alias 与已生成静态数据不一致导致的 Check code 失败。
-- 审查并完善 `upsert_video` 的 schema、整场替换语义、测试和用户操作文档。
-- 形成 Naraetan 后续批次与其他频道的全库清洗候选审计计划。
-- 恢复“新增 31 个 YouTube 来源”的完整交付边界：逐来源核对当前 main、生产 videoId 覆盖、本地 accepted 与 checkpoint，只续跑真实缺口。
-- 审计最近 7 天数据自动进入总库的端到端链路；评估现有补丁是否正确，并确保 7 天增量使用当前清洗、字段和来源标记规则。
-- P0：恢复生产 `/api/rankings` 的 VTuber 频道查询，修复 502 根因；错误状态保留上一页但改为简洁、可重试、可展开诊断的提示。
-- 全库 singleton/未记载歌手清洗已委派独立任务 `019f9aff-32a6-73f0-88d6-e7e7c3a74250`；本任务只负责后续审查与集成，避免与其写集冲突。
-- 该独立清洗任务的业务验收包括 `@YOSHIKA-Ch` before/after，以及生产 VTuber 榜按次数/按歌曲数各前两页逐频道歌曲审阅。
-- 不做飞书通知。
-- 不触碰旧 G 工作树中的 `.workbuddy/`、未提交删除或其他用户改动。
-- 不与 source-backfill 会话并发写同一数据库、来源目录或 checkpoint。
-- 大型数据库构建、全库扫描和长任务只使用 Mac self-hosted runner；轻中型隔离测试可使用已验证连通的 `vps-wdc`。
+2026-07-27：主线目标已由用户明确收口为两条交付线：`(1) PostgreSQL 增量迁移 -> 迁移后接入已审计清洗结果；(2) MyGit 完整 7D 恢复`。VPS2 已实时确认 PostgreSQL 16 active、`song_rank` 存在、`www-data` 可通过 Unix-socket peer 登录；`migration_*` 与 full runtime projection schema 已存在，但 `migration_state.active_revision_id` 为空、候选数据为 0。旧 SQLite run `30217524582` 已失败并停止服务；用户明确授权后，已在 Mac rollback DB `858041e58988...` 与空间预算证据下删除 VPS `/var/lib/culua/ytb-song-rank/song-rank.sqlite`（14,829,768,704 bytes），删除前可用约 14.5 GB、删除后约 29.0 GB；因此当前外部 API 待 PG candidate 接管，不把 502 当正常完成。主仓库已有 PG adapter/API wrapper、full runtime stream receiver、candidate service 和 focused tests；Mac PID=5282 已停止，checkpoint 仍是陈旧 `status=running`、`page=101`、80 个去重候选、`reachedEnd=false`。仓库当前存在约 32 万条接手前 staged deletion（含历史生成数据），本轮不得恢复、清理或扩大这批删除。
 
-## 验收条件
+## 迁移优先时间表（有界，不承诺固定总时长）
 
-1. `upsert_video` 不依赖生产配置中的假示例；合法记录有严格 videoId、歌曲、时间戳和操作者校验。
-2. 有可直接填写的整场歌单 JSON 示例、上线入口和回滚说明。
-3. Naraetan 首批按类别抽样核对原始 JSON/HTML；已知真曲保留，脏条目不再进入生成数据。
-4. Check code 全绿；核心数据更新和 Runtime DB 发布成功。
-5. 线上 `healthz`、`meta`、`rankings` 返回预期状态码和关键字段；Naraetan 目标脏项及 upsert 结果有生产查询证据。
-6. 后续清洗候选来自只读审计，不能把外部搜索的猜测直接导入生产。
-7. 31 个来源均有明确终态：已上线、真实增量待发布、或因缺少 usable detail 保留 checkpoint；不得把 crawler 进度当作生产缺口。
-8. 最近 7 天的线上视频能自动进入总库，字段覆盖、清洗结果、来源标记与当前规则一致；以生产 API 的实际 7 天样本和总量变化验收。
-9. `/api/rankings?range=all&view=vtubers&metric=occurrences&page=1&pageSize=20` 线上恢复 200；502/504 不再把完整查询串直接铺在页面上，用户可重试并展开诊断信息。
+- 现在至 30 分钟：确认 Mac 专属 temp root、当前线上 active、VPS2 PostgreSQL peer target 和旧 SQLite 服务；target 已存在，但 schema/数据/API candidate gate 未完成。
+- 30–90 分钟：在不复制 SQLite 的前提下实现并测试最小增量链路：schema、upsert、compare、rollback、active/candidate、healthz；禁止改已上线前端。
+- 90 分钟–3 小时：仅在 Mac 单一临时目录做小样本/29 份歌单迁移 dry-run 和 handle 解析；只写候选/测试库，不碰生产，必须有 manifest、checkpoint、空间峰值证据；失败或空间不足立即清理并停止。
+- 3–5 小时：完成 focused tests、事务 upsert、回滚和候选切换验证；只有真实 DSN、旧 active 可继续服务、compare/health 全绿才接入发布 workflow。
+- 5–7 小时：先发布一小批候选或 staging，线上验证 healthz/meta/rankings/版本身份；发布若仍需全量重建或超过 30–60 分钟，回到架构问题，不把清洗塞进长任务。
+- 迁移链路通过后，才用同一增量入口发布 Naraetan/Ado/`辛いことがある人生でも` 等清洗规则；清洗目标为分钟到几十分钟，不接受 9 小时无结果。
 
-## 当前状态（2026-07-26）
+设备职责：Mac 负责数据库迁移基准、长测试、source build（先空间 preflight、单临时目录、checkpoint/manifest、上限和结束清理）；WDC 只做来源多 IP relay/受控请求；culua 只读探针/小型服务验证；Windows/G 负责协调、短测试、Git/审查，不跑全库构建。
 
-- Check code run `30175755772`：`430/430` 测试通过，失败仅来自
-  `data/diff/latest-1m.json` 与 `data/diff/latest-all.json` 各自 gzip 超预算约 120 KB。
-- 根因：Mac sparse checkout 缺少旧 snapshot 工作区文件时，rank diff 没有回退到运行开始前的
-  `data/latest.json`，导致全库 `10381` 首歌与 `4565` 位歌手被错误标为新上榜；snapshot index
-  同时会按 `fs.existsSync` 错误丢弃未展开的历史条目。
-- 当前修复分支：`codex/fix-rank-diff-snapshot-20260726`。计划补齐 previous payload 回退和
-  sparse-safe snapshot index 保留规则，通过测试后推送 main 并重跑 Check code/update-core。
-- rank-diff 修复已推送 main：`0049dccca73203803ac19509560f5f5e9a338ad9`。
-- 已审查来源与 Felicia 身份整合已推送 main：`499f34585d77935770c7143118bab68295928128`。
-- 来源分支 `agent/source-backfill-usable-artifacts-20260726` 已完成内容级复核：
-  KOTATSU、Arale、UCw0ty 合计 `181 videos / 1834 occurrences`，字段覆盖 100%，
-  cleaner 二次 dry-run 为零变化，生产/main overlap 为零。
-- Felicia Lulufleur 已确认官方频道 `UClHap4tvcYZnyiqgAyEs0BQ` / `@FeliciaLulufleur`；
-  metadata hydration 可回填生产既有 `239 videos / 3293 occurrences` 的 channelId/handle/url。
-  另有 44 个生产缺失 videoId 仅保留 checkpoint，因无 usable song detail 尚未生成 accepted。
-- 全库频道身份 dry-run 审计已完成：生产 `45223` records 中 `16584` 条至少缺一个字段，
-  合并为 497 组；493 组 high-confidence，其中 Felicia 作为已单独交付正样本排除，
-  实际可交付 492 组。2 组 ambiguous、2 组 unresolved 保留人工复核。
-  候选预计把三字段覆盖提高至 `44843 / 45223`（99.16%）；本轮只交付审计脚本、测试和报告，
-  不自动写 metadata。
-- Naraetan 首批已合并：`6d2163c`。
-- `upsert_video` 已推送：`938bf7d`，文档提交 `7541a18`，示例修正 `1d2bf94`。
-- Check code run `30172044209` 失败：413 个测试通过，但 `validate-data` 报告 17 条 alias 尚未物化到静态核心数据。
-- Runtime DB run `30172044212` 仍需确认最终状态和线上结果。
-- 来源补跑 task `019f9a04-513d-77d0-ae9a-bf17249815d5` 的原目标为 31 个来源；`df608da6` 只代表最后一轮 Hanon/Noa 去重增量，不能代替整个任务。当前正在按实时 main/生产逐来源重新审计 2026-07-20 至 07-25 的 accepted、manifest 与 checkpoint。
-- 2026-07-26 已从生产 API 按 `searchScope=video` 核对 `aibg0-_tU6c`、`mt55aKAdYqM`、`HZ1q27Z5Pqc`、`0bXKzDEk79E`，4 个查询均 HTTP 200 且 `totalCount=0`，符合真实新增视频预期。
-- `vps-wdc` 已从 WSL 使用 SSH BatchMode 只读连通。
-- Naraetan 首批只读验收结论为拒绝：96 条新增 drop 中至少 8 条明确真曲被误删，另有同秒翻译与替え歌高风险项；发布前必须按逐条证据收口。
-- Naraetan batch1 原有 100/100 `selected:` selector 与 accepted comment sourceId 不一致。当前分支已用 SHA-256 `468e8db1…656e` 的 accepted JSON 唯一匹配并机械替换为真实 `sourceId/sourceHash`；二次审计 `changedRecordCount=0`，回归测试要求 100 条 selector 唯一且不再使用 `selected:`。
-- 远端 `Deploy SQLite runtime DB` run `30172044212` 在 2026-07-26 刷新时仍停留于 `Upload and activate database`，不能视为完成。
-- 原 G 工作树处于 detached HEAD `564aada`，有用户未提交内容；本任务使用独立工作树：
-  `/mnt/g/codex-work/daily-song-list-cleanup-upsert-20260726`。
+## 空间与清理门禁
 
-## 下一步
+- 每个任务开始前必须在 Mac 建立任务专属 temp root，并记录 baseline free、输入/active bytes、预计峰值、硬上限、允许保留的 artifact；中间产物不得散落在仓库、用户目录或 VPS。
+- 当前 active SQLite 约 14.8 GB；任何复制、Git pack、WAL、索引和临时文件都必须逐项解释。10 份同等副本约 148 GB；若增长超过预计峰值 20%、连续无有效进展，或出现第二份完整 DB/candidate/backup，立即 pause。
+- 触发异常时严格执行 pause -> identify PID/path -> bounded cleanup -> remeasure；不能只停进程留下残留，也不能换盘继续写。Mac 迁移禁止并发 full SQLite copies；VPS 仍只做多 IP relay，不存数据库。
+- 长任务必须有 success/failure/timeout cleanup trap：先停止本任务 PID、等待释放句柄，删除本任务 temp root、临时 pack、WAL、candidate 和重复 clone；只保留 checkpoint/manifest/小型报告。清理失败要列出精确路径/PID并继续清理安全部分。
+- 清理后必须记录 before/after bytes、free space、保留文件清单和任务状态；没有 cleanup evidence 不得称失败处理完或完成。
 
-1. 完成 Naraetan 只读验收并收口 17 条 alias 物化失败。
-2. 完成 31 来源审计；选择性纳入所有真实未上线 accepted increment，已在线数据只保留审计证据，缺详情来源才续跑。
-3. 完成 `upsert_video` 的严格校验、整场替换、catalog 防回流、unmatched 报告及回归测试。
-4. 审计并修复最近 7 天数据自动入总库链路，同步当前 cleaner/curation、字段与来源标记规则。
-5. 修复生产 502 和错误提示 UI，并完成真实浏览器交互验收。
-6. 在 Mac runner 运行核心数据构建与全量校验。
-7. commit、push，按既有 workflow 发布。
-8. 验证生产 API 和 Naraetan、31 来源增量、最近 7 天自动入库结果，记录 run ID、时间和证据。
+接手教训：全量 SQLite 候选替换曾使清洗结果无法上线；`b8b84dcecd`、`678258decb`、`5af7c37c10` 只是草案，尚无真实 DSN、生产服务或主 workflow 接入。来源抓取曾写满 VPS，重抓取/全库构建/长期 raw 或 clone 不得放 VPS；culua 小水管不能承载重任务；日期 worktree/partial data 不得合并全量生成 data。
 
-## Integration checkpoint (2026-07-26)
+## 旧会话事项核销（2026-07-27 实时状态）
 
-- Integrated P0 compact VTuber payload, retryable diagnostic UI, and VPS upstream timeout 30s -> 60s.
-- Integrated accepted-runtime curation/upsert/drop sync, strict time fields, metadata refresh ordering, and final 7d-to-all continuity gate.
-- Integrated Naraetan conservative corrections and full upsert_video semantics/documentation.
-- Integrated accepted increments: Hanon 2/16, Noa 2/19, selective A1 19/241, Ebakyouka 103/1476; cleaner dry-run 126 videos / 1752 occurrences with zero changes.
-- Lightweight WSL regression: 116/116 passed; syntax checks passed.
-- No commit, push, workflow dispatch, deployment, or live post-deploy acceptance yet.
-- Independent singleton/unknown-artist task remains active and owns YOSHIKA plus the four-page channel audit.
+### A. 频道身份/清洗主线
 
-## Release checkpoint (2026-07-26 07:20 +08:00)
+- `curation_ready_pending_release`：全库 singleton/unknown-artist 审计主体、保守 drop/merge 规则与 artifact/证据已具备；尚未经新增量入口发布，禁止删除、回滚或重跑全库清洗。
+- `curation_ready_pending_release`：Naraetan、Ado `逆光`、`辛いことがある人生でも`、`うら飯紺汰` 原创 `リスタート` 与凛々咲同名曲规则主体已具备；迁移候选链路通过后立即接入发布和线上验收，不再扩大清洗。
+- `done`：`フィナーレ。`/两视频异常已由前序执行会话修复并上线；不再审计、修改或回滚。
+- `done`：已上线前端歌曲数显示修复、样式/渲染结构、API 字段语义与收录 tag 已由前序执行会话确认；前端 code/style/schema contract frozen，不重做 UI/API/search/collection-tag。后端数据与频道歌曲数、歌曲数、视频数、次数可随迁移/清洗正常变化，本轮只不改前端结构。
+- `done`：7d 数据已由前序发布进入总量；当前线上 `https://ytb-song-rank.culua.com/api/meta` HTTP 200，active `source_commit_sha=fb0dea42fc9e1d15e499b8a10967c1829cf0f60b`，本轮不再审计、修改或回滚该项。
+- `done`：旧 D 盘 worktree、日期目录和生成 data 未作为入口；本轮只使用本文件所在正式仓库。
 
-- `Update core song-list data` run `30176739632` generated commit
-  `a01cc8723692fda7a527c62812e97719399bd732` from parent
-  `149245d814899dffcbc7ebbff18fff4c09ebafd2`; its 4.67 GB generated-object
-  push is still active on the Mac runner and must not be cancelled while
-  `git-remote-https` is making CPU/network progress.
-- The regenerated rank diffs now retain a non-null previous snapshot and are
-  within budget: latest-all gzip 3,361 bytes, latest-1m gzip 3,370 bytes,
-  latest-7d gzip 9,025 bytes.
-- Generated continuity audit: all 136 recent videos are present in the base
-  all range; all 2,208 recent occurrences have seconds, time, sourceId and
-  rawHash. YouTube accepted increments are intentionally merged by the runtime
-  DB exporter rather than written into the base `data/all.json`.
-- Full channel identity hydration was rerun against current main metadata SHA
-  `e48502b0...f6c3b7`: 492 eligible candidates produced 486 additions, 4
-  unchanged identities, 2 duplicate-candidate consolidations and 0 conflicts.
-  Felicia plus 2 ambiguous and 2 unresolved groups remain excluded. Explicit
-  apply produced SHA `bc75b5b3...adebd28`; a second apply returned changed=0.
-- The current deployed index still references stale
-  `assets/app-ha7da65830b9d.js`, which does not send `compact=1`. The reviewed
-  source assets generate version `h50a70f4cceb4`; the new hashed app contains
-  compact VTuber requests and the retryable diagnostic card.
-- Local pre-publish verification: channel hydration suites 22/22 passed;
-  asset syntax passed; app gzip 79,149 bytes and CSS gzip 15,204 bytes are
-  within budget. After supplying a temporary G-drive `python` -> `python3`
-  test shim, the combined UI/runtime selection run passed 62/62; final Check
-  code on Mac remains authoritative.
-- No new metadata, hashed asset, runtime DB or static page has been published
-  at this checkpoint. Production still reports the old runtime source and
-  Felicia handle search returns zero; delivery remains incomplete.
+### B. うら飯紺汰来源会话
 
-## Release checkpoint (2026-07-26 09:45 +08:00)
+- `pending`：旧 clone 在约 1%/0.8 GiB 时未完成；本轮未续用，也未把它当作来源结果。
+- `pending`：旧 FETCH_HEAD、package.json、checkpoint、manifest、accepted increment 未形成；需来源时重新按 relay + Mac checkpoint 方案评估。
+- `pending`：discovery、详情抓取、原始证据审计、导入和线上验证均未完成；当前迁移优先，不启动来源任务。
+- `done`：不续用 VPS clone；VPS（含 WDC）默认仅作受控来源 relay，禁止 clone/数据库/candidate/backup/raw 长期存储。
 
-- Remote `main` and production Runtime DB now run
-  `aa346c86ae8d475f87f5160088ecf4c38a3c628d`; Runtime DB workflow
-  `30179793634` succeeded and production `healthz`, `meta`, and rankings
-  recovered from the deployment-time 502.
-- Production verification found a remaining pipeline gap: VSinger runtime
-  videos are merged after `hydratePayloadWithChannelMetadata()`. As a result,
-  Felicia display-name search still returns 239 videos, while
-  `@FeliciaLulufleur` returns zero and those rows have empty channel identity
-  fields.
-- The current focused worktree is
-  `/mnt/g/codex-work/daily-song-list-runtime-channel-fix-20260726`. The fix is
-  limited to Runtime ranking export order and regression tests; deployed Web/H5
-  styling is out of scope.
-- Naraetan production acceptance still shows non-song entries including
-  `音をねじる`, `頭→目→歯`, `頭痛`, `顔`, `風邪気味かもしれない`, `飛行機`,
-  `飾り棚`, `餃子`, `高音を出すとおでこが痒くなる`, `魔法少女ごっこ遊び`,
-  `鼻歌 Humming("Last Christmas")`, and `龍角散`. These must be removed only
-  through evidence-backed curation. `(音量注意)明日への勇気` is a real song
-  and must be normalized/merged to `明日への勇気`, not dropped.
-- Independent tasks now split the cleanup work: the existing task owns
-  Naraetan, YOSHIKA, and the four VTuber-rank page audit; task
-  `019f9c2f-b11f-7191-8bd3-97dd31d936f1` audits all singleton and unknown-artist
-  candidates read-only.
+### C. 迁移交接
+
+- `pending`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；当前实测 `song_rank` 仍为空 candidate，`migration_state.active_revision_id` 为空。旧 SQLite 已按授权预删除，PG candidate gate 完成前不能把空库接管；新 workflow 必须先做 full runtime stream，再做 candidate API/计数校验。
+- `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
+- `pending`：端到端全量 stream、compare、rollback、candidate/active 切换和线上健康证据尚不存在；本地/runner 小样本与协议 focused tests 已通过，但一次交互式 Mac→WSL→VPS full stream 因管道缓冲停滞并已按 PID 清理，正式执行必须使用 Mac self-hosted workflow 的单跳 SSH 传输。Actions 现有 `VPS2_PASSWORD` 仅用于受控 SSH，不把它伪装成 PG DSN。
+- `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
+- `done`：curation/release 分支的中断合并未恢复；禁止合并全量生成 data。
+- `pending`：C/D/G/Mac 存储清单与回收规则部分完成；G 盘、正式仓库、Mac 空间/runner/cache、culua 盘和本机残留进程已有证据，WDC/VPS2 角色与空间仍缺可复核 SSH 证据；不以子任务未完成报告代替清理验收。
+
+### 迁移可行性判定（阶段 0）
+
+- `pending`：真实 PostgreSQL target 已由 VPS2 `www-data` Unix-socket peer 实连确认；Mac 数据盘仍需在本轮迁移启动前记录最新 baseline/peak/after。固定迁移 temp root `/tmp/daily-song-list-pg-migration.vi8WS5` 已重新初始化并记录 baseline，当前只保留迁移小文件与依赖；历史 PGlite evidence 不能替代本次 VPS2 实连。
+- `done`：旧全量 run `30213710452` 已按授权取消；job `89824129428` 的构建 cancelled，manifest/上传/activate/health/API 均 skipped，runner 已 `online/busy=false`，未改生产数据。
+- `done`：旧 active 保留方案已重新实时验证：`https://ytb-song-rank.culua.com/healthz`、`/api/meta`、`/api/rankings` 均 HTTP 200；health counts 为 videos 45605、songs 45561、occurrences 598033。候选未 ready 前不切换，PG 仍为空 active pointer。
+- `pending`：GitHub Actions 仍没有 PG secret 注入，但 VPS2 peer target 可由受控 Mac/SSH 任务使用；不得把 SSH 可达性冒充 schema/data/API 完成，需生成受控 manifest 并经 candidate gate。
+- `done`：同一 Mac 临时根目录 `/tmp/daily-song-list-pg-migration.vi8WS5` 已完成真实 PGlite schema/upsert/compare/rollback/active 测试（2/2 passed）和 SQLite NDJSON 流式小样本（1 video/3 occurrences）；fixture 仅 `20480` bytes，无完整 SQLite 复制。此次回归保留了两个相同 `seconds`、一个 `seconds=null`、三个不同 `occurrenceId`，并保留空字符串/NULL artist/sourceId/sourceSystem、range_id、song_key。任务 baseline free `481220472 KiB`，expected peak `536870912` bytes，hard cap `2147483648` bytes，stream root peak `107094016` bytes；cleanup `beforeBytes=107094016 afterBytes=0`、free `481115812 KiB -> 481221184 KiB`、retained `none`、status `success`。
+- `done`：P1 数据契约已在 migration patch 修正：不再过滤 NULL seconds、不再以默认值覆盖空 artist/source_id/source_system、不再禁止重复 seconds；occurrence_id/position 作为稳定 identity；range/source/song/raw provenance 字段落列；视频删除使用显式 tombstone，解析不会继承已删除父行；activate/rollback 先锁 active state，并在切换时校验 candidate parent 等于当前 active。focused test 覆盖字段保持、tombstone、rollback 和并发候选 parent mismatch。
+- `pending`：`server/pg_adapter.py` 已提供 PG-backed health/meta/rankings/source-detail 形状，`server/pg_api_server.py` 已提供兼容 URL wrapper；空 PG 已收紧为不可健康使用的错误路径。migration patch 现在可将 `songs`、`channel_metadata`、`source_occurrences`、`source_details`、`ranking_rows`、`external_songs/videos/occurrences` 等 projection 作为 `migration_runtime_rows` 流式写入并以 entity identity/tombstone 解析，adapter 已能解析 generic video/occurrence overlay；但完整 ranking/source/external/meta projection 仍未接入 SQLite 等价响应，不能生产切换。仍需由 Mac 受控导入完整 projection，并在不影响旧 SQLite 的独立端口完成真实 contract smoke，之后才允许 candidate -> compare -> health/API -> activate。
+
+### 取消旧 SQLite run 的清理核验
+
+- `done`：run `30213710452` 已取消且 runner 空闲；runner workspace 约 617 MiB，未发现 SQLite/WAL/pack/tmp/manifest 残留。精确清理旧 cache DB `14816280576` bytes 与 manifest `348` bytes；Data FS 可用 `466749772 KiB -> 481218864 KiB`，cache 保留文件为 none。另有两个旧 runlogs SQLite（约 9.76 GiB/份）不属于该 run，且 hotfix DB 被 PID 14215 使用，暂不触碰。
+
+## 范围与硬约束
+
+- 只使用 `G:\codex-work\daily-song-list`（WSL `/mnt/g/codex-work/daily-song-list`）；不创建 clone、日期目录或新 worktree，不使用 `D:\Projects\daily_song_list_dbapi`。
+- 模式门禁：`audit-readonly` 只用于审计、盘点、定位和风险判断，报告必须指明下一执行会话、限定改动文件、发布入口和线上验收条件；用户目标涉及线上修复、来源、数据库或用户可见行为时必须接续 `implementation-write`。主会话负责最终 diff 审查、push、workflow、发布和线上验证；子任务不得扩大范围，也不得以只读阻断交付。
+- 先只读核对仓库、进程、Mac/VPS/G 盘资源、远端与真实线上 API；不以旧截图、旧 commit、旧 run 或 UI 推断已上线。
+- 不修改前端样式或已上线歌曲数修复；不重跑来源、不使用 `--fresh`、不并发写同一数据库/来源目录，不发飞书。
+- `frontend code/style/schema contract frozen; data and backend counts may change normally`：迁移/清洗可以改变后端数据与统计数字，但不得修改前端布局、卡片、字体、分页控件、渲染结构或 API 字段语义。
+- culua 只做有界只读探针；WDC 不构建数据库、不长期存 raw/clone、不写爆磁盘。
+- 所有 VPS（含 WDC）只可做来源请求的多 IP 中继/受控抓取；禁止在 VPS clone、存放或构建 100GB 以上数据库，也禁止长期放完整 SQLite/PostgreSQL、candidate、backup、raw。迁移和数据库构建只能在 Mac self-hosted runner；产物只能经受控 artifact/增量协议传递。任何例外必须先给出定量空间预算、任务时长和回收动作并获用户确认，默认拒绝。
+- 大型构建、来源抓取、全库扫描和长测试只允许 Mac self-hosted runner；每次任务必须先做空间 preflight，使用单一临时任务目录、checkpoint、manifest、空间上限和结束清理。
+- Windows 只做 G 盘上的小型检查、协调和 focused tests；不复制全量 SQLite、不做无界扫描或重型构建。
+- 候选未 ready/验证失败时不切生产；迁移或清洗期间线上不得以 502 作为正常方案。
+
+## 阶段验收
+
+1. 只读盘点输出仓库/分支/status、残留进程、远端、Mac/VPS/G 存储、真实线上 active/candidate/health 证据；明确迁移阻塞。
+2. 确认真实增量目标、DSN 注入方式、schema、upsert、compare、rollback、candidate/active 切换入口；没有真实目标时明确缺口，不伪装已迁移。
+3. focused tests、dry-run、小样本和失败保持旧 active 的回归验证通过。
+4. 已审计的保守清洗规则通过增量路径发布；singleton 只作候选，证据不足保留/待审；Naraetan、`辛いことがある人生でも`、`逆光(ウタ from ONE PIECE FILM RED)`、`うら飯紺汰` 原创 `リスタート` 与凛々咲同名曲分离规则有证据。
+5. commit、push、既有 workflow 发布成功；线上验证 healthz、meta、rankings、重点条目和 active/candidate 身份，记录时间、状态码、commit/run、计数、存储与失败证据。
+
+## 当前下一步
+
+1. 在远端分支完成 diff 审查并安全提交本轮 workflow、full runtime stream、adapter/service、测试和 goal；只更新临时 index/数据库树，不带接手前 staged deletion。
+2. 通过 Mac self-hosted `migrate-pg-runtime.yml`：单一 temp root、baseline/peak/after、manifest、full stream、candidate API gate；首先验证 `healthz/meta/rankings/source`，再以 `activate=true` 原子切换 PG service，失败不切换空库。
+3. PG base active 后，恢复唯一 7D run：固定用户搜索链接完整发现到 `reachedEnd=true`，按 videoId 详情/三天规则/curation 生成 accepted increment；不得把 stale checkpoint 或 dry-run 写成数据。
+4. 将 7D 与既有 `curation_ready_pending_release` 结果合并为受控 incremental candidate，使用 `deploy-pg-incremental.yml` 的 compare/health/API/activate gate；确认新数据持续可入库后，再做重点歌曲、`うら飯紺汰` 和来源详情线上验收。
+
+## 交接记录
+
+每次状态必须记录：工作树/分支、改动文件、测试、commit/push、发布 run、线上证据、Mac/WDC/G 存储、未完成项。只有真实线上切换和验收完成后才能将平台 goal 标记 complete；阻塞须同一外部条件连续三次且无安全替代路径。

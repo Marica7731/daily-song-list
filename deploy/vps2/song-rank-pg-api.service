@@ -1,0 +1,22 @@
+[Unit]
+Description=Song Rank PostgreSQL API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/culua/ytb-song-rank
+Environment=PGHOST=/var/run/postgresql
+Environment=PGDATABASE=song_rank
+Environment=PGUSER=www-data
+Environment=PYTHONPATH=/opt/culua/ytb-song-rank/server
+ExecStart=/usr/bin/python3 /opt/culua/ytb-song-rank/server/pg_api_server.py --host 127.0.0.1 --port 8765
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,96 @@
+name: Deploy PostgreSQL incremental candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      patch_path:
+        description: "NDJSON accepted increment or curation patch"
+        required: true
+        default: "artifacts/migration/candidate.ndjson"
+      manifest_path:
+        description: "Source manifest JSON with provenance and hashes"
+        required: true
+        default: "artifacts/migration/manifest.json"
+      api_base_url:
+        description: "PG-backed API base URL for health/meta/rankings contract checks"
+        required: true
+        default: "https://ytb-song-rank.culua.com/"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-pg-incremental.yml"
+      - "scripts/migration/**"
+      - "artifacts/migration/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-pg-incremental
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    # The variable is intentionally absent until a real PG target and API
+    # adapter are provisioned. The old SQLite workflow is gated separately.
+    if: vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1'
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 30
+    env:
+      DAILY_SONG_POSTGRES_DSN: ${{ secrets.DAILY_SONG_POSTGRES_DSN }}
+      PATCH_PATH: ${{ inputs.patch_path || 'artifacts/migration/candidate.ndjson' }}
+      MANIFEST_PATH: ${{ inputs.manifest_path || 'artifacts/migration/manifest.json' }}
+      API_BASE_URL: ${{ inputs.api_base_url || vars.DAILY_SONG_PG_API_BASE_URL }}
+    steps:
+      - name: Checkout migration inputs only
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/migration
+            ${{ inputs.patch_path || 'artifacts/migration/candidate.ndjson' }}
+            ${{ inputs.manifest_path || 'artifacts/migration/manifest.json' }}
+
+      - name: Candidate compare health API activate gate
+        run: |
+          set -Eeuo pipefail
+          export PATH="/Users/be/.local/bin:/Users/be/.local/codex-toolchains/node/bin:${PATH}"
+          test -n "${DAILY_SONG_POSTGRES_DSN:-}" || { echo "PRODUCTION_PG_BLOCKED missing DAILY_SONG_POSTGRES_DSN"; exit 78; }
+          test -n "${API_BASE_URL:-}" || { echo "PRODUCTION_PG_BLOCKED missing DAILY_SONG_PG_API_BASE_URL"; exit 78; }
+          test -f "${PATCH_PATH}" || { echo "PG_INCREMENTAL_BLOCKED missing patch=${PATCH_PATH}"; exit 78; }
+          test -f "${MANIFEST_PATH}" || { echo "PG_INCREMENTAL_BLOCKED missing manifest=${MANIFEST_PATH}"; exit 78; }
+          TMP_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-release.XXXXXX")"
+          expected_peak_bytes=$((512 * 1024 * 1024))
+          hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
+          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+          cleanup() {
+            status=$?
+            node_pid="${NODE_PID:-}"
+            if [ -n "${node_pid}" ] && kill -0 "${node_pid}" 2>/dev/null; then kill -TERM "${node_pid}" 2>/dev/null || true; wait "${node_pid}" 2>/dev/null || true; fi
+            before_cleanup_bytes=0
+            if [ -d "${TMP_ROOT}" ]; then before_cleanup_bytes=$(( $(du -sk "${TMP_ROOT}" | awk '{print $1}') * 1024 )); fi
+            rm -rf "${TMP_ROOT}"
+            after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+            echo "PG_INCREMENTAL_CLEANUP status=${status} beforeBytes=${before_cleanup_bytes} afterBytes=0 baselineFreeBytes=${baseline_free_bytes} afterFreeBytes=${after_free_bytes} retained=none"
+            exit "${status}"
+          }
+          trap cleanup EXIT INT TERM
+          npm install --prefix "${TMP_ROOT}/node-env" --no-save --package-lock=false --no-audit --no-fund pg
+          actual_bytes=$(( $(du -sk "${TMP_ROOT}" | awk '{print $1}') * 1024 ))
+          if [ "${actual_bytes}" -gt "${hard_cap_bytes}" ] || [ "${actual_bytes}" -gt $((expected_peak_bytes * 120 / 100)) ]; then
+            echo "PG_INCREMENTAL_SPACE_GUARD pause actualBytes=${actual_bytes} expectedPeakBytes=${expected_peak_bytes} hardCapBytes=${hard_cap_bytes}"
+            exit 75
+          fi
+          module="$(cd "${TMP_ROOT}/node-env" && node -p 'require.resolve("pg")')"
+          node scripts/migration/run-pg-incremental.mjs \
+            --patch="${PATCH_PATH}" \
+            --manifest="${MANIFEST_PATH}" \
+            --api-url="${API_BASE_URL}" \
+            --report="${TMP_ROOT}/release-report.json" \
+            --revision="rev_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}" \
+            --pg-module="${module}" &
+          NODE_PID=$!
+          wait "${NODE_PID}"

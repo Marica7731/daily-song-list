@@ -38,7 +38,10 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # Legacy full SQLite deployment is disabled by default and is never
+    # allowed to race or overwrite the PostgreSQL runtime. It requires an
+    # explicit emergency variable and is mutually exclusive with PG.
+    if: (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && vars.DAILY_SONG_LEGACY_SQLITE_ENABLED == '1' && vars.DAILY_SONG_PG_INCREMENTAL_ENABLED != '1'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 180
     env:
