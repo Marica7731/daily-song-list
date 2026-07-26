@@ -1,16 +1,22 @@
 # daily-song-list 主线：增量数据库与安全发布迁移
 
+## 本会话 Goal（2026-07-27，G 盘正式入口）
+
+由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
+
+当前执行门：旧 SQLite active 已恢复并重新通过线上 200 验证；PG 当前只有 schema/空 state，不得接管生产。先完成真实 VPS2 PG 小样本 candidate 与 API contract smoke，再接入既有 curation accepted increment；7D 不得启动第二个实例，必须先处理 PID=5282 的 `operator-stop` 与陈旧 checkpoint，完整候选达到 `reachedEnd=true` 后才进入 `うら飯紺汰` detail/curation。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过真实线上切换和验收前保持 pending，不得标记 complete。
+
 ## 目标
 
 在唯一正式入口 `G:\codex-work\daily-song-list` 完成可审计的数据库/发布架构迁移，并在迁移完成前保持当前 active 版本可服务。目标链路是：增量 upsert -> 候选版本构建与校验 -> active 原子切换 -> 可验证 rollback -> 真实线上验收。
 
 ## 当前阶段
 
-2026-07-27：主线接手后已完成取消旧 SQLite run、Mac 空间/残留核验和精确 cache 清理；已进入 `implementation-write` 的本地/runner ephemeral PG 迁移链路。仓库当前存在约 32 万条接手前 staged deletion（含历史生成数据和旧 `CODEX_GOAL.md`），本轮不得恢复、清理或扩大这批删除。生产 PostgreSQL target/DSN 仍缺失，故生产迁移尚未开始；本地链路必须先证明可运行。
+2026-07-27：主线目标已由用户明确收口为两条交付线：`(1) PostgreSQL 增量迁移 -> 迁移后接入已审计清洗结果；(2) MyGit 完整 7D 恢复`。VPS2 已实时确认 PostgreSQL 16 active、`song_rank` 存在、`www-data` 可通过 Unix-socket peer 登录；当前 `migration_*` schema 已存在，但 `migration_state.active_revision_id` 为空，视频/occurrence/revision/audit 行数均为 0。旧 SQLite service 曾被残留 direct-activate 过程短暂置于异常状态，已按精确 PID 树停止残留并恢复 service；截至 2026-07-26T20:31:58Z，线上 `/healthz`、`/api/meta`、`/api/rankings` 均 HTTP 200，旧 active 未被 PG 替换。主仓库已有 PG adapter/API wrapper 与 focused contract tests；Mac 固定临时根中的 PID=5282 已不存在，checkpoint 仍是陈旧 `status=running`、`page=101`、80 个去重候选、`reachedEnd=false`。仓库当前存在约 32 万条接手前 staged deletion（含历史生成数据和旧 `CODEX_GOAL.md`），本轮不得恢复、清理或扩大这批删除。
 
 ## 迁移优先时间表（有界，不承诺固定总时长）
 
-- 现在至 30 分钟：取消旧 run 后完成有界 preflight，建立 Mac 专属 temp root；确认 runner/Mac 空间、当前线上 active 和生产 target/DSN。没有生产目标不阻断本地链路，但不得声称生产迁移。
+- 现在至 30 分钟：确认 Mac 专属 temp root、当前线上 active、VPS2 PostgreSQL peer target 和旧 SQLite 服务；target 已存在，但 schema/数据/API candidate gate 未完成。
 - 30–90 分钟：在不复制 SQLite 的前提下实现并测试最小增量链路：schema、upsert、compare、rollback、active/candidate、healthz；禁止改已上线前端。
 - 90 分钟–3 小时：仅在 Mac 单一临时目录做小样本/29 份歌单迁移 dry-run 和 handle 解析；只写候选/测试库，不碰生产，必须有 manifest、checkpoint、空间峰值证据；失败或空间不足立即清理并停止。
 - 3–5 小时：完成 focused tests、事务 upsert、回滚和候选切换验证；只有真实 DSN、旧 active 可继续服务、compare/health 全绿才接入发布 workflow。
@@ -49,7 +55,7 @@
 
 ### C. 迁移交接
 
-- `blocked`：生产 PostgreSQL 只有草案；实时仓库/ GitHub repo secret、variable、environment 均未发现真实 DSN、生产服务或容量证据（仅 secret `VPS2_PASSWORD`、variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`、environment `github-pages`）。生产迁移未开始；不在空项目、VPS 或完整 clone 上耗时，但本地/runner ephemeral PG 链路继续执行。
+- `pending`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；当前实测 `song_rank` 约 7.9 MB，`migration_state` 有 1 行但 active 为空，其他 migration 表均为 0 行。旧 SQLite API 的短暂 inactive/500 已被精确恢复；截至 2026-07-26T20:31:58Z，service active、线上 health/meta/rankings 均 200；在 candidate gate 通过前不得让空 PG 接管。
 - `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
 - `pending`：端到端小样本导入、compare、rollback、candidate/active 切换和线上健康证据尚不存在。
 - `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
@@ -58,13 +64,13 @@
 
 ### 迁移可行性判定（阶段 0）
 
-- `blocked`：生产迁移仍受「真实 PostgreSQL target/DSN 注入路径」阻塞；Mac runner 已释放并通过只读 SSH preflight，`bedeMacBook-Air.local` 数据盘 926 GiB、可用约 445 GiB，无 build/clone/fetch/yt-dlp 进程。ephemeral temp root `/tmp/daily-song-list-pg-migration.vi8WS5` 已建立，baseline free `492773130240` bytes、expected peak `536870912` bytes、hard cap `2147483648` bytes；本地链路不得突破上限。
+- `pending`：真实 PostgreSQL target 已由 VPS2 `www-data` Unix-socket peer 实连确认；Mac 数据盘仍需在本轮迁移启动前记录最新 baseline/peak/after。固定迁移 temp root `/tmp/daily-song-list-pg-migration.vi8WS5` 已重新初始化并记录 baseline，当前只保留迁移小文件与依赖；历史 PGlite evidence 不能替代本次 VPS2 实连。
 - `done`：旧全量 run `30213710452` 已按授权取消；job `89824129428` 的构建 cancelled，manifest/上传/activate/health/API 均 skipped，runner 已 `online/busy=false`，未改生产数据。
-- `done`：旧 active 保留方案已被实时验证为当前线上 SQLite runtime 仍可服务：`https://ytb-song-rank.culua.com/healthz` HTTP 200，`/api/meta` HTTP 200，active `source_commit_sha=fb0dea42fc9e1d15e499b8a10967c1829cf0f60b`；候选未 ready 前不切换。
-- `blocked`：生产 target 缺口保留为外部阻塞；GitHub 只读核对仍只有 `VPS2_PASSWORD`、`DAILY_SONG_REQUIRE_PUBLISHED_API=1` 和 `github-pages`，没有 `DAILY_SONG_POSTGRES_DSN` 或 PG host/port/user 注入路径。不得把本地测试冒充生产迁移。
+- `done`：旧 active 保留方案已重新实时验证：`https://ytb-song-rank.culua.com/healthz`、`/api/meta`、`/api/rankings` 均 HTTP 200；health counts 为 videos 45605、songs 45561、occurrences 598033。候选未 ready 前不切换，PG 仍为空 active pointer。
+- `pending`：GitHub Actions 仍没有 PG secret 注入，但 VPS2 peer target 可由受控 Mac/SSH 任务使用；不得把 SSH 可达性冒充 schema/data/API 完成，需生成受控 manifest 并经 candidate gate。
 - `done`：同一 Mac 临时根目录 `/tmp/daily-song-list-pg-migration.vi8WS5` 已完成真实 PGlite schema/upsert/compare/rollback/active 测试（2/2 passed）和 SQLite NDJSON 流式小样本（1 video/3 occurrences）；fixture 仅 `20480` bytes，无完整 SQLite 复制。此次回归保留了两个相同 `seconds`、一个 `seconds=null`、三个不同 `occurrenceId`，并保留空字符串/NULL artist/sourceId/sourceSystem、range_id、song_key。任务 baseline free `481220472 KiB`，expected peak `536870912` bytes，hard cap `2147483648` bytes，stream root peak `107094016` bytes；cleanup `beforeBytes=107094016 afterBytes=0`、free `481115812 KiB -> 481221184 KiB`、retained `none`、status `success`。
 - `done`：P1 数据契约已在 migration patch 修正：不再过滤 NULL seconds、不再以默认值覆盖空 artist/source_id/source_system、不再禁止重复 seconds；occurrence_id/position 作为稳定 identity；range/source/song/raw provenance 字段落列；视频删除使用显式 tombstone，解析不会继承已删除父行；activate/rollback 先锁 active state，并在切换时校验 candidate parent 等于当前 active。focused test 覆盖字段保持、tombstone、rollback 和并发候选 parent mismatch。
-- `blocked`：当前仍只有数据库/候选原型，没有 PG-backed `/healthz`、`/api/meta`、`/api/rankings`、source-detail adapter，也没有真实生产 DSN；因此本轮结果是 `未可生产发布`。不触发 workflow、不切 active、不把旧 SQLite workflow 或 ephemeral PGlite 当生产迁移。
+- `pending`：`server/pg_adapter.py` 已提供 PG-backed health/meta/rankings/source-detail 形状，`server/pg_api_server.py` 已提供兼容 URL wrapper；空 PG 已收紧为不可健康使用的错误路径。当前仍需把 schema/完整 projection/候选数据经 Mac 受控导入 VPS2，并在不影响旧 SQLite 的独立端口完成真实 contract smoke test，之后才允许 candidate -> compare -> health/API -> activate。
 
 ### 取消旧 SQLite run 的清理核验
 
@@ -93,9 +99,10 @@
 
 ## 当前下一步
 
-1. 将当前限定 migration 写集和本文件提交到独立 `codex/pg-migration-prototype` 分支；不恢复 staged data、不改前端、不提交 workflow 草稿。
-2. 真实 PG target/DSN 和 PG-backed API adapter 到位后，另行做候选发布；在此之前状态保持 `未可生产发布`，不触发生产 workflow。
-3. 如继续推进，下一步必须先实现并单独测试兼容 API adapter，再做 staging/小批 candidate -> compare -> health/API -> activate；旧 active 仍需保持可服务。
+1. 保持已恢复的 VPS2 原 SQLite API，并在后续每个迁移阶段复核 `/healthz`、`/api/meta`；旧 active 可服务前不允许任何 PG 切换。
+2. 在 Mac 单一迁移临时根记录最新空间 baseline，完成 VPS2 schema/小样本流式 upsert/compare/rollback/active smoke test；空 PG 不得接管。
+3. 唯一 Mac 7D checkpoint 先由主会话解释 `operator-stop` 与陈旧 `running` 状态；不启动第二实例，`reachedEnd=true` 前不切 7 shard、不清 raw、不导入生产。
+3. 7D 详情/curation 通过 accepted increment、三天状态规则和审计 manifest 后，接入同一 PG candidate gate；旧 SQLite active 持续服务，失败保持旧 active。
 
 ## 交接记录
 
