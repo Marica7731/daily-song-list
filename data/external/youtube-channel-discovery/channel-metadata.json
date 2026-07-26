@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T03:59:43.922Z",
+  "generatedAt": "2026-07-26T06:22:38.885Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T03:59:43.922Z",
+    "fetchedAt": "2026-07-26T06:22:38.885Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T03:59:43.922Z",
+    "generatedAt": "2026-07-26T06:22:38.885Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,30 +11657,37 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 984,
-      "parseableChannels": 962,
+      "totalChannels": 986,
+      "parseableChannels": 964,
       "realAvatar": 643,
-      "thumbnailFallback": 341,
+      "thumbnailFallback": 343,
       "missingDisplayImage": 0,
-      "missingAvatar": 341,
+      "missingAvatar": 343,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 538
+      "skipped_collected_evidence": 539,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 516,
+      "batch_limit_reached": 517,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
       {
-        "handle": "/@HibachiMana",
-        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
-        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@HibachiMana",
+        "handle": "/@Tirol_Tsukinoki",
+        "channelId": "UCqskJ0nmw-_eweWfsKvbrzQ",
+        "displayName": "Tirol Tsukinoki / Tirol Channel 【Nanashi-inc.】",
+        "sourceUrl": "https://www.youtube.com/@Tirol_Tsukinoki",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@kuzen_sia",
+        "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
+        "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
+        "sourceUrl": "https://www.youtube.com/@kuzen_sia",
         "reason": "batch_limit_reached"
       },
       {
@@ -11730,13 +11737,6 @@
         "channelId": "UCxc0MrPoACKTFlV24GqX2sg",
         "displayName": "峰月律-Minetsuki Ritsu- / 夢限大みゅーたいぷ",
         "sourceUrl": "https://www.youtube.com/@ritsu_yumemita",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@minmo_nara",
-        "channelId": "UC9WrMaSxIDRKR4wcz86IJxQ",
-        "displayName": "みんも / 奈良のVTuber【セシんもーZ】",
-        "sourceUrl": "https://www.youtube.com/@minmo_nara",
         "reason": "batch_limit_reached"
       },
       {
