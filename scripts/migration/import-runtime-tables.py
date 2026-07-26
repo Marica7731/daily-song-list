@@ -35,10 +35,17 @@ TABLES: dict[str, tuple[str, ...]] = {
     "external_occurrences": ("source_system", "occurrence_id", "canonical_song_id", "external_song_id", "external_video_id", "youtube_video_id", "seconds", "payload_json"),
 }
 
+# SQLite calls the ranking aggregate ``count``; the PostgreSQL projection
+# names the same value ``row_count``. The wire row order stays unchanged.
+TARGET_COLUMNS: dict[str, tuple[str, ...]] = {
+    **TABLES,
+    "ranking_rows": ("row_id", "range_id", "view", "metric", "scope_key", "rank", "detail_key", "title", "artist", "name", "row_count", "song_count", "video_count", "timestamp_count", "payload_json", "search_text", "channel_search_text"),
+}
+
 
 def qident(value: str) -> str:
     valid_tables = {f"runtime_{name}" for name in TABLES}
-    valid_columns = {column for columns in TABLES.values() for column in columns} | {"revision_id"}
+    valid_columns = {column for columns in TARGET_COLUMNS.values() for column in columns} | {"revision_id"}
     if value not in valid_tables and value not in valid_columns:
         raise ValueError(f"unexpected identifier: {value}")
     return '"' + value.replace('"', '""') + '"'
@@ -64,7 +71,8 @@ def create_revision(conn, revision_id: str, manifest: dict[str, Any]) -> str:
 def copy_table(conn, name: str, columns: tuple[str, ...], revision_id: str, rows: list[list[Any]]) -> int:
     table = f"runtime_{name}"
     with conn.cursor() as cur:
-        statement = f"COPY {qident(table)} ({', '.join(qident(column) for column in columns)}, revision_id) FROM STDIN"
+        target_columns = TARGET_COLUMNS[name]
+        statement = f"COPY {qident(table)} ({', '.join(qident(column) for column in target_columns)}, revision_id) FROM STDIN"
         with cur.copy(statement) as copy:
             for values in rows:
                 copy.write_row(values + [revision_id])

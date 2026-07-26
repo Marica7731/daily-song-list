@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import {
   activateCandidate,
@@ -215,4 +216,11 @@ test("runtime projection rows preserve source identity and tombstones", {
   } finally {
     await db.close();
   }
+});
+
+test("full runtime importer maps SQLite ranking count to PostgreSQL row_count", () => {
+  const importer = readFileSync(new URL("../scripts/migration/import-runtime-tables.py", import.meta.url), "utf8");
+  assert.match(importer, /TARGET_COLUMNS/);
+  assert.match(importer, /"row_count"/);
+  assert.match(importer, /"count", "song_count"/);
 });
