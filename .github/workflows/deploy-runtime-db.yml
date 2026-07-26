@@ -1,123 +1,462 @@
-name: Deploy PostgreSQL accepted increment
+name: Deploy SQLite runtime DB
 
 on:
   workflow_dispatch:
     inputs:
-      patch_path:
-        description: "Curated accepted-increment NDJSON"
-        required: true
-        default: "artifacts/migration/candidate.ndjson"
-      manifest_path:
-        description: "Manifest with source/provenance/hash evidence"
-        required: true
-        default: "artifacts/migration/manifest.json"
-      activate:
-        description: "Activate only after candidate API gate (release window)"
+      emergency_legacy_sqlite:
+        description: "Explicit emergency-only rollback; do not use for normal releases"
         required: true
         default: false
         type: boolean
-  repository_dispatch:
-    types: [accepted-increment-ready]
 
 permissions:
   contents: read
 
 concurrency:
-  group: daily-song-list-pg-increment
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && format('daily-song-list-runtime-db-skip-{0}', github.run_id) || 'daily-song-list-runtime-db-deploy' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
 jobs:
-  candidate:
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
+  deploy:
+    # Legacy full SQLite deployment is disabled by default and is never
+    # allowed to race or overwrite the PostgreSQL runtime. It requires an
+    # explicit emergency variable and is mutually exclusive with PG.
+    if: inputs.emergency_legacy_sqlite == true && vars.DAILY_SONG_LEGACY_SQLITE_ENABLED == '1' && vars.DAILY_SONG_PG_INCREMENTAL_ENABLED != '1'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 45
+    timeout-minutes: 180
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
+      REMOTE_PROJECT_DIR: "/opt/culua/ytb-song-rank"
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
-      PATCH_PATH: ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
-      MANIFEST_PATH: ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
-      ACTIVATE: ${{ inputs.activate || false }}
+      REMOTE_LOG_DIR: "/var/log/culua/ytb-song-rank"
+      REMOTE_DB_PATH: "/var/lib/culua/ytb-song-rank/song-rank.sqlite"
+      RUNTIME_DB_CACHE_DIR: "/Users/be/actions-runner-cache/daily-song-list-runtime-db"
     steps:
-      - name: Checkout bounded migration inputs
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: main
           fetch-depth: 1
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
-            scripts/migration
-            server/pg_adapter.py
-            server/pg_api_server.py
-            deploy/vps2/song-rank-pg-api.service
-            ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
-            ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
+            assets
+            config
+            data/latest.json
+            data/status.json
+            data/external
+            deploy
+            package.json
+            scripts
+            server
+            test/runtime-api.test.js
+            test/runtime-db.test.js
 
-      - name: Candidate compare health and optional activation
+      - name: Configure Mac toolchain
+        run: |
+          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve deploy revision
+        id: revision
+        run: |
+          git fetch --depth=1 origin main --prune
+          git checkout -B main FETCH_HEAD
+          commit_sha="$(git rev-parse HEAD)"
+          latest_sha256="$(shasum -a 256 data/latest.json | awk '{print $1}')"
+          echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
+          echo "latest_sha256=${latest_sha256}" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm install --no-package-lock
+
+      - name: Build runtime database
+        env:
+          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS: "1"
+          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "5000"
+          EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
+          EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+        run: |
+          mkdir -p artifacts/runtime
+          mkdir -p "${RUNTIME_DB_CACHE_DIR}"
+          cached_db="${RUNTIME_DB_CACHE_DIR}/song-rank.sqlite"
+          if [ -f "${cached_db}" ]; then
+            db_commit_sha="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_commit_sha';" || true)"
+            db_latest_sha256="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_latest_sha256';" || true)"
+            db_schema_version="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='schema_version';" || true)"
+            reuse_reason=""
+            if [ "${db_commit_sha}" = "${EXPECTED_COMMIT_SHA}" ]; then
+              reuse_reason="exact-commit"
+            elif [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
+              git fetch --depth=50 origin main --prune >/dev/null 2>&1 || true
+              if git cat-file -e "${db_commit_sha}^{commit}" 2>/dev/null; then
+                changed_db_inputs="$(git diff --name-only "${db_commit_sha}" "${EXPECTED_COMMIT_SHA}" -- assets config data/latest.json data/status.json data/external package.json scripts ':(exclude)scripts/check-published-runtime.js' || true)"
+                if [ -z "${changed_db_inputs}" ]; then
+                  reuse_reason="source-data-unchanged"
+                else
+                  echo "CODEX_RUNTIME_DB_REUSE_SKIP changedDbInputs=${changed_db_inputs}"
+                fi
+              else
+                echo "CODEX_RUNTIME_DB_REUSE_SKIP missingCachedCommit=${db_commit_sha}"
+              fi
+            fi
+            if [ -n "${reuse_reason}" ] && [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
+              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE reason=${reuse_reason} sourceCommitSha=${db_commit_sha} deployCommitSha=${EXPECTED_COMMIT_SHA} latestSha256=${db_latest_sha256}"
+              cp -f "${cached_db}" artifacts/runtime/song-rank.sqlite
+              if python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only; then
+                echo "CODEX_RUNTIME_DB_REUSE_OK"
+                exit 0
+              fi
+              echo "CODEX_RUNTIME_DB_REUSE_INVALID query-failed"
+            else
+              echo "CODEX_RUNTIME_DB_REUSE_SKIP expectedCommitSha=${EXPECTED_COMMIT_SHA} dbCommitSha=${db_commit_sha} expectedLatestSha256=${EXPECTED_LATEST_SHA256} dbLatestSha256=${db_latest_sha256} dbSchemaVersion=${db_schema_version}"
+            fi
+            rm -f artifacts/runtime/song-rank.sqlite
+          fi
+          python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
+          python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
+          cp -f artifacts/runtime/song-rank.sqlite "${cached_db}"
+
+      - name: Write database manifest
+        id: manifest
+        run: |
+          sha256="$(shasum -a 256 artifacts/runtime/song-rank.sqlite | awk '{print $1}')"
+          bytes="$(stat -f%z artifacts/runtime/song-rank.sqlite)"
+          built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat > artifacts/runtime/song-rank.sqlite.manifest.json <<JSON
+          {
+            "commit_sha": "${{ steps.revision.outputs.commit_sha }}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "built_at": "${built_at}",
+            "sha256": "${sha256}",
+            "source_latest_sha256": "${{ steps.revision.outputs.latest_sha256 }}",
+            "bytes": ${bytes}
+          }
+          JSON
+          mkdir -p "${RUNTIME_DB_CACHE_DIR}"
+          cp -f artifacts/runtime/song-rank.sqlite.manifest.json "${RUNTIME_DB_CACHE_DIR}/song-rank.sqlite.manifest.json"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "bytes=${bytes}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload database artifact
+        if: vars.DAILY_SONG_UPLOAD_DB_ARTIFACT == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: song-rank-sqlite-${{ steps.revision.outputs.commit_sha }}
+          path: |
+            artifacts/runtime/song-rank.sqlite
+            artifacts/runtime/song-rank.sqlite.manifest.json
+          retention-days: 14
+
+      - name: Upload database manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: song-rank-sqlite-manifest-${{ steps.revision.outputs.commit_sha }}
+          path: artifacts/runtime/song-rank.sqlite.manifest.json
+          retention-days: 14
+
+      - name: Verify runtime API artifact
+        env:
+          DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
+          DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+          DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH: "1"
+        run: |
+          python3 server/song_rank_api.py --db artifacts/runtime/song-rank.sqlite --host 127.0.0.1 --port 8765 > artifacts/runtime/api-smoke.log 2>&1 &
+          api_pid="$!"
+          cleanup() {
+            kill "${api_pid}" >/dev/null 2>&1 || true
+            wait "${api_pid}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "${ready}" != "1" ]; then
+            cat artifacts/runtime/api-smoke.log
+            exit 1
+          fi
+          npm run check:published:api -- http://127.0.0.1:8765/
+
+      - name: Prepare password SSH helper
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          if [ -z "${VPS2_PASSWORD}" ]; then
+            echo "::error::Missing VPS2_PASSWORD secret."
+            exit 1
+          fi
+          mkdir -p "${RUNNER_TEMP}/ssh-askpass"
+          cat > "${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          printf '%s\n' "${VPS2_PASSWORD}"
+          SH
+          chmod 700 "${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh"
+          echo "SSH_ASKPASS=${RUNNER_TEMP}/ssh-askpass/vps2-askpass.sh" >> "$GITHUB_ENV"
+          echo "SSH_ASKPASS_REQUIRE=force" >> "$GITHUB_ENV"
+          echo "DISPLAY=codex:0" >> "$GITHUB_ENV"
+
+      - name: Upload runtime support files without remote Git checkout
+        timeout-minutes: 8
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
           set -Eeuo pipefail
-          test -n "$VPS2_PASSWORD"
-          test -f "$PATCH_PATH" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
-          test -f "$MANIFEST_PATH" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
-          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-increment.XXXXXX")"
-          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
-          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-          patch_bytes="$(stat -f%z "$PATCH_PATH")"
-          manifest_bytes="$(stat -f%z "$MANIFEST_PATH")"
-          expected_peak_bytes=$((512 * 1024 * 1024))
-          hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
-          printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
-          test "$patch_bytes" -lt "$hard_cap_bytes"
-          mkdir -p "$RUNNER_TEMP/ssh-askpass"
-          printf '%s\n' "$VPS2_PASSWORD" > "$RUNNER_TEMP/ssh-askpass/vps2.password"
-          chmod 600 "$RUNNER_TEMP/ssh-askpass/vps2.password"
-          cat > "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" <<'SH'
-          #!/bin/sh
-          exec cat "$RUNNER_TEMP/ssh-askpass/vps2.password"
-          SH
-          chmod 700 "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh"
-          export SSH_ASKPASS="$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=codex:0
-          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
-          SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
-          REVISION="accepted_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
-          printf 'revision=%s\n' "$REVISION" >> "$TASK_ROOT/storage.txt"
-          cleanup() {
-            status=$?
-            if [ -n "${CANDIDATE_PID:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "kill $CANDIDATE_PID 2>/dev/null || true" || true; fi
-            if [ "$status" -ne 0 ] && [ -n "${REVISION:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"delete from migration_revisions where revision_id='$REVISION';\"" || true; fi
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -f /tmp/import-pg-incremental.py /tmp/pg-schema.sql /tmp/activate-pg-candidate.py /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/pg-increment-manifest.json /tmp/pg-increment-candidate.log" || true
-            before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
-            rm -rf -- "$TASK_ROOT"
-            after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-            echo "PG_INCREMENT_CLEANUP status=$status beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes retained=$(test "$ACTIVATE" = true && echo none || echo ready-candidate)"
-            exit "$status"
-          }
-          trap cleanup EXIT INT TERM
-          "${SCP[@]}" scripts/migration/pg-schema.sql scripts/migration/import-pg-incremental.py scripts/migration/activate-pg-candidate.py server/pg_adapter.py server/pg_api_server.py deploy/vps2/song-rank-pg-api.service "$VPS2_USER@$VPS2_HOST:/tmp/"
-          "${SCP[@]}" "$MANIFEST_PATH" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
-          remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
-          printf 'remoteFreeBefore=%s\n' "$remote_free" >> "$TASK_ROOT/storage.txt"
-          test "$remote_free" -ge "$patch_bytes"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO \"www-data\";'"
-          cat "$PATCH_PATH" | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
-          candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
-          test -n "$candidate_sha"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
-          CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
-          echo "candidatePid=$CANDIDATE_PID" >> "$TASK_ROOT/storage.txt"
-          ready=0
-          for n in $(seq 1 20); do
-            if "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/healthz' > "$TASK_ROOT/candidate-healthz.json"; then ready=1; break; fi
-            sleep 1
-          done
-          if [ "$ready" != 1 ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'cat /tmp/pg-increment-candidate.log || true'; exit 1; fi
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
-          printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
-          if [ "$ACTIVATE" = true ]; then
-            "${SCP[@]}" scripts/migration/activate-pg-candidate.py "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'"
+          tar -czf - -- package.json server scripts/check-published-runtime.js scripts/db/query-runtime-db.py deploy/vps2 |
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" \
+              "mkdir -p '${REMOTE_PROJECT_DIR}'; tar -xzf - -C '${REMOTE_PROJECT_DIR}'"
+          echo "CODEX_RUNTIME_DB_SUPPORT_FILES_UPLOAD_OK sha=${{ steps.revision.outputs.commit_sha }}"
+
+      - name: Prepare VPS2 runtime checkout
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
+        run: |
+          echo "CODEX_RUNTIME_DB_VPS_PREP_BEGIN host=${VPS2_HOST} sha=${DEPLOY_SHA}"
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_REMOTE_BEGIN'
+            mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
+            for required_cmd in git nginx python3 curl rsync gzip node npm; do
+              command -v \"\${required_cmd}\" >/dev/null 2>&1 || {
+                echo \"CODEX_RUNTIME_DB_DEPLOY_ERROR missing-command=\${required_cmd}\"
+                exit 1
+              }
+            done
+            node -e 'process.exit(Number(process.versions.node.split(\".\")[0]) >= 20 ? 0 : 1)' || {
+              echo 'CODEX_RUNTIME_DB_DEPLOY_ERROR node-version-too-old'
+              exit 1
+            }
+            cd '${REMOTE_PROJECT_DIR}'
+            if [ -d .git ]; then
+              test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_BEGIN'
+              git fetch --quiet origin main --prune
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_OK'
+              git checkout main
+              git reset --hard --quiet origin/main
+              git merge-base --is-ancestor '${DEPLOY_SHA}' HEAD
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_RESET_OK'
+            else
+              echo 'CODEX_RUNTIME_DB_VPS_PREP_FETCH_SKIPPED reason=runner-support-files'
+            fi
+            for required_file in package.json server/song_rank_api.py scripts/check-published-runtime.js scripts/db/query-runtime-db.py deploy/vps2/song-rank-api.service deploy/vps2/song-rank-db-activate.sh; do
+              test -f \"\${required_file}\" || {
+                echo \"CODEX_RUNTIME_DB_DEPLOY_ERROR missing-file=\${required_file}\"
+                exit 1
+              }
+            done
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_FILES_OK'
+            install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
+            install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
+            install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
+            install -m 0644 deploy/vps2/song-rank-runtime-update.service /etc/systemd/system/song-rank-runtime-update.service
+            install -m 0644 deploy/vps2/song-rank-runtime-update.timer /etc/systemd/system/song-rank-runtime-update.timer
+            install -m 0644 deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.conf
+            rm -f /etc/nginx/sites-enabled/default
+            ln -sf /etc/nginx/sites-available/song-rank-staging.conf /etc/nginx/sites-enabled/song-rank-staging.conf
+            nginx -t
+            systemctl daemon-reload
+            systemctl enable song-rank-api
+            systemctl reload nginx || systemctl restart nginx
+            echo 'CODEX_RUNTIME_DB_VPS_PREP_REMOTE_OK'
+          "
+          echo "CODEX_RUNTIME_DB_VPS_PREP_OK"
+
+      - name: Check remote database data identity
+        id: remote_db
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
+          EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+        run: |
+          set -Eeuo pipefail
+          echo "reuse=0" >> "$GITHUB_OUTPUT"
+          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            cd '${REMOTE_PROJECT_DIR}'
+            if [ ! -f '${REMOTE_DB_PATH}' ]; then
+              echo 'CODEX_RUNTIME_DB_REMOTE_REUSE_SKIP reason=missing-db'
+              exit 0
+            fi
+            db_meta=\$(python3 deploy/vps2/read-runtime-db-meta.py --db '${REMOTE_DB_PATH}' source_commit_sha source_latest_sha256 schema_version)
+            db_commit_sha=\$(printf '%s\n' \"\${db_meta}\" | sed -n '1p')
+            db_latest_sha256=\$(printf '%s\n' \"\${db_meta}\" | sed -n '2p')
+            db_schema_version=\$(printf '%s\n' \"\${db_meta}\" | sed -n '3p')
+            changed_db_input_count='unknown'
+            if [ -d .git ] && [ -n \"\${db_commit_sha}\" ] && git cat-file -e \"\${db_commit_sha}^{commit}\" 2>/dev/null; then
+              changed_db_inputs=\$(git diff --name-only \"\${db_commit_sha}\" '${DEPLOY_SHA}' -- assets config data/latest.json data/status.json data/external package.json scripts ':(exclude)scripts/check-published-runtime.js' || true)
+              if [ -z \"\${changed_db_inputs}\" ]; then
+                changed_db_input_count=0
+              else
+                changed_db_input_count=\$(printf '%s\n' \"\${changed_db_inputs}\" | wc -l | tr -d '[:space:]')
+              fi
+            fi
+            if [ \"\${db_latest_sha256}\" = '${EXPECTED_LATEST_SHA256}' ] && [ \"\${db_schema_version}\" = '2' ] && [ \"\${changed_db_input_count}\" = '0' ]; then
+              python3 scripts/db/query-runtime-db.py --db '${REMOTE_DB_PATH}' --range all --view songs --q '少女レイ' --page-size 5 --summary-only
+              db_bytes=\$(stat -c%s '${REMOTE_DB_PATH}')
+              echo \"CODEX_RUNTIME_DB_REMOTE_REUSE_OK sourceCommitSha=\${db_commit_sha} deployCommitSha='${DEPLOY_SHA}' latestSha256=\${db_latest_sha256} bytes=\${db_bytes}\"
+            else
+              echo \"CODEX_RUNTIME_DB_REMOTE_REUSE_SKIP sourceCommitSha=\${db_commit_sha:-missing} deployCommitSha='${DEPLOY_SHA}' expectedLatestSha256='${EXPECTED_LATEST_SHA256}' dbLatestSha256=\${db_latest_sha256:-missing} dbSchemaVersion=\${db_schema_version:-missing} changedDbInputCount=\${changed_db_input_count}\"
+            fi
+          ")"
+          printf '%s\n' "${remote_probe}"
+          if printf '%s\n' "${remote_probe}" | grep -q '^CODEX_RUNTIME_DB_REMOTE_REUSE_OK '; then
+            echo "reuse=1" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Restart API with current remote database
+        if: steps.remote_db.outputs.reuse == '1'
+        timeout-minutes: 8
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            systemctl disable --now song-rank-runtime-update.timer || true
+            systemctl restart song-rank-api
+            ready=0
+            for attempt in \$(seq 1 30); do
+              if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            if [ \"\${ready}\" != '1' ]; then
+              systemctl status song-rank-api --no-pager -l || true
+              journalctl -u song-rank-api -n 80 --no-pager || true
+              echo 'CODEX_RUNTIME_DB_RESTART_ERROR api-health-timeout'
+              exit 1
+            fi
+            systemctl reload nginx
+            echo 'CODEX_RUNTIME_DB_UPLOAD_SKIPPED reason=remote-data-current restart=ok'
+          "
+
+      - name: Upload and activate database
+        if: steps.remote_db.outputs.reuse != '1'
+        timeout-minutes: 90
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
+        run: |
+          set -Eeuo pipefail
+          remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          direct_mode=0
+          db_bytes="$(stat -f%z artifacts/runtime/song-rank.sqlite)"
+          candidate_min_free_bytes="$((db_bytes + 1073741824))"
+          cleanup_remote_candidate() {
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
+          }
+          handle_upload_error() {
+            cleanup_remote_candidate
+            if [ "${direct_mode}" = "1" ]; then
+              echo "CODEX_RUNTIME_DB_UPLOAD_ERROR direct-mode-failed service-left-stopped-to-avoid-serving-partial-db"
+              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "systemctl stop song-rank-api || true; systemctl status song-rank-api --no-pager -l || true" || true
+            fi
+          }
+          trap handle_upload_error ERR
+          remote_stats="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            mkdir -p '${REMOTE_STATE_DIR}'
+            rm -f '${remote_db}' '${remote_db}.manifest.json' '${REMOTE_DB_PATH}.previous'
+            find '${REMOTE_STATE_DIR}' -maxdepth 1 -type f -name 'song-rank.sqlite.next.*' -delete
+            free_bytes=\$(df -B1 --output=avail '${REMOTE_STATE_DIR}' | tail -n 1 | tr -d '[:space:]')
+            active_bytes=0
+            if [ -f '${REMOTE_DB_PATH}' ]; then
+              active_bytes=\$(stat -c%s '${REMOTE_DB_PATH}')
+            fi
+            printf '%s %s\n' \"\${free_bytes}\" \"\${active_bytes}\"
+          ")"
+          read -r remote_free_bytes remote_active_bytes <<< "${remote_stats}"
+          if ! [[ "${remote_free_bytes}" =~ ^[0-9]+$ ]] || ! [[ "${remote_active_bytes}" =~ ^[0-9]+$ ]]; then
+            echo "CODEX_RUNTIME_DB_UPLOAD_ERROR invalid-remote-stats value=${remote_stats}"
+            exit 1
+          fi
+          growth_bytes=0
+          if [ "${db_bytes}" -gt "${remote_active_bytes}" ]; then
+            growth_bytes="$((db_bytes - remote_active_bytes))"
+          fi
+          direct_min_free_bytes="$((growth_bytes + 1073741824))"
+          echo "CODEX_RUNTIME_DB_UPLOAD_PLAN dbBytes=${db_bytes} activeBytes=${remote_active_bytes} remoteFreeBytes=${remote_free_bytes} candidateMinFreeBytes=${candidate_min_free_bytes} directMinFreeBytes=${direct_min_free_bytes}"
+          if [ "${remote_free_bytes}" -ge "${candidate_min_free_bytes}" ]; then
+            echo "CODEX_RUNTIME_DB_UPLOAD_MODE candidate"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              if [ -f '${REMOTE_DB_PATH}' ]; then
+                cp -f '${REMOTE_DB_PATH}' '${remote_db}'
+              fi
+              df -h '${REMOTE_STATE_DIR}'
+            "
+            echo "CODEX_RUNTIME_DB_UPLOAD_TRANSPORT gzip-stream target=${remote_db}"
+            gzip -1 -c artifacts/runtime/song-rank.sqlite | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "gzip -dc > '${remote_db}'"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "cat > '${remote_db}.manifest.json'" < artifacts/runtime/song-rank.sqlite.manifest.json
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
+              systemctl disable --now song-rank-runtime-update.timer || true
+              systemctl reload nginx
+            "
+          else
+            echo "CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace"
+            if [ "${remote_free_bytes}" -lt "${direct_min_free_bytes}" ]; then
+              echo "CODEX_RUNTIME_DB_UPLOAD_ERROR insufficient-direct-space freeBytes=${remote_free_bytes} requiredBytes=${direct_min_free_bytes}"
+              exit 1
+            fi
+            direct_mode=1
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              systemctl disable --now song-rank-runtime-update.timer || true
+              systemctl stop song-rank-api
+              if systemctl is-active --quiet song-rank-api; then
+                echo 'CODEX_RUNTIME_DB_UPLOAD_ERROR api-still-active-before-direct-upload'
+                exit 1
+              fi
+              if curl -fsS --max-time 3 http://127.0.0.1:8765/healthz >/dev/null; then
+                echo 'CODEX_RUNTIME_DB_UPLOAD_ERROR api-health-still-open-before-direct-upload'
+                exit 1
+              fi
+              echo 'CODEX_RUNTIME_DB_DIRECT_STOP_OK'
+              df -h '${REMOTE_STATE_DIR}'
+            "
+            echo "CODEX_RUNTIME_DB_UPLOAD_TRANSPORT gzip-stream target=${REMOTE_DB_PATH}"
+            gzip -1 -c artifacts/runtime/song-rank.sqlite | ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "gzip -dc > '${REMOTE_DB_PATH}'"
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "cat > '${REMOTE_DB_PATH}.manifest.json'" < artifacts/runtime/song-rank.sqlite.manifest.json
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1 EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${REMOTE_DB_PATH}' /usr/local/bin/song-rank-db-activate.sh
+            "
+            direct_mode=0
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              systemctl reload nginx
+            "
+          fi
+          trap - ERR
+
+      - name: Verify VPS2 health endpoint
+        run: curl -fsS http://staging-ytb-song-rank.culua.com/healthz
+
+      - name: Verify VPS2 API contract
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
+          DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+          DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH: "1"
+        run: |
+          set -Eeuo pipefail
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            cd '${REMOTE_PROJECT_DIR}'
+            DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH='${DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH}' npm run check:published:api -- http://127.0.0.1:8765/
+          "
