@@ -596,7 +596,7 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(artistLabelBody, /entries\[0\]\[0\]/u);
   assert.match(functionBody("function buildVtuberRecords"), /incrementCanonicalSongCount\(record\.songs, cleanText\(song\.title\)\)/u);
   assert.match(appSource, /function normalizeVtuberSongCountMap[\s\S]*shouldShowSongGroupTitle[\s\S]*songWorkKeyForTitle/u);
-  assert.match(appSource, /function songCountForRecord\(record\)[\s\S]*record\?\.type === "vtuber" && record\?\.songs instanceof Map/u);
+  assert.match(appSource, /function songCountForRecord\(record\)[\s\S]*const explicit = Number\(record\?\.songCount \?\? record\?\.uniqueSongCount \?\? record\?\.songsCount\)[\s\S]*if \(Number\.isFinite\(explicit\) && explicit >= 0\) return explicit;[\s\S]*record\?\.type === "vtuber" && record\?\.songs instanceof Map/u);
   assert.match(appSource, /function incrementCanonicalSongCount[\s\S]*songWorkTitleKey/u);
   assert.match(appSource, /function sourcePublishedText\(group = \{\}, item = \{\}\)[\s\S]*formatCalendarDate\(value\)/u);
   assert.ok(appSource.includes("return /^\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}$/u.test(explicit)"));

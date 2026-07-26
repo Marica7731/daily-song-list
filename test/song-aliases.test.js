@@ -5,6 +5,7 @@ const {
   canonicalizePayloadSongAliases,
   canonicalizeSongIdentity,
   createSongAliasContext,
+  loadSongAliasContext,
   validateSongAliasConfig,
 } = require("../scripts/song-aliases");
 const RankingUtils = require("../assets/ranking-utils");
@@ -173,4 +174,33 @@ test("validates alias config shape", () => {
   const validation = validateSongAliasConfig({ schemaVersion: 1, records: [{ artist: "AliA", canonicalTitle: "かくれんぼ" }] });
 
   assert.deepEqual(validation.errors, ["records[0].aliases must be array"]);
+});
+
+test("Ado GYAKKOU film annotations merge without touching similarly named songs", () => {
+  const context = loadSongAliasContext();
+  const variants = [
+    "逆光(ウタ from ONE PIECE FILM RED)",
+    "逆光 (ウタ from ONE PIECE FILM RED)",
+    "逆光（ウタ from ONE PIECE FILM RED）",
+  ];
+
+  for (const title of variants) {
+    const canonical = canonicalizeSongIdentity({ title, artist: "Ado" }, context);
+    assert.equal(canonical.title, "逆光");
+    assert.equal(canonical.artist, "Ado");
+    assert.equal(canonical.originalTitle, title);
+  }
+
+  assert.equal(
+    canonicalizeSongIdentity({ title: "逆光のフリューゲル", artist: "ツヴァイウィング" }, context).title,
+    "逆光のフリューゲル",
+  );
+  assert.equal(
+    canonicalizeSongIdentity({ title: "逆光 - replica", artist: "Vaundy" }, context).title,
+    "逆光 - replica",
+  );
+  assert.equal(
+    canonicalizeSongIdentity({ title: "逆光 (ウタ from ONE PIECE FILM RED)", artist: "Vaundy" }, context).title,
+    "逆光 (ウタ from ONE PIECE FILM RED)",
+  );
 });

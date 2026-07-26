@@ -145,3 +145,50 @@
   Naraetan, YOSHIKA, and the four VTuber-rank page audit; task
   `019f9c2f-b11f-7191-8bd3-97dd31d936f1` audits all singleton and unknown-artist
   candidates read-only.
+
+## Delegated goal: full singleton and unknown-artist audit (2026-07-26)
+
+### Goal
+
+Audit every canonical song group with `occurrence=1` and every row/group with a
+missing artist across the full database, not only Naraetan. Do not bulk-delete
+singletons. Classify each candidate as one of:
+
+1. explicit talk / translated explanatory text;
+2. safely mergeable into a higher-frequency same-song group;
+3. verified real song from an original video or official page;
+4. channel-owner original song;
+5. insufficient evidence, retain.
+
+### Scope and acceptance
+
+- Work only in this G-drive worktree through WSL bash.
+- Preserve `videoId`, `sourceId`, `rawHash`, and evidence URL for every audited
+  decision.
+- Review Naraetan priority cases including `辛いことがある人生でも`,
+  `逆光(ウタ from ONE PIECE FILM RED)`, Japanese-title / English-gloss
+  contamination, and other singleton / unknown-artist records.
+- Unknown-artist records must first be checked for a provable same-song merge;
+  only add an artist with sufficient evidence. Delete Japanese-to-English talk
+  translations only when the raw source proves they are not songs.
+- May add checkpointed audit scripts, reports, and conservative curation changes.
+  Do not edit frontend styling, commit, push, deploy, or touch `.workbuddy/`.
+- Completion requires full-library statistics, per-candidate classification,
+  bounded/checkpointed execution evidence, relevant tests, and a cleanly scoped
+  diff suitable for review by the parent task.
+
+### Current status
+
+- Repository root confirmed at
+  `/mnt/g/codex-work/daily-song-list-runtime-channel-fix-20260726`, branch
+  `main`, baseline `9c1bb298bdd7`; worktree was clean before this goal update.
+- Historical Naraetan audit reports 21,910 singleton canonical groups and warns
+  that missing primary raw evidence must remain pending rather than be dropped.
+- Existing audits, curation rules, data entry points, and current generated
+  artifacts are now being inventoried before any data change.
+
+### Next step
+
+Locate the authoritative current database/export and existing audit tooling,
+then generate a resumable full candidate manifest before classifying or editing
+curation.
