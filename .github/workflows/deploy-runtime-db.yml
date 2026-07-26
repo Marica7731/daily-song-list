@@ -76,6 +76,18 @@ jobs:
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
 
+      - name: Mac storage preflight
+        run: |
+          run_root="${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$run_root"
+          echo "DAILY_SONG_RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          mkdir -p "$RUNTIME_DB_CACHE_DIR"
+          python3 scripts/ci/mac_storage_guard.py preflight \
+            --path . \
+            --path "$RUNNER_TEMP" \
+            --path "$RUNTIME_DB_CACHE_DIR" \
+            --min-free-gib 40
+
       - name: Resolve deploy revision
         id: revision
         run: |
@@ -132,7 +144,13 @@ jobs:
             fi
             rm -f artifacts/runtime/song-rank.sqlite
           fi
-          python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --watch-path "$RUNTIME_DB_CACHE_DIR" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
           python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
           cp -f artifacts/runtime/song-rank.sqlite "${cached_db}"
 
@@ -477,3 +495,12 @@ jobs:
             cd '${REMOTE_PROJECT_DIR}'
             DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH='${DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH}' npm run check:published:api -- http://127.0.0.1:8765/
           "
+
+      - name: Cleanup bounded Mac workspace
+        if: always()
+        run: |
+          run_root="${DAILY_SONG_RUN_ROOT:-${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}}"
+          python3 scripts/ci/mac_storage_guard.py cleanup \
+            --run-root "$run_root" \
+            --cache-root "$RUNTIME_DB_CACHE_DIR" \
+            --retention-hours 24

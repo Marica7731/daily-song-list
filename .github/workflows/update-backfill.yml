@@ -32,6 +32,16 @@ jobs:
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+
+      - name: Mac storage preflight
+        run: |
+          run_root="${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$run_root"
+          echo "DAILY_SONG_RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          python3 scripts/ci/mac_storage_guard.py preflight \
+            --path . \
+            --path "$RUNNER_TEMP" \
+            --min-free-gib 40
       - name: Record run start
         id: runmeta
         run: |
@@ -52,7 +62,13 @@ jobs:
 
       - name: Prepare immutable backfill bundle
         id: backfill
-        run: node scripts/run-backfill-update.js
+        run: |
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- node scripts/run-backfill-update.js
 
       - name: Commit backfill bundle
         run: |
@@ -89,3 +105,9 @@ jobs:
             echo "- backfill_outcome: ${{ steps.backfill.outcome }}"
             echo "- failure_hint: if this fails, record whether the failure was sync, prepare bundle, commit/rebase, or push before rerunning"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup bounded Mac workspace
+        if: always()
+        run: |
+          run_root="${DAILY_SONG_RUN_ROOT:-${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}}"
+          python3 scripts/ci/mac_storage_guard.py cleanup --run-root "$run_root"

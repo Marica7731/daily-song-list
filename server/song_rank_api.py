@@ -7,6 +7,7 @@ import argparse
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
@@ -30,13 +31,17 @@ def configure_stdio() -> None:
 def main() -> int:
     configure_stdio()
     args = parse_args()
+    postgres_dsn = args.postgres_dsn or os.environ.get("DAILY_SONG_POSTGRES_DSN", "")
+    if postgres_dsn:
+        os.environ["DAILY_SONG_POSTGRES_DSN"] = postgres_dsn
     db_path = args.db.resolve()
-    if not db_path.exists():
+    if not postgres_dsn and not db_path.exists():
         print(f"CODEX_RUNTIME_API_ERROR database not found: {db_path}", file=sys.stderr)
         return 1
     handler = make_handler(db_path)
     server = ThreadingHTTPServer((args.host, args.port), handler)
-    print(f"CODEX_RUNTIME_API_READY host={args.host} port={args.port} db={db_path}", flush=True)
+    backend = "postgres" if postgres_dsn else "sqlite"
+    print(f"CODEX_RUNTIME_API_READY host={args.host} port={args.port} backend={backend} db={db_path}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -49,6 +54,7 @@ def main() -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB_PATH)
+    parser.add_argument("--postgres-dsn", default="", help="PostgreSQL DSN; overrides SQLite when provided")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     return parser.parse_args()
@@ -93,7 +99,90 @@ def make_handler(db_path: Path):
     return SongRankHandler
 
 
-def connect(db_path: Path) -> sqlite3.Connection:
+class PgRow:
+    def __init__(self, names: list[str], values: tuple[object, ...]):
+        self._names = names
+        self._values = values
+        self._mapping = dict(zip(names, values))
+
+    def __getitem__(self, key: object) -> object:
+        if isinstance(key, int):
+            return self._values[key]
+        return self._mapping[key]
+
+    def __iter__(self):
+        return iter(self._values)
+
+
+def translate_postgres_sql(sql: str) -> str:
+    """Translate the small SQLite-compatible SQL subset used by this API."""
+    sql = re.sub(r"\btemp\.", "", sql, flags=re.IGNORECASE)
+    sql = re.sub(r"\?", "%s", sql)
+    sql = re.sub(
+        r"json_extract\(([^,()]+),\s*'\$\.([A-Za-z0-9_.]+)'\)",
+        lambda match: f"({match.group(1)} #>> '{{{match.group(2).replace('.', ',')}}}')",
+        sql,
+        flags=re.IGNORECASE,
+    )
+    sql = re.sub(
+        r"MIN\(((?:[A-Za-z_][A-Za-z0-9_]*\.)?)payload_json\)",
+        r"MIN(\1payload_json::text)",
+        sql,
+        flags=re.IGNORECASE,
+    )
+    return sql
+
+
+class PgCursor:
+    def __init__(self, connection, cursor=None):
+        self.connection = connection
+        self.cursor = cursor
+
+    def execute(self, sql: str, params=()):
+        translated = translate_postgres_sql(sql)
+        self.cursor = self.connection._conn.execute(translated, params or ())
+        return self
+
+    def _row(self, row):
+        if row is None:
+            return None
+        names = [description.name for description in self.cursor.description]
+        values = []
+        for name, value in zip(names, row):
+            if isinstance(value, (dict, list)) and (name.endswith("_json") or name == "payload_json"):
+                value = json.dumps(value, ensure_ascii=False)
+            values.append(value)
+        return PgRow(names, tuple(values))
+
+    def fetchone(self):
+        return self._row(self.cursor.fetchone())
+
+    def fetchall(self):
+        return [self._row(row) for row in self.cursor.fetchall()]
+
+
+class PgConnection:
+    def __init__(self, connection):
+        self._conn = connection
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._conn.__exit__(exc_type, exc_value, traceback)
+
+    def execute(self, sql: str, params=()):
+        return PgCursor(self).execute(sql, params)
+
+
+def connect(db_path: Path):
+    postgres_dsn = os.environ.get("DAILY_SONG_POSTGRES_DSN", "")
+    if postgres_dsn:
+        try:
+            import psycopg
+        except ImportError as exc:
+            raise RuntimeError("psycopg is required when DAILY_SONG_POSTGRES_DSN is set") from exc
+        return PgConnection(psycopg.connect(postgres_dsn))
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA temp_store=MEMORY")
@@ -693,7 +782,7 @@ def filtered_vtuber_fallback_occurrences(
           AND o.title IN ({title_placeholders})
           AND ({channel_sql})
           AND {occurrence_filter}
-        ORDER BY o.rowid
+        ORDER BY o.seconds NULLS LAST, o.occurrence_id
         LIMIT 20
         """,
         [range_id, *titles, *channel_params, *occurrence_filter_params],
@@ -1370,6 +1459,9 @@ def quote_fts_phrase(value: str) -> str:
 
 
 def sqlite_table_exists(conn: sqlite3.Connection, table: str) -> bool:
+    if isinstance(conn, PgConnection):
+        row = conn.execute("SELECT to_regclass(?) IS NOT NULL AS present", (table,)).fetchone()
+        return bool(row["present"])
     row = conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type IN ('table', 'virtual table') AND name = ? LIMIT 1",
         (table,),

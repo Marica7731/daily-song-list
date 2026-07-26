@@ -42,6 +42,16 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 15
     steps:
+      - name: Mac storage preflight before checkout
+        run: |
+          free_kib="$(df -Pk "$RUNNER_TEMP" | awk 'END {print $4}')"
+          required_kib="$((40 * 1024 * 1024))"
+          if ! [[ "$free_kib" =~ ^[0-9]+$ ]] || [ "$free_kib" -lt "$required_kib" ]; then
+            echo "::error::Mac runner has insufficient free space before checkout: freeKiB=$free_kib requiredKiB=$required_kib"
+            exit 78
+          fi
+          echo "CODEX_MAC_STORAGE_PREFLIGHT_BEFORE_CHECKOUT freeKiB=$free_kib requiredKiB=$required_kib"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -50,8 +60,19 @@ jobs:
 
       - name: Ensure full workspace checkout
         run: |
-          git sparse-checkout disable || true
-          git checkout --force
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- bash -lc 'git sparse-checkout disable || true; git checkout --force'
+
+      - name: Mac storage preflight after checkout
+        run: |
+          python3 scripts/ci/mac_storage_guard.py preflight \
+            --path . \
+            --path "$RUNNER_TEMP" \
+            --min-free-gib 40
 
       - name: Configure Mac toolchain
         run: |
@@ -142,11 +163,31 @@ jobs:
           fi
           npm run check:budget
 
+      - name: Cleanup bounded Mac workspace
+        if: always()
+        run: |
+          if [ -n "${GITHUB_WORKSPACE:-}" ] && [ -d "$GITHUB_WORKSPACE" ]; then
+            case "$GITHUB_WORKSPACE" in
+              */_work/*) rm -rf -- "$GITHUB_WORKSPACE/node_modules" "$GITHUB_WORKSPACE/.tmp" "$GITHUB_WORKSPACE/artifacts" ;;
+              *) echo "::error::refusing workspace cleanup outside Actions work root: $GITHUB_WORKSPACE"; exit 1 ;;
+            esac
+          fi
+
   curation_audit:
     if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 150
     steps:
+      - name: Mac storage preflight before audit checkout
+        run: |
+          free_kib="$(df -Pk "$RUNNER_TEMP" | awk 'END {print $4}')"
+          required_kib="$((40 * 1024 * 1024))"
+          if ! [[ "$free_kib" =~ ^[0-9]+$ ]] || [ "$free_kib" -lt "$required_kib" ]; then
+            echo "::error::Mac runner has insufficient free space before audit checkout: freeKiB=$free_kib requiredKiB=$required_kib"
+            exit 78
+          fi
+          echo "CODEX_MAC_STORAGE_PREFLIGHT_BEFORE_AUDIT_CHECKOUT freeKiB=$free_kib requiredKiB=$required_kib"
+
       - name: Checkout audit branch
         uses: actions/checkout@v4
         with:
@@ -156,8 +197,19 @@ jobs:
       - name: Ensure full audit workspace checkout
         run: |
           set -Eeuo pipefail
-          git sparse-checkout disable || true
-          git checkout --force
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- bash -lc 'git sparse-checkout disable || true; git checkout --force'
+
+      - name: Mac storage preflight after audit checkout
+        run: |
+          python3 scripts/ci/mac_storage_guard.py preflight \
+            --path . \
+            --path "$RUNNER_TEMP" \
+            --min-free-gib 40
 
       - name: Configure Mac audit toolchain
         run: |
@@ -210,15 +262,20 @@ jobs:
           CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "100"
         run: |
           set -Eeuo pipefail
-          node --max-old-space-size=12288 scripts/audit-global-song-quality.js \
-            --input data/latest.json \
-            --vsinger-dir data/external/vsinger-http/backfill \
-            --youtube-dir data/external/youtube-channel-discovery \
-            --require-vsinger \
-            --require-youtube-channel-discovery \
-            --expected-selector-count "${{ inputs.expected_selector_count || '0' }}" \
-            --checkpoint-dir "$AUDIT_ROOT/checkpoint/global" \
-            --output-dir "$AUDIT_ROOT/reports/global"
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- node --max-old-space-size=12288 scripts/audit-global-song-quality.js \
+              --input data/latest.json \
+              --vsinger-dir data/external/vsinger-http/backfill \
+              --youtube-dir data/external/youtube-channel-discovery \
+              --require-vsinger \
+              --require-youtube-channel-discovery \
+              --expected-selector-count "${{ inputs.expected_selector_count || '0' }}" \
+              --checkpoint-dir "$AUDIT_ROOT/checkpoint/global" \
+              --output-dir "$AUDIT_ROOT/reports/global"
 
       - name: Audit four production VTuber pages
         timeout-minutes: 10
@@ -234,10 +291,12 @@ jobs:
         timeout-minutes: 50
         run: |
           set -Eeuo pipefail
-          npm run db:build -- \
-            --require-youtube-channel-discovery \
-            --output "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
-            2>&1 | tee "$AUDIT_ROOT/reports/runtime-db-build.log"
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- bash -lc 'npm run db:build -- --require-youtube-channel-discovery --output "$AUDIT_ROOT/runtime-db/song-rank.sqlite" 2>&1 | tee "$AUDIT_ROOT/reports/runtime-db-build.log"'
 
       - name: Extract runtime DB audit
         timeout-minutes: 15
@@ -278,3 +337,19 @@ jobs:
           path: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}/reports
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Cleanup bounded Mac audit workspace
+        if: always()
+        run: |
+          if [ -n "${AUDIT_ROOT:-}" ]; then
+            case "$AUDIT_ROOT" in
+              "$RUNNER_TEMP"/*) rm -rf -- "$AUDIT_ROOT" ;;
+              *) echo "::error::refusing audit cleanup outside RUNNER_TEMP: $AUDIT_ROOT"; exit 1 ;;
+            esac
+          fi
+          if [ -n "${GITHUB_WORKSPACE:-}" ] && [ -d "$GITHUB_WORKSPACE" ]; then
+            case "$GITHUB_WORKSPACE" in
+              */_work/*) rm -rf -- "$GITHUB_WORKSPACE/node_modules" "$GITHUB_WORKSPACE/.tmp" "$GITHUB_WORKSPACE/artifacts" ;;
+              *) echo "::error::refusing workspace cleanup outside Actions work root: $GITHUB_WORKSPACE"; exit 1 ;;
+            esac
+          fi
