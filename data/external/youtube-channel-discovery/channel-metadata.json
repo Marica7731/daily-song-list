@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T06:22:38.885Z",
+  "generatedAt": "2026-07-26T06:58:59.756Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T06:22:38.885Z",
+    "fetchedAt": "2026-07-26T06:58:59.756Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T06:22:38.885Z",
+    "generatedAt": "2026-07-26T06:58:59.756Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 986,
-      "parseableChannels": 964,
+      "totalChannels": 988,
+      "parseableChannels": 966,
       "realAvatar": 643,
-      "thumbnailFallback": 343,
+      "thumbnailFallback": 345,
       "missingDisplayImage": 0,
-      "missingAvatar": 343,
+      "missingAvatar": 345,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 539,
-      "already_cached": 665
+      "already_cached": 665,
+      "skipped_collected_evidence": 541
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 517,
+      "batch_limit_reached": 519,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11688,6 +11688,13 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@HibachiMana",
+        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
+        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@HibachiMana",
         "reason": "batch_limit_reached"
       },
       {
@@ -11810,10 +11817,24 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@kohiponch",
+        "channelId": "UCJE9BZz0ld_yqc2ryoA3-GQ",
+        "displayName": "Pon Ch. 小日向ぽん",
+        "sourceUrl": "https://www.youtube.com/@kohiponch",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@ykn0911v",
         "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
         "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
         "sourceUrl": "https://www.youtube.com/@ykn0911v",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E7%B4%AB%E6%9C%88%E7%80%AC%E5%90%8D",
+        "channelId": "UCjb2A6046uv3LskO51FWwkg",
+        "displayName": "紫月瀬名",
+        "sourceUrl": "https://www.youtube.com/@%E7%B4%AB%E6%9C%88%E7%80%AC%E5%90%8D",
         "reason": "batch_limit_reached"
       },
       {
@@ -11828,27 +11849,6 @@
         "channelId": "UCUMwanMztK0Y-T-ns3bMR0g",
         "displayName": "庫麻Kumma Channel",
         "sourceUrl": "https://www.youtube.com/@KummaNOTE",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@VermouthBelluna",
-        "channelId": "UCGPSbXH61y4l85L9XTUl2mA",
-        "displayName": "ベルモット・ベルーナ / Vermouth Belluna【APP LAND】",
-        "sourceUrl": "https://www.youtube.com/@VermouthBelluna",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Mimeiinori_VTuber",
-        "channelId": "UCigCwuwnyh9tWhi2tuCEUcw",
-        "displayName": "未明いのり /Mimei Inori 新人VTuber",
-        "sourceUrl": "https://www.youtube.com/@Mimeiinori_VTuber",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@VPI_HanayuriChumi",
-        "channelId": "UCaRgPx8b0t6EjYwwzomXCpA",
-        "displayName": "花百合ちゅみ / Hanayuri Chumi",
-        "sourceUrl": "https://www.youtube.com/@VPI_HanayuriChumi",
         "reason": "batch_limit_reached"
       }
     ]
