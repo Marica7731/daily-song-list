@@ -49,6 +49,14 @@ but never prints their values. The current repository/Actions audit found no
 such target or PostgreSQL driver, so ephemeral testing is not production
 migration and must not trigger an active cutover.
 
+When the Mac runner cannot reach the VPS2 Unix socket directly, a workflow may
+copy only `pg-peer-relay.py` to a bounded remote temp path, start it as the
+`www-data` peer role, and expose it through an SSH local-forward. The Mac
+process remains the migration owner and uses a local `DAILY_SONG_POSTGRES_DSN`;
+the relay must be stopped and its remote temp path removed in the success,
+failure, and timeout traps. This relay is not a database, artifact, raw-data,
+or candidate store.
+
 ## Focused test
 
 Install `@electric-sql/pglite` only inside the Mac task temp root, set
