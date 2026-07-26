@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-25T23:18:41.320Z",
+  "generatedAt": "2026-07-26T03:59:43.922Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-25T21:50:09.529Z",
+    "fetchedAt": "2026-07-26T03:59:43.922Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -3020,7 +3020,7 @@
       "avatarFetchStatus": "fetched"
     },
     {
-      "handle": "/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
+      "handle": "/@H.Midori-Ch-",
       "displayName": "H.Midori Ch🍃葉山翠",
       "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
       "channelUrl": "https://www.youtube.com/channel/UCa_QYqKVEOE_EIZWgiOEZ5A",
@@ -3650,7 +3650,7 @@
       "thumbnailUrl": "https://i.ytimg.com/vi/oyLAZTWYx8s/hqdefault.jpg"
     },
     {
-      "handle": "/@HinataCh.%E5%A4%A9%E6%99%B4%E3%81%B2%E3%81%AA%E3%81%9F",
+      "handle": "/@HinataCh.",
       "displayName": "Hinata Ch. 天晴ひなた",
       "channelId": "UCBEdGV537X2NTkiwz54DTnA",
       "channelUrl": "https://www.youtube.com/channel/UCBEdGV537X2NTkiwz54DTnA",
@@ -5528,7 +5528,7 @@
       "thumbnailUrl": "https://i.ytimg.com/vi/Cd_HrWf2gQ0/hqdefault.jpg"
     },
     {
-      "handle": "/@LiLY-%E6%AD%8C%E3%81%84%E6%89%8BVsinger",
+      "handle": "/@LiLY-",
       "displayName": "LiLY-Vsinger",
       "channelId": "UCWkTi_Nv_TA9RY4lORSSlUA",
       "channelUrl": "https://www.youtube.com/channel/UCWkTi_Nv_TA9RY4lORSSlUA",
@@ -9468,7 +9468,7 @@
       "avatarFetchStatus": "fetched"
     },
     {
-      "handle": "/@sumica-%E6%BE%84%E8%8A%B1",
+      "handle": "/@sumica-",
       "displayName": "-sumica-澄花",
       "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
       "channelUrl": "https://www.youtube.com/channel/UCOpxpMDqjWr7LIGps19pw0w",
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-25T21:08:04.220Z",
+    "generatedAt": "2026-07-26T03:59:43.922Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 982,
-      "parseableChannels": 764,
+      "totalChannels": 984,
+      "parseableChannels": 962,
       "realAvatar": 643,
-      "thumbnailFallback": 339,
+      "thumbnailFallback": 341,
       "missingDisplayImage": 0,
-      "missingAvatar": 339,
+      "missingAvatar": 341,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 349,
-      "already_cached": 664
+      "already_cached": 665,
+      "skipped_collected_evidence": 538
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 131,
-      "missing_channel_url_or_handle": 218
+      "batch_limit_reached": 516,
+      "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@HibachiMana",
+        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
+        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@HibachiMana",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@yuzu_zuyuzu",
         "channelId": "UCA-dBOiqriMhZdRYP7t8Jjg",
@@ -11694,7 +11701,7 @@
         "handle": "/@H.Midori-Ch-",
         "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
         "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
         "reason": "batch_limit_reached"
       },
       {
@@ -11712,10 +11719,24 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@KumanoBearTrice",
+        "channelId": "UCQEqMSX5YYpQ9-4pdMip-vg",
+        "displayName": "熊乃ベアトリーチェ / Kumano BearTrice",
+        "sourceUrl": "https://www.youtube.com/@KumanoBearTrice",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@ritsu_yumemita",
         "channelId": "UCxc0MrPoACKTFlV24GqX2sg",
         "displayName": "峰月律-Minetsuki Ritsu- / 夢限大みゅーたいぷ",
         "sourceUrl": "https://www.youtube.com/@ritsu_yumemita",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@minmo_nara",
+        "channelId": "UC9WrMaSxIDRKR4wcz86IJxQ",
+        "displayName": "みんも / 奈良のVTuber【セシんもーZ】",
+        "sourceUrl": "https://www.youtube.com/@minmo_nara",
         "reason": "batch_limit_reached"
       },
       {
@@ -11744,6 +11765,13 @@
         "channelId": "UCBwH091x3pYLbGYwRtPbLlA",
         "displayName": "Lucia",
         "sourceUrl": "https://www.youtube.com/@Luciaaa_Sings",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Myao_Mixstgirls",
+        "channelId": "UCc_r_D9M7BGFpwXZnFaxEww",
+        "displayName": "成海ミャオ / Myao Channel【ミクスト】",
+        "sourceUrl": "https://www.youtube.com/@Myao_Mixstgirls",
         "reason": "batch_limit_reached"
       },
       {
@@ -11803,52 +11831,24 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "",
-        "channelId": "",
+        "handle": "/@VermouthBelluna",
+        "channelId": "UCGPSbXH61y4l85L9XTUl2mA",
         "displayName": "ベルモット・ベルーナ / Vermouth Belluna【APP LAND】",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "sourceUrl": "https://www.youtube.com/@VermouthBelluna",
+        "reason": "batch_limit_reached"
       },
       {
-        "handle": "",
-        "channelId": "",
+        "handle": "/@Mimeiinori_VTuber",
+        "channelId": "UCigCwuwnyh9tWhi2tuCEUcw",
         "displayName": "未明いのり /Mimei Inori 新人VTuber",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "sourceUrl": "https://www.youtube.com/@Mimeiinori_VTuber",
+        "reason": "batch_limit_reached"
       },
       {
         "handle": "/@VPI_HanayuriChumi",
         "channelId": "UCaRgPx8b0t6EjYwwzomXCpA",
         "displayName": "花百合ちゅみ / Hanayuri Chumi",
         "sourceUrl": "https://www.youtube.com/@VPI_HanayuriChumi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "黒間タクト / Kuroma Takuto",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "柚羽まくら / Yuzuha Makura",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "むかいせな / Mukai Sena",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "/@Dia-",
-        "channelId": "UC80TduEq6Sp4n2DkiUH2eLQ",
-        "displayName": "Diα - ディア",
-        "sourceUrl": "https://www.youtube.com/@Dia-",
         "reason": "batch_limit_reached"
       }
     ]
