@@ -16,6 +16,11 @@ on:
         required: true
         default: false
         type: boolean
+      stream_limit:
+        description: Bounded rows per table for transport probe; keep 0 for the full projection
+        required: true
+        default: 0
+        type: number
 
 permissions:
   contents: read
@@ -122,6 +127,7 @@ jobs:
       SOURCE_DB: "/Users/be/actions-runner-cache/daily-song-list-runtime-db/song-rank.sqlite"
       EXPECTED_PG_PEAK_BYTES: "23622320128"
       PG_HARD_CAP_BYTES: "30064771072"
+      STREAM_LIMIT: ${{ inputs.stream_limit || 0 }}
     steps:
       - name: Configure Mac toolchain and task root
         run: |
@@ -230,7 +236,7 @@ jobs:
           REVISION: full_runtime_${{ github.run_id }}_${{ github.run_attempt }}
         run: |
           set -Eeuo pipefail
-          python3 "$MIGRATION_ROOT/scripts/migration/export-runtime-tables.py" --db "$SOURCE_DB" --progress-every 1000 2> >(tee "$TASK_ROOT/export-runtime.log" >&2) |
+          python3 "$MIGRATION_ROOT/scripts/migration/export-runtime-tables.py" --db "$SOURCE_DB" --limit "$STREAM_LIMIT" --progress-every 1000 2> >(tee "$TASK_ROOT/export-runtime.log" >&2) |
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-runtime-tables.py --revision=$REVISION --manifest-file=/tmp/daily-song-list-pg-manifest.json" | tee "$TASK_ROOT/import-result.json"
           echo "REVISION=$REVISION" >> "$GITHUB_ENV"
 
@@ -241,7 +247,15 @@ jobs:
           candidate_sha="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -Atqc \"select content_sha256 from migration_revisions where revision_id='$REVISION' and status='ready'\"")"
           test -n "$candidate_sha"
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/daily-song-list-pg-candidate.log 2>&1 & echo \$! >/tmp/daily-song-list-pg-candidate.pid'"
-          for path in healthz api/meta 'api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'; do curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/$path" > "$TASK_ROOT/candidate-${path//\//_}.json"; done
+          # The candidate server binds to loopback on VPS2; run the contract
+          # probes there instead of probing the Mac runner's loopback.
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" 'set -Eeuo pipefail
+            curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/healthz" > /tmp/daily-song-list-pg-candidate-healthz.json
+            curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/meta" > /tmp/daily-song-list-pg-candidate-api-meta.json
+            curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" > /tmp/daily-song-list-pg-candidate-rankings.json'
+          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-healthz.json" "$TASK_ROOT/candidate-healthz.json"
+          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-api_meta.json" "$TASK_ROOT/candidate-api-meta.json"
+          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-rankings.json" "$TASK_ROOT/candidate-rankings.json"
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
 
       - name: Activate candidate and switch API
@@ -264,5 +278,5 @@ jobs:
         if: always()
         run: |
           set +e
-          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "if test -f /tmp/daily-song-list-pg-candidate.pid; then kill \$(cat /tmp/daily-song-list-pg-candidate.pid) 2>/dev/null || true; fi; rm -f /tmp/daily-song-list-pg-candidate.pid /tmp/daily-song-list-pg-manifest.json /tmp/import-runtime-tables.py /tmp/activate-pg-candidate.py /tmp/pg-schema.sql /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/daily-song-list-pg-candidate.log" || true
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "if test -f /tmp/daily-song-list-pg-candidate.pid; then kill \$(cat /tmp/daily-song-list-pg-candidate.pid) 2>/dev/null || true; fi; rm -f /tmp/daily-song-list-pg-candidate.pid /tmp/daily-song-list-pg-manifest.json /tmp/import-runtime-tables.py /tmp/activate-pg-candidate.py /tmp/pg-schema.sql /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/daily-song-list-pg-candidate.log /tmp/daily-song-list-pg-candidate-healthz.json /tmp/daily-song-list-pg-candidate-api-meta.json /tmp/daily-song-list-pg-candidate-rankings.json" || true
           rm -rf -- "${TASK_ROOT:-/tmp/nonexistent-daily-song-list-task-root}"
