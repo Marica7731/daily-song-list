@@ -3,6 +3,14 @@ name: Migrate PostgreSQL runtime candidate
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "migrate-pg or restore-sqlite (verified previous active only)"
+        required: true
+        default: migrate-pg
+        type: choice
+        options:
+          - migrate-pg
+          - restore-sqlite
       activate:
         description: Activate after candidate/API checks (set true only for an approved release window)
         required: true
@@ -17,7 +25,92 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  restore:
+    if: ${{ inputs.mode == 'restore-sqlite' }}
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 45
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
+      SOURCE_DB: "/Users/be/actions-runner-cache/daily-song-list-runtime-db/song-rank.sqlite"
+      EXPECTED_BYTES: "14829768704"
+      EXPECTED_SHA256: "858041e58988b35f9a60b96ec15668ecb907de41b2b7373a37b4c5e2872fc5b0"
+    steps:
+      - name: Configure bounded restore root
+        run: |
+          set -Eeuo pipefail
+          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-sqlite-restore.XXXXXX")"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          printf 'startedAt=%s\nexpectedBytes=%s\nexpectedSha256=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$EXPECTED_BYTES" "$EXPECTED_SHA256" > "$TASK_ROOT/restore-limits.txt"
+          df -k / > "$TASK_ROOT/mac-df-baseline.txt"
+
+      - name: Prepare password SSH helper
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$VPS2_PASSWORD"
+          mkdir -p "$RUNNER_TEMP/ssh-askpass"
+          cat > "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          printf '%s\n' "${VPS2_PASSWORD}"
+          SH
+          chmod 700 "$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh"
+          {
+            echo "SSH_ASKPASS=$RUNNER_TEMP/ssh-askpass/vps2-askpass.sh"
+            echo "SSH_ASKPASS_REQUIRE=force"
+            echo "DISPLAY=codex:0"
+          } >> "$GITHUB_ENV"
+
+      - name: Preflight verified rollback source and empty target
+        run: |
+          set -Eeuo pipefail
+          test -f "$SOURCE_DB"
+          test "$(stat -f%z "$SOURCE_DB")" = "$EXPECTED_BYTES"
+          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; printf '%s %s\\n' \"\$free\" \"\$old\"")"
+          read -r remote_free remote_old <<< "$remote_probe"
+          printf 'sourceBytes=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\n' "$EXPECTED_BYTES" "$remote_free" "$remote_old" > "$TASK_ROOT/preflight.txt"
+          test "$remote_old" = "0" || { echo "SQLITE_RESTORE_BLOCKED target_exists_bytes=$remote_old"; exit 78; }
+          test "$remote_free" -ge "$EXPECTED_BYTES" || { echo "SQLITE_RESTORE_BLOCKED insufficient_remote_free=$remote_free"; exit 78; }
+
+      - name: Stream verified previous active to the empty target
+        timeout-minutes: 30
+        run: |
+          set -Eeuo pipefail
+          cleanup() {
+            status=$?
+            if [ "$status" -ne 0 ]; then
+              ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "systemctl stop song-rank-api >/dev/null 2>&1 || true; rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite'" || true
+            fi
+            before_bytes=0
+            if [ -d "$TASK_ROOT" ]; then before_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 )); fi
+            df -k / > "$TASK_ROOT/mac-df-after.txt" 2>/dev/null || true
+            rm -rf -- "$TASK_ROOT"
+            echo "SQLITE_RESTORE_CLEANUP status=$status beforeBytes=$before_bytes retained=none"
+            exit "$status"
+          }
+          trap cleanup EXIT INT TERM
+          cat "$SOURCE_DB" |
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "cat > '$REMOTE_STATE_DIR/song-rank.sqlite'"
+          remote_bytes="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite'")"
+          test "$remote_bytes" = "$EXPECTED_BYTES"
+          remote_sha="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sha256sum '$REMOTE_STATE_DIR/song-rank.sqlite' | awk '{print \$1}'")"
+          test "$remote_sha" = "$EXPECTED_SHA256"
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "chown www-data:www-data '$REMOTE_STATE_DIR/song-rank.sqlite'; chmod 0644 '$REMOTE_STATE_DIR/song-rank.sqlite'; systemctl start song-rank-api; curl --fail --max-time 10 http://127.0.0.1:8765/healthz"
+          printf 'remoteBytes=%s\nremoteSha256=%s\nrestoredAt=%s\n' "$remote_bytes" "$remote_sha" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TASK_ROOT/restore-report.txt"
+
+      - name: Upload bounded restore evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite-rollback-evidence-${{ github.run_id }}
+          path: ${{ env.TASK_ROOT }}
+          if-no-files-found: ignore
+          retention-days: 7
+
   migrate:
+    if: ${{ inputs.mode != 'restore-sqlite' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 240
     env:
@@ -28,19 +121,6 @@ jobs:
       EXPECTED_PG_PEAK_BYTES: "23622320128"
       PG_HARD_CAP_BYTES: "30064771072"
     steps:
-      - name: Checkout migration files
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 1
-          filter: blob:none
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            scripts/migration
-            server/pg_adapter.py
-            server/pg_api_server.py
-            deploy/vps2/song-rank-pg-api.service
-
       - name: Configure Mac toolchain and task root
         run: |
           set -Eeuo pipefail
@@ -52,6 +132,32 @@ jobs:
           printf 'startedAt=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TASK_ROOT/state.txt"
           df -k / > "$TASK_ROOT/mac-df-baseline.txt"
           printf 'expectedPeakBytes=%s\nhardCapBytes=%s\nsourceDb=%s\n' "$EXPECTED_PG_PEAK_BYTES" "$PG_HARD_CAP_BYTES" "$SOURCE_DB" > "$TASK_ROOT/limits.txt"
+
+      - name: Download migration files into task root
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          MIGRATION_ROOT="$TASK_ROOT/repo"
+          printf 'MIGRATION_ROOT=%s\n' "$MIGRATION_ROOT" >> "$GITHUB_ENV"
+          files=(
+            scripts/migration/pg-schema.sql
+            scripts/migration/export-runtime-tables.py
+            scripts/migration/import-runtime-tables.py
+            scripts/migration/activate-pg-candidate.py
+            server/pg_adapter.py
+            server/pg_api_server.py
+            deploy/vps2/song-rank-pg-api.service
+          )
+          for path in "${files[@]}"; do
+            target="$MIGRATION_ROOT/$path"
+            mkdir -p "$(dirname "$target")"
+            curl --fail --silent --show-error --location --retry 2 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA/$path" \
+              -o "$target"
+          done
+          find "$MIGRATION_ROOT" -type f -print | sort > "$TASK_ROOT/downloaded-files.txt"
 
       - name: Prepare password SSH helper
         env:
@@ -97,18 +203,17 @@ jobs:
           remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; printf '%s %s\\n' \"\$free\" \"\$old\"")"
           read -r remote_free remote_old <<< "$remote_probe"
           printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\n' "$bytes" "$sha" "$remote_free" "$remote_old" > "$TASK_ROOT/preflight.txt"
-          if [ "$remote_free" -lt "$EXPECTED_PG_PEAK_BYTES" ] && [ "$remote_old" -gt 0 ]; then
-            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "systemctl stop song-rank-api || true; test -z \"\$(lsof '$REMOTE_STATE_DIR/song-rank.sqlite' 2>/dev/null)\"; rm -f -- '$REMOTE_STATE_DIR/song-rank.sqlite'"
+          printf 'remoteFreeAfterPreflight=%s\n' "$remote_free" >> "$TASK_ROOT/preflight.txt"
+          test "$remote_free" -ge "$EXPECTED_PG_PEAK_BYTES"
+          if [ "$remote_old" -gt 0 ]; then
+            echo "PG_PREFLIGHT_OLD_SQLITE_PRESERVED bytes=$remote_old"
           fi
-          remote_after="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'")"
-          printf 'remoteFreeAfterPredelete=%s\n' "$remote_after" >> "$TASK_ROOT/preflight.txt"
-          test "$remote_after" -ge "$EXPECTED_PG_PEAK_BYTES"
 
       - name: Install schema and bounded receiver
         timeout-minutes: 10
         run: |
           set -Eeuo pipefail
-          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no scripts/migration/pg-schema.sql scripts/migration/import-runtime-tables.py scripts/migration/activate-pg-candidate.py server/pg_adapter.py server/pg_api_server.py deploy/vps2/song-rank-pg-api.service "$VPS2_USER@$VPS2_HOST:/tmp/"
+          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$MIGRATION_ROOT/scripts/migration/pg-schema.sql" "$MIGRATION_ROOT/scripts/migration/import-runtime-tables.py" "$MIGRATION_ROOT/scripts/migration/activate-pg-candidate.py" "$MIGRATION_ROOT/server/pg_adapter.py" "$MIGRATION_ROOT/server/pg_api_server.py" "$MIGRATION_ROOT/deploy/vps2/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/"
           scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$TASK_ROOT/manifest.json" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-manifest.json"
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON TABLE migration_revisions,migration_video_rows,migration_occurrence_rows,migration_audit_rows,migration_state,runtime_meta,runtime_videos,runtime_occurrences,runtime_songs,runtime_ranking_rows,runtime_source_details,runtime_source_occurrences,runtime_channel_metadata,runtime_external_songs,runtime_external_videos,runtime_external_occurrences TO \"www-data\";'"
 
@@ -118,7 +223,7 @@ jobs:
           REVISION: full_runtime_${{ github.run_id }}_${{ github.run_attempt }}
         run: |
           set -Eeuo pipefail
-          python3 scripts/migration/export-runtime-tables.py --db "$SOURCE_DB" 2>"$TASK_ROOT/export-runtime.log" |
+          python3 "$MIGRATION_ROOT/scripts/migration/export-runtime-tables.py" --db "$SOURCE_DB" 2>"$TASK_ROOT/export-runtime.log" |
             ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-runtime-tables.py --revision=$REVISION --manifest-file=/tmp/daily-song-list-pg-manifest.json" | tee "$TASK_ROOT/import-result.json"
           echo "REVISION=$REVISION" >> "$GITHUB_ENV"
 
@@ -141,7 +246,7 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'; systemctl reload nginx"
 
       - name: Upload bounded migration evidence
-        if: always()
+        if: ${{ always() && env.TASK_ROOT != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: pg-runtime-migration-${{ github.run_id }}
