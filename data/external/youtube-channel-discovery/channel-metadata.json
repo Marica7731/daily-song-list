@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-26T17:46:55.853Z",
+  "generatedAt": "2026-07-26T19:34:09.690Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-26T17:46:55.853Z",
+    "fetchedAt": "2026-07-26T19:34:09.690Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-26T17:46:55.853Z",
+    "generatedAt": "2026-07-26T19:34:09.690Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1001,
-      "parseableChannels": 979,
+      "totalChannels": 1002,
+      "parseableChannels": 980,
       "realAvatar": 643,
-      "thumbnailFallback": 358,
+      "thumbnailFallback": 359,
       "missingDisplayImage": 0,
-      "missingAvatar": 358,
+      "missingAvatar": 359,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 551
+      "skipped_collected_evidence": 552
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 529,
+      "batch_limit_reached": 530,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
+        "channelId": "UC028TablIiJZW_P8DqgnX9Q",
+        "displayName": "灼楽えん-syakura en-",
+        "sourceUrl": "https://www.youtube.com/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Nekozaki_Roi",
         "channelId": "UCjvncTrq_44m3znLtmQk5pg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCp-5t9SrOQwXMU7iIjQfARg",
         "displayName": "Mio Channel 大神ミオ",
         "sourceUrl": "https://www.youtube.com/@OokamiMio",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shiro_zakuro",
-        "channelId": "UCPmcUzR-kh8hGVbNdYU84EA",
-        "displayName": "柘榴シロ@Zakuro shiro",
-        "sourceUrl": "https://www.youtube.com/@Shiro_zakuro",
         "reason": "batch_limit_reached"
       }
     ]
