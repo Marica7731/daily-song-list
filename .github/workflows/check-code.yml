@@ -256,10 +256,11 @@ jobs:
           python3 -u scripts/export-runtime-singleton-index.py \
             --db "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
             --output "$AUDIT_ROOT/checkpoint/global/runtime-singletons.jsonl.gz" \
-            --meta-output "$AUDIT_ROOT/checkpoint/global/runtime-singletons.meta.json"
+            --meta-output "$AUDIT_ROOT/checkpoint/global/runtime-singletons.meta.json" \
+            --db-audit "$AUDIT_ROOT/reports/runtime-db-audit.json"
           node --max-old-space-size=12288 scripts/export-global-quality-candidates.js \
-            --inventory "$AUDIT_ROOT/reports/global/inventory.jsonl.gz" \
-            --inventory-meta "$AUDIT_ROOT/reports/global/inventory-meta.json" \
+            --inventory "$AUDIT_ROOT/checkpoint/global/inventory.jsonl.gz" \
+            --inventory-meta "$AUDIT_ROOT/checkpoint/global/inventory-meta.json" \
             --runtime-singletons "$AUDIT_ROOT/checkpoint/global/runtime-singletons.jsonl.gz" \
             --runtime-meta "$AUDIT_ROOT/checkpoint/global/runtime-singletons.meta.json" \
             --output-dir "$AUDIT_ROOT/reports/global-quality" \
