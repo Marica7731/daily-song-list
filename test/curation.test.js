@@ -950,8 +950,8 @@ test("global singleton cleanup batch uses exact selectors and conservative actio
     ),
   );
 
-  assert.equal(records.length, 16);
-  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 13);
+  assert.equal(records.length, 17);
+  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 14);
   assert.equal(records.filter((entry) => entry.action === "replace_entry").length, 3);
   assert.equal(selectorKeys.size, records.length);
   assert.equal(records.every((entry) => entry.sourceId), true);
