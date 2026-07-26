@@ -36,6 +36,11 @@ python3 scripts/db/postgres_upsert.py \
   --input resolved.json \
   --dsn "$DAILY_SONG_POSTGRES_DSN" \
   --apply
+
+# 出现需要撤回时使用操作 ID，不直接修改生产表
+python3 scripts/db/postgres_rollback.py \
+  --dsn "$DAILY_SONG_POSTGRES_DSN" \
+  --operation-id "<operation-id>"
 ```
 
 第一条命令只校验格式和分组；第二条命令按视频 URL 调用 `yt-dlp` 获取频道身份，无法确认的条目保持 pending；第三条命令在一个事务中写入视频、歌曲、occurrence、操作审计和受影响歌曲聚合。
@@ -56,3 +61,14 @@ python3 scripts/db/postgres_upsert.py \
 3. 受影响歌曲/频道的 occurrence、video、song 计数与输入一致；
 4. `/healthz`、`/api/meta` 和至少一个受影响视频/频道查询通过；
 5. Mac 临时目录清理完成。任何一项失败都保持旧线上版本，不显示半成品。
+
+初次迁移后的计数和抽样校验：
+
+```bash
+python3 scripts/db/compare_postgres_runtime.py \
+  --sqlite artifacts/runtime/song-rank.sqlite \
+  --dsn "$DAILY_SONG_POSTGRES_DSN" \
+  --output migration-compare.json
+```
+
+只有 `CODEX_POSTGRES_COMPARE_OK` 才允许切换 API；`MISMATCH` 或异常都保持旧服务。

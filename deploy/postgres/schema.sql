@@ -171,6 +171,16 @@ CREATE TABLE IF NOT EXISTS curation_operations (
 );
 CREATE INDEX IF NOT EXISTS idx_curation_operations_created ON curation_operations (created_at DESC);
 
+CREATE TABLE IF NOT EXISTS curation_operation_changes (
+  operation_id UUID NOT NULL REFERENCES curation_operations(operation_id) ON DELETE CASCADE,
+  occurrence_id TEXT NOT NULL,
+  old_row_json JSONB,
+  new_row_json JSONB,
+  change_type TEXT NOT NULL,
+  PRIMARY KEY (operation_id, occurrence_id)
+);
+CREATE INDEX IF NOT EXISTS idx_curation_operation_changes_occurrence ON curation_operation_changes (occurrence_id);
+
 CREATE TABLE IF NOT EXISTS ranking_rows (
   row_id TEXT PRIMARY KEY,
   range_id TEXT NOT NULL,

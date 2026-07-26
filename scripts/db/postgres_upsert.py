@@ -267,6 +267,9 @@ def apply_operations(operations: list[dict], dsn: str, schema_file: Path) -> dic
                     )
                     occ_id = occurrence_id(operation, song)
                     new_occurrence_ids.append(occ_id)
+                    cur.execute("SELECT row_to_json(o)::text FROM occurrences o WHERE occurrence_id=%s", (occ_id,))
+                    old_row = cur.fetchone()
+                    old_row_json = old_row[0] if old_row else None
                     cur.execute(
                         """
                         INSERT INTO occurrences(occurrence_id, range_id, video_id, song_key, seconds, source_system, source_id, title, artist, is_unknown_artist, payload_json)
@@ -282,15 +285,34 @@ def apply_operations(operations: list[dict], dsn: str, schema_file: Path) -> dic
                             song["title"], song["artist"], song["artist"].casefold() in UNKNOWN_ARTISTS, json.dumps(song, ensure_ascii=False),
                         ),
                     )
+                    cur.execute("SELECT row_to_json(o)::text FROM occurrences o WHERE occurrence_id=%s", (occ_id,))
+                    new_row_json = cur.fetchone()[0]
+                    cur.execute(
+                        """
+                        INSERT INTO curation_operation_changes(operation_id, occurrence_id, old_row_json, new_row_json, change_type)
+                        VALUES (%s, %s, NULLIF(%s, '')::jsonb, NULLIF(%s, '')::jsonb, %s)
+                        ON CONFLICT(operation_id, occurrence_id) DO UPDATE SET
+                          old_row_json=EXCLUDED.old_row_json, new_row_json=EXCLUDED.new_row_json,
+                          change_type=EXCLUDED.change_type
+                        """,
+                        (operation_id, occ_id, old_row_json, new_row_json, "updated" if old_row_json else "inserted"),
+                    )
                     affected[range_id].add(key)
                     result["songs"] += 1
                     result["occurrences"] += 1
                 if operation["replaceVideo"]:
                     cur.execute(
-                        "DELETE FROM occurrences WHERE range_id=%s AND video_id=%s AND source_system=%s AND occurrence_id <> ALL(%s)",
+                        "SELECT occurrence_id, row_to_json(o)::text FROM occurrences o WHERE range_id=%s AND video_id=%s AND source_system=%s AND NOT (occurrence_id = ANY(%s))",
                         (range_id, operation["videoId"], operation["sourceSystem"], new_occurrence_ids),
                     )
-                    result["deletedOccurrences"] += cur.rowcount
+                    stale_rows = cur.fetchall()
+                    for stale_id, stale_json in stale_rows:
+                        cur.execute("DELETE FROM occurrences WHERE occurrence_id=%s", (stale_id,))
+                        cur.execute(
+                            "INSERT INTO curation_operation_changes(operation_id, occurrence_id, old_row_json, new_row_json, change_type) VALUES (%s, %s, %s::jsonb, NULL, 'deleted') ON CONFLICT(operation_id, occurrence_id) DO UPDATE SET old_row_json=EXCLUDED.old_row_json, new_row_json=NULL, change_type='deleted'",
+                            (operation_id, stale_id, stale_json),
+                        )
+                    result["deletedOccurrences"] += len(stale_rows)
             for range_id, keys in affected.items():
                 for key in keys:
                     cur.execute(
