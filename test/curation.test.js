@@ -950,13 +950,26 @@ test("global singleton cleanup batch uses exact selectors and conservative actio
     ),
   );
 
-  assert.equal(records.length, 15);
-  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 12);
+  assert.equal(records.length, 16);
+  assert.equal(records.filter((entry) => entry.action === "drop_entry").length, 13);
   assert.equal(records.filter((entry) => entry.action === "replace_entry").length, 3);
   assert.equal(selectorKeys.size, records.length);
   assert.equal(records.every((entry) => entry.sourceId), true);
   assert.equal(records.every((entry) => /^[0-9a-f]{64}$/u.test(entry.sourceHash)), true);
   assert.equal(records.every((entry) => /^[0-9a-f]{64}$/u.test(entry.rawHash)), true);
+
+  const ryukakusanDuplicates = records.filter(
+    (entry) => entry.videoId === "4xWoeTde_jQ" && entry.seconds === 646,
+  );
+  assert.equal(ryukakusanDuplicates.length, 2);
+  assert.equal(ryukakusanDuplicates.every((entry) => entry.action === "drop_entry"), true);
+  assert.deepEqual(
+    new Set(ryukakusanDuplicates.map((entry) => entry.sourceId)),
+    new Set([
+      "UgwQi_FDMM7CuX7XM954AaABAg",
+      "48a015c3-8e90-461e-a912-d3e20c1aca72",
+    ]),
+  );
 });
 
 test("global singleton cleanup drops only reviewed rows and keeps corrected songs", () => {

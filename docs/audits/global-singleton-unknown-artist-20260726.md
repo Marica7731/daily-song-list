@@ -222,7 +222,8 @@ Naraetan runtime/source before：292 videos、1,396 ranking songs、4,463 occurr
 unknown occurrence 73、unknown groups 71、singleton unknown 70、同标题多歌手冲突 140。
 
 用户截图与 accepted raw 共同确认的 12 个 non-song singleton 采用完整
-`videoId + sourceId + sourceHash + seconds + rawHash` selector：
+`videoId + sourceId + sourceHash + seconds + rawHash` selector。`龍角散` 在同一视频同一秒
+同时存在 accepted 与 VSinger 两份 provenance，因此用两个 exact selector 清理同一个已确认片段：
 
 `音をねじる`、`頭→目→歯`、`頭痛`、`顔`、`風邪気味かもしれない`、`飛行機`、
 `飾り棚`、`餃子`、`高音を出すとおでこが痒くなる`、`魔法少女ごっこ遊び`、
@@ -233,8 +234,8 @@ unknown occurrence 73、unknown groups 71、singleton unknown 70、同标题多�
 位于同一视频并共享 sourceId/sourceHash，回归测试要求 seconds/rawHash 不同时不能误命中。
 另一个视频中的 `鼻歌 / summertime` 不在本批 selector 内。
 
-本批 tag `global-singleton-20260726` 共 15 个 selector：
-12 `drop_entry`、1 个标题/注释修正、2 个可靠未知歌手回填。
+本批 tag `global-singleton-20260726` 共 16 个 selector：
+13 `drop_entry`（覆盖 12 个已确认 non-song 片段）、1 个标题/注释修正、2 个可靠未知歌手回填。
 
 ### 四页 80 个频道与全部展开歌曲
 
@@ -276,6 +277,9 @@ occurrence audit。页面紧凑 payload 不提供 artist，不能据此把歌手
 - runtime DB audit Python tests：2/2 通过。
 - `git diff --check` 通过。
 
-下一门禁是 Mac after：恢复 artifact `8626595119` 的 inventory checkpoint，
-传入 `expected_selector_count=15`。每条 selector 必须精确命中一条真实 inventory row；
-未得到该证据前不把本批写成完成。
+首个 Mac after run `30184771010` 证明原 15 个 selector 均各命中一条；其 runtime after
+仍有一条同秒的 VSinger `龍角散 / 未記載`，定位为
+`4xWoeTde_jQ@646`、sourceId `48a015c3-8e90-461e-a912-d3e20c1aca72`。
+最终门禁是在合入最新 main 后恢复 after checkpoint artifact `8627299029`，
+传入 `expected_selector_count=16`。每条 selector 必须精确命中一条真实 inventory row，
+并确认 Naraetan 目标标题只保留合并后的真歌 `明日への勇気`。

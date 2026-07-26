@@ -9,8 +9,8 @@
 3. `https://www.youtube.com/@YOSHIKA-Ch` 的专项 before/after；
 4. 四个生产榜单页（occurrences/songs 各第 1、2 页）的全部频道及展开歌曲。
 
-基线为 2026-07-26 实时 `origin/main`
-`1d2bf94f6e69fbefc5a9e488d8fd77de1569f414`。本地工作分支是
+最终复验基线为 2026-07-26 实时 `origin/main`
+`f97ecaec4f4d7ee8bcc48c1489fb7bb2ae46988e`。本地工作分支是
 `codex/global-singleton-cleanup-20260726-clean`，交付时仅推送到远端
 `codex/global-singleton-cleanup-20260726`。
 
@@ -112,3 +112,16 @@
   `明日への勇気` 注释修正、2 个 YOSHIKA 唯一高频已知歌手回填。
 - 本地 Node 46/46、Python 2/2 通过；下一步 commit/push 后 dispatch Mac after，
   `expected_selector_count=15` 并恢复 checkpoint，不使用 `--fresh`。
+
+## 2026-07-26 12:00 状态
+
+- 首个 after run `30184771010` 的 `check` 与 `curation_audit` 均成功；15 个 selector
+  各精确命中一条，checkpoint 明确从 before run `30183655942` 恢复并 resume。
+- runtime after 中 12 个目标 non-song 片段只净减 11 occurrence；审计 artifact 定位到
+  `龍角散` 在 `4xWoeTde_jQ@646` 还有一份 VSinger provenance。它与已审核 accepted
+  记录同视频、同秒、同标题，已新增第二个 exact selector，不按标题扩散删除。
+- 最新 main `f97ecaec4f4d7ee8bcc48c1489fb7bb2ae46988e` 已以 merge commit
+  `549ef1735` 合入，保留其 VSinger runtime channel identity hydration。
+- 本批现在是 16 个 selector：13 drop、3 replace。下一步本地复测、commit/push 后，
+  恢复 checkpoint artifact `8627299029` 再跑最终 Mac after，并以
+  `expected_selector_count=16` 严格验收。
