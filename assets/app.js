@@ -6319,9 +6319,9 @@ function rankCountUnit() {
 }
 
 function songCountForRecord(record) {
-  if (record?.type === "vtuber" && record?.songs instanceof Map) return record.songs.size;
   const explicit = Number(record?.songCount ?? record?.uniqueSongCount ?? record?.songsCount);
   if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+  if (record?.type === "vtuber" && record?.songs instanceof Map) return record.songs.size;
   if (record?.songs instanceof Map) return record.songs.size;
   if (Array.isArray(record?.songs)) return record.songs.length;
   const size = Number(record?.songs?.size);
