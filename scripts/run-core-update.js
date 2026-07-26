@@ -73,8 +73,13 @@ function setOutput(name, value) {
 function runStep(name, command, args) {
   const startedAt = Date.now();
   console.log(`[core-update] start ${name}: ${command} ${args.join(" ")}`);
+  const childEnv = { ...process.env };
+  if (name === "build-runtime-data") {
+    childEnv.NODE_OPTIONS = [childEnv.NODE_OPTIONS, "--max-old-space-size=8192"].filter(Boolean).join(" ");
+  }
   const result = spawnSync(command, args, {
     cwd: ROOT,
+    env: childEnv,
     stdio: "inherit",
   });
   const elapsedSeconds = Math.round((Date.now() - startedAt) / 1000);

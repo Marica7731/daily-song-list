@@ -98,6 +98,10 @@ jobs:
         continue-on-error: true
         env:
           DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          # build-runtime-data materializes the full catalog and can exceed Node's
+          # default ~4 GiB heap on the Mac runner. Keep the existing bounded job
+          # timeout, but give the build the heap size already used by build:runtime.
+          NODE_OPTIONS: --max-old-space-size=8192
         run: node scripts/run-core-update.js
 
       - name: Restore core data after core failure
