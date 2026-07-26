@@ -70,6 +70,16 @@ jobs:
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+
+      - name: Mac storage preflight
+        run: |
+          run_root="${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$run_root"
+          echo "DAILY_SONG_RUN_ROOT=$run_root" >> "$GITHUB_ENV"
+          python3 scripts/ci/mac_storage_guard.py preflight \
+            --path . \
+            --path "$RUNNER_TEMP" \
+            --min-free-gib 40
       - name: Record run start
         id: runmeta
         run: |
@@ -102,7 +112,13 @@ jobs:
           # default ~4 GiB heap on the Mac runner. Keep the existing bounded job
           # timeout, but give the build the heap size already used by build:runtime.
           NODE_OPTIONS: --max-old-space-size=8192
-        run: node scripts/run-core-update.js
+        run: |
+          python3 scripts/ci/mac_storage_guard.py run \
+            --watch-path . \
+            --watch-path "$RUNNER_TEMP" \
+            --min-free-gib 40 \
+            --max-watch-gib 60 \
+            -- node scripts/run-core-update.js
 
       - name: Restore core data after core failure
         if: always() && steps.core.outcome != 'success'
@@ -188,6 +204,12 @@ jobs:
             echo "- updated: ${{ steps.core.outputs.updated }}"
             echo "- handoff: if updated=true, Deploy SQLite runtime DB should rebuild DB on GitHub Actions and VPS2 should only activate/check the candidate DB"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup bounded Mac workspace
+        if: always()
+        run: |
+          run_root="${DAILY_SONG_RUN_ROOT:-${RUNNER_TEMP}/daily-song-list/${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}}"
+          python3 scripts/ci/mac_storage_guard.py cleanup --run-root "$run_root"
 
       - name: Fail when core update failed
         if: always() && steps.core.outcome != 'success'
