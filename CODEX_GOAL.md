@@ -4,7 +4,7 @@
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
 
-当前执行门：旧 SQLite active 已恢复并重新通过线上 200 验证；PG 当前只有 schema/空 state，不得接管生产。先完成真实 VPS2 PG 小样本 candidate 与 API contract smoke，再接入既有 curation accepted increment；7D 不得启动第二个实例，必须先处理 PID=5282 的 `operator-stop` 与陈旧 checkpoint，完整候选达到 `reachedEnd=true` 后才进入 `うら飯紺汰` detail/curation。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过真实线上切换和验收前保持 pending，不得标记 complete。
+当前执行门：旧 SQLite 已按用户授权在有 Mac rollback hash 与定量空间预算后预删除，当前 VPS 不保留完整 SQLite，PG 仍只有 schema/空 state，外部 API 待 PG candidate 接管前不可宣称可用。`migrate-pg-runtime.yml` 负责 Mac 单目录全量 SQLite→PG candidate、compare、API gate 和可选 atomic activate；`deploy-pg-incremental.yml` 负责后续 accepted increment/curation patch，避免旧 SQLite workflow 抢回生产。7D 必须在同一发布链路完成：先固定搜索链接完整 `reachedEnd=true`，再详情/三天规则/curation，最后生成 accepted increment 并经 PG candidate gate；PID=5282 已停止，陈旧 checkpoint 只作审计证据。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过真实线上切换、迁移后清洗和 7D 验收前保持 pending，不得标记 complete。
 
 ## 目标
 
@@ -12,7 +12,7 @@
 
 ## 当前阶段
 
-2026-07-27：主线目标已由用户明确收口为两条交付线：`(1) PostgreSQL 增量迁移 -> 迁移后接入已审计清洗结果；(2) MyGit 完整 7D 恢复`。VPS2 已实时确认 PostgreSQL 16 active、`song_rank` 存在、`www-data` 可通过 Unix-socket peer 登录；当前 `migration_*` schema 已存在，但 `migration_state.active_revision_id` 为空，视频/occurrence/revision/audit 行数均为 0。旧 SQLite service 曾被残留 direct-activate 过程短暂置于异常状态，已按精确 PID 树停止残留并恢复 service；截至 2026-07-26T20:31:58Z，线上 `/healthz`、`/api/meta`、`/api/rankings` 均 HTTP 200，旧 active 未被 PG 替换。主仓库已有 PG adapter/API wrapper 与 focused contract tests；Mac 固定临时根中的 PID=5282 已不存在，checkpoint 仍是陈旧 `status=running`、`page=101`、80 个去重候选、`reachedEnd=false`。仓库当前存在约 32 万条接手前 staged deletion（含历史生成数据和旧 `CODEX_GOAL.md`），本轮不得恢复、清理或扩大这批删除。
+2026-07-27：主线目标已由用户明确收口为两条交付线：`(1) PostgreSQL 增量迁移 -> 迁移后接入已审计清洗结果；(2) MyGit 完整 7D 恢复`。VPS2 已实时确认 PostgreSQL 16 active、`song_rank` 存在、`www-data` 可通过 Unix-socket peer 登录；`migration_*` 与 full runtime projection schema 已存在，但 `migration_state.active_revision_id` 为空、候选数据为 0。旧 SQLite run `30217524582` 已失败并停止服务；用户明确授权后，已在 Mac rollback DB `858041e58988...` 与空间预算证据下删除 VPS `/var/lib/culua/ytb-song-rank/song-rank.sqlite`（14,829,768,704 bytes），删除前可用约 14.5 GB、删除后约 29.0 GB；因此当前外部 API 待 PG candidate 接管，不把 502 当正常完成。主仓库已有 PG adapter/API wrapper、full runtime stream receiver、candidate service 和 focused tests；Mac PID=5282 已停止，checkpoint 仍是陈旧 `status=running`、`page=101`、80 个去重候选、`reachedEnd=false`。仓库当前存在约 32 万条接手前 staged deletion（含历史生成数据），本轮不得恢复、清理或扩大这批删除。
 
 ## 迁移优先时间表（有界，不承诺固定总时长）
 
@@ -55,9 +55,9 @@
 
 ### C. 迁移交接
 
-- `pending`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；当前实测 `song_rank` 约 7.9 MB，`migration_state` 有 1 行但 active 为空，其他 migration 表均为 0 行。旧 SQLite API 的短暂 inactive/500 已被精确恢复；截至 2026-07-26T20:31:58Z，service active、线上 health/meta/rankings 均 200；在 candidate gate 通过前不得让空 PG 接管。
+- `pending`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；当前实测 `song_rank` 仍为空 candidate，`migration_state.active_revision_id` 为空。旧 SQLite 已按授权预删除，PG candidate gate 完成前不能把空库接管；新 workflow 必须先做 full runtime stream，再做 candidate API/计数校验。
 - `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
-- `pending`：端到端小样本导入、compare、rollback、candidate/active 切换和线上健康证据尚不存在；Mac runner 当前仅有 GitHub SSH 配置，没有 VPS2 host/PG 入口，Actions 现有 `VPS2_PASSWORD` 仅是 SSH 线索，尚未接入 PG candidate 协议。
+- `pending`：端到端全量 stream、compare、rollback、candidate/active 切换和线上健康证据尚不存在；本地/runner 小样本与协议 focused tests 已通过，但一次交互式 Mac→WSL→VPS full stream 因管道缓冲停滞并已按 PID 清理，正式执行必须使用 Mac self-hosted workflow 的单跳 SSH 传输。Actions 现有 `VPS2_PASSWORD` 仅用于受控 SSH，不把它伪装成 PG DSN。
 - `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
 - `done`：curation/release 分支的中断合并未恢复；禁止合并全量生成 data。
 - `pending`：C/D/G/Mac 存储清单与回收规则部分完成；G 盘、正式仓库、Mac 空间/runner/cache、culua 盘和本机残留进程已有证据，WDC/VPS2 角色与空间仍缺可复核 SSH 证据；不以子任务未完成报告代替清理验收。
@@ -99,10 +99,10 @@
 
 ## 当前下一步
 
-1. 保持已恢复的 VPS2 原 SQLite API，并在后续每个迁移阶段复核 `/healthz`、`/api/meta`；旧 active 可服务前不允许任何 PG 切换。
-2. 在 Mac 单一迁移临时根记录最新空间 baseline，完成 VPS2 schema/小样本流式 upsert/compare/rollback/active smoke test；空 PG 不得接管。
-3. 唯一 Mac 7D checkpoint 先由主会话解释 `operator-stop` 与陈旧 `running` 状态；不启动第二实例，`reachedEnd=true` 前不切 7 shard、不清 raw、不导入生产。
-3. 7D 详情/curation 通过 accepted increment、三天状态规则和审计 manifest 后，接入同一 PG candidate gate；旧 SQLite active 持续服务，失败保持旧 active。
+1. 在远端分支完成 diff 审查并安全提交本轮 workflow、full runtime stream、adapter/service、测试和 goal；只更新临时 index/数据库树，不带接手前 staged deletion。
+2. 通过 Mac self-hosted `migrate-pg-runtime.yml`：单一 temp root、baseline/peak/after、manifest、full stream、candidate API gate；首先验证 `healthz/meta/rankings/source`，再以 `activate=true` 原子切换 PG service，失败不切换空库。
+3. PG base active 后，恢复唯一 7D run：固定用户搜索链接完整发现到 `reachedEnd=true`，按 videoId 详情/三天规则/curation 生成 accepted increment；不得把 stale checkpoint 或 dry-run 写成数据。
+4. 将 7D 与既有 `curation_ready_pending_release` 结果合并为受控 incremental candidate，使用 `deploy-pg-incremental.yml` 的 compare/health/API/activate gate；确认新数据持续可入库后，再做重点歌曲、`うら飯紺汰` 和来源详情线上验收。
 
 ## 交接记录
 
