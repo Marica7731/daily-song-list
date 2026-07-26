@@ -119,3 +119,29 @@
 - No new metadata, hashed asset, runtime DB or static page has been published
   at this checkpoint. Production still reports the old runtime source and
   Felicia handle search returns zero; delivery remains incomplete.
+
+## Release checkpoint (2026-07-26 09:45 +08:00)
+
+- Remote `main` and production Runtime DB now run
+  `aa346c86ae8d475f87f5160088ecf4c38a3c628d`; Runtime DB workflow
+  `30179793634` succeeded and production `healthz`, `meta`, and rankings
+  recovered from the deployment-time 502.
+- Production verification found a remaining pipeline gap: VSinger runtime
+  videos are merged after `hydratePayloadWithChannelMetadata()`. As a result,
+  Felicia display-name search still returns 239 videos, while
+  `@FeliciaLulufleur` returns zero and those rows have empty channel identity
+  fields.
+- The current focused worktree is
+  `/mnt/g/codex-work/daily-song-list-runtime-channel-fix-20260726`. The fix is
+  limited to Runtime ranking export order and regression tests; deployed Web/H5
+  styling is out of scope.
+- Naraetan production acceptance still shows non-song entries including
+  `音をねじる`, `頭→目→歯`, `頭痛`, `顔`, `風邪気味かもしれない`, `飛行機`,
+  `飾り棚`, `餃子`, `高音を出すとおでこが痒くなる`, `魔法少女ごっこ遊び`,
+  `鼻歌 Humming("Last Christmas")`, and `龍角散`. These must be removed only
+  through evidence-backed curation. `(音量注意)明日への勇気` is a real song
+  and must be normalized/merged to `明日への勇気`, not dropped.
+- Independent tasks now split the cleanup work: the existing task owns
+  Naraetan, YOSHIKA, and the four VTuber-rank page audit; task
+  `019f9c2f-b11f-7191-8bd3-97dd31d936f1` audits all singleton and unknown-artist
+  candidates read-only.

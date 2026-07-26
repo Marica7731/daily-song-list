@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 
@@ -21,6 +22,7 @@ const {
   assertRuntimeImportContinuity,
   buildMergedRangeGroup,
   curateYoutubeChannelDiscoveryRuntime,
+  hydrateVsingerRuntimeImportsWithChannelMetadata,
 } = require("../scripts/db/export-runtime-rankings");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 
@@ -142,6 +144,79 @@ test("runtime continuity gate rejects a final 7d video missing from all", () => 
     () => assertRuntimeImportContinuity(payload, {}),
     /7d-to-all continuity failed videos=MISSINGALL1/,
   );
+});
+
+test("runtime imports receive channel metadata before they are merged into rankings", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "runtime-import-channel-metadata-"));
+  const metadataPath = path.join(dir, "channel-metadata.json");
+  fs.writeFileSync(
+    metadataPath,
+    JSON.stringify({
+      channels: [{
+        channelId: "UClHap4tvcYZnyiqgAyEs0BQ",
+        handle: "/@FeliciaLulufleur",
+        displayName: "ふぇりしあ / Felicia Ch",
+        channelUrl: "https://www.youtube.com/@FeliciaLulufleur",
+        sourceUrl: "https://www.youtube.com/@FeliciaLulufleur",
+      }],
+    }),
+    "utf8",
+  );
+  const importedVideo = {
+    videoId: "XykI6zz_Ens",
+    title: "karaoke",
+    channelName: "ふぇりしあ / Felicia Ch",
+    publishedTimestamp: Date.parse("2026-01-30T03:00:00Z"),
+    songs: [{ seconds: 740, title: "言って", artist: "ヨルシカ" }],
+  };
+  const runtimeImports = {
+    vsinger: {
+      videos: [
+        importedVideo,
+        {
+          ...importedVideo,
+          videoId: "NOIDENTITY01",
+          channelName: "Unmatched Channel",
+        },
+      ],
+      summary: {},
+    },
+    youtubeChannelDiscovery: {
+      videos: [{
+        ...importedVideo,
+        videoId: "ACCEPTED001",
+        knownSourceType: "youtube_channel_discovery",
+        isCollected: true,
+      }],
+      summary: {},
+    },
+  };
+
+  hydrateVsingerRuntimeImportsWithChannelMetadata(runtimeImports, { metadataPath });
+
+  const hydrated = runtimeImports.vsinger.videos[0];
+  assert.equal(hydrated.channelId, "UClHap4tvcYZnyiqgAyEs0BQ");
+  assert.equal(hydrated.channelHandle, "/@FeliciaLulufleur");
+  assert.equal(hydrated.channelUrl, "https://www.youtube.com/@FeliciaLulufleur");
+  assert.equal(hydrated.sourceUrl, "https://www.youtube.com/@FeliciaLulufleur");
+  assert.deepEqual(hydrated.channelAliases, ["ふぇりしあ / Felicia Ch", "/@FeliciaLulufleur"]);
+  assert.equal(runtimeImports.vsinger.videos[1].channelHandle, "");
+  assert.equal(runtimeImports.vsinger.videos[1].channelId, undefined);
+  assert.equal(runtimeImports.youtubeChannelDiscovery.videos[0].channelHandle, undefined);
+  assert.equal(runtimeImports.youtubeChannelDiscovery.videos[0].channelId, undefined);
+
+  const allGroup = buildMergedRangeGroup(
+    {
+      generatedAt: "2026-07-26T00:00:00Z",
+      capturedAt: "2026-07-26T00:00:00Z",
+      groups: { all: { id: "all", items: [] } },
+    },
+    "all",
+    runtimeImports,
+  );
+  const mergedFelicia = allGroup.items.find((video) => video.videoId === "XykI6zz_Ens");
+  assert.equal(mergedFelicia.channelHandle, "/@FeliciaLulufleur");
+  assert.equal(mergedFelicia.channelId, "UClHap4tvcYZnyiqgAyEs0BQ");
 });
 
 test("buildClientGroup keeps only runtime video and song fields", () => {
