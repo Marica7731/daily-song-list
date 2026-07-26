@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-26T09:51:56.892Z",
+  "generatedAt": "2026-07-26T11:38:18.108Z",
   "retentionPolicy": "permanent",
   "retentionDays": null,
   "cadence": "hourly",
-  "latestSnapshotId": "20260726T090000Z",
+  "latestSnapshotId": "20260726T110000Z",
   "snapshotCount": 1,
   "shards": [
     {
       "id": "2026-07",
       "path": "data/snapshots/index/2026/07.json",
       "snapshotCount": 1,
-      "latestSnapshotId": "20260726T090000Z"
+      "latestSnapshotId": "20260726T110000Z"
     }
   ],
   "snapshots": [
     {
-      "id": "20260726T090000Z",
-      "file": "20260726T090000Z.json",
-      "path": "data/snapshots/20260726T090000Z.json",
-      "generatedAt": "2026-07-26T09:51:41.572Z",
-      "capturedAt": "2026-07-26T09:51:41.572Z",
+      "id": "20260726T110000Z",
+      "file": "20260726T110000Z.json",
+      "path": "data/snapshots/20260726T110000Z.json",
+      "generatedAt": "2026-07-26T11:38:02.455Z",
+      "capturedAt": "2026-07-26T11:38:02.455Z",
       "curationVersion": "curation-v1:df2c41fc642c",
       "curationHash": "df2c41fc642c401ea9cd87666e04a878b6965e5948126a9a60c3ec94a4cdd942",
-      "label": "07/26 下午05:51",
+      "label": "07/26 下午07:38",
       "itemCounts": {
-        "7d": 128,
-        "all": 1930
+        "7d": 131,
+        "all": 1942
       }
     }
   ]
