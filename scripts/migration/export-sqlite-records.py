@@ -31,6 +31,58 @@ def first_present(mapping: dict, *keys: str):
     return None
 
 
+def runtime_payload(row: sqlite3.Row) -> dict:
+    """Keep typed SQLite columns and the original JSON payload together."""
+
+    payload = {key: row[key] for key in row.keys()}
+    payload["payload"] = json_object(payload.get("payload_json"))
+    return payload
+
+
+def key_part(value) -> str:
+    return "" if value is None else str(value)
+
+
+def runtime_record(entity_type: str, entity_key: str, row: sqlite3.Row):
+    payload = runtime_payload(row)
+    return {
+        "kind": "runtime",
+        "entityType": entity_type,
+        "entityKey": entity_key,
+        "sourceSystem": row["source_system"] if "source_system" in row.keys() else None,
+        "rangeId": row["range_id"] if "range_id" in row.keys() else None,
+        "sourceId": row["source_id"] if "source_id" in row.keys() else None,
+        "occurrenceId": row["occurrence_id"] if "occurrence_id" in row.keys() else None,
+        "payload": payload,
+    }
+
+
+def export_runtime_records(connection, tables: set[str], range_id: str):
+    """Stream non-video runtime tables without loading any table in memory."""
+
+    specs = (
+        ("meta", "meta", lambda row: key_part(row["key"])),
+        ("videos", "videos", lambda row: key_part(row["video_id"])),
+        ("songs", "songs", lambda row: key_part(row["song_key"])),
+        ("occurrences", "occurrences", lambda row: "\x1f".join(key_part(row[key]) for key in ("video_id", "range_id", "occurrence_id"))),
+        ("channel_metadata", "channel_metadata", lambda row: key_part(row["channel_key"])),
+        ("source_occurrences", "source_occurrences", lambda row: "\x1f".join(key_part(row[key]) for key in ("source_key", "range_id", "position", "video_id"))),
+        ("source_details", "source_details", lambda row: "\x1f".join(key_part(row[key]) for key in ("source_key", "range_id", "entity_type", "entity_key"))),
+        ("ranking_rows", "ranking_rows", lambda row: key_part(row["row_id"])),
+        ("external_songs", "external_songs", lambda row: "\x1f".join(key_part(row[key]) for key in ("source_system", "external_song_id"))),
+        ("external_videos", "external_videos", lambda row: "\x1f".join(key_part(row[key]) for key in ("source_system", "external_video_id"))),
+        ("external_occurrences", "external_occurrences", lambda row: "\x1f".join(key_part(row[key]) for key in ("source_system", "occurrence_id"))),
+    )
+    for table, entity_type, key_fn in specs:
+        if table not in tables:
+            continue
+        for row in connection.execute(f"SELECT * FROM {table}"):
+            row_range = row["range_id"] if "range_id" in row.keys() else None
+            if range_id != "all" and row_range not in (None, "", range_id):
+                continue
+            yield runtime_record(entity_type, key_fn(row), row)
+
+
 def export_records(source: Path, range_id: str):
     connection = sqlite3.connect(f"file:{source.resolve()}?mode=ro", uri=True)
     connection.row_factory = sqlite3.Row
@@ -95,6 +147,7 @@ def export_records(source: Path, range_id: str):
                 "reviewedBy": "sqlite-stream-migration",
                 "note": "Read-only streamed source; no SQLite copy created.",
             }
+        yield from export_runtime_records(connection, tables, range_id)
     finally:
         connection.close()
 

@@ -44,6 +44,7 @@ export async function streamSqliteToPostgres({
       sourceKind: "sqlite-stream",
       sourcePath,
       rangeId,
+      runtimeProjection: true,
     }, { revisionId });
     const exit = await stream.exited;
     if (exit.code !== 0) {
