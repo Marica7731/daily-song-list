@@ -57,7 +57,7 @@
 
 - `pending`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；当前实测 `song_rank` 约 7.9 MB，`migration_state` 有 1 行但 active 为空，其他 migration 表均为 0 行。旧 SQLite API 的短暂 inactive/500 已被精确恢复；截至 2026-07-26T20:31:58Z，service active、线上 health/meta/rankings 均 200；在 candidate gate 通过前不得让空 PG 接管。
 - `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
-- `pending`：端到端小样本导入、compare、rollback、candidate/active 切换和线上健康证据尚不存在。
+- `pending`：端到端小样本导入、compare、rollback、candidate/active 切换和线上健康证据尚不存在；Mac runner 当前仅有 GitHub SSH 配置，没有 VPS2 host/PG 入口，Actions 现有 `VPS2_PASSWORD` 仅是 SSH 线索，尚未接入 PG candidate 协议。
 - `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
 - `done`：curation/release 分支的中断合并未恢复；禁止合并全量生成 data。
 - `pending`：C/D/G/Mac 存储清单与回收规则部分完成；G 盘、正式仓库、Mac 空间/runner/cache、culua 盘和本机残留进程已有证据，WDC/VPS2 角色与空间仍缺可复核 SSH 证据；不以子任务未完成报告代替清理验收。
@@ -70,7 +70,7 @@
 - `pending`：GitHub Actions 仍没有 PG secret 注入，但 VPS2 peer target 可由受控 Mac/SSH 任务使用；不得把 SSH 可达性冒充 schema/data/API 完成，需生成受控 manifest 并经 candidate gate。
 - `done`：同一 Mac 临时根目录 `/tmp/daily-song-list-pg-migration.vi8WS5` 已完成真实 PGlite schema/upsert/compare/rollback/active 测试（2/2 passed）和 SQLite NDJSON 流式小样本（1 video/3 occurrences）；fixture 仅 `20480` bytes，无完整 SQLite 复制。此次回归保留了两个相同 `seconds`、一个 `seconds=null`、三个不同 `occurrenceId`，并保留空字符串/NULL artist/sourceId/sourceSystem、range_id、song_key。任务 baseline free `481220472 KiB`，expected peak `536870912` bytes，hard cap `2147483648` bytes，stream root peak `107094016` bytes；cleanup `beforeBytes=107094016 afterBytes=0`、free `481115812 KiB -> 481221184 KiB`、retained `none`、status `success`。
 - `done`：P1 数据契约已在 migration patch 修正：不再过滤 NULL seconds、不再以默认值覆盖空 artist/source_id/source_system、不再禁止重复 seconds；occurrence_id/position 作为稳定 identity；range/source/song/raw provenance 字段落列；视频删除使用显式 tombstone，解析不会继承已删除父行；activate/rollback 先锁 active state，并在切换时校验 candidate parent 等于当前 active。focused test 覆盖字段保持、tombstone、rollback 和并发候选 parent mismatch。
-- `pending`：`server/pg_adapter.py` 已提供 PG-backed health/meta/rankings/source-detail 形状，`server/pg_api_server.py` 已提供兼容 URL wrapper；空 PG 已收紧为不可健康使用的错误路径。当前仍需把 schema/完整 projection/候选数据经 Mac 受控导入 VPS2，并在不影响旧 SQLite 的独立端口完成真实 contract smoke test，之后才允许 candidate -> compare -> health/API -> activate。
+- `pending`：`server/pg_adapter.py` 已提供 PG-backed health/meta/rankings/source-detail 形状，`server/pg_api_server.py` 已提供兼容 URL wrapper；空 PG 已收紧为不可健康使用的错误路径。实时 SQLite schema 显示还需保留 `songs`、`channel_metadata`、`source_occurrences`、`source_details`、`ranking_rows`、`external_songs/videos/occurrences` 等 projection；当前 prototype 只覆盖 revision/video/occurrence/audit，不能生产切换。仍需由 Mac 受控导入完整 projection，并在不影响旧 SQLite 的独立端口完成真实 contract smoke，之后才允许 candidate -> compare -> health/API -> activate。
 
 ### 取消旧 SQLite run 的清理核验
 
