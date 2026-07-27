@@ -7,6 +7,17 @@
 - Only API detail adaptation/paging/cover selection and contract tests may change. Do not change layout, CSS, field names/types, or URL routes.
 - Acceptance requires focused tests, commit/push, the existing candidate compare/health/API/locked-activate gate, and live Noa rankings/source-detail pagination and thumbnail evidence.
 
+## 2026-07-27 10:49 UTC 最新实时状态（以本段为准）
+
+- done：Noa 是通用 source-detail 分页/occurrence 封面映射回归样本，不是 Noa 特例；adapter/API contract 修复已由 run 30256355300 发布。公网 /healthz=200，Noa source page 1/2 均 pageCount=20,totalCount=391，handle/name/avatar 保留，occurrences=292/179 且封面来自不同视频。
+- done：Mac 全量 runtime SQLite 已由 run 30257210187 单一临时目录流式导入 VPS2 candidate full_runtime_30257210187_1；manifest sourceDbBytes=14829768704、source SHA=858041e58988...2fc5b0、videos=45605、occurrences=598033，PG preflight remoteFreeBefore=21782056960、currentPgBytes=6896901143、expectedCandidatePeakBytes=18088769582，run success。
+- done：ready candidate 已由 run 30259446917 在 candidate API gate 后锁定激活；当前 active=full_runtime_30257210187_1、migration=active、content SHA=6a5b8c4567e6c5c5f2c3fde79cd818c076be8e772ad49fb688d1638ccc2d37ea。公网实时计数为 videos=45605、songs=45561、occurrences=598033、rankingRows=197571、sourceOccurrences=1951433，/healthz=200。
+- done：Mac task root 与 VPS candidate API 临时文件已由 workflow cleanup 清理；迁移期间未复制 SQLite 到 VPS，旧 SQLite 路径为 0 bytes。VPS2 当前可用约 14883430400 bytes；旧 full runtime duplicate 尚未删除，待确认新 active 线上稳定后用精确 revision guard 回收。
+- pending：Mac source DB 的 sourceCommit=cae598... 已验证包含 curation overrides，但 manifest 明确 sevenDayStatus=pending_new_accepted_increment；这次迁移导入的是清洗主库，不把 7D 或迁移后清洗发布冒充完成。
+- in_progress：下一阶段沿 PG accepted-increment workflow 发布现有 curation_ready_pending_release artifact/证据，重点 Naraetan、Ado 逆光、辛いことがある人生でも、同名 リスタート；不重跑全库清洗、不改前端结构/样式/API 契约。
+- pending：随后有界续跑 うら飯紺汰 7D discovery/detail/三天规则/curation/release；旧 PID/失败 run 不作为结果，不启动第二个 Mac 重任务。
+- frontend code/style/schema contract frozen; data and backend counts may change normally。
+
 ## 本会话 Goal（2026-07-27，G 盘正式入口）
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
