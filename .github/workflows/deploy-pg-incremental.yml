@@ -98,15 +98,18 @@ jobs:
           SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
           REVISION="accepted_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
           printf 'revision=%s\n' "$REVISION" >> "$TASK_ROOT/storage.txt"
+          remote_free_after=unknown
           cleanup() {
             status=$?
             if [ -n "${CANDIDATE_PID:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "kill $CANDIDATE_PID 2>/dev/null || true" || true; fi
             if [ "$status" -ne 0 ] && [ -n "${REVISION:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"delete from migration_revisions where revision_id='$REVISION';\"" || true; fi
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -f /tmp/import-pg-incremental.py /tmp/pg-schema.sql /tmp/activate-pg-candidate.py /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/pg-increment-manifest.json /tmp/pg-increment-candidate.log" || true
+            if remote_free_after="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"; then :; else remote_free_after=unknown; fi
             before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
+            cat "$TASK_ROOT/storage.txt" 2>/dev/null || true
             rm -rf -- "$TASK_ROOT"
             after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-            echo "PG_INCREMENT_CLEANUP status=$status beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes retained=$(test "$ACTIVATE" = true && echo none || echo ready-candidate)"
+            echo "PG_INCREMENT_CLEANUP status=$status beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes remoteFreeAfterBytes=$remote_free_after retained=$(test "$ACTIVATE" = true && echo active-only || echo ready-candidate)"
             exit "$status"
           }
           trap cleanup EXIT INT TERM
