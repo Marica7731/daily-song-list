@@ -30,6 +30,8 @@ test("accepted-increment importer keeps 7d range and derives missing song identi
   assert.match(importer, /def derived_song_key/);
   assert.match(importer, /source_system = first_present\(item, "sourceSystem", "source_system"\)/);
   assert.match(importer, /source_system = "mygit-7d"/);
+  assert.match(importer, /def insert_runtime_row/);
+  assert.match(importer, /record.get\("kind"\) == "runtime"/);
 });
 
 test("ephemeral PostgreSQL candidate supports upsert, compare, activate and rollback", {

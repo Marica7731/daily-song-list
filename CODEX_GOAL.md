@@ -15,6 +15,13 @@
 
 ### 2026-07-27 主线实时纠正
 
+### 2026-07-27 Naraetan 频道身份修复（implementation-write）
+
+- `audit-readonly done`：公网 rankings 搜索确认 Naraetan 聚合为 `4483` occurrences、`293` videos，但当前聚合 payload 的 `name/channelId/channelHandle/channelUrl/avatarUrl` 均为空；视频层可复核 `UCFP9UkgIM_U8NfzRbYEOQdA`、`/@naraetanV`、`なれたん Naraetan Ch.` 与头像 URL。YouTube 官方频道页也确认为该名称。
+- `implementation-write in progress`：限定改动 `server/pg_adapter.py`、`scripts/migration/import-pg-incremental.py` 与 focused tests；支持 `channel_metadata` runtime row、ranking identity enrichment 和无 materialized source detail 时从现有 runtime 记录派生 source detail。前端结构/样式/API URL/字段语义不变。
+- `candidate pending`：新增一个 metadata-only candidate，不复制或重写 293 个视频/4483 个 occurrence；manifest 明确 rank 05/07 的 `6175/265` 与 `6033/385` 仍无视频级身份证据，禁止按数量猜测。必须先 candidate compare/health/source-detail gate，通过后才 activate；失败保持当前 active。
+- focused tests 当前 `14 passed, 2 skipped`（PGlite 未安装）；尚未 commit/push/deploy，尚无该修复的线上 HTTP 验收，不能写成已上线。
+
 ### 2026-07-27 PG 全量候选与线上切换实时结果
 
 - `migrate-pg-runtime.yml` run `30224885215` 已完成 Mac 单目录全量流式导入；候选 `full_runtime_30224885215_1` 为 `ready`，`videos=45605`、`occurrences=598033`，content SHA-256 为 `6a5b8c4567e6c5c5f2c3fde79cd818c076be8e772ad49fb688d1638ccc2d37ea`。
@@ -118,7 +125,7 @@
 
 ## 当前下一步
 
-1. 将本轮 bounded overlay adapter、7D range/source identity 修复、持续入库 workflow-run handoff、7D manifest gate 和最新 goal 通过 GitHub Database API 安全推入 main；只更新本轮文件，不带接手前 staged deletion。
+1. 将本轮 bounded overlay adapter、Naraetan metadata candidate、7D range/source identity 修复、持续入库 workflow-run handoff、7D manifest gate 和最新 goal 通过 GitHub Database API 安全推入 main；只更新本轮文件，不带接手前 staged deletion。
 2. 先用 `deploy-pg-incremental.yml` 的 `workflow_run` 入口接住 `Update core song-list data`：对 accepted channel increment 自动生成 compact PG patch；若只有核心 JSON 变化却没有 accepted patch，明确 fail-closed 并记录缺口，不能静默让新库不再进新数据。
 3. 在固定 `daily-song-list-source` 入口补齐 `うら飯紺汰` 专项 7D：沿已有 lease/checkpoint 继续详情证据与 curation，不重跑已验收的 533 条候选；生成 `reachedEnd=true`、时间覆盖、三天状态审计、cleaned accepted increment 后，带 `require_7d_gate=true` 接入同一 candidate 入口。
 4. 维护同一 workflow 作为日常/7D 增量入口：每次 accepted manifest 必须走 candidate -> compare -> health/API -> locked activate，失败保持当前 active；generic 7D 已完成但专项与全库 curation 仍 pending，不得把 pending 数据静默丢弃。

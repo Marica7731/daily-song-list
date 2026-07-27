@@ -171,6 +171,123 @@ def _json_object(value: Any) -> dict[str, Any]:
     return {}
 
 
+def _channel_metadata_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
+    """Read channel metadata from full projections and incremental runtime rows."""
+
+    if not revision_ids:
+        return []
+    values: list[dict[str, Any]] = []
+    try:
+        values.extend(_rows(
+            connection,
+            """
+            SELECT revision_id, channel_key, channel_id, handle, display_name,
+                   avatar_url, thumbnail_url, source_url, channel_url,
+                   known_source_type, is_collected, payload_json
+            FROM runtime_channel_metadata WHERE revision_id = ANY(%s)
+            ORDER BY revision_id, channel_key
+            """,
+            [list(revision_ids)],
+        ))
+    except Exception:
+        # Older/prototype fixtures may not expose the optional full-runtime table.
+        pass
+    try:
+        values.extend(_rows(
+            connection,
+            """
+            SELECT revision_id, entity_key AS channel_key, payload_json,
+                   source_system, range_id, source_id, occurrence_id, tombstone
+            FROM migration_runtime_rows
+            WHERE revision_id = ANY(%s)
+              AND entity_type IN ('channel_metadata', 'runtime_channel_metadata')
+            ORDER BY revision_id, entity_key
+            """,
+            [list(revision_ids)],
+        ))
+    except Exception:
+        pass
+    # Child revisions win over parents; a tombstone removes inherited metadata.
+    selected: dict[str, dict[str, Any]] = {}
+    priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
+    for row in values:
+        key = _text(row.get("channel_key") or row.get("channel_id") or row.get("entity_key"))
+        if not key:
+            continue
+        current = selected.get(key)
+        if current is not None and priority.get(_text(current.get("revision_id")), -1) < priority.get(_text(row.get("revision_id")), -1):
+            continue
+        if row.get("tombstone"):
+            selected.pop(key, None)
+            continue
+        payload = _json_object(row.get("payload_json"))
+        payload.update({
+            "channelKey": payload.get("channelKey") or payload.get("channel_key") or row.get("channel_key") or key,
+            "channelId": payload.get("channelId") if "channelId" in payload else row.get("channel_id"),
+            "channelHandle": payload.get("channelHandle") if "channelHandle" in payload else row.get("handle"),
+            "channelName": payload.get("channelName") if "channelName" in payload else row.get("display_name"),
+            "avatarUrl": payload.get("avatarUrl") if "avatarUrl" in payload else row.get("avatar_url"),
+            "thumbnailUrl": payload.get("thumbnailUrl") if "thumbnailUrl" in payload else row.get("thumbnail_url"),
+            "sourceUrl": payload.get("sourceUrl") if "sourceUrl" in payload else row.get("source_url"),
+            "channelUrl": payload.get("channelUrl") if "channelUrl" in payload else row.get("channel_url"),
+            "knownSourceType": payload.get("knownSourceType") if "knownSourceType" in payload else row.get("known_source_type"),
+            "isCollected": payload.get("isCollected") if "isCollected" in payload else row.get("is_collected"),
+        })
+        payload["revision_id"] = row.get("revision_id")
+        selected[key] = payload
+    return list(selected.values())
+
+
+def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
+    """Enrich a vtuber ranking record without merging unrelated unknown rows."""
+
+    result = dict(payload)
+    haystack = _overlay_norm(" ".join(_text(row.get(name)) for name in ("detail_key", "title", "name", "search_text", "channel_search_text")))
+    haystack = _overlay_norm(haystack + " " + " ".join(_text(result.get(name)) for name in ("key", "name", "channelName", "channelId", "channelHandle", "channelUrl")))
+    selected: Mapping[str, Any] | None = None
+    for item in metadata:
+        tokens = [
+            _text(item.get("channelKey") or item.get("channel_key")),
+            _text(item.get("channelId") or item.get("channel_id")),
+            _text(item.get("channelHandle") or item.get("handle")).lstrip("/@"),
+            _text(item.get("channelName") or item.get("display_name")),
+        ]
+        normalized_tokens = [token.casefold() for token in tokens if len(token) >= 4]
+        if any(token and token in haystack for token in normalized_tokens):
+            selected = item
+            break
+    if selected is None:
+        return result
+    channel_key = _text(selected.get("channelId") or selected.get("channelKey") or selected.get("channel_key"))
+    display_name = _text(selected.get("channelName") or selected.get("display_name"))
+    handle = _text(selected.get("channelHandle") or selected.get("handle"))
+    field_values = {
+        "key": channel_key,
+        "name": display_name,
+        "channelName": display_name,
+        "channelId": channel_key,
+        "channelHandle": handle,
+        "channelUrl": selected.get("channelUrl") or selected.get("channel_url"),
+        "avatarUrl": selected.get("avatarUrl") or selected.get("avatar_url"),
+        "thumbnailUrl": selected.get("thumbnailUrl") or selected.get("thumbnail_url"),
+        "videoThumbnailUrl": selected.get("thumbnailUrl") or selected.get("thumbnail_url"),
+        "sourceUrl": selected.get("sourceUrl") or selected.get("source_url"),
+        "knownSourceType": selected.get("knownSourceType") or selected.get("known_source_type"),
+        "isCollected": selected.get("isCollected") if "isCollected" in selected else selected.get("is_collected"),
+    }
+    for key, value in field_values.items():
+        if value is not None and value != "":
+            result[key] = value
+    metadata_payload = _json_object(selected.get("payload_json"))
+    metadata_payload.update({key: value for key, value in selected.items() if key not in {"revision_id", "payload_json"} and value is not None})
+    expected_songs = metadata_payload.get("expectedSongCount")
+    if (result.get("songCount") in (None, 0)) and expected_songs is not None:
+        result["songCount"] = expected_songs
+    if not result.get("sourceDetailKey"):
+        result["sourceDetailKey"] = _stable_key("source-vtuber", range_id, channel_key)
+    return result
+
+
 def _runtime_projection_revision(connection) -> tuple[str, dict[str, Any]] | None:
     """Return the active full-runtime revision when the projection is ready."""
 
@@ -369,7 +486,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         raise PostgresAdapterError("incremental candidate has no full runtime parent")
     options = _query_options(query)
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
-    search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
+    search_select = "search_text, channel_search_text" if options["q"] or options["view"] == "vtubers" else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
     base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
     if options["q"]:
@@ -428,6 +545,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
     total = len(filtered)
     offset = (options["page"] - 1) * options["pageSize"]
+    metadata = _channel_metadata_rows(connection, lineage) if options["view"] == "vtubers" else []
     records = []
     for index, row in enumerate(filtered[offset:offset + options["pageSize"]], start=offset + 1):
         payload = _json_object(row.get("payload_json"))
@@ -443,6 +561,8 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
                 [parent[0], options["range"], options["view"], db_metric, row.get("detail_key")],
             )
             payload = _json_object(stored.get("payload_json")) if stored else {}
+        if options["view"] == "vtubers":
+            payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload["rank"] = index
         records.append(payload)
     return {
@@ -1073,7 +1193,7 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         rows = _rows(
             connection,
             f"""
-            SELECT rank, payload_json
+            SELECT rank, detail_key, title, name, channel_search_text, payload_json
             FROM runtime_ranking_rows
             WHERE {where}
             ORDER BY rank
@@ -1083,9 +1203,12 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         )
         total_count = int(summary.get("total_count") or 0)
         page_count = max(1, math.ceil(total_count / options["pageSize"]))
+        metadata = _channel_metadata_rows(connection, [revision_id]) if options["view"] == "vtubers" else []
         records = []
         for row in rows:
             payload = _json_object(row.get("payload_json"))
+            if options["view"] == "vtubers":
+                payload = _apply_channel_metadata(payload, row, metadata, options["range"])
             payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
             records.append(payload)
         return {
@@ -1119,9 +1242,12 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     total_videos = sum(int(row.get("video_count") or 0) for row in rows)
     page_count = max(1, math.ceil(len(rows) / options["pageSize"]))
     offset = (options["page"] - 1) * options["pageSize"]
+    metadata = _channel_metadata_rows(connection, [revision_id]) if options["view"] == "vtubers" else []
     records = []
     for row in rows[offset : offset + options["pageSize"]]:
         payload = _json_object(row.get("payload_json"))
+        if options["view"] == "vtubers":
+            payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
         records.append(payload)
     return {
@@ -1142,6 +1268,18 @@ def _runtime_source_payload(connection, revision_id: str, key: str, query: Mappi
         [revision_id, key],
     )
     if not rows:
+        try:
+            revision = _one(
+                connection,
+                "SELECT revision_id, parent_revision_id, status, manifest_json, source_manifest_sha256, content_sha256, activated_at, created_at FROM migration_revisions WHERE revision_id = %s",
+                [revision_id],
+            ) or {"revision_id": revision_id}
+            snapshot = _load_runtime_snapshot(connection, revision_id, revision)
+            derived = source_payload_from_records(snapshot.records, key, query)
+            if derived.get("found"):
+                return derived
+        except Exception:
+            pass
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     record = _json_object(rows[0].get("payload_json"))
     query = query or {}

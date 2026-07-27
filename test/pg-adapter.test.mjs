@@ -77,6 +77,36 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("channel metadata repairs a missing vtuber identity without changing the public contract", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+row = {"detail_key": "", "name": "", "search_text": "", "channel_search_text": "naraetan naraetanv"}
+metadata = [{
+    "channelKey": "UCFP9UkgIM_U8NfzRbYEOQdA",
+    "channelId": "UCFP9UkgIM_U8NfzRbYEOQdA",
+    "channelHandle": "/@naraetanV",
+    "channelName": "なれたん Naraetan Ch.",
+    "channelUrl": "https://www.youtube.com/@naraetanV",
+    "avatarUrl": "https://yt3.googleusercontent.com/example=s900",
+    "expectedSongCount": 1636,
+}]
+payload = module._apply_channel_metadata({"count": 4483, "videoCount": 293, "songCount": 0}, row, metadata)
+assert payload["name"] == "なれたん Naraetan Ch."
+assert payload["channelId"] == "UCFP9UkgIM_U8NfzRbYEOQdA"
+assert payload["channelHandle"] == "/@naraetanV"
+assert payload["avatarUrl"].startswith("https://yt3.googleusercontent.com/")
+assert payload["songCount"] == 1636
+assert payload["sourceDetailKey"]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("missing migration tables are an explicit schema error", () => {
   const output = runPython(`
 import importlib.util

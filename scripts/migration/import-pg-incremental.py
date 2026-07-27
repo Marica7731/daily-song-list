@@ -157,6 +157,35 @@ def insert_video(cur, revision_id: str, record: dict[str, Any], generated_at: st
     return video_id, len(rows)
 
 
+def insert_runtime_row(cur, revision_id: str, record: dict[str, Any]) -> str:
+    """Insert a metadata/source runtime row without duplicating occurrences."""
+
+    entity_type = text(record.get("entityType") or record.get("entity_type"))
+    entity_key = first_present(record, "entityKey", "entity_key")
+    if not entity_type or entity_key is None or text(entity_key) == "":
+        raise ValueError("runtime record requires entityType and entityKey")
+    payload = record.get("payload")
+    if not isinstance(payload, dict):
+        payload = dict(record)
+    tombstone = record.get("tombstone") is True
+    cur.execute(
+        """INSERT INTO migration_runtime_rows
+        (revision_id,entity_type,entity_key,source_system,range_id,source_id,occurrence_id,tombstone,payload_json)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb)
+        ON CONFLICT (revision_id,entity_type,entity_key) DO UPDATE SET
+        source_system=EXCLUDED.source_system,range_id=EXCLUDED.range_id,
+        source_id=EXCLUDED.source_id,occurrence_id=EXCLUDED.occurrence_id,
+        tombstone=EXCLUDED.tombstone,payload_json=EXCLUDED.payload_json""",
+        (revision_id, entity_type, text(entity_key),
+         first_present(record, "sourceSystem", "source_system"),
+         first_present(record, "rangeId", "range_id"),
+         first_present(record, "sourceId", "source_id"),
+         first_present(record, "occurrenceId", "occurrence_id"),
+         tombstone, json.dumps(payload, ensure_ascii=False)),
+    )
+    return entity_type
+
+
 def finalize(conn, revision_id: str, parent: str, manifest: dict[str, Any], stream_hash: str, videos: int, occurrences: int, activate: bool) -> dict[str, Any]:
     with conn.transaction():
         with conn.cursor() as cur:
@@ -204,9 +233,13 @@ def main() -> int:
                 raise ValueError("accepted increment line must be an object")
             with conn.transaction():
                 with conn.cursor() as cur:
-                    video_id, occurrence_count = insert_video(cur, args.revision, record, generated_at)
-            counts["videos"] += 1
-            counts["occurrences"] += occurrence_count
+                    if record.get("kind") == "runtime" or record.get("entityType") or record.get("entity_type"):
+                        insert_runtime_row(cur, args.revision, record)
+                        counts["runtimeRows"] += 1
+                    else:
+                        video_id, occurrence_count = insert_video(cur, args.revision, record, generated_at)
+                        counts["videos"] += 1
+                        counts["occurrences"] += occurrence_count
             if counts["videos"] % 100 == 0:
                 print(f"PG_INCREMENT_PROGRESS videos={counts['videos']} occurrences={counts['occurrences']}", file=sys.stderr, flush=True)
         result = finalize(conn, args.revision, parent, manifest, digest.hexdigest(), counts["videos"], counts["occurrences"], args.activate)
