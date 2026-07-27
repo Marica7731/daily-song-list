@@ -323,6 +323,7 @@ def _runtime_channel_source_payload(
     metadata: Mapping[str, Any],
     key: str,
     query: Mapping[str, Any] | None = None,
+    overlay_revision_ids: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Read only the parent-runtime rows belonging to a verified channel.
 
@@ -406,6 +407,7 @@ def _runtime_channel_source_payload(
             })
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
+    records = _apply_record_overlay(records, _runtime_tombstones(connection, overlay_revision_ids or ()))
     canonical_key = _metadata_source_key(metadata, "all") or key
     result = _source_payload_from_channel_records(records, metadata, canonical_key, query)
     if result.get("found") and canonical_key != key:
@@ -673,6 +675,29 @@ def _apply_source_overlay(occurrences: Iterable[Mapping[str, Any]], changes: Seq
         matches = [index for index, item in enumerate(result) if _source_overlay_match(item, change)]
         if len(matches) == 1:
             result.pop(matches[0])
+    return result
+
+
+def _apply_record_overlay(records: Iterable[Mapping[str, Any]], changes: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Apply conservative occurrence tombstones to channel-derived records."""
+
+    result: list[dict[str, Any]] = []
+    for record in records:
+        video = dict(record.get("video") or {})
+        kept: list[dict[str, Any]] = []
+        for song in record.get("occurrences", ()):
+            item = dict(video)
+            item.update(song)
+            item["song"] = song
+            matches = [
+                change for change in changes
+                if _text(change.get("entityType")) in {"occurrences", "runtime_occurrences"}
+                and _source_overlay_match(item, change)
+            ]
+            if len(matches) == 1:
+                continue
+            kept.append(dict(song))
+        result.append({"video": video, "occurrences": tuple(kept)})
     return result
 
 
@@ -1753,7 +1778,7 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:
-                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query)
+                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query, overlay_revision_ids=overlay_ids)
             return persisted
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     snapshot = _load_snapshot(connection)
