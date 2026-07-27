@@ -26,7 +26,8 @@ jobs:
     timeout-minutes: 120
     env:
       SOURCE_KEY: "@urameshi_conta"
-      STAGE: ${{ inputs.stage || 'candidate' }}       DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
+      STAGE: ${{ inputs.stage || 'candidate' }}
+      DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
       SOURCE_RANGE_ID: "7d"
@@ -147,7 +148,7 @@ jobs:
           echo "URAMESHI_7D_SOURCE_FETCH paths=$source_file_count directories=$source_directory_count bytes=$downloaded_bytes"
           cd "$REPO_ROOT"
           check_space source-code-fetch
-          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
             --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
             --max-candidates 2000 --candidate-only --request-interval-ms 5000 --request-jitter-ms 2500
           check_space candidate-manifest
@@ -166,7 +167,7 @@ jobs:
             exit 0
           fi
           for shard in 0 1 2 3 4 5; do
-            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
               --max-candidates 2000 --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
               --request-interval-ms 5000 --request-jitter-ms 2500
