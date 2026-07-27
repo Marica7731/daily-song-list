@@ -56,6 +56,7 @@ jobs:
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+          export PATH="/Users/be/.local/bin:/Users/be/.local/codex-toolchains/node/bin:/Users/be/.local/codex-toolchains/python312/bin:$PATH"
           git -C "$REPO_ROOT" init -q
           git -C "$REPO_ROOT" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
           auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
