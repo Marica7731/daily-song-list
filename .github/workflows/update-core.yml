@@ -26,6 +26,8 @@ concurrency:
 
 jobs:
   update:
+    # Legacy SQLite builder is disabled until the PG incremental release path is the sole publisher.
+    if: ${{ vars.DAILY_SONG_LEGACY_SQLITE_ENABLED == '1' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 100
     env:
