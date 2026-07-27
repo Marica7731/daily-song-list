@@ -81,24 +81,35 @@ jobs:
             exit 78
           fi
           echo "URAMESHI_7D_NODE_RUNTIME node=$NODE_BIN npm=${NPM_CMD[*]}"
-          git -C "$REPO_ROOT" init -q
-          git -C "$REPO_ROOT" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
-          auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
-          GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" -c "http.extraheader=AUTHORIZATION: basic $auth_header" fetch --filter=blob:none --depth=1 origin "$GITHUB_SHA"
-          git -C "$REPO_ROOT" sparse-checkout init --cone
-          git -C "$REPO_ROOT" sparse-checkout set assets config package.json scripts
-          checkout_ok=0
-          for checkout_attempt in 1 2 3; do
-            if GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth_header" checkout -q FETCH_HEAD; then
-              checkout_ok=1
-              break
-            fi
-            echo "URAMESHI_7D_CHECKOUT_RETRY attempt=$checkout_attempt" >&2
-            sleep $((checkout_attempt * 3))
+          TREE_JSON="$TASK_ROOT/source-tree.json"
+          curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 120 --max-filesize 52428800 \
+            -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/trees/${GITHUB_SHA}?recursive=1" -o "$TREE_JSON"
+          jq -e '(.truncated == false) and (.tree | type == "array")' "$TREE_JSON" >/dev/null || {
+            echo "URAMESHI_7D_BLOCKED source-tree-missing-or-truncated" >&2; exit 78;
+          }
+          mapfile -t SOURCE_PATHS < <(jq -r '.tree[] | select(.type == "blob" and (.path == "package.json" or (.path | startswith("scripts/")) or (.path | startswith("assets/")) or (.path | startswith("config/")))) | .path' "$TREE_JSON")
+          test "${#SOURCE_PATHS[@]}" -gt 0 || { echo "URAMESHI_7D_BLOCKED source-path-list-empty" >&2; exit 78; }
+          test "${#SOURCE_PATHS[@]}" -le 512 || { echo "URAMESHI_7D_BLOCKED source-path-cap-exceeded count=${#SOURCE_PATHS[@]}" >&2; exit 78; }
+          downloaded_bytes=0
+          for source_path in "${SOURCE_PATHS[@]}"; do
+            case "$source_path" in
+              /*|*..*) echo "URAMESHI_7D_BLOCKED invalid-source-path=$source_path" >&2; exit 78 ;;
+            esac
+            destination="$REPO_ROOT/$source_path"
+            mkdir -p "$(dirname "$destination")"
+            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 --max-filesize 16777216 \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/${source_path}" -o "$destination"
+            file_bytes="$(stat -f%z "$destination")"
+            downloaded_bytes=$((downloaded_bytes + file_bytes))
+            test "$downloaded_bytes" -le 268435456 || {
+              echo "URAMESHI_7D_BLOCKED source-bytes-cap-exceeded bytes=$downloaded_bytes" >&2; exit 78;
+            }
           done
-          test "$checkout_ok" = 1 || { echo "URAMESHI_7D_BLOCKED code-checkout-retries-exhausted"; exit 78; }
+          printf 'sourcePathCount=%s\nsourceBytes=%s\n' "${#SOURCE_PATHS[@]}" "$downloaded_bytes" >> "$TASK_ROOT/storage.txt"
+          echo "URAMESHI_7D_SOURCE_FETCH paths=${#SOURCE_PATHS[@]} bytes=$downloaded_bytes"
           cd "$REPO_ROOT"
-          check_space code-checkout
+          check_space source-code-fetch
           "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
             --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
             --max-candidates 2000 --candidate-only --request-interval-ms 3000 --request-jitter-ms 1500
