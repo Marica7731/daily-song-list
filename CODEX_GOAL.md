@@ -198,3 +198,10 @@
 - `done`：远端源码内存 focused probe 输出 `FOCUSED_SOURCE_TEST_OK`，覆盖重复 continuation token 和缺失发布时间 reason；完整 Check code runs `30266738996`、`30267004386` 因 Mac job 初始化无 step 被有界取消，未伪造全套测试通过。
 - `blocked/pending`：detail run `30267032456`、`30267497473`、`30268118209` 均在 Mac runner `busy=true`、job started 但 5 分钟无任何 step/checkpoint 后取消；每次取消后 runner 回到 `online/busy=false`，没有 accepted increment、detail occurrence、curation 或生产切换。需要 Mac runner 启动层恢复后只启动一个 detail 实例，或由用户提供可用的 Mac runner 外部状态；不能用 candidate manifest 冒充 7D 完成。
 - 当前 PG active/线上数据保持不变；没有 partial 7D 导入，没有清洗切换，没有旧 active 回收。goal 仍 pending。
+### 2026-07-27 13:26 UTC 实时交接（candidate 复用与 runner 再核对）
+
+- `done`：commit `1559a4f0138ae42e28f400ad102d6c00c5011913` 增加 `--candidate-manifest` 输入；detail shard 可直接复用已验证 candidate NDJSON/manifest，不重复抓取来源。focused in-memory probe 输出 `CANDIDATE_REUSE_PROBE_OK`，验证 `reachedEnd=true`、videoId 保持且 discovery client 未被调用。
+- `done`：detail workflow 增加可选 `candidate_run_id`/`candidate_artifact_name`，并把复用 manifest 传给 6 个 shard；总上限仍为 180 分钟，单请求间隔仍为 5 秒+抖动。此次没有恢复旧 source/raw，也没有下载媒体。
+- `pending`：detail run `30269601971` 使用 candidate run `30264934836` / artifact `urameshi-7d-30264934836-1` 启动，但 `runnerName=null`、5 分钟无 step/checkpoint，已取消；runner 随后 `online/busy=false`。没有 detail artifact、status-audit、accepted increment、curation 或 PG activate。
+- `done`：线上只读复核未受影响：`https://ytb-song-rank.culua.com/healthz` HTTP 200，`/api/meta` HTTP 200，Noa source detail page 1/2 HTTP 200；当前 active revision 仍为 `accepted_30261533343_1`，counts health 为 videos=45605、songs=45560、occurrences=598032。Noa 仍是已确认回归样本，不扩大为全局封面损坏。
+- `pending/external`：需要 Mac self-hosted runner 的 job assignment/runner service 恢复后，才可继续单一 detail；候选复用 patch 已准备好，禁止用 cancelled run 或 candidate-only manifest 冒充 7D 完成。
