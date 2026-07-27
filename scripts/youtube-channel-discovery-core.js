@@ -248,7 +248,6 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
   apiKey = page.apiKey;
   clientVersion = page.clientVersion || DEFAULT_CLIENT_VERSION;
   addCandidateItems(items, page.initialData, deps.extractSearchItems, options, pageUrl);
-  continuation = findBrowseContinuation(page.initialData);
   const continuationApiPath = (() => {
     try {
       return new URL(pageUrl).pathname === "/results" ? "/youtubei/v1/search" : "/youtubei/v1/browse";
@@ -256,6 +255,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
       return "/youtubei/v1/browse";
     }
   })();
+  continuation = findBrowseContinuation(page.initialData, continuationApiPath);
 
   while (continuation && apiKey && pageCount < options.maxChannelPages) {
     if (seenContinuationTokens.has(continuation)) break;
@@ -272,7 +272,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
     });
     pageCount += 1;
     addCandidateItems(items, continuationResponse, deps.extractSearchItems, options, pageUrl);
-    continuation = findBrowseContinuation(continuationResponse);
+    continuation = findBrowseContinuation(continuationResponse, continuationApiPath);
   }
 
   const filtered = filterDiscoveryCandidates(items, options.keywords, Date.now());
@@ -398,18 +398,26 @@ function isRetriableRequestError(error) {
   return /(?:HTTP\s+(?:429|5\d\d)|fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|UND_ERR|terminated|timeout|network)/iu.test(message);
 }
 
-function findBrowseContinuation(data) {
+function findBrowseContinuation(data, apiPath = "/youtubei/v1/browse") {
+  const expectedApiPath = apiPath === "/youtubei/v1/search" ? "/youtubei/v1/search" : "/youtubei/v1/browse";
+  let genericToken = "";
   for (const item of walkDicts(data)) {
     const endpoint = item.continuationEndpoint;
     const token = endpoint?.continuationCommand?.token;
     const apiUrl = endpoint?.commandMetadata?.webCommandMetadata?.apiUrl || "";
-    if (token && /\/youtubei\/v1\/browse/i.test(apiUrl)) return token;
+    if (!token) continue;
+    if (apiUrl && apiUrl.includes(expectedApiPath)) return token;
+    if (!apiUrl && !genericToken) genericToken = token;
   }
   for (const item of walkDicts(data)) {
-    const token = item.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token || item.continuationCommand?.token;
-    if (token) return token;
+    const endpoint = item.continuationItemRenderer?.continuationEndpoint;
+    const token = endpoint?.continuationCommand?.token || item.continuationCommand?.token;
+    const apiUrl = endpoint?.commandMetadata?.webCommandMetadata?.apiUrl || "";
+    if (!token) continue;
+    if (apiUrl && apiUrl.includes(expectedApiPath)) return token;
+    if (!apiUrl && !genericToken) genericToken = token;
   }
-  return "";
+  return genericToken;
 }
 
 function filterDiscoveryCandidates(items, keywords = DEFAULT_KEYWORDS, nowMs = Date.now()) {

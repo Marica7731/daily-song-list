@@ -74,6 +74,25 @@ test("channel page parser extracts renderers and browse continuation", () => {
   assert.equal(new Date(filtered[0].publishedTimestamp).toISOString(), "2026-07-17T00:00:00.000Z");
 });
 
+test("continuation selector honors search API", () => {
+  const data = {
+    browse: {
+      continuationEndpoint: {
+        commandMetadata: { webCommandMetadata: { apiUrl: "/youtubei/v1/browse" } },
+        continuationCommand: { token: "BROWSE_TOKEN" },
+      },
+    },
+    search: {
+      continuationEndpoint: {
+        commandMetadata: { webCommandMetadata: { apiUrl: "/youtubei/v1/search" } },
+        continuationCommand: { token: "SEARCH_TOKEN" },
+      },
+    },
+  };
+
+  assert.equal(findBrowseContinuation(data), "BROWSE_TOKEN");
+  assert.equal(findBrowseContinuation(data, "/youtubei/v1/search"), "SEARCH_TOKEN");
+});
 test("search discovery routes continuation to youtubei search", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-search-test-"));
   const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";
