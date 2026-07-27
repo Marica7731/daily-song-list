@@ -1553,13 +1553,21 @@ def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
             item[name] = nested_video[name]
     return item
 
-def _runtime_source_payload(connection, revision_id: str, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def _runtime_source_payload(
+    connection,
+    revision_id: str,
+    key: str,
+    query: Mapping[str, Any] | None = None,
+    allow_derived: bool = True,
+) -> dict[str, Any]:
     rows = _rows(
         connection,
         "SELECT payload_json FROM runtime_source_details WHERE revision_id = %s AND source_key = %s",
         [revision_id, key],
     )
     if not rows:
+        if not allow_derived:
+            return {"schemaVersion": 1, "found": False, "sourceKey": key}
         try:
             revision = _one(
                 connection,
@@ -1631,24 +1639,24 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
-        persisted = _runtime_source_payload(connection, runtime[0], key, query)
-        if persisted.get("found"):
-            return persisted
         metadata = _channel_metadata_rows(connection, _revision_lineage(connection, runtime[0]))
         channel_metadata = _metadata_for_source_key(metadata, key)
         if channel_metadata:
+            persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
+            if persisted.get("found"):
+                return persisted
             return _runtime_channel_source_payload(connection, runtime[0], channel_metadata, key, query)
         return _runtime_source_payload(connection, runtime[0], key, query)
     generic_runtime = _generic_runtime_projection_revision(connection)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
-            persisted = _runtime_source_payload(connection, parent[0], key, query)
-            if persisted.get("found"):
-                return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:
+                persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False)
+                if persisted.get("found"):
+                    return persisted
                 return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query, overlay_revision_ids=[item for item in _revision_lineage(connection, generic_runtime[0]) if item != parent[0]])
             return _runtime_source_payload(connection, parent[0], key, query)
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
