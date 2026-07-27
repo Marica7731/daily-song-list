@@ -180,6 +180,21 @@ jobs:
           printf 'TASK_ROOT=%s\nPG_INPUT_ROOT=%s\n' "$TASK_ROOT" "$INPUT_ROOT" >> "$GITHUB_ENV"
           test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
           test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
+          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            jq -e '
+              (.status == "ready") and
+              (.curationArtifactIncluded == true) and
+              (.statusAuditIncluded == true) and
+              ((.curationMutationCount // 0) > 0) and
+              ((.reviewAudit.unmatched // 0) == 0) and
+              ((.reviewAudit.ambiguous // 0) == 0) and
+              ((.reviewAudit.invalid // 0) == 0)
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED curation-manifest-not-ready"; exit 78;
+            }
+            test -s "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED empty-curation-patch"; exit 78; }
+            echo "PG_INCREMENT_CURATION_GATE_OK mutations=$(jq -r '.curationMutationCount' "$MANIFEST_INPUT")"
+          fi
           if [ "$REQUIRE_7D_GATE" = "true" ]; then
             jq -e --arg source_key "$SOURCE_KEY" '
               ((.rangeId == "7d" or .range == "7d") and
@@ -258,7 +273,7 @@ jobs:
           candidate_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
           if [ -n "$candidate_source_key" ]; then
             candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \\"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\\"" > "$TASK_ROOT/candidate-source.json"; then
+            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\"" > "$TASK_ROOT/candidate-source.json"; then
               echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key" >&2
               cat "$TASK_ROOT/candidate-source.json" >&2 || true
               exit 1
