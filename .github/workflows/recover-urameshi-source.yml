@@ -155,7 +155,7 @@ jobs:
           if [ "$STAGE" = "candidate" ]; then
             DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
             test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
-            jq -e '.pageSummaries | length > 0 and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
+            jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
               echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
             }
             jq -c '.[]' "$TASK_ROOT/discovery/raw-videos.json" > "$RELEASE_ROOT/candidate-manifest.ndjson"
