@@ -2929,12 +2929,7 @@ async function fetchWithRetry(url, options) {
       throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
     }
     try {
-      const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-        try {
-          response = await fetch(url, { ...options, signal: options?.signal || controller.signal });
-        } finally {
-          clearTimeout(timeout);
+      response = await fetch(url, { ...options, signal: options?.signal || AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
         }
     } catch (error) {
       if (attempt >= FETCH_RETRIES) throw error;
