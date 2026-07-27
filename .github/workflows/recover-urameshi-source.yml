@@ -144,7 +144,7 @@ jobs:
           for shard in 0 1 2 3 4 5; do
             "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
-              --max-candidates 2000 --max-inspect 500 --inspect-shard-count 6 --inspect-shard-index "$shard" \
+              --max-candidates 2000 --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
               --request-interval-ms 5000 --request-jitter-ms 2500
             check_space "detail-shard-$shard"
           done
