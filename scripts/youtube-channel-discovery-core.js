@@ -479,6 +479,14 @@ function mergeDiscoveryCandidate(target, item, context) {
 }
 
 function rawVideoCandidate(candidate, singerName = "") {
+  const publishedTimestamp = Number(candidate.publishedTimestamp);
+  const hasPublishedTimestamp = Number.isFinite(publishedTimestamp) && publishedTimestamp > 0;
+  const publishedText = candidate.publishedText || "";
+  const publishedAtMissingReason = hasPublishedTimestamp
+    ? ""
+    : publishedText
+      ? "published text could not be parsed"
+      : "discovery renderer omitted published text";
   return {
     sourceSystem: SOURCE_SYSTEM,
     channelUrl: candidate.channelUrl || "",
@@ -492,7 +500,8 @@ function rawVideoCandidate(candidate, singerName = "") {
     streamedAt: timestampToIso(candidate.publishedTimestamp),
     publishedAt: timestampToIso(candidate.publishedTimestamp),
     publishedAtOriginalText: candidate.publishedText || null,
-    publishedAtTimestampMs: Number.isFinite(Number(candidate.publishedTimestamp)) && Number(candidate.publishedTimestamp) > 0 ? Number(candidate.publishedTimestamp) : null,
+    publishedAtTimestampMs: hasPublishedTimestamp ? publishedTimestamp : null,
+    publishedAtMissingReason,
     publishedAtTimezone: candidate.publishedAtTimezone || null,
     publishedAtTimezoneReason: candidate.publishedAtTimezone ? "source-provided" : "published text has no timezone",
     publishedAtEvidence: candidate.publishedAtEvidence || "youtube discovery published text",

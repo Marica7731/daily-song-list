@@ -490,6 +490,13 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
   assert.equal(raw.publishedAt, "2026-07-18T00:00:00.000Z");
   assert.equal(raw.publishedAtOriginalText, "2026-07-18T00:00:00Z");
   assert.equal(raw.publishedAtTimezone, null);
+
+  const missingPublishedAt = rawVideoCandidate({
+    videoId: "MISSINGDATE01",
+    title: "歌枠",
+    publishedText: "",
+  });
+  assert.equal(missingPublishedAt.publishedAtMissingReason, "discovery renderer omitted published text");
   assert.equal(raw.rawHash.length, 64);
   assert.equal(occurrences.length, 1);
   assert.equal(occurrences[0].youtubeUrl, "https://www.youtube.com/watch?v=DDDDDDDDDDD&t=3723s");
