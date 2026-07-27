@@ -69,7 +69,7 @@ concurrency:
 
 jobs:
   candidate:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 45
     env:
