@@ -102,7 +102,11 @@ jobs:
           printf 'remoteFreeBefore=%s\n' "$remote_free" >> "$TASK_ROOT/storage.txt"
           test "$remote_free" -ge "$patch_bytes"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO \"www-data\";'"
-          cat "$PATCH_PATH" | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
+          if [[ "$PATCH_PATH" == *.gz ]]; then
+            gzip -dc "$PATCH_PATH"
+          else
+            cat "$PATCH_PATH"
+          fi | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
           candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
           test -n "$candidate_sha"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
