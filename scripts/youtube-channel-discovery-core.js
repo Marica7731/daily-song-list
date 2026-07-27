@@ -249,6 +249,13 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
   clientVersion = page.clientVersion || DEFAULT_CLIENT_VERSION;
   addCandidateItems(items, page.initialData, deps.extractSearchItems, options, pageUrl);
   continuation = findBrowseContinuation(page.initialData);
+  const continuationApiPath = (() => {
+    try {
+      return new URL(pageUrl).pathname === "/results" ? "/youtubei/v1/search" : "/youtubei/v1/browse";
+    } catch {
+      return "/youtubei/v1/browse";
+    }
+  })();
 
   while (continuation && apiKey && pageCount < options.maxChannelPages) {
     if (seenContinuationTokens.has(continuation)) break;
@@ -258,6 +265,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
       apiKey,
       clientVersion,
       continuation,
+      apiPath: continuationApiPath,
       fetchImpl: deps.fetchImpl || fetch,
       requestIntervalMs: options.requestIntervalMs,
       userAgent: deps.userAgent,
@@ -322,14 +330,24 @@ function channelMetadataFromInitialData(data) {
   return { title: "", channelId: "", channelUrl: "", handleUrl: "", thumbnailUrl: "" };
 }
 
-async function fetchBrowseContinuation({ apiKey, clientVersion, continuation, fetchImpl = fetch, requestIntervalMs = 0, userAgent = "", maxAttempts = 3 }) {
+async function fetchBrowseContinuation({
+  apiKey,
+  clientVersion,
+  continuation,
+  apiPath = "/youtubei/v1/browse",
+  fetchImpl = fetch,
+  requestIntervalMs = 0,
+  userAgent = "",
+  maxAttempts = 3,
+}) {
   let lastError = null;
   const attempts = Math.max(1, Number(maxAttempts) || 1);
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     await maybeDelay(attempt === 1 ? requestIntervalMs : Math.max(250, requestIntervalMs) * attempt);
     let response = null;
     try {
-      response = await fetchImpl(`https://www.youtube.com/youtubei/v1/browse?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
+      const endpointPath = apiPath === "/youtubei/v1/search" ? "/youtubei/v1/search" : "/youtubei/v1/browse";
+      response = await fetchImpl(`https://www.youtube.com${endpointPath}?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
         headers: {
           "user-agent":
@@ -363,7 +381,8 @@ async function fetchBrowseContinuation({ apiKey, clientVersion, continuation, fe
         continue;
       }
     }
-    lastError = new Error(`youtubei browse continuation HTTP ${response.status}`);
+    const endpointName = apiPath === "/youtubei/v1/search" ? "search" : "browse";
+    lastError = new Error(`youtubei ${endpointName} continuation HTTP ${response.status}`);
     if (!isRetriableContinuationStatus(response.status) || attempt === attempts) throw lastError;
   }
   throw lastError || new Error("youtubei browse continuation failed");

@@ -26,10 +26,7 @@ test("channel options normalize YouTube handles, tabs, keywords, and output path
     "--channel-url",
     "@noa_polaris",
     "--discovery-url",
-    "
-https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D
-",
-    "--singer-name",
+    "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D",    "--singer-name",
     "Noa Polaris",
     "--keyword",
     "LIVE,歌",
@@ -77,6 +74,58 @@ test("channel page parser extracts renderers and browse continuation", () => {
   assert.equal(new Date(filtered[0].publishedTimestamp).toISOString(), "2026-07-17T00:00:00.000Z");
 });
 
+test("search discovery routes continuation to youtubei search", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-search-test-"));
+  const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";
+  const html = youtubeHtml({
+    initialData: channelData({
+      videos: [videoRenderer("SEARCHVIDEO01", "【歌枠】検索結果", "1 日前")],
+      continuation: "SEARCH_NEXT",
+    }),
+  });
+  const client = {
+    async getText(url) {
+      assert.equal(url, firstUrl);
+      return { status: 200, body: html, bytes: Buffer.byteLength(html), fromCache: false };
+    },
+  };
+  const requests = [];
+  const fetchImpl = async (url) => {
+    requests.push(url);
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return channelData({ videos: [] });
+      },
+    };
+  };
+
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@urameshi_conta",
+      discoveryUrl: firstUrl,
+      singerName: "うら飯 紺汰",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 2,
+      maxCandidates: 10,
+      maxInspect: 0,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: true,
+    },
+    { client, extractSearchItems, fetchImpl },
+  );
+
+  assert.equal(result.manifest.candidateCount, 1);
+  assert.equal(result.manifest.pageSummaries[0].reachedEnd, true);
+  assert.equal(requests.length, 1);
+  assert.match(requests[0], /youtubei\/v1\/search/u);
+});
 test("channel discovery handles YouTube lockupViewModel channel pages", () => {
   const data = {
     metadata: {
