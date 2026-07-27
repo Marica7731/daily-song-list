@@ -2930,7 +2930,6 @@ async function fetchWithRetry(url, options) {
     }
     try {
       response = await fetch(url, { ...options, signal: options?.signal || AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
-        }
     } catch (error) {
       if (attempt >= FETCH_RETRIES) throw error;
       await delay(networkRetryDelayMs(attempt));
