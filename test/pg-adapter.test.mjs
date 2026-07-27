@@ -102,6 +102,8 @@ assert payload["channelHandle"] == "/@naraetanV"
 assert payload["avatarUrl"].startswith("https://yt3.googleusercontent.com/")
 assert payload["songCount"] == 1636
 assert payload["sourceDetailKey"]
+assert module._metadata_for_source_key(metadata, "UCFP9UkgIM_U8NfzRbYEOQdA") is metadata[0]
+assert module._metadata_for_source_key(metadata, "/@naraetanV") is metadata[0]
 print("OK")
 `);
   assert.equal(output, "OK");

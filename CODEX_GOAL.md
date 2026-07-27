@@ -4,7 +4,7 @@
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
 
-当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 generic 7D accepted increment 已由正式 workflow run `30232629804` 以 `candidate -> compare -> health/API -> locked activate` 合并，当前 active=`accepted_30232629804_1`。但实时审计确认“日常更新 -> PG”此前仍未自动接通：`update-core.yml` 会继续提交生成数据，而 PG workflow 只接受手动/accepted dispatch，因此本轮必须补上 workflow-run handoff；不能把已有一次成功 run 写成持续入库已经完成。新 workflow 将只接收已接受的增量文件，未形成 accepted patch 时对核心数据变更 fail-closed，避免新库静默停在旧数据。7D 专项仍需独立 `reachedEnd=true`、时间覆盖、三天状态审计、curation accepted increment 和线上 source-detail 验收；generic 7D 137/2179 不能冒充 `うら飯紺汰` 专项。VPS 远端临时脚本/候选 API 已清理，两个未激活的 ready duplicate revision 已精确删除；Mac run 的 storage manifest 通过 workflow 显式输出门禁保留，任务目录不作为长期 artifact。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过持续入库、迁移后全库清洗发布和来源专项线上验收前保持 pending，不得标记 complete。
+当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 metadata/source-detail 修复由 run `30237611997` 以 `candidate -> compare -> health/API -> locked activate` 合并，当前 active=`accepted_30237611997_1`。但实时审计确认“日常更新 -> PG”此前仍未自动接通：`update-core.yml` 会继续提交生成数据，而 PG workflow 只接受手动/accepted dispatch，因此本轮必须补上 workflow-run handoff；不能把已有一次成功 run 写成持续入库已经完成。新 workflow 将只接收已接受的增量文件，未形成 accepted patch 时对核心数据变更 fail-closed，避免新库静默停在旧数据。7D 专项仍需独立 `reachedEnd=true`、时间覆盖、三天状态审计、curation accepted increment 和线上 source-detail 验收；generic 7D 137/2179 不能冒充 `うら飯紺汰` 专项。VPS 远端临时脚本/候选 API 已清理，两个未激活的 ready duplicate revision 已精确删除；Mac run 的 storage manifest 通过 workflow 显式输出门禁保留，任务目录不作为长期 artifact。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过持续入库、迁移后全库清洗发布和来源专项线上验收前保持 pending，不得标记 complete。
 本轮 implementation-write 已提交 `b62e50f`（持续入库 handoff、7D workflow/gate、转换器、三天状态审计）及 `23cc596f`/`6743847d`（reusable artifact 路径与 Mac checkout 认证修复）。7D run `30234065925` 首次因 checkout 认证格式失败，已 cleanup；重试 `30234207137` 因 Mac runner 长时间 `busy=true` 且 job 一直 `runner_name=null`，超过有界等待后取消，未生成 artifact、未导入或切换 PG。当前这不是数据完成证据；需 runner 恢复后只重跑该单一 source workflow。
 
 ## 目标
@@ -15,12 +15,12 @@
 
 ### 2026-07-27 主线实时纠正
 
-### 2026-07-27 Naraetan 频道身份修复（implementation-write）
+### 2026-07-27 Naraetan 频道身份修复（implementation-write done；计数 reconciliation pending）
 
-- `audit-readonly done`：公网 rankings 搜索确认 Naraetan 聚合为 `4483` occurrences、`293` videos，但当前聚合 payload 的 `name/channelId/channelHandle/channelUrl/avatarUrl` 均为空；视频层可复核 `UCFP9UkgIM_U8NfzRbYEOQdA`、`/@naraetanV`、`なれたん Naraetan Ch.` 与头像 URL。YouTube 官方频道页也确认为该名称。
-- `implementation-write in progress`：限定改动 `server/pg_adapter.py`、`scripts/migration/import-pg-incremental.py` 与 focused tests；支持 `channel_metadata` runtime row、ranking identity enrichment 和无 materialized source detail 时从现有 runtime 记录派生 source detail。前端结构/样式/API URL/字段语义不变。
-- `candidate pending`：新增一个 metadata-only candidate，不复制或重写 293 个视频/4483 个 occurrence；manifest 明确 rank 05/07 的 `6175/265` 与 `6033/385` 仍无视频级身份证据，禁止按数量猜测。必须先 candidate compare/health/source-detail gate，通过后才 activate；失败保持当前 active。
-- focused tests 当前 `14 passed, 2 skipped`（PGlite 未安装）；尚未 commit/push/deploy，尚无该修复的线上 HTTP 验收，不能写成已上线。
+- `done`：公网 rankings 搜索与 `/api/sources/dc7c736a993c4cb9c28f7be0` 均 HTTP 200；当前 rankings 返回 `name=なれたん Naraetan Ch.`、`channelHandle=/@naraetanV`、头像 URL、`sourceDetailKey=dc7c736a993c4cb9c28f7be0`、`4483/293/1404`（occurrences/videos/songs）。
+- `done`：限定改动 `server/pg_adapter.py` 与 focused tests 已由 commit `f449b514a44a332de8251f9bdb653dddbc8e972c` 推送；activation run `30237611997` 已完成锁定切换，公网 `/healthz`、`/api/meta`、rankings 与 source detail 均已验证。前端结构/样式/API URL/字段语义不变。
+- `pending`：source detail 当前真实返回 `4461/292` occurrences/videos，排名聚合返回 `4483/293`；身份和歌曲数组已恢复，但这 22 occurrences/1 video 的投影差异需在后续数据 reconciliation 中处理，不能静默补数或把截图旧状态当作当前线上状态。
+- focused tests 当前 `11 passed, 2 skipped`（PGlite 未安装）；无前端文件改动。
 
 ### 2026-07-27 PG 全量候选与线上切换实时结果
 

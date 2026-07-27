@@ -260,10 +260,25 @@ def _metadata_source_key(item: Mapping[str, Any], range_id: str = "all") -> str:
 
 
 def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) -> Mapping[str, Any] | None:
-    """Find metadata that explicitly or stably identifies a source-detail key."""
+    """Find metadata by source-detail key or legacy channel identity alias."""
 
+    requested = _text(key)
+    requested_alias = requested.lstrip("/@").casefold()
     for item in metadata:
-        if _metadata_source_key(item, "all") == key or _metadata_source_key(item, "7d") == key:
+        if _metadata_source_key(item, "all") == requested or _metadata_source_key(item, "7d") == requested:
+            return item
+        payload = _json_object(item.get("payload_json"))
+        aliases = (
+            item.get("channelId") or item.get("channel_id"),
+            item.get("channelKey") or item.get("channel_key"),
+            item.get("channelHandle") or item.get("handle"),
+            item.get("channelName") or item.get("display_name"),
+            payload.get("channelId") or payload.get("channel_id"),
+            payload.get("channelKey") or payload.get("channel_key"),
+            payload.get("channelHandle") or payload.get("handle"),
+            payload.get("channelName") or payload.get("display_name"),
+        )
+        if any(_text(alias).lstrip("/@").casefold() == requested_alias for alias in aliases if _text(alias)):
             return item
     return None
 
@@ -391,7 +406,12 @@ def _runtime_channel_source_payload(
             })
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
-    return _source_payload_from_channel_records(records, metadata, key, query)
+    canonical_key = _metadata_source_key(metadata, "all") or key
+    result = _source_payload_from_channel_records(records, metadata, canonical_key, query)
+    if result.get("found") and canonical_key != key:
+        result = dict(result)
+        result["sourceKey"] = key
+    return result
 
 
 def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
