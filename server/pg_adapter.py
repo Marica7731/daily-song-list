@@ -258,6 +258,19 @@ def _metadata_source_key(item: Mapping[str, Any], range_id: str = "all") -> str:
     )
     return _stable_key("source-vtuber", range_id, channel_key) if channel_key else ""
 
+def _source_range_for_key(metadata: Mapping[str, Any], key: str) -> str:
+    """Infer the requested source-detail range from a stable channel key."""
+
+    channel_key = _text(
+        metadata.get("channelId")
+        or metadata.get("channel_id")
+        or metadata.get("channelKey")
+        or metadata.get("channel_key")
+    )
+    if channel_key and _stable_key("source-vtuber", "7d", channel_key) == _text(key):
+        return "7d"
+    return "all"
+
 
 def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) -> Mapping[str, Any] | None:
     """Find metadata by source-detail key or legacy channel identity alias."""
@@ -266,6 +279,17 @@ def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) ->
     requested_alias = requested.lstrip("/@").casefold()
     for item in metadata:
         if _metadata_source_key(item, "all") == requested or _metadata_source_key(item, "7d") == requested:
+            return item
+        channel_key = _text(
+            item.get("channelId")
+            or item.get("channel_id")
+            or item.get("channelKey")
+            or item.get("channel_key")
+        )
+        if channel_key and requested in {
+            _stable_key("source-vtuber", "all", channel_key),
+            _stable_key("source-vtuber", "7d", channel_key),
+        }:
             return item
         payload = _json_object(item.get("payload_json"))
         aliases = (
@@ -335,6 +359,7 @@ def _runtime_channel_source_payload(
     channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
     channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
     channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
+    range_id = _source_range_for_key(metadata, key)
     predicates: list[str] = []
     params: list[Any] = [revision_id]
     if channel_id:
@@ -370,9 +395,10 @@ def _runtime_channel_source_payload(
                is_unknown_artist, payload_json
         FROM runtime_occurrences
         WHERE revision_id = %s AND video_id = ANY(%s)
+          AND COALESCE(range_id, 'all') = %s
         ORDER BY video_id, range_id, occurrence_id
         """,
-        [revision_id, video_ids],
+        [revision_id, video_ids, range_id],
     )
     by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in occurrence_rows:
@@ -406,8 +432,10 @@ def _runtime_channel_source_payload(
             })
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
-    canonical_key = _metadata_source_key(metadata, "all") or key
-    result = _source_payload_from_channel_records(records, metadata, canonical_key, query)
+    canonical_key = _stable_key("source-vtuber", range_id, channel_id) or key
+    detail_query = dict(query or {})
+    detail_query["range"] = range_id
+    result = _source_payload_from_channel_records(records, metadata, canonical_key, detail_query)
     if result.get("found") and canonical_key != key:
         result = dict(result)
         result["sourceKey"] = key
@@ -457,7 +485,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     metadata_payload = _json_object(selected.get("payload_json"))
     metadata_payload.update({key: value for key, value in selected.items() if key not in {"revision_id", "payload_json"} and value is not None})
     expected_songs = metadata_payload.get("expectedSongCount")
-    if (result.get("songCount") in (None, 0)) and expected_songs is not None:
+    if range_id == "all" and (result.get("songCount") in (None, 0)) and expected_songs is not None:
         result["songCount"] = expected_songs
     if not result.get("sourceDetailKey"):
         result["sourceDetailKey"] = _stable_key("source-vtuber", range_id, channel_key)
