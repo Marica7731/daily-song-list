@@ -58,7 +58,8 @@ jobs:
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
           git -C "$REPO_ROOT" init -q
           git -C "$REPO_ROOT" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
-          git -C "$REPO_ROOT" -c http.extraheader="AUTHORIZATION: bearer $GITHUB_TOKEN" fetch --filter=blob:none --depth=1 origin "$GITHUB_SHA"
+          auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+          GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" -c "http.extraheader=AUTHORIZATION: basic $auth_header" fetch --filter=blob:none --depth=1 origin "$GITHUB_SHA"
           git -C "$REPO_ROOT" sparse-checkout init --cone
           git -C "$REPO_ROOT" sparse-checkout set assets config package.json scripts
           git -C "$REPO_ROOT" checkout -q FETCH_HEAD
