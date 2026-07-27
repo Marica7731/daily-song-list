@@ -1861,13 +1861,9 @@ def meta_payload(connection) -> dict[str, Any]:
                     )
                     if song_count and int(song_count[0].get("count") or 0) == 1:
                         counts["songs"] = max(0, counts.get("songs", 0) - 1)
-                source_count = _rows(
-                    connection,
-                    "SELECT count(*) AS count FROM runtime_source_occurrences WHERE revision_id = %s AND video_id = %s AND seconds IS NOT DISTINCT FROM %s",
-                    [parent_id, base_row.get("video_id"), base_row.get("seconds")],
-                )
-                if source_count:
-                    counts["source_occurrences"] = max(0, counts.get("source_occurrences", 0) - int(source_count[0].get("count") or 0))
+                # source_occurrences is a denormalized, multi-source index;
+                # never scan it from health/meta.  Its materialized baseline
+                # remains authoritative until a source-detail rebuild.
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
