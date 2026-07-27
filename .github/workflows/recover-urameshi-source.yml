@@ -23,7 +23,7 @@ concurrency:
 jobs:
   collect:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 30
+    timeout-minutes: 180
     env:
       SOURCE_KEY: "@urameshi_conta"
       STAGE: ${{ inputs.stage || 'candidate' }}
@@ -34,7 +34,7 @@ jobs:
       SCRATCH_CAP_BYTES: "4294967296"
       YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS: "15000"
       DAILY_SONG_COMMENT_REPLY_LIMIT: "2"
-      DISCOVERY_MAX_CHANNEL_PAGES: "500"
+      DISCOVERY_MAX_CHANNEL_PAGES: "2000"
       DISCOVERY_MAX_CANDIDATES: "10000"
       DISCOVERY_REQUEST_INTERVAL_MS: "1000"
       DISCOVERY_REQUEST_JITTER_MS: "500"
