@@ -139,7 +139,6 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-
 test("persisted source detail pages use every occurrence row and keep its video thumbnail", () => {
   const output = runPython(`
 import importlib.util
@@ -153,10 +152,19 @@ class Cursor:
     def execute(self, sql, params):
         if "runtime_source_details" in sql:
             self.description = [("payload_json",)]
-            self.rows = [(json.dumps({"sourceDetailKey": "src-noa", "channelName": "Noa", "occurrences": [{"videoId": "legacy-preview", "thumbnailUrl": "legacy.jpg"}], "songs": ["Song A", "Song B", "Song C"]}),)]
+            self.rows = [(json.dumps({
+                "sourceDetailKey": "src-noa",
+                "channelName": "Noa",
+                "occurrences": [{"videoId": "legacy-preview", "thumbnailUrl": "legacy.jpg"}],
+                "songs": ["Song A", "Song B", "Song C"],
+            }),)]
         elif "runtime_source_occurrences" in sql:
             self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
-            self.rows = [(0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, None, json.dumps({"thumbnailUrl": "a.jpg"})), (1, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 30, json.dumps({"thumbnailUrl": "b.jpg"})), (2, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 60, json.dumps({"thumbnailUrl": "c.jpg"}))]
+            self.rows = [
+                (0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, None, json.dumps({"thumbnailUrl": "a.jpg"})),
+                (1, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 30, json.dumps({"thumbnailUrl": "b.jpg"})),
+                (2, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 60, json.dumps({"thumbnailUrl": "c.jpg"})),
+            ]
         else:
             raise AssertionError(sql)
     def fetchall(self):
@@ -167,14 +175,50 @@ class Connection:
     def cursor(self):
         return Cursor()
 page = module._runtime_source_payload(Connection(), "rev", "src-noa", {"page": "2", "pageSize": "2"})
-assert page["found"] is True and page["pageCount"] == 2 and page["totalCount"] == 3
-assert page["record"]["occurrences"][0]["videoId"] == "video-c"
-assert page["record"]["occurrences"][0]["thumbnailUrl"] == "c.jpg"
-assert page["record"]["occurrences"][0]["seconds"] == 60
+assert page["found"] is True
+assert page["pageCount"] == 2 and page["totalCount"] == 3
+assert page["record"]["occurrences"] == [{"thumbnailUrl": "c.jpg", "videoId": "video-c", "title": "C", "channelName": "Noa", "channelId": "channel", "channelHandle": "@noa", "channelUrl": "https://youtube.com/@noa", "publishedAt": 3, "seconds": 60}]
+assert page["record"]["occurrencePreviewLimited"] is True
+assert module._runtime_source_occurrence({"video_id": "video-null", "seconds": None, "payload_json": "{}"})["seconds"] is None
 print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("source endpoint prefers persisted detail rows before channel fallback", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Cursor:
+    def execute(self, sql, params):
+        if "runtime_source_details" in sql:
+            self.description = [("payload_json",)]
+            self.rows = [(json.dumps({"sourceDetailKey": "src", "occurrences": []}),)]
+        elif "runtime_source_occurrences" in sql:
+            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
+            self.rows = []
+        else:
+            raise AssertionError("channel fallback should not be queried: " + sql)
+    def fetchall(self):
+        return self.rows
+    def close(self):
+        pass
+class Connection:
+    def cursor(self):
+        return Cursor()
+module._runtime_projection_revision = lambda connection: ("rev", {})
+result = module.source_payload(Connection(), "src", {"page": "1", "pageSize": "20"})
+assert result["found"] is True and result["sourceKey"] == "src"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("missing migration tables are an explicit schema error", () => {
   const output = runPython(`
 import importlib.util
@@ -280,7 +324,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("range-specific channel source details use the requested range", () => {
+test("generic overlays do not replay ancestors of the full runtime parent", () => {
   const output = runPython(`
 import importlib.util
 spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
@@ -288,39 +332,15 @@ module = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
-channel_id = "UCFP9UkgIM_U8NfzRbYEOQdA"
-mMetadata = {"channelId": channel_id, "channelName": "なれたん Naraetan Ch.", "channelHandle": "/@naraetanV", "expectedSongCount": 1404, "sourceDetailKey": module._stable_key("source-vtuber", "all", channel_id)}
-range_key = module._stable_key("source-vtuber", "7d", channel_id)
-assert module._metadata_for_source_key([mMetadata], range_key) is mMetadata
-ranking = module._apply_channel_metadata({"key": channel_id, "count": 54, "videoCount": 2, "songCount": 0}, {"detail_key": channel_id, "channel_search_text": "naraetan"}, [mMetadata], "7d")
-assert ranking["sourceDetailKey"] == range_key and ranking["songCount"] == 0
-class Cursor:
-    def execute(self, sql, params):
-        if "FROM runtime_videos" in sql:
-            self.description = [("video_id",), ("title",), ("channel_name",), ("channel_id",), ("channel_handle",), ("channel_url",), ("published_timestamp",), ("payload_json",)]
-            self.rows = [("video-7d", "歌枠", "なれたん Naraetan Ch.", channel_id, "/@naraetanV", "https://www.youtube.com/@naraetanV", "2026-07-27T00:00:00Z", {})]
-        elif "FROM runtime_occurrences" in sql:
-            assert "COALESCE(range_id, 'all') = %s" in sql and params[-1] == "7d"
-            self.description = [("occurrence_id",), ("range_id",), ("video_id",), ("song_key",), ("seconds",), ("source_system",), ("source_id",), ("title",), ("artist",), ("is_niche",), ("is_unknown_artist",), ("payload_json",)]
-            self.rows = [("occ-7d", "7d", "video-7d", "song-7d", 12, "youtube", "src-7d", "Song 7D", "Artist", False, False, {})]
-        else:
-            self.description = []
-            self.rows = []
-    def fetchall(self): return self.rows
-    def close(self): pass
-class Connection:
-    def cursor(self): return Cursor()
-source = module._runtime_channel_source_payload(Connection(), "rev", mMetadata, range_key, {"page": "1", "pageSize": "20"})
-assert source["found"] is True and source["sourceKey"] == range_key
-assert len(source["record"]["occurrences"]) == 1
-assert source["record"]["occurrences"][0]["song"]["rangeId"] == "7d"
+module._revision_lineage = lambda connection, revision_id: ["candidate", "full-runtime", "old-increment"]
+assert module._overlay_revision_ids(object(), "candidate", "full-runtime") == ["candidate"]
+try:
+    module._overlay_revision_ids(object(), "candidate", "missing-full")
+except module.PostgresAdapterError as error:
+    assert "not in active revision lineage" in str(error)
+else:
+    raise AssertionError("missing full parent must fail closed")
 print("OK")
 `);
-  assert.equal(output, "OK");
-});
-
-
-test("channel source details merge active overlay videos and occurrences", () => {
-  const output = runPython("import importlib.util\nspec = importlib.util.spec_from_file_location(\"pg_adapter\", " + JSON.stringify(ADAPTER) + ")\nmodule = importlib.util.module_from_spec(spec)\nimport sys\nsys.modules[spec.name] = module\nspec.loader.exec_module(module)\nchannel_id = \"UCFP9UkgIM_U8NfzRbYEOQdA\"\nmetadata = {\"channelId\": channel_id, \"channelHandle\": \"/@naraetanV\", \"channelName\": \"\u00e3\u0081\u00aa\u00e3\u201a\u0152\u00e3\u0081\u0178\u00e3\u201a\u201c Naraetan Ch.\", \"sourceDetailKey\": module._stable_key(\"source-vtuber\", \"all\", channel_id)}\nrange_key = module._stable_key(\"source-vtuber\", \"7d\", channel_id)\nclass Cursor:\n    def execute(self, sql, params):\n        if \"FROM runtime_videos\" in sql:\n            self.description = [(name,) for name in (\"video_id\", \"title\", \"channel_name\", \"channel_id\", \"channel_handle\", \"channel_url\", \"published_timestamp\", \"payload_json\")]\n            self.rows = [(\"video-parent\", \"Parent\", \"Naraetan\", channel_id, \"/@naraetanV\", \"https://youtube.com/@naraetanV\", \"2026-07-27T00:00:00Z\", {})]\n        elif \"FROM runtime_occurrences\" in sql:\n            self.description = [(name,) for name in (\"occurrence_id\", \"range_id\", \"video_id\", \"song_key\", \"seconds\", \"source_system\", \"source_id\", \"title\", \"artist\", \"is_niche\", \"is_unknown_artist\", \"payload_json\")]\n            self.rows = [(\"parent-occ\", \"7d\", \"video-parent\", \"parent-song\", 10, \"youtube\", \"src\", \"Parent song\", \"Artist\", False, False, {})]\n        elif \"FROM migration_video_rows\" in sql:\n            self.description = [(name,) for name in (\"revision_id\", \"video_id\", \"title\", \"channel_name\", \"channel_id\", \"channel_handle\", \"channel_url\", \"published_timestamp\", \"tombstone\", \"payload_json\")]\n            self.rows = [(\"overlay\", \"video-overlay\", \"Overlay\", \"Naraetan\", channel_id, \"/@naraetanV\", \"https://youtube.com/@naraetanV\", \"2026-07-27T01:00:00Z\", False, {})]\n        elif \"FROM migration_occurrence_rows\" in sql:\n            self.description = [(name,) for name in (\"revision_id\", \"occurrence_key\", \"occurrence_id\", \"position\", \"range_id\", \"video_id\", \"song_key\", \"seconds\", \"source_system\", \"source_id\", \"title\", \"artist\", \"is_niche\", \"is_unknown_artist\", \"raw_hash\", \"payload_json\")]\n            self.rows = [(\"overlay\", \"overlay-key\", \"overlay-occ\", 0, \"7d\", \"video-overlay\", \"overlay-song\", 20, \"youtube\", \"src\", \"Overlay song\", \"Artist\", False, False, \"hash\", {})]\n        else:\n            self.description = []\n            self.rows = []\n    def fetchall(self): return self.rows\n    def close(self): pass\nclass Connection:\n    def cursor(self): return Cursor()\nsource = module._runtime_channel_source_payload(Connection(), \"full\", metadata, range_key, {\"page\": \"1\", \"pageSize\": \"20\"}, overlay_revision_ids=[\"overlay\"])\nassert source[\"found\"] is True\nassert source[\"totalVideoCount\"] == 2 and source[\"totalOccurrenceCount\"] == 2\nassert {item[\"videoId\"] for item in source[\"record\"][\"occurrences\"]} == {\"video-parent\", \"video-overlay\"}\nprint(\"OK\")\n");
   assert.equal(output, "OK");
 });

@@ -258,19 +258,6 @@ def _metadata_source_key(item: Mapping[str, Any], range_id: str = "all") -> str:
     )
     return _stable_key("source-vtuber", range_id, channel_key) if channel_key else ""
 
-def _source_range_for_key(metadata: Mapping[str, Any], key: str) -> str:
-    """Infer the requested source-detail range from a stable channel key."""
-
-    channel_key = _text(
-        metadata.get("channelId")
-        or metadata.get("channel_id")
-        or metadata.get("channelKey")
-        or metadata.get("channel_key")
-    )
-    if channel_key and _stable_key("source-vtuber", "7d", channel_key) == _text(key):
-        return "7d"
-    return "all"
-
 
 def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) -> Mapping[str, Any] | None:
     """Find metadata by source-detail key or legacy channel identity alias."""
@@ -279,17 +266,6 @@ def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) ->
     requested_alias = requested.lstrip("/@").casefold()
     for item in metadata:
         if _metadata_source_key(item, "all") == requested or _metadata_source_key(item, "7d") == requested:
-            return item
-        channel_key = _text(
-            item.get("channelId")
-            or item.get("channel_id")
-            or item.get("channelKey")
-            or item.get("channel_key")
-        )
-        if channel_key and requested in {
-            _stable_key("source-vtuber", "all", channel_key),
-            _stable_key("source-vtuber", "7d", channel_key),
-        }:
             return item
         payload = _json_object(item.get("payload_json"))
         aliases = (
@@ -347,14 +323,18 @@ def _runtime_channel_source_payload(
     metadata: Mapping[str, Any],
     key: str,
     query: Mapping[str, Any] | None = None,
-    overlay_revision_ids: list[str] | None = None,
 ) -> dict[str, Any]:
-    """Read a verified channel from the parent projection plus active overlays."""
+    """Read only the parent-runtime rows belonging to a verified channel.
+
+    Metadata-only increments must not force the API to materialize the entire
+    runtime snapshot.  The channel identity is evidence-backed, so it is safe
+    to use it as the bounded lookup predicate while preserving all parent
+    video/occurrence payloads and source provenance.
+    """
 
     channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
     channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
     channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
-    range_id = _source_range_for_key(metadata, key)
     predicates: list[str] = []
     params: list[Any] = [revision_id]
     if channel_id:
@@ -379,12 +359,9 @@ def _runtime_channel_source_payload(
         """,
         params,
     )
-    video_by_id = {
-        _text(row.get("video_id")): dict(row)
-        for row in video_rows
-        if _text(row.get("video_id"))
-    }
-    video_ids = list(video_by_id)
+    video_ids = [_text(row.get("video_id")) for row in video_rows if _text(row.get("video_id"))]
+    if not video_ids:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
     occurrence_rows = _rows(
         connection,
         """
@@ -393,81 +370,17 @@ def _runtime_channel_source_payload(
                is_unknown_artist, payload_json
         FROM runtime_occurrences
         WHERE revision_id = %s AND video_id = ANY(%s)
-          AND COALESCE(range_id, 'all') = %s
         ORDER BY video_id, range_id, occurrence_id
         """,
-        [revision_id, video_ids, range_id],
-    ) if video_ids else []
+        [revision_id, video_ids],
+    )
     by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for row in occurrence_rows:
         by_video[_text(row.get("video_id"))].append(row)
-
-    overlay_ids = list(dict.fromkeys(overlay_revision_ids or []))
-    if overlay_ids:
-        overlay_video_rows = _rows(
-            connection,
-            f"""
-            SELECT revision_id, video_id, title, channel_name, channel_id,
-                   channel_handle, channel_url, published_at AS published_timestamp,
-                   tombstone, payload_json
-            FROM migration_video_rows
-            WHERE revision_id = ANY(%s)
-              AND (video_id = ANY(%s) OR {' OR '.join(["channel_id = %s", "channel_handle = %s", "channel_name = %s"])})
-            ORDER BY video_id
-            """,
-            [overlay_ids, video_ids, channel_id, channel_handle, channel_name],
-        )
-        priority = {revision_key: index for index, revision_key in enumerate(overlay_ids)}
-        latest_video_rows: dict[str, Mapping[str, Any]] = {}
-        for row in overlay_video_rows:
-            video_id = _text(row.get("video_id"))
-            if video_id and (
-                video_id not in latest_video_rows
-                or priority.get(_text(row.get("revision_id")), len(priority))
-                < priority.get(_text(latest_video_rows[video_id].get("revision_id")), len(priority))
-            ):
-                latest_video_rows[video_id] = row
-        for video_id, row in latest_video_rows.items():
-            if row.get("tombstone"):
-                video_by_id.pop(video_id, None)
-                by_video.pop(video_id, None)
-                continue
-            video_by_id[video_id] = dict(row)
-            by_video[video_id] = []
-
-        video_ids = list(video_by_id)
-        overlay_occurrence_rows = _rows(
-            connection,
-            """
-            SELECT o.revision_id, o.occurrence_key, o.occurrence_id, o.position,
-                   o.range_id, o.video_id, o.song_key, o.seconds,
-                   o.source_system, o.source_id, o.title, o.artist,
-                   o.is_niche, o.is_unknown_artist, o.raw_hash, o.payload_json
-            FROM migration_occurrence_rows AS o
-            WHERE o.revision_id = ANY(%s)
-              AND COALESCE(o.range_id, 'all') = %s
-              AND o.video_id = ANY(%s)
-            ORDER BY o.video_id, o.position, o.occurrence_key
-            """,
-            [overlay_ids, range_id, video_ids],
-        ) if video_ids else []
-        latest_occurrences: dict[tuple[str, str, str], Mapping[str, Any]] = {}
-        for row in overlay_occurrence_rows:
-            occurrence_key = _text(row.get("occurrence_key")) or _text(row.get("occurrence_id")) or str(row.get("position") or 0)
-            row_key = (_text(row.get("video_id")), _text(row.get("range_id")) or "all", occurrence_key)
-            if row_key not in latest_occurrences or priority.get(_text(row.get("revision_id")), len(priority)) < priority.get(_text(latest_occurrences[row_key].get("revision_id")), len(priority)):
-                latest_occurrences[row_key] = row
-        for row in latest_occurrences.values():
-            video_id = _text(row.get("video_id"))
-            if video_id in video_by_id:
-                by_video[video_id].append(row)
-
     records: list[dict[str, Any]] = []
-    for video_id in sorted(video_by_id):
-        row = video_by_id[video_id]
+    for row in video_rows:
+        video_id = _text(row.get("video_id"))
         video = _json_object(row.get("payload_json"))
-        if isinstance(video.get("payload"), Mapping):
-            video = dict(video["payload"])
         video.update({
             "videoId": video.get("videoId") or video_id,
             "title": video.get("title") if video.get("title") is not None else row.get("title"),
@@ -480,8 +393,6 @@ def _runtime_channel_source_payload(
         songs: list[dict[str, Any]] = []
         for occurrence in by_video.get(video_id, ()):
             song = _json_object(occurrence.get("payload_json"))
-            if isinstance(song.get("payload"), Mapping):
-                song = dict(song["payload"])
             song.update({
                 "occurrenceId": song.get("occurrenceId") if song.get("occurrenceId") is not None else occurrence.get("occurrence_id"),
                 "position": song.get("position") if song.get("position") is not None else len(songs),
@@ -495,14 +406,13 @@ def _runtime_channel_source_payload(
             })
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
-    canonical_key = _stable_key("source-vtuber", range_id, channel_id) or key
-    detail_query = dict(query or {})
-    detail_query["range"] = range_id
-    result = _source_payload_from_channel_records(records, metadata, canonical_key, detail_query)
+    canonical_key = _metadata_source_key(metadata, "all") or key
+    result = _source_payload_from_channel_records(records, metadata, canonical_key, query)
     if result.get("found") and canonical_key != key:
         result = dict(result)
         result["sourceKey"] = key
     return result
+
 
 def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
     """Enrich a vtuber ranking record without merging unrelated unknown rows."""
@@ -547,7 +457,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     metadata_payload = _json_object(selected.get("payload_json"))
     metadata_payload.update({key: value for key, value in selected.items() if key not in {"revision_id", "payload_json"} and value is not None})
     expected_songs = metadata_payload.get("expectedSongCount")
-    if range_id == "all" and (result.get("songCount") in (None, 0)) and expected_songs is not None:
+    if (result.get("songCount") in (None, 0)) and expected_songs is not None:
         result["songCount"] = expected_songs
     if not result.get("sourceDetailKey"):
         result["sourceDetailKey"] = _stable_key("source-vtuber", range_id, channel_key)
@@ -772,8 +682,8 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         base_params,
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
-    lineage = _revision_lineage(connection, revision_id)
-    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, [item for item in lineage if item != parent[0]]), options["view"])
+    overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
+    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, overlay_ids), options["view"])
     for key, item in delta.items():
         row = groups.get(key)
         if row is None:
@@ -811,7 +721,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
     total = len(filtered)
     offset = (options["page"] - 1) * options["pageSize"]
-    metadata = _channel_metadata_rows(connection, lineage) if options["view"] == "vtubers" else []
+    metadata = _channel_metadata_rows(connection, [revision_id, *overlay_ids, parent[0]]) if options["view"] == "vtubers" else []
     records = []
     for index, row in enumerate(filtered[offset:offset + options["pageSize"]], start=offset + 1):
         payload = _json_object(row.get("payload_json"))
@@ -863,6 +773,24 @@ def _revision_lineage(connection, revision_id: str) -> list[str]:
     return lineage
 
 
+def _overlay_revision_ids(connection, revision_id: str, full_revision_id: str) -> list[str]:
+    """Return only overlay descendants of the immutable full projection.
+
+    The complete revision lineage also contains historical ancestors of the
+    full runtime.  Those rows are already represented by the full projection
+    and must never be counted or replayed as a new increment.
+    """
+
+    lineage = _revision_lineage(connection, revision_id)
+    try:
+        full_index = lineage.index(full_revision_id)
+    except ValueError as error:
+        raise PostgresAdapterError(
+            f"full runtime parent is not in active revision lineage: {full_revision_id}"
+        ) from error
+    return lineage[:full_index]
+
+
 def _runtime_payload_field(payload: Mapping[str, Any], row: Mapping[str, Any], *names: str) -> Any:
     for name in names:
         if name in payload:
@@ -883,19 +811,21 @@ def _load_generic_runtime_snapshot(connection, revision_id: str, revision: Mappi
 
     videos: dict[str, dict[str, Any]] = {}
     occurrences: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    lineage = _revision_lineage(connection, revision_id)
-    parent_id = _text(revision.get("parent_revision_id"))
-    if parent_id:
-        parent = _one(connection, "SELECT revision_id, parent_revision_id, status, manifest_json, source_manifest_sha256, content_sha256, activated_at, created_at FROM migration_revisions WHERE revision_id = %s", [parent_id])
-        if parent and _json_object(parent.get("manifest_json")).get("runtimeProjection") and not _json_object(parent.get("manifest_json")).get("incrementalOverlay"):
-            base = _load_runtime_snapshot(connection, parent_id, parent)
+    parent = _generic_parent_runtime_revision(connection, revision_id, revision)
+    if parent:
+        parent_id, parent_revision = parent
+        base = _load_runtime_snapshot(connection, parent_id, parent_revision)
+        overlay_lineage = _overlay_revision_ids(connection, revision_id, parent_id)
+        if base:
             for record in base.records:
                 video = dict(record["video"])
                 video_id = _text(video.get("videoId"))
                 videos[video_id] = video
                 occurrences[video_id] = [dict(item) for item in record.get("occurrences", ())]
+    else:
+        overlay_lineage = _revision_lineage(connection, revision_id)
 
-    for revision_key in reversed(lineage):
+    for revision_key in reversed(overlay_lineage):
         video_rows = _rows(connection, "SELECT video_id, title, channel_name, channel_id, channel_handle, channel_url, published_at, tombstone, payload_json FROM migration_video_rows WHERE revision_id = %s", [revision_key])
         occurrence_rows = _rows(connection, "SELECT video_id, occurrence_key, occurrence_id, position, range_id, song_key, seconds, title, artist, source_id, raw_hash, source_system, payload_json FROM migration_occurrence_rows WHERE revision_id = %s ORDER BY video_id, position, occurrence_key", [revision_key])
         replacement_ids = { _text(row.get("video_id")) for row in video_rows }
@@ -1553,6 +1483,7 @@ def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
             item[name] = nested_video[name]
     return item
 
+
 def _runtime_source_payload(
     connection,
     revision_id: str,
@@ -1614,8 +1545,10 @@ def _runtime_source_payload(
         record["occurrences"] = [item for item in occurrences if _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId")) in selected]
         record["sourceFilterQuery"] = options["q"]
         record["count"] = len(occurrences)
+        record["occurrenceCount"] = len(occurrences)
         record["timestampCount"] = len(occurrences)
         record["videoCount"] = len(video_keys)
+        record["occurrencePreviewLimited"] = len(record["occurrences"]) < len(occurrences)
         return {
             "schemaVersion": 1, "found": True, "sourceKey": key, "record": record,
             "page": page, "pageSize": options["pageSize"], "pageCount": page_count,
@@ -1639,26 +1572,26 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
+        persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
+        if persisted.get("found"):
+            return persisted
         metadata = _channel_metadata_rows(connection, _revision_lineage(connection, runtime[0]))
         channel_metadata = _metadata_for_source_key(metadata, key)
         if channel_metadata:
-            persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
-            if persisted.get("found"):
-                return persisted
             return _runtime_channel_source_payload(connection, runtime[0], channel_metadata, key, query)
-        return _runtime_source_payload(connection, runtime[0], key, query)
+        return persisted
     generic_runtime = _generic_runtime_projection_revision(connection)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
+            persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False)
+            if persisted.get("found"):
+                return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:
-                persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False)
-                if persisted.get("found"):
-                    return persisted
-                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query, overlay_revision_ids=[item for item in _revision_lineage(connection, generic_runtime[0]) if item != parent[0]])
-            return _runtime_source_payload(connection, parent[0], key, query)
+                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query)
+            return persisted
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     snapshot = _load_snapshot(connection)
     return source_payload_from_records(snapshot.records, key, query)
@@ -1737,8 +1670,8 @@ def meta_payload(connection) -> dict[str, Any]:
             "ranking_rows": counts.get("latest_ranking_rows", 0),
             "source_occurrences": counts.get("source_occurrences_rows", 0),
         })
-        lineage = _revision_lineage(connection, generic_runtime[0])
-        delta_rows = _overlay_candidate_rows(connection, [item for item in lineage if item != parent_id])
+        overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent_id)
+        delta_rows = _overlay_candidate_rows(connection, overlay_ids)
         if delta_rows:
             counts["videos"] = counts.get("videos", 0) + len({_text(row.get("video_id")) for row in delta_rows})
             counts["occurrences"] = counts.get("occurrences", 0) + len(delta_rows)
