@@ -21,6 +21,7 @@ jobs:
       SINGER_NAME: "うら飯 紺汰"
       SOURCE_RANGE_ID: "7d"
       SCRATCH_CAP_BYTES: "4294967296"
+      YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS: "15000"
     steps:
       - name: Collect bounded 7D detail and accepted increment
         env:

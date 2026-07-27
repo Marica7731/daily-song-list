@@ -114,6 +114,7 @@ const VIDEO_CONCURRENCY = positiveInteger(process.env.DAILY_SONG_VIDEO_CONCURREN
 const REPLY_LIMIT = positiveInteger(process.env.DAILY_SONG_COMMENT_REPLY_LIMIT, 12);
 const SEARCH_CONTINUATION_ROUNDS = positiveInteger(process.env.DAILY_SONG_SEARCH_CONTINUATION_ROUNDS, 40);
 const FETCH_RETRIES = positiveInteger(process.env.DAILY_SONG_FETCH_RETRIES, 3);
+  const REQUEST_TIMEOUT_MS = positiveInteger(process.env.DAILY_SONG_REQUEST_TIMEOUT_MS, 15_000);
 const REQUEST_DELAY_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_DELAY_MS, 0);
 const REQUEST_JITTER_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_JITTER_MS, 0);
 const RATE_LIMIT_COOLDOWN_MS = nonNegativeInteger(process.env.DAILY_SONG_429_COOLDOWN_MS, 15_000);
@@ -2928,7 +2929,7 @@ async function fetchWithRetry(url, options) {
       throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
     }
     try {
-      response = await fetch(url, options);
+      const controller = new AbortController();`r`n        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);`r`n        try {`r`n          response = await fetch(url, { ...options, signal: options?.signal || controller.signal });`r`n        } finally {`r`n          clearTimeout(timeout);`r`n        }
     } catch (error) {
       if (attempt >= FETCH_RETRIES) throw error;
       await delay(networkRetryDelayMs(attempt));
