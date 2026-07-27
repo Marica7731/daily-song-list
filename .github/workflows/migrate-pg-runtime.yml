@@ -125,7 +125,10 @@ jobs:
       VPS2_USER: "root"
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
       SOURCE_DB: "/Users/be/actions-runner-cache/daily-song-list-runtime-db/song-rank.sqlite"
-      EXPECTED_PG_PEAK_BYTES: "23622320128"
+      # The SQLite source is streamed and never stored on VPS2. Reserve four
+      # GiB over the current PG database size for a second full candidate,
+      # indexes and WAL; the source DB bytes are not a remote peak estimate.
+      PG_RESERVED_BYTES: "4294967296"
       PG_HARD_CAP_BYTES: "30064771072"
       STREAM_LIMIT: ${{ inputs.stream_limit || 0 }}
     steps:
@@ -139,7 +142,7 @@ jobs:
           printf 'REVISION=full_runtime_%s_%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
           printf 'startedAt=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TASK_ROOT/state.txt"
           df -k / > "$TASK_ROOT/mac-df-baseline.txt"
-          printf 'expectedPeakBytes=%s\nhardCapBytes=%s\nsourceDb=%s\n' "$EXPECTED_PG_PEAK_BYTES" "$PG_HARD_CAP_BYTES" "$SOURCE_DB" > "$TASK_ROOT/limits.txt"
+          printf 'pgReserveBytes=%s\nhardCapBytes=%s\nsourceDb=%s\n' "$PG_RESERVED_BYTES" "$PG_HARD_CAP_BYTES" "$SOURCE_DB" > "$TASK_ROOT/limits.txt"
 
       - name: Download migration files into task root
         env:
@@ -210,9 +213,12 @@ jobs:
           cat > "$TASK_ROOT/manifest.json" <<JSON
           {"schemaVersion":1,"sourceKind":"mac-runtime-sqlite-stream","sourceDbBytes":$bytes,"sourceDbSha256":"$sha","sourceCommit":"$source_commit","sourceLatestSha256":"$source_latest_sha","latestVideos":$videos,"latestOccurrences":$occurrences,"sevenDayStatus":"pending_new_accepted_increment","startedAt":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
           JSON
-          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); old=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; printf '%s %s\\n' \"\$free\" \"\$old\"")"
-          read -r remote_free remote_old <<< "$remote_probe"
-          printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\nremoteOldBytes=%s\n' "$bytes" "$sha" "$remote_free" "$remote_old" > "$TASK_ROOT/preflight.txt"
+          remote_probe="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "free=\$(df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'); db=\$(sudo -u postgres psql -d song_rank -Atqc 'select pg_database_size(current_database())'); old=0; test -f '$REMOTE_STATE_DIR/song-rank.sqlite' && old=\$(stat -c%s '$REMOTE_STATE_DIR/song-rank.sqlite') || true; printf '%s %s %s\\n' \"\$free\" \"\$db\" \"\$old\"")"
+          read -r remote_free remote_db_bytes remote_old <<< "$remote_probe"
+          test "$remote_db_bytes" -gt 0
+          candidate_peak=$(( remote_db_bytes * 2 + PG_RESERVED_BYTES ))
+          test "$candidate_peak" -le "$PG_HARD_CAP_BYTES"
+          printf 'sourceBytes=%s\nsourceSha256=%s\nremoteFreeBefore=%s\ncurrentPgBytes=%s\nexpectedCandidatePeakBytes=%s\nremoteOldBytes=%s\n' "$bytes" "$sha" "$remote_free" "$remote_db_bytes" "$candidate_peak" "$remote_old" > "$TASK_ROOT/preflight.txt"
           printf 'remoteFreeAfterPreflight=%s\n' "$remote_free" >> "$TASK_ROOT/preflight.txt"
           if [ "$remote_old" -gt 0 ]; then
             echo "PG_PREFLIGHT_STALE_SQLITE_CLEANUP bytes=$remote_old"
@@ -220,7 +226,7 @@ jobs:
             remote_free="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n 1 | tr -d '[:space:]'")"
             printf 'remoteFreeAfterStaleSqliteCleanup=%s\n' "$remote_free" >> "$TASK_ROOT/preflight.txt"
           fi
-          test "$remote_free" -ge "$EXPECTED_PG_PEAK_BYTES"
+          test "$remote_free" -ge "$candidate_peak" || { echo "PG_PREFLIGHT_BLOCKED insufficient_remote_free=$remote_free expectedCandidatePeak=$candidate_peak"; exit 78; }
 
       - name: Install schema and bounded receiver
         timeout-minutes: 10
