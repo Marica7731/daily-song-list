@@ -4,7 +4,7 @@
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
 
-当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 7D accepted increment `mygit_7d_20260727_2` 通过候选 API gate 后原子激活，VPS2 当前只保留 PG active。`deploy-pg-incremental.yml` 已补齐 `.gz` 输入、7D/all/search/source contract gate 与 cleanup，后续 workflow 不再走全量 SQLite。当前 workflow run `30228901978`、`30229296719` 均因 Mac runner 分配后零 step 被有界取消，手工 candidate/activate 已完成但需在补丁 push 后重跑 workflow 取得正式 run 证据。固定搜索链接的 yt-dlp 发现证据为 `playlist_count=533`、详情候选 534、accepted 137/2179 occurrence；通用 continuation 旧 checkpoint 仍 `paused_no_progress`，`うら飯紺汰` 专项详情尚未形成，因此 7D 主线为“已合并当前 accepted increment，来源专项 pending”，不得把它写成完整来源收口。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过 workflow 运行、迁移后清洗和来源专项线上验收前保持 pending，不得标记 complete。
+当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 7D accepted increment `mygit_7d_20260727_2` 通过候选 API gate 后原子激活，VPS2 当前只保留 PG active。`deploy-pg-incremental.yml` 已补齐 `.gz` 输入、7D/all/search/source contract gate 与 cleanup，后续 workflow 不再走全量 SQLite。workflow run `30228901978`、`30229296719`、最新 `30230751826` 均因 Mac runner 分配后零 step 被有界取消；最新 run 的 head=`deca362a0166e9394138b5400855a41e9149873a`，取消结论已核实，手工 candidate/activate 已完成但正式 Mac workflow 仍是外部 runner 阻塞。固定搜索链接的 yt-dlp 发现证据为 `playlist_count=533`、详情候选 534、accepted 137/2179 occurrence；通用 continuation 旧 checkpoint 仍 `paused_no_progress`，`うら飯紺汰` 专项详情尚未形成，因此 7D 主线为“已合并当前 accepted increment，来源专项 pending”，不得把它写成完整来源收口。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过 workflow 运行、迁移后清洗和来源专项线上验收前保持 pending，不得标记 complete。
 
 ## 目标
 
@@ -75,7 +75,7 @@
 - `done`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；Mac run `30224885215` 已完成 full runtime stream，candidate `full_runtime_30224885215_1` 已通过 compare/health/API gate 后原子激活；active counts 为 `45605/45561/598033`（videos/songs/occurrences）。
 - `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
 - `done`：端到端 full stream、compare、candidate/active 切换和线上健康证据已存在；正式 run 使用 Mac self-hosted 单跳 SSH 传输。首次 gate 因证据文件名拼写失败，已在 workflow 修复；`VPS2_PASSWORD` 仅用于受控 SSH，PG target 使用 VPS2 Unix-socket peer，不伪装为 GitHub PG DSN。
-- `done/verification-pending`：`mygit_7d_20260727_2` 已由同一 PG candidate -> health/API -> locked activate 路径合并，旧 full revision 可作 parent/rollback；GitHub workflow 仍需在最新 commit 上取得一次非零步正式 run，不能用手工 run 替代 workflow 证据。
+- `done/verification-pending`：`mygit_7d_20260727_2` 已由同一 PG candidate -> health/API -> locked activate 路径合并，旧 full revision 可作 parent/rollback；GitHub workflow 最新 run `30230751826` 仍为零 step/cancelled，不能用手工 run替代正式 workflow 证据。
 - `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
 - `done`：curation/release 分支的中断合并未恢复；禁止合并全量生成 data。
 - `pending`：C/D/G/Mac 存储清单与回收规则部分完成；G 盘、正式仓库、Mac 空间/runner/cache、culua 盘和本机残留进程已有证据，WDC/VPS2 角色与空间仍缺可复核 SSH 证据；不以子任务未完成报告代替清理验收。

@@ -261,13 +261,13 @@ def _overlay_norm(value: Any) -> str:
     return " ".join(unicodedata.normalize("NFKC", _text(value)).casefold().split())
 
 
-def _overlay_candidate_rows(connection, revision_id: str) -> list[dict[str, Any]]:
+def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
     """Read only the candidate rows; never resolve the parent occurrence table."""
 
-    return _rows(
+    rows = _rows(
         connection,
         """
-        SELECT o.video_id, o.occurrence_id, o.position, o.range_id,
+        SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
                v.title AS video_title, v.channel_name, v.channel_id,
@@ -276,11 +276,23 @@ def _overlay_candidate_rows(connection, revision_id: str) -> list[dict[str, Any]
         FROM migration_occurrence_rows AS o
         LEFT JOIN migration_video_rows AS v
           ON v.revision_id = o.revision_id AND v.video_id = o.video_id
-        WHERE o.revision_id = %s
+        WHERE o.revision_id = ANY(%s)
         ORDER BY o.video_id, o.position, o.occurrence_key
         """,
-        [revision_id],
+        [list(revision_ids)],
     )
+    priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
+    rows.sort(key=lambda row: (priority.get(_text(row.get("revision_id")), len(priority)), _text(row.get("video_id")), int(row.get("position") or 0)))
+    selected_revision: dict[str, str] = {}
+    resolved: list[dict[str, Any]] = []
+    for row in rows:
+        video_id = _text(row.get("video_id"))
+        revision_id = _text(row.get("revision_id"))
+        if video_id not in selected_revision:
+            selected_revision[video_id] = revision_id
+        if selected_revision[video_id] == revision_id:
+            resolved.append(row)
+    return resolved
 
 
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
@@ -377,7 +389,8 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         base_params,
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
-    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, revision_id), options["view"])
+    lineage = _revision_lineage(connection, revision_id)
+    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, [item for item in lineage if item != parent[0]]), options["view"])
     for key, item in delta.items():
         row = groups.get(key)
         if row is None:
@@ -1258,10 +1271,11 @@ def meta_payload(connection) -> dict[str, Any]:
             "ranking_rows": counts.get("latest_ranking_rows", 0),
             "source_occurrences": counts.get("source_occurrences_rows", 0),
         })
-        delta = _rows(connection, "SELECT count(DISTINCT video_id) AS videos, count(*) AS occurrences FROM migration_occurrence_rows WHERE revision_id = %s", [generic_runtime[0]])
-        if delta:
-            counts["videos"] = counts.get("videos", 0) + int(delta[0].get("videos") or 0)
-            counts["occurrences"] = counts.get("occurrences", 0) + int(delta[0].get("occurrences") or 0)
+        lineage = _revision_lineage(connection, generic_runtime[0])
+        delta_rows = _overlay_candidate_rows(connection, [item for item in lineage if item != parent_id])
+        if delta_rows:
+            counts["videos"] = counts.get("videos", 0) + len({_text(row.get("video_id")) for row in delta_rows})
+            counts["occurrences"] = counts.get("occurrences", 0) + len(delta_rows)
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
