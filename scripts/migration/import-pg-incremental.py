@@ -70,9 +70,19 @@ def occurrence_rows(record: dict[str, Any], video_id: str) -> list[tuple[Any, ..
         payload.setdefault("position", position)
         title = item.get("title")
         artist = item.get("artist")
-        range_id = item.get("rangeId", item.get("range_id")) or record.get("rangeId", record.get("range_id")) or "7d"
-        song_key = item.get("songKey", item.get("song_key")) or derived_song_key(title, artist)
-        source_system = item.get("sourceSystem", item.get("source_system")) or record.get("sourceSystem", record.get("source_system")) or "mygit-7d"
+        range_id = first_present(item, "rangeId", "range_id")
+        if range_id is None:
+            range_id = first_present(record, "rangeId", "range_id")
+        if range_id is None:
+            range_id = "7d"
+        song_key = first_present(item, "songKey", "song_key")
+        if song_key is None:
+            song_key = derived_song_key(title, artist)
+        source_system = first_present(item, "sourceSystem", "source_system")
+        if source_system is None:
+            source_system = first_present(record, "sourceSystem", "source_system")
+        if source_system is None:
+            source_system = "mygit-7d"
         payload.update({"rangeId": range_id, "songKey": song_key, "sourceSystem": source_system})
         rows.append((
             video_id,
@@ -90,6 +100,15 @@ def occurrence_rows(record: dict[str, Any], video_id: str) -> list[tuple[Any, ..
             json.dumps(payload, ensure_ascii=False),
         ))
     return rows
+
+
+def first_present(mapping: dict[str, Any], *keys: str) -> Any:
+    """Return the first existing key, preserving explicit empty/NULL values."""
+
+    for key in keys:
+        if key in mapping:
+            return mapping[key]
+    return None
 
 
 def insert_video(cur, revision_id: str, record: dict[str, Any], generated_at: str) -> tuple[str, int]:

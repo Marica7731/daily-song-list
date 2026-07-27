@@ -16,8 +16,49 @@ on:
         required: true
         default: false
         type: boolean
+      require_7d_gate:
+        description: "Require complete 7D manifest/time-coverage gate"
+        required: false
+        default: false
+        type: boolean
+      source_key:
+        description: "Optional source key to match in the manifest"
+        required: false
+        default: ""
   repository_dispatch:
     types: [accepted-increment-ready]
+  workflow_run:
+    workflows: ["Update core song-list data"]
+    types: [completed]
+  workflow_call:
+    inputs:
+      artifact_name:
+        type: string
+        required: false
+        default: ""
+      patch_path:
+        type: string
+        required: false
+        default: "candidate.ndjson"
+      manifest_path:
+        type: string
+        required: false
+        default: "manifest.json"
+      activate:
+        type: boolean
+        required: false
+        default: true
+      require_7d_gate:
+        type: boolean
+        required: false
+        default: false
+      source_key:
+        type: string
+        required: false
+        default: ""
+    secrets:
+      VPS2_PASSWORD:
+        required: true
 
 permissions:
   contents: read
@@ -28,7 +69,7 @@ concurrency:
 
 jobs:
   candidate:
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 45
     env:
@@ -37,11 +78,22 @@ jobs:
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
       PATCH_PATH: ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
       MANIFEST_PATH: ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
-      ACTIVATE: ${{ inputs.activate || false }}
+      ACTIVATE: ${{ inputs.activate || github.event.client_payload.activate || (github.event_name == 'workflow_run') || false }}
+      REQUIRE_7D_GATE: ${{ inputs.require_7d_gate || github.event.client_payload.require_7d_gate || false }}
+      SOURCE_KEY: ${{ inputs.source_key || github.event.client_payload.source_key || '' }}
+      ARTIFACT_NAME: ${{ inputs.artifact_name || '' }}
+      ARTIFACT_ROOT: ${{ runner.temp }}/daily-song-list-pg-artifact
     steps:
+      - name: Download generated accepted increment
+        if: ${{ inputs.artifact_name != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ runner.temp }}/daily-song-list-pg-artifact
       - name: Candidate compare health and optional activation
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
@@ -65,19 +117,80 @@ jobs:
               "$RAW_BASE/$source_path" -o "$destination"
             test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty input=$source_path"; exit 78; }
           }
+          if [ -n "$ARTIFACT_NAME" ]; then
+            PATCH_INPUT="$ARTIFACT_ROOT/$PATCH_PATH"
+            MANIFEST_INPUT="$ARTIFACT_ROOT/$MANIFEST_PATH"
+            test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact patch=$PATCH_PATH"; exit 78; }
+            test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact manifest=$MANIFEST_PATH"; exit 78; }
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            SOURCE_SHA="${{ github.event.workflow_run.head_sha }}"
+            SOURCE_BASE_SHA="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.parents[0].sha')"
+            COMPARE_JSON="$TASK_ROOT/compare.json"
+            curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${SOURCE_BASE_SHA}...${SOURCE_SHA}" -o "$COMPARE_JSON"
+            test "$(jq -er '.files | length' "$COMPARE_JSON")" -lt 300 || {
+              echo "PG_INCREMENT_BLOCKED compare-api-file-limit sourceSha=$SOURCE_SHA"; exit 78;
+            }
+            mapfile -t ACCEPTED_PATHS < <(jq -er -r '.files[]?.filename | select(startswith("data/external/youtube-channel-discovery/accepted/") and endswith(".json"))' "$COMPARE_JSON")
+            if [ "${#ACCEPTED_PATHS[@]}" -eq 0 ]; then
+              runtime_changes="$(jq -er -r '.files[]?.filename | select(test("^data/(latest|7d|all|72h|1m|status)\\.json$"))' "$COMPARE_JSON" || true)"
+              if [ -n "$runtime_changes" ]; then
+                echo "PG_INCREMENT_BLOCKED core-data-changed-without-accepted-increment sourceSha=$SOURCE_SHA paths=$(printf '%s,' $runtime_changes)"
+                exit 78
+              fi
+              echo "PG_INCREMENT_NOOP sourceSha=$SOURCE_SHA reason=no-accepted-increment"
+              exit 0
+            fi
+            fetch_input "scripts/migration/accepted-files-to-patch.py" "$INPUT_ROOT/accepted-files-to-patch.py"
+            DATA_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
+            ACCEPTED_ARGS=()
+            accepted_index=0
+            mkdir -p "$INPUT_ROOT/accepted"
+            for source_path in "${ACCEPTED_PATHS[@]}"; do
+              destination="$INPUT_ROOT/accepted/$(printf '%04d.json' "$accepted_index")"
+              curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
+                "$DATA_RAW_BASE/$source_path" -o "$destination"
+              test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty accepted input=$source_path"; exit 78; }
+              ACCEPTED_ARGS+=(--input "$destination")
+              accepted_index=$((accepted_index + 1))
+            done
+            python3 "$INPUT_ROOT/accepted-files-to-patch.py" "${ACCEPTED_ARGS[@]}" \
+              --output "$INPUT_ROOT/patch" --manifest-output "$INPUT_ROOT/manifest" --range-id all
+            PATCH_PATH="workflow-run-generated"
+            MANIFEST_PATH="workflow-run-generated"
+          fi
           fetch_input "scripts/migration/pg-schema.sql" "$INPUT_ROOT/pg-schema.sql"
           fetch_input "scripts/migration/import-pg-incremental.py" "$INPUT_ROOT/import-pg-incremental.py"
           fetch_input "scripts/migration/activate-pg-candidate.py" "$INPUT_ROOT/activate-pg-candidate.py"
           fetch_input "server/pg_adapter.py" "$INPUT_ROOT/pg_adapter.py"
           fetch_input "server/pg_api_server.py" "$INPUT_ROOT/pg_api_server.py"
           fetch_input "deploy/vps2/song-rank-pg-api.service" "$INPUT_ROOT/song-rank-pg-api.service"
-          fetch_input "$PATCH_PATH" "$INPUT_ROOT/patch"
-          fetch_input "$MANIFEST_PATH" "$INPUT_ROOT/manifest"
-          PATCH_INPUT="$INPUT_ROOT/patch"
-          MANIFEST_INPUT="$INPUT_ROOT/manifest"
+          if [ -z "$ARTIFACT_NAME" ] && [ "$GITHUB_EVENT_NAME" != "workflow_run" ]; then
+            fetch_input "$PATCH_PATH" "$INPUT_ROOT/patch"
+            fetch_input "$MANIFEST_PATH" "$INPUT_ROOT/manifest"
+            PATCH_INPUT="$INPUT_ROOT/patch"
+            MANIFEST_INPUT="$INPUT_ROOT/manifest"
+          fi
           printf 'TASK_ROOT=%s\nPG_INPUT_ROOT=%s\n' "$TASK_ROOT" "$INPUT_ROOT" >> "$GITHUB_ENV"
           test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
           test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
+          if [ "$REQUIRE_7D_GATE" = "true" ]; then
+            jq -e --arg source_key "$SOURCE_KEY" '
+              ((.rangeId == "7d" or .range == "7d") and
+               .sourceReachedEnd == true and
+               .mediaDownloaded == false and
+               (.statusAuditIncluded == true) and
+               ((.acceptedVideoCount // 0) > 0) and
+               ((.acceptedOccurrenceCount // 0) > 0) and
+               (($source_key == "") or (.sourceKey == $source_key)))
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED 7d-manifest-gate sourceKey=$SOURCE_KEY"; exit 78;
+            }
+            echo "PG_INCREMENT_7D_GATE_OK sourceKey=$SOURCE_KEY manifest=$MANIFEST_PATH"
+          fi
           baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
           patch_bytes="$(stat -f%z "$PATCH_INPUT")"
           manifest_bytes="$(stat -f%z "$MANIFEST_INPUT")"
@@ -150,8 +263,36 @@ jobs:
             fi
             printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service && systemctl daemon-reload"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'" | tee -a "$TASK_ROOT/activation-result.txt"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" '
+              set -Eeuo pipefail
+              old_was_active=0
+              systemctl is-active --quiet song-rank-api && old_was_active=1 || true
+              if systemctl is-active --quiet song-rank-pg-api; then
+                systemctl restart song-rank-pg-api
+              else
+                systemctl stop song-rank-api || true
+                if ! systemctl start song-rank-pg-api; then
+                  [ "$old_was_active" = 1 ] && systemctl start song-rank-api || true
+                  exit 1
+                fi
+              fi
+              ready=0
+              for n in $(seq 1 30); do
+                if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
+                sleep 1
+              done
+              if [ "$ready" != 1 ]; then
+                systemctl stop song-rank-pg-api || true
+                [ "$old_was_active" = 1 ] && systemctl start song-rank-api || true
+                echo PG_INCREMENT_BLOCKED activated-service-health-timeout >&2
+                exit 1
+              fi
+              systemctl disable song-rank-api || true
+              systemctl reload nginx || true
+              curl -fsS http://127.0.0.1:8765/healthz
+              curl -fsS http://127.0.0.1:8765/api/meta
+              curl -fsS "http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"
+            ' | tee -a "$TASK_ROOT/activation-result.txt"
           fi
           echo PG_INCREMENT_STORAGE_BEGIN
           cat "$TASK_ROOT/storage.txt"

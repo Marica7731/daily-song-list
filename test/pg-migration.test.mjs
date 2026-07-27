@@ -24,9 +24,12 @@ test("production DSN detection never exposes its value", () => {
 
 test("accepted-increment importer keeps 7d range and derives missing song identity", () => {
   const importer = readFileSync(new URL("../scripts/migration/import-pg-incremental.py", import.meta.url), "utf8");
-  assert.match(importer, /or record\.get\("rangeId".*or "7d"/);
+  assert.match(importer, /def first_present/);
+  assert.match(importer, /range_id = first_present\(item, "rangeId", "range_id"\)/);
+  assert.match(importer, /range_id = "7d"/);
   assert.match(importer, /def derived_song_key/);
-  assert.match(importer, /or record\.get\("sourceSystem".*or "mygit-7d"/);
+  assert.match(importer, /source_system = first_present\(item, "sourceSystem", "source_system"\)/);
+  assert.match(importer, /source_system = "mygit-7d"/);
 });
 
 test("ephemeral PostgreSQL candidate supports upsert, compare, activate and rollback", {

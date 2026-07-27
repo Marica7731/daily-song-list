@@ -1,0 +1,141 @@
+name: Recover @urameshi_conta 7D and publish PG increment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: daily-song-list-source-urameshi-7d
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 120
+    env:
+      SOURCE_KEY: "@urameshi_conta"
+      CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
+      SINGER_NAME: "うら飯 紺汰"
+      SOURCE_RANGE_ID: "7d"
+      SCRATCH_CAP_BYTES: "4294967296"
+    steps:
+      - name: Collect bounded 7D detail and accepted increment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-urameshi-7d.XXXXXX")"
+          RELEASE_ROOT="$TASK_ROOT/release"
+          REPO_ROOT="$TASK_ROOT/repo"
+          mkdir -p "$RELEASE_ROOT" "$REPO_ROOT"
+          printf 'startedAt=%s\nexpectedPeakBytes=4294967296\nhardCapBytes=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRATCH_CAP_BYTES" > "$TASK_ROOT/storage.txt"
+          df -k "$RUNNER_TEMP" > "$TASK_ROOT/mac-df-baseline.txt"
+          printf 'TASK_ROOT=%s\nRELEASE_ROOT=%s\nARTIFACT_NAME=urameshi-7d-%s-%s\n' "$TASK_ROOT" "$RELEASE_ROOT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+          on_exit() {
+            status=$?
+            printf 'exitStatus=%s\nendedAt=%s\n' "$status" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TASK_ROOT/storage.txt"
+            used_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
+            printf 'peakObservedBytes=%s\n' "$used_bytes" >> "$TASK_ROOT/storage.txt"
+            if [ "$used_bytes" -gt "$SCRATCH_CAP_BYTES" ]; then
+              echo "URAMESHI_7D_BLOCKED scratch-cap-exceeded bytes=$used_bytes cap=$SCRATCH_CAP_BYTES" >&2
+            fi
+            if [ "$status" -ne 0 ]; then
+              echo "URAMESHI_7D_PARTIAL taskRoot=$TASK_ROOT" >&2
+            fi
+            exit "$status"
+          }
+          trap on_exit EXIT INT TERM
+          check_space() {
+            used_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
+            test "$used_bytes" -le "$SCRATCH_CAP_BYTES" || { echo "URAMESHI_7D_BLOCKED scratch-cap-exceeded bytes=$used_bytes cap=$SCRATCH_CAP_BYTES"; exit 78; }
+            printf 'checkpoint=%s usedBytes=%s\n' "$1" "$used_bytes" >> "$TASK_ROOT/storage.txt"
+          }
+          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
+          echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+          git -C "$REPO_ROOT" init -q
+          git -C "$REPO_ROOT" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git -C "$REPO_ROOT" -c http.extraheader="AUTHORIZATION: bearer $GITHUB_TOKEN" fetch --filter=blob:none --depth=1 origin "$GITHUB_SHA"
+          git -C "$REPO_ROOT" sparse-checkout init --cone
+          git -C "$REPO_ROOT" sparse-checkout set assets config package.json scripts
+          git -C "$REPO_ROOT" checkout -q FETCH_HEAD
+          cd "$REPO_ROOT"
+          check_space code-checkout
+          npm run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+            --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
+            --max-candidates 2000 --candidate-only --request-interval-ms 3000 --request-jitter-ms 1500
+          check_space candidate-manifest
+          for shard in 0 1 2 3 4 5; do
+            npm run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+              --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
+              --max-candidates 2000 --max-inspect 500 --inspect-shard-count 6 --inspect-shard-index "$shard" \
+              --request-interval-ms 3000 --request-jitter-ms 1500
+            check_space "detail-shard-$shard"
+          done
+          DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
+          DETAILS="$TASK_ROOT/discovery/video-details.json"
+          test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
+          test -s "$DETAILS" || { echo "URAMESHI_7D_BLOCKED missing video details"; exit 78; }
+          jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
+            echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
+          }
+          python3 scripts/migration/7d-status-audit.py --details "$DETAILS" \
+            --output "$TASK_ROOT/status-audit.json" --review-queue "$TASK_ROOT/review-queue.ndjson"
+          npm run youtube:import-channel-discovery -- --input-dir "$TASK_ROOT/discovery" --report-path "$TASK_ROOT/import-report.json"
+          npm run youtube:export-channel-increment -- --input-dir "$TASK_ROOT/discovery" --output "$TASK_ROOT/accepted.json"
+          python3 scripts/migration/accepted-files-to-patch.py --input "$TASK_ROOT/accepted.json" \
+            --output "$TASK_ROOT/candidate.ndjson" --manifest-output "$TASK_ROOT/manifest.json" \
+            --range-id "$SOURCE_RANGE_ID" --source-key "$SOURCE_KEY" --status-audit "$TASK_ROOT/status-audit.json"
+          discovery_sha="$(shasum -a 256 "$DISCOVERY_MANIFEST" | awk '{print $1}')"
+          jq --arg source "$SOURCE_KEY" --arg discoverySha "$discovery_sha" \
+            --slurpfile discovery "$DISCOVERY_MANIFEST" \
+            '.sourceKey=$source | .sourceReachedEnd=true | .mediaDownloaded=false | .discoveryManifestSha256=$discoverySha | .candidateCount=($discovery[0].candidateCount // 0) | .inspectedVideoCount=($discovery[0].usableVideoCount // 0) | .timeCoverageEvidence="publishedAt retained in detail/status audit"' \
+            "$TASK_ROOT/manifest.json" > "$TASK_ROOT/manifest.next.json"
+          mv "$TASK_ROOT/manifest.next.json" "$TASK_ROOT/manifest.json"
+          test "$(jq -er '.acceptedVideoCount' "$TASK_ROOT/manifest.json")" -gt 0
+          test "$(jq -er '.acceptedOccurrenceCount' "$TASK_ROOT/manifest.json")" -gt 0
+          cp "$DISCOVERY_MANIFEST" "$RELEASE_ROOT/source-manifest.json"
+          cp "$TASK_ROOT/manifest.json" "$RELEASE_ROOT/manifest.json"
+          cp "$TASK_ROOT/candidate.ndjson" "$RELEASE_ROOT/candidate.ndjson"
+          cp "$TASK_ROOT/accepted.json" "$RELEASE_ROOT/accepted.json"
+          cp "$TASK_ROOT/status-audit.json" "$RELEASE_ROOT/status-audit.json"
+          cp "$TASK_ROOT/review-queue.ndjson" "$RELEASE_ROOT/review-queue.ndjson"
+          cp "$TASK_ROOT/import-report.json" "$RELEASE_ROOT/import-report.json"
+          test -f "$TASK_ROOT/discovery/checkpoint.json" && cp "$TASK_ROOT/discovery/checkpoint.json" "$RELEASE_ROOT/checkpoint.json" || true
+          cp "$TASK_ROOT/storage.txt" "$RELEASE_ROOT/storage-before-upload.txt"
+          trap - EXIT INT TERM
+
+      - name: Upload accepted 7D evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.RELEASE_ROOT }}
+          if-no-files-found: error
+          retention-days: 2
+
+      - name: Cleanup source task root
+        if: always()
+        run: |
+          set -Eeuo pipefail
+          before_bytes=0
+          if [ -n "${TASK_ROOT:-}" ] && [ -d "$TASK_ROOT" ]; then
+            before_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
+            rm -rf -- "$TASK_ROOT"
+          fi
+          echo "URAMESHI_7D_CLEANUP status=success beforeBytes=$before_bytes afterBytes=0 retained=artifact:$ARTIFACT_NAME"
+
+  deploy:
+    needs: collect
+    uses: ./.github/workflows/deploy-pg-incremental.yml
+    with:
+      artifact_name: urameshi-7d-${{ github.run_id }}-${{ github.run_attempt }}
+      patch_path: candidate.ndjson
+      manifest_path: manifest.json
+      activate: true
+      require_7d_gate: true
+      source_key: "@urameshi_conta"
+    secrets: inherit
