@@ -67,6 +67,7 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
     singerName: String(args["singer-name"] || args.name || defaults.singerName || "").trim(),
     outputDir: path.resolve(String(args["output-dir"] || defaults.outputDir || path.join("artifacts", "channel-discovery", safePathName(channelUrl)))),
     cacheDir: path.resolve(String(args["cache-dir"] || defaults.cacheDir || path.join(".local-cache", "youtube-channel-discovery"))),
+    candidateManifestPath: String(args["candidate-manifest"] || defaults.candidateManifestPath || "").trim(),
     keywords: keywordList(args.keyword || args.keywords || defaults.keywords),
     tabs: tabList(args.tab || args.tabs || defaults.tabs),
     maxChannelPages: positiveInteger(args["max-channel-pages"], defaults.maxChannelPages ?? 3, "--max-channel-pages"),
@@ -82,26 +83,68 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
   };
 }
 
+function loadCandidateManifest(filePath) {
+  const resolvedPath = path.resolve(filePath);
+  if (!fs.existsSync(resolvedPath)) throw new Error(`candidate manifest not found: ${resolvedPath}`);
+  const text = fs.readFileSync(resolvedPath, "utf8").trim();
+  const records = text
+    ? (text.startsWith("[") ? JSON.parse(text) : text.split(/\r?\n/u).filter(Boolean).map((line) => JSON.parse(line)))
+    : [];
+  const manifestPath = path.join(path.dirname(resolvedPath), "manifest.json");
+  const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : {};
+  return {
+    manifest,
+    records: records.map((record) => ({
+      videoId: record.videoId || record.youtubeVideoId || "",
+      title: record.title || record.videoTitle || "",
+      channelUrl: record.channelUrl || "",
+      channelId: record.channelId || "",
+      channelName: record.channelName || "",
+      thumbnailUrl: record.thumbnailUrl || "",
+      publishedTimestamp: record.publishedTimestamp ?? record.publishedAtTimestampMs ?? null,
+      publishedText: record.publishedText || record.publishedAtOriginalText || "",
+      durationText: record.durationText || "",
+      matchedKeywords: record.matchedKeywords || record.keywords || [],
+      discoverySourceUrl: record.discoverySourceUrl || record.sourceUrl || "",
+    })),
+  };
+}
 async function runChannelDiscovery(options, deps) {
   const startedAt = new Date();
   const normalizedChannelUrl = normalizeChannelUrl(options.channelUrl);
-  const pageUrls = options.discoveryUrl ? [options.discoveryUrl] : channelTabUrls(normalizedChannelUrl, options.tabs);
+  const candidateInput = options.candidateManifestPath ? loadCandidateManifest(options.candidateManifestPath) : null;
+  const pageUrls = candidateInput?.manifest?.pageUrls?.length
+    ? candidateInput.manifest.pageUrls
+    : (options.discoveryUrl ? [options.discoveryUrl] : channelTabUrls(normalizedChannelUrl, options.tabs));
   const checkpointPath = path.join(options.outputDir, "checkpoint.json");
   const checkpoint = options.fresh ? emptyCheckpoint() : loadCheckpoint(checkpointPath);
   const candidatesByVideoId = new Map();
   const pageSummaries = [];
 
-  for (const pageUrl of pageUrls) {
-    const pageResult = await fetchChannelPageWithContinuations(pageUrl, options, deps);
-    pageSummaries.push(pageResult.summary);
-    for (const item of pageResult.items) {
+  if (candidateInput) {
+    for (const item of candidateInput.records) {
       mergeDiscoveryCandidate(candidatesByVideoId, item, {
         channelUrl: normalizedChannelUrl,
-        discoverySourceUrl: pageUrl,
+        discoverySourceUrl: item.discoverySourceUrl || candidateInput.manifest.discoveryUrl || options.discoveryUrl,
         singerName: options.singerName,
         keywords: options.keywords,
         fetchedAt: startedAt.toISOString(),
       });
+    }
+    pageSummaries.push(...(candidateInput.manifest.pageSummaries || []));
+  } else {
+    for (const pageUrl of pageUrls) {
+      const pageResult = await fetchChannelPageWithContinuations(pageUrl, options, deps);
+      pageSummaries.push(pageResult.summary);
+      for (const item of pageResult.items) {
+        mergeDiscoveryCandidate(candidatesByVideoId, item, {
+          channelUrl: normalizedChannelUrl,
+          discoverySourceUrl: pageUrl,
+          singerName: options.singerName,
+          keywords: options.keywords,
+          fetchedAt: startedAt.toISOString(),
+        });
+      }
     }
   }
 
@@ -167,6 +210,8 @@ async function runChannelDiscovery(options, deps) {
     inspectShardIndex: options.inspectShardIndex || 0,
     inspectShardCount: options.inspectShardCount || 1,
     candidateOnly: options.candidateOnly,
+    candidateManifestPath: options.candidateManifestPath || "",
+    sourceReachedEnd: pageSummaries.length > 0 && pageSummaries.every((summary) => summary.reachedEnd === true),
     candidateCount: rawVideos.length,
     inspectedInLatestRun: inspectedCount,
     usableVideoCount: details.length,

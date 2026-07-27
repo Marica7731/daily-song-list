@@ -11,6 +11,16 @@ on:
         options:
           - candidate
           - detail
+      candidate_run_id:
+        description: Prior candidate-stage run to reuse for detail collection
+        required: false
+        default: ""
+        type: string
+      candidate_artifact_name:
+        description: Exact candidate artifact name from candidate_run_id
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -27,6 +37,8 @@ jobs:
     env:
       SOURCE_KEY: "@urameshi_conta"
       STAGE: ${{ inputs.stage || 'candidate' }}
+      CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id || '' }}
+      CANDIDATE_ARTIFACT_NAME: ${{ inputs.candidate_artifact_name || '' }}
       DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
@@ -152,9 +164,25 @@ jobs:
           echo "URAMESHI_7D_SOURCE_FETCH paths=$source_file_count directories=$source_directory_count bytes=$downloaded_bytes"
           cd "$REPO_ROOT"
           check_space source-code-fetch
-          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
-            --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
-            --max-candidates "$DISCOVERY_MAX_CANDIDATES" --candidate-only --request-interval-ms "$DISCOVERY_REQUEST_INTERVAL_MS" --request-jitter-ms "$DISCOVERY_REQUEST_JITTER_MS"
+          CANDIDATE_MANIFEST_PATH=""
+          if [ "$STAGE" = "detail" ] && [ -n "$CANDIDATE_RUN_ID" ] && [ -n "$CANDIDATE_ARTIFACT_NAME" ]; then
+            mkdir -p "$TASK_ROOT/candidate-input"
+            gh run download "$CANDIDATE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$CANDIDATE_ARTIFACT_NAME" --dir "$TASK_ROOT/candidate-input"
+            CANDIDATE_MANIFEST_PATH="$(find "$TASK_ROOT/candidate-input" -type f -name candidate-manifest.ndjson -print -quit)"
+            test -s "$CANDIDATE_MANIFEST_PATH" || { echo "URAMESHI_7D_BLOCKED candidate artifact missing manifest" >&2; exit 78; }
+            echo "URAMESHI_7D_REUSE_CANDIDATE run=$CANDIDATE_RUN_ID artifact=$CANDIDATE_ARTIFACT_NAME path=$CANDIDATE_MANIFEST_PATH"
+          fi
+          if [ "$STAGE" = "detail" ] && [ -n "$CANDIDATE_MANIFEST_PATH" ]; then
+            echo "URAMESHI_7D_CANDIDATE_REUSED path=$CANDIDATE_MANIFEST_PATH"
+          else
+            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
+              --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
+              --max-candidates "$DISCOVERY_MAX_CANDIDATES" --candidate-only --request-interval-ms "$DISCOVERY_REQUEST_INTERVAL_MS" --request-jitter-ms "$DISCOVERY_REQUEST_JITTER_MS"
+          fi
+          candidate_manifest_args=()
+          if [ -n "$CANDIDATE_MANIFEST_PATH" ]; then
+            candidate_manifest_args=(--candidate-manifest "$CANDIDATE_MANIFEST_PATH")
+          fi
           check_space candidate-manifest
           if [ "$STAGE" = "candidate" ]; then
             DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
@@ -173,7 +201,7 @@ jobs:
           for shard in 0 1 2 3 4 5; do
             "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
-              --max-candidates "$DISCOVERY_MAX_CANDIDATES" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
+              --max-candidates "$DISCOVERY_MAX_CANDIDATES" "${candidate_manifest_args[@]}" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
               --request-interval-ms 5000 --request-jitter-ms 2500
             check_space "detail-shard-$shard"
           done

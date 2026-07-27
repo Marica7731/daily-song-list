@@ -113,6 +113,47 @@ test("continuation selector skips already consumed tokens", () => {
 
   assert.equal(findBrowseContinuation(data, "/youtubei/v1/search", new Set(["SEEN_TOKEN"])), "NEXT_TOKEN");
 });
+test("detail can reuse a verified candidate manifest without rediscovery", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-candidate-reuse-test-"));
+  const candidatePath = path.join(dir, "candidate-manifest.ndjson");
+  fs.writeFileSync(candidatePath, JSON.stringify({
+    youtubeVideoId: "REUSEVIDEO01",
+    videoTitle: "歌枠",
+    channelUrl: "https://www.youtube.com/@urameshi_conta",
+    channelName: "うら飯 紺汰",
+    publishedAtTimestampMs: Date.parse("2026-07-27T00:00:00Z"),
+    publishedAtOriginalText: "1 日前",
+    matchedKeywords: ["歌"],
+    discoverySourceUrl: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0",
+  }) + "\n", "utf8");
+  fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify({
+    pageUrls: ["https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0"],
+    pageSummaries: [{ pageCount: 361, candidateCount: 1, reachedEnd: true }],
+  }), "utf8");
+  const result = await runChannelDiscovery({
+    channelUrl: "https://www.youtube.com/@urameshi_conta",
+    discoveryUrl: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0",
+    candidateManifestPath: candidatePath,
+    outputDir: dir,
+    cacheDir: path.join(dir, "cache"),
+    singerName: "うら飯 紺汰",
+    keywords: ["歌"],
+    tabs: ["videos"],
+    maxChannelPages: 1,
+    maxCandidates: 10,
+    maxInspect: 0,
+    requestIntervalMs: 0,
+    requestTimeoutMs: 1000,
+    requestJitterMs: 0,
+    inspectShardIndex: 0,
+    inspectShardCount: 1,
+    fresh: true,
+    candidateOnly: true,
+  }, { client: { metrics: {}, getText: async () => { throw new Error("candidate manifest reuse unexpectedly rediscovered source"); } }, extractSearchItems: () => [] });
+  assert.equal(result.manifest.sourceReachedEnd, true);
+  assert.equal(result.rawVideos.length, 1);
+  assert.equal(result.rawVideos[0].youtubeVideoId, "REUSEVIDEO01");
+});
 test("search discovery routes continuation to youtubei search", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-search-test-"));
   const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";
