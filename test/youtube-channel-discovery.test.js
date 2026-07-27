@@ -25,6 +25,10 @@ test("channel options normalize YouTube handles, tabs, keywords, and output path
   const options = channelDiscoveryOptionsFromArgs(parseCliArgs([
     "--channel-url",
     "@noa_polaris",
+    "--discovery-url",
+    "
+https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D
+",
     "--singer-name",
     "Noa Polaris",
     "--keyword",
@@ -36,6 +40,7 @@ test("channel options normalize YouTube handles, tabs, keywords, and output path
   ]));
 
   assert.equal(options.channelUrl, "https://www.youtube.com/@noa_polaris");
+  assert.equal(options.discoveryUrl, "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D");
   assert.equal(options.singerName, "Noa Polaris");
   assert.deepEqual(options.keywords, ["LIVE", "歌"]);
   assert.deepEqual(options.tabs, ["streams", "videos"]);
@@ -180,6 +185,7 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
   const result = await runChannelDiscovery(
     {
       channelUrl: "https://www.youtube.com/@noa_polaris",
+      discoveryUrl: firstUrl,
       singerName: "Noa Polaris",
       outputDir: dir,
       cacheDir: path.join(dir, "cache"),
@@ -198,6 +204,7 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
 
   assert.deepEqual(inspected, ["AAAAAAAAAAA", "BBBBBBBBBBB"]);
   assert.equal(result.manifest.candidateCount, 3);
+  assert.equal(result.manifest.discoveryUrl, firstUrl);
   assert.equal(result.manifest.usableVideoCount, 2);
   assert.equal(result.manifest.occurrenceCount, 2);
   assert.equal(continuationRequests, 2);
@@ -247,6 +254,7 @@ test("channel discovery retries transient video detail failures", async () => {
   const result = await runChannelDiscovery(
     {
       channelUrl: "https://www.youtube.com/@noa_polaris",
+      discoveryUrl: firstUrl,
       singerName: "Noa Polaris",
       outputDir: dir,
       cacheDir: path.join(dir, "cache"),
@@ -310,6 +318,7 @@ test("channel discovery can inspect a deterministic candidate shard", async () =
   const result = await runChannelDiscovery(
     {
       channelUrl: "https://www.youtube.com/@noa_polaris",
+      discoveryUrl: firstUrl,
       singerName: "Noa Polaris",
       outputDir: dir,
       cacheDir: path.join(dir, "cache"),
@@ -343,6 +352,7 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
     channelName: "Hanon",
     thumbnailUrl: "https://example.test/thumb.jpg",
     publishedTimestamp: Date.parse("2026-07-18T00:00:00Z"),
+    publishedText: "2026-07-18T00:00:00Z",
     matchedKeywords: ["歌", "リレー"],
     discoverySourceUrl: "https://www.youtube.com/@kanaruhanon/streams",
     fetchedAt: "2026-07-19T00:00:00Z",
@@ -368,6 +378,8 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
   assert.equal(raw.youtubeVideoId, "DDDDDDDDDDD");
   assert.equal(raw.youtubeUrl, "https://www.youtube.com/watch?v=DDDDDDDDDDD");
   assert.equal(raw.publishedAt, "2026-07-18T00:00:00.000Z");
+  assert.equal(raw.publishedAtOriginalText, "2026-07-18T00:00:00Z");
+  assert.equal(raw.publishedAtTimezone, null);
   assert.equal(raw.rawHash.length, 64);
   assert.equal(occurrences.length, 1);
   assert.equal(occurrences[0].youtubeUrl, "https://www.youtube.com/watch?v=DDDDDDDDDDD&t=3723s");

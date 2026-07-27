@@ -2,6 +2,15 @@ name: Recover @urameshi_conta 7D and publish PG increment
 
 on:
   workflow_dispatch:
+    inputs:
+      stage:
+        description: "candidate manifest only or detail collection"
+        required: false
+        default: "candidate"
+        type: choice
+        options:
+          - candidate
+          - detail
 
 permissions:
   contents: read
@@ -14,9 +23,10 @@ concurrency:
 jobs:
   collect:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 360
+    timeout-minutes: 120
     env:
       SOURCE_KEY: "@urameshi_conta"
+      STAGE: ${{ inputs.stage || 'candidate' }}       DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
       SOURCE_RANGE_ID: "7d"
@@ -141,6 +151,20 @@ jobs:
             --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
             --max-candidates 2000 --candidate-only --request-interval-ms 5000 --request-jitter-ms 2500
           check_space candidate-manifest
+          if [ "$STAGE" = "candidate" ]; then
+            DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
+            test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
+            jq -e '.pageSummaries | length > 0 and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
+              echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
+            }
+            jq -c '.[]' "$TASK_ROOT/discovery/raw-videos.json" > "$RELEASE_ROOT/candidate-manifest.ndjson"
+            discovery_sha="$(shasum -a 256 "$DISCOVERY_MANIFEST" | awk '{print $1}')"
+            jq --arg source "$SOURCE_KEY" --arg discoverySha "$discovery_sha" '.sourceKey=$source | .rangeId="7d" | .sourceReachedEnd=true | .mediaDownloaded=false | .candidateOnly=true | .discoveryManifestSha256=$discoverySha | .candidateManifestPath="candidate-manifest.ndjson"' "$DISCOVERY_MANIFEST" > "$RELEASE_ROOT/manifest.json"
+            cp "$DISCOVERY_MANIFEST" "$RELEASE_ROOT/source-manifest.json"
+            cp "$TASK_ROOT/storage.txt" "$RELEASE_ROOT/storage-before-upload.txt"
+            echo "URAMESHI_7D_CANDIDATE_READY candidates=$(jq -r '.candidateCount // 0' "$DISCOVERY_MANIFEST") reachedEnd=true"
+            exit 0
+          fi
           for shard in 0 1 2 3 4 5; do
             "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
@@ -202,6 +226,7 @@ jobs:
           echo "URAMESHI_7D_CLEANUP status=success beforeBytes=$before_bytes afterBytes=0 retained=artifact:$ARTIFACT_NAME"
 
   deploy:
+    if: ${{ inputs.stage != 'candidate' }}
     needs: collect
     uses: ./.github/workflows/deploy-pg-incremental.yml
     with:

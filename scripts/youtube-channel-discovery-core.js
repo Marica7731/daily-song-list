@@ -57,11 +57,13 @@ function positiveInteger(value, fallback, label) {
 
 function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
   const rawChannelUrl = String(args["channel-url"] || args.url || args._?.[0] || defaults.channelUrl || "").trim();
+  const rawDiscoveryUrl = String(args["discovery-url"] || defaults.discoveryUrl || "").trim();
   if (!rawChannelUrl) throw new Error("Usage: npm run youtube:discover-channel -- --channel-url <YouTube channel URL>");
   const channelUrl = normalizeChannelUrl(rawChannelUrl);
   const requestIntervalMs = positiveInteger(args["request-interval-ms"], defaults.requestIntervalMs ?? 2500, "--request-interval-ms");
   return {
     channelUrl,
+    discoveryUrl: rawDiscoveryUrl ? normalizeDiscoveryUrl(rawDiscoveryUrl) : "",
     singerName: String(args["singer-name"] || args.name || defaults.singerName || "").trim(),
     outputDir: path.resolve(String(args["output-dir"] || defaults.outputDir || path.join("artifacts", "channel-discovery", safePathName(channelUrl)))),
     cacheDir: path.resolve(String(args["cache-dir"] || defaults.cacheDir || path.join(".local-cache", "youtube-channel-discovery"))),
@@ -82,7 +84,7 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
 async function runChannelDiscovery(options, deps) {
   const startedAt = new Date();
   const normalizedChannelUrl = normalizeChannelUrl(options.channelUrl);
-  const pageUrls = channelTabUrls(normalizedChannelUrl, options.tabs);
+  const pageUrls = options.discoveryUrl ? [options.discoveryUrl] : channelTabUrls(normalizedChannelUrl, options.tabs);
   const checkpointPath = path.join(options.outputDir, "checkpoint.json");
   const checkpoint = options.fresh ? emptyCheckpoint() : loadCheckpoint(checkpointPath);
   const candidatesByVideoId = new Map();
@@ -94,6 +96,7 @@ async function runChannelDiscovery(options, deps) {
     for (const item of pageResult.items) {
       mergeDiscoveryCandidate(candidatesByVideoId, item, {
         channelUrl: normalizedChannelUrl,
+    discoveryUrl: options.discoveryUrl || "",
         discoverySourceUrl: pageUrl,
         singerName: options.singerName,
         keywords: options.keywords,
@@ -449,6 +452,11 @@ function rawVideoCandidate(candidate, singerName = "") {
     thumbnailUrl: candidate.thumbnailUrl || `https://i.ytimg.com/vi/${candidate.videoId}/hqdefault.jpg`,
     streamedAt: timestampToIso(candidate.publishedTimestamp),
     publishedAt: timestampToIso(candidate.publishedTimestamp),
+    publishedAtOriginalText: candidate.publishedText || null,
+    publishedAtTimestampMs: Number.isFinite(Number(candidate.publishedTimestamp)) && Number(candidate.publishedTimestamp) > 0 ? Number(candidate.publishedTimestamp) : null,
+    publishedAtTimezone: candidate.publishedAtTimezone || null,
+    publishedAtTimezoneReason: candidate.publishedAtTimezone ? "source-provided" : "published text has no timezone",
+    publishedAtEvidence: candidate.publishedAtEvidence || "youtube discovery published text",
     publishedText: candidate.publishedText || "",
     durationText: candidate.durationText || "",
     matchedKeywords: candidate.matchedKeywords || [],
@@ -578,6 +586,17 @@ function channelTabUrls(channelUrl, tabs = DEFAULT_TABS) {
     url.searchParams.set("persist_hl", "1");
     return url.toString();
   });
+}
+
+function normalizeDiscoveryUrl(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const url = new URL(text);
+  if (url.hostname !== "youtube.com" && !url.hostname.endsWith(".youtube.com")) throw new Error("Expected a youtube.com discovery URL, got " + value);
+  url.protocol = "https:";
+  url.hostname = "www.youtube.com";
+  url.hash = "";
+  return url.toString();
 }
 
 function normalizeChannelUrl(value) {
@@ -816,6 +835,7 @@ module.exports = {
   keywordList,
   matchedDiscoveryKeywords,
   normalizeChannelUrl,
+  normalizeDiscoveryUrl,
   occurrenceRecordsFromDetail,
   parseCliArgs,
   parsePublishedTimestamp,
