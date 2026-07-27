@@ -123,16 +123,19 @@ metadata = {
     "channelHandle": "/@naraetanV",
     "channelName": "なれたん Naraetan Ch.",
     "avatarUrl": "https://yt3.googleusercontent.com/example=s900",
+    "thumbnailUrl": "https://i.ytimg.com/vi/source-default/hqdefault.jpg",
     "sourceDetailKey": module._stable_key("source-vtuber", "all", channel_id),
 }
 records = [{
     "video": {"videoId": "eKx6coop-bo", "title": "歌枠", "channelId": channel_id, "channelName": ""},
     "occurrences": ({"occurrenceId": "o-1", "position": 0, "rangeId": "all", "title": "Song A", "artist": "Artist A", "seconds": None},),
 }]
+records[0]["video"]["thumbnailUrl"] = "https://i.ytimg.com/vi/eKx6coop-bo/hqdefault.jpg"
 source = module._source_payload_from_channel_records(records, metadata, metadata["sourceDetailKey"], {"page": "1", "pageSize": "1"})
 assert source["found"] is True
 assert source["record"]["channelName"] == "なれたん Naraetan Ch."
 assert source["record"]["avatarUrl"].startswith("https://yt3.googleusercontent.com/")
+assert source["record"]["occurrences"][0]["item"]["thumbnailUrl"] == "https://i.ytimg.com/vi/eKx6coop-bo/hqdefault.jpg"
 assert source["record"]["occurrences"][0]["song"]["seconds"] is None
 print("OK")
 `);

@@ -294,11 +294,12 @@ def _apply_source_channel_metadata(record: Mapping[str, Any], metadata: Mapping[
         "channelName": metadata.get("channelName") or metadata.get("display_name"),
         "channelUrl": metadata.get("channelUrl") or metadata.get("channel_url"),
         "avatarUrl": metadata.get("avatarUrl") or metadata.get("avatar_url"),
-        "thumbnailUrl": metadata.get("thumbnailUrl") or metadata.get("thumbnail_url"),
         "sourceUrl": metadata.get("sourceUrl") or metadata.get("source_url"),
         "knownSourceType": metadata.get("knownSourceType") or metadata.get("known_source_type"),
         "isCollected": metadata.get("isCollected") if "isCollected" in metadata else metadata.get("is_collected"),
     }
+    # A channel-level representative thumbnail is not video identity.
+    # Preserve the per-video thumbnail already present in each record.
     for name, value in fields.items():
         if value is not None and value != "":
             video[name] = value
