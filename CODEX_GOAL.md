@@ -9,6 +9,15 @@
 最新实时交接（2026-07-27 05:18 UTC）：PG alias 兼容补丁 commit `688321a0793099443bc381475cfda1e2a36304d7` 已由 run `30238784985` 完成 candidate compare/health/locked activate，当前 active=`accepted_30238784985_1`；公网 `/healthz`、`/api/meta`、`/api/sources/UCFP9UkgIM_U8NfzRbYEOQdA` 与 `/api/sources/dc7c736a993c4cb9c28f7be0` 均 HTTP 200，二者均返回 Naraetan 名称、handle、头像和歌曲数组。7D run `30238452962` 因约 8 分钟无 step/checkpoint 被取消；随后唯一重试 `30239203546` 因 Mac runner 长时间 `online/busy=true`、job 未分配而取消，均无 manifest、accepted increment、来源导入或生产切换。当前无活动 7D run，下一次只能在 runner 明确 idle 后单实例启动；不能把 queue/cancelled 写成 7D 进行中或完成。
 本轮 implementation-write 已提交 `b62e50f`（持续入库 handoff、7D workflow/gate、转换器、三天状态审计）及 `23cc596f`/`6743847d`（reusable artifact 路径与 Mac checkout 认证修复）。7D run `30234065925` 首次因 checkout 认证格式失败，已 cleanup；重试 `30234207137` 因 Mac runner 长时间 `busy=true` 且 job 一直 `runner_name=null`，超过有界等待后取消，未生成 artifact、未导入或切换 PG。当前这不是数据完成证据；需 runner 恢复后只重跑该单一 source workflow。
 
+### 2026-07-27 07:27 UTC 实时状态（以本段为准）
+
+- 唯一 7D run `30244079991` 仍为 `in_progress`，job `89907217361` 在 `mac-daily-song-list-builder` 上运行，固定 head `6c3524c4b7d444492cb18b7a12894eb422872217`；它仍是 Mac 单机、6 shard 串行流程，每 shard `max-inspect=500`。不得启动第二个 7D 实例。
+- Naraetan overlay 修复 run `30244929817` 仍为 queued，尚未接管 Mac；因此线上 source detail 当前仍为 `videoCount=1`、`songCount=22`、`totalOccurrenceCount=22`，不能宣称 54/2 聚合差异已修复。
+- 本轮新增有界多 worker 协议：`scripts/migration/7d-stream-protocol.py` 实现 videoId 稳定分片、逐视频 canonical hash/ack、fsync 后 checkpoint、重复投递幂等、硬容量上限和 `mediaDownloaded=false`；`test/7d-stream-protocol.test.mjs` 覆盖 nullable/repeated seconds、来源字段保留与冲突 replay。远端 main 提交为 `2ec0d47a`、`f4e07c71`、`7b575501`（README），未接生产数据库，未来 run 才能使用。
+- WSL focused 回归：`python3 -m py_compile` 通过；7D/PG/adapter/API 合计 `16 passed, 2 skipped, 0 failed`，两个 skipped 是未安装 PGlite。由本轮提交触发的 Mac Check code runs 已取消，避免占用唯一 7D runner。
+- 当前线上正确 API 为 `https://ytb-song-rank.culua.com`：`/healthz`、`/api/meta`、Naraetan `/api/sources/2ee34b53f2838fbac4d98103` 均 HTTP 200；active=`accepted_30243460721_1`，VPS2 PG 可用空间 `21,791,055,872` bytes，`pg_api_server.py` PID `376164`。`https://ytb.culua.com` 是 GitHub Pages 404，不作为 runtime API 验收地址。
+- 未完成：当前 7D 尚无最终 accepted manifest/curation/线上专项验收；Naraetan overlay 尚未发布；多 worker 协议尚未接入调度；全库 `curation_ready_pending_release` 与日常 accepted-patch workflow handoff 仍待 candidate gate。目标保持 pending。
+
 ## 目标
 
 在唯一正式入口 `G:\codex-work\daily-song-list` 完成可审计的数据库/发布架构迁移，并在迁移完成前保持当前 active 版本可服务。目标链路是：增量 upsert -> 候选版本构建与校验 -> active 原子切换 -> 可验证 rollback -> 真实线上验收。
