@@ -96,7 +96,6 @@ async function runChannelDiscovery(options, deps) {
     for (const item of pageResult.items) {
       mergeDiscoveryCandidate(candidatesByVideoId, item, {
         channelUrl: normalizedChannelUrl,
-    discoveryUrl: options.discoveryUrl || "",
         discoverySourceUrl: pageUrl,
         singerName: options.singerName,
         keywords: options.keywords,
@@ -156,6 +155,7 @@ async function runChannelDiscovery(options, deps) {
     sourceSystem: SOURCE_SYSTEM,
     generatedAt,
     channelUrl: normalizedChannelUrl,
+    discoveryUrl: options.discoveryUrl || "",
     singerName: options.singerName,
     keywords: options.keywords,
     tabs: options.tabs,
