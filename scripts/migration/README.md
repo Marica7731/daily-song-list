@@ -57,6 +57,20 @@ the relay must be stopped and its remote temp path removed in the success,
 failure, and timeout traps. This relay is not a database, artifact, raw-data,
 or candidate store.
 
+## 7D streaming handoff
+
+`7d-stream-protocol.py` provides the storage-bounded handoff used by future
+multi-worker detail runs. `partition` hashes each `videoId` into disjoint
+candidate shard files and writes a compact partition manifest. A worker may
+hold only its current detail response; after the coordinator's fsync-backed
+acknowledgement it can release that response. `ingest` accepts one JSON
+envelope per line, verifies run/shard/video identity and the canonical record
+hash, preserves nullable and repeated occurrence fields, and makes duplicate
+delivery idempotent through its checkpoint. It never accepts media paths or
+writes PostgreSQL. The coordinator must give each worker a distinct shard
+output/checkpoint and enforce the hard byte cap; an unavailable coordinator
+must stop the worker instead of creating an unbounded spool.
+
 ## Focused test
 
 Install `@electric-sql/pglite` only inside the Mac task temp root, set
