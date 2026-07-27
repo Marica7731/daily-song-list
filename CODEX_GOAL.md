@@ -189,3 +189,12 @@
 - curation 状态仍为 curation_ready_pending_release：当前 active overlay manifest 已激活但该单条 tombstone 尚未完成 source/rankings 可见性验收，不把 run success 当成清洗完成。
 - 7D：最近 run 30253290230 failure，discovery candidates=1165 但 inspected=0/videos=0/occurrences=0，未生成 accepted increment；不得把它当作完成，也不得并发启动第二个实例。
 - 未完成：实现/验证 curation overlay 的实际删除可见性；修复 7D detail worker 的可用详情获取后，再按 candidate -> compare -> health/API -> locked activate 发布。
+
+### 2026-07-27 13:04 UTC 实时交接（本轮主会话）
+
+- `done`：Noa 目前仍是已确认的单频道展开详情回归样本，不足以证明全局封面数据损坏。公网 source detail 已显示不同视频的不同 thumbnail、同一频道的 name/handle/avatar；本轮不改前端布局、样式、URL 或字段契约。
+- `done`：commit `07b52babfec8f7a9c42c6d13fa93333ac538233a` 修复 YouTube continuation 选择器跳过已消费 token；commit `f92fa78764f26704bcaec3231296ec9e58f5e92c` 为缺失发布时间写入显式 `publishedAtMissingReason`，commit `0b9c0703e0a8c6d15f16c2496b7c38457c86d0e0` 将 7D workflow 的有界总时长改为 180 分钟、页数保护改为 2000。仅修改 source discovery/test/workflow 文件。
+- `done`：7D candidate run `30264934836` success；Mac 单任务 cleanup success；manifest `reachedEnd=true`，pageCount=361，candidateCount=1382，unique videoId=1382，mediaDownloaded=false，候选 artifact 284763 bytes。候选 manifest 的临时下载根 `G:\codex-work\.tmp\urameshi-7d-30264934836` cleanup `beforeBytes=1716726 afterBytes=0`。
+- `done`：远端源码内存 focused probe 输出 `FOCUSED_SOURCE_TEST_OK`，覆盖重复 continuation token 和缺失发布时间 reason；完整 Check code runs `30266738996`、`30267004386` 因 Mac job 初始化无 step 被有界取消，未伪造全套测试通过。
+- `blocked/pending`：detail run `30267032456`、`30267497473`、`30268118209` 均在 Mac runner `busy=true`、job started 但 5 分钟无任何 step/checkpoint 后取消；每次取消后 runner 回到 `online/busy=false`，没有 accepted increment、detail occurrence、curation 或生产切换。需要 Mac runner 启动层恢复后只启动一个 detail 实例，或由用户提供可用的 Mac runner 外部状态；不能用 candidate manifest 冒充 7D 完成。
+- 当前 PG active/线上数据保持不变；没有 partial 7D 导入，没有清洗切换，没有旧 active 回收。goal 仍 pending。
