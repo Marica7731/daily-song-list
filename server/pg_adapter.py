@@ -693,18 +693,33 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
     for change in changes:
         if _text(change.get("entityType")) not in {"occurrences", "runtime_occurrences"}:
             continue
-        key = _runtime_change_group_key(change, view)
-        if not key or key not in groups:
-            continue
-        row = groups[key]
-        row["row_count"] = max(0, int(row.get("row_count") or 0) - 1)
-        row["timestamp_count"] = max(0, int(row.get("timestamp_count") or 0) - 1)
-        if row["row_count"] == 0:
-            groups.pop(key, None)
-            continue
-        payload = _json_object(row.get("payload_json"))
-        payload.update({"count": row["row_count"], "timestampCount": row["timestamp_count"]})
-        row["payload_json"] = payload
+        target_title = _overlay_norm(change.get("title"))
+        target_artist = _overlay_norm(change.get("artist"))
+        target_video = _text(change.get("videoId") or change.get("video_id"))
+        target_channel = _overlay_norm(change.get("channelId") or change.get("channel_id") or change.get("channelHandle") or change.get("channel_handle") or change.get("channelName") or change.get("channel_name"))
+        for key, row in list(groups.items()):
+            row_title = _overlay_norm(row.get("title"))
+            row_artist = _overlay_norm(row.get("artist"))
+            row_name = _overlay_norm(row.get("name"))
+            row_search = _overlay_norm(f"{row.get('search_text', '')} {row.get('channel_search_text', '')}")
+            if view in {"songs", "songIndex", "vsingerSongs"}:
+                matched = bool(target_title and target_artist and row_title == target_title and row_artist == target_artist)
+            elif view == "artists":
+                matched = bool(target_artist and (row_artist == target_artist or _overlay_norm(row.get("detail_key")) == target_artist))
+            elif view == "videos":
+                matched = bool(target_video and _text(row.get("detail_key")) == target_video)
+            else:
+                matched = bool(target_channel and (target_channel in row_search or target_channel == row_name or target_channel == _overlay_norm(row.get("detail_key"))))
+            if not matched:
+                continue
+            row["row_count"] = max(0, int(row.get("row_count") or 0) - 1)
+            row["timestamp_count"] = max(0, int(row.get("timestamp_count") or 0) - 1)
+            if row["row_count"] == 0:
+                groups.pop(key, None)
+                continue
+            payload = _json_object(row.get("payload_json"))
+            payload.update({"count": row["row_count"], "timestampCount": row["timestamp_count"]})
+            row["payload_json"] = payload
 
 
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
