@@ -252,7 +252,17 @@ jobs:
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/sources/Naraetan?page=1&pageSize=1"' > "$TASK_ROOT/candidate-source.json"
+          candidate_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
+          if [ -n "$candidate_source_key" ]; then
+            candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\"" > "$TASK_ROOT/candidate-source.json"
+            jq -e '(.found == true) and ((.record // {}) | ((.occurrences // []) | length > 0 or (.songCount // 0) > 0 or (.totalOccurrenceCount // 0) > 0))' "$TASK_ROOT/candidate-source.json" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED source-detail-gate key=$candidate_source_key" >&2
+              exit 78
+            }
+          else
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/sources/Naraetan?page=1&pageSize=1"' > "$TASK_ROOT/candidate-source.json"
+          fi
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
             "${SCP[@]}" "$INPUT_ROOT/activate-pg-candidate.py" "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
