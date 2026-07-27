@@ -4,7 +4,7 @@
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
 
-当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 7D accepted increment `mygit_7d_20260727_2` 通过候选 API gate 后原子激活，VPS2 当前只保留 PG active。`deploy-pg-incremental.yml` 已补齐 `.gz` 输入、7D/all/search/source contract gate、raw-fetch（无 partial-clone checkout）与 cleanup/bytes 输出，后续 workflow 不再走全量 SQLite。workflow run `30228901978`、`30229296719`、`30230751826`、`30231155849` 均在 Mac runner 分配后于 checkout/零 step 阶段被有界取消；新 raw-fetch 版本的 candidate gate run `30231545388` 已真实成功，revision=`accepted_30231545388_1`、parent=`mygit_7d_20260727_2`、`137/2179`，`activate=false`，Mac runner 已释放。固定搜索链接的 yt-dlp 发现证据为 `playlist_count=533`、详情候选 534、accepted 137/2179 occurrence；通用 continuation 旧 checkpoint 仍 `paused_no_progress`，`うら飯紺汰` 专项详情尚未形成，因此 7D 主线为“当前 accepted increment 已经由正式 candidate gate 验证，来源专项 pending”，不得把它写成完整来源收口。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过正式 workflow 激活、迁移后清洗和来源专项线上验收前保持 pending，不得标记 complete。
+当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 7D accepted increment `mygit_7d_20260727_2` 通过候选 API gate 后原子激活，VPS2 当前只保留 PG active。`deploy-pg-incremental.yml` 已补齐 `.gz` 输入、7D/all/search/source contract gate、raw-fetch（无 partial-clone checkout）与 cleanup/bytes 输出，后续 workflow 不再走全量 SQLite。workflow run `30228901978`、`30229296719`、`30230751826`、`30231155849` 均在 Mac runner 分配后于 checkout/零 step 阶段被有界取消；candidate gate run `30231545388` 已真实成功，revision=`accepted_30231545388_1`、parent=`mygit_7d_20260727_2`、`137/2179`，`activate=false`。正式 activate run `30231748830` 的 candidate gate 成功，但由于旧 workflow 用 awk 错提 hash，activation 未切换且旧 active 保持；现已改为 jq 严格提取 64 位 hash，并让 activation 失败真正使 job 失败。固定搜索链接的 yt-dlp 发现证据为 `playlist_count=533`、详情候选 534、accepted 137/2179 occurrence；通用 continuation 旧 checkpoint 仍 `paused_no_progress`，`うら飯紺汰` 专项详情尚未形成，因此 7D 主线为“当前 accepted increment 已由正式 candidate gate 验证，正式 activate 待修复 run”，不得把它写成完整来源收口。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过正式 workflow 激活、迁移后清洗和来源专项线上验收前保持 pending，不得标记 complete。
 
 ## 目标
 
@@ -119,7 +119,7 @@
 
 1. 将本轮 bounded overlay adapter、7D range/source identity 修复、raw-fetch workflow 7D/all/search/source gate 和最新 goal 通过 GitHub Database API 安全推入 main；只更新本轮文件，不带接手前 staged deletion。
 2. 在固定 `daily-song-list-source` 入口补齐 `うら飯紺汰` 专项 7D：沿已有有界 checkpoint/manifest 继续详情证据与 curation，不重跑已验收的 533 条候选，不把 generic 7D 的 137/2179 误写成专项完成。
-3. 推送 workflow 的 storage manifest 输出补丁后，正式 dispatch `Deploy PostgreSQL accepted increment` 并以 `activate=true` 完成同一 7D manifest 的 candidate -> compare -> health/API -> locked activate；同一 workflow 必须承担日常 7D 增量合并，避免新库切换后新数据停写；手工 active 保持可回滚。
+3. 推送 workflow 的 hash/activation 失败传播补丁后，正式 dispatch `Deploy PostgreSQL accepted increment` 并以 `activate=true` 完成同一 7D manifest 的 candidate -> compare -> health/API -> locked activate；同一 workflow 必须承担日常 7D 增量合并，避免新库切换后新数据停写；手工 active 保持可回滚。
 4. 将既有 `curation_ready_pending_release` artifact 继续按同一 candidate 入口发布；验收新增数据持续可入库：healthz/meta/rankings/source/search、重点歌曲、`うら飯紺汰` 和 active revision 身份。成功后清理 PG 临时文件，VPS 不恢复 SQLite。
 
 ## 交接记录

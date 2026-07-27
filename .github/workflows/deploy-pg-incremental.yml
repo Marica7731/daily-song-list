@@ -124,7 +124,7 @@ jobs:
           else
             cat "$PATCH_INPUT"
           fi | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
-          candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
+          candidate_sha="$(jq -er '.contentSha256 | select(type == \"string\" and test(\"^[0-9a-f]{64}$\"))' "$TASK_ROOT/import-result.json")"
           test -n "$candidate_sha"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
           CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
@@ -143,5 +143,13 @@ jobs:
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
             "${SCP[@]}" "$INPUT_ROOT/activate-pg-candidate.py" "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'"
+            if ! activation_output="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py && sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'")"; then
+              printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
+              echo "PG_INCREMENT_BLOCKED activation failed" >&2
+              exit 1
+            fi
+            printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service && systemctl daemon-reload"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'" | tee -a "$TASK_ROOT/activation-result.txt"
           fi
