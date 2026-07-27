@@ -134,7 +134,10 @@ jobs:
             test "$(jq -er '.files | length' "$COMPARE_JSON")" -lt 300 || {
               echo "PG_INCREMENT_BLOCKED compare-api-file-limit sourceSha=$SOURCE_SHA"; exit 78;
             }
-            mapfile -t ACCEPTED_PATHS < <(jq -er -r '.files[]?.filename | select(startswith("data/external/youtube-channel-discovery/accepted/") and endswith(".json"))' "$COMPARE_JSON")
+            ACCEPTED_PATHS=()
+            while IFS= read -r accepted_path; do
+              [ -n "$accepted_path" ] && ACCEPTED_PATHS+=("$accepted_path")
+            done < <(jq -r '.files[]?.filename | select(startswith("data/external/youtube-channel-discovery/accepted/") and endswith(".json"))' "$COMPARE_JSON" || true)
             if [ "${#ACCEPTED_PATHS[@]}" -eq 0 ]; then
               runtime_changes="$(jq -er -r '.files[]?.filename | select(test("^data/(latest|7d|all|72h|1m|status)\\.json$"))' "$COMPARE_JSON" || true)"
               if [ -n "$runtime_changes" ]; then
@@ -255,7 +258,11 @@ jobs:
           candidate_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
           if [ -n "$candidate_source_key" ]; then
             candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\"" > "$TASK_ROOT/candidate-source.json"
+            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \\"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\\"" > "$TASK_ROOT/candidate-source.json"; then
+              echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key" >&2
+              cat "$TASK_ROOT/candidate-source.json" >&2 || true
+              exit 1
+            fi
             jq -e '(.found == true) and ((.record // {}) | ((.occurrences // []) | length > 0 or (.songCount // 0) > 0 or (.totalOccurrenceCount // 0) > 0))' "$TASK_ROOT/candidate-source.json" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED source-detail-gate key=$candidate_source_key" >&2
               exit 78
