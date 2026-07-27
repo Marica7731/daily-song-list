@@ -73,6 +73,7 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
     maxCandidates: positiveInteger(args["max-candidates"] || args["max-videos"], defaults.maxCandidates ?? 100, "--max-candidates"),
     maxInspect: positiveInteger(args["max-inspect"], defaults.maxInspect ?? 20, "--max-inspect"),
     requestIntervalMs,
+    requestTimeoutMs: positiveInteger(args["request-timeout-ms"], defaults.requestTimeoutMs ?? Number(process.env.YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS || 15000), "--request-timeout-ms"),
     requestJitterMs: positiveInteger(args["request-jitter-ms"], defaults.requestJitterMs ?? 1000, "--request-jitter-ms"),
     inspectShardIndex: positiveInteger(args["inspect-shard-index"], defaults.inspectShardIndex ?? 0, "--inspect-shard-index"),
     inspectShardCount: positiveInteger(args["inspect-shard-count"], defaults.inspectShardCount ?? 1, "--inspect-shard-count"),
@@ -268,6 +269,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
       apiPath: continuationApiPath,
       fetchImpl: deps.fetchImpl || fetch,
       requestIntervalMs: options.requestIntervalMs,
+      requestTimeoutMs: options.requestTimeoutMs,
       userAgent: deps.userAgent,
     });
     pageCount += 1;
@@ -337,6 +339,7 @@ async function fetchBrowseContinuation({
   apiPath = "/youtubei/v1/browse",
   fetchImpl = fetch,
   requestIntervalMs = 0,
+  requestTimeoutMs = 15000,
   userAgent = "",
   maxAttempts = 3,
 }) {
@@ -345,7 +348,11 @@ async function fetchBrowseContinuation({
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     await maybeDelay(attempt === 1 ? requestIntervalMs : Math.max(250, requestIntervalMs) * attempt);
     let response = null;
+    let timeoutHandle = null;
+    const requestController = typeof AbortController === "function" ? new AbortController() : null;
+    const timeoutMs = Math.max(1, Number(requestTimeoutMs) || 15000);
     try {
+      if (requestController) timeoutHandle = setTimeout(() => requestController.abort(), timeoutMs);
       const endpointPath = apiPath === "/youtubei/v1/search" ? "/youtubei/v1/search" : "/youtubei/v1/browse";
       response = await fetchImpl(`https://www.youtube.com${endpointPath}?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
@@ -355,6 +362,7 @@ async function fetchBrowseContinuation({
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
           "accept-language": "ja,en-US;q=0.8,en;q=0.6",
           "content-type": "application/json",
+          signal: requestController?.signal,
         },
         body: JSON.stringify({
           context: {
@@ -371,6 +379,8 @@ async function fetchBrowseContinuation({
     } catch (error) {
       lastError = error;
       continue;
+    } finally {
+      if (timeoutHandle) clearTimeout(timeoutHandle);
     }
     if (response.ok) {
       try {
@@ -857,6 +867,7 @@ module.exports = {
   candidateSort,
   enrichDetail,
   extractJsonAfter,
+  fetchBrowseContinuation,
   filterDiscoveryCandidates,
   findBrowseContinuation,
   keywordList,

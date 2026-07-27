@@ -11,6 +11,7 @@ const { extractSearchItems } = require("../scripts/update-songlist");
 const {
   channelDiscoveryOptionsFromArgs,
   channelTabUrls,
+  fetchBrowseContinuation,
   filterDiscoveryCandidates,
   findBrowseContinuation,
   matchedDiscoveryKeywords,
@@ -144,6 +145,28 @@ test("search discovery routes continuation to youtubei search", async () => {
   assert.equal(result.manifest.pageSummaries[0].reachedEnd, true);
   assert.equal(requests.length, 1);
   assert.match(requests[0], /youtubei\/v1\/search/u);
+});
+test("continuation aborts stalled requests", async () => {
+  let calls = 0;
+  await assert.rejects(
+    fetchBrowseContinuation({
+      apiKey: "API_KEY",
+      clientVersion: "CLIENT_VERSION",
+      continuation: "TOKEN",
+      requestTimeoutMs: 5,
+      maxAttempts: 1,
+      fetchImpl: async (_url, init) => {
+        calls += 1;
+        assert.ok(init.signal);
+        await new Promise((resolve, reject) => {
+          init.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+          setTimeout(resolve, 1000);
+        });
+      },
+    }),
+    /aborted/u,
+  );
+  assert.equal(calls, 1);
 });
 test("channel discovery handles YouTube lockupViewModel channel pages", () => {
   const data = {
