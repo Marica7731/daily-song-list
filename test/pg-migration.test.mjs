@@ -22,6 +22,13 @@ test("production DSN detection never exposes its value", () => {
   assert.deepEqual(resolveDsnFromEnv({}), { key: null, present: false });
 });
 
+test("accepted-increment importer keeps 7d range and derives missing song identity", () => {
+  const importer = readFileSync(new URL("../scripts/migration/import-pg-incremental.py", import.meta.url), "utf8");
+  assert.match(importer, /or record\.get\("rangeId".*or "7d"/);
+  assert.match(importer, /def derived_song_key/);
+  assert.match(importer, /or record\.get\("sourceSystem".*or "mygit-7d"/);
+});
+
 test("ephemeral PostgreSQL candidate supports upsert, compare, activate and rollback", {
   skip: !pgliteModulePath ? "set PGLITE_MODULE to run the real ephemeral PostgreSQL test" : false,
 }, async () => {

@@ -16,6 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import unicodedata
 from typing import Any
 
 import psycopg
@@ -23,6 +24,14 @@ import psycopg
 
 def text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
+
+
+def normalized(value: Any) -> str:
+    return " ".join(unicodedata.normalize("NFKC", text(value)).casefold().split())
+
+
+def derived_song_key(title: Any, artist: Any) -> str:
+    return hashlib.sha256(f"song\0{normalized(title)}\0{normalized(artist)}".encode("utf-8")).hexdigest()[:24]
 
 
 def json_object(value: Any) -> dict[str, Any]:
@@ -59,19 +68,25 @@ def occurrence_rows(record: dict[str, Any], video_id: str) -> list[tuple[Any, ..
         payload = dict(item)
         payload.setdefault("videoId", video_id)
         payload.setdefault("position", position)
+        title = item.get("title")
+        artist = item.get("artist")
+        range_id = item.get("rangeId", item.get("range_id")) or record.get("rangeId", record.get("range_id")) or "7d"
+        song_key = item.get("songKey", item.get("song_key")) or derived_song_key(title, artist)
+        source_system = item.get("sourceSystem", item.get("source_system")) or record.get("sourceSystem", record.get("source_system")) or "mygit-7d"
+        payload.update({"rangeId": range_id, "songKey": song_key, "sourceSystem": source_system})
         rows.append((
             video_id,
             occurrence_key,
             occurrence_id,
             int(item.get("position", position)),
-            item.get("rangeId", item.get("range_id")),
-            item.get("songKey", item.get("song_key")),
+            range_id,
+            song_key,
             item.get("seconds"),
             item.get("title"),
             item.get("artist"),
             item.get("sourceId", item.get("source_id")),
             item.get("rawHash", item.get("raw_hash")),
-            item.get("sourceSystem", item.get("source_system")),
+            source_system,
             json.dumps(payload, ensure_ascii=False),
         ))
     return rows

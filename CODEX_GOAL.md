@@ -4,7 +4,7 @@
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。
 
-当前执行门：旧 SQLite 已按用户授权删除，PG 全量候选已由 Mac self-hosted run `30224885215` 流式写入 VPS2，并在 `full_runtime_30224885215_1` 通过手工 API gate 后原子激活；VPS2 保留 PG active，不再保留完整 SQLite。`migrate-pg-runtime.yml` 负责全量基线/候选，`deploy-pg-incremental.yml` 负责后续 7D accepted increment 与既有 curation patch 的 compare/health/API/activate，避免新数据再次被旧 SQLite workflow 截断。7D 必须使用固定搜索链接完整 `reachedEnd=true`，再做详情/三天规则/curation，最后生成 accepted increment 并经 PG workflow 合并；PID=5282 已停止，旧 checkpoint 只作审计证据。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过迁移后清洗和 7D 线上验收前保持 pending，不得标记 complete。
+当前执行门：旧 SQLite 已按用户授权删除，PG 全量版本已由 Mac self-hosted run `30224885215` 流式写入 VPS2；`full_runtime_30224885215_1` 先 active，随后 7D accepted increment `mygit_7d_20260727_2` 通过候选 API gate 后原子激活，VPS2 当前只保留 PG active。`deploy-pg-incremental.yml` 已补齐 `.gz` 输入、7D/all/search/source contract gate 与 cleanup，后续 workflow 不再走全量 SQLite。当前 workflow run `30228901978`、`30229296719` 均因 Mac runner 分配后零 step 被有界取消，手工 candidate/activate 已完成但需在补丁 push 后重跑 workflow 取得正式 run 证据。固定搜索链接的 yt-dlp 发现证据为 `playlist_count=533`、详情候选 534、accepted 137/2179 occurrence；通用 continuation 旧 checkpoint 仍 `paused_no_progress`，`うら飯紺汰` 专项详情尚未形成，因此 7D 主线为“已合并当前 accepted increment，来源专项 pending”，不得把它写成完整来源收口。任何阶段都必须记录 checkpoint/manifest、expected/actual bytes、cleanup evidence；目标未通过 workflow 运行、迁移后清洗和来源专项线上验收前保持 pending，不得标记 complete。
 
 ## 目标
 
@@ -19,7 +19,8 @@
 - `migrate-pg-runtime.yml` run `30224885215` 已完成 Mac 单目录全量流式导入；候选 `full_runtime_30224885215_1` 为 `ready`，`videos=45605`、`occurrences=598033`，content SHA-256 为 `6a5b8c4567e6c5c5f2c3fde79cd818c076be8e772ad49fb688d1638ccc2d37ea`。
 - 该 run 首次失败原因已定位并修复：候选 gate 拷贝 `/api/meta` 证据时文件名多了下划线；同时修正 service 运行所需的 `/opt/culua/ytb-song-rank/server/` 安装路径。PG adapter 的无搜索词 ranking 路径改为 SQL 聚合 + LIMIT/OFFSET，all ranking 实测约 `0.22s`，避免反向代理 502。
 - 候选已由带锁 activate 脚本切为 active；`song-rank-pg-api.service` 实时 `active`，`migration_state` active revision 为 `full_runtime_30224885215_1`。VPS2 最近实测可用空间 `21,778,079,744` bytes；无导入/候选 API 残留进程，临时 API 已清理。
-- 2026-07-27 约 `00:20 UTC`：公网 `https://ytb-song-rank.culua.com/healthz`、`/api/meta`、`/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1`、7d rankings search 均 HTTP 200；`/api/sources/Naraetan?page=1&pageSize=1` HTTP 200（当前 key 未命中返回 found=false，不能当作 Naraetan 数据已发布）。迁移后清洗与 7D 仍未完成，不能标记 goal complete。
+- 2026-07-27 约 `00:20 UTC`：公网 `https://ytb-song-rank.culua.com/healthz`、`/api/meta`、`/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1`、7d rankings search 均 HTTP 200；`/api/sources/Naraetan?page=1&pageSize=1` HTTP 200（当前 key 未命中返回 found=false，不能当作 Naraetan 数据已发布）。
+- 2026-07-27 `01:42–01:45 UTC`：7D candidate gate 的 health/meta/7d rankings/all rankings/search/source 均本地 HTTP 200；candidate RSS 从 OOM 峰值约 1.7 GiB 降至约 64 MiB。`mygit_7d_20260727_2` 激活后 VPS 本地与公网 `https://ytb-song-rank.culua.com` 的 health/meta/7d rankings/all rankings/search/source 均 HTTP 200；active counts 为 `45742/45561/600212`（videos/songs/occurrences）。workflow 正式重跑与 `うら飯紺汰` 专项来源仍 pending，不能标记 goal complete。
 
 - 实时探针发现 VPS2 `song-rank-api` 在 `2026-07-26T20:41:15Z` 被停止，公开 `/healthz` 与 `/api/meta` 当前 HTTP 502；PG 尚未接管，不能把该状态当作迁移中的正常窗口。
 - 旧 active SQLite 在 VPS2 原路径缺失，但 Mac cache 仍保留单一已登记副本 `/Users/be/actions-runner-cache/daily-song-list-runtime-db/song-rank.sqlite`：`14,829,768,704` bytes，manifest rollback SHA-256 为 `858041e58988b35f9a60b96ec15668ecb907de41b2b7373a37b4c5e2872fc5b0`。本轮已尝试有界流式恢复；因 Windows→WSL→VPS 管道约 30 秒仅推进约 155 KiB，已停止并删除精确 PID 及不完整目标，VPS 未残留 partial SQLite，需使用 Mac runner 直连的受控 rollback workflow 恢复旧 active 后再继续 PG。
@@ -53,6 +54,7 @@
 
 ### A. 频道身份/清洗主线
 
+- `partial/done`：固定搜索链接的当前 7D accepted increment 已通过 PG candidate gate 并激活（137 videos/2179 occurrences）；全库 curation artifact 仍为 `curation_ready_pending_release`，不能把这次来源增量等同于全库清洗上线。
 - `curation_ready_pending_release`：全库 singleton/unknown-artist 审计主体、保守 drop/merge 规则与 artifact/证据已具备；尚未经新增量入口发布，禁止删除、回滚或重跑全库清洗。
 - `curation_ready_pending_release`：Naraetan、Ado `逆光`、`辛いことがある人生でも`、`うら飯紺汰` 原创 `リスタート` 与凛々咲同名曲规则主体已具备；迁移候选链路通过后立即接入发布和线上验收，不再扩大清洗。
 - `done`：`フィナーレ。`/两视频异常已由前序执行会话修复并上线；不再审计、修改或回滚。
@@ -62,6 +64,7 @@
 
 ### B. うら飯紺汰来源会话
 
+- `pending`：本次固定搜索链接结果未形成 `うら飯紺汰` 专项 accepted shard；generic 7D 137/2179 已合并，但专项发现/详情/原始证据/线上重点验收仍需独立有界续跑。
 - `pending`：旧 clone 在约 1%/0.8 GiB 时未完成；本轮未续用，也未把它当作来源结果。
 - `pending`：旧 FETCH_HEAD、package.json、checkpoint、manifest、accepted increment 未形成；需来源时重新按 relay + Mac checkpoint 方案评估。
 - `pending`：discovery、详情抓取、原始证据审计、导入和线上验证均未完成；当前迁移优先，不启动来源任务。
@@ -72,6 +75,7 @@
 - `done`：VPS2 真实 PostgreSQL target 已存在且 `www-data` peer 可连接；Mac run `30224885215` 已完成 full runtime stream，candidate `full_runtime_30224885215_1` 已通过 compare/health/API gate 后原子激活；active counts 为 `45605/45561/598033`（videos/songs/occurrences）。
 - `done`：已确认 `deploy-runtime-db.yml` 仍以 Mac 全量构建 SQLite、通过 artifact/SSH 上传至 VPS2 的 `song-rank.sqlite` 为中心；这正是待替换的架构，不视为增量迁移。
 - `done`：端到端 full stream、compare、candidate/active 切换和线上健康证据已存在；正式 run 使用 Mac self-hosted 单跳 SSH 传输。首次 gate 因证据文件名拼写失败，已在 workflow 修复；`VPS2_PASSWORD` 仅用于受控 SSH，PG target 使用 VPS2 Unix-socket peer，不伪装为 GitHub PG DSN。
+- `done/verification-pending`：`mygit_7d_20260727_2` 已由同一 PG candidate -> health/API -> locked activate 路径合并，旧 full revision 可作 parent/rollback；GitHub workflow 仍需在最新 commit 上取得一次非零步正式 run，不能用手工 run 替代 workflow 证据。
 - `pending`：29 份歌单的 channel handle 解析、可视化/脚本化 upsert 尚未交付。
 - `done`：curation/release 分支的中断合并未恢复；禁止合并全量生成 data。
 - `pending`：C/D/G/Mac 存储清单与回收规则部分完成；G 盘、正式仓库、Mac 空间/runner/cache、culua 盘和本机残留进程已有证据，WDC/VPS2 角色与空间仍缺可复核 SSH 证据；不以子任务未完成报告代替清理验收。
@@ -113,10 +117,10 @@
 
 ## 当前下一步
 
-1. 将本轮 adapter 性能修复、workflow 文件名/服务路径修复和最新 goal 通过 GitHub Database API 安全推入 main；只更新本轮文件，不带接手前 staged deletion。
-2. 在固定 `daily-song-list-source` 入口恢复唯一 7D run：用户搜索链接完整发现到 `reachedEnd=true`，按 videoId 详情/三天规则/curation 生成 accepted increment；不得把 stale checkpoint 或 dry-run 当真实数据。
-3. 将 7D accepted increment 与既有 `curation_ready_pending_release` artifact 合并为受控 incremental candidate，使用 `deploy-pg-incremental.yml` 的 compare/health/API/activate gate；每个分片验收 hash/count/time coverage 后才清理来源临时文件。
-4. 线上验收新增数据持续可入库：healthz/meta/rankings/source/search、重点歌曲、`うら飯紺汰` 和 active revision 身份；成功后再考虑删除 PG 迁移临时文件，VPS 不恢复 SQLite。
+1. 将本轮 bounded overlay adapter、7D range/source identity 修复、workflow 7D/all/search/source gate 和最新 goal 通过 GitHub Database API 安全推入 main；只更新本轮文件，不带接手前 staged deletion。
+2. 在固定 `daily-song-list-source` 入口补齐 `うら飯紺汰` 专项 7D：沿已有有界 checkpoint/manifest 继续详情证据与 curation，不重跑已验收的 533 条候选，不把 generic 7D 的 137/2179 误写成专项完成。
+3. 补丁 push 后正式 dispatch `Deploy PostgreSQL accepted increment`，先 `activate=false` 验证 Mac runner 实际执行、candidate 7d/all/search/source gate 和 cleanup，再按同一 manifest 做正式 activate；手工 active 保持可回滚。
+4. 将既有 `curation_ready_pending_release` artifact 继续按同一 candidate 入口发布；验收新增数据持续可入库：healthz/meta/rankings/source/search、重点歌曲、`うら飯紺汰` 和 active revision 身份。成功后清理 PG 临时文件，VPS 不恢复 SQLite。
 
 ## 交接记录
 

@@ -109,7 +109,7 @@ jobs:
           fi | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
           candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
           test -n "$candidate_sha"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
           CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
           echo "candidatePid=$CANDIDATE_PID" >> "$TASK_ROOT/storage.txt"
           ready=0
@@ -118,8 +118,11 @@ jobs:
             sleep 1
           done
           if [ "$ready" != 1 ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'cat /tmp/pg-increment-candidate.log || true'; exit 1; fi
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/sources/Naraetan?page=1&pageSize=1"' > "$TASK_ROOT/candidate-source.json"
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
             "${SCP[@]}" scripts/migration/activate-pg-candidate.py "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"

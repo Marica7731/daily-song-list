@@ -22,6 +22,7 @@ import hashlib
 import json
 import math
 import os
+import unicodedata
 from typing import Any, Iterable, Mapping, Sequence
 
 
@@ -231,6 +232,216 @@ def _generic_runtime_projection_revision(connection) -> tuple[str, dict[str, Any
         return revision_id, revision
     except Exception:
         return None
+
+
+def _generic_parent_runtime_revision(connection, revision_id: str, revision: Mapping[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    """Find the nearest immutable full projection without loading its rows."""
+
+    current = _text(revision.get("parent_revision_id"))
+    while current:
+        row = _one(
+            connection,
+            """
+            SELECT revision_id, parent_revision_id, status, manifest_json,
+                   source_manifest_sha256, content_sha256, activated_at, created_at
+            FROM migration_revisions WHERE revision_id = %s
+            """,
+            [current],
+        )
+        if not row:
+            raise PostgresAdapterError(f"active revision parent does not exist: {current}")
+        manifest = _json_object(row.get("manifest_json"))
+        if manifest.get("runtimeProjection") is True and not manifest.get("incrementalOverlay"):
+            return current, row
+        current = _text(row.get("parent_revision_id"))
+    return None
+
+
+def _overlay_norm(value: Any) -> str:
+    return " ".join(unicodedata.normalize("NFKC", _text(value)).casefold().split())
+
+
+def _overlay_candidate_rows(connection, revision_id: str) -> list[dict[str, Any]]:
+    """Read only the candidate rows; never resolve the parent occurrence table."""
+
+    return _rows(
+        connection,
+        """
+        SELECT o.video_id, o.occurrence_id, o.position, o.range_id,
+               o.song_key, o.seconds, o.title, o.artist, o.source_id,
+               o.raw_hash, o.source_system,
+               v.title AS video_title, v.channel_name, v.channel_id,
+               v.channel_handle, v.channel_url, v.published_at,
+               v.tombstone AS video_tombstone
+        FROM migration_occurrence_rows AS o
+        LEFT JOIN migration_video_rows AS v
+          ON v.revision_id = o.revision_id AND v.video_id = o.video_id
+        WHERE o.revision_id = %s
+        ORDER BY o.video_id, o.position, o.occurrence_key
+        """,
+        [revision_id],
+    )
+
+
+def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
+    groups: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if row.get("video_tombstone"):
+            continue
+        occurrence: dict[str, Any] = {}
+        video: dict[str, Any] = {}
+        title = _text(row.get("title")) or _text(occurrence.get("title"))
+        artist = _text(row.get("artist")) or _text(occurrence.get("artist"))
+        video_id = _text(row.get("video_id"))
+        video.update({
+            "videoId": video.get("videoId") or video_id,
+            "title": video.get("title") or row.get("video_title"),
+            "channelName": video.get("channelName") or row.get("channel_name"),
+            "channelId": video.get("channelId") or row.get("channel_id"),
+            "channelHandle": video.get("channelHandle") or row.get("channel_handle"),
+            "channelUrl": video.get("channelUrl") or row.get("channel_url"),
+            "publishedAt": video.get("publishedAt") or row.get("published_at"),
+        })
+        occurrence.update({
+            "videoId": video_id,
+            "occurrenceId": occurrence.get("occurrenceId") or row.get("occurrence_id"),
+            "position": occurrence.get("position", row.get("position")),
+            "rangeId": occurrence.get("rangeId") or row.get("range_id") or "7d",
+            "songKey": occurrence.get("songKey") or row.get("song_key"),
+            "seconds": occurrence.get("seconds", row.get("seconds")),
+            "title": title,
+            "artist": artist,
+            "sourceId": occurrence.get("sourceId") or row.get("source_id"),
+            "rawHash": occurrence.get("rawHash") or row.get("raw_hash"),
+            "sourceSystem": occurrence.get("sourceSystem") or row.get("source_system"),
+        })
+        if view in {"songs", "songIndex", "vsingerSongs"}:
+            key = f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+            name = title
+        elif view == "artists":
+            key = _overlay_norm(artist) or "unknown"
+            name = artist or "unknown"
+        elif view == "videos":
+            key = video_id
+            name = _text(video.get("title"))
+        else:
+            key = _text(video.get("channelId")) or _text(video.get("channelHandle")).lstrip("@/") or _overlay_norm(video.get("channelName"))
+            name = _text(video.get("channelName")) or key
+        if not key:
+            continue
+        group = groups.setdefault(key, {
+            "key": key, "title": title, "artist": artist, "name": name,
+            "occurrences": [], "videoIds": set(), "songKeys": set(),
+            "search": "",
+        })
+        group["occurrences"].append({"song": {"title": title, "artist": artist, "songKey": occurrence.get("songKey"), "seconds": occurrence.get("seconds"), "rangeId": occurrence.get("rangeId"), "sourceId": occurrence.get("sourceId"), "sourceSystem": occurrence.get("sourceSystem")}, "video": video, **occurrence})
+        group["videoIds"].add(video_id)
+        group["songKeys"].add(_text(occurrence.get("songKey")) or key)
+        group["search"] = f"{group['title']} {group['artist']} {group['name']} {video.get('channelName', '')} {video_id}".casefold()
+    return groups
+
+
+def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
+    if metric == "videos":
+        return int(row.get("video_count") or 0)
+    if metric == "songs":
+        return int(row.get("song_count") or 0)
+    return int(row.get("row_count") or 0)
+
+
+def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Return bounded candidate rankings from parent aggregates plus delta rows."""
+
+    parent = _generic_parent_runtime_revision(connection, revision_id, revision)
+    if not parent:
+        raise PostgresAdapterError("incremental candidate has no full runtime parent")
+    options = _query_options(query)
+    db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
+    search_clause = ""
+    base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
+    if options["q"]:
+        search_clause = " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
+        needle = f"%{options['q']}%"
+        base_params.extend([needle, needle])
+    base_rows = _rows(
+        connection,
+        f"""
+        SELECT rank, detail_key, title, artist, name, row_count, song_count,
+               video_count, timestamp_count, {search_select}
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
+          {search_clause}
+        ORDER BY rank
+        """,
+        base_params,
+    )
+    groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
+    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, revision_id), options["view"])
+    for key, item in delta.items():
+        row = groups.get(key)
+        if row is None:
+            count = len(item["occurrences"])
+            video_count = len(item["videoIds"])
+            song_count = len(item["songKeys"])
+            payload = {
+                "type": "video" if options["view"] == "videos" else "artist" if options["view"] == "artists" else "vtuber" if options["view"] == "vtubers" else "song",
+                "key": key, "title": item["title"], "displayArtist": item["artist"],
+                "name": item["name"], "count": count, "videoCount": video_count,
+                "songCount": song_count, "timestampCount": count,
+                "occurrences": item["occurrences"][:20],
+            }
+            row = {"detail_key": key, "title": item["title"], "artist": item["artist"], "name": item["name"], "row_count": count, "song_count": song_count, "video_count": video_count, "timestamp_count": count, "payload_json": payload, "search_text": item["search"], "channel_search_text": item["search"]}
+            groups[key] = row
+        else:
+            row["row_count"] = int(row.get("row_count") or 0) + len(item["occurrences"])
+            row["song_count"] = int(row.get("song_count") or 0) + len(item["songKeys"])
+            row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
+            row["timestamp_count"] = int(row.get("timestamp_count") or 0) + len(item["occurrences"])
+            payload = _json_object(row.get("payload_json"))
+            payload.update({"count": row["row_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
+            if isinstance(payload.get("occurrences"), list):
+                payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
+            row["payload_json"] = payload
+            row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
+    filtered = []
+    for row in groups.values():
+        search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
+        if options["q"] and options["q"] not in search:
+            continue
+        if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
+            continue
+        filtered.append(row)
+    filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
+    total = len(filtered)
+    offset = (options["page"] - 1) * options["pageSize"]
+    records = []
+    for index, row in enumerate(filtered[offset:offset + options["pageSize"]], start=offset + 1):
+        payload = _json_object(row.get("payload_json"))
+        if not payload:
+            stored = _one(
+                connection,
+                """
+                SELECT payload_json FROM runtime_ranking_rows
+                WHERE revision_id = %s AND range_id = %s AND view = %s
+                  AND metric = %s AND detail_key = %s
+                LIMIT 1
+                """,
+                [parent[0], options["range"], options["view"], db_metric, row.get("detail_key")],
+            )
+            payload = _json_object(stored.get("payload_json")) if stored else {}
+        payload["rank"] = index
+        records.append(payload)
+    return {
+        "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
+        "metric": "occurrences" if options["metric"] == "count" else options["metric"],
+        "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+        "page": options["page"], "pageSize": options["pageSize"], "totalCount": total,
+        "filteredBaseCount": total, "totalOccurrenceCount": sum(int(row.get("row_count") or 0) for row in filtered),
+        "totalSongCount": sum(int(row.get("song_count") or 0) for row in filtered),
+        "totalVideoCount": sum(int(row.get("video_count") or 0) for row in filtered),
+        "pageCount": max(1, math.ceil(total / options["pageSize"])), "compact": options["compact"], "records": records,
+    }
 
 
 def _revision_lineage(connection, revision_id: str) -> list[str]:
@@ -953,6 +1164,9 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
     runtime = _runtime_projection_revision(connection)
     if runtime:
         return _runtime_rankings_payload(connection, runtime[0], query)
+    generic_runtime = _generic_runtime_projection_revision(connection)
+    if generic_runtime:
+        return _generic_overlay_rankings_payload(connection, generic_runtime[0], generic_runtime[1], query)
     snapshot = _load_snapshot(connection)
     return rankings_payload_from_records(snapshot.records, query)
 
@@ -961,6 +1175,12 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
     runtime = _runtime_projection_revision(connection)
     if runtime:
         return _runtime_source_payload(connection, runtime[0], key, query)
+    generic_runtime = _generic_runtime_projection_revision(connection)
+    if generic_runtime:
+        parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
+        if parent:
+            return _runtime_source_payload(connection, parent[0], key, query)
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
     snapshot = _load_snapshot(connection)
     return source_payload_from_records(snapshot.records, key, query)
 
@@ -1006,6 +1226,49 @@ def meta_payload(connection) -> dict[str, Any]:
             "external_occurrences": meta_int("external_occurrences", "latest_external_occurrences", "vsinger_occurrences"),
         }
         return {"schemaVersion": 1, "meta": meta, "counts": counts}
+    generic_runtime = _generic_runtime_projection_revision(connection)
+    if generic_runtime:
+        parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
+        if not parent:
+            raise PostgresAdapterError("incremental candidate has no full runtime parent")
+        parent_id, parent_revision = parent
+        meta_rows = _rows(connection, "SELECT key, value FROM runtime_meta WHERE revision_id = %s", [parent_id])
+        meta = {str(row.get("key")): _jsonable(row.get("value")) for row in meta_rows}
+        manifest = _json_object(parent_revision.get("manifest_json"))
+        candidate_manifest = _json_object(generic_runtime[1].get("manifest_json"))
+        meta.update({str(key): _jsonable(value) for key, value in candidate_manifest.items() if key not in {"runtimeProjection", "incrementalOverlay"} and (isinstance(value, (str, int, float, bool)) or value is None)})
+        meta.update({
+            "active_revision_id": generic_runtime[0],
+            "migration_status": generic_runtime[1].get("status", ""),
+            "source_manifest_sha256": generic_runtime[1].get("source_manifest_sha256", ""),
+            "content_sha256": generic_runtime[1].get("content_sha256", ""),
+            "built_at": _jsonable(generic_runtime[1].get("activated_at") or generic_runtime[1].get("created_at") or ""),
+            "parent_revision_id": parent_id,
+        })
+        counts = {}
+        for key, fallback in (("latest_videos", 0), ("latest_songs", 0), ("latest_occurrences", 0), ("latest_ranking_rows", 0), ("source_occurrences_rows", 0), ("channel_metadata", 0), ("external_songs", 0), ("external_videos", 0), ("external_occurrences", 0)):
+            try:
+                counts[key] = int(meta.get(key, fallback))
+            except (TypeError, ValueError):
+                counts[key] = fallback
+        counts.update({
+            "videos": counts.get("latest_videos", 0),
+            "songs": counts.get("latest_songs", 0),
+            "occurrences": counts.get("latest_occurrences", 0),
+            "ranking_rows": counts.get("latest_ranking_rows", 0),
+            "source_occurrences": counts.get("source_occurrences_rows", 0),
+        })
+        delta = _rows(connection, "SELECT count(DISTINCT video_id) AS videos, count(*) AS occurrences FROM migration_occurrence_rows WHERE revision_id = %s", [generic_runtime[0]])
+        if delta:
+            counts["videos"] = counts.get("videos", 0) + int(delta[0].get("videos") or 0)
+            counts["occurrences"] = counts.get("occurrences", 0) + int(delta[0].get("occurrences") or 0)
+        return {"schemaVersion": 1, "meta": meta, "counts": {
+            "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
+            "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
+            "source_occurrences": counts.get("source_occurrences", counts.get("source_occurrences_rows", 0)),
+            "channel_metadata": counts.get("channel_metadata", 0), "external_songs": counts.get("external_songs", 0),
+            "external_videos": counts.get("external_videos", 0), "external_occurrences": counts.get("external_occurrences", 0),
+        }}
     snapshot = _load_snapshot(connection)
     records = list(snapshot.records)
     occurrence_count = sum(len(record["occurrences"]) for record in records)
