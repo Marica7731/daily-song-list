@@ -178,3 +178,14 @@
 - 多 VPS 状态: Mac runner SSH 未发现 vps-racknerd/vps-wdc/vps-jp/vps-aiyun/vps-la/culua alias；Actions 只列 VPS2_PASSWORD。可并发架构已具备协议，但真实 relay host/key/secret 路径尚未接入，不能伪造已并发。
 - 未完成: 修复并复现 candidate source-detail 500；处理 Mac checkout lock 的 bounded cleanup；接入真实 relay 后再启动单一 7D candidate/detail run；完成 curation、PG candidate compare/health/API、activate 和线上验收。
 - 禁止: D 盘、完整 SQLite/媒体下载、VPS 长期 raw/clone/database、恢复 staged data 删除、前端样式/结构/API 字段 URL 修改、无 ready candidate 切生产。
+
+
+### 2026-07-27 11:35 UTC
+
+- mode: release-verify + implementation-write (仅 PG adapter 增量投影；不改前端样式、结构、URL 或字段语义)。
+- 已确认：Noa 展开详情的分页封面复现不是当前已证实的全局数据写坏；线上 /api/sources/29ae50b7975dbdcf?page=1&pageSize=1 与 page=2 均 HTTP 200，视频分别为 HZ1q27Z5Pqc、0bXKzDEk79E，封面 URL 不同，频道名、handle、avatar 均存在。
+- 已修复并推送 cba982f48389652630cdec08a07aa4b1e48f233c：overlay 只回放 immutable full runtime 之后的 lineage，避免历史 occurrence rows 重复计入；source detail 已持久化时先走有界查询。focused tests node --test test/pg-adapter.test.mjs test/pg-api-server.test.mjs = 13 passed / 0 failed。
+- adapter 发布 run 30262343247 success；线上 health/meta 复核 HTTP 200，counts=videos 45605 / songs 45561 / occurrences 598033，active=accepted_30261533343_1，旧 full revision 保留。
+- curation 状态仍为 curation_ready_pending_release：当前 active overlay manifest 已激活但该单条 tombstone 尚未完成 source/rankings 可见性验收，不把 run success 当成清洗完成。
+- 7D：最近 run 30253290230 failure，discovery candidates=1165 但 inspected=0/videos=0/occurrences=0，未生成 accepted increment；不得把它当作完成，也不得并发启动第二个实例。
+- 未完成：实现/验证 curation overlay 的实际删除可见性；修复 7D detail worker 的可用详情获取后，再按 candidate -> compare -> health/API -> locked activate 发布。
