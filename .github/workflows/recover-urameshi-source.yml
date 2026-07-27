@@ -4,13 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       stage:
-        description: "candidate manifest only or detail collection"
+        description: "candidate manifest, one resumable detail shard, or legacy detail"
         required: false
         default: "candidate"
         type: choice
         options:
           - candidate
           - detail
+          - detail-shard
       candidate_run_id:
         description: Prior candidate-stage run to reuse for detail collection
         required: false
@@ -18,6 +19,28 @@ on:
         type: string
       candidate_artifact_name:
         description: Exact candidate artifact name from candidate_run_id
+        required: false
+        default: ""
+        type: string
+      detail_shard_index:
+        description: "One deterministic candidate shard (0 through 5)"
+        required: false
+        default: "0"
+        type: choice
+        options:
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+      checkpoint_run_id:
+        description: "Prior detail-shard run whose checkpoint artifact is resumed"
+        required: false
+        default: ""
+        type: string
+      checkpoint_artifact_name:
+        description: "Exact checkpoint artifact name from checkpoint_run_id"
         required: false
         default: ""
         type: string
@@ -39,6 +62,9 @@ jobs:
       STAGE: ${{ inputs.stage || 'candidate' }}
       CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id || '' }}
       CANDIDATE_ARTIFACT_NAME: ${{ inputs.candidate_artifact_name || '' }}
+      DETAIL_SHARD_INDEX: ${{ inputs.detail_shard_index || '0' }}
+      CHECKPOINT_RUN_ID: ${{ inputs.checkpoint_run_id || '' }}
+      CHECKPOINT_ARTIFACT_NAME: ${{ inputs.checkpoint_artifact_name || '' }}
       DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
@@ -60,11 +86,26 @@ jobs:
           RELEASE_ROOT="$TASK_ROOT/release"
           REPO_ROOT="$TASK_ROOT/repo"
           mkdir -p "$RELEASE_ROOT" "$REPO_ROOT"
+          if [ "$STAGE" = "detail-shard" ]; then
+            case "$DETAIL_SHARD_INDEX" in 0|1|2|3|4|5) ;; *) echo "URAMESHI_7D_BLOCKED invalid-detail-shard=$DETAIL_SHARD_INDEX" >&2; exit 78 ;; esac
+            ARTIFACT_NAME="urameshi-7d-detail-shard-${DETAIL_SHARD_INDEX}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          else
+            ARTIFACT_NAME="urameshi-7d-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          fi
           printf 'startedAt=%s\nexpectedPeakBytes=4294967296\nhardCapBytes=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRATCH_CAP_BYTES" > "$TASK_ROOT/storage.txt"
           df -k "$RUNNER_TEMP" > "$TASK_ROOT/mac-df-baseline.txt"
-          printf 'TASK_ROOT=%s\nRELEASE_ROOT=%s\nARTIFACT_NAME=urameshi-7d-%s-%s\n' "$TASK_ROOT" "$RELEASE_ROOT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+          printf 'TASK_ROOT=%s\nRELEASE_ROOT=%s\nARTIFACT_NAME=%s\n' "$TASK_ROOT" "$RELEASE_ROOT" "$ARTIFACT_NAME" >> "$GITHUB_ENV"
+          checkpoint_mirror_pid=""
+          stop_checkpoint_mirror() {
+            if [ -n "${checkpoint_mirror_pid:-}" ]; then
+              kill "$checkpoint_mirror_pid" 2>/dev/null || true
+              wait "$checkpoint_mirror_pid" 2>/dev/null || true
+              checkpoint_mirror_pid=""
+            fi
+          }
           on_exit() {
             status=$?
+            stop_checkpoint_mirror
             printf 'exitStatus=%s\nendedAt=%s\n' "$status" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TASK_ROOT/storage.txt"
             used_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
             printf 'peakObservedBytes=%s\n' "$used_bytes" >> "$TASK_ROOT/storage.txt"
@@ -165,19 +206,52 @@ jobs:
           cd "$REPO_ROOT"
           check_space source-code-fetch
           CANDIDATE_MANIFEST_PATH=""
-          if [ "$STAGE" = "detail" ] && [ -n "$CANDIDATE_RUN_ID" ] && [ -n "$CANDIDATE_ARTIFACT_NAME" ]; then
+          candidate_manifest_sha=""
+          if [ "$STAGE" = "detail" ]; then
+            echo "URAMESHI_7D_BLOCKED legacy-detail-is-not-resumable use=detail-shard" >&2
+            exit 78
+          fi
+          if [ "$STAGE" = "detail-shard" ]; then
+            test -n "$CANDIDATE_RUN_ID" && test -n "$CANDIDATE_ARTIFACT_NAME" || {
+              echo "URAMESHI_7D_BLOCKED detail-shard-requires-candidate-artifact" >&2; exit 78;
+            }
             mkdir -p "$TASK_ROOT/candidate-input"
             gh run download "$CANDIDATE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$CANDIDATE_ARTIFACT_NAME" --dir "$TASK_ROOT/candidate-input"
             CANDIDATE_MANIFEST_PATH="$(find "$TASK_ROOT/candidate-input" -type f -name candidate-manifest.ndjson -print -quit)"
             test -s "$CANDIDATE_MANIFEST_PATH" || { echo "URAMESHI_7D_BLOCKED candidate artifact missing manifest" >&2; exit 78; }
-            echo "URAMESHI_7D_REUSE_CANDIDATE run=$CANDIDATE_RUN_ID artifact=$CANDIDATE_ARTIFACT_NAME path=$CANDIDATE_MANIFEST_PATH"
-          fi
-          if [ "$STAGE" = "detail" ] && [ -n "$CANDIDATE_MANIFEST_PATH" ]; then
-            echo "URAMESHI_7D_CANDIDATE_REUSED path=$CANDIDATE_MANIFEST_PATH"
-          else
+            candidate_manifest_sha="$(shasum -a 256 "$CANDIDATE_MANIFEST_PATH" | awk '{print $1}')"
+            echo "URAMESHI_7D_REUSE_CANDIDATE run=$CANDIDATE_RUN_ID artifact=$CANDIDATE_ARTIFACT_NAME sha=$candidate_manifest_sha"
+            if [ -n "$CHECKPOINT_RUN_ID" ] || [ -n "$CHECKPOINT_ARTIFACT_NAME" ]; then
+              test -n "$CHECKPOINT_RUN_ID" && test -n "$CHECKPOINT_ARTIFACT_NAME" || {
+                echo "URAMESHI_7D_BLOCKED checkpoint-input-pair-required" >&2; exit 78;
+              }
+              mkdir -p "$TASK_ROOT/checkpoint-input" "$TASK_ROOT/discovery"
+              gh run download "$CHECKPOINT_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$CHECKPOINT_ARTIFACT_NAME" --dir "$TASK_ROOT/checkpoint-input"
+              prior_checkpoint="$(find "$TASK_ROOT/checkpoint-input" -type f -name checkpoint.json -print -quit)"
+              prior_progress="$(find "$TASK_ROOT/checkpoint-input" -type f -name partial-manifest.json -print -quit)"
+              test -s "$prior_checkpoint" && test -s "$prior_progress" || {
+                echo "URAMESHI_7D_BLOCKED checkpoint artifact incomplete" >&2; exit 78;
+              }
+              jq -e --arg candidate_sha "$candidate_manifest_sha" --argjson requested_shard "$DETAIL_SHARD_INDEX" '
+                .kind == "urameshi-7d-detail-checkpoint" and
+                .candidateManifestSha256 == $candidate_sha and
+                .nextShardIndex == $requested_shard
+              ' "$prior_progress" >/dev/null || {
+                echo "URAMESHI_7D_BLOCKED checkpoint lineage mismatch" >&2; exit 78;
+              }
+              cp "$prior_checkpoint" "$TASK_ROOT/discovery/checkpoint.json"
+              echo "URAMESHI_7D_CHECKPOINT_REUSED run=$CHECKPOINT_RUN_ID artifact=$CHECKPOINT_ARTIFACT_NAME shard=$DETAIL_SHARD_INDEX"
+            elif [ "$DETAIL_SHARD_INDEX" != "0" ]; then
+              echo "URAMESHI_7D_BLOCKED detail-shard-requires-checkpoint" >&2
+              exit 78
+            fi
+          elif [ "$STAGE" = "candidate" ]; then
             "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
               --max-candidates "$DISCOVERY_MAX_CANDIDATES" --candidate-only --request-interval-ms "$DISCOVERY_REQUEST_INTERVAL_MS" --request-jitter-ms "$DISCOVERY_REQUEST_JITTER_MS"
+          else
+            echo "URAMESHI_7D_BLOCKED unsupported-stage=$STAGE" >&2
+            exit 78
           fi
           candidate_manifest_args=()
           if [ -n "$CANDIDATE_MANIFEST_PATH" ]; then
@@ -198,13 +272,70 @@ jobs:
             echo "URAMESHI_7D_CANDIDATE_READY candidates=$(jq -r '.candidateCount // 0' "$DISCOVERY_MANIFEST") reachedEnd=true"
             exit 0
           fi
-          for shard in 0 1 2 3 4 5; do
-            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
-              --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
-              --max-candidates "$DISCOVERY_MAX_CANDIDATES" "${candidate_manifest_args[@]}" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
-              --request-interval-ms 5000 --request-jitter-ms 2500
-            check_space "detail-shard-$shard"
-          done
+          test "$STAGE" = "detail-shard" || { echo "URAMESHI_7D_BLOCKED unsupported-stage=$STAGE" >&2; exit 78; }
+          shard="$DETAIL_SHARD_INDEX"
+          checkpoint_path="$TASK_ROOT/discovery/checkpoint.json"
+          sync_checkpoint() {
+            if [ -s "$checkpoint_path" ]; then
+              cp "$checkpoint_path" "$RELEASE_ROOT/checkpoint.json.next"
+              mv "$RELEASE_ROOT/checkpoint.json.next" "$RELEASE_ROOT/checkpoint.json"
+            fi
+          }
+          write_partial_manifest() {
+            partial_complete="$1"
+            next_shard="$2"
+            sync_checkpoint
+            completed_count="$(jq -r '(.completedVideoIds // []) | length' "$checkpoint_path" 2>/dev/null || echo 0)"
+            detail_count="$(jq -r '(.details // []) | length' "$checkpoint_path" 2>/dev/null || echo 0)"
+            checkpoint_sha="$(test -s "$RELEASE_ROOT/checkpoint.json" && shasum -a 256 "$RELEASE_ROOT/checkpoint.json" | awk '{print $1}' || true)"
+            jq -n \
+              --arg candidate_sha "$candidate_manifest_sha" \
+              --arg checkpoint_sha "$checkpoint_sha" \
+              --argjson completed_shard "$shard" \
+              --argjson next_shard "$next_shard" \
+              --argjson complete "$partial_complete" \
+              --argjson completed_count "$completed_count" \
+              --argjson detail_count "$detail_count" \
+              '{schemaVersion:1,kind:"urameshi-7d-detail-checkpoint",candidateManifestSha256:$candidate_sha,checkpointSha256:$checkpoint_sha,completedShardIndex:$completed_shard,nextShardIndex:$next_shard,complete:$complete,completedVideoCount:$completed_count,detailCount:$detail_count,generatedAt:(now|todateiso8601)}' \
+              > "$RELEASE_ROOT/partial-manifest.json"
+            for progress_file in manifest.json raw-videos.json video-details.json audits.json report.md; do
+              test -f "$TASK_ROOT/discovery/$progress_file" && cp "$TASK_ROOT/discovery/$progress_file" "$RELEASE_ROOT/$progress_file" || true
+            done
+            cp "$TASK_ROOT/storage.txt" "$RELEASE_ROOT/storage-before-upload.txt"
+          }
+          write_partial_manifest false "$shard"
+          checkpoint_mirror() {
+            while true; do
+              sync_checkpoint
+              sleep 20
+            done
+          }
+          checkpoint_mirror &
+          checkpoint_mirror_pid=$!
+          set +e
+          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
+            --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
+            --max-candidates "$DISCOVERY_MAX_CANDIDATES" "${candidate_manifest_args[@]}" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
+            --request-interval-ms 5000 --request-jitter-ms 2500
+          detail_status=$?
+          set -e
+          stop_checkpoint_mirror
+          sync_checkpoint
+          check_space "detail-shard-$shard"
+          test -s "$RELEASE_ROOT/checkpoint.json" || { echo "URAMESHI_7D_BLOCKED missing-detail-checkpoint shard=$shard" >&2; exit 78; }
+          if [ "$detail_status" -ne 0 ]; then
+            write_partial_manifest false "$shard"
+            echo "URAMESHI_7D_SHARD_CHECKPOINT complete=false shard=$shard nextShard=$shard"
+            exit "$detail_status"
+          fi
+          if [ "$shard" -lt 5 ]; then
+            next_shard=$((shard + 1))
+            write_partial_manifest true "$next_shard"
+            echo "URAMESHI_7D_SHARD_CHECKPOINT complete=true shard=$shard nextShard=$next_shard"
+            exit 0
+          fi
+          write_partial_manifest true 6
+          echo "URAMESHI_7D_SHARD_CHECKPOINT complete=true shard=5 nextShard=6"
           DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
           DETAILS="$TASK_ROOT/discovery/video-details.json"
           test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
@@ -259,7 +390,7 @@ jobs:
           echo "URAMESHI_7D_CLEANUP status=success beforeBytes=$before_bytes afterBytes=0 retained=artifact:$ARTIFACT_NAME"
 
   deploy:
-    if: ${{ inputs.stage != 'candidate' }}
+    if: ${{ inputs.stage == 'detail-shard' && inputs.detail_shard_index == '5' }}
     needs: collect
     uses: ./.github/workflows/deploy-pg-incremental.yml
     with:
