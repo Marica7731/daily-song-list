@@ -81,21 +81,18 @@ jobs:
             exit 78
           fi
           echo "URAMESHI_7D_NODE_RUNTIME node=$NODE_BIN npm=${NPM_CMD[*]}"
-          TREE_JSON="$TASK_ROOT/source-tree.json"
-          curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 120 --max-filesize 52428800 \
-            -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/trees/${GITHUB_SHA}?recursive=1" -o "$TREE_JSON"
-          jq -e '(.truncated == false) and (.tree | type == "array")' "$TREE_JSON" >/dev/null || {
-            echo "URAMESHI_7D_BLOCKED source-tree-missing-or-truncated" >&2; exit 78;
-          }
-          mapfile -t SOURCE_PATHS < <(jq -r '.tree[] | select(.type == "blob" and (.path == "package.json" or (.path | startswith("scripts/")) or (.path | startswith("assets/")) or (.path | startswith("config/")))) | .path' "$TREE_JSON")
-          test "${#SOURCE_PATHS[@]}" -gt 0 || { echo "URAMESHI_7D_BLOCKED source-path-list-empty" >&2; exit 78; }
-          test "${#SOURCE_PATHS[@]}" -le 512 || { echo "URAMESHI_7D_BLOCKED source-path-cap-exceeded count=${#SOURCE_PATHS[@]}" >&2; exit 78; }
+          source_file_count=0
+          source_directory_count=0
           downloaded_bytes=0
-          for source_path in "${SOURCE_PATHS[@]}"; do
+          download_source_file() {
+            source_path="$1"
             case "$source_path" in
               /*|*..*) echo "URAMESHI_7D_BLOCKED invalid-source-path=$source_path" >&2; exit 78 ;;
             esac
+            source_file_count=$((source_file_count + 1))
+            test "$source_file_count" -le 512 || {
+              echo "URAMESHI_7D_BLOCKED source-path-cap-exceeded count=$source_file_count" >&2; exit 78;
+            }
             destination="$REPO_ROOT/$source_path"
             mkdir -p "$(dirname "$destination")"
             curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 --max-filesize 16777216 \
@@ -105,9 +102,37 @@ jobs:
             test "$downloaded_bytes" -le 268435456 || {
               echo "URAMESHI_7D_BLOCKED source-bytes-cap-exceeded bytes=$downloaded_bytes" >&2; exit 78;
             }
-          done
-          printf 'sourcePathCount=%s\nsourceBytes=%s\n' "${#SOURCE_PATHS[@]}" "$downloaded_bytes" >> "$TASK_ROOT/storage.txt"
-          echo "URAMESHI_7D_SOURCE_FETCH paths=${#SOURCE_PATHS[@]} bytes=$downloaded_bytes"
+          }
+          download_source_directory() {
+            source_directory="$1"
+            source_directory_count=$((source_directory_count + 1))
+            test "$source_directory_count" -le 128 || {
+              echo "URAMESHI_7D_BLOCKED source-directory-cap-exceeded count=$source_directory_count" >&2; exit 78;
+            }
+            listing="$TASK_ROOT/contents-$(printf '%s' "$source_directory" | tr '/.' '__').json"
+            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 30 --max-filesize 5242880 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/${source_directory}?ref=${GITHUB_SHA}" -o "$listing"
+            jq -e 'type == "array"' "$listing" >/dev/null || {
+              echo "URAMESHI_7D_BLOCKED source-directory-list-invalid path=$source_directory" >&2; exit 78;
+            }
+            while IFS=$'\t' read -r entry_type entry_path; do
+              if [ "$entry_type" = "dir" ]; then
+                download_source_directory "$entry_path"
+              elif [ "$entry_type" = "file" ]; then
+                download_source_file "$entry_path"
+              else
+                echo "URAMESHI_7D_BLOCKED unsupported-source-entry type=$entry_type path=$entry_path" >&2
+                exit 78
+              fi
+            done < <(jq -r '.[] | [.type,.path] | @tsv' "$listing")
+          }
+          download_source_file package.json
+          download_source_directory scripts
+          download_source_directory assets
+          download_source_directory config
+          printf 'sourcePathCount=%s\nsourceDirectoryCount=%s\nsourceBytes=%s\n' "$source_file_count" "$source_directory_count" "$downloaded_bytes" >> "$TASK_ROOT/storage.txt"
+          echo "URAMESHI_7D_SOURCE_FETCH paths=$source_file_count directories=$source_directory_count bytes=$downloaded_bytes"
           cd "$REPO_ROOT"
           check_space source-code-fetch
           "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
