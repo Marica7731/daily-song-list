@@ -53,10 +53,34 @@ jobs:
             test "$used_bytes" -le "$SCRATCH_CAP_BYTES" || { echo "URAMESHI_7D_BLOCKED scratch-cap-exceeded bytes=$used_bytes cap=$SCRATCH_CAP_BYTES"; exit 78; }
             printf 'checkpoint=%s usedBytes=%s\n' "$1" "$used_bytes" >> "$TASK_ROOT/storage.txt"
           }
+          echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+          echo "/usr/local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
-          export PATH="/Users/be/.local/bin:/Users/be/.local/codex-toolchains/node/bin:/Users/be/.local/codex-toolchains/python312/bin:$PATH"
+          export PATH="/opt/homebrew/bin:/usr/local/bin:/Users/be/.local/bin:/Users/be/.local/codex-toolchains/node/bin:/Users/be/.local/codex-toolchains/python312/bin:$PATH"
+          NODE_BIN="$(command -v node || true)"
+          NPM_CMD=()
+          if command -v npm >/dev/null 2>&1; then
+            NPM_CMD=(npm)
+          elif [ -n "$NODE_BIN" ]; then
+            NODE_ROOT="$(cd "$(dirname "$NODE_BIN")/.." && pwd)"
+            for npm_cli in \
+              "$NODE_ROOT/lib/node_modules/npm/bin/npm-cli.js" \
+              "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js" \
+              "/usr/local/lib/node_modules/npm/bin/npm-cli.js" \
+              "/Users/be/.local/lib/node_modules/npm/bin/npm-cli.js"; do
+              if [ -f "$npm_cli" ]; then
+                NPM_CMD=("$NODE_BIN" "$npm_cli")
+                break
+              fi
+            done
+          fi
+          if [ -z "$NODE_BIN" ] || [ "${#NPM_CMD[@]}" -eq 0 ]; then
+            echo "URAMESHI_7D_BLOCKED node-runtime-missing node=${NODE_BIN:-missing}" >&2
+            exit 78
+          fi
+          echo "URAMESHI_7D_NODE_RUNTIME node=$NODE_BIN npm=${NPM_CMD[*]}"
           git -C "$REPO_ROOT" init -q
           git -C "$REPO_ROOT" remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
           auth_header="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
@@ -75,12 +99,12 @@ jobs:
           test "$checkout_ok" = 1 || { echo "URAMESHI_7D_BLOCKED code-checkout-retries-exhausted"; exit 78; }
           cd "$REPO_ROOT"
           check_space code-checkout
-          npm run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
             --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
             --max-candidates 2000 --candidate-only --request-interval-ms 3000 --request-jitter-ms 1500
           check_space candidate-manifest
           for shard in 0 1 2 3 4 5; do
-            npm run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
+            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
               --max-candidates 2000 --max-inspect 500 --inspect-shard-count 6 --inspect-shard-index "$shard" \
               --request-interval-ms 3000 --request-jitter-ms 1500
@@ -95,8 +119,8 @@ jobs:
           }
           python3 scripts/migration/7d-status-audit.py --details "$DETAILS" \
             --output "$TASK_ROOT/status-audit.json" --review-queue "$TASK_ROOT/review-queue.ndjson"
-          npm run youtube:import-channel-discovery -- --input-dir "$TASK_ROOT/discovery" --report-path "$TASK_ROOT/import-report.json"
-          npm run youtube:export-channel-increment -- --input-dir "$TASK_ROOT/discovery" --output "$TASK_ROOT/accepted.json"
+          "${NPM_CMD[@]}" run youtube:import-channel-discovery -- --input-dir "$TASK_ROOT/discovery" --report-path "$TASK_ROOT/import-report.json"
+          "${NPM_CMD[@]}" run youtube:export-channel-increment -- --input-dir "$TASK_ROOT/discovery" --output "$TASK_ROOT/accepted.json"
           python3 scripts/migration/accepted-files-to-patch.py --input "$TASK_ROOT/accepted.json" \
             --output "$TASK_ROOT/candidate.ndjson" --manifest-output "$TASK_ROOT/manifest.json" \
             --range-id "$SOURCE_RANGE_ID" --source-key "$SOURCE_KEY" --status-audit "$TASK_ROOT/status-audit.json"
