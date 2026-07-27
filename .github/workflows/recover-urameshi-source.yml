@@ -23,7 +23,7 @@ concurrency:
 jobs:
   collect:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 120
+    timeout-minutes: 30
     env:
       SOURCE_KEY: "@urameshi_conta"
       STAGE: ${{ inputs.stage || 'candidate' }}
@@ -34,6 +34,10 @@ jobs:
       SCRATCH_CAP_BYTES: "4294967296"
       YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS: "15000"
       DAILY_SONG_COMMENT_REPLY_LIMIT: "2"
+      DISCOVERY_MAX_CHANNEL_PAGES: "500"
+      DISCOVERY_MAX_CANDIDATES: "10000"
+      DISCOVERY_REQUEST_INTERVAL_MS: "1000"
+      DISCOVERY_REQUEST_JITTER_MS: "500"
     steps:
       - name: Collect bounded 7D detail and accepted increment
         env:
@@ -149,8 +153,8 @@ jobs:
           cd "$REPO_ROOT"
           check_space source-code-fetch
           "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
-            --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
-            --max-candidates 2000 --candidate-only --request-interval-ms 5000 --request-jitter-ms 2500
+            --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
+            --max-candidates "$DISCOVERY_MAX_CANDIDATES" --candidate-only --request-interval-ms "$DISCOVERY_REQUEST_INTERVAL_MS" --request-jitter-ms "$DISCOVERY_REQUEST_JITTER_MS"
           check_space candidate-manifest
           if [ "$STAGE" = "candidate" ]; then
             DISCOVERY_MANIFEST="$TASK_ROOT/discovery/manifest.json"
@@ -168,8 +172,8 @@ jobs:
           fi
           for shard in 0 1 2 3 4 5; do
             "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
-              --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages 50 \
-              --max-candidates 2000 --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
+              --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
+              --max-candidates "$DISCOVERY_MAX_CANDIDATES" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
               --request-interval-ms 5000 --request-jitter-ms 2500
             check_space "detail-shard-$shard"
           done
