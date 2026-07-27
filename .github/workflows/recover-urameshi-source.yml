@@ -14,7 +14,7 @@ concurrency:
 jobs:
   collect:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 120
+    timeout-minutes: 360
     env:
       SOURCE_KEY: "@urameshi_conta"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
@@ -22,6 +22,7 @@ jobs:
       SOURCE_RANGE_ID: "7d"
       SCRATCH_CAP_BYTES: "4294967296"
       YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS: "15000"
+      DAILY_SONG_COMMENT_REPLY_LIMIT: "2"
     steps:
       - name: Collect bounded 7D detail and accepted increment
         env:
