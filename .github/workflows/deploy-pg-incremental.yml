@@ -153,5 +153,8 @@ jobs:
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'" | tee -a "$TASK_ROOT/activation-result.txt"
           fi
+          echo PG_INCREMENT_STORAGE_BEGIN
+          cat "$TASK_ROOT/storage.txt"
+          echo PG_INCREMENT_STORAGE_END
           trap - EXIT INT TERM
           cleanup
