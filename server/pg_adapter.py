@@ -826,6 +826,55 @@ def source_payload_from_records(records: Iterable[Mapping[str, Any]], key: str, 
 def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     options = _query_options(query)
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    # The normal UI request has no text filter.  Do not materialize every
+    # payload just to return one page: the full runtime projection can contain
+    # hundreds of thousands of rows, and the old SQLite API answered this path
+    # from a precomputed index.  Keep the filtered/search path below for
+    # compatibility, but make the common path bounded and proxy-safe.
+    if not options["q"]:
+        where = "revision_id = %s AND range_id = %s AND view = %s AND metric = %s AND row_count >= %s"
+        params = [revision_id, options["range"], options["view"], db_metric, options["minCount"]]
+        summary = _rows(
+            connection,
+            f"""
+            SELECT count(*) AS total_count,
+                   coalesce(sum(row_count), 0) AS total_occurrence_count,
+                   coalesce(sum(song_count), 0) AS total_song_count,
+                   coalesce(sum(video_count), 0) AS total_video_count
+            FROM runtime_ranking_rows
+            WHERE {where}
+            """,
+            params,
+        )[0]
+        rows = _rows(
+            connection,
+            f"""
+            SELECT rank, payload_json
+            FROM runtime_ranking_rows
+            WHERE {where}
+            ORDER BY rank
+            LIMIT %s OFFSET %s
+            """,
+            [*params, options["pageSize"], (options["page"] - 1) * options["pageSize"]],
+        )
+        total_count = int(summary.get("total_count") or 0)
+        page_count = max(1, math.ceil(total_count / options["pageSize"]))
+        records = []
+        for row in rows:
+            payload = _json_object(row.get("payload_json"))
+            payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
+            records.append(payload)
+        return {
+            "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
+            "metric": "occurrences" if options["metric"] == "count" else options["metric"],
+            "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+            "page": options["page"], "pageSize": options["pageSize"], "totalCount": total_count,
+            "filteredBaseCount": total_count,
+            "totalOccurrenceCount": int(summary.get("total_occurrence_count") or 0),
+            "totalSongCount": int(summary.get("total_song_count") or 0),
+            "totalVideoCount": int(summary.get("total_video_count") or 0),
+            "pageCount": page_count, "compact": options["compact"], "records": records,
+        }
     rows = _rows(
         connection,
         """

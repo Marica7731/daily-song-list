@@ -246,7 +246,7 @@ jobs:
           set -Eeuo pipefail
           candidate_sha="$(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -Atqc \"select content_sha256 from migration_revisions where revision_id='$REVISION' and status='ready'\"")"
           test -n "$candidate_sha"
-          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/daily-song-list-pg-candidate.log 2>&1 & echo \$! >/tmp/daily-song-list-pg-candidate.pid'"
+          ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/daily-song-list-pg-candidate.log 2>&1 & echo \$! >/tmp/daily-song-list-pg-candidate.pid'"
           # The candidate server binds to loopback on VPS2; run the contract
           # probes there instead of probing the Mac runner's loopback.
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST" 'set -Eeuo pipefail
@@ -264,7 +264,7 @@ jobs:
             curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/meta" > /tmp/daily-song-list-pg-candidate-api-meta.json
             curl --fail-with-body --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" > /tmp/daily-song-list-pg-candidate-rankings.json'
           scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-healthz.json" "$TASK_ROOT/candidate-healthz.json"
-          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-api_meta.json" "$TASK_ROOT/candidate-api-meta.json"
+          scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-api-meta.json" "$TASK_ROOT/candidate-api-meta.json"
           scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-candidate-rankings.json" "$TASK_ROOT/candidate-rankings.json"
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
 
