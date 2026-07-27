@@ -39,34 +39,48 @@ jobs:
       MANIFEST_PATH: ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
       ACTIVATE: ${{ inputs.activate || false }}
     steps:
-      - name: Checkout bounded migration inputs
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 1
-          filter: blob:none
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            scripts/migration
-            server/pg_adapter.py
-            server/pg_api_server.py
-            deploy/vps2/song-rank-pg-api.service
-            ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}
-            ${{ inputs.manifest_path || github.event.client_payload.manifest_path || 'artifacts/migration/manifest.json' }}
-
       - name: Candidate compare health and optional activation
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
           set -Eeuo pipefail
-          test -n "$VPS2_PASSWORD"
-          test -f "$PATCH_PATH" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
-          test -f "$MANIFEST_PATH" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
+          test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
           TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-increment.XXXXXX")"
-          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          INPUT_ROOT="$TASK_ROOT/inputs"
+          mkdir -p "$INPUT_ROOT"
+          bootstrap_cleanup() {
+            status=$?
+            rm -rf -- "$TASK_ROOT"
+            exit "$status"
+          }
+          trap bootstrap_cleanup EXIT INT TERM
+          RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
+          fetch_input() {
+            source_path="$1"
+            destination="$2"
+            case "$source_path" in
+              /*|*..*) echo "PG_INCREMENT_BLOCKED invalid input path=$source_path"; exit 78 ;;
+            esac
+            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
+              "$RAW_BASE/$source_path" -o "$destination"
+            test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty input=$source_path"; exit 78; }
+          }
+          fetch_input "scripts/migration/pg-schema.sql" "$INPUT_ROOT/pg-schema.sql"
+          fetch_input "scripts/migration/import-pg-incremental.py" "$INPUT_ROOT/import-pg-incremental.py"
+          fetch_input "scripts/migration/activate-pg-candidate.py" "$INPUT_ROOT/activate-pg-candidate.py"
+          fetch_input "server/pg_adapter.py" "$INPUT_ROOT/pg_adapter.py"
+          fetch_input "server/pg_api_server.py" "$INPUT_ROOT/pg_api_server.py"
+          fetch_input "deploy/vps2/song-rank-pg-api.service" "$INPUT_ROOT/song-rank-pg-api.service"
+          fetch_input "$PATCH_PATH" "$INPUT_ROOT/patch"
+          fetch_input "$MANIFEST_PATH" "$INPUT_ROOT/manifest"
+          PATCH_INPUT="$INPUT_ROOT/patch"
+          MANIFEST_INPUT="$INPUT_ROOT/manifest"
+          printf 'TASK_ROOT=%s\nPG_INPUT_ROOT=%s\n' "$TASK_ROOT" "$INPUT_ROOT" >> "$GITHUB_ENV"
+          test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
+          test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
           baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-          patch_bytes="$(stat -f%z "$PATCH_PATH")"
-          manifest_bytes="$(stat -f%z "$MANIFEST_PATH")"
+          patch_bytes="$(stat -f%z "$PATCH_INPUT")"
+          manifest_bytes="$(stat -f%z "$MANIFEST_INPUT")"
           expected_peak_bytes=$((512 * 1024 * 1024))
           hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
           printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
@@ -96,16 +110,16 @@ jobs:
             exit "$status"
           }
           trap cleanup EXIT INT TERM
-          "${SCP[@]}" scripts/migration/pg-schema.sql scripts/migration/import-pg-incremental.py scripts/migration/activate-pg-candidate.py server/pg_adapter.py server/pg_api_server.py deploy/vps2/song-rank-pg-api.service "$VPS2_USER@$VPS2_HOST:/tmp/"
-          "${SCP[@]}" "$MANIFEST_PATH" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
+          "${SCP[@]}" "$INPUT_ROOT/pg-schema.sql" "$INPUT_ROOT/import-pg-incremental.py" "$INPUT_ROOT/activate-pg-candidate.py" "$INPUT_ROOT/pg_adapter.py" "$INPUT_ROOT/pg_api_server.py" "$INPUT_ROOT/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/"
+          "${SCP[@]}" "$MANIFEST_INPUT" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
           remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
           printf 'remoteFreeBefore=%s\n' "$remote_free" >> "$TASK_ROOT/storage.txt"
           test "$remote_free" -ge "$patch_bytes"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO \"www-data\";'"
           if [[ "$PATCH_PATH" == *.gz ]]; then
-            gzip -dc "$PATCH_PATH"
+            gzip -dc "$PATCH_INPUT"
           else
-            cat "$PATCH_PATH"
+            cat "$PATCH_INPUT"
           fi | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
           candidate_sha="$(awk -F'"' '/contentSha256/{print $4}' "$TASK_ROOT/import-result.json")"
           test -n "$candidate_sha"
@@ -125,6 +139,6 @@ jobs:
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/sources/Naraetan?page=1&pageSize=1"' > "$TASK_ROOT/candidate-source.json"
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
-            "${SCP[@]}" scripts/migration/activate-pg-candidate.py "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
+            "${SCP[@]}" "$INPUT_ROOT/activate-pg-candidate.py" "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py; sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl disable --now song-rank-api || true; systemctl enable --now song-rank-pg-api; for n in \$(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl -fsS http://127.0.0.1:8765/healthz; curl -fsS http://127.0.0.1:8765/api/meta; curl -fsS 'http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1'"
           fi
