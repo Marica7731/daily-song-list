@@ -107,6 +107,36 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("channel source details stay bounded and reuse parent occurrences", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UCFP9UkgIM_U8NfzRbYEOQdA"
+metadata = {
+    "channelId": channel_id,
+    "channelHandle": "/@naraetanV",
+    "channelName": "なれたん Naraetan Ch.",
+    "avatarUrl": "https://yt3.googleusercontent.com/example=s900",
+    "sourceDetailKey": module._stable_key("source-vtuber", "all", channel_id),
+}
+records = [{
+    "video": {"videoId": "eKx6coop-bo", "title": "歌枠", "channelId": channel_id, "channelName": ""},
+    "occurrences": ({"occurrenceId": "o-1", "position": 0, "rangeId": "all", "title": "Song A", "artist": "Artist A", "seconds": None},),
+}]
+source = module._source_payload_from_channel_records(records, metadata, metadata["sourceDetailKey"], {"page": "1", "pageSize": "1"})
+assert source["found"] is True
+assert source["record"]["channelName"] == "なれたん Naraetan Ch."
+assert source["record"]["avatarUrl"].startswith("https://yt3.googleusercontent.com/")
+assert source["record"]["occurrences"][0]["song"]["seconds"] is None
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("missing migration tables are an explicit schema error", () => {
   const output = runPython(`
 import importlib.util

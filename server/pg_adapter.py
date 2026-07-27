@@ -238,6 +238,162 @@ def _channel_metadata_rows(connection, revision_ids: Sequence[str]) -> list[dict
     return list(selected.values())
 
 
+def _metadata_source_key(item: Mapping[str, Any], range_id: str = "all") -> str:
+    """Return the stable source-detail key carried by a channel metadata row."""
+
+    payload = _json_object(item.get("payload_json"))
+    explicit = _text(
+        item.get("sourceDetailKey")
+        or item.get("source_detail_key")
+        or payload.get("sourceDetailKey")
+        or payload.get("source_detail_key")
+    )
+    if explicit:
+        return explicit
+    channel_key = _text(
+        item.get("channelId")
+        or item.get("channel_id")
+        or item.get("channelKey")
+        or item.get("channel_key")
+    )
+    return _stable_key("source-vtuber", range_id, channel_key) if channel_key else ""
+
+
+def _metadata_for_source_key(metadata: Iterable[Mapping[str, Any]], key: str) -> Mapping[str, Any] | None:
+    """Find metadata that explicitly or stably identifies a source-detail key."""
+
+    for item in metadata:
+        if _metadata_source_key(item, "all") == key or _metadata_source_key(item, "7d") == key:
+            return item
+    return None
+
+
+def _apply_source_channel_metadata(record: Mapping[str, Any], metadata: Mapping[str, Any]) -> dict[str, Any]:
+    """Overlay verified channel identity onto a parent-runtime source record."""
+
+    result = {"video": dict(record.get("video") or {}), "occurrences": tuple(record.get("occurrences") or ())}
+    video = result["video"]
+    fields = {
+        "channelId": metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"),
+        "channelHandle": metadata.get("channelHandle") or metadata.get("handle"),
+        "channelName": metadata.get("channelName") or metadata.get("display_name"),
+        "channelUrl": metadata.get("channelUrl") or metadata.get("channel_url"),
+        "avatarUrl": metadata.get("avatarUrl") or metadata.get("avatar_url"),
+        "thumbnailUrl": metadata.get("thumbnailUrl") or metadata.get("thumbnail_url"),
+        "sourceUrl": metadata.get("sourceUrl") or metadata.get("source_url"),
+        "knownSourceType": metadata.get("knownSourceType") or metadata.get("known_source_type"),
+        "isCollected": metadata.get("isCollected") if "isCollected" in metadata else metadata.get("is_collected"),
+    }
+    for name, value in fields.items():
+        if value is not None and value != "":
+            video[name] = value
+    return result
+
+
+def _source_payload_from_channel_records(
+    records: Iterable[Mapping[str, Any]],
+    metadata: Mapping[str, Any],
+    key: str,
+    query: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build source detail from a bounded, channel-filtered parent record set."""
+
+    enriched = [_apply_source_channel_metadata(record, metadata) for record in records]
+    return source_payload_from_records(enriched, key, query)
+
+
+def _runtime_channel_source_payload(
+    connection,
+    revision_id: str,
+    metadata: Mapping[str, Any],
+    key: str,
+    query: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Read only the parent-runtime rows belonging to a verified channel.
+
+    Metadata-only increments must not force the API to materialize the entire
+    runtime snapshot.  The channel identity is evidence-backed, so it is safe
+    to use it as the bounded lookup predicate while preserving all parent
+    video/occurrence payloads and source provenance.
+    """
+
+    channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
+    channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
+    channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
+    predicates: list[str] = []
+    params: list[Any] = [revision_id]
+    if channel_id:
+        predicates.append("channel_id = %s")
+        params.append(channel_id)
+    if channel_handle:
+        predicates.append("channel_handle = %s")
+        params.append(channel_handle)
+    if channel_name:
+        predicates.append("channel_name = %s")
+        params.append(channel_name)
+    if not predicates:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
+    video_rows = _rows(
+        connection,
+        f"""
+        SELECT video_id, title, channel_name, channel_id, channel_handle,
+               channel_url, published_timestamp, payload_json
+        FROM runtime_videos
+        WHERE revision_id = %s AND ({' OR '.join(predicates)})
+        ORDER BY video_id
+        """,
+        params,
+    )
+    video_ids = [_text(row.get("video_id")) for row in video_rows if _text(row.get("video_id"))]
+    if not video_ids:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
+    occurrence_rows = _rows(
+        connection,
+        """
+        SELECT occurrence_id, range_id, video_id, song_key, seconds,
+               source_system, source_id, title, artist, is_niche,
+               is_unknown_artist, payload_json
+        FROM runtime_occurrences
+        WHERE revision_id = %s AND video_id = ANY(%s)
+        ORDER BY video_id, range_id, occurrence_id
+        """,
+        [revision_id, video_ids],
+    )
+    by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for row in occurrence_rows:
+        by_video[_text(row.get("video_id"))].append(row)
+    records: list[dict[str, Any]] = []
+    for row in video_rows:
+        video_id = _text(row.get("video_id"))
+        video = _json_object(row.get("payload_json"))
+        video.update({
+            "videoId": video.get("videoId") or video_id,
+            "title": video.get("title") if video.get("title") is not None else row.get("title"),
+            "channelName": video.get("channelName") if video.get("channelName") is not None else row.get("channel_name"),
+            "channelId": video.get("channelId") if video.get("channelId") is not None else row.get("channel_id"),
+            "channelHandle": video.get("channelHandle") if video.get("channelHandle") is not None else row.get("channel_handle"),
+            "channelUrl": video.get("channelUrl") if video.get("channelUrl") is not None else row.get("channel_url"),
+            "publishedAt": video.get("publishedAt") if video.get("publishedAt") is not None else row.get("published_timestamp"),
+        })
+        songs: list[dict[str, Any]] = []
+        for occurrence in by_video.get(video_id, ()):
+            song = _json_object(occurrence.get("payload_json"))
+            song.update({
+                "occurrenceId": song.get("occurrenceId") if song.get("occurrenceId") is not None else occurrence.get("occurrence_id"),
+                "position": song.get("position") if song.get("position") is not None else len(songs),
+                "rangeId": song.get("rangeId") if song.get("rangeId") is not None else occurrence.get("range_id"),
+                "songKey": song.get("songKey") if song.get("songKey") is not None else occurrence.get("song_key"),
+                "seconds": song.get("seconds") if song.get("seconds") is not None else occurrence.get("seconds"),
+                "title": song.get("title") if song.get("title") is not None else occurrence.get("title"),
+                "artist": song.get("artist") if song.get("artist") is not None else occurrence.get("artist"),
+                "sourceId": song.get("sourceId") if song.get("sourceId") is not None else occurrence.get("source_id"),
+                "sourceSystem": song.get("sourceSystem") if song.get("sourceSystem") is not None else occurrence.get("source_system"),
+            })
+            songs.append(song)
+        records.append({"video": video, "occurrences": tuple(songs)})
+    return _source_payload_from_channel_records(records, metadata, key, query)
+
+
 def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
     """Enrich a vtuber ranking record without merging unrelated unknown rows."""
 
@@ -1325,11 +1481,19 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
+        metadata = _channel_metadata_rows(connection, _revision_lineage(connection, runtime[0]))
+        channel_metadata = _metadata_for_source_key(metadata, key)
+        if channel_metadata:
+            return _runtime_channel_source_payload(connection, runtime[0], channel_metadata, key, query)
         return _runtime_source_payload(connection, runtime[0], key, query)
     generic_runtime = _generic_runtime_projection_revision(connection)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
+            metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
+            channel_metadata = _metadata_for_source_key(metadata, key)
+            if channel_metadata:
+                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query)
             return _runtime_source_payload(connection, parent[0], key, query)
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     snapshot = _load_snapshot(connection)
