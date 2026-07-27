@@ -94,6 +94,25 @@ test("continuation selector honors search API", () => {
   assert.equal(findBrowseContinuation(data), "BROWSE_TOKEN");
   assert.equal(findBrowseContinuation(data, "/youtubei/v1/search"), "SEARCH_TOKEN");
 });
+
+test("continuation selector skips already consumed tokens", () => {
+  const data = {
+    first: {
+      continuationEndpoint: {
+        commandMetadata: { webCommandMetadata: { apiUrl: "/youtubei/v1/search" } },
+        continuationCommand: { token: "SEEN_TOKEN" },
+      },
+    },
+    second: {
+      continuationEndpoint: {
+        commandMetadata: { webCommandMetadata: { apiUrl: "/youtubei/v1/search" } },
+        continuationCommand: { token: "NEXT_TOKEN" },
+      },
+    },
+  };
+
+  assert.equal(findBrowseContinuation(data, "/youtubei/v1/search", new Set(["SEEN_TOKEN"])), "NEXT_TOKEN");
+});
 test("search discovery routes continuation to youtubei search", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-search-test-"));
   const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";
