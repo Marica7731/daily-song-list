@@ -145,3 +145,18 @@
 ## 交接记录
 
 每次状态必须记录：工作树/分支、改动文件、测试、commit/push、发布 run、线上证据、Mac/WDC/G 存储、未完成项。只有真实线上切换和验收完成后才能将平台 goal 标记 complete；阻塞须同一外部条件连续三次且无安全替代路径。
+
+### 
+2026-07-27 07:56:49 UTC
+ 实时状态（以本段为准）
+- mode: release-verify + implementation-write（仅迁移 workflow/7D 调度相关写集；不改前端）
+- 正式入口: G:\\codex-work\\daily-song-list；本地工作树既有 staged deletions 保持原样，未恢复生成 data。
+- 7D run 30244079991: cancelled；job 89907217361 于 2026-07-27T07:35:45Z cancelled，cleanup success，task root beforeBytes=11767808、afterBytes=0；未形成 accepted manifest/increment，未导入生产。
+- 旧 SQLite 定时 run 30246931182: cancelled；在 Checkout 阶段停止，未进入 run-core-update/build runtime；日志显示 Mac 工作目录 index.lock 由当前 checkout PID 24141 持有，不能误删。
+- Mac preflight: 2026-07-27T07:55:34Z，free=368982316 KiB（约 369 GiB）；当前检查 PID 24141/24136/24134 仍在持锁 checkout，需完成/取消后再按 PID/句柄清理。
+- PG active: 仍保留 accepted_30243460721_1；Naraetan overlay run 30244929817 failed at candidate source-detail HTTP 500，candidate 已删除，remoteFreeAfterBytes=21790998528，未切换生产。
+- workflow fixes pushed via GitHub Contents API: 4856aa1（Mac Bash 兼容并输出 candidate source error body）；54e57d8（workflow_run 仅在上游成功时允许 PG job，取消旧 core 不再触发激活）。
+- 7D streaming protocol commits remain: 2ec0d47、f4e07c7、7b57550；focused tests previously 16 passed/2 skipped/0 failed；协议尚未接入真实多 relay 调度。
+- 多 VPS 状态: Mac runner SSH 未发现 vps-racknerd/vps-wdc/vps-jp/vps-aiyun/vps-la/culua alias；Actions 只列 VPS2_PASSWORD。可并发架构已具备协议，但真实 relay host/key/secret 路径尚未接入，不能伪造已并发。
+- 未完成: 修复并复现 candidate source-detail 500；处理 Mac checkout lock 的 bounded cleanup；接入真实 relay 后再启动单一 7D candidate/detail run；完成 curation、PG candidate compare/health/API、activate 和线上验收。
+- 禁止: D 盘、完整 SQLite/媒体下载、VPS 长期 raw/clone/database、恢复 staged data 删除、前端样式/结构/API 字段 URL 修改、无 ready candidate 切生产。
