@@ -1,5 +1,12 @@
 # daily-song-list 主线：增量数据库与安全发布迁移
 
+## Pre-release gate: VTuber source-detail paging and cover mapping
+
+- `pending -> implementation-write`: Noa is the confirmed regression sample; the fix is generic for compact vtuber/source-detail responses.
+- Preserve channel handle, name, avatar, occurrence provenance, and per-video thumbnail. Keep `frontend code/style/schema contract frozen; data and backend counts may change normally`.
+- Only API detail adaptation/paging/cover selection and contract tests may change. Do not change layout, CSS, field names/types, or URL routes.
+- Acceptance requires focused tests, commit/push, the existing candidate compare/health/API/locked-activate gate, and live Noa rankings/source-detail pagination and thumbnail evidence.
+
 ## 本会话 Goal（2026-07-27，G 盘正式入口）
 
 由当前主会话负责收口两项用户交付：`PostgreSQL 增量迁移 -> 迁移后发布既有清洗结果` 与 `MyGit 完整 7D 恢复`。后者明确包含 `うら飯紺汰` 来源的 7D 候选发现、详情/时间码、三天规则、curation accepted increment 和线上发布验收；前者通过 candidate gate 后，清洗结果必须沿同一增量入口上线，不能停在本地 artifact。PID=5282 当前仅保留为停止/断点证据；本轮 audit-readonly 未启动、暂停或删除任何 7D 任务，也未创建新的仓库/worktree/目录。主会话负责限定写集、测试、commit、push、既有 workflow、candidate/active 切换和真实线上验收。

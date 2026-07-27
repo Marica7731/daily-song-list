@@ -1527,6 +1527,32 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     }
 
 
+def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalize one persisted source occurrence without losing its video image."""
+
+    item = _json_object(row.get("payload_json"))
+    nested_video = item.get("video") if isinstance(item.get("video"), Mapping) else {}
+    if isinstance(item.get("payload"), Mapping):
+        item = dict(item["payload"])
+        nested_video = item.get("video") if isinstance(item.get("video"), Mapping) else {}
+    fields = {
+        "videoId": row.get("video_id"),
+        "title": row.get("title"),
+        "channelName": row.get("channel_name"),
+        "channelId": row.get("channel_id"),
+        "channelHandle": row.get("channel_handle"),
+        "channelUrl": row.get("channel_url"),
+        "publishedAt": row.get("published_timestamp"),
+        "seconds": row.get("seconds"),
+    }
+    for name, value in fields.items():
+        if name not in item and (value is not None or name == "seconds"):
+            item[name] = value
+    for name in ("thumbnailUrl", "videoThumbnailUrl", "avatarUrl"):
+        if name not in item and nested_video.get(name) is not None:
+            item[name] = nested_video[name]
+    return item
+
 def _runtime_source_payload(connection, revision_id: str, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     rows = _rows(
         connection,
@@ -1549,9 +1575,23 @@ def _runtime_source_payload(connection, revision_id: str, key: str, query: Mappi
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     record = _json_object(rows[0].get("payload_json"))
     query = query or {}
-    if any(field in query for field in ("page", "pageSize")) and isinstance(record.get("occurrences"), list):
+    if any(field in query for field in ("page", "pageSize")):
         options = _query_options(query)
-        occurrences = list(record["occurrences"])
+        range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
+        source_rows = _rows(
+            connection,
+            """
+            SELECT position, video_id, title, channel_name, channel_id, channel_handle,
+                   channel_url, published_timestamp, seconds, payload_json
+            FROM runtime_source_occurrences
+            WHERE revision_id = %s AND source_key = %s AND range_id = %s
+            ORDER BY position
+            """,
+            [revision_id, key, range_id],
+        )
+        occurrences = [_runtime_source_occurrence(row) for row in source_rows]
+        if not occurrences:
+            occurrences = list(record.get("occurrences") or [])
         if options["q"]:
             occurrences = [item for item in occurrences if options["q"] in json.dumps(item, ensure_ascii=False).casefold()]
         video_keys: list[str] = []
@@ -1591,6 +1631,9 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
+        persisted = _runtime_source_payload(connection, runtime[0], key, query)
+        if persisted.get("found"):
+            return persisted
         metadata = _channel_metadata_rows(connection, _revision_lineage(connection, runtime[0]))
         channel_metadata = _metadata_for_source_key(metadata, key)
         if channel_metadata:
@@ -1600,6 +1643,9 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
+            persisted = _runtime_source_payload(connection, parent[0], key, query)
+            if persisted.get("found"):
+                return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:

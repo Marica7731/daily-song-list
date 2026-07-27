@@ -139,6 +139,42 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+
+test("persisted source detail pages use every occurrence row and keep its video thumbnail", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Cursor:
+    def execute(self, sql, params):
+        if "runtime_source_details" in sql:
+            self.description = [("payload_json",)]
+            self.rows = [(json.dumps({"sourceDetailKey": "src-noa", "channelName": "Noa", "occurrences": [{"videoId": "legacy-preview", "thumbnailUrl": "legacy.jpg"}], "songs": ["Song A", "Song B", "Song C"]}),)]
+        elif "runtime_source_occurrences" in sql:
+            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
+            self.rows = [(0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, None, json.dumps({"thumbnailUrl": "a.jpg"})), (1, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 30, json.dumps({"thumbnailUrl": "b.jpg"})), (2, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 60, json.dumps({"thumbnailUrl": "c.jpg"}))]
+        else:
+            raise AssertionError(sql)
+    def fetchall(self):
+        return self.rows
+    def close(self):
+        pass
+class Connection:
+    def cursor(self):
+        return Cursor()
+page = module._runtime_source_payload(Connection(), "rev", "src-noa", {"page": "2", "pageSize": "2"})
+assert page["found"] is True and page["pageCount"] == 2 and page["totalCount"] == 3
+assert page["record"]["occurrences"][0]["videoId"] == "video-c"
+assert page["record"]["occurrences"][0]["thumbnailUrl"] == "c.jpg"
+assert page["record"]["occurrences"][0]["seconds"] == 60
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
 test("missing migration tables are an explicit schema error", () => {
   const output = runPython(`
 import importlib.util
