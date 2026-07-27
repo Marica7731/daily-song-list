@@ -1,0 +1,99 @@
+name: Deploy PostgreSQL adapter contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_key:
+        description: "Source detail key used for the live contract probe"
+        required: true
+        default: "29ae50b7975dbdcf"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-pg-adapter-contract
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      SOURCE_KEY: ${{ inputs.source_key }}
+      PUBLIC_BASE: "https://ytb-song-rank.culua.com"
+    steps:
+      - name: Create bounded task root
+        run: |
+          set -Eeuo pipefail
+          TASK_ROOT="$(mktemp -d "$RUNNER_TEMP/daily-song-list-adapter.XXXXXX")"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          df -B1 / > "$TASK_ROOT/storage-before.txt"
+          printf 'runId=%s\nstartedAt=%s\nsourceKey=%s\n' "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SOURCE_KEY" > "$TASK_ROOT/manifest.txt"
+
+      - name: Fetch adapter sources from this commit
+        run: |
+          set -Eeuo pipefail
+          RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
+          curl --fail --location --connect-timeout 8 --max-time 20 "$RAW_BASE/server/pg_adapter.py" -o "$TASK_ROOT/pg_adapter.py"
+          curl --fail --location --connect-timeout 8 --max-time 20 "$RAW_BASE/server/pg_api_server.py" -o "$TASK_ROOT/pg_api_server.py"
+          PYTHONDONTWRITEBYTECODE=1 python3 - "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" <<'PY'
+          import sys
+          for filename in sys.argv[1:]:
+              compile(open(filename, encoding="utf-8").read(), filename, "exec")
+          PY
+          sha256sum "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" >> "$TASK_ROOT/manifest.txt"
+
+      - name: Prepare bounded SSH helper
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$VPS2_PASSWORD"
+          mkdir -p "$TASK_ROOT/ssh"
+          printf '%s\n' "$VPS2_PASSWORD" > "$TASK_ROOT/ssh/password"
+          chmod 600 "$TASK_ROOT/ssh/password"
+          cat > "$TASK_ROOT/ssh/askpass.sh" <<'SH'
+          #!/bin/sh
+          exec cat "$TASK_ROOT/ssh/password"
+          SH
+          chmod 700 "$TASK_ROOT/ssh/askpass.sh"
+          {
+            echo "SSH_ASKPASS=$TASK_ROOT/ssh/askpass.sh"
+            echo "SSH_ASKPASS_REQUIRE=force"
+            echo "DISPLAY=daily-song-list"
+          } >> "$GITHUB_ENV"
+          printf 'SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)\nSCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)\n' >> "$GITHUB_ENV"
+
+      - name: Start candidate and verify source-detail contract
+        run: |
+          set -Eeuo pipefail
+          REMOTE_ROOT="/tmp/daily-song-list-adapter-${GITHUB_RUN_ID}"
+          printf 'REMOTE_ROOT=%s\n' "$REMOTE_ROOT" >> "$GITHUB_ENV"
+          eval "$SSH" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; rm -rf '$REMOTE_ROOT'; install -d -m 0755 '$REMOTE_ROOT/server'; install -m 0644 /dev/null '$REMOTE_ROOT/placeholder';"
+          eval "$SCP" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/server/"
+          eval "$SSH" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; sudo -u www-data env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data PYTHONPATH='$REMOTE_ROOT/server' nohup python3 '$REMOTE_ROOT/server/pg_api_server.py' --host 127.0.0.1 --port 18766 > '$REMOTE_ROOT/candidate.log' 2>&1 & echo \$! > '$REMOTE_ROOT/candidate.pid'; for n in \$(seq 1 20); do curl --fail --max-time 5 http://127.0.0.1:18766/healthz > '$REMOTE_ROOT/candidate-healthz.json' && break; sleep 1; done; test -s '$REMOTE_ROOT/candidate-healthz.json'"
+          eval "$SSH" "$VPS2_USER@$VPS2_HOST" "curl --fail --max-time 10 http://127.0.0.1:18766/api/meta > '$REMOTE_ROOT/candidate-meta.json'; curl --fail --max-time 10 'http://127.0.0.1:18766/api/rankings?range=all&view=vtubers&metric=occurrences&page=1&pageSize=1&q=Noa' > '$REMOTE_ROOT/candidate-rankings.json'; curl --fail --max-time 10 'http://127.0.0.1:18766/api/sources/$SOURCE_KEY?page=1&pageSize=20' > '$REMOTE_ROOT/source-page-1.json'; curl --fail --max-time 10 'http://127.0.0.1:18766/api/sources/$SOURCE_KEY?page=2&pageSize=20' > '$REMOTE_ROOT/source-page-2.json'; jq -e --arg key '$SOURCE_KEY' '(.found == true and .sourceKey == $key and .pageCount > 1 and .totalOccurrenceCount > 3 and .record.occurrencePreviewLimited == true and (.record.channelHandle | length) > 0 and (.record.channelName | length) > 0 and (.record.avatarUrl | length) > 0)' '$REMOTE_ROOT/source-page-1.json' >/dev/null; jq -e '(.page == 2 and (.record.occurrences | length) > 0 and ([.record.occurrences[]?.item.thumbnailUrl // .record.occurrences[]?.thumbnailUrl] | map(select(. != null)) | unique | length) > 0)' '$REMOTE_ROOT/source-page-2.json' >/dev/null; cp '$REMOTE_ROOT/source-page-1.json' '$REMOTE_ROOT/source-page-2.json' '$REMOTE_ROOT/candidate-evidence/' 2>/dev/null || true"
+
+      - name: Install verified adapter and retain rollback files until health passes
+        run: |
+          set -Eeuo pipefail
+          eval "$SSH" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; install -d -m 0755 '$REMOTE_ROOT/backup' /opt/culua/ytb-song-rank/server; cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$REMOTE_ROOT/backup/pg_adapter.py'; cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$REMOTE_ROOT/backup/pg_api_server.py'; install -m 0644 '$REMOTE_ROOT/server/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/server/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; if ! systemctl restart song-rank-pg-api; then install -m 0644 '$REMOTE_ROOT/backup/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/backup/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; exit 1; fi; for n in \$(seq 1 20); do curl --fail --max-time 5 http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl --fail --max-time 10 http://127.0.0.1:8765/healthz > '$REMOTE_ROOT/production-healthz.json'; curl --fail --max-time 10 'http://127.0.0.1:8765/api/sources/$SOURCE_KEY?page=1&pageSize=20' > '$REMOTE_ROOT/production-source.json'; jq -e '(.found == true and .pageCount > 1 and .totalOccurrenceCount > 3)' '$REMOTE_ROOT/production-source.json' >/dev/null; rm -rf '$REMOTE_ROOT/backup'"
+
+      - name: Verify public API and cleanup
+        if: always()
+        run: |
+          set +e
+          curl --fail --connect-timeout 8 --max-time 20 "$PUBLIC_BASE/healthz" > "$TASK_ROOT/public-healthz.json"
+          public_status=$?
+          curl --fail --connect-timeout 8 --max-time 20 "$PUBLIC_BASE/api/sources/$SOURCE_KEY?page=1&pageSize=20" > "$TASK_ROOT/public-source.json"
+          source_status=$?
+          df -B1 / > "$TASK_ROOT/storage-after.txt"
+          printf 'finishedAt=%s\npublicHealthExit=%s\npublicSourceExit=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$public_status" "$source_status" >> "$TASK_ROOT/manifest.txt"
+          if [ -n "${REMOTE_ROOT:-}" ]; then
+            eval "$SSH" "$VPS2_USER@$VPS2_HOST" "if test -f '$REMOTE_ROOT/candidate.pid'; then kill \$(cat '$REMOTE_ROOT/candidate.pid') 2>/dev/null || true; fi; rm -rf '$REMOTE_ROOT'" || true
+          fi
+          rm -rf "$TASK_ROOT"
