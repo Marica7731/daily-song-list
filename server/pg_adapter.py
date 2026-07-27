@@ -588,6 +588,125 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
     return resolved
 
 
+def _overlay_runtime_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
+    if not revision_ids:
+        return []
+    return _rows(
+        connection,
+        """
+        SELECT revision_id, entity_type, entity_key, source_system, range_id,
+               source_id, occurrence_id, tombstone, payload_json
+        FROM migration_runtime_rows
+        WHERE revision_id = ANY(%s)
+        ORDER BY revision_id, entity_type, entity_key
+        """,
+        [list(revision_ids)],
+    )
+
+
+def _overlay_payload(row: Mapping[str, Any]) -> dict[str, Any]:
+    payload = _json_object(row.get("payload_json"))
+    if isinstance(payload.get("payload"), Mapping):
+        payload = dict(payload["payload"])
+    return payload
+
+
+def _runtime_tombstones(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
+    """Return conservative occurrence/video tombstones from overlay rows."""
+
+    changes_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in _overlay_runtime_rows(connection, revision_ids):
+        if not row.get("tombstone"):
+            continue
+        entity_type = _text(row.get("entity_type"))
+        if entity_type not in {"occurrences", "runtime_occurrences", "videos", "runtime_videos"}:
+            continue
+        payload = _overlay_payload(row)
+        payload.setdefault("occurrenceId", row.get("occurrence_id"))
+        payload.setdefault("sourceId", row.get("source_id"))
+        payload.setdefault("sourceSystem", row.get("source_system"))
+        payload.setdefault("rangeId", row.get("range_id"))
+        payload.setdefault("entityKey", row.get("entity_key"))
+        payload["entityType"] = entity_type
+        identity = _text(payload.get("occurrenceId") or payload.get("entityKey") or payload.get("videoId"))
+        if identity:
+            changes_by_key[(_text(payload.get("entityType")), identity)] = payload
+    return list(changes_by_key.values())
+
+
+def _source_overlay_match(item: Mapping[str, Any], change: Mapping[str, Any]) -> bool:
+    target_video = _text(change.get("videoId") or change.get("video_id"))
+    item_video = _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId"))
+    if target_video and item_video != target_video:
+        return False
+    target_occurrence = _text(change.get("occurrenceId") or change.get("occurrence_id"))
+    item_occurrence = _text(item.get("occurrenceId") or item.get("occurrence_id"))
+    if target_occurrence and item_occurrence:
+        return target_occurrence == item_occurrence
+    if "seconds" in change and change.get("seconds") is not None:
+        try:
+            if int(item.get("seconds")) != int(change.get("seconds")):
+                return False
+        except (TypeError, ValueError):
+            return False
+    song = item.get("song") if isinstance(item.get("song"), Mapping) else {}
+    target_title = _overlay_norm(change.get("title"))
+    target_artist = _overlay_norm(change.get("artist"))
+    if target_title and _overlay_norm(song.get("title") or item.get("title")) != target_title:
+        return False
+    if target_artist and _overlay_norm(song.get("artist") or item.get("artist")) != target_artist:
+        return False
+    return bool(target_video or target_occurrence)
+
+
+def _apply_source_overlay(occurrences: Iterable[Mapping[str, Any]], changes: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    result = [dict(item) for item in occurrences]
+    for change in changes:
+        entity_type = _text(change.get("entityType"))
+        if entity_type in {"videos", "runtime_videos"}:
+            target_video = _text(change.get("videoId") or change.get("video_id"))
+            if target_video:
+                result = [item for item in result if _text(item.get("videoId")) != target_video]
+            continue
+        if entity_type not in {"occurrences", "runtime_occurrences"}:
+            continue
+        matches = [index for index, item in enumerate(result) if _source_overlay_match(item, change)]
+        if len(matches) == 1:
+            result.pop(matches[0])
+    return result
+
+
+def _runtime_change_group_key(change: Mapping[str, Any], view: str) -> str:
+    title = _text(change.get("title"))
+    artist = _text(change.get("artist"))
+    video_id = _text(change.get("videoId") or change.get("video_id"))
+    if view in {"songs", "songIndex", "vsingerSongs"}:
+        return f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+    if view == "artists":
+        return _overlay_norm(artist) or "unknown"
+    if view == "videos":
+        return video_id
+    return _text(change.get("channelId") or change.get("channel_id")) or _text(change.get("channelHandle") or change.get("channel_handle")).lstrip("@/") or _overlay_norm(change.get("channelName") or change.get("channel_name"))
+
+
+def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: Sequence[Mapping[str, Any]], view: str) -> None:
+    for change in changes:
+        if _text(change.get("entityType")) not in {"occurrences", "runtime_occurrences"}:
+            continue
+        key = _runtime_change_group_key(change, view)
+        if not key or key not in groups:
+            continue
+        row = groups[key]
+        row["row_count"] = max(0, int(row.get("row_count") or 0) - 1)
+        row["timestamp_count"] = max(0, int(row.get("timestamp_count") or 0) - 1)
+        if row["row_count"] == 0:
+            groups.pop(key, None)
+            continue
+        payload = _json_object(row.get("payload_json"))
+        payload.update({"count": row["row_count"], "timestampCount": row["timestamp_count"]})
+        row["payload_json"] = payload
+
+
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -710,6 +829,25 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
                 payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
             row["payload_json"] = payload
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
+    runtime_changes = _runtime_tombstones(connection, overlay_ids)
+    video_ids = {
+        _text(change.get("videoId") or change.get("video_id"))
+        for change in runtime_changes
+        if _text(change.get("videoId") or change.get("video_id"))
+    }
+    if video_ids:
+        video_rows = _rows(
+            connection,
+            "SELECT video_id, channel_name, channel_id, channel_handle FROM runtime_videos WHERE revision_id = %s AND video_id = ANY(%s)",
+            [parent[0], list(video_ids)],
+        )
+        video_by_id = {_text(row.get("video_id")): row for row in video_rows}
+        for change in runtime_changes:
+            video = video_by_id.get(_text(change.get("videoId") or change.get("video_id")))
+            if video:
+                for name in ("channel_name", "channel_id", "channel_handle"):
+                    change.setdefault(name, video.get(name))
+    _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
     filtered = []
     for row in groups.values():
         search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
@@ -1490,6 +1628,7 @@ def _runtime_source_payload(
     key: str,
     query: Mapping[str, Any] | None = None,
     allow_derived: bool = True,
+    overlay_revision_ids: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     rows = _rows(
         connection,
@@ -1514,6 +1653,7 @@ def _runtime_source_payload(
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     record = _json_object(rows[0].get("payload_json"))
     query = query or {}
+    overlay_changes = _runtime_tombstones(connection, overlay_revision_ids or ())
     if any(field in query for field in ("page", "pageSize")):
         options = _query_options(query)
         range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
@@ -1531,6 +1671,7 @@ def _runtime_source_payload(
         occurrences = [_runtime_source_occurrence(row) for row in source_rows]
         if not occurrences:
             occurrences = list(record.get("occurrences") or [])
+        occurrences = _apply_source_overlay(occurrences, overlay_changes)
         if options["q"]:
             occurrences = [item for item in occurrences if options["q"] in json.dumps(item, ensure_ascii=False).casefold()]
         video_keys: list[str] = []
@@ -1555,6 +1696,12 @@ def _runtime_source_payload(
             "totalCount": len(video_keys), "totalVideoCount": len(video_keys),
             "totalOccurrenceCount": len(occurrences),
         }
+    if overlay_changes and isinstance(record.get("occurrences"), list):
+        record = dict(record)
+        record["occurrences"] = _apply_source_overlay(record["occurrences"], overlay_changes)
+        record["count"] = len(record["occurrences"])
+        record["occurrenceCount"] = len(record["occurrences"])
+        record["timestampCount"] = len(record["occurrences"])
     return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
 
 
@@ -1584,7 +1731,8 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
-            persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False)
+            overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent[0])
+            persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
             if persisted.get("found"):
                 return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
@@ -1684,6 +1832,42 @@ def meta_payload(connection) -> dict[str, Any]:
                 )
                 existing_song_keys = {_text(row.get("song_key")) for row in existing_song_rows}
                 counts["songs"] = counts.get("songs", 0) + len(candidate_song_keys - existing_song_keys)
+        runtime_changes = _runtime_tombstones(connection, overlay_ids)
+        occurrence_ids = [
+            _text(change.get("occurrenceId") or change.get("occurrence_id"))
+            for change in runtime_changes
+            if _text(change.get("entityType")) in {"occurrences", "runtime_occurrences"}
+            and _text(change.get("occurrenceId") or change.get("occurrence_id"))
+        ]
+        if occurrence_ids:
+            base_occurrence_rows = _rows(
+                connection,
+                "SELECT occurrence_id, song_key, video_id, seconds FROM runtime_occurrences WHERE revision_id = %s AND occurrence_id = ANY(%s)",
+                [parent_id, occurrence_ids],
+            )
+            base_by_id = {_text(row.get("occurrence_id")): row for row in base_occurrence_rows}
+            for change in runtime_changes:
+                occurrence_id = _text(change.get("occurrenceId") or change.get("occurrence_id"))
+                base_row = base_by_id.get(occurrence_id)
+                if not base_row:
+                    continue
+                counts["occurrences"] = max(0, counts.get("occurrences", 0) - 1)
+                song_key = _text(base_row.get("song_key"))
+                if song_key:
+                    song_count = _rows(
+                        connection,
+                        "SELECT count(*) AS count FROM runtime_occurrences WHERE revision_id = %s AND song_key = %s",
+                        [parent_id, song_key],
+                    )
+                    if song_count and int(song_count[0].get("count") or 0) == 1:
+                        counts["songs"] = max(0, counts.get("songs", 0) - 1)
+                source_count = _rows(
+                    connection,
+                    "SELECT count(*) AS count FROM runtime_source_occurrences WHERE revision_id = %s AND video_id = %s AND seconds IS NOT DISTINCT FROM %s",
+                    [parent_id, base_row.get("video_id"), base_row.get("seconds")],
+                )
+                if source_count:
+                    counts["source_occurrences"] = max(0, counts.get("source_occurrences", 0) - int(source_count[0].get("count") or 0))
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),

@@ -344,3 +344,33 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("runtime occurrence tombstones remove one source occurrence only when identity is unique", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Cursor:
+    def execute(self, sql, params):
+        if "migration_runtime_rows" not in sql:
+            raise AssertionError(sql)
+        self.description = [(name,) for name in ("revision_id", "entity_type", "entity_key", "source_system", "range_id", "source_id", "occurrence_id", "tombstone", "payload_json")]
+        self.rows = [("rev", "occurrences", "occ-1", "latest_json", "all", None, "occ-1", True, json.dumps({"videoId": "video-1", "occurrenceId": "occ-1", "seconds": 30, "title": "Song", "artist": "Artist"}))]
+    def fetchall(self): return self.rows
+    def close(self): pass
+class Connection:
+    def cursor(self): return Cursor()
+changes = module._runtime_tombstones(Connection(), ["rev"])
+one = [{"videoId": "video-1", "seconds": 30, "song": {"title": "Song", "artist": "Artist"}}]
+assert module._apply_source_overlay(one, changes) == []
+ambiguous = one + [dict(one[0])]
+assert len(module._apply_source_overlay(ambiguous, changes)) == 2
+assert module._runtime_change_group_key(changes[0], "songs") == "song::artist"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
