@@ -62,7 +62,16 @@ jobs:
           GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" -c "http.extraheader=AUTHORIZATION: basic $auth_header" fetch --filter=blob:none --depth=1 origin "$GITHUB_SHA"
           git -C "$REPO_ROOT" sparse-checkout init --cone
           git -C "$REPO_ROOT" sparse-checkout set assets config package.json scripts
-          git -C "$REPO_ROOT" checkout -q FETCH_HEAD
+          checkout_ok=0
+          for checkout_attempt in 1 2 3; do
+            if GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" -c http.version=HTTP/1.1 -c "http.extraheader=AUTHORIZATION: basic $auth_header" checkout -q FETCH_HEAD; then
+              checkout_ok=1
+              break
+            fi
+            echo "URAMESHI_7D_CHECKOUT_RETRY attempt=$checkout_attempt" >&2
+            sleep $((checkout_attempt * 3))
+          done
+          test "$checkout_ok" = 1 || { echo "URAMESHI_7D_BLOCKED code-checkout-retries-exhausted"; exit 78; }
           cd "$REPO_ROOT"
           check_space code-checkout
           npm run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
