@@ -1276,6 +1276,15 @@ def meta_payload(connection) -> dict[str, Any]:
         if delta_rows:
             counts["videos"] = counts.get("videos", 0) + len({_text(row.get("video_id")) for row in delta_rows})
             counts["occurrences"] = counts.get("occurrences", 0) + len(delta_rows)
+            candidate_song_keys = {_text(row.get("song_key")) for row in delta_rows if _text(row.get("song_key"))}
+            if candidate_song_keys:
+                existing_song_rows = _rows(
+                    connection,
+                    "SELECT song_key FROM runtime_songs WHERE revision_id = %s AND song_key = ANY(%s)",
+                    [parent_id, list(candidate_song_keys)],
+                )
+                existing_song_keys = {_text(row.get("song_key")) for row in existing_song_rows}
+                counts["songs"] = counts.get("songs", 0) + len(candidate_song_keys - existing_song_keys)
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
