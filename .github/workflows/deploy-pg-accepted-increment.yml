@@ -95,15 +95,17 @@ jobs:
             "$TASK_ROOT/accepted-files.compare.json" >/dev/null || {
               echo "PG_ACCEPTED_HANDOFF_BLOCKED removed-or-unsupported-accepted-file"; exit 78;
             }
-          mkdir -p "$TASK_ROOT/accepted" "$TASK_ROOT/artifact"
+          repository_root="$TASK_ROOT/repository"
+          mkdir -p "$repository_root" "$TASK_ROOT/artifact"
           curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
             "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-files-to-patch.py" \
             -o "$TASK_ROOT/accepted-files-to-patch.py"
           accepted_args=()
-          accepted_index=0
+          accepted_inputs=()
           : > "$TASK_ROOT/accepted-files.evidence.ndjson"
           while IFS=$'\t' read -r repo_path expected_blob status; do
-            destination="$TASK_ROOT/accepted/$(printf '%04d.json' "$accepted_index")"
+            destination="$repository_root/$repo_path"
+            mkdir -p "$(dirname "$destination")"
             curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
               "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}/${repo_path}" -o "$destination"
             test -s "$destination" || { echo "PG_ACCEPTED_HANDOFF_BLOCKED empty=$repo_path"; exit 78; }
@@ -130,24 +132,25 @@ jobs:
             jq -cn --arg path "$repo_path" --arg blobSha "$expected_blob" --arg sha256 "$file_sha256" --arg status "$status" \
               '{path:$path,blobSha:$blobSha,sha256:$sha256,status:$status}' >> "$TASK_ROOT/accepted-files.evidence.ndjson"
             accepted_args+=(--input "$destination")
-            accepted_index=$((accepted_index + 1))
+            accepted_inputs+=("$destination")
           done < <(jq -r '.[] | [.path,.blobSha,.status] | @tsv' "$TASK_ROOT/accepted-files.compare.json")
           jq -s 'sort_by(.path)' "$TASK_ROOT/accepted-files.evidence.ndjson" > "$TASK_ROOT/accepted-files.evidence.json"
           jq -s -e '
             [.[].videos[].videoId] as $videoIds |
             ($videoIds | length > 0) and (($videoIds | unique | length) == ($videoIds | length))
-          ' "$TASK_ROOT"/accepted/*.json >/dev/null || {
+          ' "${accepted_inputs[@]}" >/dev/null || {
             echo "PG_ACCEPTED_HANDOFF_BLOCKED duplicate-video-across-accepted-files"; exit 78;
           }
           source_detail_key="$(jq -sr '
             [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
-          ' "$TASK_ROOT"/accepted/*.json)"
+          ' "${accepted_inputs[@]}")"
           test -n "$source_detail_key" || { echo "PG_ACCEPTED_HANDOFF_BLOCKED missing-source-detail-key"; exit 78; }
           python3 "$TASK_ROOT/accepted-files-to-patch.py" "${accepted_args[@]}" \
             --output "$TASK_ROOT/artifact/candidate.ndjson" \
             --manifest-output "$TASK_ROOT/artifact/manifest.json" \
             --range-id all \
             --source-key "$source_detail_key" \
+            --source-root "$repository_root" \
             --reviewed-at "$source_committed_at"
           test -s "$TASK_ROOT/artifact/candidate.ndjson"
           patch_sha256="$(shasum -a 256 "$TASK_ROOT/artifact/candidate.ndjson" | awk '{print $1}')"

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -78,6 +79,63 @@ test("accepted converter preserves 7d/null/duplicate-seconds/provenance fields",
     assert.equal(summary.reviewAudit.pending_followup, 2);
     assert.equal(summary.acceptedVideoCount, 1);
     assert.equal(summary.acceptedOccurrenceCount, 3);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("accepted converter is byte deterministic across different task roots", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "accepted-patch-determinism-"));
+  const sourceRelativePath = "data/external/youtube-channel-discovery/accepted/daily.json";
+  const payload = {
+    schemaVersion: 1,
+    kind: "youtube-channel-discovery-increment",
+    sourceSystem: "youtube_channel_discovery",
+    videoCount: 1,
+    occurrenceCount: 1,
+    videos: [{
+      videoId: "video-1",
+      channelId: "channel-1",
+      songs: [{ title: "song", artist: "artist", seconds: 42 }],
+    }],
+  };
+  const build = (taskName) => {
+    const taskRoot = path.join(root, taskName);
+    const sourceRoot = path.join(taskRoot, "repository");
+    const input = path.join(sourceRoot, ...sourceRelativePath.split("/"));
+    const output = path.join(taskRoot, "candidate.ndjson");
+    const manifest = path.join(taskRoot, "manifest.json");
+    fs.mkdirSync(path.dirname(input), { recursive: true });
+    fs.writeFileSync(input, `${JSON.stringify(payload)}\n`, "utf8");
+    execFileSync(python, [
+      script,
+      "--input", input,
+      "--output", output,
+      "--manifest-output", manifest,
+      "--range-id", "all",
+      "--source-key", "channel-1",
+      "--source-root", sourceRoot,
+      "--reviewed-at", "2026-07-28T12:34:56Z",
+    ], { stdio: "pipe" });
+    return {
+      patch: fs.readFileSync(output),
+      manifest: fs.readFileSync(manifest),
+    };
+  };
+  try {
+    const first = build("first-random-root");
+    const second = build("second-random-root");
+    assert.deepEqual(first.patch, second.patch);
+    assert.deepEqual(first.manifest, second.manifest);
+    assert.equal(
+      crypto.createHash("sha256").update(first.patch).digest("hex"),
+      crypto.createHash("sha256").update(second.patch).digest("hex"),
+    );
+    const record = JSON.parse(first.patch.toString("utf8"));
+    assert.equal(record.sourcePath, sourceRelativePath);
+    assert.equal(record.songs[0].sourcePath, sourceRelativePath);
+    const summary = JSON.parse(first.manifest.toString("utf8"));
+    assert.deepEqual(summary.inputFiles, [sourceRelativePath]);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

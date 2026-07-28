@@ -139,6 +139,9 @@ test("accepted commits prepare a deterministic hashed artifact before the reusab
   assert.match(acceptedWorkflow, /duplicate-video-across-accepted-files/u);
   assert.match(acceptedWorkflow, /missing-source-detail-identity/u);
   assert.match(acceptedWorkflow, /occurrenceId:\$song\.occurrenceId/u);
+  assert.match(acceptedWorkflow, /repository_root="\$TASK_ROOT\/repository"/u);
+  assert.match(acceptedWorkflow, /destination="\$repository_root\/\$repo_path"/u);
+  assert.match(acceptedWorkflow, /--source-root "\$repository_root"/u);
   assert.match(
     acceptedWorkflow,
     /uses: \.\/\.github\/workflows\/deploy-pg-incremental\.yml/u,
@@ -184,4 +187,11 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
   assert.match(deployWorkflow, /pg_adapter\.py\.bak/u);
   assert.match(deployWorkflow, /systemctl disable --now song-rank-api/u);
   assert.match(deployWorkflow, /https:\/\/ytb-song-rank\.culua\.com\/healthz/u);
+});
+
+test("workflow-run accepted conversion sorts repository paths and uses a stable source root", () => {
+  assert.match(deployWorkflow, /\] \| sort\[\]/u);
+  assert.match(deployWorkflow, /ACCEPTED_ROOT="\$TASK_ROOT\/repository"/u);
+  assert.match(deployWorkflow, /destination="\$ACCEPTED_ROOT\/\$source_path"/u);
+  assert.match(deployWorkflow, /--source-root "\$ACCEPTED_ROOT"/u);
 });

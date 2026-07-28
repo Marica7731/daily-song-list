@@ -74,7 +74,14 @@ def occurrence_id(item: dict[str, Any], position: int) -> str:
     return text(value) or f"position:{position}"
 
 
-def convert_video(video: dict[str, Any], source: dict[str, Any], source_path: Path, default_range: str, reviewed_at: str) -> dict[str, Any]:
+def convert_video(
+    video: dict[str, Any],
+    source: dict[str, Any],
+    source_path: Path,
+    source_label: str,
+    default_range: str,
+    reviewed_at: str,
+) -> dict[str, Any]:
     video_id = text(first_present(video, "videoId", "video_id"))
     if not video_id:
         raise ValueError(f"accepted video missing videoId: {source_path}")
@@ -113,7 +120,7 @@ def convert_video(video: dict[str, Any], source: dict[str, Any], source_path: Pa
         if item["sourceSystem"] is None:
             item["sourceSystem"] = source_system
         item["videoId"] = video_id
-        item["sourcePath"] = str(source_path)
+        item["sourcePath"] = source_label
         item["reviewedAt"] = reviewed_at
         songs.append(item)
     record = dict(video)
@@ -122,7 +129,7 @@ def convert_video(video: dict[str, Any], source: dict[str, Any], source_path: Pa
     record["rangeId"] = range_id
     record["sourceSystem"] = source_system
     record["songs"] = songs
-    record["sourcePath"] = str(source_path)
+    record["sourcePath"] = source_label
     record["reviewedAt"] = reviewed_at
     record.setdefault("reviewedBy", "accepted-file-converter")
     record.setdefault("reason", "accepted-channel-increment")
@@ -137,8 +144,10 @@ def convert(
     source_key: str | None,
     status_audit_path: Path | None = None,
     reviewed_at: str | None = None,
+    source_root: Path | None = None,
 ) -> dict[str, Any]:
     reviewed_at = reviewed_timestamp(reviewed_at)
+    resolved_source_root = source_root.resolve() if source_root else None
     source_hash = hashlib.sha256()
     records = 0
     occurrences = 0
@@ -151,11 +160,27 @@ def convert(
             payload = read_payload(path)
             raw = path.read_bytes()
             source_hash.update(raw)
-            input_names.append(str(path))
+            if resolved_source_root:
+                try:
+                    source_label = path.resolve().relative_to(resolved_source_root).as_posix()
+                except ValueError as exc:
+                    raise ValueError(
+                        f"accepted input is outside --source-root: {path}"
+                    ) from exc
+            else:
+                source_label = str(path)
+            input_names.append(source_label)
             for video in payload["videos"]:
                 if not isinstance(video, dict):
                     raise ValueError(f"accepted artifact has non-object video: {path}")
-                record = convert_video(video, payload, path, default_range, reviewed_at)
+                record = convert_video(
+                    video,
+                    payload,
+                    path,
+                    source_label,
+                    default_range,
+                    reviewed_at,
+                )
                 encoded = (json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
                 stream.write(encoded)
                 records += 1
@@ -194,6 +219,11 @@ def main() -> int:
     parser.add_argument("--manifest-output", type=Path, required=True)
     parser.add_argument("--range-id", default="all")
     parser.add_argument("--source-key")
+    parser.add_argument(
+        "--source-root",
+        type=Path,
+        help="Stable root used to record repository-relative sourcePath values",
+    )
     parser.add_argument("--status-audit", type=Path)
     parser.add_argument(
         "--reviewed-at",
@@ -209,6 +239,7 @@ def main() -> int:
             args.source_key,
             args.status_audit,
             args.reviewed_at,
+            args.source_root,
         )
         print(json.dumps({"status": "ok", **manifest}, ensure_ascii=False))
         return 0

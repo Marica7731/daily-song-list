@@ -182,7 +182,10 @@ jobs:
             ACCEPTED_PATHS=()
             while IFS= read -r accepted_path; do
               [ -n "$accepted_path" ] && ACCEPTED_PATHS+=("$accepted_path")
-            done < <(jq -r '.files[]?.filename | select(startswith("data/external/youtube-channel-discovery/accepted/") and endswith(".json"))' "$COMPARE_JSON" || true)
+            done < <(jq -r '[
+              .files[]?.filename |
+              select(startswith("data/external/youtube-channel-discovery/accepted/") and endswith(".json"))
+            ] | sort[]' "$COMPARE_JSON" || true)
             if [ "${#ACCEPTED_PATHS[@]}" -eq 0 ]; then
               runtime_changes="$(jq -er -r '.files[]?.filename | select(test("^data/(latest|7d|all|72h|1m|status)\\.json$"))' "$COMPARE_JSON" || true)"
               if [ -n "$runtime_changes" ]; then
@@ -195,10 +198,12 @@ jobs:
             fetch_input "scripts/migration/accepted-files-to-patch.py" "$INPUT_ROOT/accepted-files-to-patch.py"
             DATA_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             ACCEPTED_ARGS=()
-            accepted_index=0
-            mkdir -p "$INPUT_ROOT/accepted"
+            ACCEPTED_INPUTS=()
+            ACCEPTED_ROOT="$TASK_ROOT/repository"
+            mkdir -p "$ACCEPTED_ROOT"
             for source_path in "${ACCEPTED_PATHS[@]}"; do
-              destination="$INPUT_ROOT/accepted/$(printf '%04d.json' "$accepted_index")"
+              destination="$ACCEPTED_ROOT/$source_path"
+              mkdir -p "$(dirname "$destination")"
               curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
                 "$DATA_RAW_BASE/$source_path" -o "$destination"
               test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty accepted input=$source_path"; exit 78; }
@@ -217,21 +222,22 @@ jobs:
                 echo "PG_INCREMENT_BLOCKED accepted-contract input=$source_path"; exit 78;
               }
               ACCEPTED_ARGS+=(--input "$destination")
-              accepted_index=$((accepted_index + 1))
+              ACCEPTED_INPUTS+=("$destination")
             done
             jq -s -e '
               [.[].videos[].videoId] as $video_ids |
               ($video_ids | length > 0) and (($video_ids | unique | length) == ($video_ids | length))
-            ' "$INPUT_ROOT"/accepted/*.json >/dev/null || {
+            ' "${ACCEPTED_INPUTS[@]}" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED duplicate-video-across-accepted-files"; exit 78;
             }
             GENERATED_SOURCE_KEY="$(jq -sr '
               [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
-            ' "$INPUT_ROOT"/accepted/*.json)"
+            ' "${ACCEPTED_INPUTS[@]}")"
             test -n "$GENERATED_SOURCE_KEY" || { echo "PG_INCREMENT_BLOCKED missing-source-detail-key"; exit 78; }
             python3 "$INPUT_ROOT/accepted-files-to-patch.py" "${ACCEPTED_ARGS[@]}" \
               --output "$INPUT_ROOT/patch" --manifest-output "$INPUT_ROOT/manifest" --range-id all \
-              --source-key "$GENERATED_SOURCE_KEY" --reviewed-at "$SOURCE_COMMITTED_AT"
+              --source-key "$GENERATED_SOURCE_KEY" --source-root "$ACCEPTED_ROOT" \
+              --reviewed-at "$SOURCE_COMMITTED_AT"
             GENERATED_PATCH_SHA256="$(shasum -a 256 "$INPUT_ROOT/patch" | awk '{print $1}')"
             jq '
               [.files[]? |
