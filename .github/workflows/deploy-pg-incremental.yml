@@ -25,6 +25,14 @@ on:
         description: "Optional source key to match in the manifest"
         required: false
         default: ""
+      artifact_name:
+        description: "Optional same-repository artifact name for an approved resume"
+        required: false
+        default: ""
+      artifact_run_id:
+        description: "Optional producing workflow run ID for artifact_name"
+        required: false
+        default: ""
   repository_dispatch:
     types: [accepted-increment-ready]
   workflow_run:
@@ -56,6 +64,10 @@ on:
         type: string
         required: false
         default: ""
+      artifact_run_id:
+        type: string
+        required: false
+        default: ""
     secrets:
       VPS2_PASSWORD:
         required: true
@@ -82,6 +94,7 @@ jobs:
       REQUIRE_7D_GATE: ${{ inputs.require_7d_gate || github.event.client_payload.require_7d_gate || false }}
       SOURCE_KEY: ${{ inputs.source_key || github.event.client_payload.source_key || '' }}
       ARTIFACT_NAME: ${{ inputs.artifact_name || '' }}
+      ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id || '' }}
     steps:
       - name: Download generated accepted increment
         if: ${{ inputs.artifact_name != '' }}
@@ -89,6 +102,9 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: ${{ runner.temp }}/daily-song-list-pg-artifact
+          run-id: ${{ inputs.artifact_run_id || github.run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
       - name: Candidate compare health and optional activation
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
