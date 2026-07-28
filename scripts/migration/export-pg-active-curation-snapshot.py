@@ -18,16 +18,20 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import importlib.util
+import itertools
 import json
 import os
 from pathlib import Path
 import sys
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Iterator, Mapping, Sequence
 
 
 EXPORT_OK_PREFIX = "PG_ACTIVE_CURATION_EXPORT_OK "
 CAPTURE_OK_PREFIX = "PG_ACTIVE_CURATION_CAPTURE_OK "
 FINALIZE_OK_PREFIX = "PG_ACTIVE_CURATION_FINALIZE_OK "
+STREAM_BATCH_SIZE = 1000
+MAX_OVERLAY_VIDEOS = 10000
+MAX_OVERLAY_ROWS = 100000
 REQUIRED_SNAPSHOT_FIELDS = (
     "videoId",
     "occurrenceId",
@@ -103,8 +107,453 @@ def load_adapter(path: Path):
     return module
 
 
+def json_object(value: Any) -> dict[str, Any]:
+    if isinstance(value, Mapping):
+        return dict(value)
+    if isinstance(value, str) and value.strip():
+        parsed = json.loads(value)
+        return dict(parsed) if isinstance(parsed, Mapping) else {}
+    return {}
+
+
+def cursor_names(cursor: Any) -> list[str]:
+    return [str(column[0]) for column in (cursor.description or ())]
+
+
+def iter_query_rows(
+    connection: Any,
+    sql: str,
+    params: Sequence[Any] = (),
+    *,
+    batch_size: int = STREAM_BATCH_SIZE,
+    cursor_tag: str,
+) -> Iterator[dict[str, Any]]:
+    name = f"curation_export_{os.getpid()}_{cursor_tag}"
+    try:
+        cursor = connection.cursor(name=name)
+    except TypeError:
+        cursor = connection.cursor(name)
+    try:
+        if hasattr(cursor, "itersize"):
+            cursor.itersize = batch_size
+        cursor.execute(sql, params)
+        names = cursor_names(cursor)
+        while True:
+            values = cursor.fetchmany(batch_size)
+            if not values:
+                break
+            for row in values:
+                yield dict(zip(names, row))
+    finally:
+        close = getattr(cursor, "close", None)
+        if close:
+            close()
+
+
+def revision_row(adapter: Any, connection: Any, revision_id: str) -> dict[str, Any]:
+    row = adapter._one(
+        connection,
+        """
+        SELECT revision_id, parent_revision_id, status, manifest_json
+        FROM migration_revisions WHERE revision_id = %s
+        """,
+        [revision_id],
+    )
+    if not row:
+        raise GateError(f"active revision lineage is missing: {revision_id}")
+    return row
+
+
+def runtime_plan(
+    adapter: Any,
+    connection: Any,
+    active_revision: str,
+) -> tuple[str, list[str]]:
+    overlays: list[str] = []
+    seen: set[str] = set()
+    current = active_revision
+    while current:
+        if current in seen:
+            raise GateError(f"active revision parent cycle: {current}")
+        seen.add(current)
+        row = revision_row(adapter, connection, current)
+        manifest = json_object(row.get("manifest_json"))
+        if manifest.get("runtimeProjection") is True and not manifest.get("incrementalOverlay"):
+            return current, list(reversed(overlays))
+        overlays.append(current)
+        current = text(row.get("parent_revision_id"))
+    raise GateError(f"active revision has no immutable full runtime parent: {active_revision}")
+
+
+def overlay_rows(
+    connection: Any,
+    overlay_revision_ids: Sequence[str],
+) -> tuple[list[dict[str, Any]], set[str]]:
+    revisions: list[dict[str, Any]] = []
+    affected_video_ids: set[str] = set()
+    total_rows = 0
+    for index, revision_id in enumerate(overlay_revision_ids):
+        def collect(sql: str, cursor_tag: str) -> list[dict[str, Any]]:
+            nonlocal total_rows
+            rows: list[dict[str, Any]] = []
+            for row in iter_query_rows(
+                connection,
+                sql,
+                [revision_id],
+                cursor_tag=cursor_tag,
+            ):
+                total_rows += 1
+                if total_rows > MAX_OVERLAY_ROWS:
+                    raise GateError(
+                        f"active overlay row cap exceeded rows={total_rows} "
+                        f"cap={MAX_OVERLAY_ROWS}"
+                    )
+                rows.append(row)
+            return rows
+
+        videos = collect(
+            """
+                SELECT video_id, title, channel_name, channel_id, channel_handle,
+                       channel_url, published_at, tombstone, payload_json
+                FROM migration_video_rows
+                WHERE revision_id = %s ORDER BY video_id
+            """,
+            f"overlay_videos_{index}",
+        )
+        occurrences = collect(
+            """
+                SELECT video_id, occurrence_key, occurrence_id, position, range_id,
+                       song_key, seconds, title, artist, source_id, raw_hash,
+                       source_system, payload_json
+                FROM migration_occurrence_rows
+                WHERE revision_id = %s
+                ORDER BY video_id, position, occurrence_key
+            """,
+            f"overlay_occurrences_{index}",
+        )
+        runtime = collect(
+            """
+                SELECT entity_type, entity_key, source_system, range_id, source_id,
+                       occurrence_id, tombstone, payload_json
+                FROM migration_runtime_rows
+                WHERE revision_id = %s ORDER BY entity_type, entity_key
+            """,
+            f"overlay_runtime_{index}",
+        )
+        affected_video_ids.update(text(row.get("video_id")) for row in videos)
+        affected_video_ids.update(text(row.get("video_id")) for row in occurrences)
+        for row in runtime:
+            payload = json_object(row.get("payload_json"))
+            entity_type = text(row.get("entity_type"))
+            if entity_type in {"videos", "runtime_videos"}:
+                affected_video_ids.add(text(payload.get("videoId") or row.get("entity_key")))
+            elif entity_type in {"occurrences", "runtime_occurrences"}:
+                affected_video_ids.add(text(payload.get("videoId") or payload.get("video_id")))
+        affected_video_ids.discard("")
+        if len(affected_video_ids) > MAX_OVERLAY_VIDEOS:
+            raise GateError(
+                f"active overlay video cap exceeded videos={len(affected_video_ids)} "
+                f"cap={MAX_OVERLAY_VIDEOS}"
+            )
+        revisions.append(
+            {
+                "revisionId": revision_id,
+                "videos": videos,
+                "occurrences": occurrences,
+                "runtime": runtime,
+            }
+        )
+    return revisions, affected_video_ids
+
+
+def base_video(row: Mapping[str, Any]) -> dict[str, Any]:
+    payload = json_object(row.get("video_payload_json", row.get("payload_json")))
+    payload.update(
+        {
+            "videoId": payload.get("videoId") or row.get("video_id"),
+            "title": payload["title"] if "title" in payload else row.get("video_title", row.get("title")),
+            "channelName": payload["channelName"] if "channelName" in payload else row.get("channel_name"),
+            "channelId": payload["channelId"] if "channelId" in payload else row.get("channel_id"),
+            "channelHandle": payload["channelHandle"] if "channelHandle" in payload else row.get("channel_handle"),
+            "channelUrl": payload["channelUrl"] if "channelUrl" in payload else row.get("channel_url"),
+            "publishedAt": payload["publishedAt"] if "publishedAt" in payload else row.get("published_timestamp"),
+        }
+    )
+    return payload
+
+
+def base_occurrence(row: Mapping[str, Any], position: int) -> dict[str, Any]:
+    payload = json_object(row.get("occurrence_payload_json", row.get("payload_json")))
+    payload.update(
+        {
+            "occurrenceId": payload["occurrenceId"] if "occurrenceId" in payload else row.get("occurrence_id"),
+            "position": payload["position"] if "position" in payload else position,
+            "rangeId": payload["rangeId"] if "rangeId" in payload else row.get("range_id"),
+            "songKey": payload["songKey"] if "songKey" in payload else row.get("song_key"),
+            "seconds": payload["seconds"] if "seconds" in payload else row.get("seconds"),
+            "title": payload["title"] if "title" in payload else row.get("occurrence_title", row.get("title")),
+            "artist": payload["artist"] if "artist" in payload else row.get("artist"),
+            "sourceId": payload["sourceId"] if "sourceId" in payload else row.get("source_id"),
+            "sourceSystem": payload["sourceSystem"] if "sourceSystem" in payload else row.get("source_system"),
+        }
+    )
+    return payload
+
+
+BASE_VIDEO_SQL = """
+SELECT video_id, title AS video_title, channel_name, channel_id, channel_handle,
+       channel_url, published_timestamp, payload_json AS video_payload_json
+FROM runtime_videos
+WHERE revision_id = %s AND video_id = ANY(%s)
+ORDER BY video_id
+"""
+
+BASE_OCCURRENCE_SQL = """
+SELECT occurrence_id, range_id, video_id, song_key, seconds, source_system,
+       source_id, title AS occurrence_title, artist,
+       payload_json AS occurrence_payload_json
+FROM runtime_occurrences
+WHERE revision_id = %s AND video_id = ANY(%s)
+ORDER BY video_id, range_id, occurrence_id
+"""
+
+BASE_STREAM_SQL = """
+SELECT o.occurrence_id, o.range_id, o.video_id, o.song_key, o.seconds,
+       o.source_system, o.source_id, o.title AS occurrence_title, o.artist,
+       o.payload_json AS occurrence_payload_json,
+       v.title AS video_title, v.channel_name, v.channel_id, v.channel_handle,
+       v.channel_url, v.published_timestamp, v.payload_json AS video_payload_json
+FROM runtime_occurrences AS o
+JOIN runtime_videos AS v
+  ON v.revision_id = o.revision_id AND v.video_id = o.video_id
+WHERE o.revision_id = %s
+ORDER BY o.video_id, o.range_id, o.occurrence_id
+"""
+
+
+def affected_base_records(
+    connection: Any,
+    full_revision_id: str,
+    affected_video_ids: set[str],
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[dict[str, Any]]]]:
+    videos: dict[str, dict[str, Any]] = {}
+    occurrences: dict[str, list[dict[str, Any]]] = {}
+    if not affected_video_ids:
+        return videos, occurrences
+    selected = sorted(affected_video_ids)
+    for row in iter_query_rows(
+        connection,
+        BASE_VIDEO_SQL,
+        [full_revision_id, selected],
+        cursor_tag="affected_videos",
+    ):
+        video_id = text(row.get("video_id"))
+        videos[video_id] = base_video(row)
+        occurrences[video_id] = []
+    positions: dict[str, int] = {}
+    affected_rows = 0
+    for row in iter_query_rows(
+        connection,
+        BASE_OCCURRENCE_SQL,
+        [full_revision_id, selected],
+        cursor_tag="affected_occurrences",
+    ):
+        video_id = text(row.get("video_id"))
+        position = positions.get(video_id, 0)
+        positions[video_id] = position + 1
+        occurrences.setdefault(video_id, []).append(base_occurrence(row, position))
+        affected_rows += 1
+        if affected_rows > MAX_OVERLAY_ROWS:
+            raise GateError(
+                f"affected parent occurrence cap exceeded rows={affected_rows} "
+                f"cap={MAX_OVERLAY_ROWS}"
+            )
+    return videos, occurrences
+
+
+def apply_overlay_rows(
+    videos: dict[str, dict[str, Any]],
+    occurrences: dict[str, list[dict[str, Any]]],
+    revisions: Sequence[Mapping[str, Any]],
+) -> None:
+    positions: dict[str, int] = {}
+    for revision in revisions:
+        video_rows = revision["videos"]
+        for video_id in {text(row.get("video_id")) for row in video_rows}:
+            occurrences[video_id] = []
+        for row in video_rows:
+            video_id = text(row.get("video_id"))
+            if row.get("tombstone"):
+                videos.pop(video_id, None)
+                occurrences.pop(video_id, None)
+                continue
+            payload = json_object(row.get("payload_json"))
+            if isinstance(payload.get("payload"), Mapping):
+                payload = dict(payload["payload"])
+            payload.update(
+                {
+                    "videoId": video_id,
+                    "title": payload.get("title", row.get("title")),
+                    "channelName": payload.get("channelName", row.get("channel_name")),
+                    "channelId": payload.get("channelId", row.get("channel_id")),
+                    "channelHandle": payload.get("channelHandle", row.get("channel_handle")),
+                    "channelUrl": payload.get("channelUrl", row.get("channel_url")),
+                    "publishedAt": payload.get("publishedAt", row.get("published_at")),
+                }
+            )
+            videos[video_id] = payload
+        for row in revision["occurrences"]:
+            video_id = text(row.get("video_id"))
+            payload = json_object(row.get("payload_json"))
+            payload.update(
+                {
+                    "videoId": video_id,
+                    "occurrenceId": row.get("occurrence_id"),
+                    "position": row.get("position"),
+                    "rangeId": row.get("range_id"),
+                    "songKey": row.get("song_key"),
+                    "seconds": row.get("seconds"),
+                    "title": row.get("title"),
+                    "artist": row.get("artist"),
+                    "sourceId": row.get("source_id"),
+                    "rawHash": row.get("raw_hash"),
+                    "sourceSystem": row.get("source_system"),
+                }
+            )
+            occurrences.setdefault(video_id, []).append(payload)
+        for row in revision["runtime"]:
+            entity_type = text(row.get("entity_type"))
+            payload = json_object(row.get("payload_json"))
+            if isinstance(payload.get("payload"), Mapping):
+                payload = dict(payload["payload"])
+            if entity_type in {"videos", "runtime_videos"}:
+                video_id = text(payload.get("videoId") or payload.get("video_id") or row.get("entity_key"))
+                if row.get("tombstone"):
+                    videos.pop(video_id, None)
+                    occurrences.pop(video_id, None)
+                    continue
+                if video_id:
+                    payload.update(
+                        {
+                            "videoId": video_id,
+                            "title": payload.get("title"),
+                            "channelName": payload.get("channelName", payload.get("channel_name")),
+                            "channelId": payload.get("channelId", payload.get("channel_id")),
+                            "channelHandle": payload.get("channelHandle", payload.get("channel_handle")),
+                            "channelUrl": payload.get("channelUrl", payload.get("channel_url")),
+                            "publishedAt": payload.get(
+                                "publishedAt",
+                                payload.get("published_at", payload.get("published_timestamp")),
+                            ),
+                        }
+                    )
+                    videos[video_id] = payload
+            elif entity_type in {"occurrences", "runtime_occurrences"}:
+                video_id = text(payload.get("videoId") or payload.get("video_id"))
+                if not video_id:
+                    continue
+                occurrence_id = text(
+                    payload.get("occurrenceId")
+                    or payload.get("occurrence_id")
+                    or row.get("occurrence_id")
+                    or row.get("entity_key")
+                )
+                existing = [
+                    item
+                    for item in occurrences.setdefault(video_id, [])
+                    if text(item.get("occurrenceId")) != occurrence_id
+                ]
+                if not row.get("tombstone"):
+                    position = payload.get("position")
+                    try:
+                        position = int(position)
+                    except (TypeError, ValueError):
+                        position = positions.get(video_id, 0)
+                    positions[video_id] = max(positions.get(video_id, 0), position + 1)
+                    payload.update(
+                        {
+                            "videoId": video_id,
+                            "occurrenceId": occurrence_id,
+                            "position": position,
+                            "rangeId": payload.get("rangeId", payload.get("range_id", row.get("range_id"))),
+                            "songKey": payload.get("songKey", payload.get("song_key")),
+                            "seconds": payload.get("seconds"),
+                            "title": payload.get("title"),
+                            "artist": payload.get("artist"),
+                            "sourceId": payload.get("sourceId", payload.get("source_id", row.get("source_id"))),
+                            "sourceSystem": payload.get(
+                                "sourceSystem",
+                                payload.get("source_system", row.get("source_system")),
+                            ),
+                        }
+                    )
+                    existing.append(payload)
+                occurrences[video_id] = existing
+
+
+def iter_base_records(connection: Any, full_revision_id: str) -> Iterator[dict[str, Any]]:
+    current_video_id = ""
+    current_video: dict[str, Any] | None = None
+    current_occurrences: list[dict[str, Any]] = []
+    position = 0
+    for row in iter_query_rows(
+        connection,
+        BASE_STREAM_SQL,
+        [full_revision_id],
+        cursor_tag="full_runtime",
+    ):
+        video_id = text(row.get("video_id"))
+        if current_video_id and video_id != current_video_id:
+            yield {"video": current_video, "occurrences": tuple(current_occurrences)}
+            current_occurrences = []
+            position = 0
+        if video_id != current_video_id:
+            current_video_id = video_id
+            current_video = base_video(row)
+        current_occurrences.append(base_occurrence(row, position))
+        position += 1
+    if current_video_id:
+        yield {"video": current_video, "occurrences": tuple(current_occurrences)}
+
+
+def iter_active_records(adapter: Any, connection: Any, active_revision: str) -> Iterator[dict[str, Any]]:
+    full_revision_id, overlay_revision_ids = runtime_plan(adapter, connection, active_revision)
+    revisions, affected_video_ids = overlay_rows(connection, overlay_revision_ids)
+    videos, occurrences = affected_base_records(connection, full_revision_id, affected_video_ids)
+    apply_overlay_rows(videos, occurrences, revisions)
+    affected_records = {
+        video_id: {
+            "video": video,
+            "occurrences": tuple(
+                sorted(
+                    occurrences.get(video_id, []),
+                    key=lambda item: (int(item.get("position") or 0), text(item.get("occurrenceId"))),
+                )
+            ),
+        }
+        for video_id, video in videos.items()
+        if video_id in affected_video_ids
+    }
+    affected_ids = iter(sorted(affected_records))
+    affected_id = next(affected_ids, None)
+    for record in iter_base_records(connection, full_revision_id):
+        video_id = text(record["video"].get("videoId"))
+        while affected_id is not None and affected_id < video_id:
+            yield affected_records[affected_id]
+            affected_id = next(affected_ids, None)
+        if video_id in affected_video_ids:
+            if affected_id == video_id:
+                yield affected_records[affected_id]
+                affected_id = next(affected_ids, None)
+            continue
+        yield record
+    while affected_id is not None:
+        yield affected_records[affected_id]
+        affected_id = next(affected_ids, None)
+
+
 def snapshot_rows(snapshot: Any) -> Iterable[dict[str, Any]]:
-    records = getattr(snapshot, "records", None)
+    records = snapshot if isinstance(snapshot, Iterable) else getattr(snapshot, "records", None)
     if records is None:
         raise GateError("PG adapter snapshot has no records")
     for record in records:
@@ -170,13 +619,8 @@ def export_snapshot(args: argparse.Namespace) -> int:
             raise GateError(
                 f"active revision mismatch expected={args.expected_active_revision} actual={active_revision}"
             )
-        snapshot = adapter._load_snapshot(connection)
-        resolved_revision = text(getattr(snapshot, "revision_id", ""))
-        if resolved_revision != active_revision:
-            raise GateError(
-                f"resolved snapshot mismatch active={active_revision} resolved={resolved_revision}"
-            )
-        for row in snapshot_rows(snapshot):
+        records = iter_active_records(adapter, connection, active_revision)
+        for row in snapshot_rows(records):
             encoded = json_bytes(row)
             sys.stdout.buffer.write(encoded)
             digest.update(encoded)
@@ -189,6 +633,8 @@ def export_snapshot(args: argparse.Namespace) -> int:
                     file=sys.stderr,
                     flush=True,
                 )
+        if row_count == 0:
+            raise GateError("active snapshot stream is empty")
         sys.stdout.buffer.flush()
         summary = {
             "status": "ok",
