@@ -21,6 +21,21 @@ def normalized_handle(value: Any) -> str:
     return text(value).lstrip("/@").casefold()
 
 
+def active_revision(payload: Mapping[str, Any]) -> str:
+    """Read the revision from either adapter output or the HTTP envelope."""
+
+    current: Mapping[str, Any] = payload
+    for _ in range(3):
+        revision = text(current.get("active_revision_id"))
+        if revision:
+            return revision
+        nested = current.get("meta")
+        if not isinstance(nested, Mapping):
+            break
+        current = nested
+    return ""
+
+
 def occurrence_video(occurrence: Mapping[str, Any]) -> Mapping[str, Any]:
     item = occurrence.get("item")
     if isinstance(item, Mapping):
@@ -133,7 +148,7 @@ def main() -> int:
         raise RuntimeError(f"unhealthy target: {health.get('status')!r}")
     _, body_bytes, meta = fetch_json(args.base_url, "/api/meta", args.timeout)
     total_bytes += body_bytes
-    active = text(meta.get("active_revision_id"))
+    active = active_revision(meta)
     if args.expected_active and active != args.expected_active:
         raise RuntimeError(f"active CAS mismatch: expected={args.expected_active} actual={active}")
 

@@ -73,6 +73,9 @@ module = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+assert module.active_revision({"active_revision_id": "direct"}) == "direct"
+assert module.active_revision({"meta": {"active_revision_id": "wrapped"}}) == "wrapped"
+assert module.active_revision({"meta": {"meta": {"active_revision_id": "http-envelope"}}}) == "http-envelope"
 good = {
     "key": "UCGOOD",
     "channelId": "UCGOOD",
