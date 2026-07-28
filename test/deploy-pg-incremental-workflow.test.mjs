@@ -29,7 +29,7 @@ function workflowRunBlocks(workflow) {
       }
       body.push(line.slice(Math.min(contentIndent, line.length)));
     }
-    blocks.push(body.join("\n").replace(/\$\{\{.*?\}\}/gu, "CODEX_ACTION_EXPR"));
+    blocks.push(body.join("\n"));
   }
   return blocks;
 }
@@ -41,6 +41,11 @@ test("workflow YAML parses and every run block has valid bash syntax", () => {
   ]) {
     assert.ok(workflowRunBlocks(workflow).length > 0);
     for (const [index, script] of workflowRunBlocks(workflow).entries()) {
+      assert.doesNotMatch(
+        script,
+        /\$\{\{/u,
+        `${name} run block ${index + 1} must keep Actions expressions in env to avoid GitHub's expression-length limit`,
+      );
       const result = spawnSync("bash", ["-n"], { input: script, encoding: "utf8" });
       assert.equal(
         result.status,

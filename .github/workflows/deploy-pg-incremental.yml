@@ -111,6 +111,7 @@ jobs:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           GITHUB_TOKEN: ${{ github.token }}
           ARTIFACT_ROOT: ${{ runner.temp }}/daily-song-list-pg-artifact
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha || '' }}
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
@@ -164,7 +165,7 @@ jobs:
             test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact patch=$PATCH_PATH"; exit 78; }
             test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact manifest=$MANIFEST_PATH"; exit 78; }
           elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
-            SOURCE_SHA="${{ github.event.workflow_run.head_sha }}"
+            SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
             SOURCE_BASE_SHA="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
               -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.parents[0].sha')"
