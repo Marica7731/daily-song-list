@@ -91,7 +91,12 @@ def load_adapter(path: Path):
     if spec is None or spec.loader is None:
         raise GateError(f"cannot load PG adapter: {path}")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(spec.name, None)
+        raise
     for name in ("connect_from_env", "_one", "_load_snapshot"):
         if not hasattr(module, name):
             raise GateError(f"PG adapter missing required function: {name}")

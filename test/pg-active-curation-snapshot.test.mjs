@@ -28,6 +28,8 @@ function sha256(value) {
 
 function fakeAdapterSource() {
   return String.raw`
+from dataclasses import dataclass
+
 class Cursor:
     def __enter__(self):
         return self
@@ -44,9 +46,14 @@ class Connection:
     def close(self):
         return None
 
+@dataclass(frozen=True)
 class Snapshot:
-    revision_id = "accepted_fixture_1"
-    records = (
+    revision_id: str
+    records: tuple
+
+SNAPSHOT = Snapshot(
+    revision_id="accepted_fixture_1",
+    records=(
         {
             "video": {"videoId": "video-1", "channelHandle": "@channel"},
             "occurrences": (
@@ -76,7 +83,8 @@ class Snapshot:
                 },
             ),
         },
-    )
+    ),
+)
 
 def connect_from_env():
     return Connection()
@@ -85,11 +93,11 @@ def _one(_connection, _sql, _params=()):
     return {"state_value": "accepted_fixture_1"}
 
 def _load_snapshot(_connection):
-    return Snapshot()
+    return SNAPSHOT
 `;
 }
 
-test("export resolves the active adapter snapshot and emits only deterministic minimum fields", () => {
+test("dynamic dataclass adapter loads before export and emits deterministic minimum fields", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pg-curation-export-test-"));
   try {
     const adapter = path.join(root, "pg_adapter.py");
