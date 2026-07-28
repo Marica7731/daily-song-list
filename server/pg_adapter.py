@@ -886,6 +886,13 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
 
 
 def _overlay_candidate_search_text(row: Mapping[str, Any]) -> str:
+    channel_id = _text(row.get("channel_id")).casefold()
+    channel_handle = _text(row.get("channel_handle")).lstrip("/").casefold()
+    channel_url = _text(row.get("channel_url")).casefold()
+    trusted_channel_url = channel_url if (
+        (channel_id and channel_id in channel_url)
+        or (channel_handle and channel_handle in channel_url)
+    ) else ""
     return " ".join(
         _text(value)
         for value in (
@@ -895,7 +902,7 @@ def _overlay_candidate_search_text(row: Mapping[str, Any]) -> str:
             row.get("channel_name"),
             row.get("channel_id"),
             row.get("channel_handle"),
-            row.get("channel_url"),
+            trusted_channel_url,
             row.get("video_id"),
         )
     ).casefold()

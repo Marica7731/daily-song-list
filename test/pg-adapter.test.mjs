@@ -524,7 +524,7 @@ same_song_other_channel = {
     "channel_name": "Other Channel",
     "channel_id": "UCOTHER",
     "channel_handle": "/@other",
-    "channel_url": "https://www.youtube.com/@other",
+    "channel_url": "https://www.youtube.com/@urameshi_conta",
     "occurrence_id": "occurrence-2",
 }
 other_song = {
@@ -536,6 +536,7 @@ other_song = {
 }
 rows = [same_song_other_channel, other_song, matched_row]
 groups = module._overlay_candidate_groups(rows, "songs")
+assert "@urameshi_conta" not in module._overlay_candidate_search_text(same_song_other_channel)
 search = groups["song a::artist a"]["search"]
 assert "uc8vlcljjgfb4-ny2heb0-ew" in search
 assert "/@urameshi_conta" in search
