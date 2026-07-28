@@ -625,3 +625,26 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("generic overlays resolve channel aliases before channel metadata fallback", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+module._runtime_projection_revision = lambda connection: None
+module._generic_runtime_projection_revision = lambda connection: ("active", {"revision_id": "active"})
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["active"]
+module._runtime_source_key_for_channel_alias = lambda connection, revision_id, key: "complete-source"
+module._runtime_source_payload = lambda connection, revision_id, key, query, **kwargs: {"schemaVersion": 1, "found": key == "complete-source", "sourceKey": key, "record": {"sourceDetailKey": key, "occurrences": [{"videoId": "full-video"}]}}
+module._channel_metadata_rows = lambda *args: (_ for _ in ()).throw(AssertionError("metadata fallback must not run"))
+result = module.source_payload(object(), "UCIu1rRiQLeUU8e1saN6I0eg", {"page": "1"})
+assert result["found"] is True and result["sourceKey"] == "complete-source"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
