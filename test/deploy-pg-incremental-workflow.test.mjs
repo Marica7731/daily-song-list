@@ -84,6 +84,58 @@ function sourceIdentityGate(payload, {
   ).status;
 }
 
+function rankingsMetrics(payload, {
+  channelId = "UCA",
+  channelHandle = "/@source-a",
+} = {}) {
+  const program = `
+    def normalize_handle:
+      if type == "string" then ltrimstr("/") else "" end;
+    [.records[]?.occurrences[]?] as $occurrences |
+    {
+      totalCount,
+      totalOccurrenceCount,
+      identityMismatchCount:([
+        $occurrences[] |
+        select(
+          (
+            (($expected_channel_id == "") or
+              ((.video.channelId // "") == $expected_channel_id)) and
+            (($expected_channel_handle == "") or
+              (((.video.channelHandle // "") | normalize_handle) ==
+                ($expected_channel_handle | normalize_handle)))
+          ) | not
+        )
+      ] | length),
+      tupleMatchCount:([
+        $occurrences[] |
+        select(
+          (.videoId == $video_id) and
+          (.song.title == $title) and
+          ((.song.artist // null) == $artist) and
+          ((.song.seconds // null) == $seconds)
+        )
+      ] | length)
+    }
+  `;
+  const result = spawnSync(
+    "jq",
+    [
+      "-c",
+      "--arg", "expected_channel_id", channelId,
+      "--arg", "expected_channel_handle", channelHandle,
+      "--arg", "video_id", "video-a",
+      "--argjson", "title", JSON.stringify("Song"),
+      "--argjson", "artist", JSON.stringify("Artist"),
+      "--argjson", "seconds", "42",
+      program,
+    ],
+    { input: JSON.stringify(payload), encoding: "utf8" },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout);
+}
+
 test("workflow YAML parses and every run block has valid bash syntax", () => {
   for (const [name, workflow] of [
     ["deploy-pg-incremental", deployWorkflow],
@@ -104,6 +156,47 @@ test("workflow YAML parses and every run block has valid bash syntax", () => {
       );
     }
   }
+});
+
+test("rankings metrics bind occurrence identity and tuple without trusting channelUrl", () => {
+  const matchingOccurrence = {
+    videoId: "video-a",
+    song: { title: "Song", artist: "Artist", seconds: 42 },
+    video: {
+      channelId: "UCA",
+      channelHandle: "/@source-a",
+      channelUrl: "https://www.youtube.com/@polluted-other-source",
+    },
+  };
+  assert.deepEqual(
+    rankingsMetrics({
+      totalCount: 1,
+      totalOccurrenceCount: 1,
+      records: [{ occurrences: [matchingOccurrence] }],
+    }),
+    {
+      totalCount: 1,
+      totalOccurrenceCount: 1,
+      identityMismatchCount: 0,
+      tupleMatchCount: 1,
+    },
+  );
+  assert.equal(
+    rankingsMetrics({
+      totalCount: 1,
+      totalOccurrenceCount: 1,
+      records: [{
+        occurrences: [{
+          ...matchingOccurrence,
+          video: {
+            ...matchingOccurrence.video,
+            channelId: "WRONG",
+          },
+        }],
+      }],
+    }).identityMismatchCount,
+    1,
+  );
 });
 
 test("source identity gate uses the API-visible tuple and fails closed on ambiguity", () => {
@@ -260,7 +353,18 @@ test("accepted commits prepare a deterministic hashed artifact before the reusab
   assert.match(acceptedWorkflow, /--reviewed-at "\$source_committed_at"/u);
   assert.match(acceptedWorkflow, /duplicate-video-across-accepted-files/u);
   assert.match(acceptedWorkflow, /missing-source-detail-identity/u);
-  assert.match(acceptedWorkflow, /occurrenceId:\$song\.occurrenceId/u);
+  assert.match(acceptedWorkflow, /accepted-source-identities\.py/u);
+  assert.match(acceptedWorkflow, /\.sourceIdentityCount/u);
+  assert.match(acceptedWorkflow, /\.sourceIdentityEvidence/u);
+  assert.match(
+    acceptedWorkflow,
+    /sort \| first \/\/ ""/u,
+    "the compatibility source key must use the same deterministic ordering as the evidence helper",
+  );
+  assert.match(
+    acceptedWorkflow,
+    /\.identityEvidence == \.sourceIdentityEvidence\[0\]/u,
+  );
   assert.match(acceptedWorkflow, /repository_root="\$TASK_ROOT\/repository"/u);
   assert.match(acceptedWorkflow, /destination="\$repository_root\/\$repo_path"/u);
   assert.match(acceptedWorkflow, /--source-root "\$repository_root"/u);
@@ -271,6 +375,54 @@ test("accepted commits prepare a deterministic hashed artifact before the reusab
   assert.match(
     acceptedWorkflow,
     /artifact_run_id: \$\{\{ github\.run_id \}\}/u,
+  );
+});
+
+test("GitHub accepted handoffs bind and verify every distinct source probe", () => {
+  assert.match(
+    deployWorkflow,
+    /fetch_input "scripts\/migration\/accepted-source-identities\.py"/u,
+  );
+  assert.match(deployWorkflow, /workflow-run-source-identities-invalid/u);
+  assert.match(deployWorkflow, /sort \| first \/\/ ""/u);
+  assert.match(
+    deployWorkflow,
+    /--verify-manifest "\$MANIFEST_INPUT"/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /accepted-source-identities-mismatch/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /jq -ce '\.sourceIdentityEvidence\[\]' "\$SOURCE_IDENTITIES_JSON"/u,
+  );
+  assert.match(deployWorkflow, /source_identity_probe_count/u);
+  assert.match(deployWorkflow, /while IFS= read -r probe_identity; do/u);
+  assert.match(deployWorkflow, /candidate-source-\$probe_index-\$source_page\.json/u);
+  assert.match(deployWorkflow, /public-source-\$probe_index-\$source_page\.json/u);
+  assert.equal(
+    deployWorkflow.match(/pageSize=100&q=\$probe_video_path/gu)?.length,
+    2,
+    "candidate and public gates must filter before pagination by the exact probe video",
+  );
+  assert.match(deployWorkflow, /PG_INCREMENT_CANDIDATE_SOURCES_OK/u);
+  assert.match(deployWorkflow, /PG_INCREMENT_PUBLIC_SOURCES_OK/u);
+  assert.match(acceptedWorkflow, /\.acceptedSongGroupCount/u);
+  assert.match(
+    acceptedWorkflow,
+    /\[\.sourceIdentityEvidence\[\]\.acceptedOccurrenceCount\] \| add == \.acceptedOccurrenceCount/u,
+  );
+  assert.match(deployWorkflow, /\.acceptedSongGroupCount/u);
+  assert.match(
+    deployWorkflow,
+    /\.kind == "accepted-increment"/u,
+    "all accepted increments must recompute source evidence from the actual patch",
+  );
+  assert.match(
+    deployWorkflow,
+    /\.identityEvidence\.sourceDetailKey \/\/ empty/u,
+    "legacy single-source artifacts retain their exact compatibility path",
   );
 });
 
@@ -309,6 +461,41 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
   assert.match(deployWorkflow, /candidate-source-identity-mismatch/u);
   assert.match(deployWorkflow, /public-source-identity-mismatch/u);
   assert.match(deployWorkflow, /source-detail-key-missing/u);
+  assert.match(deployWorkflow, /rankings_probe_metrics\(\)/u);
+  assert.match(deployWorkflow, /fetch_rankings_probe\(\)/u);
+  assert.match(deployWorkflow, /verify_rankings_probe\(\)/u);
+  assert.match(
+    deployWorkflow,
+    /pageSize=30&q=\$rank_query_path&searchFields=title%2Cchannel/u,
+    "the source rankings gate must use the reviewed channel-search contract",
+  );
+  assert.match(
+    deployWorkflow,
+    /pageSize=50&q=\$probe_video_path&searchFields=video/u,
+    "a second rankings query must bind an exact patch tuple",
+  );
+  assert.match(deployWorkflow, /\.totalOccurrenceCount == \$occurrences/u);
+  assert.match(deployWorkflow, /\.totalCount == \$groups/u);
+  assert.match(deployWorkflow, /\.identityMismatchCount == 0/u);
+  assert.match(deployWorkflow, /tuple_matches.*-eq 1/u);
+  assert.match(
+    deployWorkflow,
+    /verify_rankings_probe candidate "http:\/\/127\.0\.0\.1:18766"/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /verify_rankings_probe public "https:\/\/ytb-song-rank\.culua\.com"/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /test "\$http_code" = 200/u,
+    "candidate and public rankings probes must require exact HTTP 200",
+  );
+  assert.doesNotMatch(
+    deployWorkflow.match(/rankings_probe_metrics\(\) \{[\s\S]*?\n            \}/u)?.[0] ?? "",
+    /channelUrl/u,
+    "historically polluted channel URLs must not participate in rankings identity",
+  );
   assert.doesNotMatch(
     deployWorkflow,
     /api\/sources\/Naraetan/u,

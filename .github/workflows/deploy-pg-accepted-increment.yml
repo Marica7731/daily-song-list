@@ -100,6 +100,9 @@ jobs:
           curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
             "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-files-to-patch.py" \
             -o "$TASK_ROOT/accepted-files-to-patch.py"
+          curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-source-identities.py" \
+            -o "$TASK_ROOT/accepted-source-identities.py"
           accepted_args=()
           accepted_inputs=()
           : > "$TASK_ROOT/accepted-files.evidence.ndjson"
@@ -142,7 +145,8 @@ jobs:
             echo "PG_ACCEPTED_HANDOFF_BLOCKED duplicate-video-across-accepted-files"; exit 78;
           }
           source_detail_key="$(jq -sr '
-            [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
+            [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] |
+            sort | first // ""
           ' "${accepted_inputs[@]}")"
           test -n "$source_detail_key" || { echo "PG_ACCEPTED_HANDOFF_BLOCKED missing-source-detail-key"; exit 78; }
           python3 "$TASK_ROOT/accepted-files-to-patch.py" "${accepted_args[@]}" \
@@ -155,25 +159,15 @@ jobs:
           test -s "$TASK_ROOT/artifact/candidate.ndjson"
           patch_sha256="$(shasum -a 256 "$TASK_ROOT/artifact/candidate.ndjson" | awk '{print $1}')"
           accepted_files_sha256="$(jq -cS . "$TASK_ROOT/accepted-files.evidence.json" | shasum -a 256 | awk '{print $1}')"
-          probe_record="$(sed -n '1p' "$TASK_ROOT/artifact/candidate.ndjson")"
-          identity_evidence="$(jq -ce --arg source_detail_key "$source_detail_key" '
-            (.songs[0] // null) as $song |
-            select(
-              (.videoId | type == "string" and length > 0) and
-              ($song != null) and
-              ($song.occurrenceId | type == "string" and length > 0) and
-              ($song.title | type == "string")
-            ) |
-            {
-              sourceDetailKey:$source_detail_key,
-              videoId:.videoId,
-              occurrenceId:$song.occurrenceId,
-              title:$song.title,
-              artist:($song.artist // null),
-              seconds:($song.seconds // null)
-            }
-          ' <<<"$probe_record")" || {
+          python3 "$TASK_ROOT/accepted-source-identities.py" \
+            --patch "$TASK_ROOT/artifact/candidate.ndjson" \
+            --output "$TASK_ROOT/source-identities.json" || {
             echo "PG_ACCEPTED_HANDOFF_BLOCKED missing-source-detail-identity"; exit 78;
+          }
+          generated_source_detail_key="$(jq -er '.identityEvidence.sourceDetailKey' "$TASK_ROOT/source-identities.json")"
+          test "$generated_source_detail_key" = "$source_detail_key" || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED first-source-key-mismatch expected=$source_detail_key actual=$generated_source_detail_key"
+            exit 78
           }
           jq \
             --arg source_commit_sha "$SOURCE_SHA" \
@@ -181,9 +175,9 @@ jobs:
             --arg source_committed_at "$source_committed_at" \
             --arg patch_sha256 "$patch_sha256" \
             --arg accepted_files_sha256 "$accepted_files_sha256" \
-            --argjson identity_evidence "$identity_evidence" \
             --slurpfile accepted_files "$TASK_ROOT/accepted-files.evidence.json" \
-            '. + {
+            --slurpfile source_identities "$TASK_ROOT/source-identities.json" \
+            '. + $source_identities[0] + {
               status:"ready",
               handoffKind:"github-accepted-paths",
               source_commit_sha:$source_commit_sha,
@@ -192,8 +186,7 @@ jobs:
               patch_sha256:$patch_sha256,
               accepted_files_sha256:$accepted_files_sha256,
               inputFiles:[$accepted_files[0][].path],
-              acceptedFiles:$accepted_files[0],
-              identityEvidence:$identity_evidence
+              acceptedFiles:$accepted_files[0]
             }' "$TASK_ROOT/artifact/manifest.json" > "$TASK_ROOT/artifact/manifest.next.json"
           mv "$TASK_ROOT/artifact/manifest.next.json" "$TASK_ROOT/artifact/manifest.json"
           jq -e '
@@ -205,7 +198,18 @@ jobs:
             (.source_base_sha | test("^[0-9a-fA-F]{40}$")) and
             (.patch_sha256 | test("^[0-9a-f]{64}$")) and
             (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
-            (.acceptedFiles | type == "array" and length > 0)
+            (.acceptedFiles | type == "array" and length > 0) and
+            (.sourceIdentityCount | type == "number" and . > 0) and
+            (.sourceIdentityEvidence | type == "array" and length == .sourceIdentityCount) and
+            ([.sourceIdentityEvidence[].sourceDetailKey] | length == (unique | length)) and
+            (all(.sourceIdentityEvidence[];
+              (.acceptedVideoCount | type == "number" and . > 0) and
+              (.acceptedOccurrenceCount | type == "number" and . > 0) and
+              (.acceptedSongGroupCount | type == "number" and . > 0)
+            )) and
+            ([.sourceIdentityEvidence[].acceptedVideoCount] | add == .acceptedVideoCount) and
+            ([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add == .acceptedOccurrenceCount) and
+            (.identityEvidence == .sourceIdentityEvidence[0])
           ' "$TASK_ROOT/artifact/manifest.json" >/dev/null
           patch_bytes="$(stat -c%s "$TASK_ROOT/artifact/candidate.ndjson")"
           manifest_bytes="$(stat -c%s "$TASK_ROOT/artifact/manifest.json")"
@@ -235,6 +239,7 @@ jobs:
             echo "- accepted_occurrences: $(jq -r '.acceptedOccurrenceCount' "$TASK_ROOT/artifact/manifest.json")"
             echo "- patch_sha256: $patch_sha256"
             echo "- source_detail_key: $source_detail_key"
+            echo "- source_identity_count: $(jq -r '.sourceIdentityCount' "$TASK_ROOT/artifact/manifest.json")"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload deterministic accepted handoff

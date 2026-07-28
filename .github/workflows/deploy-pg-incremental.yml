@@ -463,6 +463,7 @@ jobs:
               "$RAW_BASE/$source_path" -o "$destination"
             test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty input=$source_path"; exit 78; }
           }
+          fetch_input "scripts/migration/accepted-source-identities.py" "$INPUT_ROOT/accepted-source-identities.py"
           if [ -n "$ARTIFACT_NAME" ]; then
             PATCH_INPUT="$ARTIFACT_ROOT/$PATCH_PATH"
             MANIFEST_INPUT="$ARTIFACT_ROOT/$MANIFEST_PATH"
@@ -535,7 +536,8 @@ jobs:
               echo "PG_INCREMENT_BLOCKED duplicate-video-across-accepted-files"; exit 78;
             }
             GENERATED_SOURCE_KEY="$(jq -sr '
-              [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
+              [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] |
+              sort | first // ""
             ' "${ACCEPTED_INPUTS[@]}")"
             test -n "$GENERATED_SOURCE_KEY" || { echo "PG_INCREMENT_BLOCKED missing-source-detail-key"; exit 78; }
             python3 "$INPUT_ROOT/accepted-files-to-patch.py" "${ACCEPTED_ARGS[@]}" \
@@ -543,6 +545,14 @@ jobs:
               --source-key "$GENERATED_SOURCE_KEY" --source-root "$ACCEPTED_ROOT" \
               --reviewed-at "$SOURCE_COMMITTED_AT"
             GENERATED_PATCH_SHA256="$(shasum -a 256 "$INPUT_ROOT/patch" | awk '{print $1}')"
+            python3 "$INPUT_ROOT/accepted-source-identities.py" \
+              --patch "$INPUT_ROOT/patch" \
+              --output "$INPUT_ROOT/source-identities.json" || {
+              echo "PG_INCREMENT_BLOCKED workflow-run-source-identities-invalid"; exit 78;
+            }
+            test "$(jq -er '.identityEvidence.sourceDetailKey' "$INPUT_ROOT/source-identities.json")" = "$GENERATED_SOURCE_KEY" || {
+              echo "PG_INCREMENT_BLOCKED workflow-run-first-source-key-mismatch"; exit 78;
+            }
             jq '
               [.files[]? |
                 select(.filename | startswith("data/external/youtube-channel-discovery/accepted/")) |
@@ -557,9 +567,9 @@ jobs:
               --arg source_committed_at "$SOURCE_COMMITTED_AT" \
               --arg patch_sha256 "$GENERATED_PATCH_SHA256" \
               --arg accepted_files_sha256 "$GENERATED_ACCEPTED_FILES_SHA256" \
-              --arg source_detail_key "$GENERATED_SOURCE_KEY" \
               --slurpfile accepted_files "$INPUT_ROOT/accepted-files.json" \
-              '. + {
+              --slurpfile source_identities "$INPUT_ROOT/source-identities.json" \
+              '. + $source_identities[0] + {
                 status:"ready",
                 handoffKind:"github-accepted-paths",
                 source_commit_sha:$source_commit_sha,
@@ -568,8 +578,7 @@ jobs:
                 patch_sha256:$patch_sha256,
                 accepted_files_sha256:$accepted_files_sha256,
                 inputFiles:[$accepted_files[0][].path],
-                acceptedFiles:$accepted_files[0],
-                identityEvidence:{sourceDetailKey:$source_detail_key}
+                acceptedFiles:$accepted_files[0]
               }' "$INPUT_ROOT/manifest" > "$INPUT_ROOT/manifest.next"
             mv "$INPUT_ROOT/manifest.next" "$INPUT_ROOT/manifest"
             PATCH_PATH="workflow-run-generated"
@@ -606,7 +615,17 @@ jobs:
               (.patch_sha256 | test("^[0-9a-f]{64}$")) and
               (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
               (.acceptedFiles | type == "array" and length > 0) and
-              (.identityEvidence.sourceDetailKey | type == "string" and length > 0)
+              (.sourceIdentityCount | type == "number" and . > 0) and
+              (.sourceIdentityEvidence | type == "array" and length == .sourceIdentityCount) and
+              ([.sourceIdentityEvidence[].sourceDetailKey] | length == (unique | length)) and
+              (all(.sourceIdentityEvidence[];
+                (.acceptedVideoCount | type == "number" and . > 0) and
+                (.acceptedOccurrenceCount | type == "number" and . > 0) and
+                (.acceptedSongGroupCount | type == "number" and . > 0)
+              )) and
+              ([.sourceIdentityEvidence[].acceptedVideoCount] | add == .acceptedVideoCount) and
+              ([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add == .acceptedOccurrenceCount) and
+              (.identityEvidence == .sourceIdentityEvidence[0])
             ' "$MANIFEST_INPUT" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED github-accepted-manifest-not-ready"; exit 78;
             }
@@ -655,6 +674,21 @@ jobs:
           hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
           printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
           test "$patch_bytes" -lt "$hard_cap_bytes"
+          SOURCE_IDENTITIES_JSON=""
+          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            SOURCE_IDENTITIES_JSON="$TASK_ROOT/verified-source-identities.json"
+            source_identity_args=(
+              --patch "$PATCH_INPUT"
+              --output "$SOURCE_IDENTITIES_JSON"
+            )
+            if jq -e '.handoffKind == "github-accepted-paths"' "$MANIFEST_INPUT" >/dev/null; then
+              source_identity_args+=(--verify-manifest "$MANIFEST_INPUT")
+            fi
+            python3 "$INPUT_ROOT/accepted-source-identities.py" "${source_identity_args[@]}" || {
+              echo "PG_INCREMENT_BLOCKED accepted-source-identities-mismatch"; exit 78;
+            }
+            echo "PG_INCREMENT_SOURCE_MANIFEST_OK probes=$(jq -r '.sourceIdentityCount' "$SOURCE_IDENTITIES_JSON")"
+          fi
           mkdir -p "$RUNNER_TEMP/ssh-askpass"
           printf '%s\n' "$VPS2_PASSWORD" > "$RUNNER_TEMP/ssh-askpass/vps2.password"
           chmod 600 "$RUNNER_TEMP/ssh-askpass/vps2.password"
@@ -780,127 +814,318 @@ jobs:
           }
           candidate_source_key=""
           candidate_source_path=""
+          candidate_source_paths=""
+          source_identity_probes="$TASK_ROOT/source-identity-probes.jsonl"
+          : > "$source_identity_probes"
           if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
             echo "PG_INCREMENT_CURATION_SOURCE_GATE snapshot=$active_revision_before"
           else
-          candidate_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
-          if [[ "$PATCH_PATH" == *.gz ]]; then
-            probe_record="$(gzip -dc "$PATCH_INPUT" | sed -n '1p')"
-          else
-            probe_record="$(sed -n '1p' "$PATCH_INPUT")"
-          fi
-          probe_identity="$(jq -ce '
-            (.songs[0] // null) as $song |
-            select(
-              (.videoId | type == "string" and length > 0) and
-              $song != null and
-              ($song.occurrenceId | type == "string" and length > 0) and
-              ($song.title | type == "string")
-            ) |
-            {
-              sourceDetailKey:(.channelId // .channelHandle // ""),
-              channelId:(.channelId // ""),
-              channelHandle:(.channelHandle // ""),
-              videoId:.videoId,
-              occurrenceId:$song.occurrenceId,
-              title:$song.title,
-              artist:($song.artist // null),
-              seconds:($song.seconds // null)
-            }
-          ' <<<"$probe_record")" || {
-            echo "PG_INCREMENT_BLOCKED source-detail-identity-unparseable"; exit 78;
-          }
-          if [ -z "$candidate_source_key" ]; then
-            candidate_source_key="$(jq -er '.sourceDetailKey | select(type == "string" and length > 0)' <<<"$probe_identity" || true)"
-          fi
-          test -n "$candidate_source_key" || {
-            echo "PG_INCREMENT_BLOCKED source-detail-key-missing"; exit 78;
-          }
-          probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
-          probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
-          probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
-          probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
-          probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
-          probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
-          probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
-          candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-          source_detail_probe_metrics() {
-            jq -c \
-              --arg expected_channel_id "$probe_channel_id" \
-              --arg expected_channel_handle "$probe_channel_handle" \
-              --arg video_id "$probe_video_id" \
-              --argjson title "$probe_title_json" \
-              --argjson artist "$probe_artist_json" \
-              --argjson seconds "$probe_seconds_json" '
-                def normalize_handle:
-                  if type == "string" then ltrimstr("/") else "" end;
-                ([
-                  .record.occurrences[]? |
-                  select(
-                    (.videoId == $video_id) and
-                    (.song.title == $title) and
-                    ((.song.artist // null) == $artist) and
-                    ((.song.seconds // null) == $seconds)
-                  )
-                ] | length) as $tuple_match_count |
-                ([
-                  .record.occurrences[]? |
-                  select(.videoId == $video_id)
-                ] | length) as $video_match_count |
+            if [ -n "$SOURCE_IDENTITIES_JSON" ]; then
+              jq -ce '.sourceIdentityEvidence[]' "$SOURCE_IDENTITIES_JSON" > "$source_identity_probes"
+            else
+              legacy_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
+              if [[ "$PATCH_PATH" == *.gz ]]; then
+                probe_record="$(gzip -dc "$PATCH_INPUT" | sed -n '1p')"
+              else
+                probe_record="$(sed -n '1p' "$PATCH_INPUT")"
+              fi
+              jq -ce --arg legacy_source_key "$legacy_source_key" '
+                (.songs[0] // null) as $song |
+                select(
+                  (.videoId | type == "string" and length > 0) and
+                  $song != null and
+                  ($song.occurrenceId | type == "string" and length > 0) and
+                  ($song.title | type == "string")
+                ) |
                 {
-                  found:(.found == true),
-                  page:(.page // null),
-                  pageCount:(.pageCount // null),
-                  recordChannelId:(.record.channelId // ""),
-                  recordChannelHandle:(.record.channelHandle // ""),
-                  identityMatch:(
-                    (($expected_channel_id == "") or
-                      ((.record.channelId // "") == $expected_channel_id)) and
-                    (($expected_channel_handle == "") or
-                      (((.record.channelHandle // "") | normalize_handle) ==
-                        ($expected_channel_handle | normalize_handle)))
+                  sourceDetailKey:(
+                    if $legacy_source_key != "" then $legacy_source_key
+                    else (.channelId // .channelHandle // "")
+                    end
                   ),
-                  videoMatchCount:$video_match_count,
-                  tupleMatchCount:$tuple_match_count
+                  channelId:(.channelId // ""),
+                  channelHandle:(.channelHandle // ""),
+                  videoId:.videoId,
+                  occurrenceId:$song.occurrenceId,
+                  title:$song.title,
+                  artist:($song.artist // null),
+                  seconds:($song.seconds // null)
                 }
-              ' "$1"
-          }
-          candidate_source_match=0
-          candidate_source_metrics="$TASK_ROOT/candidate-source-metrics.jsonl"
-          : > "$candidate_source_metrics"
-          for source_page in $(seq 1 20); do
-            candidate_source_file="$TASK_ROOT/candidate-source-$source_page.json"
-            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-              "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=$source_page&pageSize=100\"" \
-              > "$candidate_source_file"; then
-              echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key page=$source_page" >&2
-              cat "$candidate_source_file" >&2 || true
-              exit 1
+              ' <<<"$probe_record" > "$source_identity_probes" || {
+                echo "PG_INCREMENT_BLOCKED source-detail-identity-unparseable"; exit 78;
+              }
             fi
-            source_metrics="$(source_detail_probe_metrics "$candidate_source_file")" || {
-              echo "PG_INCREMENT_BLOCKED candidate-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+            source_identity_probe_count="$(wc -l < "$source_identity_probes" | tr -d '[:space:]')"
+            test "$source_identity_probe_count" -gt 0 || {
+              echo "PG_INCREMENT_BLOCKED source-detail-key-missing"; exit 78;
             }
-            printf '%s\n' "$source_metrics" >> "$candidate_source_metrics"
-            if jq -e '
-              (.found == true) and
-              (.identityMatch == true) and
-              (.tupleMatchCount == 1)
-            ' <<<"$source_metrics" >/dev/null; then
-              candidate_source_match=1
-              break
-            fi
-            source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$candidate_source_file")" || {
-              echo "PG_INCREMENT_BLOCKED candidate-source-pagination-invalid key=$candidate_source_key"; exit 78;
+            source_detail_probe_metrics() {
+              jq -c \
+                --arg expected_channel_id "$probe_channel_id" \
+                --arg expected_channel_handle "$probe_channel_handle" \
+                --arg video_id "$probe_video_id" \
+                --argjson title "$probe_title_json" \
+                --argjson artist "$probe_artist_json" \
+                --argjson seconds "$probe_seconds_json" '
+                  def normalize_handle:
+                    if type == "string" then ltrimstr("/") else "" end;
+                  ([
+                    .record.occurrences[]? |
+                    select(
+                      (.videoId == $video_id) and
+                      (.song.title == $title) and
+                      ((.song.artist // null) == $artist) and
+                      ((.song.seconds // null) == $seconds)
+                    )
+                  ] | length) as $tuple_match_count |
+                  ([
+                    .record.occurrences[]? |
+                    select(.videoId == $video_id)
+                  ] | length) as $video_match_count |
+                  {
+                    found:(.found == true),
+                    page:(.page // null),
+                    pageCount:(.pageCount // null),
+                    recordChannelId:(.record.channelId // ""),
+                    recordChannelHandle:(.record.channelHandle // ""),
+                    identityMatch:(
+                      (($expected_channel_id == "") or
+                        ((.record.channelId // "") == $expected_channel_id)) and
+                      (($expected_channel_handle == "") or
+                        (((.record.channelHandle // "") | normalize_handle) ==
+                          ($expected_channel_handle | normalize_handle)))
+                    ),
+                    videoMatchCount:$video_match_count,
+                    tupleMatchCount:$tuple_match_count
+                  }
+                ' "$1"
             }
-            [ "$source_page" -lt "$source_page_count" ] || break
-          done
-          if [ "$candidate_source_match" != 1 ]; then
-            while IFS= read -r source_metrics; do
-              echo "PG_INCREMENT_SOURCE_PAGE key=$candidate_source_key metrics=$source_metrics" >&2
-            done < "$candidate_source_metrics"
-            echo "PG_INCREMENT_BLOCKED candidate-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id" >&2
-            exit 78
-          fi
+            manifest_range_id="$(jq -er '.rangeId // .range // "all"' "$MANIFEST_INPUT")"
+            manifest_range_path="$(printf '%s' "$manifest_range_id" | jq -sRr @uri)"
+            rankings_probe_metrics() {
+              jq -c \
+                --arg expected_channel_id "$probe_channel_id" \
+                --arg expected_channel_handle "$probe_channel_handle" \
+                --arg video_id "$probe_video_id" \
+                --argjson title "$probe_title_json" \
+                --argjson artist "$probe_artist_json" \
+                --argjson seconds "$probe_seconds_json" '
+                  def normalize_handle:
+                    if type == "string" then ltrimstr("/") else "" end;
+                  [.records[]?.occurrences[]?] as $occurrences |
+                  {
+                    page:(.page // null),
+                    pageCount:(.pageCount // null),
+                    totalCount:(.totalCount // null),
+                    totalOccurrenceCount:(.totalOccurrenceCount // null),
+                    returnedOccurrenceCount:($occurrences | length),
+                    identityMismatchCount:([
+                      $occurrences[] |
+                      select(
+                        (
+                          (($expected_channel_id == "") or
+                            ((.video.channelId // "") == $expected_channel_id)) and
+                          (($expected_channel_handle == "") or
+                            (((.video.channelHandle // "") | normalize_handle) ==
+                              ($expected_channel_handle | normalize_handle)))
+                        ) | not
+                      )
+                    ] | length),
+                    tupleMatchCount:([
+                      $occurrences[] |
+                      select(
+                        (.videoId == $video_id) and
+                        (.song.title == $title) and
+                        ((.song.artist // null) == $artist) and
+                        ((.song.seconds // null) == $seconds)
+                      )
+                    ] | length)
+                  }
+                ' "$1"
+            }
+            fetch_rankings_probe() {
+              local phase="$1"
+              local url="$2"
+              local output="$3"
+              local http_code
+              if [ "$phase" = candidate ]; then
+                local remote_url
+                local transport="$output.transport"
+                printf -v remote_url '%q' "$url"
+                if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+                  "set -e; body=\$(mktemp /tmp/pg-rankings-probe.XXXXXX); trap 'rm -f \"\$body\"' EXIT; code=\$(curl --silent --show-error --max-time 30 -o \"\$body\" -w '%{http_code}' $remote_url); printf '%s\\n' \"\$code\"; cat \"\$body\"" \
+                  > "$transport"; then
+                  echo "PG_INCREMENT_BLOCKED candidate-rankings-http-failure" >&2
+                  return 1
+                fi
+                http_code="$(sed -n '1p' "$transport")"
+                tail -n +2 "$transport" > "$output"
+              else
+                http_code="$(curl --silent --show-error --location \
+                  --connect-timeout 8 --max-time 20 \
+                  -o "$output" -w '%{http_code}' "$url")" || {
+                  echo "PG_INCREMENT_BLOCKED public-rankings-http-failure" >&2
+                  return 1
+                }
+              fi
+              test "$http_code" = 200 || {
+                echo "PG_INCREMENT_BLOCKED $phase-rankings-http-status status=$http_code" >&2
+                return 1
+              }
+            }
+            verify_rankings_probe() {
+              local phase="$1"
+              local base_url="$2"
+              local expected_occurrences="$probe_accepted_occurrences"
+              local expected_groups="$probe_accepted_song_groups"
+              local rank_query
+              local rank_query_path
+              local rank_page=1
+              local rank_page_count=0
+              local rank_returned=0
+              local rank_file
+              local rank_metrics
+              rank_query="${probe_channel_handle#/}"
+              if [ -z "$rank_query" ]; then rank_query="$probe_channel_id"; fi
+              test -n "$rank_query" || {
+                echo "PG_INCREMENT_BLOCKED $phase-rankings-query-missing probe=$probe_index" >&2
+                exit 78
+              }
+              rank_query_path="$(printf '%s' "$rank_query" | jq -sRr @uri)"
+              while :; do
+                rank_file="$TASK_ROOT/$phase-rankings-source-$probe_index-$rank_page.json"
+                fetch_rankings_probe "$phase" \
+                  "$base_url/api/rankings?range=$manifest_range_path&view=songs&metric=occurrences&page=$rank_page&pageSize=30&q=$rank_query_path&searchFields=title%2Cchannel" \
+                  "$rank_file" || exit 1
+                rank_metrics="$(rankings_probe_metrics "$rank_file")" || {
+                  echo "PG_INCREMENT_BLOCKED $phase-rankings-metrics-invalid probe=$probe_index page=$rank_page" >&2
+                  exit 78
+                }
+                echo "PG_INCREMENT_RANKINGS_PAGE phase=$phase probe=$probe_index metrics=$rank_metrics"
+                jq -e \
+                  --argjson page "$rank_page" \
+                  --argjson occurrences "$expected_occurrences" \
+                  --argjson groups "$expected_groups" '
+                    (.page == $page) and
+                    (.pageCount | type == "number" and . >= 1 and . <= 50) and
+                    (.totalCount == $groups and .totalCount > 0) and
+                    (.totalOccurrenceCount == $occurrences) and
+                    (.identityMismatchCount == 0)
+                  ' <<<"$rank_metrics" >/dev/null || {
+                  echo "PG_INCREMENT_BLOCKED $phase-rankings-source-mismatch probe=$probe_index" >&2
+                  exit 78
+                }
+                rank_returned=$((rank_returned + $(jq -er '.returnedOccurrenceCount' <<<"$rank_metrics")))
+                rank_page_count="$(jq -er '.pageCount' <<<"$rank_metrics")"
+                [ "$rank_page" -lt "$rank_page_count" ] || break
+                rank_page=$((rank_page + 1))
+              done
+              test "$rank_returned" -gt 0 || {
+                echo "PG_INCREMENT_BLOCKED $phase-rankings-empty-preview probe=$probe_index" >&2
+                exit 78
+              }
+
+              local tuple_page=1
+              local tuple_page_count=0
+              local tuple_matches=0
+              local tuple_returned=0
+              local tuple_file
+              local tuple_metrics
+              while :; do
+                tuple_file="$TASK_ROOT/$phase-rankings-tuple-$probe_index-$tuple_page.json"
+                fetch_rankings_probe "$phase" \
+                  "$base_url/api/rankings?range=$manifest_range_path&view=songs&metric=occurrences&page=$tuple_page&pageSize=50&q=$probe_video_path&searchFields=video" \
+                  "$tuple_file" || exit 1
+                tuple_metrics="$(rankings_probe_metrics "$tuple_file")" || {
+                  echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-metrics-invalid probe=$probe_index page=$tuple_page" >&2
+                  exit 78
+                }
+                echo "PG_INCREMENT_RANKINGS_TUPLE_PAGE phase=$phase probe=$probe_index metrics=$tuple_metrics"
+                jq -e --argjson page "$tuple_page" '
+                  (.page == $page) and
+                  (.pageCount | type == "number" and . >= 1 and . <= 50) and
+                  (.totalCount | type == "number" and . > 0) and
+                  (.totalOccurrenceCount | type == "number" and . > 0) and
+                  (.identityMismatchCount == 0)
+                ' <<<"$tuple_metrics" >/dev/null || {
+                  echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-identity-mismatch probe=$probe_index" >&2
+                  exit 78
+                }
+                tuple_matches=$((tuple_matches + $(jq -er '.tupleMatchCount' <<<"$tuple_metrics")))
+                tuple_returned=$((tuple_returned + $(jq -er '.returnedOccurrenceCount' <<<"$tuple_metrics")))
+                tuple_page_count="$(jq -er '.pageCount' <<<"$tuple_metrics")"
+                [ "$tuple_page" -lt "$tuple_page_count" ] || break
+                tuple_page=$((tuple_page + 1))
+              done
+              test "$tuple_returned" -gt 0 && test "$tuple_matches" -eq 1 || {
+                echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-mismatch probe=$probe_index video=$probe_video_id occurrence=$probe_occurrence_id matches=$tuple_matches" >&2
+                exit 78
+              }
+              echo "PG_INCREMENT_RANKINGS_OK phase=$phase probe=$probe_index occurrences=$expected_occurrences groups=$expected_groups pages=$rank_page_count tupleMatches=$tuple_matches"
+            }
+            : > "$TASK_ROOT/candidate-source-paths.txt"
+            probe_index=0
+            while IFS= read -r probe_identity; do
+              probe_index=$((probe_index + 1))
+              candidate_source_key="$(jq -er '.sourceDetailKey | select(type == "string" and length > 0)' <<<"$probe_identity")" || {
+                echo "PG_INCREMENT_BLOCKED source-detail-key-missing probe=$probe_index"; exit 78;
+              }
+              probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
+              probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
+              probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
+              probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
+              probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
+              probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
+              probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
+              probe_accepted_occurrences="$(jq -er '.acceptedOccurrenceCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
+                echo "PG_INCREMENT_BLOCKED source-rankings-occurrence-count-missing probe=$probe_index"; exit 78;
+              }
+              probe_accepted_song_groups="$(jq -er '.acceptedSongGroupCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
+                echo "PG_INCREMENT_BLOCKED source-rankings-group-count-missing probe=$probe_index"; exit 78;
+              }
+              candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
+              probe_video_path="$(printf '%s' "$probe_video_id" | jq -sRr @uri)"
+              printf '%s\n' "$candidate_source_path" >> "$TASK_ROOT/candidate-source-paths.txt"
+              candidate_source_match=0
+              candidate_source_metrics="$TASK_ROOT/candidate-source-$probe_index-metrics.jsonl"
+              : > "$candidate_source_metrics"
+              for source_page in $(seq 1 20); do
+                candidate_source_file="$TASK_ROOT/candidate-source-$probe_index-$source_page.json"
+                if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+                  "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=$source_page&pageSize=100&q=$probe_video_path\"" \
+                  > "$candidate_source_file"; then
+                  echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key page=$source_page" >&2
+                  cat "$candidate_source_file" >&2 || true
+                  exit 1
+                fi
+                source_metrics="$(source_detail_probe_metrics "$candidate_source_file")" || {
+                  echo "PG_INCREMENT_BLOCKED candidate-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+                }
+                printf '%s\n' "$source_metrics" >> "$candidate_source_metrics"
+                if jq -e '
+                  (.found == true) and
+                  (.identityMatch == true) and
+                  (.tupleMatchCount == 1)
+                ' <<<"$source_metrics" >/dev/null; then
+                  candidate_source_match=1
+                  break
+                fi
+                source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$candidate_source_file")" || {
+                  echo "PG_INCREMENT_BLOCKED candidate-source-pagination-invalid key=$candidate_source_key"; exit 78;
+                }
+                [ "$source_page" -lt "$source_page_count" ] || break
+              done
+              if [ "$candidate_source_match" != 1 ]; then
+                while IFS= read -r source_metrics; do
+                  echo "PG_INCREMENT_SOURCE_PAGE probe=$probe_index key=$candidate_source_key metrics=$source_metrics" >&2
+                done < "$candidate_source_metrics"
+                echo "PG_INCREMENT_BLOCKED candidate-source-identity-mismatch probe=$probe_index key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id" >&2
+                exit 78
+              fi
+              verify_rankings_probe candidate "http://127.0.0.1:18766"
+            done < "$source_identity_probes"
+            candidate_source_paths="$(sort -u "$TASK_ROOT/candidate-source-paths.txt" | paste -sd' ' -)"
+            echo "PG_INCREMENT_CANDIDATE_SOURCES_OK probes=$source_identity_probe_count"
           fi
           candidate_meta_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/candidate-meta.json" || true)"
           if [ -n "$manifest_source_commit" ]; then
@@ -949,8 +1174,10 @@ jobs:
               curl --fail-with-body --max-time 20 http://127.0.0.1:8765/healthz
               curl --fail-with-body --max-time 20 http://127.0.0.1:8765/api/meta
               curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1\"
-              if [ -n \"$candidate_source_path\" ]; then
-                curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/sources/$candidate_source_path?page=1&pageSize=1\"
+              if [ -n \"$candidate_source_paths\" ]; then
+                for source_path in $candidate_source_paths; do
+                  curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/sources/\$source_path?page=1&pageSize=1\"
+                done
               fi
               systemctl disable --now song-rank-api || true
               systemctl reload nginx
@@ -970,38 +1197,60 @@ jobs:
             ' "$TASK_ROOT/public-meta.json" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED public-meta-gate revision=$REVISION"; exit 78;
             }
-            if [ -n "$candidate_source_path" ]; then
-              public_source_match=0
-              public_source_metrics="$TASK_ROOT/public-source-metrics.jsonl"
-              : > "$public_source_metrics"
-              for source_page in $(seq 1 20); do
-                public_source_file="$TASK_ROOT/public-source-$source_page.json"
-                curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
-                  "https://ytb-song-rank.culua.com/api/sources/$candidate_source_path?page=$source_page&pageSize=100" \
-                  -o "$public_source_file"
-                source_metrics="$(source_detail_probe_metrics "$public_source_file")" || {
-                  echo "PG_INCREMENT_BLOCKED public-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+            if [ -s "$source_identity_probes" ]; then
+              probe_index=0
+              while IFS= read -r probe_identity; do
+                probe_index=$((probe_index + 1))
+                candidate_source_key="$(jq -er '.sourceDetailKey' <<<"$probe_identity")"
+                probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
+                probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
+                probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
+                probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
+                probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
+                probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
+                probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
+                probe_accepted_occurrences="$(jq -er '.acceptedOccurrenceCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
+                  echo "PG_INCREMENT_BLOCKED source-rankings-occurrence-count-missing probe=$probe_index"; exit 78;
                 }
-                printf '%s\n' "$source_metrics" >> "$public_source_metrics"
-                if jq -e '
-                  (.found == true) and
-                  (.identityMatch == true) and
-                  (.tupleMatchCount == 1)
-                ' <<<"$source_metrics" >/dev/null; then
-                  public_source_match=1
-                  break
+                probe_accepted_song_groups="$(jq -er '.acceptedSongGroupCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
+                  echo "PG_INCREMENT_BLOCKED source-rankings-group-count-missing probe=$probe_index"; exit 78;
+                }
+                candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
+                probe_video_path="$(printf '%s' "$probe_video_id" | jq -sRr @uri)"
+                public_source_match=0
+                public_source_metrics="$TASK_ROOT/public-source-$probe_index-metrics.jsonl"
+                : > "$public_source_metrics"
+                for source_page in $(seq 1 20); do
+                  public_source_file="$TASK_ROOT/public-source-$probe_index-$source_page.json"
+                  curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
+                    "https://ytb-song-rank.culua.com/api/sources/$candidate_source_path?page=$source_page&pageSize=100&q=$probe_video_path" \
+                    -o "$public_source_file"
+                  source_metrics="$(source_detail_probe_metrics "$public_source_file")" || {
+                    echo "PG_INCREMENT_BLOCKED public-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+                  }
+                  printf '%s\n' "$source_metrics" >> "$public_source_metrics"
+                  if jq -e '
+                    (.found == true) and
+                    (.identityMatch == true) and
+                    (.tupleMatchCount == 1)
+                  ' <<<"$source_metrics" >/dev/null; then
+                    public_source_match=1
+                    break
+                  fi
+                  source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$public_source_file")" || {
+                    echo "PG_INCREMENT_BLOCKED public-source-pagination-invalid key=$candidate_source_key"; exit 78;
+                  }
+                  [ "$source_page" -lt "$source_page_count" ] || break
+                done
+                if [ "$public_source_match" != 1 ]; then
+                  while IFS= read -r source_metrics; do
+                    echo "PG_INCREMENT_PUBLIC_SOURCE_PAGE probe=$probe_index key=$candidate_source_key metrics=$source_metrics" >&2
+                  done < "$public_source_metrics"
+                  echo "PG_INCREMENT_BLOCKED public-source-identity-mismatch probe=$probe_index key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id"; exit 78;
                 fi
-                source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$public_source_file")" || {
-                  echo "PG_INCREMENT_BLOCKED public-source-pagination-invalid key=$candidate_source_key"; exit 78;
-                }
-                [ "$source_page" -lt "$source_page_count" ] || break
-              done
-              if [ "$public_source_match" != 1 ]; then
-                while IFS= read -r source_metrics; do
-                  echo "PG_INCREMENT_PUBLIC_SOURCE_PAGE key=$candidate_source_key metrics=$source_metrics" >&2
-                done < "$public_source_metrics"
-                echo "PG_INCREMENT_BLOCKED public-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id"; exit 78;
-              fi
+                verify_rankings_probe public "https://ytb-song-rank.culua.com"
+              done < "$source_identity_probes"
+              echo "PG_INCREMENT_PUBLIC_SOURCES_OK probes=$source_identity_probe_count"
             fi
             if [ -n "$manifest_source_commit" ]; then
               public_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/public-meta.json" || true)"
