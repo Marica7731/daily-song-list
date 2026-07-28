@@ -418,9 +418,32 @@ def _runtime_channel_source_payload(
             records = [record for record in records if _text(record["video"].get("videoId")) not in candidate_video_ids]
             records.extend(candidate_records)
     records = _apply_record_overlay(records, _runtime_tombstones(connection, overlay_revision_ids or ()))
-    return _source_payload_from_channel_records(
-        records, metadata, key, _source_query_for_channel(key, metadata, query),
+    source_query = _source_query_for_channel(key, metadata, query)
+    payload = _source_payload_from_channel_records(records, metadata, key, source_query)
+    if payload.get("found"):
+        return payload
+
+    # Full runtime projections can retain the original JavaScript source key
+    # (16 hex characters), while this adapter derives a 24-character stable
+    # key when rebuilding one channel from parent rows plus accepted overlays.
+    # Resolve through the canonical key, then preserve the persisted public URL.
+    options = _query_options(source_query)
+    channel_key = channel_id or channel_handle.lstrip("/@") or channel_name
+    canonical_key = _stable_key("source-vtuber", options["range"], channel_key)
+    if not channel_key or canonical_key == key:
+        return payload
+    canonical = _source_payload_from_channel_records(
+        records, metadata, canonical_key, source_query,
     )
+    if not canonical.get("found"):
+        return payload
+    canonical = dict(canonical)
+    canonical_record = dict(canonical.get("record") or {})
+    canonical_record["sourceDetailKey"] = key
+    canonical_record["sourceDetailPath"] = f"/api/sources/{key}"
+    canonical["sourceKey"] = key
+    canonical["record"] = canonical_record
+    return canonical
 
 
 def _with_source_detail_path(payload: Mapping[str, Any]) -> dict[str, Any]:

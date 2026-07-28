@@ -686,3 +686,101 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("channel source rebuild preserves a legacy persisted source key", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+metadata = {
+    "sourceDetailKey": "cf1354d9534576ab",
+    "channelId": "UC7cZJOAJZD1W4aOfqnRgWiA",
+    "channelHandle": "/@MunMosh",
+}
+canonical_key = module._stable_key("source-vtuber", "all", metadata["channelId"])
+def rows(connection, sql, params):
+    if "FROM runtime_videos" in sql:
+        return [{
+            "video_id": "parent-video",
+            "title": "Parent",
+            "channel_name": "MunMosh",
+            "channel_id": metadata["channelId"],
+            "channel_handle": metadata["channelHandle"],
+            "channel_url": "https://youtube.com/@MunMosh",
+            "payload_json": {},
+        }]
+    if "FROM runtime_occurrences" in sql:
+        return []
+    if "FROM migration_occurrence_rows AS o" in sql:
+        return [{
+            "revision_id": "candidate",
+            "video_id": "overlay-video",
+            "occurrence_id": "position:0",
+            "position": 1,
+            "range_id": "7d",
+            "song_key": "song-key",
+            "seconds": 770,
+            "title": "Song",
+            "artist": "Artist",
+            "source_id": "@urameshi_conta",
+            "raw_hash": "raw",
+            "source_system": "youtube_channel_discovery",
+            "video_title": "Overlay",
+            "channel_name": "MunMosh",
+            "channel_id": metadata["channelId"],
+            "channel_handle": metadata["channelHandle"],
+            "channel_url": "https://youtube.com/@urameshi_conta",
+            "published_at": "2026-07-27T11:33:06Z",
+            "video_tombstone": False,
+        }]
+    if "FROM migration_video_rows" in sql:
+        return [{
+            "revision_id": "candidate",
+            "video_id": "overlay-video",
+            "payload_json": {
+                "videoId": "overlay-video",
+                "channelId": metadata["channelId"],
+                "channelHandle": metadata["channelHandle"],
+            },
+        }]
+    if "FROM migration_occurrence_rows WHERE" in sql:
+        return [{
+            "revision_id": "candidate",
+            "video_id": "overlay-video",
+            "occurrence_id": "position:0",
+            "position": 1,
+            "payload_json": {
+                "title": "Song",
+                "artist": "Artist",
+                "seconds": 770,
+            },
+        }]
+    if "FROM migration_runtime_rows" in sql:
+        return []
+    raise AssertionError(sql)
+module._rows = rows
+result = module._runtime_channel_source_payload(
+    object(), "parent", metadata, metadata["sourceDetailKey"],
+    {"page": "1", "pageSize": "100"}, overlay_revision_ids=["candidate"],
+)
+assert canonical_key == "f25caaaaafb523a6dd9a8a27"
+assert result["found"] is True
+assert result["sourceKey"] == metadata["sourceDetailKey"]
+assert result["record"]["sourceDetailKey"] == metadata["sourceDetailKey"]
+assert result["record"]["sourceDetailPath"] == "/api/sources/cf1354d9534576ab"
+matches = [
+    item for item in result["record"]["occurrences"]
+    if item["videoId"] == "overlay-video"
+    and item["song"]["title"] == "Song"
+    and item["song"]["artist"] == "Artist"
+    and item["song"]["seconds"] == 770
+]
+assert len(matches) == 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
