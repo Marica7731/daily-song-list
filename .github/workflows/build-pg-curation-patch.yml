@@ -195,8 +195,10 @@ jobs:
             "$RETAINED_ROOT/checkpoint.zip"
           unzip -q "$RETAINED_ROOT/audit.zip" -d "$RETAINED_ROOT/audit"
           unzip -q "$RETAINED_ROOT/checkpoint.zip" -d "$RETAINED_ROOT/checkpoint"
-          mapfile -t retained_large_gzip < <(find "$RETAINED_ROOT/audit" -type f \
-            \( -name 'candidate-classifications.jsonl.gz' -o -name 'inventory.jsonl.gz' \) | sort)
+          retained_large_gzip=()
+          while IFS= read -r payload; do
+            retained_large_gzip+=("$payload")
+          done < <(find "$RETAINED_ROOT/audit" -type f \( -name 'candidate-classifications.jsonl.gz' -o -name 'inventory.jsonl.gz' \) | sort)
           test "${#retained_large_gzip[@]}" -eq 2 || {
             echo "PG_CURATION_PRODUCER_BLOCKED retained large payloads missing"; exit 78;
           }
