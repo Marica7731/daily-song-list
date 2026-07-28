@@ -504,7 +504,7 @@ module = importlib.util.module_from_spec(spec)
 import sys
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
-row = {
+matched_row = {
     "video_id": "video-urameshi",
     "video_title": "Karaoke",
     "channel_name": "Conta Urameshi",
@@ -518,14 +518,31 @@ row = {
     "title": "Song A",
     "artist": "Artist A",
 }
-groups = module._overlay_candidate_groups([row], "songs")
+same_song_other_channel = {
+    **matched_row,
+    "video_id": "video-other-a",
+    "channel_name": "Other Channel",
+    "channel_id": "UCOTHER",
+    "channel_handle": "/@other",
+    "channel_url": "https://www.youtube.com/@other",
+    "occurrence_id": "occurrence-2",
+}
+other_song = {
+    **same_song_other_channel,
+    "video_id": "video-other-b",
+    "occurrence_id": "occurrence-3",
+    "song_key": "song-b",
+    "title": "Song B",
+}
+rows = [same_song_other_channel, other_song, matched_row]
+groups = module._overlay_candidate_groups(rows, "songs")
 search = groups["song a::artist a"]["search"]
 assert "uc8vlcljjgfb4-ny2heb0-ew" in search
 assert "/@urameshi_conta" in search
 assert "https://www.youtube.com/@urameshi_conta" in search
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
-module._overlay_candidate_rows = lambda connection, revision_ids: [row]
+module._overlay_candidate_rows = lambda connection, revision_ids: rows
 module._runtime_tombstones = lambda connection, revision_ids: []
 module._rows = lambda connection, sql, params: []
 payload = module._generic_overlay_rankings_payload(
@@ -543,6 +560,8 @@ payload = module._generic_overlay_rankings_payload(
 )
 assert payload["totalCount"] == 1
 assert payload["records"][0]["title"] == "Song A"
+assert payload["records"][0]["count"] == 1
+assert payload["records"][0]["videoCount"] == 1
 print("OK")
 `);
   assert.equal(output, "OK");

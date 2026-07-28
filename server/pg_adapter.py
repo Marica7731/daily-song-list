@@ -885,6 +885,22 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
             row["payload_json"] = payload
 
 
+def _overlay_candidate_search_text(row: Mapping[str, Any]) -> str:
+    return " ".join(
+        _text(value)
+        for value in (
+            row.get("title"),
+            row.get("artist"),
+            row.get("video_title"),
+            row.get("channel_name"),
+            row.get("channel_id"),
+            row.get("channel_handle"),
+            row.get("channel_url"),
+            row.get("video_id"),
+        )
+    ).casefold()
+
+
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -939,19 +955,7 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
         group["occurrences"].append({"song": {"title": title, "artist": artist, "songKey": occurrence.get("songKey"), "seconds": occurrence.get("seconds"), "rangeId": occurrence.get("rangeId"), "sourceId": occurrence.get("sourceId"), "sourceSystem": occurrence.get("sourceSystem")}, "video": video, **occurrence})
         group["videoIds"].add(video_id)
         group["songKeys"].add(_text(occurrence.get("songKey")) or key)
-        group["search"] = " ".join(
-            _text(value)
-            for value in (
-                group["title"],
-                group["artist"],
-                group["name"],
-                video.get("channelName"),
-                video.get("channelId"),
-                video.get("channelHandle"),
-                video.get("channelUrl"),
-                video_id,
-            )
-        ).casefold()
+        group["search"] = f"{group['search']} {_overlay_candidate_search_text(row)}".strip()
     return groups
 
 
@@ -992,7 +996,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
     overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
-    delta = _overlay_candidate_groups(_overlay_candidate_rows(connection, overlay_ids), options["view"])
+    candidate_rows = _overlay_candidate_rows(connection, overlay_ids)
+    if options["searchTokens"]:
+        candidate_rows = [
+            row for row in candidate_rows
+            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+        ]
+    delta = _overlay_candidate_groups(candidate_rows, options["view"])
     for key, item in delta.items():
         row = groups.get(key)
         if row is None:
