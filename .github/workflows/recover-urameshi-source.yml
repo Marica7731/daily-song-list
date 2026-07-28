@@ -44,6 +44,11 @@ on:
         required: false
         default: ""
         type: string
+      status_followup:
+        description: "Re-audit refreshed shard-5 details; still-missing timestamps become skipped_no_increment"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -65,6 +70,7 @@ jobs:
       DETAIL_SHARD_INDEX: ${{ inputs.detail_shard_index || '0' }}
       CHECKPOINT_RUN_ID: ${{ inputs.checkpoint_run_id || '' }}
       CHECKPOINT_ARTIFACT_NAME: ${{ inputs.checkpoint_artifact_name || '' }}
+      STATUS_FOLLOWUP: ${{ inputs.status_followup && '1' || '0' }}
       DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
@@ -86,6 +92,10 @@ jobs:
           RELEASE_ROOT="$TASK_ROOT/release"
           REPO_ROOT="$TASK_ROOT/repo"
           mkdir -p "$RELEASE_ROOT" "$REPO_ROOT"
+          if [ "$STATUS_FOLLOWUP" = "1" ] && { [ "$STAGE" != "detail-shard" ] || [ "$DETAIL_SHARD_INDEX" != "5" ]; }; then
+            echo "URAMESHI_7D_BLOCKED status-followup-requires-detail-shard-5" >&2
+            exit 78
+          fi
           if [ "$STAGE" = "detail-shard" ]; then
             case "$DETAIL_SHARD_INDEX" in 0|1|2|3|4|5) ;; *) echo "URAMESHI_7D_BLOCKED invalid-detail-shard=$DETAIL_SHARD_INDEX" >&2; exit 78 ;; esac
             ARTIFACT_NAME="urameshi-7d-detail-shard-${DETAIL_SHARD_INDEX}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
@@ -291,12 +301,13 @@ jobs:
             jq -n \
               --arg candidate_sha "$candidate_manifest_sha" \
               --arg checkpoint_sha "$checkpoint_sha" \
+              --arg status_followup "$STATUS_FOLLOWUP" \
               --argjson completed_shard "$shard" \
               --argjson next_shard "$next_shard" \
               --argjson complete "$partial_complete" \
               --argjson completed_count "$completed_count" \
               --argjson detail_count "$detail_count" \
-              '{schemaVersion:1,kind:"urameshi-7d-detail-checkpoint",candidateManifestSha256:$candidate_sha,checkpointSha256:$checkpoint_sha,completedShardIndex:$completed_shard,nextShardIndex:$next_shard,complete:$complete,completedVideoCount:$completed_count,detailCount:$detail_count,generatedAt:(now|todateiso8601)}' \
+              '{schemaVersion:1,kind:"urameshi-7d-detail-checkpoint",candidateManifestSha256:$candidate_sha,checkpointSha256:$checkpoint_sha,statusFollowup:($status_followup == "1"),completedShardIndex:$completed_shard,nextShardIndex:$next_shard,complete:$complete,completedVideoCount:$completed_count,detailCount:$detail_count,generatedAt:(now|todateiso8601)}' \
               > "$RELEASE_ROOT/partial-manifest.json"
             for progress_file in manifest.json raw-videos.json video-details.json audits.json report.md; do
               test -f "$TASK_ROOT/discovery/$progress_file" && cp "$TASK_ROOT/discovery/$progress_file" "$RELEASE_ROOT/$progress_file" || true
@@ -343,17 +354,43 @@ jobs:
           jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
             echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
           }
-          python3 scripts/migration/7d-status-audit.py --details "$DETAILS" \
-            --output "$TASK_ROOT/status-audit.json" --review-queue "$TASK_ROOT/review-queue.ndjson"
-          "${NPM_CMD[@]}" run youtube:import-channel-discovery -- --input-dir "$TASK_ROOT/discovery" --report-path "$TASK_ROOT/import-report.json"
-          "${NPM_CMD[@]}" run youtube:export-channel-increment -- --input-dir "$TASK_ROOT/discovery" --output "$TASK_ROOT/accepted.json"
+          FILTERED_DISCOVERY="$TASK_ROOT/discovery-accepted"
+          status_audit_args=(
+            --details "$DETAILS"
+            --output "$TASK_ROOT/status-audit.json"
+            --review-queue "$TASK_ROOT/review-queue.ndjson"
+            --accepted-details-output "$FILTERED_DISCOVERY/video-details.json"
+          )
+          if [ "$STATUS_FOLLOWUP" = "1" ]; then
+            status_audit_args+=(--followup)
+          fi
+          python3 scripts/migration/7d-status-audit.py "${status_audit_args[@]}"
+          accepted_status_count="$(jq '[.records[] | select(.status == "accepted_candidate")] | length' "$TASK_ROOT/status-audit.json")"
+          filtered_detail_count="$(jq 'length' "$FILTERED_DISCOVERY/video-details.json")"
+          test "$filtered_detail_count" -gt 0 || {
+            echo "URAMESHI_7D_BLOCKED no-accepted-status-details"; exit 78;
+          }
+          test "$filtered_detail_count" -eq "$accepted_status_count" || {
+            echo "URAMESHI_7D_BLOCKED filtered-detail-count-mismatch accepted=$accepted_status_count filtered=$filtered_detail_count"; exit 78;
+          }
+          "${NPM_CMD[@]}" run youtube:import-channel-discovery -- --input-dir "$FILTERED_DISCOVERY" --report-path "$TASK_ROOT/import-report.json"
+          "${NPM_CMD[@]}" run youtube:export-channel-increment -- --input-dir "$FILTERED_DISCOVERY" --output "$TASK_ROOT/accepted.json"
+          jq -e --slurpfile statusAudit "$TASK_ROOT/status-audit.json" '
+            ($statusAudit[0].records |
+              map(select(.status == "accepted_candidate")) |
+              INDEX(.videoId)) as $accepted
+            | all(.videos[]?; $accepted[(.videoId // .video_id)] != null)
+          ' "$TASK_ROOT/accepted.json" >/dev/null || {
+            echo "URAMESHI_7D_BLOCKED non-accepted-status-video-leaked"; exit 78;
+          }
           python3 scripts/migration/accepted-files-to-patch.py --input "$TASK_ROOT/accepted.json" \
             --output "$TASK_ROOT/candidate.ndjson" --manifest-output "$TASK_ROOT/manifest.json" \
             --range-id "$SOURCE_RANGE_ID" --source-key "$SOURCE_KEY" --status-audit "$TASK_ROOT/status-audit.json"
           discovery_sha="$(shasum -a 256 "$DISCOVERY_MANIFEST" | awk '{print $1}')"
           jq --arg source "$SOURCE_KEY" --arg discoverySha "$discovery_sha" \
             --slurpfile discovery "$DISCOVERY_MANIFEST" \
-            '.sourceKey=$source | .sourceReachedEnd=true | .mediaDownloaded=false | .discoveryManifestSha256=$discoverySha | .candidateCount=($discovery[0].candidateCount // 0) | .inspectedVideoCount=($discovery[0].usableVideoCount // 0) | .timeCoverageEvidence="publishedAt retained in detail/status audit"' \
+            --slurpfile statusAudit "$TASK_ROOT/status-audit.json" \
+            '.sourceKey=$source | .sourceReachedEnd=true | .mediaDownloaded=false | .discoveryManifestSha256=$discoverySha | .candidateCount=($discovery[0].candidateCount // 0) | .inspectedVideoCount=($discovery[0].usableVideoCount // 0) | .statusAuditFollowup=($statusAudit[0].followup // false) | .reviewAudit=($statusAudit[0].summary // {}) | .timeCoverageEvidence="publishedAt retained in detail/status audit"' \
             "$TASK_ROOT/manifest.json" > "$TASK_ROOT/manifest.next.json"
           mv "$TASK_ROOT/manifest.next.json" "$TASK_ROOT/manifest.json"
           test "$(jq -er '.acceptedVideoCount' "$TASK_ROOT/manifest.json")" -gt 0

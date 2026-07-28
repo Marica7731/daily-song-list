@@ -313,6 +313,13 @@ function isSongRequestInstructionEntry(title, artist, raw) {
 function isSuspiciousImportSongEntry(title, artist, raw) {
   const hasArtist = !isUnknownArtistField(artist);
   const text = `${title || ""} ${artist || ""} ${raw || ""}`.normalize("NFKC");
+  const normalizedTitle = String(title || "").normalize("NFKC").trim();
+  const normalizedArtist = String(artist || "").normalize("NFKC").trim();
+  if (
+    (/^\d{1,2}[./-]\d{1,2}[./-]\d{2,4}$/u.test(normalizedTitle) && /^(?:live[\s/|:.-]+)?ao\s+vivo$/iu.test(normalizedArtist)) ||
+    (/^【一般ライブ】\d{1,2}$/u.test(normalizedTitle) && /^[月火水木金土日]$/u.test(normalizedArtist)) ||
+    (/^【マンデーバスターズ】/u.test(normalizedTitle) && isUnknownArtistField(normalizedArtist))
+  ) return true;
   if (/^\s*(?:[\[【(（]\s*)?\d{1,3}(?:\s*[\]】)）])?\s*$/u.test(title) && /[一-龯ぁ-んァ-ヶA-Za-z]/u.test(artist)) return true;
   if (!hasArtist && /[「『《〈].{1,80}[」』》〉]/u.test(title) && /(?:説明|紹介|感想|告知|雑談|コメント|リクエスト|公開|正体)/u.test(text)) return true;
   return false;

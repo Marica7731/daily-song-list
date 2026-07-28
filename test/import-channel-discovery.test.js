@@ -194,6 +194,43 @@ test("channel discovery import audits dirty source rows before accepting songs",
   assert.equal(directAudit.dropped.length + directAudit.suspicious.length, 1);
 });
 
+test("channel discovery import quarantines known 7D description metadata rows", () => {
+  const audited = auditDiscoverySongs(
+    discoveryDetail({
+      videoId: "URAMESHI001",
+      channelName: "urameshi regression fixture",
+      channelHandle: "/@urameshi_conta",
+      discoveryChannelUrl: "https://www.youtube.com/@urameshi_conta",
+      songs: [
+        song("4:00", "17/07/2026", "Live Ao vivo", "4:00 17/07/2026 / Live Ao vivo"),
+        song("4:30", "17/07/2026", "Real Artist", "4:30 17/07/2026 / Real Artist"),
+        song("16:58", "【一般ライブ】7", "月", "16:58 【一般ライブ】7 / 月"),
+        song("17:30", "【一般ライブ】7", "Real Artist", "17:30 【一般ライブ】7 / Real Artist"),
+        song("17:40", "【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一", "未記載", "17:40 【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一"),
+        song("18:00", "【マンデーバスターズ】Real Song", "Real Artist", "18:00 【マンデーバスターズ】Real Song / Real Artist"),
+      ],
+    }),
+  );
+
+  assert.deepEqual(
+    audited.accepted.map((item) => `${item.title} / ${item.artist}`),
+    [
+      "17/07/2026 / Real Artist",
+      "【一般ライブ】7 / Real Artist",
+      "【マンデーバスターズ】Real Song / Real Artist",
+    ],
+  );
+  assert.equal(audited.dropped.length, 0);
+  assert.deepEqual(
+    audited.suspicious.map((item) => [item.title, item.artist, item.reason]),
+    [
+      ["17/07/2026", "Live Ao vivo", "suspicious_import_song_entry"],
+      ["【一般ライブ】7", "月", "suspicious_import_song_entry"],
+      ["【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一", "未記載", "suspicious_import_song_entry"],
+    ],
+  );
+});
+
 test("normalizeImportedVideo maps detail song fields into catalog-ready videos", () => {
   const video = normalizeImportedVideo(
     {
