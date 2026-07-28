@@ -228,6 +228,12 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
   assert.match(deployWorkflow, /videoMatchCount:\$video_match_count/u);
   assert.match(deployWorkflow, /tupleMatchCount:\$tuple_match_count/u);
   assert.match(deployWorkflow, /PG_INCREMENT_SOURCE_PAGE/u);
+  assert.match(deployWorkflow, /PG_INCREMENT_PUBLIC_SOURCE_PAGE/u);
+  assert.doesNotMatch(
+    deployWorkflow,
+    /source_detail_matches_probe/u,
+    "candidate and public gates must both use the defined metrics helper",
+  );
   assert.match(deployWorkflow, /candidate-source-identity-mismatch/u);
   assert.match(deployWorkflow, /public-source-identity-mismatch/u);
   assert.match(deployWorkflow, /source-detail-key-missing/u);
@@ -237,6 +243,11 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
     "source detail must never fall back to an unrelated known channel",
   );
   assert.match(deployWorkflow, /rollback guard failed current=/u);
+  assert.match(
+    deployWorkflow,
+    /cleanup\(\) \{\s+status=\$\?\s+set \+e/u,
+    "cleanup must preserve the original status and disable errexit before rollback",
+  );
   assert.match(deployWorkflow, /pg_adapter\.py\.bak/u);
   assert.match(deployWorkflow, /systemctl disable --now song-rank-api/u);
   assert.match(deployWorkflow, /https:\/\/ytb-song-rank\.culua\.com\/healthz/u);

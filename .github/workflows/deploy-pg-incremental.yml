@@ -371,6 +371,7 @@ jobs:
           remote_free_after=unknown
           cleanup() {
             status=$?
+            set +e
             if [ -n "${CANDIDATE_PID:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "kill $CANDIDATE_PID 2>/dev/null || true" || true; fi
             if [ "$status" -ne 0 ] && [ "$activated" = 1 ] && [ -n "$previous_active" ]; then
               "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"begin; select pg_advisory_xact_lock(hashtext('daily-song-list/active')); do \\\$\\\$ declare current text; begin select state_value into current from migration_state where state_key='active_revision_id' for update; if current <> '$REVISION' then raise exception 'rollback guard failed current=% expected=$REVISION', current; end if; update migration_revisions set status='active',activated_at=current_timestamp where revision_id='$previous_active' and status='superseded'; update migration_revisions set status='superseded' where revision_id='$REVISION' and status='active'; update migration_state set state_value='$previous_active' where state_key='active_revision_id'; end; \\\$\\\$; commit;\"" || true
@@ -667,12 +668,22 @@ jobs:
             }
             if [ -n "$candidate_source_path" ]; then
               public_source_match=0
+              public_source_metrics="$TASK_ROOT/public-source-metrics.jsonl"
+              : > "$public_source_metrics"
               for source_page in $(seq 1 20); do
                 public_source_file="$TASK_ROOT/public-source-$source_page.json"
                 curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
                   "https://ytb-song-rank.culua.com/api/sources/$candidate_source_path?page=$source_page&pageSize=100" \
                   -o "$public_source_file"
-                if source_detail_matches_probe "$public_source_file"; then
+                source_metrics="$(source_detail_probe_metrics "$public_source_file")" || {
+                  echo "PG_INCREMENT_BLOCKED public-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+                }
+                printf '%s\n' "$source_metrics" >> "$public_source_metrics"
+                if jq -e '
+                  (.found == true) and
+                  (.identityMatch == true) and
+                  (.tupleMatchCount == 1)
+                ' <<<"$source_metrics" >/dev/null; then
                   public_source_match=1
                   break
                 fi
@@ -681,9 +692,12 @@ jobs:
                 }
                 [ "$source_page" -lt "$source_page_count" ] || break
               done
-              test "$public_source_match" = 1 || {
+              if [ "$public_source_match" != 1 ]; then
+                while IFS= read -r source_metrics; do
+                  echo "PG_INCREMENT_PUBLIC_SOURCE_PAGE key=$candidate_source_key metrics=$source_metrics" >&2
+                done < "$public_source_metrics"
                 echo "PG_INCREMENT_BLOCKED public-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id"; exit 78;
-              }
+              fi
             fi
             if [ -n "$manifest_source_commit" ]; then
               public_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/public-meta.json" || true)"
