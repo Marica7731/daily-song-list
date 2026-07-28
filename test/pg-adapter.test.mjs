@@ -209,11 +209,17 @@ class Cursor:
             self.description = [(name,) for name in ("occurrence_id", "range_id", "video_id", "song_key", "seconds", "source_system", "source_id", "title", "artist", "is_niche", "is_unknown_artist", "payload_json")]
             self.rows = [("old-song", "all", "old-video", "old-key", 1, "latest_json", "", "Old song", "Artist", False, False, "{}")]
         elif "FROM migration_occurrence_rows AS o" in sql:
-            self.description = [(name,) for name in ("revision_id", "video_id", "occurrence_id", "position", "range_id", "song_key", "seconds", "title", "artist", "source_id", "raw_hash", "source_system", "occurrence_payload_json", "video_title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_at", "video_payload_json", "video_tombstone")]
+            self.description = [(name,) for name in ("revision_id", "video_id", "occurrence_id", "position", "range_id", "song_key", "seconds", "title", "artist", "source_id", "raw_hash", "source_system", "video_title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_at", "video_tombstone")]
             self.rows = [
-                ("patch", "new-a", "a-song", 0, "7d", "a-key", 10, "Song A", "Artist A", "src-a", "hash-a", "youtube_channel_discovery", "{}", "New A", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-27T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-a/hqdefault.jpg"}), False),
-                ("patch", "new-b", "b-song", 0, "7d", "b-key", 20, "Song B", "Artist B", "src-b", "hash-b", "youtube_channel_discovery", "{}", "New B", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-28T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}), False),
+                ("patch", "new-a", "a-song", 0, "7d", "a-key", 10, "Song A", "Artist A", "src-a", "hash-a", "youtube_channel_discovery", "New A", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-27T00:00:00Z", False),
+                ("patch", "new-b", "b-song", 0, "7d", "b-key", 20, "Song B", "Artist B", "src-b", "hash-b", "youtube_channel_discovery", "New B", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-28T00:00:00Z", False),
             ]
+        elif "SELECT revision_id, video_id, payload_json FROM migration_video_rows" in sql:
+            self.description = [(name,) for name in ("revision_id", "video_id", "payload_json")]
+            self.rows = [("patch", "new-a", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-a/hqdefault.jpg"})), ("patch", "new-b", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}))]
+        elif "SELECT revision_id, video_id, occurrence_id, position, payload_json FROM migration_occurrence_rows" in sql:
+            self.description = [(name,) for name in ("revision_id", "video_id", "occurrence_id", "position", "payload_json")]
+            self.rows = [("patch", "new-a", "a-song", 0, "{}"), ("patch", "new-b", "b-song", 0, "{}")]
         elif "FROM migration_runtime_rows" in sql:
             self.description = [("revision_id",)]
             self.rows = []

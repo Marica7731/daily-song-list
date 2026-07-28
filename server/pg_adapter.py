@@ -410,7 +410,7 @@ def _runtime_channel_source_payload(
         records.append({"video": video, "occurrences": tuple(songs)})
     if overlay_revision_ids:
         candidate_records = _overlay_channel_records(
-            _overlay_candidate_rows(connection, overlay_revision_ids), metadata,
+            connection, _overlay_candidate_rows(connection, overlay_revision_ids), metadata,
         )
         if candidate_records:
             candidate_video_ids = {_text(record["video"].get("videoId")) for record in candidate_records}
@@ -571,10 +571,8 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
         SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
-               o.payload_json AS occurrence_payload_json,
                v.title AS video_title, v.channel_name, v.channel_id,
                v.channel_handle, v.channel_url, v.published_at,
-               v.payload_json AS video_payload_json,
                v.tombstone AS video_tombstone
         FROM migration_occurrence_rows AS o
         LEFT JOIN migration_video_rows AS v
@@ -611,13 +609,13 @@ def _source_query_for_channel(key: str, metadata: Mapping[str, Any], query: Mapp
     return result
 
 
-def _overlay_channel_records(rows: Iterable[Mapping[str, Any]], metadata: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _overlay_channel_records(connection, rows: Iterable[Mapping[str, Any]], metadata: Mapping[str, Any]) -> list[dict[str, Any]]:
     """Turn the accepted increment's rows for one channel into source records."""
 
     channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
     channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
     channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
-    records: dict[str, dict[str, Any]] = {}
+    selected_rows: list[Mapping[str, Any]] = []
     for row in rows:
         if row.get("video_tombstone"):
             continue
@@ -630,9 +628,37 @@ def _overlay_channel_records(rows: Iterable[Mapping[str, Any]], metadata: Mappin
         video_id = _text(row.get("video_id"))
         if not video_id:
             continue
+        selected_rows.append(row)
+    if not selected_rows:
+        return []
+    selected_pairs = {(_text(row.get("revision_id")), _text(row.get("video_id"))) for row in selected_rows}
+    revision_ids = sorted({revision_id for revision_id, _ in selected_pairs})
+    video_ids = sorted({video_id for _, video_id in selected_pairs})
+    video_payloads = {
+        (_text(row.get("revision_id")), _text(row.get("video_id"))): _json_object(row.get("payload_json"))
+        for row in _rows(
+            connection,
+            "SELECT revision_id, video_id, payload_json FROM migration_video_rows WHERE revision_id = ANY(%s) AND video_id = ANY(%s)",
+            [revision_ids, video_ids],
+        )
+        if (_text(row.get("revision_id")), _text(row.get("video_id"))) in selected_pairs
+    }
+    occurrence_payloads = {
+        (_text(row.get("revision_id")), _text(row.get("video_id")), _text(row.get("occurrence_id")), int(row.get("position") or 0)): _json_object(row.get("payload_json"))
+        for row in _rows(
+            connection,
+            "SELECT revision_id, video_id, occurrence_id, position, payload_json FROM migration_occurrence_rows WHERE revision_id = ANY(%s) AND video_id = ANY(%s)",
+            [revision_ids, video_ids],
+        )
+        if (_text(row.get("revision_id")), _text(row.get("video_id"))) in selected_pairs
+    }
+    records: dict[str, dict[str, Any]] = {}
+    for row in selected_rows:
+        video_id = _text(row.get("video_id"))
+        revision_id = _text(row.get("revision_id"))
         record = records.get(video_id)
         if record is None:
-            video = _json_object(row.get("video_payload_json"))
+            video = video_payloads.get((revision_id, video_id), {})
             if isinstance(video.get("payload"), Mapping):
                 video = dict(video["payload"])
             video.update({
@@ -646,7 +672,7 @@ def _overlay_channel_records(rows: Iterable[Mapping[str, Any]], metadata: Mappin
             })
             record = {"video": video, "occurrences": []}
             records[video_id] = record
-        song = _json_object(row.get("occurrence_payload_json"))
+        song = occurrence_payloads.get((revision_id, video_id, _text(row.get("occurrence_id")), int(row.get("position") or 0)), {})
         if isinstance(song.get("payload"), Mapping):
             song = dict(song["payload"])
         song.update({
