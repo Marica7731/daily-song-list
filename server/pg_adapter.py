@@ -1945,14 +1945,27 @@ def _runtime_source_key_for_channel_alias(connection, revision_id: str, requeste
     if len(alias) < 4:
         return ""
     rows = _rows(connection, """
-        SELECT payload_json FROM runtime_ranking_rows
-        WHERE revision_id = %s AND view = 'vtubers' AND metric = 'occurrences'
+        SELECT payload_json, row_count FROM runtime_ranking_rows
+        WHERE revision_id = %s AND view = 'vtubers' AND metric = 'count'
           AND (detail_key = %s OR channel_search_text ILIKE %s)
         LIMIT 8
         """, [revision_id, alias, f"%{alias}%"])
-    candidates = {_text(_json_object(row.get("payload_json")).get("sourceDetailKey")) for row in rows}
-    candidates.discard("")
-    return next(iter(candidates)) if len(candidates) == 1 else ""
+    scores: dict[str, int] = {}
+    for row in rows:
+        payload = _json_object(row.get("payload_json"))
+        candidate = _text(payload.get("sourceDetailKey"))
+        if not candidate:
+            continue
+        try:
+            score = int(row.get("row_count") or payload.get("count") or 0)
+        except (TypeError, ValueError):
+            score = 0
+        scores[candidate] = max(scores.get(candidate, 0), score)
+    if not scores:
+        return ""
+    highest = max(scores.values())
+    winners = [key for key, score in scores.items() if score == highest]
+    return winners[0] if len(winners) == 1 else ""
 
 
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
