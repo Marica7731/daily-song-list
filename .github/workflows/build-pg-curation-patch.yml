@@ -1,0 +1,340 @@
+name: Build PostgreSQL curation patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      rules_manifest_path:
+        description: "Repository-relative audited curation rules manifest"
+        required: true
+        default: "artifacts/migration/curation-global-singleton-minimal.json"
+      rules_manifest_sha256:
+        description: "Approved SHA-256 of the rules manifest"
+        required: true
+      expected_active_revision_id:
+        description: "Exact PG active revision audited before producer dispatch"
+        required: true
+      snapshot_expected_max_bytes:
+        description: "Expected compact snapshot bytes; 20 percent growth blocks"
+        required: true
+        default: 536870912
+        type: number
+      snapshot_hard_cap_bytes:
+        description: "Absolute compact snapshot stream cap"
+        required: true
+        default: 1073741824
+        type: number
+      task_hard_cap_bytes:
+        description: "Absolute Mac task-root cap"
+        required: true
+        default: 2147483648
+        type: number
+      artifact_retention_days:
+        description: "Retention for the compact producer artifact"
+        required: true
+        default: 3
+        type: number
+  workflow_call:
+    inputs:
+      rules_manifest_path:
+        type: string
+        required: false
+        default: "artifacts/migration/curation-global-singleton-minimal.json"
+      rules_manifest_sha256:
+        type: string
+        required: true
+      expected_active_revision_id:
+        type: string
+        required: true
+      snapshot_expected_max_bytes:
+        type: number
+        required: false
+        default: 536870912
+      snapshot_hard_cap_bytes:
+        type: number
+        required: false
+        default: 1073741824
+      task_hard_cap_bytes:
+        type: number
+        required: false
+        default: 2147483648
+      artifact_retention_days:
+        type: number
+        required: false
+        default: 3
+    outputs:
+      artifact_name:
+        description: "Compact curation patch artifact for manual consumer review"
+        value: ${{ jobs.producer.outputs.artifact_name }}
+    secrets:
+      VPS2_PASSWORD:
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-pg-curation-producer
+  cancel-in-progress: false
+
+jobs:
+  producer:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 45
+    outputs:
+      artifact_name: ${{ steps.identity.outputs.artifact_name }}
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      RULES_MANIFEST_PATH: ${{ inputs.rules_manifest_path }}
+      RULES_MANIFEST_SHA256: ${{ inputs.rules_manifest_sha256 }}
+      EXPECTED_ACTIVE_REVISION_ID: ${{ inputs.expected_active_revision_id }}
+      SNAPSHOT_EXPECTED_MAX_BYTES: ${{ inputs.snapshot_expected_max_bytes }}
+      SNAPSHOT_HARD_CAP_BYTES: ${{ inputs.snapshot_hard_cap_bytes }}
+      TASK_HARD_CAP_BYTES: ${{ inputs.task_hard_cap_bytes }}
+      ARTIFACT_RETENTION_DAYS: ${{ inputs.artifact_retention_days }}
+    steps:
+      - name: Configure bounded producer roots
+        id: identity
+        run: |
+          set -Eeuo pipefail
+          case "$RULES_MANIFEST_PATH" in
+            /*|*..*) echo "PG_CURATION_PRODUCER_BLOCKED invalid rules path"; exit 78 ;;
+          esac
+          [[ "$RULES_MANIFEST_PATH" =~ ^[A-Za-z0-9_./-]+\.json$ ]]
+          [[ "$RULES_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$EXPECTED_ACTIVE_REVISION_ID" =~ ^[A-Za-z0-9_.-]+$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[0-9]+$ ]]
+          test "$SNAPSHOT_EXPECTED_MAX_BYTES" -gt 0
+          test "$SNAPSHOT_HARD_CAP_BYTES" -ge "$SNAPSHOT_EXPECTED_MAX_BYTES"
+          test "$TASK_HARD_CAP_BYTES" -ge "$SNAPSHOT_HARD_CAP_BYTES"
+          test "$ARTIFACT_RETENTION_DAYS" -ge 1
+          test "$ARTIFACT_RETENTION_DAYS" -le 7
+          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-curation-producer.XXXXXX")"
+          ARTIFACT_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-curation-artifact.XXXXXX")"
+          REMOTE_TASK_ROOT="/tmp/daily-song-list-curation-producer-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          REMOTE_UNIT="daily-song-list-curation-producer-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          ARTIFACT_NAME="pg-curation-patch-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          {
+            printf 'TASK_ROOT=%s\n' "$TASK_ROOT"
+            printf 'ARTIFACT_ROOT=%s\n' "$ARTIFACT_ROOT"
+            printf 'REMOTE_TASK_ROOT=%s\n' "$REMOTE_TASK_ROOT"
+            printf 'REMOTE_UNIT=%s\n' "$REMOTE_UNIT"
+            printf 'REMOTE_CLEANUP_REQUIRED=0\n'
+            printf 'ARTIFACT_NAME=%s\n' "$ARTIFACT_NAME"
+          } >> "$GITHUB_ENV"
+          baseline_free_bytes=$(( $(df -k "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
+          required_free_bytes=$(( TASK_HARD_CAP_BYTES + 1073741824 ))
+          test "$baseline_free_bytes" -ge "$required_free_bytes" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED insufficient Mac free bytes=$baseline_free_bytes required=$required_free_bytes"
+            exit 78
+          }
+          {
+            printf 'BASELINE_FREE_BYTES=%s\n' "$baseline_free_bytes"
+          } >> "$GITHUB_ENV"
+          printf 'artifact_name=%s\n' "$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          printf 'startedAt=%s\nbaselineFreeBytes=%s\nexpectedSnapshotBytes=%s\nsnapshotHardCapBytes=%s\ntaskHardCapBytes=%s\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$baseline_free_bytes" \
+            "$SNAPSHOT_EXPECTED_MAX_BYTES" "$SNAPSHOT_HARD_CAP_BYTES" "$TASK_HARD_CAP_BYTES" \
+            > "$TASK_ROOT/storage.txt"
+
+      - name: Download exact producer inputs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          PRODUCER_ROOT="$TASK_ROOT/repo"
+          printf 'PRODUCER_ROOT=%s\n' "$PRODUCER_ROOT" >> "$GITHUB_ENV"
+          files=(
+            scripts/migration/export-pg-active-curation-snapshot.py
+            scripts/migration/curation-overrides-to-patch.py
+            server/pg_adapter.py
+            "$RULES_MANIFEST_PATH"
+          )
+          for path in "${files[@]}"; do
+            case "$path" in /*|*..*) echo "PG_CURATION_PRODUCER_BLOCKED invalid download path=$path"; exit 78 ;; esac
+            target="$PRODUCER_ROOT/$path"
+            mkdir -p "$(dirname "$target")"
+            curl --fail --silent --show-error --location --retry 2 \
+              --connect-timeout 5 --max-time 60 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA/$path" \
+              -o "$target"
+            test -s "$target"
+          done
+          actual_rules_sha="$(shasum -a 256 "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" | awk '{print $1}')"
+          test "$actual_rules_sha" = "$RULES_MANIFEST_SHA256" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED rules SHA expected=$RULES_MANIFEST_SHA256 actual=$actual_rules_sha"
+            exit 78
+          }
+          find "$PRODUCER_ROOT" -type f -print | sort > "$TASK_ROOT/downloaded-files.txt"
+
+      - name: Prepare bounded SSH helper
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$VPS2_PASSWORD" || { echo "PG_CURATION_PRODUCER_BLOCKED missing VPS2_PASSWORD"; exit 78; }
+          SSH_HELPER_ROOT="$TASK_ROOT/ssh-askpass"
+          mkdir -p "$SSH_HELPER_ROOT"
+          printf '%s\n' "$VPS2_PASSWORD" > "$SSH_HELPER_ROOT/vps2.password"
+          chmod 600 "$SSH_HELPER_ROOT/vps2.password"
+          cat > "$SSH_HELPER_ROOT/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          exec cat "$TASK_ROOT/ssh-askpass/vps2.password"
+          SH
+          chmod 700 "$SSH_HELPER_ROOT/vps2-askpass.sh"
+          {
+            printf 'SSH_ASKPASS=%s\n' "$SSH_HELPER_ROOT/vps2-askpass.sh"
+            printf 'SSH_ASKPASS_REQUIRE=force\n'
+            printf 'DISPLAY=codex:0\n'
+          } >> "$GITHUB_ENV"
+
+      - name: Verify active revision and install only small remote inputs
+        timeout-minutes: 5
+        run: |
+          set -Eeuo pipefail
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          remote_probe="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "active=\$(sudo -u postgres psql -d song_rank -Atqc \"select state_value from migration_state where state_key='active_revision_id'\"); db=\$(sudo -u postgres psql -d song_rank -Atqc 'select pg_database_size(current_database())'); free=\$(df -B1 --output=avail /var/lib/culua/ytb-song-rank | tail -n1 | tr -d '[:space:]'); printf '%s %s %s\\n' \"\$active\" \"\$db\" \"\$free\"")"
+          read -r remote_active remote_db_bytes remote_free_bytes <<< "$remote_probe"
+          test "$remote_active" = "$EXPECTED_ACTIVE_REVISION_ID" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$remote_active"
+            exit 78
+          }
+          test "$remote_db_bytes" -gt 0
+          test "$remote_free_bytes" -gt 0
+          printf 'remoteActiveRevisionId=%s\nremotePgBytes=%s\nremoteFreeBeforeBytes=%s\n' \
+            "$remote_active" "$remote_db_bytes" "$remote_free_bytes" >> "$TASK_ROOT/storage.txt"
+          printf 'REMOTE_CLEANUP_REQUIRED=1\n' >> "$GITHUB_ENV"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "case '$REMOTE_TASK_ROOT' in /tmp/daily-song-list-curation-producer-[0-9]*-[0-9]*) ;; *) exit 78 ;; esac; test ! -e '$REMOTE_TASK_ROOT'; install -d -m 0755 '$REMOTE_TASK_ROOT'"
+          "${SCP[@]}" \
+            "$PRODUCER_ROOT/scripts/migration/export-pg-active-curation-snapshot.py" \
+            "$PRODUCER_ROOT/server/pg_adapter.py" \
+            "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_TASK_ROOT/"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "chmod 0644 '$REMOTE_TASK_ROOT/export-pg-active-curation-snapshot.py' '$REMOTE_TASK_ROOT/pg_adapter.py' '$REMOTE_TASK_ROOT/$(basename "$RULES_MANIFEST_PATH")'; find '$REMOTE_TASK_ROOT' -maxdepth 1 -type f -printf '%f %s\\n' | sort"
+
+      - name: Stream active snapshot to capped Mac task root
+        timeout-minutes: 30
+        run: |
+          set -Eeuo pipefail
+          set -o pipefail
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          SNAPSHOT_PATH="$TASK_ROOT/active-snapshot.ndjson"
+          SNAPSHOT_CHECKPOINT="$TASK_ROOT/snapshot-checkpoint.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "systemd-run --quiet --wait --collect --pipe --unit='$REMOTE_UNIT' --uid=www-data \
+              --property=MemoryMax=2147483648 --property=MemorySwapMax=0 \
+              --property=CPUQuota=100% --property=RuntimeMaxSec=1800 \
+              --setenv=PGHOST=/var/run/postgresql --setenv=PGDATABASE=song_rank --setenv=PGUSER=www-data \
+              /usr/bin/python3 '$REMOTE_TASK_ROOT/export-pg-active-curation-snapshot.py' export \
+              --adapter '$REMOTE_TASK_ROOT/pg_adapter.py' \
+              --expected-active-revision '$EXPECTED_ACTIVE_REVISION_ID' \
+              --progress-every 10000" \
+            2> >(tee "$TASK_ROOT/remote-export.log" >&2) |
+            python3 "$PRODUCER_ROOT/scripts/migration/export-pg-active-curation-snapshot.py" capture \
+              --output "$SNAPSHOT_PATH" \
+              --checkpoint-output "$SNAPSHOT_CHECKPOINT" \
+              --max-bytes "$SNAPSHOT_HARD_CAP_BYTES" \
+              --max-rows 1000000 \
+              --progress-every 10000 |
+            tee "$TASK_ROOT/capture-result.json"
+          snapshot_bytes="$(stat -f%z "$SNAPSHOT_PATH")"
+          expected_growth_cap=$(( SNAPSHOT_EXPECTED_MAX_BYTES * 120 / 100 ))
+          test "$snapshot_bytes" -le "$expected_growth_cap" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED expected snapshot growth exceeded bytes=$snapshot_bytes cap=$expected_growth_cap"
+            exit 78
+          }
+          task_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
+          test "$task_bytes" -le "$TASK_HARD_CAP_BYTES" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED task cap exceeded bytes=$task_bytes cap=$TASK_HARD_CAP_BYTES"
+            exit 78
+          }
+          printf 'snapshotBytes=%s\ntaskPeakBytes=%s\n' "$snapshot_bytes" "$task_bytes" >> "$TASK_ROOT/storage.txt"
+
+      - name: Convert and finalize compact curation artifact
+        timeout-minutes: 12
+        run: |
+          set -Eeuo pipefail
+          python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
+            --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
+            --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
+            --output "$ARTIFACT_ROOT/candidate.ndjson" \
+            --manifest-output "$TASK_ROOT/converter-manifest.json" \
+            --review-output "$ARTIFACT_ROOT/review.json"
+          python3 "$PRODUCER_ROOT/scripts/migration/export-pg-active-curation-snapshot.py" finalize \
+            --converter-manifest "$TASK_ROOT/converter-manifest.json" \
+            --review "$ARTIFACT_ROOT/review.json" \
+            --candidate "$ARTIFACT_ROOT/candidate.ndjson" \
+            --snapshot-checkpoint "$TASK_ROOT/snapshot-checkpoint.json" \
+            --remote-log "$TASK_ROOT/remote-export.log" \
+            --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
+            --output-manifest "$ARTIFACT_ROOT/manifest.json" \
+            --output-checkpoint "$ARTIFACT_ROOT/producer-checkpoint.json" \
+            --expected-active-revision "$EXPECTED_ACTIVE_REVISION_ID" \
+            --expected-selector-mutations 1 \
+            --expected-alias-mutations 10 \
+            --producer-commit "$GITHUB_SHA" \
+            --producer-run-id "$GITHUB_RUN_ID" \
+            --producer-run-attempt "$GITHUB_RUN_ATTEMPT" |
+            tee "$TASK_ROOT/finalize-result.json"
+          snapshot_bytes="$(stat -f%z "$TASK_ROOT/active-snapshot.ndjson")"
+          rm -f -- "$TASK_ROOT/active-snapshot.ndjson"
+          test ! -e "$TASK_ROOT/active-snapshot.ndjson"
+          artifact_bytes=$(( $(du -sk "$ARTIFACT_ROOT" | awk '{print $1}') * 1024 ))
+          test "$artifact_bytes" -lt "$SNAPSHOT_EXPECTED_MAX_BYTES"
+          printf 'snapshotRemovedBytes=%s\nartifactBytes=%s\nsnapshotAfterFinalizeBytes=0\n' \
+            "$snapshot_bytes" "$artifact_bytes" >> "$TASK_ROOT/storage.txt"
+          cp "$TASK_ROOT/storage.txt" "$ARTIFACT_ROOT/storage.txt"
+          find "$ARTIFACT_ROOT" -maxdepth 1 -type f ! -name artifact-sha256.txt -print0 |
+            xargs -0 shasum -a 256 > "$ARTIFACT_ROOT/artifact-sha256.txt"
+
+      - name: Upload compact curation producer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_ROOT }}
+          if-no-files-found: error
+          retention-days: ${{ inputs.artifact_retention_days }}
+
+      - name: Cleanup Mac and VPS producer roots
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set +e
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          remote_cleanup=not-created
+          remote_free_after=unknown
+          if [ "${REMOTE_CLEANUP_REQUIRED:-0}" = 1 ] &&
+             [ -n "${REMOTE_TASK_ROOT:-}" ] &&
+             [[ "$REMOTE_TASK_ROOT" =~ ^/tmp/daily-song-list-curation-producer-[0-9]+-[0-9]+$ ]] &&
+             [[ "${REMOTE_UNIT:-}" =~ ^daily-song-list-curation-producer-[0-9]+-[0-9]+$ ]]; then
+            if "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "systemctl stop '$REMOTE_UNIT' >/dev/null 2>&1 || true; systemctl reset-failed '$REMOTE_UNIT' >/dev/null 2>&1 || true; rm -rf -- '$REMOTE_TASK_ROOT'; test ! -e '$REMOTE_TASK_ROOT'; pgrep -f '[e]xport-pg-active-curation-snapshot.py export' >/dev/null && exit 1 || true"; then
+              remote_cleanup=removed
+            fi
+            remote_free_after="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "df -B1 --output=avail /var/lib/culua/ytb-song-rank | tail -n1 | tr -d '[:space:]'" 2>/dev/null || echo unknown)"
+          fi
+          task_before_bytes=0
+          artifact_before_bytes=0
+          [ -d "${TASK_ROOT:-}" ] && task_before_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
+          [ -d "${ARTIFACT_ROOT:-}" ] && artifact_before_bytes=$(( $(du -sk "$ARTIFACT_ROOT" | awk '{print $1}') * 1024 ))
+          case "${TASK_ROOT:-}" in
+            "$RUNNER_TEMP"/daily-song-list-curation-producer.*) rm -rf -- "$TASK_ROOT" ;;
+            "") ;;
+            *) echo "PG_CURATION_PRODUCER_CLEANUP unsafe task root=$TASK_ROOT"; exit 1 ;;
+          esac
+          case "${ARTIFACT_ROOT:-}" in
+            "$RUNNER_TEMP"/daily-song-list-curation-artifact.*) rm -rf -- "$ARTIFACT_ROOT" ;;
+            "") ;;
+            *) echo "PG_CURATION_PRODUCER_CLEANUP unsafe artifact root=$ARTIFACT_ROOT"; exit 1 ;;
+          esac
+          after_free_bytes=$(( $(df -k "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
+          echo "PG_CURATION_PRODUCER_CLEANUP status=$JOB_STATUS taskBeforeBytes=$task_before_bytes artifactBeforeBytes=$artifact_before_bytes taskAfterBytes=0 artifactAfterBytes=0 baselineFreeBytes=${BASELINE_FREE_BYTES:-unknown} afterFreeBytes=$after_free_bytes remoteCleanup=$remote_cleanup remoteSnapshotBytes=0 remoteFreeAfterBytes=$remote_free_after retained=github-artifact-only"
+          test "$remote_cleanup" = removed || test "$remote_cleanup" = not-created || exit 1
