@@ -494,6 +494,8 @@ jobs:
             ) |
             {
               sourceDetailKey:(.channelId // .channelHandle // ""),
+              channelId:(.channelId // ""),
+              channelHandle:(.channelHandle // ""),
               videoId:.videoId,
               occurrenceId:$song.occurrenceId,
               title:$song.title,
@@ -511,17 +513,22 @@ jobs:
           }
           probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
           probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
+          probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
+          probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
           probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
           probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
           probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
           candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-          source_detail_matches_probe() {
-            jq -e \
+          source_detail_probe_metrics() {
+            jq -c \
+              --arg expected_channel_id "$probe_channel_id" \
+              --arg expected_channel_handle "$probe_channel_handle" \
               --arg video_id "$probe_video_id" \
               --argjson title "$probe_title_json" \
               --argjson artist "$probe_artist_json" \
               --argjson seconds "$probe_seconds_json" '
-                (.found == true) and
+                def normalize_handle:
+                  if type == "string" then ltrimstr("/") else "" end;
                 ([
                   .record.occurrences[]? |
                   select(
@@ -530,10 +537,32 @@ jobs:
                     ((.song.artist // null) == $artist) and
                     ((.song.seconds // null) == $seconds)
                   )
-                ] | length) == 1
-              ' "$1" >/dev/null
+                ] | length) as $tuple_match_count |
+                ([
+                  .record.occurrences[]? |
+                  select(.videoId == $video_id)
+                ] | length) as $video_match_count |
+                {
+                  found:(.found == true),
+                  page:(.page // null),
+                  pageCount:(.pageCount // null),
+                  recordChannelId:(.record.channelId // ""),
+                  recordChannelHandle:(.record.channelHandle // ""),
+                  identityMatch:(
+                    (($expected_channel_id == "") or
+                      ((.record.channelId // "") == $expected_channel_id)) and
+                    (($expected_channel_handle == "") or
+                      (((.record.channelHandle // "") | normalize_handle) ==
+                        ($expected_channel_handle | normalize_handle)))
+                  ),
+                  videoMatchCount:$video_match_count,
+                  tupleMatchCount:$tuple_match_count
+                }
+              ' "$1"
           }
           candidate_source_match=0
+          candidate_source_metrics="$TASK_ROOT/candidate-source-metrics.jsonl"
+          : > "$candidate_source_metrics"
           for source_page in $(seq 1 20); do
             candidate_source_file="$TASK_ROOT/candidate-source-$source_page.json"
             if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
@@ -543,7 +572,15 @@ jobs:
               cat "$candidate_source_file" >&2 || true
               exit 1
             fi
-            if source_detail_matches_probe "$candidate_source_file"; then
+            source_metrics="$(source_detail_probe_metrics "$candidate_source_file")" || {
+              echo "PG_INCREMENT_BLOCKED candidate-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
+            }
+            printf '%s\n' "$source_metrics" >> "$candidate_source_metrics"
+            if jq -e '
+              (.found == true) and
+              (.identityMatch == true) and
+              (.tupleMatchCount == 1)
+            ' <<<"$source_metrics" >/dev/null; then
               candidate_source_match=1
               break
             fi
@@ -552,10 +589,13 @@ jobs:
             }
             [ "$source_page" -lt "$source_page_count" ] || break
           done
-          test "$candidate_source_match" = 1 || {
+          if [ "$candidate_source_match" != 1 ]; then
+            while IFS= read -r source_metrics; do
+              echo "PG_INCREMENT_SOURCE_PAGE key=$candidate_source_key metrics=$source_metrics" >&2
+            done < "$candidate_source_metrics"
             echo "PG_INCREMENT_BLOCKED candidate-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id" >&2
             exit 78
-          }
+          fi
           fi
           candidate_meta_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/candidate-meta.json" || true)"
           if [ -n "$manifest_source_commit" ]; then

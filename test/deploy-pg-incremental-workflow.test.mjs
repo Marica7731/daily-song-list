@@ -34,9 +34,13 @@ function workflowRunBlocks(workflow) {
   return blocks;
 }
 
-function sourceIdentityGate(payload) {
+function sourceIdentityGate(payload, {
+  channelId = "UC7cZJOAJZD1W4aOfqnRgWiA",
+  channelHandle = "/@MunMosh",
+} = {}) {
   const predicate = `
-    (.found == true) and
+    def normalize_handle:
+      if type == "string" then ltrimstr("/") else "" end;
     ([
       .record.occurrences[]? |
       select(
@@ -45,12 +49,21 @@ function sourceIdentityGate(payload) {
         ((.song.artist // null) == $artist) and
         ((.song.seconds // null) == $seconds)
       )
-    ] | length) == 1
+    ] | length) as $tuple_match_count |
+    (.found == true) and
+    (($expected_channel_id == "") or
+      ((.record.channelId // "") == $expected_channel_id)) and
+    (($expected_channel_handle == "") or
+      (((.record.channelHandle // "") | normalize_handle) ==
+        ($expected_channel_handle | normalize_handle))) and
+    ($tuple_match_count == 1)
   `;
   return spawnSync(
     "jq",
     [
       "-e",
+      "--arg", "expected_channel_id", channelId,
+      "--arg", "expected_channel_handle", channelHandle,
       "--arg", "video_id", "G7cNtd_Gy9c",
       "--argjson", "title", JSON.stringify("song"),
       "--argjson", "artist", JSON.stringify("artist"),
@@ -89,13 +102,36 @@ test("source identity gate uses the API-visible tuple and fails closed on ambigu
     song: { title: "song", artist: "artist", seconds: 770 },
   };
   assert.equal(
-    sourceIdentityGate({ found: true, record: { occurrences: [matchingOccurrence] } }),
+    sourceIdentityGate({
+      found: true,
+      record: {
+        channelId: "UC7cZJOAJZD1W4aOfqnRgWiA",
+        channelHandle: "/@MunMosh",
+        occurrences: [matchingOccurrence],
+      },
+    }),
     0,
+  );
+  assert.equal(
+    sourceIdentityGate({
+      found: true,
+      record: {
+        channelId: "UC7cZJOAJZD1W4aOfqnRgWiA",
+        channelHandle: "@MunMosh",
+        occurrences: [matchingOccurrence],
+      },
+    }),
+    0,
+    "source identity accepts only the benign leading-slash handle variant",
   );
   assert.notEqual(
     sourceIdentityGate({
       found: true,
-      record: { occurrences: [matchingOccurrence, matchingOccurrence] },
+      record: {
+        channelId: "UC7cZJOAJZD1W4aOfqnRgWiA",
+        channelHandle: "/@MunMosh",
+        occurrences: [matchingOccurrence, matchingOccurrence],
+      },
     }),
     0,
   );
@@ -103,6 +139,8 @@ test("source identity gate uses the API-visible tuple and fails closed on ambigu
     sourceIdentityGate({
       found: true,
       record: {
+        channelId: "UC7cZJOAJZD1W4aOfqnRgWiA",
+        channelHandle: "/@MunMosh",
         occurrences: [{
           ...matchingOccurrence,
           videoId: "wrong-video",
@@ -110,6 +148,18 @@ test("source identity gate uses the API-visible tuple and fails closed on ambigu
       },
     }),
     0,
+  );
+  assert.notEqual(
+    sourceIdentityGate({
+      found: true,
+      record: {
+        channelId: "UC8VlcljjGFb4-Ny2Heb0-ew",
+        channelHandle: "/@urameshi_conta",
+        occurrences: [matchingOccurrence],
+      },
+    }),
+    0,
+    "a fuzzy source lookup must not pass using an unrelated record identity",
   );
 });
 
@@ -174,7 +224,10 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
     "the source API does not expose occurrenceId inside song",
   );
   assert.match(deployWorkflow, /\.record\.occurrences\[\]\? \|/u);
-  assert.match(deployWorkflow, /\] \| length\) == 1/u);
+  assert.match(deployWorkflow, /identityMatch:/u);
+  assert.match(deployWorkflow, /videoMatchCount:\$video_match_count/u);
+  assert.match(deployWorkflow, /tupleMatchCount:\$tuple_match_count/u);
+  assert.match(deployWorkflow, /PG_INCREMENT_SOURCE_PAGE/u);
   assert.match(deployWorkflow, /candidate-source-identity-mismatch/u);
   assert.match(deployWorkflow, /public-source-identity-mismatch/u);
   assert.match(deployWorkflow, /source-detail-key-missing/u);
