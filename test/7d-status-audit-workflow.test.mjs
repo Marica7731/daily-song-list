@@ -41,6 +41,6 @@ test("7d recovery binds every artifact stage to the requested channel identity",
   assert.match(workflow, /\.channelId \/\/ ""\) == ""/u);
   assert.match(workflow, /\.discoverySourceUrl \/\/ ""\) \| startswith\(\$expected_url \+ "\/"\)/u);
   assert.match(workflow, /candidate-source-pages-not-channel-bounded/u);
-  assert.match(workflow, /\$channel_url \+ "\/streams"/u);
-  assert.match(workflow, /\$channel_url \+ "\/videos"/u);
+  assert.match(workflow, /startswith\(\$channel_url \+ "\/streams\?"\)/u);
+  assert.match(workflow, /startswith\(\$channel_url \+ "\/videos\?"\)/u);
 });

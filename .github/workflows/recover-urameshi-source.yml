@@ -351,8 +351,8 @@ jobs:
               (.pageUrls | type) == "array" and
               (.pageUrls | length) > 0 and
               all(.pageUrls[];
-                . == ($channel_url + "/streams") or
-                . == ($channel_url + "/videos")
+                startswith($channel_url + "/streams?") or
+                startswith($channel_url + "/videos?")
               )
             ' "$DISCOVERY_MANIFEST" >/dev/null || {
               echo "URAMESHI_7D_BLOCKED candidate-source-pages-not-channel-bounded" >&2; exit 78;
