@@ -572,3 +572,31 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("VTuber aliases resolve the persisted occurrences-metric source detail", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+calls = []
+def rows(connection, sql, params):
+    calls.append((sql, params))
+    return [{"payload_json": json.dumps({"sourceDetailKey": "source-noa"})}]
+module._rows = rows
+assert module._runtime_source_key_for_channel_alias(object(), "active", "UCIu1rRiQLeUU8e1saN6I0eg") == "source-noa"
+assert len(calls) == 1 and "metric = 'occurrences'" in calls[0][0]
+assert calls[0][1] == ["active", "UCIu1rRiQLeUU8e1saN6I0eg", "%UCIu1rRiQLeUU8e1saN6I0eg%"]
+module._runtime_projection_revision = lambda connection: ("active", {})
+module._runtime_source_payload = lambda connection, revision_id, key, query, **kwargs: {"schemaVersion": 1, "found": key == "source-noa", "sourceKey": key}
+module._channel_metadata_rows = lambda *args: []
+module._revision_lineage = lambda *args: []
+assert module.source_payload(object(), "UCIu1rRiQLeUU8e1saN6I0eg")["sourceKey"] == "source-noa"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});

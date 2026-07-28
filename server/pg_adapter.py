@@ -1946,7 +1946,7 @@ def _runtime_source_key_for_channel_alias(connection, revision_id: str, requeste
         return ""
     rows = _rows(connection, """
         SELECT payload_json FROM runtime_ranking_rows
-        WHERE revision_id = %s AND view = 'vtubers' AND metric = 'count'
+        WHERE revision_id = %s AND view = 'vtubers' AND metric = 'occurrences'
           AND (detail_key = %s OR channel_search_text ILIKE %s)
         LIMIT 8
         """, [revision_id, alias, f"%{alias}%"])
