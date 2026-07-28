@@ -314,6 +314,13 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             audit.append(audit_result(index, raw_override, "invalid", error="replace_entry requires replacement.title or replacement.artist"))
             continue
         candidates = candidate_rows(raw_override, rows, action)
+        same_seconds = [row for row in rows if row.get("seconds") == raw_override.get("seconds")]
+        if not candidates and not same_seconds:
+            # The exact video/time entry has disappeared from the active snapshot.
+            # This is a safe no-op; provenance mismatches at an existing time stay
+            # fail-closed below.
+            audit.append(audit_result(index, raw_override, "already_applied_absent", evidence="active snapshot has no occurrence at audited video/time"))
+            continue
         expected = expected_count(raw_override, "expectedMatchCount")
         if expected is not None and len(candidates) != expected:
             audit.append(audit_result(index, raw_override, "count_mismatch", matchCount=len(candidates), expectedMatchCount=expected))

@@ -84,3 +84,8 @@ test("uploaded artifact excludes the full snapshot and contains only compact evi
   assert.match(workflow, /artifact-sha256\.txt/);
   assert.match(workflow, /retained-artifact-verification\.txt/);
 });
+
+test("producer pins the current curation mutation budget", () => {
+  assert.match(workflow, /--expected-selector-mutations 0/);
+  assert.match(workflow, /--expected-alias-mutations 13/);
+});

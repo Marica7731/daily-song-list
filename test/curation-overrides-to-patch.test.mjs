@@ -143,7 +143,39 @@ test("exact selector rejects a different sourceHash even when seconds sourceId a
   }
 });
 
-test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protects excluded scopes", () => {
+test("exact selector treats a missing audited time as an explicit no-op", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-absent-test-"));
+  try {
+    const overrides = path.join(root, "overrides.json");
+    const snapshot = path.join(root, "snapshot.ndjson");
+    const output = path.join(root, "patch.ndjson");
+    const manifest = path.join(root, "manifest.json");
+    const review = path.join(root, "review.json");
+    fs.writeFileSync(overrides, JSON.stringify({ records: [{
+      action: "drop_entry", videoId: "lUDCE3zZmuQ", seconds: 9463,
+      sourceId: "Ugxw2-DEUVx0aNsvVyR4AaABAg", expectedMatchCount: 1,
+    }] }), "utf8");
+    fs.writeFileSync(snapshot, JSON.stringify({
+      videoId: "lUDCE3zZmuQ", occurrenceId: "occ-official", position: 1,
+      seconds: 8336, title: "花に亡霊", artist: "ヨルシカ",
+    }) + "\n", "utf8");
+    const result = spawnSync(python, [
+      script, "--overrides", overrides, "--snapshot", snapshot, "--output", output,
+      "--manifest-output", manifest, "--review-output", review,
+    ], { encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
+    const resultReview = JSON.parse(fs.readFileSync(review, "utf8"));
+    assert.equal(resultManifest.status, "ready");
+    assert.equal(resultManifest.selectorMutationCount, 0);
+    assert.equal(resultManifest.reviewAudit.already_applied_absent, 1);
+    assert.equal(resultReview.results[0].status, "already_applied_absent");
+    assert.equal(fs.readFileSync(output, "utf8"), "");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 13 and protects excluded scopes", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-minimal-test-"));
   try {
     const snapshot = path.join(root, "snapshot.ndjson");
@@ -154,7 +186,7 @@ test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protec
     assert.equal(rules.records.length, 1);
     assert.equal(rules.records[0].expectedMatchCount, 1);
     assert.equal(rules.artistScopedAliases.length, 1);
-    assert.equal(rules.artistScopedAliases[0].expectedMatchCount, 10);
+    assert.equal(rules.artistScopedAliases[0].expectedMatchCount, 13);
     assert.equal(rules.safetyAssertions.find((item) => item.assertionId === "exclude-urameshi-legacy-rules").auditedLegacyRuleCount, 27);
 
     const aliasVariants = rules.artistScopedAliases[0].aliases.filter((title) => title !== "逆光");
@@ -173,7 +205,7 @@ test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protec
         rangeId: "all",
         sourceSystem: "accepted",
       },
-      ...Array.from({ length: 10 }, (_, index) => ({
+      ...Array.from({ length: 13 }, (_, index) => ({
         videoId: `ado-video-${index}`,
         occurrenceId: `occ-ado-${index}`,
         position: index,
@@ -233,9 +265,9 @@ test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protec
     assert.equal(result.status, 0, result.stderr);
 
     const rows = fs.readFileSync(output, "utf8").trim().split("\n").map(JSON.parse);
-    assert.equal(rows.length, 11);
+    assert.equal(rows.length, 14);
     assert.equal(rows.filter((row) => row.tombstone).length, 1);
-    assert.equal(rows.filter((row) => !row.tombstone && row.payload.title === "逆光" && row.payload.artist === "Ado").length, 10);
+    assert.equal(rows.filter((row) => !row.tombstone && row.payload.title === "逆光" && row.payload.artist === "Ado").length, 13);
     assert.equal(rows.some((row) => row.entityKey === "occ-protected-vaundy"), false);
     assert.equal(rows.some((row) => row.entityKey === "occ-protected-flugel"), false);
     assert.equal(rows.some((row) => row.payload.originalIdentity.channelHandle === "@urameshi_conta"), false);
@@ -248,9 +280,9 @@ test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protec
 
     const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
     assert.equal(resultManifest.status, "ready");
-    assert.equal(resultManifest.curationMutationCount, 11);
+    assert.equal(resultManifest.curationMutationCount, 14);
     assert.equal(resultManifest.selectorMutationCount, 1);
-    assert.equal(resultManifest.aliasMutationCount, 10);
+    assert.equal(resultManifest.aliasMutationCount, 13);
 
     const resultReview = JSON.parse(fs.readFileSync(review, "utf8"));
     const naraetan = resultReview.results.find((item) => item.ruleId === "naraetan-lUDCE3zZmuQ-9463-translated-commentary");
@@ -259,7 +291,7 @@ test("minimal singleton manifest emits exactly Naraetan 1 plus Ado 10 and protec
     const flugel = resultReview.results.find((item) => item.assertionId === "protect-gyakko-no-flugel");
     const urameshi = resultReview.results.find((item) => item.assertionId === "exclude-urameshi-legacy-rules");
     assert.equal(naraetan.matchCount, 1);
-    assert.equal(ado.matchCount, 10);
+    assert.equal(ado.matchCount, 13);
     assert.deepEqual([vaundy.scopeRowCount, vaundy.mutationCount], [1, 0]);
     assert.deepEqual([flugel.scopeRowCount, flugel.mutationCount], [1, 0]);
     assert.deepEqual([urameshi.scopeRowCount, urameshi.mutationCount, urameshi.auditedLegacyRuleCount], [27, 0, 27]);

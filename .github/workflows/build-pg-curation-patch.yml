@@ -332,8 +332,8 @@ jobs:
             --output-manifest "$ARTIFACT_ROOT/manifest.json" \
             --output-checkpoint "$ARTIFACT_ROOT/producer-checkpoint.json" \
             --expected-active-revision "$EXPECTED_ACTIVE_REVISION_ID" \
-            --expected-selector-mutations 1 \
-            --expected-alias-mutations 10 \
+            --expected-selector-mutations 0 \
+            --expected-alias-mutations 13 \
             --producer-commit "$GITHUB_SHA" \
             --producer-run-id "$GITHUB_RUN_ID" \
             --producer-run-attempt "$GITHUB_RUN_ATTEMPT" |
