@@ -34,6 +34,16 @@ function workflowRunBlocks(workflow) {
   return blocks;
 }
 
+function workflowJob(workflow, jobName, nextJobName) {
+  const pattern = new RegExp(
+    `^  ${jobName}:\\n([\\s\\S]*?)^  ${nextJobName}:`,
+    "mu",
+  );
+  const match = pattern.exec(workflow);
+  assert.ok(match, `missing ${jobName} job`);
+  return match[1];
+}
+
 function sourceIdentityGate(payload, {
   channelId = "UC7cZJOAJZD1W4aOfqnRgWiA",
   channelHandle = "/@MunMosh",
@@ -172,6 +182,68 @@ test("PG incremental dispatch can resume only an explicit same-repository artifa
   assert.match(deployWorkflow, /repository: \$\{\{ github\.repository \}\}/u);
   assert.match(deployWorkflow, /github-token: \$\{\{ github\.token \}\}/u);
   assert.match(deployWorkflow, /if: \$\{\{ inputs\.artifact_name != '' \}\}/u);
+});
+
+test("rollback-only is a locked artifact-free CAS restore with exact online gates", () => {
+  const rollbackJob = workflowJob(deployWorkflow, "rollback", "candidate");
+  assert.match(deployWorkflow, /rollback_only:/u);
+  assert.match(
+    deployWorkflow,
+    /EXPECTED_CURRENT_REVISION: "accepted_30389564789_1"/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /EXPECTED_TARGET_REVISION: "accepted_30347149376_1"/u,
+  );
+  assert.match(
+    deployWorkflow,
+    /EXPECTED_TARGET_CONTENT_SHA256: "5d8a123075e2de5d0221a935004d74fe7e7daf18d0aa90f1f071ebdb3f104b6c"/u,
+  );
+  assert.match(
+    rollbackJob,
+    /github\.event_name == 'workflow_dispatch' && inputs\.rollback_only == true/u,
+  );
+  assert.doesNotMatch(rollbackJob, /download-artifact|ARTIFACT_NAME|import-pg-incremental|activate-pg-candidate/u);
+  assert.match(rollbackJob, /PG_ROLLBACK_WAIT concurrent-release/u);
+  assert.match(rollbackJob, /pg_advisory_xact_lock\(hashtext\('daily-song-list\/active'\)\)/u);
+  assert.match(rollbackJob, /WHERE state_key='active_revision_id'\s+FOR UPDATE/u);
+  assert.match(rollbackJob, /current_revision IS DISTINCT FROM '\$EXPECTED_CURRENT_REVISION'/u);
+  assert.match(rollbackJob, /current_parent IS DISTINCT FROM '\$EXPECTED_TARGET_REVISION'/u);
+  assert.match(rollbackJob, /target_status IS DISTINCT FROM 'superseded'/u);
+  assert.match(rollbackJob, /target_content_sha256 IS DISTINCT FROM '\$EXPECTED_TARGET_CONTENT_SHA256'/u);
+  assert.match(rollbackJob, /target_status IS DISTINCT FROM 'active'/u);
+  assert.match(rollbackJob, /SET status='rolled_back'/u);
+  assert.match(rollbackJob, /SET status='active', activated_at=CURRENT_TIMESTAMP/u);
+  assert.match(rollbackJob, /SET state_value='\$EXPECTED_TARGET_REVISION'/u);
+  assert.equal(
+    rollbackJob.match(/GET DIAGNOSTICS affected_rows = ROW_COUNT/gu)?.length,
+    3,
+    "all three rollback updates must assert exactly one affected row",
+  );
+  assert.match(rollbackJob, /systemctl restart song-rank-pg-api/u);
+  assert.match(rollbackJob, /q=%40urameshi_conta/u);
+  assert.match(rollbackJob, /\.totalCount == 0/u);
+  assert.match(rollbackJob, /UC8VlcljjGFb4-Ny2Heb0-ew/u);
+  assert.match(rollbackJob, /d24ec2cab8f7f564/u);
+  assert.match(rollbackJob, /PG_ROLLBACK_PUBLIC_OK/u);
+  assert.match(rollbackJob, /PG_ROLLBACK_CLEANUP/u);
+  assert.match(
+    rollbackJob,
+    /TASK_ROOT=.*?[\s\S]*?trap cleanup EXIT INT TERM\s+baseline_free_bytes=/u,
+    "cleanup trap must be installed before Mac storage probing",
+  );
+  const cleanupBody = /cleanup\(\) \{([\s\S]*?)^\s+\}\s+trap cleanup/mu.exec(rollbackJob)?.[1];
+  assert.ok(cleanupBody, "missing rollback cleanup body");
+  assert.doesNotMatch(
+    cleanupBody,
+    /UPDATE migration_(?:state|revisions)/u,
+    "rollback cleanup must never perform a second pointer mutation",
+  );
+  assert.match(
+    deployWorkflow,
+    /github\.event_name != 'workflow_dispatch' \|\| inputs\.rollback_only != true/u,
+    "normal candidate work must be skipped in rollback-only mode",
+  );
 });
 
 test("accepted commits prepare a deterministic hashed artifact before the reusable deploy", () => {

@@ -33,6 +33,11 @@ on:
         description: "Optional producing workflow run ID for artifact_name"
         required: false
         default: ""
+      rollback_only:
+        description: "Emergency CAS rollback only; never downloads or imports an artifact"
+        required: true
+        default: false
+        type: boolean
   repository_dispatch:
     types: [accepted-increment-ready]
   workflow_run:
@@ -81,8 +86,307 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  rollback:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.rollback_only == true }}
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 15
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
+      EXPECTED_CURRENT_REVISION: "accepted_30389564789_1"
+      EXPECTED_TARGET_REVISION: "accepted_30347149376_1"
+      EXPECTED_TARGET_CONTENT_SHA256: "5d8a123075e2de5d0221a935004d74fe7e7daf18d0aa90f1f071ebdb3f104b6c"
+      EXPECTED_SOURCE_PATH: "%40urameshi_conta"
+      EXPECTED_SOURCE_DETAIL_KEY: "d24ec2cab8f7f564"
+      EXPECTED_SOURCE_CHANNEL_ID: "UC8VlcljjGFb4-Ny2Heb0-ew"
+      EXPECTED_SOURCE_CHANNEL_HANDLE: "/@urameshi_conta"
+    steps:
+      - name: CAS rollback active PostgreSQL revision
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$VPS2_PASSWORD" || { echo "PG_ROLLBACK_BLOCKED missing VPS2_PASSWORD"; exit 78; }
+          [[ "$EXPECTED_CURRENT_REVISION" =~ ^[A-Za-z0-9._-]+$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-current-revision"; exit 78;
+          }
+          [[ "$EXPECTED_TARGET_REVISION" =~ ^[A-Za-z0-9._-]+$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-target-revision"; exit 78;
+          }
+          [[ "$EXPECTED_TARGET_CONTENT_SHA256" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-target-content-sha256"; exit 78;
+          }
+          test "$EXPECTED_CURRENT_REVISION" != "$EXPECTED_TARGET_REVISION" || {
+            echo "PG_ROLLBACK_BLOCKED expected-current-equals-target"; exit 78;
+          }
+          for release_wait_attempt in $(seq 1 20); do
+            active_releases="$(
+              for release_status in in_progress queued; do
+                curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+                  "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?status=${release_status}&per_page=100"
+              done | jq -sr --argjson current_run "$GITHUB_RUN_ID" '
+                [.[].workflow_runs[] |
+                  select(.id != $current_run) |
+                  select(.name | test("PostgreSQL|PG|7D|curation"; "i")) |
+                  {id,name,status,head_sha}
+                ] | unique_by(.id)
+              '
+            )"
+            if [ "$(jq -r 'length' <<<"$active_releases")" -eq 0 ]; then
+              break
+            fi
+            echo "PG_ROLLBACK_WAIT concurrent-release attempt=$release_wait_attempt runs=$(jq -c . <<<"$active_releases")"
+            if [ "$release_wait_attempt" -eq 20 ]; then
+              echo "PG_ROLLBACK_BLOCKED concurrent-release-timeout runs=$(jq -c . <<<"$active_releases")"
+              exit 78
+            fi
+            sleep 30
+          done
+          TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-rollback.XXXXXX")"
+          baseline_free_bytes=unknown
+          remote_free_before=unknown
+          remote_free_after=unknown
+          pointer_committed=0
+          noop=0
+          cleanup() {
+            status=$?
+            set +e
+            if declare -p SSH >/dev/null 2>&1; then
+              if remote_free_after="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+                "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"; then :; else
+                remote_free_after=unknown
+              fi
+            fi
+            before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
+            rm -rf -- "$TASK_ROOT"
+            after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+            retained=unchanged
+            if [ "$pointer_committed" = 1 ] && [ "$noop" = 1 ]; then
+              retained=target-already-active
+            elif [ "$pointer_committed" = 1 ] && [ "$status" -eq 0 ]; then
+              retained=rollback-target
+            elif [ "$pointer_committed" = 1 ]; then
+              retained=rollback-target-unverified
+            fi
+            echo "PG_ROLLBACK_CLEANUP status=$status pointerCommitted=$pointer_committed noop=$noop beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes remoteFreeBeforeBytes=$remote_free_before remoteFreeAfterBytes=$remote_free_after retained=$retained"
+            exit "$status"
+          }
+          trap cleanup EXIT INT TERM
+          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+          ASKPASS_ROOT="$TASK_ROOT/ssh-askpass"
+          mkdir -p "$ASKPASS_ROOT"
+          ROLLBACK_PASSWORD_FILE="$ASKPASS_ROOT/vps2.password"
+          export ROLLBACK_PASSWORD_FILE
+          printf '%s\n' "$VPS2_PASSWORD" > "$ROLLBACK_PASSWORD_FILE"
+          chmod 600 "$ROLLBACK_PASSWORD_FILE"
+          cat > "$ASKPASS_ROOT/vps2-askpass.sh" <<'SH'
+          #!/bin/sh
+          exec cat "$ROLLBACK_PASSWORD_FILE"
+          SH
+          chmod 700 "$ASKPASS_ROOT/vps2-askpass.sh"
+          export SSH_ASKPASS="$ASKPASS_ROOT/vps2-askpass.sh" SSH_ASKPASS_REQUIRE=force DISPLAY=codex:0
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ConnectionAttempts=1 -o ServerAliveInterval=5 -o ServerAliveCountMax=2)
+          remote_free_before="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
+          [[ "$remote_free_before" =~ ^[0-9]+$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-remote-free-before"; exit 78;
+          }
+          active_before="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "sudo -u www-data psql -d song_rank -At -c \"select state_value from migration_state where state_key='active_revision_id'\"")"
+          if [ "$active_before" = "$EXPECTED_TARGET_REVISION" ]; then
+            noop=1
+          elif [ "$active_before" != "$EXPECTED_CURRENT_REVISION" ]; then
+            echo "PG_ROLLBACK_BLOCKED preflight-current-mismatch expected=$EXPECTED_CURRENT_REVISION actual=${active_before:-missing}"
+            exit 78
+          fi
+          cat > "$TASK_ROOT/rollback.sql" <<SQL
+          BEGIN;
+          SELECT pg_advisory_xact_lock(hashtext('daily-song-list/active'));
+          DO \$\$
+          DECLARE
+            current_revision text;
+            current_status text;
+            current_parent text;
+            target_status text;
+            target_content_sha256 text;
+            affected_rows integer;
+          BEGIN
+            SELECT state_value
+              INTO current_revision
+              FROM migration_state
+              WHERE state_key='active_revision_id'
+              FOR UPDATE;
+            IF current_revision = '$EXPECTED_TARGET_REVISION' THEN
+              SELECT status, content_sha256
+                INTO target_status, target_content_sha256
+                FROM migration_revisions
+                WHERE revision_id='$EXPECTED_TARGET_REVISION'
+                FOR UPDATE;
+              IF target_status IS DISTINCT FROM 'active' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED noop target status=% expected=active', target_status;
+              END IF;
+              IF target_content_sha256 IS DISTINCT FROM '$EXPECTED_TARGET_CONTENT_SHA256' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED noop target content sha mismatch';
+              END IF;
+            ELSE
+              IF current_revision IS DISTINCT FROM '$EXPECTED_CURRENT_REVISION' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED current=% expected=$EXPECTED_CURRENT_REVISION', current_revision;
+              END IF;
+              SELECT status, parent_revision_id
+                INTO current_status, current_parent
+                FROM migration_revisions
+                WHERE revision_id=current_revision
+                FOR UPDATE;
+              IF current_status IS DISTINCT FROM 'active' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED current status=% expected=active', current_status;
+              END IF;
+              IF current_parent IS DISTINCT FROM '$EXPECTED_TARGET_REVISION' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED current parent=% expected=$EXPECTED_TARGET_REVISION', current_parent;
+              END IF;
+              SELECT status, content_sha256
+                INTO target_status, target_content_sha256
+                FROM migration_revisions
+                WHERE revision_id='$EXPECTED_TARGET_REVISION'
+                FOR UPDATE;
+              IF target_status IS DISTINCT FROM 'superseded' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED target status=% expected=superseded', target_status;
+              END IF;
+              IF target_content_sha256 IS DISTINCT FROM '$EXPECTED_TARGET_CONTENT_SHA256' THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED target content sha mismatch';
+              END IF;
+              UPDATE migration_revisions
+                SET status='rolled_back'
+                WHERE revision_id='$EXPECTED_CURRENT_REVISION' AND status='active';
+              GET DIAGNOSTICS affected_rows = ROW_COUNT;
+              IF affected_rows <> 1 THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED current update rows=% expected=1', affected_rows;
+              END IF;
+              UPDATE migration_revisions
+                SET status='active', activated_at=CURRENT_TIMESTAMP
+                WHERE revision_id='$EXPECTED_TARGET_REVISION' AND status='superseded';
+              GET DIAGNOSTICS affected_rows = ROW_COUNT;
+              IF affected_rows <> 1 THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED target update rows=% expected=1', affected_rows;
+              END IF;
+              UPDATE migration_state
+                SET state_value='$EXPECTED_TARGET_REVISION'
+                WHERE state_key='active_revision_id' AND state_value='$EXPECTED_CURRENT_REVISION';
+              GET DIAGNOSTICS affected_rows = ROW_COUNT;
+              IF affected_rows <> 1 THEN
+                RAISE EXCEPTION 'PG_ROLLBACK_BLOCKED state update rows=% expected=1', affected_rows;
+              END IF;
+            END IF;
+          END
+          \$\$;
+          COMMIT;
+          SQL
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f -" \
+            < "$TASK_ROOT/rollback.sql" | tee "$TASK_ROOT/rollback-transaction.log"
+          pointer_committed=1
+          rollback_state="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "sudo -u www-data psql -d song_rank -At -F '|' -c \"select r.revision_id,r.status,r.content_sha256 from migration_state s join migration_revisions r on r.revision_id=s.state_value where s.state_key='active_revision_id'\"")"
+          IFS='|' read -r actual_revision actual_status actual_content_sha256 <<<"$rollback_state"
+          test "$actual_revision" = "$EXPECTED_TARGET_REVISION" || {
+            echo "PG_ROLLBACK_BLOCKED committed-revision-mismatch expected=$EXPECTED_TARGET_REVISION actual=${actual_revision:-missing}"; exit 78;
+          }
+          test "$actual_status" = active || {
+            echo "PG_ROLLBACK_BLOCKED committed-status-mismatch actual=${actual_status:-missing}"; exit 78;
+          }
+          test "$actual_content_sha256" = "$EXPECTED_TARGET_CONTENT_SHA256" || {
+            echo "PG_ROLLBACK_BLOCKED committed-content-sha-mismatch"; exit 78;
+          }
+          echo "PG_ROLLBACK_TRANSACTION_OK previous=$active_before active=$actual_revision contentSha256=$actual_content_sha256 noop=$noop"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" '
+            set -Eeuo pipefail
+            systemctl restart song-rank-pg-api
+            ready=0
+            for n in $(seq 1 30); do
+              if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
+              sleep 1
+            done
+            test "$ready" = 1 || { echo PG_ROLLBACK_BLOCKED service-health-timeout >&2; exit 1; }
+          '
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "curl --fail-with-body --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz" \
+            > "$TASK_ROOT/local-healthz.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "curl --fail-with-body --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta" \
+            > "$TASK_ROOT/local-meta.json"
+          jq -e --arg revision "$EXPECTED_TARGET_REVISION" --arg sha "$EXPECTED_TARGET_CONTENT_SHA256" '
+            (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
+          ' "$TASK_ROOT/local-healthz.json" >/dev/null
+          jq -e --arg revision "$EXPECTED_TARGET_REVISION" --arg sha "$EXPECTED_TARGET_CONTENT_SHA256" '
+            (.meta.active_revision_id == $revision) and
+            (.meta.migration_status == "active") and
+            (.meta.content_sha256 == $sha)
+          ' "$TASK_ROOT/local-meta.json" >/dev/null || {
+            echo "PG_ROLLBACK_BLOCKED local-meta-gate revision=$EXPECTED_TARGET_REVISION"; exit 78;
+          }
+          public_health_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-healthz.json" -w '%{http_code}' \
+            https://ytb-song-rank.culua.com/healthz)"
+          public_meta_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-meta.json" -w '%{http_code}' \
+            https://ytb-song-rank.culua.com/api/meta)"
+          public_rankings_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-rankings-7d.json" -w '%{http_code}' \
+            "https://ytb-song-rank.culua.com/api/rankings?range=7d&view=songs&metric=occurrences&q=%40urameshi_conta&page=1&pageSize=1")"
+          public_source_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-source.json" -w '%{http_code}' \
+            "https://ytb-song-rank.culua.com/api/sources/$EXPECTED_SOURCE_PATH?page=1&pageSize=1")"
+          test "$public_health_http" = 200
+          test "$public_meta_http" = 200
+          test "$public_rankings_http" = 200
+          test "$public_source_http" = 200
+          jq -e '
+            (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
+          ' "$TASK_ROOT/public-healthz.json" >/dev/null
+          jq -e --arg revision "$EXPECTED_TARGET_REVISION" --arg sha "$EXPECTED_TARGET_CONTENT_SHA256" '
+            (.meta.active_revision_id == $revision) and
+            (.meta.migration_status == "active") and
+            (.meta.content_sha256 == $sha)
+          ' "$TASK_ROOT/public-meta.json" >/dev/null || {
+            echo "PG_ROLLBACK_BLOCKED public-meta-gate revision=$EXPECTED_TARGET_REVISION"; exit 78;
+          }
+          jq -e '
+            (.rangeId == "7d") and
+            (.view == "songs") and
+            (.metric == "occurrences") and
+            (.totalCount == 0) and
+            ((.records | length) == 0)
+          ' "$TASK_ROOT/public-rankings-7d.json" >/dev/null || {
+            echo "PG_ROLLBACK_BLOCKED unexpected-urameshi-7d-ranking"; exit 78;
+          }
+          jq -e \
+            --arg source_key "$EXPECTED_SOURCE_DETAIL_KEY" \
+            --arg channel_id "$EXPECTED_SOURCE_CHANNEL_ID" \
+            --arg channel_handle "$EXPECTED_SOURCE_CHANNEL_HANDLE" '
+            def normalize_handle:
+              if type == "string" then ltrimstr("/") else "" end;
+            (.found == true) and
+            (.sourceKey == $source_key) and
+            (.record.sourceDetailKey == $source_key) and
+            (.record.channelId == $channel_id) and
+            ((.record.channelHandle | normalize_handle) == ($channel_handle | normalize_handle))
+          ' "$TASK_ROOT/public-source.json" >/dev/null || {
+            echo "PG_ROLLBACK_BLOCKED urameshi-source-identity-mismatch"; exit 78;
+          }
+          printf 'baselineFreeBytes=%s\nremoteFreeBeforeBytes=%s\nexpectedCurrentRevision=%s\nexpectedTargetRevision=%s\nexpectedTargetContentSha256=%s\n' \
+            "$baseline_free_bytes" "$remote_free_before" "$EXPECTED_CURRENT_REVISION" "$EXPECTED_TARGET_REVISION" "$EXPECTED_TARGET_CONTENT_SHA256" \
+            > "$TASK_ROOT/storage.txt"
+          echo "PG_ROLLBACK_PUBLIC_OK active=$EXPECTED_TARGET_REVISION healthHttp=$public_health_http metaHttp=$public_meta_http rankingsHttp=$public_rankings_http sourceHttp=$public_source_http urameshi7dTotalCount=0 sourceKey=$EXPECTED_SOURCE_DETAIL_KEY channelId=$EXPECTED_SOURCE_CHANNEL_ID"
+          echo PG_ROLLBACK_STORAGE_BEGIN
+          cat "$TASK_ROOT/storage.txt"
+          echo PG_ROLLBACK_STORAGE_END
+          trap - EXIT INT TERM
+          cleanup
+
   candidate:
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1' }}
+    if: ${{ (github.event_name != 'workflow_dispatch' || inputs.rollback_only != true) && (github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1') }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 45
     env:
