@@ -2013,6 +2013,23 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             if resolved_key:
                 persisted = _runtime_source_payload(connection, parent[0], resolved_key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
                 if persisted.get("found"):
+                    persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                    if persisted_record:
+                        repaired = _runtime_channel_source_payload(
+                            connection,
+                            parent[0],
+                            persisted_record,
+                            resolved_key,
+                            query,
+                            overlay_revision_ids=overlay_ids,
+                        )
+                        if repaired.get("found"):
+                            repaired = dict(repaired)
+                            repaired["record"] = {
+                                **dict(persisted_record),
+                                **dict(repaired.get("record") or {}),
+                            }
+                            return repaired
                     return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)

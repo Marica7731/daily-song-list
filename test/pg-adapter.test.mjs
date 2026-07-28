@@ -670,10 +670,18 @@ module._generic_runtime_projection_revision = lambda connection: ("active", {"re
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["active"]
 module._runtime_source_key_for_channel_alias = lambda connection, revision_id, key: "complete-source"
-module._runtime_source_payload = lambda connection, revision_id, key, query, **kwargs: {"schemaVersion": 1, "found": key == "complete-source", "sourceKey": key, "record": {"sourceDetailKey": key, "occurrences": [{"videoId": "full-video"}]}}
+module._runtime_source_payload = lambda connection, revision_id, key, query, **kwargs: {"schemaVersion": 1, "found": key == "complete-source", "sourceKey": key, "record": {"sourceDetailKey": key, "channelId": "UC7DDETAIL", "legacyField": "kept", "occurrences": [{"videoId": "full-video"}]}}
+calls = []
+def rebuilt(connection, revision_id, metadata, key, query, overlay_revision_ids):
+    calls.append((revision_id, metadata["channelId"], key, overlay_revision_ids))
+    return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": key, "occurrences": [{"videoId": "new-video"}]}}
+module._runtime_channel_source_payload = rebuilt
 module._channel_metadata_rows = lambda *args: (_ for _ in ()).throw(AssertionError("metadata fallback must not run"))
 result = module.source_payload(object(), "UCIu1rRiQLeUU8e1saN6I0eg", {"page": "1"})
 assert result["found"] is True and result["sourceKey"] == "complete-source"
+assert result["record"]["occurrences"] == [{"videoId": "new-video"}]
+assert result["record"]["legacyField"] == "kept"
+assert calls == [("parent", "UC7DDETAIL", "complete-source", ["active"])]
 print("OK")
 `);
   assert.equal(output, "OK");
