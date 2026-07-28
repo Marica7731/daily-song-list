@@ -939,7 +939,19 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
         group["occurrences"].append({"song": {"title": title, "artist": artist, "songKey": occurrence.get("songKey"), "seconds": occurrence.get("seconds"), "rangeId": occurrence.get("rangeId"), "sourceId": occurrence.get("sourceId"), "sourceSystem": occurrence.get("sourceSystem")}, "video": video, **occurrence})
         group["videoIds"].add(video_id)
         group["songKeys"].add(_text(occurrence.get("songKey")) or key)
-        group["search"] = f"{group['title']} {group['artist']} {group['name']} {video.get('channelName', '')} {video_id}".casefold()
+        group["search"] = " ".join(
+            _text(value)
+            for value in (
+                group["title"],
+                group["artist"],
+                group["name"],
+                video.get("channelName"),
+                video.get("channelId"),
+                video.get("channelHandle"),
+                video.get("channelUrl"),
+                video_id,
+            )
+        ).casefold()
     return groups
 
 

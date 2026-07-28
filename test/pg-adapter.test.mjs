@@ -496,6 +496,58 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic incremental ranking search includes overlay channel identities", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+row = {
+    "video_id": "video-urameshi",
+    "video_title": "Karaoke",
+    "channel_name": "Conta Urameshi",
+    "channel_id": "UC8VlcljjGFb4-Ny2Heb0-ew",
+    "channel_handle": "/@urameshi_conta",
+    "channel_url": "https://www.youtube.com/@urameshi_conta",
+    "occurrence_id": "occurrence-1",
+    "position": 0,
+    "range_id": "7d",
+    "song_key": "song-a",
+    "title": "Song A",
+    "artist": "Artist A",
+}
+groups = module._overlay_candidate_groups([row], "songs")
+search = groups["song a::artist a"]["search"]
+assert "uc8vlcljjgfb4-ny2heb0-ew" in search
+assert "/@urameshi_conta" in search
+assert "https://www.youtube.com/@urameshi_conta" in search
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
+module._overlay_candidate_rows = lambda connection, revision_ids: [row]
+module._runtime_tombstones = lambda connection, revision_ids: []
+module._rows = lambda connection, sql, params: []
+payload = module._generic_overlay_rankings_payload(
+    object(),
+    "candidate",
+    {"revision_id": "candidate"},
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "pageSize": "30",
+        "q": "@urameshi_conta",
+        "searchFields": "title,channel",
+    },
+)
+assert payload["totalCount"] == 1
+assert payload["records"][0]["title"] == "Song A"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("generic incremental rankings keep stored identity fields after count merges", () => {
   const output = runPython(`
 import importlib.util
