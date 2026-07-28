@@ -64,6 +64,8 @@ jobs:
     timeout-minutes: 180
     env:
       SOURCE_KEY: "@urameshi_conta"
+      EXPECTED_CHANNEL_ID: "UC8VlcljjGFb4-Ny2Heb0-ew"
+      EXPECTED_CHANNEL_HANDLE: "/@urameshi_conta"
       STAGE: ${{ inputs.stage || 'candidate' }}
       CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id || '' }}
       CANDIDATE_ARTIFACT_NAME: ${{ inputs.candidate_artifact_name || '' }}
@@ -71,7 +73,6 @@ jobs:
       CHECKPOINT_RUN_ID: ${{ inputs.checkpoint_run_id || '' }}
       CHECKPOINT_ARTIFACT_NAME: ${{ inputs.checkpoint_artifact_name || '' }}
       STATUS_FOLLOWUP: ${{ inputs.status_followup && '1' || '0' }}
-      DISCOVERY_URL: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D"
       CHANNEL_URL: "https://www.youtube.com/@urameshi_conta"
       SINGER_NAME: "うら飯 紺汰"
       SOURCE_RANGE_ID: "7d"
@@ -215,6 +216,52 @@ jobs:
           echo "URAMESHI_7D_SOURCE_FETCH paths=$source_file_count directories=$source_directory_count bytes=$downloaded_bytes"
           cd "$REPO_ROOT"
           check_space source-code-fetch
+          verify_target_identity() {
+            identity_file="$1"
+            identity_format="$2"
+            identity_stage="$3"
+            identity_jq_args=()
+            if [ "$identity_format" = "ndjson" ]; then
+              identity_jq_args=(-s)
+            fi
+            if ! identity_metrics="$(jq "${identity_jq_args[@]}" -c               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+                def identity_records:
+                  if type == "array" then .
+                  elif ((.videos? // null) | type) == "array" then .videos
+                  else [] end;
+                {
+                  recordCount: (identity_records | length),
+                  channelIds: (identity_records | map(.channelId // "") | unique),
+                  channelHandles: (identity_records | map(.channelHandle // "") | unique),
+                  expectedChannelId: $expected_id,
+                  expectedChannelHandle: $expected_handle
+                }
+              ' "$identity_file")"; then
+              echo "URAMESHI_7D_BLOCKED identity-metrics-invalid stage=$identity_stage" >&2
+              exit 78
+            fi
+            echo "URAMESHI_7D_IDENTITY stage=$identity_stage metrics=$identity_metrics"
+            if ! jq "${identity_jq_args[@]}" -e               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+                def identity_records:
+                  if type == "array" then .
+                  elif ((.videos? // null) | type) == "array" then .videos
+                  else [] end;
+                def norm_handle:
+                  tostring
+                  | ascii_downcase
+                  | sub("^/+"; "")
+                  | if length > 0 then "/" + . else "" end;
+                (identity_records | length) > 0 and
+                all(identity_records[];
+                  (.channelId // "") == $expected_id and
+                  (((.channelHandle // "") | norm_handle) as $actual_handle |
+                    ($actual_handle == "" or $actual_handle == ($expected_handle | norm_handle)))
+                )
+              ' "$identity_file" >/dev/null; then
+              echo "URAMESHI_7D_BLOCKED channel-identity-mismatch stage=$identity_stage" >&2
+              exit 78
+            fi
+          }
           CANDIDATE_MANIFEST_PATH=""
           candidate_manifest_sha=""
           if [ "$STAGE" = "detail" ]; then
@@ -230,6 +277,18 @@ jobs:
             CANDIDATE_MANIFEST_PATH="$(find "$TASK_ROOT/candidate-input" -type f -name candidate-manifest.ndjson -print -quit)"
             test -s "$CANDIDATE_MANIFEST_PATH" || { echo "URAMESHI_7D_BLOCKED candidate artifact missing manifest" >&2; exit 78; }
             candidate_manifest_sha="$(shasum -a 256 "$CANDIDATE_MANIFEST_PATH" | awk '{print $1}')"
+            candidate_evidence_manifest="$(dirname "$CANDIDATE_MANIFEST_PATH")/manifest.json"
+            test -s "$candidate_evidence_manifest" || {
+              echo "URAMESHI_7D_BLOCKED candidate artifact missing identity manifest" >&2; exit 78;
+            }
+            jq -e               --arg source "$SOURCE_KEY"               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+                .identityEvidence.sourceDetailKey == $source and
+                .identityEvidence.channelId == $expected_id and
+                ((.identityEvidence.channelHandle // "") | ascii_downcase) == ($expected_handle | ascii_downcase)
+              ' "$candidate_evidence_manifest" >/dev/null || {
+              echo "URAMESHI_7D_BLOCKED candidate artifact identity evidence mismatch" >&2; exit 78;
+            }
+            verify_target_identity "$CANDIDATE_MANIFEST_PATH" ndjson candidate-artifact
             echo "URAMESHI_7D_REUSE_CANDIDATE run=$CANDIDATE_RUN_ID artifact=$CANDIDATE_ARTIFACT_NAME sha=$candidate_manifest_sha"
             if [ -n "$CHECKPOINT_RUN_ID" ] || [ -n "$CHECKPOINT_ARTIFACT_NAME" ]; then
               test -n "$CHECKPOINT_RUN_ID" && test -n "$CHECKPOINT_ARTIFACT_NAME" || {
@@ -256,7 +315,7 @@ jobs:
               exit 78
             fi
           elif [ "$STAGE" = "candidate" ]; then
-            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
+            "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
               --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
               --max-candidates "$DISCOVERY_MAX_CANDIDATES" --candidate-only --request-interval-ms "$DISCOVERY_REQUEST_INTERVAL_MS" --request-jitter-ms "$DISCOVERY_REQUEST_JITTER_MS"
           else
@@ -274,9 +333,24 @@ jobs:
             jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
               echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
             }
+            verify_target_identity "$TASK_ROOT/discovery/raw-videos.json" json candidate-discovery
             jq -c '.[]' "$TASK_ROOT/discovery/raw-videos.json" > "$RELEASE_ROOT/candidate-manifest.ndjson"
             discovery_sha="$(shasum -a 256 "$DISCOVERY_MANIFEST" | awk '{print $1}')"
-            jq --arg source "$SOURCE_KEY" --arg discoverySha "$discovery_sha" '.sourceKey=$source | .rangeId="7d" | .sourceReachedEnd=true | .mediaDownloaded=false | .candidateOnly=true | .discoveryManifestSha256=$discoverySha | .candidateManifestPath="candidate-manifest.ndjson"' "$DISCOVERY_MANIFEST" > "$RELEASE_ROOT/manifest.json"
+            jq               --arg source "$SOURCE_KEY"               --arg discoverySha "$discovery_sha"               --arg expectedChannelId "$EXPECTED_CHANNEL_ID"               --arg expectedChannelHandle "$EXPECTED_CHANNEL_HANDLE"               --arg channelUrl "$CHANNEL_URL" '
+                .sourceKey=$source
+                | .rangeId="7d"
+                | .sourceReachedEnd=true
+                | .mediaDownloaded=false
+                | .candidateOnly=true
+                | .discoveryManifestSha256=$discoverySha
+                | .candidateManifestPath="candidate-manifest.ndjson"
+                | .identityEvidence={
+                    sourceDetailKey: $source,
+                    channelId: $expectedChannelId,
+                    channelHandle: $expectedChannelHandle,
+                    channelUrl: $channelUrl
+                  }
+              ' "$DISCOVERY_MANIFEST" > "$RELEASE_ROOT/manifest.json"
             cp "$DISCOVERY_MANIFEST" "$RELEASE_ROOT/source-manifest.json"
             cp "$TASK_ROOT/storage.txt" "$RELEASE_ROOT/storage-before-upload.txt"
             echo "URAMESHI_7D_CANDIDATE_READY candidates=$(jq -r '.candidateCount // 0' "$DISCOVERY_MANIFEST") reachedEnd=true"
@@ -324,7 +398,7 @@ jobs:
           checkpoint_mirror &
           checkpoint_mirror_pid=$!
           set +e
-          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --discovery-url "$DISCOVERY_URL" --singer-name "$SINGER_NAME" \
+          "${NPM_CMD[@]}" run youtube:discover-channel -- --channel-url "$CHANNEL_URL" --singer-name "$SINGER_NAME" \
             --output-dir "$TASK_ROOT/discovery" --cache-dir "$TASK_ROOT/cache" --max-channel-pages "$DISCOVERY_MAX_CHANNEL_PAGES" \
             --max-candidates "$DISCOVERY_MAX_CANDIDATES" "${candidate_manifest_args[@]}" --max-inspect 2000 --inspect-shard-count 6 --inspect-shard-index "$shard" \
             --request-interval-ms 5000 --request-jitter-ms 2500
@@ -351,6 +425,7 @@ jobs:
           DETAILS="$TASK_ROOT/discovery/video-details.json"
           test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
           test -s "$DETAILS" || { echo "URAMESHI_7D_BLOCKED missing video details"; exit 78; }
+          verify_target_identity "$DETAILS" json detail-output
           jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
             echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
           }
@@ -375,6 +450,7 @@ jobs:
           }
           "${NPM_CMD[@]}" run youtube:import-channel-discovery -- --input-dir "$FILTERED_DISCOVERY" --report-path "$TASK_ROOT/import-report.json"
           "${NPM_CMD[@]}" run youtube:export-channel-increment -- --input-dir "$FILTERED_DISCOVERY" --output "$TASK_ROOT/accepted.json"
+          verify_target_identity "$TASK_ROOT/accepted.json" json accepted-export
           jq -e --slurpfile statusAudit "$TASK_ROOT/status-audit.json" '
             ($statusAudit[0].records |
               map(select(.status == "accepted_candidate")) |
@@ -388,9 +464,12 @@ jobs:
             --range-id "$SOURCE_RANGE_ID" --source-key "$SOURCE_KEY" --status-audit "$TASK_ROOT/status-audit.json"
           discovery_sha="$(shasum -a 256 "$DISCOVERY_MANIFEST" | awk '{print $1}')"
           jq --arg source "$SOURCE_KEY" --arg discoverySha "$discovery_sha" \
+            --arg expectedChannelId "$EXPECTED_CHANNEL_ID" \
+            --arg expectedChannelHandle "$EXPECTED_CHANNEL_HANDLE" \
+            --arg channelUrl "$CHANNEL_URL" \
             --slurpfile discovery "$DISCOVERY_MANIFEST" \
             --slurpfile statusAudit "$TASK_ROOT/status-audit.json" \
-            '.sourceKey=$source | .sourceReachedEnd=true | .mediaDownloaded=false | .discoveryManifestSha256=$discoverySha | .candidateCount=($discovery[0].candidateCount // 0) | .inspectedVideoCount=($discovery[0].usableVideoCount // 0) | .statusAuditFollowup=($statusAudit[0].followup // false) | .reviewAudit=($statusAudit[0].summary // {}) | .timeCoverageEvidence="publishedAt retained in detail/status audit"' \
+            '.sourceKey=$source | .sourceReachedEnd=true | .mediaDownloaded=false | .discoveryManifestSha256=$discoverySha | .candidateCount=($discovery[0].candidateCount // 0) | .inspectedVideoCount=($discovery[0].usableVideoCount // 0) | .statusAuditFollowup=($statusAudit[0].followup // false) | .reviewAudit=($statusAudit[0].summary // {}) | .timeCoverageEvidence="publishedAt retained in detail/status audit" | .identityEvidence={sourceDetailKey:$source,channelId:$expectedChannelId,channelHandle:$expectedChannelHandle,channelUrl:$channelUrl}' \
             "$TASK_ROOT/manifest.json" > "$TASK_ROOT/manifest.next.json"
           mv "$TASK_ROOT/manifest.next.json" "$TASK_ROOT/manifest.json"
           test "$(jq -er '.acceptedVideoCount' "$TASK_ROOT/manifest.json")" -gt 0

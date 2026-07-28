@@ -22,3 +22,16 @@ test("7d recovery explicitly wires bounded shard-5 follow-up audit evidence", ()
   assert.match(workflow, /--input-dir "\$FILTERED_DISCOVERY"/u);
   assert.match(workflow, /non-accepted-status-video-leaked/u);
 });
+
+test("7d recovery binds every artifact stage to the requested channel identity", () => {
+  assert.match(workflow, /EXPECTED_CHANNEL_ID: "UC8VlcljjGFb4-Ny2Heb0-ew"/u);
+  assert.match(workflow, /EXPECTED_CHANNEL_HANDLE: "\/@urameshi_conta"/u);
+  assert.doesNotMatch(workflow, /DISCOVERY_URL/u);
+  assert.match(workflow, /verify_target_identity "\$TASK_ROOT\/discovery\/raw-videos\.json" json candidate-discovery/u);
+  assert.match(workflow, /verify_target_identity "\$CANDIDATE_MANIFEST_PATH" ndjson candidate-artifact/u);
+  assert.match(workflow, /verify_target_identity "\$DETAILS" json detail-output/u);
+  assert.match(workflow, /verify_target_identity "\$TASK_ROOT\/accepted\.json" json accepted-export/u);
+  assert.match(workflow, /candidate artifact identity evidence mismatch/u);
+  assert.match(workflow, /\.identityEvidence=\{sourceDetailKey:\$source,channelId:\$expectedChannelId/u);
+  assert.match(workflow, /channel-identity-mismatch stage=\$identity_stage/u);
+});
