@@ -460,20 +460,85 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     """Enrich a vtuber ranking record without merging unrelated unknown rows."""
 
     result = dict(payload)
-    haystack = _overlay_norm(" ".join(_text(row.get(name)) for name in ("detail_key", "title", "name", "search_text", "channel_search_text")))
-    haystack = _overlay_norm(haystack + " " + " ".join(_text(result.get(name)) for name in ("key", "name", "channelName", "channelId", "channelHandle", "channelUrl")))
-    selected: Mapping[str, Any] | None = None
-    for item in metadata:
-        tokens = [
-            _text(item.get("channelKey") or item.get("channel_key")),
-            _text(item.get("channelId") or item.get("channel_id")),
-            _text(item.get("channelHandle") or item.get("handle")).lstrip("/@"),
-            _text(item.get("channelName") or item.get("display_name")),
-        ]
-        normalized_tokens = [token.casefold() for token in tokens if len(token) >= 4]
-        if any(token and token in haystack for token in normalized_tokens):
-            selected = item
-            break
+    metadata_rows = list(metadata)
+    occurrence_ids: set[str] = set()
+    occurrence_handles: set[str] = set()
+    for occurrence in result.get("occurrences") or ():
+        if not isinstance(occurrence, Mapping):
+            continue
+        video = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
+        if not isinstance(video, Mapping):
+            video = occurrence
+        channel_id = _text(video.get("channelId") or video.get("channel_id"))
+        channel_handle = _text(video.get("channelHandle") or video.get("channel_handle")).lstrip("/@").casefold()
+        if channel_id:
+            occurrence_ids.add(channel_id)
+        if channel_handle:
+            occurrence_handles.add(channel_handle)
+
+    detail_key = _text(row.get("detail_key"))
+    row_ids = {detail_key}
+    if ":" in detail_key:
+        row_ids.add(detail_key.rsplit(":", 1)[-1])
+    strong_ids = {
+        value
+        for value in (
+            *occurrence_ids,
+            *row_ids,
+            _text(result.get("channelId")),
+            _text(result.get("key")),
+        )
+        if value
+    }
+    strong_handles = {
+        value
+        for value in (
+            *occurrence_handles,
+            _text(result.get("channelHandle")).lstrip("/@").casefold(),
+        )
+        if value
+    }
+
+    exact_matches: list[Mapping[str, Any]] = []
+    for item in metadata_rows:
+        item_ids = {
+            value
+            for value in (
+                _text(item.get("channelKey") or item.get("channel_key")),
+                _text(item.get("channelId") or item.get("channel_id")),
+            )
+            if value
+        }
+        item_handle = _text(item.get("channelHandle") or item.get("handle")).lstrip("/@").casefold()
+        if strong_ids.intersection(item_ids) or (item_handle and item_handle in strong_handles):
+            exact_matches.append(item)
+
+    selected: Mapping[str, Any] | None = exact_matches[0] if len(exact_matches) == 1 else None
+    if selected is None and not strong_ids and not strong_handles:
+        # Legacy rows can lack a stable identity.  Only then allow a unique
+        # textual fallback, and never let a historical URL relabel a card.
+        haystack = _overlay_norm(" ".join(
+            _text(value)
+            for value in (
+                row.get("title"),
+                row.get("name"),
+                row.get("search_text"),
+                row.get("channel_search_text"),
+                result.get("name"),
+                result.get("channelName"),
+            )
+        ))
+        fallback_matches: list[Mapping[str, Any]] = []
+        for item in metadata_rows:
+            tokens = [
+                _text(item.get("channelHandle") or item.get("handle")).lstrip("/@"),
+                _text(item.get("channelName") or item.get("display_name")),
+            ]
+            normalized_tokens = [_overlay_norm(token) for token in tokens if len(token) >= 4]
+            if any(token and token in haystack for token in normalized_tokens):
+                fallback_matches.append(item)
+        if len(fallback_matches) == 1:
+            selected = fallback_matches[0]
     if selected is None:
         return _with_source_detail_path(result)
     channel_key = _text(selected.get("channelId") or selected.get("channelKey") or selected.get("channel_key"))
@@ -605,8 +670,10 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
         SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
+               o.payload_json AS occurrence_payload_json,
                v.title AS video_title, v.channel_name, v.channel_id,
                v.channel_handle, v.channel_url, v.published_at,
+               v.payload_json AS video_payload_json,
                v.tombstone AS video_tombstone
         FROM migration_occurrence_rows AS o
         LEFT JOIN migration_video_rows AS v
@@ -913,8 +980,8 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
     for row in rows:
         if row.get("video_tombstone"):
             continue
-        occurrence: dict[str, Any] = {}
-        video: dict[str, Any] = {}
+        occurrence = _json_object(row.get("occurrence_payload_json"))
+        video = _json_object(row.get("video_payload_json"))
         title = _text(row.get("title")) or _text(occurrence.get("title"))
         artist = _text(row.get("artist")) or _text(occurrence.get("artist"))
         video_id = _text(row.get("video_id"))
@@ -959,7 +1026,22 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
             "occurrences": [], "videoIds": set(), "songKeys": set(),
             "search": "",
         })
-        group["occurrences"].append({"song": {"title": title, "artist": artist, "songKey": occurrence.get("songKey"), "seconds": occurrence.get("seconds"), "rangeId": occurrence.get("rangeId"), "sourceId": occurrence.get("sourceId"), "sourceSystem": occurrence.get("sourceSystem")}, "video": video, **occurrence})
+        group["occurrences"].append({
+            **occurrence,
+            "song": {
+                "title": title,
+                "artist": artist,
+                "songKey": occurrence.get("songKey"),
+                "seconds": occurrence.get("seconds"),
+                "rangeId": occurrence.get("rangeId"),
+                "sourceId": occurrence.get("sourceId"),
+                "sourceSystem": occurrence.get("sourceSystem"),
+            },
+            "item": dict(video),
+            # Keep the accepted-handoff compatibility field while callers
+            # migrate to the public ranking occurrence shape.
+            "video": dict(video),
+        })
         group["videoIds"].add(video_id)
         group["songKeys"].add(_text(occurrence.get("songKey")) or key)
         group["search"] = f"{group['search']} {_overlay_candidate_search_text(row)}".strip()
@@ -2051,10 +2133,14 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
             if persisted.get("found"):
                 persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
-                if persisted_record and _text(persisted_record.get("sourceDetailKey")) != _text(key):
+                if persisted_record and (
+                    overlay_ids
+                    or _text(persisted_record.get("sourceDetailKey")) != _text(key)
+                ):
                     # A parent projection can retain an all-range payload under
-                    # a 7d key.  Rebuild only this channel from parent rows plus
-                    # the accepted increment, retaining every existing field.
+                    # a 7d key, and accepted overlays add rows that do not exist
+                    # in the persisted parent source detail.  Rebuild only this
+                    # channel while retaining every existing public field.
                     repaired = _runtime_channel_source_payload(connection, parent[0], persisted_record, key, query, overlay_revision_ids=overlay_ids)
                     if repaired.get("found"):
                         repaired = dict(repaired)

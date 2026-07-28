@@ -1,12 +1,39 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(TEST_DIR, "..");
 const ADAPTER = path.join(ROOT, "server", "pg_adapter.py");
+const IDENTITY_AUDIT = path.join(ROOT, "scripts", "migration", "audit-ranking-source-identities.py");
+const ADAPTER_WORKFLOW = fs.readFileSync(
+  path.join(ROOT, ".github", "workflows", "deploy-pg-adapter-contract.yml"),
+  "utf8",
+);
+
+function workflowRunBlocks(workflow) {
+  const lines = workflow.split(/\r?\n/u);
+  const blocks = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = /^(\s*)run:\s*\|\s*$/u.exec(lines[index]);
+    if (!match) continue;
+    const contentIndent = match[1].length + 2;
+    const body = [];
+    for (index += 1; index < lines.length; index += 1) {
+      const line = lines[index];
+      if (line.trim() && line.search(/\S/u) < contentIndent) {
+        index -= 1;
+        break;
+      }
+      body.push(line.slice(Math.min(contentIndent, line.length)));
+    }
+    blocks.push(body.join("\n"));
+  }
+  return blocks;
+}
 function resolvePython() {
   const candidates = process.env.PYTHON
     ? [process.env.PYTHON]
@@ -35,6 +62,77 @@ function runPython(script) {
 
 test("adapter parses without creating pycache files", () => {
   runPython(`compile(open(${JSON.stringify(ADAPTER)}, encoding="utf-8").read(), ${JSON.stringify(ADAPTER)}, "exec")`);
+  runPython(`compile(open(${JSON.stringify(IDENTITY_AUDIT)}, encoding="utf-8").read(), ${JSON.stringify(IDENTITY_AUDIT)}, "exec")`);
+});
+
+test("ranking identity audit detects card, occurrence, URL, and thumbnail mismatches", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+good = {
+    "key": "UCGOOD",
+    "channelId": "UCGOOD",
+    "channelHandle": "/@good",
+    "channelUrl": "https://www.youtube.com/channel/UCGOOD",
+    "sourceDetailKey": "source-good",
+    "occurrences": [{
+        "item": {
+            "videoId": "video-good",
+            "channelId": "UCGOOD",
+            "channelHandle": "/@good",
+            "thumbnailUrl": "https://i.ytimg.com/vi/video-good/hqdefault.jpg",
+        },
+        "video": {
+            "videoId": "video-good",
+            "channelId": "UCGOOD",
+            "channelHandle": "/@good",
+            "thumbnailUrl": "https://i.ytimg.com/vi/video-good/hqdefault.jpg",
+        },
+    }],
+}
+assert module.audit_record(good) == set()
+bad = {
+    **good,
+    "channelId": "UCWRONG",
+    "channelHandle": "/@wrong",
+    "channelUrl": "https://www.youtube.com/@other",
+    "occurrences": [{
+        "item": {**good["occurrences"][0]["item"], "thumbnailUrl": "https://i.ytimg.com/vi/other/hqdefault.jpg"},
+        "video": good["occurrences"][0]["video"],
+    }],
+}
+problems = module.audit_record(bad)
+assert "card_channel_url_mismatch" in problems
+assert "card_occurrence_channel_id_mismatch" in problems
+assert "card_occurrence_handle_mismatch" in problems
+assert "item_video_identity_mismatch" in problems
+assert "thumbnail_video_id_mismatch" in problems
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("adapter release workflow is fail-closed around identity and rollback gates", () => {
+  assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
+  assert.match(ADAPTER_WORKFLOW, /audit-ranking-source-identities\.py/u);
+  assert.match(ADAPTER_WORKFLOW, /--range all --range 7d --metric videos/u);
+  assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
+  assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
+  const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
+  assert.ok(blocks.length >= 6);
+  for (const [index, block] of blocks.entries()) {
+    const normalized = block.replace(/\$\{\{[^}]+\}\}/gu, "CODEX_WORKFLOW_EXPRESSION");
+    const result = spawnSync("bash", ["-n"], {
+      input: normalized,
+      encoding: "utf8",
+      windowsHide: true,
+    });
+    assert.equal(result.status, 0, `run block ${index + 1}: ${result.stderr}`);
+  }
 });
 
 test("DSN selection does not expose the connection secret", () => {
@@ -104,6 +202,68 @@ assert payload["songCount"] == 1636
 assert payload["sourceDetailKey"]
 assert module._metadata_for_source_key(metadata, "UCFP9UkgIM_U8NfzRbYEOQdA") is metadata[0]
 assert module._metadata_for_source_key(metadata, "/@naraetanV") is metadata[0]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("channel metadata cannot relabel a card with a different exact source identity", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+mikoto_id = "UCkZif4byA067Xl_c199w3BQ"
+shin_id = "UC5zO6IFsWSUHMYgJMv81XKg"
+urameshi_id = "UC8VlcljjGFb4-Ny2Heb0-ew"
+meda_id = "UC0HX1e5jJnhN5Xn0epV2wzA"
+metadata = [
+    {"channelId": shin_id, "channelHandle": "/@shingames7857", "channelName": "shin"},
+    {"channelId": meda_id, "channelHandle": "/@MEDAzcd", "channelName": "MEDA"},
+    {"channelId": mikoto_id, "channelHandle": "/@mikoto_songs", "channelName": "Mikoto"},
+    {"channelId": urameshi_id, "channelHandle": "/@urameshi_conta", "channelName": "Conta Urameshi"},
+]
+mikoto = module._apply_channel_metadata(
+    {
+        "key": mikoto_id,
+        "channelId": mikoto_id,
+        "channelHandle": "/@mikoto_songs",
+        "channelUrl": "https://www.youtube.com/@shingames7857",
+        "sourceDetailKey": "mikoto-source",
+        "occurrences": [{"item": {"channelId": mikoto_id, "channelHandle": "/@mikoto_songs"}}],
+    },
+    {
+        "detail_key": mikoto_id,
+        "name": "Mikoto",
+        "search_text": "Mikoto SHINING STAR",
+        "channel_search_text": "@mikoto_songs",
+    },
+    metadata,
+)
+assert mikoto["key"] == mikoto_id
+assert mikoto["channelId"] == mikoto_id
+assert mikoto["channelHandle"] == "/@mikoto_songs"
+assert mikoto["name"] == "Mikoto"
+assert mikoto["sourceDetailKey"] == "mikoto-source"
+urameshi = module._apply_channel_metadata(
+    {
+        "key": urameshi_id,
+        "channelId": urameshi_id,
+        "channelHandle": "/@urameshi_conta",
+        "channelUrl": "https://www.youtube.com/@MEDAzcd",
+        "occurrences": [{"video": {"channelId": urameshi_id, "channelHandle": "/@urameshi_conta"}}],
+    },
+    {"detail_key": urameshi_id, "search_text": "MEDA", "channel_search_text": "@urameshi_conta"},
+    metadata,
+    "7d",
+)
+assert urameshi["key"] == urameshi_id
+assert urameshi["channelId"] == urameshi_id
+assert urameshi["channelHandle"] == "/@urameshi_conta"
+assert urameshi["name"] == "Conta Urameshi"
+assert urameshi["sourceDetailKey"] == module._stable_key("source-vtuber", "7d", urameshi_id)
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -243,7 +403,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("generic source endpoint repairs only a stale range-keyed parent record", () => {
+test("generic source endpoint rebuilds persisted parent detail with accepted overlays", () => {
   const output = runPython(`
 import importlib.util
 spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
@@ -255,12 +415,12 @@ module._runtime_projection_revision = lambda connection: None
 module._generic_runtime_projection_revision = lambda connection: ("active", {"revision_id": "active"})
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["active"]
-module._runtime_source_payload = lambda connection, revision_id, key, query, allow_derived, overlay_revision_ids: {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": "all-key", "channelId": "UC7DDETAIL", "legacyField": "kept"}}
+module._runtime_source_payload = lambda connection, revision_id, key, query, allow_derived, overlay_revision_ids: {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": key, "channelId": "UC7DDETAIL", "legacyField": "kept", "videoCount": 1}}
 module._runtime_channel_source_payload = lambda connection, revision_id, metadata, key, query, overlay_revision_ids: {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": key, "videoCount": 2, "occurrences": [{"videoId": "new-a"}]}, "page": 1}
-result = module.source_payload(object(), "seven-day-key", {"page": "1", "pageSize": "20"})
-assert result["sourceKey"] == "seven-day-key" and result["page"] == 1
+result = module.source_payload(object(), "all-key", {"page": "1", "pageSize": "20"})
+assert result["sourceKey"] == "all-key" and result["page"] == 1
 assert result["record"]["legacyField"] == "kept"
-assert result["record"]["sourceDetailKey"] == "seven-day-key"
+assert result["record"]["sourceDetailKey"] == "all-key"
 assert result["record"]["videoCount"] == 2
 print("OK")
 `);
@@ -563,6 +723,51 @@ assert payload["totalCount"] == 1
 assert payload["records"][0]["title"] == "Song A"
 assert payload["records"][0]["count"] == 1
 assert payload["records"][0]["videoCount"] == 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic overlay occurrences preserve the exact video identity and thumbnail", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UC8VlcljjGFb4-Ny2Heb0-ew"
+row = {
+    "video_id": "lUDCE3zZmuQ",
+    "video_title": "Karaoke",
+    "channel_name": "Conta Urameshi",
+    "channel_id": channel_id,
+    "channel_handle": "/@urameshi_conta",
+    "channel_url": "https://www.youtube.com/@MEDAzcd",
+    "video_payload_json": {
+        "videoId": "lUDCE3zZmuQ",
+        "thumbnailUrl": "https://i.ytimg.com/vi/lUDCE3zZmuQ/hqdefault.jpg",
+        "channelId": channel_id,
+        "channelHandle": "/@urameshi_conta",
+    },
+    "occurrence_id": "position:9463",
+    "position": 0,
+    "range_id": "7d",
+    "song_key": "song-a",
+    "title": "Song A",
+    "artist": "Artist A",
+    "seconds": 9463,
+    "occurrence_payload_json": {"sourceHash": "hash-a"},
+}
+group = module._overlay_candidate_groups([row], "vtubers")[channel_id]
+occurrence = group["occurrences"][0]
+assert occurrence["item"] == occurrence["video"]
+assert occurrence["item"]["videoId"] == "lUDCE3zZmuQ"
+assert occurrence["item"]["channelId"] == channel_id
+assert occurrence["item"]["channelHandle"] == "/@urameshi_conta"
+assert occurrence["item"]["thumbnailUrl"] == "https://i.ytimg.com/vi/lUDCE3zZmuQ/hqdefault.jpg"
+assert occurrence["song"]["seconds"] == 9463
+assert occurrence["sourceHash"] == "hash-a"
 print("OK")
 `);
   assert.equal(output, "OK");
