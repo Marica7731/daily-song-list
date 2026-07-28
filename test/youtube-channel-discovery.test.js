@@ -159,7 +159,7 @@ test("search discovery routes continuation to youtubei search", async () => {
   const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";
   const html = youtubeHtml({
     initialData: channelData({
-      videos: [videoRenderer("SEARCHVIDEO01", "【歌枠】検索結果", "1 日前")],
+      videos: [videoRenderer("SEARCHVID01", "【歌枠】検索結果", "1 日前")],
       continuation: "SEARCH_NEXT",
       continuationApiUrl: "/youtubei/v1/search",
     }),
