@@ -188,6 +188,79 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic 7d source details replace stale parent previews with accepted rows", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UC7DDETAIL"
+key = module._stable_key("source-vtuber", "7d", channel_id)
+metadata = {"channelId": channel_id, "channelName": "Channel 7D", "sourceDetailKey": module._stable_key("source-vtuber", "all", channel_id)}
+class Cursor:
+    def execute(self, sql, params):
+        if "FROM runtime_videos" in sql:
+            self.description = [(name,) for name in ("video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "payload_json")]
+            self.rows = [("old-video", "Old", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", 1, json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/old-video/hqdefault.jpg"}))]
+        elif "FROM runtime_occurrences" in sql:
+            self.description = [(name,) for name in ("occurrence_id", "range_id", "video_id", "song_key", "seconds", "source_system", "source_id", "title", "artist", "is_niche", "is_unknown_artist", "payload_json")]
+            self.rows = [("old-song", "all", "old-video", "old-key", 1, "latest_json", "", "Old song", "Artist", False, False, "{}")]
+        elif "FROM migration_occurrence_rows AS o" in sql:
+            self.description = [(name,) for name in ("revision_id", "video_id", "occurrence_id", "position", "range_id", "song_key", "seconds", "title", "artist", "source_id", "raw_hash", "source_system", "occurrence_payload_json", "video_title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_at", "video_payload_json", "video_tombstone")]
+            self.rows = [
+                ("patch", "new-a", "a-song", 0, "7d", "a-key", 10, "Song A", "Artist A", "src-a", "hash-a", "youtube_channel_discovery", "{}", "New A", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-27T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-a/hqdefault.jpg"}), False),
+                ("patch", "new-b", "b-song", 0, "7d", "b-key", 20, "Song B", "Artist B", "src-b", "hash-b", "youtube_channel_discovery", "{}", "New B", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-28T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}), False),
+            ]
+        elif "FROM migration_runtime_rows" in sql:
+            self.description = [("revision_id",)]
+            self.rows = []
+        else:
+            raise AssertionError(sql)
+    def fetchall(self):
+        return self.rows
+    def close(self):
+        pass
+class Connection:
+    def cursor(self):
+        return Cursor()
+page = module._runtime_channel_source_payload(Connection(), "parent", metadata, key, {"page": "1", "pageSize": "20"}, overlay_revision_ids=["patch"])
+assert page["found"] is True and page["sourceKey"] == key
+assert page["record"]["sourceDetailKey"] == key
+assert page["totalCount"] == 2 and page["totalOccurrenceCount"] == 2
+items = {entry["videoId"]: entry["item"]["thumbnailUrl"] for entry in page["record"]["occurrences"]}
+assert items == {"new-a": "https://i.ytimg.com/vi/new-a/hqdefault.jpg", "new-b": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic source endpoint repairs only a stale range-keyed parent record", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+module._runtime_projection_revision = lambda connection: None
+module._generic_runtime_projection_revision = lambda connection: ("active", {"revision_id": "active"})
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["active"]
+module._runtime_source_payload = lambda connection, revision_id, key, query, allow_derived, overlay_revision_ids: {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": "all-key", "channelId": "UC7DDETAIL", "legacyField": "kept"}}
+module._runtime_channel_source_payload = lambda connection, revision_id, metadata, key, query, overlay_revision_ids: {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {"sourceDetailKey": key, "videoCount": 2, "occurrences": [{"videoId": "new-a"}]}, "page": 1}
+result = module.source_payload(object(), "seven-day-key", {"page": "1", "pageSize": "20"})
+assert result["sourceKey"] == "seven-day-key" and result["page"] == 1
+assert result["record"]["legacyField"] == "kept"
+assert result["record"]["sourceDetailKey"] == "seven-day-key"
+assert result["record"]["videoCount"] == 2
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("source endpoint prefers persisted detail rows before channel fallback", () => {
   const output = runPython(`
 import importlib.util

@@ -408,13 +408,18 @@ def _runtime_channel_source_payload(
             })
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
+    if overlay_revision_ids:
+        candidate_records = _overlay_channel_records(
+            _overlay_candidate_rows(connection, overlay_revision_ids), metadata,
+        )
+        if candidate_records:
+            candidate_video_ids = {_text(record["video"].get("videoId")) for record in candidate_records}
+            records = [record for record in records if _text(record["video"].get("videoId")) not in candidate_video_ids]
+            records.extend(candidate_records)
     records = _apply_record_overlay(records, _runtime_tombstones(connection, overlay_revision_ids or ()))
-    canonical_key = _metadata_source_key(metadata, "all") or key
-    result = _source_payload_from_channel_records(records, metadata, canonical_key, query)
-    if result.get("found") and canonical_key != key:
-        result = dict(result)
-        result["sourceKey"] = key
-    return result
+    return _source_payload_from_channel_records(
+        records, metadata, key, _source_query_for_channel(key, metadata, query),
+    )
 
 
 def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
@@ -566,8 +571,10 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
         SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
+               o.payload_json AS occurrence_payload_json,
                v.title AS video_title, v.channel_name, v.channel_id,
                v.channel_handle, v.channel_url, v.published_at,
+               v.payload_json AS video_payload_json,
                v.tombstone AS video_tombstone
         FROM migration_occurrence_rows AS o
         LEFT JOIN migration_video_rows AS v
@@ -589,6 +596,76 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
         if selected_revision[video_id] == revision_id:
             resolved.append(row)
     return resolved
+
+
+def _source_query_for_channel(key: str, metadata: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Infer a vtuber source key's range without changing the endpoint URL."""
+
+    result = dict(query or {})
+    channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
+    if channel_id:
+        for range_id in SUPPORTED_RANGES:
+            if _stable_key("source-vtuber", range_id, channel_id) == _text(key):
+                result["range"] = range_id
+                break
+    return result
+
+
+def _overlay_channel_records(rows: Iterable[Mapping[str, Any]], metadata: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Turn the accepted increment's rows for one channel into source records."""
+
+    channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
+    channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
+    channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
+    records: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if row.get("video_tombstone"):
+            continue
+        if not any((
+            channel_id and _text(row.get("channel_id")) == channel_id,
+            channel_handle and _text(row.get("channel_handle")) == channel_handle,
+            channel_name and _text(row.get("channel_name")) == channel_name,
+        )):
+            continue
+        video_id = _text(row.get("video_id"))
+        if not video_id:
+            continue
+        record = records.get(video_id)
+        if record is None:
+            video = _json_object(row.get("video_payload_json"))
+            if isinstance(video.get("payload"), Mapping):
+                video = dict(video["payload"])
+            video.update({
+                "videoId": video.get("videoId") or video_id,
+                "title": video.get("title") if video.get("title") is not None else row.get("video_title"),
+                "channelName": video.get("channelName") if video.get("channelName") is not None else row.get("channel_name"),
+                "channelId": video.get("channelId") if video.get("channelId") is not None else row.get("channel_id"),
+                "channelHandle": video.get("channelHandle") if video.get("channelHandle") is not None else row.get("channel_handle"),
+                "channelUrl": video.get("channelUrl") if video.get("channelUrl") is not None else row.get("channel_url"),
+                "publishedAt": video.get("publishedAt") if video.get("publishedAt") is not None else row.get("published_at"),
+            })
+            record = {"video": video, "occurrences": []}
+            records[video_id] = record
+        song = _json_object(row.get("occurrence_payload_json"))
+        if isinstance(song.get("payload"), Mapping):
+            song = dict(song["payload"])
+        song.update({
+            "occurrenceId": song.get("occurrenceId") if song.get("occurrenceId") is not None else row.get("occurrence_id"),
+            "position": song.get("position") if song.get("position") is not None else row.get("position"),
+            "rangeId": song.get("rangeId") if song.get("rangeId") is not None else row.get("range_id"),
+            "songKey": song.get("songKey") if song.get("songKey") is not None else row.get("song_key"),
+            "seconds": song.get("seconds") if song.get("seconds") is not None else row.get("seconds"),
+            "title": song.get("title") if song.get("title") is not None else row.get("title"),
+            "artist": song.get("artist") if song.get("artist") is not None else row.get("artist"),
+            "sourceId": song.get("sourceId") if song.get("sourceId") is not None else row.get("source_id"),
+            "rawHash": song.get("rawHash") if song.get("rawHash") is not None else row.get("raw_hash"),
+            "sourceSystem": song.get("sourceSystem") if song.get("sourceSystem") is not None else row.get("source_system"),
+        })
+        record["occurrences"].append(song)
+    return [
+        {"video": record["video"], "occurrences": tuple(record["occurrences"])}
+        for _, record in sorted(records.items())
+    ]
 
 
 def _overlay_runtime_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
@@ -1775,6 +1852,16 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent[0])
             persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
             if persisted.get("found"):
+                persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                if persisted_record and _text(persisted_record.get("sourceDetailKey")) != _text(key):
+                    # A parent projection can retain an all-range payload under
+                    # a 7d key.  Rebuild only this channel from parent rows plus
+                    # the accepted increment, retaining every existing field.
+                    repaired = _runtime_channel_source_payload(connection, parent[0], persisted_record, key, query, overlay_revision_ids=overlay_ids)
+                    if repaired.get("found"):
+                        repaired = dict(repaired)
+                        repaired["record"] = {**dict(persisted_record), **dict(repaired.get("record") or {})}
+                        return repaired
                 return persisted
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
