@@ -394,7 +394,7 @@ jobs:
     needs: collect
     uses: ./.github/workflows/deploy-pg-incremental.yml
     with:
-      artifact_name: urameshi-7d-${{ github.run_id }}-${{ github.run_attempt }}
+      artifact_name: urameshi-7d-detail-shard-${{ inputs.detail_shard_index }}-${{ github.run_id }}-${{ github.run_attempt }}
       patch_path: candidate.ndjson
       manifest_path: manifest.json
       activate: true

@@ -14,5 +14,6 @@ test("urameshi recovery details one resumable shard before final activation", ()
   assert.match(workflow, /checkpoint_mirror/u);
   assert.match(workflow, /nextShardIndex/u);
   assert.doesNotMatch(workflow, /for shard in 0 1 2 3 4 5; do/u);
+  assert.match(workflow, /artifact_name: urameshi-7d-detail-shard-\$\{\{ inputs\.detail_shard_index \}\}-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}/u);
   assert.match(workflow, /inputs\.stage == 'detail-shard' && inputs\.detail_shard_index == '5'/u);
 });
