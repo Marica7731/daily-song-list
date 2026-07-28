@@ -423,6 +423,16 @@ def _runtime_channel_source_payload(
     )
 
 
+def _with_source_detail_path(payload: Mapping[str, Any]) -> dict[str, Any]:
+    """Expose an already-existing source endpoint when a record has its key."""
+
+    result = dict(payload)
+    key = _text(result.get("sourceDetailKey"))
+    if key and not _text(result.get("sourceDetailPath")):
+        result["sourceDetailPath"] = f"/api/sources/{key}"
+    return result
+
+
 def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], metadata: Iterable[Mapping[str, Any]], range_id: str = "all") -> dict[str, Any]:
     """Enrich a vtuber ranking record without merging unrelated unknown rows."""
 
@@ -442,7 +452,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
             selected = item
             break
     if selected is None:
-        return result
+        return _with_source_detail_path(result)
     channel_key = _text(selected.get("channelId") or selected.get("channelKey") or selected.get("channel_key"))
     display_name = _text(selected.get("channelName") or selected.get("display_name"))
     handle = _text(selected.get("channelHandle") or selected.get("handle"))
@@ -470,7 +480,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
         result["songCount"] = expected_songs
     if not result.get("sourceDetailKey"):
         result["sourceDetailKey"] = _stable_key("source-vtuber", range_id, channel_key)
-    return result
+    return _with_source_detail_path(result)
 
 
 def _runtime_projection_revision(connection) -> tuple[str, dict[str, Any]] | None:

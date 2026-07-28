@@ -555,3 +555,20 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("vtuber records expose their existing source endpoint even without metadata", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+payload = module._apply_channel_metadata({"sourceDetailKey": "29ae50b7975dbdcf"}, {}, [])
+assert payload["sourceDetailPath"] == "/api/sources/29ae50b7975dbdcf"
+assert module._with_source_detail_path({"sourceDetailPath": "/custom", "sourceDetailKey": "src"})["sourceDetailPath"] == "/custom"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
