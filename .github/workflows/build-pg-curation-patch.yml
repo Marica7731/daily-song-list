@@ -195,12 +195,17 @@ jobs:
             "$RETAINED_ROOT/checkpoint.zip"
           unzip -q "$RETAINED_ROOT/audit.zip" -d "$RETAINED_ROOT/audit"
           unzip -q "$RETAINED_ROOT/checkpoint.zip" -d "$RETAINED_ROOT/checkpoint"
-          retained_large_gzip=()
-          while IFS= read -r payload; do
-            retained_large_gzip+=("$payload")
-          done < <(find "$RETAINED_ROOT/audit" -type f \( -name 'candidate-classifications.jsonl.gz' -o -name 'inventory.jsonl.gz' \) | sort)
+          retained_large_gzip=(
+            "$RETAINED_ROOT/audit/global-quality/candidate-classifications.jsonl.gz"
+            "$RETAINED_ROOT/checkpoint/global/inventory.jsonl.gz"
+          )
+          for payload in "${retained_large_gzip[@]}"; do
+            test -s "$payload" || {
+              echo "PG_CURATION_PRODUCER_BLOCKED retained large payload missing path=$payload"; exit 78;
+            }
+          done
           test "${#retained_large_gzip[@]}" -eq 2 || {
-            echo "PG_CURATION_PRODUCER_BLOCKED retained large payloads missing"; exit 78;
+            echo "PG_CURATION_PRODUCER_BLOCKED retained large payload count invalid"; exit 78;
           }
           {
             printf 'retainedAuditArtifactId=8633425268\nretainedAuditZipBytes=136315858\n'
@@ -210,7 +215,7 @@ jobs:
             for payload in "${retained_large_gzip[@]}"; do
               gzip -t "$payload"
               printf 'retainedPayload=%s bytes=%s sha256=%s\n' \
-                "${payload#"$RETAINED_ROOT/audit/"}" "$(stat -f%z "$payload")" \
+                "${payload#"$RETAINED_ROOT/"}" "$(stat -f%z "$payload")" \
                 "$(shasum -a 256 "$payload" | awk '{print $1}')"
             done
           } | tee "$TASK_ROOT/retained-artifact-verification.txt"

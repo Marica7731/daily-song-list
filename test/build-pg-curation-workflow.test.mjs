@@ -64,7 +64,9 @@ test("producer verifies retained audit bytes, digests, and large gzip payloads o
   assert.match(workflow, /inventory\.jsonl\.gz/);
   assert.match(workflow, /gzip -t "\$payload"/);
   assert.doesNotMatch(workflow, /\bmapfile\b/);
-  assert.match(workflow, /retained_large_gzip=\(\)\n\s+while IFS= read -r payload;/);
+  assert.match(workflow, /audit\/global-quality\/candidate-classifications\.jsonl\.gz/);
+  assert.match(workflow, /checkpoint\/global\/inventory\.jsonl\.gz/);
+  assert.match(workflow, /for payload in "\$\{retained_large_gzip\[@\]\}"; do/);
   assert.match(workflow, /retained-artifact-verification\.txt/);
 });
 
