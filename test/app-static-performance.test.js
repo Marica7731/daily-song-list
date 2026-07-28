@@ -511,3 +511,10 @@ function functionBody(signature) {
   }
   throw new Error(`unterminated ${signature}`);
 }
+
+
+test("source detail keys always select the existing API endpoint", () => {
+  const body = functionBody("function sourceDetailPathForRecord");
+  assert.match(body, /if \(detailKey\) \{\s*return `\/api\/sources\/\$\{encodeURIComponent\(detailKey\)\}`;/u);
+  assert.doesNotMatch(body, /state\.runtimeApi\.available && detailKey/u);
+});

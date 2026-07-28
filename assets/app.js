@@ -7265,7 +7265,7 @@ function sourceDetailPathForRecord(record, occurrences = []) {
   const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);
   if (explicitPath) return explicitPath;
   const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);
-  if (state.runtimeApi.available && detailKey) {
+  if (detailKey) {
     return `/api/sources/${encodeURIComponent(detailKey)}`;
   }
   const candidates = [
