@@ -169,6 +169,55 @@ jobs:
           }
           find "$PRODUCER_ROOT" -type f -print | sort > "$TASK_ROOT/downloaded-files.txt"
 
+      - name: Verify retained curation audit and checkpoint artifacts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          RETAINED_ROOT="$TASK_ROOT/retained-curation"
+          mkdir -p "$RETAINED_ROOT/audit" "$RETAINED_ROOT/checkpoint"
+          fetch_artifact() {
+            local artifact_id="$1" expected_bytes="$2" expected_sha="$3" destination="$4"
+            curl --fail --silent --show-error --location --retry 2 \
+              --connect-timeout 5 --max-time 120 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
+              -o "$destination"
+            test "$(stat -f%z "$destination")" = "$expected_bytes"
+            test "$(shasum -a 256 "$destination" | awk '{print $1}')" = "$expected_sha"
+            unzip -tq "$destination"
+          }
+          fetch_artifact 8633425268 136315858 \
+            20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9 \
+            "$RETAINED_ROOT/audit.zip"
+          fetch_artifact 8633419597 79947767 \
+            aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0 \
+            "$RETAINED_ROOT/checkpoint.zip"
+          unzip -q "$RETAINED_ROOT/audit.zip" -d "$RETAINED_ROOT/audit"
+          unzip -q "$RETAINED_ROOT/checkpoint.zip" -d "$RETAINED_ROOT/checkpoint"
+          mapfile -t retained_large_gzip < <(find "$RETAINED_ROOT/audit" -type f \
+            \( -name 'candidate-classifications.jsonl.gz' -o -name 'inventory.jsonl.gz' \) | sort)
+          test "${#retained_large_gzip[@]}" -eq 2 || {
+            echo "PG_CURATION_PRODUCER_BLOCKED retained large payloads missing"; exit 78;
+          }
+          {
+            printf 'retainedAuditArtifactId=8633425268\nretainedAuditZipBytes=136315858\n'
+            printf 'retainedAuditZipSha256=20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9\n'
+            printf 'retainedCheckpointArtifactId=8633419597\nretainedCheckpointZipBytes=79947767\n'
+            printf 'retainedCheckpointZipSha256=aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0\n'
+            for payload in "${retained_large_gzip[@]}"; do
+              gzip -t "$payload"
+              printf 'retainedPayload=%s bytes=%s sha256=%s\n' \
+                "${payload#"$RETAINED_ROOT/audit/"}" "$(stat -f%z "$payload")" \
+                "$(shasum -a 256 "$payload" | awk '{print $1}')"
+            done
+          } | tee "$TASK_ROOT/retained-artifact-verification.txt"
+          retained_bytes=$(( $(du -sk "$RETAINED_ROOT" | awk '{print $1}') * 1024 ))
+          test "$retained_bytes" -le "$TASK_HARD_CAP_BYTES" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED retained artifact cap exceeded bytes=$retained_bytes"; exit 78;
+          }
+          printf 'retainedArtifactBytes=%s\n' "$retained_bytes" >> "$TASK_ROOT/storage.txt"
+
       - name: Prepare bounded SSH helper
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
@@ -290,6 +339,7 @@ jobs:
           printf 'snapshotRemovedBytes=%s\nartifactBytes=%s\nsnapshotAfterFinalizeBytes=0\n' \
             "$snapshot_bytes" "$artifact_bytes" >> "$TASK_ROOT/storage.txt"
           cp "$TASK_ROOT/storage.txt" "$ARTIFACT_ROOT/storage.txt"
+          cp "$TASK_ROOT/retained-artifact-verification.txt" "$ARTIFACT_ROOT/retained-artifact-verification.txt"
           find "$ARTIFACT_ROOT" -maxdepth 1 -type f ! -name artifact-sha256.txt -print0 |
             xargs -0 shasum -a 256 > "$ARTIFACT_ROOT/artifact-sha256.txt"
 

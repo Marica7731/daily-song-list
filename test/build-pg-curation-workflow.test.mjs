@@ -53,6 +53,19 @@ test("producer has explicit expected, hard, task caps and non-resumable checkpoi
   assert.match(workflow, /"\$RUNNER_TEMP"\/daily-song-list-curation-artifact\.\*/);
 });
 
+test("producer verifies retained audit bytes, digests, and large gzip payloads on Mac", () => {
+  assert.match(workflow, /Verify retained curation audit and checkpoint artifacts/);
+  assert.match(workflow, /actions\/artifacts\/\$artifact_id\/zip/);
+  assert.match(workflow, /20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9/);
+  assert.match(workflow, /fetch_artifact 8633419597 79947767/);
+  assert.match(workflow, /aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0/);
+  assert.match(workflow, /unzip -tq/);
+  assert.match(workflow, /candidate-classifications\.jsonl\.gz/);
+  assert.match(workflow, /inventory\.jsonl\.gz/);
+  assert.match(workflow, /gzip -t "\$payload"/);
+  assert.match(workflow, /retained-artifact-verification\.txt/);
+});
+
 test("uploaded artifact excludes the full snapshot and contains only compact evidence", () => {
   const uploadStep = workflow.slice(
     workflow.indexOf("- name: Upload compact curation producer artifact"),
@@ -65,4 +78,5 @@ test("uploaded artifact excludes the full snapshot and contains only compact evi
   assert.match(workflow, /review\.json/);
   assert.match(workflow, /storage\.txt/);
   assert.match(workflow, /artifact-sha256\.txt/);
+  assert.match(workflow, /retained-artifact-verification\.txt/);
 });
