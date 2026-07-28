@@ -73,6 +73,7 @@ on:
         required: true
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -113,6 +114,30 @@ jobs:
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
+          for release_wait_attempt in $(seq 1 20); do
+            active_releases="$(
+              for release_status in in_progress queued; do
+                curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+                  "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?status=${release_status}&per_page=100"
+              done | jq -sr --argjson current_run "$GITHUB_RUN_ID" '
+                [.[].workflow_runs[] |
+                  select(.id != $current_run) |
+                  select(.name | test("PostgreSQL|PG|7D"; "i")) |
+                  {id,name,status,head_sha}
+                ] | unique_by(.id)
+              '
+            )"
+            if [ "$(jq -r 'length' <<<"$active_releases")" -eq 0 ]; then
+              break
+            fi
+            echo "PG_INCREMENT_WAIT concurrent-release attempt=$release_wait_attempt runs=$(jq -c . <<<"$active_releases")"
+            if [ "$release_wait_attempt" -eq 20 ]; then
+              echo "PG_INCREMENT_BLOCKED concurrent-release-timeout runs=$(jq -c . <<<"$active_releases")"
+              exit 78
+            fi
+            sleep 30
+          done
           TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-increment.XXXXXX")"
           INPUT_ROOT="$TASK_ROOT/inputs"
           mkdir -p "$INPUT_ROOT"
@@ -143,6 +168,9 @@ jobs:
             SOURCE_BASE_SHA="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
               -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.parents[0].sha')"
+            SOURCE_COMMITTED_AT="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.commit.committer.date')"
             COMPARE_JSON="$TASK_ROOT/compare.json"
             curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
               -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
@@ -173,11 +201,66 @@ jobs:
               curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
                 "$DATA_RAW_BASE/$source_path" -o "$destination"
               test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty accepted input=$source_path"; exit 78; }
+              jq -e '
+                (.kind == "youtube-channel-discovery-increment") and
+                (.schemaVersion == 1) and
+                (.videos | type == "array" and length > 0) and
+                (.videoCount == (.videos | length)) and
+                (.occurrenceCount == ([.videos[].songs[]?] | length)) and
+                all(.videos[];
+                  (.videoId | type == "string" and length > 0) and
+                  (.songs | type == "array" and length > 0) and
+                  ((.channelId // .channelHandle // "") | type == "string" and length > 0)
+                )
+              ' "$destination" >/dev/null || {
+                echo "PG_INCREMENT_BLOCKED accepted-contract input=$source_path"; exit 78;
+              }
               ACCEPTED_ARGS+=(--input "$destination")
               accepted_index=$((accepted_index + 1))
             done
+            jq -s -e '
+              [.[].videos[].videoId] as $video_ids |
+              ($video_ids | length > 0) and (($video_ids | unique | length) == ($video_ids | length))
+            ' "$INPUT_ROOT"/accepted/*.json >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED duplicate-video-across-accepted-files"; exit 78;
+            }
+            GENERATED_SOURCE_KEY="$(jq -sr '
+              [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
+            ' "$INPUT_ROOT"/accepted/*.json)"
+            test -n "$GENERATED_SOURCE_KEY" || { echo "PG_INCREMENT_BLOCKED missing-source-detail-key"; exit 78; }
             python3 "$INPUT_ROOT/accepted-files-to-patch.py" "${ACCEPTED_ARGS[@]}" \
-              --output "$INPUT_ROOT/patch" --manifest-output "$INPUT_ROOT/manifest" --range-id all
+              --output "$INPUT_ROOT/patch" --manifest-output "$INPUT_ROOT/manifest" --range-id all \
+              --source-key "$GENERATED_SOURCE_KEY" --reviewed-at "$SOURCE_COMMITTED_AT"
+            GENERATED_PATCH_SHA256="$(shasum -a 256 "$INPUT_ROOT/patch" | awk '{print $1}')"
+            jq '
+              [.files[]? |
+                select(.filename | startswith("data/external/youtube-channel-discovery/accepted/")) |
+                select(.filename | endswith(".json")) |
+                {path:.filename,blobSha:.sha,status:.status}
+              ] | sort_by(.path)
+            ' "$COMPARE_JSON" > "$INPUT_ROOT/accepted-files.json"
+            GENERATED_ACCEPTED_FILES_SHA256="$(jq -cS . "$INPUT_ROOT/accepted-files.json" | shasum -a 256 | awk '{print $1}')"
+            jq \
+              --arg source_commit_sha "$SOURCE_SHA" \
+              --arg source_base_sha "$SOURCE_BASE_SHA" \
+              --arg source_committed_at "$SOURCE_COMMITTED_AT" \
+              --arg patch_sha256 "$GENERATED_PATCH_SHA256" \
+              --arg accepted_files_sha256 "$GENERATED_ACCEPTED_FILES_SHA256" \
+              --arg source_detail_key "$GENERATED_SOURCE_KEY" \
+              --slurpfile accepted_files "$INPUT_ROOT/accepted-files.json" \
+              '. + {
+                status:"ready",
+                handoffKind:"github-accepted-paths",
+                source_commit_sha:$source_commit_sha,
+                source_base_sha:$source_base_sha,
+                source_committed_at:$source_committed_at,
+                patch_sha256:$patch_sha256,
+                accepted_files_sha256:$accepted_files_sha256,
+                inputFiles:[$accepted_files[0][].path],
+                acceptedFiles:$accepted_files[0],
+                identityEvidence:{sourceDetailKey:$source_detail_key}
+              }' "$INPUT_ROOT/manifest" > "$INPUT_ROOT/manifest.next"
+            mv "$INPUT_ROOT/manifest.next" "$INPUT_ROOT/manifest"
             PATCH_PATH="workflow-run-generated"
             MANIFEST_PATH="workflow-run-generated"
           fi
@@ -196,6 +279,27 @@ jobs:
           printf 'TASK_ROOT=%s\nPG_INPUT_ROOT=%s\n' "$TASK_ROOT" "$INPUT_ROOT" >> "$GITHUB_ENV"
           test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
           test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
+          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            jq -e '
+              ((.acceptedVideoCount // 0) > 0) and
+              ((.acceptedOccurrenceCount // 0) > 0)
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED empty-accepted-increment"; exit 78;
+            }
+          fi
+          if jq -e '.handoffKind == "github-accepted-paths"' "$MANIFEST_INPUT" >/dev/null; then
+            jq -e '
+              (.status == "ready") and
+              (.source_commit_sha | test("^[0-9a-fA-F]{40}$")) and
+              (.source_base_sha | test("^[0-9a-fA-F]{40}$")) and
+              (.patch_sha256 | test("^[0-9a-f]{64}$")) and
+              (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
+              (.acceptedFiles | type == "array" and length > 0) and
+              (.identityEvidence.sourceDetailKey | type == "string" and length > 0)
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED github-accepted-manifest-not-ready"; exit 78;
+            }
+          fi
           if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
             jq -e '
               (.status == "ready") and
@@ -228,6 +332,14 @@ jobs:
           baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
           patch_bytes="$(stat -f%z "$PATCH_INPUT")"
           manifest_bytes="$(stat -f%z "$MANIFEST_INPUT")"
+          test "$patch_bytes" -gt 0 || { echo "PG_INCREMENT_BLOCKED empty-patch"; exit 78; }
+          expected_patch_sha="$(jq -er '.patch_sha256 // empty' "$MANIFEST_INPUT" || true)"
+          if [ -n "$expected_patch_sha" ]; then
+            actual_patch_sha="$(shasum -a 256 "$PATCH_INPUT" | awk '{print $1}')"
+            test "$actual_patch_sha" = "$expected_patch_sha" || {
+              echo "PG_INCREMENT_BLOCKED patch-sha256-mismatch expected=$expected_patch_sha actual=$actual_patch_sha"; exit 78;
+            }
+          fi
           expected_peak_bytes=$((512 * 1024 * 1024))
           hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
           printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
@@ -245,21 +357,65 @@ jobs:
           SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
           REVISION="accepted_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
           printf 'revision=%s\n' "$REVISION" >> "$TASK_ROOT/storage.txt"
+          activated=0
+          noop=0
+          previous_active=""
+          remote_backup_dir=""
           remote_free_after=unknown
           cleanup() {
             status=$?
             if [ -n "${CANDIDATE_PID:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "kill $CANDIDATE_PID 2>/dev/null || true" || true; fi
-            if [ "$status" -ne 0 ] && [ -n "${REVISION:-}" ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"delete from migration_revisions where revision_id='$REVISION';\"" || true; fi
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -f /tmp/import-pg-incremental.py /tmp/pg-schema.sql /tmp/activate-pg-candidate.py /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/pg-increment-manifest.json /tmp/pg-increment-candidate.log" || true
+            if [ "$status" -ne 0 ] && [ "$activated" = 1 ] && [ -n "$previous_active" ]; then
+              "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"begin; select pg_advisory_xact_lock(hashtext('daily-song-list/active')); do \\\$\\\$ declare current text; begin select state_value into current from migration_state where state_key='active_revision_id' for update; if current <> '$REVISION' then raise exception 'rollback guard failed current=% expected=$REVISION', current; end if; update migration_revisions set status='active',activated_at=current_timestamp where revision_id='$previous_active' and status='superseded'; update migration_revisions set status='superseded' where revision_id='$REVISION' and status='active'; update migration_state set state_value='$previous_active' where state_key='active_revision_id'; end; \\\$\\\$; commit;\"" || true
+              if [ -n "$remote_backup_dir" ]; then
+                "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "test ! -f '$remote_backup_dir/pg_adapter.py.bak' || cp -p '$remote_backup_dir/pg_adapter.py.bak' /opt/culua/ytb-song-rank/server/pg_adapter.py; test ! -f '$remote_backup_dir/pg_api_server.py.bak' || cp -p '$remote_backup_dir/pg_api_server.py.bak' /opt/culua/ytb-song-rank/server/pg_api_server.py; test ! -f '$remote_backup_dir/service.bak' || cp -p '$remote_backup_dir/service.bak' /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl restart song-rank-pg-api || true" || true
+              fi
+            elif [ "$status" -ne 0 ] && [ -n "${REVISION:-}" ]; then
+              "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"delete from migration_revisions where revision_id='$REVISION' and status in ('draft','ready');\"" || true
+            fi
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -f /tmp/import-pg-incremental.py /tmp/pg-schema.sql /tmp/activate-pg-candidate.py /tmp/pg_adapter.py /tmp/pg_api_server.py /tmp/song-rank-pg-api.service /tmp/pg-increment-manifest.json /tmp/pg-increment-candidate.log; test -z '$remote_backup_dir' || rm -rf -- '$remote_backup_dir'" || true
             if remote_free_after="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"; then :; else remote_free_after=unknown; fi
             before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
             cat "$TASK_ROOT/storage.txt" 2>/dev/null || true
             rm -rf -- "$TASK_ROOT"
+            rm -rf -- "$RUNNER_TEMP/ssh-askpass"
             after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
-            echo "PG_INCREMENT_CLEANUP status=$status beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes remoteFreeAfterBytes=$remote_free_after retained=$(test "$ACTIVATE" = true && echo active-only || echo ready-candidate)"
+            retained=old-active
+            if [ "$noop" = 1 ]; then retained=no-change; elif [ "$status" -eq 0 ] && [ "$activated" = 1 ]; then retained=active-only; elif [ "$status" -eq 0 ]; then retained=ready-candidate; fi
+            echo "PG_INCREMENT_CLEANUP status=$status activated=$activated beforeBytes=$before_cleanup_bytes afterBytes=0 baselineFreeBytes=$baseline_free_bytes afterFreeBytes=$after_free_bytes remoteFreeAfterBytes=$remote_free_after retained=$retained"
             exit "$status"
           }
           trap cleanup EXIT INT TERM
+          active_revision_before="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "sudo -u www-data psql -d song_rank -At -c \"select state_value from migration_state where state_key='active_revision_id'\"")"
+          test -n "$active_revision_before" || {
+            echo "PG_INCREMENT_BLOCKED active-revision-before-missing"; exit 78;
+          }
+          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            curation_snapshot_revision="$(jq -er '.activeSnapshotRevisionId | select(type == "string" and length > 0)' "$MANIFEST_INPUT" || true)"
+            test "$curation_snapshot_revision" = "$active_revision_before" || {
+              echo "PG_INCREMENT_BLOCKED curation-active-snapshot-mismatch manifest=${curation_snapshot_revision:-missing} active=$active_revision_before"
+              exit 78
+            }
+          fi
+          manifest_source_commit="$(jq -er '.source_commit_sha // empty' "$MANIFEST_INPUT" || true)"
+          if [ -n "$manifest_source_commit" ]; then
+            [[ "$manifest_source_commit" =~ ^[0-9a-fA-F]{40}$ ]] || {
+              echo "PG_INCREMENT_BLOCKED invalid-manifest-source-commit"; exit 78;
+            }
+            existing_source_revision="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -At -F '|' -c \"select revision_id,status from migration_revisions where manifest_json->>'source_commit_sha'='$manifest_source_commit' order by created_at desc limit 1\"")"
+            case "$existing_source_revision" in
+              *"|active"|*"|superseded")
+                noop=1
+                echo "PG_INCREMENT_NOOP sourceSha=$manifest_source_commit existing=$existing_source_revision"
+                cleanup
+                ;;
+              *"|ready")
+                echo "PG_INCREMENT_BLOCKED existing-ready-source sourceSha=$manifest_source_commit revision=$existing_source_revision"
+                exit 78
+                ;;
+            esac
+          fi
           "${SCP[@]}" "$INPUT_ROOT/pg-schema.sql" "$INPUT_ROOT/import-pg-incremental.py" "$INPUT_ROOT/activate-pg-candidate.py" "$INPUT_ROOT/pg_adapter.py" "$INPUT_ROOT/pg_api_server.py" "$INPUT_ROOT/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/"
           "${SCP[@]}" "$MANIFEST_INPUT" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
           remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
@@ -273,7 +429,23 @@ jobs:
           fi | "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/import-pg-incremental.py --revision=$REVISION --manifest-file=/tmp/pg-increment-manifest.json" | tee "$TASK_ROOT/import-result.json"
           candidate_sha="$(jq -er '.contentSha256 | select(type == "string" and test("^[0-9a-f]{64}$"))' "$TASK_ROOT/import-result.json")"
           test -n "$candidate_sha"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/opt/culua/ytb-song-rank nohup python3 /opt/culua/ytb-song-rank/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
+          previous_active="$(jq -er '.parentRevisionId | select(type == "string" and length > 0)' "$TASK_ROOT/import-result.json")"
+          test "$previous_active" = "$active_revision_before" || {
+            echo "PG_INCREMENT_BLOCKED candidate-parent-changed expected=$active_revision_before actual=$previous_active"; exit 78;
+          }
+          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            expected_videos="$(jq -er '.acceptedVideoCount' "$MANIFEST_INPUT")"
+            expected_occurrences="$(jq -er '.acceptedOccurrenceCount' "$MANIFEST_INPUT")"
+            actual_videos="$(jq -er '.videoCount' "$TASK_ROOT/import-result.json")"
+            actual_occurrences="$(jq -er '.occurrenceCount' "$TASK_ROOT/import-result.json")"
+            test "$actual_videos" -eq "$expected_videos" || {
+              echo "PG_INCREMENT_BLOCKED video-count-mismatch expected=$expected_videos actual=$actual_videos"; exit 78;
+            }
+            test "$actual_occurrences" -eq "$expected_occurrences" || {
+              echo "PG_INCREMENT_BLOCKED occurrence-count-mismatch expected=$expected_occurrences actual=$actual_occurrences"; exit 78;
+            }
+          fi
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/tmp nohup python3 /tmp/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
           CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
           echo "candidatePid=$CANDIDATE_PID" >> "$TASK_ROOT/storage.txt"
           ready=0
@@ -286,61 +458,190 @@ jobs:
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json"
+          jq -e --arg revision "$REVISION" '
+            (.meta.active_revision_id == $revision) and
+            (.meta.migration_status == "ready") and
+            ((.counts.videos // 0) > 0) and
+            ((.counts.occurrences // 0) > 0)
+          ' "$TASK_ROOT/candidate-meta.json" >/dev/null || {
+            echo "PG_INCREMENT_BLOCKED candidate-meta-gate revision=$REVISION"; exit 78;
+          }
+          candidate_source_key=""
+          candidate_source_path=""
+          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
+            echo "PG_INCREMENT_CURATION_SOURCE_GATE snapshot=$active_revision_before"
+          else
           candidate_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
-          if [ -n "$candidate_source_key" ]; then
-            candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=1&pageSize=1\"" > "$TASK_ROOT/candidate-source.json"; then
-              echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key" >&2
-              cat "$TASK_ROOT/candidate-source.json" >&2 || true
+          if [[ "$PATCH_PATH" == *.gz ]]; then
+            probe_record="$(gzip -dc "$PATCH_INPUT" | sed -n '1p')"
+          else
+            probe_record="$(sed -n '1p' "$PATCH_INPUT")"
+          fi
+          probe_identity="$(jq -ce '
+            (.songs[0] // null) as $song |
+            select(
+              (.videoId | type == "string" and length > 0) and
+              $song != null and
+              ($song.occurrenceId | type == "string" and length > 0) and
+              ($song.title | type == "string")
+            ) |
+            {
+              sourceDetailKey:(.channelId // .channelHandle // ""),
+              videoId:.videoId,
+              occurrenceId:$song.occurrenceId,
+              title:$song.title,
+              artist:($song.artist // null),
+              seconds:($song.seconds // null)
+            }
+          ' <<<"$probe_record")" || {
+            echo "PG_INCREMENT_BLOCKED source-detail-identity-unparseable"; exit 78;
+          }
+          if [ -z "$candidate_source_key" ]; then
+            candidate_source_key="$(jq -er '.sourceDetailKey | select(type == "string" and length > 0)' <<<"$probe_identity" || true)"
+          fi
+          test -n "$candidate_source_key" || {
+            echo "PG_INCREMENT_BLOCKED source-detail-key-missing"; exit 78;
+          }
+          probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
+          probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
+          probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
+          probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
+          probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
+          candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
+          source_detail_matches_probe() {
+            jq -e \
+              --arg video_id "$probe_video_id" \
+              --arg occurrence_id "$probe_occurrence_id" \
+              --argjson title "$probe_title_json" \
+              --argjson artist "$probe_artist_json" \
+              --argjson seconds "$probe_seconds_json" '
+                (.found == true) and any(.record.occurrences[]?;
+                  (.videoId == $video_id) and
+                  ((.song.occurrenceId // .song.occurrence_id // "") == $occurrence_id) and
+                  (.song.title == $title) and
+                  ((.song.artist // null) == $artist) and
+                  ((.song.seconds // null) == $seconds)
+                )
+              ' "$1" >/dev/null
+          }
+          candidate_source_match=0
+          for source_page in $(seq 1 20); do
+            candidate_source_file="$TASK_ROOT/candidate-source-$source_page.json"
+            if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=$source_page&pageSize=100\"" \
+              > "$candidate_source_file"; then
+              echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key page=$source_page" >&2
+              cat "$candidate_source_file" >&2 || true
               exit 1
             fi
-            jq -e '(.found == true) and ((.record // {}) | ((.occurrences // []) | length > 0 or (.songCount // 0) > 0 or (.totalOccurrenceCount // 0) > 0))' "$TASK_ROOT/candidate-source.json" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED source-detail-gate key=$candidate_source_key" >&2
-              exit 78
+            if source_detail_matches_probe "$candidate_source_file"; then
+              candidate_source_match=1
+              break
+            fi
+            source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$candidate_source_file")" || {
+              echo "PG_INCREMENT_BLOCKED candidate-source-pagination-invalid key=$candidate_source_key"; exit 78;
             }
-          else
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/sources/Naraetan?page=1&pageSize=1"' > "$TASK_ROOT/candidate-source.json"
+            [ "$source_page" -lt "$source_page_count" ] || break
+          done
+          test "$candidate_source_match" = 1 || {
+            echo "PG_INCREMENT_BLOCKED candidate-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id" >&2
+            exit 78
+          }
+          fi
+          candidate_meta_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/candidate-meta.json" || true)"
+          if [ -n "$manifest_source_commit" ]; then
+            test "$candidate_meta_source_commit" = "$manifest_source_commit" || {
+              echo "PG_INCREMENT_BLOCKED candidate-source-commit-mismatch expected=$manifest_source_commit actual=$candidate_meta_source_commit"; exit 78;
+            }
+          fi
+          candidate_meta_patch_sha="$(jq -er '.meta.patch_sha256 // empty' "$TASK_ROOT/candidate-meta.json" || true)"
+          candidate_meta_stream_sha="$(jq -er '.meta.streamSha256 // empty' "$TASK_ROOT/candidate-meta.json" || true)"
+          if [ -n "$expected_patch_sha" ]; then
+            test "$candidate_meta_patch_sha" = "$expected_patch_sha" || {
+              echo "PG_INCREMENT_BLOCKED candidate-meta-patch-sha-mismatch expected=$expected_patch_sha actual=$candidate_meta_patch_sha"; exit 78;
+            }
+            test "$candidate_meta_stream_sha" = "$expected_patch_sha" || {
+              echo "PG_INCREMENT_BLOCKED candidate-meta-stream-sha-mismatch expected=$expected_patch_sha actual=$candidate_meta_stream_sha"; exit 78;
+            }
           fi
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
-            "${SCP[@]}" "$INPUT_ROOT/activate-pg-candidate.py" "$VPS2_USER@$VPS2_HOST:/tmp/activate-pg-candidate.py"
-            if ! activation_output="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0755 /tmp/activate-pg-candidate.py /opt/culua/ytb-song-rank/activate-pg-candidate.py && sudo -u www-data python3 /opt/culua/ytb-song-rank/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'")"; then
+            remote_backup_dir="/tmp/daily-song-list-pg-increment-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -d -m 0700 '$remote_backup_dir'; test ! -f /opt/culua/ytb-song-rank/server/pg_adapter.py || cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$remote_backup_dir/pg_adapter.py.bak'; test ! -f /opt/culua/ytb-song-rank/server/pg_api_server.py || cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$remote_backup_dir/pg_api_server.py.bak'; test ! -f /etc/systemd/system/song-rank-pg-api.service || cp -p /etc/systemd/system/song-rank-pg-api.service '$remote_backup_dir/service.bak'"
+            if ! activation_output="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$candidate_sha'")"; then
               printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
               echo "PG_INCREMENT_BLOCKED activation failed" >&2
               exit 1
             fi
             printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service && systemctl daemon-reload"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" '
+            activated=1
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "
               set -Eeuo pipefail
-              old_was_active=0
-              systemctl is-active --quiet song-rank-api && old_was_active=1 || true
-              if systemctl is-active --quiet song-rank-pg-api; then
-                systemctl restart song-rank-pg-api
-              else
-                systemctl stop song-rank-api || true
-                if ! systemctl start song-rank-pg-api; then
-                  [ "$old_was_active" = 1 ] && systemctl start song-rank-api || true
-                  exit 1
-                fi
-              fi
+              install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py
+              install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py
+              install -d -m 0755 /opt/culua/ytb-song-rank/server
+              install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py
+              install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py
+              install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service
+              systemctl daemon-reload
+              systemctl enable song-rank-pg-api
+              systemctl restart song-rank-pg-api
               ready=0
-              for n in $(seq 1 30); do
+              for n in \$(seq 1 30); do
                 if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
                 sleep 1
               done
-              if [ "$ready" != 1 ]; then
-                systemctl stop song-rank-pg-api || true
-                [ "$old_was_active" = 1 ] && systemctl start song-rank-api || true
-                echo PG_INCREMENT_BLOCKED activated-service-health-timeout >&2
-                exit 1
+              test \"\$ready\" = 1 || { echo PG_INCREMENT_BLOCKED activated-service-health-timeout >&2; exit 1; }
+              curl --fail-with-body --max-time 20 http://127.0.0.1:8765/healthz
+              curl --fail-with-body --max-time 20 http://127.0.0.1:8765/api/meta
+              curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1\"
+              if [ -n \"$candidate_source_path\" ]; then
+                curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/sources/$candidate_source_path?page=1&pageSize=1\"
               fi
-              systemctl disable song-rank-api || true
-              systemctl reload nginx || true
-              curl -fsS http://127.0.0.1:8765/healthz
-              curl -fsS http://127.0.0.1:8765/api/meta
-              curl -fsS "http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"
-            ' | tee -a "$TASK_ROOT/activation-result.txt"
+              systemctl disable --now song-rank-api || true
+              systemctl reload nginx
+            " | tee -a "$TASK_ROOT/activation-result.txt"
+            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
+              https://ytb-song-rank.culua.com/healthz -o "$TASK_ROOT/public-healthz.json"
+            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
+              https://ytb-song-rank.culua.com/api/meta -o "$TASK_ROOT/public-meta.json"
+            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
+              "https://ytb-song-rank.culua.com/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" \
+              -o "$TASK_ROOT/public-rankings.json"
+            jq -e --arg revision "$REVISION" '
+              (.meta.active_revision_id == $revision) and
+              (.meta.migration_status == "active") and
+              ((.counts.videos // 0) > 0) and
+              ((.counts.occurrences // 0) > 0)
+            ' "$TASK_ROOT/public-meta.json" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED public-meta-gate revision=$REVISION"; exit 78;
+            }
+            if [ -n "$candidate_source_path" ]; then
+              public_source_match=0
+              for source_page in $(seq 1 20); do
+                public_source_file="$TASK_ROOT/public-source-$source_page.json"
+                curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
+                  "https://ytb-song-rank.culua.com/api/sources/$candidate_source_path?page=$source_page&pageSize=100" \
+                  -o "$public_source_file"
+                if source_detail_matches_probe "$public_source_file"; then
+                  public_source_match=1
+                  break
+                fi
+                source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$public_source_file")" || {
+                  echo "PG_INCREMENT_BLOCKED public-source-pagination-invalid key=$candidate_source_key"; exit 78;
+                }
+                [ "$source_page" -lt "$source_page_count" ] || break
+              done
+              test "$public_source_match" = 1 || {
+                echo "PG_INCREMENT_BLOCKED public-source-identity-mismatch key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id"; exit 78;
+              }
+            fi
+            if [ -n "$manifest_source_commit" ]; then
+              public_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/public-meta.json" || true)"
+              test "$public_source_commit" = "$manifest_source_commit" || {
+                echo "PG_INCREMENT_BLOCKED public-source-commit-mismatch expected=$manifest_source_commit actual=$public_source_commit"; exit 78;
+              }
+            fi
           fi
           echo PG_INCREMENT_STORAGE_BEGIN
           cat "$TASK_ROOT/storage.txt"

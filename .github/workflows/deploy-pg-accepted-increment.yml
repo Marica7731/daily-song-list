@@ -1,0 +1,266 @@
+name: Prepare PostgreSQL accepted increment handoff
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/external/youtube-channel-discovery/accepted/*.json"
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: "Accepted source commit to reconcile"
+        required: true
+        type: string
+      base_sha:
+        description: "Optional compare base; defaults to source commit parent"
+        required: false
+        default: ""
+        type: string
+      activate:
+        description: "Activate only after candidate/API/rollback gates pass"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: daily-song-list-pg-accepted-handoff
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.event_name == 'push' && github.sha || inputs.source_sha }}
+      BASE_SHA: ${{ github.event_name == 'push' && github.event.before || inputs.base_sha }}
+    outputs:
+      artifact_name: ${{ steps.prepare.outputs.artifact_name }}
+      base_sha: ${{ steps.prepare.outputs.base_sha }}
+      patch_sha256: ${{ steps.prepare.outputs.patch_sha256 }}
+      source_detail_key: ${{ steps.prepare.outputs.source_detail_key }}
+      source_sha: ${{ steps.prepare.outputs.source_sha }}
+    steps:
+      - name: Create bounded handoff root
+        id: root
+        run: |
+          set -Eeuo pipefail
+          task_root="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-pg-accepted.XXXXXX")"
+          echo "task_root=$task_root" >> "$GITHUB_OUTPUT"
+          echo "TASK_ROOT=$task_root" >> "$GITHUB_ENV"
+          echo "baselineFreeBytes=$(( $(df -Pk "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))" > "$task_root/storage.txt"
+          echo "expectedPeakBytes=$((512 * 1024 * 1024))" >> "$task_root/storage.txt"
+          echo "hardCapBytes=$((2 * 1024 * 1024 * 1024))" >> "$task_root/storage.txt"
+
+      - name: Validate commit and prepare deterministic accepted patch
+        id: prepare
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED invalid-source-sha=$SOURCE_SHA"; exit 78;
+          }
+          api_headers=(-H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json")
+          commit_json="$TASK_ROOT/source-commit.json"
+          curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+            "${api_headers[@]}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" -o "$commit_json"
+          source_committed_at="$(jq -er '.commit.committer.date' "$commit_json")"
+          if [ -z "$BASE_SHA" ]; then
+            BASE_SHA="$(jq -er '.parents[0].sha' "$commit_json")"
+          fi
+          [[ "$BASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED invalid-base-sha=$BASE_SHA"; exit 78;
+          }
+          compare_json="$TASK_ROOT/compare.json"
+          curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
+            "${api_headers[@]}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${BASE_SHA}...${SOURCE_SHA}" -o "$compare_json"
+          test "$(jq -er '.files | length' "$compare_json")" -lt 300 || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED compare-api-file-limit sourceSha=$SOURCE_SHA"; exit 78;
+          }
+          jq '
+            [.files[]? |
+              select(.filename | startswith("data/external/youtube-channel-discovery/accepted/")) |
+              select(.filename | endswith(".json")) |
+              {path:.filename, blobSha:.sha, status:.status, previousPath:(.previous_filename // null)}
+            ] | sort_by(.path)
+          ' "$compare_json" > "$TASK_ROOT/accepted-files.compare.json"
+          test "$(jq -er 'length' "$TASK_ROOT/accepted-files.compare.json")" -gt 0 || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED no-accepted-files sourceSha=$SOURCE_SHA"; exit 78;
+          }
+          jq -e 'all(.[]; .status == "added" or .status == "modified" or .status == "renamed")' \
+            "$TASK_ROOT/accepted-files.compare.json" >/dev/null || {
+              echo "PG_ACCEPTED_HANDOFF_BLOCKED removed-or-unsupported-accepted-file"; exit 78;
+            }
+          mkdir -p "$TASK_ROOT/accepted" "$TASK_ROOT/artifact"
+          curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-files-to-patch.py" \
+            -o "$TASK_ROOT/accepted-files-to-patch.py"
+          accepted_args=()
+          accepted_index=0
+          : > "$TASK_ROOT/accepted-files.evidence.ndjson"
+          while IFS=$'\t' read -r repo_path expected_blob status; do
+            destination="$TASK_ROOT/accepted/$(printf '%04d.json' "$accepted_index")"
+            curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}/${repo_path}" -o "$destination"
+            test -s "$destination" || { echo "PG_ACCEPTED_HANDOFF_BLOCKED empty=$repo_path"; exit 78; }
+            actual_blob="$(git hash-object "$destination")"
+            test "$actual_blob" = "$expected_blob" || {
+              echo "PG_ACCEPTED_HANDOFF_BLOCKED blob-mismatch path=$repo_path expected=$expected_blob actual=$actual_blob"; exit 78;
+            }
+            jq -e '
+              (.kind == "youtube-channel-discovery-increment") and
+              (.schemaVersion == 1) and
+              (.videos | type == "array" and length > 0) and
+              (.videoCount == (.videos | length)) and
+              (.occurrenceCount == ([.videos[].songs[]?] | length)) and
+              all(.videos[];
+                (.videoId | type == "string" and length > 0) and
+                (.songs | type == "array" and length > 0) and
+                ((.channelId // .channelHandle // "") | type == "string" and length > 0)
+              ) and
+              (([.videos[].videoId] | unique | length) == (.videos | length))
+            ' "$destination" >/dev/null || {
+              echo "PG_ACCEPTED_HANDOFF_BLOCKED accepted-contract path=$repo_path"; exit 78;
+            }
+            file_sha256="$(shasum -a 256 "$destination" | awk '{print $1}')"
+            jq -cn --arg path "$repo_path" --arg blobSha "$expected_blob" --arg sha256 "$file_sha256" --arg status "$status" \
+              '{path:$path,blobSha:$blobSha,sha256:$sha256,status:$status}' >> "$TASK_ROOT/accepted-files.evidence.ndjson"
+            accepted_args+=(--input "$destination")
+            accepted_index=$((accepted_index + 1))
+          done < <(jq -r '.[] | [.path,.blobSha,.status] | @tsv' "$TASK_ROOT/accepted-files.compare.json")
+          jq -s 'sort_by(.path)' "$TASK_ROOT/accepted-files.evidence.ndjson" > "$TASK_ROOT/accepted-files.evidence.json"
+          jq -s -e '
+            [.[].videos[].videoId] as $videoIds |
+            ($videoIds | length > 0) and (($videoIds | unique | length) == ($videoIds | length))
+          ' "$TASK_ROOT"/accepted/*.json >/dev/null || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED duplicate-video-across-accepted-files"; exit 78;
+          }
+          source_detail_key="$(jq -sr '
+            [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] | first // ""
+          ' "$TASK_ROOT"/accepted/*.json)"
+          test -n "$source_detail_key" || { echo "PG_ACCEPTED_HANDOFF_BLOCKED missing-source-detail-key"; exit 78; }
+          python3 "$TASK_ROOT/accepted-files-to-patch.py" "${accepted_args[@]}" \
+            --output "$TASK_ROOT/artifact/candidate.ndjson" \
+            --manifest-output "$TASK_ROOT/artifact/manifest.json" \
+            --range-id all \
+            --source-key "$source_detail_key" \
+            --reviewed-at "$source_committed_at"
+          test -s "$TASK_ROOT/artifact/candidate.ndjson"
+          patch_sha256="$(shasum -a 256 "$TASK_ROOT/artifact/candidate.ndjson" | awk '{print $1}')"
+          accepted_files_sha256="$(jq -cS . "$TASK_ROOT/accepted-files.evidence.json" | shasum -a 256 | awk '{print $1}')"
+          probe_record="$(sed -n '1p' "$TASK_ROOT/artifact/candidate.ndjson")"
+          identity_evidence="$(jq -ce --arg source_detail_key "$source_detail_key" '
+            (.songs[0] // null) as $song |
+            select(
+              (.videoId | type == "string" and length > 0) and
+              ($song != null) and
+              ($song.occurrenceId | type == "string" and length > 0) and
+              ($song.title | type == "string")
+            ) |
+            {
+              sourceDetailKey:$source_detail_key,
+              videoId:.videoId,
+              occurrenceId:$song.occurrenceId,
+              title:$song.title,
+              artist:($song.artist // null),
+              seconds:($song.seconds // null)
+            }
+          ' <<<"$probe_record")" || {
+            echo "PG_ACCEPTED_HANDOFF_BLOCKED missing-source-detail-identity"; exit 78;
+          }
+          jq \
+            --arg source_commit_sha "$SOURCE_SHA" \
+            --arg source_base_sha "$BASE_SHA" \
+            --arg source_committed_at "$source_committed_at" \
+            --arg patch_sha256 "$patch_sha256" \
+            --arg accepted_files_sha256 "$accepted_files_sha256" \
+            --argjson identity_evidence "$identity_evidence" \
+            --slurpfile accepted_files "$TASK_ROOT/accepted-files.evidence.json" \
+            '. + {
+              status:"ready",
+              handoffKind:"github-accepted-paths",
+              source_commit_sha:$source_commit_sha,
+              source_base_sha:$source_base_sha,
+              source_committed_at:$source_committed_at,
+              patch_sha256:$patch_sha256,
+              accepted_files_sha256:$accepted_files_sha256,
+              inputFiles:[$accepted_files[0][].path],
+              acceptedFiles:$accepted_files[0],
+              identityEvidence:$identity_evidence
+            }' "$TASK_ROOT/artifact/manifest.json" > "$TASK_ROOT/artifact/manifest.next.json"
+          mv "$TASK_ROOT/artifact/manifest.next.json" "$TASK_ROOT/artifact/manifest.json"
+          jq -e '
+            (.status == "ready") and
+            (.handoffKind == "github-accepted-paths") and
+            (.acceptedVideoCount > 0) and
+            (.acceptedOccurrenceCount > 0) and
+            (.source_commit_sha | test("^[0-9a-fA-F]{40}$")) and
+            (.source_base_sha | test("^[0-9a-fA-F]{40}$")) and
+            (.patch_sha256 | test("^[0-9a-f]{64}$")) and
+            (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
+            (.acceptedFiles | type == "array" and length > 0)
+          ' "$TASK_ROOT/artifact/manifest.json" >/dev/null
+          patch_bytes="$(stat -c%s "$TASK_ROOT/artifact/candidate.ndjson")"
+          manifest_bytes="$(stat -c%s "$TASK_ROOT/artifact/manifest.json")"
+          task_bytes="$(du -sb "$TASK_ROOT" | awk '{print $1}')"
+          test "$task_bytes" -lt $((2 * 1024 * 1024 * 1024))
+          {
+            echo "sourceSha=$SOURCE_SHA"
+            echo "baseSha=$BASE_SHA"
+            echo "patchSha256=$patch_sha256"
+            echo "patchBytes=$patch_bytes"
+            echo "manifestBytes=$manifest_bytes"
+            echo "taskPeakBytes=$task_bytes"
+          } >> "$TASK_ROOT/storage.txt"
+          artifact_name="pg-accepted-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "artifact_name=$artifact_name" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "patch_sha256=$patch_sha256" >> "$GITHUB_OUTPUT"
+          echo "source_detail_key=$source_detail_key" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Accepted increment handoff"
+            echo "- source_sha: $SOURCE_SHA"
+            echo "- base_sha: $BASE_SHA"
+            echo "- source_committed_at: $source_committed_at"
+            echo "- accepted_files: $(jq 'length' "$TASK_ROOT/accepted-files.evidence.json")"
+            echo "- accepted_videos: $(jq -r '.acceptedVideoCount' "$TASK_ROOT/artifact/manifest.json")"
+            echo "- accepted_occurrences: $(jq -r '.acceptedOccurrenceCount' "$TASK_ROOT/artifact/manifest.json")"
+            echo "- patch_sha256: $patch_sha256"
+            echo "- source_detail_key: $source_detail_key"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload deterministic accepted handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prepare.outputs.artifact_name }}
+          path: ${{ env.TASK_ROOT }}/artifact
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Cleanup bounded handoff root
+        if: always()
+        run: |
+          set +e
+          before_cleanup_bytes="$(du -sb "$TASK_ROOT" 2>/dev/null | awk '{print $1}')"
+          cat "$TASK_ROOT/storage.txt" 2>/dev/null || true
+          rm -rf -- "$TASK_ROOT"
+          after_free_bytes=$(( $(df -Pk "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
+          echo "PG_ACCEPTED_HANDOFF_CLEANUP beforeBytes=${before_cleanup_bytes:-0} afterBytes=0 afterFreeBytes=$after_free_bytes retained=artifact-only"
+
+  release:
+    needs: prepare
+    uses: ./.github/workflows/deploy-pg-incremental.yml
+    with:
+      artifact_name: ${{ needs.prepare.outputs.artifact_name }}
+      artifact_run_id: ${{ github.run_id }}
+      patch_path: candidate.ndjson
+      manifest_path: manifest.json
+      activate: ${{ github.event_name == 'push' || inputs.activate }}
+      require_7d_gate: false
+      source_key: ${{ needs.prepare.outputs.source_detail_key }}
+    secrets: inherit

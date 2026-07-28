@@ -38,6 +38,15 @@ def published_at(value: Any) -> Any:
     return value
 
 
+def reviewed_timestamp(value: str | None) -> str:
+    if not value:
+        return datetime.now(timezone.utc).isoformat()
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("--reviewed-at must include a timezone")
+    return parsed.astimezone(timezone.utc).isoformat()
+
+
 def read_payload(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -120,8 +129,16 @@ def convert_video(video: dict[str, Any], source: dict[str, Any], source_path: Pa
     return record
 
 
-def convert(paths: Iterable[Path], output: Path, manifest_path: Path, default_range: str, source_key: str | None, status_audit_path: Path | None = None) -> dict[str, Any]:
-    reviewed_at = datetime.now(timezone.utc).isoformat()
+def convert(
+    paths: Iterable[Path],
+    output: Path,
+    manifest_path: Path,
+    default_range: str,
+    source_key: str | None,
+    status_audit_path: Path | None = None,
+    reviewed_at: str | None = None,
+) -> dict[str, Any]:
+    reviewed_at = reviewed_timestamp(reviewed_at)
     source_hash = hashlib.sha256()
     records = 0
     occurrences = 0
@@ -178,9 +195,21 @@ def main() -> int:
     parser.add_argument("--range-id", default="all")
     parser.add_argument("--source-key")
     parser.add_argument("--status-audit", type=Path)
+    parser.add_argument(
+        "--reviewed-at",
+        help="Deterministic timezone-aware source review/commit timestamp",
+    )
     args = parser.parse_args()
     try:
-        manifest = convert(input_paths(args), args.output, args.manifest_output, args.range_id, args.source_key, args.status_audit)
+        manifest = convert(
+            input_paths(args),
+            args.output,
+            args.manifest_output,
+            args.range_id,
+            args.source_key,
+            args.status_audit,
+            args.reviewed_at,
+        )
         print(json.dumps({"status": "ok", **manifest}, ensure_ascii=False))
         return 0
     except Exception as exc:
