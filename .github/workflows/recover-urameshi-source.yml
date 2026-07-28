@@ -220,11 +220,11 @@ jobs:
             identity_file="$1"
             identity_format="$2"
             identity_stage="$3"
-            identity_jq_args=()
+            identity_jq_mode=""
             if [ "$identity_format" = "ndjson" ]; then
-              identity_jq_args=(-s)
+              identity_jq_mode="-s"
             fi
-            if ! identity_metrics="$(jq "${identity_jq_args[@]}" -c               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+            if ! identity_metrics="$(jq $identity_jq_mode -c               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
                 def identity_records:
                   if type == "array" then .
                   elif ((.videos? // null) | type) == "array" then .videos
@@ -241,7 +241,7 @@ jobs:
               exit 78
             fi
             echo "URAMESHI_7D_IDENTITY stage=$identity_stage metrics=$identity_metrics"
-            if ! jq "${identity_jq_args[@]}" -e               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+            if ! jq $identity_jq_mode -e               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
                 def identity_records:
                   if type == "array" then .
                   elif ((.videos? // null) | type) == "array" then .videos

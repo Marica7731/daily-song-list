@@ -34,4 +34,6 @@ test("7d recovery binds every artifact stage to the requested channel identity",
   assert.match(workflow, /candidate artifact identity evidence mismatch/u);
   assert.match(workflow, /\.identityEvidence=\{sourceDetailKey:\$source,channelId:\$expectedChannelId/u);
   assert.match(workflow, /channel-identity-mismatch stage=\$identity_stage/u);
+  assert.match(workflow, /identity_jq_mode=""/u);
+  assert.doesNotMatch(workflow, /identity_jq_args/u);
 });
