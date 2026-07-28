@@ -512,17 +512,19 @@ jobs:
           source_detail_matches_probe() {
             jq -e \
               --arg video_id "$probe_video_id" \
-              --arg occurrence_id "$probe_occurrence_id" \
               --argjson title "$probe_title_json" \
               --argjson artist "$probe_artist_json" \
               --argjson seconds "$probe_seconds_json" '
-                (.found == true) and any(.record.occurrences[]?;
-                  (.videoId == $video_id) and
-                  ((.song.occurrenceId // .song.occurrence_id // "") == $occurrence_id) and
-                  (.song.title == $title) and
-                  ((.song.artist // null) == $artist) and
-                  ((.song.seconds // null) == $seconds)
-                )
+                (.found == true) and
+                ([
+                  .record.occurrences[]? |
+                  select(
+                    (.videoId == $video_id) and
+                    (.song.title == $title) and
+                    ((.song.artist // null) == $artist) and
+                    ((.song.seconds // null) == $seconds)
+                  )
+                ] | length) == 1
               ' "$1" >/dev/null
           }
           candidate_source_match=0

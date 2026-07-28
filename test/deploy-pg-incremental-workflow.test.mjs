@@ -34,6 +34,33 @@ function workflowRunBlocks(workflow) {
   return blocks;
 }
 
+function sourceIdentityGate(payload) {
+  const predicate = `
+    (.found == true) and
+    ([
+      .record.occurrences[]? |
+      select(
+        (.videoId == $video_id) and
+        (.song.title == $title) and
+        ((.song.artist // null) == $artist) and
+        ((.song.seconds // null) == $seconds)
+      )
+    ] | length) == 1
+  `;
+  return spawnSync(
+    "jq",
+    [
+      "-e",
+      "--arg", "video_id", "G7cNtd_Gy9c",
+      "--argjson", "title", JSON.stringify("song"),
+      "--argjson", "artist", JSON.stringify("artist"),
+      "--argjson", "seconds", "770",
+      predicate,
+    ],
+    { input: JSON.stringify(payload), encoding: "utf8" },
+  ).status;
+}
+
 test("workflow YAML parses and every run block has valid bash syntax", () => {
   for (const [name, workflow] of [
     ["deploy-pg-incremental", deployWorkflow],
@@ -54,6 +81,36 @@ test("workflow YAML parses and every run block has valid bash syntax", () => {
       );
     }
   }
+});
+
+test("source identity gate uses the API-visible tuple and fails closed on ambiguity", () => {
+  const matchingOccurrence = {
+    videoId: "G7cNtd_Gy9c",
+    song: { title: "song", artist: "artist", seconds: 770 },
+  };
+  assert.equal(
+    sourceIdentityGate({ found: true, record: { occurrences: [matchingOccurrence] } }),
+    0,
+  );
+  assert.notEqual(
+    sourceIdentityGate({
+      found: true,
+      record: { occurrences: [matchingOccurrence, matchingOccurrence] },
+    }),
+    0,
+  );
+  assert.notEqual(
+    sourceIdentityGate({
+      found: true,
+      record: {
+        occurrences: [{
+          ...matchingOccurrence,
+          videoId: "wrong-video",
+        }],
+      },
+    }),
+    0,
+  );
 });
 
 test("PG incremental dispatch can resume only an explicit same-repository artifact run", () => {
@@ -108,7 +165,13 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
     /\.identityEvidence\.sourceDetailKey \/\/ empty/u,
   );
   assert.match(deployWorkflow, /source-detail-identity-unparseable/u);
-  assert.match(deployWorkflow, /\.song\.occurrenceId/u);
+  assert.doesNotMatch(
+    deployWorkflow,
+    /\.song\.occurrenceId/u,
+    "the source API does not expose occurrenceId inside song",
+  );
+  assert.match(deployWorkflow, /\.record\.occurrences\[\]\? \|/u);
+  assert.match(deployWorkflow, /\] \| length\) == 1/u);
   assert.match(deployWorkflow, /candidate-source-identity-mismatch/u);
   assert.match(deployWorkflow, /public-source-identity-mismatch/u);
   assert.match(deployWorkflow, /source-detail-key-missing/u);
