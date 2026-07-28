@@ -43,6 +43,7 @@ SUPPORTED_RANGES = {"7d", "all"}
 SUPPORTED_VIEWS = {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}
 MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
+MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
 
 
 class PostgresAdapterError(RuntimeError):
@@ -928,9 +929,9 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     search_select = "search_text, channel_search_text" if options["q"] or options["view"] == "vtubers" else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
     base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
-    if options["q"]:
-        search_clause = " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
-        needle = f"%{options['q']}%"
+    for token in options["searchTokens"]:
+        search_clause += " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
+        needle = f"%{token}%"
         base_params.extend([needle, needle])
     base_rows = _rows(
         connection,
@@ -995,7 +996,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     filtered = []
     for row in groups.values():
         search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
-        if options["q"] and options["q"] not in search:
+        if options["searchTokens"] and not _matches_search_tokens(search, options["searchTokens"]):
             continue
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
@@ -1284,6 +1285,7 @@ def _query_options(query: Mapping[str, Any] | None) -> dict[str, Any]:
         "range": range_id,
         "view": view,
         "q": q,
+        "searchTokens": [token for token in q.split() if token],
         "page": page,
         "pageSize": page_size,
         "metric": metric,
@@ -1294,6 +1296,11 @@ def _query_options(query: Mapping[str, Any] | None) -> dict[str, Any]:
         "hideUnknownArtist": _bool_query(query, "hideUnknownArtist"),
         "compact": _bool_query(query, "compact"),
     }
+
+
+def _matches_search_tokens(search_text: object, tokens: Iterable[str]) -> bool:
+    haystack = _text(search_text).casefold()
+    return all(token in haystack for token in tokens)
 
 
 def _load_snapshot(connection) -> _Snapshot:
@@ -1711,9 +1718,14 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         """,
         [revision_id, options["range"], options["view"], db_metric],
     )
-    if options["q"]:
-        needle = options["q"]
-        rows = [row for row in rows if needle in (_text(row.get("search_text")) + " " + _text(row.get("channel_search_text"))).casefold()]
+    if options["searchTokens"]:
+        rows = [
+            row for row in rows
+            if _matches_search_tokens(
+                _text(row.get("search_text")) + " " + _text(row.get("channel_search_text")),
+                options["searchTokens"],
+            )
+        ]
     rows = [row for row in rows if int(row.get("row_count") or 0) >= options["minCount"]]
     total_occurrences = sum(int(row.get("row_count") or 0) for row in rows)
     total_songs = sum(int(row.get("song_count") or 0) for row in rows)
@@ -1774,6 +1786,47 @@ def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
     return item
 
 
+def _runtime_source_occurrences(connection, revision_id: str, key: str, range_id: str) -> list[dict[str, Any]]:
+    source_rows = _rows(
+        connection,
+        """
+        SELECT position, video_id, title, channel_name, channel_id, channel_handle,
+               channel_url, published_timestamp, seconds, payload_json
+        FROM runtime_source_occurrences
+        WHERE revision_id = %s AND source_key = %s AND range_id = %s
+        ORDER BY position
+        """,
+        [revision_id, key, range_id],
+    )
+    return [_runtime_source_occurrence(row) for row in source_rows]
+
+
+def _source_song_preview_key(item: Mapping[str, Any]) -> str:
+    song = item.get("song") if isinstance(item.get("song"), Mapping) else {}
+    song_key = _text(song.get("songKey") or song.get("key") or item.get("songKey"))
+    if song_key:
+        return f"key:{song_key.casefold()}"
+    title = _text(song.get("title") or item.get("songTitle") or item.get("title"))
+    artist = _text(song.get("artist") or item.get("songArtist") or item.get("artist"))
+    if title:
+        return f"title:{title.casefold()}\x1f{artist.casefold()}"
+    return ""
+
+
+def _source_song_previews(occurrences: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    previews: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in occurrences:
+        key = _source_song_preview_key(item)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        previews.append(dict(item))
+        if len(previews) >= MAX_SOURCE_PREVIEW_OCCURRENCES:
+            break
+    return previews
+
+
 def _runtime_source_payload(
     connection,
     revision_id: str,
@@ -1809,18 +1862,7 @@ def _runtime_source_payload(
     if any(field in query for field in ("page", "pageSize")):
         options = _query_options(query)
         range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
-        source_rows = _rows(
-            connection,
-            """
-            SELECT position, video_id, title, channel_name, channel_id, channel_handle,
-                   channel_url, published_timestamp, seconds, payload_json
-            FROM runtime_source_occurrences
-            WHERE revision_id = %s AND source_key = %s AND range_id = %s
-            ORDER BY position
-            """,
-            [revision_id, key, range_id],
-        )
-        occurrences = [_runtime_source_occurrence(row) for row in source_rows]
+        occurrences = _runtime_source_occurrences(connection, revision_id, key, range_id)
         if not occurrences:
             occurrences = list(record.get("occurrences") or [])
         occurrences = _apply_source_overlay(occurrences, overlay_changes)
@@ -1848,6 +1890,25 @@ def _runtime_source_payload(
             "totalCount": len(video_keys), "totalVideoCount": len(video_keys),
             "totalOccurrenceCount": len(occurrences),
         }
+    if record.get("occurrencePreviewLimited") and not query.get("q"):
+        options = _query_options(query)
+        range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
+        occurrences = _runtime_source_occurrences(connection, revision_id, key, range_id)
+        if occurrences:
+            occurrences = _apply_source_overlay(occurrences, overlay_changes)
+            previews = _source_song_previews(occurrences)
+            if previews:
+                video_keys = {
+                    _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId"))
+                    for item in occurrences
+                }
+                record = dict(record)
+                record["occurrences"] = previews
+                record["count"] = len(occurrences)
+                record["occurrenceCount"] = len(occurrences)
+                record["timestampCount"] = len(occurrences)
+                record["videoCount"] = len(video_keys - {""})
+                record["occurrencePreviewLimited"] = len(previews) < len(occurrences)
     if overlay_changes and isinstance(record.get("occurrences"), list):
         record = dict(record)
         record["occurrences"] = _apply_source_overlay(record["occurrences"], overlay_changes)

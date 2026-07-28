@@ -495,3 +495,63 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("runtime ranking search uses every whitespace-delimited link token", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+options = module._query_options({"q": "@noa_polaris 10月無口な君を忘れる"})
+assert options["searchTokens"] == ["@noa_polaris", "10月無口な君を忘れる"]
+assert module._matches_search_tokens("Noa @noa_polaris 10月無口な君を忘れる", options["searchTokens"])
+assert not module._matches_search_tokens("Noa @noa_polaris", options["searchTokens"])
+module._rows = lambda connection, sql, params: [{"rank": 1, "row_count": 11, "song_count": 1, "video_count": 11, "timestamp_count": 11, "search_text": "10月無口な君を忘れる あたらよ", "channel_search_text": "ノア @noa_polaris", "payload_json": {"title": "10月無口な君を忘れる"}}]
+payload = module._runtime_rankings_payload(object(), "rev", {"range": "all", "view": "songs", "metric": "occurrences", "q": "@noa_polaris 10月無口な君を忘れる"})
+assert payload["totalCount"] == 1 and payload["records"][0]["title"] == "10月無口な君を忘れる"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("unpaged source detail provides one real-video preview per song", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Cursor:
+    def execute(self, sql, params):
+        if "runtime_source_details" in sql:
+            self.description = [("payload_json",)]
+            self.rows = [(json.dumps({"sourceDetailKey": "src-noa", "rangeId": "all", "occurrencePreviewLimited": True, "occurrences": [{"videoId": "legacy", "thumbnailUrl": "legacy.jpg"}]}),)]
+        elif "runtime_source_occurrences" in sql:
+            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
+            self.rows = [
+                (0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, 0, json.dumps({"item": {"videoId": "video-a", "thumbnailUrl": "a.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
+                (1, "video-a2", "A2", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 1, json.dumps({"item": {"videoId": "video-a2", "thumbnailUrl": "a2.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
+                (2, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 2, json.dumps({"item": {"videoId": "video-b", "thumbnailUrl": "b.jpg"}, "song": {"songKey": "song-b", "title": "Song B"}})),
+                (3, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 4, 3, json.dumps({"item": {"videoId": "video-c", "thumbnailUrl": "c.jpg"}, "song": {"songKey": "song-c", "title": "Song C"}})),
+            ]
+        else:
+            raise AssertionError(sql)
+    def fetchall(self): return self.rows
+    def close(self): pass
+class Connection:
+    def cursor(self): return Cursor()
+result = module._runtime_source_payload(Connection(), "rev", "src-noa")
+assert result["found"] is True
+assert result["record"]["occurrenceCount"] == 4 and result["record"]["videoCount"] == 4
+previews = result["record"]["occurrences"]
+assert [item["item"]["thumbnailUrl"] for item in previews] == ["a.jpg", "b.jpg", "c.jpg"]
+assert {item["item"]["videoId"] for item in previews} == {"video-a", "video-b", "video-c"}
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
