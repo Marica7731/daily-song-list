@@ -161,6 +161,7 @@ test("search discovery routes continuation to youtubei search", async () => {
     initialData: channelData({
       videos: [videoRenderer("SEARCHVIDEO01", "【歌枠】検索結果", "1 日前")],
       continuation: "SEARCH_NEXT",
+      continuationApiUrl: "/youtubei/v1/search",
     }),
   });
   const client = {
@@ -558,7 +559,7 @@ function youtubeHtml({ initialData }) {
   )};</script>`;
 }
 
-function channelData({ videos, continuation = "" }) {
+function channelData({ videos, continuation = "", continuationApiUrl = "/youtubei/v1/browse" }) {
   return {
     contents: {
       twoColumnBrowseResultsRenderer: {
@@ -574,7 +575,7 @@ function channelData({ videos, continuation = "" }) {
                           {
                             continuationItemRenderer: {
                               continuationEndpoint: {
-                                commandMetadata: { webCommandMetadata: { apiUrl: "/youtubei/v1/browse" } },
+                                commandMetadata: { webCommandMetadata: { apiUrl: continuationApiUrl } },
                                 continuationCommand: { token: continuation },
                               },
                             },
