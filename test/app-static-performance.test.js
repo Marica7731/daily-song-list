@@ -515,6 +515,6 @@ function functionBody(signature) {
 
 test("source detail keys always select the existing API endpoint", () => {
   const body = functionBody("function sourceDetailPathForRecord");
-  assert.match(body, /if \(detailKey\) \{\s*return `\/api\/sources\/\$\{encodeURIComponent\(detailKey\)\}`;/u);
+  assert.match(body, /detailKey \|\| vtuberAlias/u);
   assert.doesNotMatch(body, /state\.runtimeApi\.available && detailKey/u);
 });

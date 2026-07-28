@@ -1939,12 +1939,33 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
     return rankings_payload_from_records(snapshot.records, query)
 
 
+def _runtime_source_key_for_channel_alias(connection, revision_id: str, requested_key: str) -> str:
+    """Resolve one active-revision VTuber channel identity to a unique source key."""
+    alias = _text(requested_key).strip()
+    if len(alias) < 4:
+        return ""
+    rows = _rows(connection, """
+        SELECT payload_json FROM runtime_ranking_rows
+        WHERE revision_id = %s AND view = 'vtubers' AND metric = 'count'
+          AND (detail_key = %s OR channel_search_text ILIKE %s)
+        LIMIT 8
+        """, [revision_id, alias, f"%{alias}%"])
+    candidates = {_text(_json_object(row.get("payload_json")).get("sourceDetailKey")) for row in rows}
+    candidates.discard("")
+    return next(iter(candidates)) if len(candidates) == 1 else ""
+
+
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
         persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
         if persisted.get("found"):
             return persisted
+        resolved_key = _runtime_source_key_for_channel_alias(connection, runtime[0], key)
+        if resolved_key:
+            persisted = _runtime_source_payload(connection, runtime[0], resolved_key, query, allow_derived=False)
+            if persisted.get("found"):
+                return persisted
         metadata = _channel_metadata_rows(connection, _revision_lineage(connection, runtime[0]))
         channel_metadata = _metadata_for_source_key(metadata, key)
         if channel_metadata:
