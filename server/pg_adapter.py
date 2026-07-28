@@ -968,7 +968,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
             row["timestamp_count"] = int(row.get("timestamp_count") or 0) + len(item["occurrences"])
             payload = _json_object(row.get("payload_json"))
-            payload.update({"count": row["row_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
+            payload.update({"count": row["row_count"], "songCount": row["song_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
             if isinstance(payload.get("occurrences"), list):
                 payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
             row["payload_json"] = payload
@@ -1763,6 +1763,14 @@ def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
     for name in ("thumbnailUrl", "videoThumbnailUrl", "avatarUrl"):
         if name not in item and nested_video.get(name) is not None:
             item[name] = nested_video[name]
+    video_id = _text(row.get("video_id"))
+    if video_id:
+        for name in ("thumbnailUrl", "videoThumbnailUrl"):
+            nested_thumbnail = _text(nested_video.get(name))
+            current_thumbnail = _text(item.get(name))
+            marker = f"/vi/{video_id}/"
+            if nested_thumbnail and marker in nested_thumbnail and marker not in current_thumbnail:
+                item[name] = nested_thumbnail
     return item
 
 

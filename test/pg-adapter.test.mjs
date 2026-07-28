@@ -456,3 +456,42 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+
+test("persisted source details prefer a nested thumbnail matching the row video", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+item = module._runtime_source_occurrence({"video_id": "right-video", "payload_json": json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/wrong-video/hqdefault.jpg", "video": {"thumbnailUrl": "https://i.ytimg.com/vi/right-video/hqdefault.jpg"}})})
+assert item["thumbnailUrl"] == "https://i.ytimg.com/vi/right-video/hqdefault.jpg"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic incremental rankings return their merged song count", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
+module._overlay_candidate_rows = lambda connection, revision_ids: []
+module._overlay_candidate_groups = lambda rows, view: {"channel": {"title": "", "artist": "", "name": "Channel", "search": "channel", "occurrences": [{"videoId": "new-video"}], "videoIds": {"new-video"}, "songKeys": {"song-a", "song-b"}}}
+module._runtime_tombstones = lambda connection, revision_ids: []
+module._channel_metadata_rows = lambda connection, revision_ids: []
+module._rows = lambda connection, sql, params: [{"rank": 1, "detail_key": "channel", "title": "", "artist": "", "name": "Channel", "row_count": 8, "song_count": 7, "video_count": 1, "timestamp_count": 8, "search_text": "channel", "channel_search_text": "channel", "payload_json": {"type": "vtuber", "key": "channel", "name": "Channel", "count": 8, "songCount": 0, "videoCount": 1, "timestampCount": 8}}] if "FROM runtime_ranking_rows" in sql else []
+payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "vtubers", "metric": "occurrences", "pageSize": "20"})
+assert payload["records"][0]["songCount"] == 9
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
