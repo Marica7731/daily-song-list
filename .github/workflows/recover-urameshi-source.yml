@@ -221,10 +221,14 @@ jobs:
             identity_format="$2"
             identity_stage="$3"
             identity_jq_mode=""
+            identity_allow_missing_id="0"
             if [ "$identity_format" = "ndjson" ]; then
               identity_jq_mode="-s"
             fi
-            if ! identity_metrics="$(jq $identity_jq_mode -c               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+            case "$identity_stage" in
+              candidate-discovery|candidate-artifact) identity_allow_missing_id="1" ;;
+            esac
+            if ! identity_metrics="$(jq $identity_jq_mode -c               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE"               --arg expected_url "$CHANNEL_URL"               --arg allow_missing_id "$identity_allow_missing_id" '
                 def identity_records:
                   if type == "array" then .
                   elif ((.videos? // null) | type) == "array" then .videos
@@ -234,14 +238,16 @@ jobs:
                   channelIds: (identity_records | map(.channelId // "") | unique),
                   channelHandles: (identity_records | map(.channelHandle // "") | unique),
                   expectedChannelId: $expected_id,
-                  expectedChannelHandle: $expected_handle
+                  expectedChannelHandle: $expected_handle,
+                  expectedChannelUrl: $expected_url,
+                  allowMissingChannelId: ($allow_missing_id == "1")
                 }
               ' "$identity_file")"; then
               echo "URAMESHI_7D_BLOCKED identity-metrics-invalid stage=$identity_stage" >&2
               exit 78
             fi
             echo "URAMESHI_7D_IDENTITY stage=$identity_stage metrics=$identity_metrics"
-            if ! jq $identity_jq_mode -e               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE" '
+            if ! jq $identity_jq_mode -e               --arg expected_id "$EXPECTED_CHANNEL_ID"               --arg expected_handle "$EXPECTED_CHANNEL_HANDLE"               --arg expected_url "$CHANNEL_URL"               --arg allow_missing_id "$identity_allow_missing_id" '
                 def identity_records:
                   if type == "array" then .
                   elif ((.videos? // null) | type) == "array" then .videos
@@ -253,7 +259,15 @@ jobs:
                   | if length > 0 then "/" + . else "" end;
                 (identity_records | length) > 0 and
                 all(identity_records[];
-                  (.channelId // "") == $expected_id and
+                  (
+                    (.channelId // "") == $expected_id or
+                    (
+                      $allow_missing_id == "1" and
+                      (.channelId // "") == "" and
+                      (.channelUrl // "") == $expected_url and
+                      ((.discoverySourceUrl // "") | startswith($expected_url + "/"))
+                    )
+                  ) and
                   (((.channelHandle // "") | norm_handle) as $actual_handle |
                     ($actual_handle == "" or $actual_handle == ($expected_handle | norm_handle)))
                 )
@@ -332,6 +346,16 @@ jobs:
             test -s "$DISCOVERY_MANIFEST" || { echo "URAMESHI_7D_BLOCKED missing discovery manifest"; exit 78; }
             jq -e '(.pageSummaries | length > 0) and all(.pageSummaries[]; .reachedEnd == true)' "$DISCOVERY_MANIFEST" >/dev/null || {
               echo "URAMESHI_7D_BLOCKED reachedEnd=false"; exit 78;
+            }
+            jq -e --arg channel_url "$CHANNEL_URL" '
+              (.pageUrls | type) == "array" and
+              (.pageUrls | length) > 0 and
+              all(.pageUrls[];
+                . == ($channel_url + "/streams") or
+                . == ($channel_url + "/videos")
+              )
+            ' "$DISCOVERY_MANIFEST" >/dev/null || {
+              echo "URAMESHI_7D_BLOCKED candidate-source-pages-not-channel-bounded" >&2; exit 78;
             }
             verify_target_identity "$TASK_ROOT/discovery/raw-videos.json" json candidate-discovery
             jq -c '.[]' "$TASK_ROOT/discovery/raw-videos.json" > "$RELEASE_ROOT/candidate-manifest.ndjson"
