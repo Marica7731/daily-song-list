@@ -979,10 +979,11 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
             row["timestamp_count"] = int(row.get("timestamp_count") or 0) + len(item["occurrences"])
             payload = _json_object(row.get("payload_json"))
-            payload.update({"count": row["row_count"], "songCount": row["song_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
-            if isinstance(payload.get("occurrences"), list):
-                payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
-            row["payload_json"] = payload
+            if payload:
+                payload.update({"count": row["row_count"], "songCount": row["song_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
+                if isinstance(payload.get("occurrences"), list):
+                    payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
+                row["payload_json"] = payload
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
     runtime_changes = _runtime_tombstones(connection, overlay_ids)
     video_ids = {
@@ -1032,6 +1033,12 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             payload = _json_object(stored.get("payload_json")) if stored else {}
         if options["view"] == "vtubers":
             payload = _apply_channel_metadata(payload, row, metadata, options["range"])
+        payload.update({
+            "count": int(row.get("row_count") or 0),
+            "songCount": int(row.get("song_count") or 0),
+            "videoCount": int(row.get("video_count") or 0),
+            "timestampCount": int(row.get("timestamp_count") or 0),
+        })
         payload["rank"] = index
         records.append(payload)
     return {

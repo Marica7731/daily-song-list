@@ -496,6 +496,36 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic incremental rankings keep stored identity fields after count merges", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+title = "\u6c34\u6d41\u306e\u30ed\u30c3\u30af"
+artist = "\u65e5\u98df\u306a\u3064\u3053"
+key = f"{title.casefold()}::{artist.casefold()}"
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
+module._overlay_candidate_rows = lambda connection, revision_ids: []
+module._overlay_candidate_groups = lambda rows, view: {key: {"title": title, "artist": artist, "name": title, "search": f"{title} {artist} @noa_polaris", "occurrences": [{"videoId": "new-video"}], "videoIds": {"new-video"}, "songKeys": {key}}}
+module._runtime_tombstones = lambda connection, revision_ids: []
+module._channel_metadata_rows = lambda connection, revision_ids: []
+module._rows = lambda connection, sql, params: [{"rank": 1, "detail_key": key, "title": title, "artist": artist, "name": "", "row_count": 494, "song_count": 0, "video_count": 475, "timestamp_count": 494, "search_text": f"{title} {artist}", "channel_search_text": "@noa_polaris"}] if "FROM runtime_ranking_rows" in sql else []
+module._one = lambda connection, sql, params: {"payload_json": {"type": "song", "key": key, "title": title, "displayArtist": artist, "count": 494, "songCount": 0, "videoCount": 475, "timestampCount": 494, "sourceDetailKey": "source-water"}}
+payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "songs", "metric": "occurrences", "pageSize": "20", "q": f"@noa_polaris {title}"})
+record = payload["records"][0]
+assert record["title"] == title
+assert record["displayArtist"] == artist
+assert record["sourceDetailKey"] == "source-water"
+assert record["count"] == 495 and record["videoCount"] == 476 and record["songCount"] == 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 
 test("runtime ranking search uses every whitespace-delimited link token", () => {
   const output = runPython(`
