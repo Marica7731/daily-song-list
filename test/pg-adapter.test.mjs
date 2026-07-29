@@ -655,6 +655,11 @@ test("adapter release workflow is fail-closed around identity and rollback gates
   assert.match(ADAPTER_WORKFLOW, /--max-time 60[\s\\]+http:\/\/127\.0\.0\.1:18766\/healthz/u);
   assert.match(ADAPTER_WORKFLOW, /systemd-run --quiet --collect --unit="\$candidate_unit"/u);
   assert.match(ADAPTER_WORKFLOW, /--property=RuntimeMaxSec=13m/u);
+  assert.match(ADAPTER_WORKFLOW, /--setenv=DAILY_SONG_PG_ADAPTER_PHASE_TRACE=1/u);
+  assert.match(ADAPTER_WORKFLOW, /if \[ "\$audit_status" -ne 0 \]; then[\s\S]*journalctl -u "\$candidate_unit" -n 160 --no-pager/u);
+  const installSection = ADAPTER_WORKFLOW.split("Install verified adapter and retain rollback files until health passes", 2)[1];
+  assert.ok(installSection);
+  assert.doesNotMatch(installSection, /DAILY_SONG_PG_ADAPTER_PHASE_TRACE/u);
   assert.match(ADAPTER_WORKFLOW, /journalctl -u "\$candidate_unit" -n 80 --no-pager/u);
   assert.match(ADAPTER_WORKFLOW, /timeout --signal=TERM --kill-after=15s 12m/u);
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
@@ -2064,12 +2069,15 @@ def rows(connection, sql, params):
         parent_video_queries += 1
         return parent_videos
     if "FROM runtime_occurrences" in sql:
+        if "o.video_id = ANY" in sql:
+            return [row for row in parent_occurrences if row["video_id"] in params[2]]
         return parent_occurrences
     return []
 module._rows = rows
 module._generic_parent_runtime_revision = lambda *args: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda *args: ["candidate"]
 module._overlay_candidate_rows = lambda *args: candidate_rows
+module._accepted_video_resets = lambda *args: {video_id: {"video_id": video_id, "tombstone": False} for video_id in {"video-old", "video-new"}}
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda *args: []
 module._VTUBER_REPLACEMENT_CACHE.clear()
@@ -2162,8 +2170,14 @@ def rows(connection, sql, params):
     if "jsonb_to_recordset" in sql:
         aggregate_queries += 1
         assert "o.payload_json::jsonb->>'isNiche'" in sql
-        assert sorted(json.loads(params[1])) == ["video-new", "video-old"]
-        values = json.loads(params[0])
+        assert "affected_channels AS MATERIALIZED" in sql
+        assert "affected_videos AS MATERIALIZED" in sql
+        assert "LEFT JOIN affected_videos AS touched" in sql
+        assert "jsonb_array_elements_text" not in sql
+        assert params[0] == [channel_id]
+        assert sorted(params[1]) == ["video-new", "video-old"]
+        assert params[2:4] == [[], []]
+        values = json.loads(params[4])
         assert len(values) == 3
         return [{"channel_id": channel_id, "row_count": 4, "video_count": 3, "song_count": 3}]
     return []
@@ -2171,6 +2185,7 @@ module._rows = rows
 module._generic_parent_runtime_revision = lambda *args: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda *args: ["candidate"]
 module._overlay_candidate_rows = lambda *args: candidate_rows
+module._accepted_video_resets = lambda *args: {video_id: {"video_id": video_id, "tombstone": False} for video_id in {"video-old", "video-new"}}
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda *args: []
 module._VTUBER_REPLACEMENT_CACHE.clear()
@@ -2604,7 +2619,7 @@ def rows(connection, sql, params):
             "video_id": "overlay-video",
             "occurrence_id": "position:0",
             "position": 1,
-            "range_id": "7d",
+            "range_id": "all",
             "song_key": "song-key",
             "seconds": 770,
             "title": "Song",
@@ -3358,6 +3373,211 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("VTuber exact aggregation covers reset tombstones and replacements without a second parent scan", () => {
+  const output = runPython(`
+import importlib.util
+import json
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Connection:
+    def cursor(self): return object()
+
+def candidate(video_id, occurrence_id, channel_id, key):
+    return {"revision_id": "accepted", "video_id": video_id, "occurrence_id": occurrence_id,
+      "position": 0, "range_id": "all", "song_key": key, "title": key, "artist": "Artist",
+      "channel_id": channel_id, "channel_name": channel_id, "video_tombstone": False,
+      "video_payload_json": {"videoId": video_id, "channelId": channel_id, "channelName": channel_id},
+      "occurrence_payload_json": {"videoId": video_id, "occurrenceId": occurrence_id, "songKey": key, "title": key, "artist": "Artist", "rangeId": "all"}}
+
+accepted = candidate("accepted-reset", "accepted-occ", "UCNEW", "accepted-song")
+replacement = candidate("runtime-replacement", "replacement-occ", "UCMOVED", "canonical")
+reset_changes = [{"entityType": "occurrences", "acceptedVideoReset": True, "videoId": "accepted-reset", "occurrenceId": "old", "channel_id": "UCOLD"}]
+runtime_changes = [
+  {"entityType": "occurrences", "videoId": "runtime-tombstone", "occurrenceId": "dead", "channel_id": "UCOLD"},
+  {"entityType": "occurrences", "videoId": "runtime-replacement", "occurrenceId": "old-name", "channel_id": "UCOLD", "replacement": True},
+]
+seen = []
+def rows(_connection, sql, params):
+    seen.append((sql, params))
+    assert "affected_channels AS MATERIALIZED" in sql
+    assert "affected_videos AS MATERIALIZED" in sql
+    assert "LEFT JOIN affected_videos AS touched" in sql
+    assert "affected_occurrences AS MATERIALIZED" in sql
+    assert "LEFT JOIN affected_occurrences AS changed" in sql
+    assert "jsonb_array_elements_text" not in sql
+    assert params[0] == ["UCMOVED", "UCNEW", "UCOLD"]
+    assert params[1] == ["accepted-reset"]
+    assert params[2] == ["runtime-replacement", "runtime-tombstone"]
+    assert params[3] == ["old-name", "dead"]
+    values = json.loads(params[4])
+    assert {(item["video_id"], item["song_key"]) for item in values} == {("accepted-reset", "accepted-song"), ("runtime-replacement", "canonical")}
+    return [
+      {"channel_id": "UCOLD", "row_count": 1, "video_count": 1, "song_count": 1},
+      {"channel_id": "UCNEW", "row_count": 1, "video_count": 1, "song_count": 1},
+      {"channel_id": "UCMOVED", "row_count": 1, "video_count": 1, "song_count": 1},
+    ]
+module._rows = rows
+module._VTUBER_REPLACEMENT_CACHE.clear()
+base = {"UCOLD": {"payload_json": {"channelId": "UCOLD", "occurrences": [
+  {"videoId": "runtime-tombstone", "occurrenceId": "dead", "item": {"videoId": "runtime-tombstone", "channelId": "UCOLD"}},
+  {"videoId": "keep", "occurrenceId": "keep", "item": {"videoId": "keep", "channelId": "UCOLD"}},
+]}}}
+exact = module._overlay_vtuber_replacement_rows(
+  Connection(), "active", "parent", [accepted], {"range": "all"}, base,
+  reset_changes, runtime_changes, [replacement], {"accepted-reset": {"tombstone": False}},
+)
+assert (
+    set(exact) == {"UCOLD", "UCNEW", "UCMOVED"}
+    and exact["UCOLD"]["row_count"] == 1
+    and {item["videoId"] for item in exact["UCOLD"]["payload_json"]["occurrences"]} == {"keep"}
+    and exact["UCNEW"]["payload_json"]["sourceDetailKey"] == module._stable_key("source-vtuber", "all", "UCNEW")
+    and len(seen) == 1
+), {"exact": exact, "seen": seen}
+
+# A nonempty exact VTuber projection is complete for its channels, so the
+# generic bounded reconcile must not execute a second parent occurrence scan.
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["candidate"]
+module._overlay_candidate_rows = lambda *_: []
+module._accepted_video_resets = lambda *_: {}
+module._runtime_tombstones = lambda *_: []
+module._channel_metadata_rows = lambda *_: []
+module._overlay_vtuber_replacement_rows = lambda *_args: {"UC1": {"detail_key": "UC1", "name": "One", "row_count": 1, "song_count": 1, "video_count": 1, "timestamp_count": 1, "payload_json": {"type": "vtuber", "key": "UC1", "channelId": "UC1", "count": 1, "songCount": 1, "videoCount": 1, "timestampCount": 1}}}
+reconcile_calls = []
+module._reconcile_affected_song_counts = lambda *args: reconcile_calls.append(args)
+module._rows = lambda _connection, sql, _params: [{"rank": 1, "detail_key": "UC1", "title": "", "artist": "", "name": "One", "row_count": 1, "song_count": 1, "video_count": 1, "timestamp_count": 1, "search_text": "", "channel_search_text": "", "payload_json": {"type": "vtuber", "key": "UC1", "channelId": "UC1"}}] if "runtime_ranking_rows" in sql else []
+payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "vtubers", "metric": "count", "pageSize": "20"})
+assert payload["records"][0]["channelId"] == "UC1"
+assert reconcile_calls == []
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("VTuber exact rows retain untouched runtime-video songs and physical-range boundaries", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def candidate(video_id, occurrence_id, key, range_id="all"):
+    return {"revision_id": "accepted", "video_id": video_id, "occurrence_id": occurrence_id, "position": 0, "range_id": range_id, "song_key": key, "title": key, "artist": "Artist", "channel_id": "UC1", "channel_name": "One", "video_tombstone": False, "video_payload_json": {"videoId": video_id, "channelId": "UC1", "channelName": "One"}, "occurrence_payload_json": {"videoId": video_id, "occurrenceId": occurrence_id, "songKey": key, "title": key, "artist": "Artist", "rangeId": range_id}}
+
+parent_videos = [
+  {"video_id": "full", "title": "Full", "channel_id": "UC1", "channel_name": "One", "payload_json": {}},
+  {"video_id": "runtime", "title": "Runtime", "channel_id": "UC1", "channel_name": "One", "payload_json": {}},
+  {"video_id": "other", "title": "Other", "channel_id": "UC1", "channel_name": "One", "payload_json": {}},
+]
+parent_occurrences = [
+  {"video_id": "full", "occurrence_id": "old-all", "range_id": "all", "song_key": "old-all", "title": "old-all", "artist": "Artist", "payload_json": {}},
+  {"video_id": "full", "occurrence_id": "old-7d", "range_id": "7d", "song_key": "old-7d", "title": "old-7d", "artist": "Artist", "payload_json": {}},
+  {"video_id": "runtime", "occurrence_id": "remove", "range_id": "all", "song_key": "remove", "title": "remove", "artist": "Artist", "payload_json": {}},
+  {"video_id": "runtime", "occurrence_id": "replace", "range_id": "all", "song_key": "old-name", "title": "old-name", "artist": "Artist", "payload_json": {}},
+  {"video_id": "runtime", "occurrence_id": "keep", "range_id": "all", "song_key": "keep", "title": "keep", "artist": "Artist", "payload_json": {}},
+  {"video_id": "runtime", "occurrence_id": "seven", "range_id": "7d", "song_key": "seven", "title": "seven", "artist": "Artist", "payload_json": {}},
+  {"video_id": "other", "occurrence_id": "other", "range_id": "all", "song_key": "other", "title": "other", "artist": "Artist", "payload_json": {}},
+]
+def rows(_connection, sql, _params):
+    if "FROM runtime_videos" in sql: return parent_videos
+    if "FROM runtime_occurrences" in sql: return parent_occurrences
+    raise AssertionError(sql)
+module._rows = rows
+runtime_changes = [
+  {"entityType": "occurrences", "videoId": "runtime", "occurrenceId": "remove", "channel_id": "UC1"},
+  {"entityType": "occurrences", "videoId": "runtime", "occurrenceId": "replace", "channel_id": "UC1", "replacement": True},
+]
+all_rows = module._overlay_vtuber_replacement_rows(
+  object(), "active-all", "parent", [candidate("full", "fresh", "fresh")], module._query_options({"range": "all", "view": "vtubers"}), {},
+  [{"entityType": "occurrences", "acceptedVideoReset": True, "videoId": "full", "occurrenceId": "old-all", "channel_id": "UC1"}],
+  runtime_changes, [candidate("runtime", "replace", "canonical")], {"full": {"tombstone": False}},
+)
+all_payload = all_rows["UC1"]["payload_json"]
+all_ids = {item["song"]["occurrenceId"] for item in all_payload["occurrences"]}
+assert all_ids == {"fresh", "replace", "keep", "other"}, all_payload
+assert (all_payload["count"], all_payload["videoCount"], all_payload["songCount"]) == (4, 3, 4)
+assert all_payload["sourceDetailKey"] == module._stable_key("source-vtuber", "all", "UC1")
+
+# The same full-video boundary removes old 7d rows, while all-only runtime
+# chains and candidates never cross the physical range boundary.
+seven_rows = module._overlay_vtuber_replacement_rows(
+  object(), "active-7d", "parent", [], module._query_options({"range": "7d", "view": "vtubers"}), {},
+  [{"entityType": "occurrences", "acceptedVideoReset": True, "videoId": "full", "occurrenceId": "old-7d", "channel_id": "UC1"}],
+  [], [], {"full": {"tombstone": False}},
+)
+seven_payload = seven_rows["UC1"]["payload_json"]
+assert {item["song"]["occurrenceId"] for item in seven_payload["occurrences"]} == {"seven"}
+assert seven_payload["sourceDetailKey"] == module._stable_key("source-vtuber", "7d", "UC1")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("VTuber exact input is range-filtered and candidate filters preserve SQL semantics", () => {
+  const output = runPython(`
+import importlib.util
+import json
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def candidate(video_id, occurrence_id, range_id, artist="Artist", niche=True):
+    return {"revision_id": "accepted", "video_id": video_id, "occurrence_id": occurrence_id, "position": 0, "range_id": range_id, "song_key": occurrence_id, "title": occurrence_id, "artist": artist, "channel_id": "UC1", "channel_name": "One", "video_tombstone": False, "video_payload_json": {"videoId": video_id, "channelId": "UC1", "channelName": "One"}, "occurrence_payload_json": {"videoId": video_id, "occurrenceId": occurrence_id, "songKey": occurrence_id, "title": occurrence_id, "artist": artist, "rangeId": range_id, "isNiche": niche}}
+
+all_row = candidate("all-video", "all-occ", "all")
+seven_row = candidate("seven-video", "seven-occ", "7d")
+captured = []
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["accepted"]
+module._overlay_candidate_rows = lambda *_: [all_row, seven_row]
+module._accepted_video_resets = lambda *_: {}
+module._accepted_video_reset_changes = lambda *_: []
+module._runtime_tombstones = lambda *_: [
+  {"entityType": "occurrences", "videoId": "all-video", "occurrenceId": "all-occ", "rangeId": "all", "channel_id": "UC1"},
+  {"entityType": "occurrences", "videoId": "seven-video", "occurrenceId": "seven-occ", "rangeId": "7d", "channel_id": "UC1"},
+]
+module._enrich_runtime_original_group_counts = lambda *_: None
+module._channel_metadata_rows = lambda *_: []
+real_exact = module._overlay_vtuber_replacement_rows
+def exact(*args):
+    captured.append(args)
+    return {"UC1": {"detail_key": "UC1", "name": "One", "row_count": 1, "song_count": 1, "video_count": 1, "timestamp_count": 1, "payload_json": {"type": "vtuber", "key": "UC1", "channelId": "UC1"}}}
+module._overlay_vtuber_replacement_rows = exact
+module._rows = lambda _connection, sql, _params: []
+module._generic_overlay_rankings_payload(object(), "active", {"revision_id": "active"}, {"range": "7d", "view": "vtubers", "metric": "count", "pageSize": "20"})
+rows, _options, _base, _reset, changes, replacements = captured[0][3:9]
+assert [row["range_id"] for row in rows] == ["7d"]
+assert [change["rangeId"] for change in changes] == ["7d"]
+assert replacements == ()
+module._overlay_vtuber_replacement_rows = real_exact
+
+# SQL candidate values honour both niche and unknown-artist gates before the
+# aggregate query; this does not need a schema/index migration.
+class Connection:
+    def cursor(self): return object()
+seen = []
+def sql_rows(_connection, sql, params):
+    seen.append((sql, params))
+    assert "CREATE INDEX" not in sql and "jsonb_array_elements_text" not in sql
+    values = json.loads(params[4])
+    assert [(item["video_id"], item["song_key"]) for item in values] == [("known", "known")]
+    return [{"channel_id": "UC1", "row_count": 1, "video_count": 1, "song_count": 1}]
+module._rows = sql_rows
+module._VTUBER_REPLACEMENT_CACHE.clear()
+module._overlay_vtuber_replacement_rows(Connection(), "filters", "parent", [candidate("known", "known", "all"), candidate("unknown", "unknown", "all", artist=""), candidate("broad", "broad", "all", niche=False)], module._query_options({"range": "all", "view": "vtubers", "nicheOnly": "1", "hideUnknownArtist": "1"}), {}, (), (), (), {})
+assert len(seen) == 1, seen
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("overlay SQL keeps physical ranges strict and bounds exact tuple lookups", () => {
   const output = runPython(`
 import importlib.util
@@ -3373,8 +3593,8 @@ range_calls = []
 def vtuber_rows(_connection, sql, params):
     assert "(%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))" in sql
     assert "(%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))" in sql
-    assert params[5] == params[6] and params[5] in {"all", "7d"}, params
-    range_calls.append(tuple(params[5:7]))
+    assert params[7] == params[8] and params[7] in {"all", "7d"}, params
+    range_calls.append(tuple(params[7:9]))
     return [{"channel_id": "UC1", "row_count": 1, "video_count": 1, "song_count": 1}]
 module._rows = vtuber_rows
 module._VTUBER_REPLACEMENT_CACHE.clear()

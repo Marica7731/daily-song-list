@@ -23,6 +23,8 @@ import json
 import math
 import os
 import re
+import sys
+import time
 import unicodedata
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -50,6 +52,19 @@ _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
 # map, never record/payload data: a changed active pointer produces a different
 # key and a process restart simply recomputes it from PostgreSQL.
 _GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int]] = {}
+
+
+def _phase_trace(phase: str, started_at: float) -> float:
+    """Emit candidate-only timing markers without changing normal API output."""
+
+    now = time.perf_counter()
+    if os.environ.get("DAILY_SONG_PG_ADAPTER_PHASE_TRACE") == "1":
+        print(
+            f"pg_adapter_phase phase={phase} elapsed_seconds={now - started_at:.3f}",
+            file=sys.stderr,
+            flush=True,
+        )
+    return now
 
 
 class PostgresAdapterError(RuntimeError):
@@ -2413,6 +2428,10 @@ def _overlay_vtuber_replacement_rows(
     rows: Iterable[Mapping[str, Any]],
     options: Mapping[str, Any],
     base_groups: Mapping[str, Mapping[str, Any]],
+    reset_changes: Sequence[Mapping[str, Any]] = (),
+    runtime_changes: Sequence[Mapping[str, Any]] = (),
+    replacement_rows: Sequence[Mapping[str, Any]] = (),
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Rebuild affected VTuber groups with per-video replacement semantics."""
 
@@ -2437,7 +2456,48 @@ def _overlay_vtuber_replacement_rows(
 
     candidate_records: dict[str, dict[str, Any]] = {}
     affected_channel_ids: set[str] = set()
-    for row in rows:
+    # Only full-video boundaries remove every parent occurrence.  Runtime
+    # occurrence chains stay as (video_id, occurrence_id) anti-joins below;
+    # treating those as video replacements would silently drop unrelated songs
+    # from the same video.
+    full_video_ids = {
+        _text(video_id) for video_id in (accepted_video_resets or {}) if _text(video_id)
+    }
+    affected_occurrence_ids: set[tuple[str, str]] = set()
+
+    def row_channel_id(row: Mapping[str, Any]) -> str:
+        video = _overlay_public_video(row)
+        return _text(
+            row.get("channel_id")
+            or video.get("channelId")
+            or _json_object(row.get("replacementVideoPayload")).get("channelId")
+        )
+
+    # The exact aggregate must cover both sides of a channel move.  A pure
+    # accepted/runtime tombstone has no candidate tuple, but its original
+    # channel remains affected and must be rebuilt rather than decremented
+    # again by the generic reconcile path below.
+    for changed in (*reset_changes, *runtime_changes, *replacement_rows):
+        channel_id = row_channel_id(changed)
+        if channel_id:
+            affected_channel_ids.add(channel_id)
+        video_id = _text(changed.get("videoId") or changed.get("video_id"))
+        entity_type = _text(changed.get("entityType") or changed.get("entity_type"))
+        occurrence_id = _text(changed.get("occurrenceId") or changed.get("occurrence_id"))
+        if entity_type in {"videos", "runtime_videos"} and video_id:
+            full_video_ids.add(video_id)
+        elif (
+            entity_type in {"occurrences", "runtime_occurrences"}
+            and not bool(changed.get("acceptedVideoReset"))
+            and video_id and occurrence_id
+        ):
+            affected_occurrence_ids.add((video_id, occurrence_id))
+
+    # Non-tombstone candidates are the complete replacement projection for
+    # every selected accepted video.  Final runtime replacements are appended
+    # as candidates too, including a same-video title correction that the
+    # generic delta intentionally suppresses.
+    for row in (*rows, *replacement_rows):
         if row.get("video_tombstone"):
             continue
         video_id = _text(row.get("video_id"))
@@ -2448,7 +2508,7 @@ def _overlay_vtuber_replacement_rows(
         affected_channel_ids.add(channel_id)
         record = candidate_records.get(video_id)
         if record is None:
-            record = {"video": video, "occurrences": []}
+            record = {"video": video, "occurrences": [], "identities": set()}
             candidate_records[video_id] = record
         song = _json_object(row.get("occurrence_payload_json"))
         if isinstance(song.get("payload"), Mapping):
@@ -2465,7 +2525,14 @@ def _overlay_vtuber_replacement_rows(
             "rawHash": song.get("rawHash") or row.get("raw_hash"),
             "sourceSystem": song.get("sourceSystem") or row.get("source_system"),
         })
-        record["occurrences"].append(song)
+        identity = (
+            _text(song.get("occurrenceId")),
+            _text(song.get("songKey")),
+            _text(song.get("rangeId")),
+        )
+        if identity not in record["identities"]:
+            record["identities"].add(identity)
+            record["occurrences"].append(song)
     if not affected_channel_ids:
         return {}
 
@@ -2509,13 +2576,21 @@ def _overlay_vtuber_replacement_rows(
         summaries = _rows(
             connection,
             """
-            WITH overlay_occurrences AS (
+            WITH affected_channels AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS channel_id
+            ),
+            affected_videos AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS video_id
+            ),
+            affected_occurrences AS MATERIALIZED (
+              SELECT DISTINCT video_id, occurrence_id
+              FROM unnest(%s::text[], %s::text[])
+                AS item(video_id, occurrence_id)
+            ),
+            overlay_occurrences AS MATERIALIZED (
               SELECT channel_id, video_id, song_key
               FROM jsonb_to_recordset(%s::jsonb)
                 AS item(channel_id text, video_id text, song_key text)
-            ),
-            replacement_videos AS (
-              SELECT jsonb_array_elements_text(%s::jsonb) AS video_id
             ),
             parent_occurrences AS (
               SELECT v.channel_id, o.video_id,
@@ -2527,13 +2602,17 @@ def _overlay_vtuber_replacement_rows(
               FROM runtime_videos AS v
               JOIN runtime_occurrences AS o
                 ON o.revision_id = v.revision_id AND o.video_id = v.video_id
+              JOIN affected_channels AS affected
+                ON affected.channel_id = v.channel_id
+              LEFT JOIN affected_videos AS touched
+                ON touched.video_id = v.video_id
+              LEFT JOIN affected_occurrences AS changed
+                ON changed.video_id = o.video_id
+               AND changed.occurrence_id = o.occurrence_id
               WHERE v.revision_id = %s
                 AND o.revision_id = %s
-                AND v.channel_id = ANY(%s)
-                AND NOT EXISTS (
-                  SELECT 1 FROM replacement_videos AS replacement
-                  WHERE replacement.video_id = v.video_id
-                )
+                AND touched.video_id IS NULL
+                AND changed.occurrence_id IS NULL
                 AND (
                   (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
                   OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
@@ -2560,11 +2639,13 @@ def _overlay_vtuber_replacement_rows(
             GROUP BY channel_id
             """,
             [
-                json.dumps(candidate_values, ensure_ascii=False),
-                json.dumps(sorted(candidate_records), ensure_ascii=False),
-                parent_revision_id,
-                parent_revision_id,
                 sorted(affected_channel_ids),
+                sorted(full_video_ids),
+                [video_id for video_id, _ in sorted(affected_occurrence_ids)],
+                [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
+                json.dumps(candidate_values, ensure_ascii=False),
+                parent_revision_id,
+                parent_revision_id,
                 _text(options.get("range")) or "all",
                 _text(options.get("range")) or "all",
                 bool(options.get("hideUnknownArtist")),
@@ -2577,7 +2658,7 @@ def _overlay_vtuber_replacement_rows(
             if _text(row.get("channel_id"))
         }
         exact: dict[str, dict[str, Any]] = {}
-        replaced_video_ids = set(candidate_records)
+        replaced_video_ids = set(full_video_ids)
         for channel_id in sorted(affected_channel_ids):
             summary = summary_by_channel.get(channel_id, {})
             base_row = base_groups.get(channel_id) or {}
@@ -2604,7 +2685,8 @@ def _overlay_vtuber_replacement_rows(
                 if _text(nested.get("channelId")) not in {"", channel_id}:
                     continue
                 video_id = _text(nested.get("videoId") or occurrence.get("videoId"))
-                if video_id in replaced_video_ids:
+                occurrence_id = _text(occurrence.get("occurrenceId"))
+                if video_id in replaced_video_ids or (video_id, occurrence_id) in affected_occurrence_ids:
                     continue
                 canonical = dict(occurrence)
                 canonical["item"] = dict(nested)
@@ -2682,7 +2764,7 @@ def _overlay_vtuber_replacement_rows(
         parent_by_video[_text(occurrence.get("video_id"))].append(occurrence)
 
     records: list[dict[str, Any]] = []
-    replaced_video_ids = set(candidate_records)
+    replaced_video_ids = set(full_video_ids)
     for row in parent_video_rows:
         video_id = _text(row.get("video_id"))
         if not video_id or video_id in replaced_video_ids:
@@ -2699,6 +2781,8 @@ def _overlay_vtuber_replacement_rows(
         })
         songs: list[dict[str, Any]] = []
         for occurrence in parent_by_video.get(video_id, ()):
+            if (video_id, _text(occurrence.get("occurrence_id"))) in affected_occurrence_ids:
+                continue
             song = _json_object(occurrence.get("payload_json"))
             song.update({
                 "occurrenceId": song.get("occurrenceId") or occurrence.get("occurrence_id"),
@@ -2751,6 +2835,7 @@ def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
 def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Return bounded candidate rankings from parent aggregates plus delta rows."""
 
+    phase_started = time.perf_counter()
     parent = _generic_parent_runtime_revision(connection, revision_id, revision)
     if not parent:
         raise PostgresAdapterError("incremental candidate has no full runtime parent")
@@ -2776,9 +2861,11 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         base_params,
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
+    phase_started = _phase_trace("base", phase_started)
     overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
     candidate_rows = _overlay_candidate_rows(connection, overlay_ids, False)
     all_candidate_rows = tuple(candidate_rows)
+    phase_started = _phase_trace("overlay", phase_started)
     accepted_video_resets = _accepted_video_resets(connection, overlay_ids, False)
     reset_changes = _accepted_video_reset_changes(
         connection, parent[0], accepted_video_resets, options,
@@ -2789,8 +2876,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         accepted_video_resets.values() if accepted_video_resets else None,
         all_candidate_rows,
     )
+    phase_started = _phase_trace("reset", phase_started)
     candidate_rows = _overlay_rows_for_range(candidate_rows, options["range"])
     runtime_changes = _overlay_rows_for_range(runtime_changes_all, options["range"])
+    # The exact VTuber query is physical-range scoped.  Do not pass the
+    # lineage-wide candidate list: a legacy/all row must not leak into 7d,
+    # and a 7d row must not perturb the all aggregate.
+    exact_candidate_rows = tuple(candidate_rows)
     video_ids = {
         _text(change.get("videoId") or change.get("video_id"))
         for change in runtime_changes
@@ -2841,6 +2933,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     _apply_runtime_tombstone_groups(groups, reset_changes, options["view"])
     _apply_runtime_change_previews(groups, reset_changes, options["view"])
     replacement_rows = _runtime_replacement_candidate_rows(runtime_changes)
+    exact_replacement_rows = tuple(replacement_rows)
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         candidate_rows = [*candidate_rows, *replacement_rows]
     elif options["view"] == "artists":
@@ -2858,19 +2951,32 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row for row in candidate_rows
             if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
         ]
+        exact_candidate_rows = tuple(
+            row for row in exact_candidate_rows
+            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+        )
+        exact_replacement_rows = tuple(
+            row for row in exact_replacement_rows
+            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+        )
     delta = _overlay_candidate_groups(candidate_rows, options["view"])
     exact_vtuber_rows = (
         _overlay_vtuber_replacement_rows(
             connection,
             revision_id,
             parent[0],
-            candidate_rows,
+            exact_candidate_rows,
             options,
             groups,
+            reset_changes,
+            runtime_changes,
+            exact_replacement_rows,
+            accepted_video_resets,
         )
         if options["view"] == "vtubers"
         else {}
     )
+    phase_started = _phase_trace("exact", phase_started)
     groups.update(exact_vtuber_rows)
     for key, item in delta.items():
         if key in exact_vtuber_rows:
@@ -2911,16 +3017,21 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
     _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
     _apply_runtime_change_previews(groups, runtime_changes, options["view"])
-    _reconcile_affected_song_counts(
-        connection,
-        parent[0],
-        all_candidate_rows,
-        replacement_rows,
-        [*reset_changes, *runtime_changes],
-        groups,
-        options["view"],
-        options,
-    )
+    # Exact VTuber aggregation already owns every affected channel's effective
+    # tuple set.  Re-running the generic bounded parent scan here was the
+    # cold-ranking timeout; songs/artists/videos keep their existing path.
+    if options["view"] != "vtubers" or not exact_vtuber_rows:
+        _reconcile_affected_song_counts(
+            connection,
+            parent[0],
+            all_candidate_rows,
+            replacement_rows,
+            [*reset_changes, *runtime_changes],
+            groups,
+            options["view"],
+            options,
+        )
+    phase_started = _phase_trace("reconcile", phase_started)
     filtered = []
     for row in groups.values():
         search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
@@ -2959,6 +3070,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         payload["rank"] = index
         records.append(payload)
     _hydrate_overlay_page_previews(connection, candidate_rows, records)
+    _phase_trace("hydrate", phase_started)
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -3370,7 +3482,10 @@ def _occurrences_for_range(record: Mapping[str, Any], range_id: str) -> list[dic
     values = []
     for song in record["occurrences"]:
         song_range = _text(song.get("rangeId"))
-        if range_id == "all" or song_range in {range_id, ""}:
+        # ``all`` and ``7d`` are separate physical projections.  Legacy rows
+        # without a range remain visible through both paths, but a materialized
+        # 7d tuple must never leak into the all aggregate (or vice versa).
+        if song_range in {range_id, ""}:
             item = dict(record["video"])
             values.append({"rangeId": song_range or range_id, "videoId": item.get("videoId", ""), "item": item, "song": dict(song)})
     return values

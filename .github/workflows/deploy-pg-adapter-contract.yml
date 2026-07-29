@@ -130,6 +130,7 @@ jobs:
             --setenv=PGHOST=/var/run/postgresql \
             --setenv=PGDATABASE=song_rank \
             --setenv=PGUSER=www-data \
+            --setenv=DAILY_SONG_PG_ADAPTER_PHASE_TRACE=1 \
             --setenv=PYTHONPATH="$remote_root/server" \
             /usr/bin/python3 "$remote_root/server/pg_api_server.py" \
               --host 127.0.0.1 --port 18766
@@ -169,6 +170,9 @@ jobs:
           # The cap bounds this at 6*200 ranking pages plus the fixed probes.
           # Preserve every per-request timing/progress marker in the job log.
           cat "$remote_root/candidate-identity-audit.log"
+          if [ "$audit_status" -ne 0 ]; then
+            journalctl -u "$candidate_unit" -n 160 --no-pager
+          fi
           exit "$audit_status"
           REMOTE
 
