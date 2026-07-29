@@ -119,17 +119,71 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("ranking identity audit prints its full summary before failing probes", () => {
+  const output = runPython(`
+import contextlib
+import importlib.util
+import io
+import json
+import sys
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+def fetch_json(base_url, path, timeout):
+    if path == "/healthz":
+        return 200, 1, {"status": "ok"}
+    if path == "/api/meta":
+        return 200, 1, {"meta": {"active_revision_id": "active"}}
+    if path.startswith("/api/sources/source-key"):
+        return 200, 1, {
+            "found": True,
+            "totalOccurrenceCount": 1,
+            "record": {"channelId": "UCEXPECTED", "occurrenceCount": 1, "videoCount": 1},
+        }
+    raise AssertionError(path)
+module.fetch_json = fetch_json
+sys.argv = [
+    "audit", "--base-url", "http://candidate", "--skip-rankings",
+    "--negative-query", "", "--expected-active", "active",
+    "--source-probe", "source-key,UCEXPECTED,2,2",
+]
+stream = io.StringIO()
+with contextlib.redirect_stdout(stream):
+    try:
+        module.main()
+    except RuntimeError as error:
+        assert "gateErrors=2" in str(error)
+    else:
+        raise AssertionError("probe mismatch must fail")
+summary_line = next(line for line in stream.getvalue().splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
+summary = json.loads(summary_line.split(" ", 1)[1])
+assert summary["affectedRecords"] == 0
+assert summary["gateErrors"] == [
+    "source occurrence count mismatch: source-key",
+    "source video count mismatch: source-key",
+]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("adapter release workflow is fail-closed around identity and rollback gates", () => {
   assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
   assert.match(ADAPTER_WORKFLOW, /audit-ranking-source-identities\.py/u);
-  assert.match(ADAPTER_WORKFLOW, /--range all --range 7d --metric count --metric songs --metric videos/u);
+  assert.match(
+    ADAPTER_WORKFLOW,
+    /--range all --range 7d[\s\\]+--metric count --metric songs --metric videos/u,
+  );
   assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
   assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
-  assert.match(ADAPTER_WORKFLOW, /--max-time 60 http:\/\/127\.0\.0\.1:18766\/healthz/u);
-  assert.match(ADAPTER_WORKFLOW, /tail -n 80 '\$REMOTE_ROOT\/candidate\.log'/u);
+  assert.match(ADAPTER_WORKFLOW, /--max-time 60[\s\\]+http:\/\/127\.0\.0\.1:18766\/healthz/u);
+  assert.match(ADAPTER_WORKFLOW, /tail -n 80 "\$remote_root\/candidate\.log"/u);
+  assert.match(ADAPTER_WORKFLOW, /timeout --signal=TERM --kill-after=15s 12m/u);
+  assert.match(ADAPTER_WORKFLOW, /<\/dev\/null >"\$remote_root\/candidate\.log"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);
   for (const [index, block] of blocks.entries()) {
@@ -255,6 +309,7 @@ assert mikoto["channelId"] == mikoto_id
 assert mikoto["channelHandle"] == "/@mikoto_songs"
 assert mikoto["name"] == "Mikoto"
 assert mikoto["sourceDetailKey"] == "mikoto-source"
+assert mikoto["channelUrl"] == f"https://www.youtube.com/channel/{mikoto_id}"
 urameshi = module._apply_channel_metadata(
     {
         "key": urameshi_id,
@@ -288,6 +343,37 @@ assert urameshi["sourceDetailKey"] == module._stable_key("source-vtuber", "7d", 
 assert urameshi["occurrences"][0]["item"]["channelHandle"] == "/@urameshi_conta"
 assert urameshi["occurrences"][0]["video"]["channelHandle"] == "/@urameshi_conta"
 assert urameshi["occurrences"][0]["item"]["thumbnailUrl"].endswith("/expected-video/hqdefault.jpg")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("a unique occurrence identity repairs cards without metadata and remains addressable", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UCP0Eq4VN3bUB5EJUerAugSQ"
+payload = module._apply_channel_metadata(
+    {
+        "key": channel_id,
+        "occurrences": [{
+            "item": {"videoId": "video-id", "channelId": channel_id, "channelHandle": "/@Mihako_Tarta"},
+            "video": {"videoId": "video-id", "channelId": channel_id, "channelHandle": "/@Mihako_Tarta"},
+        }],
+    },
+    {"detail_key": channel_id},
+    [],
+)
+assert payload["channelId"] == channel_id
+assert payload["channelHandle"] == "/@Mihako_Tarta"
+assert payload["channelUrl"] == f"https://www.youtube.com/channel/{channel_id}"
+assert payload["sourceDetailKey"] == channel_id
+assert payload["sourceDetailPath"] == f"/api/sources/{channel_id}"
+assert payload["occurrences"][0]["item"] == payload["occurrences"][0]["video"]
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -988,6 +1074,36 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic source details rebuild a channel-id key without metadata", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UCP0Eq4VN3bUB5EJUerAugSQ"
+module._runtime_projection_revision = lambda connection: None
+module._generic_runtime_projection_revision = lambda connection: ("active", {"revision_id": "active"})
+module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["active"]
+module._runtime_source_payload = lambda *args, **kwargs: {"schemaVersion": 1, "found": False, "sourceKey": args[2]}
+module._runtime_source_key_for_channel_alias = lambda *args: ""
+module._channel_metadata_rows = lambda *args: []
+module._revision_lineage = lambda *args: ["active", "parent"]
+calls = []
+def rebuilt(connection, revision_id, metadata, key, query, overlay_revision_ids):
+    calls.append((revision_id, metadata, key, overlay_revision_ids))
+    return {"schemaVersion": 1, "found": True, "sourceKey": key}
+module._runtime_channel_source_payload = rebuilt
+result = module.source_payload(object(), channel_id)
+assert result["found"] is True and result["sourceKey"] == channel_id
+assert calls == [("parent", {"channelId": channel_id}, channel_id, ["active"])]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 
 test("channel source rebuild preserves a legacy persisted source key", () => {
   const output = runPython(`
@@ -1005,6 +1121,8 @@ metadata = {
 canonical_key = module._stable_key("source-vtuber", "all", metadata["channelId"])
 def rows(connection, sql, params):
     if "FROM runtime_videos" in sql:
+        assert "channel_id = %s" in sql
+        assert "channel_handle = %s" not in sql and "channel_name = %s" not in sql
         return [{
             "video_id": "parent-video",
             "title": "Parent",
@@ -1031,11 +1149,15 @@ def rows(connection, sql, params):
             "raw_hash": "raw",
             "source_system": "youtube_channel_discovery",
             "video_title": "Overlay",
-            "channel_name": "MunMosh",
-            "channel_id": metadata["channelId"],
-            "channel_handle": metadata["channelHandle"],
+            "channel_name": "",
+            "channel_id": "",
+            "channel_handle": "",
             "channel_url": "https://youtube.com/@urameshi_conta",
             "published_at": "2026-07-27T11:33:06Z",
+            "video_payload_json": {
+                "channelId": metadata["channelId"],
+                "channelHandle": metadata["channelHandle"],
+            },
             "video_tombstone": False,
         }]
     if "FROM migration_video_rows" in sql:

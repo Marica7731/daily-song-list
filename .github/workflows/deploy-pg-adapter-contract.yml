@@ -109,8 +109,71 @@ jobs:
           printf 'REMOTE_ROOT=%s\n' "$REMOTE_ROOT" >> "$GITHUB_ENV"
           ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; rm -rf '$REMOTE_ROOT' /tmp/daily-song-list-adapter-30256082805; install -d -m 0755 '$REMOTE_ROOT/server'; install -m 0644 /dev/null '$REMOTE_ROOT/placeholder';"
           scp "${SSH_OPTS[@]}" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$TASK_ROOT/audit-ranking-source-identities.py" "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/server/"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; sudo -u www-data env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data PYTHONPATH='$REMOTE_ROOT/server' nohup python3 '$REMOTE_ROOT/server/pg_api_server.py' --host 127.0.0.1 --port 18766 > '$REMOTE_ROOT/candidate.log' 2>&1 & echo \$! > '$REMOTE_ROOT/candidate.pid'; candidate_pid=\$(cat '$REMOTE_ROOT/candidate.pid'); for n in \$(seq 1 20); do kill -0 \$candidate_pid 2>/dev/null || { tail -n 80 '$REMOTE_ROOT/candidate.log'; exit 1; }; ss -ltn 'sport = :18766' | grep -q LISTEN && break; sleep 1; done; kill -0 \$candidate_pid 2>/dev/null; ss -ltn 'sport = :18766' | grep -q LISTEN; curl --silent --show-error --fail --max-time 60 http://127.0.0.1:18766/healthz > '$REMOTE_ROOT/candidate-healthz.json' || { tail -n 80 '$REMOTE_ROOT/candidate.log'; exit 1; }; test -s '$REMOTE_ROOT/candidate-healthz.json'"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set +e; python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url http://127.0.0.1:18766 --range all --range 7d --metric count --metric songs --metric videos --page-size 200 --max-pages 20 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/candidate-identity-audit.log' 2>&1; audit_status=\$?; tail -n 60 '$REMOTE_ROOT/candidate-identity-audit.log'; exit \$audit_status"
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION" "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" <<'REMOTE'
+          set -Eeuo pipefail
+          remote_root="$1"
+          expected_active="$2"
+          source_key="$3"
+          source_channel_id="$4"
+          source_occurrence_count="$5"
+          source_video_count="$6"
+          candidate_pid=""
+          cleanup_candidate() {
+            if [ -n "$candidate_pid" ]; then
+              pkill -TERM -P "$candidate_pid" 2>/dev/null || true
+              kill "$candidate_pid" 2>/dev/null || true
+              for unused in $(seq 1 10); do
+                kill -0 "$candidate_pid" 2>/dev/null || return 0
+                sleep 1
+              done
+              pkill -KILL -P "$candidate_pid" 2>/dev/null || true
+              kill -KILL "$candidate_pid" 2>/dev/null || true
+            fi
+          }
+          trap cleanup_candidate EXIT
+          sudo -u www-data env \
+            PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data \
+            PYTHONPATH="$remote_root/server" \
+            nohup python3 "$remote_root/server/pg_api_server.py" \
+              --host 127.0.0.1 --port 18766 \
+              </dev/null >"$remote_root/candidate.log" 2>&1 &
+          candidate_pid="$!"
+          printf '%s\n' "$candidate_pid" > "$remote_root/candidate.pid"
+          for unused in $(seq 1 20); do
+            kill -0 "$candidate_pid" 2>/dev/null || {
+              tail -n 80 "$remote_root/candidate.log"
+              exit 1
+            }
+            ss -ltn 'sport = :18766' | grep -q LISTEN && break
+            sleep 1
+          done
+          kill -0 "$candidate_pid" 2>/dev/null
+          ss -ltn 'sport = :18766' | grep -q LISTEN
+          curl --silent --show-error --fail --max-time 60 \
+            http://127.0.0.1:18766/healthz > "$remote_root/candidate-healthz.json" || {
+              tail -n 80 "$remote_root/candidate.log"
+              exit 1
+            }
+          test -s "$remote_root/candidate-healthz.json"
+          set +e
+          timeout --signal=TERM --kill-after=15s 12m \
+            python3 "$remote_root/server/audit-ranking-source-identities.py" \
+              --base-url http://127.0.0.1:18766 \
+              --range all --range 7d \
+              --metric count --metric songs --metric videos \
+              --page-size 200 --max-pages 20 \
+              --expected-active "$expected_active" \
+              --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
+              --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
+              --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
+              --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
+              --source-probe "$source_key,$source_channel_id,$source_occurrence_count,$source_video_count" \
+              > "$remote_root/candidate-identity-audit.log" 2>&1
+          audit_status="$?"
+          set -e
+          tail -n 80 "$remote_root/candidate-identity-audit.log"
+          exit "$audit_status"
+          REMOTE
 
       - name: Install verified adapter and retain rollback files until health passes
         run: |

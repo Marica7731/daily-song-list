@@ -343,10 +343,10 @@ def _runtime_channel_source_payload(
     if channel_id:
         predicates.append("channel_id = %s")
         params.append(channel_id)
-    if channel_handle:
+    elif channel_handle:
         predicates.append("channel_handle = %s")
         params.append(channel_handle)
-    if channel_name:
+    elif channel_name:
         predicates.append("channel_name = %s")
         params.append(channel_name)
     if not predicates:
@@ -463,12 +463,14 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     metadata_rows = list(metadata)
     occurrence_ids: set[str] = set()
     occurrence_handles: set[str] = set()
+    occurrence_videos: list[Mapping[str, Any]] = []
     for occurrence in result.get("occurrences") or ():
         if not isinstance(occurrence, Mapping):
             continue
         video = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
         if not isinstance(video, Mapping):
             video = occurrence
+        occurrence_videos.append(video)
         channel_id = _text(video.get("channelId") or video.get("channel_id"))
         channel_handle = _text(video.get("channelHandle") or video.get("channel_handle")).lstrip("/@").casefold()
         if channel_id:
@@ -514,6 +516,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
             exact_matches.append(item)
 
     selected: Mapping[str, Any] | None = exact_matches[0] if len(exact_matches) == 1 else None
+    selected_from_occurrence = False
     if selected is None and not strong_ids and not strong_handles:
         # Legacy rows can lack a stable identity.  Only then allow a unique
         # textual fallback, and never let a historical URL relabel a card.
@@ -539,18 +542,54 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
                 fallback_matches.append(item)
         if len(fallback_matches) == 1:
             selected = fallback_matches[0]
+    if selected is None and len(occurrence_ids) == 1:
+        # Older projection rows can lack a channel-metadata row even though
+        # every preview occurrence carries the same exact YouTube channel ID.
+        # Use that tuple directly; never infer across multiple channel IDs.
+        evidence_id = next(iter(occurrence_ids))
+        evidence = [
+            video
+            for video in occurrence_videos
+            if _text(video.get("channelId") or video.get("channel_id")) == evidence_id
+        ]
+        evidence_handles = sorted({
+            _text(video.get("channelHandle") or video.get("channel_handle"))
+            for video in evidence
+            if _text(video.get("channelHandle") or video.get("channel_handle"))
+        })
+        evidence_names = sorted({
+            _text(video.get("channelName") or video.get("channel_name"))
+            for video in evidence
+            if _text(video.get("channelName") or video.get("channel_name"))
+        })
+        selected = {
+            "channelId": evidence_id,
+            "channelHandle": evidence_handles[0] if evidence_handles else "",
+            "channelName": evidence_names[0] if evidence_names else "",
+        }
+        selected_from_occurrence = True
     if selected is None:
         return _with_source_detail_path(result)
     channel_key = _text(selected.get("channelId") or selected.get("channelKey") or selected.get("channel_key"))
     display_name = _text(selected.get("channelName") or selected.get("display_name"))
     handle = _text(selected.get("channelHandle") or selected.get("handle"))
+    channel_url = _text(selected.get("channelUrl") or selected.get("channel_url"))
+    normalized_channel_url = channel_url.casefold()
+    normalized_handle = handle.lstrip("/@").casefold()
+    if channel_url and not (
+        (channel_key and channel_key.casefold() in normalized_channel_url)
+        or (normalized_handle and normalized_handle in normalized_channel_url)
+    ):
+        channel_url = ""
+    if not channel_url and channel_key:
+        channel_url = f"https://www.youtube.com/channel/{channel_key}"
     field_values = {
         "key": channel_key,
         "name": display_name,
         "channelName": display_name,
         "channelId": channel_key,
         "channelHandle": handle,
-        "channelUrl": selected.get("channelUrl") or selected.get("channel_url"),
+        "channelUrl": channel_url,
         "avatarUrl": selected.get("avatarUrl") or selected.get("avatar_url"),
         "thumbnailUrl": selected.get("thumbnailUrl") or selected.get("thumbnail_url"),
         "videoThumbnailUrl": selected.get("thumbnailUrl") or selected.get("thumbnail_url"),
@@ -563,7 +602,6 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
             result[key] = value
     canonical_occurrences: list[Any] = []
     canonical_handle = handle.lstrip("/@").casefold()
-    channel_url = selected.get("channelUrl") or selected.get("channel_url")
     for occurrence in result.get("occurrences") or ():
         if not isinstance(occurrence, Mapping):
             canonical_occurrences.append(occurrence)
@@ -599,7 +637,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     if (result.get("songCount") in (None, 0)) and expected_songs is not None:
         result["songCount"] = expected_songs
     if not result.get("sourceDetailKey"):
-        result["sourceDetailKey"] = _stable_key("source-vtuber", range_id, channel_key)
+        result["sourceDetailKey"] = channel_key if selected_from_occurrence else _stable_key("source-vtuber", range_id, channel_key)
     return _with_source_detail_path(result)
 
 
@@ -752,10 +790,16 @@ def _overlay_channel_records(connection, rows: Iterable[Mapping[str, Any]], meta
     for row in rows:
         if row.get("video_tombstone"):
             continue
+        video_payload = _json_object(row.get("video_payload_json"))
+        if isinstance(video_payload.get("payload"), Mapping):
+            video_payload = dict(video_payload["payload"])
+        row_channel_id = _text(row.get("channel_id") or video_payload.get("channelId") or video_payload.get("channel_id"))
+        row_channel_handle = _text(row.get("channel_handle") or video_payload.get("channelHandle") or video_payload.get("channel_handle"))
+        row_channel_name = _text(row.get("channel_name") or video_payload.get("channelName") or video_payload.get("channel_name"))
         if not any((
-            channel_id and _text(row.get("channel_id")) == channel_id,
-            channel_handle and _text(row.get("channel_handle")) == channel_handle,
-            channel_name and _text(row.get("channel_name")) == channel_name,
+            channel_id and row_channel_id == channel_id,
+            not channel_id and channel_handle and row_channel_handle == channel_handle,
+            not channel_id and not channel_handle and channel_name and row_channel_name == channel_name,
         )):
             continue
         video_id = _text(row.get("video_id"))
@@ -2205,6 +2249,15 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:
                 return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query, overlay_revision_ids=overlay_ids)
+            if key.startswith("UC"):
+                return _runtime_channel_source_payload(
+                    connection,
+                    parent[0],
+                    {"channelId": key},
+                    key,
+                    query,
+                    overlay_revision_ids=overlay_ids,
+                )
             return persisted
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     snapshot = _load_snapshot(connection)

@@ -141,6 +141,7 @@ def main() -> int:
     affected_records: set[str] = set()
     problem_counts: Counter[str] = Counter()
     samples: list[dict[str, Any]] = []
+    gate_errors: list[str] = []
 
     _, body_bytes, health = fetch_json(args.base_url, "/healthz", args.timeout)
     total_bytes += body_bytes
@@ -220,7 +221,7 @@ def main() -> int:
         _, body_bytes, negative = fetch_json(args.base_url, f"/api/rankings?{query}", args.timeout)
         total_bytes += body_bytes
         if int(negative.get("totalCount") or 0) != 0:
-            raise RuntimeError(f"negative query returned records: {args.negative_query!r}")
+            gate_errors.append(f"negative query returned records: {args.negative_query!r}")
 
     for probe in args.channel_probe:
         handle, separator, expected_id = probe.partition("=")
@@ -242,7 +243,7 @@ def main() -> int:
             if isinstance(record, Mapping) and text(record.get("channelId")) == expected_id
         ]
         if len(matches) != 1 or audit_record(matches[0]):
-            raise RuntimeError(f"channel probe failed: {probe}")
+            gate_errors.append(f"channel probe failed: {probe}")
 
     for key, expected_id, expected_occurrences, expected_videos in args.source_probe:
         query = urlencode({"page": 1, "pageSize": 200})
@@ -250,17 +251,18 @@ def main() -> int:
         total_bytes += body_bytes
         record = payload.get("record") if isinstance(payload.get("record"), Mapping) else {}
         if not payload.get("found") or text(record.get("channelId")) != expected_id:
-            raise RuntimeError(f"source identity probe failed: {key}")
+            gate_errors.append(f"source identity probe failed: {key}")
         if int(payload.get("totalOccurrenceCount") or record.get("occurrenceCount") or 0) != expected_occurrences:
-            raise RuntimeError(f"source occurrence count mismatch: {key}")
+            gate_errors.append(f"source occurrence count mismatch: {key}")
         if int(record.get("videoCount") or 0) != expected_videos:
-            raise RuntimeError(f"source video count mismatch: {key}")
+            gate_errors.append(f"source video count mismatch: {key}")
         for occurrence in record.get("occurrences") or ():
             if not isinstance(occurrence, Mapping):
-                raise RuntimeError(f"invalid source occurrence: {key}")
+                gate_errors.append(f"invalid source occurrence: {key}")
+                continue
             inner_id = text(occurrence_video(occurrence).get("channelId"))
             if inner_id and inner_id != expected_id:
-                raise RuntimeError(f"source occurrence identity mismatch: {key}")
+                gate_errors.append(f"source occurrence identity mismatch: {key}")
 
     digest = hashlib.sha256("\n".join(sorted(affected_records)).encode()).hexdigest()
     summary = {
@@ -275,11 +277,14 @@ def main() -> int:
         "affectedSha256": digest,
         "bytesRead": total_bytes,
         "elapsedSeconds": round(time.monotonic() - started, 3),
+        "gateErrors": gate_errors,
         "samples": samples,
     }
     print("IDENTITY_AUDIT_SUMMARY " + json.dumps(summary, ensure_ascii=False, sort_keys=True))
-    if affected_records:
-        raise RuntimeError(f"identity audit found {len(affected_records)} affected ranking records")
+    if affected_records or gate_errors:
+        raise RuntimeError(
+            f"identity audit failed: affected={len(affected_records)} gateErrors={len(gate_errors)}"
+        )
     print("IDENTITY_AUDIT_COMPLETE")
     return 0
 
