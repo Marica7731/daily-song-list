@@ -11,6 +11,13 @@ on:
       - "config/**"
       - "test/**"
       - "docs/**"
+      - "data/latest.json"
+      - "data/snapshots/**"
+      - "data/diff/**"
+      - "data/ui/**"
+      - "data/video-catalog.json"
+      - "data/review/**"
+      - "data/song-search-known-songs.json"
       - "index.html"
       - "package.json"
       - "README.md"
@@ -41,17 +48,61 @@ jobs:
   check:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: .codex-check-source
     steps:
+      - name: Prepare clean Check code source
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
+          : "${HOME:?HOME is required}"
+          workspace="$(cd -- "$GITHUB_WORKSPACE" && pwd -P)"
+          home="$(cd -- "$HOME" && pwd -P)"
+          source_parent="$(cd -- "$workspace" && pwd -P)"
+          source="$source_parent/.codex-check-source"
+          if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
+            echo "refusing unsafe workspace: $workspace" >&2
+            exit 1
+          fi
+          if [ "$source_parent" != "$workspace" ] || [ "$source" != "$workspace/.codex-check-source" ] || [ "$source" = "/" ] || [ "$source" = "$home" ] || [ "$source" = "$workspace" ]; then
+            echo "refusing unexpected Check code source: $source" >&2
+            exit 1
+          fi
+          if [ -L "$source" ] || { [ -e "$source" ] && [ ! -d "$source" ]; }; then
+            echo "refusing anomalous Check code source: $source" >&2
+            exit 1
+          fi
+          before_bytes=0
+          if [ -e "$source" ] || [ -L "$source" ]; then
+            before_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
+          fi
+          echo "CODEX_CHECK_SOURCE_PRECLEAN before_bytes=$before_bytes path=$source"
+          rm -rf -- "$source"
+          mkdir -p -- "$source"
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          path: .codex-check-source
           fetch-depth: 50
           filter: blob:none
-
-      - name: Ensure full workspace checkout
-        run: |
-          git sparse-checkout disable || true
-          git checkout --force
+          sparse-checkout: |
+            .github
+            /artifacts/migration/curation-global-singleton-minimal.json
+            assets
+            config
+            data/review
+            deploy
+            docs
+            scripts
+            server
+            test
+            /package.json
+            /index.html
+            /README.md
+          sparse-checkout-cone-mode: false
 
       - name: Configure Mac toolchain
         run: |
@@ -62,7 +113,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Marica7731/mygit
-          path: .tmp/mygit
+          path: .codex-check-source/.tmp/check-code-mygit
           fetch-depth: 1
           filter: blob:none
           sparse-checkout: |
@@ -70,17 +121,106 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Check blocklist mirror sync
-        run: node scripts/check-blocked-vtuber-sync.js --source .tmp/mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
+        run: node scripts/check-blocked-vtuber-sync.js --source .tmp/check-code-mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
 
       - name: Run checks
         env:
+          CHECK_EVENT_NAME: ${{ github.event_name }}
           CHECK_BASE_SHA: ${{ github.event.before }}
         run: |
           set -Eeuo pipefail
-          base="${CHECK_BASE_SHA}"
-          if [ -z "${base}" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
-            base="$(git rev-parse HEAD^ 2>/dev/null || true)"
-          fi
+          event_name="${CHECK_EVENT_NAME:?CHECK_EVENT_NAME is required}"
+          base=""
+          case "$event_name" in
+            push)
+              base="${CHECK_BASE_SHA:-}"
+              if ! [[ "$base" =~ ^[0-9a-f]{40}$ ]] || [[ "$base" =~ ^0{40}$ ]]; then
+                echo "::error::Push event requires a non-zero 40-hex before SHA." >&2
+                exit 1
+              fi
+              if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+                echo "CODEX_CHECK_BASE_FETCH base=$base"
+                fetch_deadline_seconds=90
+                fetch_log="$(mktemp)"
+                cleanup_fetch_log() { rm -f -- "$fetch_log"; }
+                trap cleanup_fetch_log EXIT
+                if fetch_result="$(python3 - "$fetch_deadline_seconds" "$fetch_log" "$base" <<'PY'
+          import os
+          import signal
+          import subprocess
+          import sys
+          deadline = float(sys.argv[1])
+          log_path = sys.argv[2]
+          base = sys.argv[3]
+          process = None
+          timed_out = False
+          def signal_group(sig):
+              try:
+                  os.killpg(process.pid, sig)
+              except ProcessLookupError:
+                  pass
+          try:
+              with open(log_path, "wb") as log_file:
+                  process = subprocess.Popen(
+                      ["git", "-c", "http.lowSpeedLimit=1024", "-c", "http.lowSpeedTime=30", "fetch", "--no-tags", "--depth=1", "origin", base],
+                      stdout=log_file,
+                      stderr=subprocess.STDOUT,
+                      start_new_session=True,
+                  )
+                  try:
+                      status = process.wait(timeout=deadline)
+                  except subprocess.TimeoutExpired:
+                      timed_out = True
+                      signal_group(signal.SIGTERM)
+                      try:
+                          process.wait(timeout=2)
+                      except subprocess.TimeoutExpired:
+                          pass
+                      signal_group(signal.SIGKILL)
+                      if process.poll() is None:
+                          process.wait(timeout=5)
+                      status = 124
+              print("timeout" if timed_out else "completed")
+              raise SystemExit(status)
+          finally:
+              if process is not None:
+                  signal_group(signal.SIGKILL)
+                  if process.poll() is None:
+                      try:
+                          process.wait(timeout=5)
+                      except subprocess.TimeoutExpired:
+                          pass
+          PY
+                )"; then
+                  fetch_status=0
+                else
+                  fetch_status=$?
+                fi
+                if [ "$fetch_result" = "timeout" ]; then
+                  echo "::error::CODEX_CHECK_BASE_FETCH_TIMEOUT seconds=$fetch_deadline_seconds base=$base" >&2
+                fi
+                cat "$fetch_log" >&2
+                rm -f -- "$fetch_log"
+                trap - EXIT
+                if [ "$fetch_status" -ne 0 ]; then
+                  echo "::error::CODEX_CHECK_BASE_FETCH_FAILED base=$base" >&2
+                  exit 1
+                fi
+              fi
+              if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+                echo "::error::CODEX_CHECK_BASE_MISSING_AFTER_FETCH base=$base" >&2
+                exit 1
+              fi
+              echo "CODEX_CHECK_BASE_OK event=push base=$base"
+              ;;
+            workflow_dispatch)
+              echo "CODEX_CHECK_BASE_FULL_GATES event=workflow_dispatch"
+              ;;
+            *)
+              echo "::error::Unsupported Check code event for base-diff gating: $event_name" >&2
+              exit 1
+              ;;
+          esac
           run_ui_proof=1
           if [ -n "${base}" ]; then
             ui_changes="$(git diff --name-only "${base}" HEAD -- \
@@ -106,13 +246,44 @@ jobs:
           fi
           run_data_validate=1
           if [ -n "${base}" ]; then
+            # validate-data.js default scope=all require closure; keep this list exact so
+            # unrelated migration/accepted-discovery changes do not materialize data/ui.
             data_changes="$(git diff --name-only "${base}" HEAD -- \
               config \
+              package.json \
+              scripts/validate-data.js \
+              scripts/curation.js \
+              scripts/entry-repair.js \
+              scripts/song-aliases.js \
+              scripts/song-search-index.js \
+              scripts/video-catalog.js \
+              scripts/range-config.js \
+              scripts/recent-all-continuity.js \
+              scripts/blocked-vtuber-utils.js \
+              assets/source-filter.js \
+              assets/ranking-utils.js \
+              assets/frontend-utils.js \
               data/latest.json \
-              data/status.json \
-              data/external)"
+              data/snapshots \
+              data/diff \
+              data/ui \
+              data/video-catalog.json \
+              data/review \
+              data/song-search-known-songs.json)"
             if [ -z "${data_changes}" ]; then
               run_data_validate=0
+            fi
+          fi
+          run_budget=1
+          if [ -n "${base}" ]; then
+            budget_changes="$(git diff --name-only "${base}" HEAD -- \
+              index.html \
+              assets \
+              data/ui \
+              data/diff \
+              scripts/check-runtime-budgets.js)"
+            if [ -z "${budget_changes}" ]; then
+              run_budget=0
             fi
           fi
           node scripts/check-js-syntax.js
@@ -150,11 +321,63 @@ jobs:
             node --test "${test_files[@]}"
           fi
           if [ "${run_data_validate}" = "1" ]; then
+            git sparse-checkout add \
+              /data/latest.json \
+              /data/snapshots/ \
+              /data/diff/ \
+              /data/ui/ \
+              /data/video-catalog.json \
+              /data/song-search-known-songs.json
             npm run validate
           else
             echo "CODEX_DATA_VALIDATE_SKIPPED reason=no-data-input-changes"
           fi
-          npm run check:budget
+          if [ "${run_budget}" = "1" ]; then
+            git sparse-checkout add \
+              /data/ui/ \
+              /data/diff/
+            npm run check:budget
+          else
+            echo "CODEX_BUDGET_SKIPPED reason=no-budget-input-changes"
+          fi
+
+      - name: Remove Check code source
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
+          : "${HOME:?HOME is required}"
+          workspace="$(cd -- "$GITHUB_WORKSPACE" && pwd -P)"
+          home="$(cd -- "$HOME" && pwd -P)"
+          source_parent="$(cd -- "$workspace" && pwd -P)"
+          source="$source_parent/.codex-check-source"
+          if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
+            echo "refusing unsafe workspace: $workspace" >&2
+            exit 1
+          fi
+          if [ "$source_parent" != "$workspace" ] || [ "$source" != "$workspace/.codex-check-source" ] || [ "$source" = "/" ] || [ "$source" = "$home" ] || [ "$source" = "$workspace" ]; then
+            echo "refusing unexpected Check code source: $source" >&2
+            exit 1
+          fi
+          if [ -L "$source" ] || { [ -e "$source" ] && [ ! -d "$source" ]; }; then
+            echo "refusing anomalous Check code source: $source" >&2
+            exit 1
+          fi
+          before_bytes=0
+          if [ -e "$source" ]; then
+            before_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
+          fi
+          rm -rf -- "$source"
+          after_bytes=0
+          if [ -e "$source" ] || [ -L "$source" ]; then
+            after_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
+          fi
+          if [ "$after_bytes" != "0" ] || [ -e "$source" ] || [ -L "$source" ]; then
+            echo "::error::Check code source cleanup left residue at $source bytes=$after_bytes" >&2
+            exit 1
+          fi
+          echo "CODEX_CHECK_SOURCE_POSTCLEAN before_bytes=$before_bytes after_bytes=$after_bytes path=$source"
 
   curation_audit:
     if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
