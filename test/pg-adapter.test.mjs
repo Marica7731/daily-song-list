@@ -160,8 +160,8 @@ summary_line = next(line for line in stream.getvalue().splitlines() if line.star
 summary = json.loads(summary_line.split(" ", 1)[1])
 assert summary["affectedRecords"] == 0
 assert summary["gateErrors"] == [
-    "source occurrence count mismatch: source-key",
-    "source video count mismatch: source-key",
+    "source occurrence count mismatch: source-key expected=2 actual=1",
+    "source video count mismatch: source-key expected=2 actual=1",
 ]
 print("OK")
 `);
@@ -181,9 +181,11 @@ test("adapter release workflow is fail-closed around identity and rollback gates
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
   assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
   assert.match(ADAPTER_WORKFLOW, /--max-time 60[\s\\]+http:\/\/127\.0\.0\.1:18766\/healthz/u);
-  assert.match(ADAPTER_WORKFLOW, /tail -n 80 "\$remote_root\/candidate\.log"/u);
+  assert.match(ADAPTER_WORKFLOW, /systemd-run --quiet --collect --unit="\$candidate_unit"/u);
+  assert.match(ADAPTER_WORKFLOW, /--property=RuntimeMaxSec=13m/u);
+  assert.match(ADAPTER_WORKFLOW, /journalctl -u "\$candidate_unit" -n 80 --no-pager/u);
   assert.match(ADAPTER_WORKFLOW, /timeout --signal=TERM --kill-after=15s 12m/u);
-  assert.match(ADAPTER_WORKFLOW, /<\/dev\/null >"\$remote_root\/candidate\.log"/u);
+  assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);
   for (const [index, block] of blocks.entries()) {
@@ -761,6 +763,120 @@ module._channel_metadata_rows = lambda connection, revision_ids: []
 module._rows = lambda connection, sql, params: [{"rank": 1, "detail_key": "channel", "title": "", "artist": "", "name": "Channel", "row_count": 8, "song_count": 7, "video_count": 1, "timestamp_count": 8, "search_text": "channel", "channel_search_text": "channel", "payload_json": {"type": "vtuber", "key": "channel", "name": "Channel", "count": 8, "songCount": 0, "videoCount": 1, "timestampCount": 8}}] if "FROM runtime_ranking_rows" in sql else []
 payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "vtubers", "metric": "occurrences", "pageSize": "20"})
 assert payload["records"][0]["songCount"] == 9
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("VTuber overlay rankings replace parent videos before recomputing counts", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UC8VlcljjGFb4-Ny2Heb0-ew"
+def candidate(video_id, occurrence_id, song_key, position):
+    return {
+        "revision_id": "candidate",
+        "video_id": video_id,
+        "occurrence_id": occurrence_id,
+        "position": position,
+        "range_id": "7d",
+        "song_key": song_key,
+        "title": song_key,
+        "artist": "Artist",
+        "video_payload_json": {
+            "videoId": video_id,
+            "channelId": channel_id,
+            "channelHandle": "/@urameshi_conta",
+            "channelName": "Conta Urameshi",
+        },
+        "occurrence_payload_json": {
+            "occurrenceId": occurrence_id,
+            "songKey": song_key,
+            "title": song_key,
+            "artist": "Artist",
+            "rangeId": "7d",
+        },
+    }
+candidate_rows = [
+    candidate("video-old", "candidate-old", "song-d", 0),
+    candidate("video-new", "candidate-new-1", "song-d", 0),
+    candidate("video-new", "candidate-new-2", "song-e", 1),
+]
+base_row = {
+    "rank": 1,
+    "detail_key": channel_id,
+    "title": "",
+    "artist": "",
+    "name": "Conta Urameshi",
+    "row_count": 3,
+    "song_count": 3,
+    "video_count": 2,
+    "timestamp_count": 3,
+    "search_text": "Conta Urameshi",
+    "channel_search_text": "@urameshi_conta",
+    "payload_json": {
+        "type": "vtuber",
+        "key": channel_id,
+        "channelId": channel_id,
+        "channelHandle": "/@urameshi_conta",
+        "count": 3,
+        "songCount": 3,
+        "videoCount": 2,
+        "timestampCount": 3,
+    },
+}
+parent_videos = [
+    {
+        "video_id": "video-old", "title": "Old", "channel_name": "Conta Urameshi",
+        "channel_id": channel_id, "channel_handle": "/@urameshi_conta",
+        "channel_url": f"https://www.youtube.com/channel/{channel_id}",
+        "published_timestamp": 1, "payload_json": {},
+    },
+    {
+        "video_id": "video-keep", "title": "Keep", "channel_name": "Conta Urameshi",
+        "channel_id": channel_id, "channel_handle": "/@urameshi_conta",
+        "channel_url": f"https://www.youtube.com/channel/{channel_id}",
+        "published_timestamp": 2, "payload_json": {},
+    },
+]
+parent_occurrences = [
+    {"video_id": "video-old", "occurrence_id": "old-a", "range_id": "all", "song_key": "song-a", "title": "song-a", "artist": "Artist", "payload_json": {}},
+    {"video_id": "video-old", "occurrence_id": "old-b", "range_id": "all", "song_key": "song-b", "title": "song-b", "artist": "Artist", "payload_json": {}},
+    {"video_id": "video-keep", "occurrence_id": "keep-c", "range_id": "all", "song_key": "song-c", "title": "song-c", "artist": "Artist", "payload_json": {}},
+]
+parent_video_queries = 0
+def rows(connection, sql, params):
+    global parent_video_queries
+    if "FROM runtime_ranking_rows" in sql:
+        return [base_row]
+    if "FROM runtime_videos" in sql:
+        parent_video_queries += 1
+        return parent_videos
+    if "FROM runtime_occurrences" in sql:
+        return parent_occurrences
+    return []
+module._rows = rows
+module._generic_parent_runtime_revision = lambda *args: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *args: ["candidate"]
+module._overlay_candidate_rows = lambda *args: candidate_rows
+module._runtime_tombstones = lambda *args: []
+module._channel_metadata_rows = lambda *args: []
+module._VTUBER_REPLACEMENT_CACHE.clear()
+query = {"range": "all", "view": "vtubers", "metric": "occurrences", "pageSize": "20"}
+first = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, query)
+record = first["records"][0]
+assert record["channelId"] == channel_id
+assert record["count"] == 4
+assert record["videoCount"] == 3
+assert record["songCount"] == 3
+assert {item["videoId"] for item in record["occurrences"]} == {"video-keep", "video-old", "video-new"}
+second = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, query)
+assert second["records"][0]["count"] == 4
+assert parent_video_queries == 1
 print("OK")
 `);
   assert.equal(output, "OK");

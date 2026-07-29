@@ -39,7 +39,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
@@ -117,41 +117,34 @@ jobs:
           source_channel_id="$4"
           source_occurrence_count="$5"
           source_video_count="$6"
-          candidate_pid=""
+          candidate_unit="daily-song-list-adapter-${remote_root##*-}"
           cleanup_candidate() {
-            if [ -n "$candidate_pid" ]; then
-              pkill -TERM -P "$candidate_pid" 2>/dev/null || true
-              kill "$candidate_pid" 2>/dev/null || true
-              for unused in $(seq 1 10); do
-                kill -0 "$candidate_pid" 2>/dev/null || return 0
-                sleep 1
-              done
-              pkill -KILL -P "$candidate_pid" 2>/dev/null || true
-              kill -KILL "$candidate_pid" 2>/dev/null || true
-            fi
+            systemctl stop "$candidate_unit" 2>/dev/null || true
+            systemctl reset-failed "$candidate_unit" 2>/dev/null || true
           }
           trap cleanup_candidate EXIT
-          sudo -u www-data env \
-            PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data \
-            PYTHONPATH="$remote_root/server" \
-            nohup python3 "$remote_root/server/pg_api_server.py" \
-              --host 127.0.0.1 --port 18766 \
-              </dev/null >"$remote_root/candidate.log" 2>&1 &
-          candidate_pid="$!"
-          printf '%s\n' "$candidate_pid" > "$remote_root/candidate.pid"
+          systemd-run --quiet --collect --unit="$candidate_unit" \
+            --uid=www-data --property=RuntimeMaxSec=13m \
+            --setenv=PGHOST=/var/run/postgresql \
+            --setenv=PGDATABASE=song_rank \
+            --setenv=PGUSER=www-data \
+            --setenv=PYTHONPATH="$remote_root/server" \
+            /usr/bin/python3 "$remote_root/server/pg_api_server.py" \
+              --host 127.0.0.1 --port 18766
+          systemctl show "$candidate_unit" --property MainPID --value > "$remote_root/candidate.pid"
           for unused in $(seq 1 20); do
-            kill -0 "$candidate_pid" 2>/dev/null || {
-              tail -n 80 "$remote_root/candidate.log"
+            systemctl is-active --quiet "$candidate_unit" || {
+              journalctl -u "$candidate_unit" -n 80 --no-pager
               exit 1
             }
             ss -ltn 'sport = :18766' | grep -q LISTEN && break
             sleep 1
           done
-          kill -0 "$candidate_pid" 2>/dev/null
+          systemctl is-active --quiet "$candidate_unit"
           ss -ltn 'sport = :18766' | grep -q LISTEN
           curl --silent --show-error --fail --max-time 60 \
             http://127.0.0.1:18766/healthz > "$remote_root/candidate-healthz.json" || {
-              tail -n 80 "$remote_root/candidate.log"
+              journalctl -u "$candidate_unit" -n 80 --no-pager
               exit 1
             }
           test -s "$remote_root/candidate-healthz.json"
@@ -201,6 +194,6 @@ jobs:
           echo "ADAPTER_RELEASE_STORAGE_AFTER"
           cat "$TASK_ROOT/storage-after.txt"
           if [ -n "${REMOTE_ROOT:-}" ]; then
-            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "if test -f '$REMOTE_ROOT/candidate.pid'; then kill \$(cat '$REMOTE_ROOT/candidate.pid') 2>/dev/null || true; fi; rm -rf '$REMOTE_ROOT'" || true
+            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "candidate_unit='daily-song-list-adapter-${GITHUB_RUN_ID}'; systemctl stop \"\$candidate_unit\" 2>/dev/null || true; systemctl reset-failed \"\$candidate_unit\" 2>/dev/null || true; rm -rf '$REMOTE_ROOT'" || true
           fi
           rm -rf "$TASK_ROOT"

@@ -44,6 +44,7 @@ SUPPORTED_VIEWS = {"songs", "songIndex", "artists", "videos", "vtubers", "vsinge
 MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
 MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
+_VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
 
 
 class PostgresAdapterError(RuntimeError):
@@ -1124,6 +1125,166 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
     return groups
 
 
+def _overlay_vtuber_replacement_rows(
+    connection,
+    active_revision_id: str,
+    parent_revision_id: str,
+    rows: Iterable[Mapping[str, Any]],
+    options: Mapping[str, Any],
+) -> dict[str, dict[str, Any]]:
+    """Rebuild affected VTuber groups with per-video replacement semantics."""
+
+    cache_key = (
+        active_revision_id,
+        parent_revision_id,
+        _text(options.get("range")),
+        _text(options.get("q")),
+        tuple(options.get("searchFields") or ()),
+        bool(options.get("nicheOnly")),
+        bool(options.get("hideUnknownArtist")),
+    )
+    cached = _VTUBER_REPLACEMENT_CACHE.get(cache_key)
+    if cached is not None:
+        return {
+            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
+            for key, row in cached.items()
+        }
+
+    candidate_records: dict[str, dict[str, Any]] = {}
+    affected_channel_ids: set[str] = set()
+    for row in rows:
+        if row.get("video_tombstone"):
+            continue
+        video_id = _text(row.get("video_id"))
+        video = _json_object(row.get("video_payload_json"))
+        if isinstance(video.get("payload"), Mapping):
+            video = dict(video["payload"])
+        channel_id = _text(video.get("channelId") or row.get("channel_id"))
+        if not video_id or not channel_id:
+            continue
+        affected_channel_ids.add(channel_id)
+        record = candidate_records.get(video_id)
+        if record is None:
+            video.update({
+                "videoId": video_id,
+                "title": video.get("title") or row.get("video_title"),
+                "channelName": video.get("channelName") or row.get("channel_name"),
+                "channelId": channel_id,
+                "channelHandle": video.get("channelHandle") or row.get("channel_handle"),
+                "channelUrl": video.get("channelUrl") or row.get("channel_url"),
+                "publishedAt": video.get("publishedAt") or row.get("published_at"),
+            })
+            record = {"video": video, "occurrences": []}
+            candidate_records[video_id] = record
+        song = _json_object(row.get("occurrence_payload_json"))
+        if isinstance(song.get("payload"), Mapping):
+            song = dict(song["payload"])
+        song.update({
+            "occurrenceId": song.get("occurrenceId") or row.get("occurrence_id"),
+            "position": song.get("position", row.get("position")),
+            "rangeId": song.get("rangeId") or row.get("range_id") or "7d",
+            "songKey": song.get("songKey") or row.get("song_key"),
+            "seconds": song.get("seconds", row.get("seconds")),
+            "title": song.get("title") or row.get("title"),
+            "artist": song.get("artist") or row.get("artist"),
+            "sourceId": song.get("sourceId") or row.get("source_id"),
+            "rawHash": song.get("rawHash") or row.get("raw_hash"),
+            "sourceSystem": song.get("sourceSystem") or row.get("source_system"),
+        })
+        record["occurrences"].append(song)
+    if not affected_channel_ids:
+        return {}
+
+    parent_video_rows = _rows(
+        connection,
+        """
+        SELECT video_id, title, channel_name, channel_id, channel_handle,
+               channel_url, published_timestamp, payload_json
+        FROM runtime_videos
+        WHERE revision_id = %s AND channel_id = ANY(%s)
+        ORDER BY video_id
+        """,
+        [parent_revision_id, sorted(affected_channel_ids)],
+    )
+    parent_video_ids = [
+        _text(row.get("video_id"))
+        for row in parent_video_rows
+        if _text(row.get("video_id"))
+    ]
+    parent_occurrence_rows = _rows(
+        connection,
+        """
+        SELECT occurrence_id, range_id, video_id, song_key, seconds,
+               source_system, source_id, title, artist, payload_json
+        FROM runtime_occurrences
+        WHERE revision_id = %s AND video_id = ANY(%s)
+        ORDER BY video_id, range_id, occurrence_id
+        """,
+        [parent_revision_id, parent_video_ids],
+    ) if parent_video_ids else []
+    parent_by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for occurrence in parent_occurrence_rows:
+        parent_by_video[_text(occurrence.get("video_id"))].append(occurrence)
+
+    records: list[dict[str, Any]] = []
+    replaced_video_ids = set(candidate_records)
+    for row in parent_video_rows:
+        video_id = _text(row.get("video_id"))
+        if not video_id or video_id in replaced_video_ids:
+            continue
+        video = _json_object(row.get("payload_json"))
+        video.update({
+            "videoId": video_id,
+            "title": video.get("title") or row.get("title"),
+            "channelName": video.get("channelName") or row.get("channel_name"),
+            "channelId": row.get("channel_id") or video.get("channelId"),
+            "channelHandle": row.get("channel_handle") or video.get("channelHandle"),
+            "channelUrl": row.get("channel_url") or video.get("channelUrl"),
+            "publishedAt": video.get("publishedAt") or row.get("published_timestamp"),
+        })
+        songs: list[dict[str, Any]] = []
+        for occurrence in parent_by_video.get(video_id, ()):
+            song = _json_object(occurrence.get("payload_json"))
+            song.update({
+                "occurrenceId": song.get("occurrenceId") or occurrence.get("occurrence_id"),
+                "rangeId": song.get("rangeId") or occurrence.get("range_id"),
+                "songKey": song.get("songKey") or occurrence.get("song_key"),
+                "seconds": song.get("seconds", occurrence.get("seconds")),
+                "title": song.get("title") or occurrence.get("title"),
+                "artist": song.get("artist") or occurrence.get("artist"),
+                "sourceId": song.get("sourceId") or occurrence.get("source_id"),
+                "sourceSystem": song.get("sourceSystem") or occurrence.get("source_system"),
+            })
+            songs.append(song)
+        records.append({"video": video, "occurrences": songs})
+    records.extend(candidate_records.values())
+
+    exact: dict[str, dict[str, Any]] = {}
+    for group in _entity_groups(records, {**dict(options), "view": "vtubers"}):
+        payload = _group_payload(group, {**dict(options), "view": "vtubers"})
+        key = _text(group.get("key"))
+        exact[key] = {
+            "detail_key": key,
+            "title": "",
+            "artist": "",
+            "name": payload.get("name") or payload.get("channelName") or key,
+            "row_count": int(payload.get("count") or 0),
+            "song_count": int(payload.get("songCount") or 0),
+            "video_count": int(payload.get("videoCount") or 0),
+            "timestamp_count": int(payload.get("timestampCount") or 0),
+            "payload_json": payload,
+            "search_text": json.dumps(payload, ensure_ascii=False),
+            "channel_search_text": json.dumps(payload, ensure_ascii=False),
+        }
+    if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
+        _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
+    _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+    return {
+        key: {**row, "payload_json": dict(row.get("payload_json") or {})}
+        for key, row in exact.items()
+    }
+
+
 def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
     if metric == "videos":
         return int(row.get("video_count") or 0)
@@ -1168,7 +1329,21 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
         ]
     delta = _overlay_candidate_groups(candidate_rows, options["view"])
+    exact_vtuber_rows = (
+        _overlay_vtuber_replacement_rows(
+            connection,
+            revision_id,
+            parent[0],
+            candidate_rows,
+            options,
+        )
+        if options["view"] == "vtubers"
+        else {}
+    )
+    groups.update(exact_vtuber_rows)
     for key, item in delta.items():
+        if key in exact_vtuber_rows:
+            continue
         row = groups.get(key)
         if row is None:
             count = len(item["occurrences"])

@@ -142,6 +142,7 @@ def main() -> int:
     problem_counts: Counter[str] = Counter()
     samples: list[dict[str, Any]] = []
     gate_errors: list[str] = []
+    ranking_channel_tuples: dict[str, set[tuple[int, int]]] = {}
 
     _, body_bytes, health = fetch_json(args.base_url, "/healthz", args.timeout)
     total_bytes += body_bytes
@@ -179,6 +180,12 @@ def main() -> int:
                         records_scanned += 1
                         record_key = f"{range_id}|{metric}|{text(record.get('key'))}|{text(record.get('sourceDetailKey'))}"
                         unique_records.add(f"{range_id}|{text(record.get('key'))}")
+                        record_channel_id = text(record.get("channelId"))
+                        if range_id == "all" and record_channel_id:
+                            ranking_channel_tuples.setdefault(record_channel_id, set()).add((
+                                int(record.get("count") or record.get("timestampCount") or 0),
+                                int(record.get("videoCount") or 0),
+                            ))
                         problems = audit_record(record)
                         if problems:
                             affected_records.add(record_key)
@@ -246,16 +253,30 @@ def main() -> int:
             gate_errors.append(f"channel probe failed: {probe}")
 
     for key, expected_id, expected_occurrences, expected_videos in args.source_probe:
+        if not args.skip_rankings:
+            actual_ranking_tuples = sorted(ranking_channel_tuples.get(expected_id, set()))
+            expected_ranking_tuple = [(expected_occurrences, expected_videos)]
+            if actual_ranking_tuples != expected_ranking_tuple:
+                gate_errors.append(
+                    f"ranking/source count mismatch: {key} "
+                    f"expected={expected_ranking_tuple} actual={actual_ranking_tuples}"
+                )
         query = urlencode({"page": 1, "pageSize": 200})
         _, body_bytes, payload = fetch_json(args.base_url, f"/api/sources/{key}?{query}", args.timeout)
         total_bytes += body_bytes
         record = payload.get("record") if isinstance(payload.get("record"), Mapping) else {}
         if not payload.get("found") or text(record.get("channelId")) != expected_id:
             gate_errors.append(f"source identity probe failed: {key}")
-        if int(payload.get("totalOccurrenceCount") or record.get("occurrenceCount") or 0) != expected_occurrences:
-            gate_errors.append(f"source occurrence count mismatch: {key}")
-        if int(record.get("videoCount") or 0) != expected_videos:
-            gate_errors.append(f"source video count mismatch: {key}")
+        actual_occurrences = int(payload.get("totalOccurrenceCount") or record.get("occurrenceCount") or 0)
+        actual_videos = int(record.get("videoCount") or 0)
+        if actual_occurrences != expected_occurrences:
+            gate_errors.append(
+                f"source occurrence count mismatch: {key} expected={expected_occurrences} actual={actual_occurrences}"
+            )
+        if actual_videos != expected_videos:
+            gate_errors.append(
+                f"source video count mismatch: {key} expected={expected_videos} actual={actual_videos}"
+            )
         for occurrence in record.get("occurrences") or ():
             if not isinstance(occurrence, Mapping):
                 gate_errors.append(f"invalid source occurrence: {key}")
@@ -274,6 +295,10 @@ def main() -> int:
         "uniqueRankingRecords": len(unique_records),
         "affectedRecords": len(affected_records),
         "problemCounts": dict(sorted(problem_counts.items())),
+        "sourceProbeRankingTuples": {
+            expected_id: sorted(ranking_channel_tuples.get(expected_id, set()))
+            for _, expected_id, _, _ in args.source_probe
+        },
         "affectedSha256": digest,
         "bytesRead": total_bytes,
         "elapsedSeconds": round(time.monotonic() - started, 3),
