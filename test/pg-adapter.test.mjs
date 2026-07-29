@@ -122,7 +122,8 @@ print("OK")
 test("adapter release workflow is fail-closed around identity and rollback gates", () => {
   assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
   assert.match(ADAPTER_WORKFLOW, /audit-ranking-source-identities\.py/u);
-  assert.match(ADAPTER_WORKFLOW, /--range all --range 7d --metric videos/u);
+  assert.match(ADAPTER_WORKFLOW, /--range all --range 7d --metric count --metric songs --metric videos/u);
+  assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
