@@ -39,7 +39,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Three serialized 12m audits reserve 36m; keep 9m for startup, install,
+    # rollback, log collection, and cleanup so Actions cannot kill rollback mid-flight.
+    timeout-minutes: 45
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
@@ -154,7 +156,7 @@ jobs:
               --base-url http://127.0.0.1:18766 \
               --range all --range 7d \
               --metric count --metric songs --metric videos \
-              --page-size 200 --max-pages 20 --timeout 60 \
+              --page-size 20 --max-pages 200 --concurrency 4 --timeout 60 \
               --expected-active "$expected_active" \
               --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
               --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
@@ -164,7 +166,9 @@ jobs:
               > "$remote_root/candidate-identity-audit.log" 2>&1
           audit_status="$?"
           set -e
-          tail -n 80 "$remote_root/candidate-identity-audit.log"
+          # The cap bounds this at 6*200 ranking pages plus the fixed probes.
+          # Preserve every per-request timing/progress marker in the job log.
+          cat "$remote_root/candidate-identity-audit.log"
           exit "$audit_status"
           REMOTE
 
@@ -172,7 +176,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; install -d -m 0755 '$REMOTE_ROOT/backup' /opt/culua/ytb-song-rank/server; cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$REMOTE_ROOT/backup/pg_adapter.py'; cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$REMOTE_ROOT/backup/pg_api_server.py'; rollback_adapter() { install -m 0644 '$REMOTE_ROOT/backup/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/backup/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; }; trap rollback_adapter ERR; install -m 0644 '$REMOTE_ROOT/server/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/server/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; for n in \$(seq 1 20); do systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN && break; sleep 1; done; systemctl is-active --quiet song-rank-pg-api; ss -ltn 'sport = :8765' | grep -q LISTEN; curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/healthz >/dev/null || { journalctl -u song-rank-pg-api -n 80 --no-pager; false; }; python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url http://127.0.0.1:8765 --skip-rankings --timeout 60 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-local-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-local-identity-audit.log'; false; }; python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url '$PUBLIC_BASE' --skip-rankings --timeout 60 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-public-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-public-identity-audit.log'; false; }; tail -n 20 '$REMOTE_ROOT/production-local-identity-audit.log'; tail -n 20 '$REMOTE_ROOT/production-public-identity-audit.log'; rm -rf '$REMOTE_ROOT/backup'; trap - ERR"
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; install -d -m 0755 '$REMOTE_ROOT/backup' /opt/culua/ytb-song-rank/server; cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$REMOTE_ROOT/backup/pg_adapter.py'; cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$REMOTE_ROOT/backup/pg_api_server.py'; rollback_adapter() { install -m 0644 '$REMOTE_ROOT/backup/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/backup/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; }; trap rollback_adapter ERR; install -m 0644 '$REMOTE_ROOT/server/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/server/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; for n in \$(seq 1 20); do systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN && break; sleep 1; done; systemctl is-active --quiet song-rank-pg-api; ss -ltn 'sport = :8765' | grep -q LISTEN; curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/healthz >/dev/null || { journalctl -u song-rank-pg-api -n 80 --no-pager; false; }; timeout --signal=TERM --kill-after=15s 12m python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url http://127.0.0.1:8765 --skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-local-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-local-identity-audit.log'; false; }; timeout --signal=TERM --kill-after=15s 12m python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url '$PUBLIC_BASE' --skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-public-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-public-identity-audit.log'; false; }; tail -n 20 '$REMOTE_ROOT/production-local-identity-audit.log'; tail -n 20 '$REMOTE_ROOT/production-public-identity-audit.log'; rm -rf '$REMOTE_ROOT/backup'; trap - ERR"
           printf 'PUBLIC_IDENTITY_AUDIT_PASSED=1\n' >> "$GITHUB_ENV"
 
       - name: Verify public API and cleanup

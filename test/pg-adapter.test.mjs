@@ -65,6 +65,63 @@ test("adapter parses without creating pycache files", () => {
   runPython(`compile(open(${JSON.stringify(IDENTITY_AUDIT)}, encoding="utf-8").read(), ${JSON.stringify(IDENTITY_AUDIT)}, "exec")`);
 });
 
+test("ranking identity audit emits a bounded TimeoutError diagnostic", () => {
+  const output = runPython(`
+import contextlib
+import importlib.util
+import io
+import sys
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+module.urlopen = lambda *args, **kwargs: (_ for _ in ()).throw(TimeoutError("fixture timeout"))
+stream = io.StringIO()
+with contextlib.redirect_stdout(stream):
+    try:
+        module.fetch_json("http://candidate", "/api/rankings?range=all", 0.25)
+    except TimeoutError:
+        pass
+    else:
+        raise AssertionError("expected TimeoutError")
+lines = stream.getvalue().splitlines()
+assert lines[0].startswith("AUDIT_REQUEST_START phase=unspecified url=http://candidate/api/rankings?range=all timeoutSeconds=0.25")
+assert "AUDIT_REQUEST_TIMEOUT phase=unspecified url=http://candidate/api/rankings?range=all timeoutSeconds=0.25" in lines[1]
+assert "error=TimeoutError" in lines[1]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("ranking identity audit bounds every CLI request and pagination control", () => {
+  const output = runPython(`
+import contextlib
+import importlib.util
+import io
+import sys
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+for flag, value in (
+    ("--page-size", "21"), ("--page-size", "0"), ("--page-size", "-1"),
+    ("--max-pages", "201"), ("--max-pages", "0"),
+    ("--concurrency", "5"),
+    ("--timeout", "0"), ("--timeout", "61"),
+):
+    sys.argv = ["audit", "--base-url", "http://candidate", flag, value]
+    with contextlib.redirect_stderr(io.StringIO()):
+        try:
+            module.main()
+        except SystemExit as error:
+            assert error.code == 2, (flag, value, error.code)
+        else:
+            raise AssertionError(f"expected parser failure: {flag}={value}")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("ranking identity audit detects card, occurrence, URL, and thumbnail mismatches", () => {
   const output = runPython(`
 import importlib.util
@@ -76,6 +133,31 @@ spec.loader.exec_module(module)
 assert module.active_revision({"active_revision_id": "direct"}) == "direct"
 assert module.active_revision({"meta": {"active_revision_id": "wrapped"}}) == "wrapped"
 assert module.active_revision({"meta": {"meta": {"active_revision_id": "http-envelope"}}}) == "http-envelope"
+assert module.normalized_handle("　／＠ＥxＰｅＣｔｅＤ　") == "expected"
+assert module.normalized_handle("/@Expected") == "expected"
+assert module.normalized_handle("@EXPECTED") == "expected"
+assert module.normalized_handle("@@expected") == ""
+assert module.normalized_handle("//@expected") == ""
+assert module.normalized_handle("@/expected") == ""
+assert module.channel_url_matches("https://www.youtube.com/@Expected/", "UCEXPECTED", "expected")
+assert module.channel_url_matches("https://youtube.com/channel/UCEXPECTED", "UCEXPECTED", "expected")
+assert module.thumbnail_matches_video("https://i.ytimg.com/vi/video-good/hqdefault.jpg", "video-good")
+assert module.thumbnail_matches_video("https://i.ytimg.com/vi_webp/video-good/hqdefault.webp", "video-good")
+assert module.thumbnail_matches_video("https://img.youtube.com/an_webp/video-good/mqdefault_6s.webp", "video-good")
+for thumbnail in (
+    "https://evil.example/vi/video-good/hqdefault.jpg",
+    "https://i.ytimg.com/static/video-good/hqdefault.jpg",
+    "https://i.ytimg.com/vi/other-video/hqdefault.jpg?video=video-good",
+    "data:image/jpeg;base64,video-good",
+):
+    assert not module.thumbnail_matches_video(thumbnail, "video-good"), thumbnail
+for url in (
+    "https://youtube.com/@expected-evil",
+    "https://youtube.com.evil/@expected",
+    "https://youtube.com/@other?next=@expected",
+    "https://youtube.com/@other#@expected",
+):
+    assert not module.channel_url_matches(url, "UCEXPECTED", "expected"), url
 good = {
     "key": "UCGOOD",
     "channelId": "UCGOOD",
@@ -98,6 +180,43 @@ good = {
     }],
 }
 assert module.audit_record(good) == set()
+expected_card = {
+    **good,
+    "key": "UCEXPECTED",
+    "channelId": "UCEXPECTED",
+    "channelHandle": "/@expected",
+    "channelUrl": "https://youtube.com/@expected",
+    "occurrences": good["occurrences"],
+}
+for url in (
+    "https://youtube.com/@expected-evil",
+    "https://youtube.com.evil/@expected",
+    "https://youtube.com/@other?next=@expected",
+    "https://youtube.com/@other#@expected",
+):
+    assert "card_channel_url_mismatch" in module.audit_record({**expected_card, "channelUrl": url}), url
+assert module.audit_record({**good, "occurrences": [{"item": good["occurrences"][0]["item"]}]}) == set()
+assert module.audit_record({**good, "occurrences": [{"video": good["occurrences"][0]["video"]}]}) == set()
+assert "invalid_occurrence_item_schema" in module.audit_record({**good, "occurrences": [{"item": None, "video": good["occurrences"][0]["video"]}]})
+assert "invalid_occurrence_video_schema" in module.audit_record({**good, "occurrences": [{"item": good["occurrences"][0]["item"], "video": None}]})
+assert "missing_card_occurrences" in module.audit_record({**good, "occurrences": []})
+missing_occurrences = dict(good)
+missing_occurrences.pop("occurrences")
+assert "missing_card_occurrences" in module.audit_record(missing_occurrences)
+assert "invalid_card_occurrences" in module.audit_record({**good, "occurrences": {}})
+top_missing = module.audit_record({**good, "channelHandle": "", "channelUrl": ""})
+assert "missing_card_channel_handle" in top_missing
+assert "missing_card_channel_url" in top_missing
+for field, problem in (
+    ("videoId", "missing_occurrence_video_id"),
+    ("channelId", "missing_occurrence_channel_id"),
+    ("channelHandle", "missing_occurrence_channel_handle"),
+    ("thumbnailUrl", "missing_occurrence_thumbnail"),
+):
+    item = dict(good["occurrences"][0]["item"])
+    item.pop(field)
+    assert problem in module.audit_record({**good, "occurrences": [{"item": item}]}), (field, problem)
+assert "missing_occurrence_video_identity" in module.audit_record({**good, "occurrences": [{"videoId": "flat"}]})
 bad = {
     **good,
     "channelId": "UCWRONG",
@@ -119,7 +238,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("ranking identity audit prints its full summary before failing probes", () => {
+test("source identity audit validates compact source metadata before reporting summary", () => {
   const output = runPython(`
 import contextlib
 import importlib.util
@@ -130,54 +249,79 @@ spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
-def fetch_json(base_url, path, timeout):
+def fetch_json(base_url, path, timeout, *unused):
     if path == "/healthz":
         return 200, 1, {"status": "ok"}
     if path == "/api/meta":
         return 200, 1, {"meta": {"active_revision_id": "active"}}
+    if path.startswith("/api/rankings"):
+        return 200, 1, {"totalCount": 1, "records": [{
+            "key": "UCEXPECTED", "channelId": "UCEXPECTED", "channelHandle": "/@expected",
+            "channelUrl": "https://www.youtube.com/@expected", "sourceDetailKey": "source-key", "occurrences": [{"item": {"videoId": "probe-video", "channelId": "UCEXPECTED", "channelHandle": "/@expected", "thumbnailUrl": "https://i.ytimg.com/vi/probe-video/hqdefault.jpg"}}],
+        }]}
     if path.startswith("/api/sources/source-key"):
         return 200, 1, {
             "found": True,
+            "sourceKey": "source-key",
+            "page": 1,
+            "pageSize": 20,
+            "pageCount": 1,
+            "totalCount": 1,
+            "totalVideoCount": 1,
             "totalOccurrenceCount": 1,
-            "record": {"channelId": "UCEXPECTED", "occurrenceCount": 1, "videoCount": 1},
+            "record": {
+                "sourceDetailKey": "source-key",
+                "channelId": "UCEXPECTED",
+                "channelHandle": "/@expected",
+                "channelUrl": "https://www.youtube.com/@expected",
+                "occurrences": [{
+                    "videoId": "video-1",
+                    "item": {"videoId": "video-1", "channelId": "UCEXPECTED", "channelHandle": "/@expected", "thumbnailUrl": "https://i.ytimg.com/vi/video-1/hqdefault.jpg"},
+                    "song": {"occurrenceId": "position:0"},
+                }],
+            },
         }
     raise AssertionError(path)
 module.fetch_json = fetch_json
 sys.argv = [
     "audit", "--base-url", "http://candidate", "--skip-rankings",
     "--negative-query", "", "--expected-active", "active",
-    "--source-probe", "source-key,UCEXPECTED,2,2",
+    "--channel-probe", "@expected=UCEXPECTED",
+    "--source-probe", "source-key,UCEXPECTED,1,1",
 ]
 stream = io.StringIO()
 with contextlib.redirect_stdout(stream):
-    try:
-        module.main()
-    except RuntimeError as error:
-        assert "gateErrors=2" in str(error)
-    else:
-        raise AssertionError("probe mismatch must fail")
+    assert module.main() == 0
 summary_line = next(line for line in stream.getvalue().splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
 summary = json.loads(summary_line.split(" ", 1)[1])
 assert summary["affectedRecords"] == 0
-assert summary["gateErrors"] == [
-    "source occurrence count mismatch: source-key expected=2 actual=1",
-    "source video count mismatch: source-key expected=2 actual=1",
-]
+assert summary["gateErrors"] == []
+assert summary["sourceProbeCoverage"] == {"source-key": {"pages": 1, "videos": 1, "occurrences": 1}}
 print("OK")
 `);
   assert.equal(output, "OK");
 });
 
 test("adapter release workflow is fail-closed around identity and rollback gates", () => {
+  const jobTimeout = Number(/^    timeout-minutes: (\d+)$/mu.exec(ADAPTER_WORKFLOW)?.[1]);
+  const auditTimeoutStages = ADAPTER_WORKFLOW.match(/timeout --signal=TERM --kill-after=15s 12m/gu) || [];
+  assert.equal(auditTimeoutStages.length, 3);
+  assert.equal(auditTimeoutStages.length * 12, 36);
+  assert.equal(jobTimeout, 45);
+  assert.equal(jobTimeout - auditTimeoutStages.length * 12, 9);
   assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
   assert.match(ADAPTER_WORKFLOW, /audit-ranking-source-identities\.py/u);
   assert.match(
     ADAPTER_WORKFLOW,
     /--range all --range 7d[\s\\]+--metric count --metric songs --metric videos/u,
   );
-  assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
-  assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20 --timeout 60/u);
-  assert.equal((ADAPTER_WORKFLOW.match(/--skip-rankings --timeout 60/gu) || []).length, 2);
+  assert.match(ADAPTER_WORKFLOW, /--page-size 20 --max-pages 200 --concurrency 4 --timeout 60/u);
+  assert.equal(20 * 200, 4000);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /pageSize=200/u);
+  assert.match(ADAPTER_WORKFLOW, /cat "\$remote_root\/candidate-identity-audit\.log"/u);
+  assert.equal((ADAPTER_WORKFLOW.match(/--skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4/gu) || []).length, 2);
+  assert.equal((ADAPTER_WORKFLOW.match(/timeout --signal=TERM --kill-after=15s 12m python3 '\$REMOTE_ROOT\/server\/audit-ranking-source-identities\.py'/gu) || []).length, 2);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
@@ -199,6 +343,355 @@ test("adapter release workflow is fail-closed around identity and rollback gates
     });
     assert.equal(result.status, 0, `run block ${index + 1}: ${result.stderr}`);
   }
+});
+
+test("ranking identity audit uses a bounded concurrent window and fails closed on bad pages", () => {
+  const output = runPython(`
+import contextlib
+import gc
+import importlib.util
+import io
+import json
+import sys
+import threading
+import time
+import weakref
+from urllib.parse import parse_qs, urlsplit
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Payload(dict):
+    pass
+mode = "success"
+calls = []
+payload_refs = []
+active = 0
+peak_active = 0
+lock = threading.Lock()
+blob = "x" * 200000
+def record(identity, rank=None, source_key=None):
+    key = "UC" + str(identity)
+    if mode == "missing-key":
+        key = ""
+    if source_key is None:
+        source_key = "" if mode == "sample-order" else "source-" + str(identity)
+    if rank is None:
+        rank = identity
+    if mode == "rank-zero" and identity == 1:
+        rank = 0
+    if mode == "rank-invalid" and identity == 1:
+        rank = "1"
+    if mode == "rank-missing" and identity == 1:
+        rank = None
+    if mode == "rank-duplicate" and identity == 2:
+        rank = 1
+    if mode == "rank-out-of-bounds" and identity == 4:
+        rank = 5
+    channel_id = "UC-mismatch" if mode == "key-channel-mismatch" and identity == 1 else key
+    handle = "/@fixture" + str(identity)
+    video_id = "fixture-video-" + str(identity)
+    return {"key": key, "rank": rank, "channelId": channel_id, "channelHandle": handle, "channelUrl": "https://youtube.com/channel/" + channel_id, "sourceDetailKey": source_key, "occurrences": [{"item": {"videoId": video_id, "channelId": channel_id, "channelHandle": handle, "thumbnailUrl": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg"}}], "synthetic": blob}
+def fetch_json(base_url, path, timeout, *unused):
+    global active, peak_active
+    if path == "/healthz":
+        return 200, 1, {"status": "ok"}
+    if path == "/api/meta":
+        return 200, 1, {"active_revision_id": "active"}
+    if path.startswith("/api/rankings"):
+        page = int(parse_qs(urlsplit(path).query)["page"][0])
+        calls.append(page)
+        if page > 1:
+            with lock:
+                active += 1
+                peak_active = max(peak_active, active)
+            try:
+                if mode == "request-failure" and page == 2:
+                    raise RuntimeError("fixture page failure")
+                time.sleep(0.03 * (5 - page))
+            finally:
+                with lock:
+                    active -= 1
+        if mode == "zero":
+            total, page_count, rows = 0, 1, []
+        elif mode == "page-redistribution":
+            total, page_count = 40, 2
+            values = range(1, 22) if page == 1 else range(22, 41)
+            rows = [record(value) for value in values]
+        else:
+            total = 5 if mode == "total-drift" and page == 3 else 4
+            page_count = 3 if mode == "page-count-inconsistent" else 4
+            if mode == "missing" and page == 4:
+                rows = []
+            elif mode == "page-size-mismatch" and page == 2:
+                rows = [record(2), record(3)]
+            elif mode == "same-key-different-source" and page == 2:
+                rows = [record(1, rank=2, source_key="source-changed")]
+            else:
+                rows = [record(1 if mode == "duplicate" and page == 2 else page)]
+        payload = Payload({"page": page, "pageCount": page_count, "totalCount": total, "records": rows})
+        payload_refs.append(weakref.ref(payload))
+        return 200, len(blob), payload
+    raise AssertionError(path)
+module.fetch_json = fetch_json
+def run_case(next_mode):
+    global mode, active, peak_active
+    mode = next_mode
+    calls.clear()
+    payload_refs.clear()
+    active = 0
+    peak_active = 0
+    page_size = "20" if next_mode == "page-redistribution" else "1"
+    sys.argv = ["audit", "--base-url", "http://candidate", "--range", "all", "--metric", "count", "--page-size", page_size, "--max-pages", "4", "--concurrency", "4", "--negative-query", "", "--expected-active", "active"]
+    stream = io.StringIO()
+    with contextlib.redirect_stdout(stream):
+        try:
+            result = module.main()
+        except RuntimeError as error:
+            return stream.getvalue(), error
+    return stream.getvalue(), result
+stream, result = run_case("success")
+assert result == 0
+assert calls[0] == 1 and calls.count(1) == 1
+assert 1 < peak_active <= 4
+summary_line = next(line for line in stream.splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
+summary = json.loads(summary_line.split(" ", 1)[1])
+assert summary["concurrency"] == 4 and summary["maxInFlight"] == 3
+assert summary["rankingCoverage"] == {"all|count": {"expected": 4, "scanned": 4, "unique": 4, "ranks": 4}}
+assert summary["bytesRead"] >= 4 * len(blob)
+gc.collect()
+assert all(reference() is None for reference in payload_refs)
+for bad_mode, expected in (("request-failure", "fixture page failure"), ("total-drift", "ranking total changed during audit"), ("duplicate", "duplicate ranking record during audit"), ("same-key-different-source", "duplicate ranking record during audit"), ("missing-key", "missing stable key"), ("key-channel-mismatch", "key/channelId mismatch"), ("rank-zero", "rank out of bounds"), ("rank-invalid", "invalid ranking rank"), ("rank-missing", "invalid ranking rank"), ("rank-duplicate", "duplicate ranking rank"), ("rank-out-of-bounds", "rank out of bounds"), ("page-count-inconsistent", "pageCount inconsistent"), ("page-size-mismatch", "page size mismatch"), ("page-redistribution", "page size mismatch"), ("missing", "page size mismatch")):
+    stream, error = run_case(bad_mode)
+    assert expected in str(error), (bad_mode, str(error))
+    assert "IDENTITY_AUDIT_SUMMARY" not in stream
+stream, result = run_case("zero")
+assert result == 0
+summary_line = next(line for line in stream.splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
+summary = json.loads(summary_line.split(" ", 1)[1])
+assert summary["rankingCoverage"] == {"all|count": {"expected": 0, "scanned": 0, "unique": 0, "ranks": 0}}
+stream, error = run_case("sample-order")
+assert "identity audit failed" in str(error)
+summary_line = next(line for line in stream.splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
+summary = json.loads(summary_line.split(" ", 1)[1])
+assert [sample["key"] for sample in summary["samples"]] == ["UC1", "UC2", "UC3", "UC4"]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source identity audit fully pages video groups with bounded payload retention", () => {
+  const output = runPython(`
+import contextlib
+import gc
+import importlib.util
+import io
+import json
+import sys
+import threading
+import time
+import weakref
+from urllib.parse import parse_qs, urlsplit
+spec = importlib.util.spec_from_file_location("identity_audit", ${JSON.stringify(IDENTITY_AUDIT)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+class Payload(dict):
+    pass
+mode = "success"
+calls = []
+payload_refs = []
+active = 0
+peak_active = 0
+lock = threading.Lock()
+blob = "x" * 200000
+def source_rows(page):
+    start = (page - 1) * 20 + 1
+    count = 20 if page < 3 else 9
+    rows = []
+    for video_number in range(start, start + count):
+        repeats = 2 if video_number <= 5 else 1
+        for position in range(repeats):
+            rows.append({
+                "videoId": f"video-{video_number}",
+                "item": {
+                    "videoId": f"video-{video_number}", "channelId": "UCEXPECTED",
+                    "channelHandle": "/@expected",
+                    "thumbnailUrl": f"https://i.ytimg.com/vi/video-{video_number}/hqdefault.jpg",
+                },
+                "video": {
+                    "videoId": f"video-{video_number}", "channelId": "UCEXPECTED",
+                    "channelHandle": "/@expected",
+                    "thumbnailUrl": f"https://i.ytimg.com/vi/video-{video_number}/hqdefault.jpg",
+                },
+                "song": {"occurrenceId": f"position:{position}"},
+                "rangeId": "all",
+                "synthetic": blob,
+            })
+    return rows
+def fetch_json(base_url, path, timeout, *unused):
+    global active, peak_active
+    if path == "/healthz":
+        return 200, 1, {"status": "ok"}
+    if path == "/api/meta":
+        return 200, 1, {"active_revision_id": "active"}
+    if path.startswith("/api/rankings"):
+        query = parse_qs(urlsplit(path).query)
+        assert query["pageSize"] == ["20"]
+        return 200, 1, {"totalCount": 1, "records": [{
+            "key": "UCEXPECTED", "channelId": "UCEXPECTED", "channelHandle": "/@expected",
+            "channelUrl": "https://www.youtube.com/@expected", "sourceDetailKey": "source-key", "occurrences": [{"item": {"videoId": "probe-video", "channelId": "UCEXPECTED", "channelHandle": "/@expected", "thumbnailUrl": "https://i.ytimg.com/vi/probe-video/hqdefault.jpg"}}],
+        }]}
+    if path.startswith("/api/sources/source-key"):
+        query = parse_qs(urlsplit(path).query)
+        page = int(query["page"][0])
+        assert query["pageSize"] == ["20"]
+        calls.append(page)
+        if page > 1:
+            with lock:
+                active += 1
+                peak_active = max(peak_active, active)
+            try:
+                if mode == "request-failure" and page == 2:
+                    raise RuntimeError("fixture source request failure")
+                time.sleep(0.03 * (4 - page))
+            finally:
+                with lock:
+                    active -= 1
+        rows = source_rows(page)
+        total_occurrences = 54
+        page_count = 3
+        total_videos = 49
+        if mode == "total-drift" and page == 2:
+            total_occurrences = 55
+        if mode == "page-count-drift" and page == 2:
+            page_count = 4
+        if mode == "missing-page" and page == 3:
+            rows = []
+        if mode == "duplicate-video" and page == 2:
+            rows[0]["item"]["videoId"] = "video-1"
+            rows[0]["video"]["videoId"] = "video-1"
+            rows[0]["videoId"] = "video-1"
+            rows[0]["item"]["thumbnailUrl"] = "https://i.ytimg.com/vi/video-1/hqdefault.jpg"
+            rows[0]["video"]["thumbnailUrl"] = "https://i.ytimg.com/vi/video-1/hqdefault.jpg"
+            rows[0]["song"]["occurrenceId"] = "position:99"
+        if mode == "duplicate-occurrence" and page == 2:
+            rows.insert(1, dict(rows[0]))
+        if mode == "wrong-channel" and page == 2:
+            rows[0]["item"] = {"videoId": rows[0]["videoId"], "channelId": "UCWRONG"}
+        if mode == "missing-item-thumbnail" and page == 2:
+            rows[0]["item"].pop("thumbnailUrl")
+        if mode == "wrong-item-thumbnail" and page == 2:
+            rows[0]["item"]["thumbnailUrl"] = "https://i.ytimg.com/vi/other-video/hqdefault.jpg"
+        if mode == "legacy-missing-thumbnail" and page == 2:
+            rows[0]["video"].pop("thumbnailUrl")
+        if mode == "legacy-wrong-thumbnail" and page == 2:
+            rows[0]["video"]["thumbnailUrl"] = "https://i.ytimg.com/vi/other-video/hqdefault.jpg"
+        if mode == "legacy-different-thumbnail" and page == 2:
+            rows[0]["video"]["thumbnailUrl"] = "https://i.ytimg.com/vi/video-21/default.jpg"
+        if mode == "legacy-alias-thumbnail" and page == 2:
+            rows[0]["video"]["videoThumbnailUrl"] = rows[0]["video"].pop("thumbnailUrl")
+        if mode == "source-video-null" and page == 2:
+            rows[0]["video"] = None
+        if mode == "source-video-scalar" and page == 2:
+            rows[0]["video"] = "not-an-object"
+        if mode == "item-only":
+            for row in rows:
+                row.pop("video")
+        record_url = "https://www.youtube.com/@expected"
+        if mode == "record-url":
+            record_url = "https://www.youtube.com/@wrong"
+        elif mode == "record-url-evil":
+            record_url = "https://youtube.com.evil/@expected"
+        payload = Payload({
+            "found": True,
+            "sourceKey": "source-key",
+            "page": page,
+            "pageSize": 20,
+            "pageCount": page_count,
+            "totalCount": total_videos,
+            "totalVideoCount": total_videos,
+            "totalOccurrenceCount": total_occurrences,
+            "record": {
+                "sourceDetailKey": "source-key",
+                "channelId": "UCEXPECTED",
+                "channelHandle": "/@expected" if mode != "record-handle" else "/@wrong",
+                "channelUrl": record_url,
+                "occurrences": rows,
+            },
+        })
+        if mode == "item-handle" and page == 2:
+            payload["record"]["occurrences"][0]["item"]["channelHandle"] = "/@wrong"
+        payload_refs.append(weakref.ref(payload))
+        return 200, len(blob), payload
+    raise AssertionError(path)
+module.fetch_json = fetch_json
+def run_case(next_mode):
+    global mode, active, peak_active
+    mode = next_mode
+    calls.clear()
+    payload_refs.clear()
+    active = 0
+    peak_active = 0
+    sys.argv = [
+        "audit", "--base-url", "http://candidate", "--skip-rankings",
+        "--negative-query", "", "--expected-active", "active",
+        "--max-pages", "4", "--concurrency", "4",
+        "--channel-probe", "@expected=UCEXPECTED",
+        "--source-probe", "source-key,UCEXPECTED,54,49",
+    ]
+    if next_mode == "handle-ambiguity":
+        sys.argv.extend(["--channel-probe", "@different=UCEXPECTED"])
+    stream = io.StringIO()
+    with contextlib.redirect_stdout(stream):
+        try:
+            result = module.main()
+        except RuntimeError as error:
+            return stream.getvalue(), error
+    return stream.getvalue(), result
+stream, result = run_case("success")
+assert result == 0
+assert calls[0] == 1 and calls.count(1) == 1
+assert 1 < peak_active <= 4
+summary_line = next(line for line in stream.splitlines() if line.startswith("IDENTITY_AUDIT_SUMMARY "))
+summary = json.loads(summary_line.split(" ", 1)[1])
+assert summary["sourceProbeCoverage"] == {"source-key": {"pages": 3, "videos": 49, "occurrences": 54}}
+assert summary["maxInFlight"] == 2
+assert stream.index("AUDIT_SOURCE_PAGE source=source-key page=1/3") < stream.index("AUDIT_SOURCE_PAGE source=source-key page=2/3")
+gc.collect()
+assert all(reference() is None for reference in payload_refs)
+for compatible_mode in ("item-only", "legacy-alias-thumbnail"):
+    stream, result = run_case(compatible_mode)
+    assert result == 0, compatible_mode
+for bad_mode, expected in (
+    ("request-failure", "fixture source request failure"),
+    ("total-drift", "source occurrence total changed during audit"),
+    ("page-count-drift", "source pageCount inconsistent"),
+    ("missing-page", "source video page coverage mismatch"),
+    ("duplicate-video", "duplicate source video during audit"),
+    ("duplicate-occurrence", "duplicate source occurrence during audit"),
+    ("wrong-channel", "source occurrence item channel mismatch"),
+    ("missing-item-thumbnail", "source occurrence missing item thumbnail"),
+    ("wrong-item-thumbnail", "source occurrence item thumbnail videoId mismatch"),
+    ("legacy-missing-thumbnail", "source occurrence missing video thumbnail"),
+    ("legacy-wrong-thumbnail", "source occurrence video thumbnail videoId mismatch"),
+    ("legacy-different-thumbnail", "source occurrence item/video thumbnail mismatch"),
+    ("source-video-null", "source occurrence invalid video schema"),
+    ("source-video-scalar", "source occurrence invalid video schema"),
+    ("record-handle", "source record handle mismatch"),
+    ("item-handle", "source occurrence item handle mismatch"),
+    ("record-url", "source record channelUrl mismatch"),
+    ("record-url-evil", "source record channelUrl mismatch"),
+    ("handle-ambiguity", "ambiguous expected handle for channel"),
+):
+    stream, error = run_case(bad_mode)
+    assert expected in str(error), (bad_mode, str(error))
+    assert "IDENTITY_AUDIT_SUMMARY" not in stream
+    if bad_mode == "request-failure":
+        assert "AUDIT_SOURCE_PAGE_ERROR source=source-key page=2" in stream
+print("OK")
+`);
+  assert.equal(output, "OK");
 });
 
 test("DSN selection does not expose the connection secret", () => {
