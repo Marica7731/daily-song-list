@@ -54,13 +54,16 @@ _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
 _GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int]] = {}
 
 
-def _phase_trace(phase: str, started_at: float) -> float:
+def _phase_trace(phase: str, started_at: float, **counts: int) -> float:
     """Emit candidate-only timing markers without changing normal API output."""
 
     now = time.perf_counter()
     if os.environ.get("DAILY_SONG_PG_ADAPTER_PHASE_TRACE") == "1":
+        dimensions = "".join(
+            f" {name}={int(value)}" for name, value in sorted(counts.items())
+        )
         print(
-            f"pg_adapter_phase phase={phase} elapsed_seconds={now - started_at:.3f}",
+            f"pg_adapter_phase phase={phase} elapsed_seconds={now - started_at:.3f}{dimensions}",
             file=sys.stderr,
             flush=True,
         )
@@ -2493,14 +2496,21 @@ def _overlay_vtuber_replacement_rows(
         ):
             affected_occurrence_ids.add((video_id, occurrence_id))
 
-    # Non-tombstone candidates are the complete replacement projection for
-    # every selected accepted video.  Final runtime replacements are appended
-    # as candidates too, including a same-video title correction that the
-    # generic delta intentionally suppresses.
-    for row in (*rows, *replacement_rows):
+    # Runtime occurrence chains replace the matching accepted projection, not
+    # just the parent tuple: otherwise an accepted old key and its canonical
+    # runtime replacement would both reach the exact aggregate.  Full-video
+    # accepted resets are intentionally absent from affected_occurrence_ids,
+    # so their selected accepted rows remain candidates.
+    for is_accepted_row, row in (
+        *((True, row) for row in rows),
+        *((False, row) for row in replacement_rows),
+    ):
         if row.get("video_tombstone"):
             continue
         video_id = _text(row.get("video_id"))
+        occurrence_id = _text(row.get("occurrence_id"))
+        if is_accepted_row and (video_id, occurrence_id) in affected_occurrence_ids:
+            continue
         video = _overlay_public_video(row)
         channel_id = _text(video.get("channelId") or row.get("channel_id"))
         if not video_id or not channel_id:
@@ -2544,6 +2554,7 @@ def _overlay_vtuber_replacement_rows(
     # existing parent preview plus accepted rows and never retain a replaced
     # video's stale occurrence.
     if not options.get("q") and hasattr(connection, "cursor"):
+        exact_started = time.perf_counter()
         candidate_values: list[dict[str, str]] = []
         candidate_previews: dict[str, list[dict[str, Any]]] = defaultdict(list)
         candidate_videos: dict[str, Mapping[str, Any]] = {}
@@ -2569,11 +2580,85 @@ def _overlay_vtuber_replacement_rows(
                 })
                 preview = dict(occurrence)
                 preview["video"] = dict(preview.get("item") or {})
-                candidate_previews[channel_id] = _bounded_overlay_previews(
-                    (*candidate_previews[channel_id], preview),
-                )
+                candidate_previews[channel_id].append(preview)
 
-        summaries = _rows(
+        exact_started = _phase_trace(
+            "exact_build_inputs",
+            exact_started,
+            affected_channels=len(affected_channel_ids),
+            overlay_videos=len(full_video_ids),
+            overlay_occurrences=len(candidate_values),
+            replaced_occurrences=len(affected_occurrence_ids),
+        )
+
+        range_values = ["all", ""] if (_text(options.get("range")) or "all") == "all" else ["7d", ""]
+        fast_default = not bool(options.get("nicheOnly")) and not bool(options.get("hideUnknownArtist"))
+
+        if fast_default:
+            summaries = _rows(
+                connection,
+                """
+                WITH affected_channels AS MATERIALIZED (
+                  SELECT DISTINCT unnest(%s::text[]) AS channel_id
+                ), affected_videos AS MATERIALIZED (
+                  SELECT DISTINCT unnest(%s::text[]) AS video_id
+                ), affected_occurrences AS MATERIALIZED (
+                  SELECT DISTINCT video_id, occurrence_id
+                  FROM unnest(%s::text[], %s::text[]) AS item(video_id, occurrence_id)
+                ), touched_occurrence_videos AS MATERIALIZED (
+                  SELECT DISTINCT video_id FROM affected_occurrences
+                ), range_values AS MATERIALIZED (
+                  SELECT DISTINCT unnest(%s::text[]) AS range_id
+                ), overlay_occurrences AS MATERIALIZED (
+                  SELECT channel_id, video_id, song_key FROM jsonb_to_recordset(%s::jsonb)
+                    AS item(channel_id text, video_id text, song_key text)
+                ), affected_parent_videos AS MATERIALIZED (
+                  SELECT v.video_id, v.channel_id FROM runtime_videos AS v
+                  JOIN affected_channels AS affected ON affected.channel_id = v.channel_id
+                  LEFT JOIN affected_videos AS reset ON reset.video_id = v.video_id
+                  WHERE v.revision_id = %s AND reset.video_id IS NULL
+                ), fast_parent_occurrences AS (
+                  SELECT parent.channel_id, o.video_id, o.song_key
+                  FROM affected_parent_videos AS parent
+                  LEFT JOIN touched_occurrence_videos AS touched ON touched.video_id = parent.video_id
+                  JOIN runtime_occurrences AS o ON o.revision_id = %s AND o.video_id = parent.video_id
+                  JOIN range_values AS scope ON scope.range_id = o.range_id
+                  WHERE touched.video_id IS NULL
+                ), touched_parent_occurrences AS (
+                  SELECT parent.channel_id, o.video_id, o.song_key
+                  FROM affected_parent_videos AS parent
+                  JOIN touched_occurrence_videos AS touched ON touched.video_id = parent.video_id
+                  JOIN runtime_occurrences AS o ON o.revision_id = %s AND o.video_id = parent.video_id
+                  JOIN range_values AS scope ON scope.range_id = o.range_id
+                  LEFT JOIN affected_occurrences AS changed
+                    ON changed.video_id = o.video_id AND changed.occurrence_id = o.occurrence_id
+                  WHERE changed.occurrence_id IS NULL
+                ), combined AS (
+                  SELECT channel_id, video_id, song_key FROM fast_parent_occurrences
+                  UNION ALL SELECT channel_id, video_id, song_key FROM touched_parent_occurrences
+                  UNION ALL SELECT channel_id, video_id, song_key FROM overlay_occurrences
+                )
+                SELECT channel_id, count(*) AS row_count, count(DISTINCT video_id) AS video_count,
+                       count(DISTINCT song_key) AS song_count,
+                       bool_or(song_key = '') AS has_empty_song_key
+                FROM combined GROUP BY channel_id
+                """,
+                [sorted(affected_channel_ids), sorted(full_video_ids),
+                 [video_id for video_id, _ in sorted(affected_occurrence_ids)],
+                 [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
+                 range_values, json.dumps(candidate_values, ensure_ascii=False),
+                 parent_revision_id, parent_revision_id, parent_revision_id],
+            )
+            # The current producer invariant is nonempty song_key.  If it
+            # regresses, discard this index-only result and retain the legacy
+            # title/artist fallback instead of silently merging an empty key.
+            fast_default = not any(bool(row.get("has_empty_song_key")) for row in summaries)
+        exact_started = _phase_trace(
+            "exact_fast_preflight", exact_started,
+            fast_path=int(fast_default), empty_song_keys=int(not fast_default),
+        )
+
+        if not fast_default: summaries = _rows(
             connection,
             """
             WITH affected_channels AS MATERIALIZED (
@@ -2587,36 +2672,41 @@ def _overlay_vtuber_replacement_rows(
               FROM unnest(%s::text[], %s::text[])
                 AS item(video_id, occurrence_id)
             ),
+            range_values AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS range_id
+            ),
             overlay_occurrences AS MATERIALIZED (
               SELECT channel_id, video_id, song_key
               FROM jsonb_to_recordset(%s::jsonb)
                 AS item(channel_id text, video_id text, song_key text)
             ),
+            affected_parent_videos AS MATERIALIZED (
+              SELECT v.video_id, v.channel_id
+              FROM runtime_videos AS v
+              JOIN affected_channels AS affected
+                ON affected.channel_id = v.channel_id
+              LEFT JOIN affected_videos AS touched
+                ON touched.video_id = v.video_id
+              WHERE v.revision_id = %s
+                AND touched.video_id IS NULL
+            ),
             parent_occurrences AS (
-              SELECT v.channel_id, o.video_id,
+              SELECT parent.channel_id, o.video_id,
                      coalesce(
                        nullif(o.song_key, ''),
                        lower(coalesce(o.title, '')) || '::' ||
                          lower(coalesce(o.artist, ''))
                      ) AS song_key
-              FROM runtime_videos AS v
+              FROM affected_parent_videos AS parent
               JOIN runtime_occurrences AS o
-                ON o.revision_id = v.revision_id AND o.video_id = v.video_id
-              JOIN affected_channels AS affected
-                ON affected.channel_id = v.channel_id
-              LEFT JOIN affected_videos AS touched
-                ON touched.video_id = v.video_id
+                ON o.revision_id = %s
+               AND o.video_id = parent.video_id
+              JOIN range_values AS scope
+                ON scope.range_id = o.range_id
               LEFT JOIN affected_occurrences AS changed
                 ON changed.video_id = o.video_id
                AND changed.occurrence_id = o.occurrence_id
-              WHERE v.revision_id = %s
-                AND o.revision_id = %s
-                AND touched.video_id IS NULL
-                AND changed.occurrence_id IS NULL
-                AND (
-                  (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
-                  OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
-                )
+              WHERE changed.occurrence_id IS NULL
                 AND (NOT %s OR nullif(o.artist, '') IS NOT NULL)
                 AND (
                   NOT %s
@@ -2643,15 +2733,15 @@ def _overlay_vtuber_replacement_rows(
                 sorted(full_video_ids),
                 [video_id for video_id, _ in sorted(affected_occurrence_ids)],
                 [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
+                range_values,
                 json.dumps(candidate_values, ensure_ascii=False),
                 parent_revision_id,
                 parent_revision_id,
-                _text(options.get("range")) or "all",
-                _text(options.get("range")) or "all",
                 bool(options.get("hideUnknownArtist")),
                 bool(options.get("nicheOnly")),
             ],
         )
+        exact_started = _phase_trace("exact_sql", exact_started, summary_rows=len(summaries))
         summary_by_channel = {
             _text(row.get("channel_id")): row
             for row in summaries
@@ -2727,6 +2817,12 @@ def _overlay_vtuber_replacement_rows(
         if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
             _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
         _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+        _phase_trace(
+            "exact_finalize",
+            exact_started,
+            output_channels=len(exact),
+            preview_channels=len(candidate_previews),
+        )
         return {
             key: {**row, "payload_json": dict(row.get("payload_json") or {})}
             for key, row in exact.items()
