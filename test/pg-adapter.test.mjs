@@ -125,6 +125,10 @@ test("adapter release workflow is fail-closed around identity and rollback gates
   assert.match(ADAPTER_WORKFLOW, /--range all --range 7d --metric videos/u);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
+  assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
+  assert.match(ADAPTER_WORKFLOW, /--max-time 60 http:\/\/127\.0\.0\.1:18766\/healthz/u);
+  assert.match(ADAPTER_WORKFLOW, /tail -n 80 '\$REMOTE_ROOT\/candidate\.log'/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);
   for (const [index, block] of blocks.entries()) {
@@ -256,7 +260,20 @@ urameshi = module._apply_channel_metadata(
         "channelId": urameshi_id,
         "channelHandle": "/@urameshi_conta",
         "channelUrl": "https://www.youtube.com/@MEDAzcd",
-        "occurrences": [{"video": {"channelId": urameshi_id, "channelHandle": "/@urameshi_conta"}}],
+        "occurrences": [{
+            "item": {
+                "videoId": "expected-video",
+                "thumbnailUrl": "https://i.ytimg.com/vi/expected-video/hqdefault.jpg",
+                "channelId": urameshi_id,
+                "channelHandle": "/@urameshi_conta%20legacy",
+            },
+            "video": {
+                "videoId": "expected-video",
+                "thumbnailUrl": "https://i.ytimg.com/vi/expected-video/hqdefault.jpg",
+                "channelId": urameshi_id,
+                "channelHandle": "/@urameshi_conta%20legacy",
+            },
+        }],
     },
     {"detail_key": urameshi_id, "search_text": "MEDA", "channel_search_text": "@urameshi_conta"},
     metadata,
@@ -267,6 +284,9 @@ assert urameshi["channelId"] == urameshi_id
 assert urameshi["channelHandle"] == "/@urameshi_conta"
 assert urameshi["name"] == "Conta Urameshi"
 assert urameshi["sourceDetailKey"] == module._stable_key("source-vtuber", "7d", urameshi_id)
+assert urameshi["occurrences"][0]["item"]["channelHandle"] == "/@urameshi_conta"
+assert urameshi["occurrences"][0]["video"]["channelHandle"] == "/@urameshi_conta"
+assert urameshi["occurrences"][0]["item"]["thumbnailUrl"].endswith("/expected-video/hqdefault.jpg")
 print("OK")
 `);
   assert.equal(output, "OK");

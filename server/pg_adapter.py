@@ -561,6 +561,38 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
     for key, value in field_values.items():
         if value is not None and value != "":
             result[key] = value
+    canonical_occurrences: list[Any] = []
+    canonical_handle = handle.lstrip("/@").casefold()
+    channel_url = selected.get("channelUrl") or selected.get("channel_url")
+    for occurrence in result.get("occurrences") or ():
+        if not isinstance(occurrence, Mapping):
+            canonical_occurrences.append(occurrence)
+            continue
+        occurrence_result = dict(occurrence)
+        for nested_key in ("item", "video"):
+            nested = occurrence_result.get(nested_key)
+            if not isinstance(nested, Mapping):
+                continue
+            nested_id = _text(nested.get("channelId") or nested.get("channel_id"))
+            nested_handle = _text(nested.get("channelHandle") or nested.get("channel_handle")).lstrip("/@").casefold()
+            if not channel_key or not (
+                nested_id == channel_key
+                or (not nested_id and canonical_handle and nested_handle == canonical_handle)
+            ):
+                continue
+            canonical_video = dict(nested)
+            for key, value in {
+                "channelId": channel_key,
+                "channelHandle": handle,
+                "channelName": display_name,
+                "channelUrl": channel_url,
+            }.items():
+                if value is not None and value != "":
+                    canonical_video[key] = value
+            occurrence_result[nested_key] = canonical_video
+        canonical_occurrences.append(occurrence_result)
+    if "occurrences" in result:
+        result["occurrences"] = canonical_occurrences
     metadata_payload = _json_object(selected.get("payload_json"))
     metadata_payload.update({key: value for key, value in selected.items() if key not in {"revision_id", "payload_json"} and value is not None})
     expected_songs = metadata_payload.get("expectedSongCount")
