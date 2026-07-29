@@ -735,36 +735,73 @@ def _overlay_norm(value: Any) -> str:
 def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
     """Read only the candidate rows; never resolve the parent occurrence table."""
 
-    rows = _rows(
+    occurrence_rows = _rows(
         connection,
         """
         SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
-               o.payload_json AS occurrence_payload_json,
-               v.title AS video_title, v.channel_name, v.channel_id,
-               v.channel_handle, v.channel_url, v.published_at,
-               v.payload_json AS video_payload_json,
-               v.tombstone AS video_tombstone
+               o.payload_json AS occurrence_payload_json
         FROM migration_occurrence_rows AS o
-        LEFT JOIN migration_video_rows AS v
-          ON v.revision_id = o.revision_id AND v.video_id = o.video_id
         WHERE o.revision_id = ANY(%s)
         ORDER BY o.video_id, o.position, o.occurrence_key
         """,
         [list(revision_ids)],
     )
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
-    rows.sort(key=lambda row: (priority.get(_text(row.get("revision_id")), len(priority)), _text(row.get("video_id")), int(row.get("position") or 0)))
-    selected_revision: dict[str, str] = {}
+    video_rows = _rows(
+        connection,
+        """
+        SELECT revision_id, video_id, title AS video_title, channel_name,
+               channel_id, channel_handle, channel_url, published_at,
+               payload_json AS video_payload_json,
+               tombstone AS video_tombstone
+        FROM migration_video_rows
+        WHERE revision_id = ANY(%s)
+        ORDER BY video_id
+        """,
+        [list(revision_ids)],
+    )
+    video_rows.sort(key=lambda row: (
+        priority.get(_text(row.get("revision_id")), len(priority)),
+        _text(row.get("video_id")),
+    ))
+    selected_video: dict[str, dict[str, Any]] = {}
+    for row in video_rows:
+        video_id = _text(row.get("video_id"))
+        if video_id and video_id not in selected_video:
+            selected_video[video_id] = row
+    fallback_revision: dict[str, str] = {}
+    occurrence_rows.sort(key=lambda row: (
+        priority.get(_text(row.get("revision_id")), len(priority)),
+        _text(row.get("video_id")),
+        int(row.get("position") or 0),
+    ))
     resolved: list[dict[str, Any]] = []
-    for row in rows:
+    for row in occurrence_rows:
         video_id = _text(row.get("video_id"))
         revision_id = _text(row.get("revision_id"))
-        if video_id not in selected_revision:
-            selected_revision[video_id] = revision_id
-        if selected_revision[video_id] == revision_id:
-            resolved.append(row)
+        video = selected_video.get(video_id)
+        selected_revision = _text(video.get("revision_id")) if video else ""
+        if not selected_revision:
+            selected_revision = fallback_revision.setdefault(video_id, revision_id)
+        if selected_revision != revision_id:
+            continue
+        merged = dict(row)
+        if video:
+            merged.update({
+                "video_title": video.get("video_title") or video.get("title"),
+                "channel_name": video.get("channel_name"),
+                "channel_id": video.get("channel_id"),
+                "channel_handle": video.get("channel_handle"),
+                "channel_url": video.get("channel_url"),
+                "published_at": video.get("published_at"),
+                "video_payload_json": video.get("video_payload_json")
+                    if "video_payload_json" in video else video.get("payload_json"),
+                "video_tombstone": video.get("video_tombstone")
+                    if "video_tombstone" in video else video.get("tombstone"),
+            })
+        resolved.append(merged)
     return resolved
 
 
@@ -1052,25 +1089,50 @@ def _overlay_candidate_search_text(row: Mapping[str, Any]) -> str:
     ).casefold()
 
 
+def _overlay_public_video(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Keep the established public video tuple without curation-only blobs."""
+
+    source = _json_object(row.get("video_payload_json"))
+    if isinstance(source.get("payload"), Mapping):
+        source = dict(source["payload"])
+    aliases = {
+        "videoId": ("videoId", "video_id"),
+        "title": ("title", "video_title"),
+        "channelName": ("channelName", "channel_name"),
+        "channelId": ("channelId", "channel_id"),
+        "channelHandle": ("channelHandle", "channel_handle"),
+        "channelUrl": ("channelUrl", "channel_url"),
+        "publishedAt": ("publishedAt", "published_at"),
+        "publishedTimestamp": ("publishedTimestamp", "published_timestamp"),
+        "thumbnailUrl": ("thumbnailUrl", "thumbnail_url"),
+        "videoThumbnailUrl": ("videoThumbnailUrl", "video_thumbnail_url"),
+        "avatarUrl": ("avatarUrl", "avatar_url"),
+        "sourceUrl": ("sourceUrl", "source_url"),
+        "sourceSystem": ("sourceSystem", "source_system"),
+        "rangeId": ("rangeId", "range_id"),
+    }
+    result: dict[str, Any] = {}
+    for public_name, names in aliases.items():
+        for name in names:
+            value = source.get(name)
+            if value is None or value == "":
+                value = row.get(name)
+            if value is not None and value != "":
+                result[public_name] = value
+                break
+    return result
+
+
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
     for row in rows:
         if row.get("video_tombstone"):
             continue
         occurrence = _json_object(row.get("occurrence_payload_json"))
-        video = _json_object(row.get("video_payload_json"))
+        video = _overlay_public_video(row)
         title = _text(row.get("title")) or _text(occurrence.get("title"))
         artist = _text(row.get("artist")) or _text(occurrence.get("artist"))
         video_id = _text(row.get("video_id"))
-        video.update({
-            "videoId": video.get("videoId") or video_id,
-            "title": video.get("title") or row.get("video_title"),
-            "channelName": video.get("channelName") or row.get("channel_name"),
-            "channelId": video.get("channelId") or row.get("channel_id"),
-            "channelHandle": video.get("channelHandle") or row.get("channel_handle"),
-            "channelUrl": video.get("channelUrl") or row.get("channel_url"),
-            "publishedAt": video.get("publishedAt") or row.get("published_at"),
-        })
         occurrence.update({
             "videoId": video_id,
             "occurrenceId": occurrence.get("occurrenceId") or row.get("occurrence_id"),
@@ -1157,24 +1219,13 @@ def _overlay_vtuber_replacement_rows(
         if row.get("video_tombstone"):
             continue
         video_id = _text(row.get("video_id"))
-        video = _json_object(row.get("video_payload_json"))
-        if isinstance(video.get("payload"), Mapping):
-            video = dict(video["payload"])
+        video = _overlay_public_video(row)
         channel_id = _text(video.get("channelId") or row.get("channel_id"))
         if not video_id or not channel_id:
             continue
         affected_channel_ids.add(channel_id)
         record = candidate_records.get(video_id)
         if record is None:
-            video.update({
-                "videoId": video_id,
-                "title": video.get("title") or row.get("video_title"),
-                "channelName": video.get("channelName") or row.get("channel_name"),
-                "channelId": channel_id,
-                "channelHandle": video.get("channelHandle") or row.get("channel_handle"),
-                "channelUrl": video.get("channelUrl") or row.get("channel_url"),
-                "publishedAt": video.get("publishedAt") or row.get("published_at"),
-            })
             record = {"video": video, "occurrences": []}
             candidate_records[video_id] = record
         song = _json_object(row.get("occurrence_payload_json"))
@@ -1265,8 +1316,8 @@ def _overlay_vtuber_replacement_rows(
                 AND (
                   NOT %s
                   OR coalesce(
-                    o.payload_json->>'isNiche',
-                    o.payload_json->'payload'->>'isNiche',
+                    o.payload_json::jsonb->>'isNiche',
+                    o.payload_json::jsonb->'payload'->>'isNiche',
                     'false'
                   ) = 'true'
                 )
@@ -1360,8 +1411,8 @@ def _overlay_vtuber_replacement_rows(
                 "video_count": int(summary.get("video_count") or 0),
                 "timestamp_count": int(summary.get("row_count") or 0),
                 "payload_json": payload,
-                "search_text": json.dumps(payload, ensure_ascii=False),
-                "channel_search_text": json.dumps(payload, ensure_ascii=False),
+                "search_text": "",
+                "channel_search_text": "",
             }
         if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
             _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
@@ -1477,7 +1528,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         raise PostgresAdapterError("incremental candidate has no full runtime parent")
     options = _query_options(query)
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
-    search_select = "search_text, channel_search_text" if options["q"] or options["view"] == "vtubers" else "'' AS search_text, '' AS channel_search_text"
+    search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
     base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
     for token in options["searchTokens"]:

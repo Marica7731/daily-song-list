@@ -488,6 +488,12 @@ class Cursor:
                 ("patch", "new-a", "a-song", 0, "7d", "a-key", 10, "Song A", "Artist A", "src-a", "hash-a", "youtube_channel_discovery", "New A", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-27T00:00:00Z", False),
                 ("patch", "new-b", "b-song", 0, "7d", "b-key", 20, "Song B", "Artist B", "src-b", "hash-b", "youtube_channel_discovery", "New B", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-28T00:00:00Z", False),
             ]
+        elif "title AS video_title" in sql and "FROM migration_video_rows" in sql:
+            self.description = [(name,) for name in ("revision_id", "video_id", "video_title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_at", "video_payload_json", "video_tombstone")]
+            self.rows = [
+                ("patch", "new-a", "New A", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-27T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-a/hqdefault.jpg"}), False),
+                ("patch", "new-b", "New B", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", "2026-07-28T00:00:00Z", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}), False),
+            ]
         elif "SELECT revision_id, video_id, payload_json FROM migration_video_rows" in sql:
             self.description = [(name,) for name in ("revision_id", "video_id", "payload_json")]
             self.rows = [("patch", "new-a", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-a/hqdefault.jpg"})), ("patch", "new-b", json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/new-b/hqdefault.jpg"}))]
@@ -954,9 +960,11 @@ aggregate_queries = 0
 def rows(connection, sql, params):
     global aggregate_queries
     if "FROM runtime_ranking_rows" in sql:
+        assert "'' AS search_text, '' AS channel_search_text" in sql
         return [base_row]
     if "jsonb_to_recordset" in sql:
         aggregate_queries += 1
+        assert "o.payload_json::jsonb->>'isNiche'" in sql
         assert sorted(json.loads(params[1])) == ["video-new", "video-old"]
         values = json.loads(params[0])
         assert len(values) == 3
@@ -1053,6 +1061,45 @@ assert payload["totalCount"] == 1
 assert payload["records"][0]["title"] == "Song A"
 assert payload["records"][0]["count"] == 1
 assert payload["records"][0]["videoCount"] == 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("overlay candidate rows load each video payload only once", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+occurrences = [
+    {"revision_id": "new", "video_id": "video-a", "occurrence_id": "new-1", "position": 0, "occurrence_payload_json": "{}"},
+    {"revision_id": "new", "video_id": "video-a", "occurrence_id": "new-2", "position": 1, "occurrence_payload_json": "{}"},
+    {"revision_id": "old", "video_id": "video-a", "occurrence_id": "old-1", "position": 0, "occurrence_payload_json": "{}"},
+]
+video_payload = '{"videoId":"video-a","thumbnailUrl":"https://i.ytimg.com/vi/video-a/hqdefault.jpg"}'
+videos = [
+    {"revision_id": "new", "video_id": "video-a", "video_title": "New", "channel_id": "UCNEW", "video_payload_json": video_payload, "video_tombstone": False},
+    {"revision_id": "old", "video_id": "video-a", "video_title": "Old", "channel_id": "UCOLD", "video_payload_json": '{"videoId":"video-a"}', "video_tombstone": False},
+]
+queries = []
+def rows(connection, sql, params):
+    queries.append(sql)
+    if "FROM migration_occurrence_rows" in sql:
+        assert "migration_video_rows" not in sql
+        assert "video_payload_json" not in sql
+        return occurrences
+    if "FROM migration_video_rows" in sql:
+        return videos
+    return []
+module._rows = rows
+resolved = module._overlay_candidate_rows(object(), ["new", "old"])
+assert len(queries) == 2
+assert [row["occurrence_id"] for row in resolved] == ["new-1", "new-2"]
+assert all(row["channel_id"] == "UCNEW" for row in resolved)
+assert resolved[0]["video_payload_json"] is resolved[1]["video_payload_json"]
 print("OK")
 `);
   assert.equal(output, "OK");
