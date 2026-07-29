@@ -884,6 +884,108 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("VTuber replacement aggregation stays in PostgreSQL on real connections", () => {
+  const output = runPython(`
+import importlib.util
+import json
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+channel_id = "UC8VlcljjGFb4-Ny2Heb0-ew"
+def candidate(video_id, occurrence_id, song_key, position):
+    return {
+        "revision_id": "candidate",
+        "video_id": video_id,
+        "occurrence_id": occurrence_id,
+        "position": position,
+        "range_id": "7d",
+        "song_key": song_key,
+        "title": song_key,
+        "artist": "Artist",
+        "video_payload_json": {
+            "videoId": video_id,
+            "channelId": channel_id,
+            "channelHandle": "/@urameshi_conta",
+            "channelName": "Conta Urameshi",
+        },
+        "occurrence_payload_json": {
+            "occurrenceId": occurrence_id,
+            "songKey": song_key,
+            "title": song_key,
+            "artist": "Artist",
+            "rangeId": "7d",
+        },
+    }
+candidate_rows = [
+    candidate("video-old", "candidate-old", "song-d", 0),
+    candidate("video-new", "candidate-new-1", "song-d", 0),
+    candidate("video-new", "candidate-new-2", "song-e", 1),
+]
+base_row = {
+    "rank": 1,
+    "detail_key": channel_id,
+    "title": "",
+    "artist": "",
+    "name": "Conta Urameshi",
+    "row_count": 3,
+    "song_count": 3,
+    "video_count": 2,
+    "timestamp_count": 3,
+    "search_text": "Conta Urameshi",
+    "channel_search_text": "@urameshi_conta",
+    "payload_json": {
+        "type": "vtuber",
+        "key": channel_id,
+        "channelId": channel_id,
+        "channelHandle": "/@urameshi_conta",
+        "count": 3,
+        "songCount": 3,
+        "videoCount": 2,
+        "timestampCount": 3,
+        "occurrences": [
+            {"videoId": "video-old", "item": {"videoId": "video-old", "channelId": channel_id}},
+            {"videoId": "video-keep", "item": {"videoId": "video-keep", "channelId": channel_id}},
+        ],
+    },
+}
+aggregate_queries = 0
+def rows(connection, sql, params):
+    global aggregate_queries
+    if "FROM runtime_ranking_rows" in sql:
+        return [base_row]
+    if "jsonb_to_recordset" in sql:
+        aggregate_queries += 1
+        assert sorted(json.loads(params[1])) == ["video-new", "video-old"]
+        values = json.loads(params[0])
+        assert len(values) == 3
+        return [{"channel_id": channel_id, "row_count": 4, "video_count": 3, "song_count": 3}]
+    return []
+module._rows = rows
+module._generic_parent_runtime_revision = lambda *args: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *args: ["candidate"]
+module._overlay_candidate_rows = lambda *args: candidate_rows
+module._runtime_tombstones = lambda *args: []
+module._channel_metadata_rows = lambda *args: []
+module._VTUBER_REPLACEMENT_CACHE.clear()
+class RealConnection:
+    def cursor(self):
+        raise AssertionError("mocked _rows should own SQL execution")
+query = {"range": "all", "view": "vtubers", "metric": "occurrences", "pageSize": "20"}
+payload = module._generic_overlay_rankings_payload(RealConnection(), "candidate", {"revision_id": "candidate"}, query)
+record = payload["records"][0]
+assert aggregate_queries == 1
+assert record["count"] == 4
+assert record["videoCount"] == 3
+assert record["songCount"] == 3
+assert {item["videoId"] for item in record["occurrences"]} == {"video-keep", "video-old", "video-new"}
+assert all(item["item"] == item["video"] for item in record["occurrences"])
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("generic incremental ranking search includes overlay channel identities", () => {
   const output = runPython(`
 import importlib.util

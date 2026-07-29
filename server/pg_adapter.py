@@ -1131,6 +1131,7 @@ def _overlay_vtuber_replacement_rows(
     parent_revision_id: str,
     rows: Iterable[Mapping[str, Any]],
     options: Mapping[str, Any],
+    base_groups: Mapping[str, Mapping[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     """Rebuild affected VTuber groups with per-video replacement semantics."""
 
@@ -1194,6 +1195,181 @@ def _overlay_vtuber_replacement_rows(
         record["occurrences"].append(song)
     if not affected_channel_ids:
         return {}
+
+    # The accepted lineage can touch hundreds of channels.  Fetching every
+    # parent occurrence payload for those channels expanded a 329 MB JSON
+    # result to more than 1.6 GiB in Python.  For the unfiltered ranking path,
+    # keep replacement aggregation inside PostgreSQL and return only one
+    # summary row per affected channel.  Payload previews remain bounded to the
+    # existing parent preview plus accepted rows and never retain a replaced
+    # video's stale occurrence.
+    if not options.get("q") and hasattr(connection, "cursor"):
+        candidate_values: list[dict[str, str]] = []
+        candidate_previews: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        candidate_videos: dict[str, Mapping[str, Any]] = {}
+        for record in candidate_records.values():
+            video = record["video"]
+            channel_id = _text(video.get("channelId"))
+            if not channel_id:
+                continue
+            candidate_videos.setdefault(channel_id, video)
+            for occurrence in _occurrences_for_range(record, _text(options.get("range")) or "all"):
+                if options.get("nicheOnly") and occurrence["song"].get("isNiche") is not True:
+                    continue
+                if options.get("hideUnknownArtist") and not _text(occurrence["song"].get("artist")):
+                    continue
+                song = occurrence["song"]
+                song_key = _text(song.get("songKey")) or (
+                    f"{_overlay_norm(song.get('title'))}::{_overlay_norm(song.get('artist'))}"
+                )
+                candidate_values.append({
+                    "channel_id": channel_id,
+                    "video_id": _text(occurrence.get("videoId")),
+                    "song_key": song_key,
+                })
+                if len(candidate_previews[channel_id]) < 20:
+                    preview = dict(occurrence)
+                    preview["video"] = dict(preview.get("item") or {})
+                    candidate_previews[channel_id].append(preview)
+
+        summaries = _rows(
+            connection,
+            """
+            WITH overlay_occurrences AS (
+              SELECT channel_id, video_id, song_key
+              FROM jsonb_to_recordset(%s::jsonb)
+                AS item(channel_id text, video_id text, song_key text)
+            ),
+            replacement_videos AS (
+              SELECT jsonb_array_elements_text(%s::jsonb) AS video_id
+            ),
+            parent_occurrences AS (
+              SELECT v.channel_id, o.video_id,
+                     coalesce(
+                       nullif(o.song_key, ''),
+                       lower(coalesce(o.title, '')) || '::' ||
+                         lower(coalesce(o.artist, ''))
+                     ) AS song_key
+              FROM runtime_videos AS v
+              JOIN runtime_occurrences AS o
+                ON o.revision_id = v.revision_id AND o.video_id = v.video_id
+              WHERE v.revision_id = %s
+                AND o.revision_id = %s
+                AND v.channel_id = ANY(%s)
+                AND NOT EXISTS (
+                  SELECT 1 FROM replacement_videos AS replacement
+                  WHERE replacement.video_id = v.video_id
+                )
+                AND (%s = 'all' OR coalesce(o.range_id, '') IN (%s, ''))
+                AND (NOT %s OR nullif(o.artist, '') IS NOT NULL)
+                AND (
+                  NOT %s
+                  OR coalesce(
+                    o.payload_json->>'isNiche',
+                    o.payload_json->'payload'->>'isNiche',
+                    'false'
+                  ) = 'true'
+                )
+            ),
+            combined AS (
+              SELECT channel_id, video_id, song_key FROM parent_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key FROM overlay_occurrences
+            )
+            SELECT channel_id, count(*) AS row_count,
+                   count(DISTINCT video_id) AS video_count,
+                   count(DISTINCT song_key) AS song_count
+            FROM combined
+            GROUP BY channel_id
+            """,
+            [
+                json.dumps(candidate_values, ensure_ascii=False),
+                json.dumps(sorted(candidate_records), ensure_ascii=False),
+                parent_revision_id,
+                parent_revision_id,
+                sorted(affected_channel_ids),
+                _text(options.get("range")) or "all",
+                _text(options.get("range")) or "all",
+                bool(options.get("hideUnknownArtist")),
+                bool(options.get("nicheOnly")),
+            ],
+        )
+        summary_by_channel = {
+            _text(row.get("channel_id")): row
+            for row in summaries
+            if _text(row.get("channel_id"))
+        }
+        exact: dict[str, dict[str, Any]] = {}
+        replaced_video_ids = set(candidate_records)
+        for channel_id in sorted(affected_channel_ids):
+            summary = summary_by_channel.get(channel_id, {})
+            base_row = base_groups.get(channel_id) or {}
+            payload = _json_object(base_row.get("payload_json"))
+            video = dict(candidate_videos.get(channel_id) or {})
+            handle = _text(video.get("channelHandle"))
+            channel_url = _text(video.get("channelUrl"))
+            normalized_url = channel_url.casefold()
+            if channel_url and not (
+                channel_id.casefold() in normalized_url
+                or (handle and handle.lstrip("/@").casefold() in normalized_url)
+            ):
+                channel_url = ""
+            if not channel_url:
+                channel_url = f"https://www.youtube.com/channel/{channel_id}"
+            name = _text(video.get("channelName")) or _text(payload.get("channelName")) or channel_id
+            base_previews: list[dict[str, Any]] = []
+            for occurrence in payload.get("occurrences") or ():
+                if not isinstance(occurrence, Mapping):
+                    continue
+                nested = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
+                if not isinstance(nested, Mapping):
+                    continue
+                if _text(nested.get("channelId")) not in {"", channel_id}:
+                    continue
+                video_id = _text(nested.get("videoId") or occurrence.get("videoId"))
+                if video_id in replaced_video_ids:
+                    continue
+                canonical = dict(occurrence)
+                canonical["item"] = dict(nested)
+                canonical["video"] = dict(nested)
+                base_previews.append(canonical)
+            previews = (candidate_previews.get(channel_id, []) + base_previews)[:20]
+            payload.update({
+                "type": "vtuber",
+                "key": channel_id,
+                "name": name,
+                "channelName": name,
+                "channelId": channel_id,
+                "channelHandle": handle or payload.get("channelHandle", ""),
+                "channelUrl": channel_url,
+                "count": int(summary.get("row_count") or 0),
+                "songCount": int(summary.get("song_count") or 0),
+                "videoCount": int(summary.get("video_count") or 0),
+                "timestampCount": int(summary.get("row_count") or 0),
+                "occurrences": previews,
+                "sourceDetailKey": payload.get("sourceDetailKey")
+                    or _stable_key("source-vtuber", _text(options.get("range")) or "all", channel_id),
+            })
+            exact[channel_id] = {
+                "detail_key": channel_id,
+                "title": "",
+                "artist": "",
+                "name": name,
+                "row_count": int(summary.get("row_count") or 0),
+                "song_count": int(summary.get("song_count") or 0),
+                "video_count": int(summary.get("video_count") or 0),
+                "timestamp_count": int(summary.get("row_count") or 0),
+                "payload_json": payload,
+                "search_text": json.dumps(payload, ensure_ascii=False),
+                "channel_search_text": json.dumps(payload, ensure_ascii=False),
+            }
+        if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
+            _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
+        _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+        return {
+            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
+            for key, row in exact.items()
+        }
 
     parent_video_rows = _rows(
         connection,
@@ -1336,6 +1512,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             parent[0],
             candidate_rows,
             options,
+            groups,
         )
         if options["view"] == "vtubers"
         else {}
