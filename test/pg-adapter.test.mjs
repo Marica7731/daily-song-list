@@ -176,6 +176,8 @@ test("adapter release workflow is fail-closed around identity and rollback gates
     /--range all --range 7d[\s\\]+--metric count --metric songs --metric videos/u,
   );
   assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
+  assert.match(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20 --timeout 60/u);
+  assert.equal((ADAPTER_WORKFLOW.match(/--skip-rankings --timeout 60/gu) || []).length, 2);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
