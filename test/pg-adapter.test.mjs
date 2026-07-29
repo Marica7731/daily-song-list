@@ -93,6 +93,321 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic cold meta cache is revision-bound and ranking previews hydrate only returned tuples", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+active = ["accepted-a"]
+applied = []
+module._runtime_projection_revision = lambda *_: None
+module._generic_runtime_projection_revision = lambda *_: (active[0], {"status": "active", "manifest_json": {}, "content_sha256": active[0]})
+module._generic_parent_runtime_revision = lambda *_: ("parent-" + active[0], {"manifest_json": {}})
+module._overlay_revision_ids = lambda *_: [active[0]]
+module._apply_generic_overlay_meta_counts = lambda _c, parent, overlays, counts: (applied.append((parent, tuple(overlays))) or {**counts, "videos": len(applied)})
+module._rows = lambda _c, sql, _p: ([{"key": "latest_videos", "value": 10}] if "SELECT key, value FROM runtime_meta" in sql else [])
+module._GENERIC_META_COUNTS_CACHE.clear()
+assert module.health_payload(object())["counts"]["videos"] == 1
+assert module.meta_payload(object())["counts"]["videos"] == 1
+assert applied == [("parent-accepted-a", ("accepted-a",))]
+active[0] = "accepted-b"
+assert module.meta_payload(object())["counts"]["videos"] == 2
+assert applied[-1] == ("parent-accepted-b", ("accepted-b",))
+active[0] = "accepted-a"
+assert module.meta_payload(object())["counts"]["videos"] == 1
+assert len(applied) == 2
+
+rows = [
+    {"revision_id": "accepted-a", "video_id": f"video-{index}", "occurrence_id": f"occ-{index}", "position": 0,
+     "range_id": "all", "song_key": "song", "title": "Song", "artist": "Artist",
+     "channel_id": "UC1", "channel_handle": "@one", "channel_name": "One", "video_title": f"Video {index}",
+     "video_tombstone": False, "occurrence_payload_json": None, "video_payload_json": None}
+    for index in range(4000)
+]
+groups = module._overlay_candidate_groups(rows, "vtubers")
+assert groups["UC1"]["occurrenceCount"] == 4000
+assert len(groups["UC1"]["occurrences"]) == 20
+payload = {"occurrences": groups["UC1"]["occurrences"]}
+sql_calls = []
+def scalar_rows(_connection, sql, _params):
+    sql_calls.append(sql)
+    if "migration_occurrence_rows" in sql:
+        return rows
+    if "migration_video_rows" in sql:
+        return [{
+            "revision_id": "accepted-a", "video_id": row["video_id"], "video_title": row["video_title"],
+            "channel_id": "UC1", "channel_handle": "@one", "channel_name": "One", "video_tombstone": False,
+            "video_payload_json": None,
+        } for row in rows]
+    raise AssertionError(sql)
+module._rows = scalar_rows
+module._json_object = lambda value: (_ for _ in ()).throw(AssertionError("scalar overlay parsed JSON"))
+lean = module._overlay_candidate_rows(object(), ["accepted-a"], False)
+assert len(lean) == 4000
+assert len(module._accepted_video_resets(object(), ["accepted-a"], False)) == 4000
+assert all("NULL::jsonb AS" in sql for sql in sql_calls)
+module._json_object = lambda value: dict(value) if isinstance(value, dict) else {}
+hydration = []
+def hydrate_rows(_connection, sql, params):
+    assert "WITH requested" in sql and "migration_occurrence_rows" in sql
+    assert len(params[0]) == len(params[1]) == len(params[2]) == len(params[3]) == 20
+    assert params[-1] == 21
+    hydration.append(tuple(params[1]))
+    return [{
+        "revision_id": "accepted-a", "video_id": video_id, "occurrence_id": occurrence_id, "position": 0,
+        "joined_video_id": video_id,
+        "occurrence_payload_json": {"occurrenceId": occurrence_id},
+        "video_payload_json": {"videoId": video_id, "channelId": "UC1", "channelHandle": "@one", "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"},
+        "video_title": video_id, "channel_id": "UC1", "channel_handle": "@one", "channel_name": "One",
+    } for video_id, occurrence_id in zip(params[1], params[2])]
+module._rows = hydrate_rows
+module._hydrate_overlay_page_previews(object(), rows, [payload])
+assert len(hydration) == 1 and len(hydration[0]) == 20
+assert payload["occurrences"][0]["item"]["thumbnailUrl"].endswith("/video-0/hqdefault.jpg")
+assert payload["occurrences"][0]["item"] == payload["occurrences"][0]["video"]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("overlay preview hydration rejects inexact returned identities and permits a bounded 400-tuple page", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+candidate_rows = [
+    {"revision_id": "accepted-a", "video_id": f"video-{index:03d}", "occurrence_id": f"occ-{index:03d}", "position": 0}
+    for index in range(400)
+]
+payloads = []
+for start in range(0, 400, 20):
+    payloads.append({"occurrences": [
+        {"videoId": f"video-{index:03d}", "occurrenceId": f"occ-{index:03d}", "position": 0,
+         "item": {"videoId": f"video-{index:03d}"}}
+        for index in range(start, start + 20)
+    ]})
+
+def hydrated(row):
+    return {
+        **row,
+        "joined_video_id": row["video_id"],
+        "occurrence_payload_json": {"occurrenceId": row["occurrence_id"], "position": row["position"]},
+        "video_payload_json": {"videoId": row["video_id"], "channelId": "UC1", "thumbnailUrl": f"https://i.ytimg.com/vi/{row['video_id']}/hqdefault.jpg"},
+        "video_title": row["video_id"], "channel_id": "UC1", "channel_name": "One",
+    }
+
+def install(returned):
+    def rows(_connection, sql, params):
+        assert "WITH requested" in sql
+        assert len(params[0]) == len(params[1]) == len(params[2]) == len(params[3]) == 400
+        assert params[-1] == 401
+        return returned
+    module._rows = rows
+
+install([hydrated(row) for row in candidate_rows])
+module._hydrate_overlay_page_previews(object(), candidate_rows, payloads)
+assert payloads[-1]["occurrences"][-1]["item"]["thumbnailUrl"].endswith("/video-399/hqdefault.jpg")
+
+def expect_failure(returned, marker):
+    fresh_payloads = [{"occurrences": [dict(item) for item in payload["occurrences"]]} for payload in payloads]
+    install(returned)
+    try:
+        module._hydrate_overlay_page_previews(object(), candidate_rows, fresh_payloads)
+    except module.PostgresAdapterError as exc:
+        assert marker in str(exc), str(exc)
+    else:
+        raise AssertionError(f"expected {marker}")
+
+expect_failure([hydrated(row) for row in candidate_rows[1:]], "missing=1")
+expect_failure([hydrated(candidate_rows[0]), hydrated(candidate_rows[0]), *[hydrated(row) for row in candidate_rows[2:]]], "duplicate identity")
+unexpected = dict(candidate_rows[-1], video_id="video-unexpected", occurrence_id="occ-unexpected")
+expect_failure([*[hydrated(row) for row in candidate_rows[:-1]], hydrated(unexpected)], "unexpected=1")
+revision_tampered = dict(hydrated(candidate_rows[-1]), revision_id="accepted-tampered")
+expect_failure([*[hydrated(row) for row in candidate_rows[:-1]], revision_tampered], "missing=1")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("overlay preview hydration permits empty object payloads but requires the video join", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+candidate = {"revision_id": "accepted-a", "video_id": "video-a", "occurrence_id": "occ-a", "position": 0}
+payload = {"occurrences": [{"videoId": "video-a", "occurrenceId": "occ-a", "position": 0, "item": {"videoId": "video-a"}}]}
+def returned(joined_video_id):
+    return [{"revision_id": "accepted-a", "video_id": "video-a", "occurrence_id": "occ-a", "position": 0,
+             "joined_video_id": joined_video_id, "occurrence_payload_json": {}, "video_payload_json": {},
+             "video_title": "Video A", "channel_id": "UC1", "channel_name": "One"}]
+def rows(_connection, sql, _params):
+    assert "v.video_id AS joined_video_id" in sql
+    return returned("video-a")
+module._rows = rows
+module._hydrate_overlay_page_previews(object(), [candidate], [payload])
+assert payload["occurrences"][0]["item"]["videoId"] == "video-a"
+
+module._rows = lambda *_: returned(None)
+try:
+    module._hydrate_overlay_page_previews(object(), [candidate], [{"occurrences": [dict(payload["occurrences"][0])]}])
+except module.PostgresAdapterError as exc:
+    assert "incomplete video join" in str(exc), str(exc)
+else:
+    raise AssertionError("missing video join was accepted")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("overlay preview cap preserves candidate, generic parent, VTuber, artist, and video input ordering", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+rows = [
+    {"video_id": f"video-{index:02d}", "occurrence_id": f"occ-{index:02d}", "position": 0,
+     "title": "Song", "artist": "Artist", "song_key": "song", "range_id": "all",
+     "channel_id": "UC1", "channel_name": "One", "video_title": f"Video {index:02d}",
+     "video_payload_json": {"videoId": f"video-{index:02d}", "channelId": "UC1"},
+     "occurrence_payload_json": {"occurrenceId": f"occ-{index:02d}", "position": 0}}
+    for index in range(25, -1, -1)
+]
+group = module._overlay_candidate_groups(rows, "songs")["song::artist"]
+expected_candidate = [f"video-{index:02d}" for index in range(25, 5, -1)]
+assert [item["videoId"] for item in group["occurrences"]] == expected_candidate
+artist_group = module._overlay_candidate_groups(rows, "artists")["artist"]
+video_group = module._overlay_candidate_groups(rows, "videos")["video-25"]
+assert [item["videoId"] for item in artist_group["occurrences"]] == expected_candidate
+assert [item["videoId"] for item in video_group["occurrences"]] == ["video-25"]
+parent = [{"videoId": "video-19", "occurrenceId": "old", "position": 9}, {"videoId": "video-20", "occurrenceId": "old", "position": 0}]
+merged = module._bounded_overlay_previews([*parent, *group["occurrences"]])
+assert [item["videoId"] for item in merged] == ["video-19", "video-20", *expected_candidate[:18]]
+vtuber_merged = module._bounded_overlay_previews([*group["occurrences"], *parent])
+assert [item["videoId"] for item in vtuber_merged] == expected_candidate
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("real-shape scalar and payload overlay fixtures keep reset, replacement, tombstone, ranking, and source results identical", () => {
+  const output = runPython(`
+import copy
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+videos = [
+    {"revision_id": "accepted", "video_id": "video-accepted", "title": "Accepted video", "channel_id": "UC1", "channel_name": "Channel", "channel_handle": "@channel", "channel_url": "https://youtube.com/@channel", "published_at": "2026-07-29T00:00:00Z", "tombstone": False, "payload_json": {"videoId": "video-accepted", "title": "Accepted video", "channelId": "UC1", "channelName": "Channel", "channelHandle": "@channel", "thumbnailUrl": "accepted.jpg"}},
+    {"revision_id": "accepted", "video_id": "video-replacement", "title": "Replacement video", "channel_id": "UC1", "channel_name": "Channel", "channel_handle": "@channel", "channel_url": "https://youtube.com/@channel", "published_at": "2026-07-29T00:00:01Z", "tombstone": False, "payload_json": {"videoId": "video-replacement", "title": "Replacement video", "channelId": "UC1", "channelName": "Channel", "channelHandle": "@channel", "thumbnailUrl": "replacement.jpg"}},
+    {"revision_id": "accepted", "video_id": "video-7d", "title": "Seven video", "channel_id": "UC1", "channel_name": "Channel", "channel_handle": "@channel", "channel_url": "https://youtube.com/@channel", "published_at": "2026-07-29T00:00:02Z", "tombstone": False, "payload_json": {"videoId": "video-7d", "title": "Seven video", "channelId": "UC1", "channelName": "Channel", "channelHandle": "@channel", "thumbnailUrl": "seven.jpg"}},
+    {"revision_id": "accepted", "video_id": "video-tombstone", "title": "Removed", "channel_id": "UC1", "channel_name": "Channel", "channel_handle": "@channel", "channel_url": "https://youtube.com/@channel", "published_at": "2026-07-29T00:00:03Z", "tombstone": True, "payload_json": {"videoId": "video-tombstone", "channelId": "UC1"}},
+]
+occurrences = [
+    {"revision_id": "accepted", "video_id": "video-accepted", "occurrence_id": "accepted", "position": 0, "range_id": "all", "song_key": "accepted", "seconds": 11, "title": "Accepted", "artist": "Singer", "source_id": "src-a", "raw_hash": "a", "source_system": "fixture", "payload_json": {"occurrenceId": "accepted", "position": 0, "rangeId": "all", "songKey": "accepted", "seconds": 11, "title": "Accepted", "artist": "Singer", "sourceId": "src-a", "sourceSystem": "fixture"}},
+    {"revision_id": "accepted", "video_id": "video-replacement", "occurrence_id": "replacement", "position": 0, "range_id": "all", "song_key": "replacement", "seconds": 22, "title": "Replacement", "artist": "Singer", "source_id": "src-r", "raw_hash": "r", "source_system": "fixture", "payload_json": {"occurrenceId": "replacement", "position": 0, "rangeId": "all", "songKey": "replacement", "seconds": 22, "title": "Replacement", "artist": "Singer", "sourceId": "src-r", "sourceSystem": "fixture", "originalIdentity": {"videoId": "video-replacement", "title": "Old", "artist": "Singer"}}},
+    {"revision_id": "accepted", "video_id": "video-7d", "occurrence_id": "seven", "position": 0, "range_id": "7d", "song_key": "seven", "seconds": 33, "title": "Seven", "artist": "Singer", "source_id": "src-7", "raw_hash": "7", "source_system": "fixture", "payload_json": {"occurrenceId": "seven", "position": 0, "rangeId": "7d", "songKey": "seven", "seconds": 33, "title": "Seven", "artist": "Singer", "sourceId": "src-7", "sourceSystem": "fixture"}},
+]
+
+def rows(_connection, sql, _params):
+    if "FROM migration_occurrence_rows" in sql:
+        result = copy.deepcopy(occurrences)
+        for row in result:
+            if "NULL::jsonb" in sql:
+                row["occurrence_payload_json"] = None
+            else:
+                row["occurrence_payload_json"] = row.pop("payload_json")
+        return result
+    if "FROM migration_video_rows" in sql:
+        result = copy.deepcopy(videos)
+        for row in result:
+            row["video_title"] = row.pop("title")
+            row["video_tombstone"] = row["tombstone"]
+            if "NULL::jsonb" in sql:
+                row["video_payload_json"] = None
+            else:
+                row["video_payload_json"] = row.pop("payload_json")
+        return result
+    raise AssertionError(sql)
+module._rows = rows
+
+full = module._overlay_candidate_rows(object(), ["accepted"], True)
+scalar = module._overlay_candidate_rows(object(), ["accepted"], False)
+assert all(row["video_payload_json"] is None and row["occurrence_payload_json"] is None for row in scalar)
+full_resets = module._accepted_video_resets(object(), ["accepted"], True)
+scalar_resets = module._accepted_video_resets(object(), ["accepted"], False)
+assert {
+    key: (row["revision_id"], row["video_id"], row["tombstone"])
+    for key, row in full_resets.items()
+} == {
+    key: (row["revision_id"], row["video_id"], row["tombstone"])
+    for key, row in scalar_resets.items()
+}
+assert scalar_resets["video-tombstone"]["tombstone"] is True
+
+# The bounded path hydrates just returned tuples.  This fixture materializes
+# all three live previews only to compare it against the detailed full-payload
+# path; the production page cap is tested independently above.
+by_identity = {(row["video_id"], row["occurrence_id"], row["position"]): row for row in full}
+hydrated = []
+for row in scalar:
+    key = (row["video_id"], row["occurrence_id"], row["position"])
+    source = by_identity[key]
+    hydrated.append({**row, "video_payload_json": source["video_payload_json"], "occurrence_payload_json": source["occurrence_payload_json"]})
+
+def records(rows):
+    result = []
+    for row in rows:
+        record = module._overlay_source_record(row)
+        if record is not None:
+            result.append(record)
+    return result
+
+full_records, scalar_records = records(full), records(hydrated)
+assert full_records == scalar_records
+for range_id in ("all", "7d"):
+    for view in ("songs", "vtubers"):
+        query = {"range": range_id, "view": view, "metric": "occurrences", "q": "singer" if view == "songs" else "channel", "page": "1", "pageSize": "1"}
+        expected = module.rankings_payload_from_records(full_records, query)
+        actual = module.rankings_payload_from_records(scalar_records, query)
+        assert actual == expected
+        for card in actual["records"]:
+            assert card["count"] == card["timestampCount"]
+            assert card["sourceDetailKey"]
+            for occurrence in card["occurrences"]:
+                assert occurrence["item"]["videoId"].startswith("video-")
+                assert occurrence["item"]["channelId"] == "UC1"
+                assert occurrence.get("video", occurrence["item"])["videoId"] == occurrence["item"]["videoId"]
+            source = module.source_payload_from_records(full_records, card["sourceDetailKey"], {"range": range_id, "page": "1", "pageSize": "1"})
+            scalar_source = module.source_payload_from_records(scalar_records, card["sourceDetailKey"], {"range": range_id, "page": "1", "pageSize": "1"})
+            assert scalar_source == source
+            if source.get("found"):
+                record = source["record"]
+                assert record["count"] == record["timestampCount"]
+                assert record["videoCount"] >= 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("ranking identity audit bounds every CLI request and pagination control", () => {
   const output = runPython(`
 import contextlib
@@ -324,6 +639,17 @@ test("adapter release workflow is fail-closed around identity and rollback gates
   assert.equal((ADAPTER_WORKFLOW.match(/timeout --signal=TERM --kill-after=15s 12m python3 '\$REMOTE_ROOT\/server\/audit-ranking-source-identities\.py'/gu) || []).length, 2);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
   assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
+  assert.match(ADAPTER_WORKFLOW, /production-public-healthz\.json/u);
+  assert.match(ADAPTER_WORKFLOW, /--base-url '\$PUBLIC_BASE' --skip-rankings/u);
+  assert.match(ADAPTER_WORKFLOW, /hostedPublicHealthDiagnosticHttpCode/u);
+  assert.match(ADAPTER_WORKFLOW, /hostedPublicHealthDiagnosticCurlExit/u);
+  assert.match(ADAPTER_WORKFLOW, /hostedPublicSourceDiagnosticHttpCode/u);
+  assert.match(ADAPTER_WORKFLOW, /hostedPublicSourceDiagnosticCurlExit/u);
+  assert.match(ADAPTER_WORKFLOW, /--fail[^\n]*--write-out '%\{http_code\}'/u);
+  assert.doesNotMatch(
+    ADAPTER_WORKFLOW,
+    /curl --fail --connect-timeout 8 --max-time 20[^\n]*"\$PUBLIC_BASE/u,
+  );
   assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
   assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
   assert.match(ADAPTER_WORKFLOW, /--max-time 60[\s\\]+http:\/\/127\.0\.0\.1:18766\/healthz/u);
@@ -1637,7 +1963,7 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
-module._overlay_candidate_rows = lambda connection, revision_ids: []
+module._overlay_candidate_rows = lambda *args: []
 module._overlay_candidate_groups = lambda rows, view: {"channel": {"title": "", "artist": "", "name": "Channel", "search": "channel", "occurrences": [{"videoId": "new-video"}], "videoIds": {"new-video"}, "songKeys": {"song-a", "song-b"}}}
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda connection, revision_ids: []
@@ -1912,7 +2238,7 @@ assert "/@urameshi_conta" in search
 assert "https://www.youtube.com/@urameshi_conta" in search
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
-module._overlay_candidate_rows = lambda connection, revision_ids: rows
+module._overlay_candidate_rows = lambda *args: rows
 module._runtime_tombstones = lambda *args: []
 module._rows = lambda connection, sql, params: []
 payload = module._generic_overlay_rankings_payload(
@@ -2034,7 +2360,7 @@ artist = "\u65e5\u98df\u306a\u3064\u3053"
 key = f"{title.casefold()}::{artist.casefold()}"
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
-module._overlay_candidate_rows = lambda connection, revision_ids: []
+module._overlay_candidate_rows = lambda *args: []
 module._overlay_candidate_groups = lambda rows, view: {key: {"title": title, "artist": artist, "name": title, "search": f"{title} {artist} @noa_polaris", "occurrences": [{"videoId": "new-video"}], "videoIds": {"new-video"}, "songKeys": {key}}}
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda connection, revision_ids: []
@@ -2598,6 +2924,7 @@ def replacement(video_id, occurrence_id, old_key, new_key):
     }
 
 def meta_case(*, candidates=(), resets=None, reset_changes=(), runtime=(), identity_rows=(), parent_videos=(), song_counts=None):
+    module._GENERIC_META_COUNTS_CACHE.clear()
     resets = dict(resets or {})
     song_counts = dict(song_counts or {})
     module._runtime_projection_revision = lambda *_: None

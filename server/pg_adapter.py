@@ -46,6 +46,10 @@ MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
 MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
 _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
+# Generic increments are immutable.  Keep only their small derived meta count
+# map, never record/payload data: a changed active pointer produces a different
+# key and a process restart simply recomputes it from PostgreSQL.
+_GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int]] = {}
 
 
 class PostgresAdapterError(RuntimeError):
@@ -811,16 +815,27 @@ def _overlay_video_projection(value: Any) -> dict[str, Any]:
     }
 
 
-def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
-    """Read only the candidate rows; never resolve the parent occurrence table."""
+def _overlay_candidate_rows(
+    connection, revision_ids: Sequence[str], include_payload: bool = True,
+) -> list[dict[str, Any]]:
+    """Read only the candidate rows; never resolve the parent occurrence table.
+
+    Rankings and meta reconciliation need the indexed scalar columns for every
+    changed tuple, but a page of 20 cards must not deserialize every retained
+    JSON preview.  Detailed source reconstruction keeps ``include_payload``
+    enabled; the bounded ranking/meta paths hydrate only returned previews.
+    """
+
+    occurrence_payload = "o.payload_json" if include_payload else "NULL::jsonb"
+    video_payload = "payload_json" if include_payload else "NULL::jsonb"
 
     occurrence_rows = _rows(
         connection,
-        """
+        f"""
         SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
                o.song_key, o.seconds, o.title, o.artist, o.source_id,
                o.raw_hash, o.source_system,
-               o.payload_json AS occurrence_payload_json
+               {occurrence_payload} AS occurrence_payload_json
         FROM migration_occurrence_rows AS o
         WHERE o.revision_id = ANY(%s)
         ORDER BY o.revision_id, o.video_id, o.position, o.occurrence_key
@@ -833,10 +848,10 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
     video_rows = _rows(
         connection,
-        """
+        f"""
         SELECT revision_id, video_id, title AS video_title, channel_name,
                channel_id, channel_handle, channel_url, published_at,
-               payload_json AS video_payload_json,
+               {video_payload} AS video_payload_json,
                tombstone AS video_tombstone
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
@@ -912,7 +927,9 @@ def _overlay_candidate_rows(connection, revision_ids: Sequence[str]) -> list[dic
     return resolved
 
 
-def _accepted_video_resets(connection, revision_ids: Sequence[str]) -> dict[str, dict[str, Any]]:
+def _accepted_video_resets(
+    connection, revision_ids: Sequence[str], include_payload: bool = True,
+) -> dict[str, dict[str, Any]]:
     """Return the newest accepted/full video projection per overlay video.
 
     This is intentionally bounded to the overlay lineage.  A selected row is
@@ -923,12 +940,13 @@ def _accepted_video_resets(connection, revision_ids: Sequence[str]) -> dict[str,
     if not revision_ids:
         return {}
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
+    payload = "payload_json" if include_payload else "NULL::jsonb"
     rows = _rows(
         connection,
-        """
+        f"""
         SELECT revision_id, video_id, title AS video_title, channel_name,
                channel_id, channel_handle, channel_url, published_at,
-               tombstone, payload_json
+               tombstone, {payload} AS payload_json
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
         ORDER BY video_id
@@ -2087,6 +2105,17 @@ def _overlay_public_video(row: Mapping[str, Any]) -> dict[str, Any]:
     return result
 
 
+def _bounded_overlay_previews(items: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the first 20 caller-ordered previews without retaining a full group."""
+
+    previews: list[dict[str, Any]] = []
+    for item in items:
+        if len(previews) == 20:
+            break
+        previews.append(dict(item))
+    return previews
+
+
 def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -2138,10 +2167,14 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
             continue
         group = groups.setdefault(key, {
             "key": key, "title": title, "artist": artist, "name": name,
-            "occurrences": [], "videoIds": set(), "songKeys": set(),
+            "occurrences": [], "occurrenceCount": 0, "videoIds": set(), "songKeys": set(),
             "search": "",
         })
-        group["occurrences"].append({
+        group["occurrenceCount"] += 1
+        # Card previews are an established maximum of 20.  Counting an
+        # accepted increment must not retain every scalar, let alone every
+        # JSON payload, merely because one returned page contains this group.
+        preview = {
             **occurrence,
             "song": {
                 "title": title,
@@ -2156,7 +2189,8 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
             # Keep the accepted-handoff compatibility field while callers
             # migrate to the public ranking occurrence shape.
             "video": dict(video),
-        })
+        }
+        group["occurrences"] = _bounded_overlay_previews((*group["occurrences"], preview))
         group["videoIds"].add(video_id)
         group["songKeys"].add(_text(occurrence.get("songKey")) or key)
         group["search"] = f"{group['search']} {_overlay_candidate_search_text(row)}".strip()
@@ -2180,6 +2214,196 @@ def _overlay_rows_for_range(
         if row_range in {range_id, ""}:
             selected.append(row)
     return selected
+
+
+def _hydrate_overlay_page_previews(
+    connection,
+    candidate_rows: Sequence[Mapping[str, Any]],
+    payloads: Sequence[Mapping[str, Any]],
+) -> None:
+    """Hydrate JSON only for candidate preview tuples present on this page.
+
+    The scalar overlay pass deliberately leaves ``payload_json`` unread.  A
+    card can nevertheless require the original item image/identity shape, so
+    fetch exactly the at-most-20 previews for each returned card afterwards.
+    """
+
+    def scalar_key(row: Mapping[str, Any], label: str, strict: bool = True) -> tuple[str, str, str, int] | None:
+        revision_id = _text(row.get("revision_id"))
+        video_id = _text(row.get("video_id"))
+        if not revision_id or not video_id:
+            if not strict:
+                return None
+            raise PostgresAdapterError(f"overlay preview hydration {label} is missing revision/video identity")
+        if row.get("position") is None:
+            if not strict:
+                return (revision_id, video_id, _text(row.get("occurrence_id")), 0)
+            raise PostgresAdapterError(f"overlay preview hydration {label} is missing position")
+        try:
+            position = int(row.get("position"))
+        except (TypeError, ValueError) as exc:
+            raise PostgresAdapterError(f"overlay preview hydration {label} has invalid position") from exc
+        return (revision_id, video_id, _text(row.get("occurrence_id")), position)
+
+    def payload_object(value: Any, label: str) -> dict[str, Any]:
+        if isinstance(value, Mapping):
+            result = dict(value)
+        elif isinstance(value, str) and value.strip():
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError as exc:
+                raise PostgresAdapterError(f"overlay preview hydration {label} is invalid JSON") from exc
+            if not isinstance(parsed, Mapping):
+                raise PostgresAdapterError(f"overlay preview hydration {label} is not an object")
+            result = dict(parsed)
+        else:
+            raise PostgresAdapterError(f"overlay preview hydration {label} is missing")
+        if isinstance(result.get("payload"), Mapping):
+            result = dict(result["payload"])
+        return result
+
+    candidates: dict[tuple[str, str, str, int], Mapping[str, Any]] = {}
+    preview_candidates: dict[tuple[str, str, int], tuple[str, str, str, int]] = {}
+    for candidate in candidate_rows:
+        key = scalar_key(candidate, "candidate scalar row", strict=False)
+        if key is None:
+            continue
+        if key in candidates:
+            raise PostgresAdapterError("overlay preview hydration has duplicate candidate scalar identity")
+        candidates[key] = candidate
+        preview_key = key[1:]
+        prior = preview_candidates.get(preview_key)
+        if prior is not None and prior != key:
+            raise PostgresAdapterError("overlay preview hydration has ambiguous candidate preview identity")
+        preview_candidates[preview_key] = key
+    requested: dict[tuple[str, str, str, int], Mapping[str, Any]] = {}
+    for payload in payloads:
+        occurrences = payload.get("occurrences") if isinstance(payload, Mapping) else None
+        if not isinstance(occurrences, list):
+            continue
+        for occurrence in occurrences:
+            if not isinstance(occurrence, Mapping):
+                continue
+            item = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
+            video_id = _text(occurrence.get("videoId") or (item or {}).get("videoId"))
+            occurrence_id = _text(occurrence.get("occurrenceId"))
+            if occurrence.get("position") is None:
+                position = 0
+            else:
+                try:
+                    position = int(occurrence.get("position"))
+                except (TypeError, ValueError) as exc:
+                    raise PostgresAdapterError("overlay preview hydration requested preview has invalid position") from exc
+            preview_key = (video_id, occurrence_id, position)
+            key = preview_candidates.get(preview_key)
+            if key is not None:
+                candidate = candidates[key]
+                # Detailed/source callers already supplied both payloads.  The
+                # bounded ranking path alone needs a second exact-tuple read.
+                if (
+                    candidate.get("video_payload_json") is not None
+                    and candidate.get("occurrence_payload_json") is not None
+                ):
+                    continue
+                if key in requested:
+                    raise PostgresAdapterError("overlay preview hydration has duplicate requested identity")
+                requested[key] = candidate
+    if not requested:
+        return
+    rows = list(requested.values())
+    revision_ids = [_text(row.get("revision_id")) for row in rows]
+    video_ids = [_text(row.get("video_id")) for row in rows]
+    occurrence_ids = [_text(row.get("occurrence_id")) for row in rows]
+    positions = [int(row.get("position") or 0) for row in rows]
+    hydrated_rows = _rows(
+        connection,
+        """
+        WITH requested(revision_id, video_id, occurrence_id, position) AS (
+          SELECT * FROM unnest(%s::text[], %s::text[], %s::text[], %s::integer[])
+        )
+        SELECT o.revision_id, o.video_id, o.occurrence_id, o.position,
+               o.payload_json AS occurrence_payload_json,
+               v.video_id AS joined_video_id, v.payload_json AS video_payload_json, v.title AS video_title,
+               v.channel_name, v.channel_id, v.channel_handle, v.channel_url,
+               v.published_at
+        FROM migration_occurrence_rows AS o
+        JOIN requested AS requested
+          ON requested.revision_id = o.revision_id
+         AND requested.video_id = o.video_id
+         AND requested.occurrence_id = coalesce(o.occurrence_id, '')
+         AND requested.position = o.position
+        LEFT JOIN migration_video_rows AS v
+          ON v.revision_id = o.revision_id AND v.video_id = o.video_id
+        ORDER BY o.revision_id, o.video_id, o.position, o.occurrence_id
+        LIMIT %s
+        """,
+        [revision_ids, video_ids, occurrence_ids, positions, len(rows) + 1],
+    )
+    if len(hydrated_rows) > len(rows):
+        raise PostgresAdapterError("overlay preview hydration exceeded bounded request set")
+    hydrated: dict[tuple[str, str, int], Mapping[str, Any]] = {}
+    for hydrated_row in hydrated_rows:
+        key = scalar_key(hydrated_row, "returned scalar row")
+        assert key is not None
+        if key in hydrated:
+            raise PostgresAdapterError("overlay preview hydration returned duplicate identity")
+        video_payload = payload_object(hydrated_row.get("video_payload_json"), "returned video payload")
+        occurrence_payload = payload_object(hydrated_row.get("occurrence_payload_json"), "returned occurrence payload")
+        if _text(hydrated_row.get("joined_video_id")) != key[1]:
+            raise PostgresAdapterError("overlay preview hydration returned an incomplete video join")
+        video_identity = _text(video_payload.get("videoId") or video_payload.get("video_id"))
+        if video_identity and video_identity != key[1]:
+            raise PostgresAdapterError("overlay preview hydration returned video payload identity mismatch")
+        occurrence_identity = _text(occurrence_payload.get("occurrenceId") or occurrence_payload.get("occurrence_id"))
+        if occurrence_identity and occurrence_identity != key[2]:
+            raise PostgresAdapterError("overlay preview hydration returned occurrence payload identity mismatch")
+        if occurrence_payload.get("position") is not None:
+            try:
+                payload_position = int(occurrence_payload.get("position"))
+            except (TypeError, ValueError) as exc:
+                raise PostgresAdapterError("overlay preview hydration returned occurrence payload has invalid position") from exc
+            if payload_position != key[3]:
+                raise PostgresAdapterError("overlay preview hydration returned occurrence payload position mismatch")
+        hydrated[key] = hydrated_row
+    requested_keys = set(requested)
+    returned_keys = set(hydrated)
+    if requested_keys != returned_keys:
+        missing = len(requested_keys - returned_keys)
+        unexpected = len(returned_keys - requested_keys)
+        raise PostgresAdapterError(
+            "overlay preview hydration returned an inexact identity set "
+            f"(missing={missing}, unexpected={unexpected})"
+        )
+    for payload in payloads:
+        occurrences = payload.get("occurrences") if isinstance(payload, Mapping) else None
+        if not isinstance(occurrences, list):
+            continue
+        for occurrence in occurrences:
+            if not isinstance(occurrence, dict):
+                continue
+            item = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
+            video_id = _text(occurrence.get("videoId") or (item or {}).get("videoId"))
+            occurrence_id = _text(occurrence.get("occurrenceId"))
+            if occurrence.get("position") is None:
+                position = 0
+            else:
+                try:
+                    position = int(occurrence.get("position"))
+                except (TypeError, ValueError) as exc:
+                    raise PostgresAdapterError("overlay preview hydration requested preview has invalid position") from exc
+            preview_key = (video_id, occurrence_id, position)
+            requested_key = preview_candidates.get(preview_key)
+            row = hydrated.get(requested_key) if requested_key is not None else None
+            if row is None and requested_key in requested:
+                raise PostgresAdapterError("overlay preview hydration lost a requested identity")
+            if row is None:
+                continue
+            video = _overlay_public_video(row)
+            if _text(video.get("videoId")) != video_id:
+                raise PostgresAdapterError("overlay preview hydration returned an incomplete video join")
+            if video:
+                occurrence["item"] = dict(video)
+                occurrence["video"] = dict(video)
 
 
 def _overlay_vtuber_replacement_rows(
@@ -2276,10 +2500,11 @@ def _overlay_vtuber_replacement_rows(
                     "video_id": _text(occurrence.get("videoId")),
                     "song_key": song_key,
                 })
-                if len(candidate_previews[channel_id]) < 20:
-                    preview = dict(occurrence)
-                    preview["video"] = dict(preview.get("item") or {})
-                    candidate_previews[channel_id].append(preview)
+                preview = dict(occurrence)
+                preview["video"] = dict(preview.get("item") or {})
+                candidate_previews[channel_id] = _bounded_overlay_previews(
+                    (*candidate_previews[channel_id], preview),
+                )
 
         summaries = _rows(
             connection,
@@ -2385,7 +2610,9 @@ def _overlay_vtuber_replacement_rows(
                 canonical["item"] = dict(nested)
                 canonical["video"] = dict(nested)
                 base_previews.append(canonical)
-            previews = (candidate_previews.get(channel_id, []) + base_previews)[:20]
+            previews = _bounded_overlay_previews(
+                (*candidate_previews.get(channel_id, ()), *base_previews),
+            )
             payload.update({
                 "type": "vtuber",
                 "key": channel_id,
@@ -2550,9 +2777,9 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
     overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
-    candidate_rows = _overlay_candidate_rows(connection, overlay_ids)
+    candidate_rows = _overlay_candidate_rows(connection, overlay_ids, False)
     all_candidate_rows = tuple(candidate_rows)
-    accepted_video_resets = _accepted_video_resets(connection, overlay_ids)
+    accepted_video_resets = _accepted_video_resets(connection, overlay_ids, False)
     reset_changes = _accepted_video_reset_changes(
         connection, parent[0], accepted_video_resets, options,
     )
@@ -2650,7 +2877,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             continue
         row = groups.get(key)
         if row is None:
-            count = len(item["occurrences"])
+            count = int(item.get("occurrenceCount", len(item["occurrences"])))
             video_count = len(item["videoIds"])
             song_count = len(item["songKeys"])
             payload = {
@@ -2669,15 +2896,17 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row = {"detail_key": key, "title": item["title"], "artist": item["artist"], "name": item["name"], "row_count": count, "song_count": song_count, "video_count": video_count, "timestamp_count": count, "payload_json": payload, "search_text": item["search"], "channel_search_text": item["search"]}
             groups[key] = row
         else:
-            row["row_count"] = int(row.get("row_count") or 0) + len(item["occurrences"])
+            row["row_count"] = int(row.get("row_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
             row["song_count"] = int(row.get("song_count") or 0) + len(item["songKeys"])
             row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
-            row["timestamp_count"] = int(row.get("timestamp_count") or 0) + len(item["occurrences"])
+            row["timestamp_count"] = int(row.get("timestamp_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
             payload = _json_object(row.get("payload_json"))
             if payload:
                 payload.update({"count": row["row_count"], "songCount": row["song_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
                 if isinstance(payload.get("occurrences"), list):
-                    payload["occurrences"] = (payload["occurrences"] + item["occurrences"])[:20]
+                    payload["occurrences"] = _bounded_overlay_previews(
+                        (*payload["occurrences"], *item["occurrences"]),
+                    )
                 row["payload_json"] = payload
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
     _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
@@ -2729,6 +2958,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         })
         payload["rank"] = index
         records.append(payload)
+    _hydrate_overlay_page_previews(connection, candidate_rows, records)
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -3828,7 +4058,7 @@ def _generic_overlay_song_source_for_key(
         return None
     options = _query_options(query)
     candidate_rows = tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
-    accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids)
+    accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids, False)
     changes = _runtime_tombstones(
         connection, overlay_revision_ids,
         accepted_video_resets.values() if accepted_video_resets else None,
@@ -4212,8 +4442,10 @@ def _apply_generic_overlay_meta_counts(
     """
 
     result = dict(counts)
-    candidate_rows = tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
-    accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids)
+    candidate_rows = tuple(
+        _overlay_candidate_rows(connection, overlay_revision_ids, False)
+    )
+    accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids, False)
     reset_changes = _accepted_video_reset_changes(
         connection, parent_revision_id, accepted_video_resets, {"range": "all"},
     )
@@ -4419,9 +4651,16 @@ def meta_payload(connection) -> dict[str, Any]:
             "source_occurrences": counts.get("source_occurrences_rows", 0),
         })
         overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent_id)
-        counts = _apply_generic_overlay_meta_counts(
-            connection, parent_id, overlay_ids, counts,
-        )
+        cache_key = (generic_runtime[0], parent_id, tuple(overlay_ids))
+        cached_counts = _GENERIC_META_COUNTS_CACHE.get(cache_key)
+        if cached_counts is None:
+            cached_counts = _apply_generic_overlay_meta_counts(
+                connection, parent_id, overlay_ids, counts,
+            )
+            if len(_GENERIC_META_COUNTS_CACHE) >= 8:
+                _GENERIC_META_COUNTS_CACHE.pop(next(iter(_GENERIC_META_COUNTS_CACHE)))
+            _GENERIC_META_COUNTS_CACHE[cache_key] = dict(cached_counts)
+        counts = {**counts, **cached_counts}
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
