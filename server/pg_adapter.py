@@ -2746,12 +2746,10 @@ def _overlay_vtuber_replacement_rows(
     affected_occurrence_ids: set[tuple[str, str]] = set()
 
     def row_channel_id(row: Mapping[str, Any]) -> str:
-        video = _overlay_public_video(row)
-        return _text(
-            row.get("channel_id")
-            or video.get("channelId")
-            or _json_object(row.get("replacementVideoPayload")).get("channelId")
-        )
+        # The caller has already supplied a bounded parent tuple when this
+        # historical change lacked a channel.  Never let scalar precedence
+        # hide a scalar/payload conflict in the exact aggregation path.
+        return _validated_overlay_change_identity(row)[1]
 
     def require_identity(row: Mapping[str, Any], require_occurrence: bool = True) -> None:
         video_id = _text(row.get("videoId") or row.get("video_id"))
@@ -3296,6 +3294,111 @@ def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
     return int(row.get("row_count") or 0)
 
 
+def _validated_overlay_change_identity(
+    change: Mapping[str, Any], parent_video: Mapping[str, Any] | None = None,
+) -> tuple[str, str]:
+    """Return one exact change identity, rejecting every conflicting source.
+
+    A runtime/accepted change can carry denormalised scalar fields, an old
+    video payload, and (only when needed) one parent runtime-video tuple.
+    They are all evidence for the *same* removed tuple, never fallbacks with
+    precedence.  A replacement has a separate new-side immutable tuple;
+    validate its payload pair here without mistaking it for the old tuple.
+    """
+
+    error = "VTuber exact overlay change is missing required immutable identity"
+    direct_video_ids = [
+        _text(change.get(name)) for name in ("videoId", "video_id")
+        if _text(change.get(name))
+    ]
+    if not direct_video_ids:
+        raise PostgresAdapterError(error)
+    video_id = direct_video_ids[0]
+    video_ids = list(direct_video_ids)
+    channel_ids = [
+        _text(change.get(name)) for name in ("channel_id", "channelId")
+        if _text(change.get(name))
+    ]
+    handles = [
+        _normalized_channel_handle(change.get(name))
+        for name in ("channel_handle", "channelHandle")
+        if _normalized_channel_handle(change.get(name))
+    ]
+    urls = [
+        _text(change.get(name)) for name in ("channel_url", "channelUrl")
+        if _text(change.get(name))
+    ]
+
+    payloads: list[Any] = [
+        change.get("videoPayload"), change.get("video_payload_json"),
+    ]
+    replacement_video = _json_object(change.get("replacementVideoPayload"))
+    if replacement_video and not bool(change.get("replacement")):
+        payloads.append(replacement_video)
+    if parent_video is not None:
+        payloads.extend((parent_video, parent_video.get("payload_json")))
+    for raw_payload in payloads:
+        payload = _json_object(raw_payload)
+        nested = payload.get("payload")
+        payload_maps = (payload, nested) if isinstance(nested, Mapping) else (payload,)
+        for source in payload_maps:
+            for name in ("videoId", "video_id"):
+                value = _text(source.get(name))
+                if value:
+                    video_ids.append(value)
+            for name in ("channelId", "channel_id"):
+                value = _text(source.get(name))
+                if value:
+                    channel_ids.append(value)
+            for name in ("channelHandle", "channel_handle"):
+                value = _normalized_channel_handle(source.get(name))
+                if value:
+                    handles.append(value)
+            for name in ("channelUrl", "channel_url"):
+                value = _text(source.get(name))
+                if value:
+                    urls.append(value)
+    if any(value != video_id for value in video_ids):
+        raise PostgresAdapterError(error)
+    if len(set(channel_ids)) > 1:
+        raise PostgresAdapterError(error)
+    channel_id = channel_ids[0] if channel_ids else ""
+    if channel_id:
+        for url in urls:
+            if not _channel_url_is_coherent(url, channel_id, "") and not any(
+                _channel_url_is_coherent(url, channel_id, handle) for handle in handles
+            ):
+                raise PostgresAdapterError(error)
+    # ReplacementVideoPayload is evidence for the new-side tuple, whose video
+    # may deliberately differ from this change's removed video.  Keep the
+    # existing strict replacement error contract while rejecting mismatched
+    # new-side video/channel identities before any exact cache can be used.
+    if bool(change.get("replacement")):
+        replacement = _json_object(change.get("replacementPayload"))
+        replacement_video = _json_object(change.get("replacementVideoPayload"))
+        replacement_id = _text(replacement.get("videoId") or replacement.get("video_id"))
+        replacement_sources = [
+            _text(replacement_video.get(name))
+            for name in ("videoId", "video_id")
+            if _text(replacement_video.get(name))
+        ]
+        replacement_channels = [
+            _text(replacement.get(name))
+            for name in ("channelId", "channel_id")
+            if _text(replacement.get(name))
+        ] + [
+            _text(replacement_video.get(name))
+            for name in ("channelId", "channel_id")
+            if _text(replacement_video.get(name))
+        ]
+        if (
+            replacement_id and replacement_sources
+            and any(value != replacement_id for value in replacement_sources)
+        ) or len(set(replacement_channels)) > 1:
+            raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+    return video_id, channel_id
+
+
 def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Return bounded candidate rankings from parent aggregates plus delta rows."""
 
@@ -3350,10 +3453,19 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     # lineage-wide candidate list: a legacy/all row must not leak into 7d,
     # and a 7d row must not perturb the all aggregate.
     exact_candidate_rows = tuple(candidate_rows)
+    # Legacy parent occurrences can lack their denormalised channel fields.
+    # Resolve those fields only through the parent runtime-video tuple for the
+    # same immutable video.  Accepted resets need the same bounded repair as
+    # runtime curation; otherwise exact VTuber coverage rejects a legal
+    # historical reset before it can reach the SQL aggregate.
+    identity_changes = tuple((*reset_changes, *runtime_changes))
+    identity_by_change = {
+        id(change): _validated_overlay_change_identity(change)
+        for change in identity_changes
+    }
     video_ids = {
-        _text(change.get("videoId") or change.get("video_id"))
-        for change in runtime_changes
-        if _text(change.get("videoId") or change.get("video_id"))
+        video_id for video_id, channel_id in identity_by_change.values()
+        if not channel_id
     }
     if video_ids:
         video_rows = _rows(
@@ -3363,17 +3475,44 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
                    channel_url, payload_json
             FROM runtime_videos
             WHERE revision_id = %s AND video_id = ANY(%s)
+            ORDER BY video_id
+            LIMIT %s
             """,
-            [parent[0], list(video_ids)],
+            [parent[0], sorted(video_ids), _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
         )
-        video_by_id = {_text(row.get("video_id")): row for row in video_rows}
-        for change in runtime_changes:
-            video = video_by_id.get(_text(change.get("videoId") or change.get("video_id")))
-            if video:
-                for name in ("channel_name", "channel_id", "channel_handle", "channel_url"):
-                    change.setdefault(name, video.get(name))
-                change.setdefault("videoTitle", video.get("title"))
-                change.setdefault("videoPayload", video.get("payload_json"))
+        if len(video_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError("VTuber parent video lookup exceeded bounded cap")
+        video_by_id: dict[str, Mapping[str, Any]] = {}
+        for video in video_rows:
+            video_id = _text(video.get("video_id"))
+            if not video_id:
+                continue
+            if video_id in video_by_id:
+                raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+            video_by_id[video_id] = video
+        for change in identity_changes:
+            change_video_id, existing_channel_id = identity_by_change[id(change)]
+            if existing_channel_id:
+                continue
+            video = video_by_id.get(change_video_id)
+            if not video:
+                raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+            _validated_overlay_change_identity(change, video)
+            parent_video = _overlay_public_video(video)
+            for name, public_name in (
+                ("channel_name", "channelName"),
+                ("channel_id", "channelId"),
+                ("channel_handle", "channelHandle"),
+                ("channel_url", "channelUrl"),
+            ):
+                if not _text(change.get(name)):
+                    value = video.get(name) or parent_video.get(public_name)
+                    if _text(value):
+                        change[name] = value
+            if not _text(change.get("videoTitle")):
+                change["videoTitle"] = video.get("title") or parent_video.get("title")
+            if not _json_object(change.get("videoPayload")):
+                change["videoPayload"] = video.get("payload_json")
     _enrich_runtime_original_group_counts(
         connection,
         parent[0],

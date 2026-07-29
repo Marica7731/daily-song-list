@@ -187,6 +187,105 @@ tombstoned = execute(
 )
 assert [(row["channelId"], row["count"]) for row in tombstoned["records"]] == [("UCOLD", 1)]
 
+# Historical runtime curation can retain only the occurrence identity.  Its
+# missing channel may be recovered solely from the bounded parent-video tuple
+# for that same immutable video; this must reach exact coverage rather than a
+# generic fallback or a 503.
+legacy_parent = video("old-target", "UCOLD")
+for field in ("channel_id", "channel_name", "channel_handle", "channel_url"):
+    legacy_parent[field] = ""
+legacy_runtime = execute(
+    [base("UCOLD", 2)], [legacy_parent, video("old-b", "UCOLD")],
+    [occurrence("old-target", "target"), occurrence("old-b", "B")], runtime_changes=[
+      {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}
+    ],
+)
+assert [(row["channelId"], row["count"]) for row in legacy_runtime["records"]] == [("UCOLD", 1)]
+
+# Accepted full-video resets use the same parent tuple evidence.  Conversely,
+# a payload that claims another video cannot prove this change's identity.
+legacy_reset = execute(
+    [base("UCOLD", 1)], [legacy_parent], [occurrence("old-target", "target")],
+    resets={"old-target": {"video_id": "old-target", "tombstone": True}},
+    reset_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target",
+                    "acceptedVideoReset": True}],
+)
+assert legacy_reset["records"] == []
+wrong_parent = video("old-target", "UCOLD")
+wrong_parent["channel_id"] = ""
+wrong_parent["payload_json"] = {"videoId": "other-video", "channelId": "UCOTHER"}
+try:
+    execute(
+        [base("UCOLD", 1)], [wrong_parent], [occurrence("old-target", "target")], runtime_changes=[
+          {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}
+        ],
+    )
+    raise AssertionError("mismatched parent video proved a legacy identity")
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+
+# Every pre-existing source is evidence, never a scalar-precedence fallback.
+# These were the v9 P1 holes: a conflicting payload could silently return the
+# scalar's UCOLD card (SCALAR_PAYLOAD_CONFLICT_NOT_REJECTED returned=UCOLD:1).
+def expect_identity_rejection(label, parent_videos, runtime_changes=(), reset_changes=(), resets=None):
+    try:
+        execute(
+            [base("UCOLD", 1)], parent_videos,
+            [occurrence("old-target", "target")],
+            resets=resets, reset_changes=reset_changes, runtime_changes=runtime_changes,
+        )
+        raise AssertionError(label + " was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+
+expect_identity_rejection(
+    "scalar/payload video conflict", [video("old-target", "UCOLD")],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target",
+                      "channel_id": "UCOLD", "videoPayload": {"videoId": "other-video", "channelId": "UCOLD"}}],
+)
+expect_identity_rejection(
+    "scalar/payload channel conflict", [video("old-target", "UCOLD")],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target",
+                      "channel_id": "UCOLD", "videoPayload": {"videoId": "old-target", "channelId": "UCOTHER"}}],
+)
+parent_payload_conflict = video("old-target", "UCOLD")
+parent_payload_conflict["payload_json"] = {"videoId": "old-target", "channelId": "UCOTHER"}
+expect_identity_rejection(
+    "parent scalar/payload conflict", [parent_payload_conflict],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}],
+)
+expect_identity_rejection(
+    "duplicate parent tuples", [video("old-target", "UCOLD"), video("old-target", "UCOLD")],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}],
+)
+expect_identity_rejection(
+    "missing parent tuple", [],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}],
+)
+
+# The legal resetChanges8032 shape has ten immutable occurrences but no
+# denormalised channel identity.  One bounded parent tuple restores all ten.
+reset_ten = [
+    {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "reset-%d" % index,
+     "acceptedVideoReset": True}
+    for index in range(10)
+]
+reset_ten_result = execute(
+    [base("UCOLD", 10)], [video("old-target", "UCOLD")],
+    [occurrence("old-target", "reset-%d" % index) for index in range(10)],
+    resets={"old-target": {"video_id": "old-target", "tombstone": True}},
+    reset_changes=reset_ten,
+)
+assert reset_ten_result["records"] == []
+
+consistent = execute(
+    [base("UCOLD", 1)], [video("old-target", "UCOLD")], [occurrence("old-target", "target")],
+    runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "video_id": "old-target",
+                      "occurrenceId": "target", "channel_id": "UCOLD", "channelId": "UCOLD",
+                      "videoPayload": {"videoId": "old-target", "channelId": "UCOLD"}}],
+)
+assert consistent["records"] == []
+
 # All tuples deleted yields a zero coverage marker internally, then one public
 # removal: no card and no total contribution.
 zero = execute(
