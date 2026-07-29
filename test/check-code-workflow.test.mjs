@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { execFileSync, spawnSync } from "node:child_process";
 import { dirname, join, relative, resolve } from "node:path";
 import test from "node:test";
@@ -131,6 +131,23 @@ async function validatorTrackedDataRoots() {
   return roots.map(([root]) => root);
 }
 
+async function reviewedDiscoveryAcceptedFiles() {
+  const runtimeTest = await readFile(resolve(candidateRoot, "test", "youtube-channel-discovery-runtime.test.js"), "utf8");
+  const expectedVideoIds = new Set([...runtimeTest.matchAll(/^    \["([A-Za-z0-9_-]{11})", \{/gm)].map((match) => match[1]));
+  assert.equal(expectedVideoIds.size, 4, "reviewed runtime test must declare its four accepted videos");
+  return [
+    "data/external/youtube-channel-discovery/accepted/2026-07-25-source-backfill-kanaruhanon.json",
+    "data/external/youtube-channel-discovery/accepted/2026-07-25-source-backfill-noa-polaris.json",
+  ];
+}
+
+async function copyCandidatePath(sourcePath, fixtureRoot) {
+  const relativePath = sourcePath.replace(/^\//, "");
+  const destination = join(fixtureRoot, relativePath);
+  await mkdir(dirname(destination), { recursive: true });
+  await cp(join(candidateRoot, relativePath), destination, { recursive: true });
+}
+
 async function writeJson(filePath, value) {
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${JSON.stringify(value)}\n`);
@@ -228,6 +245,7 @@ test("Check code starts in a fixed sparse source tree with every initial depende
   assert.match(checkout[1], /sparse-checkout-cone-mode: false/);
 
   const sparse = primarySparsePatterns(workflow);
+  const reviewedAccepted = await reviewedDiscoveryAcceptedFiles();
   for (const dependency of [
     ".github",
     "/artifacts/migration/curation-global-singleton-minimal.json",
@@ -245,7 +263,12 @@ test("Check code starts in a fixed sparse source tree with every initial depende
   ]) {
     assert.ok(sparse.includes(dependency), `initial sparse checkout must include ${dependency}`);
   }
-  assert.equal(sparse.some((dependency) => dependency.startsWith("data/external/")), false);
+  assert.deepEqual(
+    sparse.filter((dependency) => dependency.startsWith("/data/external/youtube-channel-discovery/")),
+    reviewedAccepted.map((filePath) => `/${filePath}`),
+    "initial sparse checkout may contain only accepted files required by the reviewed runtime test",
+  );
+  assert.equal(sparse.some((dependency) => dependency.startsWith("/data/external/youtube-channel-discovery/raw/") || dependency.includes("/review/") || dependency.includes("/backfill/")), false);
   assert.equal(sparse.some((dependency) => dependency === "data/ui" || dependency === "data/diff"), false);
   assert.match(job, new RegExp(`path: ${checkSourcePath}/\\.tmp/check-code-mygit`));
   assert.match(job, /--source \.tmp\/check-code-mygit\/config\/blocked-vtuber-channels\.json/);
@@ -572,6 +595,48 @@ test("a real non-cone sparse checkout materializes every validate-data tracked d
     await assert.rejects(readFile(join(fixtureRoot, "data/status.json"), "utf8"));
     await assert.rejects(readFile(join(fixtureRoot, "data/external/youtube-channel-discovery/fixture.json"), "utf8"));
     await assert.rejects(readFile(join(fixtureRoot, "data/unrelated.json"), "utf8"));
+  } finally {
+    await rm(fixtureRoot, { force: true, recursive: true });
+  }
+});
+
+test("workflow initial sparse checkout runs reviewed discovery runtime with only its two accepted fixtures", async () => {
+  const workflow = await readFile(workflowPath, "utf8");
+  const patterns = primarySparsePatterns(workflow);
+  const acceptedFiles = await reviewedDiscoveryAcceptedFiles();
+  const fixtureRoot = await mkdtemp(join(candidateRoot, ".discovery-sparse-fixture-"));
+  try {
+    for (const sourcePath of ["assets", "config", "scripts", "test/youtube-channel-discovery-runtime.test.js", ...acceptedFiles]) {
+      await copyCandidatePath(sourcePath, fixtureRoot);
+    }
+    const excludedDecoys = [
+      "data/external/youtube-channel-discovery/accepted/fixture-unreviewed.json",
+      "data/external/youtube-channel-discovery/raw/fixture.json",
+      "data/external/youtube-channel-discovery/review/fixture.json",
+      "data/external/youtube-channel-discovery/backfill/fixture.json",
+      "data/external/youtube-channel-discovery/candidates/fixture.json",
+      "data/status.json",
+      "data/ui/meta.json",
+      "data/diff/latest-7d.json",
+    ];
+    for (const decoyPath of excludedDecoys) {
+      await mkdir(dirname(join(fixtureRoot, decoyPath)), { recursive: true });
+      await writeFile(join(fixtureRoot, decoyPath), `sparse-decoy:${decoyPath}\n`);
+    }
+    execFileSync("git", ["init", "--quiet", fixtureRoot]);
+    execFileSync("git", ["-C", fixtureRoot, "add", "."]);
+    execFileSync("git", ["-C", fixtureRoot, "-c", "user.name=Codex", "-c", "user.email=codex@example.invalid", "commit", "--quiet", "-m", "fixture"]);
+    execFileSync("git", ["-C", fixtureRoot, "sparse-checkout", "init", "--no-cone"]);
+    execFileSync("git", ["-C", fixtureRoot, "sparse-checkout", "set", "--no-cone", ...patterns]);
+    const acceptedDirectory = join(fixtureRoot, "data", "external", "youtube-channel-discovery", "accepted");
+    assert.deepEqual((await readdir(acceptedDirectory)).sort(), acceptedFiles.map((filePath) => filePath.split("/").at(-1)).sort());
+    for (const decoyPath of excludedDecoys) {
+      await assert.rejects(readFile(join(fixtureRoot, decoyPath), "utf8"), { code: "ENOENT" }, `initial sparse checkout must exclude tracked ${decoyPath}`);
+    }
+    assert.doesNotThrow(() => execFileSync("node", ["--test", "test/youtube-channel-discovery-runtime.test.js"], { cwd: fixtureRoot, stdio: "pipe" }));
+    const rawDecoy = "data/external/youtube-channel-discovery/raw/fixture.json";
+    execFileSync("git", ["-C", fixtureRoot, "sparse-checkout", "set", "--no-cone", ...patterns, `/${rawDecoy}`]);
+    assert.equal(await readFile(join(fixtureRoot, rawDecoy), "utf8"), `sparse-decoy:${rawDecoy}\n`, "raw decoy positive control must materialize when its pattern is injected");
   } finally {
     await rm(fixtureRoot, { force: true, recursive: true });
   }
