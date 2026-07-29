@@ -34,7 +34,7 @@
         "逆光（ウタ from ONE PIECE FILM RED）",
         "⭐逆光（ウタfrom ONE PIECE FILM RED）"
       ],
-      "expectedMatchCount": 13,
+      "expectedMatchCount": 14,
       "reason": "verified_same_song_official_album_title",
       "batchTag": "global-singleton-followup-20260726",
       "evidenceUrls": [
@@ -52,6 +52,7 @@
         "artist": "Vaundy",
         "title": "逆光 - replica"
       },
+      "expectedScopeCount": 3,
       "expectedMutationCount": 0
     },
     {
@@ -59,6 +60,25 @@
       "startsWith": {
         "title": "逆光のフリューゲル"
       },
+      "expectedScopeCount": 123,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-luna-8-32",
+      "equals": {
+        "title": "8.32",
+        "artist": "*Luna"
+      },
+      "expectedScopeCount": 17,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-ado-gyakko-canonical",
+      "equals": {
+        "title": "逆光",
+        "artist": "Ado"
+      },
+      "expectedScopeCount": 401,
       "expectedMutationCount": 0
     },
     {
@@ -67,6 +87,7 @@
         "channelHandle": "@urameshi_conta"
       },
       "auditedLegacyRuleCount": 27,
+      "expectedScopeCount": 3919,
       "expectedMutationCount": 0
     }
   ]

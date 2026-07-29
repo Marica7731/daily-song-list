@@ -445,7 +445,7 @@ test("finalize binds converter output to independently matched remote and Mac sn
     const rulesValue = {
       records: [{}],
       safetyAssertions: [
-        { assertionId: "protect-vaundy", expectedMutationCount: 0 },
+        { assertionId: "protect-vaundy", expectedMutationCount: 0, expectedScopeCount: 3 },
         { assertionId: "protect-flugel", expectedMutationCount: 0 },
         { assertionId: "exclude-urameshi", expectedMutationCount: 0 },
       ],
@@ -469,6 +469,7 @@ test("finalize binds converter output to independently matched remote and Mac sn
         assertionId: item.assertionId,
         status: "accepted",
         mutationCount: 0,
+        scopeRowCount: item.expectedScopeCount ?? 0,
       })),
     }), "utf8");
     fs.writeFileSync(snapshotCheckpoint, JSON.stringify({
@@ -519,4 +520,28 @@ test("finalize binds converter output to independently matched remote and Mac sn
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("finalize rejects a ready converter when an exact protected scope count drifted", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "pg-curation-finalize-scope-test-"));
+  try {
+    const rules = path.join(root, "rules.json");
+    const candidate = path.join(root, "candidate.ndjson");
+    const converter = path.join(root, "converter.json");
+    const review = path.join(root, "review.json");
+    const checkpoint = path.join(root, "checkpoint.json");
+    const remote = path.join(root, "remote.log");
+    const output = path.join(root, "output.json");
+    const producer = path.join(root, "producer.json");
+    const rulesValue = { safetyAssertions: [{ assertionId: "scope", expectedMutationCount: 0, expectedScopeCount: 3919 }] };
+    fs.writeFileSync(rules, JSON.stringify(rulesValue));
+    fs.writeFileSync(candidate, "");
+    fs.writeFileSync(converter, JSON.stringify({ kind: "curation-accepted-increment", status: "ready", selectorMutationCount: 0, aliasMutationCount: 0, curationMutationCount: 0, snapshotSha256: "sha", rulesManifestSha256: sha256(fs.readFileSync(rules)) }));
+    fs.writeFileSync(review, JSON.stringify({ summary: { accepted: 1 }, results: [{ kind: "safety_assertion", assertionId: "scope", status: "accepted", mutationCount: 0, scopeRowCount: 3918 }] }));
+    fs.writeFileSync(checkpoint, JSON.stringify({ complete: true, resumable: false, rows: 1, bytes: 1, sha256: "sha" }));
+    fs.writeFileSync(remote, `PG_ACTIVE_CURATION_EXPORT_OK ${JSON.stringify({ status: "ok", activeRevisionId: "accepted_fixture_1", rows: 1, bytes: 1, sha256: "sha" })}\n`);
+    const result = spawnSync(python, [script, "finalize", "--converter-manifest", converter, "--review", review, "--candidate", candidate, "--snapshot-checkpoint", checkpoint, "--remote-log", remote, "--rules-manifest", rules, "--output-manifest", output, "--output-checkpoint", producer, "--expected-active-revision", "accepted_fixture_1", "--expected-selector-mutations", "0", "--expected-alias-mutations", "0", "--producer-commit", "sha", "--producer-run-id", "1", "--producer-run-attempt", "1"], { encoding: "utf8" });
+    assert.equal(result.status, 78, result.stderr);
+    assert.match(result.stderr, /safety scope mismatch/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });

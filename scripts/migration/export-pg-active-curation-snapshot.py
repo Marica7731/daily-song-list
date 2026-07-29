@@ -828,6 +828,7 @@ def finalize_artifact(args: argparse.Namespace) -> int:
         "count_mismatch",
         "alias_count_mismatch",
         "safety_violation",
+        "scope_count_mismatch",
     }
     summary = review.get("summary")
     results = review.get("results")
@@ -856,6 +857,12 @@ def finalize_artifact(args: argparse.Namespace) -> int:
             raise GateError(
                 f"safety mutation mismatch assertion={assertion_id} expected={expected} actual={result.get('mutationCount')}"
             )
+        if "expectedScopeCount" in assertion:
+            expected_scope = assertion.get("expectedScopeCount")
+            if result.get("scopeRowCount") != expected_scope:
+                raise GateError(
+                    f"safety scope mismatch assertion={assertion_id} expected={expected_scope} actual={result.get('scopeRowCount')}"
+                )
 
     rules_sha = sha256_file(args.rules_manifest)
     if converter_manifest.get("rulesManifestSha256") != rules_sha:

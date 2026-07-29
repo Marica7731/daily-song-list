@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
+import http from "node:http";
+import os from "node:os";
 import path from "node:path";
 
+const isolatedRoot = process.env.D_GATE_ROOT || ".";
 const deployWorkflow = fs.readFileSync(
-  path.resolve(".github/workflows/deploy-pg-incremental.yml"),
+  path.resolve(isolatedRoot, ".github/workflows/deploy-pg-incremental.yml"),
   "utf8",
 );
 const acceptedWorkflow = fs.readFileSync(
@@ -42,6 +46,13 @@ function workflowJob(workflow, jobName, nextJobName) {
   const match = pattern.exec(workflow);
   assert.ok(match, `missing ${jobName} job`);
   return match[1];
+}
+
+function workflowHeredoc(workflow, destination) {
+  const escaped = destination.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const match = new RegExp(`cat > "${escaped}" <<'PY'\\n([\\s\\S]*?)\\n          PY`, "u").exec(workflow);
+  assert.ok(match, `missing ${destination} heredoc`);
+  return match[1].replace(/^          /gmu, "");
 }
 
 function sourceIdentityGate(payload, {
@@ -134,6 +145,103 @@ function rankingsMetrics(payload, {
   );
   assert.equal(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);
+}
+
+function aliasManifestGate(manifest) {
+  if (!Object.hasOwn(manifest, "aliasSourceGroups")) return 0;
+  const schema = `
+    (.aliasSourceGroups | type == "array") and
+    (.aliasSourceGroupCount | type == "number" and floor == . and . >= 0 and . <= 64) and
+    (.aliasSourceGroupCount == (.aliasSourceGroups | length)) and
+    (.aliasSourceGroupsSha256 | type == "string" and test("^[0-9a-f]{64}$")) and
+    all(.aliasSourceGroups[];
+      type == "object" and
+      ((keys | sort) == ["count","originalGroupKey","originalSourceDetailKey","rangeId","replacementGroupKey","replacementSourceDetailKey"]) and
+      (.rangeId == "all" or .rangeId == "7d") and
+      (.originalGroupKey | type == "string" and length > 0) and
+      (.replacementGroupKey | type == "string" and length > 0) and
+      (.originalSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
+      (.replacementSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
+      (.originalSourceDetailKey != .replacementSourceDetailKey) and
+      (.count | type == "number" and floor == . and . > 0)
+    ) and
+    (([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | length) ==
+      ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length)) and
+    (([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | length) ==
+      ([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | unique | length))
+  `;
+  const validation = spawnSync("jq", ["-e", schema], {
+    input: JSON.stringify(manifest), encoding: "utf8",
+  });
+  if (validation.status !== 0) return validation.status || 1;
+  const canonical = spawnSync("jq", ["-cS", ".aliasSourceGroups"], {
+    input: JSON.stringify(manifest), encoding: "utf8",
+  });
+  if (canonical.status !== 0) return canonical.status || 1;
+  const actualHash = crypto.createHash("sha256").update(canonical.stdout).digest("hex");
+  if (actualHash !== manifest.aliasSourceGroupsSha256) return 1;
+  const tuples = manifest.aliasSourceReview?.selectedIdentities;
+  if (!Array.isArray(tuples) || tuples.length === 0) return 1;
+  if (!Number.isInteger(manifest.aliasSourceReview?.selectedIdentityCount)
+    || manifest.aliasSourceReview.selectedIdentityCount !== tuples.length
+    || tuples.length > 50000) return 1;
+  const canonicalTuples = `${JSON.stringify(tuples.map((tuple) => Object.fromEntries(
+    Object.entries(tuple).sort(([a], [b]) => a.localeCompare(b)),
+  )))}\n`;
+  if (crypto.createHash("sha256").update(canonicalTuples).digest("hex")
+    !== manifest.aliasSourceReview.selectedIdentitiesSha256) return 1;
+  const ordered = [...tuples].sort((left, right) => [left.rangeId === "all" ? 0 : 1, left.originalGroupKey, left.originalSourceDetailKey, left.replacementGroupKey, left.replacementSourceDetailKey, left.videoId, left.occurrenceId].join("\u0000").localeCompare([right.rangeId === "all" ? 0 : 1, right.originalGroupKey, right.originalSourceDetailKey, right.replacementGroupKey, right.replacementSourceDetailKey, right.videoId, right.occurrenceId].join("\u0000")));
+  if (ordered.some((tuple, index) => tuple !== tuples[index])) return 1;
+  const expected = manifest.aliasSourceGroups.reduce((sum, group) => sum + group.count, 0);
+  if (tuples.length !== expected) return 1;
+  const seen = new Set();
+  for (const tuple of tuples) {
+    if (!tuple || typeof tuple !== "object") return 1;
+    const keys = Object.keys(tuple).sort();
+    if (JSON.stringify(keys) !== JSON.stringify([
+      "occurrenceId", "originalArtist", "originalGroupKey", "originalSourceDetailKey", "originalTitle",
+      "rangeId", "replacementArtist", "replacementGroupKey", "replacementSourceDetailKey", "replacementTitle", "seconds", "sourceId", "storedRangeId", "videoId",
+    ])) return 1;
+    if (!["all", "7d"].includes(tuple.rangeId)) return 1;
+    if (![tuple.videoId, tuple.occurrenceId, tuple.originalTitle, tuple.originalArtist,
+      tuple.replacementTitle, tuple.replacementArtist, tuple.originalGroupKey, tuple.replacementGroupKey]
+      .every((value) => typeof value === "string" && value.length > 0)) return 1;
+    if (!/^[0-9a-f]{16}$/u.test(tuple.originalSourceDetailKey) || !/^[0-9a-f]{16}$/u.test(tuple.replacementSourceDetailKey)) return 1;
+    if (!Number.isInteger(tuple.seconds) || tuple.seconds < 0 || !["", "all", "7d"].includes(tuple.storedRangeId)
+      || (tuple.storedRangeId && tuple.storedRangeId !== tuple.rangeId) || typeof tuple.sourceId !== "string") return 1;
+    const identity = [tuple.rangeId, tuple.originalSourceDetailKey, tuple.replacementSourceDetailKey, tuple.videoId, tuple.occurrenceId].join("\\u0000");
+    if (seen.has(identity)) return 1;
+    seen.add(identity);
+  }
+  for (const group of manifest.aliasSourceGroups) {
+    const members = tuples.filter((tuple) => tuple.rangeId === group.rangeId
+      && tuple.originalGroupKey === group.originalGroupKey
+      && tuple.originalSourceDetailKey === group.originalSourceDetailKey
+      && tuple.replacementGroupKey === group.replacementGroupKey
+      && tuple.replacementSourceDetailKey === group.replacementSourceDetailKey);
+    if (members.length !== group.count) return 1;
+  }
+  return 0;
+}
+
+function aliasManifest(groups, tuples) {
+  const canonical = `${JSON.stringify(groups.map((group) => Object.fromEntries(
+    Object.entries(group).sort(([a], [b]) => a.localeCompare(b)),
+  )))}\n`;
+  return {
+    kind: "curation-accepted-increment",
+    aliasSourceGroups: groups,
+    aliasSourceGroupCount: groups.length,
+    aliasSourceGroupsSha256: crypto.createHash("sha256").update(canonical).digest("hex"),
+    aliasSourceReview: {
+      schemaVersion: 1,
+      selectedIdentityCount: tuples.length,
+      selectedIdentitiesSha256: crypto.createHash("sha256").update(`${JSON.stringify(tuples.map((tuple) => Object.fromEntries(
+        Object.entries(tuple).sort(([a], [b]) => a.localeCompare(b)),
+      )))}\n`).digest("hex"),
+      selectedIdentities: tuples,
+    },
+  };
 }
 
 test("workflow YAML parses and every run block has valid bash syntax", () => {
@@ -264,6 +372,207 @@ test("source identity gate uses the API-visible tuple and fails closed on ambigu
     0,
     "a fuzzy source lookup must not pass using an unrelated record identity",
   );
+});
+
+test("alias source manifests are canonically hashed, bounded, and require compact reviewed tuples", () => {
+  const allGroup = {
+    rangeId: "all",
+    originalGroupKey: "old::artist",
+    originalSourceDetailKey: "1111111111111111",
+    replacementGroupKey: "new::artist",
+    replacementSourceDetailKey: "2222222222222222",
+    count: 1,
+  };
+  const allTuple = {
+    rangeId: "all",
+    originalSourceDetailKey: allGroup.originalSourceDetailKey,
+    replacementSourceDetailKey: allGroup.replacementSourceDetailKey,
+    originalGroupKey: allGroup.originalGroupKey,
+    replacementGroupKey: allGroup.replacementGroupKey,
+    videoId: "video-1",
+    occurrenceId: "occ-1",
+    sourceId: "channel-1",
+    seconds: 42,
+    storedRangeId: "all",
+    originalTitle: "old",
+    originalArtist: "artist",
+    replacementTitle: "new",
+    replacementArtist: "artist",
+  };
+  const manifest = aliasManifest([allGroup], [allTuple]);
+  assert.equal(aliasManifestGate(manifest), 0);
+  assert.equal(aliasManifestGate({ kind: "accepted-increment" }), 0, "legacy manifests must not opt into the alias gate");
+  assert.notEqual(aliasManifestGate({ ...manifest, aliasSourceGroupsSha256: "0".repeat(64) }), 0, "hash tampering must fail");
+  assert.notEqual(aliasManifestGate({ ...manifest, aliasSourceReview: { ...manifest.aliasSourceReview, selectedIdentitiesSha256: "0".repeat(64) } }), 0, "tuple hash tampering must fail");
+  assert.notEqual(aliasManifestGate({ ...manifest, aliasSourceReview: undefined }), 0, "the producer review must be delivered with the deploy artifact");
+  assert.notEqual(aliasManifestGate(aliasManifest([allGroup, { ...allGroup }], [allTuple, { ...allTuple, occurrenceId: "occ-2" }])), 0, "ambiguous duplicate original projections must fail");
+  const sevenDayGroup = {
+    ...allGroup,
+    rangeId: "7d",
+    originalSourceDetailKey: "3333333333333333",
+    replacementSourceDetailKey: "4444444444444444",
+  };
+  const sevenDayTuple = {
+    ...allTuple,
+    rangeId: "7d",
+    originalSourceDetailKey: sevenDayGroup.originalSourceDetailKey,
+    replacementSourceDetailKey: sevenDayGroup.replacementSourceDetailKey,
+    originalGroupKey: sevenDayGroup.originalGroupKey,
+    replacementGroupKey: sevenDayGroup.replacementGroupKey,
+    storedRangeId: "7d",
+  };
+  assert.equal(aliasManifestGate(aliasManifest([allGroup, sevenDayGroup], [allTuple, sevenDayTuple])), 0,
+    "a legacy occurrence may project to all and 7d without equating the two projections to aliasMutationCount");
+  assert.notEqual(aliasManifestGate(aliasManifest([allGroup], [{ ...allTuple, occurrenceId: "occ-1" }, { ...allTuple, occurrenceId: "occ-2" }])), 0,
+    "tuple count must equal the source-group delta ledger");
+  assert.notEqual(aliasManifestGate(aliasManifest([allGroup], [{ ...allTuple, replacementGroupKey: "other::artist" }])), 0,
+    "each compact tuple must be bound to exactly one declared source group");
+  const unordered = aliasManifest([allGroup, sevenDayGroup], [sevenDayTuple, allTuple]);
+  assert.notEqual(aliasManifestGate(unordered), 0, "a valid hash cannot bless an unstable tuple order");
+});
+
+test("workflow fails closed when an alias aggregate lacks reviewed candidate tuples", () => {
+  for (const requiredGate of [
+    "alias-source-groups-schema",
+    "alias-source-groups-sha256-mismatch",
+    "alias-source-review-contract-missing",
+    "alias-source-review-tuples-mismatch",
+    "PG_INCREMENT_ALIAS_SOURCE_MANIFEST_OK",
+  ]) assert.match(deployWorkflow, new RegExp(requiredGate, "u"));
+  assert.match(deployWorkflow, /\.aliasSourceGroupCount == \(\.aliasSourceGroups \| length\)/u);
+  assert.match(deployWorkflow, /\.aliasSourceGroupsSha256 \| type == "string" and test\("\^\[0-9a-f\]\{64\}\$"\)/u);
+  assert.match(deployWorkflow, /\.aliasSourceReview\.selectedIdentities \| type == "array" and length > 0/u);
+  assert.match(deployWorkflow, /legacy rows deliberately project into both all and 7d ranges/u);
+  assert.doesNotMatch(deployWorkflow, /aliasMutationCount.*alias_expected_projection_count/u,
+    "legacy dual-range projections must not be equated to physical mutation count");
+});
+
+test("alias ledger verifier is syntactically executable and separates parent, candidate, and public probes", () => {
+  const verifier = workflowHeredoc(deployWorkflow, "$INPUT_ROOT/verify-alias-source-ledger.py");
+  const result = spawnSync("python3", ["-c", "import sys; compile(sys.stdin.read(), 'alias-ledger', 'exec')"], {
+    input: verifier,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  for (const required of [
+    "http://127.0.0.1:8765",
+    "http://127.0.0.1:18766",
+    "https://ytb-song-rank.culua.com",
+    "old-source-present",
+    "replacement-source-count",
+    "replacement-card-count",
+    "curation-provenance",
+    "source-pagination-total",
+    "PG_INCREMENT_ALIAS_SOURCE_LEDGER_OK",
+  ]) assert.match(verifier, new RegExp(required.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "u"));
+  assert.match(deployWorkflow, /--phase candidate --ledger "\$alias_ledger" --remote/u);
+  assert.match(deployWorkflow, /--phase public --ledger "\$alias_ledger"/u);
+});
+
+test("alias ledger executes parent-to-candidate and public source/card checks", async () => {
+  const verifier = workflowHeredoc(deployWorkflow, "$INPUT_ROOT/verify-alias-source-ledger.py");
+  const group = {
+    rangeId: "all", originalGroupKey: "old::artist", originalSourceDetailKey: "1111111111111111",
+    replacementGroupKey: "new::artist", replacementSourceDetailKey: "2222222222222222", count: 1,
+  };
+  const group2 = {
+    rangeId: "all", originalGroupKey: "old-2::artist", originalSourceDetailKey: "3333333333333333",
+    replacementGroupKey: group.replacementGroupKey, replacementSourceDetailKey: group.replacementSourceDetailKey, count: 1,
+  };
+  const tuple = {
+    rangeId: "all", storedRangeId: "all", videoId: "video-1", occurrenceId: "occ-1", sourceId: "channel-1", seconds: 42,
+    originalTitle: "old", originalArtist: "artist", originalGroupKey: group.originalGroupKey,
+    originalSourceDetailKey: group.originalSourceDetailKey, replacementTitle: "new", replacementArtist: "artist",
+    replacementGroupKey: group.replacementGroupKey, replacementSourceDetailKey: group.replacementSourceDetailKey,
+  };
+  const tuple2 = {
+    rangeId: "all", storedRangeId: "all", videoId: "video-2", occurrenceId: "occ-2", sourceId: "", seconds: 43,
+    originalTitle: "old-2", originalArtist: "artist", originalGroupKey: group2.originalGroupKey,
+    originalSourceDetailKey: group2.originalSourceDetailKey, replacementTitle: "new", replacementArtist: "artist",
+    replacementGroupKey: group2.replacementGroupKey, replacementSourceDetailKey: group2.replacementSourceDetailKey,
+  };
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "daily-song-list-alias-ledger-"));
+  const verifierPath = path.join(temp, "verify.py");
+  const manifestPath = path.join(temp, "manifest.json");
+  const ledgerPath = path.join(temp, "ledger.json");
+  fs.writeFileSync(verifierPath, verifier);
+  fs.writeFileSync(manifestPath, JSON.stringify({ ...aliasManifest([group, group2], [tuple, tuple2]), aliasMutationCount: 2 }));
+  let badCandidateCount = false;
+  let oldSourcePresent = false;
+  let badCardCount = false;
+  let badSourcePath = false;
+  const source = (key, total, occurrences) => ({
+    found: true, sourceKey: key, page: 1, pageCount: 1, totalOccurrenceCount: total,
+    record: { sourceDetailKey: key, sourceDetailPath: badSourcePath ? "/unexpected" : "", count: total, timestampCount: total, key: group.replacementGroupKey, title: "new", displayArtist: "artist", occurrences },
+  });
+  const originalSource = (key, original, occurrences) => ({
+    found: true, sourceKey: key, page: 1, pageCount: 1, totalOccurrenceCount: 1,
+    record: { sourceDetailKey: key, sourceDetailPath: "", count: 1, timestampCount: 1, key: original.originalGroupKey, title: original.originalTitle, displayArtist: original.originalArtist, occurrences },
+  });
+  const old = (key) => ({ found: false, sourceKey: key });
+  const row = (videoId, sourceId, seconds = 42) => ({ videoId, seconds, channelId: "UCfixture", channelHandle: "/@fixture", channelUrl: "https://youtube.example/@fixture", item: { videoId, channelId: "UCfixture", channelHandle: "/@fixture", channelUrl: "https://youtube.example/@fixture" }, song: { title: "new", artist: "artist", seconds, sourceId } });
+  const selected = row("video-1", "channel-1");
+  const selected2 = row("video-2", "", 43);
+  const inherited = row("video-parent", "channel-parent");
+  const server = http.createServer((request, response) => {
+    const url = new URL(request.url, "http://fixture");
+    const phase = url.pathname.split("/")[1];
+    const key = decodeURIComponent(url.pathname.split("/").at(-1));
+    let payload;
+    if (url.pathname.includes("/api/sources/")) {
+      if (key === group.originalSourceDetailKey || key === group2.originalSourceDetailKey) payload = phase === "parent" ? originalSource(key, key === group.originalSourceDetailKey ? tuple : tuple2, [key === group.originalSourceDetailKey ? row("video-1", "channel-1") : row("video-2", "", 43)]) : (oldSourcePresent ? source(key, 0, []) : old(key));
+      else if (phase === "parent") payload = source(key, 1, [inherited]);
+      else payload = source(key, badCandidateCount && phase === "candidate" ? 2 : 3,
+        badCandidateCount && phase === "candidate" ? [selected, selected2] : [selected, selected2, inherited]);
+    } else if (url.pathname.endsWith("/api/rankings")) {
+      const isOld = url.searchParams.get("q") === "old";
+      payload = { page: 1, pageCount: 1, records: isOld ? [] : [{
+        title: "new", displayArtist: "artist", key: group.replacementGroupKey, sourceDetailKey: group.replacementSourceDetailKey, sourceDetailPath: "",
+        count: phase === "parent" ? 1 : (badCardCount && phase === "candidate" ? 2 : 3),
+      }] };
+    } else payload = { error: "unexpected" };
+    response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify(payload));
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const runVerifier = (args, env = {}) => new Promise((resolve) => {
+    const child = spawn("python3", args, { env: { ...process.env, ...env } });
+    let stderr = "";
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.on("close", (status) => resolve({ status, stderr }));
+  });
+  try {
+    const candidate = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--test-fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`]);
+    assert.equal(candidate.status, 0, candidate.stderr);
+    const publicRun = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "public", "--ledger", ledgerPath, "--public-base", `${base}/public`]);
+    assert.equal(publicRun.status, 0, publicRun.stderr);
+    const sshPath = path.join(temp, "ssh");
+    fs.writeFileSync(sshPath, "#!/bin/sh\nlast=\"\"\nfor arg in \"$@\"; do last=\"$arg\"; done\ncase \"$last\" in *psql*) if [ \"$PG_BAD\" = 1 ]; then echo 2\|1\|2; else echo 2\|0\|2; fi ;; *) sh -c \"$last\" ;; esac\n");
+    fs.chmodSync(sshPath, 0o700);
+    const batchEnv = { PATH: `${temp}:${process.env.PATH}` };
+    const missingRevision = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--remote", "fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`], batchEnv);
+    assert.notEqual(missingRevision.status, 0, "candidate ledger requires an explicit revision for the PG batch join");
+    const pgMismatch = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--remote", "fixture", "--candidate-revision", "candidate-1", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`], { ...batchEnv, PG_BAD: "1" });
+    assert.notEqual(pgMismatch.status, 0, "a single bounded PG batch mismatch blocks candidate verification");
+    oldSourcePresent = true;
+    const staleOld = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--test-fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`]);
+    assert.notEqual(staleOld.status, 0, "an old source must never survive candidate projection");
+    oldSourcePresent = false;
+    badCandidateCount = true;
+    const mismatched = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--test-fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`]);
+    assert.notEqual(mismatched.status, 0, "replacement source total must equal parent plus delta");
+    badCandidateCount = false;
+    badCardCount = true;
+    const cardMismatch = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--test-fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`]);
+    assert.notEqual(cardMismatch.status, 0, "replacement ranking card count must equal source total");
+    badCardCount = false;
+    badSourcePath = true;
+    const pathMismatch = await runVerifier([verifierPath, "--manifest", manifestPath, "--phase", "candidate", "--ledger", ledgerPath, "--test-fixture", "--parent-base", `${base}/parent`, "--candidate-base", `${base}/candidate`]);
+    assert.notEqual(pathMismatch.status, 0, "replacement source detail path must remain the public empty-path contract");
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
 });
 
 test("PG incremental dispatch can resume only an explicit same-repository artifact run", () => {

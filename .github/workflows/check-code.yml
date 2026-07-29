@@ -132,8 +132,22 @@ jobs:
           if [ "${run_ui_proof}" = "1" ] && [ "${ui_proof_ok}" = "1" ]; then
             npm test
           else
-            test_files="$(git ls-files 'test/*.test.js' 'test/**/*.test.js' | grep -v '^test/ui-proof\.test\.js$' | sort -u)"
-            node --test ${test_files}
+            test_files=()
+            while IFS= read -r -d '' test_file; do
+              case "${test_file}" in
+                test/ui-proof.test.js|test/ui-proof.test.mjs) continue ;;
+              esac
+              test_files+=("${test_file}")
+            done < <(git ls-files -z -- \
+              'test/*.test.js' \
+              'test/**/*.test.js' \
+              'test/*.test.mjs' \
+              'test/**/*.test.mjs')
+            if [ "${#test_files[@]}" -eq 0 ]; then
+              echo "::error::No tracked non-UI test files were selected." >&2
+              exit 1
+            fi
+            node --test "${test_files[@]}"
           fi
           if [ "${run_data_validate}" = "1" ]; then
             npm run validate

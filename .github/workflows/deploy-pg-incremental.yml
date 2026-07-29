@@ -964,6 +964,328 @@ jobs:
           ' "$TASK_ROOT/candidate-meta.json" >/dev/null || {
             echo "PG_INCREMENT_BLOCKED candidate-meta-gate revision=$REVISION"; exit 78;
           }
+          # The producer only began emitting aliasSourceGroups with the curation
+          # alias manifest.  Do not treat that aggregate as sufficient evidence
+          # for a source migration: an aggregate contains no per-occurrence tuple
+          # with which the candidate and the active parent can be distinguished.
+          # A manifest without this field retains the pre-existing contract.
+          ALIAS_SOURCE_GATE=0
+          if jq -e 'has("aliasSourceGroups")' "$MANIFEST_INPUT" >/dev/null; then
+            ALIAS_SOURCE_GATE=1
+            alias_groups_canonical="$TASK_ROOT/alias-source-groups.canonical.json"
+            jq -e '
+              (.aliasSourceGroups | type == "array") and
+              (.aliasMutationCount | type == "number" and floor == . and . > 0 and . <= 50000) and
+              (.aliasSourceGroupCount | type == "number" and floor == . and . >= 0 and . <= 64) and
+              (.aliasSourceGroupCount == (.aliasSourceGroups | length)) and
+              (.aliasSourceGroupsSha256 | type == "string" and test("^[0-9a-f]{64}$")) and
+              all(.aliasSourceGroups[];
+                type == "object" and
+                ((keys | sort) == ["count","originalGroupKey","originalSourceDetailKey","rangeId","replacementGroupKey","replacementSourceDetailKey"]) and
+                (.rangeId == "all" or .rangeId == "7d") and
+                (.originalGroupKey | type == "string" and length > 0) and
+                (.replacementGroupKey | type == "string" and length > 0) and
+                (.originalSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
+                (.replacementSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
+                (.originalSourceDetailKey != .replacementSourceDetailKey) and
+                (.count | type == "number" and floor == . and . > 0)
+              ) and
+              (([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | length) ==
+                ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length)) and
+              (([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | length) ==
+                ([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | unique | length))
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED alias-source-groups-schema"; exit 78;
+            }
+            jq -cS '.aliasSourceGroups' "$MANIFEST_INPUT" > "$alias_groups_canonical"
+            alias_groups_sha256="$(shasum -a 256 "$alias_groups_canonical" | awk '{print $1}')"
+            test "$alias_groups_sha256" = "$(jq -r '.aliasSourceGroupsSha256' "$MANIFEST_INPUT")" || {
+              echo "PG_INCREMENT_BLOCKED alias-source-groups-sha256-mismatch"; exit 78;
+            }
+            # Keep the expected source deltas separate from aliasMutationCount:
+            # legacy rows deliberately project into both all and 7d ranges.
+            alias_expected_projection_count="$(jq -er '[.aliasSourceGroups[].count] | add' "$MANIFEST_INPUT")"
+            test "$alias_expected_projection_count" -gt 0 || {
+              echo "PG_INCREMENT_BLOCKED alias-source-groups-empty"; exit 78;
+            }
+            # Versioned compact tuples are required for the dynamic API ledger.
+            # The current producer does not include them, so it must fail closed
+            # rather than make candidate checks against the public active API.
+            jq -e '
+              (.aliasSourceReview | type == "object") and
+              (.aliasSourceReview.schemaVersion == 1) and
+              (.aliasSourceReview.selectedIdentityCount | type == "number" and floor == . and . > 0 and . <= 50000) and
+              (.aliasSourceReview.selectedIdentities | type == "array" and length > 0) and
+              (.aliasSourceReview.selectedIdentityCount == (.aliasSourceReview.selectedIdentities | length)) and
+              (.aliasSourceReview.selectedIdentitiesSha256 | type == "string" and test("^[0-9a-f]{64}$")) and
+              (.aliasSourceReview.selectedIdentities == ([.aliasSourceReview.selectedIdentities[] | .] | sort_by([
+                if .rangeId == "all" then 0 else 1 end,
+                .originalGroupKey,.originalSourceDetailKey,.replacementGroupKey,.replacementSourceDetailKey,.videoId,.occurrenceId
+              ]))) and
+              all(.aliasSourceReview.selectedIdentities[];
+                type == "object" and
+                ((keys | sort) == ["occurrenceId","originalArtist","originalGroupKey","originalSourceDetailKey","originalTitle","rangeId","replacementArtist","replacementGroupKey","replacementSourceDetailKey","replacementTitle","seconds","sourceId","storedRangeId","videoId"]) and
+                (.rangeId == "all" or .rangeId == "7d") and
+                (.videoId | type == "string" and length > 0) and
+                (.occurrenceId | type == "string" and length > 0) and
+                (.sourceId | type == "string") and
+                (.seconds | type == "number" and floor == . and . >= 0) and
+                (.storedRangeId | type == "string" and (. == "" or . == "all" or . == "7d")) and
+                ((.storedRangeId == "") or (.storedRangeId == .rangeId)) and
+                (.originalTitle | type == "string" and length > 0) and
+                (.originalArtist | type == "string" and length > 0) and
+                (.replacementTitle | type == "string" and length > 0) and
+                (.replacementArtist | type == "string" and length > 0) and
+                (.originalGroupKey | type == "string" and length > 0) and
+                (.replacementGroupKey | type == "string" and length > 0) and
+                (.originalSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
+                (.replacementSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$"))
+              )
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED alias-source-review-contract-missing"; exit 78;
+            }
+            alias_review_canonical="$TASK_ROOT/alias-source-review.canonical.json"
+            jq -cS '.aliasSourceReview.selectedIdentities' "$MANIFEST_INPUT" > "$alias_review_canonical"
+            alias_review_sha256="$(shasum -a 256 "$alias_review_canonical" | awk '{print $1}')"
+            test "$alias_review_sha256" = "$(jq -r '.aliasSourceReview.selectedIdentitiesSha256' "$MANIFEST_INPUT")" || {
+              echo "PG_INCREMENT_BLOCKED alias-source-review-sha256-mismatch"; exit 78;
+            }
+            jq -e '
+              (.aliasSourceReview.selectedIdentities | length) == ([.aliasSourceGroups[].count] | add) and
+              (([.aliasSourceReview.selectedIdentities[] | [.rangeId,.originalSourceDetailKey,.replacementSourceDetailKey,.videoId,.occurrenceId] | @json] | length) ==
+                ([.aliasSourceReview.selectedIdentities[] | [.rangeId,.originalSourceDetailKey,.replacementSourceDetailKey,.videoId,.occurrenceId] | @json] | unique | length))
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED alias-source-review-tuples-mismatch"; exit 78;
+            }
+            jq -e '
+              .aliasSourceReview.selectedIdentities as $tuples |
+              ([ $tuples[] | [.videoId,.occurrenceId,.storedRangeId] | @json ] | unique) as $physical |
+              ($physical | length) > 0 and
+              all($tuples[] | select(.storedRangeId == ""); . as $physical |
+                ([ $tuples[] | select(.videoId == $physical.videoId and .occurrenceId == $physical.occurrenceId and .storedRangeId == "") | .rangeId ] | sort) == ["7d","all"]
+              )
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED alias-source-legacy-projection-mismatch"; exit 78;
+            }
+            jq -e '
+              .aliasSourceGroups as $groups |
+              .aliasSourceReview.selectedIdentities as $tuples |
+              all($tuples[]; . as $tuple | any($groups[];
+                .rangeId == $tuple.rangeId and
+                .originalGroupKey == $tuple.originalGroupKey and
+                .originalSourceDetailKey == $tuple.originalSourceDetailKey and
+                .replacementGroupKey == $tuple.replacementGroupKey and
+                .replacementSourceDetailKey == $tuple.replacementSourceDetailKey
+              )) and
+              all($groups[]; . as $group |
+                ([$tuples[] | select(
+                  .rangeId == $group.rangeId and
+                  .originalGroupKey == $group.originalGroupKey and
+                  .originalSourceDetailKey == $group.originalSourceDetailKey and
+                  .replacementGroupKey == $group.replacementGroupKey and
+                  .replacementSourceDetailKey == $group.replacementSourceDetailKey
+                )] | length) == $group.count)
+            ' "$MANIFEST_INPUT" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED alias-source-review-group-ledger-mismatch"; exit 78;
+            }
+            echo "PG_INCREMENT_ALIAS_SOURCE_MANIFEST_OK groups=$(jq -r '.aliasSourceGroupCount' "$MANIFEST_INPUT") projectedOccurrences=$alias_expected_projection_count"
+            cat > "$INPUT_ROOT/verify-alias-source-ledger.py" <<'PY'
+          import argparse, json, shlex, subprocess, urllib.parse, urllib.request
+
+          MAX_PAGES = 1000
+
+          def die(message):
+              raise RuntimeError("PG_INCREMENT_BLOCKED alias-source-" + message)
+
+          def get_json(url, remote):
+              if remote:
+                  command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=no", remote, "curl --fail-with-body --max-time 30 " + shlex.quote(url)]
+                  result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+                  if result.returncode:
+                      die("http phase=remote detail=" + result.stderr.strip())
+                  raw = result.stdout
+              else:
+                  try:
+                      with urllib.request.urlopen(url, timeout=30) as response:
+                          if response.status != 200: die("http-status=" + str(response.status))
+                          raw = response.read().decode("utf-8")
+                  except Exception as exc:
+                      die("http phase=public detail=" + str(exc))
+              try:
+                  return json.loads(raw)
+              except json.JSONDecodeError as exc:
+                  die("invalid-json detail=" + str(exc))
+
+          def source_pages(base, key, remote, group=None):
+              key_path = urllib.parse.quote(key, safe="")
+              pages, page, page_count = [], 1, None
+              while page_count is None or page <= page_count:
+                  if page > MAX_PAGES: die("source-page-cap key=" + key)
+                  payload = get_json(base + "/api/sources/" + key_path + "?page=" + str(page) + "&pageSize=100", remote)
+                  if payload.get("found") is False:
+                      if page != 1: die("source-found-flapped key=" + key)
+                      return None, []
+                  if payload.get("found") is not True or payload.get("sourceKey") != key:
+                      die("source-identity key=" + key)
+                  record = payload.get("record")
+                  if not isinstance(record, dict) or record.get("sourceDetailKey") != key:
+                      die("source-detail-key key=" + key)
+                  if record.get("count") != payload.get("totalOccurrenceCount"):
+                      die("source-record-count key=" + key)
+                  if record.get("timestampCount") != payload.get("totalOccurrenceCount"):
+                      die("source-timestamp-count key=" + key)
+                  if group and group.get("_original") and (record.get("key") != group["originalGroupKey"] or record.get("title") != group["originalTitle"] or record.get("displayArtist") != group["originalArtist"]):
+                      die("source-record-identity key=" + key)
+                  if group and not group.get("_original") and (record.get("key") != group["replacementGroupKey"] or record.get("title") != group["replacementTitle"] or record.get("displayArtist") != group["replacementArtist"] or record.get("sourceDetailPath") != ""):
+                      die("source-record-identity key=" + key)
+                  candidate_pages = payload.get("pageCount")
+                  if not isinstance(candidate_pages, int) or candidate_pages < 1 or candidate_pages > MAX_PAGES or payload.get("page") != page:
+                      die("source-pagination key=" + key)
+                  if page_count is None: page_count = candidate_pages
+                  elif page_count != candidate_pages: die("source-page-count-flapped key=" + key)
+                  pages.append(payload)
+                  page += 1
+              total = pages[0].get("totalOccurrenceCount")
+              if not isinstance(total, int) or total < 0:
+                  die("source-total key=" + key)
+              if any(item.get("totalOccurrenceCount") != total for item in pages):
+                  die("source-total-flapped key=" + key)
+              occurrences = [item for payload in pages for item in payload["record"].get("occurrences", [])]
+              if not all(isinstance(item, dict) for item in occurrences): die("source-occurrence-shape key=" + key)
+              if len(occurrences) != total:
+                  die("source-pagination-total key=" + key)
+              if any("curationProvenance" in item or "curationAction" in item or isinstance(item.get("song"), dict) and ("curationProvenance" in item["song"] or "curationAction" in item["song"]) for item in occurrences):
+                  die("curation-provenance key=" + key)
+              return total, occurrences
+
+          def song(item):
+              return item.get("song") if isinstance(item.get("song"), dict) else item
+
+          def exact_card(base, group, old, expected, remote):
+              title = group["originalTitle"] if old else group["replacementTitle"]
+              artist = group["originalArtist"] if old else group["replacementArtist"]
+              source_key = group["originalSourceDetailKey"] if old else group["replacementSourceDetailKey"]
+              query = urllib.parse.urlencode({"range": group["rangeId"], "view": "songs", "metric": "occurrences", "pageSize": 100, "q": title, "searchFields": "title"})
+              page, page_count, cards = 1, None, []
+              while page_count is None or page <= page_count:
+                  payload = get_json(base + "/api/rankings?" + query + "&page=" + str(page), remote)
+                  if payload.get("page") != page or not isinstance(payload.get("pageCount"), int) or payload["pageCount"] < 1 or payload["pageCount"] > MAX_PAGES:
+                      die("rankings-pagination key=" + source_key)
+                  page_count = payload["pageCount"] if page_count is None else page_count
+                  if payload["pageCount"] != page_count: die("rankings-page-count-flapped key=" + source_key)
+                  cards.extend(payload.get("records", [])); page += 1
+              group_key = group["originalGroupKey"] if old else group["replacementGroupKey"]
+              matches = [card for card in cards if isinstance(card, dict) and card.get("title") == title and card.get("displayArtist") == artist and card.get("key") == group_key]
+              if old:
+                  if matches: die("old-card-present key=" + source_key)
+                  return
+              if len(matches) != 1 or matches[0].get("sourceDetailKey") != source_key or matches[0].get("sourceDetailPath") != "":
+                  die("replacement-card key=" + source_key)
+              count = matches[0].get("count", matches[0].get("totalOccurrenceCount"))
+              if count != expected: die("replacement-card-count key=" + source_key)
+
+          def verify_tuples(group, occurrences):
+              for tuple_ in group["tuples"]:
+                  matches = [row for row in occurrences if isinstance(row.get("item"), dict) and isinstance(row.get("song"), dict) and row.get("videoId") == tuple_["videoId"] and row.get("seconds") == tuple_["seconds"] and row["item"].get("videoId") == tuple_["videoId"] and row["song"].get("title") == tuple_["replacementTitle"] and row["song"].get("artist") == tuple_["replacementArtist"] and row["song"].get("seconds") == tuple_["seconds"] and (not isinstance(row.get("video"), dict) or row["video"].get("videoId") == tuple_["videoId"]) and row["item"].get("channelId") == row.get("channelId") and row["item"].get("channelHandle") == row.get("channelHandle") and row["item"].get("channelUrl") == row.get("channelUrl")]
+                  if len(matches) != 1: die("replacement-tuple video=" + tuple_["videoId"])
+
+          def sql(value):
+              return "'" + str(value).replace("'", "''") + "'"
+
+          def verify_candidate_pg(tuples, revision, remote, expected_physical):
+              physical = {}
+              for row in tuples:
+                  key = (row["videoId"], row["occurrenceId"], row["storedRangeId"])
+                  comparable = {name: value for name, value in row.items() if name not in {"rangeId", "originalSourceDetailKey", "replacementSourceDetailKey"}}
+                  if key in physical and physical[key] != comparable:
+                      die("physical-projection-conflict occurrence=" + row["occurrenceId"])
+                  physical[key] = comparable
+              for key, row in physical.items():
+                  if key[2] == "":
+                      projections = sorted(item["rangeId"] for item in tuples if (item["videoId"], item["occurrenceId"], item["storedRangeId"]) == key)
+                      if projections != ["7d", "all"]: die("legacy-projection-pair occurrence=" + key[1])
+              if len(physical) != expected_physical: die("pg-physical-count expected=" + str(expected_physical) + " actual=" + str(len(physical)))
+              contract = json.dumps({"aliasSourceReview": {"selectedIdentities": tuples}}, ensure_ascii=False, separators=(",", ":"))
+              script = "SET statement_timeout='45s';\nWITH doc AS (SELECT " + sql(contract) + "::jsonb AS payload),\n" + r'''
+          tuples AS (
+            SELECT * FROM doc, jsonb_to_recordset(payload->'aliasSourceReview'->'selectedIdentities') AS t(
+              "rangeId" text,"storedRangeId" text,"videoId" text,"occurrenceId" text,"sourceId" text,"seconds" integer,
+              "originalTitle" text,"originalArtist" text,"replacementTitle" text,"replacementArtist" text,
+              "originalGroupKey" text,"originalSourceDetailKey" text,"replacementGroupKey" text,"replacementSourceDetailKey" text)
+          ), physical AS (
+            SELECT DISTINCT ON ("videoId","occurrenceId","storedRangeId") * FROM tuples
+            ORDER BY "videoId","occurrenceId","storedRangeId","rangeId"
+          ), joined AS (
+            SELECT p.*, r.entity_key FROM physical p LEFT JOIN migration_runtime_rows r ON
+              r.revision_id=''' + sql(revision) + r''' AND r.entity_type='occurrences' AND r.tombstone=false AND
+              r.occurrence_id=p."occurrenceId" AND coalesce(r.source_id,'')=p."sourceId" AND
+              coalesce(r.range_id,'')=p."storedRangeId" AND r.payload_json->>'videoId'=p."videoId" AND
+              (r.payload_json->>'seconds')::integer=p."seconds" AND r.payload_json->>'title'=p."replacementTitle" AND r.payload_json->>'artist'=p."replacementArtist" AND
+              coalesce(r.payload_json->'originalIdentity'->>'videoId','')=p."videoId" AND
+              coalesce(r.payload_json->'originalIdentity'->>'occurrenceId','')=p."occurrenceId" AND
+              coalesce(r.payload_json->'originalIdentity'->>'sourceId','')=p."sourceId" AND
+              coalesce(r.payload_json->'originalIdentity'->>'rangeId','')=p."storedRangeId" AND
+              coalesce(r.payload_json->'originalIdentity'->>'title','')=p."originalTitle" AND
+              coalesce(r.payload_json->'originalIdentity'->>'artist','')=p."originalArtist"
+          ) SELECT (SELECT count(*) FROM physical) || '|' || (SELECT count(*) FROM joined WHERE entity_key IS NULL) || '|' || (SELECT count(*) FROM joined) ;'''
+              command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=no", remote, "sudo -u www-data psql -d song_rank -v ON_ERROR_STOP=1 -At"]
+              result = subprocess.run(command, input=script, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+              expected = str(expected_physical) + "|0|" + str(expected_physical)
+              if result.returncode or result.stdout.strip().splitlines()[-1:] != [expected]: die("pg-batch-tuple-mismatch expected=" + expected)
+
+          parser = argparse.ArgumentParser(); parser.add_argument("--manifest", required=True); parser.add_argument("--phase", choices=("candidate", "public"), required=True); parser.add_argument("--ledger", required=True); parser.add_argument("--remote", default=""); parser.add_argument("--candidate-revision", default=""); parser.add_argument("--test-fixture", action="store_true"); parser.add_argument("--parent-base", default="http://127.0.0.1:8765"); parser.add_argument("--candidate-base", default="http://127.0.0.1:18766"); parser.add_argument("--public-base", default="https://ytb-song-rank.culua.com")
+          args = parser.parse_args(); manifest = json.load(open(args.manifest, encoding="utf-8"))
+          groups = manifest["aliasSourceGroups"]; tuples = manifest["aliasSourceReview"]["selectedIdentities"]
+          bundle = []
+          for group in groups:
+              group = dict(group); group["tuples"] = [row for row in tuples if all(row[name] == group[name] for name in ("rangeId", "originalGroupKey", "originalSourceDetailKey", "replacementGroupKey", "replacementSourceDetailKey"))]
+              group["originalTitle"], group["originalArtist"] = group["tuples"][0]["originalTitle"], group["tuples"][0]["originalArtist"]
+              group["replacementTitle"], group["replacementArtist"] = group["tuples"][0]["replacementTitle"], group["tuples"][0]["replacementArtist"]
+              if any((row["originalTitle"], row["originalArtist"], row["replacementTitle"], row["replacementArtist"]) != (group["originalTitle"], group["originalArtist"], group["replacementTitle"], group["replacementArtist"]) for row in group["tuples"]): die("group-title-ambiguity key=" + group["replacementSourceDetailKey"])
+              bundle.append(group)
+          if args.phase == "candidate":
+              parent, target, remote = args.parent_base, args.candidate_base, args.remote
+              if args.test_fixture:
+                  if remote or args.candidate_revision: die("fixture-pg-arguments")
+              else:
+                  if not args.candidate_revision or not remote: die("pg-candidate-arguments")
+                  verify_candidate_pg(tuples, args.candidate_revision, remote, manifest.get("aliasMutationCount"))
+              for group in bundle:
+                  original_group = dict(group); original_group["_original"] = True
+                  parent_old_total, _ = source_pages(parent, group["originalSourceDetailKey"], remote, original_group)
+                  if parent_old_total != group["count"]: die("parent-original-count key=" + group["originalSourceDetailKey"])
+                  old_total, _ = source_pages(target, group["originalSourceDetailKey"], remote)
+                  if old_total is not None: die("old-source-present key=" + group["originalSourceDetailKey"])
+                  exact_card(target, group, True, 0, remote)
+              replacements = {}
+              for group in bundle:
+                  key = (group["rangeId"], group["replacementGroupKey"], group["replacementSourceDetailKey"])
+                  if key not in replacements:
+                      replacements[key] = dict(group); replacements[key]["tuples"] = []; replacements[key]["count"] = 0
+                  replacements[key]["tuples"].extend(group["tuples"]); replacements[key]["count"] += group["count"]
+              for group in replacements.values():
+                  parent_total, _ = source_pages(parent, group["replacementSourceDetailKey"], remote, group)
+                  if parent_total is None: parent_total = 0
+                  expected = parent_total + group["count"]; actual, occurrences = source_pages(target, group["replacementSourceDetailKey"], remote, group)
+                  if actual != expected: die("replacement-source-count key=" + group["replacementSourceDetailKey"])
+                  verify_tuples(group, occurrences); exact_card(target, group, False, actual, remote)
+                  group["expectedTotal"] = expected
+              json.dump({"originals": bundle, "replacements": list(replacements.values())}, open(args.ledger, "w", encoding="utf-8"), sort_keys=True, separators=(",", ":"))
+          else:
+              ledger = json.load(open(args.ledger, encoding="utf-8")); target, remote = args.public_base, ""
+              for group in ledger["originals"]:
+                  old_total, _ = source_pages(target, group["originalSourceDetailKey"], remote)
+                  if old_total is not None: die("public-old-source-present key=" + group["originalSourceDetailKey"])
+                  exact_card(target, group, True, 0, remote)
+              for group in ledger["replacements"]:
+                  actual, occurrences = source_pages(target, group["replacementSourceDetailKey"], remote, group)
+                  if actual != group["expectedTotal"]: die("public-replacement-source-count key=" + group["replacementSourceDetailKey"])
+                  verify_tuples(group, occurrences); exact_card(target, group, False, actual, remote)
+          print("PG_INCREMENT_ALIAS_SOURCE_LEDGER_OK phase=" + args.phase + " groups=" + str(len(bundle)))
+          PY
+            alias_ledger="$TASK_ROOT/alias-source-ledger.json"
+            python3 "$INPUT_ROOT/verify-alias-source-ledger.py" --manifest "$MANIFEST_INPUT" --phase candidate --ledger "$alias_ledger" --remote "$VPS2_USER@$VPS2_HOST" --candidate-revision "$REVISION" || exit 78
+          fi
           candidate_source_key=""
           candidate_source_path=""
           candidate_source_paths=""
@@ -1349,6 +1671,9 @@ jobs:
             ' "$TASK_ROOT/public-meta.json" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED public-meta-gate revision=$REVISION"; exit 78;
             }
+            if [ "$ALIAS_SOURCE_GATE" = 1 ]; then
+              python3 "$INPUT_ROOT/verify-alias-source-ledger.py" --manifest "$MANIFEST_INPUT" --phase public --ledger "$alias_ledger" || exit 78
+            fi
             if [ -s "$source_identity_probes" ]; then
               probe_index=0
               while IFS= read -r probe_identity; do

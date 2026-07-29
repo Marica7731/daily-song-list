@@ -33,6 +33,182 @@ def norm(value: Any) -> str:
     return " ".join(unicodedata.normalize("NFKC", text(value)).casefold().split())
 
 
+def derived_song_key(title: Any, artist: Any) -> str:
+    return hashlib.sha256(f"song\0{norm(title)}\0{norm(artist)}".encode("utf-8")).hexdigest()[:24]
+
+
+def public_song_group_key(title: Any, artist: Any) -> str:
+    return f"{norm(title)}::{norm(artist)}"
+
+
+def production_source_detail_key(range_id: str, prefix: str, group_key: str) -> str:
+    """Byte-for-byte request key used by export-runtime-rankings.js."""
+
+    return hashlib.sha256(
+        f"{range_id}:{prefix}:all:{group_key}".encode("utf-8")
+    ).hexdigest()[:16]
+
+
+IDENTITY_FIELDS = (
+    "rangeId",
+    "videoId",
+    "occurrenceId",
+    "seconds",
+    "sourceId",
+    "storedRangeId",
+    "originalGroupKey",
+    "originalSourceDetailKey",
+    "replacementGroupKey",
+    "replacementSourceDetailKey",
+    "originalTitle",
+    "originalArtist",
+    "replacementTitle",
+    "replacementArtist",
+)
+
+
+def canonical_json_bytes(value: Any) -> bytes:
+    """Match ``jq -cS``: sorted keys, compact JSON, UTF-8, trailing newline."""
+
+    return (json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n").encode("utf-8")
+
+
+def identity_sort_key(identity: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        {"all": 0, "7d": 1}.get(text(identity.get("rangeId")), 2),
+        text(identity.get("originalGroupKey")),
+        text(identity.get("originalSourceDetailKey")),
+        text(identity.get("replacementGroupKey")),
+        text(identity.get("replacementSourceDetailKey")),
+        text(identity.get("videoId")),
+        text(identity.get("occurrenceId")),
+    )
+
+
+def alias_selected_identities(current: dict[str, Any], replacement: dict[str, Any]) -> list[dict[str, Any]]:
+    """Create deterministic range/source audit rows for an accepted alias."""
+
+    stored_range = text(current.get("rangeId"))
+    if stored_range and stored_range not in {"all", "7d"}:
+        raise ValueError(f"alias occurrence has unsupported rangeId: {stored_range}")
+    ranges = (stored_range,) if stored_range else ("all", "7d")
+    original_key = public_song_group_key(current.get("title"), current.get("artist"))
+    replacement_key = public_song_group_key(replacement.get("title"), replacement.get("artist"))
+    result = []
+    for range_id in ranges:
+        result.append({
+            "videoId": text(current.get("videoId")),
+            "occurrenceId": text(current.get("occurrenceId")),
+            "rangeId": range_id,
+            "seconds": current.get("seconds"),
+            "sourceId": text(current.get("sourceId")),
+            "storedRangeId": stored_range,
+            "originalTitle": text(current.get("title")),
+            "originalArtist": text(current.get("artist")),
+            "originalGroupKey": original_key,
+            "originalSourceDetailKey": production_source_detail_key(range_id, "song", original_key),
+            "replacementTitle": text(replacement.get("title")),
+            "replacementArtist": text(replacement.get("artist")),
+            "replacementGroupKey": replacement_key,
+            "replacementSourceDetailKey": production_source_detail_key(range_id, "song", replacement_key),
+        })
+    return result
+
+
+def validated_alias_source_review(identities: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return the canonical identity ledger and its exact source-group rollup.
+
+    This is intentionally stricter than the producer's mutation accounting:
+    a legacy row produces two reviewed range projections but remains one physical
+    alias mutation.  The deploy gate verifies the same tuple key and canonical
+    bytes before it issues any source-detail request.
+    """
+
+    if len(identities) > 50000:
+        raise ValueError("alias source review exceeds selected identity cap (50000)")
+    selected: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    physical: dict[tuple[str, str, str], tuple[Any, ...]] = {}
+    physical_ranges: dict[tuple[str, str, str], set[str]] = {}
+    physical_projection_counts: dict[tuple[str, str, str], int] = {}
+    for raw in identities:
+        if not isinstance(raw, dict):
+            raise ValueError("alias source review identity must be an object")
+        if set(raw) != set(IDENTITY_FIELDS):
+            raise ValueError("alias source review identity has missing or unexpected fields")
+        identity = {field: text(raw.get(field)) for field in IDENTITY_FIELDS if field != "seconds"}
+        seconds = raw.get("seconds")
+        if isinstance(seconds, bool) or not isinstance(seconds, int) or seconds < 0:
+            raise ValueError("alias source review identity has invalid seconds")
+        identity["seconds"] = seconds
+        if identity["rangeId"] not in {"all", "7d"}:
+            raise ValueError("alias source review identity has invalid rangeId")
+        required_text = set(IDENTITY_FIELDS) - {"seconds", "sourceId", "storedRangeId"}
+        if any(not identity[field] for field in required_text):
+            raise ValueError("alias source review identity has blank required field")
+        if identity["storedRangeId"] not in {"", "all", "7d"}:
+            raise ValueError("alias source review identity has invalid storedRangeId")
+        if identity["storedRangeId"] and identity["storedRangeId"] != identity["rangeId"]:
+            raise ValueError("alias source review identity range projection conflicts with storedRangeId")
+        for field in ("originalSourceDetailKey", "replacementSourceDetailKey"):
+            if len(identity[field]) != 16 or any(char not in "0123456789abcdef" for char in identity[field]):
+                raise ValueError(f"alias source review identity has invalid {field}")
+        if identity["originalSourceDetailKey"] == identity["replacementSourceDetailKey"]:
+            raise ValueError("alias source review identity has identical source detail keys")
+        tuple_key = (
+            identity["rangeId"], identity["originalSourceDetailKey"], identity["replacementSourceDetailKey"],
+            identity["videoId"], identity["occurrenceId"],
+        )
+        if tuple_key in seen:
+            raise ValueError("alias source review has duplicate identity tuple")
+        seen.add(tuple_key)
+        physical_key = (identity["videoId"], identity["occurrenceId"], identity["storedRangeId"])
+        physical_value = (
+            identity["sourceId"], identity["seconds"],
+            identity["originalTitle"], identity["originalArtist"],
+            identity["replacementTitle"], identity["replacementArtist"],
+            identity["originalGroupKey"], identity["replacementGroupKey"],
+        )
+        if physical_key in physical and physical[physical_key] != physical_value:
+            raise ValueError("alias source review has conflicting identity projection")
+        physical[physical_key] = physical_value
+        physical_ranges.setdefault(physical_key, set()).add(identity["rangeId"])
+        physical_projection_counts[physical_key] = physical_projection_counts.get(physical_key, 0) + 1
+        selected.append(identity)
+    for physical_key, ranges in physical_ranges.items():
+        stored_range = physical_key[2]
+        expected_ranges = {stored_range} if stored_range else {"all", "7d"}
+        expected_count = 1 if stored_range else 2
+        if ranges != expected_ranges or physical_projection_counts[physical_key] != expected_count:
+            raise ValueError("alias source review has incomplete or duplicate legacy physical projections")
+    selected.sort(key=identity_sort_key)
+
+    group_counts: dict[tuple[str, str, str, str, str], int] = {}
+    for identity in selected:
+        group_key = (
+            identity["rangeId"], identity["originalGroupKey"], identity["originalSourceDetailKey"],
+            identity["replacementGroupKey"], identity["replacementSourceDetailKey"],
+        )
+        group_counts[group_key] = group_counts.get(group_key, 0) + 1
+    groups = [
+        {
+            "rangeId": range_id,
+            "originalGroupKey": original_group_key,
+            "originalSourceDetailKey": original_source_key,
+            "replacementGroupKey": replacement_group_key,
+            "replacementSourceDetailKey": replacement_source_key,
+            "count": count,
+        }
+        for (range_id, original_group_key, original_source_key, replacement_group_key, replacement_source_key), count
+        in sorted(group_counts.items())
+    ]
+    if len(groups) > 64:
+        raise ValueError("alias source review exceeds source group cap (64)")
+    if sum(group["count"] for group in groups) != len(selected):
+        raise ValueError("alias source review group aggregate is invalid")
+    return selected, groups
+
+
 def first(mapping: dict[str, Any], *keys: str) -> Any:
     for key in keys:
         if key in mapping:
@@ -97,21 +273,16 @@ def candidate_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]], act
     candidates = [row for row in rows if row.get("seconds") == seconds]
 
     expected_raw = text(override.get("rawHash"))
-    with_raw = [row for row in candidates if text(row.get("rawHash"))]
-    if expected_raw and with_raw:
+    if expected_raw:
         candidates = [row for row in candidates if text(row.get("rawHash")) == expected_raw]
 
     expected_source_hash = text(override.get("sourceHash"))
-    with_source_hash = [row for row in candidates if text(row.get("sourceHash"))]
-    if expected_source_hash and with_source_hash:
+    if expected_source_hash:
         candidates = [row for row in candidates if text(row.get("sourceHash")) == expected_source_hash]
 
     expected_source = text(override.get("sourceId"))
-    with_source = [row for row in candidates if text(row.get("sourceId"))]
-    if expected_source and with_source:
-        source_matches = [row for row in candidates if text(row.get("sourceId")) == expected_source]
-        if source_matches:
-            candidates = source_matches
+    if expected_source:
+        candidates = [row for row in candidates if text(row.get("sourceId")) == expected_source]
 
     # drop_entry carries the original title and artist.  replace_entry does
     # not always carry them, so it must remain unique after the identity pass.
@@ -191,6 +362,7 @@ def runtime_row(
     identity = original_identity(current)
     if replacement:
         payload.update(replacement)
+        payload["songKey"] = derived_song_key(payload.get("title"), payload.get("artist"))
     payload.update({
         "videoId": text(current["videoId"]),
         "occurrenceId": occurrence_id,
@@ -258,9 +430,13 @@ def scope_matches(assertion: dict[str, Any], row: dict[str, Any]) -> bool:
     prefixes = assertion.get("startsWith", {})
     if not isinstance(exact, dict) or not isinstance(prefixes, dict):
         raise ValueError("safety assertion equals/startsWith must be objects")
+    def scope_norm(key: str, value: Any) -> str:
+        result = norm(value)
+        return result.lstrip("/") if key == "channelHandle" else result
+
     return (
-        all(norm(row.get(key)) == norm(value) for key, value in exact.items())
-        and all(norm(row.get(key)).startswith(norm(value)) for key, value in prefixes.items())
+        all(scope_norm(key, row.get(key)) == scope_norm(key, value) for key, value in exact.items())
+        and all(scope_norm(key, row.get(key)).startswith(scope_norm(key, value)) for key, value in prefixes.items())
     )
 
 
@@ -288,6 +464,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     }
     selector_mutations = 0
     alias_mutations = 0
+    alias_identities: list[dict[str, Any]] = []
 
     for index, raw_override in enumerate(rules["records"]):
         if not isinstance(raw_override, dict):
@@ -384,6 +561,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             })
             continue
         replacement = {"title": text(raw_rule.get("canonicalTitle")), "artist": text(raw_rule.get("artist"))}
+        rule_identities: list[dict[str, Any]] = []
         for current in candidates:
             override = {
                 **raw_rule,
@@ -397,6 +575,9 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             }
             mutations.append(runtime_row(override, current, False, replacement, context))
             alias_mutations += 1
+            selected = alias_selected_identities(current, replacement)
+            rule_identities.extend(selected)
+            alias_identities.extend(selected)
         audit.append({
             "index": index,
             "kind": "artist_scoped_alias",
@@ -407,6 +588,10 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             "matchCount": len(candidates),
             "expectedMatchCount": expected,
             "occurrenceIds": [row["occurrenceId"] for row in candidates],
+            "selectedIdentities": sorted(
+                rule_identities,
+                key=lambda item: (item["rangeId"], item["originalGroupKey"], item["videoId"], item["occurrenceId"]),
+            ),
             "reason": text(raw_rule.get("reason")),
         })
 
@@ -421,18 +606,25 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             continue
         try:
             expected = expected_count(assertion, "expectedMutationCount")
+            expected_scope = expected_count(assertion, "expectedScopeCount")
             scope_count = sum(1 for row in snapshot_rows if scope_matches(assertion, row))
             mutation_count = sum(1 for row in mutated_identities if scope_matches(assertion, row))
         except ValueError as exc:
             audit.append({"index": index, "kind": "safety_assertion", "assertionId": assertion.get("assertionId"), "status": "invalid", "error": str(exc)})
             continue
-        status = "accepted" if expected is None or mutation_count == expected else "safety_violation"
+        if expected_scope is not None and scope_count != expected_scope:
+            status = "scope_count_mismatch"
+        elif expected is not None and mutation_count != expected:
+            status = "safety_violation"
+        else:
+            status = "accepted"
         audit.append({
             "index": index,
             "kind": "safety_assertion",
             "assertionId": assertion.get("assertionId"),
             "status": status,
             "scopeRowCount": scope_count,
+            "expectedScopeCount": expected_scope,
             "mutationCount": mutation_count,
             "expectedMutationCount": expected,
             "auditedLegacyRuleCount": assertion.get("auditedLegacyRuleCount"),
@@ -441,6 +633,15 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     counts: dict[str, int] = {}
     for item in audit:
         counts[item["status"]] = counts.get(item["status"], 0) + 1
+    selected_identities, alias_source_groups = validated_alias_source_review(alias_identities)
+    selected_physical_identities = {
+        (identity["videoId"], identity["occurrenceId"], identity["storedRangeId"])
+        for identity in selected_identities
+    }
+    if alias_mutations != len(selected_physical_identities):
+        raise ValueError("alias mutation count does not equal reviewed physical identity count")
+    alias_source_groups_bytes = canonical_json_bytes(alias_source_groups)
+    selected_identities_bytes = canonical_json_bytes(selected_identities)
     review = {
         "schemaVersion": 1,
         "generatedAt": generated_at,
@@ -462,6 +663,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             "count_mismatch",
             "alias_count_mismatch",
             "safety_violation",
+            "scope_count_mismatch",
         )) else "needs_review",
         "generatedAt": generated_at,
         "rangeId": "all",
@@ -482,6 +684,21 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "reviewSha256": sha256_bytes(review_path.read_bytes()),
         "sourceManifestSha256": sha256_bytes((sha256_bytes(rules_raw) + snapshot_sha).encode("ascii")),
     }
+    if selected_identities:
+        # This review ledger deliberately remains in the producer artifact and
+        # never enters a public API payload.  It records range projections, not
+        # database mutations, so a legacy all+7d row still has one mutation.
+        manifest.update({
+            "aliasSourceGroups": alias_source_groups,
+            "aliasSourceGroupCount": len(alias_source_groups),
+            "aliasSourceGroupsSha256": sha256_bytes(alias_source_groups_bytes),
+            "aliasSourceReview": {
+                "schemaVersion": 1,
+                "selectedIdentityCount": len(selected_identities),
+                "selectedIdentitiesSha256": sha256_bytes(selected_identities_bytes),
+                "selectedIdentities": selected_identities,
+            },
+        })
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return manifest
 
