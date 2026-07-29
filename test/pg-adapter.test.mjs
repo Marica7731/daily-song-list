@@ -278,6 +278,87 @@ reset_ten_result = execute(
 )
 assert reset_ten_result["records"] == []
 
+# Some legacy parent video projections retain the immutable video id but no
+# channel tuple at all.  A selected accepted reset for that *same* video is
+# still immutable evidence; use it only after exact video-id validation.
+parent_without_channel = video("old-target", "UCOLD")
+for field in ("channel_id", "channel_name", "channel_handle", "channel_url"):
+    parent_without_channel[field] = ""
+parent_without_channel["payload_json"] = {"videoId": "old-target"}
+accepted_same_video = video("old-target", "UCOLD")
+accepted_reset_identity = execute(
+    [base("UCOLD", 1)], [parent_without_channel], [occurrence("old-target", "target")],
+    resets={"old-target": {**accepted_same_video, "tombstone": True}},
+    reset_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target",
+                    "acceptedVideoReset": True}],
+)
+assert accepted_reset_identity["records"] == []
+
+def expect_accepted_reset_rejection(label, change, candidates):
+    try:
+        module._accepted_reset_identity_evidence(change, candidates)
+        raise AssertionError(label + " was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+
+expect_accepted_reset_rejection(
+    "duplicate accepted reset identity", {"videoId": "old-target"},
+    [accepted_same_video, accepted_same_video],
+)
+accepted_channel_conflict = dict(accepted_same_video)
+accepted_channel_conflict["payload_json"] = {"videoId": "old-target", "channelId": "UCOTHER"}
+expect_accepted_reset_rejection(
+    "accepted scalar/payload channel conflict", {"videoId": "old-target"},
+    [accepted_channel_conflict],
+)
+accepted_handle_conflict = dict(accepted_same_video)
+accepted_handle_conflict["payload_json"] = {
+    "videoId": "old-target", "channelId": "UCOLD", "channelHandle": "@other"
+}
+expect_accepted_reset_rejection(
+    "accepted scalar/payload handle conflict", {"videoId": "old-target"},
+    [accepted_handle_conflict],
+)
+accepted_url_pollution = dict(accepted_same_video)
+accepted_url_pollution["channel_url"] = "https://www.youtube.com/channel/UCOTHER"
+accepted_url_pollution["payload_json"] = {
+    "videoId": "old-target", "channelId": "UCOLD",
+    "channelHandle": "@ucold", "channelUrl": "https://www.youtube.com/channel/UCOTHER",
+}
+canonical_evidence = module._accepted_reset_identity_evidence(
+    {"videoId": "old-target"}, [accepted_url_pollution],
+)
+assert canonical_evidence["channel_url"] == "https://www.youtube.com/@ucold"
+assert "UCOTHER" not in repr(canonical_evidence)
+
+# URL-only legacy pollution is discarded instead of selecting a channel.  The
+# public card and both occurrence aliases must expose the same canonical tuple.
+polluted_candidate = candidate("old-target", "target", "UCOLD", "target")
+polluted_candidate["video_payload_json"].update({
+    "channelHandle": "@ucold", "channelUrl": "https://www.youtube.com/channel/UCOTHER",
+})
+canonical_public = execute(
+    [base("UCOLD", 1)], [parent_without_channel], [occurrence("old-target", "target")],
+    candidates=[polluted_candidate],
+    resets={"old-target": {**accepted_url_pollution, "tombstone": False}},
+    reset_changes=[{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target",
+                    "acceptedVideoReset": True}],
+)
+card = canonical_public["records"][0]
+assert card["channelId"] == "UCOLD" and card["channelHandle"] == "ucold"
+assert card["channelUrl"] == "https://www.youtube.com/@ucold"
+assert "_canonicalChannelUrl" not in repr(card)
+for public_occurrence in card["occurrences"]:
+    for nested in (public_occurrence["item"], public_occurrence["video"]):
+        assert nested["videoId"] == "old-target"
+        assert nested["channelId"] == "UCOLD" and nested["channelHandle"] == "ucold"
+        assert nested["channelUrl"] == "https://www.youtube.com/@ucold"
+        assert "UCOTHER" not in repr(nested)
+expect_accepted_reset_rejection(
+    "accepted conflicts with existing identity", {"videoId": "old-target", "channel_id": "UCOTHER"},
+    [accepted_same_video],
+)
+
 consistent = execute(
     [base("UCOLD", 1)], [video("old-target", "UCOLD")], [occurrence("old-target", "target")],
     runtime_changes=[{"entityType": "occurrences", "videoId": "old-target", "video_id": "old-target",
