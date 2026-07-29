@@ -947,6 +947,7 @@ def _overlay_candidate_rows(
 
 def _accepted_video_resets(
     connection, revision_ids: Sequence[str], include_payload: bool = True,
+    strict_video_id: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Return the newest accepted/full video projection per overlay video.
 
@@ -979,6 +980,8 @@ def _accepted_video_resets(
     selected: dict[str, dict[str, Any]] = {}
     for row in sorted(rows, key=lambda item: priority.get(_text(item.get("revision_id")), len(priority))):
         video_id = _text(row.get("video_id"))
+        if not video_id and strict_video_id:
+            raise PostgresAdapterError("VTuber accepted video reset is missing required immutable identity")
         if video_id and video_id not in selected:
             selected[video_id] = dict(row)
     return selected
@@ -1228,6 +1231,7 @@ def _runtime_tombstones(
     revision_ids: Sequence[str],
     accepted_video_rows: Iterable[Mapping[str, Any]] | None = None,
     accepted_occurrence_rows: Iterable[Mapping[str, Any]] | None = None,
+    strict_immutable_identity: bool = False,
 ) -> list[dict[str, Any]]:
     """Resolve each runtime chain to its full-parent identity and final state."""
 
@@ -1316,6 +1320,10 @@ def _runtime_tombstones(
         if event_kind == "video":
             video_id = _text(row.get("video_id"))
             if not video_id:
+                if strict_immutable_identity:
+                    raise PostgresAdapterError(
+                        "VTuber exact overlay change is missing required immutable identity"
+                    )
                 continue
             for key in [key for key in chains if key[1] == video_id]:
                 chains.pop(key, None)
@@ -1325,6 +1333,10 @@ def _runtime_tombstones(
             video_id = _text(payload.get("videoId") or row.get("video_id"))
             identity = _text(payload.get("occurrenceId") or row.get("occurrence_id"))
             if not video_id or not identity:
+                if strict_immutable_identity:
+                    raise PostgresAdapterError(
+                        "VTuber exact overlay change is missing required immutable identity"
+                    )
                 continue
             key = ("occurrences", video_id, identity)
             chains[key] = {
@@ -1339,14 +1351,22 @@ def _runtime_tombstones(
             continue
         current_payload = _overlay_payload(row)
         original = current_payload.get("originalIdentity")
-        video_id = _text(current_payload.get("videoId"))
+        video_id = _text(current_payload.get("videoId") or row.get("video_id"))
+        occurrence_id = _text(current_payload.get("occurrenceId") or row.get("occurrence_id"))
         identity = _text(
-            current_payload.get("occurrenceId")
-            or row.get("occurrence_id")
+            occurrence_id
             or row.get("entity_key")
             or video_id
         )
-        if not identity:
+        if not video_id or not identity or (
+            strict_immutable_identity
+            and entity_type in {"occurrences", "runtime_occurrences"}
+            and not occurrence_id
+        ):
+            if strict_immutable_identity:
+                raise PostgresAdapterError(
+                    "VTuber exact overlay change is missing required immutable identity"
+                )
             continue
         key = (entity_type, video_id, identity)
         chain = chains.setdefault(key, {"root": None, "final": None, "kind": "shadowed"})
@@ -1405,7 +1425,165 @@ def _runtime_tombstones(
     return changes
 
 
-def _runtime_replacement_candidate_rows(changes: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def _thumbnail_video_id(thumbnail: str) -> str:
+    """Extract the immutable video id from a conventional YouTube thumbnail.
+
+    A replacement is allowed to carry an explicit thumbnail only when this
+    helper can bind it to one video.  In particular, an arbitrary CDN URL is
+    not evidence of video ownership just because its path happens to contain
+    an old id.
+    """
+
+    value = _text(thumbnail)
+    if not value:
+        return ""
+    path_match = re.search(r"/(?:vi|vi_webp|an_webp)/([^/?#]+)/", value, re.IGNORECASE)
+    if path_match:
+        return _text(path_match.group(1))
+    query_match = re.search(r"(?:[?&])videoId=([^&#/]+)", value, re.IGNORECASE)
+    return _text(query_match.group(1)) if query_match else ""
+
+
+def thumbnail_matches_video(thumbnail: str, video_id: str) -> bool:
+    """Return whether a supported thumbnail URL binds exactly to ``video_id``."""
+
+    return bool(video_id and _thumbnail_video_id(thumbnail) == _text(video_id))
+
+
+def _replacement_thumbnail_matches_video(thumbnail: str, video_id: str) -> bool:
+    """Backward-compatible private spelling used by older adapter callers."""
+
+    return thumbnail_matches_video(thumbnail, video_id)
+
+
+def _normalized_channel_handle(value: Any) -> str:
+    return _text(value).strip().lstrip("/@").casefold()
+
+
+def _channel_url_is_coherent(channel_url: Any, channel_id: str, handle: Any = "") -> bool:
+    """Require a retained public URL to bind to its channel id or handle."""
+
+    normalized_url = _text(channel_url).casefold()
+    normalized_handle = _normalized_channel_handle(handle)
+    return bool(normalized_url and (
+        _text(channel_id).casefold() in normalized_url
+        or (normalized_handle and normalized_handle in normalized_url)
+    ))
+
+
+def _strict_replacement_public_video(
+    change: Mapping[str, Any], replacement: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build a replacement video tuple without crossing its old public identity.
+
+    The change side identifies only the removed parent tuple.  The replacement
+    side owns every public field unless the immutable video/channel identity is
+    unchanged (or only the video changed within the same immutable channel).
+    """
+
+    old_video_id = _text(change.get("videoId") or change.get("video_id"))
+    old_channel_id = _text(change.get("channelId") or change.get("channel_id"))
+    video_id = _text(replacement.get("videoId"))
+    source = _json_object(change.get("replacementVideoPayload"))
+    if not source:
+        source = _overlay_video_projection(replacement)
+    payload_video_id = _text(source.get("videoId") or source.get("video_id"))
+    payload_channel_id = _text(source.get("channelId") or source.get("channel_id"))
+    replacement_channel_id = _text(replacement.get("channelId"))
+    if (
+        not old_video_id
+        or not old_channel_id
+        or not video_id
+        or (payload_video_id and payload_video_id != video_id)
+        or (replacement_channel_id and payload_channel_id and replacement_channel_id != payload_channel_id)
+    ):
+        raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+    channel_id = replacement_channel_id or payload_channel_id
+    if not channel_id or (old_video_id == video_id and old_channel_id != channel_id):
+        raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+
+    new_video = old_video_id != video_id
+    channel_move = old_channel_id != channel_id
+    thumbnail = _text(source.get("thumbnailUrl") or source.get("thumbnail_url"))
+    if thumbnail and _thumbnail_video_id(thumbnail) != video_id:
+        raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+
+    handle = _text(source.get("channelHandle") or source.get("channel_handle") or replacement.get("channelHandle"))
+    channel_url = _text(source.get("channelUrl") or source.get("channel_url") or replacement.get("channelUrl"))
+    name = _text(source.get("channelName") or source.get("channel_name") or replacement.get("channelName"))
+    if channel_move:
+        old_handle = _normalized_channel_handle(
+            change.get("channel_handle") or _json_object(change.get("videoPayload")).get("channelHandle")
+        )
+        old_url = _text(
+            change.get("channel_url") or _json_object(change.get("videoPayload")).get("channelUrl")
+        ).casefold()
+        normalized_handle = _normalized_channel_handle(handle)
+        normalized_url = channel_url.casefold()
+        if (
+            (old_handle and normalized_handle == old_handle)
+            or (old_url and normalized_url == old_url)
+            or (old_channel_id.casefold() in normalized_url)
+            or (old_handle and old_handle in normalized_url)
+            or (channel_url and not _channel_url_is_coherent(channel_url, channel_id, handle))
+        ):
+            raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+        if not handle and not channel_url:
+            channel_url = f"https://www.youtube.com/channel/{channel_id}"
+    else:
+        # The immutable channel is the same, so channel metadata may be
+        # reused.  A changed video still never reuses old video fields.
+        old_payload = _json_object(change.get("videoPayload"))
+        handle = handle or _text(change.get("channel_handle")) or _text(old_payload.get("channelHandle"))
+        channel_url = channel_url or _text(change.get("channel_url")) or _text(old_payload.get("channelUrl"))
+        name = name or _text(change.get("channel_name")) or _text(old_payload.get("channelName"))
+        if not new_video and old_payload:
+            old_payload_video_id = _text(old_payload.get("videoId") or old_payload.get("video_id"))
+            old_payload_channel_id = _text(old_payload.get("channelId") or old_payload.get("channel_id"))
+            if (
+                (old_payload_video_id and old_payload_video_id != video_id)
+                or (old_payload_channel_id and old_payload_channel_id != channel_id)
+            ):
+                raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+            # Same immutable video ownership permits verified video metadata
+            # (including its thumbnail) to survive a title-only replacement.
+            for name_key, value in old_payload.items():
+                source.setdefault(name_key, value)
+    if channel_url and not _channel_url_is_coherent(channel_url, channel_id, handle):
+        raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+    if not channel_url:
+        channel_url = f"https://www.youtube.com/channel/{channel_id}"
+    if new_video and not thumbnail:
+        thumbnail = f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+
+    public_video = dict(source)
+    public_video.update({
+        "videoId": video_id,
+        "channelId": channel_id,
+        "channelHandle": handle,
+        "channelUrl": channel_url,
+    })
+    if name:
+        public_video["channelName"] = name
+    if thumbnail:
+        public_video["thumbnailUrl"] = thumbnail
+    if new_video:
+        public_video.pop("videoThumbnailUrl", None)
+        public_video["title"] = _text(source.get("title") or replacement.get("title"))
+    return public_video, {
+        "video_id": video_id,
+        "channel_id": channel_id,
+        "channel_handle": handle,
+        "channel_url": channel_url,
+        "channel_name": name,
+        "video_title": _text(public_video.get("title")),
+    }
+
+
+def _runtime_replacement_candidate_rows(
+    changes: Sequence[Mapping[str, Any]],
+    strict_immutable_identity: bool = False,
+) -> list[dict[str, Any]]:
     """Convert final runtime replacements to song-ranking delta rows."""
 
     rows: list[dict[str, Any]] = []
@@ -1415,8 +1593,24 @@ def _runtime_replacement_candidate_rows(changes: Sequence[Mapping[str, Any]]) ->
             continue
         title = _text(replacement.get("title"))
         artist = _text(replacement.get("artist"))
-        video_id = _text(replacement.get("videoId") or change.get("videoId"))
-        occurrence_id = _text(replacement.get("occurrenceId") or change.get("occurrenceId"))
+        replacement_video_id = _text(replacement.get("videoId"))
+        replacement_occurrence_id = _text(replacement.get("occurrenceId"))
+        video_payload = _json_object(change.get("replacementVideoPayload"))
+        if not video_payload:
+            video_payload = _overlay_video_projection(replacement)
+        replacement_channel_id = _text(replacement.get("channelId") or video_payload.get("channelId"))
+        if strict_immutable_identity and not (
+            title and replacement_video_id and replacement_occurrence_id and replacement_channel_id
+        ):
+            raise PostgresAdapterError(
+                "VTuber exact replacement is missing required immutable identity"
+            )
+        strict_public: dict[str, Any] = {}
+        if strict_immutable_identity:
+            video_payload, strict_public = _strict_replacement_public_video(change, replacement)
+            replacement_channel_id = _text(strict_public["channel_id"])
+        video_id = replacement_video_id or _text(change.get("videoId"))
+        occurrence_id = replacement_occurrence_id or _text(change.get("occurrenceId"))
         if not title or not video_id or not occurrence_id:
             continue
         song_key = _text(replacement.get("songKey"))
@@ -1426,9 +1620,6 @@ def _runtime_replacement_candidate_rows(changes: Sequence[Mapping[str, Any]]) ->
             ).hexdigest()[:24]
         occurrence = dict(replacement)
         occurrence["songKey"] = song_key
-        video_payload = _json_object(change.get("replacementVideoPayload"))
-        if not video_payload:
-            video_payload = _overlay_video_projection(replacement)
         rows.append({
             "revision_id": change.get("revisionId"),
             "video_id": video_id,
@@ -1443,12 +1634,12 @@ def _runtime_replacement_candidate_rows(changes: Sequence[Mapping[str, Any]]) ->
             "raw_hash": replacement.get("rawHash"),
             "source_system": replacement.get("sourceSystem"),
             "occurrence_payload_json": occurrence,
-            "video_title": video_payload.get("title") or change.get("videoTitle"),
-            "channel_name": video_payload.get("channelName") or change.get("channel_name"),
-            "channel_id": video_payload.get("channelId") or change.get("channel_id"),
-            "channel_handle": video_payload.get("channelHandle") or change.get("channel_handle"),
-            "channel_url": video_payload.get("channelUrl") or change.get("channel_url"),
-            "video_payload_json": video_payload or change.get("videoPayload"),
+            "video_title": strict_public.get("video_title") or video_payload.get("title") or change.get("videoTitle"),
+            "channel_name": strict_public.get("channel_name") or video_payload.get("channelName") or change.get("channel_name"),
+            "channel_id": replacement_channel_id or change.get("channel_id"),
+            "channel_handle": strict_public.get("channel_handle") if strict_immutable_identity else video_payload.get("channelHandle") or change.get("channel_handle"),
+            "channel_url": strict_public.get("channel_url") if strict_immutable_identity else video_payload.get("channelUrl") or change.get("channel_url"),
+            "video_payload_json": video_payload if strict_immutable_identity else video_payload or change.get("videoPayload"),
             "video_tombstone": False,
             "runtime_replacement": True,
             "replacement_same_artist": change.get("replacementSameArtist"),
@@ -2424,6 +2615,96 @@ def _hydrate_overlay_page_previews(
                 occurrence["video"] = dict(video)
 
 
+def _cached_vtuber_rows_are_safe(
+    cached: Mapping[str, Mapping[str, Any]],
+    affected_channel_ids: set[str],
+    old_channel_markers: Mapping[str, Mapping[str, set[str]]],
+) -> bool:
+    """Validate a small exact-cache value before it can bypass PostgreSQL.
+
+    The cache is a performance optimization, not an identity source.  It is
+    intentionally checked only after the current effective candidates and
+    affected-channel set have been constructed.
+    """
+
+    if not isinstance(cached, Mapping) or len(cached) > 8 or set(cached) != affected_channel_ids:
+        return False
+    for channel_id, row in cached.items():
+        if not isinstance(row, Mapping) or _text(row.get("detail_key")) != channel_id:
+            return False
+        payload = _json_object(row.get("payload_json"))
+        if (
+            _text(payload.get("key")) != channel_id
+            or _text(payload.get("channelId")) != channel_id
+            or _text(row.get("name")) != _text(payload.get("name"))
+        ):
+            return False
+        try:
+            counts = tuple(int(row.get(field) or 0) for field in (
+                "row_count", "song_count", "video_count", "timestamp_count",
+            ))
+            payload_counts = tuple(int(payload.get(field) or 0) for field in (
+                "count", "songCount", "videoCount", "timestampCount",
+            ))
+        except (TypeError, ValueError):
+            return False
+        if min(*counts, *payload_counts) < 0 or counts != payload_counts:
+            return False
+        occurrences = payload.get("occurrences")
+        if not isinstance(occurrences, list) or len(occurrences) > 20:
+            return False
+        if counts[0] == 0 and (any(payload_counts) or occurrences):
+            return False
+
+        handle = _normalized_channel_handle(payload.get("channelHandle"))
+        channel_url = _text(payload.get("channelUrl"))
+        if channel_url and not _channel_url_is_coherent(channel_url, channel_id, handle):
+            return False
+        # A moved channel must never obtain the old channel's public handle or
+        # URL from a cache entry.  The old channel's own (possibly non-zero)
+        # card remains valid when it still has unaffected tuples.
+        for old_channel_id, marker in old_channel_markers.items():
+            if old_channel_id == channel_id:
+                continue
+            old_handles = marker.get("handles", set())
+            old_urls = marker.get("urls", set())
+            normalized_url = channel_url.casefold()
+            if (
+                (handle and handle in old_handles)
+                or (normalized_url and normalized_url in old_urls)
+                or old_channel_id.casefold() in normalized_url
+                or any(old_handle and old_handle in normalized_url for old_handle in old_handles)
+            ):
+                return False
+        for occurrence in occurrences:
+            if not isinstance(occurrence, Mapping):
+                return False
+            item = occurrence.get("item")
+            video = occurrence.get("video")
+            if not isinstance(item, Mapping) and not isinstance(video, Mapping):
+                return False
+            item = item if isinstance(item, Mapping) else video
+            video = video if isinstance(video, Mapping) else item
+            video_id = _text(item.get("videoId"))
+            if not video_id or _text(video.get("videoId")) != video_id:
+                return False
+            if _text(item.get("channelId")) != channel_id or _text(video.get("channelId")) != channel_id:
+                return False
+            item_handle = _normalized_channel_handle(item.get("channelHandle"))
+            video_handle = _normalized_channel_handle(video.get("channelHandle"))
+            if item_handle and video_handle and item_handle != video_handle:
+                return False
+            for nested, nested_handle in ((item, item_handle), (video, video_handle)):
+                nested_url = _text(nested.get("channelUrl"))
+                thumbnail = _text(nested.get("thumbnailUrl") or nested.get("videoThumbnailUrl"))
+                if (
+                    (thumbnail and not thumbnail_matches_video(thumbnail, video_id))
+                    or (nested_url and not _channel_url_is_coherent(nested_url, channel_id, nested_handle))
+                ):
+                    return False
+    return True
+
+
 def _overlay_vtuber_replacement_rows(
     connection,
     active_revision_id: str,
@@ -2435,8 +2716,11 @@ def _overlay_vtuber_replacement_rows(
     runtime_changes: Sequence[Mapping[str, Any]] = (),
     replacement_rows: Sequence[Mapping[str, Any]] = (),
     accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    exact_required: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Rebuild affected VTuber groups with per-video replacement semantics."""
+
+    rows = tuple(rows)
 
     cache_key = (
         active_revision_id,
@@ -2450,13 +2734,6 @@ def _overlay_vtuber_replacement_rows(
         bool(options.get("nicheOnly")),
         bool(options.get("hideUnknownArtist")),
     )
-    cached = _VTUBER_REPLACEMENT_CACHE.get(cache_key)
-    if cached is not None:
-        return {
-            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
-            for key, row in cached.items()
-        }
-
     candidate_records: dict[str, dict[str, Any]] = {}
     affected_channel_ids: set[str] = set()
     # Only full-video boundaries remove every parent occurrence.  Runtime
@@ -2475,6 +2752,22 @@ def _overlay_vtuber_replacement_rows(
             or video.get("channelId")
             or _json_object(row.get("replacementVideoPayload")).get("channelId")
         )
+
+    def require_identity(row: Mapping[str, Any], require_occurrence: bool = True) -> None:
+        video_id = _text(row.get("videoId") or row.get("video_id"))
+        occurrence_id = _text(row.get("occurrenceId") or row.get("occurrence_id"))
+        if not video_id or not row_channel_id(row) or (require_occurrence and not occurrence_id):
+            raise PostgresAdapterError(
+                "VTuber exact overlay change is missing required immutable identity"
+            )
+
+    if exact_required:
+        for row in rows:
+            if not row.get("video_tombstone"):
+                require_identity(row)
+        for changed in (*reset_changes, *runtime_changes, *replacement_rows):
+            entity_type = _text(changed.get("entityType") or changed.get("entity_type"))
+            require_identity(changed, entity_type not in {"videos", "runtime_videos"})
 
     # The exact aggregate must cover both sides of a channel move.  A pure
     # accepted/runtime tombstone has no candidate tuple, but its original
@@ -2513,8 +2806,15 @@ def _overlay_vtuber_replacement_rows(
             continue
         video = _overlay_public_video(row)
         channel_id = _text(video.get("channelId") or row.get("channel_id"))
+        # Exact VTuber aggregation has no safe fuzzy identity fallback.  A
+        # partially projected accepted/replacement tuple would otherwise
+        # quietly omit a public channel while the endpoint still returns 200.
+        # Do not expose row values in this error: identities are data, not
+        # diagnostic text.
         if not video_id or not channel_id:
-            continue
+            raise PostgresAdapterError(
+                "VTuber exact overlay candidate is missing required immutable identity"
+            )
         affected_channel_ids.add(channel_id)
         record = candidate_records.get(video_id)
         if record is None:
@@ -2543,6 +2843,36 @@ def _overlay_vtuber_replacement_rows(
         if identity not in record["identities"]:
             record["identities"].add(identity)
             record["occurrences"].append(song)
+
+    # Cache lookup comes after all immutable/current candidate construction.
+    # That makes a cache hit unable to conceal a malformed replacement or a
+    # stale public card, while still avoiding SQL for a legal hit.
+    old_channel_markers: dict[str, dict[str, set[str]]] = defaultdict(
+        lambda: {"handles": set(), "urls": set()},
+    )
+    for changed in (*reset_changes, *runtime_changes):
+        old_channel_id = row_channel_id(changed)
+        if not old_channel_id:
+            continue
+        old_video = _json_object(changed.get("videoPayload"))
+        old_handle = _normalized_channel_handle(
+            changed.get("channel_handle") or old_video.get("channelHandle")
+        )
+        old_url = _text(changed.get("channel_url") or old_video.get("channelUrl")).casefold()
+        if old_handle:
+            old_channel_markers[old_channel_id]["handles"].add(old_handle)
+        if old_url:
+            old_channel_markers[old_channel_id]["urls"].add(old_url)
+    cached = _VTUBER_REPLACEMENT_CACHE.get(cache_key)
+    if cached is not None:
+        if not _cached_vtuber_rows_are_safe(cached, affected_channel_ids, old_channel_markers):
+            raise PostgresAdapterError("VTuber exact replacement cache identity is invalid")
+        return {
+            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
+            for key, row in cached.items()
+        }
+    if exact_required and not affected_channel_ids:
+        raise PostgresAdapterError("VTuber exact overlay required coverage is empty")
     if not affected_channel_ids:
         return {}
 
@@ -2911,6 +3241,44 @@ def _overlay_vtuber_replacement_rows(
             "search_text": json.dumps(payload, ensure_ascii=False),
             "channel_search_text": json.dumps(payload, ensure_ascii=False),
         }
+    # Match the SQL path's explicit coverage rows.  An affected channel can
+    # legitimately have no effective tuples after a tombstone; returning a
+    # zero row lets the caller remove its old public group exactly once.
+    for channel_id in sorted(affected_channel_ids):
+        if channel_id in exact:
+            continue
+        base_row = base_groups.get(channel_id) or {}
+        payload = _json_object(base_row.get("payload_json"))
+        name = _text(payload.get("channelName") or payload.get("name") or base_row.get("name")) or channel_id
+        payload.update({
+            "type": "vtuber",
+            "key": channel_id,
+            "name": name,
+            "channelName": name,
+            "channelId": channel_id,
+            "channelHandle": payload.get("channelHandle", ""),
+            "channelUrl": payload.get("channelUrl") or f"https://www.youtube.com/channel/{channel_id}",
+            "count": 0,
+            "songCount": 0,
+            "videoCount": 0,
+            "timestampCount": 0,
+            "occurrences": [],
+            "sourceDetailKey": payload.get("sourceDetailKey")
+                or _stable_key("source-vtuber", _text(options.get("range")) or "all", channel_id),
+        })
+        exact[channel_id] = {
+            "detail_key": channel_id,
+            "title": "",
+            "artist": "",
+            "name": name,
+            "row_count": 0,
+            "song_count": 0,
+            "video_count": 0,
+            "timestamp_count": 0,
+            "payload_json": payload,
+            "search_text": json.dumps(payload, ensure_ascii=False),
+            "channel_search_text": json.dumps(payload, ensure_ascii=False),
+        }
     if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
         _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
     _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
@@ -2962,7 +3330,9 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     candidate_rows = _overlay_candidate_rows(connection, overlay_ids, False)
     all_candidate_rows = tuple(candidate_rows)
     phase_started = _phase_trace("overlay", phase_started)
-    accepted_video_resets = _accepted_video_resets(connection, overlay_ids, False)
+    accepted_video_resets = _accepted_video_resets(
+        connection, overlay_ids, False, options["view"] == "vtubers",
+    )
     reset_changes = _accepted_video_reset_changes(
         connection, parent[0], accepted_video_resets, options,
     )
@@ -2971,6 +3341,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         overlay_ids,
         accepted_video_resets.values() if accepted_video_resets else None,
         all_candidate_rows,
+        options["view"] == "vtubers",
     )
     phase_started = _phase_trace("reset", phase_started)
     candidate_rows = _overlay_rows_for_range(candidate_rows, options["range"])
@@ -3026,9 +3397,16 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             _overlay_song_group_norm(change.get("title")),
             _overlay_song_group_norm(change.get("artist")),
         )]
-    _apply_runtime_tombstone_groups(groups, reset_changes, options["view"])
-    _apply_runtime_change_previews(groups, reset_changes, options["view"])
-    replacement_rows = _runtime_replacement_candidate_rows(runtime_changes)
+    # The VTuber exact aggregate below owns both sides of every reset/move.
+    # Applying the bounded generic mutation here would make the caller replay
+    # those same tuples after the exact result is installed.
+    if options["view"] != "vtubers":
+        _apply_runtime_tombstone_groups(groups, reset_changes, options["view"])
+        _apply_runtime_change_previews(groups, reset_changes, options["view"])
+    replacement_rows = _runtime_replacement_candidate_rows(
+        runtime_changes,
+        options["view"] == "vtubers",
+    )
     exact_replacement_rows = tuple(replacement_rows)
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         candidate_rows = [*candidate_rows, *replacement_rows]
@@ -3055,7 +3433,25 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             row for row in exact_replacement_rows
             if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
         )
-    delta = _overlay_candidate_groups(candidate_rows, options["view"])
+    # Exact VTuber aggregation owns the complete effective tuple set for every
+    # affected channel, including channels whose final count is zero.  Building
+    # the generic delta first is therefore redundant here, and its cumulative
+    # search-text construction is quadratic for a large single-channel import.
+    # Keep the generic path unchanged for every other public view.
+    delta = (
+        {} if options["view"] == "vtubers"
+        else _overlay_candidate_groups(candidate_rows, options["view"])
+    )
+    phase_started = _phase_trace(
+        "candidate_delta",
+        phase_started,
+        candidate_count=len(candidate_rows),
+        delta_groups=len(delta),
+    )
+    exact_required = bool(
+        options["view"] == "vtubers"
+        and (exact_candidate_rows or reset_changes or runtime_changes or exact_replacement_rows)
+    )
     exact_vtuber_rows = (
         _overlay_vtuber_replacement_rows(
             connection,
@@ -3068,12 +3464,23 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             runtime_changes,
             exact_replacement_rows,
             accepted_video_resets,
+            exact_required,
         )
         if options["view"] == "vtubers"
         else {}
     )
     phase_started = _phase_trace("exact", phase_started)
+    exact_owned = options["view"] == "vtubers" and bool(exact_vtuber_rows)
+    if exact_required and not exact_owned:
+        raise PostgresAdapterError("VTuber exact overlay required coverage is empty")
     groups.update(exact_vtuber_rows)
+    if options["view"] == "vtubers":
+        # The exact helper returns an explicit zero summary for every affected
+        # channel.  It is a coverage marker internally, but must not become a
+        # public ranking row or contribute to totals.
+        for key, row in exact_vtuber_rows.items():
+            if int(row.get("row_count") or 0) == 0:
+                groups.pop(key, None)
     for key, item in delta.items():
         if key in exact_vtuber_rows:
             continue
@@ -3111,12 +3518,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
                     )
                 row["payload_json"] = payload
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
-    _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
-    _apply_runtime_change_previews(groups, runtime_changes, options["view"])
+    if options["view"] != "vtubers":
+        _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
+        _apply_runtime_change_previews(groups, runtime_changes, options["view"])
     # Exact VTuber aggregation already owns every affected channel's effective
     # tuple set.  Re-running the generic bounded parent scan here was the
     # cold-ranking timeout; songs/artists/videos keep their existing path.
-    if options["view"] != "vtubers" or not exact_vtuber_rows:
+    if options["view"] != "vtubers" or (exact_required and not exact_owned):
         _reconcile_affected_song_counts(
             connection,
             parent[0],

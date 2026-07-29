@@ -93,6 +93,362 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("VTuber caller installs exact coverage once and rejects incomplete overlay identities", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+real_accepted_video_resets = module._accepted_video_resets
+
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["accepted"]
+module._enrich_runtime_original_group_counts = lambda *_: None
+module._channel_metadata_rows = lambda *_: []
+module._hydrate_overlay_page_previews = lambda *_: None
+
+def candidate(video_id, occurrence_id, channel_id, key):
+    return {
+        "revision_id": "accepted", "video_id": video_id, "occurrence_id": occurrence_id,
+        "position": 0, "range_id": "all", "song_key": key, "title": key, "artist": "Artist",
+        "channel_id": channel_id, "channel_name": channel_id, "video_tombstone": False,
+        "video_payload_json": {"videoId": video_id, "channelId": channel_id, "channelName": channel_id},
+        "occurrence_payload_json": {"videoId": video_id, "occurrenceId": occurrence_id, "songKey": key, "title": key, "artist": "Artist", "rangeId": "all"},
+    }
+
+def video(video_id, channel_id):
+    return {"video_id": video_id, "title": video_id, "channel_id": channel_id,
+      "channel_name": channel_id, "channel_handle": "@" + channel_id.lower(),
+      "channel_url": "https://www.youtube.com/channel/" + channel_id,
+      "published_timestamp": "2026-07-29T00:00:00Z",
+      "payload_json": {"videoId": video_id, "channelId": channel_id, "channelName": channel_id}}
+
+def occurrence(video_id, occurrence_id):
+    return {"video_id": video_id, "occurrence_id": occurrence_id, "range_id": "all",
+      "song_key": occurrence_id, "title": occurrence_id, "artist": "Artist", "payload_json": {}}
+
+def base(channel_id, count):
+    payload = {"type": "vtuber", "key": channel_id, "channelId": channel_id,
+      "channelName": channel_id, "name": channel_id, "count": count, "songCount": count,
+      "videoCount": count, "timestampCount": count, "occurrences": []}
+    return {"rank": 1, "detail_key": channel_id, "title": "", "artist": "", "name": channel_id,
+      "row_count": count, "song_count": count, "video_count": count, "timestamp_count": count,
+      "search_text": channel_id, "channel_search_text": channel_id, "payload_json": payload}
+
+def execute(base_rows, parent_videos, parent_occurrences, candidates=(), resets=None, reset_changes=(), runtime_changes=(), prewarm=None):
+    module._overlay_candidate_rows = lambda *_: list(candidates)
+    module._accepted_video_resets = lambda *_: dict(resets or {})
+    module._accepted_video_reset_changes = lambda *_: [dict(change) for change in reset_changes]
+    module._runtime_tombstones = lambda *_: [dict(change) for change in runtime_changes]
+    # The caller must not replay exact VTuber tuples through either generic
+    # reconciler.  This turns a future double-preview/decrement regression
+    # into a direct integration-test failure.
+    module._apply_runtime_tombstone_groups = lambda *_: (_ for _ in ()).throw(AssertionError("generic VTuber tombstone replay"))
+    module._apply_runtime_change_previews = lambda *_: (_ for _ in ()).throw(AssertionError("generic VTuber preview replay"))
+    def rows(_connection, sql, _params):
+        if "FROM runtime_ranking_rows" in sql:
+            return [dict(row) for row in base_rows]
+        if "FROM runtime_videos" in sql:
+            return [dict(row) for row in parent_videos]
+        if "FROM runtime_occurrences" in sql:
+            return [dict(row) for row in parent_occurrences]
+        return []
+    module._rows = rows
+    module._VTUBER_REPLACEMENT_CACHE.clear()
+    if prewarm is not None:
+        module._VTUBER_REPLACEMENT_CACHE[("active", "parent", "all", "", "", (), "", 0, False, False)] = prewarm
+    return module._generic_overlay_rankings_payload(
+        object(), "active", {"revision_id": "active"},
+        {"range": "all", "view": "vtubers", "metric": "count", "pageSize": "20"},
+    )
+
+# Real caller -> real exact fallback: a channel move leaves old-channel B=1
+# while the new channel has its inherited C plus the accepted tuple (C=2).
+moved = execute(
+    [base("UCOLD", 2), base("UCNEW", 1)],
+    [video("old-target", "UCOLD"), video("old-b", "UCOLD"), video("new-existing", "UCNEW")],
+    [occurrence("old-target", "target"), occurrence("old-b", "B"), occurrence("new-existing", "C")],
+    [candidate("new-target", "new", "UCNEW", "new")],
+    {"old-target": {"video_id": "old-target", "tombstone": False}},
+    [{"entityType": "videos", "videoId": "old-target", "channel_id": "UCOLD"}],
+)
+assert {row["channelId"]: row["count"] for row in moved["records"]} == {"UCNEW": 2, "UCOLD": 1}
+
+# A pure occurrence tombstone removes its target once, retaining B=1 rather
+# than applying an additional generic decrement after exact installation.
+tombstoned = execute(
+    [base("UCOLD", 2)], [video("old-target", "UCOLD"), video("old-b", "UCOLD")],
+    [occurrence("old-target", "target"), occurrence("old-b", "B")], runtime_changes=[
+      {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "channel_id": "UCOLD"}
+    ],
+)
+assert [(row["channelId"], row["count"]) for row in tombstoned["records"]] == [("UCOLD", 1)]
+
+# All tuples deleted yields a zero coverage marker internally, then one public
+# removal: no card and no total contribution.
+zero = execute(
+    [base("UCZERO", 1)], [video("dead", "UCZERO")], [occurrence("dead", "dead")], runtime_changes=[
+      {"entityType": "occurrences", "videoId": "dead", "occurrenceId": "dead", "channel_id": "UCZERO"}
+    ],
+)
+assert zero["records"] == [] and zero["totalCount"] == 0 and zero["totalOccurrenceCount"] == 0
+
+# Runtime replacement likewise remains exact-owned; the guarded generic
+# caller hooks above prove no second preview mutation is attempted.
+replaced = execute(
+    [base("UCOLD", 2)], [video("old-target", "UCOLD"), video("old-b", "UCOLD")],
+    [occurrence("old-target", "target"), occurrence("old-b", "B")], runtime_changes=[
+      {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "rangeId": "all", "channel_id": "UCOLD", "replacement": True,
+       "replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "title": "New", "artist": "Artist",
+         "rangeId": "all", "position": 0, "channelId": "UCOLD", "channelName": "UCOLD"}}
+    ],
+)
+assert replaced["records"][0]["count"] == 2
+
+# Replacement identities are new-side-only.  An old immutable channel/video
+# may locate the removed tuple, but must never be borrowed for the replacement.
+for malformed in (
+    {"replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "title": "New", "artist": "Artist"}},
+    {"replacementPayload": {"occurrenceId": "new", "title": "New", "artist": "Artist", "channelId": "UCNEW"}},
+    {"replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "artist": "Artist", "channelId": "UCNEW"}},
+):
+    try:
+        execute(
+            [base("UCOLD", 1)], [video("old-target", "UCOLD")], [occurrence("old-target", "target")], runtime_changes=[
+              {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "rangeId": "all", "channel_id": "UCOLD", "replacement": True, **malformed}
+            ],
+        )
+        raise AssertionError("malformed replacement reached VTuber exact coverage")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact replacement is missing required immutable identity"
+
+# A direct runtime/accepted reset change without an immutable channel cannot
+# fall through to generic reconciliation or an exact-empty partial result.
+for reset_changes, runtime_changes in (
+    ([], [{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target"}]),
+    ([{"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "acceptedVideoReset": True}], []),
+):
+    try:
+        execute(
+            [base("UCOLD", 1)], [], [occurrence("old-target", "target")],
+            reset_changes=reset_changes, runtime_changes=runtime_changes,
+        )
+        raise AssertionError("missing immutable channel reached exact-empty reconciliation")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+
+# A channel move must project public identity only from the new side.  The old
+# tuple's handle/URL can locate its removal but never appear on the new card.
+moved_public = execute(
+    [base("UCOLD", 1)], [video("old-target", "UCOLD")], [occurrence("old-target", "target")], runtime_changes=[
+      {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "rangeId": "all",
+       "channel_id": "UCOLD", "channel_handle": "@old_handle", "channel_url": "https://youtube.com/@old_handle",
+       "videoPayload": {"videoId": "old-target", "channelId": "UCOLD", "title": "Old video", "thumbnailUrl": "https://i.ytimg.com/vi/old-target/hqdefault.jpg"},
+       "replacement": True,
+       "replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "title": "New", "artist": "Artist", "rangeId": "all", "channelId": "UCNEW"},
+       "replacementVideoPayload": {"videoId": "new-target", "channelId": "UCNEW", "thumbnailUrl": "https://i.ytimg.com/vi/new-target/hqdefault.jpg"}}
+    ],
+)
+assert [(row["channelId"], row.get("channelHandle", ""), row["channelUrl"])
+  for row in moved_public["records"]] == [("UCNEW", "", "https://www.youtube.com/channel/UCNEW")]
+moved_item = moved_public["records"][0]["occurrences"][0]["item"]
+assert moved_item["videoId"] == "new-target" and moved_item["channelId"] == "UCNEW"
+assert moved_item["thumbnailUrl"].endswith("/new-target/hqdefault.jpg")
+assert "old_handle" not in str(moved_public) and "old-target" not in str(moved_public)
+
+# Bad new-side IDs and an old-video thumbnail are rejected before a preheated
+# exact cache could be read.
+for payload in (
+    {"videoId": "old-target", "channelId": "UCNEW"},
+    {"videoId": "new-target", "channelId": "UCNEW", "thumbnailUrl": "https://i.ytimg.com/vi/old-target/hqdefault.jpg"},
+):
+    try:
+        execute(
+            [base("UCOLD", 1)], [video("old-target", "UCOLD")], [occurrence("old-target", "target")], runtime_changes=[
+              {"entityType": "occurrences", "videoId": "old-target", "occurrenceId": "target", "rangeId": "all", "channel_id": "UCOLD", "replacement": True,
+               "replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "title": "New", "artist": "Artist", "rangeId": "all", "channelId": "UCNEW"},
+               "replacementVideoPayload": payload}
+            ], prewarm={"UCOLD": {"detail_key": "UCOLD", "payload_json": {"channelId": "UCOLD"}}},
+        )
+        raise AssertionError("invalid replacement public identity reached exact cache")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact replacement public identity is invalid"
+
+# Same-channel new videos may retain channel metadata, never old video fields.
+same_channel = module._runtime_replacement_candidate_rows([{
+  "videoId": "old-target", "occurrenceId": "target", "channel_id": "UCOLD", "channel_handle": "@old", "channel_url": "https://youtube.com/@old",
+  "videoPayload": {"videoId": "old-target", "channelId": "UCOLD", "title": "Old video", "thumbnailUrl": "https://i.ytimg.com/vi/old-target/hqdefault.jpg"},
+  "replacement": True,
+  "replacementPayload": {"videoId": "new-target", "occurrenceId": "new", "title": "New video", "artist": "Artist", "channelId": "UCOLD"},
+  "replacementVideoPayload": {"videoId": "new-target", "channelId": "UCOLD"},
+}], True)[0]
+assert same_channel["channel_handle"] == "@old" and same_channel["channel_url"] == "https://youtube.com/@old"
+assert same_channel["video_payload_json"]["title"] == "New video"
+assert same_channel["video_payload_json"]["thumbnailUrl"].endswith("/new-target/hqdefault.jpg")
+assert "old-target" not in str(same_channel["video_payload_json"])
+
+same_video = module._runtime_replacement_candidate_rows([{
+  "videoId": "same", "occurrenceId": "old", "channel_id": "UCOLD",
+  "videoPayload": {"videoId": "same", "channelId": "UCOLD", "title": "Verified", "thumbnailUrl": "https://i.ytimg.com/vi/same/hqdefault.jpg"},
+  "replacement": True,
+  "replacementPayload": {"videoId": "same", "occurrenceId": "new", "title": "Canonical", "artist": "Artist", "channelId": "UCOLD"},
+  "replacementVideoPayload": {"videoId": "same", "channelId": "UCOLD"},
+}], True)[0]
+assert same_video["video_payload_json"]["thumbnailUrl"].endswith("/same/hqdefault.jpg")
+
+try:
+    module._runtime_replacement_candidate_rows([{
+      "videoId": "same", "occurrenceId": "old", "channel_id": "UCOLD", "replacement": True,
+      "replacementPayload": {"videoId": "same", "occurrenceId": "new", "title": "New", "artist": "Artist", "channelId": "UCNEW"},
+      "replacementVideoPayload": {"videoId": "same", "channelId": "UCNEW"},
+    }], True)
+    raise AssertionError("same-video channel move was accepted")
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber exact replacement public identity is invalid"
+
+# Required accepted reset boundaries are not silently filtered by the caller.
+module._accepted_video_resets = real_accepted_video_resets
+module._overlay_candidate_rows = lambda *_: []
+module._overlay_revision_ids = lambda *_: ["accepted"]
+def malformed_reset_rows(_connection, sql, _params):
+    if "runtime_ranking_rows" in sql:
+        return [base("UCBASE", 1)]
+    if "migration_video_rows" in sql:
+        return [{"revision_id": "accepted", "video_id": "", "tombstone": True}]
+    return []
+module._rows = malformed_reset_rows
+try:
+    module._generic_overlay_rankings_payload(object(), "active", {"revision_id": "active"},
+      {"range": "all", "view": "vtubers", "metric": "count", "pageSize": "20"})
+    raise AssertionError("malformed accepted reset was silently filtered")
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber accepted video reset is missing required immutable identity"
+
+# No overlay tuple leaves the baseline untouched and does not claim exact ownership.
+baseline = execute(
+    [base("UCBASE", 1)], [video("base-target", "UCBASE")], [occurrence("base-target", "base")],
+)
+assert [(row["channelId"], row["count"]) for row in baseline["records"]] == [("UCBASE", 1)]
+
+for bad in (
+    candidate("video-present", "occ", "", "bad"),
+    {**candidate("", "occ", "UC1", "bad"), "video_payload_json": {"channelId": "UC1"}},
+):
+    module._VTUBER_REPLACEMENT_CACHE.clear()
+    try:
+        module._overlay_vtuber_replacement_rows(object(), "bad", "parent", [bad], {"range": "all"}, {})
+        raise AssertionError("incomplete exact identity was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact overlay candidate is missing required immutable identity"
+
+# Validation happens before the exact-cache read, so a malformed new tuple
+# cannot reuse an older partial entry and the error path does not replace it.
+cache_key = ("cached", "parent", "all", "", "", (), "", 0, False, False)
+cached = {"UCOLD": {"detail_key": "UCOLD", "payload_json": {"channelId": "UCOLD"}}}
+module._VTUBER_REPLACEMENT_CACHE.clear()
+module._VTUBER_REPLACEMENT_CACHE[cache_key] = cached
+try:
+    module._overlay_vtuber_replacement_rows(
+        object(), "cached", "parent", [candidate("video", "occ", "", "bad")],
+        {"range": "all"}, {}, exact_required=True,
+    )
+    raise AssertionError("partial exact cache was reused for malformed identity")
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+assert module._VTUBER_REPLACEMENT_CACHE[cache_key] is cached
+
+# The strict runtime boundary needs both old immutable IDs.  It also binds an
+# explicit new thumbnail instead of merely looking for the older /vi/ spelling.
+def strict_change(thumbnail="", handle="@new", channel_url="https://youtube.com/@new"):
+    video = {"videoId": "new-video", "channelId": "UCNEW", "channelHandle": handle, "channelUrl": channel_url}
+    if thumbnail:
+        video["thumbnailUrl"] = thumbnail
+    return {"videoId": "old-video", "occurrenceId": "old-occ", "channel_id": "UCOLD",
+      "channel_handle": "@old", "channel_url": "https://youtube.com/@old",
+      "videoPayload": {"videoId": "old-video", "channelId": "UCOLD", "channelHandle": "@old", "channelUrl": "https://youtube.com/@old", "thumbnailUrl": "https://i.ytimg.com/vi/old-video/hqdefault.jpg"},
+      "replacement": True,
+      "replacementPayload": {"videoId": "new-video", "occurrenceId": "new-occ", "title": "New", "artist": "Artist", "channelId": "UCNEW"},
+      "replacementVideoPayload": video}
+
+for bad_thumbnail in (
+    "https://i.ytimg.com/vi_webp/old-video/hqdefault.webp",
+    "https://i.ytimg.com/an_webp/old-video/mqdefault_6s.webp",
+    "https://third.example/old-video.jpg",
+    "https://third.example/unknown.jpg",
+):
+    try:
+        module._runtime_replacement_candidate_rows([strict_change(bad_thumbnail)], True)
+        raise AssertionError("unbound or old thumbnail was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact replacement public identity is invalid"
+for good_thumbnail in (
+    "https://i.ytimg.com/vi/new-video/hqdefault.jpg",
+    "https://i.ytimg.com/vi_webp/new-video/hqdefault.webp",
+    "https://i.ytimg.com/an_webp/new-video/mqdefault_6s.webp",
+    "https://i.ytimg.com/thumbnail.jpg?videoId=new-video",
+):
+    assert module._runtime_replacement_candidate_rows([strict_change(good_thumbnail)], True)[0]["video_payload_json"]["thumbnailUrl"] == good_thumbnail
+for malformed in (
+    {key: value for key, value in strict_change().items() if key != "channel_id"},
+    strict_change("https://i.ytimg.com/vi/new-video/hqdefault.jpg", "@old", "https://youtube.com/@new"),
+    strict_change("https://i.ytimg.com/vi/new-video/hqdefault.jpg", "@new", "https://youtube.com/@old"),
+):
+    try:
+        module._runtime_replacement_candidate_rows([malformed], True)
+        raise AssertionError("old immutable/channel public identity was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact replacement public identity is invalid"
+valid_move = module._runtime_replacement_candidate_rows([
+    strict_change("https://i.ytimg.com/vi/new-video/hqdefault.jpg")
+], True)[0]
+assert valid_move["channel_handle"] == "@new" and valid_move["channel_url"] == "https://youtube.com/@new"
+
+# Cache hits happen only after candidates are public/identity-complete.  A
+# legal cache avoids SQL; poisoned key/card/occurrence/thumbnail variants
+# raise and leave the cached object untouched.
+class CacheConnection:
+    def cursor(self): return object()
+cache_candidate = candidate("cache-video", "cache-occ", "UCNEW", "cache")
+cache_candidate["video_payload_json"].update({"channelHandle": "@new", "channelUrl": "https://youtube.com/@new", "thumbnailUrl": "https://i.ytimg.com/vi/cache-video/hqdefault.jpg"})
+cache_candidate["occurrence_payload_json"].update({"videoId": "cache-video"})
+cache_calls = []
+def cache_rows(_connection, sql, _params):
+    cache_calls.append(sql)
+    return [{"channel_id": "UCNEW", "row_count": 1, "video_count": 1, "song_count": 1, "has_empty_song_key": False}]
+module._rows = cache_rows
+module._VTUBER_REPLACEMENT_CACHE.clear()
+cache_options = {"range": "all"}
+cache_first = module._overlay_vtuber_replacement_rows(CacheConnection(), "cache-safe", "parent", [cache_candidate], cache_options, {})
+assert cache_calls
+module._rows = lambda *_: (_ for _ in ()).throw(AssertionError("legal cache queried SQL"))
+assert module._overlay_vtuber_replacement_rows(CacheConnection(), "cache-safe", "parent", [cache_candidate], cache_options, {})["UCNEW"]["row_count"] == 1
+cache_key = ("cache-safe", "parent", "all", "", "", (), "", 0, False, False)
+legal_cached = module._VTUBER_REPLACEMENT_CACHE[cache_key]
+for poisoned in (
+    {},
+    {"UCNEW": {**legal_cached["UCNEW"], "detail_key": "UCOLD"}},
+    {"UCNEW": {**legal_cached["UCNEW"], "payload_json": {**legal_cached["UCNEW"]["payload_json"], "channelId": "UCOLD"}}},
+    {"UCNEW": {**legal_cached["UCNEW"], "payload_json": {
+        **legal_cached["UCNEW"]["payload_json"],
+        "occurrences": [{"item": {"videoId": "cache-video", "channelId": "UCNEW", "thumbnailUrl": "https://i.ytimg.com/vi/old-video/hqdefault.jpg"}}],
+    }}},
+):
+    module._VTUBER_REPLACEMENT_CACHE[cache_key] = poisoned
+    try:
+        module._overlay_vtuber_replacement_rows(CacheConnection(), "cache-safe", "parent", [cache_candidate], cache_options, {})
+        raise AssertionError("poisoned cache was accepted")
+    except module.PostgresAdapterError as error:
+        assert str(error) == "VTuber exact replacement cache identity is invalid"
+    assert module._VTUBER_REPLACEMENT_CACHE[cache_key] is poisoned
+module._VTUBER_REPLACEMENT_CACHE[cache_key] = legal_cached
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("generic cold meta cache is revision-bound and ranking previews hydrate only returned tuples", () => {
   const output = runPython(`
 import importlib.util
@@ -1958,7 +2314,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("generic incremental rankings return their merged song count", () => {
+test("incremental VTuber rankings retain their exact merged song count", () => {
   const output = runPython(`
 import importlib.util
 spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
@@ -1969,12 +2325,15 @@ spec.loader.exec_module(module)
 module._generic_parent_runtime_revision = lambda connection, revision_id, revision: ("parent", {"revision_id": "parent"})
 module._overlay_revision_ids = lambda connection, revision_id, parent_id: ["candidate"]
 module._overlay_candidate_rows = lambda *args: []
-module._overlay_candidate_groups = lambda rows, view: {"channel": {"title": "", "artist": "", "name": "Channel", "search": "channel", "occurrences": [{"videoId": "new-video"}], "videoIds": {"new-video"}, "songKeys": {"song-a", "song-b"}}}
+grouper_calls = []
+module._overlay_candidate_groups = lambda rows, view: grouper_calls.append(view) or {}
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda connection, revision_ids: []
+module._overlay_vtuber_replacement_rows = lambda *args: {"channel": {"detail_key": "channel", "title": "", "artist": "", "name": "Channel", "row_count": 8, "song_count": 9, "video_count": 1, "timestamp_count": 8, "payload_json": {"type": "vtuber", "key": "channel", "name": "Channel", "count": 8, "songCount": 9, "videoCount": 1, "timestampCount": 8}}}
 module._rows = lambda connection, sql, params: [{"rank": 1, "detail_key": "channel", "title": "", "artist": "", "name": "Channel", "row_count": 8, "song_count": 7, "video_count": 1, "timestamp_count": 8, "search_text": "channel", "channel_search_text": "channel", "payload_json": {"type": "vtuber", "key": "channel", "name": "Channel", "count": 8, "songCount": 0, "videoCount": 1, "timestampCount": 8}}] if "FROM runtime_ranking_rows" in sql else []
 payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "vtubers", "metric": "occurrences", "pageSize": "20"})
 assert payload["records"][0]["songCount"] == 9
+assert grouper_calls == []
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -2056,9 +2415,9 @@ parent_videos = [
     },
 ]
 parent_occurrences = [
-    {"video_id": "video-old", "occurrence_id": "old-a", "range_id": "all", "song_key": "song-a", "title": "song-a", "artist": "Artist", "payload_json": {}},
-    {"video_id": "video-old", "occurrence_id": "old-b", "range_id": "all", "song_key": "song-b", "title": "song-b", "artist": "Artist", "payload_json": {}},
-    {"video_id": "video-keep", "occurrence_id": "keep-c", "range_id": "all", "song_key": "song-c", "title": "song-c", "artist": "Artist", "payload_json": {}},
+    {"video_id": "video-old", "occurrence_id": "old-a", "range_id": "all", "song_key": "song-a", "title": "song-a", "artist": "Artist", "channel_id": channel_id, "payload_json": {}},
+    {"video_id": "video-old", "occurrence_id": "old-b", "range_id": "all", "song_key": "song-b", "title": "song-b", "artist": "Artist", "channel_id": channel_id, "payload_json": {}},
+    {"video_id": "video-keep", "occurrence_id": "keep-c", "range_id": "all", "song_key": "song-c", "title": "song-c", "artist": "Artist", "channel_id": channel_id, "payload_json": {}},
 ]
 parent_video_queries = 0
 def rows(connection, sql, params):
@@ -3016,7 +3375,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("public non-song rankings recount accepted reset aggregates from effective tuples", () => {
+test("public artist and video rankings recount accepted reset aggregates from effective tuples", () => {
   const output = runPython(`
 import copy
 import importlib.util
@@ -3071,14 +3430,6 @@ artists = public("artists", same, [rank("artist", artist="Artist", rows=[occ("vi
 assert (artists["artist"]["count"], artists["artist"]["videoCount"], artists["artist"]["songCount"]) == (3, 2, 3)
 assert {item["occurrenceId"] for item in artists["artist"]["occurrences"]} == {"b", "c1", "c2"}
 
-# Channel move: the old VTuber retains only B, while the new one owns C's
-# cards.  The unrelated old video cannot be removed or double-counted.
-moved = [candidate("c1", channel_id="UCNEW", channel_name="New"), candidate("c2", channel_id="UCNEW", channel_name="New")]
-vtubers = public("vtubers", moved, [rank("UCOLD", name="Old", rows=[occ("video-a", "a1", "a1"), occ("video-a", "a2", "a2"), occ("video-b", "b", "b")], videos=2)])
-assert (vtubers["UCOLD"]["count"], vtubers["UCOLD"]["videoCount"]) == (1, 1)
-assert (vtubers["UCNEW"]["count"], vtubers["UCNEW"]["videoCount"]) == (2, 1)
-assert {item["occurrenceId"] for item in vtubers["UCNEW"]["occurrences"]} == {"c1", "c2"}
-
 # Artist rename follows the same bounded effective projection.
 renamed = [candidate("c1", artist="Renamed"), candidate("c2", artist="Renamed")]
 artist_rename = public("artists", renamed, [rank("artist", artist="Artist", rows=[occ("video-a", "a1", "a1"), occ("video-a", "a2", "a2"), occ("video-b", "b", "b")], videos=2)])
@@ -3104,9 +3455,6 @@ tomb_artist = public("artists", [], [rank("artist", artist="Artist", rows=[occ("
 assert counts(tomb_artist["artist"]) == (1, 1, 1, 1) and {item["occurrenceId"] for item in tomb_artist["artist"]["occurrences"]} == {"b"}
 tomb_video = public("videos", [], [rank("video-a", rows=[occ("video-a", "a1", "a1"), occ("video-a", "a2", "a2")], videos=1), rank("video-b", rows=[occ("video-b", "b", "b")], videos=1)])
 assert set(tomb_video) == {"video-b"} and counts(tomb_video["video-b"]) == (1, 1, 1, 1)
-tomb_vtuber = public("vtubers", [], [rank("UCOLD", name="Old", rows=[occ("video-a", "a1", "a1"), occ("video-a", "a2", "a2"), occ("video-b", "b", "b")], videos=2)])
-assert counts(tomb_vtuber["UCOLD"]) == (1, 1, 1, 1) and {item["occurrenceId"] for item in tomb_vtuber["UCOLD"]["occurrences"]} == {"b"}
-
 # A later runtime tombstone is also remove-only.  It cannot be reintroduced
 # by effective reconciliation after the preliminary aggregate decrement.
 module._accepted_video_resets = lambda *args: {}
@@ -3432,6 +3780,56 @@ module._rows = lambda _connection, sql, _params: [{"rank": 1, "detail_key": "UC1
 payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "vtubers", "metric": "count", "pageSize": "20"})
 assert payload["records"][0]["channelId"] == "UC1"
 assert reconcile_calls == []
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("VTuber exact rankings skip the generic candidate grouper without changing exact counts", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+candidate = {"revision_id": "accepted", "video_id": "video-1", "occurrence_id": "occ-1",
+  "position": 0, "range_id": "all", "song_key": "song-1", "title": "Song", "artist": "Artist",
+  "channel_id": "UC1", "channel_name": "One", "video_tombstone": False,
+  "video_payload_json": {"videoId": "video-1", "channelId": "UC1", "channelName": "One"},
+  "occurrence_payload_json": {"videoId": "video-1", "occurrenceId": "occ-1", "songKey": "song-1", "title": "Song", "artist": "Artist", "rangeId": "all"}}
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["accepted"]
+module._overlay_candidate_rows = lambda *_: [candidate]
+module._accepted_video_resets = lambda *_: {}
+module._accepted_video_reset_changes = lambda *_: []
+module._runtime_tombstones = lambda *_: []
+module._enrich_runtime_original_group_counts = lambda *_: None
+module._channel_metadata_rows = lambda *_: []
+module._reconcile_affected_song_counts = lambda *_: None
+module._hydrate_overlay_page_previews = lambda *_: None
+grouper_calls = []
+def generic_grouper(rows, view):
+    grouper_calls.append((view, list(rows)))
+    return {"song::artist": {"title": "Song", "artist": "Artist", "name": "Song", "search": "song artist",
+      "occurrences": [], "occurrenceCount": 3, "videoIds": {"video-1"}, "songKeys": {"song-1"}}}
+module._overlay_candidate_groups = generic_grouper
+module._overlay_vtuber_replacement_rows = lambda *_: {"UC1": {"detail_key": "UC1", "name": "One",
+  "row_count": 2, "song_count": 1, "video_count": 1, "timestamp_count": 2,
+  "payload_json": {"type": "vtuber", "key": "UC1", "channelId": "UC1", "count": 2, "songCount": 1, "videoCount": 1, "timestampCount": 2}}}
+module._rows = lambda _connection, sql, _params: []
+
+vtubers = module._generic_overlay_rankings_payload(object(), "active", {"revision_id": "active"},
+  {"range": "all", "view": "vtubers", "metric": "count", "pageSize": "20"})
+assert grouper_calls == []
+assert [(row["channelId"], row["count"], row["songCount"], row["videoCount"])
+  for row in vtubers["records"]] == [("UC1", 2, 1, 1)]
+
+songs = module._generic_overlay_rankings_payload(object(), "active", {"revision_id": "active"},
+  {"range": "all", "view": "songs", "metric": "count", "pageSize": "20"})
+assert [view for view, _rows in grouper_calls] == ["songs"]
+assert songs["records"][0]["count"] == 3
 print("OK")
 `);
   assert.equal(output, "OK");
