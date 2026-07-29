@@ -38,6 +38,42 @@ on:
         required: true
         default: false
         type: boolean
+      rollback_expected_current_revision:
+        description: "Rollback CAS: exact active revision that must currently be active"
+        required: false
+        type: string
+      rollback_target_parent_revision:
+        description: "Rollback CAS: exact parent revision to restore"
+        required: false
+        type: string
+      rollback_target_content_sha256:
+        description: "Rollback CAS: SHA-256 content hash expected for the target revision"
+        required: false
+        type: string
+      rollback_source_key:
+        description: "Rollback public gate: exact active sourceDetailKey"
+        required: false
+        type: string
+      rollback_source_channel_id:
+        description: "Rollback public gate: exact active source channelId"
+        required: false
+        type: string
+      rollback_source_channel_handle:
+        description: "Rollback public gate: exact active source channelHandle"
+        required: false
+        type: string
+      rollback_source_occurrence_count:
+        description: "Rollback public gate: exact active source total occurrence count"
+        required: false
+        type: string
+      rollback_source_video_count:
+        description: "Rollback public gate: exact active source video count"
+        required: false
+        type: string
+      rollback_source_tuple_json:
+        description: "Rollback public gate: unique source tuple JSON (videoId,title,artist,seconds)"
+        required: false
+        type: string
   repository_dispatch:
     types: [accepted-increment-ready]
   workflow_run:
@@ -94,13 +130,15 @@ jobs:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
-      EXPECTED_CURRENT_REVISION: "accepted_30389564789_1"
-      EXPECTED_TARGET_REVISION: "accepted_30347149376_1"
-      EXPECTED_TARGET_CONTENT_SHA256: "5d8a123075e2de5d0221a935004d74fe7e7daf18d0aa90f1f071ebdb3f104b6c"
-      EXPECTED_SOURCE_PATH: "%40urameshi_conta"
-      EXPECTED_SOURCE_DETAIL_KEY: "d24ec2cab8f7f564"
-      EXPECTED_SOURCE_CHANNEL_ID: "UC8VlcljjGFb4-Ny2Heb0-ew"
-      EXPECTED_SOURCE_CHANNEL_HANDLE: "/@urameshi_conta"
+      EXPECTED_CURRENT_REVISION: ${{ inputs.rollback_expected_current_revision || '' }}
+      EXPECTED_TARGET_REVISION: ${{ inputs.rollback_target_parent_revision || '' }}
+      EXPECTED_TARGET_CONTENT_SHA256: ${{ inputs.rollback_target_content_sha256 || '' }}
+      EXPECTED_SOURCE_DETAIL_KEY: ${{ inputs.rollback_source_key || '' }}
+      EXPECTED_SOURCE_CHANNEL_ID: ${{ inputs.rollback_source_channel_id || '' }}
+      EXPECTED_SOURCE_CHANNEL_HANDLE: ${{ inputs.rollback_source_channel_handle || '' }}
+      EXPECTED_SOURCE_OCCURRENCE_COUNT: ${{ inputs.rollback_source_occurrence_count || '' }}
+      EXPECTED_SOURCE_VIDEO_COUNT: ${{ inputs.rollback_source_video_count || '' }}
+      EXPECTED_SOURCE_TUPLE_JSON: ${{ inputs.rollback_source_tuple_json || '' }}
     steps:
       - name: CAS rollback active PostgreSQL revision
         env:
@@ -109,6 +147,14 @@ jobs:
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD" || { echo "PG_ROLLBACK_BLOCKED missing VPS2_PASSWORD"; exit 78; }
+          for required_rollback_input in \
+            EXPECTED_CURRENT_REVISION EXPECTED_TARGET_REVISION EXPECTED_TARGET_CONTENT_SHA256 \
+            EXPECTED_SOURCE_DETAIL_KEY EXPECTED_SOURCE_CHANNEL_ID EXPECTED_SOURCE_CHANNEL_HANDLE \
+            EXPECTED_SOURCE_OCCURRENCE_COUNT EXPECTED_SOURCE_VIDEO_COUNT EXPECTED_SOURCE_TUPLE_JSON; do
+            test -n "${!required_rollback_input}" || {
+              echo "PG_ROLLBACK_BLOCKED missing-${required_rollback_input,,}"; exit 78;
+            }
+          done
           [[ "$EXPECTED_CURRENT_REVISION" =~ ^[A-Za-z0-9._-]+$ ]] || {
             echo "PG_ROLLBACK_BLOCKED invalid-current-revision"; exit 78;
           }
@@ -117,6 +163,31 @@ jobs:
           }
           [[ "$EXPECTED_TARGET_CONTENT_SHA256" =~ ^[0-9a-f]{64}$ ]] || {
             echo "PG_ROLLBACK_BLOCKED invalid-target-content-sha256"; exit 78;
+          }
+          [[ "$EXPECTED_SOURCE_DETAIL_KEY" =~ ^[A-Za-z0-9._-]+$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-key"; exit 78;
+          }
+          [[ "$EXPECTED_SOURCE_CHANNEL_ID" =~ ^UC[A-Za-z0-9_-]{20,}$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-channel-id"; exit 78;
+          }
+          [[ "$EXPECTED_SOURCE_CHANNEL_HANDLE" =~ ^/?@[A-Za-z0-9_.-]+$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-channel-handle"; exit 78;
+          }
+          [[ "$EXPECTED_SOURCE_OCCURRENCE_COUNT" =~ ^[1-9][0-9]*$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-occurrence-count"; exit 78;
+          }
+          [[ "$EXPECTED_SOURCE_VIDEO_COUNT" =~ ^[1-9][0-9]*$ ]] || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-video-count"; exit 78;
+          }
+          jq -e '
+            type == "object" and
+            (.videoId | type == "string" and test("^[A-Za-z0-9_-]{6,}$")) and
+            (.title | type == "string" and length > 0 and length <= 500) and
+            ((.artist | type) == "string" or .artist == null) and
+            ((.seconds | type) == "number" or .seconds == null) and
+            (if .seconds == null then true else (.seconds >= 0 and floor == .seconds) end)
+          ' <<<"$EXPECTED_SOURCE_TUPLE_JSON" >/dev/null || {
+            echo "PG_ROLLBACK_BLOCKED invalid-source-tuple-json"; exit 78;
           }
           test "$EXPECTED_CURRENT_REVISION" != "$EXPECTED_TARGET_REVISION" || {
             echo "PG_ROLLBACK_BLOCKED expected-current-equals-target"; exit 78;
@@ -332,16 +403,9 @@ jobs:
           public_meta_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
             --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-meta.json" -w '%{http_code}' \
             https://ytb-song-rank.culua.com/api/meta)"
-          public_rankings_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
-            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-rankings-7d.json" -w '%{http_code}' \
-            "https://ytb-song-rank.culua.com/api/rankings?range=7d&view=songs&metric=occurrences&q=%40urameshi_conta&page=1&pageSize=1")"
-          public_source_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
-            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-source.json" -w '%{http_code}' \
-            "https://ytb-song-rank.culua.com/api/sources/$EXPECTED_SOURCE_PATH?page=1&pageSize=1")"
+          public_source_http=200
           test "$public_health_http" = 200
           test "$public_meta_http" = 200
-          test "$public_rankings_http" = 200
-          test "$public_source_http" = 200
           jq -e '
             (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
           ' "$TASK_ROOT/public-healthz.json" >/dev/null
@@ -352,33 +416,121 @@ jobs:
           ' "$TASK_ROOT/public-meta.json" >/dev/null || {
             echo "PG_ROLLBACK_BLOCKED public-meta-gate revision=$EXPECTED_TARGET_REVISION"; exit 78;
           }
-          jq -e '
-            (.rangeId == "7d") and
-            (.view == "songs") and
-            (.metric == "occurrences") and
-            (.totalCount == 0) and
-            ((.records | length) == 0)
-          ' "$TASK_ROOT/public-rankings-7d.json" >/dev/null || {
-            echo "PG_ROLLBACK_BLOCKED unexpected-urameshi-7d-ranking"; exit 78;
+          source_key_path="$(printf '%s' "$EXPECTED_SOURCE_DETAIL_KEY" | jq -sRr @uri)"
+          source_page=1
+          source_page_count=0
+          source_returned_occurrences=0
+          source_tuple_matches=0
+          : > "$TASK_ROOT/public-source-video-ids.txt"
+          while :; do
+            public_source_file="$TASK_ROOT/public-source-$source_page.json"
+            public_source_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+              --connect-timeout 8 --max-time 20 -o "$public_source_file" -w '%{http_code}' \
+              "https://ytb-song-rank.culua.com/api/sources/$source_key_path?page=$source_page&pageSize=100")"
+            test "$public_source_http" = 200 || {
+              echo "PG_ROLLBACK_BLOCKED public-source-http-status page=$source_page status=$public_source_http"; exit 78;
+            }
+            source_metrics="$(jq -c \
+              --arg source_key "$EXPECTED_SOURCE_DETAIL_KEY" \
+              --arg channel_id "$EXPECTED_SOURCE_CHANNEL_ID" \
+              --arg channel_handle "$EXPECTED_SOURCE_CHANNEL_HANDLE" \
+              --argjson expected_occurrences "$EXPECTED_SOURCE_OCCURRENCE_COUNT" \
+              --argjson expected_videos "$EXPECTED_SOURCE_VIDEO_COUNT" \
+              --argjson expected_tuple "$EXPECTED_SOURCE_TUPLE_JSON" '
+                def normalize_handle:
+                  if type == "string" then ltrimstr("/") else "" end;
+                (.record.occurrences // []) as $occurrences |
+                {
+                  page:(.page // null),
+                  pageCount:(.pageCount // null),
+                  found:(.found == true),
+                  sourceKey:(.sourceKey // ""),
+                  recordSourceKey:(.record.sourceDetailKey // ""),
+                  channelId:(.record.channelId // ""),
+                  channelHandle:(.record.channelHandle // ""),
+                  totalOccurrenceCount:(.totalOccurrenceCount // .record.occurrenceCount // null),
+                  videoCount:(.record.videoCount // null),
+                  returnedOccurrenceCount:($occurrences | length),
+                  tupleMatchCount:([
+                    $occurrences[]? |
+                    select(
+                      (.videoId == $expected_tuple.videoId) and
+                      (.song.title == $expected_tuple.title) and
+                      ((.song.artist // null) == $expected_tuple.artist) and
+                      ((.song.seconds // null) == $expected_tuple.seconds)
+                    )
+                  ] | length),
+                  occurrenceIdentityMismatchCount:([
+                    $occurrences[]? |
+                    ((.item // .video // {}) as $video |
+                      (($video.channelId // "") != $channel_id) or
+                      ((($video.channelHandle // "") | normalize_handle) !=
+                        ($channel_handle | normalize_handle)))
+                  ] | length)
+                }
+              ' "$public_source_file")"
+            jq -e \
+              --argjson page "$source_page" \
+              --arg source_key "$EXPECTED_SOURCE_DETAIL_KEY" \
+              --arg channel_id "$EXPECTED_SOURCE_CHANNEL_ID" \
+              --arg channel_handle "$EXPECTED_SOURCE_CHANNEL_HANDLE" \
+              --argjson expected_occurrences "$EXPECTED_SOURCE_OCCURRENCE_COUNT" \
+              --argjson expected_videos "$EXPECTED_SOURCE_VIDEO_COUNT" '
+                def normalize_handle:
+                  if type == "string" then ltrimstr("/") else "" end;
+                (.page == $page) and
+                (.pageCount | type == "number" and . >= 1 and . <= 100) and
+                (.found == true) and
+                (.sourceKey == $source_key) and
+                (.recordSourceKey == $source_key) and
+                (.channelId == $channel_id) and
+                ((.channelHandle | normalize_handle) == ($channel_handle | normalize_handle)) and
+                (.totalOccurrenceCount == $expected_occurrences) and
+                (.videoCount == $expected_videos) and
+                (.occurrenceIdentityMismatchCount == 0)
+              ' <<<"$source_metrics" >/dev/null || {
+              echo "PG_ROLLBACK_BLOCKED public-source-identity-or-count-mismatch page=$source_page metrics=$source_metrics"; exit 78;
+            }
+            echo "PG_ROLLBACK_PUBLIC_SOURCE_PAGE page=$source_page metrics=$source_metrics"
+            source_returned_occurrences=$((source_returned_occurrences + $(jq -er '.returnedOccurrenceCount' <<<"$source_metrics")))
+            source_tuple_matches=$((source_tuple_matches + $(jq -er '.tupleMatchCount' <<<"$source_metrics")))
+            jq -r '.record.occurrences[]? | ((.item // .video // {}).videoId // .videoId // empty)' "$public_source_file" >> "$TASK_ROOT/public-source-video-ids.txt"
+            source_page_count="$(jq -er '.pageCount' <<<"$source_metrics")"
+            [ "$source_page" -lt "$source_page_count" ] || break
+            source_page=$((source_page + 1))
+          done
+          test "$source_returned_occurrences" -eq "$EXPECTED_SOURCE_OCCURRENCE_COUNT" || {
+            echo "PG_ROLLBACK_BLOCKED public-source-pagination-occurrence-mismatch expected=$EXPECTED_SOURCE_OCCURRENCE_COUNT actual=$source_returned_occurrences"; exit 78;
           }
-          jq -e \
-            --arg source_key "$EXPECTED_SOURCE_DETAIL_KEY" \
-            --arg channel_id "$EXPECTED_SOURCE_CHANNEL_ID" \
-            --arg channel_handle "$EXPECTED_SOURCE_CHANNEL_HANDLE" '
-            def normalize_handle:
-              if type == "string" then ltrimstr("/") else "" end;
-            (.found == true) and
-            (.sourceKey == $source_key) and
-            (.record.sourceDetailKey == $source_key) and
-            (.record.channelId == $channel_id) and
-            ((.record.channelHandle | normalize_handle) == ($channel_handle | normalize_handle))
-          ' "$TASK_ROOT/public-source.json" >/dev/null || {
-            echo "PG_ROLLBACK_BLOCKED urameshi-source-identity-mismatch"; exit 78;
+          test "$(sort -u "$TASK_ROOT/public-source-video-ids.txt" | sed '/^$/d' | wc -l | tr -d '[:space:]')" -eq "$EXPECTED_SOURCE_VIDEO_COUNT" || {
+            echo "PG_ROLLBACK_BLOCKED public-source-pagination-video-mismatch expected=$EXPECTED_SOURCE_VIDEO_COUNT"; exit 78;
+          }
+          test "$source_tuple_matches" -eq 1 || {
+            echo "PG_ROLLBACK_BLOCKED public-source-tuple-mismatch matches=$source_tuple_matches"; exit 78;
+          }
+          curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
+            --connect-timeout 8 --max-time 20 \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/audit-ranking-source-identities.py" \
+            -o "$TASK_ROOT/audit-ranking-source-identities.py"
+          PYTHONDONTWRITEBYTECODE=1 timeout --signal=TERM --kill-after=15s 12m \
+            python3 "$TASK_ROOT/audit-ranking-source-identities.py" \
+            --base-url https://ytb-song-rank.culua.com --range all --range 7d \
+            --metric count --metric songs --metric videos \
+            --page-size 200 --max-pages 20 --timeout 60 \
+            --expected-active "$EXPECTED_TARGET_REVISION" \
+            --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
+            --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
+            --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
+            --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
+            --source-probe "$EXPECTED_SOURCE_DETAIL_KEY,$EXPECTED_SOURCE_CHANNEL_ID,$EXPECTED_SOURCE_OCCURRENCE_COUNT,$EXPECTED_SOURCE_VIDEO_COUNT" \
+            | tee "$TASK_ROOT/public-p0-identity-audit.log"
+          grep -qx 'IDENTITY_AUDIT_COMPLETE' "$TASK_ROOT/public-p0-identity-audit.log" || {
+            echo "PG_ROLLBACK_BLOCKED public-p0-identity-audit-incomplete"; exit 78;
           }
           printf 'baselineFreeBytes=%s\nremoteFreeBeforeBytes=%s\nexpectedCurrentRevision=%s\nexpectedTargetRevision=%s\nexpectedTargetContentSha256=%s\n' \
             "$baseline_free_bytes" "$remote_free_before" "$EXPECTED_CURRENT_REVISION" "$EXPECTED_TARGET_REVISION" "$EXPECTED_TARGET_CONTENT_SHA256" \
             > "$TASK_ROOT/storage.txt"
-          echo "PG_ROLLBACK_PUBLIC_OK active=$EXPECTED_TARGET_REVISION healthHttp=$public_health_http metaHttp=$public_meta_http rankingsHttp=$public_rankings_http sourceHttp=$public_source_http urameshi7dTotalCount=0 sourceKey=$EXPECTED_SOURCE_DETAIL_KEY channelId=$EXPECTED_SOURCE_CHANNEL_ID"
+          echo "PG_ROLLBACK_PUBLIC_OK active=$EXPECTED_TARGET_REVISION healthHttp=$public_health_http metaHttp=$public_meta_http sourceHttp=$public_source_http sourcePages=$source_page_count sourceKey=$EXPECTED_SOURCE_DETAIL_KEY channelId=$EXPECTED_SOURCE_CHANNEL_ID"
           echo PG_ROLLBACK_STORAGE_BEGIN
           cat "$TASK_ROOT/storage.txt"
           echo PG_ROLLBACK_STORAGE_END

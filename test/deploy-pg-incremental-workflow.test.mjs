@@ -277,26 +277,54 @@ test("PG incremental dispatch can resume only an explicit same-repository artifa
   assert.match(deployWorkflow, /if: \$\{\{ inputs\.artifact_name != '' \}\}/u);
 });
 
-test("rollback-only is a locked artifact-free CAS restore with exact online gates", () => {
+test("rollback-only is a dispatch-time locked artifact-free CAS restore with exact online gates", () => {
   const rollbackJob = workflowJob(deployWorkflow, "rollback", "candidate");
   assert.match(deployWorkflow, /rollback_only:/u);
-  assert.match(
-    deployWorkflow,
-    /EXPECTED_CURRENT_REVISION: "accepted_30389564789_1"/u,
-  );
-  assert.match(
-    deployWorkflow,
-    /EXPECTED_TARGET_REVISION: "accepted_30347149376_1"/u,
-  );
-  assert.match(
-    deployWorkflow,
-    /EXPECTED_TARGET_CONTENT_SHA256: "5d8a123075e2de5d0221a935004d74fe7e7daf18d0aa90f1f071ebdb3f104b6c"/u,
+  for (const input of [
+    "rollback_expected_current_revision",
+    "rollback_target_parent_revision",
+    "rollback_target_content_sha256",
+    "rollback_source_key",
+    "rollback_source_channel_id",
+    "rollback_source_channel_handle",
+    "rollback_source_occurrence_count",
+    "rollback_source_video_count",
+    "rollback_source_tuple_json",
+  ]) {
+    assert.match(deployWorkflow, new RegExp(`\\n      ${input}:\\n`, "u"));
+  }
+  assert.match(deployWorkflow, /EXPECTED_CURRENT_REVISION: \$\{\{ inputs\.rollback_expected_current_revision \|\| '' \}\}/u);
+  assert.match(deployWorkflow, /EXPECTED_TARGET_REVISION: \$\{\{ inputs\.rollback_target_parent_revision \|\| '' \}\}/u);
+  assert.match(deployWorkflow, /EXPECTED_TARGET_CONTENT_SHA256: \$\{\{ inputs\.rollback_target_content_sha256 \|\| '' \}\}/u);
+  for (const staleRollbackValue of [
+    "accepted_30389564789_1",
+    "accepted_30347149376_1",
+    "5d8a123075e2de5d0221a935004d74fe7e7daf18d0aa90f1f071ebdb3f104b6c",
+    "d24ec2cab8f7f564",
+  ]) {
+    assert.doesNotMatch(rollbackJob, new RegExp(staleRollbackValue, "u"));
+  }
+  assert.doesNotMatch(
+    rollbackJob,
+    /EXPECTED_SOURCE_CHANNEL_ID: "UC8VlcljjGFb4-Ny2Heb0-ew"/u,
+    "the source identity must be dispatch input, not a rollback default",
   );
   assert.match(
     rollbackJob,
     /github\.event_name == 'workflow_dispatch' && inputs\.rollback_only == true/u,
   );
   assert.doesNotMatch(rollbackJob, /download-artifact|ARTIFACT_NAME|import-pg-incremental|activate-pg-candidate/u);
+  assert.match(rollbackJob, /missing-\$\{required_rollback_input,,\}/u);
+  assert.match(rollbackJob, /invalid-current-revision/u);
+  assert.match(rollbackJob, /invalid-target-revision/u);
+  assert.match(rollbackJob, /invalid-target-content-sha256/u);
+  assert.match(rollbackJob, /invalid-source-key/u);
+  assert.match(rollbackJob, /invalid-source-channel-id/u);
+  assert.match(rollbackJob, /invalid-source-channel-handle/u);
+  assert.match(rollbackJob, /invalid-source-occurrence-count/u);
+  assert.match(rollbackJob, /invalid-source-video-count/u);
+  assert.match(rollbackJob, /invalid-source-tuple-json/u);
+  assert.match(rollbackJob, /exit 78/u);
   assert.match(rollbackJob, /PG_ROLLBACK_WAIT concurrent-release/u);
   assert.match(rollbackJob, /pg_advisory_xact_lock\(hashtext\('daily-song-list\/active'\)\)/u);
   assert.match(rollbackJob, /WHERE state_key='active_revision_id'\s+FOR UPDATE/u);
@@ -314,10 +342,27 @@ test("rollback-only is a locked artifact-free CAS restore with exact online gate
     "all three rollback updates must assert exactly one affected row",
   );
   assert.match(rollbackJob, /systemctl restart song-rank-pg-api/u);
-  assert.match(rollbackJob, /q=%40urameshi_conta/u);
-  assert.match(rollbackJob, /\.totalCount == 0/u);
-  assert.match(rollbackJob, /UC8VlcljjGFb4-Ny2Heb0-ew/u);
-  assert.match(rollbackJob, /d24ec2cab8f7f564/u);
+  assert.match(rollbackJob, /api\/sources\/\$source_key_path\?page=\$source_page&pageSize=100/u);
+  assert.match(rollbackJob, /source_returned_occurrences.*EXPECTED_SOURCE_OCCURRENCE_COUNT/u);
+  assert.match(rollbackJob, /public-source-pagination-video-mismatch/u);
+  assert.match(rollbackJob, /public-source-tuple-mismatch/u);
+  assert.match(rollbackJob, /occurrenceIdentityMismatchCount/u);
+  assert.match(rollbackJob, /source_tuple_matches.*-eq 1/u);
+  assert.match(rollbackJob, /audit-ranking-source-identities\.py/u);
+  assert.match(rollbackJob, /timeout --signal=TERM --kill-after=15s 12m/u);
+  for (const requiredAuditArgument of [
+    "--range all --range 7d",
+    "--metric count --metric songs --metric videos",
+    "--page-size 200 --max-pages 20 --timeout 60",
+    "--channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg'",
+    "--channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA'",
+    "--channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ'",
+    "--channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew'",
+  ]) {
+    assert.ok(rollbackJob.includes(requiredAuditArgument), `missing P0 audit argument: ${requiredAuditArgument}`);
+  }
+  assert.doesNotMatch(rollbackJob, /--negative-query\s+''/u);
+  assert.match(rollbackJob, /IDENTITY_AUDIT_COMPLETE/u);
   assert.match(rollbackJob, /PG_ROLLBACK_PUBLIC_OK/u);
   assert.match(rollbackJob, /PG_ROLLBACK_CLEANUP/u);
   assert.match(
@@ -337,6 +382,8 @@ test("rollback-only is a locked artifact-free CAS restore with exact online gate
     /github\.event_name != 'workflow_dispatch' \|\| inputs\.rollback_only != true/u,
     "normal candidate work must be skipped in rollback-only mode",
   );
+  assert.match(deployWorkflow, /group: daily-song-list-pg-increment/u);
+  assert.match(deployWorkflow, /cancel-in-progress: false/u);
 });
 
 test("accepted commits prepare a deterministic hashed artifact before the reusable deploy", () => {
