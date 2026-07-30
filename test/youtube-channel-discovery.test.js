@@ -1,13 +1,59 @@
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const { spawnSync } = require("node:child_process");
 const test = require("node:test");
 
 process.env.DAILY_SONG_REQUEST_DELAY_MS = "0";
 process.env.DAILY_SONG_REQUEST_JITTER_MS = "0";
 
-const { extractSearchItems } = require("../scripts/update-songlist");
+function textValue(value) {
+  if (typeof value === "string") return value;
+  if (value?.simpleText) return value.simpleText;
+  if (value?.content) return value.content;
+  return (value?.runs || []).map((item) => item?.text || "").join("");
+}
+
+function extractSearchItems(data) {
+  const records = [];
+  const walk = (value) => {
+    if (!value || typeof value !== "object") return;
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+      return;
+    }
+    if (value.videoRenderer?.videoId) {
+      const item = value.videoRenderer;
+      const owner = item.ownerText?.runs?.[0] || {};
+      records.push({
+        videoId: item.videoId,
+        title: textValue(item.title),
+        channelName: owner.text || "",
+        channelId: owner.navigationEndpoint?.browseEndpoint?.browseId || "",
+        publishedText: textValue(item.publishedTimeText),
+        durationText: textValue(item.lengthText),
+        thumbnailUrl: (item.thumbnail?.thumbnails || []).at(-1)?.url || "",
+      });
+    }
+    if (value.lockupViewModel?.contentId) {
+      const item = value.lockupViewModel;
+      const metadataParts = item.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows?.[0]?.metadataParts || [];
+      records.push({
+        videoId: item.contentId,
+        title: textValue(item.metadata?.lockupMetadataViewModel?.title),
+        publishedText: textValue(metadataParts.at(-1)?.text),
+        durationText: textValue(item.contentImage?.thumbnailViewModel?.overlays?.[0]?.thumbnailBottomOverlayViewModel?.badges?.[0]?.thumbnailBadgeViewModel?.text),
+        thumbnailUrl: (item.contentImage?.thumbnailViewModel?.image?.sources || []).at(-1)?.url || "",
+      });
+    }
+    Object.values(value).forEach(walk);
+  };
+  walk(data);
+  return records;
+}
+
 const {
   channelDiscoveryOptionsFromArgs,
   channelTabUrls,
@@ -15,10 +61,12 @@ const {
   filterDiscoveryCandidates,
   findBrowseContinuation,
   matchedDiscoveryKeywords,
+  normalizeChannelUrl,
   occurrenceRecordsFromDetail,
   parseCliArgs,
   parseYouTubePage,
   rawVideoCandidate,
+  recomputeCandidatePageEvidence,
   runChannelDiscovery,
 } = require("../scripts/youtube-channel-discovery-core");
 
@@ -47,6 +95,16 @@ test("channel options normalize YouTube handles, tabs, keywords, and output path
     "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1",
     "https://www.youtube.com/@noa_polaris/videos?hl=ja&persist_hl=1",
   ]);
+  assert.equal(channelDiscoveryOptionsFromArgs(parseCliArgs(["--channel-url", "https://m.youtube.com/@Noa_Polaris/streams?ignored=1"])).channelUrl, "https://www.youtube.com/@noa_polaris/streams");
+  assert.throws(() => normalizeChannelUrl(""));
+  for (const invalidChannelUrl of ["https://www.youtube.com/browse", "https://evil.youtube.com/@noa_polaris", "https://notyoutube.example/@noa_polaris", "https://www.youtube.com/@noa_polaris/about"]) {
+    assert.throws(() => channelDiscoveryOptionsFromArgs(parseCliArgs(["--channel-url", invalidChannelUrl])));
+  }
+  for (const expectedHandle of ["", "@", "https://www.youtube.com/@noa_polaris", "@noa;touch-pwned", "＠noa_polaris"]) {
+    assert.throws(() => channelDiscoveryOptionsFromArgs(parseCliArgs([
+      "--channel-url", "@noa_polaris", "--expected-channel-id", "UCIu1rRiQLeUU8e1saN6I0eg", "--expected-channel-handle", expectedHandle, "--candidate-only",
+    ])), /exact ASCII/u);
+  }
 });
 
 test("channel page parser extracts renderers and browse continuation", () => {
@@ -148,7 +206,7 @@ test("detail can reuse a verified candidate manifest without rediscovery", async
     inspectShardIndex: 0,
     inspectShardCount: 1,
     fresh: true,
-    candidateOnly: true,
+    candidateOnly: false,
   }, { client: { metrics: {}, getText: async () => { throw new Error("candidate manifest reuse unexpectedly rediscovered source"); } }, extractSearchItems: () => [] });
   assert.equal(result.manifest.sourceReachedEnd, true);
   assert.equal(result.rawVideos.length, 1);
@@ -197,7 +255,7 @@ test("search discovery routes continuation to youtubei search", async () => {
       requestIntervalMs: 0,
       requestJitterMs: 0,
       fresh: true,
-      candidateOnly: true,
+      candidateOnly: false,
     },
     { client, extractSearchItems, fetchImpl },
   );
@@ -229,7 +287,7 @@ test("continuation aborts stalled requests", async () => {
   );
   assert.equal(calls, 1);
 });
-test("channel discovery handles YouTube lockupViewModel channel pages", () => {
+test("channel discovery handles YouTube lockupViewModel channel pages", async () => {
   const data = {
     metadata: {
       channelMetadataRenderer: {
@@ -262,6 +320,45 @@ test("channel discovery handles YouTube lockupViewModel channel pages", () => {
   assert.equal(items[0].durationText, "27:45");
   assert.equal(items[0].thumbnailUrl, "https://i.ytimg.com/vi/EEEEEEEEEEE/hqdefault.jpg");
   assert.deepEqual(filtered[0].matchedKeywords, ["歌", "リレー"]);
+  const wrongPageData = channelData({ videos: [] });
+  wrongPageData.metadata = {
+    channelMetadataRenderer: {
+      title: "Noa Polaris",
+      externalId: "UCIu1rRiQLeUU8e1saN6I0eg",
+      ownerUrls: ["https://www.youtube.com/@noa_polaris"],
+    },
+  };
+  const wrongPageUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const wrongPageHtml = youtubeHtml({ initialData: wrongPageData });
+  await assert.rejects(
+    () => runChannelDiscovery({
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      discoveryUrl: wrongPageUrl,
+      expectedChannelId: "UCIu1rRiQLeUU8e1saN6I0eg",
+      expectedChannelHandle: "@noa_polaris",
+      outputDir: fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-wrong-page-test-")),
+      cacheDir: fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-wrong-page-cache-")),
+      keywords: ["song"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 0,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: true,
+    }, {
+      client: {
+        metrics: { requestCount: 1 },
+        async getText() {
+          return { status: 200, body: wrongPageHtml, url: "https://www.youtube.com/@other_handle/streams", bytes: Buffer.byteLength(wrongPageHtml), fromCache: false };
+        },
+      },
+      extractSearchItems,
+      inspectVideoSongList: async () => null,
+    }),
+    /observed channel redirect differs|observed discovery page identity mismatch/u,
+  );
 });
 
 test("runChannelDiscovery writes raw videos, parsed details, occurrences, and report", async () => {
@@ -493,6 +590,195 @@ test("channel discovery can inspect a deterministic candidate shard", async () =
   assert.equal(result.manifest.inspectShardIndex, 1);
   assert.equal(result.manifest.inspectShardCount, 2);
   assert.equal(result.manifest.usableVideoCount, 2);
+});
+
+test("raw continuation bodies bind initial, inter-round, and terminal tokens during replay", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-continuation-replay-"));
+  const expectedChannelId = "UCIu1rRiQLeUU8e1saN6I0eg";
+  const expectedHandle = "@noa_polaris";
+  const channelUrl = `https://www.youtube.com/${expectedHandle}`;
+  const tokenHash = (token) => token ? crypto.createHash("sha256").update(token, "utf8").digest("hex") : "";
+  const chainHash = (previous, request) => crypto.createHash("sha256").update(`${previous}\n${request}`, "utf8").digest("hex");
+  const ownedVideo = (videoId, title) => {
+    const renderer = videoRenderer(videoId, title, "2 days ago");
+    renderer.ownerText.runs[0].navigationEndpoint.browseEndpoint = {
+      browseId: expectedChannelId,
+      canonicalBaseUrl: expectedHandle,
+    };
+    return renderer;
+  };
+  const initialPage = (videoId, token) => ({
+    channelMetadataRenderer: {
+      title: "Noa Polaris",
+      externalId: expectedChannelId,
+      vanityChannelUrl: channelUrl,
+    },
+    ...channelData({ videos: [ownedVideo(videoId, `LIVE ${videoId}`)], continuation: token }),
+  });
+  const continuationPage = (videoId, nextToken = "") =>
+    channelData({ videos: [ownedVideo(videoId, `LIVE ${videoId}`)], continuation: nextToken });
+  const responses = new Map([
+    ["STREAMS_1", continuationPage("CCCCCCCCCCC", "STREAMS_2")],
+    ["STREAMS_2", continuationPage("DDDDDDDDDDD")],
+    ["VIDEOS_1", continuationPage("GGGGGGGGGGG", "VIDEOS_2")],
+    ["VIDEOS_2", continuationPage("HHHHHHHHHHH")],
+  ]);
+  const options = {
+    channelUrl,
+    expectedChannelId,
+    expectedChannelHandle: expectedHandle,
+    singerName: "Noa Polaris",
+    outputDir: dir,
+    cacheDir: path.join(dir, "cache"),
+    keywords: ["LIVE"],
+    tabs: ["streams", "videos"],
+    maxChannelPages: 3,
+    maxCandidates: 20,
+    maxInspect: 0,
+    requestIntervalMs: 0,
+    requestTimeoutMs: 1000,
+    requestJitterMs: 0,
+    fresh: true,
+    forceRefresh: true,
+    sourceCommit: "a".repeat(40),
+    channelSlug: "noa-polaris",
+    candidateOnly: true,
+  };
+  let initialCalls = 0;
+  try {
+    const result = await runChannelDiscovery(options, {
+      client: {
+        metrics: {},
+        async getText(pageUrl) {
+          const isStreams = initialCalls++ === 0;
+          const body = youtubeHtml({
+            initialData: initialPage(isStreams ? "AAAAAAAAAAA" : "BBBBBBBBBBB", isStreams ? "STREAMS_1" : "VIDEOS_1"),
+          });
+          return { status: 200, body, bytes: Buffer.byteLength(body), url: pageUrl.split("?")[0] };
+        },
+      },
+      extractSearchItems,
+      async fetchImpl(_url, init) {
+        const token = JSON.parse(init.body).continuation;
+        const data = responses.get(token);
+        assert.ok(data, `unexpected continuation token ${token}`);
+        return { ok: true, status: 200, text: async () => JSON.stringify(data) };
+      },
+    });
+    assert.equal(result.manifest.complete, true);
+    assert.deepEqual(result.manifest.pageSummaries.map((page) => page.continuationRounds), [2, 2]);
+    assert.equal(fs.existsSync(path.join(dir, "candidate-manifest.ndjson")), true);
+    assert.equal(result.manifest.kind, "channel-discovery-source-manifest");
+    assert.equal(result.manifest.pageEvidenceFiles.length, 6);
+    const checkpoint = JSON.parse(fs.readFileSync(path.join(dir, "checkpoint.json"), "utf8"));
+    assert.equal(checkpoint.kind, "channel-discovery-candidate-checkpoint");
+    assert.deepEqual(checkpoint.discoveryCheckpoint.pageSummaries, result.manifest.pageSummaries);
+    const request = {
+      schemaVersion: 1,
+      kind: "channel-discovery-candidate-run",
+      sourceCommit: options.sourceCommit,
+      channelId: expectedChannelId,
+      channelHandle: expectedHandle,
+      channelSlug: options.channelSlug,
+      channelUrl,
+      expectedChannelId,
+      expectedChannelHandle: expectedHandle,
+      expectedChannelUrl: channelUrl,
+      expectedTabs: ["streams", "videos"],
+      maxChannelPages: options.maxChannelPages,
+      maxVideos: options.maxCandidates,
+      forceRefresh: true,
+      candidateOnly: true,
+    };
+    const requestPath = path.join(dir, "request.json");
+    fs.writeFileSync(requestPath, `${JSON.stringify(request)}\n`, "utf8");
+    const gateArgs = [
+      "-e", "-s",
+      "--arg", "expectedSourceCommit", options.sourceCommit,
+      "--arg", "expectedChannelId", expectedChannelId,
+      "--arg", "expectedChannelHandle", expectedHandle,
+      "--arg", "expectedChannelUrl", channelUrl,
+    ];
+    const artifactGate = spawnSync("jq", [
+      ...gateArgs,
+      "--slurpfile", "requestFile", requestPath,
+      "--slurpfile", "sourceManifestFile", path.join(dir, "manifest.json"),
+      "--slurpfile", "checkpointFile", path.join(dir, "checkpoint.json"),
+      "-f", path.join(__dirname, "..", "scripts", "channel-discovery-candidate-artifact-gate.jq"),
+      path.join(dir, "candidate-manifest.ndjson"),
+    ], { encoding: "utf8" });
+    assert.equal(artifactGate.status, 0, artifactGate.stderr || artifactGate.stdout);
+    const recordsGate = spawnSync("jq", [
+      ...gateArgs,
+      "--argjson", "maxVideos", String(options.maxCandidates),
+      "--slurpfile", "sourceManifestFile", path.join(dir, "manifest.json"),
+      "-f", path.join(__dirname, "..", "scripts", "channel-discovery-candidate-records-gate.jq"),
+      path.join(dir, "candidate-manifest.ndjson"),
+    ], { encoding: "utf8" });
+    assert.equal(recordsGate.status, 0, recordsGate.stderr || recordsGate.stdout);
+
+    const page = result.manifest.pageSummaries[0];
+    const initialBody = fs.readFileSync(path.join(dir, page.evidencePath));
+    const continuationBodies = new Map(page.continuationEvidence.map((entry) => [
+      entry.evidencePath,
+      fs.readFileSync(path.join(dir, entry.evidencePath)),
+    ]));
+    assert.deepEqual(
+      recomputeCandidatePageEvidence(initialBody, page, options, extractSearchItems, continuationBodies),
+      { rawItemCount: 3, candidateCount: 3 },
+    );
+
+    const rejectedTreeSelfReportedGate = (summary) =>
+      summary.pageCount === summary.continuationRounds + 1 &&
+      summary.continuationEvidence.length === summary.continuationRounds &&
+      summary.continuationEvidence.every((entry, index) =>
+        entry.round === index + 1 &&
+        /^[a-f0-9]{64}$/u.test(entry.requestTokenSha256) &&
+        (entry.nextTokenSha256 === "" || /^[a-f0-9]{64}$/u.test(entry.nextTokenSha256)));
+
+    const initialMismatch = structuredClone(page);
+    initialMismatch.continuationEvidence[0].requestTokenSha256 = tokenHash("FORGED_INITIAL");
+    initialMismatch.continuationEvidence[0].tokenChainSha256 = chainHash("", initialMismatch.continuationEvidence[0].requestTokenSha256);
+    initialMismatch.continuationEvidence[1].tokenChainSha256 = chainHash(
+      initialMismatch.continuationEvidence[0].tokenChainSha256,
+      initialMismatch.continuationEvidence[1].requestTokenSha256,
+    );
+    assert.equal(rejectedTreeSelfReportedGate(initialMismatch), true);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, initialMismatch, options, extractSearchItems, continuationBodies),
+      /initial evidence continuation token does not bind round 1/u,
+    );
+
+    const rawNextMismatch = structuredClone(page);
+    const forgedNextHash = tokenHash("FORGED_NEXT_ROUND");
+    rawNextMismatch.continuationEvidence[0].nextTokenSha256 = forgedNextHash;
+    rawNextMismatch.continuationEvidence[1].requestTokenSha256 = forgedNextHash;
+    rawNextMismatch.continuationEvidence[1].tokenChainSha256 = chainHash(
+      rawNextMismatch.continuationEvidence[0].tokenChainSha256,
+      forgedNextHash,
+    );
+    assert.equal(rejectedTreeSelfReportedGate(rawNextMismatch), true);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, rawNextMismatch, options, extractSearchItems, continuationBodies),
+      /continuation raw next token mismatch/u,
+    );
+
+    const forgedTerminal = structuredClone(page);
+    forgedTerminal.continuationEvidence = [{ ...forgedTerminal.continuationEvidence[0], nextTokenSha256: "" }];
+    forgedTerminal.continuationRounds = 1;
+    forgedTerminal.pageCount = 2;
+    forgedTerminal.rawItemCount = 2;
+    forgedTerminal.candidateCount = 2;
+    forgedTerminal.reachedEnd = true;
+    forgedTerminal.requiresContinuation = false;
+    assert.equal(rejectedTreeSelfReportedGate(forgedTerminal), true);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, forgedTerminal, options, extractSearchItems, continuationBodies),
+      /continuation raw next token mismatch|raw continuation terminal state mismatch/u,
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("raw and occurrence records carry fields needed by the review/import pipeline", () => {

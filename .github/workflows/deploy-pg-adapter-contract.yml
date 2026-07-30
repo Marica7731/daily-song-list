@@ -39,9 +39,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Three serialized 12m audits reserve 36m; keep 9m for startup, install,
-    # rollback, log collection, and cleanup so Actions cannot kill rollback mid-flight.
-    timeout-minutes: 45
+    # Candidate and installed-public quick gates are independently bounded;
+    # reserve enough time for rollback and cleanup without exhaustive paging.
+    timeout-minutes: 20
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
@@ -103,7 +103,7 @@ jobs:
             echo "DISPLAY=daily-song-list"
           } >> "$GITHUB_ENV"
 
-      - name: Start candidate and verify source-detail contract
+      - name: Start candidate and run minimal quick gate
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
@@ -126,7 +126,7 @@ jobs:
           }
           trap cleanup_candidate EXIT
           systemd-run --quiet --collect --unit="$candidate_unit" \
-            --uid=www-data --property=RuntimeMaxSec=13m \
+            --uid=www-data --property=RuntimeMaxSec=8m \
             --setenv=PGHOST=/var/run/postgresql \
             --setenv=PGDATABASE=song_rank \
             --setenv=PGUSER=www-data \
@@ -145,56 +145,316 @@ jobs:
           done
           systemctl is-active --quiet "$candidate_unit"
           ss -ltn 'sport = :18766' | grep -q LISTEN
-          curl --silent --show-error --fail --max-time 60 \
-            http://127.0.0.1:18766/healthz > "$remote_root/candidate-healthz.json" || {
+          base_url="http://127.0.0.1:18766"
+          curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            "$base_url/healthz" > "$remote_root/candidate-healthz.json" || {
               journalctl -u "$candidate_unit" -n 80 --no-pager
               exit 1
             }
-          test -s "$remote_root/candidate-healthz.json"
-          set +e
-          timeout --signal=TERM --kill-after=15s 12m \
+          jq -e 'type == "object"' "$remote_root/candidate-healthz.json" >/dev/null
+
+          meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/candidate-meta.json" --write-out '%{http_code}' \
+            "$base_url/api/meta")"
+          test "$meta_http_code" = 200
+          jq -e --arg expected "$expected_active" \
+            '(.meta.active_revision_id // .active_revision_id // .activeRevisionId) == $expected' \
+            "$remote_root/candidate-meta.json" >/dev/null
+
+          rankings_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/candidate-page1.json" --write-out '%{http_code}' \
+            "$base_url/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
+          test "$rankings_http_code" = 200
+
+          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
+          negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
+            --data-urlencode 'metric=count' --data-urlencode 'page=1' \
+            --data-urlencode 'pageSize=20' \
+            --data-urlencode 'searchFields=title,channel' \
+            --data "q=$negative_query" \
+            --output "$remote_root/candidate-negative.json" --write-out '%{http_code}' \
+            "$base_url/api/rankings")"
+          test "$negative_http_code" = 200
+
+          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/candidate-source.json" --write-out '%{http_code}' \
+            "$base_url/api/sources/$source_key?page=1&pageSize=20")"
+          test "$source_http_code" = 200
+
+          timeout --signal=TERM --kill-after=10s 3m \
             python3 "$remote_root/server/audit-ranking-source-identities.py" \
-              --base-url http://127.0.0.1:18766 \
-              --range all --range 7d \
-              --metric count --metric songs --metric videos \
-              --page-size 20 --max-pages 200 --concurrency 4 --timeout 60 \
+              --base-url "$base_url" --skip-rankings \
+              --negative-query "" --page-size 20 --max-pages 1 \
+              --timeout 20 --concurrency 4 \
               --expected-active "$expected_active" \
-              --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
               --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
+              --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
               --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
               --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
-              --source-probe "$source_key,$source_channel_id,$source_occurrence_count,$source_video_count" \
-              > "$remote_root/candidate-identity-audit.log" 2>&1
-          audit_status="$?"
-          set -e
-          # The cap bounds this at 6*200 ranking pages plus the fixed probes.
-          # Preserve every per-request timing/progress marker in the job log.
-          cat "$remote_root/candidate-identity-audit.log"
-          if [ "$audit_status" -ne 0 ]; then
-            journalctl -u "$candidate_unit" -n 160 --no-pager
-          fi
-          exit "$audit_status"
+              > "$remote_root/candidate-handles.log" 2>&1
+          cat "$remote_root/candidate-handles.log"
+
+          python3 - \
+            "$remote_root/candidate-page1.json" \
+            "$remote_root/candidate-negative.json" \
+            "$remote_root/candidate-source.json" \
+            "$source_key" "$source_channel_id" \
+            "$source_occurrence_count" "$source_video_count" <<'PY'
+          import json
+          import sys
+
+          page_path, negative_path, source_path = sys.argv[1:4]
+          source_key, source_channel_id = sys.argv[4:6]
+          expected_occurrences, expected_videos = map(int, sys.argv[6:8])
+
+          with open(page_path, encoding="utf-8") as stream:
+              page = json.load(stream)
+          records = page.get("records")
+          if not isinstance(records, list):
+              raise AssertionError("ranking records are missing")
+          for card in records:
+              count = int(card.get("count") or card.get("timestampCount") or 0)
+              if count <= 0:
+                  continue
+              occurrences = card.get("occurrences")
+              if not isinstance(occurrences, list) or not occurrences:
+                  raise AssertionError("positive ranking card has no occurrence")
+              channel_id = str(card.get("channelId") or "")
+              if not channel_id:
+                  raise AssertionError("ranking channel identity mismatch")
+              for occurrence in occurrences:
+                  item = occurrence.get("item") or {}
+                  video = occurrence.get("video") or {}
+                  if item.get("channelId") != channel_id or video.get("channelId") != channel_id:
+                      raise AssertionError("ranking channel identity mismatch")
+                  item_video_id = str(item.get("videoId") or "")
+                  video_video_id = str(video.get("videoId") or "")
+                  occurrence_video_id = str(occurrence.get("videoId") or item_video_id)
+                  if not item_video_id or item_video_id != video_video_id or item_video_id != occurrence_video_id:
+                      raise AssertionError("ranking video identity mismatch")
+                  item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
+                  video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
+                  if not item_thumbnail or item_thumbnail != video_thumbnail:
+                      raise AssertionError("ranking thumbnail identity mismatch")
+
+          with open(negative_path, encoding="utf-8") as stream:
+              negative = json.load(stream)
+          if negative.get("records") or int(negative.get("totalCount") or 0) != 0:
+              raise AssertionError("negative ranking query returned records")
+
+          with open(source_path, encoding="utf-8") as stream:
+              source = json.load(stream)
+          if source.get("found") is not True or source.get("sourceKey") != source_key:
+              raise AssertionError("source input identity mismatch")
+          if int(source.get("page") or 0) != 1 or int(source.get("pageSize") or 0) != 20:
+              raise AssertionError("source page mismatch")
+          if int(source.get("totalOccurrenceCount") or -1) != expected_occurrences:
+              raise AssertionError("source occurrence total mismatch")
+          if int(source.get("totalVideoCount") or -1) != expected_videos:
+              raise AssertionError("source video total mismatch")
+          record = source.get("record") or {}
+          if record.get("sourceDetailKey") != source_key or record.get("channelId") != source_channel_id:
+              raise AssertionError("source channel identity mismatch")
+          source_occurrences = record.get("occurrences")
+          if not isinstance(source_occurrences, list) or (expected_occurrences > 0 and not source_occurrences):
+              raise AssertionError("source page has no occurrence")
+          for occurrence in source_occurrences:
+              item = occurrence.get("item") or {}
+              video = occurrence.get("video") or {}
+              if item.get("channelId") != source_channel_id or video.get("channelId") != source_channel_id:
+                  raise AssertionError("source channel identity mismatch")
+              occurrence_video_id = str(occurrence.get("videoId") or "")
+              item_video_id = str(item.get("videoId") or "")
+              video_video_id = str(video.get("videoId") or "")
+              if not occurrence_video_id or occurrence_video_id != item_video_id or occurrence_video_id != video_video_id:
+                  raise AssertionError("source video identity mismatch")
+              item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
+              video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
+              if not item_thumbnail or item_thumbnail != video_thumbnail:
+                  raise AssertionError("source thumbnail identity mismatch")
+          PY
+          touch "$remote_root/candidate-quick-gate-passed"
           REMOTE
 
       - name: Install verified adapter and retain rollback files until health passes
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; install -d -m 0755 '$REMOTE_ROOT/backup' /opt/culua/ytb-song-rank/server; cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$REMOTE_ROOT/backup/pg_adapter.py'; cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$REMOTE_ROOT/backup/pg_api_server.py'; rollback_adapter() { install -m 0644 '$REMOTE_ROOT/backup/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/backup/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; }; trap rollback_adapter ERR; install -m 0644 '$REMOTE_ROOT/server/pg_adapter.py' /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 '$REMOTE_ROOT/server/pg_api_server.py' /opt/culua/ytb-song-rank/server/pg_api_server.py; systemctl restart song-rank-pg-api; for n in \$(seq 1 20); do systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN && break; sleep 1; done; systemctl is-active --quiet song-rank-pg-api; ss -ltn 'sport = :8765' | grep -q LISTEN; curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/healthz >/dev/null || { journalctl -u song-rank-pg-api -n 80 --no-pager; false; }; timeout --signal=TERM --kill-after=15s 12m python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url http://127.0.0.1:8765 --skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-local-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-local-identity-audit.log'; false; }; timeout --signal=TERM --kill-after=15s 12m python3 '$REMOTE_ROOT/server/audit-ranking-source-identities.py' --base-url '$PUBLIC_BASE' --skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4 --expected-active '$EXPECTED_ACTIVE_REVISION' --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' --source-probe '$SOURCE_KEY,$SOURCE_CHANNEL_ID,$SOURCE_OCCURRENCE_COUNT,$SOURCE_VIDEO_COUNT' > '$REMOTE_ROOT/production-public-identity-audit.log' 2>&1 || { tail -n 60 '$REMOTE_ROOT/production-public-identity-audit.log'; false; }; curl --silent --show-error --fail --connect-timeout 8 --max-time 20 '$PUBLIC_BASE/healthz' > '$REMOTE_ROOT/production-public-healthz.json' || { tail -n 60 '$REMOTE_ROOT/production-public-identity-audit.log'; false; }; test -s '$REMOTE_ROOT/production-public-healthz.json'; tail -n 20 '$REMOTE_ROOT/production-local-identity-audit.log'; tail -n 20 '$REMOTE_ROOT/production-public-identity-audit.log'; rm -rf '$REMOTE_ROOT/backup'; trap - ERR"
-          printf 'PUBLIC_IDENTITY_AUDIT_PASSED=1\n' >> "$GITHUB_ENV"
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$PUBLIC_BASE" "$EXPECTED_ACTIVE_REVISION" \
+            "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" \
+            "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" <<'REMOTE'
+          set -Eeuo pipefail
+          remote_root="$1"
+          public_base="$2"
+          expected_active="$3"
+          source_key="$4"
+          source_channel_id="$5"
+          source_occurrence_count="$6"
+          source_video_count="$7"
 
-      - name: Verify public API and cleanup
+          install -d -m 0755 "$remote_root/backup" /opt/culua/ytb-song-rank/server
+          cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py "$remote_root/backup/pg_adapter.py"
+          cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py "$remote_root/backup/pg_api_server.py"
+          rollback_adapter() {
+            install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+            install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+            systemctl restart song-rank-pg-api
+          }
+          trap rollback_adapter ERR
+
+          install -m 0644 "$remote_root/server/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+          install -m 0644 "$remote_root/server/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+          systemctl restart song-rank-pg-api
+          for unused in $(seq 1 20); do
+            systemctl is-active --quiet song-rank-pg-api \
+              && ss -ltn 'sport = :8765' | grep -q LISTEN \
+              && break
+            sleep 1
+          done
+          systemctl is-active --quiet song-rank-pg-api
+          ss -ltn 'sport = :8765' | grep -q LISTEN
+
+          curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            "$public_base/healthz" > "$remote_root/production-public-healthz.json"
+          jq -e 'type == "object"' "$remote_root/production-public-healthz.json" >/dev/null
+
+          meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/production-public-meta.json" --write-out '%{http_code}' \
+            "$public_base/api/meta")"
+          test "$meta_http_code" = 200
+          jq -e --arg expected "$expected_active" \
+            '(.meta.active_revision_id // .active_revision_id // .activeRevisionId) == $expected' \
+            "$remote_root/production-public-meta.json" >/dev/null
+
+          rankings_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/production-public-page1.json" --write-out '%{http_code}' \
+            "$public_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
+          test "$rankings_http_code" = 200
+
+          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
+          negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
+            --data-urlencode 'metric=count' --data-urlencode 'page=1' \
+            --data-urlencode 'pageSize=20' \
+            --data-urlencode 'searchFields=title,channel' \
+            --data "q=$negative_query" \
+            --output "$remote_root/production-public-negative.json" --write-out '%{http_code}' \
+            "$public_base/api/rankings")"
+          test "$negative_http_code" = 200
+
+          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+            --output "$remote_root/production-public-source.json" --write-out '%{http_code}' \
+            "$public_base/api/sources/$source_key?page=1&pageSize=20")"
+          test "$source_http_code" = 200
+
+          timeout --signal=TERM --kill-after=10s 3m \
+            python3 "$remote_root/server/audit-ranking-source-identities.py" \
+              --base-url "$public_base" --skip-rankings \
+              --negative-query "" --page-size 20 --max-pages 1 \
+              --timeout 20 --concurrency 4 \
+              --expected-active "$expected_active" \
+              --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
+              --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
+              --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
+              --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
+              > "$remote_root/production-public-handles.log" 2>&1
+          cat "$remote_root/production-public-handles.log"
+
+          python3 - \
+            "$remote_root/production-public-page1.json" \
+            "$remote_root/production-public-negative.json" \
+            "$remote_root/production-public-source.json" \
+            "$source_key" "$source_channel_id" \
+            "$source_occurrence_count" "$source_video_count" <<'PY'
+          import json
+          import sys
+
+          page_path, negative_path, source_path = sys.argv[1:4]
+          source_key, source_channel_id = sys.argv[4:6]
+          expected_occurrences, expected_videos = map(int, sys.argv[6:8])
+
+          with open(page_path, encoding="utf-8") as stream:
+              page = json.load(stream)
+          records = page.get("records")
+          if not isinstance(records, list):
+              raise AssertionError("ranking records are missing")
+          for card in records:
+              count = int(card.get("count") or card.get("timestampCount") or 0)
+              if count <= 0:
+                  continue
+              occurrences = card.get("occurrences")
+              if not isinstance(occurrences, list) or not occurrences:
+                  raise AssertionError("positive ranking card has no occurrence")
+              channel_id = str(card.get("channelId") or "")
+              if not channel_id:
+                  raise AssertionError("ranking channel identity mismatch")
+              for occurrence in occurrences:
+                  item = occurrence.get("item") or {}
+                  video = occurrence.get("video") or {}
+                  if item.get("channelId") != channel_id or video.get("channelId") != channel_id:
+                      raise AssertionError("ranking channel identity mismatch")
+                  item_video_id = str(item.get("videoId") or "")
+                  video_video_id = str(video.get("videoId") or "")
+                  occurrence_video_id = str(occurrence.get("videoId") or item_video_id)
+                  if not item_video_id or item_video_id != video_video_id or item_video_id != occurrence_video_id:
+                      raise AssertionError("ranking video identity mismatch")
+                  item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
+                  video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
+                  if not item_thumbnail or item_thumbnail != video_thumbnail:
+                      raise AssertionError("ranking thumbnail identity mismatch")
+
+          with open(negative_path, encoding="utf-8") as stream:
+              negative = json.load(stream)
+          if negative.get("records") or int(negative.get("totalCount") or 0) != 0:
+              raise AssertionError("negative ranking query returned records")
+
+          with open(source_path, encoding="utf-8") as stream:
+              source = json.load(stream)
+          if source.get("found") is not True or source.get("sourceKey") != source_key:
+              raise AssertionError("source input identity mismatch")
+          if int(source.get("page") or 0) != 1 or int(source.get("pageSize") or 0) != 20:
+              raise AssertionError("source page mismatch")
+          if int(source.get("totalOccurrenceCount") or -1) != expected_occurrences:
+              raise AssertionError("source occurrence total mismatch")
+          if int(source.get("totalVideoCount") or -1) != expected_videos:
+              raise AssertionError("source video total mismatch")
+          record = source.get("record") or {}
+          if record.get("sourceDetailKey") != source_key or record.get("channelId") != source_channel_id:
+              raise AssertionError("source channel identity mismatch")
+          source_occurrences = record.get("occurrences")
+          if not isinstance(source_occurrences, list) or (expected_occurrences > 0 and not source_occurrences):
+              raise AssertionError("source page has no occurrence")
+          for occurrence in source_occurrences:
+              item = occurrence.get("item") or {}
+              video = occurrence.get("video") or {}
+              if item.get("channelId") != source_channel_id or video.get("channelId") != source_channel_id:
+                  raise AssertionError("source channel identity mismatch")
+              occurrence_video_id = str(occurrence.get("videoId") or "")
+              item_video_id = str(item.get("videoId") or "")
+              video_video_id = str(video.get("videoId") or "")
+              if not occurrence_video_id or occurrence_video_id != item_video_id or occurrence_video_id != video_video_id:
+                  raise AssertionError("source video identity mismatch")
+              item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
+              video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
+              if not item_thumbnail or item_thumbnail != video_thumbnail:
+                  raise AssertionError("source thumbnail identity mismatch")
+          PY
+          touch "$remote_root/production-public-quick-gate-passed"
+          rm -rf "$remote_root/backup"
+          trap - ERR
+          REMOTE
+          printf 'PUBLIC_QUICK_GATE_PASSED=1\n' >> "$GITHUB_ENV"
+
+      - name: Record result and cleanup
         if: always()
         run: |
           set +e
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          public_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 --header 'Accept: application/json' --user-agent 'daily-song-list-adapter-release/1' --output "$TASK_ROOT/public-healthz.json" --write-out '%{http_code}' "$PUBLIC_BASE/healthz")"
-          public_curl_exit=$?
-          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 --header 'Accept: application/json' --user-agent 'daily-song-list-adapter-release/1' --output "$TASK_ROOT/public-source.json" --write-out '%{http_code}' "$PUBLIC_BASE/api/sources/$SOURCE_KEY?page=1&pageSize=20")"
-          source_curl_exit=$?
           df -B1 / > "$TASK_ROOT/storage-after.txt"
-          printf 'finishedAt=%s\npublicIdentityAuditPassed=%s\nhostedPublicHealthDiagnosticHttpCode=%s\nhostedPublicHealthDiagnosticCurlExit=%s\nhostedPublicSourceDiagnosticHttpCode=%s\nhostedPublicSourceDiagnosticCurlExit=%s\n' \
-            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PUBLIC_IDENTITY_AUDIT_PASSED:-0}" "${public_http_code:-000}" "$public_curl_exit" "${source_http_code:-000}" "$source_curl_exit" >> "$TASK_ROOT/manifest.txt"
+          printf 'finishedAt=%s\npublicQuickGatePassed=%s\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PUBLIC_QUICK_GATE_PASSED:-0}" >> "$TASK_ROOT/manifest.txt"
           echo "ADAPTER_RELEASE_MANIFEST"
           cat "$TASK_ROOT/manifest.txt"
           echo "ADAPTER_RELEASE_STORAGE_BEFORE"

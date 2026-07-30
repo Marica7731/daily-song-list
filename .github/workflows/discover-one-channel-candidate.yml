@@ -1,0 +1,362 @@
+name: Discover one channel candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel_id:
+        description: Immutable YouTube channel ID
+        required: true
+        type: string
+      channel_handle:
+        description: Canonical YouTube handle
+        required: true
+        type: string
+      channel_slug:
+        description: Lowercase artifact slug
+        required: true
+        type: string
+      max_channel_pages:
+        description: Maximum pages per tab, including the initial page
+        required: true
+        type: choice
+        options: ["10", "25"]
+        default: "10"
+      max_videos:
+        description: Maximum retained discovery candidates
+        required: true
+        type: choice
+        options: ["250", "500", "1000"]
+        default: "500"
+      force_refresh:
+        description: Start without a prior checkpoint
+        required: true
+        type: choice
+        options: ["false", "true"]
+        default: "false"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: channel-discovery-candidate-${{ inputs.channel_slug }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 25
+    env:
+      CHANNEL_ID: ${{ inputs.channel_id }}
+      CHANNEL_HANDLE: ${{ inputs.channel_handle }}
+      CHANNEL_SLUG: ${{ inputs.channel_slug }}
+      MAX_CHANNEL_PAGES: ${{ inputs.max_channel_pages }}
+      MAX_VIDEOS: ${{ inputs.max_videos }}
+      FORCE_REFRESH: ${{ inputs.force_refresh }}
+      NODE_MAX_OLD_SPACE_SIZE_MB: "1536"
+      TASK_CAP_BYTES: "2147483648"
+      ARTIFACT_CAP_BYTES: "134217728"
+      DISCOVERY_TIMEOUT_SECONDS: "1200"
+      TASK_ROOT: ${{ runner.temp }}/daily-song-channel-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          clean: false
+
+      - name: Run and verify candidate-only discovery
+        id: candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'CHANNEL_DISCOVERY_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          [[ "$CHANNEL_ID" =~ ^UC[A-Za-z0-9_-]{22}$ ]] || fail "invalid-channel-id"
+          [[ "$CHANNEL_HANDLE" =~ ^@[A-Za-z0-9._-]{3,30}$ ]] || fail "invalid-channel-handle"
+          [[ "$CHANNEL_SLUG" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]] || fail "invalid-channel-slug"
+          case "$MAX_CHANNEL_PAGES" in 10|25) ;; *) fail "invalid-max-channel-pages" ;; esac
+          case "$MAX_VIDEOS" in 250|500|1000) ;; *) fail "invalid-max-videos" ;; esac
+          case "$FORCE_REFRESH" in false|true) ;; *) fail "invalid-force-refresh" ;; esac
+          [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] || fail "unsafe-runner-temp"
+
+          NORMALIZED_CHANNEL_HANDLE="$(printf '%s' "$CHANNEL_HANDLE" | tr '[:upper:]' '[:lower:]')"
+          CHANNEL_URL="https://www.youtube.com/$NORMALIZED_CHANNEL_HANDLE"
+          EXPECTED_TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [[ "$TASK_ROOT" == "$EXPECTED_TASK_ROOT" && "$TASK_ROOT" == "$RUNNER_TEMP"/daily-song-channel-discovery-* ]] || fail "unsafe-task-root"
+          if [ -e "$TASK_ROOT" ]; then
+            [ ! -L "$TASK_ROOT" ] || fail "task-root-symlink"
+            rm -rf -- "$TASK_ROOT"
+          fi
+          mkdir -m 700 "$TASK_ROOT"
+          ARTIFACT_DIR="$TASK_ROOT/artifact"
+          CACHE_DIR="$TASK_ROOT/cache"
+          mkdir -m 700 "$ARTIFACT_DIR" "$CACHE_DIR"
+          printf 'ARTIFACT_DIR=%s\n' "$ARTIFACT_DIR" >> "$GITHUB_ENV"
+
+          task_bytes() {
+            local kib
+            kib="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 }')"
+            [[ "$kib" =~ ^[0-9]+$ ]] || return 78
+            printf '%s\n' "$((kib * 1024))"
+          }
+
+          discovery_rss_bytes() {
+            local kib
+            if [ -z "${discovery_pid:-}" ] || ! kill -0 "$discovery_pid" 2>/dev/null; then
+              printf '0\n'
+              return
+            fi
+            kib="$(ps -o rss= -p "$discovery_pid" | awk 'NF == 1 { print $1 }')"
+            [[ "$kib" =~ ^[0-9]+$ ]] || return 78
+            printf '%s\n' "$((kib * 1024))"
+          }
+
+          stop_owned_pid() {
+            if [ -n "${discovery_pid:-}" ] && kill -0 "$discovery_pid" 2>/dev/null; then
+              kill -TERM "$discovery_pid" 2>/dev/null || true
+              wait "$discovery_pid" 2>/dev/null || true
+            fi
+            discovery_pid=""
+          }
+          finalize_step() {
+            local status=$?
+            trap - EXIT
+            set +e
+            stop_owned_pid
+            printf 'before_bytes=%s\npeak_task_bytes=%s\npeak_rss_bytes=%s\nafter_bytes=%s\n' \
+              "${before_bytes:-0}" "${peak_task_bytes:-0}" "${peak_rss_bytes:-0}" "${after_bytes:-0}" >> "$GITHUB_OUTPUT"
+            exit "$status"
+          }
+          trap finalize_step EXIT
+
+          before_bytes="$(task_bytes)" || fail "task-before-sample"
+          [ "$before_bytes" -le "$TASK_CAP_BYTES" ] || fail "task-before-cap"
+          peak_task_bytes="$before_bytes"
+          peak_rss_bytes=0
+
+          FRESH_ARGS=()
+          case "$FORCE_REFRESH" in
+            true) FRESH_ARGS=(--fresh) ;;
+            false) ;;
+          esac
+
+          jq -n \
+            --arg sourceCommit "$GITHUB_SHA" \
+            --arg channelId "$CHANNEL_ID" \
+            --arg channelHandle "$NORMALIZED_CHANNEL_HANDLE" \
+            --arg channelSlug "$CHANNEL_SLUG" \
+            --arg channelUrl "$CHANNEL_URL" \
+            --argjson maxChannelPages "$MAX_CHANNEL_PAGES" \
+            --argjson maxVideos "$MAX_VIDEOS" \
+            --argjson forceRefresh "$FORCE_REFRESH" \
+            '{
+              schemaVersion: 1,
+              kind: "channel-discovery-candidate-run",
+              sourceCommit: $sourceCommit,
+              channelId: $channelId,
+              channelHandle: $channelHandle,
+              channelSlug: $channelSlug,
+              channelUrl: $channelUrl,
+              expectedChannelId: $channelId,
+              expectedChannelHandle: $channelHandle,
+              expectedChannelUrl: $channelUrl,
+              expectedTabs: ["streams", "videos"],
+              maxChannelPages: $maxChannelPages,
+              maxVideos: $maxVideos,
+              forceRefresh: $forceRefresh,
+              candidateOnly: true
+            }' > "$ARTIFACT_DIR/request.json"
+
+          NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+            "$GITHUB_WORKSPACE/scripts/youtube-channel-discovery.js" \
+            --channel-url "$CHANNEL_URL" \
+            --expected-channel-id "$CHANNEL_ID" \
+            --expected-channel-handle "$NORMALIZED_CHANNEL_HANDLE" \
+            --channel-slug "$CHANNEL_SLUG" \
+            --source-commit "$GITHUB_SHA" \
+            --force-refresh "$FORCE_REFRESH" \
+            --output-dir "$ARTIFACT_DIR" \
+            --cache-dir "$CACHE_DIR" \
+            --max-channel-pages "$MAX_CHANNEL_PAGES" \
+            --max-videos "$MAX_VIDEOS" \
+            --max-inspect 0 \
+            --request-timeout-ms 15000 \
+            --request-interval-ms 2500 \
+            --request-jitter-ms 1000 \
+            --tab streams \
+            --tab videos \
+            --candidate-only \
+            "${FRESH_ARGS[@]}" \
+            > "$ARTIFACT_DIR/discovery.log" 2>&1 &
+          discovery_pid=$!
+          deadline=$((SECONDS + DISCOVERY_TIMEOUT_SECONDS))
+          monitor_status=0
+
+          while kill -0 "$discovery_pid" 2>/dev/null; do
+            [ "$SECONDS" -lt "$deadline" ] || { monitor_status=124; break; }
+            rss_bytes="$(discovery_rss_bytes)" || { monitor_status=78; break; }
+            current_task_bytes="$(task_bytes)" || { monitor_status=78; break; }
+            [ "$rss_bytes" -le "$TASK_CAP_BYTES" ] || { monitor_status=78; break; }
+            [ "$current_task_bytes" -le "$TASK_CAP_BYTES" ] || { monitor_status=78; break; }
+            [ "$rss_bytes" -le "$peak_rss_bytes" ] || peak_rss_bytes="$rss_bytes"
+            [ "$current_task_bytes" -le "$peak_task_bytes" ] || peak_task_bytes="$current_task_bytes"
+            sleep 1
+          done
+
+          if [ "$monitor_status" -ne 0 ]; then
+            stop_owned_pid
+            fail "discovery-monitor-status-$monitor_status"
+          fi
+          set +e
+          wait "$discovery_pid"
+          discovery_status=$?
+          set -e
+          discovery_pid=""
+          [ "$discovery_status" -eq 0 ] || fail "discovery-exit-$discovery_status"
+
+          for required in request.json manifest.json checkpoint.json candidate-manifest.ndjson; do
+            [ -s "$ARTIFACT_DIR/$required" ] && [ ! -L "$ARTIFACT_DIR/$required" ] || fail "missing-$required"
+          done
+          [ -d "$ARTIFACT_DIR/pages" ] && [ ! -L "$ARTIFACT_DIR/pages" ] || fail "missing-pages"
+          find "$ARTIFACT_DIR/pages" -type l -print -quit | grep -q . && fail "page-evidence-symlink"
+
+          jq -r '.pageEvidenceFiles[] | [.path,.sha256,(.bytes|tostring)] | @tsv' "$ARTIFACT_DIR/manifest.json" |
+            while IFS=$'\t' read -r evidence_path expected_sha expected_bytes; do
+              case "$evidence_path" in
+                pages/[0-9][0-9]-streams.html|pages/[0-9][0-9]-videos.html|pages/[0-9][0-9]-streams-continuation-[0-9][0-9][0-9].json|pages/[0-9][0-9]-videos-continuation-[0-9][0-9][0-9].json) ;;
+                *) exit 78 ;;
+              esac
+              [ -f "$ARTIFACT_DIR/$evidence_path" ] && [ ! -L "$ARTIFACT_DIR/$evidence_path" ] || exit 78
+              [ "$(wc -c < "$ARTIFACT_DIR/$evidence_path" | tr -d ' ')" = "$expected_bytes" ] || exit 78
+              [ "$(shasum -a 256 "$ARTIFACT_DIR/$evidence_path" | awk '{print $1}')" = "$expected_sha" ] || exit 78
+            done || fail "physical-page-evidence"
+
+          jq -e -s \
+            --arg expectedSourceCommit "$GITHUB_SHA" \
+            --arg expectedChannelId "$CHANNEL_ID" \
+            --arg expectedChannelHandle "$NORMALIZED_CHANNEL_HANDLE" \
+            --arg expectedChannelUrl "$CHANNEL_URL" \
+            --slurpfile requestFile "$ARTIFACT_DIR/request.json" \
+            --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
+            --slurpfile checkpointFile "$ARTIFACT_DIR/checkpoint.json" \
+            -f "$GITHUB_WORKSPACE/scripts/channel-discovery-candidate-artifact-gate.jq" \
+            "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "artifact-gate"
+
+          jq -e -s \
+            --arg expectedSourceCommit "$GITHUB_SHA" \
+            --arg expectedChannelId "$CHANNEL_ID" \
+            --arg expectedChannelHandle "$NORMALIZED_CHANNEL_HANDLE" \
+            --arg expectedChannelUrl "$CHANNEL_URL" \
+            --argjson maxVideos "$MAX_VIDEOS" \
+            --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
+            -f "$GITHUB_WORKSPACE/scripts/channel-discovery-candidate-records-gate.jq" \
+            "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "records-gate"
+
+          NODE_OPTIONS= NODE_PATH= ARTIFACT_DIR="$ARTIFACT_DIR" SOURCE_ROOT="$GITHUB_WORKSPACE" \
+            node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" - <<'VERIFY_RAW_CONTINUATIONS'
+          const assert = require("node:assert/strict");
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const artifactDir = process.env.ARTIFACT_DIR;
+          const sourceRoot = process.env.SOURCE_ROOT;
+          const core = require(path.join(sourceRoot, "scripts/youtube-channel-discovery-core.js"));
+          const { extractSearchItems } = require(path.join(sourceRoot, "scripts/update-songlist.js"));
+          const source = JSON.parse(fs.readFileSync(path.join(artifactDir, "manifest.json"), "utf8"));
+          const request = JSON.parse(fs.readFileSync(path.join(artifactDir, "request.json"), "utf8"));
+          const evidenceBodies = source.pageEvidenceFiles.map((entry) =>
+            fs.readFileSync(path.join(artifactDir, entry.path)));
+          const replay = core.recomputeCandidateArtifactEvidence(evidenceBodies, source, {
+            channelUrl: request.channelUrl,
+            expectedChannelId: request.channelId,
+            expectedChannelHandle: request.channelHandle,
+            candidateOnly: true,
+            maxChannelPages: request.maxChannelPages,
+            singerName: source.singerName || "",
+            keywords: source.keywords,
+            candidateEvidenceNowMs: source.candidateEvidenceNowMs,
+          }, extractSearchItems);
+          assert.equal(replay.rawItemCount, source.rawItemCount);
+          assert.equal(replay.pageCandidateCountSum, source.pageCandidateCountSum);
+          assert.equal(replay.candidateCount, source.candidateCount);
+          const records = fs.readFileSync(path.join(artifactDir, "candidate-manifest.ndjson"), "utf8")
+            .trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
+          const evidenceById = (items) => new Map(items.map((item) => [
+            item.youtubeVideoId,
+            JSON.stringify(item.discoveryEvidenceRefs || []),
+          ]));
+          assert.deepEqual(evidenceById(records), evidenceById(replay.rawVideos));
+          VERIFY_RAW_CONTINUATIONS
+
+          after_bytes="$(task_bytes)" || fail "task-after-sample"
+          [ "$after_bytes" -le "$TASK_CAP_BYTES" ] || fail "task-after-cap"
+          [ "$after_bytes" -le "$peak_task_bytes" ] || peak_task_bytes="$after_bytes"
+          artifact_bytes="$(du -sk "$ARTIFACT_DIR" | awk 'NR == 1 { print $1 * 1024 }')"
+          [[ "$artifact_bytes" =~ ^[0-9]+$ ]] || fail "artifact-size-sample"
+          [ "$artifact_bytes" -le "$ARTIFACT_CAP_BYTES" ] || fail "artifact-size-cap"
+
+          jq -n \
+            --argjson beforeBytes "$before_bytes" \
+            --argjson peakTaskBytes "$peak_task_bytes" \
+            --argjson peakDiscoveryRssBytes "$peak_rss_bytes" \
+            --argjson afterBytes "$after_bytes" \
+            --argjson taskCapBytes "$TASK_CAP_BYTES" \
+            --argjson artifactBytes "$artifact_bytes" \
+            --argjson artifactCapBytes "$ARTIFACT_CAP_BYTES" \
+            '{beforeBytes:$beforeBytes,peakTaskBytes:$peakTaskBytes,peakDiscoveryRssBytes:$peakDiscoveryRssBytes,afterBytes:$afterBytes,taskCapBytes:$taskCapBytes,artifactBytes:$artifactBytes,artifactCapBytes:$artifactCapBytes}' \
+            > "$ARTIFACT_DIR/resource-usage.json"
+
+          final_task_bytes="$(task_bytes)" || fail "task-final-sample"
+          [ "$final_task_bytes" -le "$TASK_CAP_BYTES" ] || fail "task-final-cap"
+          final_artifact_bytes="$(du -sk "$ARTIFACT_DIR" | awk 'NR == 1 { print $1 * 1024 }')"
+          [[ "$final_artifact_bytes" =~ ^[0-9]+$ ]] || fail "artifact-final-size-sample"
+          [ "$final_artifact_bytes" -le "$ARTIFACT_CAP_BYTES" ] || fail "artifact-final-size-cap"
+          printf 'CHANNEL_DISCOVERY_CANDIDATE_OK candidates=%s artifactBytes=%s\n' \
+            "$(jq -r '.candidateCount' "$ARTIFACT_DIR/manifest.json")" "$final_artifact_bytes"
+
+      - name: Upload bounded candidate artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: channel-discovery-${{ inputs.channel_slug }}
+          path: ${{ env.ARTIFACT_DIR }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 3
+
+      - name: Cleanup owned task root
+        if: always()
+        shell: bash
+        env:
+          REPORT_BEFORE_BYTES: ${{ steps.candidate.outputs.before_bytes }}
+          REPORT_PEAK_TASK_BYTES: ${{ steps.candidate.outputs.peak_task_bytes }}
+          REPORT_PEAK_RSS_BYTES: ${{ steps.candidate.outputs.peak_rss_bytes }}
+          REPORT_AFTER_BYTES: ${{ steps.candidate.outputs.after_bytes }}
+        run: |
+          set -Eeuo pipefail
+          cleanup_before_bytes=0
+          cleanup_after_bytes=0
+          if [ -n "${TASK_ROOT:-}" ]; then
+            expected="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            [ "$TASK_ROOT" = "$expected" ] || exit 78
+            case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-channel-discovery-*) ;; *) exit 78 ;; esac
+            if [ -e "$TASK_ROOT" ]; then
+              [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || exit 78
+              cleanup_before_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+              rm -rf -- "$TASK_ROOT"
+            fi
+            [ ! -e "$TASK_ROOT" ] || exit 78
+          fi
+          {
+            printf '### Candidate discovery resource report\n\n'
+            printf -- '- task before discovery: %s bytes\n' "${REPORT_BEFORE_BYTES:-unavailable}"
+            printf -- '- peak task root: %s bytes\n' "${REPORT_PEAK_TASK_BYTES:-unavailable}"
+            printf -- '- peak discovery PID RSS: %s bytes\n' "${REPORT_PEAK_RSS_BYTES:-unavailable}"
+            printf -- '- task after discovery/gates: %s bytes\n' "${REPORT_AFTER_BYTES:-unavailable}"
+            printf -- '- cleanup before: %s bytes\n' "$cleanup_before_bytes"
+            printf -- '- cleanup after: %s bytes\n' "$cleanup_after_bytes"
+          } >> "$GITHUB_STEP_SUMMARY"

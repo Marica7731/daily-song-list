@@ -20,7 +20,7 @@ async function main() {
     cacheDir: options.cacheDir,
     userAgent: process.env.YOUTUBE_DISCOVERY_USER_AGENT || BROWSER_USER_AGENT,
     requestIntervalMs: options.requestIntervalMs,
-    requestTimeoutMs: Number(process.env.YOUTUBE_DISCOVERY_REQUEST_TIMEOUT_MS || 30000),
+    requestTimeoutMs: options.requestTimeoutMs,
     connectTimeoutMs: Number(process.env.YOUTUBE_DISCOVERY_CONNECT_TIMEOUT_MS || 15000),
   });
   const startedAt = Date.now();
@@ -40,6 +40,9 @@ async function main() {
       `inspected=${result.manifest.inspectedInLatestRun}`,
       `videos=${result.manifest.usableVideoCount}`,
       `occurrences=${result.manifest.occurrenceCount}`,
+      `rawItems=${result.manifest.rawItemCount || 0}`,
+      `pageCandidateSum=${result.manifest.pageCandidateCountSum || 0}`,
+      `uniqueCandidates=${result.manifest.uniqueCandidateCount || result.manifest.candidateCount}`,
       `elapsedSeconds=${elapsedSeconds}`,
       `outputDir=${quoteForMarker(path.resolve(options.outputDir))}`,
     ].join(" "),

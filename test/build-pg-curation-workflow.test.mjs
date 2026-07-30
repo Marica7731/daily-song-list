@@ -44,7 +44,22 @@ test("producer has explicit expected, hard, task caps and non-resumable checkpoi
   assert.match(workflow, /default: 1073741824/);
   assert.match(workflow, /default: 2147483648/);
   assert.match(workflow, /test "\$TASK_HARD_CAP_BYTES" -le 2147483648/);
-  assert.match(workflow, /ulimit -v 2097152/);
+  assert.doesNotMatch(workflow, /\bulimit\s+-v\b/);
+  assert.match(workflow, /readonly MAC_CONVERTER_RSS_LIMIT_BYTES=2147483648/);
+  assert.match(workflow, /ps -o rss= -p "\$child_pid"/);
+  assert.match(workflow, /kill -TERM "\$child_pid"/);
+  assert.match(workflow, /for _ in 1 2 3 4 5; do[\s\S]*sleep 1/);
+  assert.match(workflow, /kill -KILL "\$child_pid"/);
+  assert.match(workflow, /if \(\( exceeded \)\); then\s+return 137/);
+  assert.equal(
+    (
+      workflow.match(
+        /run_with_rss_watchdog "\$MAC_CONVERTER_RSS_LIMIT_BYTES" (?:bind-current-active|build-candidate)/g,
+      ) || []
+    ).length,
+    2,
+    "both converter invocations must be wrapped by the RSS watchdog",
+  );
   assert.match(workflow, /--unit='\$REMOTE_UNIT'/);
   assert.match(workflow, /--property=MemorySwapMax=0/);
   assert.match(workflow, /systemctl stop '\$REMOTE_UNIT'/);

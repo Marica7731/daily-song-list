@@ -19,10 +19,14 @@ const IDENTITY_AUDIT = path.join(
   "migration",
   "audit-ranking-source-identities.py",
 );
-const ADAPTER_WORKFLOW = fs.readFileSync(
-  path.join(SUPPORT_ROOT, ".github", "workflows", "deploy-pg-adapter-contract.yml"),
-  "utf8",
+const ADAPTER_WORKFLOW_PATH = path.join(
+  SUPPORT_ROOT,
+  ".github",
+  "workflows",
+  "deploy-pg-adapter-contract.yml",
 );
+const ADAPTER_WORKFLOW_BYTES = fs.readFileSync(ADAPTER_WORKFLOW_PATH);
+const ADAPTER_WORKFLOW = ADAPTER_WORKFLOW_BYTES.toString("utf8");
 
 function workflowRunBlocks(workflow) {
   const lines = workflow.split(/\r?\n/u);
@@ -2236,51 +2240,102 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("adapter release workflow is fail-closed around identity and rollback gates", () => {
+test("adapter release workflow uses one bounded quick gate around rollback-safe install", () => {
   const jobTimeout = Number(/^    timeout-minutes: (\d+)$/mu.exec(ADAPTER_WORKFLOW)?.[1]);
-  const auditTimeoutStages = ADAPTER_WORKFLOW.match(/timeout --signal=TERM --kill-after=15s 12m/gu) || [];
-  assert.equal(auditTimeoutStages.length, 3);
-  assert.equal(auditTimeoutStages.length * 12, 36);
-  assert.equal(jobTimeout, 45);
-  assert.equal(jobTimeout - auditTimeoutStages.length * 12, 9);
+  assert.ok(jobTimeout > 0 && jobTimeout <= 20, `workflow timeout is ${jobTimeout}m`);
   assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
   assert.match(ADAPTER_WORKFLOW, /audit-ranking-source-identities\.py/u);
-  assert.match(
-    ADAPTER_WORKFLOW,
-    /--range all --range 7d[\s\\]+--metric count --metric songs --metric videos/u,
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /--range all --range 7d/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /--metric count --metric songs --metric videos/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /--max-pages 200/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /timeout --signal=TERM --kill-after=15s 12m/u);
+  assert.doesNotMatch(ADAPTER_WORKFLOW, /production-local-identity-audit/u);
+  assert.equal((ADAPTER_WORKFLOW.match(/--skip-rankings/gu) || []).length, 2);
+  assert.equal((ADAPTER_WORKFLOW.match(/--max-pages 1/gu) || []).length, 2);
+  assert.equal((ADAPTER_WORKFLOW.match(/--timeout 20 --concurrency 4/gu) || []).length, 2);
+  for (const probe of [
+    "@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA",
+    "@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg",
+    "@mikoto_songs=UCkZif4byA067Xl_c199w3BQ",
+    "@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew",
+  ]) {
+    assert.equal(ADAPTER_WORKFLOW.split(probe).length - 1, 2, probe);
+  }
+  assert.equal(
+    (ADAPTER_WORKFLOW.match(/\/api\/rankings\?range=all&view=vtubers&metric=count&page=1&pageSize=20/gu) || []).length,
+    2,
   );
-  assert.match(ADAPTER_WORKFLOW, /--page-size 20 --max-pages 200 --concurrency 4 --timeout 60/u);
-  assert.equal(20 * 200, 4000);
-  assert.doesNotMatch(ADAPTER_WORKFLOW, /--page-size 200 --max-pages 20/u);
-  assert.doesNotMatch(ADAPTER_WORKFLOW, /pageSize=200/u);
-  assert.match(ADAPTER_WORKFLOW, /cat "\$remote_root\/candidate-identity-audit\.log"/u);
-  assert.equal((ADAPTER_WORKFLOW.match(/--skip-rankings --page-size 20 --max-pages 200 --timeout 60 --concurrency 4/gu) || []).length, 2);
-  assert.equal((ADAPTER_WORKFLOW.match(/timeout --signal=TERM --kill-after=15s 12m python3 '\$REMOTE_ROOT\/server\/audit-ranking-source-identities\.py'/gu) || []).length, 2);
-  assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
-  assert.match(ADAPTER_WORKFLOW, /production-public-identity-audit\.log/u);
-  assert.match(ADAPTER_WORKFLOW, /production-public-healthz\.json/u);
-  assert.match(ADAPTER_WORKFLOW, /--base-url '\$PUBLIC_BASE' --skip-rankings/u);
-  assert.match(ADAPTER_WORKFLOW, /hostedPublicHealthDiagnosticHttpCode/u);
-  assert.match(ADAPTER_WORKFLOW, /hostedPublicHealthDiagnosticCurlExit/u);
-  assert.match(ADAPTER_WORKFLOW, /hostedPublicSourceDiagnosticHttpCode/u);
-  assert.match(ADAPTER_WORKFLOW, /hostedPublicSourceDiagnosticCurlExit/u);
-  assert.match(ADAPTER_WORKFLOW, /--fail[^\n]*--write-out '%\{http_code\}'/u);
+  assert.ok(
+    [...ADAPTER_WORKFLOW_BYTES].every((byte) => byte < 0x80),
+    "workflow must remain ASCII-only",
+  );
+  const mojibake = String.fromCodePoint(
+    0x00e5, 0x2026, 0x00a8,
+    0x00e5, 0x0160, 0x203a,
+    0x00e3, 0x201a, 0x00ad,
+    0x00e3, 0x0192, 0x00b3,
+    0x00e3, 0x201a, 0x00b0,
+  );
+  assert.equal(
+    ADAPTER_WORKFLOW_BYTES.includes(Buffer.from(mojibake, "utf8")),
+    false,
+    "workflow contains the known mojibake negative query",
+  );
+  const exactNegativeQuery = `@shingames7857 ${String.fromCodePoint(
+    0x5168, 0x529b, 0x30ad, 0x30f3, 0x30b0,
+  )}`;
+  const encodedNegativeQueries = [
+    ...ADAPTER_WORKFLOW.matchAll(/negative_query='([^']+)'/gu),
+  ].map((match) => match[1]);
+  assert.equal(encodedNegativeQueries.length, 2);
+  for (const encoded of encodedNegativeQueries) {
+    assert.equal(encoded, encodeURIComponent(exactNegativeQuery));
+    assert.equal(decodeURIComponent(encoded), exactNegativeQuery);
+  }
+  const negativeRequests = ADAPTER_WORKFLOW.match(
+    /--get --data-urlencode 'range=all' --data-urlencode 'view=songs'[\s\\]+--data-urlencode 'metric=count' --data-urlencode 'page=1'[\s\\]+--data-urlencode 'pageSize=20'[\s\\]+--data-urlencode 'searchFields=title,channel'[\s\\]+--data "q=\$negative_query"/gu,
+  ) || [];
+  assert.equal(negativeRequests.length, 2);
   assert.doesNotMatch(
     ADAPTER_WORKFLOW,
-    /curl --fail --connect-timeout 8 --max-time 20[^\n]*"\$PUBLIC_BASE/u,
+    /--get --data-urlencode 'range=all' --data-urlencode 'view=vtubers'[\s\\]+--data-urlencode 'metric=count'/u,
   );
-  assert.doesNotMatch(ADAPTER_WORKFLOW, /for n in \\\$\(seq 1 20\); do curl .*\/healthz/u);
+  assert.equal(
+    (ADAPTER_WORKFLOW.match(/\/api\/sources\/\$source_key\?page=1&pageSize=20/gu) || []).length,
+    2,
+  );
+  assert.equal(
+    (ADAPTER_WORKFLOW.match(/\/api\/meta/gu) || []).length,
+    2,
+  );
+  assert.match(ADAPTER_WORKFLOW, /active_revision_id/u);
+  assert.match(ADAPTER_WORKFLOW, /positive ranking card has no occurrence/u);
+  assert.match(ADAPTER_WORKFLOW, /ranking channel identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /ranking video identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /ranking thumbnail identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /negative ranking query returned records/u);
+  assert.match(ADAPTER_WORKFLOW, /source occurrence total mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /source video total mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /source channel identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /source video identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /source thumbnail identity mismatch/u);
+  assert.match(ADAPTER_WORKFLOW, /test "\$rankings_http_code" = 200/u);
+  assert.match(ADAPTER_WORKFLOW, /test "\$negative_http_code" = 200/u);
+  assert.match(ADAPTER_WORKFLOW, /test "\$source_http_code" = 200/u);
+  assert.match(ADAPTER_WORKFLOW, /candidate-quick-gate-passed/u);
+  assert.match(ADAPTER_WORKFLOW, /production-public-quick-gate-passed/u);
+  assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
+  assert.match(ADAPTER_WORKFLOW, /production-public-healthz\.json/u);
+  assert.match(ADAPTER_WORKFLOW, /--base-url "\$public_base" --skip-rankings/u);
   assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
-  assert.match(ADAPTER_WORKFLOW, /--max-time 60[\s\\]+http:\/\/127\.0\.0\.1:18766\/healthz/u);
   assert.match(ADAPTER_WORKFLOW, /systemd-run --quiet --collect --unit="\$candidate_unit"/u);
-  assert.match(ADAPTER_WORKFLOW, /--property=RuntimeMaxSec=13m/u);
+  assert.match(ADAPTER_WORKFLOW, /--property=RuntimeMaxSec=8m/u);
   assert.match(ADAPTER_WORKFLOW, /--setenv=DAILY_SONG_PG_ADAPTER_PHASE_TRACE=1/u);
-  assert.match(ADAPTER_WORKFLOW, /if \[ "\$audit_status" -ne 0 \]; then[\s\S]*journalctl -u "\$candidate_unit" -n 160 --no-pager/u);
   const installSection = ADAPTER_WORKFLOW.split("Install verified adapter and retain rollback files until health passes", 2)[1];
   assert.ok(installSection);
   assert.doesNotMatch(installSection, /DAILY_SONG_PG_ADAPTER_PHASE_TRACE/u);
-  assert.match(ADAPTER_WORKFLOW, /journalctl -u "\$candidate_unit" -n 80 --no-pager/u);
-  assert.match(ADAPTER_WORKFLOW, /timeout --signal=TERM --kill-after=15s 12m/u);
+  assert.doesNotMatch(installSection, /http:\/\/127\.0\.0\.1:8765\/api\//u);
+  assert.match(installSection, /PUBLIC_BASE/u);
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);

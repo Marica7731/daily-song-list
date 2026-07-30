@@ -286,8 +286,47 @@ jobs:
             echo "PG_CURATION_PRODUCER_BLOCKED final active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$final_remote_active"
             exit 78
           }
-          (
-            ulimit -v 2097152
+          readonly MAC_CONVERTER_RSS_LIMIT_BYTES=2147483648
+          run_with_rss_watchdog() {
+            local limit_bytes="$1"
+            local label="$2"
+            shift 2
+            "$@" &
+            local child_pid=$!
+            local exceeded=0
+            local rss_kib rss_bytes child_status
+            while kill -0 "$child_pid" 2>/dev/null; do
+              rss_kib="$(ps -o rss= -p "$child_pid" 2>/dev/null | awk 'NR==1 {gsub(/[[:space:]]/, ""); print}' || true)"
+              if [[ "$rss_kib" =~ ^[0-9]+$ ]]; then
+                rss_bytes=$(( rss_kib * 1024 ))
+                if (( rss_bytes > limit_bytes )); then
+                  exceeded=1
+                  echo "PG_CURATION_PRODUCER_RSS_LIMIT_EXCEEDED label=$label pid=$child_pid rssBytes=$rss_bytes limitBytes=$limit_bytes" >&2
+                  kill -TERM "$child_pid" 2>/dev/null || true
+                  for _ in 1 2 3 4 5; do
+                    kill -0 "$child_pid" 2>/dev/null || break
+                    sleep 1
+                  done
+                  if kill -0 "$child_pid" 2>/dev/null; then
+                    echo "PG_CURATION_PRODUCER_RSS_LIMIT_EXCEEDED label=$label pid=$child_pid escalation=KILL" >&2
+                    kill -KILL "$child_pid" 2>/dev/null || true
+                  fi
+                  break
+                fi
+              fi
+              sleep 1
+            done
+            if wait "$child_pid"; then
+              child_status=0
+            else
+              child_status=$?
+            fi
+            if (( exceeded )); then
+              return 137
+            fi
+            return "$child_status"
+          }
+          run_with_rss_watchdog "$MAC_CONVERTER_RSS_LIMIT_BYTES" bind-current-active \
             python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
               --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
               --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
@@ -295,13 +334,13 @@ jobs:
               --bind-current-active-evidence \
               --binding-evidence-output "$ARTIFACT_ROOT/current-active-binding.json" \
               --active-revision-id "$EXPECTED_ACTIVE_REVISION_ID"
+          run_with_rss_watchdog "$MAC_CONVERTER_RSS_LIMIT_BYTES" build-candidate \
             python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
               --rules-manifest "$ARTIFACT_ROOT/bound-rules-manifest.json" \
               --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
               --output "$ARTIFACT_ROOT/candidate.ndjson" \
               --manifest-output "$TASK_ROOT/converter-manifest.json" \
               --review-output "$ARTIFACT_ROOT/review.json"
-          )
           task_peak_bytes="${TASK_PEAK_BYTES:-0}"
           task_after_convert_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
           if [ "$task_after_convert_bytes" -gt "$task_peak_bytes" ]; then
