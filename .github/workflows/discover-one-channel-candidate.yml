@@ -138,6 +138,7 @@ jobs:
           scripts/blocked-vtuber-utils.js|13983|ae88220a840c0350d879c86b745af62951bee9cc
           scripts/build-runtime-data.js|92299|1afab30a25df5af27917534326e6469d22c2ca94
           scripts/channel-discovery-candidate-artifact-gate.jq|9618|54e348c83453515fa560d2a264a1307ceb8be2bb
+          scripts/channel-discovery-candidate-artifact-diagnostic.jq|11839|20eaabe1f191881fa536c48e30e30883cc0254df
           scripts/channel-discovery-candidate-records-gate.jq|6993|25097ed05c3abcf616e9fcb0f3a6e3d73136d22c
           scripts/channel-metadata-cache.js|9419|85d3caffac760d3e9e47f855157070645d81541e
           scripts/curation.js|43979|b3bc02ce4058ec1cd30e2df5df9da941ada1d511
@@ -157,7 +158,7 @@ jobs:
           scripts/youtube-channel-discovery.js|2444|1d78bdeeefe0b9dc6db6e7caf185f531cfed51b4
           PINNED_SOURCE_FILES
 
-          [ "$source_files" -eq 24 ] || fail "source-file-count"
+          [ "$source_files" -eq 25 ] || fail "source-file-count"
           js_files="$(find "$SOURCE_ROOT" -type f -name '*.js' | wc -l | tr -d ' ')"
           [ "$js_files" -eq 21 ] || fail "source-js-count"
           while IFS= read -r js_file; do
@@ -386,7 +387,7 @@ jobs:
               [ "$(shasum -a 256 "$ARTIFACT_DIR/$evidence_path" | awk '{print $1}')" = "$expected_sha" ] || exit 78
             done || fail "physical-page-evidence"
 
-          jq -e -s \
+          if ! jq -e -s \
             --arg expectedSourceCommit "$GITHUB_SHA" \
             --arg expectedChannelId "$CHANNEL_ID" \
             --arg expectedChannelHandle "$NORMALIZED_CHANNEL_HANDLE" \
@@ -395,7 +396,20 @@ jobs:
             --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
             --slurpfile checkpointFile "$ARTIFACT_DIR/checkpoint.json" \
             -f "$SOURCE_ROOT/scripts/channel-discovery-candidate-artifact-gate.jq" \
-            "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "artifact-gate"
+            "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null; then
+            printf 'CHANNEL_DISCOVERY_ARTIFACT_DIAGNOSTIC ' >&2
+            jq -c -s \
+              --arg expectedSourceCommit "$GITHUB_SHA" \
+              --arg expectedChannelId "$CHANNEL_ID" \
+              --arg expectedChannelHandle "$NORMALIZED_CHANNEL_HANDLE" \
+              --arg expectedChannelUrl "$CHANNEL_URL" \
+              --slurpfile requestFile "$ARTIFACT_DIR/request.json" \
+              --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
+              --slurpfile checkpointFile "$ARTIFACT_DIR/checkpoint.json" \
+              -f "$SOURCE_ROOT/scripts/channel-discovery-candidate-artifact-diagnostic.jq" \
+              "$ARTIFACT_DIR/candidate-manifest.ndjson" >&2 || true
+            fail "artifact-gate"
+          fi
 
           jq -e -s \
             --arg expectedSourceCommit "$GITHUB_SHA" \

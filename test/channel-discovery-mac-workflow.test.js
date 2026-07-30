@@ -18,6 +18,7 @@ const expectedSourceFiles = new Map([
   ["scripts/blocked-vtuber-utils.js", ["13983", "ae88220a840c0350d879c86b745af62951bee9cc"]],
   ["scripts/build-runtime-data.js", ["92299", "1afab30a25df5af27917534326e6469d22c2ca94"]],
   ["scripts/channel-discovery-candidate-artifact-gate.jq", ["9618", "54e348c83453515fa560d2a264a1307ceb8be2bb"]],
+  ["scripts/channel-discovery-candidate-artifact-diagnostic.jq", ["11839", "20eaabe1f191881fa536c48e30e30883cc0254df"]],
   ["scripts/channel-discovery-candidate-records-gate.jq", ["6993", "25097ed05c3abcf616e9fcb0f3a6e3d73136d22c"]],
   ["scripts/channel-metadata-cache.js", ["9419", "85d3caffac760d3e9e47f855157070645d81541e"]],
   ["scripts/curation.js", ["43979", "b3bc02ce4058ec1cd30e2df5df9da941ada1d511"]],
@@ -109,7 +110,7 @@ test("pinned source bundle is the exact audited runtime and gate closure", () =>
     pinnedSourceRows().map(([relative, bytes, blob]) => [relative, [bytes, blob]]),
   );
   assert.deepEqual(actual, expectedSourceFiles);
-  assert.equal(actual.size, 24);
+  assert.equal(actual.size, 25);
   assert.equal([...actual.keys()].filter((file) => file.endsWith(".js")).length, 21);
   for (const [relative, [bytes, blob]] of actual) {
     assert.match(relative, /^(?:assets|config|scripts)\//u);
@@ -127,7 +128,7 @@ test("each downloaded file is fail-closed on HTTP, exact size, Git blob SHA, and
   assert.match(workflow, /"\$NODE_BIN" --check "\$js_file"/u);
   assert.match(workflow, /source-module-load/u);
   assert.match(workflow, /SOURCE_BUNDLE_CAP_BYTES: "2097152"/u);
-  assert.match(workflow, /\[ "\$source_files" -eq 24 \]/u);
+  assert.match(workflow, /\[ "\$source_files" -eq 25 \]/u);
   assert.match(workflow, /\[ "\$js_files" -eq 21 \]/u);
 });
 
@@ -189,7 +190,16 @@ test("one owned root still has bounded source, Node memory, PID RSS, task, and a
 
 test("raw page replay and both frozen candidate gates use only the pinned source root", () => {
   assert.match(workflow, /-f "\$SOURCE_ROOT\/scripts\/channel-discovery-candidate-artifact-gate\.jq"/u);
+  assert.match(workflow, /-f "\$SOURCE_ROOT\/scripts\/channel-discovery-candidate-artifact-diagnostic\.jq"/u);
   assert.match(workflow, /-f "\$SOURCE_ROOT\/scripts\/channel-discovery-candidate-records-gate\.jq"/u);
+  assert.match(
+    workflow,
+    /if ! jq -e -s[\s\S]*channel-discovery-candidate-artifact-gate\.jq[\s\S]*candidate-manifest\.ndjson" >\/dev\/null; then[\s\S]*CHANNEL_DISCOVERY_ARTIFACT_DIAGNOSTIC[\s\S]*channel-discovery-candidate-artifact-diagnostic\.jq[\s\S]*candidate-manifest\.ndjson" >&2 \|\| true\n {12}fail "artifact-gate"\n {10}fi/u,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /channel-discovery-candidate-artifact-gate\.jq"[\s\S]{0,120}\|\| fail "artifact-gate"/u,
+  );
   assert.match(workflow, /SOURCE_ROOT="\$SOURCE_ROOT"/u);
   assert.match(workflow, /recomputeCandidateArtifactEvidence/u);
   assert.match(workflow, /VERIFY_RAW_CONTINUATIONS/u);
