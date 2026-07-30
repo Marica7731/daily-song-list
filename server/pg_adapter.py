@@ -7080,7 +7080,13 @@ def _occurrences_for_range(record: Mapping[str, Any], range_id: str) -> list[dic
         # 7d tuple must never leak into the all aggregate (or vice versa).
         if song_range in {range_id, ""}:
             item = dict(record["video"])
-            values.append({"rangeId": song_range or range_id, "videoId": item.get("videoId", ""), "item": item, "song": dict(song)})
+            values.append({
+                "rangeId": song_range or range_id,
+                "videoId": item.get("videoId", ""),
+                "item": item,
+                "video": dict(item),
+                "song": dict(song),
+            })
     return values
 
 

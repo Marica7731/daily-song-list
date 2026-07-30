@@ -2881,7 +2881,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("channel source details stay bounded and reuse parent occurrences", () => {
+test("channel source details bind item and compatibility video to one immutable tuple", () => {
   const output = runPython(`
 import importlib.util
 spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
@@ -2907,8 +2907,13 @@ source = module._source_payload_from_channel_records(records, metadata, metadata
 assert source["found"] is True
 assert source["record"]["channelName"] == "なれたん Naraetan Ch."
 assert source["record"]["avatarUrl"].startswith("https://yt3.googleusercontent.com/")
-assert source["record"]["occurrences"][0]["item"]["thumbnailUrl"] == "https://i.ytimg.com/vi/eKx6coop-bo/hqdefault.jpg"
-assert source["record"]["occurrences"][0]["song"]["seconds"] is None
+occurrence = source["record"]["occurrences"][0]
+assert occurrence["videoId"] == "eKx6coop-bo"
+assert occurrence["item"] == occurrence["video"]
+assert occurrence["item"]["videoId"] == occurrence["videoId"]
+assert occurrence["item"]["channelId"] == channel_id
+assert occurrence["item"]["thumbnailUrl"] == "https://i.ytimg.com/vi/eKx6coop-bo/hqdefault.jpg"
+assert occurrence["song"]["seconds"] is None
 print("OK")
 `);
   assert.equal(output, "OK");
