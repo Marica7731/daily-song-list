@@ -316,9 +316,24 @@ jobs:
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
 
-          curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
-            "$public_base/healthz" > "$remote_root/production-public-healthz.json"
-          jq -e 'type == "object"' "$remote_root/production-public-healthz.json" >/dev/null
+          readiness_deadline=$((SECONDS + 75))
+          readiness_attempt=0
+          readiness_ready=false
+          while (( SECONDS < readiness_deadline )); do
+            ((readiness_attempt += 1))
+            if curl --silent --show-error --fail --connect-timeout 3 --max-time 8 \
+                "$public_base/healthz" > "$remote_root/production-public-healthz.json" \
+              && jq -e 'type == "object"' "$remote_root/production-public-healthz.json" >/dev/null; then
+              readiness_ready=true
+              break
+            fi
+            rm -f "$remote_root/production-public-healthz.json"
+            printf 'public readiness attempt %s did not pass\n' "$readiness_attempt" >&2
+            if (( SECONDS < readiness_deadline )); then
+              sleep 2
+            fi
+          done
+          test "$readiness_ready" = true
 
           meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
             --output "$remote_root/production-public-meta.json" --write-out '%{http_code}' \

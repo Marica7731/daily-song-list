@@ -2336,6 +2336,19 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   assert.doesNotMatch(installSection, /DAILY_SONG_PG_ADAPTER_PHASE_TRACE/u);
   assert.doesNotMatch(installSection, /http:\/\/127\.0\.0\.1:8765\/api\//u);
   assert.match(installSection, /PUBLIC_BASE/u);
+  assert.match(installSection, /readiness_deadline=\$\(\(SECONDS \+ 75\)\)/u);
+  assert.match(installSection, /while \(\( SECONDS < readiness_deadline \)\); do/u);
+  assert.match(
+    installSection,
+    /--connect-timeout 3 --max-time 8[\s\\]+"\$public_base\/healthz"/u,
+  );
+  assert.match(installSection, /sleep 2/u);
+  assert.match(installSection, /test "\$readiness_ready" = true/u);
+  assert.doesNotMatch(installSection, /while true|until curl/u);
+  assert.doesNotMatch(
+    installSection,
+    /--connect-timeout 8 --max-time 20[\s\\]+"\$public_base\/healthz"/u,
+  );
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);
