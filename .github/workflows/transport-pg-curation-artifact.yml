@@ -1,0 +1,106 @@
+name: Transport PG curation conservative artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: Output artifact retention
+        required: true
+        default: "14"
+        type: choice
+        options:
+          - "7"
+          - "14"
+          - "30"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pg-curation-artifact-transport-30514755176-M4iBwhm_hRI-ffca0d2f8e3f1d0b5aa3fd75
+  cancel-in-progress: false
+
+jobs:
+  derive:
+    name: Derive and upload artifact only
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact transport implementation
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Download exact same-repository producer artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: pg-curation-patch-30514755176-1
+          path: ${{ runner.temp }}/pg-curation-transport-source
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: "30514755176"
+
+      - name: Derive conservative subset and verify all hashes
+        id: derive
+        shell: bash
+        env:
+          SOURCE_ROOT: ${{ runner.temp }}/pg-curation-transport-source
+          TASK_ROOT: ${{ runner.temp }}/pg-curation-transport-${{ github.run_id }}-${{ github.run_attempt }}
+          SOURCE_RUN_ID: "30514755176"
+          SOURCE_ARTIFACT_NAME: pg-curation-patch-30514755176-1
+          EXPECTED_SOURCE_MANIFEST_SHA256: a37330992d674506d1a9cb302f24b0a72fcad77a8f7561ca8d9811ccf381ba65
+          EXPECTED_SOURCE_ROW_SHA256: 31b7a67d5213fe1d3318d03aad60658fc333773525d34e2d6ec5fac78373b46f
+          EXPECTED_ACTIVE_REVISION_ID: accepted_30402041297_1
+          EXCLUDE_VIDEO_ID: M4iBwhm_hRI
+          EXCLUDE_OCCURRENCE_ID: ffca0d2f8e3f1d0b5aa3fd75
+        run: |
+          set -euo pipefail
+          umask 077
+          test ! -e "$TASK_ROOT"
+          mkdir -p "$TASK_ROOT"
+          output_root="$TASK_ROOT/output"
+          result_path="$TASK_ROOT/result.json"
+          node scripts/migration/derive-curation-conservative-subset.mjs \
+            --source-root "$SOURCE_ROOT" \
+            --output-root "$output_root" \
+            --expected-source-manifest-sha256 "$EXPECTED_SOURCE_MANIFEST_SHA256" \
+            --expected-source-row-sha256 "$EXPECTED_SOURCE_ROW_SHA256" \
+            --expected-active-revision-id "$EXPECTED_ACTIVE_REVISION_ID" \
+            --exclude-video-id "$EXCLUDE_VIDEO_ID" \
+            --exclude-occurrence-id "$EXCLUDE_OCCURRENCE_ID" \
+            --exclusion-reason conservative_keep_missing_db_immutable_channel_identity \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --source-artifact-name "$SOURCE_ARTIFACT_NAME" \
+            --transport-run-id "$GITHUB_RUN_ID" \
+            --transport-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --transport-commit-sha "$GITHUB_SHA" \
+            --result-output "$result_path"
+          test "$(jq -r .status "$result_path")" = ready_artifact_only_no_deploy
+          test "$(jq -r .outputMutationCount "$result_path")" = 13
+          (
+            cd "$output_root"
+            sha256sum -c artifact-sha256.txt
+          )
+          artifact_name="pg-curation-conservative-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf 'artifact_name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+          printf 'output_root=%s\n' "$output_root" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Conservative curation artifact transport"
+            echo
+            echo "- Source run: \`$SOURCE_RUN_ID\`"
+            echo "- Source artifact: \`$SOURCE_ARTIFACT_NAME\`"
+            echo "- Output artifact: \`$artifact_name\`"
+            echo "- Mutations: 14 -> 13"
+            echo "- Status: artifact only; no deploy or activation"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload newly hashed artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ steps.derive.outputs.artifact_name }}
+          path: ${{ steps.derive.outputs.output_root }}
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention_days }}
+          compression-level: 6

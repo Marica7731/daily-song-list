@@ -757,11 +757,50 @@ test("accepted handoff manifest validation keeps root scope for source identity 
     sourceIdentityEvidence: [identity],
     identityEvidence: identity,
   };
-  const validation = spawnSync("jq", ["-e", match.groups.program], {
-    input: JSON.stringify(manifest),
-    encoding: "utf8",
+  const validate = (value) => spawnSync(
+    "jq",
+    ["-e", match.groups.program],
+    {
+      input: JSON.stringify(value),
+      encoding: "utf8",
+    },
+  );
+  for (const compatible of [
+    manifest,
+    { ...manifest, identityResetCount: null, identityResets: null },
+    { ...manifest, identityResetCount: 0, identityResets: [] },
+  ]) {
+    const validation = validate(compatible);
+    assert.equal(validation.status, 0, validation.stderr);
+  }
+  const completeResets = [
+    [117, 1240],
+    [103, 2569],
+    [100, 1006],
+    [95, 798],
+  ].map(([parentVideoCount, parentOccurrenceCount]) => ({
+    parentVideoCount,
+    parentOccurrenceCount,
+    complete: true,
+    sourceReachedEnd: true,
+    unresolvedParentVideoIds: [],
+    unexpectedResetVideoIds: [],
+  }));
+  const completeValidation = validate({
+    ...manifest,
+    identityResetCount: completeResets.length,
+    identityResets: completeResets,
   });
-  assert.equal(validation.status, 0, validation.stderr);
+  assert.equal(completeValidation.status, 0, completeValidation.stderr);
+  const incompleteValidation = validate({
+    ...manifest,
+    identityResetCount: completeResets.length,
+    identityResets: [
+      { ...completeResets[0], complete: false },
+      ...completeResets.slice(1),
+    ],
+  });
+  assert.notEqual(incompleteValidation.status, 0);
 });
 
 test("GitHub accepted handoffs bind and verify every distinct source probe", () => {

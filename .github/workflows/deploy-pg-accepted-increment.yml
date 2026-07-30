@@ -240,16 +240,17 @@ jobs:
             (.handoffKind == "github-accepted-paths") and
             (.acceptedVideoCount > 0) and
             (.acceptedOccurrenceCount > 0) and
-            (.identityResetCount == (.identityResets | length)) and
+            ((.identityResetCount // 0) ==
+              ((.identityResets // []) | length)) and
             (
-              .identityResetCount == 0 or
+              (.identityResetCount // 0) == 0 or
               (
                 .identityResetCount == 4 and
                 (([.identityResets[].parentVideoCount] | add) == 415) and
                 (([.identityResets[].parentOccurrenceCount] | add) == 5613)
               )
             ) and
-            (all(.identityResets[];
+            (all((.identityResets // [])[];
               .complete == true and
               .sourceReachedEnd == true and
               .unresolvedParentVideoIds == [] and
