@@ -9321,3 +9321,178 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("unused accepted and runtime replacement preview identity does not block page 1", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def scalar(revision_id, runtime_replacement=False):
+    video_payload = {
+        "videoId": "MhemBDB0yJo",
+        "title": "Shibirei video",
+        "channelName": "Shibirei Amoru",
+        "channelId": "UCpKdAmIYIkpySO7tsTN0oJA",
+        "channelHandle": "/@ShibireiAmoru88",
+        "channelUrl": "https://www.youtube.com/@shibireiamoru88",
+    }
+    return {
+        "revision_id": revision_id,
+        "video_id": "MhemBDB0yJo",
+        "occurrence_id": "position:4",
+        "position": 5,
+        "range_id": "7d",
+        "title": (
+            "\u9006\u5149"
+            if runtime_replacement
+            else "\u9006\u5149(\u30a6\u30bf from ONE PIECE FILM RED)"
+        ),
+        "artist": "Ado",
+        "video_payload_json": video_payload if runtime_replacement else None,
+        "occurrence_payload_json": (
+            {
+                "videoId": "MhemBDB0yJo",
+                "occurrenceId": "position:4",
+                "position": 5,
+                "rangeId": "7d",
+                "title": "\u9006\u5149",
+                "artist": "Ado",
+            }
+            if runtime_replacement
+            else None
+        ),
+        "runtime_replacement": runtime_replacement,
+    }
+
+top_preview = {
+    "videoId": "top-video",
+    "occurrenceId": "top-occurrence",
+    "position": 1,
+    "rangeId": "7d",
+    "title": "Top Song",
+    "artist": "Top Artist",
+    "song": {
+        "title": "Top Song",
+        "artist": "Top Artist",
+        "rangeId": "7d",
+    },
+    "item": {
+        "videoId": "top-video",
+        "channelId": "UC-TOP",
+        "channelHandle": "/@top",
+    },
+    "video": {
+        "videoId": "top-video",
+        "channelId": "UC-TOP",
+        "channelHandle": "/@top",
+    },
+}
+top_payload = {
+    "type": "song",
+    "key": "top song::top artist",
+    "title": "Top Song",
+    "displayArtist": "Top Artist",
+    "count": 68,
+    "songCount": 1,
+    "videoCount": 68,
+    "timestampCount": 68,
+    "occurrences": [top_preview],
+}
+top_row = {
+    "rank": 1,
+    "detail_key": top_payload["key"],
+    "title": top_payload["title"],
+    "artist": top_payload["displayArtist"],
+    "name": top_payload["title"],
+    "row_count": 68,
+    "song_count": 1,
+    "video_count": 68,
+    "timestamp_count": 68,
+    "payload_json": top_payload,
+}
+
+module._rows = lambda *_args: (_ for _ in ()).throw(
+    AssertionError("unused D preview identity must not query hydration")
+)
+prepared = {
+    "filtered": (top_row,),
+    "metadata": (),
+    "candidateRows": (
+        scalar("accepted_30347149376_1"),
+        scalar("accepted_30538117062_1", True),
+    ),
+    "parentRevisionId": "full-parent",
+    "aggregateTotals": {
+        "totalCount": 9269,
+        "totalOccurrenceCount": 19112,
+        "totalSongCount": 9269,
+        "totalVideoCount": 19000,
+    },
+}
+rendered = module._render_generic_overlay_rankings(
+    object(),
+    prepared,
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "1",
+    },
+)
+record = rendered["records"][0]
+assert record["key"] == "top song::top artist"
+assert record["title"] == "Top Song"
+assert record["displayArtist"] == "Top Artist"
+assert record["count"] == 68
+assert record["occurrences"] == [top_preview]
+
+# Reversed input order must still prefer the one explicit runtime replacement.
+prepared["candidateRows"] = tuple(reversed(prepared["candidateRows"]))
+rendered = module._render_generic_overlay_rankings(
+    object(),
+    prepared,
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "1",
+    },
+)
+assert rendered["records"][0]["key"] == "top song::top artist"
+
+# Two ordinary candidates or two replacements remain ambiguous and fail closed.
+for duplicate in (False, True):
+    prepared["candidateRows"] = (
+        scalar("revision-a", duplicate),
+        scalar("revision-b", duplicate),
+    )
+    try:
+        module._render_generic_overlay_rankings(
+            object(),
+            prepared,
+            {
+                "range": "7d",
+                "view": "songs",
+                "metric": "occurrences",
+                "page": "1",
+                "pageSize": "1",
+            },
+        )
+    except module.PostgresAdapterError as error:
+        assert str(error) == (
+            "overlay preview hydration has ambiguous candidate preview identity"
+        )
+    else:
+        raise AssertionError("same-kind duplicate preview identity did not fail")
+
+print("OK")
+`);
+  assert.equal(output, "OK");
+});

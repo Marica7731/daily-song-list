@@ -3764,7 +3764,19 @@ def _hydrate_overlay_page_previews(
         preview_key = key[1:]
         prior = preview_candidates.get(preview_key)
         if prior is not None and prior != key:
-            raise PostgresAdapterError("overlay preview hydration has ambiguous candidate preview identity")
+            prior_candidate = candidates[prior]
+            prior_replacement = bool(
+                prior_candidate.get("runtime_replacement")
+            )
+            current_replacement = bool(
+                candidate.get("runtime_replacement")
+            )
+            if prior_replacement == current_replacement:
+                raise PostgresAdapterError(
+                    "overlay preview hydration has ambiguous candidate preview identity"
+                )
+            if prior_replacement:
+                continue
         preview_candidates[preview_key] = key
     requested: dict[tuple[str, str, str, int], Mapping[str, Any]] = {}
     for payload in payloads:
