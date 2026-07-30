@@ -107,7 +107,7 @@ function verifyDetailArtifact(options) {
   assert(new Set(audits.map((audit) => audit.videoId)).size === 3, "audit video IDs are not unique");
   assert(sameSet(audits.map((audit) => audit.videoId), videoIds), "audit video IDs mismatch");
   assert(sameSet(checkpoint.completedVideoIds, videoIds), "checkpoint completed video IDs mismatch");
-  assert(checkpoint.inspectedInLatestRun === 3, "checkpoint inspected count mismatch");
+  assert(checkpoint.detailCount === 3, "checkpoint inspected count mismatch");
 
   for (const record of rawVideos) validateCandidateRecord(record, expected, null);
   const detailIds = new Set();

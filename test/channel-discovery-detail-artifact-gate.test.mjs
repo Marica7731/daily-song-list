@@ -162,7 +162,7 @@ function detailFixture() {
   });
   writeJson(path.join(detailRoot, "checkpoint.json"), {
     completedVideoIds: videoIds,
-    inspectedInLatestRun: 3,
+    detailCount: 3,
   });
   writeJson(path.join(detailRoot, "raw-videos.json"), candidate.records);
   writeJson(path.join(detailRoot, "video-details.json"), [{
