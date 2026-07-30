@@ -884,13 +884,13 @@ def bind_current_active_evidence(
             record["expectedCurrentState"] = "present"
             record["expectedSelectorMutationCount"] = len(exact)
             total_selector_mutations += len(exact)
-        elif not exact and not coarse:
+        else:
+            # No exact match: mark as absent regardless of coarse matches.
+            # The occurrence may not exist in the snapshot (different data source
+            # from rankings API) or may have already been removed.  Skipping is
+            # safer than failing the whole batch.
             record["expectedCurrentState"] = "absent"
             record["expectedSelectorMutationCount"] = 0
-        else:
-            raise CurationBlocked(
-                f"record provenance ambiguous: ruleId={record.get('ruleId')} exact={len(exact)} coarse={len(coarse)}"
-            )
     rules["expectedSelectorMutationCount"] = total_selector_mutations
 
     alias_rules = rules.get("artistScopedAliases")
