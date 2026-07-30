@@ -14,8 +14,20 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any, Iterable
+
+from legacy_vtuber_identity_reset import (
+    ContractError,
+    validate_accepted_identity_resets,
+    validate_identity_reset_manifest_presence,
+)
+
+
+SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
+CHANNEL_ID_RE = re.compile(r"^UC[A-Za-z0-9_-]{22}$")
+HANDLE_RE = re.compile(r"^@[A-Za-z0-9._-]{3,30}$")
 
 
 def text(value: Any) -> str:
@@ -55,6 +67,121 @@ def read_payload(path: Path) -> dict[str, Any]:
     if not isinstance(videos, list):
         raise ValueError(f"accepted artifact has no videos list: {path}")
     return payload
+
+
+def canonical_sha256(value: Any) -> str:
+    encoded = json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def validate_identity_resets(
+    payload: dict[str, Any], source_path: Path,
+) -> list[dict[str, Any]]:
+    """Validate the complete parent binding before emitting any patch rows."""
+
+    try:
+        raw_resets = validate_identity_reset_manifest_presence(payload)
+    except ContractError as exc:
+        raise ValueError(
+            f"identity reset manifest presence mismatch: {source_path}: {exc}",
+        ) from exc
+    if not raw_resets:
+        return []
+    videos = payload.get("videos")
+    assert isinstance(videos, list)
+    video_ids = [
+        text(video.get("videoId"))
+        for video in videos
+        if isinstance(video, dict)
+    ]
+    if len(video_ids) != len(videos) or len(video_ids) != len(set(video_ids)):
+        raise ValueError(f"identity reset accepted videos are not exact: {source_path}")
+    selected_ids: list[str] = []
+    legacy_keys: set[str] = set()
+    parent_revisions: set[str] = set()
+    validated: list[dict[str, Any]] = []
+    for raw in raw_resets:
+        if not isinstance(raw, dict):
+            raise ValueError(f"identity reset must be an object: {source_path}")
+        reset = dict(raw)
+        required_text = (
+            "kind", "parentRevisionId", "parentRuntimeRevisionId",
+            "legacyDetailKey", "sourceKey", "parentVideoIdsSha256",
+            "parentOccurrenceIdentitiesSha256", "targetChannelId",
+            "targetChannelHandle", "targetChannelUrl",
+            "identityEvidenceSha256",
+        )
+        if any(not text(reset.get(name)) for name in required_text):
+            raise ValueError(f"identity reset misses required binding: {source_path}")
+        if (
+            reset.get("schemaVersion") != 1
+            or reset.get("kind") != "legacy-vtuber-full-identity-reset"
+            or reset.get("rangeId") != "all"
+            or reset.get("sourceReachedEnd") is not True
+            or reset.get("complete") is not True
+            or reset.get("unresolvedParentVideoIds") != []
+            or reset.get("unexpectedResetVideoIds") != []
+        ):
+            raise ValueError(f"identity reset is not complete: {source_path}")
+        parent_ids = reset.get("parentVideoIds")
+        if (
+            not isinstance(parent_ids, list)
+            or not parent_ids
+            or parent_ids != sorted(parent_ids)
+            or len(parent_ids) != len(set(parent_ids))
+            or len(parent_ids) != int(reset.get("parentVideoCount") or 0)
+            or canonical_sha256(parent_ids) != reset["parentVideoIdsSha256"]
+        ):
+            raise ValueError(f"identity reset parent video set mismatch: {source_path}")
+        if int(reset.get("parentOccurrenceCount") or 0) <= 0:
+            raise ValueError(f"identity reset occurrence count is invalid: {source_path}")
+        if any(
+            not SHA256_RE.fullmatch(text(reset.get(name)))
+            for name in (
+                "parentVideoIdsSha256",
+                "parentOccurrenceIdentitiesSha256",
+                "identityEvidenceSha256",
+            )
+        ):
+            raise ValueError(f"identity reset digest is invalid: {source_path}")
+        channel_id = text(reset.get("targetChannelId"))
+        handle = text(reset.get("targetChannelHandle"))
+        if (
+            not CHANNEL_ID_RE.fullmatch(channel_id)
+            or not HANDLE_RE.fullmatch(handle)
+            or text(reset.get("targetChannelUrl"))
+            != f"https://www.youtube.com/{handle}"
+        ):
+            raise ValueError(f"identity reset target identity is invalid: {source_path}")
+        key = text(reset.get("legacyDetailKey"))
+        if key in legacy_keys:
+            raise ValueError(f"identity reset repeats legacy detail key: {source_path}")
+        legacy_keys.add(key)
+        parent_revisions.add(text(reset.get("parentRevisionId")))
+        selected_ids.extend(parent_ids)
+        validated.append(reset)
+    if len(parent_revisions) != 1:
+        raise ValueError(f"identity resets bind different active parents: {source_path}")
+    if len(selected_ids) != len(set(selected_ids)) or sorted(selected_ids) != sorted(video_ids):
+        raise ValueError(f"identity reset set is partial, duplicate, or extra: {source_path}")
+    try:
+        totals = validate_accepted_identity_resets(validated, videos)
+    except ContractError as exc:
+        raise ValueError(
+            f"identity reset accepted contract mismatch: {source_path}: {exc}",
+        ) from exc
+    if totals != {
+        "videoCount": 415,
+        "occurrenceCount": 5613,
+        "identityResetCount": 4,
+    }:
+        raise ValueError(
+            f"identity reset must equal 4 groups / 415 videos / "
+            f"5613 occurrences: {source_path}",
+        )
+    return validated
 
 
 def input_paths(args: argparse.Namespace) -> list[Path]:
@@ -154,10 +281,20 @@ def convert(
     input_names: list[str] = []
     range_ids: set[str] = set()
     source_systems: set[str] = set()
+    identity_resets: list[dict[str, Any]] = []
+    identity_reset_keys: set[str] = set()
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("wb") as stream:
         for path in paths:
             payload = read_payload(path)
+            for reset in validate_identity_resets(payload, path):
+                key = text(reset.get("legacyDetailKey"))
+                if key in identity_reset_keys:
+                    raise ValueError(
+                        f"identity reset repeats legacy detail key across files: {key}"
+                    )
+                identity_reset_keys.add(key)
+                identity_resets.append(reset)
             raw = path.read_bytes()
             source_hash.update(raw)
             if resolved_source_root:
@@ -205,6 +342,8 @@ def convert(
         "rangeIds": sorted(range_ids),
         "sourceSystems": sorted(source_systems),
         "reviewAudit": status_audit.get("summary", {}) if isinstance(status_audit, dict) else {},
+        "identityResets": identity_resets,
+        "identityResetCount": len(identity_resets),
     }
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

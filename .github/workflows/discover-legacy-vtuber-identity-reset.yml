@@ -1,0 +1,276 @@
+name: Prepare legacy VTuber identity reset parent
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_active_revision:
+        description: Exact active revision CAS observed immediately before dispatch
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-pg-release
+  cancel-in-progress: false
+
+jobs:
+  parent-snapshot:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 30
+    env:
+      EXPECTED_ACTIVE_REVISION: ${{ inputs.expected_active_revision }}
+      VPS2_HOST: ${{ vars.VPS2_HOST }}
+      VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
+      VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}
+      TASK_CAP_BYTES: "2147483648"
+      FETCH_SIZE: "256"
+    steps:
+      - name: Export exact parent sets with server cursor
+        id: snapshot
+        shell: bash
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'LEGACY_IDENTITY_RESET_BLOCKED %s\n' "$1" >&2
+            exit 78
+          }
+
+          [[ "$EXPECTED_ACTIVE_REVISION" =~ ^[A-Za-z0-9._-]{8,160}$ ]] ||
+            fail "invalid-expected-active"
+          [ -n "$VPS2_HOST" ] || fail "missing-vps-host"
+          [ -n "$VPS2_USER" ] || fail "missing-vps-user"
+          [ -n "$VPS2_PASSWORD" ] || fail "missing-vps-password"
+          [ -n "$VPS2_KNOWN_HOSTS" ] || fail "missing-vps-known-hosts"
+          [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] ||
+            fail "unsafe-runner-temp"
+
+          TASK_ROOT="$RUNNER_TEMP/daily-song-legacy-identity-reset-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          EXPECTED_ROOT="$RUNNER_TEMP/daily-song-legacy-identity-reset-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [ "$TASK_ROOT" = "$EXPECTED_ROOT" ] || fail "unsafe-task-root"
+          case "$TASK_ROOT" in
+            "$RUNNER_TEMP"/daily-song-legacy-identity-reset-*) ;;
+            *) fail "unsafe-task-root-pattern" ;;
+          esac
+          [ ! -e "$TASK_ROOT" ] || fail "task-root-already-exists"
+          umask 077
+          mkdir -p "$TASK_ROOT/source" "$TASK_ROOT/parent" "$TASK_ROOT/ssh"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+
+          task_bytes() {
+            local kib
+            kib="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 }')"
+            [[ "$kib" =~ ^[0-9]+$ ]] || return 78
+            printf '%s\n' "$((kib * 1024))"
+          }
+
+          before_bytes="$(task_bytes)" || fail "bytes-before"
+          peak_bytes="$before_bytes"
+          [ "$before_bytes" -le "$TASK_CAP_BYTES" ] || fail "bytes-before-cap"
+
+          raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
+          curl --fail --location --silent --show-error --connect-timeout 10 \
+            --max-time 60 --retry 3 --retry-all-errors \
+            "$raw_base/scripts/migration/legacy_vtuber_identity_reset.py" \
+            -o "$TASK_ROOT/source/legacy_vtuber_identity_reset.py"
+          curl --fail --location --silent --show-error --connect-timeout 10 \
+            --max-time 60 --retry 3 --retry-all-errors \
+            "$raw_base/config/legacy-vtuber-identity-reset-targets.json" \
+            -o "$TASK_ROOT/source/targets.json"
+          python3 -B -m py_compile "$TASK_ROOT/source/legacy_vtuber_identity_reset.py" ||
+            fail "producer-python-compile"
+          jq -e '
+            .kind == "legacy-vtuber-identity-reset-targets" and
+            (.targets | type == "array" and length == 4)
+          ' "$TASK_ROOT/source/targets.json" >/dev/null ||
+            fail "target-contract"
+
+          printf '%s\n' "$VPS2_PASSWORD" > "$TASK_ROOT/ssh/password"
+          printf '%s\n' "$VPS2_KNOWN_HOSTS" > "$TASK_ROOT/ssh/known_hosts"
+          cat > "$TASK_ROOT/ssh/askpass.sh" <<'ASKPASS'
+          #!/bin/sh
+          cat "$TASK_ROOT/ssh/password"
+          ASKPASS
+          chmod 0700 "$TASK_ROOT/ssh/askpass.sh"
+          chmod 0600 "$TASK_ROOT/ssh/password" "$TASK_ROOT/ssh/known_hosts"
+          export TASK_ROOT
+          export SSH_ASKPASS="$TASK_ROOT/ssh/askpass.sh"
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=codex:0
+          SSH=(
+            ssh -o BatchMode=no -o NumberOfPasswordPrompts=1
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$TASK_ROOT/ssh/known_hosts"
+            -o ConnectTimeout=10
+            -o ServerAliveInterval=5 -o ServerAliveCountMax=2
+          )
+          SCP=(
+            scp -o BatchMode=no -o NumberOfPasswordPrompts=1
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$TASK_ROOT/ssh/known_hosts"
+            -o ConnectTimeout=10
+          )
+
+          REMOTE_ROOT="/tmp/daily-song-legacy-identity-reset-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          case "$REMOTE_ROOT" in
+            /tmp/daily-song-legacy-identity-reset-*) ;;
+            *) fail "unsafe-remote-root" ;;
+          esac
+          printf 'REMOTE_ROOT=%s\n' "$REMOTE_ROOT" >> "$GITHUB_ENV"
+          remote_cleanup() {
+            remote_delete_status=0
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "case '$REMOTE_ROOT' in /tmp/daily-song-legacy-identity-reset-*) rm -rf -- '$REMOTE_ROOT' ;; *) exit 78 ;; esac" \
+              >/dev/null || remote_delete_status=$?
+            remote_absent_status=0
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "test ! -e '$REMOTE_ROOT'" >/dev/null ||
+              remote_absent_status=$?
+            if [ "$remote_delete_status" -ne 0 ] ||
+              [ "$remote_absent_status" -ne 0 ]; then
+              printf 'LEGACY_IDENTITY_RESET_BLOCKED remote-cleanup-failed root=%s deleteStatus=%s absentStatus=%s\n' \
+                "$REMOTE_ROOT" "$remote_delete_status" "$remote_absent_status" >&2
+              return 78
+            fi
+          }
+          trap remote_cleanup EXIT INT TERM
+
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "test ! -e '$REMOTE_ROOT' && install -d -m 0700 '$REMOTE_ROOT/source' '$REMOTE_ROOT/output'" ||
+            fail "remote-root"
+          "${SCP[@]}" \
+            "$TASK_ROOT/source/legacy_vtuber_identity_reset.py" \
+            "$TASK_ROOT/source/targets.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/source/" ||
+            fail "remote-source-copy"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "ulimit -v 2097152; sudo -u www-data env PYTHONDONTWRITEBYTECODE=1 \
+              python3 '$REMOTE_ROOT/source/legacy_vtuber_identity_reset.py' export-parent \
+              --expected-active '$EXPECTED_ACTIVE_REVISION' \
+              --targets '$REMOTE_ROOT/source/targets.json' \
+              --output-root '$REMOTE_ROOT/output'" \
+            | tee "$TASK_ROOT/producer.log" ||
+            fail "parent-export"
+          grep -qx 'LEGACY_VTUBER_IDENTITY_RESET_COMPLETE' "$TASK_ROOT/producer.log" ||
+            fail "parent-export-incomplete"
+
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "tar -C '$REMOTE_ROOT/output' -cf - ." |
+            tar -C "$TASK_ROOT/parent" -xf - ||
+            fail "parent-artifact-stream"
+          [ -s "$TASK_ROOT/parent/parent-manifest.json" ] ||
+            fail "missing-parent-manifest"
+          [ -s "$TASK_ROOT/parent/checkpoint.json" ] ||
+            fail "missing-checkpoint"
+          expected_manifest_sha="$(jq -er '
+            .manifestSha256 | select(test("^[a-f0-9]{64}$"))
+          ' "$TASK_ROOT/parent/checkpoint.json")" ||
+            fail "checkpoint-manifest-sha-missing"
+          actual_manifest_sha="$(shasum -a 256 \
+            "$TASK_ROOT/parent/parent-manifest.json" | awk '{print $1}')"
+          [ "$actual_manifest_sha" = "$expected_manifest_sha" ] ||
+            fail "checkpoint-manifest-sha-mismatch"
+          jq -e \
+            --arg active "$EXPECTED_ACTIVE_REVISION" '
+              .kind == "legacy-vtuber-identity-reset-parent" and
+              .expectedActiveRevisionId == $active and
+              .complete == false and
+              .sourceReachedEnd == false and
+              (.groups | length == 4) and
+              .expectedTotals == {
+                groups:4,
+                videos:415,
+                occurrences:5613
+              } and
+              (([.groups[].parentVideoCount] | add) == 415) and
+              (([.groups[].parentOccurrenceCount] | add) == 5613) and
+              (all(.groups[];
+                .parentRevisionId == $active and
+                (.parentVideoIds | length == .parentVideoCount) and
+                (.parentVideoIdsSha256 | test("^[a-f0-9]{64}$")) and
+                (.parentOccurrenceIdentitiesSha256 | test("^[a-f0-9]{64}$"))
+              ))
+            ' "$TASK_ROOT/parent/parent-manifest.json" >/dev/null ||
+            fail "parent-manifest-contract"
+          jq -e '.complete == true and (.manifestSha256 | test("^[a-f0-9]{64}$"))' \
+            "$TASK_ROOT/parent/checkpoint.json" >/dev/null ||
+            fail "checkpoint-contract"
+          parent_file_count=0
+          while IFS=$'\t' read -r relative_path expected_bytes expected_sha; do
+            case "$relative_path" in
+              parent-videos-[0-9a-f]*.ndjson) ;;
+              *) fail "unsafe-parent-file-path" ;;
+            esac
+            parent_file="$TASK_ROOT/parent/$relative_path"
+            [ -f "$parent_file" ] && [ ! -L "$parent_file" ] ||
+              fail "missing-parent-file"
+            actual_bytes="$(wc -c < "$parent_file" | tr -d '[:space:]')"
+            actual_sha="$(shasum -a 256 "$parent_file" | awk '{print $1}')"
+            [ "$actual_bytes" = "$expected_bytes" ] ||
+              fail "parent-file-bytes-mismatch"
+            [ "$actual_sha" = "$expected_sha" ] ||
+              fail "parent-file-sha-mismatch"
+            parent_file_count=$((parent_file_count + 1))
+          done < <(jq -r '.files[] | [.path,.bytes,.sha256] | @tsv' \
+            "$TASK_ROOT/parent/parent-manifest.json")
+          [ "$parent_file_count" -eq 4 ] || fail "parent-file-count-mismatch"
+
+          rm -f "$TASK_ROOT/ssh/password"
+          current_bytes="$(task_bytes)" || fail "bytes-after"
+          [ "$current_bytes" -le "$TASK_CAP_BYTES" ] || fail "bytes-after-cap"
+          [ "$current_bytes" -le "$peak_bytes" ] || peak_bytes="$current_bytes"
+          jq -n \
+            --argjson beforeBytes "$before_bytes" \
+            --argjson peakBytes "$peak_bytes" \
+            --argjson afterBytes "$current_bytes" \
+            --argjson taskCapBytes "$TASK_CAP_BYTES" \
+            '{
+              beforeBytes:$beforeBytes,
+              peakBytes:$peakBytes,
+              afterBytes:$afterBytes,
+              taskCapBytes:$taskCapBytes,
+              cleanupExpectedAfterBytes:0
+            }' > "$TASK_ROOT/parent/workflow-resource-usage.json"
+          tar -C "$TASK_ROOT/parent" -cf - . |
+            shasum -a 256 |
+            awk 'NR == 1 { print "artifact_sha256=" $1 }' >> "$GITHUB_OUTPUT"
+          printf 'before_bytes=%s\npeak_bytes=%s\nafter_bytes=%s\n' \
+            "$before_bytes" "$peak_bytes" "$current_bytes" >> "$GITHUB_OUTPUT"
+          remote_cleanup
+          trap - EXIT INT TERM
+
+      - name: Upload review-only parent snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-vtuber-identity-reset-parent-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.TASK_ROOT }}/parent
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 6
+
+      - name: Cleanup owned Mac task root
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cleanup_before=0
+          if [ -n "${TASK_ROOT:-}" ]; then
+            expected="$RUNNER_TEMP/daily-song-legacy-identity-reset-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            [ "$TASK_ROOT" = "$expected" ] || exit 78
+            case "$TASK_ROOT" in
+              "$RUNNER_TEMP"/daily-song-legacy-identity-reset-*) ;;
+              *) exit 78 ;;
+            esac
+            if [ -e "$TASK_ROOT" ]; then
+              [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || exit 78
+              cleanup_before="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+              rm -rf -- "$TASK_ROOT"
+            fi
+            [ ! -e "$TASK_ROOT" ] || exit 78
+          fi
+          printf 'LEGACY_IDENTITY_RESET_CLEANUP_OK beforeBytes=%s afterBytes=0\n' \
+            "$cleanup_before"

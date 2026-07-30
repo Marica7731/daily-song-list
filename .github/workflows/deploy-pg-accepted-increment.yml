@@ -101,6 +101,9 @@ jobs:
             "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-files-to-patch.py" \
             -o "$TASK_ROOT/accepted-files-to-patch.py"
           curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/legacy_vtuber_identity_reset.py" \
+            -o "$TASK_ROOT/legacy_vtuber_identity_reset.py"
+          curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
             "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/accepted-source-identities.py" \
             -o "$TASK_ROOT/accepted-source-identities.py"
           accepted_args=()
@@ -117,6 +120,12 @@ jobs:
               echo "PG_ACCEPTED_HANDOFF_BLOCKED blob-mismatch path=$repo_path expected=$expected_blob actual=$actual_blob"; exit 78;
             }
             jq -e '
+              ([.videos[]? | select(
+                ((.reason // "") == "legacy-vtuber-full-identity-reset") or
+                ((.curationReason // "") == "legacy-vtuber-full-identity-reset") or
+                has("identityResetEvidence") or
+                has("identityReset")
+              )] | length) as $legacy_marked |
               (.kind == "youtube-channel-discovery-increment") and
               (.schemaVersion == 1) and
               (.videos | type == "array" and length > 0) and
@@ -127,7 +136,44 @@ jobs:
                 (.songs | type == "array" and length > 0) and
                 ((.channelId // .channelHandle // "") | type == "string" and length > 0)
               ) and
-              (([.videos[].videoId] | unique | length) == (.videos | length))
+              (([.videos[].videoId] | unique | length) == (.videos | length)) and
+              (
+                ($legacy_marked == 0) or
+                (.identityResets | type == "array" and length > 0)
+              ) and
+              (
+                ((.identityResets // []) == []) or
+                (
+                  (.identityResets | type == "array" and length > 0) and
+                  (all(.identityResets[];
+                    .schemaVersion == 1 and
+                    .kind == "legacy-vtuber-full-identity-reset" and
+                    .rangeId == "all" and
+                    .sourceReachedEnd == true and
+                    .complete == true and
+                    .unresolvedParentVideoIds == [] and
+                    .unexpectedResetVideoIds == [] and
+                    (.parentRevisionId | type == "string" and length > 0) and
+                    (.parentRuntimeRevisionId | type == "string" and length > 0) and
+                    (.legacyDetailKey | type == "string" and length > 0) and
+                    (.parentVideoIds | type == "array") and
+                    ((.parentVideoIds | length) == .parentVideoCount) and
+                    (.parentVideoIds == (.parentVideoIds | sort | unique)) and
+                    (.parentVideoIdsSha256 | test("^[a-f0-9]{64}$")) and
+                    (.parentOccurrenceCount | type == "number" and . > 0) and
+                    (.parentOccurrenceIdentitiesSha256 | test("^[a-f0-9]{64}$")) and
+                    (.identityEvidenceSha256 | test("^[a-f0-9]{64}$")) and
+                    (.targetChannelId | test("^UC[A-Za-z0-9_-]{22}$")) and
+                    (.targetChannelHandle | test("^@[A-Za-z0-9._-]{3,30}$")) and
+                    .targetChannelUrl == ("https://www.youtube.com/" + .targetChannelHandle)
+                  )) and
+                  (.identityResets | length == 4) and
+                  (([.identityResets[].parentVideoCount] | add) == 415) and
+                  (([.identityResets[].parentOccurrenceCount] | add) == 5613) and
+                  (([.identityResets[].parentVideoIds[]] | sort) == ([.videos[].videoId] | sort)) and
+                  (([.identityResets[].parentVideoIds[]] | unique | length) == (.videos | length))
+                )
+              )
             ' "$destination" >/dev/null || {
               echo "PG_ACCEPTED_HANDOFF_BLOCKED accepted-contract path=$repo_path"; exit 78;
             }
@@ -194,6 +240,21 @@ jobs:
             (.handoffKind == "github-accepted-paths") and
             (.acceptedVideoCount > 0) and
             (.acceptedOccurrenceCount > 0) and
+            (.identityResetCount == (.identityResets | length)) and
+            (
+              .identityResetCount == 0 or
+              (
+                .identityResetCount == 4 and
+                (([.identityResets[].parentVideoCount] | add) == 415) and
+                (([.identityResets[].parentOccurrenceCount] | add) == 5613)
+              )
+            ) and
+            (all(.identityResets[];
+              .complete == true and
+              .sourceReachedEnd == true and
+              .unresolvedParentVideoIds == [] and
+              .unexpectedResetVideoIds == []
+            )) and
             (.source_commit_sha | test("^[0-9a-fA-F]{40}$")) and
             (.source_base_sha | test("^[0-9a-fA-F]{40}$")) and
             (.patch_sha256 | test("^[0-9a-f]{64}$")) and

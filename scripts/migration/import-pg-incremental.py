@@ -22,6 +22,9 @@ from typing import Any
 import psycopg
 
 
+LEGACY_IDENTITY_RESET_KIND = "legacy-vtuber-full-identity-reset"
+
+
 def text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
 
@@ -47,6 +50,120 @@ def active_id(cur) -> str:
     cur.execute("SELECT state_value FROM migration_state WHERE state_key='active_revision_id'")
     row = cur.fetchone()
     return text(row[0]) if row else ""
+
+
+def identity_reset_expectations(
+    conn: Any,
+    manifest: dict[str, Any],
+    expected_active: str,
+) -> dict[str, dict[str, str]]:
+    """Recompute complete parent sets before creating the draft revision."""
+
+    resets = manifest.get("identityResets")
+    if resets in (None, []):
+        return {}
+    if not isinstance(resets, list):
+        raise ValueError("identityResets must be an array")
+    try:
+        from legacy_vtuber_identity_reset import (
+            ContractError,
+            verify_reset_manifests_against_db,
+        )
+    except ImportError as exc:
+        raise RuntimeError(
+            "identity reset verifier is missing beside import-pg-incremental.py",
+        ) from exc
+    try:
+        verified = verify_reset_manifests_against_db(
+            conn, resets, expected_active,
+        )
+    except ContractError as exc:
+        raise RuntimeError(f"identity reset parent CAS failed: {exc}") from exc
+    expected = verified.get("expectedVideos")
+    if not isinstance(expected, dict) or not expected:
+        raise RuntimeError("identity reset verifier returned no expected videos")
+    return {
+        text(video_id): {
+            "legacyDetailKey": text(value.get("legacyDetailKey")),
+            "channelId": text(value.get("channelId")),
+            "channelHandle": text(value.get("channelHandle")),
+            "channelUrl": text(value.get("channelUrl")),
+        }
+        for video_id, value in expected.items()
+        if isinstance(value, dict) and text(video_id)
+    }
+
+
+def has_legacy_identity_reset_marker(record: Any) -> bool:
+    if not isinstance(record, dict):
+        return False
+    return (
+        text(record.get("reason")) == LEGACY_IDENTITY_RESET_KIND
+        or text(record.get("curationReason")) == LEGACY_IDENTITY_RESET_KIND
+        or "identityResetEvidence" in record
+        or "identityReset" in record
+    )
+
+
+def require_identity_reset_expectations(
+    record: dict[str, Any],
+    expected: dict[str, dict[str, str]],
+) -> None:
+    if has_legacy_identity_reset_marker(record) and not expected:
+        raise ValueError(
+            "legacy-marked accepted video requires non-empty identityResets",
+        )
+
+
+def verify_identity_reset_record(
+    record: dict[str, Any],
+    expected: dict[str, dict[str, str]],
+    seen: set[str],
+) -> None:
+    video_id = text(record.get("videoId") or record.get("video_id"))
+    contract = expected.get(video_id)
+    if contract is None:
+        raise ValueError(f"identity reset patch contains unexpected video={video_id}")
+    if video_id in seen:
+        raise ValueError(f"identity reset patch repeats video={video_id}")
+    seen.add(video_id)
+    handle = text(record.get("channelHandle") or record.get("channel_handle"))
+    if handle.startswith("/"):
+        handle = handle[1:]
+    if (
+        text(record.get("channelId") or record.get("channel_id"))
+        != contract["channelId"]
+        or handle != contract["channelHandle"]
+        or text(record.get("channelUrl") or record.get("channel_url"))
+        != contract["channelUrl"]
+    ):
+        raise ValueError(
+            f"identity reset patch channel identity mismatch video={video_id}",
+        )
+    evidence = record.get("identityResetEvidence")
+    if (
+        text(record.get("reason")) != "legacy-vtuber-full-identity-reset"
+        or not isinstance(evidence, dict)
+        or text(evidence.get("videoId")) != video_id
+    ):
+        raise ValueError(f"identity reset patch misses review evidence video={video_id}")
+
+
+def verify_identity_reset_patch(
+    manifest: dict[str, Any],
+    records: list[dict[str, Any]],
+) -> dict[str, Any]:
+    resets = manifest.get("identityResets")
+    if not isinstance(resets, list) or not resets:
+        raise ValueError("identity reset patch manifest is missing resets")
+    try:
+        from legacy_vtuber_identity_reset import (
+            ContractError,
+            validate_accepted_identity_resets,
+        )
+        return validate_accepted_identity_resets(resets, records)
+    except ContractError as exc:
+        raise ValueError(f"identity reset accepted patch failed: {exc}") from exc
 
 
 def occurrence_rows(record: dict[str, Any], video_id: str) -> list[tuple[Any, ...]]:
@@ -223,6 +340,17 @@ def main() -> int:
         with conn.transaction():
             with conn.cursor() as cur:
                 parent = active_id(cur)
+        reset_expectations = identity_reset_expectations(conn, manifest, parent)
+        reset_seen: set[str] = set()
+        reset_records: list[dict[str, Any]] = []
+        with conn.transaction():
+            with conn.cursor() as cur:
+                current = active_id(cur)
+                if current != parent:
+                    raise RuntimeError(
+                        f"candidate parent changed during identity reset verification "
+                        f"expected={parent} actual={current}",
+                    )
                 cur.execute("INSERT INTO migration_revisions (revision_id,parent_revision_id,status,source_manifest_sha256,manifest_json) VALUES (%s,NULLIF(%s,''),'draft',%s,%s::jsonb)", (args.revision, parent, text(manifest.get("sourceManifestSha256")), json.dumps(manifest, ensure_ascii=False)))
         for raw in sys.stdin.buffer:
             if not raw.strip():
@@ -231,6 +359,16 @@ def main() -> int:
             record = json.loads(raw)
             if not isinstance(record, dict):
                 raise ValueError("accepted increment line must be an object")
+            require_identity_reset_expectations(record, reset_expectations)
+            if reset_expectations:
+                if record.get("kind") == "runtime" or record.get("entityType") or record.get("entity_type"):
+                    raise ValueError(
+                        "identity reset patch cannot mix runtime metadata rows",
+                    )
+                verify_identity_reset_record(
+                    record, reset_expectations, reset_seen,
+                )
+                reset_records.append(record)
             with conn.transaction():
                 with conn.cursor() as cur:
                     if record.get("kind") == "runtime" or record.get("entityType") or record.get("entity_type"):
@@ -242,6 +380,26 @@ def main() -> int:
                         counts["occurrences"] += occurrence_count
             if counts["videos"] % 100 == 0:
                 print(f"PG_INCREMENT_PROGRESS videos={counts['videos']} occurrences={counts['occurrences']}", file=sys.stderr, flush=True)
+        if reset_expectations and reset_seen != set(reset_expectations):
+            missing = sorted(set(reset_expectations) - reset_seen)
+            raise ValueError(
+                f"identity reset patch is partial missing={','.join(missing[:8])}",
+            )
+        if reset_expectations:
+            verified_patch = verify_identity_reset_patch(manifest, reset_records)
+            if (
+                verified_patch["videoCount"] != len(reset_expectations)
+                or verified_patch["occurrenceCount"]
+                != int(manifest.get("acceptedOccurrenceCount") or 0)
+                or verified_patch != {
+                    "videoCount": 415,
+                    "occurrenceCount": 5613,
+                    "identityResetCount": 4,
+                }
+            ):
+                raise ValueError(
+                    "identity reset patch totals disagree with manifest",
+                )
         result = finalize(conn, args.revision, parent, manifest, digest.hexdigest(), counts["videos"], counts["occurrences"], args.activate)
         print(json.dumps({"status": "ok", **result}, ensure_ascii=False))
         return 0
