@@ -4370,7 +4370,13 @@ module._overlay_candidate_groups = lambda rows, view: {key: {"title": title, "ar
 module._runtime_tombstones = lambda *args: []
 module._channel_metadata_rows = lambda connection, revision_ids: []
 module._rows = lambda connection, sql, params: [{"rank": 1, "detail_key": key, "title": title, "artist": artist, "name": "", "row_count": 494, "song_count": 0, "video_count": 475, "timestamp_count": 494, "search_text": f"{title} {artist}", "channel_search_text": "@noa_polaris"}] if "FROM runtime_ranking_rows" in sql else []
-module._one = lambda connection, sql, params: {"payload_json": {"type": "song", "key": key, "title": title, "displayArtist": artist, "count": 494, "songCount": 0, "videoCount": 475, "timestampCount": 494, "sourceDetailKey": "source-water"}}
+module._one = lambda connection, sql, params: {"payload_json": {
+    "type": "song", "key": key, "title": title,
+    "displayArtist": artist, "count": 494, "songCount": 0,
+    "videoCount": 475, "timestampCount": 494,
+    "sourceDetailKey": "source-water",
+    "occurrences": [{"videoId": "stored-video"}],
+}}
 payload = module._generic_overlay_rankings_payload(object(), "candidate", {"revision_id": "candidate"}, {"range": "all", "view": "songs", "metric": "occurrences", "pageSize": "20", "q": f"@noa_polaris {title}"})
 record = payload["records"][0]
 assert record["title"] == title
@@ -8981,6 +8987,336 @@ except module.PostgresAdapterError as error:
     )
 else:
     raise AssertionError("incomplete unaffected prefix returned a partial page")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("7d pageSize1 hydrates a top affected song card before publishing counts", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+detail_key = "hot song::artist"
+row = {
+    "rank": 1,
+    "detail_key": detail_key,
+    "title": "Hot Song",
+    "artist": "Artist",
+    "name": "Hot Song",
+    "row_count": 3,
+    "song_count": 1,
+    "video_count": 2,
+    "timestamp_count": 3,
+    # This is the bounded affected-row shape in production: the preparation
+    # query deliberately omits the large persisted payload.
+    "payload_json": None,
+    "search_text": "",
+    "channel_search_text": "",
+}
+change = {
+    "entityType": "occurrences",
+    "rangeId": "7d",
+    "videoId": "deleted-video",
+    "occurrenceId": "deleted-occurrence",
+    "title": "Hot Song",
+    "artist": "Artist",
+}
+
+module._apply_runtime_tombstone_groups(
+    {detail_key: row},
+    [change],
+    "songs",
+    "_deferred_reset_preview_changes",
+)
+assert row["row_count"] == 2
+assert not module._json_object(row.get("payload_json"))
+assert len(row["_deferred_reset_preview_changes"]) == 1
+
+def occurrence(video_id, occurrence_id, channel_id):
+    video = {
+        "videoId": video_id,
+        "title": f"Video {video_id}",
+        "channelName": f"Channel {channel_id}",
+        "channelId": channel_id,
+        "channelHandle": f"/@{channel_id.lower()}",
+        "channelUrl": f"https://www.youtube.com/channel/{channel_id}",
+        "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+        "rangeId": "7d",
+    }
+    return {
+        "videoId": video_id,
+        "occurrenceId": occurrence_id,
+        "position": 1,
+        "rangeId": "7d",
+        "title": "Hot Song",
+        "artist": "Artist",
+        "song": {
+            "title": "Hot Song",
+            "artist": "Artist",
+            "rangeId": "7d",
+        },
+        "item": dict(video),
+        "video": dict(video),
+    }
+
+parent_payload = {
+    "type": "song",
+    "key": detail_key,
+    "title": "Hot Song",
+    "displayArtist": "Artist",
+    "name": "Hot Song",
+    "count": 3,
+    "songCount": 1,
+    "videoCount": 2,
+    "timestampCount": 3,
+    "occurrences": [
+        occurrence(
+            "deleted-video",
+            "deleted-occurrence",
+            "UC-DELETED",
+        ),
+        occurrence(
+            "kept-video",
+            "kept-occurrence",
+            "UC-KEPT",
+        ),
+    ],
+}
+accepted_preview = occurrence(
+    "accepted-video",
+    "accepted-occurrence",
+    "UC-ACCEPTED",
+)
+# This mirrors the existing-parent delta branch: the candidate aggregate raises
+# scalar counts, while only its bounded preview tuple is retained until render.
+row["row_count"] += 1
+row["timestamp_count"] += 1
+row["video_count"] += 1
+row["_deferred_candidate_previews"] = [accepted_preview]
+accepted_candidate = {
+    "revision_id": "accepted",
+    "video_id": "accepted-video",
+    "occurrence_id": "accepted-occurrence",
+    "position": 1,
+    "range_id": "7d",
+    "title": "Hot Song",
+    "artist": "Artist",
+    "video_payload_json": dict(accepted_preview["item"]),
+    "occurrence_payload_json": {
+        key: value
+        for key, value in accepted_preview.items()
+        if key not in {"item", "video", "song"}
+    },
+}
+payload_queries = []
+def one(_connection, sql, params):
+    assert "exact returned generic ranking payload hydration" in sql
+    payload_queries.append(tuple(params))
+    return {"payload_json": parent_payload}
+
+module._one = one
+prepared = {
+    "filtered": (dict(row),),
+    "metadata": (),
+    "candidateRows": (accepted_candidate,),
+    "parentRevisionId": "parent",
+    "aggregateTotals": {
+        "totalCount": 1,
+        "totalOccurrenceCount": 3,
+        "totalSongCount": 1,
+        "totalVideoCount": 3,
+    },
+}
+rendered = module._render_generic_overlay_rankings(
+    object(),
+    prepared,
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "1",
+    },
+)
+assert len(rendered["records"]) == 1
+record = rendered["records"][0]
+assert record["rank"] == 1
+assert record["key"] == detail_key
+assert record["title"] == "Hot Song"
+assert record["displayArtist"] == "Artist"
+assert record["count"] == 3
+assert record["songCount"] == 1
+assert record["videoCount"] == 3
+assert isinstance(record["occurrences"], list)
+assert len(record["occurrences"]) == 2
+by_video = {
+    occurrence["videoId"]: occurrence
+    for occurrence in record["occurrences"]
+}
+assert "deleted-video" not in by_video
+kept = by_video["kept-video"]
+assert kept["videoId"] == "kept-video"
+assert kept["occurrenceId"] == "kept-occurrence"
+assert kept["item"] == kept["video"]
+assert kept["item"]["channelId"] == "UC-KEPT"
+accepted = by_video["accepted-video"]
+assert accepted["occurrenceId"] == "accepted-occurrence"
+assert accepted["item"] == accepted["video"]
+assert accepted["item"]["channelId"] == "UC-ACCEPTED"
+assert payload_queries == [(
+    "parent", "7d", "songs", "count", detail_key,
+)]
+
+later_runtime_change = {
+    "entityType": "occurrences",
+    "rangeId": "7d",
+    "videoId": "accepted-video",
+    "occurrenceId": "accepted-occurrence",
+    "title": "Hot Song",
+    "artist": "Artist",
+    "originalGroupVideoOccurrenceCount": 1,
+}
+module._apply_runtime_tombstone_groups(
+    {detail_key: row},
+    [later_runtime_change],
+    "songs",
+)
+assert row["row_count"] == 2
+assert row["video_count"] == 2
+assert len(row["_deferred_runtime_preview_changes"]) == 1
+after_runtime = module._render_generic_overlay_rankings(
+    object(),
+    {
+        **prepared,
+        "filtered": (dict(row),),
+        "aggregateTotals": {
+            "totalCount": 1,
+            "totalOccurrenceCount": 2,
+            "totalSongCount": 1,
+            "totalVideoCount": 2,
+        },
+    },
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "1",
+    },
+)
+after_runtime_record = after_runtime["records"][0]
+assert after_runtime_record["count"] == 2
+assert after_runtime_record["videoCount"] == 2
+assert {
+    item["videoId"]
+    for item in after_runtime_record["occurrences"]
+} == {"kept-video"}
+assert payload_queries == [
+    ("parent", "7d", "songs", "count", detail_key),
+    ("parent", "7d", "songs", "count", detail_key),
+]
+
+module._one = lambda *_args: {}
+try:
+    module._render_generic_overlay_rankings(
+        object(),
+        {
+            **prepared,
+            "filtered": (dict(row),),
+        },
+        {
+            "range": "7d",
+            "view": "songs",
+            "metric": "occurrences",
+            "page": "1",
+            "pageSize": "1",
+        },
+    )
+except module.PostgresAdapterError as error:
+    assert str(error) == "generic ranking payload hydration is incomplete"
+else:
+    raise AssertionError("counts-only affected card did not fail closed")
+
+unknown_key = "unknown song::"
+unknown_parent_preview = occurrence(
+    "unknown-parent-video",
+    "unknown-parent-occurrence",
+    "UC-UNKNOWN-PARENT",
+)
+unknown_parent_preview["title"] = "Unknown Song"
+unknown_parent_preview["artist"] = ""
+unknown_parent_preview["song"].update({
+    "title": "Unknown Song",
+    "artist": "",
+})
+unknown_candidate_preview = occurrence(
+    "unknown-candidate-video",
+    "unknown-candidate-occurrence",
+    "UC-UNKNOWN-CANDIDATE",
+)
+unknown_candidate_preview["title"] = "Unknown Song"
+unknown_candidate_preview["artist"] = ""
+unknown_candidate_preview["song"].update({
+    "title": "Unknown Song",
+    "artist": "",
+})
+unknown_row = {
+    "rank": 1,
+    "detail_key": unknown_key,
+    "title": "Unknown Song",
+    "artist": "",
+    "name": "Unknown Song",
+    "row_count": 2,
+    "song_count": 1,
+    "video_count": 2,
+    "timestamp_count": 2,
+    "payload_json": None,
+    "_deferred_candidate_previews": [unknown_candidate_preview],
+}
+unknown_parent_payload = {
+    "type": "song",
+    "key": unknown_key,
+    "title": "Unknown Song",
+    "displayArtist": "\u672a\u8a18\u8f09",
+    "name": "Unknown Song",
+    "count": 1,
+    "songCount": 1,
+    "videoCount": 1,
+    "timestampCount": 1,
+    "occurrences": [unknown_parent_preview],
+}
+module._one = lambda *_args: {
+    "payload_json": unknown_parent_payload,
+}
+unknown_rendered = module._render_generic_overlay_rankings(
+    object(),
+    {
+        "filtered": (unknown_row,),
+        "metadata": (),
+        "candidateRows": (),
+        "parentRevisionId": "parent",
+    },
+    {
+        "range": "7d",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "1",
+    },
+)
+unknown_record = unknown_rendered["records"][0]
+assert unknown_record["key"] == unknown_key
+assert unknown_record["title"] == "Unknown Song"
+assert unknown_record["displayArtist"] == "\u672a\u8a18\u8f09"
+assert {
+    item["videoId"] for item in unknown_record["occurrences"]
+} == {"unknown-parent-video", "unknown-candidate-video"}
 print("OK")
 `);
   assert.equal(output, "OK");

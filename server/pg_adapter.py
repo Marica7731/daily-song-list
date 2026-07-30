@@ -2987,7 +2987,12 @@ def _runtime_change_group_key(change: Mapping[str, Any], view: str) -> str:
     return _text(change.get("channelId") or change.get("channel_id")) or _text(change.get("channelHandle") or change.get("channel_handle")).lstrip("@/") or _overlay_norm(change.get("channelName") or change.get("channel_name"))
 
 
-def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: Sequence[Mapping[str, Any]], view: str) -> None:
+def _apply_runtime_tombstone_groups(
+    groups: dict[str, dict[str, Any]],
+    changes: Sequence[Mapping[str, Any]],
+    view: str,
+    deferred_preview_key: str = "_deferred_runtime_preview_changes",
+) -> None:
     decremented_videos: set[tuple[str, str]] = set()
     removal_counts: dict[tuple[str, str, str], int] = defaultdict(int)
     for change in changes:
@@ -3087,12 +3092,24 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
                 groups.pop(key, None)
                 continue
             payload = _json_object(row.get("payload_json"))
-            payload.update({
-                "count": row["row_count"],
-                "videoCount": row.get("video_count", 0),
-                "timestampCount": row["timestamp_count"],
-            })
-            row["payload_json"] = payload
+            if payload:
+                payload.update({
+                    "count": row["row_count"],
+                    "videoCount": row.get("video_count", 0),
+                    "timestampCount": row["timestamp_count"],
+                })
+                row["payload_json"] = payload
+            else:
+                # Bounded parent rows intentionally carry scalar counts with
+                # payload_json=NULL.  Do not turn that sentinel into a
+                # counts-only public payload: render must hydrate the exact
+                # persisted parent payload and replay these preview changes.
+                deferred = row.setdefault(deferred_preview_key, [])
+                if not isinstance(deferred, list):
+                    raise PostgresAdapterError(
+                        "deferred runtime preview state is invalid"
+                    )
+                deferred.append(dict(change))
 
 
 def _runtime_change_matches_group(row: Mapping[str, Any], change: Mapping[str, Any], view: str) -> bool:
@@ -6809,7 +6826,10 @@ def _prepare_generic_overlay_rankings(
     # those same tuples after the exact result is installed.
     if options["view"] != "vtubers":
         _apply_runtime_tombstone_groups(
-            groups, generic_reset_changes, options["view"],
+            groups,
+            generic_reset_changes,
+            options["view"],
+            "_deferred_reset_preview_changes",
         )
         _apply_runtime_change_previews(
             groups, generic_reset_changes, options["view"],
@@ -6988,6 +7008,21 @@ def _prepare_generic_overlay_rankings(
                         (*payload["occurrences"], *item["occurrences"]),
                     )
                 row["payload_json"] = payload
+            elif item["occurrences"]:
+                # The bounded scalar parent deliberately has no JSON payload.
+                # Retain only the public preview tuples needed by a returned
+                # card; render will merge them into the exact parent payload
+                # and hydrate their immutable video/occurrence identities.
+                deferred = row.get("_deferred_candidate_previews", ())
+                if not isinstance(deferred, (list, tuple)):
+                    raise PostgresAdapterError(
+                        "deferred candidate preview state is invalid"
+                    )
+                row["_deferred_candidate_previews"] = (
+                    _bounded_overlay_previews(
+                        (*deferred, *item["occurrences"]),
+                    )
+                )
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
     if options["view"] != "vtubers":
         _apply_runtime_tombstone_groups(
@@ -7568,6 +7603,147 @@ def _bounded_clicked_song_scopes(
     return scoped
 
 
+def _generic_ranking_payload_is_complete(
+    payload: Mapping[str, Any],
+    row: Mapping[str, Any],
+    view: str,
+) -> bool:
+    """Reject scalar/count sentinels before they become public cards."""
+
+    if not payload:
+        return False
+    if view not in {"songs", "songIndex", "vsingerSongs"}:
+        return True
+    occurrences = payload.get("occurrences")
+    return bool(
+        _text(payload.get("key"))
+        and _text(payload.get("key")) == _text(row.get("detail_key"))
+        and _text(payload.get("title"))
+        and "displayArtist" in payload
+        and isinstance(payload.get("displayArtist"), str)
+        and isinstance(occurrences, list)
+        and (
+            int(row.get("row_count") or 0) <= 0
+            or bool(occurrences)
+        )
+    )
+
+
+def _hydrated_generic_ranking_payload(
+    connection,
+    parent_revision_id: str,
+    row: Mapping[str, Any],
+    options: Mapping[str, Any],
+    db_metric: str,
+) -> dict[str, Any]:
+    """Hydrate one returned card by exact parent identity, then replay deltas."""
+
+    payload = copy.deepcopy(_json_object(row.get("payload_json")))
+    view = _text(options.get("view"))
+    reset_deferred = row.get("_deferred_reset_preview_changes", ())
+    if not isinstance(reset_deferred, (list, tuple)):
+        raise PostgresAdapterError(
+            "deferred reset preview state is invalid"
+        )
+    runtime_deferred = row.get(
+        "_deferred_runtime_preview_changes", (),
+    )
+    if not isinstance(runtime_deferred, (list, tuple)):
+        raise PostgresAdapterError(
+            "deferred runtime preview state is invalid"
+        )
+    candidate_previews = row.get("_deferred_candidate_previews", ())
+    if not isinstance(candidate_previews, (list, tuple)):
+        raise PostgresAdapterError(
+            "deferred candidate preview state is invalid"
+        )
+    requires_canonical_hydration = bool(
+        reset_deferred or candidate_previews or runtime_deferred
+    )
+    if not payload or (
+        requires_canonical_hydration
+        and not _generic_ranking_payload_is_complete(payload, row, view)
+    ):
+        stored = _one(
+            connection,
+            """
+            /* exact returned generic ranking payload hydration */
+            SELECT payload_json FROM runtime_ranking_rows
+            WHERE revision_id = %s AND range_id = %s AND view = %s
+              AND metric = %s AND detail_key = %s
+            LIMIT 1
+            """,
+            [
+                parent_revision_id,
+                options["range"],
+                view,
+                db_metric,
+                row.get("detail_key"),
+            ],
+        )
+        payload = copy.deepcopy(
+            _json_object(stored.get("payload_json")) if stored else {}
+        )
+    if (
+        requires_canonical_hydration
+        and view in {"songs", "songIndex", "vsingerSongs"}
+        and not isinstance(payload.get("occurrences"), list)
+    ):
+        raise PostgresAdapterError(
+            "generic ranking payload hydration is incomplete"
+        )
+    if reset_deferred:
+        hydrated_row = dict(row)
+        hydrated_row["payload_json"] = payload
+        _apply_runtime_change_previews(
+            {_text(row.get("detail_key")): hydrated_row},
+            reset_deferred,
+            view,
+        )
+        payload = copy.deepcopy(
+            _json_object(hydrated_row.get("payload_json"))
+        )
+    if candidate_previews:
+        parent_previews = payload.get("occurrences")
+        if not isinstance(parent_previews, list):
+            raise PostgresAdapterError(
+                "generic ranking parent previews are invalid"
+            )
+        payload["occurrences"] = _bounded_overlay_previews(
+            (*parent_previews, *candidate_previews),
+        )
+    if runtime_deferred:
+        hydrated_row = dict(row)
+        hydrated_row["payload_json"] = payload
+        _apply_runtime_change_previews(
+            {_text(row.get("detail_key")): hydrated_row},
+            runtime_deferred,
+            view,
+        )
+        payload = copy.deepcopy(
+            _json_object(hydrated_row.get("payload_json"))
+        )
+    if (
+        requires_canonical_hydration
+        and view in {"songs", "songIndex", "vsingerSongs"}
+    ):
+        # The scalar identity is the exact group that survived overlay
+        # ranking.  A stale stored payload must not rename that public card.
+        payload["key"] = _text(row.get("detail_key"))
+        payload["title"] = _text(row.get("title"))
+        scalar_artist = _text(row.get("artist"))
+        if scalar_artist:
+            payload["displayArtist"] = scalar_artist
+    if (
+        requires_canonical_hydration
+        and not _generic_ranking_payload_is_complete(payload, row, view)
+    ):
+        raise PostgresAdapterError(
+            "generic ranking payload hydration is incomplete"
+        )
+    return payload
+
+
 def _render_generic_overlay_rankings(
     connection,
     prepared: Mapping[str, Any],
@@ -7626,28 +7802,13 @@ def _render_generic_overlay_rankings(
             )
         scoped_rows: list[dict[str, Any]] = []
         for row in filtered:
-            payload = copy.deepcopy(_json_object(row.get("payload_json")))
-            if not payload:
-                stored = _one(
-                    connection,
-                    """
-                    SELECT payload_json FROM runtime_ranking_rows
-                    WHERE revision_id = %s AND range_id = %s AND view = %s
-                      AND metric = %s AND detail_key = %s
-                    LIMIT 1
-                    """,
-                    [
-                        parent_revision_id,
-                        options["range"],
-                        options["view"],
-                        db_metric,
-                        row.get("detail_key"),
-                    ],
-                )
-                payload = (
-                    _json_object(stored.get("payload_json"))
-                    if stored else {}
-                )
+            payload = _hydrated_generic_ranking_payload(
+                connection,
+                parent_revision_id,
+                row,
+                options,
+                db_metric,
+            )
             complete_scope = clicked_song_scopes.get(
                 _text(row.get("detail_key"))
             )
@@ -7714,19 +7875,13 @@ def _render_generic_overlay_rankings(
     offset = (options["page"] - 1) * options["pageSize"]
     records = []
     for index, row in enumerate(render_rows[offset:offset + options["pageSize"]], start=offset + 1):
-        payload = copy.deepcopy(_json_object(row.get("payload_json")))
-        if not payload:
-            stored = _one(
-                connection,
-                """
-                SELECT payload_json FROM runtime_ranking_rows
-                WHERE revision_id = %s AND range_id = %s AND view = %s
-                  AND metric = %s AND detail_key = %s
-                LIMIT 1
-                """,
-                [parent_revision_id, options["range"], options["view"], db_metric, row.get("detail_key")],
-            )
-            payload = _json_object(stored.get("payload_json")) if stored else {}
+        payload = _hydrated_generic_ranking_payload(
+            connection,
+            parent_revision_id,
+            row,
+            options,
+            db_metric,
+        )
         if options["view"] == "vtubers":
             payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload.update({
