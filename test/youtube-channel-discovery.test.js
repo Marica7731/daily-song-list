@@ -685,14 +685,18 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     };
     return renderer;
   };
-  const initialPage = (videoId, token) => ({
-    channelMetadataRenderer: {
-      title: "Noa Polaris",
-      externalId: expectedChannelId,
-      vanityChannelUrl: channelUrl,
-    },
-    ...channelData({ videos: [ownedVideo(videoId, `LIVE ${videoId}`)], continuation: token }),
-  });
+  const initialPage = (videoId, token, { missingOwner = false } = {}) => {
+    const renderer = ownedVideo(videoId, `LIVE ${videoId}`);
+    if (missingOwner) delete renderer.ownerText;
+    return {
+      channelMetadataRenderer: {
+        title: "Noa Polaris",
+        externalId: expectedChannelId,
+        vanityChannelUrl: channelUrl,
+      },
+      ...channelData({ videos: [renderer], continuation: token }),
+    };
+  };
   const continuationPage = (videoId, nextToken = "", { missingOwner = false } = {}) => {
     const renderer = ownedVideo(videoId, `LIVE ${videoId}`);
     if (missingOwner) delete renderer.ownerText;
@@ -733,7 +737,11 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
         async getText(pageUrl) {
           const isStreams = initialCalls++ === 0;
           const body = youtubeHtml({
-            initialData: initialPage(isStreams ? "AAAAAAAAAAA" : "BBBBBBBBBBB", isStreams ? "STREAMS_1" : "VIDEOS_1"),
+            initialData: initialPage(
+              isStreams ? "qsnARvP0Ta8" : "BBBBBBBBBBB",
+              isStreams ? "STREAMS_1" : "VIDEOS_1",
+              { missingOwner: isStreams },
+            ),
           });
           return { status: 200, body, bytes: Buffer.byteLength(body), url: pageUrl.split("?")[0] };
         },
@@ -748,6 +756,11 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     });
     assert.equal(result.manifest.complete, true);
     assert.deepEqual(result.manifest.pageSummaries.map((page) => page.continuationRounds), [2, 2]);
+    const inheritedInitialOwnerRecord = result.rawVideos.find((record) => record.youtubeVideoId === "qsnARvP0Ta8");
+    assert.ok(inheritedInitialOwnerRecord);
+    assert.equal(inheritedInitialOwnerRecord.channelId, expectedChannelId);
+    assert.equal(inheritedInitialOwnerRecord.discoveryEvidenceRefs[0].rendererOwnerIdentityInherited, true);
+    assert.deepEqual(result.manifest.pageSummaries[0].inheritedInitialOwnerVideoIds, ["qsnARvP0Ta8"]);
     const inheritedOwnerRecord = result.rawVideos.find((record) => record.youtubeVideoId === "jsEw-2Nclgo");
     assert.ok(inheritedOwnerRecord);
     assert.equal(inheritedOwnerRecord.channelId, expectedChannelId);
@@ -833,7 +846,7 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     conflictingBodies.set(conflictingSummary.continuationEvidence[0].evidencePath, conflictingBytes);
     assert.throws(
       () => recomputeCandidatePageEvidence(initialBody, conflictingSummary, options, extractSearchItems, conflictingBodies),
-      /continuation renderer has ambiguous or missing owner identity/u,
+      /candidate renderer has ambiguous or missing owner identity/u,
     );
 
     const differentOwnerContinuation = continuationPage("jsEw-2Nclgo", "STREAMS_2");
@@ -851,16 +864,88 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
       /continuation renderer owner channel mismatch/u,
     );
 
-    const missingInitialData = initialPage("INITMISS001", "STREAMS_1");
-    const missingInitialRenderer = missingInitialData.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents[0].richItemRenderer.content.videoRenderer;
-    delete missingInitialRenderer.ownerText;
-    const missingInitialBody = Buffer.from(youtubeHtml({ initialData: missingInitialData }), "utf8");
-    const missingInitialSummary = structuredClone(page);
-    missingInitialSummary.bytes = missingInitialBody.byteLength;
-    missingInitialSummary.rawSha256 = crypto.createHash("sha256").update(missingInitialBody).digest("hex");
+    const firstInitialRenderer = (data) =>
+      data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents[0].richItemRenderer.content.videoRenderer;
+    const initialReplayFixture = (data, summaryOverrides = {}) => {
+      const body = Buffer.from(youtubeHtml({ initialData: data }), "utf8");
+      const summary = Object.assign(structuredClone(page), summaryOverrides, {
+        bytes: body.byteLength,
+        rawSha256: crypto.createHash("sha256").update(body).digest("hex"),
+      });
+      return { body, summary };
+    };
+
+    const evilResponseSummary = structuredClone(page);
+    evilResponseSummary.observedChannelResponseUrl = "https://evil.example/@noa_polaris/streams";
     assert.throws(
-      () => recomputeCandidatePageEvidence(missingInitialBody, missingInitialSummary, options, extractSearchItems, continuationBodies),
-      /candidate initial renderer missing immutable owner identity/u,
+      () => recomputeCandidatePageEvidence(initialBody, evilResponseSummary, options, extractSearchItems, continuationBodies),
+      /invalid or missing observed channel response URL/u,
+    );
+
+    const evilMetadataData = initialPage("qsnARvP0Ta8", "STREAMS_1", { missingOwner: true });
+    evilMetadataData.channelMetadataRenderer.vanityChannelUrl = "https://evil.example/@noa_polaris";
+    const evilMetadata = initialReplayFixture(evilMetadataData);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(evilMetadata.body, evilMetadata.summary, options, extractSearchItems, continuationBodies),
+      /invalid observed channel metadata URL/u,
+    );
+
+    const differentMetadataData = initialPage("qsnARvP0Ta8", "STREAMS_1", { missingOwner: true });
+    differentMetadataData.channelMetadataRenderer.externalId = "UC0123456789012345678901";
+    const differentMetadata = initialReplayFixture(differentMetadataData);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(differentMetadata.body, differentMetadata.summary, options, extractSearchItems, continuationBodies),
+      /missing immutable owner identity without verified channel page provenance/u,
+    );
+
+    const differentInitialOwnerData = initialPage("qsnARvP0Ta8", "STREAMS_1");
+    const differentInitialOwnerEndpoint = firstInitialRenderer(differentInitialOwnerData).ownerText.runs[0].navigationEndpoint.browseEndpoint;
+    differentInitialOwnerEndpoint.browseId = "UC0123456789012345678901";
+    differentInitialOwnerEndpoint.canonicalBaseUrl = "@other_handle";
+    const differentInitialOwner = initialReplayFixture(differentInitialOwnerData, { inheritedInitialOwnerVideoIds: [] });
+    assert.throws(
+      () => recomputeCandidatePageEvidence(differentInitialOwner.body, differentInitialOwner.summary, options, extractSearchItems, continuationBodies),
+      /candidate initial renderer owner channel mismatch/u,
+    );
+
+    const partialInitialOwnerData = initialPage("qsnARvP0Ta8", "STREAMS_1");
+    delete firstInitialRenderer(partialInitialOwnerData).ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId;
+    const partialInitialOwner = initialReplayFixture(partialInitialOwnerData, { inheritedInitialOwnerVideoIds: [] });
+    assert.throws(
+      () => recomputeCandidatePageEvidence(partialInitialOwner.body, partialInitialOwner.summary, options, extractSearchItems, continuationBodies),
+      /candidate renderer has ambiguous or missing owner identity/u,
+    );
+
+    const multipleInitialOwnerData = initialPage("qsnARvP0Ta8", "STREAMS_1");
+    firstInitialRenderer(multipleInitialOwnerData).ownerText.runs.push({
+      text: "Other owner",
+      navigationEndpoint: {
+        browseEndpoint: {
+          browseId: "UC0123456789012345678901",
+          canonicalBaseUrl: "@other_handle",
+        },
+      },
+    });
+    const multipleInitialOwner = initialReplayFixture(multipleInitialOwnerData, { inheritedInitialOwnerVideoIds: [] });
+    assert.throws(
+      () => recomputeCandidatePageEvidence(multipleInitialOwner.body, multipleInitialOwner.summary, options, extractSearchItems, continuationBodies),
+      /candidate renderer has ambiguous or missing owner identity/u,
+    );
+
+    const searchPageSummary = structuredClone(page);
+    searchPageSummary.pageUrl = "https://www.youtube.com/results?search_query=LIVE";
+    searchPageSummary.observedChannelResponseUrl = searchPageSummary.pageUrl;
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, searchPageSummary, options, extractSearchItems, continuationBodies),
+      /invalid or missing observed channel response URL/u,
+    );
+
+    const nonChannelTabSummary = structuredClone(page);
+    nonChannelTabSummary.pageUrl = "https://www.youtube.com/@noa_polaris/about";
+    nonChannelTabSummary.observedChannelResponseUrl = nonChannelTabSummary.pageUrl;
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, nonChannelTabSummary, options, extractSearchItems, continuationBodies),
+      /invalid or missing observed channel response URL/u,
     );
 
     const unverifiedOwnerFallback = structuredClone(page);
