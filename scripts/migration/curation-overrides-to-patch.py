@@ -939,7 +939,15 @@ def bind_current_active_evidence(
         )
         assertion["expectedScopeCount"] = observed
         assertion["minScopeCount"] = observed
-        assertion["knownTuplePresence"] = tuples
+        # Only set knownTuplePresence for small scopes.  Large scopes
+        # (e.g. 4700+ tuples for top songs) make convert's known_tuple_matches
+        # O(tuples × snapshot_rows) prohibitively slow.  expectedScopeCount +
+        # minScopeCount still protect the scope count; knownTuplePresence is a
+        # stronger per-tuple check that is only feasible for small scopes.
+        if len(matches) <= 100:
+            assertion["knownTuplePresence"] = tuples
+        else:
+            assertion.pop("knownTuplePresence", None)
         assertion["expectedMutationCount"] = 0
         assertion.pop("bindCurrentActiveEvidence", None)
         assertion_evidence.append({
