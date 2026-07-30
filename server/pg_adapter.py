@@ -1274,10 +1274,11 @@ def _accepted_video_reset_identity_changes(
         returned.add(video_id)
         video = _overlay_public_video(row)
         channel_id = _text(row.get("channel_id") or video.get("channelId"))
-        if not channel_id:
-            raise PostgresAdapterError(
-                "VTuber exact overlay change is missing required immutable identity"
-            )
+        # A legacy parent projection can retain only the immutable video id.
+        # Keep that bounded reset change so the caller can validate and bind
+        # the selected accepted projection for this exact same video.  The
+        # later evidence join remains fail-closed for missing, duplicate, or
+        # conflicting video/channel/handle sources.
         changes.append({
             "entityType": "videos",
             "videoId": video_id,

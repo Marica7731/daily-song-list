@@ -165,6 +165,135 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("direct page-1 accepted reset uses selected immutable identity for a legacy parent", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+class Connection:
+    def cursor(self):
+        return object()
+
+base = {
+    "rank": 1, "detail_key": "UC-SELECTED", "title": "", "artist": "",
+    "name": "Selected", "row_count": 1, "song_count": 1,
+    "video_count": 1, "timestamp_count": 1,
+    "payload_json": {
+        "type": "vtuber", "key": "UC-SELECTED",
+        "channelId": "UC-SELECTED", "channelName": "Selected",
+        "channelHandle": "@selected", "count": 1, "songCount": 1,
+        "videoCount": 1, "timestampCount": 1, "occurrences": [],
+    },
+}
+selected_reset = {
+    "revision_id": "accepted", "video_id": "legacy-video",
+    "video_title": "Accepted", "channel_name": "Selected",
+    "channel_id": "UC-SELECTED", "channel_handle": "@selected",
+    "channel_url": "https://www.youtube.com/@selected",
+    "published_at": None, "tombstone": False,
+    "payload_json": {
+        "videoId": "legacy-video", "channelId": "UC-SELECTED",
+        "channelName": "Selected", "channelHandle": "@selected",
+        "channelUrl": "https://www.youtube.com/@selected",
+    },
+}
+legacy_parent = {
+    "video_id": "legacy-video", "title": "Legacy",
+    "video_title": "Legacy", "channel_name": "", "channel_id": "",
+    "channel_handle": "", "channel_url": "",
+    "payload_json": {"videoId": "legacy-video"},
+    "video_payload_json": {"videoId": "legacy-video"},
+}
+
+module._overlay_revision_ids = lambda *_: ["accepted"]
+module._resolve_exact_vtuber_channel_scope = lambda *_: None
+module._accepted_video_resets = lambda *_: {"legacy-video": dict(selected_reset)}
+module._runtime_tombstones = lambda *_: []
+module._runtime_replacement_candidate_rows = lambda *_: []
+module._channel_metadata_rows = lambda *_: []
+
+parent_row = dict(legacy_parent)
+def rows(_connection, sql, params):
+    if "FROM runtime_ranking_rows" in sql:
+        return [dict(base)]
+    if "FROM runtime_videos" in sql:
+        assert params[0] == "parent"
+        assert params[1] == ["legacy-video"]
+        assert params[2] <= 50001
+        return [dict(parent_row)]
+    raise AssertionError(sql)
+
+module._rows = rows
+captured = []
+def exact(
+    _connection, _active, _parent, candidate_rows, _options, _groups,
+    reset_changes=(), runtime_changes=(), replacement_rows=(),
+    accepted_video_resets=None, exact_required=False,
+    exact_channel_scope=None, direct_overlay_revision_ids=(),
+):
+    assert candidate_rows == ()
+    assert runtime_changes == () and replacement_rows == ()
+    assert tuple(direct_overlay_revision_ids) == ("accepted",)
+    assert exact_required is True and exact_channel_scope is None
+    assert tuple(accepted_video_resets) == ("legacy-video",)
+    assert len(reset_changes) == 1
+    change = reset_changes[0]
+    assert change["entityType"] == "videos"
+    assert change["videoId"] == "legacy-video"
+    assert change["acceptedVideoReset"] is True
+    assert change["channel_id"] == "UC-SELECTED"
+    assert change["channel_handle"] == "selected"
+    assert change["videoPayload"]["videoId"] == "legacy-video"
+    assert change["videoPayload"]["channelId"] == "UC-SELECTED"
+    captured.append(dict(change))
+    return {"UC-SELECTED": dict(base)}
+
+module._overlay_vtuber_replacement_rows = exact
+options = {
+    "range": "all", "view": "vtubers", "metric": "count",
+    "q": "", "searchTokens": [], "searchScope": "all",
+    "searchFields": [], "page": 1, "pageSize": 20, "minCount": 1,
+    "nicheOnly": False, "hideUnknownArtist": False,
+}
+prepared = module._prepare_generic_overlay_rankings(
+    Connection(), "active", ("parent", {"revision_id": "parent"}), options,
+)
+assert [row["detail_key"] for row in prepared["filtered"]] == ["UC-SELECTED"]
+assert len(captured) == 1
+
+# The repair is narrowly same-video evidence.  Conflicting scalar/payload
+# parent channels remain fail-closed before exact aggregation.
+parent_row = {
+    **legacy_parent,
+    "channel_id": "UC-PARENT",
+    "channel_handle": "@parent",
+    "video_payload_json": {
+        "videoId": "legacy-video", "channelId": "UC-CONFLICT",
+        "channelHandle": "@conflict",
+    },
+    "payload_json": {
+        "videoId": "legacy-video", "channelId": "UC-CONFLICT",
+        "channelHandle": "@conflict",
+    },
+}
+try:
+    module._prepare_generic_overlay_rankings(
+        Connection(), "active", ("parent", {"revision_id": "parent"}), options,
+    )
+    raise AssertionError("cross-channel parent evidence reached exact aggregation")
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber exact overlay change is missing required immutable identity"
+assert len(captured) == 1
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("direct page-1 summaries and previews preserve totals, order, and same-source identities", () => {
   const output = runPython(`
 import importlib.util
