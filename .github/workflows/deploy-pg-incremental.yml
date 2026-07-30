@@ -802,8 +802,8 @@ jobs:
                 (.acceptedOccurrenceCount | type == "number" and . > 0) and
                 (.acceptedSongGroupCount | type == "number" and . > 0)
               )) and
-              ([.sourceIdentityEvidence[].acceptedVideoCount] | add == .acceptedVideoCount) and
-              ([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add == .acceptedOccurrenceCount) and
+              (([.sourceIdentityEvidence[].acceptedVideoCount] | add) == .acceptedVideoCount) and
+              (([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add) == .acceptedOccurrenceCount) and
               (.identityEvidence == .sourceIdentityEvidence[0])
             ' "$MANIFEST_INPUT" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED github-accepted-manifest-not-ready"; exit 78;
