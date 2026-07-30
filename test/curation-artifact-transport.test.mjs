@@ -1,15 +1,12 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import fs from "node:fs";
-import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { after, test } from "node:test";
 
-const require = createRequire(import.meta.url);
-const { parseDocument } = require("yaml");
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const script = path.join(repo, "scripts/migration/derive-curation-conservative-subset.mjs");
 const workflow = path.join(repo, ".github/workflows/transport-pg-curation-artifact.yml");
@@ -39,6 +36,32 @@ function canonical(value) {
 const canonicalSha = (value) => sha(Buffer.from(`${JSON.stringify(canonical(value))}\n`, "utf8"));
 const pretty = (value) => Buffer.from(`${JSON.stringify(value, null, 2)}\n`, "utf8");
 const write = (name, bytes) => fs.writeFileSync(path.join(source, name), bytes);
+
+function extractLiteralRunBlocks(text) {
+  const lines = text.split(/\r?\n/);
+  const blocks = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = /^(\s*)run:\s*\|\s*$/.exec(lines[index]);
+    if (!match) continue;
+    const parentIndent = match[1].length;
+    const body = [];
+    for (index += 1; index < lines.length; index += 1) {
+      const line = lines[index];
+      const indent = /^(\s*)/.exec(line)[1].length;
+      if (line.trim() && indent <= parentIndent) {
+        index -= 1;
+        break;
+      }
+      body.push(line);
+    }
+    const contentIndent = Math.min(
+      ...body.filter((line) => line.trim()).map((line) => /^(\s*)/.exec(line)[1].length),
+    );
+    assert.ok(Number.isFinite(contentIndent) && contentIndent > parentIndent);
+    blocks.push(body.map((line) => line.slice(Math.min(contentIndent, line.length))).join("\n"));
+  }
+  return blocks;
+}
 
 function identity(row, originalTitle) {
   return {
@@ -312,21 +335,37 @@ test("fails closed on excluded source row drift", () => {
 
 test("formal workflow is artifact-only, least-privilege, pinned and bounded", () => {
   const text = fs.readFileSync(workflow, "utf8");
-  const document = parseDocument(text);
-  assert.deepEqual(document.errors, []);
-  const parsed = document.toJS();
-  const runStep = parsed.jobs.derive.steps.find((step) => step.id === "derive");
-  const syntax = spawnSync("bash", ["-n"], { input: runStep.run, encoding: "utf8", timeout: 5_000 });
-  assert.equal(syntax.status, 0, syntax.stderr);
-  assert.match(text, /workflow_dispatch:/);
-  assert.match(text, /actions:\s*read/);
-  assert.match(text, /contents:\s*read/);
-  assert.match(text, /runs-on:\s*ubuntu-latest/);
-  assert.match(text, /timeout-minutes:\s*10/);
-  assert.match(text, /cancel-in-progress:\s*false/);
-  assert.match(text, /actions\/checkout@11d5960a326750d5838078e36cf38b85af677262/);
-  assert.match(text, /actions\/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093/);
-  assert.match(text, /actions\/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02/);
+  const runBlocks = extractLiteralRunBlocks(text);
+  assert.ok(runBlocks.length > 0);
+  assert.equal((text.match(/^\s+shell:\s*bash\s*$/gm) ?? []).length, runBlocks.length);
+  for (const [index, block] of runBlocks.entries()) {
+    const syntax = spawnSync("bash", ["-n"], { input: block, encoding: "utf8", timeout: 5_000 });
+    assert.equal(syntax.status, 0, `run block ${index}: ${syntax.stderr}`);
+  }
+  assert.match(text, /^on:\n  workflow_dispatch:\n    inputs:\n      retention_days:/m);
+  assert.match(text, /^permissions:\n  actions: read\n  contents: read$/m);
+  assert.match(text, /^concurrency:\n  group: pg-curation-artifact-transport-30514755176-M4iBwhm_hRI-ffca0d2f8e3f1d0b5aa3fd75\n  cancel-in-progress: false$/m);
+  assert.match(text, /^\s{4}runs-on: ubuntu-latest$/m);
+  assert.match(text, /^\s{4}timeout-minutes: 10$/m);
+  assert.match(text, /^\s{10}retention-days: \$\{\{ inputs\.retention_days \}\}$/m);
+  const pinnedActions = [
+    ["actions/checkout", "11d5960a326750d5838078e36cf38b85af677262"],
+    ["actions/download-artifact", "d3f86a106a0bac45b974a628896c90dbdf5c8093"],
+    ["actions/upload-artifact", "ea165f8d65b6e75b540449e92b4886f43607fa02"],
+  ];
+  for (const [action, commit] of pinnedActions) {
+    const pinnedUsesLine = new RegExp(
+      `^\\s{8}uses: ${action}@${commit}(?:\\s+#\\s+[^\\r\\n]+)?$`,
+      "mu",
+    );
+    assert.match(text, pinnedUsesLine);
+    const spoofed = text.replace(
+      pinnedUsesLine,
+      `        uses: ${action}@v4 # ${commit}`,
+    );
+    assert.notEqual(spoofed, text);
+    assert.doesNotMatch(spoofed, pinnedUsesLine);
+  }
   assert.match(text, /run-id:\s*"30514755176"/);
   assert.match(text, /name:\s*pg-curation-patch-30514755176-1/);
   assert.doesNotMatch(text, /deploy-pg|activate-pg|ssh |psql |environment:/i);
