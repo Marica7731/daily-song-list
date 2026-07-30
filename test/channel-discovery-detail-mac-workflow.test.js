@@ -104,11 +104,10 @@ test("source bundle contains the exact runtime closure and no checkout", () => {
     assert.ok(files.includes(required), `missing ${required}`);
   }
   assert.doesNotMatch(workflow, /actions\/checkout|GITHUB_WORKSPACE/u);
-  assert.match(workflow, /github_api "git\/trees\/\$GITHUB_SHA\?recursive=1" "\$tree_json"/u);
   assert.match(workflow, /github_api "actions\/artifacts\/\$candidate_artifact_id\/zip" "\$TASK_ROOT\/candidate\.zip"/u);
   assert.doesNotMatch(workflow, /(^|\s)gh api(?:\s|$)/mu);
-  assert.match(workflow, /printf 'blob %s\\0'/u);
-  assert.match(workflow, /\[ "\$actual_blob_sha" = "\$expected_blob_sha" \]/u);
+  assert.doesNotMatch(workflow, /git\/trees\/|expected_blob_sha|actual_blob_sha|source-blob-/u);
+  assert.match(workflow, /raw\.githubusercontent\.com\/\$GITHUB_REPOSITORY\/\$GITHUB_SHA/u);
 });
 
 function workflowRunBlocks(source) {

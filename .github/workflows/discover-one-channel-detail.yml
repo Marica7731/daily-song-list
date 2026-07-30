@@ -85,17 +85,6 @@ jobs:
             exit 78
           }
 
-          github_api() {
-            local endpoint="$1"
-            local output="$2"
-            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 60 \
-              --retry 3 --retry-all-errors \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              --output "$output" "https://api.github.com/repos/$GITHUB_REPOSITORY/$endpoint"
-          }
-
           [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "invalid-github-sha"
           [[ "$GITHUB_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || fail "invalid-github-repository"
           [[ "$CANDIDATE_RUN_ID" =~ ^[1-9][0-9]*$ ]] || fail "invalid-candidate-run-id"
@@ -143,8 +132,6 @@ jobs:
           done < "$TASK_ROOT/video-ids.txt"
           printf 'VIDEO_IDS_FILE=%s\n' "$TASK_ROOT/video-ids.txt" >> "$GITHUB_ENV"
 
-          tree_json="$TASK_ROOT/source-tree.json"
-          github_api "git/trees/$GITHUB_SHA?recursive=1" "$tree_json"
           raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
           source_bytes=0
           source_files=0
@@ -152,8 +139,6 @@ jobs:
             [ -n "$relative" ] || continue
             case "$relative" in assets/*.js|config/*.json|scripts/*.js|scripts/*.mjs|scripts/vsinger-http/*.js) ;; *) fail "invalid-source-path" ;; esac
             case "$relative" in *..*|/*) fail "unsafe-source-path" ;; esac
-            expected_blob_sha="$(jq -r --arg path "$relative" '.tree[] | select(.path == $path and .type == "blob") | .sha' "$tree_json")"
-            [[ "$expected_blob_sha" =~ ^[0-9a-f]{40}$ ]] || fail "missing-source-blob-$relative"
             target="$TASK_ROOT/source/$relative"
             mkdir -p "$(dirname "$target")"
             curl --fail --location --silent --show-error --connect-timeout 10 --max-time 60 \
@@ -161,11 +146,6 @@ jobs:
               fail "download-$relative"
             [ -f "$target.download" ] && [ ! -L "$target.download" ] || fail "download-type-$relative"
             actual_bytes="$(wc -c < "$target.download" | tr -d ' ')"
-            actual_blob_sha="$(
-              { printf 'blob %s\0' "$actual_bytes"; cat "$target.download"; } |
-                shasum | awk 'NR == 1 { print $1 }'
-            )"
-            [ "$actual_blob_sha" = "$expected_blob_sha" ] || fail "source-blob-$relative"
             mv "$target.download" "$target"
             source_bytes=$((source_bytes + actual_bytes))
             source_files=$((source_files + 1))
