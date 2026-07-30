@@ -7672,6 +7672,7 @@ def _hydrated_generic_ranking_payload(
     requires_canonical_hydration = bool(
         reset_deferred or candidate_previews or runtime_deferred
     )
+    parent_stored_found = False
     if not payload or (
         requires_canonical_hydration
         and not _generic_ranking_payload_is_complete(payload, row, view)
@@ -7693,9 +7694,9 @@ def _hydrated_generic_ranking_payload(
                 row.get("detail_key"),
             ],
         )
-        payload = copy.deepcopy(
-            _json_object(stored.get("payload_json")) if stored else {}
-        )
+        stored_payload = _json_object(stored.get("payload_json")) if stored else {}
+        parent_stored_found = bool(stored_payload)
+        payload = copy.deepcopy(stored_payload)
     hydration_degraded = False
     if (
         requires_canonical_hydration
@@ -7765,12 +7766,17 @@ def _hydrated_generic_ranking_payload(
         and not hydration_degraded
         and not _generic_ranking_payload_is_complete(payload, row, view)
     ):
-        # Final degrade: the parent stored payload is still incomplete for
-        # any reason (missing identity match, stale schema, legacy scalar
-        # card, etc).  Degrade to an empty-occurrences card with the
-        # reviewed scalar identity instead of failing the whole ranking
-        # page with a 503.  Identity is overwritten from the row above,
-        # so no stale identity can leak.
+        if not parent_stored_found:
+            # The parent revision has no stored payload at all for this
+            # card; a counts-only affected card cannot be hydrated and
+            # must fail closed.
+            raise PostgresAdapterError(
+                "generic ranking payload hydration is incomplete"
+            )
+        # The parent stored payload exists but is incomplete (legacy
+        # VSinger Moment scalar card, stale schema, etc).  Degrade to an
+        # empty-occurrences card with the reviewed scalar identity
+        # instead of failing the whole ranking page with a 503.
         hydration_degraded = True
         if not isinstance(payload.get("occurrences"), list):
             payload["occurrences"] = []
