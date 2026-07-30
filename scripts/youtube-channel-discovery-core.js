@@ -40,6 +40,20 @@ function keywordList(value = null) {
   return uniqueStrings(raw.length ? raw : DEFAULT_KEYWORDS);
 }
 
+function videoIdList(value = null) {
+  const raw = listValues(value)
+    .flatMap((item) => String(item || "").split(","))
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const values = uniqueStrings(raw);
+  for (const videoId of values) {
+    if (!/^[A-Za-z0-9_-]{11}$/u.test(videoId)) {
+      throw new Error(`invalid explicit video ID: ${videoId}`);
+    }
+  }
+  return values;
+}
+
 function tabList(value = null) {
   const raw = listValues(value)
     .flatMap((item) => String(item || "").split(","))
@@ -99,6 +113,7 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
     outputDir: path.resolve(String(args["output-dir"] || defaults.outputDir || path.join("artifacts", "channel-discovery", safePathName(channelUrl)))),
     cacheDir: path.resolve(String(args["cache-dir"] || defaults.cacheDir || path.join(".local-cache", "youtube-channel-discovery"))),
     candidateManifestPath: String(args["candidate-manifest"] || defaults.candidateManifestPath || "").trim(),
+    videoIds: videoIdList(args["video-id"] || defaults.videoIds),
     keywords: keywordList(args.keyword || args.keywords || defaults.keywords),
     tabs: candidateOnly ? candidateInitialTabs(args.tab || args.tabs || defaults.tabs) : tabList(args.tab || args.tabs || defaults.tabs),
     maxChannelPages: positiveInteger(args["max-channel-pages"], defaults.maxChannelPages ?? 3, "--max-channel-pages"),
@@ -129,10 +144,12 @@ function loadCandidateManifest(filePath) {
   return {
     manifest,
     records: records.map((record) => ({
+      ...record,
       videoId: record.videoId || record.youtubeVideoId || "",
       title: record.title || record.videoTitle || "",
       channelUrl: record.channelUrl || "",
       channelId: record.channelId || "",
+      channelHandle: record.channelHandle || "",
       observedChannelId: record.observedChannelId || "",
       observedChannelHandle: record.observedChannelHandle || "",
       observedChannelUrl: record.observedChannelUrl || "",
@@ -145,6 +162,10 @@ function loadCandidateManifest(filePath) {
       durationText: record.durationText || "",
       matchedKeywords: record.matchedKeywords || record.keywords || [],
       discoverySourceUrl: record.discoverySourceUrl || record.sourceUrl || "",
+      discoverySourceUrls: record.discoverySourceUrls || record.sourceUrls || [],
+      discoveryEvidenceRefs: Array.isArray(record.discoveryEvidenceRefs)
+        ? record.discoveryEvidenceRefs.map((entry) => ({ ...entry }))
+        : [],
     })),
   };
 }
@@ -192,9 +213,44 @@ async function runChannelDiscovery(options, deps) {
 
   const observedPages = validateObservedPageSummaries(pageSummaries, options);
 
-  const candidates = [...candidatesByVideoId.values()]
-    .sort(candidateSort)
-    .slice(0, options.maxCandidates || candidatesByVideoId.size);
+  const requestedVideoIds = videoIdList(options.videoIds);
+  if (requestedVideoIds.length > 0) {
+    if (!candidateInput) {
+      throw new Error("explicit --video-id requires --candidate-manifest");
+    }
+    if (options.candidateOnly) {
+      throw new Error("explicit --video-id is detail-only");
+    }
+    if (requestedVideoIds.length > 3) {
+      throw new Error("detail-only workflow allows at most 3 explicit video IDs");
+    }
+    if (Number(options.maxInspect) !== requestedVideoIds.length) {
+      throw new Error("--max-inspect must equal the explicit video ID count");
+    }
+    if (Number(options.inspectShardCount || 1) !== 1 || Number(options.inspectShardIndex || 0) !== 0) {
+      throw new Error("explicit video IDs require a single inspection shard");
+    }
+    const inputCounts = new Map();
+    for (const record of candidateInput.records) {
+      inputCounts.set(record.videoId, (inputCounts.get(record.videoId) || 0) + 1);
+    }
+    for (const videoId of requestedVideoIds) {
+      if (inputCounts.get(videoId) !== 1) {
+        throw new Error(`explicit video ID must occur exactly once in candidate manifest: ${videoId}`);
+      }
+    }
+    if (candidateInput.records.length !== requestedVideoIds.length) {
+      throw new Error("filtered candidate manifest contains an extra video ID");
+    }
+  }
+  const sortedCandidates = [...candidatesByVideoId.values()].sort(candidateSort);
+  const candidates = requestedVideoIds.length > 0
+    ? requestedVideoIds.map((videoId) => {
+      const candidate = candidatesByVideoId.get(videoId);
+      if (!candidate) throw new Error(`explicit video ID missing after candidate normalization: ${videoId}`);
+      return candidate;
+    })
+    : sortedCandidates.slice(0, options.maxCandidates || candidatesByVideoId.size);
   const observedChannelIdentity = validateObservedChannelIdentity(candidates, options, observedPages);
   const rawVideos = candidates.map((candidate) => rawVideoCandidate(candidate, options.singerName));
   const previousDetails = Array.isArray(checkpoint.details) ? checkpoint.details : [];
@@ -213,11 +269,14 @@ async function runChannelDiscovery(options, deps) {
     for (const candidate of inspectable) {
       await maybeDelay(options.requestIntervalMs);
       const result = await inspectVideoSongListWithRetry(candidate, deps, options);
+      if (!result?.detail && !result?.audit) {
+        throw new Error(`inspection returned no detail or terminal audit: ${candidate.videoId}`);
+      }
       if (result?.detail) {
         details.push(enrichDetail(result.detail, candidate, options.singerName));
-        completed.add(candidate.videoId);
       }
       if (result?.audit) audits.push(result.audit);
+      completed.add(candidate.videoId);
       inspectedCount += 1;
       saveCheckpoint(checkpointPath, {
         schemaVersion: 1,
@@ -275,6 +334,7 @@ async function runChannelDiscovery(options, deps) {
     maxInspect: options.maxInspect,
     inspectShardIndex: options.inspectShardIndex || 0,
     inspectShardCount: options.inspectShardCount || 1,
+    requestedVideoIds,
     candidateOnly: options.candidateOnly,
     candidateEvidenceNowMs: options.candidateOnly ? startedAt.getTime() : null,
     complete,
@@ -1355,6 +1415,7 @@ function occurrenceRecordsFromDetail(detail, singerName = "") {
     sourceSystem: SOURCE_SYSTEM,
     channelUrl: detail.discoveryChannelUrl || "",
     channelId: detail.channelId || "",
+    channelHandle: detail.channelHandle || "",
     singerName: singerName || detail.discoverySingerName || "",
     youtubeVideoId: detail.videoId,
     youtubeUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${Number(song.seconds) || 0}s`,
@@ -1993,6 +2054,7 @@ module.exports = {
   filterDiscoveryCandidates,
   findBrowseContinuation,
   keywordList,
+  loadCandidateManifest,
   matchedDiscoveryKeywords,
   normalizeChannelUrl,
   normalizeDiscoveryUrl,
@@ -2008,4 +2070,5 @@ module.exports = {
   recomputeCandidatePageEvidence,
   recomputeCandidateArtifactEvidence,
   tabList,
+  videoIdList,
 };

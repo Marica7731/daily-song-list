@@ -37,6 +37,7 @@ const {
   selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
   selectPreviousSnapshotForDiff,
+  shouldRetainAuditSourceText,
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
   MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
 } = require("../scripts/update-songlist");
@@ -50,6 +51,22 @@ const SOURCE_URLS = {
   today: TODAY_SEARCH_URL,
   month: MONTH_SEARCH_URL,
 };
+
+test("detail-only audit source text retention is opt-in and preserves prior need", () => {
+  const previous = process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT;
+  try {
+    delete process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT;
+    assert.equal(shouldRetainAuditSourceText(false), false);
+    assert.equal(shouldRetainAuditSourceText(true), true);
+    process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT = "1";
+    assert.equal(shouldRetainAuditSourceText(false), true);
+    process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT = "0";
+    assert.equal(shouldRetainAuditSourceText(false), false);
+  } finally {
+    if (previous == null) delete process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT;
+    else process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT = previous;
+  }
+});
 
 test("watch-page metadata fills missing 7d publication and channel fields without overwriting search evidence", () => {
   const html = `<script>var ytInitialPlayerResponse = {"videoDetails":{"channelId":"UCwatch123","author":"Watch Author","thumbnail":{"thumbnails":[{"url":"https://i.ytimg.com/watch.jpg","width":1280}] }},"microformat":{"playerMicroformatRenderer":{"externalChannelId":"UCwatch123","ownerChannelName":"Watch Author","ownerProfileUrl":"https://www.youtube.com/@watch_author","publishDate":"2026-07-17","uploadDate":"2026-07-17","thumbnail":{"thumbnails":[{"url":"https://i.ytimg.com/micro.jpg","width":640}]}}}};</script>`;

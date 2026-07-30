@@ -60,6 +60,7 @@ const {
   fetchBrowseContinuation,
   filterDiscoveryCandidates,
   findBrowseContinuation,
+  loadCandidateManifest,
   matchedDiscoveryKeywords,
   normalizeChannelUrl,
   occurrenceRecordsFromDetail,
@@ -68,6 +69,7 @@ const {
   rawVideoCandidate,
   recomputeCandidatePageEvidence,
   runChannelDiscovery,
+  videoIdList,
 } = require("../scripts/youtube-channel-discovery-core");
 
 test("channel options normalize YouTube handles, tabs, keywords, and output paths", () => {
@@ -104,6 +106,48 @@ test("channel options normalize YouTube handles, tabs, keywords, and output path
     assert.throws(() => channelDiscoveryOptionsFromArgs(parseCliArgs([
       "--channel-url", "@noa_polaris", "--expected-channel-id", "UCIu1rRiQLeUU8e1saN6I0eg", "--expected-channel-handle", expectedHandle, "--candidate-only",
     ])), /exact ASCII/u);
+  }
+});
+
+test("detail-only options retain ordered exact video IDs and reject invalid IDs", () => {
+  const args = parseCliArgs([
+    "--channel-url", "@natori_hinata",
+    "--video-id", "y0KqY2Wgaiw",
+    "--video-id", "OG_Td-kXSzE,DtKGpOOZBIE",
+  ]);
+  const options = channelDiscoveryOptionsFromArgs(args);
+  assert.deepEqual(options.videoIds, ["y0KqY2Wgaiw", "OG_Td-kXSzE", "DtKGpOOZBIE"]);
+  assert.deepEqual(videoIdList(["y0KqY2Wgaiw", "OG_Td-kXSzE,DtKGpOOZBIE"]), options.videoIds);
+  assert.throws(() => videoIdList("too-short"), /invalid explicit video ID/u);
+});
+
+test("candidate manifest loading preserves exact channel identity and evidence refs", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "channel-detail-load-"));
+  try {
+    const candidatePath = path.join(root, "candidate-manifest.ndjson");
+    const record = {
+      youtubeVideoId: "y0KqY2Wgaiw",
+      channelId: "UCahlYbdb3AHrNQdojztSMvQ",
+      channelHandle: "@natori_hinata",
+      channelUrl: "https://www.youtube.com/@natori_hinata",
+      discoverySourceUrls: ["https://www.youtube.com/@natori_hinata/videos"],
+      discoveryEvidenceRefs: [{
+        path: "pages/videos.html",
+        sha256: "a".repeat(64),
+        bytes: 123,
+        rendererOwnerChannelId: "UCahlYbdb3AHrNQdojztSMvQ",
+      }],
+    };
+    fs.writeFileSync(candidatePath, `${JSON.stringify(record)}\n`, "utf8");
+    fs.writeFileSync(path.join(root, "manifest.json"), "{}\n", "utf8");
+    const loaded = loadCandidateManifest(candidatePath).records[0];
+    assert.equal(loaded.channelId, record.channelId);
+    assert.equal(loaded.channelHandle, record.channelHandle);
+    assert.deepEqual(loaded.discoverySourceUrls, record.discoverySourceUrls);
+    assert.deepEqual(loaded.discoveryEvidenceRefs, record.discoveryEvidenceRefs);
+    assert.notEqual(loaded.discoveryEvidenceRefs, record.discoveryEvidenceRefs);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 });
 
@@ -212,6 +256,78 @@ test("detail can reuse a verified candidate manifest without rediscovery", async
   assert.equal(result.rawVideos.length, 1);
   assert.equal(result.rawVideos[0].youtubeVideoId, "REUSEVIDEO01");
 });
+
+test("audit-only detail completion is checkpointed and skipped on resume", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-detail-audit-resume-"));
+  try {
+    const candidatePath = path.join(dir, "candidate-manifest.ndjson");
+    fs.writeFileSync(candidatePath, `${JSON.stringify({
+      youtubeVideoId: "AUDITONLY01",
+      videoTitle: "song stream",
+      channelUrl: "https://www.youtube.com/@natori_hinata",
+      channelName: "Hinata Natori",
+      publishedAtTimestampMs: Date.parse("2026-07-27T00:00:00Z"),
+      matchedKeywords: ["song"],
+      discoverySourceUrl: "https://www.youtube.com/@natori_hinata/videos",
+    })}\n`, "utf8");
+    fs.writeFileSync(path.join(dir, "manifest.json"), JSON.stringify({
+      pageUrls: ["https://www.youtube.com/@natori_hinata/videos"],
+      pageSummaries: [{ pageCount: 1, candidateCount: 1, reachedEnd: true }],
+    }), "utf8");
+    const baseOptions = {
+      channelUrl: "https://www.youtube.com/@natori_hinata",
+      candidateManifestPath: candidatePath,
+      videoIds: ["AUDITONLY01"],
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      singerName: "Hinata Natori",
+      keywords: ["song"],
+      tabs: ["videos"],
+      maxChannelPages: 1,
+      maxCandidates: 1,
+      maxInspect: 1,
+      requestIntervalMs: 0,
+      requestTimeoutMs: 1000,
+      requestJitterMs: 0,
+      inspectShardIndex: 0,
+      inspectShardCount: 1,
+      candidateOnly: false,
+    };
+    let inspections = 0;
+    const deps = {
+      client: { metrics: {}, getText: async () => { throw new Error("resume unexpectedly rediscovered source"); } },
+      extractSearchItems: () => [],
+      inspectVideoSongList: async (candidate) => {
+        inspections += 1;
+        return {
+          audit: {
+            videoId: candidate.videoId,
+            result: "no_timestamp_source",
+            selectedSongCount: 0,
+            sources: [],
+          },
+        };
+      },
+    };
+    const first = await runChannelDiscovery({ ...baseOptions, fresh: true }, deps);
+    assert.equal(inspections, 1);
+    assert.deepEqual(first.manifest.requestedVideoIds, ["AUDITONLY01"]);
+    assert.equal(first.manifest.inspectedInLatestRun, 1);
+    assert.equal(first.details.length, 0);
+    assert.equal(first.audits.length, 1);
+    const firstCheckpoint = JSON.parse(fs.readFileSync(path.join(dir, "checkpoint.json"), "utf8"));
+    assert.deepEqual(firstCheckpoint.completedVideoIds, ["AUDITONLY01"]);
+
+    const second = await runChannelDiscovery({ ...baseOptions, fresh: false }, deps);
+    assert.equal(inspections, 1);
+    assert.equal(second.manifest.inspectedInLatestRun, 0);
+    assert.equal(second.audits.length, 1);
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, "checkpoint.json"), "utf8")).completedVideoIds, ["AUDITONLY01"]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("search discovery routes continuation to youtubei search", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-search-test-"));
   const firstUrl = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggDEAEYAg%253D%253D";

@@ -1,0 +1,416 @@
+name: Discover one channel detail
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run_id:
+        description: Candidate discovery run ID
+        required: true
+        type: string
+        default: "30519379147"
+      candidate_artifact_name:
+        description: Exact candidate discovery artifact name
+        required: true
+        type: string
+        default: channel-discovery-natori-hinata
+      candidate_zip_sha256:
+        description: Exact candidate artifact ZIP SHA-256
+        required: true
+        type: string
+        default: 963f69d1d45f168f33a949c055753f479c3abaf7d9557d320e25fc8f6fe8c86b
+      channel_id:
+        description: Immutable YouTube channel ID
+        required: true
+        type: string
+        default: UCahlYbdb3AHrNQdojztSMvQ
+      channel_handle:
+        description: Canonical YouTube handle
+        required: true
+        type: string
+        default: "@natori_hinata"
+      channel_slug:
+        description: Lowercase artifact slug
+        required: true
+        type: string
+        default: natori-hinata
+      singer_name:
+        description: Reviewed channel display name
+        required: true
+        type: string
+        default: 菜鳥ひなた / Hinata Natori
+      video_ids:
+        description: Exactly three comma-separated candidate video IDs
+        required: true
+        type: string
+        default: y0KqY2Wgaiw,OG_Td-kXSzE,DtKGpOOZBIE
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: channel-discovery-detail-${{ inputs.channel_slug }}
+  cancel-in-progress: false
+
+jobs:
+  detail:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+      CANDIDATE_ARTIFACT_NAME: ${{ inputs.candidate_artifact_name }}
+      CANDIDATE_ZIP_SHA256: ${{ inputs.candidate_zip_sha256 }}
+      CHANNEL_ID: ${{ inputs.channel_id }}
+      CHANNEL_HANDLE: ${{ inputs.channel_handle }}
+      CHANNEL_SLUG: ${{ inputs.channel_slug }}
+      SINGER_NAME: ${{ inputs.singer_name }}
+      VIDEO_IDS: ${{ inputs.video_ids }}
+      MAX_INSPECT: "3"
+      TASK_CAP_BYTES: "2147483648"
+      ARTIFACT_CAP_BYTES: "134217728"
+      SOURCE_BUNDLE_CAP_BYTES: "2097152"
+      NODE_MAX_OLD_SPACE_SIZE_MB: "1536"
+      DETAIL_TIMEOUT_SECONDS: "1200"
+
+    steps:
+      - name: Prepare pinned source and owned task root
+        id: prepare
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'CHANNEL_DETAIL_PREPARE_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "invalid-github-sha"
+          [[ "$GITHUB_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || fail "invalid-github-repository"
+          [[ "$CANDIDATE_RUN_ID" =~ ^[1-9][0-9]*$ ]] || fail "invalid-candidate-run-id"
+          [[ "$CANDIDATE_ARTIFACT_NAME" =~ ^[A-Za-z0-9._-]+$ ]] || fail "invalid-candidate-artifact-name"
+          [[ "$CANDIDATE_ZIP_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail "invalid-candidate-zip-sha"
+          [[ "$CHANNEL_ID" =~ ^UC[A-Za-z0-9_-]{22}$ ]] || fail "invalid-channel-id"
+          [[ "$CHANNEL_HANDLE" =~ ^@[A-Za-z0-9._-]{3,30}$ ]] || fail "invalid-channel-handle"
+          [[ "$CHANNEL_SLUG" =~ ^[a-z0-9]+([._-][a-z0-9]+)*$ ]] || fail "invalid-channel-slug"
+          [ -n "$SINGER_NAME" ] || fail "missing-singer-name"
+          [ "$MAX_INSPECT" = "3" ] || fail "invalid-max-inspect"
+          [ "$TASK_CAP_BYTES" = "2147483648" ] || fail "invalid-task-cap"
+          [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] || fail "unsafe-runner-temp"
+
+          TASK_ROOT="$RUNNER_TEMP/daily-song-channel-detail-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          expected_root="$RUNNER_TEMP/daily-song-channel-detail-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [ "$TASK_ROOT" = "$expected_root" ] || fail "unsafe-task-root"
+          case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-channel-detail-*) ;; *) fail "unsafe-task-root-pattern" ;; esac
+          if [ -e "$TASK_ROOT" ]; then
+            [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || fail "unsafe-existing-task-root"
+            rm -rf -- "$TASK_ROOT"
+          fi
+          umask 077
+          mkdir -p "$TASK_ROOT/source" "$TASK_ROOT/candidate-source" "$TASK_ROOT/selected-input" \
+            "$TASK_ROOT/output" "$TASK_ROOT/cache" "$TASK_ROOT/release"
+          printf 'TASK_ROOT=%s\nSOURCE_ROOT=%s\nINPUT_ROOT=%s\nOUTPUT_ROOT=%s\nRELEASE_ROOT=%s\n' \
+            "$TASK_ROOT" "$TASK_ROOT/source" "$TASK_ROOT/selected-input" "$TASK_ROOT/output" "$TASK_ROOT/release" >> "$GITHUB_ENV"
+
+          NODE_BIN="$(command -v node || true)"
+          [ -n "$NODE_BIN" ] && [ -x "$NODE_BIN" ] || {
+            for candidate in /opt/homebrew/bin/node /usr/local/bin/node "$HOME/.local/codex-toolchains/node/bin/node"; do
+              if [ -x "$candidate" ]; then NODE_BIN="$candidate"; break; fi
+            done
+          }
+          [ -n "$NODE_BIN" ] && [ -x "$NODE_BIN" ] || fail "node-runtime-missing"
+          [[ "$("$NODE_BIN" --version)" =~ ^v([0-9]+)\. ]] || fail "node-version-invalid"
+          [ "${BASH_REMATCH[1]}" -ge 18 ] || fail "node-version-unsupported"
+          printf 'NODE_BIN=%s\n' "$NODE_BIN" >> "$GITHUB_ENV"
+          printf '%s\n' "$(dirname "$NODE_BIN")" >> "$GITHUB_PATH"
+
+          printf '%s' "$VIDEO_IDS" | tr ',' '\n' | sed '/^[[:space:]]*$/d;s/^[[:space:]]*//;s/[[:space:]]*$//' > "$TASK_ROOT/video-ids.txt"
+          [ "$(wc -l < "$TASK_ROOT/video-ids.txt" | tr -d ' ')" = "3" ] || fail "video-id-count"
+          [ "$(LC_ALL=C sort -u "$TASK_ROOT/video-ids.txt" | wc -l | tr -d ' ')" = "3" ] || fail "duplicate-video-id"
+          while IFS= read -r video_id; do
+            [[ "$video_id" =~ ^[A-Za-z0-9_-]{11}$ ]] || fail "invalid-video-id"
+          done < "$TASK_ROOT/video-ids.txt"
+          printf 'VIDEO_IDS_FILE=%s\n' "$TASK_ROOT/video-ids.txt" >> "$GITHUB_ENV"
+
+          tree_json="$TASK_ROOT/source-tree.json"
+          gh api "repos/$GITHUB_REPOSITORY/git/trees/$GITHUB_SHA?recursive=1" > "$tree_json"
+          raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
+          source_bytes=0
+          source_files=0
+          while IFS= read -r relative; do
+            [ -n "$relative" ] || continue
+            case "$relative" in assets/*.js|config/*.json|scripts/*.js|scripts/*.mjs|scripts/vsinger-http/*.js) ;; *) fail "invalid-source-path" ;; esac
+            case "$relative" in *..*|/*) fail "unsafe-source-path" ;; esac
+            expected_blob_sha="$(jq -r --arg path "$relative" '.tree[] | select(.path == $path and .type == "blob") | .sha' "$tree_json")"
+            [[ "$expected_blob_sha" =~ ^[0-9a-f]{40}$ ]] || fail "missing-source-blob-$relative"
+            target="$TASK_ROOT/source/$relative"
+            mkdir -p "$(dirname "$target")"
+            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 60 \
+              --max-filesize 262144 --retry 3 --retry-all-errors --output "$target.download" "$raw_base/$relative" ||
+              fail "download-$relative"
+            [ -f "$target.download" ] && [ ! -L "$target.download" ] || fail "download-type-$relative"
+            actual_bytes="$(wc -c < "$target.download" | tr -d ' ')"
+            actual_blob_sha="$(
+              { printf 'blob %s\0' "$actual_bytes"; cat "$target.download"; } |
+                shasum | awk 'NR == 1 { print $1 }'
+            )"
+            [ "$actual_blob_sha" = "$expected_blob_sha" ] || fail "source-blob-$relative"
+            mv "$target.download" "$target"
+            source_bytes=$((source_bytes + actual_bytes))
+            source_files=$((source_files + 1))
+            [ "$source_bytes" -le "$SOURCE_BUNDLE_CAP_BYTES" ] || fail "source-bundle-cap"
+          done <<'PINNED_SOURCE_PATHS'
+          assets/frontend-utils.js
+          assets/ranking-utils.js
+          assets/source-filter.js
+          config/blocked-vtuber-channels.json
+          scripts/blocked-vtuber-utils.js
+          scripts/build-runtime-data.js
+          scripts/channel-discovery-detail-artifact-gate.mjs
+          scripts/channel-metadata-cache.js
+          scripts/curation.js
+          scripts/entry-repair.js
+          scripts/range-config.js
+          scripts/recent-all-continuity.js
+          scripts/song-aliases.js
+          scripts/song-search-index.js
+          scripts/song-utils.js
+          scripts/update-songlist.js
+          scripts/video-catalog.js
+          scripts/vsinger-http/html-utils.js
+          scripts/vsinger-http/http-client.js
+          scripts/vsinger-http/model.js
+          scripts/vsinger-http/runtime-importer.js
+          scripts/youtube-channel-discovery-core.js
+          scripts/youtube-channel-discovery.js
+          PINNED_SOURCE_PATHS
+
+          [ "$source_files" = "23" ] || fail "source-file-count"
+          while IFS= read -r source_file; do "$NODE_BIN" --check "$source_file" >/dev/null; done < <(
+            find "$TASK_ROOT/source" -type f \( -name '*.js' -o -name '*.mjs' \) | LC_ALL=C sort
+          )
+          printf 'SOURCE_BUNDLE_BYTES=%s\n' "$source_bytes" >> "$GITHUB_ENV"
+          printf 'CHANNEL_DETAIL_SOURCE_OK files=%s bytes=%s commit=%s\n' "$source_files" "$source_bytes" "$GITHUB_SHA"
+
+      - name: Download, bind, and select candidate records
+        id: candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'CHANNEL_DETAIL_CANDIDATE_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          run_json="$TASK_ROOT/candidate-run.json"
+          artifacts_json="$TASK_ROOT/candidate-artifacts.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN_ID" > "$run_json"
+          [ "$(jq -r '.conclusion' "$run_json")" = "success" ] || fail "candidate-run-not-success"
+          candidate_source_commit="$(jq -r '.head_sha' "$run_json")"
+          [[ "$candidate_source_commit" =~ ^[0-9a-f]{40}$ ]] || fail "candidate-source-commit"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN_ID/artifacts" > "$artifacts_json"
+          [ "$(jq --arg name "$CANDIDATE_ARTIFACT_NAME" '[.artifacts[] | select(.name == $name and .expired == false)] | length' "$artifacts_json")" = "1" ] ||
+            fail "candidate-artifact-not-unique"
+          candidate_artifact_id="$(jq -r --arg name "$CANDIDATE_ARTIFACT_NAME" '.artifacts[] | select(.name == $name and .expired == false) | .id' "$artifacts_json")"
+          [[ "$candidate_artifact_id" =~ ^[1-9][0-9]*$ ]] || fail "candidate-artifact-id"
+          gh api -H "Accept: application/vnd.github+json" \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$candidate_artifact_id/zip" > "$TASK_ROOT/candidate.zip"
+          actual_zip_sha="$(shasum -a 256 "$TASK_ROOT/candidate.zip" | awk 'NR == 1 { print $1 }')"
+          [ "$actual_zip_sha" = "$CANDIDATE_ZIP_SHA256" ] || fail "candidate-zip-hash"
+          /usr/bin/ditto -x -k "$TASK_ROOT/candidate.zip" "$TASK_ROOT/candidate-source"
+          [ -z "$(find "$TASK_ROOT/candidate-source" -type l -print -quit)" ] || fail "candidate-artifact-symlink"
+
+          "$NODE_BIN" "$SOURCE_ROOT/scripts/channel-discovery-detail-artifact-gate.mjs" select \
+            --candidate-root "$TASK_ROOT/candidate-source" \
+            --video-ids-file "$VIDEO_IDS_FILE" \
+            --output "$INPUT_ROOT/candidate-manifest.ndjson" \
+            --expected-channel-id "$CHANNEL_ID" \
+            --expected-channel-handle "$CHANNEL_HANDLE" \
+            --expected-channel-url "https://www.youtube.com/$CHANNEL_HANDLE" \
+            --expected-source-commit "$candidate_source_commit"
+          cp "$TASK_ROOT/candidate-source/manifest.json" "$INPUT_ROOT/manifest.json"
+          cp "$TASK_ROOT/candidate-source/manifest.json" "$RELEASE_ROOT/candidate-source-manifest.json"
+          cp "$INPUT_ROOT/candidate-manifest.ndjson" "$RELEASE_ROOT/selected-candidates.ndjson"
+          printf 'CANDIDATE_SOURCE_COMMIT=%s\nCANDIDATE_ARTIFACT_ID=%s\n' \
+            "$candidate_source_commit" "$candidate_artifact_id" >> "$GITHUB_ENV"
+          printf 'CHANNEL_DETAIL_CANDIDATE_OK run=%s artifact=%s zip=%s videos=3\n' \
+            "$CANDIDATE_RUN_ID" "$candidate_artifact_id" "$actual_zip_sha"
+
+      - name: Run bounded detail extraction and build review artifact
+        id: detail
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'CHANNEL_DETAIL_RUN_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          before_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+          peak_task_bytes="$before_bytes"
+          peak_rss_bytes=0
+          monitor_status=0
+          detail_pid=""
+          monitor_pid=""
+          checkpoint_pid=""
+
+          sync_checkpoint() {
+            if [ -s "$OUTPUT_ROOT/checkpoint.json" ]; then
+              cp "$OUTPUT_ROOT/checkpoint.json" "$RELEASE_ROOT/checkpoint.json.next"
+              mv "$RELEASE_ROOT/checkpoint.json.next" "$RELEASE_ROOT/checkpoint.json"
+            fi
+          }
+          stop_helpers() {
+            for helper_pid in "$monitor_pid" "$checkpoint_pid"; do
+              if [ -n "$helper_pid" ]; then kill "$helper_pid" 2>/dev/null || true; wait "$helper_pid" 2>/dev/null || true; fi
+            done
+            sync_checkpoint
+          }
+          trap stop_helpers EXIT
+
+          checkpoint_mirror() {
+            while true; do sync_checkpoint; sleep 20; done
+          }
+          checkpoint_mirror &
+          checkpoint_pid=$!
+
+          set +e
+          DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT=1 \
+          DAILY_SONG_VIDEO_CONCURRENCY=1 \
+          NODE_OPTIONS= NODE_PATH= \
+            "$NODE_BIN" "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+            "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
+            --channel-url "https://www.youtube.com/$CHANNEL_HANDLE" \
+            --expected-channel-id "$CHANNEL_ID" \
+            --expected-channel-handle "$CHANNEL_HANDLE" \
+            --singer-name "$SINGER_NAME" \
+            --candidate-manifest "$INPUT_ROOT/candidate-manifest.ndjson" \
+            --output-dir "$OUTPUT_ROOT" \
+            --cache-dir "$TASK_ROOT/cache" \
+            --video-id "$(sed -n '1p' "$VIDEO_IDS_FILE")" \
+            --video-id "$(sed -n '2p' "$VIDEO_IDS_FILE")" \
+            --video-id "$(sed -n '3p' "$VIDEO_IDS_FILE")" \
+            --max-channel-pages 25 \
+            --max-candidates 3 \
+            --max-inspect 3 \
+            --inspect-shard-count 1 \
+            --inspect-shard-index 0 \
+            --request-interval-ms 5000 \
+            --request-jitter-ms 2500 \
+            --request-timeout-ms 15000 \
+            --source-commit "$GITHUB_SHA" &
+          detail_pid=$!
+
+          started_seconds=$SECONDS
+          while kill -0 "$detail_pid" 2>/dev/null; do
+            task_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+            rss_kib="$(ps -o rss= -p "$detail_pid" 2>/dev/null | awk 'NR == 1 { print $1 + 0 }')"
+            rss_bytes=$((rss_kib * 1024))
+            [ "$task_bytes" -gt "$peak_task_bytes" ] && peak_task_bytes="$task_bytes"
+            [ "$rss_bytes" -gt "$peak_rss_bytes" ] && peak_rss_bytes="$rss_bytes"
+            if [ "$task_bytes" -gt "$TASK_CAP_BYTES" ] || [ "$rss_bytes" -gt "$TASK_CAP_BYTES" ] ||
+               [ $((SECONDS - started_seconds)) -ge "$DETAIL_TIMEOUT_SECONDS" ]; then
+              monitor_status=78
+              kill "$detail_pid" 2>/dev/null || true
+              break
+            fi
+            sleep 5
+          done
+          wait "$detail_pid"
+          detail_status=$?
+          set -e
+          [ "$monitor_status" = "0" ] || detail_status="$monitor_status"
+          stop_helpers
+          monitor_pid=""
+          checkpoint_pid=""
+
+          for output_file in manifest.json raw-videos.json video-details.json occurrences.json audits.json report.md checkpoint.json; do
+            [ ! -f "$OUTPUT_ROOT/$output_file" ] || cp "$OUTPUT_ROOT/$output_file" "$RELEASE_ROOT/$output_file"
+          done
+          after_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+          jq -n \
+            --argjson beforeBytes "$before_bytes" \
+            --argjson peakTaskBytes "$peak_task_bytes" \
+            --argjson peakDetailRssBytes "$peak_rss_bytes" \
+            --argjson afterBytes "$after_bytes" \
+            --argjson taskCapBytes "$TASK_CAP_BYTES" \
+            --argjson maxInspect 3 \
+            '{beforeBytes:$beforeBytes,peakTaskBytes:$peakTaskBytes,peakDetailRssBytes:$peakDetailRssBytes,afterBytes:$afterBytes,taskCapBytes:$taskCapBytes,maxInspect:$maxInspect,cleanupExpectedAfterBytes:0,cleanupStatus:"pending_owned_temp_root_removal"}' \
+            > "$RELEASE_ROOT/resource-usage.json"
+          jq -n \
+            --argjson candidateRunId "$CANDIDATE_RUN_ID" \
+            --argjson candidateArtifactId "$CANDIDATE_ARTIFACT_ID" \
+            --arg candidateArtifactName "$CANDIDATE_ARTIFACT_NAME" \
+            --arg candidateZipSha256 "$CANDIDATE_ZIP_SHA256" \
+            --arg candidateSourceCommit "$CANDIDATE_SOURCE_COMMIT" \
+            --arg detailSourceCommit "$GITHUB_SHA" \
+            --arg channelId "$CHANNEL_ID" \
+            --arg channelHandle "$CHANNEL_HANDLE" \
+            --arg channelUrl "https://www.youtube.com/$CHANNEL_HANDLE" \
+            --rawfile videoIds "$VIDEO_IDS_FILE" \
+            '{schemaVersion:1,kind:"channel-discovery-detail-request",reviewOnly:true,candidateOnly:true,maxInspect:3,candidateRunId:$candidateRunId,candidateArtifactId:$candidateArtifactId,candidateArtifactName:$candidateArtifactName,candidateZipSha256:$candidateZipSha256,candidateSourceCommit:$candidateSourceCommit,detailSourceCommit:$detailSourceCommit,channelId:$channelId,channelHandle:$channelHandle,channelUrl:$channelUrl,expectedChannelId:$channelId,expectedChannelHandle:$channelHandle,expectedChannelUrl:$channelUrl,videoIds:($videoIds|split("\n")|map(select(length>0)))}' \
+            > "$RELEASE_ROOT/request.json"
+
+          if [ "$detail_status" -ne 0 ]; then
+            jq -n --argjson status "$detail_status" --arg sourceCommit "$GITHUB_SHA" \
+              '{schemaVersion:1,kind:"channel-discovery-detail-checkpoint",complete:false,reviewOnly:true,acceptedEligible:false,exitStatus:$status,sourceCommit:$sourceCommit}' \
+              > "$RELEASE_ROOT/partial-manifest.json"
+            exit "$detail_status"
+          fi
+
+          for required_file in manifest.json raw-videos.json video-details.json occurrences.json audits.json checkpoint.json; do
+            [ -s "$RELEASE_ROOT/$required_file" ] || fail "missing-$required_file"
+          done
+          "$NODE_BIN" "$SOURCE_ROOT/scripts/channel-discovery-detail-artifact-gate.mjs" verify \
+            --detail-root "$RELEASE_ROOT" \
+            --selected-candidates "$RELEASE_ROOT/selected-candidates.ndjson" \
+            --video-ids-file "$VIDEO_IDS_FILE" \
+            --request "$RELEASE_ROOT/request.json" \
+            --resource "$RELEASE_ROOT/resource-usage.json" \
+            --source-evidence-out "$RELEASE_ROOT/source-evidence.json" \
+            --manifest-out "$RELEASE_ROOT/review-ready-manifest.json" \
+            --expected-channel-id "$CHANNEL_ID" \
+            --expected-channel-handle "$CHANNEL_HANDLE" \
+            --expected-channel-url "https://www.youtube.com/$CHANNEL_HANDLE" \
+            --expected-source-commit "$GITHUB_SHA"
+          release_bytes="$(du -sk "$RELEASE_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+          [ "$release_bytes" -le "$ARTIFACT_CAP_BYTES" ] || fail "artifact-cap"
+          printf 'CHANNEL_DETAIL_REVIEW_READY bytes=%s videos=3 reviewOnly=true\n' "$release_bytes"
+
+      - name: Upload bounded detail or checkpoint artifact
+        if: ${{ always() && steps.prepare.outcome == 'success' && steps.candidate.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: channel-detail-${{ inputs.channel_slug }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.RELEASE_ROOT }}
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 6
+
+      - name: Cleanup owned task root
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cleanup_before_bytes=0
+          cleanup_after_bytes=0
+          if [ -n "${TASK_ROOT:-}" ]; then
+            expected="$RUNNER_TEMP/daily-song-channel-detail-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            [ "$TASK_ROOT" = "$expected" ] || exit 78
+            case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-channel-detail-*) ;; *) exit 78 ;; esac
+            if [ -e "$TASK_ROOT" ]; then
+              [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || exit 78
+              cleanup_before_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+              rm -rf -- "$TASK_ROOT"
+            fi
+            [ ! -e "$TASK_ROOT" ] || exit 78
+          fi
+          {
+            printf '### Channel detail cleanup\n\n'
+            printf -- '- cleanup before: %s bytes\n' "$cleanup_before_bytes"
+            printf -- '- cleanup after: %s bytes\n' "$cleanup_after_bytes"
+            printf -- '- status: owned_temp_root_removed\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+          printf 'CHANNEL_DETAIL_CLEANUP_OK beforeBytes=%s afterBytes=0\n' "$cleanup_before_bytes"

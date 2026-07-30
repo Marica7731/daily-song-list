@@ -1414,7 +1414,12 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   stats.riskLevel = riskLevel(stats.riskScore);
   stats.singleSongIdentification = singleSongIdentification(stats, candidate, cleaned, sourceText, sourceContext);
   const rejectedReason = manuallyRejectedSource ? "manual_reject_source" : rejectedSongSourceReason(stats, candidate);
-  const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason) || stats.sourceType === "video_title" || Boolean(stats.singleSongIdentification);
+  const sourceTextIsNeeded = shouldRetainAuditSourceText(
+    stats.riskScore > 0 ||
+      Boolean(rejectedReason) ||
+      stats.sourceType === "video_title" ||
+      Boolean(stats.singleSongIdentification),
+  );
   return {
     songs: cleaned,
     stats,
@@ -1458,6 +1463,10 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       ...(sourceTextIsNeeded ? { sourceText } : {}),
     },
   };
+}
+
+function shouldRetainAuditSourceText(existingReason = false) {
+  return process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT === "1" || Boolean(existingReason);
 }
 
 function filterArtistRichMixedSourceSongs(songs) {
@@ -3207,6 +3216,7 @@ module.exports = {
   selectCandidatesForInspection,
   selectPreviousSnapshotForDiff,
   selectBestSongs,
+  shouldRetainAuditSourceText,
   sourceScore,
   writeRankDiffFiles,
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
