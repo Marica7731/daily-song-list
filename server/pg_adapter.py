@@ -7150,6 +7150,7 @@ def _cached_generic_ranking_preparation(
 def _scoped_clicked_song_payload(
     payload: Mapping[str, Any],
     channel_ids: set[str],
+    complete_count: int | None = None,
 ) -> dict[str, Any] | None:
     """Return one clicked-song card containing only the resolved source."""
 
@@ -7185,16 +7186,118 @@ def _scoped_clicked_song_payload(
         scoped_occurrences.append(canonical)
     if not scoped_occurrences:
         return None
+    exact_count = (
+        len(scoped_occurrences)
+        if complete_count is None
+        else int(complete_count)
+    )
+    if exact_count < len(scoped_occurrences):
+        raise PostgresAdapterError(
+            "song channel result has an invalid complete occurrence count"
+        )
+
+    artist_names: dict[str, str] = {}
+    channel_names: dict[str, dict[str, str]] = defaultdict(dict)
+    for occurrence in scoped_occurrences:
+        item = occurrence["item"]
+        video = occurrence["video"]
+        song = (
+            occurrence.get("song")
+            if isinstance(occurrence.get("song"), Mapping)
+            else {}
+        )
+        occurrence_artist = _text(occurrence.get("artist"))
+        song_artist = _text(song.get("artist"))
+        if (
+            occurrence_artist
+            and song_artist
+            and _overlay_norm(occurrence_artist) != _overlay_norm(song_artist)
+        ):
+            raise PostgresAdapterError(
+                "song channel result has inconsistent artist identity"
+            )
+        artist = occurrence_artist or song_artist
+        if artist:
+            artist_names.setdefault(_overlay_norm(artist), artist)
+
+        channel_id = _text(item.get("channelId"))
+        item_channel_name = _text(item.get("channelName"))
+        video_channel_name = _text(video.get("channelName"))
+        if (
+            item_channel_name
+            and video_channel_name
+            and _overlay_norm(item_channel_name)
+            != _overlay_norm(video_channel_name)
+        ):
+            raise PostgresAdapterError(
+                "song channel result has inconsistent channel identity"
+            )
+        channel_name = item_channel_name or video_channel_name
+        if channel_name:
+            channel_names[channel_id].setdefault(
+                _overlay_norm(channel_name),
+                channel_name,
+            )
+    if len(artist_names) > 1:
+        raise PostgresAdapterError(
+            "song channel result has ambiguous artist identity"
+        )
+    observed_channel_ids = {
+        _text(occurrence["item"].get("channelId"))
+        for occurrence in scoped_occurrences
+        if _text(occurrence["item"].get("channelId"))
+    }
+    if len(observed_channel_ids) != 1:
+        raise PostgresAdapterError(
+            "song channel result has ambiguous channel identity"
+        )
+    channel_id = next(iter(observed_channel_ids))
+    if len(channel_names.get(channel_id, {})) > 1:
+        raise PostgresAdapterError(
+            "song channel result has ambiguous channel identity"
+        )
+
     result = copy.deepcopy(dict(payload))
     result["occurrences"] = scoped_occurrences
-    result["count"] = len(scoped_occurrences)
-    result["timestampCount"] = len(scoped_occurrences)
+    result["count"] = exact_count
+    result["timestampCount"] = exact_count
     result["songCount"] = 1
     result["videoCount"] = len({
         _text(occurrence["item"].get("videoId"))
         for occurrence in scoped_occurrences
         if _text(occurrence["item"].get("videoId"))
     })
+    display_artist = _text(result.get("displayArtist"))
+    if artist_names:
+        artist_key, occurrence_artist = next(iter(artist_names.items()))
+        if display_artist and _overlay_norm(display_artist) != artist_key:
+            raise PostgresAdapterError(
+                "song channel result has inconsistent artist identity"
+            )
+        artist_name = display_artist or occurrence_artist
+        result["displayArtist"] = artist_name
+        result["artists"] = [{
+            "key": artist_key,
+            "name": artist_name,
+            "count": exact_count,
+        }]
+    else:
+        if display_artist:
+            raise PostgresAdapterError(
+                "song channel result is missing its artist identity"
+            )
+        result["artists"] = []
+
+    public_channel_names = channel_names.get(channel_id, {})
+    if public_channel_names:
+        channel_key, channel_name = next(iter(public_channel_names.items()))
+        result["channels"] = [{
+            "key": channel_key,
+            "name": channel_name,
+            "count": exact_count,
+        }]
+    else:
+        result["channels"] = []
     return result
 
 
@@ -7483,6 +7586,11 @@ def _render_generic_overlay_rankings(
             scoped_payload = _scoped_clicked_song_payload(
                 payload,
                 song_channel_ids,
+                (
+                    int(complete_scope.get("count") or 0)
+                    if isinstance(complete_scope, Mapping)
+                    else None
+                ),
             )
             if scoped_payload is None:
                 continue

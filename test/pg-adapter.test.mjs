@@ -7874,6 +7874,16 @@ assert [record["title"] for record in thousand["records"]] == [
 ]
 assert thousand["records"][0]["key"] == "athousandmiles::vanessacarlton"
 assert thousand["records"][0]["displayArtist"] == "Vanessa Carlton"
+assert thousand["records"][0]["artists"] == [{
+    "key": "vanessa carlton",
+    "name": "Vanessa Carlton",
+    "count": 1,
+}]
+assert thousand["records"][0]["channels"] == [{
+    "key": "channel",
+    "name": "Channel",
+    "count": 1,
+}]
 assert all(
     occurrence["item"]["channelId"] == SHIN
     for occurrence in thousand["records"][0]["occurrences"]
@@ -7963,6 +7973,101 @@ assert module._matches_search_tokens(
 assert base_probes == [
     "from y to y", "a thousand miles", "全力キング", "染脳",
 ]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("scoped clicked song rebuilds public count maps from exact occurrences", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+CHANNEL = "UC5zO6IFsWSUHMYgJMv81XKg"
+
+def occurrence(index, outer_artist="Vanessa Carlton", song_artist="Vanessa Carlton"):
+    video = {
+        "videoId": f"video-{index}",
+        "channelId": CHANNEL,
+        "channelName": "shin",
+        "channelHandle": "/@shingames7857",
+    }
+    return {
+        "videoId": video["videoId"],
+        "occurrenceId": f"occ-{index}",
+        "artist": outer_artist,
+        "song": {
+            "title": "A Thousand Miles",
+            "artist": song_artist,
+        },
+        "item": video,
+        "video": dict(video),
+    }
+
+result = module._scoped_clicked_song_payload(
+    {
+        "type": "song",
+        "title": "A Thousand Miles",
+        "displayArtist": "Vanessa Carlton",
+        # These values reproduce the stale/null public-card boundary.  The
+        # scoped result must never preserve either value.
+        "artists": None,
+        "channels": [{"key": "polluted", "name": "Polluted", "count": 999}],
+        "occurrences": [occurrence(1), occurrence(2)],
+    },
+    {CHANNEL},
+    39,
+)
+assert result["count"] == 39
+assert result["timestampCount"] == 39
+assert result["artists"] == [{
+    "key": "vanessa carlton",
+    "name": "Vanessa Carlton",
+    "count": 39,
+}]
+assert result["channels"] == [{
+    "key": "shin",
+    "name": "shin",
+    "count": 39,
+}]
+
+try:
+    module._scoped_clicked_song_payload(
+        {
+            "displayArtist": "Vanessa Carlton",
+            "occurrences": [
+                occurrence(1, song_artist="Different Artist"),
+            ],
+        },
+        {CHANNEL},
+        1,
+    )
+except module.PostgresAdapterError as error:
+    assert "inconsistent artist identity" in str(error)
+else:
+    raise AssertionError("conflicting occurrence artist was accepted")
+
+try:
+    conflicting_channel = occurrence(2)
+    conflicting_channel["item"]["channelName"] = "Polluted"
+    module._scoped_clicked_song_payload(
+        {
+            "displayArtist": "Vanessa Carlton",
+            "occurrences": [conflicting_channel],
+        },
+        {CHANNEL},
+        1,
+    )
+except module.PostgresAdapterError as error:
+    assert "inconsistent channel identity" in str(error)
+else:
+    raise AssertionError("conflicting item/video channel was accepted")
+
 print("OK")
 `);
   assert.equal(output, "OK");
