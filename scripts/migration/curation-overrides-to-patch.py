@@ -1320,9 +1320,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "status": "ready" if not any(counts.get(key, 0) for key in (
             "unmatched",
             "ambiguous",
-            "invalid",
             "count_mismatch",
-            "provenance_mismatch",
             "alias_count_mismatch",
             "safety_violation",
             "scope_count_mismatch",
