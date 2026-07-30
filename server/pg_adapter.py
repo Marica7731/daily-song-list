@@ -2028,6 +2028,16 @@ def _invalid_vtuber_handle_query(options: Mapping[str, Any]) -> bool:
     return bool(re.match(r"^/?@", query)) and _vtuber_handle_query_parts(options) is None
 
 
+def _clicked_song_title_query(parts: Mapping[str, Any] | None) -> str:
+    """Return the normalized residual title from one handle+song click."""
+
+    if parts is None:
+        return ""
+    return _overlay_norm(" ".join(
+        _text(token) for token in (parts.get("residualTokens") or ())
+    ))
+
+
 def _sql_like_literal(value: Any) -> str:
     """Escape one user token for a PostgreSQL LIKE ... ESCAPE backslash."""
 
@@ -6032,6 +6042,7 @@ def _prepare_generic_overlay_rankings(
         connection, parent[0], overlay_ids, options,
     )
     song_channel_scope: tuple[str, ...] | None = None
+    song_title_query = ""
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         channel_fields = {
             _text(value).casefold()
@@ -6047,6 +6058,9 @@ def _prepare_generic_overlay_rankings(
                 song_handle_parts is not None
                 and song_handle_parts.get("residualTokens")
             ):
+                song_title_query = _clicked_song_title_query(
+                    song_handle_parts,
+                )
                 song_channel_scope = _resolve_exact_vtuber_channel_scope(
                     connection,
                     parent[0],
@@ -6081,7 +6095,12 @@ def _prepare_generic_overlay_rankings(
     search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
     base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
-    if exact_channel_scope is not None:
+    if song_channel_scope is not None and song_title_query:
+        search_clause = " AND title ILIKE %s ESCAPE E'\\\\'"
+        base_params.append(
+            f"%{_sql_like_literal(song_title_query)}%"
+        )
+    elif exact_channel_scope is not None:
         search_clause = " AND detail_key = ANY(%s)"
         base_params.append(list(exact_channel_scope))
         if vtuber_residual_spec is not None:
@@ -6296,11 +6315,194 @@ def _prepare_generic_overlay_rankings(
             ) in exact_scope_set
         )
     # Legacy parent occurrences can lack their denormalised channel fields.
-    # Resolve those fields only through the parent runtime-video tuple for the
-    # same immutable video.  Accepted resets need the same bounded repair as
-    # runtime curation; otherwise exact VTuber coverage rejects a legal
-    # historical reset before it can reach the SQL aggregate.
+    # Resolve those fields first from the same immutable occurrence in the
+    # current accepted overlay.  A reviewed accepted row is closer lineage
+    # evidence than the full-runtime parent, which can predate channel_id.
+    # Only a unique (video_id, occurrence_id) tuple may repair the change; a
+    # missing accepted tuple falls through to the bounded parent-video lookup.
+    # This keeps every public view strict without requiring a channel id from
+    # the wrong lineage layer.
     identity_changes = tuple((*reset_changes, *runtime_changes))
+    identity_by_change = {
+        id(change): _validated_overlay_change_identity(change)
+        for change in identity_changes
+    }
+    accepted_identity_by_occurrence: dict[
+        tuple[str, str], Mapping[str, Any]
+    ] = {}
+    for candidate in all_candidate_rows:
+        candidate_video_id = _text(candidate.get("video_id"))
+        candidate_occurrence_id = _text(candidate.get("occurrence_id"))
+        if not candidate_video_id or not candidate_occurrence_id:
+            continue
+        identity = (candidate_video_id, candidate_occurrence_id)
+        if identity in accepted_identity_by_occurrence:
+            raise PostgresAdapterError(
+                "accepted overlay identity repair returned a duplicate occurrence"
+            )
+        accepted_identity_by_occurrence[identity] = candidate
+    if direct_overlay_revision_ids:
+        direct_requested = sorted({
+            (video_id, _text(
+                change.get("occurrenceId") or change.get("occurrence_id")
+            ))
+            for change in identity_changes
+            for video_id, channel_id in (
+                identity_by_change[id(change)],
+            )
+            if (
+                not channel_id
+                and _text(
+                    change.get("occurrenceId") or change.get("occurrence_id")
+                )
+                and video_id in accepted_video_resets
+            )
+        })
+        if len(direct_requested) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError(
+                "direct accepted identity repair exceeded bounded occurrence cap"
+            )
+        if direct_requested:
+            direct_occurrences = _rows(
+                connection,
+                """
+                /* bounded direct accepted occurrence identity repair */
+                WITH requested(video_id, occurrence_id) AS MATERIALIZED (
+                  SELECT video_id, occurrence_id
+                  FROM unnest(%s::text[], %s::text[])
+                    AS item(video_id, occurrence_id)
+                ),
+                effective AS MATERIALIZED (
+                  SELECT DISTINCT ON (o.video_id, o.occurrence_id)
+                         o.revision_id, o.video_id, o.occurrence_id
+                  FROM migration_occurrence_rows AS o
+                  JOIN requested AS wanted
+                    ON wanted.video_id = o.video_id
+                   AND wanted.occurrence_id = o.occurrence_id
+                  WHERE o.revision_id = ANY(%s)
+                  ORDER BY o.video_id, o.occurrence_id,
+                           array_position(%s::text[], o.revision_id)
+                )
+                SELECT revision_id, video_id, occurrence_id
+                FROM effective
+                ORDER BY video_id, occurrence_id
+                LIMIT %s
+                """,
+                [
+                    [video_id for video_id, _ in direct_requested],
+                    [occurrence_id for _, occurrence_id in direct_requested],
+                    list(direct_overlay_revision_ids),
+                    list(direct_overlay_revision_ids),
+                    len(direct_requested) + 1,
+                ],
+            )
+            requested_set = set(direct_requested)
+            direct_seen: set[tuple[str, str]] = set()
+            direct_priority = {
+                revision_id: index
+                for index, revision_id in enumerate(
+                    direct_overlay_revision_ids
+                )
+            }
+            for occurrence in direct_occurrences:
+                identity = (
+                    _text(occurrence.get("video_id")),
+                    _text(occurrence.get("occurrence_id")),
+                )
+                if (
+                    identity not in requested_set
+                    or identity in direct_seen
+                    or identity in accepted_identity_by_occurrence
+                ):
+                    raise PostgresAdapterError(
+                        "direct accepted identity repair returned a duplicate occurrence"
+                    )
+                direct_seen.add(identity)
+                selected_video = accepted_video_resets.get(identity[0])
+                selected_revision_id = _text(
+                    selected_video.get("revision_id")
+                ) if isinstance(selected_video, Mapping) else ""
+                occurrence_revision_id = _text(
+                    occurrence.get("revision_id")
+                )
+                if (
+                    occurrence_revision_id not in direct_priority
+                    or (
+                        selected_revision_id
+                        and selected_revision_id in direct_priority
+                        and direct_priority[occurrence_revision_id]
+                        > direct_priority[selected_revision_id]
+                    )
+                ):
+                    continue
+                if not isinstance(selected_video, Mapping):
+                    continue
+                _, accepted_channel_id = _validated_overlay_change_identity(
+                    {"videoId": identity[0]},
+                    selected_video,
+                    validate_urls=False,
+                )
+                if not accepted_channel_id:
+                    continue
+                accepted = dict(occurrence)
+                accepted.update({
+                    "video_title": (
+                        selected_video.get("video_title")
+                        or selected_video.get("title")
+                    ),
+                    "channel_name": selected_video.get("channel_name"),
+                    "channel_id": selected_video.get("channel_id"),
+                    "channel_handle": selected_video.get("channel_handle"),
+                    "channel_url": selected_video.get("channel_url"),
+                    "video_payload_json": selected_video.get("payload_json"),
+                })
+                accepted_identity_by_occurrence[identity] = accepted
+    for change in identity_changes:
+        change_video_id, existing_channel_id = identity_by_change[id(change)]
+        if existing_channel_id:
+            continue
+        change_occurrence_id = _text(
+            change.get("occurrenceId") or change.get("occurrence_id")
+        )
+        accepted = accepted_identity_by_occurrence.get(
+            (change_video_id, change_occurrence_id)
+        )
+        if not accepted:
+            continue
+        _validated_overlay_change_identity(
+            change, accepted, validate_urls=False,
+        )
+        accepted_video = _overlay_public_video(accepted)
+        for name, public_name in (
+            ("channel_name", "channelName"),
+            ("channel_id", "channelId"),
+            ("channel_handle", "channelHandle"),
+        ):
+            if not _text(change.get(name)):
+                value = accepted.get(name) or accepted_video.get(public_name)
+                if _text(value):
+                    change[name] = value
+        if not _text(change.get("videoTitle")):
+            change["videoTitle"] = (
+                accepted.get("video_title") or accepted_video.get("title")
+            )
+        if not _json_object(change.get("videoPayload")):
+            change["videoPayload"] = accepted.get("video_payload_json")
+        repaired_channel_id = _text(change.get("channel_id"))
+        repaired_handle = _normalized_channel_handle(
+            change.get("channel_handle")
+        )
+        if repaired_channel_id and repaired_handle:
+            _apply_canonical_channel_identity(
+                change, repaired_channel_id, repaired_handle,
+                change.get("channel_name"),
+            )
+        if (
+            bool(change.get("replacement"))
+            and bool(change.get("replacementSameVideo"))
+            and _json_object(change.get("videoPayload"))
+        ):
+            change["replacementVideoPayload"] = change["videoPayload"]
     identity_by_change = {
         id(change): _validated_overlay_change_identity(change)
         for change in identity_changes
@@ -6361,6 +6563,12 @@ def _prepare_generic_overlay_rankings(
                     change, repaired_channel_id, repaired_handle,
                     change.get("channel_name"),
                 )
+            if (
+                bool(change.get("replacement"))
+                and bool(change.get("replacementSameVideo"))
+                and _json_object(change.get("videoPayload"))
+            ):
+                change["replacementVideoPayload"] = change["videoPayload"]
     for change in identity_changes:
         change_video_id, channel_id = _validated_overlay_change_identity(
             change, validate_urls=False,
@@ -6744,7 +6952,13 @@ def _prepare_generic_overlay_rankings(
     for row in groups.values():
         search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
         exact_key = _text(row.get("detail_key"))
-        if (
+        if song_channel_scope is not None:
+            if (
+                not song_title_query
+                or song_title_query not in _overlay_norm(row.get("title"))
+            ):
+                continue
+        elif (
             vtuber_residual_spec is not None
             and exact_key in exact_vtuber_rows
         ):
@@ -7248,6 +7462,12 @@ def _render_generic_overlay_rankings(
                 payload["occurrences"] = copy.deepcopy(
                     list(complete_scope.get("occurrences") or ())
                 )
+            # The scalar row above is the identity that passed the clicked
+            # residual-title predicate.  Never let a stale but non-empty
+            # payload identity replace that reviewed key/title/artist tuple.
+            payload["key"] = _text(row.get("detail_key"))
+            payload["title"] = _text(row.get("title"))
+            payload["displayArtist"] = _text(row.get("artist"))
             scoped_payload = _scoped_clicked_song_payload(
                 payload,
                 song_channel_ids,

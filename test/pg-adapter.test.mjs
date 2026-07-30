@@ -7679,6 +7679,258 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic clicked song residual filters card titles before channel scoping", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+SHIN = "UC5zO6IFsWSUHMYgJMv81XKg"
+MEDA = "UC0HX1e5jJnhN5Xn0epV2wzA"
+
+def rank(key, title, artist):
+    return {
+        "rank": 1,
+        "detail_key": key,
+        "title": title,
+        "artist": artist,
+        "name": title,
+        "row_count": 1,
+        "song_count": 1,
+        "video_count": 1,
+        "timestamp_count": 1,
+        # Reproduce the production undefined-card boundary: scalar ranking
+        # identity exists while the stored public payload carries a non-empty
+        # but stale identity from another song.
+        "payload_json": {
+            "type": "song",
+            "key": "polluted::wrong",
+            "title": "Polluted Song",
+            "displayArtist": "Polluted Artist",
+            "occurrences": [],
+        },
+        "search_text": (
+            f"{title} {artist} from y to y @shingames7857 "
+            "@MEDAzcd"
+        ),
+        "channel_search_text": "@shingames7857 @MEDAzcd",
+    }
+
+catalog = [
+    rank("unchanged::artist", "Unchanged", "Artist"),
+    rank("defying::artist", "Defying Gravity", "from Wicked"),
+    rank("from y to y::artist", "from Y to Y", "Artist"),
+    rank(
+        "a thousand miles::vanessa carlton",
+        "A Thousand Miles",
+        "Vanessa Carlton",
+    ),
+    rank("king::artist", "全力キング", "Artist"),
+    rank("染脳::unknown", "染脳", "unknown"),
+]
+
+def scalar(key, title, artist, channel_id, index=1):
+    return {
+        "detail_key": key,
+        "video_id": f"video-{channel_id}-{index}",
+        "occurrence_id": f"occ-{channel_id}-{index}",
+        "range_id": "all",
+        "song_key": key,
+        "seconds": index,
+        "title": title,
+        "artist": artist,
+        "source_id": "source",
+        "source_system": "test",
+        "video_title": "Stream",
+        "channel_name": "Channel",
+        "channel_id": channel_id,
+        "channel_handle": (
+            "/@shingames7857" if channel_id == SHIN else "/@MEDAzcd"
+        ),
+        "channel_url": "https://www.youtube.com/channel/" + channel_id,
+        "published_timestamp": "2026-01-01T00:00:00Z",
+        "thumbnail_url": (
+            "https://i.ytimg.com/vi/"
+            f"video-{channel_id}-{index}/hqdefault.jpg"
+        ),
+    }
+
+scalars = {
+    ("from y to y::artist", SHIN): [
+        scalar("from y to y::artist", "from Y to Y", "Artist", SHIN),
+    ],
+    ("a thousand miles::vanessa carlton", SHIN): [
+        scalar(
+            "a thousand miles::vanessa carlton",
+            "A Thousand Miles",
+            "Vanessa Carlton",
+            SHIN,
+        ),
+    ],
+    ("染脳::unknown", MEDA): [
+        scalar("染脳::unknown", "染脳", "unknown", MEDA),
+    ],
+    # 全力キング is a real global song, but not a SHIN occurrence.
+    ("king::artist", SHIN): [],
+}
+base_probes = []
+
+def rows(_connection, sql, params):
+    if "FROM runtime_ranking_rows" in sql:
+        assert "title ILIKE %s" in sql
+        assert all("@shingames7857" not in str(value) for value in params)
+        assert all("@medazcd" not in str(value).casefold() for value in params)
+        needle = str(params[-1]).strip("%").casefold()
+        base_probes.append(needle)
+        return [
+            dict(item)
+            for item in catalog
+            if needle in item["title"].casefold()
+        ]
+    if "bounded complete clicked-song scalar tuples" in sql:
+        result = []
+        for key in params[0]:
+            for channel_id in params[3]:
+                result.extend(scalars.get((key, channel_id), ()))
+        return result
+    return []
+
+module._rows = rows
+module._overlay_revision_ids = lambda *_: []
+module._resolve_exact_vtuber_channel_scope = (
+    lambda _connection, _parent, _overlay, options:
+      (
+        (SHIN,)
+        if options["view"] == "vtubers"
+        and options["q"].startswith("@shingames7857 ")
+        else (MEDA,)
+        if options["view"] == "vtubers"
+        and options["q"].startswith("@medazcd ")
+        else None
+      )
+)
+module._overlay_candidate_rows = lambda *_args, **_kwargs: []
+module._accepted_video_resets = lambda *_args, **_kwargs: {}
+module._accepted_video_reset_changes = lambda *_: []
+module._runtime_tombstones = lambda *_args, **_kwargs: []
+module._channel_metadata_rows = lambda *_: []
+module._enrich_runtime_original_group_counts = lambda *_: None
+module._overlay_vtuber_replacement_rows = lambda *_: {}
+
+def query(q):
+    options = module._query_options({
+        "range": "all",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "20",
+        "q": q,
+        "searchFields": "title,channel",
+    })
+    prepared = module._prepare_generic_overlay_rankings(
+        object(), "active", ("parent", {"revision_id": "parent"}), options,
+    )
+    return module._render_generic_overlay_rankings(
+        object(), prepared, {
+            "range": "all",
+            "view": "songs",
+            "metric": "occurrences",
+            "page": "1",
+            "pageSize": "20",
+            "q": q,
+            "searchFields": "title,channel",
+        },
+    )
+
+shin = query("@shingames7857 from Y to Y")
+assert shin["totalCount"] == 1, shin
+assert [record["title"] for record in shin["records"]] == ["from Y to Y"]
+assert all(
+    occurrence["item"]["channelId"] == SHIN
+    for occurrence in shin["records"][0]["occurrences"]
+)
+
+thousand = query("@shingames7857 A Thousand Miles")
+assert thousand["totalCount"] == 1
+assert [record["title"] for record in thousand["records"]] == [
+    "A Thousand Miles",
+]
+assert all(
+    occurrence["item"]["channelId"] == SHIN
+    for occurrence in thousand["records"][0]["occurrences"]
+)
+
+negative = query("@shingames7857 全力キング")
+assert negative["totalCount"] == 0
+assert negative["records"] == []
+
+meda = query("@MEDAzcd 染脳")
+assert meda["totalCount"] == 1
+assert [record["title"] for record in meda["records"]] == ["染脳"]
+assert all(
+    occurrence["item"]["channelId"] == MEDA
+    for occurrence in meda["records"][0]["occurrences"]
+)
+
+# Overlay-only candidate and runtime-replacement rows retain the exact handle
+# and residual title in the same scalar search text used by prepare(), so the
+# existing options.searchTokens filter cannot discard the clicked target.
+candidate_options = module._query_options({
+    "range": "all",
+    "view": "songs",
+    "q": "@shingames7857 Candidate Song",
+    "searchFields": "title,channel",
+})
+candidate = {
+    "video_id": "candidate-video",
+    "occurrence_id": "candidate-occurrence",
+    "title": "Candidate Song",
+    "artist": "Artist",
+    "channel_id": SHIN,
+    "channel_handle": "/@shingames7857",
+}
+assert module._matches_search_tokens(
+    module._overlay_candidate_search_text(candidate),
+    candidate_options["searchTokens"],
+)
+replacement = module._runtime_replacement_candidate_rows([{
+    "revisionId": "runtime",
+    "replacement": True,
+    "replacementPayload": {
+        "videoId": "replacement-video",
+        "occurrenceId": "replacement-occurrence",
+        "title": "Replacement Song",
+        "artist": "Artist",
+        "channelId": SHIN,
+    },
+    "replacementVideoPayload": {
+        "videoId": "replacement-video",
+        "channelId": SHIN,
+        "channelHandle": "/@shingames7857",
+    },
+}])[0]
+replacement_options = module._query_options({
+    "range": "all",
+    "view": "songs",
+    "q": "@shingames7857 Replacement Song",
+    "searchFields": "title,channel",
+})
+assert module._matches_search_tokens(
+    module._overlay_candidate_search_text(replacement),
+    replacement_options["searchTokens"],
+)
+assert base_probes == [
+    "from y to y", "a thousand miles", "全力キング", "染脳",
+]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("E v21 mixed VTuber search uses bounded full effective tuples beyond previews", () => {
   const output = runPython(`
 import importlib.util
@@ -7987,6 +8239,353 @@ unfiltered = module._overlay_vtuber_replacement_rows(
   {target_id: dict(base_row)}, (), (), (), {}, True, None,
 )
 assert unfiltered[target_id]["row_count"] == 224193
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic 7d curation repairs public identity from its accepted occurrence", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+# Exact shape of the sole 7d runtime replacement in artifact 8748655198:
+# it is a valid song/occurrence tuple and carries the reviewed handle, but the
+# legacy full-runtime ancestor has no immutable channel_id for VTuber repair.
+change = {
+    "entityType": "occurrences",
+    "revisionId": "accepted_30528693014_1",
+    "videoId": "MhemBDB0yJo",
+    "occurrenceId": "position:4",
+    "rangeId": "7d",
+    "title": "逆光(ウタ from ONE PIECE FILM RED)",
+    "artist": "Ado",
+    "channelHandle": "/@ShibireiAmoru88",
+    "replacement": True,
+    "replacementSameArtist": True,
+    "replacementSameVideo": True,
+    "replacementPayload": {
+        "videoId": "MhemBDB0yJo",
+        "occurrenceId": "position:4",
+        "position": 5,
+        "rangeId": "7d",
+        "title": "逆光",
+        "artist": "Ado",
+        "channelHandle": "/@ShibireiAmoru88",
+    },
+}
+accepted = {
+    "revision_id": "accepted_30402041297_1",
+    "video_id": "MhemBDB0yJo",
+    "occurrence_id": "position:4",
+    "position": 5,
+    "range_id": "7d",
+    "song_key": "de3ab6da570b6beb9ca42cc3",
+    "seconds": 1747,
+    "title": "\u9006\u5149(\u30a6\u30bf from ONE PIECE FILM RED)",
+    "artist": "Ado",
+    "source_id": "UgxRfG2vHGbBQEP3JTZ4AaABAg",
+    "source_system": "youtube_channel_discovery",
+    "video_title": "accepted source video",
+    "channel_name": "\u7d2b\u8587\u4ee4\u3042\u3082\u308b / Shibirei Amoru",
+    "channel_id": "UCpKdAmIYIkpySO7tsTN0oJA",
+    "channel_handle": "/@ShibireiAmoru88",
+    # A polluted historical URL is derived metadata, not identity evidence.
+    "channel_url": "https://www.youtube.com/@urameshi_conta",
+    "video_payload_json": {
+        "videoId": "MhemBDB0yJo",
+        "title": "accepted source video",
+        "channelName": "\u7d2b\u8587\u4ee4\u3042\u3082\u308b / Shibirei Amoru",
+        "channelId": "UCpKdAmIYIkpySO7tsTN0oJA",
+        "channelHandle": "/@ShibireiAmoru88",
+        "channelUrl": "https://www.youtube.com/@urameshi_conta",
+    },
+    "occurrence_payload_json": {
+        "videoId": "MhemBDB0yJo",
+        "occurrenceId": "position:4",
+        "position": 5,
+        "rangeId": "7d",
+        "songKey": "de3ab6da570b6beb9ca42cc3",
+        "seconds": 1747,
+        "title": "\u9006\u5149(\u30a6\u30bf from ONE PIECE FILM RED)",
+        "artist": "Ado",
+    },
+}
+assert module._validated_overlay_change_identity(
+    change, validate_urls=False,
+) == ("MhemBDB0yJo", "")
+
+original_key = module._runtime_change_group_key(change, "songs")
+base = {
+    "rank": 1, "detail_key": original_key,
+    "title": change["title"], "artist": "Ado", "name": change["title"],
+    "row_count": 1, "song_count": 1, "video_count": 1,
+    "timestamp_count": 1,
+    "payload_json": {
+        "type": "song", "key": original_key, "title": change["title"],
+        "displayArtist": "Ado", "count": 1, "songCount": 1,
+        "videoCount": 1, "timestampCount": 1, "occurrences": [],
+    },
+    "search_text": "", "channel_search_text": "",
+}
+parent_identity_queries = 0
+def rows(_connection, sql, _params):
+    global parent_identity_queries
+    if "FROM runtime_videos" in sql:
+        parent_identity_queries += 1
+        return []
+    if "FROM runtime_ranking_rows" in sql:
+        return [dict(base)]
+    raise AssertionError(sql)
+
+module._rows = rows
+module._one = lambda *_args: {
+    "total_count": 1, "total_occurrence_count": 1,
+    "total_song_count": 1, "total_video_count": 1,
+}
+module._overlay_revision_ids = lambda *_args: ["accepted_30528693014_1"]
+module._resolve_exact_vtuber_channel_scope = lambda *_args: None
+module._overlay_candidate_rows = lambda *_args: [dict(accepted)]
+module._accepted_video_resets = lambda *_args: {}
+module._accepted_video_reset_changes = lambda *_args: []
+module._runtime_tombstones = lambda *_args: [dict(change)]
+module._enrich_runtime_original_group_counts = lambda *_args: None
+module._channel_metadata_rows = lambda *_args: []
+module._overlay_vtuber_replacement_rows = lambda *_args, **_kwargs: {}
+
+prepared = module._prepare_generic_overlay_rankings(
+    object(), "accepted_30528693014_1",
+    ("full-runtime-parent", {"revision_id": "full-runtime-parent"}),
+    {
+        "range": "7d", "view": "songs", "metric": "occurrences",
+        "q": "", "searchTokens": [], "searchScope": "all",
+        "searchFields": [], "page": 1, "pageSize": 1, "minCount": 1,
+        "nicheOnly": False, "hideUnknownArtist": False,
+    },
+)
+assert parent_identity_queries == 0, (
+    parent_identity_queries,
+    [(row["title"], row["artist"]) for row in prepared["filtered"]],
+)
+replacement_rows = [
+    row for row in prepared["filtered"]
+    if row["title"] == "\u9006\u5149" and row["artist"] == "Ado"
+]
+assert len(replacement_rows) == 1
+occurrences = replacement_rows[0]["payload_json"]["occurrences"]
+assert len(occurrences) == 1
+rendered = occurrences[0]
+assert rendered["videoId"] == "MhemBDB0yJo"
+assert rendered["item"] == rendered["video"]
+assert rendered["item"]["videoId"] == "MhemBDB0yJo"
+assert rendered["item"]["channelId"] == "UCpKdAmIYIkpySO7tsTN0oJA"
+assert module._normalized_channel_handle(
+    rendered["item"]["channelHandle"]
+) == module._normalized_channel_handle("/@ShibireiAmoru88")
+assert rendered["item"]["channelUrl"] == (
+    "https://www.youtube.com/@shibireiamoru88"
+)
+module._overlay_candidate_rows = lambda *_args: [
+    dict(accepted), dict(accepted),
+]
+try:
+    module._prepare_generic_overlay_rankings(
+        object(), "accepted_30528693014_1",
+        ("full-runtime-parent", {"revision_id": "full-runtime-parent"}),
+        {
+            "range": "7d", "view": "songs", "metric": "occurrences",
+            "q": "", "searchTokens": [], "searchScope": "all",
+            "searchFields": [], "page": 1, "pageSize": 1, "minCount": 1,
+            "nicheOnly": False, "hideUnknownArtist": False,
+        },
+    )
+except module.PostgresAdapterError as error:
+    assert str(error) == (
+        "accepted overlay identity repair returned a duplicate occurrence"
+    )
+else:
+    raise AssertionError("duplicate accepted identity did not fail closed")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("direct unfiltered VTuber curation repairs Mhem from one accepted tuple", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+class Connection:
+    def cursor(self):
+        return object()
+
+channel_id = "UCpKdAmIYIkpySO7tsTN0oJA"
+handle = "/@ShibireiAmoru88"
+change = {
+    "entityType": "occurrences",
+    "revisionId": "accepted_30528693014_1",
+    "videoId": "MhemBDB0yJo",
+    "occurrenceId": "position:4",
+    "rangeId": "7d",
+    "title": "\u9006\u5149(\u30a6\u30bf from ONE PIECE FILM RED)",
+    "artist": "Ado",
+    "channelHandle": handle,
+    "replacement": True,
+    "replacementSameArtist": True,
+    "replacementSameVideo": True,
+    "replacementPayload": {
+        "videoId": "MhemBDB0yJo",
+        "occurrenceId": "position:4",
+        "position": 5,
+        "rangeId": "7d",
+        "songKey": "canonical-gyakko",
+        "seconds": 1747,
+        "title": "\u9006\u5149",
+        "artist": "Ado",
+        "channelHandle": handle,
+    },
+}
+selected_reset = {
+    "revision_id": "accepted_30402041297_1",
+    "video_id": "MhemBDB0yJo",
+    "video_title": "accepted source video",
+    "channel_name": "\u7d2b\u8587\u4ee4\u3042\u3082\u308b / Shibirei Amoru",
+    "channel_id": channel_id,
+    "channel_handle": handle,
+    # Derived historical metadata is polluted and must be canonicalised.
+    "channel_url": "https://www.youtube.com/@urameshi_conta",
+    "published_at": None,
+    "tombstone": False,
+    "payload_json": {
+        "videoId": "MhemBDB0yJo",
+        "title": "accepted source video",
+        "channelName": "\u7d2b\u8587\u4ee4\u3042\u3082\u308b / Shibirei Amoru",
+        "channelId": channel_id,
+        "channelHandle": handle,
+        "channelUrl": "https://www.youtube.com/@urameshi_conta",
+        "thumbnailUrl": "https://i.ytimg.com/vi/MhemBDB0yJo/hqdefault.jpg",
+    },
+}
+direct_rows = [{
+    "revision_id": "accepted_30402041297_1",
+    "video_id": "MhemBDB0yJo",
+    "occurrence_id": "position:4",
+}]
+calls = {"identity": 0, "parent": 0, "summary": 0}
+
+def rows(_connection, sql, params):
+    if "bounded direct accepted occurrence identity repair" in sql:
+        calls["identity"] += 1
+        assert "unnest(%s::text[], %s::text[])" in sql
+        assert "DISTINCT ON (o.video_id, o.occurrence_id)" in sql
+        assert "array_position(%s::text[], o.revision_id)" in sql
+        assert params == [
+            ["MhemBDB0yJo"], ["position:4"],
+            ["accepted_30528693014_1", "accepted_30402041297_1"],
+            ["accepted_30528693014_1", "accepted_30402041297_1"],
+            2,
+        ]
+        return [dict(row) for row in direct_rows]
+    if "direct unfiltered VTuber overlay summary" in sql:
+        calls["summary"] += 1
+        return [{
+            "channel_id": channel_id,
+            "row_count": 1,
+            "video_count": 1,
+            "song_count": 1,
+        }]
+    if "FROM runtime_videos" in sql:
+        calls["parent"] += 1
+        return []
+    if "FROM runtime_ranking_rows" in sql:
+        return []
+    raise AssertionError(sql)
+
+module._rows = rows
+module._one = lambda *_args: {
+    "total_count": 0,
+    "total_occurrence_count": 0,
+    "total_song_count": 0,
+    "total_video_count": 0,
+}
+module._overlay_revision_ids = lambda *_args: [
+    "accepted_30528693014_1", "accepted_30402041297_1",
+]
+module._resolve_exact_vtuber_channel_scope = lambda *_args: None
+module._overlay_candidate_rows = lambda *_args: (_ for _ in ()).throw(
+    AssertionError("direct path materialized accepted candidates")
+)
+module._accepted_video_resets = lambda *_args: {
+    "MhemBDB0yJo": dict(selected_reset),
+}
+module._accepted_video_reset_identity_changes = lambda *_args: []
+module._runtime_tombstones = lambda *_args: [dict(change)]
+module._channel_metadata_rows = lambda *_args: []
+module._VTUBER_REPLACEMENT_CACHE.clear()
+
+options = {
+    "range": "7d", "view": "vtubers", "metric": "occurrences",
+    "q": "", "searchTokens": [], "searchScope": "all",
+    "searchFields": [], "page": 1, "pageSize": 20, "minCount": 1,
+    "nicheOnly": False, "hideUnknownArtist": False,
+}
+prepared = module._prepare_generic_overlay_rankings(
+    Connection(), "accepted_30528693014_1",
+    ("full-runtime-parent", {"revision_id": "full-runtime-parent"}),
+    options,
+)
+assert calls == {"identity": 1, "parent": 0, "summary": 1}, calls
+assert len(prepared["filtered"]) == 1
+record = prepared["filtered"][0]
+assert record["detail_key"] == channel_id
+rendered = record["payload_json"]["occurrences"][0]
+assert rendered["videoId"] == "MhemBDB0yJo"
+assert rendered["item"] == rendered["video"]
+assert rendered["item"]["videoId"] == "MhemBDB0yJo"
+assert rendered["item"]["channelId"] == channel_id
+assert module._normalized_channel_handle(
+    rendered["item"]["channelHandle"]
+) == module._normalized_channel_handle(handle)
+assert rendered["item"]["channelUrl"] == (
+    "https://www.youtube.com/@shibireiamoru88"
+)
+
+# The SQL is expected to return one effective row per requested tuple.  A
+# duplicate result is never tie-broken in Python.
+direct_rows[:] = [
+    {
+        "revision_id": "accepted_30402041297_1",
+        "video_id": "MhemBDB0yJo",
+        "occurrence_id": "position:4",
+    },
+    {
+        "revision_id": "accepted_30402041297_1",
+        "video_id": "MhemBDB0yJo",
+        "occurrence_id": "position:4",
+    },
+]
+try:
+    module._prepare_generic_overlay_rankings(
+        Connection(), "accepted_30528693014_1",
+        ("full-runtime-parent", {"revision_id": "full-runtime-parent"}),
+        options,
+    )
+except module.PostgresAdapterError as error:
+    assert str(error) == (
+        "direct accepted identity repair returned a duplicate occurrence"
+    )
+else:
+    raise AssertionError("duplicate direct accepted identity did not fail closed")
 print("OK")
 `);
   assert.equal(output, "OK");
