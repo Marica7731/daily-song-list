@@ -7765,9 +7765,15 @@ def _hydrated_generic_ranking_payload(
         and not hydration_degraded
         and not _generic_ranking_payload_is_complete(payload, row, view)
     ):
-        raise PostgresAdapterError(
-            "generic ranking payload hydration is incomplete"
-        )
+        # Final degrade: the parent stored payload is still incomplete for
+        # any reason (missing identity match, stale schema, legacy scalar
+        # card, etc).  Degrade to an empty-occurrences card with the
+        # reviewed scalar identity instead of failing the whole ranking
+        # page with a 503.  Identity is overwritten from the row above,
+        # so no stale identity can leak.
+        hydration_degraded = True
+        if not isinstance(payload.get("occurrences"), list):
+            payload["occurrences"] = []
     return payload
 
 
