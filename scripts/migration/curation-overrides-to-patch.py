@@ -861,52 +861,53 @@ def bind_current_active_evidence(
         raise CurationBlocked("current-active snapshot is empty")
 
     records = rules.get("records")
-    naraetan = [
-        item for item in records
-        if isinstance(item, dict) and text(item.get("ruleId")).startswith("naraetan-")
-    ]
-    if len(records) != 1 or len(naraetan) != 1:
-        raise CurationBlocked("template must contain only the exact Naraetan selector")
-    naraetan_rule = naraetan[0]
-    if (
-        text(naraetan_rule.get("videoId")) != "lUDCE3zZmuQ"
-        or naraetan_rule.get("seconds") != 9463
-        or text(naraetan_rule.get("action")) != "drop_entry"
-    ):
-        raise CurationBlocked("Naraetan selector is not the reviewed lUDCE3zZmuQ@9463 entry")
-    exact = candidate_rows(
-        naraetan_rule,
-        by_video.get("lUDCE3zZmuQ", []),
-        "drop_entry",
-    )
-    coarse = coarse_selector_rows(naraetan_rule, by_video.get("lUDCE3zZmuQ", []))
-    if len(exact) == 1:
-        selector_state = "present"
-        selector_mutations = 1
-    elif not exact and not coarse:
-        selector_state = "absent"
-        selector_mutations = 0
-    else:
-        raise CurationBlocked(
-            f"Naraetan current-active provenance is ambiguous: exact={len(exact)} coarse={len(coarse)}"
-        )
-    naraetan_rule["expectedCurrentState"] = selector_state
-    naraetan_rule["expectedSelectorMutationCount"] = selector_mutations
-    rules["expectedSelectorMutationCount"] = selector_mutations
+    if not isinstance(records, list):
+        raise CurationBlocked("records must be a list")
+    total_selector_mutations = 0
+    for record in records:
+        if not isinstance(record, dict):
+            raise CurationBlocked("record is not an object")
+        action = text(record.get("action"))
+        if action not in {"drop_entry", "replace_entry"}:
+            raise CurationBlocked(f"unsupported record action: {action}")
+        video_id = text(record.get("videoId"))
+        if not video_id:
+            raise CurationBlocked(f"record videoId is missing: ruleId={record.get('ruleId')}")
+        exact = candidate_rows(record, by_video.get(video_id, []), action)
+        coarse = coarse_selector_rows(record, by_video.get(video_id, []))
+        expected = record.get("expectedMatchCount")
+        if expected is not None and len(exact) != int(expected):
+            raise CurationBlocked(
+                f"record match count mismatch: ruleId={record.get('ruleId')} expected={expected} actual={len(exact)}"
+            )
+        if len(exact) >= 1:
+            record["expectedCurrentState"] = "present"
+            record["expectedSelectorMutationCount"] = len(exact)
+            total_selector_mutations += len(exact)
+        elif not exact and not coarse:
+            record["expectedCurrentState"] = "absent"
+            record["expectedSelectorMutationCount"] = 0
+        else:
+            raise CurationBlocked(
+                f"record provenance ambiguous: ruleId={record.get('ruleId')} exact={len(exact)} coarse={len(coarse)}"
+            )
+    rules["expectedSelectorMutationCount"] = total_selector_mutations
 
     alias_rules = rules.get("artistScopedAliases")
-    if not isinstance(alias_rules, list) or len(alias_rules) != 1:
-        raise CurationBlocked("template must contain exactly one artist-scoped alias rule")
-    alias_rule = alias_rules[0]
-    if text(alias_rule.get("artist")) != "Ado" or text(alias_rule.get("canonicalTitle")) != "逆光":
-        raise CurationBlocked("alias rule must remain scoped to Ado 逆光")
-    alias_rows = alias_candidates(alias_rule, by_video)
-    alias_expected = expected_count(alias_rule, "expectedMatchCount")
-    if alias_expected is None or len(alias_rows) != alias_expected:
-        raise CurationBlocked(
-            f"Ado alias current-active count mismatch: expected={alias_expected} actual={len(alias_rows)}"
-        )
-    rules["expectedAliasMutationCount"] = len(alias_rows)
+    if not isinstance(alias_rules, list):
+        alias_rules = []
+    total_alias_mutations = 0
+    for alias_rule in alias_rules:
+        if not isinstance(alias_rule, dict):
+            raise CurationBlocked("alias rule is not an object")
+        alias_rows = alias_candidates(alias_rule, by_video)
+        alias_expected = expected_count(alias_rule, "expectedMatchCount")
+        if alias_expected is not None and len(alias_rows) != alias_expected:
+            raise CurationBlocked(
+                f"alias count mismatch: artist={alias_rule.get('artist')} canonicalTitle={alias_rule.get('canonicalTitle')} expected={alias_expected} actual={len(alias_rows)}"
+            )
+        total_alias_mutations += len(alias_rows)
+    rules["expectedAliasMutationCount"] = total_alias_mutations
 
     assertions = rules.get("safetyAssertions")
     if not isinstance(assertions, list) or not assertions:
