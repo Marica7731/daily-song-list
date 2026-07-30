@@ -68,10 +68,29 @@ function pinnedSourceRows(source = workflow) {
 }
 
 test("workflow has no repository checkout, Git command, or workspace dependency", () => {
-  assert.doesNotMatch(workflow, /actions\/checkout|GITHUB_WORKSPACE|(?:^|\s)git(?:\s|$)/mu);
+  assert.doesNotMatch(workflow, /actions\/checkout|actions\/setup-node|GITHUB_WORKSPACE|(?:^|\s)git(?:\s|$)/mu);
   assert.match(workflow, /Prepare pinned source bundle/u);
   assert.match(workflow, /https:\/\/raw\.githubusercontent\.com\/\$GITHUB_REPOSITORY\/\$GITHUB_SHA/u);
   assert.match(workflow, /\[\[ "\$GITHUB_SHA" =~ \^\[0-9a-f\]\{40\}\$ \]\]/u);
+});
+
+test("installed Mac Node is resolved once, version-checked, and propagated as an absolute executable", () => {
+  assert.match(
+    workflow,
+    /export PATH="\/Users\/be\/\.local\/codex-toolchains\/node\/bin:\/opt\/homebrew\/bin:\/usr\/local\/bin:\/Users\/be\/\.local\/bin:\$PATH"/u,
+  );
+  assert.match(workflow, /NODE_BIN="\$\(command -v node \|\| true\)"/u);
+  assert.match(workflow, /\[ -n "\$NODE_BIN" \] && \[ -x "\$NODE_BIN" \] \|\| fail "node-runtime-missing"/u);
+  assert.match(workflow, /case "\$NODE_BIN" in \/\*\) ;; \*\) fail "node-runtime-not-absolute" ;; esac/u);
+  assert.ok(workflow.includes('NODE_VERSION="$("$NODE_BIN" --version 2>/dev/null || true)"'));
+  assert.ok(workflow.includes('[[ "$NODE_VERSION" =~ ^v([0-9]+)\\. ]] || fail "node-version-invalid"'));
+  assert.match(workflow, /\[ "\$\{BASH_REMATCH\[1\]\}" -ge 18 \] \|\| fail "node-version-unsupported"/u);
+  assert.match(workflow, /printf '%s\\n' "\$\(dirname "\$NODE_BIN"\)" >> "\$GITHUB_PATH"/u);
+  assert.match(workflow, /printf 'NODE_BIN=%s\\n' "\$NODE_BIN" >> "\$GITHUB_ENV"/u);
+  assert.match(workflow, /CHANNEL_DISCOVERY_NODE_RUNTIME path=%s version=%s/u);
+  assert.doesNotMatch(workflow, /curl[\s\S]{0,120}(?:nodejs\.org|node-v[0-9]|setup-node)/iu);
+  assert.doesNotMatch(workflow, /(?:^|[ =])node (?=--check|--max-old-space-size|-e)/mu);
+  assert.ok((workflow.match(/"\$NODE_BIN"/gu) || []).length >= 10);
 });
 
 test("pinned source bundle is the exact audited runtime and gate closure", () => {
@@ -94,7 +113,7 @@ test("each downloaded file is fail-closed on HTTP, exact size, Git blob SHA, and
   assert.match(workflow, /\[ "\$actual_bytes" = "\$expected_bytes" \] \|\| fail "size-\$relative"/u);
   assert.match(workflow, /printf 'blob %s\\0' "\$actual_bytes"/u);
   assert.match(workflow, /\[ "\$actual_blob_sha" = "\$expected_blob_sha" \] \|\| fail "sha-\$relative"/u);
-  assert.match(workflow, /node --check "\$js_file"/u);
+  assert.match(workflow, /"\$NODE_BIN" --check "\$js_file"/u);
   assert.match(workflow, /source-module-load/u);
   assert.match(workflow, /SOURCE_BUNDLE_CAP_BYTES: "2097152"/u);
   assert.match(workflow, /\[ "\$source_files" -eq 24 \]/u);

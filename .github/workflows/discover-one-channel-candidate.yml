@@ -85,6 +85,17 @@ jobs:
           fi
           mkdir -m 700 "$TASK_ROOT" "$SOURCE_ROOT"
 
+          export PATH="/Users/be/.local/codex-toolchains/node/bin:/opt/homebrew/bin:/usr/local/bin:/Users/be/.local/bin:$PATH"
+          NODE_BIN="$(command -v node || true)"
+          [ -n "$NODE_BIN" ] && [ -x "$NODE_BIN" ] || fail "node-runtime-missing"
+          case "$NODE_BIN" in /*) ;; *) fail "node-runtime-not-absolute" ;; esac
+          NODE_VERSION="$("$NODE_BIN" --version 2>/dev/null || true)"
+          [[ "$NODE_VERSION" =~ ^v([0-9]+)\. ]] || fail "node-version-invalid"
+          [ "${BASH_REMATCH[1]}" -ge 18 ] || fail "node-version-unsupported"
+          printf '%s\n' "$(dirname "$NODE_BIN")" >> "$GITHUB_PATH"
+          printf 'NODE_BIN=%s\n' "$NODE_BIN" >> "$GITHUB_ENV"
+          printf 'CHANNEL_DISCOVERY_NODE_RUNTIME path=%s version=%s\n' "$NODE_BIN" "$NODE_VERSION"
+
           raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
           source_bytes=0
           source_files=0
@@ -150,9 +161,9 @@ jobs:
           js_files="$(find "$SOURCE_ROOT" -type f -name '*.js' | wc -l | tr -d ' ')"
           [ "$js_files" -eq 21 ] || fail "source-js-count"
           while IFS= read -r js_file; do
-            node --check "$js_file" >/dev/null || fail "node-check-${js_file#"$SOURCE_ROOT/"}"
+            "$NODE_BIN" --check "$js_file" >/dev/null || fail "node-check-${js_file#"$SOURCE_ROOT/"}"
           done < <(find "$SOURCE_ROOT" -type f -name '*.js' | LC_ALL=C sort)
-          NODE_OPTIONS= NODE_PATH= node -e \
+          NODE_OPTIONS= NODE_PATH= "$NODE_BIN" -e \
             'require(process.argv[1]); require(process.argv[2]);' \
             "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
             "$SOURCE_ROOT/scripts/youtube-channel-discovery-core.js" ||
@@ -261,7 +272,7 @@ jobs:
             }' > "$ARTIFACT_DIR/request.json"
 
           if [ "$FORCE_REFRESH" = "true" ]; then
-            NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+            NODE_OPTIONS= NODE_PATH= "$NODE_BIN" "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
               "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
               --channel-url "$CHANNEL_URL" \
               --expected-channel-id "$CHANNEL_ID" \
@@ -283,7 +294,7 @@ jobs:
               --fresh \
               > "$ARTIFACT_DIR/discovery.log" 2>&1 &
           else
-            NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+            NODE_OPTIONS= NODE_PATH= "$NODE_BIN" "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
               "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
               --channel-url "$CHANNEL_URL" \
               --expected-channel-id "$CHANNEL_ID" \
@@ -369,7 +380,7 @@ jobs:
             "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "records-gate"
 
           NODE_OPTIONS= NODE_PATH= ARTIFACT_DIR="$ARTIFACT_DIR" SOURCE_ROOT="$SOURCE_ROOT" \
-            node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" - <<'VERIFY_RAW_CONTINUATIONS'
+            "$NODE_BIN" "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" - <<'VERIFY_RAW_CONTINUATIONS'
           const assert = require("node:assert/strict");
           const fs = require("node:fs");
           const path = require("node:path");
