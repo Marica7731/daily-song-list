@@ -60,6 +60,13 @@ _GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int
 # retaining prior range/metric/search aggregates would exceed the candidate's
 # 2 GiB memory envelope.
 _GENERIC_RANKING_PREPARATION_CAP = 1
+_GENERIC_NO_SEARCH_PAGE_BUCKET = 5
+_GENERIC_NO_SEARCH_AFFECTED_CUSHION = 4096
+_GENERIC_RANKING_PREPARATION_MAX_BYTES = 16 * 1024 * 1024
+_GENERIC_RANKING_PREPARATION_MAX_OCCURRENCES = 4096
+_VTUBER_REPLACEMENT_CACHE_MAX_BYTES = 8 * 1024 * 1024
+_VTUBER_REPLACEMENT_CACHE_MAX_OCCURRENCES = 2048
+_CLICKED_SONG_SCOPE_GROUP_CAP = 512
 _GENERIC_RANKING_PREPARATION_CACHE: OrderedDict[
     tuple[Any, ...], Mapping[str, Any],
 ] = OrderedDict()
@@ -1359,11 +1366,9 @@ def _accepted_video_reset_changes(
     rows = _rows(
         connection,
         """
-        SELECT o.occurrence_id, o.video_id, o.song_key, o.seconds, o.title,
-               o.artist, o.range_id, o.source_id, o.source_system,
-               o.payload_json, v.channel_id, v.channel_handle, v.channel_name,
-               v.channel_url, v.title AS video_title,
-               v.payload_json AS video_payload_json
+        SELECT o.occurrence_id, o.video_id, o.song_key, o.title,
+               o.artist, o.range_id, v.channel_id, v.channel_handle,
+               v.channel_name, v.channel_url
         FROM runtime_occurrences AS o
         JOIN runtime_videos AS v
           ON v.revision_id = o.revision_id AND v.video_id = o.video_id
@@ -1391,7 +1396,6 @@ def _accepted_video_reset_changes(
         )
     changes: list[dict[str, Any]] = []
     for row in rows:
-        video = _overlay_public_video(row)
         changes.append({
             "entityType": "occurrences",
             "videoId": _text(row.get("video_id")),
@@ -1400,11 +1404,10 @@ def _accepted_video_reset_changes(
             "artist": _text(row.get("artist")),
             "songKey": _text(row.get("song_key")),
             "rangeId": _text(row.get("range_id")),
-            "channel_id": row.get("channel_id") or video.get("channelId"),
-            "channel_handle": row.get("channel_handle") or video.get("channelHandle"),
-            "channel_name": row.get("channel_name") or video.get("channelName"),
-            "channel_url": row.get("channel_url") or video.get("channelUrl"),
-            "videoPayload": row.get("video_payload_json"),
+            "channel_id": row.get("channel_id"),
+            "channel_handle": row.get("channel_handle"),
+            "channel_name": row.get("channel_name"),
+            "channel_url": row.get("channel_url"),
             "originalGroupVideoOccurrenceCount": 1,
             "acceptedVideoReset": True,
         })
@@ -2983,6 +2986,27 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
             _overlay_song_group_norm(change.get("artist")),
             _text(change.get("videoId") or change.get("video_id")),
         )] += 1
+    group_keys_by_identity: dict[str, list[str]] = defaultdict(list)
+    if view in {"songs", "songIndex", "vsingerSongs"}:
+        for key, row in groups.items():
+            identity = (
+                f"{_overlay_song_group_norm(row.get('title'))}::"
+                f"{_overlay_song_group_norm(row.get('artist'))}"
+            )
+            group_keys_by_identity[identity].append(key)
+    elif view == "artists":
+        for key, row in groups.items():
+            for identity in {
+                _overlay_norm(row.get("artist")),
+                _overlay_norm(row.get("detail_key")),
+            }:
+                if identity:
+                    group_keys_by_identity[identity].append(key)
+    elif view == "videos":
+        for key, row in groups.items():
+            identity = _text(row.get("detail_key"))
+            if identity:
+                group_keys_by_identity[identity].append(key)
     for change in changes:
         if _text(change.get("entityType")) not in {"occurrences", "runtime_occurrences"}:
             continue
@@ -2996,7 +3020,22 @@ def _apply_runtime_tombstone_groups(groups: dict[str, dict[str, Any]], changes: 
         target_artist = _overlay_norm(change.get("artist"))
         target_video = _text(change.get("videoId") or change.get("video_id"))
         target_channel = _overlay_norm(change.get("channelId") or change.get("channel_id") or change.get("channelHandle") or change.get("channel_handle") or change.get("channelName") or change.get("channel_name"))
-        for key, row in list(groups.items()):
+        if view in {"songs", "songIndex", "vsingerSongs"}:
+            candidate_group_keys = group_keys_by_identity.get(
+                f"{_overlay_song_group_norm(target_title)}::"
+                f"{_overlay_song_group_norm(target_artist)}",
+                (),
+            )
+        elif view == "artists":
+            candidate_group_keys = group_keys_by_identity.get(target_artist, ())
+        elif view == "videos":
+            candidate_group_keys = group_keys_by_identity.get(target_video, ())
+        else:
+            candidate_group_keys = tuple(groups)
+        for key in candidate_group_keys:
+            row = groups.get(key)
+            if row is None:
+                continue
             row_title = _overlay_norm(row.get("title"))
             row_artist = _overlay_norm(row.get("artist"))
             row_name = _overlay_norm(row.get("name"))
@@ -3109,11 +3148,23 @@ def _apply_runtime_change_previews(
 ) -> None:
     """Update only affected bounded previews and their exact search groups."""
 
+    changes_by_group: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    if view != "vtubers":
+        for change in changes:
+            key = _runtime_change_group_key(change, view)
+            if key:
+                changes_by_group[key].append(change)
     for row in groups.values():
-        matched = [
-            change for change in changes
-            if _runtime_change_matches_group(row, change, view)
-        ]
+        if view == "vtubers":
+            matched = [
+                change for change in changes
+                if _runtime_change_matches_group(row, change, view)
+            ]
+        else:
+            matched = changes_by_group.get(
+                _runtime_view_group_key(row, view),
+                (),
+            )
         if not matched:
             continue
         payload = _json_object(row.get("payload_json"))
@@ -3200,18 +3251,33 @@ def _bounded_affected_parent_occurrences(
     """Read only the parent rows for changed artist/video/channel groups."""
 
     if view in {"songs", "songIndex", "vsingerSongs"}:
-        titles = sorted({_text(value) for change in changes for value in (
-            change.get("title"),
-            change.get("replacementPayload", {}).get("title") if isinstance(change.get("replacementPayload"), Mapping) else "",
-        ) if _text(value)})
-        artists = sorted({_text(value) for change in changes for value in (
-            change.get("artist"),
-            change.get("replacementPayload", {}).get("artist") if isinstance(change.get("replacementPayload"), Mapping) else "",
-        ) if _text(value)})
-        if not titles or not artists:
+        pairs: set[tuple[str, str]] = set()
+        for change in changes:
+            title = _text(change.get("title"))
+            artist = _text(change.get("artist"))
+            if title and artist:
+                pairs.add((title.casefold(), artist.casefold()))
+            replacement = change.get("replacementPayload")
+            if isinstance(replacement, Mapping):
+                title = _text(replacement.get("title"))
+                artist = _text(replacement.get("artist"))
+                if title and artist:
+                    pairs.add((title.casefold(), artist.casefold()))
+        ordered_pairs = sorted(pairs)
+        if not ordered_pairs:
             return []
-        predicate = "lower(coalesce(o.title, '')) = ANY(%s) AND lower(coalesce(o.artist, '')) = ANY(%s)"
-        predicate_params: list[Any] = [[value.casefold() for value in titles], [value.casefold() for value in artists]]
+        predicate = """
+          EXISTS (
+            SELECT 1
+            FROM unnest(%s::text[], %s::text[]) AS affected(title, artist)
+            WHERE affected.title = lower(coalesce(o.title, ''))
+              AND affected.artist = lower(coalesce(o.artist, ''))
+          )
+        """
+        predicate_params: list[Any] = [
+            [title for title, _artist in ordered_pairs],
+            [artist for _title, artist in ordered_pairs],
+        ]
     elif view == "artists":
         artists = sorted({
             _text(value)
@@ -3250,10 +3316,8 @@ def _bounded_affected_parent_occurrences(
     rows = _rows(
         connection,
         f"""
-        SELECT o.occurrence_id, o.video_id, o.song_key, o.seconds, o.title, o.artist,
-               o.range_id, o.source_id, o.source_system, o.payload_json,
-               v.channel_id, v.channel_handle, v.channel_name, v.channel_url,
-               v.title AS video_title, v.payload_json AS video_payload_json
+        SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
+               v.channel_id, v.channel_handle, v.channel_name
         FROM runtime_occurrences AS o
         JOIN runtime_videos AS v
           ON v.revision_id = o.revision_id AND v.video_id = o.video_id
@@ -3312,13 +3376,38 @@ def _reconcile_affected_song_counts(
         key = _runtime_view_group_key(row, view)
         if key:
             affected_keys.add(key)
+    # Search-filtered rankings only contain the public groups that can be
+    # rewritten below.  Scope the parent lookup to those same keys before
+    # reading any occurrence rows; a query for one song must not reconcile
+    # every accepted tuple in the active overlay.
+    group_keys = {
+        key
+        for row in groups.values()
+        if (key := _runtime_view_group_key(row, view))
+    }
+    affected_keys.intersection_update(group_keys)
     if not affected_keys:
         return
+    relevant_changes = [
+        change
+        for change in affected_changes
+        if _runtime_change_view_keys((change,), view) & affected_keys
+    ]
+    relevant_candidates = [
+        row
+        for row in candidate_rows
+        if _runtime_view_group_key(row, view) in affected_keys
+    ]
+    relevant_replacements = [
+        row
+        for row in replacement_rows
+        if _runtime_view_group_key(row, view) in affected_keys
+    ]
     # Candidate tuples can introduce a new title/artist group on a reset
     # video.  Include their keys in the bounded parent lookup so an already
     # existing canonical group is recomputed rather than incremented twice.
     lookup_changes = [
-        *affected_changes,
+        *relevant_changes,
         *(
             {
                 "entityType": "occurrences",
@@ -3330,7 +3419,7 @@ def _reconcile_affected_song_counts(
                 "channel_name": row.get("channel_name"),
                 "video_payload_json": row.get("video_payload_json"),
             }
-            for row in candidate_rows
+            for row in relevant_candidates
         ),
     ]
     parent_rows = _bounded_affected_parent_occurrences(
@@ -3346,7 +3435,7 @@ def _reconcile_affected_song_counts(
     }
     candidate_video_ids = {
         _text(row.get("video_id"))
-        for row in candidate_rows
+        for row in relevant_candidates
         if _text(row.get("video_id")) and _json_object(row.get("video_payload_json"))
     }
     # A selected migration_video_rows entry is an authoritative full-video
@@ -3355,7 +3444,7 @@ def _reconcile_affected_song_counts(
     # parent video after the earlier aggregate subtraction.
     reset_video_ids = {
         _text(change.get("videoId") or change.get("video_id"))
-        for change in affected_changes
+        for change in relevant_changes
         if bool(change.get("acceptedVideoReset"))
         and _text(change.get("videoId") or change.get("video_id"))
     }
@@ -3364,11 +3453,11 @@ def _reconcile_affected_song_counts(
         if identity[0] not in candidate_video_ids
         and identity[0] not in reset_video_ids
     }
-    for row in candidate_rows:
+    for row in relevant_candidates:
         identity = (_text(row.get("video_id")), _text(row.get("occurrence_id")))
         if identity[0] and identity[1]:
             effective[identity] = dict(row)
-    for change in affected_changes:
+    for change in relevant_changes:
         # Accepted full-video reset removals describe parent rows only.  They
         # must not delete a selected accepted candidate with the same identity
         # after it has been re-added above.  Every later runtime change is
@@ -3381,7 +3470,7 @@ def _reconcile_affected_song_counts(
             _text(change.get("occurrenceId") or change.get("occurrence_id")),
         )
         effective.pop(identity, None)
-    for row in replacement_rows:
+    for row in relevant_replacements:
         identity = (_text(row.get("video_id")), _text(row.get("occurrence_id")))
         if identity[0] and identity[1]:
             effective[identity] = dict(row)
@@ -4482,6 +4571,67 @@ def _cached_vtuber_rows_are_safe(
     return True
 
 
+def _cache_value_is_bounded(
+    value: Any,
+    *,
+    max_bytes: int,
+    max_occurrences: int,
+) -> bool:
+    """Estimate one immutable cache value and reject oversized nested payloads.
+
+    Entry-count LRU limits do not constrain the retained object graph.  This
+    bounded traversal includes container members and counts occurrence preview
+    lists explicitly.  It is only a cache-admission decision; an oversized
+    value is still returned to the request that built it.
+    """
+
+    seen: set[int] = set()
+    stack: list[Any] = [value]
+    total_bytes = 0
+    occurrence_count = 0
+    while stack:
+        current = stack.pop()
+        identity = id(current)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        total_bytes += sys.getsizeof(current)
+        if total_bytes > max_bytes:
+            return False
+        if isinstance(current, Mapping):
+            for key, nested in current.items():
+                stack.append(key)
+                stack.append(nested)
+                if (
+                    _text(key) == "occurrences"
+                    and isinstance(nested, (list, tuple))
+                ):
+                    occurrence_count += len(nested)
+                    if occurrence_count > max_occurrences:
+                        return False
+        elif isinstance(current, (list, tuple, set, frozenset)):
+            stack.extend(current)
+    return True
+
+
+def _store_vtuber_replacement_cache(
+    cache_key: tuple[Any, ...],
+    exact: dict[str, dict[str, Any]],
+) -> None:
+    """Admit only identity-safe sized values to the small VTuber LRU."""
+
+    if not _cache_value_is_bounded(
+        exact,
+        max_bytes=_VTUBER_REPLACEMENT_CACHE_MAX_BYTES,
+        max_occurrences=_VTUBER_REPLACEMENT_CACHE_MAX_OCCURRENCES,
+    ):
+        return
+    with _VTUBER_REPLACEMENT_CACHE_LOCK:
+        if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
+            _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
+        _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+
+
 def _unfiltered_vtuber_summary_rows(
     connection,
     parent_revision_id: str,
@@ -5447,10 +5597,7 @@ def _overlay_vtuber_replacement_rows(
                     int(summary.get("row_count") or 0) > 0 and not previews
                 ),
             }
-        with _VTUBER_REPLACEMENT_CACHE_LOCK:
-            if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
-                _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
-            _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+        _store_vtuber_replacement_cache(cache_key, exact)
         _phase_trace(
             "exact_finalize",
             exact_started,
@@ -5628,10 +5775,7 @@ def _overlay_vtuber_replacement_rows(
             int(row.get("row_count") or 0) > 0
             and not (payload.get("occurrences") or ())
         )
-    with _VTUBER_REPLACEMENT_CACHE_LOCK:
-        if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
-            _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
-        _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+    _store_vtuber_replacement_cache(cache_key, exact)
     return copy.deepcopy(exact)
 
 
@@ -5887,21 +6031,42 @@ def _prepare_generic_overlay_rankings(
     exact_channel_scope = _resolve_exact_vtuber_channel_scope(
         connection, parent[0], overlay_ids, options,
     )
+    song_channel_scope: tuple[str, ...] | None = None
+    if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
+        channel_fields = {
+            _text(value).casefold()
+            for value in (options.get("searchFields") or ())
+        }
+        if "channel" in channel_fields or "channels" in channel_fields:
+            song_channel_options = dict(options)
+            song_channel_options["view"] = "vtubers"
+            song_handle_parts = _vtuber_handle_query_parts(
+                song_channel_options,
+            )
+            if (
+                song_handle_parts is not None
+                and song_handle_parts.get("residualTokens")
+            ):
+                song_channel_scope = _resolve_exact_vtuber_channel_scope(
+                    connection,
+                    parent[0],
+                    overlay_ids,
+                    song_channel_options,
+                )
     phase_started = _phase_trace(
         "channel_resolve",
         phase_started,
         exact_scope=(
-            len(exact_channel_scope)
-            if exact_channel_scope is not None
-            else 0
+            len(exact_channel_scope or song_channel_scope or ())
         ),
     )
-    if exact_channel_scope == ():
+    if exact_channel_scope == () or song_channel_scope == ():
         return {
             "filtered": (),
             "metadata": (),
             "candidateRows": (),
             "parentRevisionId": parent[0],
+            "songChannelIds": tuple(song_channel_scope or ()),
             "exactAffectedChannelIds": (),
             "previewExcludedVideoIds": (),
             "previewExcludedOccurrenceIds": (),
@@ -5948,6 +6113,62 @@ def _prepare_generic_overlay_rankings(
         if options["view"] == "vtubers" and exact_channel_scope is not None
         else "NULL::jsonb AS payload_json"
     )
+    bounded_no_search = not bool(options.get("q"))
+    base_limit_clause = ""
+    base_totals: dict[str, int] | None = None
+    if bounded_no_search:
+        page_bucket = max(
+            0,
+            (int(options["page"]) - 1) // _GENERIC_NO_SEARCH_PAGE_BUCKET,
+        )
+        base_window_end = (
+            (page_bucket + 1)
+            * _GENERIC_NO_SEARCH_PAGE_BUCKET
+            * int(options["pageSize"])
+        )
+        base_limit = base_window_end + _GENERIC_NO_SEARCH_AFFECTED_CUSHION
+        if base_limit > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError(
+                "generic ranking page exceeds bounded SQL window"
+            )
+        base_limit_clause = " LIMIT %s"
+        base_params.append(base_limit)
+        metric_column = {
+            "videos": "video_count",
+            "songs": "song_count",
+        }.get(options["metric"], "row_count")
+        aggregate = _one(
+            connection,
+            f"""
+            SELECT COUNT(*) AS total_count,
+                   COALESCE(SUM(row_count), 0) AS total_occurrence_count,
+                   COALESCE(SUM(song_count), 0) AS total_song_count,
+                   COALESCE(SUM(video_count), 0) AS total_video_count
+            FROM runtime_ranking_rows
+            WHERE revision_id = %s AND range_id = %s AND view = %s
+              AND metric = %s AND {metric_column} >= %s
+            """,
+            [
+                parent[0],
+                options["range"],
+                options["view"],
+                db_metric,
+                int(options["minCount"]),
+            ],
+        ) or {}
+        if "total_count" in aggregate:
+            base_totals = {
+                "totalCount": int(aggregate.get("total_count") or 0),
+                "totalOccurrenceCount": int(
+                    aggregate.get("total_occurrence_count") or 0
+                ),
+                "totalSongCount": int(
+                    aggregate.get("total_song_count") or 0
+                ),
+                "totalVideoCount": int(
+                    aggregate.get("total_video_count") or 0
+                ),
+            }
     base_rows = _rows(
         connection,
         f"""
@@ -5957,6 +6178,7 @@ def _prepare_generic_overlay_rankings(
         WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
           {search_clause}
         ORDER BY rank
+        {base_limit_clause}
         """,
         base_params,
     )
@@ -6161,25 +6383,148 @@ def _prepare_generic_overlay_rankings(
             evidence.get("channel_name") or evidence_video.get("channelName"),
         )
         _validated_overlay_change_identity(change, evidence, validate_urls=False)
+    replacement_rows = _runtime_replacement_candidate_rows(
+        runtime_changes,
+        options["view"] == "vtubers",
+    )
+    bounded_affected_keys: set[str] = set()
+    bounded_original_affected: dict[str, dict[str, Any]] = {}
+    if bounded_no_search:
+        bounded_affected_keys.update(
+            key
+            for row in (*candidate_rows, *replacement_rows)
+            if (key := _runtime_view_group_key(row, options["view"]))
+        )
+        bounded_affected_keys.update(
+            key
+            for key in _runtime_change_view_keys(
+                (*reset_changes, *runtime_changes),
+                options["view"],
+            )
+            if key
+        )
+        if len(bounded_affected_keys) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError(
+                "bounded generic ranking window exceeded affected group cap"
+            )
+        if len(bounded_affected_keys) > _GENERIC_NO_SEARCH_AFFECTED_CUSHION:
+            raise PostgresAdapterError(
+                "bounded generic ranking window exceeded displacement cushion"
+            )
+        if bounded_affected_keys:
+            affected_base_rows = _rows(
+                connection,
+                """
+                SELECT rank, detail_key, title, artist, name, row_count,
+                       song_count, video_count, timestamp_count,
+                       NULL::jsonb AS payload_json,
+                       '' AS search_text, '' AS channel_search_text
+                FROM runtime_ranking_rows
+                WHERE revision_id = %s AND range_id = %s AND view = %s
+                  AND metric = %s AND detail_key = ANY(%s)
+                ORDER BY rank
+                LIMIT %s
+                """,
+                [
+                    parent[0],
+                    options["range"],
+                    options["view"],
+                    db_metric,
+                    sorted(bounded_affected_keys),
+                    len(bounded_affected_keys) + 1,
+                ],
+            )
+            affected_base_rows = [
+                row for row in affected_base_rows
+                if _text(row.get("detail_key")) in bounded_affected_keys
+            ]
+            affected_detail_keys = [
+                _text(row.get("detail_key")) for row in affected_base_rows
+            ]
+            if len(affected_detail_keys) != len(set(affected_detail_keys)):
+                raise PostgresAdapterError(
+                    "bounded generic ranking window returned duplicate groups"
+                )
+            bounded_original_affected = {
+                _text(row.get("detail_key")): dict(row)
+                for row in affected_base_rows
+                if _text(row.get("detail_key"))
+            }
+            for key, row in bounded_original_affected.items():
+                groups.setdefault(key, dict(row))
+    phase_started = _phase_trace(
+        "affected_window",
+        phase_started,
+        affected_groups=len(bounded_affected_keys),
+        returned_groups=len(bounded_original_affected),
+    )
+    generic_candidate_rows = list(candidate_rows)
+    generic_replacement_rows = list(replacement_rows)
+    generic_reset_changes = list(reset_changes)
+    generic_runtime_changes = list(runtime_changes)
+    if options["searchTokens"] and options["view"] != "vtubers":
+        generic_candidate_rows = [
+            row for row in generic_candidate_rows
+            if _matches_search_tokens(
+                _overlay_candidate_search_text(row), options["searchTokens"],
+            )
+        ]
+        generic_replacement_rows = [
+            row for row in generic_replacement_rows
+            if _matches_search_tokens(
+                _overlay_candidate_search_text(row), options["searchTokens"],
+            )
+        ]
+        visible_group_keys = {
+            key
+            for row in groups.values()
+            if (key := _runtime_view_group_key(row, options["view"]))
+        }
+        visible_group_keys.update(
+            key
+            for row in (*generic_candidate_rows, *generic_replacement_rows)
+            if (key := _runtime_view_group_key(row, options["view"]))
+        )
+        generic_reset_changes = [
+            change for change in generic_reset_changes
+            if _runtime_change_view_keys((change,), options["view"])
+            & visible_group_keys
+        ]
+        generic_runtime_changes = [
+            change for change in generic_runtime_changes
+            if _runtime_change_view_keys((change,), options["view"])
+            & visible_group_keys
+        ]
     if options["view"] != "vtubers":
         _enrich_runtime_original_group_counts(
             connection,
             parent[0],
-            candidate_rows,
-            [*reset_changes, *runtime_changes],
+            generic_candidate_rows,
+            # Accepted reset removals are immediately assigned exact
+            # per-video/group counts from ``generic_reset_changes`` below.
+            # Re-reading every selected reset video from the full parent here
+            # made an ordinary page scan hundreds of videos for no new value.
+            generic_runtime_changes,
         )
+    phase_started = _phase_trace(
+        "enrich",
+        phase_started,
+        candidate_count=len(generic_candidate_rows),
+        reset_count=len(generic_reset_changes),
+        runtime_count=len(generic_runtime_changes),
+    )
     # The selected accepted video is a replacement boundary, not another
     # increment.  Remove all parent occurrences for its video before adding
     # the non-tombstone candidate projection below.  A later runtime curation
     # remains in ``runtime_changes`` and is deliberately applied afterwards.
     reset_group_counts: dict[tuple[str, str, str], int] = defaultdict(int)
-    for change in reset_changes:
+    for change in generic_reset_changes:
         reset_group_counts[(
             _text(change.get("videoId")),
             _overlay_song_group_norm(change.get("title")),
             _overlay_song_group_norm(change.get("artist")),
         )] += 1
-    for change in reset_changes:
+    for change in generic_reset_changes:
         change["originalGroupVideoOccurrenceCount"] = reset_group_counts[(
             _text(change.get("videoId")),
             _overlay_song_group_norm(change.get("title")),
@@ -6189,12 +6534,12 @@ def _prepare_generic_overlay_rankings(
     # Applying the bounded generic mutation here would make the caller replay
     # those same tuples after the exact result is installed.
     if options["view"] != "vtubers":
-        _apply_runtime_tombstone_groups(groups, reset_changes, options["view"])
-        _apply_runtime_change_previews(groups, reset_changes, options["view"])
-    replacement_rows = _runtime_replacement_candidate_rows(
-        runtime_changes,
-        options["view"] == "vtubers",
-    )
+        _apply_runtime_tombstone_groups(
+            groups, generic_reset_changes, options["view"],
+        )
+        _apply_runtime_change_previews(
+            groups, generic_reset_changes, options["view"],
+        )
     exact_reset_changes = tuple(reset_changes)
     exact_runtime_changes = tuple(runtime_changes)
     exact_replacement_rows = tuple(replacement_rows)
@@ -6239,6 +6584,7 @@ def _prepare_generic_overlay_rankings(
                 ) in replacement_identities
             )
         )
+    clicked_song_candidate_rows = tuple(candidate_rows)
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         candidate_rows = [*candidate_rows, *replacement_rows]
     elif options["view"] == "artists":
@@ -6347,7 +6693,17 @@ def _prepare_generic_overlay_rankings(
             groups[key] = row
         else:
             row["row_count"] = int(row.get("row_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
-            row["song_count"] = int(row.get("song_count") or 0) + len(item["songKeys"])
+            if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
+                # These views already represent one canonical title/artist
+                # song group.  A full-video refresh can remove one video's
+                # tuples while another video keeps the group alive; adding
+                # the refreshed tuples must not count that same song twice.
+                row["song_count"] = max(
+                    int(row.get("song_count") or 0),
+                    len(item["songKeys"]),
+                )
+            else:
+                row["song_count"] = int(row.get("song_count") or 0) + len(item["songKeys"])
             row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
             row["timestamp_count"] = int(row.get("timestamp_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
             payload = _json_object(row.get("payload_json"))
@@ -6360,18 +6716,25 @@ def _prepare_generic_overlay_rankings(
                 row["payload_json"] = payload
             row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
     if options["view"] != "vtubers":
-        _apply_runtime_tombstone_groups(groups, runtime_changes, options["view"])
-        _apply_runtime_change_previews(groups, runtime_changes, options["view"])
+        _apply_runtime_tombstone_groups(
+            groups, generic_runtime_changes, options["view"],
+        )
+        _apply_runtime_change_previews(
+            groups, generic_runtime_changes, options["view"],
+        )
     # Exact VTuber aggregation already owns every affected channel's effective
     # tuple set.  Re-running the generic bounded parent scan here was the
     # cold-ranking timeout; songs/artists/videos keep their existing path.
-    if options["view"] != "vtubers" or (exact_required and not exact_owned):
+    if (
+        options["view"] not in {"songs", "songIndex", "vsingerSongs", "vtubers"}
+        or (options["view"] == "vtubers" and exact_required and not exact_owned)
+    ):
         _reconcile_affected_song_counts(
             connection,
             parent[0],
             all_candidate_rows,
             replacement_rows,
-            [*reset_changes, *runtime_changes],
+            [*generic_reset_changes, *generic_runtime_changes],
             groups,
             options["view"],
             options,
@@ -6398,6 +6761,21 @@ def _prepare_generic_overlay_rankings(
             continue
         filtered.append(row)
     filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
+    clicked_song_scopes = (
+        _bounded_clicked_song_scopes(
+            connection,
+            parent[0],
+            filtered,
+            song_channel_scope,
+            options["range"],
+            clicked_song_candidate_rows,
+            replacement_rows,
+            accepted_video_resets,
+            runtime_changes,
+        )
+        if song_channel_scope
+        else {}
+    )
     metadata = (
         (
             _channel_metadata_rows(
@@ -6438,6 +6816,38 @@ def _prepare_generic_overlay_rankings(
             and _text(change.get("videoId") or change.get("video_id"))
         )
     }))
+    aggregate_totals = base_totals
+    if aggregate_totals is not None:
+        aggregate_totals = dict(aggregate_totals)
+        affected_final_keys = (
+            bounded_affected_keys
+            | set(bounded_original_affected)
+            | set(exact_vtuber_rows)
+        )
+        for key in affected_final_keys:
+            old = bounded_original_affected.get(key)
+            new = groups.get(key)
+            old_included = bool(
+                old
+                and _overlay_rank_value(old, options["metric"])
+                >= int(options["minCount"])
+            )
+            new_included = bool(
+                new
+                and _overlay_rank_value(new, options["metric"])
+                >= int(options["minCount"])
+            )
+            aggregate_totals["totalCount"] += int(new_included) - int(
+                old_included
+            )
+            for public_name, field in (
+                ("totalOccurrenceCount", "row_count"),
+                ("totalSongCount", "song_count"),
+                ("totalVideoCount", "video_count"),
+            ):
+                old_value = int(old.get(field) or 0) if old_included and old else 0
+                new_value = int(new.get(field) or 0) if new_included and new else 0
+                aggregate_totals[public_name] += new_value - old_value
     return {
         "filtered": tuple(dict(row) for row in filtered),
         "metadata": tuple(dict(row) for row in metadata),
@@ -6448,6 +6858,9 @@ def _prepare_generic_overlay_rankings(
         "exactAffectedChannelIds": tuple(sorted(exact_vtuber_rows)),
         "previewExcludedVideoIds": preview_excluded_video_ids,
         "previewExcludedOccurrenceIds": preview_excluded_occurrence_ids,
+        "aggregateTotals": aggregate_totals,
+        "songChannelIds": tuple(song_channel_scope or ()),
+        "clickedSongScopes": clicked_song_scopes,
     }
 
 
@@ -6458,7 +6871,7 @@ def _generic_ranking_preparation_key(
 ) -> tuple[Any, ...]:
     """Identify only inputs that alter the expensive immutable aggregate."""
 
-    return (
+    key = (
         revision_id,
         parent_revision_id,
         _text(options.get("range")),
@@ -6471,6 +6884,16 @@ def _generic_ranking_preparation_key(
         bool(options.get("nicheOnly")),
         bool(options.get("hideUnknownArtist")),
     )
+    if not _text(options.get("q")):
+        page = max(1, int(options.get("page") or 1))
+        page_size = max(1, int(options.get("pageSize") or 1))
+        key = (
+            *key,
+            "bounded-window",
+            (page - 1) // _GENERIC_NO_SEARCH_PAGE_BUCKET,
+            page_size,
+        )
+    return key
 
 
 def _cached_generic_ranking_preparation(
@@ -6508,13 +6931,234 @@ def _cached_generic_ranking_preparation(
         raise
     with _GENERIC_RANKING_PREPARATION_LOCK:
         flight.result = prepared
-        _GENERIC_RANKING_PREPARATION_CACHE[key] = prepared
-        _GENERIC_RANKING_PREPARATION_CACHE.move_to_end(key)
-        while len(_GENERIC_RANKING_PREPARATION_CACHE) > _GENERIC_RANKING_PREPARATION_CAP:
-            _GENERIC_RANKING_PREPARATION_CACHE.popitem(last=False)
+        if _cache_value_is_bounded(
+            prepared,
+            max_bytes=_GENERIC_RANKING_PREPARATION_MAX_BYTES,
+            max_occurrences=_GENERIC_RANKING_PREPARATION_MAX_OCCURRENCES,
+        ):
+            _GENERIC_RANKING_PREPARATION_CACHE[key] = prepared
+            _GENERIC_RANKING_PREPARATION_CACHE.move_to_end(key)
+            while len(_GENERIC_RANKING_PREPARATION_CACHE) > _GENERIC_RANKING_PREPARATION_CAP:
+                _GENERIC_RANKING_PREPARATION_CACHE.popitem(last=False)
         _GENERIC_RANKING_PREPARATION_FLIGHTS.pop(key, None)
         flight.event.set()
     return prepared
+
+
+def _scoped_clicked_song_payload(
+    payload: Mapping[str, Any],
+    channel_ids: set[str],
+) -> dict[str, Any] | None:
+    """Return one clicked-song card containing only the resolved source."""
+
+    scoped_occurrences: list[dict[str, Any]] = []
+    for occurrence in payload.get("occurrences") or ():
+        if not isinstance(occurrence, Mapping):
+            continue
+        item = (
+            occurrence.get("item")
+            if isinstance(occurrence.get("item"), Mapping)
+            else occurrence.get("video")
+        )
+        video = (
+            occurrence.get("video")
+            if isinstance(occurrence.get("video"), Mapping)
+            else item
+        )
+        if not isinstance(item, Mapping) or not isinstance(video, Mapping):
+            continue
+        channel_id = _text(item.get("channelId"))
+        if channel_id not in channel_ids:
+            continue
+        if (
+            _text(video.get("channelId")) != channel_id
+            or _text(item.get("videoId")) != _text(video.get("videoId"))
+        ):
+            raise PostgresAdapterError(
+                "song channel result has inconsistent occurrence identity"
+            )
+        canonical = dict(occurrence)
+        canonical["item"] = dict(item)
+        canonical["video"] = dict(video)
+        scoped_occurrences.append(canonical)
+    if not scoped_occurrences:
+        return None
+    result = copy.deepcopy(dict(payload))
+    result["occurrences"] = scoped_occurrences
+    result["count"] = len(scoped_occurrences)
+    result["timestampCount"] = len(scoped_occurrences)
+    result["songCount"] = 1
+    result["videoCount"] = len({
+        _text(occurrence["item"].get("videoId"))
+        for occurrence in scoped_occurrences
+        if _text(occurrence["item"].get("videoId"))
+    })
+    return result
+
+
+def _bounded_clicked_song_scopes(
+    connection,
+    parent_revision_id: str,
+    rows: Sequence[Mapping[str, Any]],
+    channel_ids: Sequence[str],
+    range_id: str,
+    candidate_rows: Sequence[Mapping[str, Any]],
+    replacement_rows: Sequence[Mapping[str, Any]],
+    accepted_video_resets: Mapping[str, Mapping[str, Any]],
+    runtime_changes: Sequence[Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Count complete clicked-song tuples while retaining only 20 previews."""
+
+    channels = sorted({_text(value) for value in channel_ids if _text(value)})
+    requested = sorted({
+        (
+            _text(row.get("detail_key")),
+            _text(row.get("title")).casefold(),
+            _text(row.get("artist")).casefold(),
+        )
+        for row in rows
+        if _text(row.get("detail_key")) and _text(row.get("title"))
+    })
+    if not channels or not requested:
+        return {}
+    if len(requested) > _CLICKED_SONG_SCOPE_GROUP_CAP:
+        raise PostgresAdapterError(
+            "clicked song channel result exceeded bounded group cap"
+        )
+    range_values = (
+        ["all", ""] if (_text(range_id) or "all") == "all" else ["7d", ""]
+    )
+    parent_rows = _rows(
+        connection,
+        """
+        /* bounded complete clicked-song scalar tuples */
+        WITH requested_groups(detail_key, title, artist) AS MATERIALIZED (
+          SELECT * FROM unnest(%s::text[], %s::text[], %s::text[])
+        ), requested_channels AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS channel_id
+        ), range_values AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS range_id
+        )
+        SELECT requested.detail_key,
+               o.video_id, o.occurrence_id, o.range_id, o.song_key,
+               o.seconds, o.title, o.artist, o.source_id, o.source_system,
+               v.title AS video_title, v.channel_name, v.channel_id,
+               v.channel_handle, v.channel_url, v.published_timestamp,
+               v.thumbnail_url
+        FROM requested_groups AS requested
+        JOIN runtime_occurrences AS o
+          ON lower(coalesce(o.title, '')) = requested.title
+         AND lower(coalesce(o.artist, '')) = requested.artist
+         AND o.revision_id = %s
+        JOIN range_values AS scope
+          ON scope.range_id = coalesce(o.range_id, '')
+        JOIN runtime_videos AS v
+          ON v.revision_id = o.revision_id
+         AND v.video_id = o.video_id
+        JOIN requested_channels AS channel
+          ON channel.channel_id = v.channel_id
+        ORDER BY requested.detail_key, o.video_id, o.occurrence_id
+        LIMIT %s
+        """,
+        [
+            [key for key, _title, _artist in requested],
+            [title for _key, title, _artist in requested],
+            [artist for _key, _title, artist in requested],
+            channels,
+            range_values,
+            parent_revision_id,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    )
+    if len(parent_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "clicked song channel scope exceeded bounded occurrence cap"
+        )
+    requested_keys = {key for key, _title, _artist in requested}
+    channel_set = set(channels)
+    reset_video_ids = {
+        _text(video_id)
+        for video_id in accepted_video_resets
+        if _text(video_id)
+    }
+    effective: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in parent_rows:
+        if (
+            _text(row.get("detail_key")) not in requested_keys
+            or _text(row.get("channel_id")) not in channel_set
+        ):
+            raise PostgresAdapterError(
+                "clicked song channel scope returned an inexact tuple"
+            )
+        identity = (
+            _text(row.get("video_id")),
+            _text(row.get("occurrence_id")),
+        )
+        if (
+            identity[0]
+            and identity[1]
+            and identity[0] not in reset_video_ids
+        ):
+            effective[identity] = dict(row)
+
+    def selected_overlay_row(row: Mapping[str, Any]) -> dict[str, Any] | None:
+        if row.get("video_tombstone"):
+            return None
+        key = _runtime_view_group_key(row, "songs")
+        video = _overlay_public_video(row)
+        channel_id = _text(row.get("channel_id") or video.get("channelId"))
+        if key not in requested_keys or channel_id not in channel_set:
+            return None
+        selected = dict(row)
+        selected["detail_key"] = key
+        return selected
+
+    for row in candidate_rows:
+        selected = selected_overlay_row(row)
+        if selected is None:
+            continue
+        identity = (
+            _text(selected.get("video_id")),
+            _text(selected.get("occurrence_id")),
+        )
+        if identity[0] and identity[1]:
+            effective[identity] = selected
+    for change in runtime_changes:
+        if bool(change.get("acceptedVideoReset")):
+            continue
+        effective.pop(
+            (
+                _text(change.get("videoId") or change.get("video_id")),
+                _text(
+                    change.get("occurrenceId")
+                    or change.get("occurrence_id")
+                ),
+            ),
+            None,
+        )
+    for row in _overlay_rows_for_range(replacement_rows, range_id):
+        selected = selected_overlay_row(row)
+        if selected is None:
+            continue
+        identity = (
+            _text(selected.get("video_id")),
+            _text(selected.get("occurrence_id")),
+        )
+        if identity[0] and identity[1]:
+            effective[identity] = selected
+
+    grouped = _overlay_candidate_groups(effective.values(), "songs")
+    return {
+        key: {
+            "count": int(group.get("occurrenceCount") or 0),
+            "videoCount": len(group.get("videoIds") or ()),
+            "occurrences": tuple(
+                copy.deepcopy(group.get("occurrences") or ())
+            ),
+        }
+        for key, group in grouped.items()
+        if key in requested_keys and int(group.get("occurrenceCount") or 0) > 0
+    }
 
 
 def _render_generic_overlay_rankings(
@@ -6551,13 +7195,107 @@ def _render_generic_overlay_rankings(
         for value in prepared.get("overlayPreviewExcludedVideoIds", ())
         if _text(value)
     )
+    song_channel_ids = {
+        _text(value)
+        for value in prepared.get("songChannelIds", ())
+        if _text(value)
+    }
+    clicked_song_scopes = (
+        prepared.get("clickedSongScopes")
+        if isinstance(prepared.get("clickedSongScopes"), Mapping)
+        else {}
+    )
     if not parent_revision_id:
         raise PostgresAdapterError("generic ranking preparation is missing its parent revision")
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
-    total = len(filtered)
+    render_rows: Sequence[Mapping[str, Any]] = filtered
+    if (
+        song_channel_ids
+        and options["view"] in {"songs", "songIndex", "vsingerSongs"}
+    ):
+        if len(filtered) > _CLICKED_SONG_SCOPE_GROUP_CAP:
+            raise PostgresAdapterError(
+                "clicked song channel result exceeded bounded group cap"
+            )
+        scoped_rows: list[dict[str, Any]] = []
+        for row in filtered:
+            payload = copy.deepcopy(_json_object(row.get("payload_json")))
+            if not payload:
+                stored = _one(
+                    connection,
+                    """
+                    SELECT payload_json FROM runtime_ranking_rows
+                    WHERE revision_id = %s AND range_id = %s AND view = %s
+                      AND metric = %s AND detail_key = %s
+                    LIMIT 1
+                    """,
+                    [
+                        parent_revision_id,
+                        options["range"],
+                        options["view"],
+                        db_metric,
+                        row.get("detail_key"),
+                    ],
+                )
+                payload = (
+                    _json_object(stored.get("payload_json"))
+                    if stored else {}
+                )
+            complete_scope = clicked_song_scopes.get(
+                _text(row.get("detail_key"))
+            )
+            if isinstance(complete_scope, Mapping):
+                payload["occurrences"] = copy.deepcopy(
+                    list(complete_scope.get("occurrences") or ())
+                )
+            scoped_payload = _scoped_clicked_song_payload(
+                payload,
+                song_channel_ids,
+            )
+            if scoped_payload is None:
+                continue
+            if isinstance(complete_scope, Mapping):
+                scoped_payload["count"] = int(
+                    complete_scope.get("count") or 0
+                )
+                scoped_payload["timestampCount"] = int(
+                    complete_scope.get("count") or 0
+                )
+                scoped_payload["videoCount"] = int(
+                    complete_scope.get("videoCount") or 0
+                )
+            scoped_row = dict(row)
+            scoped_row.update({
+                "row_count": int(scoped_payload["count"]),
+                "song_count": int(scoped_payload["songCount"]),
+                "video_count": int(scoped_payload["videoCount"]),
+                "timestamp_count": int(scoped_payload["timestampCount"]),
+                "payload_json": scoped_payload,
+            })
+            scoped_rows.append(scoped_row)
+        render_rows = tuple(scoped_rows)
+    aggregate_totals = prepared.get("aggregateTotals")
+    if isinstance(aggregate_totals, Mapping) and not song_channel_ids:
+        total = int(aggregate_totals.get("totalCount") or 0)
+        total_occurrence_count = int(
+            aggregate_totals.get("totalOccurrenceCount") or 0
+        )
+        total_song_count = int(aggregate_totals.get("totalSongCount") or 0)
+        total_video_count = int(aggregate_totals.get("totalVideoCount") or 0)
+    else:
+        total = len(render_rows)
+        total_occurrence_count = sum(
+            int(row.get("row_count") or 0) for row in render_rows
+        )
+        total_song_count = sum(
+            int(row.get("song_count") or 0) for row in render_rows
+        )
+        total_video_count = sum(
+            int(row.get("video_count") or 0) for row in render_rows
+        )
     offset = (options["page"] - 1) * options["pageSize"]
     records = []
-    for index, row in enumerate(filtered[offset:offset + options["pageSize"]], start=offset + 1):
+    for index, row in enumerate(render_rows[offset:offset + options["pageSize"]], start=offset + 1):
         payload = copy.deepcopy(_json_object(row.get("payload_json")))
         if not payload:
             stored = _one(
@@ -6649,9 +7387,10 @@ def _render_generic_overlay_rankings(
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
         "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
         "page": options["page"], "pageSize": options["pageSize"], "totalCount": total,
-        "filteredBaseCount": total, "totalOccurrenceCount": sum(int(row.get("row_count") or 0) for row in filtered),
-        "totalSongCount": sum(int(row.get("song_count") or 0) for row in filtered),
-        "totalVideoCount": sum(int(row.get("video_count") or 0) for row in filtered),
+        "filteredBaseCount": total,
+        "totalOccurrenceCount": total_occurrence_count,
+        "totalSongCount": total_song_count,
+        "totalVideoCount": total_video_count,
         "pageCount": max(1, math.ceil(total / options["pageSize"])), "compact": options["compact"], "records": records,
     }
 

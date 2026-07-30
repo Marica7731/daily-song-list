@@ -728,6 +728,121 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("ordinary pagination reads one bounded SQL bucket and keeps full aggregate totals", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_RANKING_PREPARATION_CACHE.clear()
+module._GENERIC_RANKING_PREPARATION_FLIGHTS.clear()
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: []
+module._overlay_candidate_rows = lambda *_: []
+module._accepted_video_resets = lambda *_: {}
+module._accepted_video_reset_changes = lambda *_: []
+module._runtime_tombstones = lambda *_: []
+module._enrich_runtime_original_group_counts = lambda *_: None
+module._runtime_replacement_candidate_rows = lambda *_: []
+module._reconcile_affected_song_counts = lambda *_: None
+module._hydrate_overlay_page_previews = lambda *_: None
+
+base_queries = []
+def rows(_connection, sql, params):
+    if "SELECT COUNT(*) AS total_count" in sql:
+        return [{
+            "total_count": 197000,
+            "total_occurrence_count": 600000,
+            "total_song_count": 197000,
+            "total_video_count": 250000,
+        }]
+    if "FROM runtime_ranking_rows" in sql and "ORDER BY rank" in sql:
+        assert "LIMIT %s" in sql, sql
+        base_queries.append(int(params[-1]))
+        return [{
+            "rank": index,
+            "detail_key": f"song-{index}::artist",
+            "title": f"Song {index}",
+            "artist": "Artist",
+            "name": f"Song {index}",
+            "row_count": 1,
+            "song_count": 1,
+            "video_count": 1,
+            "timestamp_count": 1,
+            "payload_json": {
+                "type": "song", "key": f"song-{index}::artist",
+                "title": f"Song {index}", "displayArtist": "Artist",
+                "count": 1, "songCount": 1, "videoCount": 1,
+                "timestampCount": 1, "occurrences": [],
+            },
+            "search_text": "", "channel_search_text": "",
+        } for index in range(1, 121)]
+    return []
+module._rows = rows
+
+def request(page):
+    return module._generic_overlay_rankings_payload(
+        object(), "active", {"revision_id": "active"},
+        {"range": "all", "view": "songs", "metric": "occurrences",
+         "page": str(page), "pageSize": "20"},
+    )
+
+page2 = request(2)
+page5 = request(5)
+assert base_queries == [4196], base_queries
+assert [row["rank"] for row in page2["records"]] == list(range(21, 41))
+assert [row["rank"] for row in page5["records"]] == list(range(81, 101))
+for payload in (page2, page5):
+    assert payload["totalCount"] == 197000
+    assert payload["totalOccurrenceCount"] == 600000
+    assert payload["pageCount"] == 9850
+
+request(6)
+assert base_queries == [4196, 4296], base_queries
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("oversized generic and VTuber values are returned but not retained in caches", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_RANKING_PREPARATION_CACHE.clear()
+module._GENERIC_RANKING_PREPARATION_FLIGHTS.clear()
+module._GENERIC_RANKING_PREPARATION_MAX_BYTES = 512
+key = ("oversized",)
+prepared = module._cached_generic_ranking_preparation(
+    key, lambda: {"filtered": (), "large": "x" * 4096},
+)
+assert prepared["large"].startswith("x")
+assert key not in module._GENERIC_RANKING_PREPARATION_CACHE
+
+module._VTUBER_REPLACEMENT_CACHE.clear()
+module._VTUBER_REPLACEMENT_CACHE_MAX_OCCURRENCES = 0
+cache_key = ("vtuber",)
+exact = {"UC1": {"payload_json": {"occurrences": [{"occurrenceId": "one"}]}}}
+module._store_vtuber_replacement_cache(cache_key, exact)
+assert cache_key not in module._VTUBER_REPLACEMENT_CACHE
+
+module._VTUBER_REPLACEMENT_CACHE_MAX_OCCURRENCES = 4
+module._store_vtuber_replacement_cache(cache_key, exact)
+assert module._VTUBER_REPLACEMENT_CACHE[cache_key] is exact
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("generic ranking preparation isolates keys, failures, eviction, and returned pages", () => {
   const output = runPython(`
 import concurrent.futures
@@ -4221,6 +4336,13 @@ base_row = {
 aggregate_queries = 0
 def rows(connection, sql, params):
     global aggregate_queries
+    if "SELECT COUNT(*) AS total_count" in sql:
+        return [{
+            "total_count": 1,
+            "total_occurrence_count": 3,
+            "total_song_count": 3,
+            "total_video_count": 2,
+        }]
     if "FROM runtime_ranking_rows" in sql:
         assert "'' AS search_text, '' AS channel_search_text" in sql
         return [base_row]
@@ -4893,7 +5015,11 @@ def chains(*args):
     chain_contexts.append(args[3])
     return []
 module._runtime_tombstones = chains
-module._enrich_runtime_original_group_counts = lambda *args: None
+enrich_changes = []
+module._enrich_runtime_original_group_counts = (
+    lambda _connection, _parent, _candidates, changes:
+    enrich_changes.append(tuple(changes))
+)
 module._reconcile_affected_song_counts = lambda *args: None
 module._channel_metadata_rows = lambda *args: []
 def ranking_rows(connection, sql, params):
@@ -4910,6 +5036,7 @@ assert ranking["totalOccurrenceCount"] == 2 and new["count"] == 1
 assert new["occurrences"][0]["occurrenceId"] == "new" and new["occurrences"][0]["item"]["thumbnailUrl"] == "c.jpg"
 assert new["sourceDetailKey"] and new.get("sourceDetailPath", "") == ""
 assert candidate_calls == [("accepted-c",)] and chain_contexts == [(candidate_c,)]
+assert enrich_changes == [()], enrich_changes
 
 module._accepted_video_resets = lambda *args: {"video-a": {"video_id": "video-a", "tombstone": True}}
 source_candidate_calls = []
@@ -4987,6 +5114,7 @@ video_sql, video_params = calls[0]
 parent_sql, parent_params = calls[1]
 assert "LIMIT %s" in video_sql and video_params[1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
 assert "o.revision_id = %s" in parent_sql and "o.video_id = ANY(%s)" in parent_sql and "LIMIT %s" in parent_sql
+assert "o.payload_json" not in parent_sql and "v.payload_json" not in parent_sql
 assert parent_params[0] == "parent" and parent_params[1] == "parent", repr(parent_params)
 assert ["video-a"] in parent_params
 assert parent_params[-1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
@@ -5176,6 +5304,285 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("song reconciliation keeps title and artist paired and scans only returned groups", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+queries = []
+def rows(_connection, sql, params):
+    queries.append((sql, params))
+    return []
+
+module._rows = rows
+changes = (
+    {
+        "entityType": "occurrences",
+        "videoId": "video-target",
+        "occurrenceId": "old-target",
+        "title": "Alpha",
+        "artist": "Singer A",
+        "replacement": True,
+        "replacementPayload": {
+            "videoId": "video-target",
+            "occurrenceId": "old-target",
+            "title": "Beta",
+            "artist": "Singer B",
+        },
+    },
+)
+module._bounded_affected_parent_occurrences(
+    object(), "parent", changes, "songs", {"range": "all"},
+)
+sql, params = queries.pop()
+assert "FROM unnest(%s::text[], %s::text[])" in sql
+assert "lower(coalesce(o.title, '')) = ANY" not in sql
+assert "o.payload_json" not in sql and "v.payload_json" not in sql
+assert params[2] == ["alpha", "beta"]
+assert params[3] == ["singer a", "singer b"]
+
+captured = []
+module._bounded_affected_parent_occurrences = (
+    lambda _connection, _parent, lookup, _view, _options:
+    (captured.extend(lookup) or [])
+)
+candidate = {
+    "revision_id": "accepted",
+    "video_id": "video-target",
+    "occurrence_id": "new-target",
+    "title": "Alpha",
+    "artist": "Singer A",
+    "song_key": "target",
+    "range_id": "all",
+    "video_payload_json": {"videoId": "video-target", "channelId": "UC-TARGET"},
+}
+unrelated = tuple({
+    **candidate,
+    "video_id": f"video-unrelated-{index}",
+    "occurrence_id": f"new-unrelated-{index}",
+    "title": f"Gamma {index}",
+    "artist": f"Singer C {index}",
+    "song_key": f"unrelated-{index}",
+    "video_payload_json": {
+        "videoId": f"video-unrelated-{index}",
+        "channelId": "UC-OTHER",
+    },
+} for index in range(1200))
+groups = {
+    "alpha::singer a": {
+        "detail_key": "alpha::singer a",
+        "title": "Alpha",
+        "artist": "Singer A",
+        "row_count": 1,
+        "song_count": 1,
+        "video_count": 1,
+        "timestamp_count": 1,
+        "payload_json": {},
+    },
+}
+module._reconcile_affected_song_counts(
+    object(),
+    "parent",
+    (candidate, *unrelated),
+    (),
+    (
+        changes[0],
+        *({
+            "entityType": "occurrences",
+            "videoId": f"video-unrelated-{index}",
+            "occurrenceId": f"old-unrelated-{index}",
+            "title": f"Gamma {index}",
+            "artist": f"Singer C {index}",
+        } for index in range(1200)),
+    ),
+    groups,
+    "songs",
+    {"range": "all"},
+)
+assert len(captured) == 2
+assert {
+    (item.get("title"), item.get("artist"))
+    for item in captured
+} == {("Alpha", "Singer A")}
+assert (
+    groups["alpha::singer a"]["row_count"],
+    groups["alpha::singer a"]["song_count"],
+    groups["alpha::singer a"]["video_count"],
+) == (1, 1, 1)
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("song fast path preserves multi-occurrence video counts across reset, replacement, and zero rows", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def rank(title, artist, count, videos):
+    key = f"{title.casefold()}::{artist.casefold()}"
+    return key, {
+        "detail_key": key,
+        "title": title,
+        "artist": artist,
+        "row_count": count,
+        "song_count": 1,
+        "video_count": videos,
+        "timestamp_count": count,
+        "payload_json": {
+            "count": count,
+            "songCount": 1,
+            "videoCount": videos,
+            "timestampCount": count,
+        },
+    }
+
+def change(occurrence_id, *, title="Old", artist="Singer", count=2):
+    return {
+        "entityType": "occurrences",
+        "acceptedVideoReset": True,
+        "videoId": "video-a",
+        "occurrenceId": occurrence_id,
+        "title": title,
+        "artist": artist,
+        "originalGroupVideoOccurrenceCount": count,
+    }
+
+# A full-video reset removes both old occurrences and decrements its one video
+# exactly once.  The accepted replacement contributes two occurrences but one
+# video and one song group.
+old_key, old_row = rank("Old", "Singer", 2, 1)
+groups = {old_key: old_row}
+module._apply_runtime_tombstone_groups(
+    groups,
+    (change("old-1"), change("old-2")),
+    "songs",
+)
+assert groups == {}
+
+def candidate(occurrence_id):
+    return {
+        "video_id": "video-a",
+        "occurrence_id": occurrence_id,
+        "song_key": "canonical-new",
+        "title": "New",
+        "artist": "Singer",
+        "range_id": "all",
+        "video_tombstone": False,
+        "occurrence_payload_json": {
+            "videoId": "video-a",
+            "occurrenceId": occurrence_id,
+            "songKey": "canonical-new",
+            "title": "New",
+            "artist": "Singer",
+        },
+        "video_payload_json": {
+            "videoId": "video-a",
+            "channelId": "UC-A",
+        },
+    }
+
+delta = module._overlay_candidate_groups(
+    (candidate("new-1"), candidate("new-2")),
+    "songs",
+)
+new_group = delta["new::singer"]
+assert (
+    new_group["occurrenceCount"],
+    len(new_group["videoIds"]),
+    len(new_group["songKeys"]),
+) == (2, 1, 1)
+
+# A partial replacement removes one of two tuples from the old card.  Because
+# one tuple from the same video remains, its videoCount and songCount stay one;
+# the replacement card gets one occurrence/video/song.
+old_key, old_row = rank("Old", "Singer", 2, 1)
+groups = {old_key: old_row}
+partial = {
+    **change("old-1"),
+    "acceptedVideoReset": False,
+    "replacement": True,
+}
+module._apply_runtime_tombstone_groups(groups, (partial,), "songs")
+assert (
+    groups[old_key]["row_count"],
+    groups[old_key]["video_count"],
+    groups[old_key]["song_count"],
+) == (1, 1, 1)
+
+# Removing the sole tuple is an explicit zero-row card, so it disappears
+# instead of surviving with stale count metadata.
+zero_key, zero_row = rank("Zero", "Singer", 1, 1)
+groups = {zero_key: zero_row}
+module._apply_runtime_tombstone_groups(
+    groups,
+    (change("zero-1", title="Zero", count=1),),
+    "songs",
+)
+assert groups == {}
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("song reset and preview application use exact group indexes instead of cartesian scans", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+groups = {}
+changes = []
+for index in range(600):
+    key = f"song {index}::artist {index}"
+    occurrence = {
+        "videoId": f"video-{index}",
+        "occurrenceId": f"occ-{index}",
+        "title": f"Song {index}",
+        "artist": f"Artist {index}",
+    }
+    groups[key] = {
+        "detail_key": key,
+        "title": f"Song {index}",
+        "artist": f"Artist {index}",
+        "row_count": 2,
+        "song_count": 1,
+        "video_count": 1,
+        "timestamp_count": 2,
+        "payload_json": {"occurrences": [dict(occurrence)]},
+    }
+    changes.append({
+        "entityType": "occurrences",
+        **occurrence,
+        "originalGroupVideoOccurrenceCount": 2,
+    })
+
+module._runtime_change_matches_group = lambda *_: (_ for _ in ()).throw(
+    AssertionError("non-VTuber indexed path used cartesian matcher")
+)
+module._apply_runtime_tombstone_groups(groups, changes, "songs")
+assert all(row["row_count"] == 1 for row in groups.values())
+module._apply_runtime_change_previews(groups, changes, "songs")
+assert all(row["payload_json"]["occurrences"] == [] for row in groups.values())
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("public artist and video rankings recount accepted reset aggregates from effective tuples", () => {
   const output = runPython(`
 import copy
@@ -5276,6 +5683,44 @@ same_identity = public("songs", [candidate("a1", title="C", song_key="canonical-
 assert set(same_identity) == {"c::artist", "b::artist"}
 assert counts(same_identity["c::artist"]) == (1, 1, 1, 1)
 assert same_identity["c::artist"]["occurrences"][0]["occurrenceId"] == "a1"
+
+# A full-video reset can remove two old tuples while another video keeps the
+# same canonical song group alive.  Refreshing the removed video with two
+# accepted tuples restores three occurrences and two videos, but still only
+# one song.  The delta merge must not add the same song group a second time.
+parent[:] = [
+    {"video_id": "video-a", "occurrence_id": "old-a1", "song_key": "shared", "title": "Same", "artist": "Artist", "range_id": "all", "channel_id": "UCOLD", "channel_name": "Old", "channel_handle": "/@old", "video_payload_json": {"videoId": "video-a", "channelId": "UCOLD", "channelName": "Old"}},
+    {"video_id": "video-a", "occurrence_id": "old-a2", "song_key": "shared", "title": "Same", "artist": "Artist", "range_id": "all", "channel_id": "UCOLD", "channel_name": "Old", "channel_handle": "/@old", "video_payload_json": {"videoId": "video-a", "channelId": "UCOLD", "channelName": "Old"}},
+    {"video_id": "video-b", "occurrence_id": "keep-b", "song_key": "shared", "title": "Same", "artist": "Artist", "range_id": "all", "channel_id": "UCOLD", "channel_name": "Old", "channel_handle": "/@old", "video_payload_json": {"videoId": "video-b", "channelId": "UCOLD", "channelName": "Old"}},
+]
+reset_changes = [{"entityType": "occurrences", "acceptedVideoReset": True, "videoId": row["video_id"], "occurrenceId": row["occurrence_id"], "title": row["title"], "artist": row["artist"], "songKey": row["song_key"], "channel_id": "UCOLD", "channel_name": "Old"} for row in parent[:2]]
+same_song_base = rank(
+    "same::artist",
+    title="Same",
+    artist="Artist",
+    rows=[
+        occ("video-a", "old-a1", "shared"),
+        occ("video-a", "old-a2", "shared"),
+        occ("video-b", "keep-b", "shared"),
+    ],
+    videos=2,
+)
+same_song_base["song_count"] = 1
+same_song_base["payload_json"]["songCount"] = 1
+same_song = public(
+    "songs",
+    [
+        candidate("new-a1", title="Same", song_key="shared"),
+        candidate("new-a2", title="Same", song_key="shared"),
+    ],
+    [same_song_base],
+)
+assert set(same_song) == {"same::artist"}
+assert counts(same_song["same::artist"]) == (3, 2, 1, 3)
+assert {
+    item["occurrenceId"]
+    for item in same_song["same::artist"]["occurrences"]
+} == {"new-a1", "new-a2", "keep-b"}
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -7273,6 +7718,189 @@ wrong_response = module._runtime_rankings_payload(
 )
 assert wrong_response["totalCount"] == 0
 assert wrong_response["records"] == []
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic clicked song results retain only the resolved channel tuple", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def occurrence(video_id, channel_id):
+    video = {
+        "videoId": video_id,
+        "channelId": channel_id,
+        "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+    }
+    return {
+        "videoId": video_id,
+        "occurrenceId": "occ-" + video_id,
+        "title": "Shared Song",
+        "artist": "Artist",
+        "item": dict(video),
+        "video": dict(video),
+    }
+
+def row(index):
+    return {
+        "detail_key": f"shared-{index}::artist",
+        "title": f"Shared Song {index}",
+        "artist": "Artist",
+        "row_count": 2,
+        "song_count": 1,
+        "video_count": 2,
+        "timestamp_count": 2,
+        "payload_json": {
+            "type": "song",
+            "key": f"shared-{index}::artist",
+            "title": f"Shared Song {index}",
+            "displayArtist": "Artist",
+            "occurrences": [
+                occurrence(f"target-video-{index}", "UC-TARGET"),
+                occurrence(f"wrong-video-{index}", "UC-WRONG"),
+            ],
+        },
+    }
+
+prepared = {
+    "filtered": (row(1), row(2)),
+    "metadata": (),
+    "candidateRows": (),
+    "parentRevisionId": "parent",
+    "songChannelIds": ("UC-TARGET",),
+}
+module._hydrate_overlay_page_previews = lambda *_: None
+def page(number):
+    return module._render_generic_overlay_rankings(
+      object(),
+      prepared,
+      {
+        "range": "all",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": str(number),
+        "pageSize": "1",
+        "q": "@target Shared Song",
+        "searchFields": "title,channel",
+      },
+    )
+
+page_one = page(1)
+page_two = page(2)
+for payload in (page_one, page_two):
+    assert payload["totalCount"] == 2
+    assert payload["pageCount"] == 2
+    assert payload["totalOccurrenceCount"] == 2
+    assert payload["totalVideoCount"] == 2
+    record = payload["records"][0]
+    assert (record["count"], record["videoCount"], record["songCount"]) == (1, 1, 1)
+    assert len(record["occurrences"]) == 1
+    assert record["occurrences"][0]["item"]["channelId"] == "UC-TARGET"
+    assert record["occurrences"][0]["item"] == record["occurrences"][0]["video"]
+assert page_one["records"][0]["key"] != page_two["records"][0]["key"]
+
+# Ranking payloads retain at most 20 global previews.  The resolved channel
+# can be absent from all of them even though the full canonical group has more
+# than 20 matching target tuples.  Count from one bounded scalar tuple query,
+# then retain only 20 target previews in the public card.
+large_row = {
+    "detail_key": "large::artist",
+    "title": "Large",
+    "artist": "Artist",
+    "row_count": 41,
+    "song_count": 1,
+    "video_count": 41,
+    "timestamp_count": 41,
+    "payload_json": {
+        "type": "song",
+        "key": "large::artist",
+        "title": "Large",
+        "displayArtist": "Artist",
+        "occurrences": [
+            occurrence(f"wrong-first-{index}", "UC-WRONG")
+            for index in range(20)
+        ],
+    },
+}
+target_rows = [
+    {
+        "detail_key": "large::artist",
+        "video_id": f"target-full-{index}",
+        "occurrence_id": f"target-occ-{index}",
+        "range_id": "all",
+        "song_key": "large",
+        "seconds": index,
+        "title": "Large",
+        "artist": "Artist",
+        "source_id": f"source-{index}",
+        "source_system": "test",
+        "video_title": f"Target {index}",
+        "channel_name": "Target",
+        "channel_id": "UC-TARGET",
+        "channel_handle": "/@target",
+        "channel_url": "https://www.youtube.com/@target",
+        "published_timestamp": "2026-01-01T00:00:00Z",
+        "thumbnail_url": f"https://i.ytimg.com/vi/target-full-{index}/hqdefault.jpg",
+    }
+    for index in range(21)
+]
+queries = []
+module._rows = lambda _connection, sql, params: queries.append((sql, params)) or target_rows
+large_scope = module._bounded_clicked_song_scopes(
+    object(),
+    "parent",
+    (large_row,),
+    ("UC-TARGET",),
+    "all",
+    (),
+    (),
+    {},
+    (),
+)
+assert len(queries) == 1
+assert "unnest(%s::text[], %s::text[], %s::text[])" in queries[0][0]
+assert "payload_json" not in queries[0][0]
+assert queries[0][1][0:4] == [
+    ["large::artist"], ["large"], ["artist"], ["UC-TARGET"],
+]
+large = module._render_generic_overlay_rankings(
+    object(),
+    {
+        "filtered": (large_row,),
+        "metadata": (),
+        "candidateRows": (),
+        "parentRevisionId": "parent",
+        "songChannelIds": ("UC-TARGET",),
+        "clickedSongScopes": large_scope,
+    },
+    {
+        "range": "all",
+        "view": "songs",
+        "metric": "occurrences",
+        "page": "1",
+        "pageSize": "20",
+        "q": "@target Large",
+        "searchFields": "title,channel",
+    },
+)
+assert large["totalCount"] == 1
+assert large["totalOccurrenceCount"] == 21
+assert large["totalVideoCount"] == 21
+record = large["records"][0]
+assert (record["count"], record["timestampCount"], record["videoCount"]) == (21, 21, 21)
+assert len(record["occurrences"]) == 20
+assert all(
+    item["item"]["channelId"] == "UC-TARGET"
+    and item["item"] == item["video"]
+    for item in record["occurrences"]
+)
 print("OK")
 `);
   assert.equal(output, "OK");
