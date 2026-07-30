@@ -550,6 +550,27 @@ def _merge_source_records(
     ]
 
 
+def _project_accepted_channel_records(
+    records: Iterable[Mapping[str, Any]],
+    target_range: str,
+) -> list[dict[str, Any]]:
+    """Expose accepted 7d source rows through their compatible all endpoint."""
+
+    result: list[dict[str, Any]] = []
+    for record in records:
+        occurrences = []
+        for value in record.get("occurrences", ()):
+            occurrence = dict(value)
+            if target_range == "all" and _text(occurrence.get("rangeId")) == "7d":
+                occurrence["rangeId"] = "all"
+            occurrences.append(occurrence)
+        result.append({
+            "video": dict(record.get("video") or {}),
+            "occurrences": tuple(occurrences),
+        })
+    return result
+
+
 def _runtime_channel_source_payload(
     connection,
     revision_id: str,
@@ -685,6 +706,10 @@ def _runtime_channel_source_payload(
             ]
         candidate_records = _overlay_channel_records(
             connection, candidate_rows, metadata,
+        )
+        candidate_records = _project_accepted_channel_records(
+            candidate_records,
+            options["range"],
         )
         if candidate_records:
             candidate_video_ids = {_text(record["video"].get("videoId")) for record in candidate_records}

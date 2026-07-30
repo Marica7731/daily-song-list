@@ -3079,8 +3079,8 @@ def video(video_id):
     }
 
 base_occurrences = []
-for index in range(3705):
-    video_id = f"base-{index % 272:03d}"
+for index in range(214):
+    video_id = f"base-{index % 17:03d}"
     occurrence = {
         "videoId": video_id,
         "occurrenceId": f"base-occurrence-{index}",
@@ -3100,16 +3100,16 @@ for index in range(3705):
     })
 
 overlay_records = {}
-for index in range(214):
-    video_id = f"overlay-{index % 17:03d}"
+for index in range(3705):
+    video_id = f"overlay-{index % 272:03d}"
     record = overlay_records.setdefault(
         video_id,
         {"video": video(video_id), "occurrences": []},
     )
     record["occurrences"].append({
         "occurrenceId": f"overlay-occurrence-{index}",
-        "position": index // 17,
-        "rangeId": "all",
+        "position": index // 272,
+        "rangeId": "7d",
         "songKey": f"overlay-song-{index}",
         "seconds": 10000 + index,
         "title": f"Overlay song {index}",
@@ -3120,8 +3120,9 @@ overlay_records = [
     for record in overlay_records.values()
 ]
 
-# The historical scalar channel lookup is empty.  Before this regression fix,
-# the source rebuild therefore returned only the 214/17 overlay delta.
+# The historical scalar channel lookup is empty.  The parent all-source rows
+# remain authoritative, while accepted physical 7d rows are exposed through
+# this channel's compatible all-source endpoint.
 module._rows = lambda connection, sql, params: []
 module._runtime_source_occurrences = lambda *args: base_occurrences
 module._overlay_candidate_rows = lambda *args, **kwargs: [{"video_id": "overlay-marker"}]
@@ -3162,9 +3163,33 @@ assert {
         + page_two["record"]["occurrences"]
     )
 } == {
-    *(f"base-{index:03d}" for index in range(272)),
-    *(f"overlay-{index:03d}" for index in range(17)),
+    *(f"base-{index:03d}" for index in range(17)),
+    *(f"overlay-{index:03d}" for index in range(272)),
 }
+
+# Ordinary runtime 7d rows retain their physical range and never leak into an
+# all-source query; only accepted channel records receive the local projection.
+runtime_7d = {
+    "videoId": "runtime-7d",
+    "item": video("runtime-7d"),
+    "song": {
+        "videoId": "runtime-7d",
+        "occurrenceId": "runtime-7d-occurrence",
+        "position": 0,
+        "rangeId": "7d",
+        "songKey": "runtime-7d-song",
+        "title": "Runtime 7d",
+        "artist": "Runtime artist",
+    },
+}
+ordinary = module._source_payload_from_channel_records(
+    module._persisted_source_records([base_occurrences[0], runtime_7d], metadata),
+    metadata,
+    source_key,
+    {"page": "1", "pageSize": "20"},
+)
+assert ordinary["totalOccurrenceCount"] == 1
+assert ordinary["record"]["occurrences"][0]["videoId"].startswith("base-")
 
 # Neither a canonical-looking URL nor a matching polluted scalar identity may
 # complete a partial nested video tuple.
