@@ -27,11 +27,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout exact transport implementation
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
+      - name: Fetch exact transport implementation
+        id: transport
+        shell: bash
+        env:
+          SCRIPT_SHA256: 1447b32a787d3c2cfff92dc68d121a2375eaacf0824a77a3821582ac4fd7657b
+        run: |
+          set -euo pipefail
+          script_path="$RUNNER_TEMP/derive-curation-conservative-subset.mjs"
+          script_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/derive-curation-conservative-subset.mjs"
+          curl --fail --show-error --silent --location \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 2 \
+            --retry-all-errors \
+            --output "$script_path" \
+            "$script_url"
+          printf '%s  %s\n' "$SCRIPT_SHA256" "$script_path" | sha256sum -c -
+          printf 'script_path=%s\n' "$script_path" >> "$GITHUB_OUTPUT"
 
       - name: Download exact same-repository producer artifact
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -55,6 +68,7 @@ jobs:
           EXPECTED_ACTIVE_REVISION_ID: accepted_30402041297_1
           EXCLUDE_VIDEO_ID: M4iBwhm_hRI
           EXCLUDE_OCCURRENCE_ID: ffca0d2f8e3f1d0b5aa3fd75
+          TRANSPORT_SCRIPT_PATH: ${{ steps.transport.outputs.script_path }}
         run: |
           set -euo pipefail
           umask 077
@@ -62,7 +76,7 @@ jobs:
           mkdir -p "$TASK_ROOT"
           output_root="$TASK_ROOT/output"
           result_path="$TASK_ROOT/result.json"
-          node scripts/migration/derive-curation-conservative-subset.mjs \
+          node "$TRANSPORT_SCRIPT_PATH" \
             --source-root "$SOURCE_ROOT" \
             --output-root "$output_root" \
             --expected-source-manifest-sha256 "$EXPECTED_SOURCE_MANIFEST_SHA256" \

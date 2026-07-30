@@ -348,8 +348,46 @@ test("formal workflow is artifact-only, least-privilege, pinned and bounded", ()
   assert.match(text, /^\s{4}runs-on: ubuntu-latest$/m);
   assert.match(text, /^\s{4}timeout-minutes: 10$/m);
   assert.match(text, /^\s{10}retention-days: \$\{\{ inputs\.retention_days \}\}$/m);
+  const exactRawScriptUrl =
+    'script_url="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/scripts/migration/derive-curation-conservative-subset.mjs"';
+  const scriptShaLine =
+    /^\s{10}SCRIPT_SHA256: 1447b32a787d3c2cfff92dc68d121a2375eaacf0824a77a3821582ac4fd7657b$/m;
+  const boundedCurlBlock = /^\s{10}curl --fail --show-error --silent --location \\\n\s{12}--connect-timeout 10 \\\n\s{12}--max-time 30 \\\n\s{12}--retry 2 \\\n\s{12}--retry-all-errors \\\n\s{12}--output "\$script_path" \\\n\s{12}"\$script_url"$/m;
+  const scriptHashCheck =
+    /^\s{10}printf '%s  %s\\n' "\$SCRIPT_SHA256" "\$script_path" \| sha256sum -c -$/m;
+  const scriptOutput =
+    /^\s{10}printf 'script_path=%s\\n' "\$script_path" >> "\$GITHUB_OUTPUT"$/m;
+  const scriptOutputEnv =
+    /^\s{10}TRANSPORT_SCRIPT_PATH: \$\{\{ steps\.transport\.outputs\.script_path \}\}$/m;
+  const exactNodeInvocation = /^\s{10}node "\$TRANSPORT_SCRIPT_PATH" \\$/m;
+  const forbiddenRepositoryFetch =
+    /actions\/checkout@|^\s*git\s+(?:clone|fetch|checkout)\b/m;
+  const transportFetchContractHolds = (candidateText) => (
+    candidateText.includes(exactRawScriptUrl)
+    && scriptShaLine.test(candidateText)
+    && boundedCurlBlock.test(candidateText)
+    && scriptHashCheck.test(candidateText)
+    && scriptOutput.test(candidateText)
+    && scriptOutputEnv.test(candidateText)
+    && exactNodeInvocation.test(candidateText)
+    && !forbiddenRepositoryFetch.test(candidateText)
+  );
+  assert.equal(transportFetchContractHolds(text), true);
+  const wrongRef = text.replace(
+    exactRawScriptUrl,
+    exactRawScriptUrl.replace("${GITHUB_SHA}", "${GITHUB_REF}"),
+  );
+  const wrongScriptSha = text.replace(
+    "1447b32a787d3c2cfff92dc68d121a2375eaacf0824a77a3821582ac4fd7657b",
+    "0".repeat(64),
+  );
+  const checkoutReintroduced =
+    `${text}\n        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262\n`;
+  for (const invalidText of [wrongRef, wrongScriptSha, checkoutReintroduced]) {
+    assert.notEqual(invalidText, text);
+    assert.equal(transportFetchContractHolds(invalidText), false);
+  }
   const pinnedActions = [
-    ["actions/checkout", "11d5960a326750d5838078e36cf38b85af677262"],
     ["actions/download-artifact", "d3f86a106a0bac45b974a628896c90dbdf5c8093"],
     ["actions/upload-artifact", "ea165f8d65b6e75b540449e92b4886f43607fa02"],
   ];
