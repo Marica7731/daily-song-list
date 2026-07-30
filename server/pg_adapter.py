@@ -15,7 +15,8 @@ objects needed by ``song_rank_api.py``.
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+import copy
 from dataclasses import dataclass
 from datetime import date, datetime
 import hashlib
@@ -24,6 +25,7 @@ import math
 import os
 import re
 import sys
+import threading
 import time
 import unicodedata
 from typing import Any, Iterable, Mapping, Sequence
@@ -48,10 +50,23 @@ MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
 MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
 _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
+_VTUBER_REPLACEMENT_CACHE_LOCK = threading.RLock()
 # Generic increments are immutable.  Keep only their small derived meta count
 # map, never record/payload data: a changed active pointer produces a different
 # key and a process restart simply recomputes it from PostgreSQL.
 _GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int]] = {}
+# A complete prepared aggregate is large on the production runtime.  One
+# entry is enough to coalesce the concurrent pages for the active spec, while
+# retaining prior range/metric/search aggregates would exceed the candidate's
+# 2 GiB memory envelope.
+_GENERIC_RANKING_PREPARATION_CAP = 1
+_GENERIC_RANKING_PREPARATION_CACHE: OrderedDict[
+    tuple[Any, ...], Mapping[str, Any],
+] = OrderedDict()
+_GENERIC_RANKING_PREPARATION_FLIGHTS: dict[
+    tuple[Any, ...], "_RankingPreparationFlight",
+] = {}
+_GENERIC_RANKING_PREPARATION_LOCK = threading.RLock()
 
 
 def _phase_trace(phase: str, started_at: float, **counts: int) -> float:
@@ -76,6 +91,13 @@ class PostgresAdapterError(RuntimeError):
 
 class PostgresSchemaError(PostgresAdapterError):
     """Raised when the migration schema is not installed or is incomplete."""
+
+
+@dataclass
+class _RankingPreparationFlight:
+    event: threading.Event
+    error: BaseException | None = None
+    result: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -196,42 +218,79 @@ def _json_object(value: Any) -> dict[str, Any]:
     return {}
 
 
-def _channel_metadata_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
+def _channel_metadata_rows(
+    connection,
+    revision_ids: Sequence[str],
+    channel_scope: Sequence[str] | None = None,
+) -> list[dict[str, Any]]:
     """Read channel metadata from full projections and incremental runtime rows."""
 
     if not revision_ids:
         return []
+    scope = (
+        sorted({_text(value) for value in channel_scope if _text(value)})
+        if channel_scope is not None
+        else None
+    )
     values: list[dict[str, Any]] = []
     try:
-        values.extend(_rows(
+        full_rows = _rows(
             connection,
-            """
+            f"""
             SELECT revision_id, channel_key, channel_id, handle, display_name,
                    avatar_url, thumbnail_url, source_url, channel_url,
                    known_source_type, is_collected, payload_json
-            FROM runtime_channel_metadata WHERE revision_id = ANY(%s)
+            FROM runtime_channel_metadata
+            WHERE revision_id = ANY(%s)
+              {"AND (channel_id = ANY(%s) OR channel_key = ANY(%s))" if scope is not None else ""}
             ORDER BY revision_id, channel_key
+            {"LIMIT %s" if scope is not None else ""}
             """,
-            [list(revision_ids)],
-        ))
+            (
+                [
+                    list(revision_ids), scope, scope,
+                    _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+                ]
+                if scope is not None
+                else [list(revision_ids)]
+            ),
+        )
     except Exception:
         # Older/prototype fixtures may not expose the optional full-runtime table.
-        pass
+        full_rows = []
+    if len(full_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("scoped runtime channel metadata lookup exceeded cap")
+    values.extend(full_rows)
     try:
-        values.extend(_rows(
+        overlay_rows = _rows(
             connection,
-            """
+            f"""
             SELECT revision_id, entity_key AS channel_key, payload_json,
                    source_system, range_id, source_id, occurrence_id, tombstone
             FROM migration_runtime_rows
             WHERE revision_id = ANY(%s)
               AND entity_type IN ('channel_metadata', 'runtime_channel_metadata')
+              {
+                "AND (entity_key = ANY(%s) OR payload_json::jsonb->>'channelId' = ANY(%s) OR payload_json::jsonb->'payload'->>'channelId' = ANY(%s))"
+                if scope is not None else ""
+              }
             ORDER BY revision_id, entity_key
+            {"LIMIT %s" if scope is not None else ""}
             """,
-            [list(revision_ids)],
-        ))
+            (
+                [
+                    list(revision_ids), scope, scope, scope,
+                    _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+                ]
+                if scope is not None
+                else [list(revision_ids)]
+            ),
+        )
     except Exception:
-        pass
+        overlay_rows = []
+    if len(overlay_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("scoped overlay channel metadata lookup exceeded cap")
+    values.extend(overlay_rows)
     # Child revisions win over parents; a tombstone removes inherited metadata.
     selected: dict[str, dict[str, Any]] = {}
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
@@ -259,6 +318,11 @@ def _channel_metadata_rows(connection, revision_ids: Sequence[str]) -> list[dict
             "isCollected": payload.get("isCollected") if "isCollected" in payload else row.get("is_collected"),
         })
         payload["revision_id"] = row.get("revision_id")
+        if scope is not None and (
+            _text(payload.get("channelId")) not in set(scope)
+            and key not in set(scope)
+        ):
+            continue
         selected[key] = payload
     return list(selected.values())
 
@@ -842,6 +906,9 @@ def _overlay_video_projection(value: Any) -> dict[str, Any]:
 
 def _overlay_candidate_rows(
     connection, revision_ids: Sequence[str], include_payload: bool = True,
+    channel_scope: Sequence[str] | None = None,
+    scoped_parent_video_ids: Sequence[str] | None = None,
+    range_id: str = "",
 ) -> list[dict[str, Any]]:
     """Read only the candidate rows; never resolve the parent occurrence table.
 
@@ -853,24 +920,50 @@ def _overlay_candidate_rows(
 
     occurrence_payload = "o.payload_json" if include_payload else "NULL::jsonb"
     video_payload = "payload_json" if include_payload else "NULL::jsonb"
-
-    occurrence_rows = _rows(
-        connection,
-        f"""
-        SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
-               o.song_key, o.seconds, o.title, o.artist, o.source_id,
-               o.raw_hash, o.source_system,
-               {occurrence_payload} AS occurrence_payload_json
-        FROM migration_occurrence_rows AS o
-        WHERE o.revision_id = ANY(%s)
-        ORDER BY o.revision_id, o.video_id, o.position, o.occurrence_key
-        LIMIT %s
-        """,
-        [list(revision_ids), _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
-    )
-    if len(occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-        raise PostgresAdapterError("overlay candidate occurrence lookup exceeded bounded cap")
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
+    scope = (
+        sorted({_text(value) for value in channel_scope if _text(value)})
+        if channel_scope is not None
+        else None
+    )
+    scoped_video_ids: list[str] | None = None
+    if scope is not None:
+        scoped_video_rows = _rows(
+            connection,
+            """
+            SELECT DISTINCT video_id
+            FROM migration_video_rows
+            WHERE revision_id = ANY(%s)
+              AND (
+                channel_id = ANY(%s)
+                OR video_id = ANY(%s)
+              )
+            ORDER BY video_id
+            LIMIT %s
+            """,
+            [
+                list(revision_ids),
+                scope,
+                list(scoped_parent_video_ids or ()),
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            ],
+        )
+        if len(scoped_video_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError(
+                "scoped overlay candidate video identity lookup exceeded cap"
+            )
+        scoped_video_ids = sorted({
+            _text(row.get("video_id"))
+            for row in scoped_video_rows
+            if _text(row.get("video_id"))
+        })
+        if not scoped_video_ids:
+            return []
+    video_scope_clause = " AND video_id = ANY(%s)" if scope is not None else ""
+    video_params: list[Any] = [list(revision_ids)]
+    if scoped_video_ids is not None:
+        video_params.append(scoped_video_ids)
+    video_params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
     video_rows = _rows(
         connection,
         f"""
@@ -880,10 +973,11 @@ def _overlay_candidate_rows(
                tombstone AS video_tombstone
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
+          {video_scope_clause}
         ORDER BY revision_id, video_id
         LIMIT %s
         """,
-        [list(revision_ids), _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
+        video_params,
     )
     if len(video_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
         raise PostgresAdapterError("overlay candidate video lookup exceeded bounded cap")
@@ -896,6 +990,47 @@ def _overlay_candidate_rows(
         video_id = _text(row.get("video_id"))
         if video_id and video_id not in selected_video:
             selected_video[video_id] = row
+    if scope is not None:
+        selected_video = {
+            video_id: row
+            for video_id, row in selected_video.items()
+            if _text(row.get("channel_id")) in set(scope)
+        }
+    selected_video_ids = sorted(selected_video)
+    if not selected_video_ids:
+        return []
+    occurrence_range_clause = ""
+    occurrence_params: list[Any] = [list(revision_ids), selected_video_ids]
+    if scope is not None:
+        occurrence_range_clause = """
+          AND (
+            (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
+            OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
+          )
+        """
+        occurrence_params.extend((
+            _text(range_id) or "all",
+            _text(range_id) or "all",
+        ))
+    occurrence_params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
+    occurrence_rows = _rows(
+        connection,
+        f"""
+        SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
+               o.song_key, o.seconds, o.title, o.artist, o.source_id,
+               o.raw_hash, o.source_system,
+               {occurrence_payload} AS occurrence_payload_json
+        FROM migration_occurrence_rows AS o
+        WHERE o.revision_id = ANY(%s)
+          AND o.video_id = ANY(%s)
+          {occurrence_range_clause}
+        ORDER BY o.revision_id, o.video_id, o.position, o.occurrence_key
+        LIMIT %s
+        """,
+        occurrence_params,
+    )
+    if len(occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("overlay candidate occurrence lookup exceeded bounded cap")
     occurrence_rows.sort(key=lambda row: (
         priority.get(_text(row.get("revision_id")), len(priority)),
         _text(row.get("video_id")),
@@ -955,6 +1090,9 @@ def _overlay_candidate_rows(
 def _accepted_video_resets(
     connection, revision_ids: Sequence[str], include_payload: bool = True,
     strict_video_id: bool = False,
+    parent_revision_id: str = "",
+    channel_scope: Sequence[str] | None = None,
+    scoped_parent_video_ids: Sequence[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Return the newest accepted/full video projection per overlay video.
 
@@ -967,6 +1105,26 @@ def _accepted_video_resets(
         return {}
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
     payload = "payload_json" if include_payload else "NULL::jsonb"
+    scope = (
+        sorted({_text(value) for value in channel_scope if _text(value)})
+        if channel_scope is not None
+        else None
+    )
+    scope_clause = ""
+    params: list[Any] = [list(revision_ids)]
+    if scope is not None:
+        if not parent_revision_id:
+            raise PostgresAdapterError(
+                "scoped accepted-video reset lookup requires parent revision"
+            )
+        scope_clause = """
+          AND (
+            channel_id = ANY(%s)
+            OR video_id = ANY(%s)
+          )
+        """
+        params.extend((scope, list(scoped_parent_video_ids or ())))
+    params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
     rows = _rows(
         connection,
         f"""
@@ -975,10 +1133,11 @@ def _accepted_video_resets(
                tombstone, {payload} AS payload_json
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
+          {scope_clause}
         ORDER BY video_id
         LIMIT %s
         """,
-        [list(revision_ids), _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
+        params,
     )
     if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
         raise PostgresAdapterError(
@@ -1063,6 +1222,71 @@ def _accepted_video_reset_changes(
             "channel_url": row.get("channel_url") or video.get("channelUrl"),
             "videoPayload": row.get("video_payload_json"),
             "originalGroupVideoOccurrenceCount": 1,
+            "acceptedVideoReset": True,
+        })
+    return changes
+
+
+def _accepted_video_reset_identity_changes(
+    connection,
+    parent_revision_id: str,
+    resets: Mapping[str, Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Read one parent video identity per accepted full-video boundary.
+
+    Unfiltered VTuber aggregation excludes the complete parent video inside
+    PostgreSQL, so it does not need one Python change object per parent
+    occurrence.  A channel move still needs the old immutable channel in the
+    affected set; this bounded video-only lookup supplies exactly that identity.
+    """
+
+    video_ids = sorted({_text(video_id) for video_id in resets if _text(video_id)})
+    if not video_ids:
+        return []
+    rows = _rows(
+        connection,
+        """
+        SELECT video_id, title AS video_title, channel_name, channel_id,
+               channel_handle, channel_url, payload_json AS video_payload_json
+        FROM runtime_videos
+        WHERE revision_id = %s AND video_id = ANY(%s)
+        ORDER BY video_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            video_ids,
+            len(video_ids) + 1,
+        ],
+    )
+    if len(rows) > len(video_ids):
+        raise PostgresAdapterError(
+            "accepted-video reset identity lookup exceeded bounded video set"
+        )
+    changes: list[dict[str, Any]] = []
+    returned: set[str] = set()
+    for row in rows:
+        video_id = _text(row.get("video_id"))
+        if not video_id or video_id not in video_ids or video_id in returned:
+            raise PostgresAdapterError(
+                "accepted-video reset identity lookup returned an inexact video set"
+            )
+        returned.add(video_id)
+        video = _overlay_public_video(row)
+        channel_id = _text(row.get("channel_id") or video.get("channelId"))
+        if not channel_id:
+            raise PostgresAdapterError(
+                "VTuber exact overlay change is missing required immutable identity"
+            )
+        changes.append({
+            "entityType": "videos",
+            "videoId": video_id,
+            "channel_id": channel_id,
+            "channel_handle": row.get("channel_handle") or video.get("channelHandle"),
+            "channel_name": row.get("channel_name") or video.get("channelName"),
+            "channel_url": row.get("channel_url") or video.get("channelUrl"),
+            "videoTitle": row.get("video_title") or video.get("title"),
+            "videoPayload": row.get("video_payload_json"),
             "acceptedVideoReset": True,
         })
     return changes
@@ -1206,20 +1430,64 @@ def _overlay_channel_records(connection, rows: Iterable[Mapping[str, Any]], meta
     ]
 
 
-def _overlay_runtime_rows(connection, revision_ids: Sequence[str]) -> list[dict[str, Any]]:
+def _overlay_runtime_rows(
+    connection,
+    revision_ids: Sequence[str],
+    parent_revision_id: str = "",
+    channel_scope: Sequence[str] | None = None,
+    scoped_parent_video_ids: Sequence[str] | None = None,
+) -> list[dict[str, Any]]:
     if not revision_ids:
         return []
+    scope = (
+        sorted({_text(value) for value in channel_scope if _text(value)})
+        if channel_scope is not None
+        else None
+    )
+    scope_clause = ""
+    params: list[Any] = [list(revision_ids)]
+    if scope is not None:
+        if not parent_revision_id:
+            raise PostgresAdapterError(
+                "scoped runtime overlay lookup requires parent revision"
+            )
+        scope_clause = """
+          AND (
+            payload_json::jsonb->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'originalIdentity'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'originalIdentity'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'replacementPayload'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'replacementPayload'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'replacementVideoPayload'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'replacementVideoPayload'->>'channelId' = ANY(%s)
+            OR payload_json::jsonb->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'originalIdentity'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'originalIdentity'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'replacementPayload'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'replacementPayload'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'replacementVideoPayload'->>'videoId' = ANY(%s)
+            OR payload_json::jsonb->'payload'->'replacementVideoPayload'->>'videoId' = ANY(%s)
+          )
+        """
+        params.extend(
+            [scope] * 8
+            + [list(scoped_parent_video_ids or ())] * 8
+        )
+    params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
     rows = _rows(
         connection,
-        """
+        f"""
         SELECT revision_id, entity_type, entity_key, source_system, range_id,
                source_id, occurrence_id, tombstone, payload_json
         FROM migration_runtime_rows
         WHERE revision_id = ANY(%s)
+          {scope_clause}
         ORDER BY revision_id, entity_type, entity_key
         LIMIT %s
         """,
-        [list(revision_ids), _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
+        params,
     )
     if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
         raise PostgresAdapterError("overlay runtime lookup exceeded bounded cap")
@@ -1239,13 +1507,26 @@ def _runtime_tombstones(
     accepted_video_rows: Iterable[Mapping[str, Any]] | None = None,
     accepted_occurrence_rows: Iterable[Mapping[str, Any]] | None = None,
     strict_immutable_identity: bool = False,
+    parent_revision_id: str = "",
+    channel_scope: Sequence[str] | None = None,
+    scoped_parent_video_ids: Sequence[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Resolve each runtime chain to its full-parent identity and final state."""
 
     if not revision_ids:
         return []
     priority = {revision_id: index for index, revision_id in enumerate(revision_ids)}
-    runtime_rows = _overlay_runtime_rows(connection, revision_ids)
+    runtime_rows = (
+        _overlay_runtime_rows(connection, revision_ids)
+        if channel_scope is None
+        else _overlay_runtime_rows(
+            connection,
+            revision_ids,
+            parent_revision_id,
+            channel_scope,
+            scoped_parent_video_ids,
+        )
+    )
     try:
         if accepted_occurrence_rows is None:
             accepted_occurrences = _rows(
@@ -1465,6 +1746,693 @@ def _replacement_thumbnail_matches_video(thumbnail: str, video_id: str) -> bool:
 
 def _normalized_channel_handle(value: Any) -> str:
     return _text(value).strip().lstrip("/@").casefold()
+
+
+def _vtuber_handle_query_parts(
+    options: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Split one strict leading VTuber handle from its residual query.
+
+    The handle is an identity constraint, not fuzzy search text.  Extraction
+    is therefore limited to the VTuber view, requires channel search
+    semantics, accepts the same conservative handle alphabet as the browser
+    click builder, and rejects a second handle or an embedded URL.
+    """
+
+    if _text(options.get("view")) != "vtubers":
+        return None
+    scope = _text(options.get("searchScope") or "all").casefold()
+    fields = tuple(
+        _text(value).casefold()
+        for value in (options.get("searchFields") or ())
+        if _text(value)
+    )
+    channel_fields = {
+        "channel", "channels", "channelid", "channelhandle", "handle", "name",
+    }
+    if fields:
+        if (
+            "all" not in fields
+            and not any(field in channel_fields for field in fields)
+        ):
+            return None
+    elif scope not in {"all", "channel", "channels"}:
+        return None
+
+    query = _text(options.get("q")).strip()
+    leading = re.match(r"^(\S+)(?:\s+|$)", query)
+    if leading is None:
+        return None
+    normalized_leading = unicodedata.normalize("NFKC", leading.group(1))
+    match = re.fullmatch(r"/?@([A-Za-z0-9._~-]{3,64})", normalized_leading)
+    if match is None:
+        return None
+    residual = query[leading.end():].strip()
+    normalized_residual = unicodedata.normalize("NFKC", residual)
+    if re.search(
+        r"(?:https?://|www\.|(?:youtube\.com|youtu\.be)(?:/|$))",
+        normalized_residual,
+        re.IGNORECASE,
+    ):
+        return None
+    residual_tokens = tuple(
+        token.casefold()
+        for token in residual.split()
+        if token
+    )
+    if any("@" in token for token in normalized_residual.split()):
+        return None
+    return {
+        "handle": unicodedata.normalize("NFKC", match.group(1)).casefold(),
+        "residualTokens": residual_tokens,
+        "searchFields": fields,
+    }
+
+
+def _invalid_vtuber_handle_query(options: Mapping[str, Any]) -> bool:
+    """Return whether a handle-shaped VTuber query must fail closed.
+
+    Ordinary text and views/search fields without channel semantics retain
+    their legacy meaning.  Once an eligible VTuber query starts with a handle
+    marker, however, malformed, multiple-handle, and URL-contaminated forms
+    must never fall through to the global legacy rebuild.
+    """
+
+    if _text(options.get("view")) != "vtubers":
+        return False
+    scope = _text(options.get("searchScope") or "all").casefold()
+    fields = {
+        _text(value).casefold()
+        for value in (options.get("searchFields") or ())
+        if _text(value)
+    }
+    channel_fields = {
+        "channel", "channels", "channelid", "channelhandle", "handle", "name",
+    }
+    channel_semantics = (
+        ("all" in fields or bool(fields.intersection(channel_fields)))
+        if fields
+        else scope in {"all", "channel", "channels"}
+    )
+    if not channel_semantics:
+        return False
+    query = unicodedata.normalize("NFKC", _text(options.get("q"))).lstrip()
+    return bool(re.match(r"^/?@", query)) and _vtuber_handle_query_parts(options) is None
+
+
+def _sql_like_literal(value: Any) -> str:
+    """Escape one user token for a PostgreSQL LIKE ... ESCAPE backslash."""
+
+    return _text(value).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _vtuber_residual_search_spec(
+    options: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Return residual tokens and the public fields they may match."""
+
+    parts = _vtuber_handle_query_parts(options)
+    if parts is None:
+        return None
+    fields = set(parts["searchFields"])
+    if not fields:
+        scope = _text(options.get("searchScope") or "all").casefold()
+        fields = {scope}
+    if "all" in fields:
+        fields.update({"title", "artist", "channel", "video", "source"})
+    if "song" in fields:
+        fields.update({"title", "artist"})
+    if fields.intersection(
+        {"channels", "channelid", "channelhandle", "handle", "name"},
+    ):
+        fields.add("channel")
+    return {
+        "tokens": tuple(parts["residualTokens"]),
+        "title": "title" in fields,
+        "artist": "artist" in fields,
+        "channel": "channel" in fields,
+        "video": "video" in fields,
+        "source": "source" in fields,
+    }
+
+
+def _vtuber_candidate_matches_residual(
+    row: Mapping[str, Any],
+    spec: Mapping[str, Any] | None,
+) -> bool:
+    """Apply mixed-query residual fields to one canonical overlay tuple."""
+
+    if spec is None or not spec.get("tokens"):
+        return True
+    video = _overlay_public_video(row)
+    occurrence = _json_object(row.get("occurrence_payload_json"))
+    if isinstance(occurrence.get("payload"), Mapping):
+        occurrence = dict(occurrence["payload"])
+    fields = {
+        "title": " ".join(
+            value for value in (
+                _text(row.get("title")),
+                _text(occurrence.get("title")),
+            ) if value
+        ).casefold(),
+        "artist": " ".join(
+            value for value in (
+                _text(row.get("artist")),
+                _text(occurrence.get("artist")),
+            ) if value
+        ).casefold(),
+        "channel": " ".join(
+            value for value in (
+                _text(row.get("channel_id")),
+                _text(row.get("channel_name")),
+                _text(row.get("channel_handle")),
+                _text(video.get("channelId")),
+                _text(video.get("channelName")),
+                _text(video.get("channelHandle")),
+            ) if value
+        ).casefold(),
+        "video": " ".join(
+            value for value in (
+                _text(row.get("video_id")),
+                _text(video.get("videoId")),
+                _text(video.get("title")),
+            ) if value
+        ).casefold(),
+        "source": " ".join(
+            value for value in (
+                _text(row.get("source_id")),
+                _text(row.get("source_system")),
+                _text(occurrence.get("sourceId")),
+                _text(occurrence.get("sourceSystem")),
+            ) if value
+        ).casefold(),
+    }
+    return all(
+        any(
+            bool(spec.get(field)) and token in fields[field]
+            for field in ("title", "artist", "channel", "video", "source")
+        )
+        for token in spec["tokens"]
+    )
+
+
+def _exact_vtuber_handle_query(options: Mapping[str, Any]) -> str | None:
+    """Return one strict exact-handle token, never a fuzzy identity hint."""
+
+    parts = _vtuber_handle_query_parts(options)
+    return _text(parts.get("handle")) if parts is not None else None
+
+
+def _resolve_exact_vtuber_channel_scope(
+    connection,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    options: Mapping[str, Any],
+) -> tuple[str, ...] | None:
+    """Resolve a strict handle to at most one immutable channel ID.
+
+    Handles are lookup keys only.  The returned scope comes from persisted
+    ``channelId``/``detail_key`` identity and never from ``channel_url`` text.
+    """
+
+    handle = _exact_vtuber_handle_query(options)
+    if handle is None:
+        return None
+    db_metric = (
+        "count"
+        if _text(options.get("metric")) in {"", "count", "occurrences"}
+        else _text(options.get("metric"))
+    )
+    rows = _rows(
+        connection,
+        """
+        WITH requested AS MATERIALIZED (
+          SELECT %s::text AS normalized_handle
+        ), overlay_lineage AS MATERIALIZED (
+          SELECT revision_id, lineage_order::bigint
+          FROM unnest(%s::text[]) WITH ORDINALITY
+            AS lineage(revision_id, lineage_order)
+        ), runtime_handle_seed_rows AS MATERIALIZED (
+          SELECT lineage.lineage_order, runtime.revision_id,
+                 runtime.entity_type, runtime.entity_key, runtime.tombstone,
+                 runtime.payload_json::jsonb AS payload
+          FROM overlay_lineage AS lineage
+          JOIN migration_runtime_rows AS runtime
+            ON runtime.revision_id = lineage.revision_id
+          CROSS JOIN requested
+          WHERE runtime.entity_type IN (
+                  'occurrences', 'runtime_occurrences',
+                  'videos', 'runtime_videos'
+                )
+            AND EXISTS (
+              SELECT 1
+              FROM (
+                VALUES
+                  (
+                    runtime.payload_json::jsonb->>'channelId',
+                    runtime.payload_json::jsonb->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'payload'->>'channelId',
+                    runtime.payload_json::jsonb->'payload'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'originalIdentity'->>'channelId',
+                    runtime.payload_json::jsonb->'originalIdentity'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'payload'->'originalIdentity'->>'channelId',
+                    runtime.payload_json::jsonb->'payload'->'originalIdentity'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'replacementPayload'->>'channelId',
+                    runtime.payload_json::jsonb->'replacementPayload'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'payload'->'replacementPayload'->>'channelId',
+                    runtime.payload_json::jsonb->'payload'->'replacementPayload'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'replacementVideoPayload'->>'channelId',
+                    runtime.payload_json::jsonb->'replacementVideoPayload'->>'channelHandle'
+                  ),
+                  (
+                    runtime.payload_json::jsonb->'payload'->'replacementVideoPayload'->>'channelId',
+                    runtime.payload_json::jsonb->'payload'->'replacementVideoPayload'->>'channelHandle'
+                  )
+              ) AS seed_identity(channel_id, channel_handle)
+              WHERE coalesce(seed_identity.channel_id, '') <> ''
+                AND coalesce(seed_identity.channel_handle, '') <> ''
+                AND regexp_replace(
+                      lower(seed_identity.channel_handle),
+                      '^/?@?', ''
+                    ) = requested.normalized_handle
+            )
+          ORDER BY lineage.lineage_order, runtime.entity_type, runtime.entity_key
+          LIMIT %s
+        ), runtime_handle_seed_guard AS MATERIALIZED (
+          SELECT count(*) AS seed_row_count
+          FROM runtime_handle_seed_rows
+        ), runtime_candidate_entity_keys AS MATERIALIZED (
+          SELECT DISTINCT
+                 CASE
+                   WHEN entity_type IN ('occurrences', 'runtime_occurrences')
+                     THEN 'occurrences'
+                   WHEN entity_type IN ('videos', 'runtime_videos')
+                     THEN 'videos'
+                 END AS entity_kind,
+                 entity_key
+          FROM runtime_handle_seed_rows
+          WHERE coalesce(entity_key, '') <> ''
+        ), runtime_candidate_video_ids AS MATERIALIZED (
+          SELECT DISTINCT candidate.video_id
+          FROM runtime_handle_seed_rows AS seed
+          CROSS JOIN LATERAL (
+            VALUES
+              (seed.payload->>'videoId'),
+              (seed.payload->'payload'->>'videoId'),
+              (seed.payload->'originalIdentity'->>'videoId'),
+              (seed.payload->'payload'->'originalIdentity'->>'videoId'),
+              (seed.payload->'replacementPayload'->>'videoId'),
+              (seed.payload->'payload'->'replacementPayload'->>'videoId'),
+              (seed.payload->'replacementVideoPayload'->>'videoId'),
+              (seed.payload->'payload'->'replacementVideoPayload'->>'videoId'),
+              (
+                CASE
+                  WHEN seed.entity_type IN ('videos', 'runtime_videos')
+                    THEN seed.entity_key
+                  ELSE NULL
+                END
+              )
+          ) AS candidate(video_id)
+          WHERE coalesce(candidate.video_id, '') <> ''
+          ORDER BY candidate.video_id
+          LIMIT %s
+        ), runtime_candidate_video_guard AS MATERIALIZED (
+          SELECT count(*) AS candidate_video_count
+          FROM runtime_candidate_video_ids
+        ), runtime_identity_rows AS MATERIALIZED (
+          SELECT lineage.lineage_order, runtime.revision_id,
+                 runtime.entity_type,
+                 CASE
+                   WHEN runtime.entity_type IN (
+                     'occurrences', 'runtime_occurrences'
+                   ) THEN 'occurrences'
+                   WHEN runtime.entity_type IN ('videos', 'runtime_videos')
+                     THEN 'videos'
+                 END AS entity_kind,
+                 runtime.entity_key, runtime.tombstone,
+                 runtime.payload_json::jsonb AS payload
+          FROM overlay_lineage AS lineage
+          JOIN migration_runtime_rows AS runtime
+            ON runtime.revision_id = lineage.revision_id
+          WHERE runtime.entity_type IN (
+                  'occurrences', 'runtime_occurrences',
+                  'videos', 'runtime_videos'
+                )
+            AND (
+              EXISTS (
+                SELECT 1
+                FROM runtime_candidate_entity_keys AS candidate
+                WHERE candidate.entity_kind = CASE
+                        WHEN runtime.entity_type IN (
+                          'occurrences', 'runtime_occurrences'
+                        ) THEN 'occurrences'
+                        WHEN runtime.entity_type IN ('videos', 'runtime_videos')
+                          THEN 'videos'
+                      END
+                  AND candidate.entity_key = runtime.entity_key
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM (
+                  VALUES
+                    (runtime.payload_json::jsonb->>'videoId'),
+                    (runtime.payload_json::jsonb->'payload'->>'videoId'),
+                    (runtime.payload_json::jsonb->'originalIdentity'->>'videoId'),
+                    (runtime.payload_json::jsonb->'payload'->'originalIdentity'->>'videoId'),
+                    (runtime.payload_json::jsonb->'replacementPayload'->>'videoId'),
+                    (runtime.payload_json::jsonb->'payload'->'replacementPayload'->>'videoId'),
+                    (runtime.payload_json::jsonb->'replacementVideoPayload'->>'videoId'),
+                    (runtime.payload_json::jsonb->'payload'->'replacementVideoPayload'->>'videoId'),
+                    (
+                      CASE
+                        WHEN runtime.entity_type IN ('videos', 'runtime_videos')
+                          THEN runtime.entity_key
+                        ELSE NULL
+                      END
+                    )
+                ) AS row_identity(video_id)
+                JOIN runtime_candidate_video_ids AS candidate
+                  ON candidate.video_id = row_identity.video_id
+              )
+            )
+          ORDER BY lineage.lineage_order, runtime.entity_type, runtime.entity_key
+          LIMIT %s
+        ), runtime_identity_guard AS MATERIALIZED (
+          SELECT greatest(
+                   seed.seed_row_count,
+                   candidate.candidate_video_count,
+                   count(runtime.revision_id)
+                 ) AS runtime_row_count
+          FROM runtime_handle_seed_guard AS seed
+          CROSS JOIN runtime_candidate_video_guard AS candidate
+          LEFT JOIN runtime_identity_rows AS runtime ON TRUE
+          GROUP BY seed.seed_row_count, candidate.candidate_video_count
+        ), runtime_latest_entity_order AS MATERIALIZED (
+          SELECT entity_kind, entity_key, min(lineage_order) AS lineage_order
+          FROM runtime_identity_rows
+          CROSS JOIN runtime_identity_guard AS bounded_guard
+          WHERE bounded_guard.runtime_row_count <= %s
+          GROUP BY entity_kind, entity_key
+        ), runtime_latest_entity_rows AS MATERIALIZED (
+          SELECT runtime.*
+          FROM runtime_identity_rows AS runtime
+          JOIN runtime_latest_entity_order AS latest
+            ON latest.entity_kind = runtime.entity_kind
+           AND latest.entity_key = runtime.entity_key
+           AND latest.lineage_order = runtime.lineage_order
+        ), runtime_latest_effective_rows AS MATERIALIZED (
+          SELECT runtime.*, identity.channel_id, identity.channel_handle,
+                 identity.video_id
+          FROM runtime_latest_entity_rows AS runtime
+          LEFT JOIN LATERAL (
+            SELECT effective.channel_id, effective.channel_handle,
+                   effective.video_id
+            FROM (
+              VALUES
+                (
+                  1,
+                  runtime.payload->'replacementVideoPayload'->>'channelId',
+                  runtime.payload->'replacementVideoPayload'->>'channelHandle',
+                  runtime.payload->'replacementVideoPayload'->>'videoId'
+                ),
+                (
+                  2,
+                  runtime.payload->'payload'->'replacementVideoPayload'->>'channelId',
+                  runtime.payload->'payload'->'replacementVideoPayload'->>'channelHandle',
+                  runtime.payload->'payload'->'replacementVideoPayload'->>'videoId'
+                ),
+                (
+                  3,
+                  runtime.payload->'replacementPayload'->>'channelId',
+                  runtime.payload->'replacementPayload'->>'channelHandle',
+                  runtime.payload->'replacementPayload'->>'videoId'
+                ),
+                (
+                  4,
+                  runtime.payload->'payload'->'replacementPayload'->>'channelId',
+                  runtime.payload->'payload'->'replacementPayload'->>'channelHandle',
+                  runtime.payload->'payload'->'replacementPayload'->>'videoId'
+                ),
+                (
+                  5,
+                  runtime.payload->>'channelId',
+                  runtime.payload->>'channelHandle',
+                  runtime.payload->>'videoId'
+                ),
+                (
+                  6,
+                  runtime.payload->'payload'->>'channelId',
+                  runtime.payload->'payload'->>'channelHandle',
+                  runtime.payload->'payload'->>'videoId'
+                )
+            ) AS effective(
+              identity_priority, channel_id, channel_handle, video_id
+            )
+            WHERE coalesce(effective.channel_id, '') <> ''
+              AND coalesce(effective.channel_handle, '') <> ''
+              AND coalesce(effective.video_id, '') <> ''
+            ORDER BY effective.identity_priority
+            LIMIT 1
+          ) AS identity ON TRUE
+        ), runtime_video_events AS MATERIALIZED (
+          SELECT DISTINCT runtime.lineage_order, runtime.revision_id,
+                 runtime.entity_key, runtime.tombstone, runtime.video_id,
+                 affected.video_id AS affected_video_id
+          FROM runtime_latest_effective_rows AS runtime
+          CROSS JOIN LATERAL (
+            VALUES
+              (runtime.payload->>'videoId'),
+              (runtime.payload->'payload'->>'videoId'),
+              (runtime.payload->'originalIdentity'->>'videoId'),
+              (runtime.payload->'payload'->'originalIdentity'->>'videoId'),
+              (runtime.payload->'replacementPayload'->>'videoId'),
+              (runtime.payload->'payload'->'replacementPayload'->>'videoId'),
+              (runtime.payload->'replacementVideoPayload'->>'videoId'),
+              (runtime.payload->'payload'->'replacementVideoPayload'->>'videoId'),
+              (runtime.entity_key)
+          ) AS affected(video_id)
+          WHERE runtime.entity_kind = 'videos'
+            AND coalesce(affected.video_id, '') <> ''
+        ), runtime_identities AS MATERIALIZED (
+          SELECT runtime.channel_id
+          FROM runtime_latest_effective_rows AS runtime
+          CROSS JOIN requested
+          WHERE NOT runtime.tombstone
+            AND coalesce(runtime.channel_id, '') <> ''
+            AND coalesce(runtime.channel_handle, '') <> ''
+            AND coalesce(runtime.video_id, '') <> ''
+            AND NOT EXISTS (
+              SELECT 1
+              FROM runtime_video_events AS video_event
+              WHERE video_event.affected_video_id = runtime.video_id
+                AND (
+                  video_event.lineage_order < runtime.lineage_order
+                  OR (
+                    video_event.lineage_order = runtime.lineage_order
+                    AND runtime.entity_kind <> 'videos'
+                  )
+                )
+            )
+            AND regexp_replace(
+                  lower(runtime.channel_handle),
+                  '^/?@?', ''
+                ) = requested.normalized_handle
+        ), identities AS MATERIALIZED (
+          SELECT ranking.detail_key AS channel_id
+          FROM runtime_ranking_rows AS ranking
+          CROSS JOIN requested
+          WHERE ranking.revision_id = %s
+            AND ranking.range_id = %s
+            AND ranking.view = 'vtubers'
+            AND ranking.metric = %s
+            AND ranking.detail_key <> ''
+            AND coalesce(
+                  ranking.payload_json::jsonb->>'channelId',
+                  ranking.detail_key
+                ) = ranking.detail_key
+            AND regexp_replace(
+                  lower(coalesce(
+                    ranking.payload_json::jsonb->>'channelHandle', ''
+                  )),
+                  '^/?@?', ''
+                ) = requested.normalized_handle
+          UNION ALL
+          SELECT video.channel_id
+          FROM migration_video_rows AS video
+          CROSS JOIN requested
+          WHERE video.revision_id = ANY(%s)
+            AND video.channel_id <> ''
+            AND coalesce(
+                  video.payload_json::jsonb->>'channelId',
+                  video.channel_id
+                ) = video.channel_id
+            AND regexp_replace(
+                  lower(coalesce(
+                    nullif(video.channel_handle, ''),
+                    video.payload_json::jsonb->>'channelHandle',
+                    ''
+                  )),
+                  '^/?@?', ''
+                ) = requested.normalized_handle
+          UNION ALL
+          SELECT channel_id
+          FROM runtime_identities
+        ), unique_identities AS MATERIALIZED (
+          SELECT DISTINCT channel_id FROM identities WHERE channel_id <> ''
+          ORDER BY channel_id
+          LIMIT 2
+        )
+        SELECT identity.channel_id, guard.runtime_row_count
+        FROM unique_identities AS identity
+        CROSS JOIN runtime_identity_guard AS guard
+        UNION ALL
+        SELECT '' AS channel_id, guard.runtime_row_count
+        FROM runtime_identity_guard AS guard
+        ORDER BY channel_id
+        LIMIT %s
+        """,
+        [
+            handle,
+            list(overlay_revision_ids),
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES,
+            parent_revision_id,
+            _text(options.get("range")) or "all",
+            db_metric,
+            list(overlay_revision_ids),
+            3,
+        ],
+    )
+    if any(
+        int(row.get("runtime_row_count") or 0)
+        > _MAX_AFFECTED_RUNTIME_OCCURRENCES
+        for row in rows
+    ):
+        raise PostgresAdapterError(
+            "exact VTuber runtime identity lookup exceeded bounded cap"
+        )
+    channel_ids = tuple(
+        sorted({_text(row.get("channel_id")) for row in rows if _text(row.get("channel_id"))})
+    )
+    if len(channel_ids) > 1:
+        raise PostgresAdapterError(
+            "exact VTuber handle resolved to multiple channel identities"
+        )
+    return channel_ids
+
+
+def _scope_accepted_video_resets(
+    connection,
+    parent_revision_id: str,
+    resets: Mapping[str, Mapping[str, Any]],
+    channel_scope: Sequence[str] | None,
+) -> dict[str, dict[str, Any]]:
+    """Keep only reset videos whose old or new immutable channel is in scope."""
+
+    if channel_scope is None:
+        return {key: dict(value) for key, value in resets.items()}
+    scope = {_text(value) for value in channel_scope if _text(value)}
+    if not scope or not resets:
+        return {}
+    selected_video_ids = {
+        _text(video_id)
+        for video_id, row in resets.items()
+        if _text(video_id) and _text(row.get("channel_id")) in scope
+    }
+    reset_video_ids = sorted({_text(value) for value in resets if _text(value)})
+    parent_rows = _rows(
+        connection,
+        """
+        SELECT video_id
+        FROM runtime_videos
+        WHERE revision_id = %s
+          AND video_id = ANY(%s)
+          AND channel_id = ANY(%s)
+        ORDER BY video_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            reset_video_ids,
+            sorted(scope),
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    )
+    if len(parent_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("scoped accepted-video reset lookup exceeded cap")
+    selected_video_ids.update(
+        _text(row.get("video_id")) for row in parent_rows if _text(row.get("video_id"))
+    )
+    return {
+        video_id: dict(row)
+        for video_id, row in resets.items()
+        if _text(video_id) in selected_video_ids
+    }
+
+
+def _bounded_parent_video_ids_for_channel_scope(
+    connection,
+    parent_revision_id: str,
+    channel_scope: Sequence[str],
+    range_id: str,
+) -> tuple[str, ...]:
+    """Read only parent videos in one resolved immutable channel scope."""
+
+    scope = sorted({_text(value) for value in channel_scope if _text(value)})
+    if not scope:
+        return ()
+    rows = _rows(
+        connection,
+        """
+        SELECT video_id
+        FROM runtime_videos
+        WHERE revision_id = %s
+          AND channel_id = ANY(%s)
+          AND EXISTS (
+            SELECT 1
+            FROM runtime_occurrences AS occurrence
+            WHERE occurrence.revision_id = %s
+              AND occurrence.video_id = runtime_videos.video_id
+              AND (
+                (%s = 'all' AND coalesce(occurrence.range_id, '') IN ('all', ''))
+                OR (%s = '7d' AND coalesce(occurrence.range_id, '') IN ('7d', ''))
+              )
+          )
+        ORDER BY video_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            scope,
+            parent_revision_id,
+            _text(range_id) or "all",
+            _text(range_id) or "all",
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    )
+    if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "scoped parent video identity lookup exceeded bounded cap"
+        )
+    return tuple(
+        _text(row.get("video_id"))
+        for row in rows
+        if _text(row.get("video_id"))
+    )
 
 
 def _channel_url_is_coherent(channel_url: Any, channel_id: str, handle: Any = "") -> bool:
@@ -2622,6 +3590,609 @@ def _hydrate_overlay_page_previews(
                 occurrence["video"] = dict(video)
 
 
+def _bounded_direct_overlay_vtuber_previews(
+    connection,
+    revision_ids: Sequence[str],
+    channel_ids: Iterable[str],
+    range_id: str,
+    excluded_video_ids: Iterable[str] = (),
+    excluded_occurrence_ids: Iterable[tuple[str, str]] = (),
+) -> dict[str, dict[str, Any]]:
+    """Return at most one accepted-overlay preview for each requested page card."""
+
+    requested_channels = sorted({_text(value) for value in channel_ids if _text(value)})
+    lineage = [_text(value) for value in revision_ids if _text(value)]
+    if not requested_channels or not lineage:
+        return {}
+    excluded_videos = sorted({
+        _text(value) for value in excluded_video_ids if _text(value)
+    })
+    excluded_occurrences = sorted({
+        (_text(video_id), _text(occurrence_id))
+        for video_id, occurrence_id in excluded_occurrence_ids
+        if _text(video_id) and _text(occurrence_id)
+    })
+    range_values = ["all", ""] if (_text(range_id) or "all") == "all" else ["7d", ""]
+    rows = _rows(
+        connection,
+        """
+        /* bounded direct overlay VTuber previews */
+        WITH requested_channels AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS channel_id
+        ), overlay_lineage AS MATERIALIZED (
+          SELECT revision_id, lineage_order
+          FROM unnest(%s::text[]) WITH ORDINALITY
+            AS item(revision_id, lineage_order)
+        ), excluded_videos AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS video_id
+        ), excluded_occurrences AS MATERIALIZED (
+          SELECT DISTINCT video_id, occurrence_id
+          FROM unnest(%s::text[], %s::text[])
+            AS item(video_id, occurrence_id)
+        ), range_values AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS range_id
+        ), newest_videos AS MATERIALIZED (
+          SELECT DISTINCT ON (video.video_id)
+                 video.video_id, video.title AS video_title,
+                 video.channel_name, video.channel_id, video.channel_handle,
+                 video.channel_url, video.published_at,
+                 video.payload_json AS video_payload_json, video.tombstone,
+                 lineage.lineage_order
+          FROM migration_video_rows AS video
+          JOIN overlay_lineage AS lineage
+            ON lineage.revision_id = video.revision_id
+          LEFT JOIN excluded_videos AS removed
+            ON removed.video_id = video.video_id
+          WHERE removed.video_id IS NULL
+          ORDER BY video.video_id, lineage.lineage_order
+        ), selected_videos AS MATERIALIZED (
+          SELECT newest.*
+          FROM newest_videos AS newest
+          JOIN requested_channels AS requested
+            ON requested.channel_id = newest.channel_id
+        ), selected_occurrences AS MATERIALIZED (
+          SELECT DISTINCT ON (
+                   occurrence.video_id,
+                   coalesce(
+                     nullif(occurrence.occurrence_id, ''),
+                     'position:' || occurrence.position::text || ':' ||
+                       coalesce(occurrence.song_key, '')
+                   )
+                 )
+                 selected.channel_id, selected.channel_name,
+                 selected.channel_handle, selected.channel_url,
+                 selected.video_id, selected.video_title,
+                 selected.published_at,
+                 selected.video_payload_json,
+                 occurrence.revision_id, occurrence.occurrence_id,
+                 occurrence.position, occurrence.range_id,
+                 occurrence.song_key, occurrence.seconds, occurrence.title,
+                 occurrence.artist, occurrence.source_id,
+                 occurrence.source_system,
+                 occurrence.payload_json AS occurrence_payload_json,
+                 lineage.lineage_order
+          FROM migration_occurrence_rows AS occurrence
+          JOIN overlay_lineage AS lineage
+            ON lineage.revision_id = occurrence.revision_id
+          JOIN selected_videos AS selected
+            ON selected.video_id = occurrence.video_id
+           AND lineage.lineage_order <= selected.lineage_order
+          JOIN range_values AS scope
+            ON scope.range_id = coalesce(occurrence.range_id, '')
+          LEFT JOIN excluded_occurrences AS changed
+            ON changed.video_id = occurrence.video_id
+           AND changed.occurrence_id = occurrence.occurrence_id
+          WHERE selected.tombstone IS NOT TRUE
+            AND changed.occurrence_id IS NULL
+          ORDER BY occurrence.video_id,
+                   coalesce(
+                     nullif(occurrence.occurrence_id, ''),
+                     'position:' || occurrence.position::text || ':' ||
+                       coalesce(occurrence.song_key, '')
+                   ),
+                   lineage.lineage_order
+        ), ranked AS (
+          SELECT selected.*,
+                 row_number() OVER (
+                   PARTITION BY selected.channel_id
+                   ORDER BY selected.video_id, selected.position,
+                            selected.occurrence_id
+                 ) AS preview_rank
+          FROM selected_occurrences AS selected
+        )
+        SELECT channel_id, channel_name, channel_handle, channel_url,
+               video_id, video_title, published_at,
+               video_payload_json, revision_id, occurrence_id, position,
+               range_id, song_key, seconds, title, artist, source_id,
+               source_system, occurrence_payload_json
+        FROM ranked
+        WHERE preview_rank = 1
+        ORDER BY channel_id
+        LIMIT %s
+        """,
+        [
+            requested_channels,
+            lineage,
+            excluded_videos,
+            [video_id for video_id, _ in excluded_occurrences],
+            [occurrence_id for _, occurrence_id in excluded_occurrences],
+            range_values,
+            len(requested_channels) + 1,
+        ],
+    )
+    if len(rows) > len(requested_channels):
+        raise PostgresAdapterError(
+            "bounded direct overlay VTuber preview query exceeded its channel cap"
+        )
+    previews: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        channel_id = _text(row.get("channel_id"))
+        video_id = _text(row.get("video_id"))
+        occurrence_id = _text(row.get("occurrence_id"))
+        if (
+            not channel_id
+            or channel_id not in requested_channels
+            or channel_id in previews
+            or not video_id
+            or not occurrence_id
+        ):
+            raise PostgresAdapterError(
+                "bounded direct overlay VTuber preview query returned an invalid identity"
+            )
+        video = _overlay_public_video(row)
+        occurrence = _overlay_public_occurrence(row.get("occurrence_payload_json"))
+        if (
+            _text(video.get("videoId")) != video_id
+            or _text(video.get("channelId")) != channel_id
+            or (
+                _text(occurrence.get("videoId"))
+                and _text(occurrence.get("videoId")) != video_id
+            )
+            or (
+                _text(occurrence.get("occurrenceId"))
+                and _text(occurrence.get("occurrenceId")) != occurrence_id
+            )
+        ):
+            raise PostgresAdapterError(
+                "bounded direct overlay VTuber preview query returned an invalid identity"
+            )
+        thumbnail = _text(
+            video.get("thumbnailUrl") or video.get("videoThumbnailUrl")
+        )
+        if not thumbnail_matches_video(thumbnail, video_id):
+            raise PostgresAdapterError(
+                "bounded direct overlay VTuber preview query returned an invalid thumbnail"
+            )
+        handle = _text(video.get("channelHandle"))
+        video.update({
+            "channelId": channel_id,
+            "channelUrl": _canonical_channel_url(channel_id, handle),
+            "thumbnailUrl": thumbnail,
+            "videoThumbnailUrl": thumbnail,
+        })
+        occurrence.update({
+            "videoId": video_id,
+            "occurrenceId": occurrence_id,
+            "position": occurrence.get("position", row.get("position")),
+            "rangeId": occurrence.get("rangeId") or row.get("range_id"),
+            "songKey": occurrence.get("songKey") or row.get("song_key"),
+            "seconds": occurrence.get("seconds", row.get("seconds")),
+            "title": occurrence.get("title") or row.get("title"),
+            "artist": occurrence.get("artist") or row.get("artist"),
+            "sourceId": occurrence.get("sourceId") or row.get("source_id"),
+            "sourceSystem": (
+                occurrence.get("sourceSystem") or row.get("source_system")
+            ),
+        })
+        previews[channel_id] = {
+            **occurrence,
+            "song": {
+                key: occurrence.get(key)
+                for key in (
+                    "title", "artist", "songKey", "seconds", "rangeId",
+                    "sourceId", "sourceSystem",
+                )
+            },
+            "item": dict(video),
+            "video": dict(video),
+        }
+    return previews
+
+
+def _bounded_final_vtuber_previews(
+    connection,
+    parent_revision_id: str,
+    channel_ids: Iterable[str],
+    range_id: str,
+    excluded_video_ids: Iterable[str] = (),
+    excluded_occurrence_ids: Iterable[tuple[str, str]] = (),
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
+) -> dict[str, dict[str, Any]]:
+    """Read exactly one surviving parent tuple for each requested channel.
+
+    Ranking aggregates intentionally omit payload JSON.  This query restores
+    only the missing public preview and applies the same full-video and
+    occurrence anti-joins as the exact overlay aggregate.  Channel membership
+    is one immutable join, not independently paired arrays, and both the SQL
+    and caller enforce one row per requested channel plus a cap+1 guard.
+    """
+
+    requested_channels = sorted({_text(value) for value in channel_ids if _text(value)})
+    if not requested_channels:
+        return {}
+    if len(requested_channels) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("bounded VTuber preview query exceeded its channel cap")
+    excluded_videos = sorted({
+        _text(value) for value in excluded_video_ids if _text(value)
+    })
+    excluded_occurrences = sorted({
+        (_text(video_id), _text(occurrence_id))
+        for video_id, occurrence_id in excluded_occurrence_ids
+        if _text(video_id) and _text(occurrence_id)
+    })
+    range_values = ["all", ""] if (_text(range_id) or "all") == "all" else ["7d", ""]
+    query_started = time.perf_counter()
+    rows = _rows(
+        connection,
+        """
+        /* bounded final VTuber previews */
+        WITH requested_channels AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS channel_id
+        ), excluded_videos AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS video_id
+        ), excluded_occurrences AS MATERIALIZED (
+          SELECT DISTINCT video_id, occurrence_id
+          FROM unnest(%s::text[], %s::text[])
+            AS item(video_id, occurrence_id)
+        ), range_values AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS range_id
+        ), candidate_videos AS MATERIALIZED (
+          SELECT v.channel_id, v.channel_name, v.channel_handle, v.channel_url,
+                 v.video_id, v.title AS video_title,
+                 v.published_timestamp AS published_at,
+                 v.thumbnail_url,
+                 v.payload_json AS video_payload_json
+          FROM requested_channels AS requested
+          JOIN runtime_videos AS v
+            ON requested.channel_id = v.channel_id
+           AND v.revision_id = %s
+          LEFT JOIN excluded_videos AS reset
+            ON reset.video_id = v.video_id
+          WHERE reset.video_id IS NULL
+        ), video_previews AS (
+          SELECT v.channel_id, v.channel_name, v.channel_handle, v.channel_url,
+                 v.video_id, v.video_title, v.published_at, v.thumbnail_url,
+                 v.video_payload_json,
+                 o.revision_id, o.occurrence_id, NULL::integer AS position,
+                 o.range_id,
+                 o.song_key, o.seconds, o.title, o.artist, o.source_id,
+                 o.source_system, o.payload_json AS occurrence_payload_json,
+                 row_number() OVER (
+                   PARTITION BY v.channel_id
+                   ORDER BY v.channel_id, o.video_id, o.occurrence_id
+                 ) AS preview_rank
+          FROM candidate_videos AS v
+          CROSS JOIN LATERAL (
+            SELECT o.revision_id, o.video_id, o.occurrence_id, o.range_id,
+                   o.song_key, o.seconds, o.title, o.artist, o.source_id,
+                   o.source_system, o.payload_json
+            FROM runtime_occurrences AS o
+            JOIN range_values AS scope
+              ON scope.range_id = o.range_id
+            LEFT JOIN excluded_occurrences AS changed
+              ON changed.video_id = o.video_id
+             AND changed.occurrence_id = o.occurrence_id
+            WHERE o.revision_id = %s
+              AND o.video_id = v.video_id
+              AND changed.occurrence_id IS NULL
+              AND (NOT %s OR nullif(o.artist, '') IS NOT NULL)
+              AND (NOT %s OR o.is_niche IS TRUE)
+            ORDER BY o.song_key, o.occurrence_id
+            LIMIT 1
+          ) AS o
+        )
+        SELECT channel_id, channel_name, channel_handle, channel_url,
+               video_id, video_title, published_at, thumbnail_url,
+               video_payload_json,
+               revision_id, occurrence_id, position, range_id, song_key,
+               seconds, title, artist, source_id, source_system,
+               occurrence_payload_json
+        FROM video_previews
+        WHERE preview_rank = 1
+        ORDER BY channel_id
+        LIMIT %s
+        """,
+        [
+            requested_channels,
+            excluded_videos,
+            [video_id for video_id, _ in excluded_occurrences],
+            [occurrence_id for _, occurrence_id in excluded_occurrences],
+            range_values,
+            parent_revision_id,
+            parent_revision_id,
+            bool(hide_unknown_artist),
+            bool(niche_only),
+            len(requested_channels) + 1,
+        ],
+    )
+    _phase_trace(
+        "preview_sql",
+        query_started,
+        requested_channels=len(requested_channels),
+        returned_channels=len(rows),
+    )
+    if len(rows) > len(requested_channels):
+        raise PostgresAdapterError("bounded VTuber preview query exceeded its channel cap")
+
+    previews: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        channel_id = _text(row.get("channel_id"))
+        video_id = _text(row.get("video_id"))
+        occurrence_id = _text(row.get("occurrence_id"))
+        if (
+            not channel_id
+            or channel_id not in requested_channels
+            or channel_id in previews
+            or not video_id
+            or not occurrence_id
+        ):
+            raise PostgresAdapterError(
+                "bounded VTuber preview query returned an inexact channel set"
+            )
+        video = _overlay_public_video(row)
+        occurrence = _overlay_public_occurrence(row.get("occurrence_payload_json"))
+        if (
+            _text(video.get("videoId")) != video_id
+            or _text(video.get("channelId")) != channel_id
+            or (
+                _text(occurrence.get("videoId"))
+                and _text(occurrence.get("videoId")) != video_id
+            )
+            or (
+                _text(occurrence.get("occurrenceId"))
+                and _text(occurrence.get("occurrenceId")) != occurrence_id
+            )
+        ):
+            raise PostgresAdapterError(
+                "bounded VTuber preview query returned an inexact channel set"
+            )
+        thumbnail = _text(
+            video.get("thumbnailUrl") or video.get("videoThumbnailUrl")
+        )
+        if not thumbnail_matches_video(thumbnail, video_id):
+            raise PostgresAdapterError(
+                "bounded VTuber preview query returned an invalid video thumbnail"
+            )
+        video["thumbnailUrl"] = thumbnail
+        video["videoThumbnailUrl"] = thumbnail
+        occurrence_update = {
+            "videoId": video_id,
+            "occurrenceId": occurrence_id,
+            "rangeId": occurrence.get("rangeId") or row.get("range_id"),
+            "songKey": occurrence.get("songKey") or row.get("song_key"),
+            "seconds": occurrence.get("seconds", row.get("seconds")),
+            "title": occurrence.get("title") or row.get("title"),
+            "artist": occurrence.get("artist") or row.get("artist"),
+            "sourceId": occurrence.get("sourceId") or row.get("source_id"),
+            "sourceSystem": (
+                occurrence.get("sourceSystem") or row.get("source_system")
+            ),
+        }
+        position = occurrence.get("position", row.get("position"))
+        if position is not None:
+            occurrence_update["position"] = position
+        occurrence.update(occurrence_update)
+        preview = {
+            **occurrence,
+            "song": {
+                "title": occurrence.get("title"),
+                "artist": occurrence.get("artist"),
+                "songKey": occurrence.get("songKey"),
+                "seconds": occurrence.get("seconds"),
+                "rangeId": occurrence.get("rangeId"),
+                "sourceId": occurrence.get("sourceId"),
+                "sourceSystem": occurrence.get("sourceSystem"),
+            },
+            "item": dict(video),
+            "video": dict(video),
+        }
+        previews[channel_id] = preview
+    if set(previews) != set(requested_channels):
+        raise PostgresAdapterError(
+            "bounded VTuber preview query returned an inexact channel set"
+        )
+    return previews
+
+
+def _canonicalize_vtuber_card_preview(
+    payload: dict[str, Any], expected_channel_id: str,
+) -> None:
+    """Validate and bind a positive VTuber card to one real occurrence tuple."""
+
+    try:
+        positive = (
+            int(payload.get("count") or 0) > 0
+            or int(payload.get("timestampCount") or 0) > 0
+        )
+    except (TypeError, ValueError) as exc:
+        raise PostgresAdapterError("VTuber ranking card count is invalid") from exc
+    if not positive:
+        return
+    occurrences = payload.get("occurrences")
+    if not isinstance(occurrences, list) or not occurrences:
+        raise PostgresAdapterError(
+            "positive VTuber ranking card has no canonical occurrence preview"
+        )
+    channel_id = _text(expected_channel_id)
+    card_channel_id = _text(payload.get("channelId") or payload.get("key"))
+    if not channel_id or card_channel_id != channel_id:
+        raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+    card_handle_raw = _text(payload.get("channelHandle"))
+    canonical_handle_raw = card_handle_raw
+    card_url = _text(payload.get("channelUrl"))
+
+    canonical_occurrences: list[dict[str, Any]] = []
+    first_thumbnail = ""
+    canonical_url = card_url
+    for source_occurrence in occurrences:
+        if not isinstance(source_occurrence, Mapping):
+            raise PostgresAdapterError(
+                "positive VTuber ranking card has no canonical occurrence preview"
+            )
+        occurrence = dict(source_occurrence)
+        item_source = (
+            occurrence.get("item")
+            if isinstance(occurrence.get("item"), Mapping)
+            else occurrence.get("video")
+        )
+        video_source = (
+            occurrence.get("video")
+            if isinstance(occurrence.get("video"), Mapping)
+            else item_source
+        )
+        if not isinstance(item_source, Mapping) or not isinstance(
+            video_source, Mapping
+        ):
+            raise PostgresAdapterError(
+                "positive VTuber ranking card has no canonical occurrence preview"
+            )
+        item = dict(item_source)
+        video = dict(video_source)
+        video_id = _text(item.get("videoId"))
+        occurrence_video_id = _text(occurrence.get("videoId"))
+        if (
+            not video_id
+            or (occurrence_video_id and occurrence_video_id != video_id)
+            or _text(video.get("videoId")) != video_id
+            or _text(item.get("channelId")) != channel_id
+            or _text(video.get("channelId")) != channel_id
+        ):
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+
+        item_handle_raw = _text(item.get("channelHandle"))
+        video_handle_raw = _text(video.get("channelHandle"))
+        if not canonical_handle_raw:
+            canonical_handle_raw = item_handle_raw or video_handle_raw
+        normalized_handles = {
+            normalized
+            for normalized in (
+                _normalized_channel_handle(canonical_handle_raw),
+                _normalized_channel_handle(item_handle_raw),
+                _normalized_channel_handle(video_handle_raw),
+            )
+            if normalized
+        }
+        if len(normalized_handles) != 1:
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if card_url and not _channel_url_is_coherent(
+            card_url, channel_id, canonical_handle_raw
+        ):
+            raise PostgresAdapterError(
+                "VTuber ranking preview channel URL is invalid"
+            )
+        item_url = _text(item.get("channelUrl"))
+        video_url = _text(video.get("channelUrl"))
+        for nested_url, nested_handle in (
+            (item_url, item_handle_raw or canonical_handle_raw),
+            (video_url, video_handle_raw or canonical_handle_raw),
+        ):
+            if nested_url and not _channel_url_is_coherent(
+                nested_url, channel_id, nested_handle
+            ):
+                raise PostgresAdapterError(
+                    "VTuber ranking preview channel URL is invalid"
+                )
+        if not canonical_url:
+            canonical_url = next((
+                value
+                for value in (item_url, video_url)
+                if value and _channel_url_is_coherent(
+                    value, channel_id, canonical_handle_raw
+                )
+            ), "")
+        thumbnail = _text(
+            item.get("thumbnailUrl")
+            or item.get("videoThumbnailUrl")
+            or video.get("thumbnailUrl")
+            or video.get("videoThumbnailUrl")
+        )
+        for nested in (item, video):
+            nested_thumbnail = _text(
+                nested.get("thumbnailUrl") or nested.get("videoThumbnailUrl")
+            )
+            if nested_thumbnail and not thumbnail_matches_video(
+                nested_thumbnail, video_id
+            ):
+                raise PostgresAdapterError(
+                    "VTuber ranking preview thumbnail is invalid"
+                )
+        if not thumbnail_matches_video(thumbnail, video_id):
+            raise PostgresAdapterError("VTuber ranking preview thumbnail is invalid")
+
+        song = occurrence.get("song")
+        if song is not None and not isinstance(song, Mapping):
+            raise PostgresAdapterError("VTuber ranking preview song tuple is invalid")
+        song = dict(song or {})
+        for field in ("occurrenceId", "position"):
+            value = occurrence.get(field) if field in occurrence else song.get(field)
+            if value is not None:
+                occurrence[field] = value
+        for field in ("title", "artist", "seconds"):
+            outer_present = field in occurrence
+            song_present = field in song
+            if not outer_present and not song_present:
+                raise PostgresAdapterError(
+                    "VTuber ranking preview song tuple is invalid"
+                )
+            if (
+                outer_present
+                and song_present
+                and occurrence.get(field) != song.get(field)
+            ):
+                raise PostgresAdapterError(
+                    "VTuber ranking preview song tuple is invalid"
+                )
+            value = occurrence.get(field) if outer_present else song.get(field)
+            occurrence[field] = value
+            song[field] = value
+        for field in ("songKey", "rangeId", "sourceId", "sourceSystem"):
+            value = occurrence.get(field) if field in occurrence else song.get(field)
+            if value is not None:
+                occurrence[field] = value
+                song[field] = value
+
+        canonical_item = dict(item)
+        canonical_item.update({
+            "videoId": video_id,
+            "channelId": channel_id,
+            "channelHandle": canonical_handle_raw,
+            "channelUrl": canonical_url
+                or _canonical_channel_url(channel_id, canonical_handle_raw),
+            "thumbnailUrl": thumbnail,
+            "videoThumbnailUrl": thumbnail,
+        })
+        occurrence["videoId"] = video_id
+        occurrence["item"] = canonical_item
+        occurrence["video"] = dict(canonical_item)
+        occurrence["song"] = song
+        canonical_occurrences.append(occurrence)
+        if not first_thumbnail:
+            first_thumbnail = thumbnail
+
+    if not canonical_url:
+        canonical_url = _canonical_channel_url(channel_id, canonical_handle_raw)
+    for occurrence in canonical_occurrences:
+        occurrence["item"]["channelUrl"] = canonical_url
+        occurrence["video"]["channelUrl"] = canonical_url
+    payload["occurrences"] = canonical_occurrences
+    payload["channelId"] = channel_id
+    payload["channelHandle"] = canonical_handle_raw
+    payload["channelUrl"] = canonical_url
+    payload["thumbnailUrl"] = first_thumbnail
+    payload["videoThumbnailUrl"] = first_thumbnail
+
+
 def _cached_vtuber_rows_are_safe(
     cached: Mapping[str, Mapping[str, Any]],
     affected_channel_ids: set[str],
@@ -2634,7 +4205,7 @@ def _cached_vtuber_rows_are_safe(
     affected-channel set have been constructed.
     """
 
-    if not isinstance(cached, Mapping) or len(cached) > 8 or set(cached) != affected_channel_ids:
+    if not isinstance(cached, Mapping) or set(cached) != affected_channel_ids:
         return False
     for channel_id, row in cached.items():
         if not isinstance(row, Mapping) or _text(row.get("detail_key")) != channel_id:
@@ -2662,6 +4233,15 @@ def _cached_vtuber_rows_are_safe(
             return False
         if counts[0] == 0 and (any(payload_counts) or occurrences):
             return False
+        if (counts[0] > 0 or counts[3] > 0) and not occurrences:
+            if row.get("_requires_preview_hydration") is not True:
+                return False
+            excluded_videos = row.get("_preview_excluded_video_ids")
+            excluded_occurrences = row.get("_preview_excluded_occurrence_ids")
+            if not isinstance(excluded_videos, tuple) or not isinstance(
+                excluded_occurrences, tuple
+            ):
+                return False
 
         handle = _normalized_channel_handle(payload.get("channelHandle"))
         channel_url = _text(payload.get("channelUrl"))
@@ -2712,6 +4292,358 @@ def _cached_vtuber_rows_are_safe(
     return True
 
 
+def _unfiltered_vtuber_summary_rows(
+    connection,
+    parent_revision_id: str,
+    affected_channel_ids: set[str],
+    full_video_ids: set[str],
+    affected_occurrence_ids: set[tuple[str, str]],
+    range_values: Sequence[str],
+    candidate_values: Sequence[Mapping[str, Any]],
+    options: Mapping[str, Any],
+    direct_overlay_revision_ids: Sequence[str] = (),
+    excluded_overlay_video_ids: Iterable[str] = (),
+) -> list[dict[str, Any]]:
+    """Keep v19's unfiltered multi-channel work as an in-Postgres summary.
+
+    This path deliberately has no mixed-query 50k tuple cap: a normal
+    unfiltered overlay can legitimately affect hundreds of channels and more
+    than 50k occurrences.  It returns one aggregate row per channel and never
+    materializes parent occurrence payloads in Python.
+    """
+
+    direct_revision_ids = [
+        _text(value) for value in direct_overlay_revision_ids if _text(value)
+    ]
+    if direct_revision_ids:
+        excluded_overlay_videos = sorted({
+            _text(value) for value in excluded_overlay_video_ids if _text(value)
+        })
+        return _rows(
+            connection,
+            """
+            /* direct unfiltered VTuber overlay summary */
+            WITH affected_channels AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS channel_id
+            ), affected_videos AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS video_id
+            ), affected_occurrences AS MATERIALIZED (
+              SELECT DISTINCT video_id, occurrence_id
+              FROM unnest(%s::text[], %s::text[])
+                AS item(video_id, occurrence_id)
+            ), range_values AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS range_id
+            ), runtime_overlay_occurrences AS MATERIALIZED (
+              SELECT channel_id, video_id, song_key
+              FROM jsonb_to_recordset(%s::jsonb)
+                AS item(channel_id text, video_id text, song_key text)
+            ), overlay_lineage AS MATERIALIZED (
+              SELECT revision_id, lineage_order
+              FROM unnest(%s::text[]) WITH ORDINALITY
+                AS item(revision_id, lineage_order)
+            ), excluded_overlay_videos AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS video_id
+            ), selected_overlay_videos AS MATERIALIZED (
+              SELECT DISTINCT ON (video.video_id)
+                     video.video_id, video.channel_id,
+                     video.tombstone, lineage.lineage_order
+              FROM migration_video_rows AS video
+              JOIN overlay_lineage AS lineage
+                ON lineage.revision_id = video.revision_id
+              ORDER BY video.video_id, lineage.lineage_order
+            ), accepted_overlay_occurrences AS MATERIALIZED (
+              SELECT DISTINCT ON (
+                       occurrence.video_id,
+                       coalesce(
+                         nullif(occurrence.occurrence_id, ''),
+                         'position:' || occurrence.position::text || ':' ||
+                           coalesce(occurrence.song_key, '')
+                       )
+                     )
+                     selected.channel_id, occurrence.video_id,
+                     coalesce(
+                       nullif(occurrence.song_key, ''),
+                       lower(coalesce(occurrence.title, '')) || '::' ||
+                         lower(coalesce(occurrence.artist, ''))
+                     ) AS song_key
+              FROM migration_occurrence_rows AS occurrence
+              JOIN overlay_lineage AS lineage
+                ON lineage.revision_id = occurrence.revision_id
+              JOIN selected_overlay_videos AS selected
+                ON selected.video_id = occurrence.video_id
+               AND lineage.lineage_order <= selected.lineage_order
+              JOIN affected_channels AS affected
+                ON affected.channel_id = selected.channel_id
+              JOIN range_values AS scope
+                ON scope.range_id = coalesce(occurrence.range_id, '')
+              LEFT JOIN affected_occurrences AS changed
+                ON changed.video_id = occurrence.video_id
+               AND changed.occurrence_id = occurrence.occurrence_id
+              LEFT JOIN excluded_overlay_videos AS removed
+                ON removed.video_id = occurrence.video_id
+              WHERE selected.tombstone IS NOT TRUE
+                AND changed.occurrence_id IS NULL
+                AND removed.video_id IS NULL
+              ORDER BY occurrence.video_id,
+                       coalesce(
+                         nullif(occurrence.occurrence_id, ''),
+                         'position:' || occurrence.position::text || ':' ||
+                           coalesce(occurrence.song_key, '')
+                       ),
+                       lineage.lineage_order
+            ), overlay_occurrences AS MATERIALIZED (
+              SELECT channel_id, video_id, song_key
+              FROM accepted_overlay_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key
+              FROM runtime_overlay_occurrences
+            ), affected_parent_videos AS MATERIALIZED (
+              SELECT video.video_id, video.channel_id
+              FROM runtime_videos AS video
+              JOIN affected_channels AS affected
+                ON affected.channel_id = video.channel_id
+              LEFT JOIN affected_videos AS reset
+                ON reset.video_id = video.video_id
+              WHERE video.revision_id = %s
+                AND reset.video_id IS NULL
+            ), touched_occurrence_videos AS MATERIALIZED (
+              SELECT DISTINCT video_id FROM affected_occurrences
+            ), fast_parent_occurrences AS (
+              SELECT parent.channel_id, occurrence.video_id,
+                     coalesce(
+                       nullif(occurrence.song_key, ''),
+                       lower(coalesce(occurrence.title, '')) || '::' ||
+                         lower(coalesce(occurrence.artist, ''))
+                     ) AS song_key
+              FROM affected_parent_videos AS parent
+              LEFT JOIN touched_occurrence_videos AS touched
+                ON touched.video_id = parent.video_id
+              JOIN runtime_occurrences AS occurrence
+                ON occurrence.revision_id = %s
+               AND occurrence.video_id = parent.video_id
+              JOIN range_values AS scope
+                ON scope.range_id = occurrence.range_id
+              WHERE touched.video_id IS NULL
+            ), touched_parent_occurrences AS (
+              SELECT parent.channel_id, occurrence.video_id,
+                     coalesce(
+                       nullif(occurrence.song_key, ''),
+                       lower(coalesce(occurrence.title, '')) || '::' ||
+                         lower(coalesce(occurrence.artist, ''))
+                     ) AS song_key
+              FROM affected_parent_videos AS parent
+              JOIN touched_occurrence_videos AS touched
+                ON touched.video_id = parent.video_id
+              JOIN runtime_occurrences AS occurrence
+                ON occurrence.revision_id = %s
+               AND occurrence.video_id = parent.video_id
+              JOIN range_values AS scope
+                ON scope.range_id = occurrence.range_id
+              LEFT JOIN affected_occurrences AS changed
+                ON changed.video_id = occurrence.video_id
+               AND changed.occurrence_id = occurrence.occurrence_id
+              WHERE changed.occurrence_id IS NULL
+            ), combined AS (
+              SELECT channel_id, video_id, song_key
+              FROM fast_parent_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key
+              FROM touched_parent_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key
+              FROM overlay_occurrences
+            )
+            SELECT channel_id, count(*) AS row_count,
+                   count(DISTINCT video_id) AS video_count,
+                   count(DISTINCT song_key) AS song_count
+            FROM combined
+            GROUP BY channel_id
+            ORDER BY channel_id
+            """,
+            [
+                sorted(affected_channel_ids),
+                sorted(full_video_ids),
+                [video_id for video_id, _ in sorted(affected_occurrence_ids)],
+                [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
+                list(range_values),
+                json.dumps(candidate_values, ensure_ascii=False),
+                direct_revision_ids,
+                excluded_overlay_videos,
+                parent_revision_id,
+                parent_revision_id,
+                parent_revision_id,
+            ],
+        )
+
+    common_params = [
+        sorted(affected_channel_ids),
+        sorted(full_video_ids),
+        [video_id for video_id, _ in sorted(affected_occurrence_ids)],
+        [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
+        list(range_values),
+        json.dumps(candidate_values, ensure_ascii=False),
+        parent_revision_id,
+    ]
+    if not bool(options.get("hideUnknownArtist")) and not bool(
+        options.get("nicheOnly")
+    ):
+        fast = _rows(
+            connection,
+            """
+            WITH affected_channels AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS channel_id
+            ), affected_videos AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS video_id
+            ), affected_occurrences AS MATERIALIZED (
+              SELECT DISTINCT video_id, occurrence_id
+              FROM unnest(%s::text[], %s::text[])
+                AS item(video_id, occurrence_id)
+            ), touched_occurrence_videos AS MATERIALIZED (
+              SELECT DISTINCT video_id FROM affected_occurrences
+            ), range_values AS MATERIALIZED (
+              SELECT DISTINCT unnest(%s::text[]) AS range_id
+            ), overlay_occurrences AS MATERIALIZED (
+              SELECT channel_id, video_id, song_key
+              FROM jsonb_to_recordset(%s::jsonb)
+                AS item(channel_id text, video_id text, song_key text)
+            ), affected_parent_videos AS MATERIALIZED (
+              SELECT video.video_id, video.channel_id
+              FROM runtime_videos AS video
+              JOIN affected_channels AS affected
+                ON affected.channel_id = video.channel_id
+              LEFT JOIN affected_videos AS reset
+                ON reset.video_id = video.video_id
+              WHERE video.revision_id = %s
+                AND reset.video_id IS NULL
+            ), fast_parent_occurrences AS (
+              SELECT parent.channel_id, occurrence.video_id,
+                     occurrence.song_key
+              FROM affected_parent_videos AS parent
+              LEFT JOIN touched_occurrence_videos AS touched
+                ON touched.video_id = parent.video_id
+              JOIN runtime_occurrences AS occurrence
+                ON occurrence.revision_id = %s
+               AND occurrence.video_id = parent.video_id
+              JOIN range_values AS scope
+                ON scope.range_id = occurrence.range_id
+              WHERE touched.video_id IS NULL
+            ), touched_parent_occurrences AS (
+              SELECT parent.channel_id, occurrence.video_id,
+                     occurrence.song_key
+              FROM affected_parent_videos AS parent
+              JOIN touched_occurrence_videos AS touched
+                ON touched.video_id = parent.video_id
+              JOIN runtime_occurrences AS occurrence
+                ON occurrence.revision_id = %s
+               AND occurrence.video_id = parent.video_id
+              JOIN range_values AS scope
+                ON scope.range_id = occurrence.range_id
+              LEFT JOIN affected_occurrences AS changed
+                ON changed.video_id = occurrence.video_id
+               AND changed.occurrence_id = occurrence.occurrence_id
+              WHERE changed.occurrence_id IS NULL
+            ), combined AS (
+              SELECT channel_id, video_id, song_key
+              FROM fast_parent_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key
+              FROM touched_parent_occurrences
+              UNION ALL
+              SELECT channel_id, video_id, song_key
+              FROM overlay_occurrences
+            )
+            SELECT channel_id, count(*) AS row_count,
+                   count(DISTINCT video_id) AS video_count,
+                   count(DISTINCT song_key) AS song_count,
+                   bool_or(song_key = '') AS has_empty_song_key
+            FROM combined
+            GROUP BY channel_id
+            ORDER BY channel_id
+            """,
+            [*common_params, parent_revision_id, parent_revision_id],
+        )
+        if not any(bool(row.get("has_empty_song_key")) for row in fast):
+            return fast
+    return _rows(
+        connection,
+        """
+        WITH affected_channels AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS channel_id
+        ),
+        affected_videos AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS video_id
+        ),
+        affected_occurrences AS MATERIALIZED (
+          SELECT DISTINCT video_id, occurrence_id
+          FROM unnest(%s::text[], %s::text[])
+            AS item(video_id, occurrence_id)
+        ),
+        range_values AS MATERIALIZED (
+          SELECT DISTINCT unnest(%s::text[]) AS range_id
+        ),
+        overlay_occurrences AS MATERIALIZED (
+          SELECT channel_id, video_id, song_key
+          FROM jsonb_to_recordset(%s::jsonb)
+            AS item(channel_id text, video_id text, song_key text)
+        ),
+        affected_parent_videos AS MATERIALIZED (
+          SELECT v.video_id, v.channel_id
+          FROM runtime_videos AS v
+          JOIN affected_channels AS affected
+            ON affected.channel_id = v.channel_id
+          LEFT JOIN affected_videos AS touched
+            ON touched.video_id = v.video_id
+          WHERE v.revision_id = %s
+            AND touched.video_id IS NULL
+        ),
+        parent_occurrences AS (
+          SELECT parent.channel_id, occurrence.video_id,
+                 coalesce(
+                   nullif(occurrence.song_key, ''),
+                   lower(coalesce(occurrence.title, '')) || '::' ||
+                     lower(coalesce(occurrence.artist, ''))
+                 ) AS song_key
+          FROM affected_parent_videos AS parent
+          JOIN runtime_occurrences AS occurrence
+            ON occurrence.revision_id = %s
+           AND occurrence.video_id = parent.video_id
+          JOIN range_values AS scope
+            ON scope.range_id = occurrence.range_id
+          LEFT JOIN affected_occurrences AS changed
+            ON changed.video_id = occurrence.video_id
+           AND changed.occurrence_id = occurrence.occurrence_id
+          WHERE changed.occurrence_id IS NULL
+            AND (NOT %s OR nullif(occurrence.artist, '') IS NOT NULL)
+            AND (
+              NOT %s
+              OR coalesce(
+                occurrence.payload_json::jsonb->>'isNiche',
+                occurrence.payload_json::jsonb->'payload'->>'isNiche',
+                'false'
+              ) = 'true'
+            )
+        ),
+        combined AS (
+          SELECT channel_id, video_id, song_key FROM parent_occurrences
+          UNION ALL
+          SELECT channel_id, video_id, song_key FROM overlay_occurrences
+        )
+        SELECT channel_id, count(*) AS row_count,
+               count(DISTINCT video_id) AS video_count,
+               count(DISTINCT song_key) AS song_count
+        FROM combined
+        GROUP BY channel_id
+        ORDER BY channel_id
+        """,
+        [
+            *common_params,
+            parent_revision_id,
+            bool(options.get("hideUnknownArtist")),
+            bool(options.get("nicheOnly")),
+        ],
+    )
+
+
 def _overlay_vtuber_replacement_rows(
     connection,
     active_revision_id: str,
@@ -2724,6 +4656,8 @@ def _overlay_vtuber_replacement_rows(
     replacement_rows: Sequence[Mapping[str, Any]] = (),
     accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
     exact_required: bool = False,
+    exact_channel_scope: Sequence[str] | None = None,
+    direct_overlay_revision_ids: Sequence[str] = (),
 ) -> dict[str, dict[str, Any]]:
     """Rebuild affected VTuber groups with per-video replacement semantics."""
 
@@ -2741,15 +4675,22 @@ def _overlay_vtuber_replacement_rows(
         bool(options.get("nicheOnly")),
         bool(options.get("hideUnknownArtist")),
     )
+    if exact_channel_scope is not None:
+        cache_key = (
+            *cache_key,
+            tuple(sorted({_text(value) for value in exact_channel_scope if _text(value)})),
+        )
     candidate_records: dict[str, dict[str, Any]] = {}
     affected_channel_ids: set[str] = set()
     # Only full-video boundaries remove every parent occurrence.  Runtime
     # occurrence chains stay as (video_id, occurrence_id) anti-joins below;
     # treating those as video replacements would silently drop unrelated songs
     # from the same video.
-    full_video_ids = {
+    accepted_full_video_ids = {
         _text(video_id) for video_id in (accepted_video_resets or {}) if _text(video_id)
     }
+    full_video_ids = set(accepted_full_video_ids)
+    runtime_full_video_ids: set[str] = set()
     affected_occurrence_ids: set[tuple[str, str]] = set()
 
     def row_channel_id(row: Mapping[str, Any]) -> str:
@@ -2765,6 +4706,46 @@ def _overlay_vtuber_replacement_rows(
             raise PostgresAdapterError(
                 "VTuber exact overlay change is missing required immutable identity"
             )
+
+    channel_scope = (
+        {_text(value) for value in exact_channel_scope if _text(value)}
+        if exact_channel_scope is not None
+        else None
+    )
+    if channel_scope is not None:
+        rows = tuple(row for row in rows if row_channel_id(row) in channel_scope)
+        scoped_replacements = tuple(
+            row for row in replacement_rows if row_channel_id(row) in channel_scope
+        )
+        replacement_identities = {
+            (
+                _text(row.get("videoId") or row.get("video_id")),
+                _text(row.get("occurrenceId") or row.get("occurrence_id")),
+            )
+            for row in scoped_replacements
+        }
+        reset_changes = tuple(
+            row for row in reset_changes if row_channel_id(row) in channel_scope
+        )
+        runtime_changes = tuple(
+            row
+            for row in runtime_changes
+            if (
+                row_channel_id(row) in channel_scope
+                or (
+                    _text(row.get("videoId") or row.get("video_id")),
+                    _text(row.get("occurrenceId") or row.get("occurrence_id")),
+                ) in replacement_identities
+            )
+        )
+        replacement_rows = scoped_replacements
+
+    for video_id, accepted in (accepted_video_resets or {}).items():
+        selected_video_id, selected_channel_id = _validated_overlay_change_identity(
+            {"videoId": _text(video_id)}, accepted, validate_urls=False,
+        )
+        if selected_video_id and selected_channel_id:
+            affected_channel_ids.add(selected_channel_id)
 
     if exact_required:
         for row in rows:
@@ -2787,6 +4768,8 @@ def _overlay_vtuber_replacement_rows(
         occurrence_id = _text(changed.get("occurrenceId") or changed.get("occurrence_id"))
         if entity_type in {"videos", "runtime_videos"} and video_id:
             full_video_ids.add(video_id)
+            if not bool(changed.get("acceptedVideoReset")):
+                runtime_full_video_ids.add(video_id)
         elif (
             entity_type in {"occurrences", "runtime_occurrences"}
             and not bool(changed.get("acceptedVideoReset"))
@@ -2868,14 +4851,12 @@ def _overlay_vtuber_replacement_rows(
             old_channel_markers[old_channel_id]["handles"].add(old_handle)
         if old_url:
             old_channel_markers[old_channel_id]["urls"].add(old_url)
-    cached = _VTUBER_REPLACEMENT_CACHE.get(cache_key)
-    if cached is not None:
-        if not _cached_vtuber_rows_are_safe(cached, affected_channel_ids, old_channel_markers):
-            raise PostgresAdapterError("VTuber exact replacement cache identity is invalid")
-        return {
-            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
-            for key, row in cached.items()
-        }
+    with _VTUBER_REPLACEMENT_CACHE_LOCK:
+        cached = _VTUBER_REPLACEMENT_CACHE.get(cache_key)
+        if cached is not None:
+            if not _cached_vtuber_rows_are_safe(cached, affected_channel_ids, old_channel_markers):
+                raise PostgresAdapterError("VTuber exact replacement cache identity is invalid")
+            return copy.deepcopy(cached)
     if exact_required and not affected_channel_ids:
         raise PostgresAdapterError("VTuber exact overlay required coverage is empty")
     if not affected_channel_ids:
@@ -2888,11 +4869,25 @@ def _overlay_vtuber_replacement_rows(
     # summary row per affected channel.  Payload previews remain bounded to the
     # existing parent preview plus accepted rows and never retain a replaced
     # video's stale occurrence.
-    if not options.get("q") and hasattr(connection, "cursor"):
+    range_values = (
+        ["all", ""]
+        if (_text(options.get("range")) or "all") == "all"
+        else ["7d", ""]
+    )
+    if (
+        (not options.get("q") or channel_scope is not None)
+        and hasattr(connection, "cursor")
+    ):
         exact_started = time.perf_counter()
-        candidate_values: list[dict[str, str]] = []
+        residual_spec = _vtuber_residual_search_spec(options)
+        candidate_values: list[dict[str, Any]] = []
         candidate_previews: dict[str, list[dict[str, Any]]] = defaultdict(list)
         candidate_videos: dict[str, Mapping[str, Any]] = {}
+        for accepted in (accepted_video_resets or {}).values():
+            video = _overlay_public_video(accepted)
+            channel_id = _text(video.get("channelId") or accepted.get("channel_id"))
+            if channel_id:
+                candidate_videos.setdefault(channel_id, video)
         for record in candidate_records.values():
             video = record["video"]
             channel_id = _text(video.get("channelId"))
@@ -2912,6 +4907,18 @@ def _overlay_vtuber_replacement_rows(
                     "channel_id": channel_id,
                     "video_id": _text(occurrence.get("videoId")),
                     "song_key": song_key,
+                    "residual_match": _vtuber_candidate_matches_residual(
+                        row={
+                            **dict(song),
+                            "video_id": occurrence.get("videoId"),
+                            "channel_id": channel_id,
+                            "channel_name": video.get("channelName"),
+                            "channel_handle": video.get("channelHandle"),
+                            "video_payload_json": video,
+                            "occurrence_payload_json": song,
+                        },
+                        spec=residual_spec,
+                    ),
                 })
                 preview = dict(occurrence)
                 preview["video"] = dict(preview.get("item") or {})
@@ -2926,75 +4933,26 @@ def _overlay_vtuber_replacement_rows(
             replaced_occurrences=len(affected_occurrence_ids),
         )
 
-        range_values = ["all", ""] if (_text(options.get("range")) or "all") == "all" else ["7d", ""]
-        fast_default = not bool(options.get("nicheOnly")) and not bool(options.get("hideUnknownArtist"))
-
-        if fast_default:
-            summaries = _rows(
+        residual_tokens = list(residual_spec.get("tokens") or ()) if residual_spec else []
+        residual_sql_tokens = [
+            _sql_like_literal(token) for token in residual_tokens
+        ]
+        summaries = (
+            _unfiltered_vtuber_summary_rows(
                 connection,
-                """
-                WITH affected_channels AS MATERIALIZED (
-                  SELECT DISTINCT unnest(%s::text[]) AS channel_id
-                ), affected_videos AS MATERIALIZED (
-                  SELECT DISTINCT unnest(%s::text[]) AS video_id
-                ), affected_occurrences AS MATERIALIZED (
-                  SELECT DISTINCT video_id, occurrence_id
-                  FROM unnest(%s::text[], %s::text[]) AS item(video_id, occurrence_id)
-                ), touched_occurrence_videos AS MATERIALIZED (
-                  SELECT DISTINCT video_id FROM affected_occurrences
-                ), range_values AS MATERIALIZED (
-                  SELECT DISTINCT unnest(%s::text[]) AS range_id
-                ), overlay_occurrences AS MATERIALIZED (
-                  SELECT channel_id, video_id, song_key FROM jsonb_to_recordset(%s::jsonb)
-                    AS item(channel_id text, video_id text, song_key text)
-                ), affected_parent_videos AS MATERIALIZED (
-                  SELECT v.video_id, v.channel_id FROM runtime_videos AS v
-                  JOIN affected_channels AS affected ON affected.channel_id = v.channel_id
-                  LEFT JOIN affected_videos AS reset ON reset.video_id = v.video_id
-                  WHERE v.revision_id = %s AND reset.video_id IS NULL
-                ), fast_parent_occurrences AS (
-                  SELECT parent.channel_id, o.video_id, o.song_key
-                  FROM affected_parent_videos AS parent
-                  LEFT JOIN touched_occurrence_videos AS touched ON touched.video_id = parent.video_id
-                  JOIN runtime_occurrences AS o ON o.revision_id = %s AND o.video_id = parent.video_id
-                  JOIN range_values AS scope ON scope.range_id = o.range_id
-                  WHERE touched.video_id IS NULL
-                ), touched_parent_occurrences AS (
-                  SELECT parent.channel_id, o.video_id, o.song_key
-                  FROM affected_parent_videos AS parent
-                  JOIN touched_occurrence_videos AS touched ON touched.video_id = parent.video_id
-                  JOIN runtime_occurrences AS o ON o.revision_id = %s AND o.video_id = parent.video_id
-                  JOIN range_values AS scope ON scope.range_id = o.range_id
-                  LEFT JOIN affected_occurrences AS changed
-                    ON changed.video_id = o.video_id AND changed.occurrence_id = o.occurrence_id
-                  WHERE changed.occurrence_id IS NULL
-                ), combined AS (
-                  SELECT channel_id, video_id, song_key FROM fast_parent_occurrences
-                  UNION ALL SELECT channel_id, video_id, song_key FROM touched_parent_occurrences
-                  UNION ALL SELECT channel_id, video_id, song_key FROM overlay_occurrences
-                )
-                SELECT channel_id, count(*) AS row_count, count(DISTINCT video_id) AS video_count,
-                       count(DISTINCT song_key) AS song_count,
-                       bool_or(song_key = '') AS has_empty_song_key
-                FROM combined GROUP BY channel_id
-                """,
-                [sorted(affected_channel_ids), sorted(full_video_ids),
-                 [video_id for video_id, _ in sorted(affected_occurrence_ids)],
-                 [occurrence_id for _, occurrence_id in sorted(affected_occurrence_ids)],
-                 range_values, json.dumps(candidate_values, ensure_ascii=False),
-                 parent_revision_id, parent_revision_id, parent_revision_id],
+                parent_revision_id,
+                affected_channel_ids,
+                full_video_ids,
+                affected_occurrence_ids,
+                range_values,
+                candidate_values,
+                options,
+                direct_overlay_revision_ids,
+                runtime_full_video_ids,
             )
-            # The current producer invariant is nonempty song_key.  If it
-            # regresses, discard this index-only result and retain the legacy
-            # title/artist fallback instead of silently merging an empty key.
-            fast_default = not any(bool(row.get("has_empty_song_key")) for row in summaries)
-        exact_started = _phase_trace(
-            "exact_fast_preflight", exact_started,
-            fast_path=int(fast_default), empty_song_keys=int(not fast_default),
-        )
-
-        if not fast_default: summaries = _rows(
-            connection,
+            if channel_scope is None
+            else _rows(
+                connection,
             """
             WITH affected_channels AS MATERIALIZED (
               SELECT DISTINCT unnest(%s::text[]) AS channel_id
@@ -3011,12 +4969,16 @@ def _overlay_vtuber_replacement_rows(
               SELECT DISTINCT unnest(%s::text[]) AS range_id
             ),
             overlay_occurrences AS MATERIALIZED (
-              SELECT channel_id, video_id, song_key
+              SELECT channel_id, video_id, song_key, residual_match
               FROM jsonb_to_recordset(%s::jsonb)
-                AS item(channel_id text, video_id text, song_key text)
+                AS item(
+                  channel_id text, video_id text, song_key text,
+                  residual_match boolean
+                )
             ),
             affected_parent_videos AS MATERIALIZED (
-              SELECT v.video_id, v.channel_id
+              SELECT v.video_id, v.channel_id, v.title, v.channel_name,
+                     v.channel_handle
               FROM runtime_videos AS v
               JOIN affected_channels AS affected
                 ON affected.channel_id = v.channel_id
@@ -3024,44 +4986,113 @@ def _overlay_vtuber_replacement_rows(
                 ON touched.video_id = v.video_id
               WHERE v.revision_id = %s
                 AND touched.video_id IS NULL
+                AND EXISTS (
+                  SELECT 1
+                  FROM runtime_occurrences AS ranged
+                  JOIN range_values AS ranged_scope
+                    ON ranged_scope.range_id = ranged.range_id
+                  WHERE ranged.revision_id = %s
+                    AND ranged.video_id = v.video_id
+                )
+              ORDER BY v.video_id
+              LIMIT %s
             ),
-            parent_occurrences AS (
-              SELECT parent.channel_id, o.video_id,
-                     coalesce(
-                       nullif(o.song_key, ''),
-                       lower(coalesce(o.title, '')) || '::' ||
-                         lower(coalesce(o.artist, ''))
-                     ) AS song_key
+            bounded_parent_occurrences AS MATERIALIZED (
+              SELECT parent.channel_id, parent.channel_name,
+                     parent.channel_handle, parent.title AS video_title,
+                     o.video_id, o.occurrence_id, o.song_key, o.title,
+                     o.artist, o.source_id, o.source_system, o.payload_json
               FROM affected_parent_videos AS parent
               JOIN runtime_occurrences AS o
                 ON o.revision_id = %s
                AND o.video_id = parent.video_id
               JOIN range_values AS scope
                 ON scope.range_id = o.range_id
+              ORDER BY o.video_id, o.occurrence_id
+              LIMIT %s
+            ),
+            parent_occurrences AS (
+              SELECT parent.channel_id, parent.video_id,
+                     coalesce(
+                       nullif(parent.song_key, ''),
+                       lower(coalesce(parent.title, '')) || '::' ||
+                         lower(coalesce(parent.artist, ''))
+                     ) AS song_key,
+                     CASE
+                       WHEN cardinality(%s::text[]) = 0 THEN true
+                       ELSE NOT EXISTS (
+                         SELECT 1
+                         FROM unnest(%s::text[]) AS token(value)
+                         WHERE NOT (
+                           (%s AND lower(coalesce(parent.title, ''))
+                             LIKE '%%' || token.value || '%%' ESCAPE E'\\\\')
+                           OR (%s AND lower(coalesce(parent.artist, ''))
+                             LIKE '%%' || token.value || '%%' ESCAPE E'\\\\')
+                           OR (%s AND lower(
+                             coalesce(parent.channel_id, '') || ' ' ||
+                             coalesce(parent.channel_name, '') || ' ' ||
+                             coalesce(parent.channel_handle, '')
+                           ) LIKE '%%' || token.value || '%%' ESCAPE E'\\\\')
+                           OR (%s AND lower(
+                             coalesce(parent.video_id, '') || ' ' ||
+                             coalesce(parent.video_title, '')
+                           ) LIKE '%%' || token.value || '%%' ESCAPE E'\\\\')
+                           OR (%s AND lower(
+                             coalesce(parent.source_id, '') || ' ' ||
+                             coalesce(parent.source_system, '')
+                           ) LIKE '%%' || token.value || '%%' ESCAPE E'\\\\')
+                         )
+                       )
+                     END AS residual_match
+              FROM bounded_parent_occurrences AS parent
               LEFT JOIN affected_occurrences AS changed
-                ON changed.video_id = o.video_id
-               AND changed.occurrence_id = o.occurrence_id
+                ON changed.video_id = parent.video_id
+               AND changed.occurrence_id = parent.occurrence_id
               WHERE changed.occurrence_id IS NULL
-                AND (NOT %s OR nullif(o.artist, '') IS NOT NULL)
+                AND (NOT %s OR nullif(parent.artist, '') IS NOT NULL)
                 AND (
                   NOT %s
                   OR coalesce(
-                    o.payload_json::jsonb->>'isNiche',
-                    o.payload_json::jsonb->'payload'->>'isNiche',
+                    parent.payload_json::jsonb->>'isNiche',
+                    parent.payload_json::jsonb->'payload'->>'isNiche',
                     'false'
                   ) = 'true'
                 )
             ),
             combined AS (
-              SELECT channel_id, video_id, song_key FROM parent_occurrences
+              SELECT channel_id, video_id, song_key, residual_match
+              FROM parent_occurrences
               UNION ALL
-              SELECT channel_id, video_id, song_key FROM overlay_occurrences
+              SELECT channel_id, video_id, song_key, residual_match
+              FROM overlay_occurrences
+            ),
+            summaries AS (
+              SELECT channel_id, count(*) AS row_count,
+                     count(DISTINCT video_id) AS video_count,
+                     count(DISTINCT song_key) AS song_count,
+                     bool_or(residual_match) AS residual_match
+              FROM combined
+              GROUP BY channel_id
+            ),
+            guards AS (
+              SELECT
+                (SELECT count(*) FROM affected_parent_videos)
+                  AS parent_video_count,
+                (SELECT count(*) FROM bounded_parent_occurrences)
+                  AS parent_occurrence_count
             )
-            SELECT channel_id, count(*) AS row_count,
-                   count(DISTINCT video_id) AS video_count,
-                   count(DISTINCT song_key) AS song_count
-            FROM combined
-            GROUP BY channel_id
+            SELECT summary.channel_id, summary.row_count,
+                   summary.video_count, summary.song_count,
+                   summary.residual_match, guard.parent_video_count,
+                   guard.parent_occurrence_count
+            FROM summaries AS summary
+            CROSS JOIN guards AS guard
+            UNION ALL
+            SELECT '' AS channel_id, 0 AS row_count, 0 AS video_count,
+                   0 AS song_count, false AS residual_match,
+                   guard.parent_video_count, guard.parent_occurrence_count
+            FROM guards AS guard
+            ORDER BY channel_id
             """,
             [
                 sorted(affected_channel_ids),
@@ -3072,24 +5103,84 @@ def _overlay_vtuber_replacement_rows(
                 json.dumps(candidate_values, ensure_ascii=False),
                 parent_revision_id,
                 parent_revision_id,
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+                parent_revision_id,
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+                residual_sql_tokens,
+                residual_sql_tokens,
+                bool(residual_spec and residual_spec.get("title")),
+                bool(residual_spec and residual_spec.get("artist")),
+                bool(residual_spec and residual_spec.get("channel")),
+                bool(residual_spec and residual_spec.get("video")),
+                bool(residual_spec and residual_spec.get("source")),
                 bool(options.get("hideUnknownArtist")),
                 bool(options.get("nicheOnly")),
-            ],
+                ],
+            )
         )
+        guard_rows = [
+            row for row in summaries if not _text(row.get("channel_id"))
+        ]
+        if len(guard_rows) > 1:
+            raise PostgresAdapterError("bounded VTuber parent guard is ambiguous")
+        if guard_rows:
+            guard = guard_rows[0]
+            if int(guard.get("parent_video_count") or 0) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+                raise PostgresAdapterError("scoped VTuber parent video lookup exceeded cap")
+            if int(guard.get("parent_occurrence_count") or 0) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+                raise PostgresAdapterError(
+                    "scoped VTuber parent occurrence lookup exceeded cap"
+                )
+        summaries = [
+            row for row in summaries if _text(row.get("channel_id"))
+        ]
         exact_started = _phase_trace("exact_sql", exact_started, summary_rows=len(summaries))
         summary_by_channel = {
             _text(row.get("channel_id")): row
             for row in summaries
             if _text(row.get("channel_id"))
         }
+        preview_excluded_video_ids = tuple(sorted(full_video_ids))
+        preview_excluded_occurrence_ids = tuple(sorted(affected_occurrence_ids))
         exact: dict[str, dict[str, Any]] = {}
         replaced_video_ids = set(full_video_ids)
+        requested_parts = _vtuber_handle_query_parts(options)
+        requested_handle = (
+            _text(requested_parts.get("handle"))
+            if requested_parts is not None
+            else ""
+        )
         for channel_id in sorted(affected_channel_ids):
             summary = summary_by_channel.get(channel_id, {})
             base_row = base_groups.get(channel_id) or {}
             payload = _json_object(base_row.get("payload_json"))
             video = dict(candidate_videos.get(channel_id) or {})
-            handle = _text(video.get("channelHandle"))
+            base_detail_key = _text(base_row.get("detail_key"))
+            payload_channel_id = _text(payload.get("channelId"))
+            if (
+                (base_detail_key and base_detail_key != channel_id)
+                or (payload_channel_id and payload_channel_id != channel_id)
+            ):
+                raise PostgresAdapterError(
+                    "VTuber base channel metadata identity is invalid"
+                )
+            candidate_channel_id = _text(video.get("channelId"))
+            if candidate_channel_id and candidate_channel_id != channel_id:
+                raise PostgresAdapterError(
+                    "VTuber candidate channel metadata identity is invalid"
+                )
+            candidate_handle = _text(video.get("channelHandle"))
+            base_handle = _text(payload.get("channelHandle"))
+            if (
+                not candidate_handle
+                and requested_handle
+                and base_handle
+                and _normalized_channel_handle(base_handle) != requested_handle
+            ):
+                raise PostgresAdapterError(
+                    "VTuber base channel metadata identity is invalid"
+                )
+            handle = candidate_handle or base_handle
             channel_url = _canonical_channel_url(channel_id, handle)
             name = _text(video.get("channelName")) or _text(payload.get("channelName")) or channel_id
             base_previews: list[dict[str, Any]] = []
@@ -3132,7 +5223,7 @@ def _overlay_vtuber_replacement_rows(
                 "name": name,
                 "channelName": name,
                 "channelId": channel_id,
-                "channelHandle": handle or payload.get("channelHandle", ""),
+                "channelHandle": handle,
                 "channelUrl": channel_url,
                 "_canonicalChannelUrl": channel_url,
                 "count": int(summary.get("row_count") or 0),
@@ -3154,21 +5245,29 @@ def _overlay_vtuber_replacement_rows(
                 "timestamp_count": int(summary.get("row_count") or 0),
                 "payload_json": payload,
                 "search_text": "",
-                "channel_search_text": "",
+                "channel_search_text": " ".join(
+                    value
+                    for value in (channel_id, handle, name)
+                    if _text(value)
+                ),
+                "_residual_match": bool(summary.get("residual_match")),
+                "_preview_excluded_video_ids": preview_excluded_video_ids,
+                "_preview_excluded_occurrence_ids": preview_excluded_occurrence_ids,
+                "_requires_preview_hydration": bool(
+                    int(summary.get("row_count") or 0) > 0 and not previews
+                ),
             }
-        if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
-            _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
-        _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+        with _VTUBER_REPLACEMENT_CACHE_LOCK:
+            if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
+                _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
+            _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
         _phase_trace(
             "exact_finalize",
             exact_started,
             output_channels=len(exact),
             preview_channels=len(candidate_previews),
         )
-        return {
-            key: {**row, "payload_json": dict(row.get("payload_json") or {})}
-            for key, row in exact.items()
-        }
+        return copy.deepcopy(exact)
 
     parent_video_rows = _rows(
         connection,
@@ -3177,10 +5276,26 @@ def _overlay_vtuber_replacement_rows(
                channel_url, published_timestamp, payload_json
         FROM runtime_videos
         WHERE revision_id = %s AND channel_id = ANY(%s)
+          AND EXISTS (
+            SELECT 1
+            FROM runtime_occurrences AS ranged
+            WHERE ranged.revision_id = %s
+              AND ranged.video_id = runtime_videos.video_id
+              AND ranged.range_id = ANY(%s)
+          )
         ORDER BY video_id
+        LIMIT %s
         """,
-        [parent_revision_id, sorted(affected_channel_ids)],
+        [
+            parent_revision_id,
+            sorted(affected_channel_ids),
+            parent_revision_id,
+            range_values,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
     )
+    if len(parent_video_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("bounded VTuber parent video lookup exceeded cap")
     parent_video_ids = [
         _text(row.get("video_id"))
         for row in parent_video_rows
@@ -3192,11 +5307,23 @@ def _overlay_vtuber_replacement_rows(
         SELECT occurrence_id, range_id, video_id, song_key, seconds,
                source_system, source_id, title, artist, payload_json
         FROM runtime_occurrences
-        WHERE revision_id = %s AND video_id = ANY(%s)
+        WHERE revision_id = %s
+          AND video_id = ANY(%s)
+          AND range_id = ANY(%s)
         ORDER BY video_id, range_id, occurrence_id
+        LIMIT %s
         """,
-        [parent_revision_id, parent_video_ids],
+        [
+            parent_revision_id,
+            parent_video_ids,
+            range_values,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
     ) if parent_video_ids else []
+    if len(parent_occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "bounded VTuber parent occurrence lookup exceeded cap"
+        )
     parent_by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for occurrence in parent_occurrence_rows:
         parent_by_video[_text(occurrence.get("video_id"))].append(occurrence)
@@ -3301,13 +5428,21 @@ def _overlay_vtuber_replacement_rows(
             "search_text": json.dumps(payload, ensure_ascii=False),
             "channel_search_text": json.dumps(payload, ensure_ascii=False),
         }
-    if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
-        _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
-    _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
-    return {
-        key: {**row, "payload_json": dict(row.get("payload_json") or {})}
-        for key, row in exact.items()
-    }
+    preview_excluded_video_ids = tuple(sorted(full_video_ids))
+    preview_excluded_occurrence_ids = tuple(sorted(affected_occurrence_ids))
+    for row in exact.values():
+        payload = _json_object(row.get("payload_json"))
+        row["_preview_excluded_video_ids"] = preview_excluded_video_ids
+        row["_preview_excluded_occurrence_ids"] = preview_excluded_occurrence_ids
+        row["_requires_preview_hydration"] = bool(
+            int(row.get("row_count") or 0) > 0
+            and not (payload.get("occurrences") or ())
+        )
+    with _VTUBER_REPLACEMENT_CACHE_LOCK:
+        if len(_VTUBER_REPLACEMENT_CACHE) >= 8:
+            _VTUBER_REPLACEMENT_CACHE.pop(next(iter(_VTUBER_REPLACEMENT_CACHE)))
+        _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
+    return copy.deepcopy(exact)
 
 
 def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
@@ -3537,27 +5672,97 @@ def _accepted_reset_identity_evidence(
     return _canonical_accepted_reset_row(candidate)
 
 
-def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    """Return bounded candidate rankings from parent aggregates plus delta rows."""
+def _prepare_generic_overlay_rankings(
+    connection,
+    revision_id: str,
+    parent: tuple[str, Mapping[str, Any]],
+    options: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Build the page-independent generic overlay aggregate once per spec."""
 
     phase_started = time.perf_counter()
-    parent = _generic_parent_runtime_revision(connection, revision_id, revision)
-    if not parent:
-        raise PostgresAdapterError("incremental candidate has no full runtime parent")
-    options = _query_options(query)
+    if _invalid_vtuber_handle_query(options):
+        return {
+            "filtered": (),
+            "metadata": (),
+            "candidateRows": (),
+            "parentRevisionId": parent[0],
+            "exactAffectedChannelIds": (),
+            "previewExcludedVideoIds": (),
+            "previewExcludedOccurrenceIds": (),
+        }
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
+    vtuber_residual_spec = _vtuber_residual_search_spec(options)
+    exact_channel_scope = _resolve_exact_vtuber_channel_scope(
+        connection, parent[0], overlay_ids, options,
+    )
+    phase_started = _phase_trace(
+        "channel_resolve",
+        phase_started,
+        exact_scope=(
+            len(exact_channel_scope)
+            if exact_channel_scope is not None
+            else 0
+        ),
+    )
+    if exact_channel_scope == ():
+        return {
+            "filtered": (),
+            "metadata": (),
+            "candidateRows": (),
+            "parentRevisionId": parent[0],
+            "exactAffectedChannelIds": (),
+            "previewExcludedVideoIds": (),
+            "previewExcludedOccurrenceIds": (),
+        }
+    exact_parent_video_ids = (
+        _bounded_parent_video_ids_for_channel_scope(
+            connection, parent[0], exact_channel_scope, options["range"],
+        )
+        if exact_channel_scope is not None
+        else ()
+    )
     search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
     base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
-    for token in options["searchTokens"]:
-        search_clause += " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
-        needle = f"%{token}%"
-        base_params.extend([needle, needle])
+    if exact_channel_scope is not None:
+        search_clause = " AND detail_key = ANY(%s)"
+        base_params.append(list(exact_channel_scope))
+        if vtuber_residual_spec is not None:
+            occurrence_fields = any(
+                bool(vtuber_residual_spec.get(field))
+                for field in ("title", "artist", "video", "source")
+            )
+            channel_fields = bool(vtuber_residual_spec.get("channel"))
+            for token in vtuber_residual_spec["tokens"]:
+                predicates: list[str] = []
+                if occurrence_fields:
+                    predicates.append("search_text ILIKE %s ESCAPE E'\\\\'")
+                    base_params.append(f"%{_sql_like_literal(token)}%")
+                if channel_fields:
+                    predicates.append("channel_search_text ILIKE %s ESCAPE E'\\\\'")
+                    base_params.append(f"%{_sql_like_literal(token)}%")
+                search_clause += (
+                    " AND (" + " OR ".join(predicates) + ")"
+                    if predicates
+                    else " AND FALSE"
+                )
+    else:
+        for token in options["searchTokens"]:
+            search_clause += " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
+            needle = f"%{token}%"
+            base_params.extend([needle, needle])
+    base_payload_select = (
+        "payload_json"
+        if options["view"] == "vtubers" and exact_channel_scope is not None
+        else "NULL::jsonb AS payload_json"
+    )
     base_rows = _rows(
         connection,
         f"""
         SELECT rank, detail_key, title, artist, name, row_count, song_count,
-               video_count, timestamp_count, {search_select}
+               video_count, timestamp_count, {base_payload_select}, {search_select}
         FROM runtime_ranking_rows
         WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
           {search_clause}
@@ -3567,12 +5772,40 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
     phase_started = _phase_trace("base", phase_started)
-    overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
-    candidate_rows = _overlay_candidate_rows(connection, overlay_ids, False)
+    direct_overlay_revision_ids = (
+        tuple(overlay_ids)
+        if (
+            options["view"] == "vtubers"
+            and exact_channel_scope is None
+            and not options.get("q")
+            and not bool(options.get("nicheOnly"))
+            and not bool(options.get("hideUnknownArtist"))
+            and hasattr(connection, "cursor")
+        )
+        else ()
+    )
+    candidate_rows = (
+        []
+        if direct_overlay_revision_ids
+        else _overlay_candidate_rows(
+            connection,
+            overlay_ids,
+            False,
+            exact_channel_scope if options["view"] == "vtubers" else None,
+            exact_parent_video_ids if exact_channel_scope is not None else None,
+            options["range"] if exact_channel_scope is not None else "",
+        )
+    )
     all_candidate_rows = tuple(candidate_rows)
     phase_started = _phase_trace("overlay", phase_started)
     accepted_video_resets = _accepted_video_resets(
-        connection, overlay_ids, False, options["view"] == "vtubers",
+        connection,
+        overlay_ids,
+        False,
+        options["view"] == "vtubers",
+        parent[0] if exact_channel_scope is not None else "",
+        exact_channel_scope if options["view"] == "vtubers" else None,
+        exact_parent_video_ids if exact_channel_scope is not None else None,
     )
     if options["view"] == "vtubers" and accepted_video_resets:
         # A selected accepted reset is immutable evidence.  Its historical
@@ -3611,15 +5844,24 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             canonical_rows.append(canonical)
         candidate_rows = canonical_rows
         all_candidate_rows = tuple(candidate_rows)
-    reset_changes = _accepted_video_reset_changes(
-        connection, parent[0], accepted_video_resets, options,
+    reset_changes = (
+        _accepted_video_reset_identity_changes(
+            connection, parent[0], accepted_video_resets,
+        )
+        if direct_overlay_revision_ids
+        else _accepted_video_reset_changes(
+            connection, parent[0], accepted_video_resets, options,
+        )
     )
     runtime_changes_all = _runtime_tombstones(
         connection,
         overlay_ids,
-        accepted_video_resets.values() if accepted_video_resets else None,
+        accepted_video_resets.values(),
         all_candidate_rows,
         options["view"] == "vtubers",
+        parent[0] if exact_channel_scope is not None else "",
+        exact_channel_scope if options["view"] == "vtubers" else None,
+        exact_parent_video_ids if exact_channel_scope is not None else None,
     )
     phase_started = _phase_trace("reset", phase_started)
     candidate_rows = _overlay_rows_for_range(candidate_rows, options["range"])
@@ -3627,7 +5869,20 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     # The exact VTuber query is physical-range scoped.  Do not pass the
     # lineage-wide candidate list: a legacy/all row must not leak into 7d,
     # and a 7d row must not perturb the all aggregate.
-    exact_candidate_rows = tuple(candidate_rows)
+    if exact_channel_scope is None:
+        exact_candidate_rows = tuple(candidate_rows)
+    else:
+        exact_scope_set = {
+            _text(value) for value in exact_channel_scope if _text(value)
+        }
+        exact_candidate_rows = tuple(
+            row
+            for row in candidate_rows
+            if _text(
+                _overlay_public_video(row).get("channelId")
+                or row.get("channel_id")
+            ) in exact_scope_set
+        )
     # Legacy parent occurrences can lack their denormalised channel fields.
     # Resolve those fields only through the parent runtime-video tuple for the
     # same immutable video.  Accepted resets need the same bounded repair as
@@ -3716,12 +5971,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             evidence.get("channel_name") or evidence_video.get("channelName"),
         )
         _validated_overlay_change_identity(change, evidence, validate_urls=False)
-    _enrich_runtime_original_group_counts(
-        connection,
-        parent[0],
-        candidate_rows,
-        [*reset_changes, *runtime_changes],
-    )
+    if options["view"] != "vtubers":
+        _enrich_runtime_original_group_counts(
+            connection,
+            parent[0],
+            candidate_rows,
+            [*reset_changes, *runtime_changes],
+        )
     # The selected accepted video is a replacement boundary, not another
     # increment.  Remove all parent occurrences for its video before adding
     # the non-tombstone candidate projection below.  A later runtime curation
@@ -3749,7 +6005,50 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         runtime_changes,
         options["view"] == "vtubers",
     )
+    exact_reset_changes = tuple(reset_changes)
+    exact_runtime_changes = tuple(runtime_changes)
     exact_replacement_rows = tuple(replacement_rows)
+    if exact_channel_scope is not None:
+        exact_scope_set = {
+            _text(value) for value in exact_channel_scope if _text(value)
+        }
+        exact_replacement_rows = tuple(
+            row
+            for row in exact_replacement_rows
+            if _validated_overlay_change_identity(
+                row, validate_urls=False,
+            )[1] in exact_scope_set
+        )
+        replacement_identities = {
+            (
+                _text(row.get("videoId") or row.get("video_id")),
+                _text(row.get("occurrenceId") or row.get("occurrence_id")),
+            )
+            for row in exact_replacement_rows
+        }
+        exact_reset_changes = tuple(
+            change
+            for change in exact_reset_changes
+            if _validated_overlay_change_identity(
+                change, validate_urls=False,
+            )[1] in exact_scope_set
+        )
+        exact_runtime_changes = tuple(
+            change
+            for change in exact_runtime_changes
+            if (
+                _validated_overlay_change_identity(
+                    change, validate_urls=False,
+                )[1] in exact_scope_set
+                or (
+                    _text(change.get("videoId") or change.get("video_id")),
+                    _text(
+                        change.get("occurrenceId")
+                        or change.get("occurrence_id")
+                    ),
+                ) in replacement_identities
+            )
+        )
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         candidate_rows = [*candidate_rows, *replacement_rows]
     elif options["view"] == "artists":
@@ -3762,7 +6061,9 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             *candidate_rows,
             *(row for row in replacement_rows if not row.get("replacement_same_video")),
         ]
-    if options["searchTokens"]:
+    if options["searchTokens"] and not (
+        options["view"] == "vtubers" and exact_channel_scope is not None
+    ):
         candidate_rows = [
             row for row in candidate_rows
             if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
@@ -3792,7 +6093,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     )
     exact_required = bool(
         options["view"] == "vtubers"
-        and (exact_candidate_rows or reset_changes or runtime_changes or exact_replacement_rows)
+        and (
+            exact_candidate_rows
+            or exact_reset_changes
+            or exact_runtime_changes
+            or exact_replacement_rows
+            or (direct_overlay_revision_ids and accepted_video_resets)
+        )
     )
     exact_vtuber_rows = (
         _overlay_vtuber_replacement_rows(
@@ -3802,11 +6109,13 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
             exact_candidate_rows,
             options,
             groups,
-            reset_changes,
-            runtime_changes,
+            exact_reset_changes,
+            exact_runtime_changes,
             exact_replacement_rows,
             accepted_video_resets,
             exact_required,
+            exact_channel_scope,
+            direct_overlay_revision_ids,
         )
         if options["view"] == "vtubers"
         else {}
@@ -3881,18 +6190,185 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
     filtered = []
     for row in groups.values():
         search = f"{row.get('search_text', '')} {row.get('channel_search_text', '')}".casefold()
-        if options["searchTokens"] and not _matches_search_tokens(search, options["searchTokens"]):
+        exact_key = _text(row.get("detail_key"))
+        if (
+            vtuber_residual_spec is not None
+            and exact_key in exact_vtuber_rows
+        ):
+            if (
+                vtuber_residual_spec["tokens"]
+                and not bool(row.get("_residual_match"))
+            ):
+                continue
+        elif options["searchTokens"] and not _matches_search_tokens(
+            search, options["searchTokens"],
+        ):
             continue
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
         filtered.append(row)
     filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
+    metadata = (
+        (
+            _channel_metadata_rows(
+                connection,
+                [revision_id, *overlay_ids, parent[0]],
+                exact_channel_scope,
+            )
+            if exact_channel_scope is not None
+            else _channel_metadata_rows(
+                connection,
+                [revision_id, *overlay_ids, parent[0]],
+            )
+        )
+        if options["view"] == "vtubers"
+        else []
+    )
+    preview_excluded_video_ids = tuple(sorted({
+        _text(video_id)
+        for row in exact_vtuber_rows.values()
+        for video_id in row.get("_preview_excluded_video_ids", ())
+        if _text(video_id)
+    }))
+    preview_excluded_occurrence_ids = tuple(sorted({
+        (_text(video_id), _text(occurrence_id))
+        for row in exact_vtuber_rows.values()
+        for video_id, occurrence_id in row.get(
+            "_preview_excluded_occurrence_ids", ()
+        )
+        if _text(video_id) and _text(occurrence_id)
+    }))
+    overlay_preview_excluded_video_ids = tuple(sorted({
+        _text(change.get("videoId") or change.get("video_id"))
+        for change in runtime_changes
+        if (
+            _text(change.get("entityType") or change.get("entity_type"))
+            in {"videos", "runtime_videos"}
+            and not bool(change.get("acceptedVideoReset"))
+            and _text(change.get("videoId") or change.get("video_id"))
+        )
+    }))
+    return {
+        "filtered": tuple(dict(row) for row in filtered),
+        "metadata": tuple(dict(row) for row in metadata),
+        "candidateRows": tuple(dict(row) for row in candidate_rows),
+        "parentRevisionId": parent[0],
+        "overlayRevisionIds": tuple(direct_overlay_revision_ids),
+        "overlayPreviewExcludedVideoIds": overlay_preview_excluded_video_ids,
+        "exactAffectedChannelIds": tuple(sorted(exact_vtuber_rows)),
+        "previewExcludedVideoIds": preview_excluded_video_ids,
+        "previewExcludedOccurrenceIds": preview_excluded_occurrence_ids,
+    }
+
+
+def _generic_ranking_preparation_key(
+    revision_id: str,
+    parent_revision_id: str,
+    options: Mapping[str, Any],
+) -> tuple[Any, ...]:
+    """Identify only inputs that alter the expensive immutable aggregate."""
+
+    return (
+        revision_id,
+        parent_revision_id,
+        _text(options.get("range")),
+        _text(options.get("view")),
+        _text(options.get("metric")),
+        _text(options.get("q")),
+        _text(options.get("searchScope")),
+        tuple(_text(value) for value in (options.get("searchFields") or ())),
+        int(options.get("minCount") or 0),
+        bool(options.get("nicheOnly")),
+        bool(options.get("hideUnknownArtist")),
+    )
+
+
+def _cached_generic_ranking_preparation(
+    key: tuple[Any, ...],
+    build,
+) -> Mapping[str, Any]:
+    """Return one successful immutable preparation, with bounded single-flight."""
+
+    with _GENERIC_RANKING_PREPARATION_LOCK:
+        cached = _GENERIC_RANKING_PREPARATION_CACHE.get(key)
+        if cached is not None:
+            _GENERIC_RANKING_PREPARATION_CACHE.move_to_end(key)
+            return cached
+        flight = _GENERIC_RANKING_PREPARATION_FLIGHTS.get(key)
+        if flight is None:
+            flight = _RankingPreparationFlight(threading.Event())
+            _GENERIC_RANKING_PREPARATION_FLIGHTS[key] = flight
+            leader = True
+        else:
+            leader = False
+    if not leader:
+        flight.event.wait()
+        if flight.error is not None:
+            raise flight.error
+        if flight.result is not None:
+            return flight.result
+        raise PostgresAdapterError("generic ranking preparation completed without a cache value")
+    try:
+        prepared = build()
+    except BaseException as exc:
+        with _GENERIC_RANKING_PREPARATION_LOCK:
+            flight.error = exc
+            _GENERIC_RANKING_PREPARATION_FLIGHTS.pop(key, None)
+            flight.event.set()
+        raise
+    with _GENERIC_RANKING_PREPARATION_LOCK:
+        flight.result = prepared
+        _GENERIC_RANKING_PREPARATION_CACHE[key] = prepared
+        _GENERIC_RANKING_PREPARATION_CACHE.move_to_end(key)
+        while len(_GENERIC_RANKING_PREPARATION_CACHE) > _GENERIC_RANKING_PREPARATION_CAP:
+            _GENERIC_RANKING_PREPARATION_CACHE.popitem(last=False)
+        _GENERIC_RANKING_PREPARATION_FLIGHTS.pop(key, None)
+        flight.event.set()
+    return prepared
+
+
+def _render_generic_overlay_rankings(
+    connection,
+    prepared: Mapping[str, Any],
+    query: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Render a fresh page from a cached aggregate without sharing payloads."""
+
+    options = _query_options(query)
+    filtered = prepared["filtered"]
+    metadata = prepared["metadata"]
+    candidate_rows = prepared["candidateRows"]
+    parent_revision_id = _text(prepared.get("parentRevisionId"))
+    preview_excluded_video_ids = tuple(
+        _text(value)
+        for value in prepared.get("previewExcludedVideoIds", ())
+        if _text(value)
+    )
+    preview_excluded_occurrence_ids = tuple(
+        (_text(video_id), _text(occurrence_id))
+        for video_id, occurrence_id in prepared.get(
+            "previewExcludedOccurrenceIds", ()
+        )
+        if _text(video_id) and _text(occurrence_id)
+    )
+    overlay_revision_ids = tuple(
+        _text(value)
+        for value in prepared.get("overlayRevisionIds", ())
+        if _text(value)
+    )
+    overlay_preview_excluded_video_ids = tuple(
+        _text(value)
+        for value in prepared.get("overlayPreviewExcludedVideoIds", ())
+        if _text(value)
+    )
+    if not parent_revision_id:
+        raise PostgresAdapterError("generic ranking preparation is missing its parent revision")
+    db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
     total = len(filtered)
     offset = (options["page"] - 1) * options["pageSize"]
-    metadata = _channel_metadata_rows(connection, [revision_id, *overlay_ids, parent[0]]) if options["view"] == "vtubers" else []
     records = []
     for index, row in enumerate(filtered[offset:offset + options["pageSize"]], start=offset + 1):
-        payload = _json_object(row.get("payload_json"))
+        payload = copy.deepcopy(_json_object(row.get("payload_json")))
         if not payload:
             stored = _one(
                 connection,
@@ -3902,7 +6378,7 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
                   AND metric = %s AND detail_key = %s
                 LIMIT 1
                 """,
-                [parent[0], options["range"], options["view"], db_metric, row.get("detail_key")],
+                [parent_revision_id, options["range"], options["view"], db_metric, row.get("detail_key")],
             )
             payload = _json_object(stored.get("payload_json")) if stored else {}
         if options["view"] == "vtubers":
@@ -3916,7 +6392,68 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         payload["rank"] = index
         records.append(payload)
     _hydrate_overlay_page_previews(connection, candidate_rows, records)
-    _phase_trace("hydrate", phase_started)
+    if options["view"] == "vtubers":
+        missing_preview_channels: list[str] = []
+        records_by_channel: dict[str, dict[str, Any]] = {}
+        for record in records:
+            channel_id = _text(record.get("channelId") or record.get("key"))
+            if channel_id:
+                records_by_channel[channel_id] = record
+            try:
+                positive = (
+                    int(record.get("count") or 0) > 0
+                    or int(record.get("timestampCount") or 0) > 0
+                )
+            except (TypeError, ValueError) as exc:
+                raise PostgresAdapterError("VTuber ranking card count is invalid") from exc
+            occurrences = record.get("occurrences")
+            if positive and (not isinstance(occurrences, list) or not occurrences):
+                if not channel_id:
+                    raise PostgresAdapterError(
+                        "positive VTuber ranking card has no canonical occurrence preview"
+                    )
+                missing_preview_channels.append(channel_id)
+        if missing_preview_channels:
+            overlay_previews = _bounded_direct_overlay_vtuber_previews(
+                connection,
+                overlay_revision_ids,
+                missing_preview_channels,
+                options["range"],
+                excluded_video_ids=overlay_preview_excluded_video_ids,
+                excluded_occurrence_ids=preview_excluded_occurrence_ids,
+            )
+            for channel_id, preview in overlay_previews.items():
+                records_by_channel[channel_id]["occurrences"] = [preview]
+            missing_preview_channels = [
+                channel_id
+                for channel_id in missing_preview_channels
+                if channel_id not in overlay_previews
+            ]
+        if missing_preview_channels:
+            try:
+                hydrated_parent_previews = _bounded_final_vtuber_previews(
+                    connection,
+                    parent_revision_id,
+                    missing_preview_channels,
+                    options["range"],
+                    excluded_video_ids=preview_excluded_video_ids,
+                    excluded_occurrence_ids=preview_excluded_occurrence_ids,
+                    niche_only=bool(options.get("nicheOnly")),
+                    hide_unknown_artist=bool(options.get("hideUnknownArtist")),
+                )
+            except PostgresAdapterError as exc:
+                if str(exc) == (
+                    "bounded VTuber preview query returned an inexact channel set"
+                ):
+                    raise PostgresAdapterError(
+                        "positive VTuber ranking card has no canonical occurrence preview"
+                    ) from exc
+                raise
+            for channel_id, preview in hydrated_parent_previews.items():
+                records_by_channel[channel_id]["occurrences"] = [preview]
+        for record in records:
+            channel_id = _text(record.get("channelId") or record.get("key"))
+            _canonicalize_vtuber_card_preview(record, channel_id)
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -3927,6 +6464,26 @@ def _generic_overlay_rankings_payload(connection, revision_id: str, revision: Ma
         "totalVideoCount": sum(int(row.get("video_count") or 0) for row in filtered),
         "pageCount": max(1, math.ceil(total / options["pageSize"])), "compact": options["compact"], "records": records,
     }
+
+
+def _generic_overlay_rankings_payload(
+    connection,
+    revision_id: str,
+    revision: Mapping[str, Any],
+    query: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Share immutable aggregation across concurrent pages, then render locally."""
+
+    options = _query_options(query)
+    parent = _generic_parent_runtime_revision(connection, revision_id, revision)
+    if not parent:
+        raise PostgresAdapterError("incremental candidate has no full runtime parent")
+    key = _generic_ranking_preparation_key(revision_id, parent[0], options)
+    prepared = _cached_generic_ranking_preparation(
+        key,
+        lambda: _prepare_generic_overlay_rankings(connection, revision_id, parent, options),
+    )
+    return _render_generic_overlay_rankings(connection, prepared, query)
 
 
 def _revision_lineage(connection, revision_id: str) -> list[str]:
