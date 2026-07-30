@@ -110,6 +110,8 @@ on:
         required: false
         default: ""
     secrets:
+      VPS2_HOST:
+        required: true
       VPS2_PASSWORD:
         required: true
       VPS2_KNOWN_HOSTS:
@@ -129,7 +131,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 15
     env:
-      VPS2_HOST: ${{ vars.VPS2_HOST }}
+      VPS2_HOST: ${{ secrets.VPS2_HOST }}
       VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
       EXPECTED_CURRENT_REVISION: ${{ inputs.rollback_expected_current_revision || '' }}
@@ -551,7 +553,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 45
     env:
-      VPS2_HOST: ${{ vars.VPS2_HOST }}
+      VPS2_HOST: ${{ secrets.VPS2_HOST }}
       VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
       PATCH_PATH: ${{ inputs.patch_path || github.event.client_payload.patch_path || 'artifacts/migration/candidate.ndjson' }}

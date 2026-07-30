@@ -16,6 +16,10 @@ const acceptedWorkflow = fs.readFileSync(
   path.resolve(".github/workflows/deploy-pg-accepted-increment.yml"),
   "utf8",
 );
+const recoveryWorkflow = fs.readFileSync(
+  path.resolve(".github/workflows/recover-urameshi-source.yml"),
+  "utf8",
+);
 
 function workflowRunBlocks(workflow) {
   const lines = workflow.split(/\r?\n/u);
@@ -942,4 +946,34 @@ test("workflow-run accepted conversion sorts repository paths and uses a stable 
   assert.match(deployWorkflow, /ACCEPTED_ROOT="\$TASK_ROOT\/repository"/u);
   assert.match(deployWorkflow, /destination="\$ACCEPTED_ROOT\/\$source_path"/u);
   assert.match(deployWorkflow, /--source-root "\$ACCEPTED_ROOT"/u);
+});
+
+test("VPS host is a required reusable secret injected into both release jobs", () => {
+  const reusableSecretBlock =
+    /^    secrets:\n      VPS2_HOST:\n        required: true\n      VPS2_PASSWORD:\n        required: true\n      VPS2_KNOWN_HOSTS:\n        required: true$/mu;
+  const secretHostInjection =
+    /^\s{6}VPS2_HOST: \$\{\{ secrets\.VPS2_HOST \}\}$/gmu;
+  const publicHostInjection =
+    /^\s{6}VPS2_HOST: \$\{\{ vars\.VPS2_HOST \}\}$/mu;
+  const secretHostContractHolds = (candidateText) => (
+    reusableSecretBlock.test(candidateText)
+    && (candidateText.match(secretHostInjection) ?? []).length === 2
+    && !publicHostInjection.test(candidateText)
+  );
+  assert.equal(secretHostContractHolds(deployWorkflow), true);
+  const publicVariableReintroduced = deployWorkflow.replaceAll(
+    "VPS2_HOST: ${{ secrets.VPS2_HOST }}",
+    "VPS2_HOST: ${{ vars.VPS2_HOST }}",
+  );
+  const requiredSecretRelaxed = deployWorkflow.replace(
+    "      VPS2_HOST:\n        required: true",
+    "      VPS2_HOST:\n        required: false",
+  );
+  assert.equal(secretHostContractHolds(publicVariableReintroduced), false);
+  assert.equal(secretHostContractHolds(requiredSecretRelaxed), false);
+  const inheritedReusableCall =
+    /^\s{4}uses: \.\/\.github\/workflows\/deploy-pg-incremental\.yml\n[\s\S]*?^\s{4}secrets: inherit$/mu;
+  for (const caller of [acceptedWorkflow, recoveryWorkflow]) {
+    assert.match(caller, inheritedReusableCall);
+  }
 });

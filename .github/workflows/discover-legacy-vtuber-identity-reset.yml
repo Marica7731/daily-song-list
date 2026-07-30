@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 30
     env:
       EXPECTED_ACTIVE_REVISION: ${{ inputs.expected_active_revision }}
-      VPS2_HOST: ${{ vars.VPS2_HOST }}
+      VPS2_HOST: ${{ secrets.VPS2_HOST }}
       VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
       VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}
       TASK_CAP_BYTES: "2147483648"

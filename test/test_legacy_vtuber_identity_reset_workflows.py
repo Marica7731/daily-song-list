@@ -126,7 +126,7 @@ class WorkflowContractTests(unittest.TestCase):
             "ulimit -v 2097152",
             "export-parent",
             "cleanupExpectedAfterBytes",
-            "VPS2_HOST: ${{ vars.VPS2_HOST }}",
+            "VPS2_HOST: ${{ secrets.VPS2_HOST }}",
             "VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}",
             "StrictHostKeyChecking=yes",
             "UserKnownHostsFile=",
@@ -142,6 +142,7 @@ class WorkflowContractTests(unittest.TestCase):
             "activate-pg-revision",
             "--fresh",
             "StrictHostKeyChecking=no",
+            "VPS2_HOST: ${{ vars.VPS2_HOST }}",
         ):
             self.assertNotIn(forbidden, source)
         self.assertNotRegex(source, r"VPS2_HOST:\s*[\"']?\d{1,3}\.")
@@ -339,7 +340,21 @@ printf '%s %s %s\n' "$status" "$delete_calls" "$absent_calls"
             self.assertNotIn("StrictHostKeyChecking=no", source)
             self.assertNotRegex(source, r"VPS2_HOST:\s*[\"']?\d{1,3}\.")
         incremental = WORKFLOWS[2].read_text(encoding="utf-8")
-        self.assertIn("VPS2_HOST: ${{ vars.VPS2_HOST }}", incremental)
+        self.assertNotIn("VPS2_HOST: ${{ vars.VPS2_HOST }}", incremental)
+        self.assertEqual(
+            incremental.count("VPS2_HOST: ${{ secrets.VPS2_HOST }}"),
+            2,
+        )
+        self.assertIn(
+            "secrets:\n"
+            "      VPS2_HOST:\n"
+            "        required: true\n"
+            "      VPS2_PASSWORD:\n"
+            "        required: true\n"
+            "      VPS2_KNOWN_HOSTS:\n"
+            "        required: true",
+            incremental,
+        )
         self.assertIn(
             "VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}",
             incremental,
