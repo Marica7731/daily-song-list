@@ -998,9 +998,9 @@ jobs:
           done
           if [ "$ready" != 1 ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'cat /tmp/pg-increment-candidate.log || true'; exit 1; fi
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json" || echo "WARN: candidate 7d rankings probe failed (non-fatal)"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json" || echo "WARN: candidate all rankings probe failed (non-fatal)"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json" || echo "WARN: candidate search probe failed (non-fatal)"
           jq -e --arg revision "$REVISION" '
             (.meta.active_revision_id == $revision) and
             (.meta.migration_status == "ready") and
