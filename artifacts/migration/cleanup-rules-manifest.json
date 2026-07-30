@@ -1,0 +1,420 @@
+{
+  "kind": "curation-rules-manifest",
+  "schemaVersion": 3,
+  "sourceCommit": "193ef62f70b7ac60684957e2f665838df61697b9",
+  "batchTag": "full-library-cleanup-20260731",
+  "status": "needs_current_active_evidence",
+  "ready": false,
+  "pendingCurrentActiveEvidence": {
+    "reason": "full-library dirty-data cleanup requires current-active snapshot binding",
+    "activeRevisionDispatchBaseline": "accepted_30402041297_1",
+    "controllerMustRecheckActiveRevisionImmediatelyBeforeDispatch": true,
+    "knownTupleSchema": "videoId+seconds",
+    "zeroScopeIsNeverReady": true
+  },
+  "records": [
+    {
+      "ruleId": "cleanup-u_jJcVG6818-7881-b7c219ae",
+      "action": "drop_entry",
+      "videoId": "u_jJcVG6818",
+      "seconds": 7881,
+      "title": "11時から6時までが”昼”",
+      "artist": "11 AM to 6 PM Is “Daytime”",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=u_jJcVG6818&t=7881s"
+      ],
+      "reviewedAt": "2026-07-30T17:48:33.596797+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-OHwbeLP4Cdw-445-6d603acc",
+      "action": "drop_entry",
+      "videoId": "OHwbeLP4Cdw",
+      "seconds": 445,
+      "title": "SPiCa 歌動画",
+      "artist": "\"SPiCa\" singing video",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=OHwbeLP4Cdw&t=445s"
+      ],
+      "reviewedAt": "2026-07-30T17:48:40.883553+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-yBwvUMnjdGs-7442-ca41d67d",
+      "action": "drop_entry",
+      "videoId": "yBwvUMnjdGs",
+      "seconds": 7442,
+      "title": "「あの花」の正式名称を知らない",
+      "artist": "Don’t know the official title of \"Anohana\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=yBwvUMnjdGs&t=7442s"
+      ],
+      "reviewedAt": "2026-07-30T17:48:56.021341+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-VF65z4SFwpY-3531-a16f95be",
+      "action": "drop_entry",
+      "videoId": "VF65z4SFwpY",
+      "seconds": 3531,
+      "title": "「ごはん大盛り無料」は嬉しい",
+      "artist": "“Free large rice” makes me happy",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=VF65z4SFwpY&t=3531s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:03.976793+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-djUTHk00yYU-12916-1df10da1",
+      "action": "drop_entry",
+      "videoId": "djUTHk00yYU",
+      "seconds": 12916,
+      "title": "「霜月語」NowSinging",
+      "artist": "\"Shimotsuki-go\" Now Singing",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=djUTHk00yYU&t=12916s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:11.139139+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-dt7Eg8eq_Nc-4874-fa12e1ad",
+      "action": "drop_entry",
+      "videoId": "dt7Eg8eq_Nc",
+      "seconds": 4874,
+      "title": "ありませーん!🙅♀",
+      "artist": "\"There is none!\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=dt7Eg8eq_Nc&t=4874s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:18.326125+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-uwBluexz7r0-10386-e3c160ad",
+      "action": "drop_entry",
+      "videoId": "uwBluexz7r0",
+      "seconds": 10386,
+      "title": "カツアゲ",
+      "artist": "Extortion (or “getting mugged”)",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=uwBluexz7r0&t=10386s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:25.801268+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup--YU-ZMvuNfc-4174-f150659d",
+      "action": "drop_entry",
+      "videoId": "-YU-ZMvuNfc",
+      "seconds": 4174,
+      "title": "バレてないことを祈ろう",
+      "artist": "\"Let’s hope no one noticed.\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=-YU-ZMvuNfc&t=4174s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:41.968064+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-PSmphMo9560-1485-4c2e1031",
+      "action": "drop_entry",
+      "videoId": "PSmphMo9560",
+      "seconds": 1485,
+      "title": "プラス3",
+      "artist": "“plus sunday”",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=PSmphMo9560&t=1485s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:49.636061+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-JXuwHhcsWbE-1056-73a2429b",
+      "action": "drop_entry",
+      "videoId": "JXuwHhcsWbE",
+      "seconds": 1056,
+      "title": "ライラックのイントロ",
+      "artist": "Intro of \"Lilac\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=JXuwHhcsWbE&t=1056s"
+      ],
+      "reviewedAt": "2026-07-30T17:49:57.710167+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-NAde7DKru8o-6037-049c44e3",
+      "action": "drop_entry",
+      "videoId": "NAde7DKru8o",
+      "seconds": 6037,
+      "title": "リップサービス(カムサンニダ & おやすみ)",
+      "artist": "Lip Service (“Kamsahamnida” & “Good Night”)",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=NAde7DKru8o&t=6037s"
+      ],
+      "reviewedAt": "2026-07-30T17:50:05.409394+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-Ttyn1E_KWbg-5800-8eeb4a12",
+      "action": "drop_entry",
+      "videoId": "Ttyn1E_KWbg",
+      "seconds": 5800,
+      "title": "今までもずっとそうやって生きてきた",
+      "artist": "\"I've always lived like that\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=Ttyn1E_KWbg&t=5800s"
+      ],
+      "reviewedAt": "2026-07-30T17:50:27.835546+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-JXuwHhcsWbE-4709-6d3680a5",
+      "action": "drop_entry",
+      "videoId": "JXuwHhcsWbE",
+      "seconds": 4709,
+      "title": "愛言葉シリーズ",
+      "artist": "\"Aikotoba\" song series",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=JXuwHhcsWbE&t=4709s"
+      ],
+      "reviewedAt": "2026-07-30T17:50:43.267295+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-IUoLR8Fwi24-1055-c96e969d",
+      "action": "drop_entry",
+      "videoId": "IUoLR8Fwi24",
+      "seconds": 1055,
+      "title": "暑い夏は嫌いだ",
+      "artist": "\"I don’t like hot summers\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=IUoLR8Fwi24&t=1055s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:05.984946+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup--YU-ZMvuNfc-6622-197cc493",
+      "action": "drop_entry",
+      "videoId": "-YU-ZMvuNfc",
+      "seconds": 6622,
+      "title": "満足しました",
+      "artist": "\"I'm satisfied.\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=-YU-ZMvuNfc&t=6622s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:13.752801+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-OHwbeLP4Cdw-6476-409a4be9",
+      "action": "drop_entry",
+      "videoId": "OHwbeLP4Cdw",
+      "seconds": 6476,
+      "title": "私は最強の2つのバージョン",
+      "artist": "Two versions of \"I'm invincible\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=OHwbeLP4Cdw&t=6476s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:29.301373+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-b0JjQSNTHU4-18973-21f3b01c",
+      "action": "drop_entry",
+      "videoId": "b0JjQSNTHU4",
+      "seconds": 18973,
+      "title": "私以外の人に逆立ちしないで",
+      "artist": "“Don’t Do a Handstand for Anyone but Me”",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=b0JjQSNTHU4&t=18973s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:37.224048+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-JC0La-p6ehk-7767-d7d5ea13",
+      "action": "drop_entry",
+      "videoId": "JC0La-p6ehk",
+      "seconds": 7767,
+      "title": "覚えてるぜ、君の名前",
+      "artist": "\"I remember your name, clear as day.\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=JC0La-p6ehk&t=7767s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:45.008454+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup-dt7Eg8eq_Nc-1550-7b42849e",
+      "action": "drop_entry",
+      "videoId": "dt7Eg8eq_Nc",
+      "seconds": 1550,
+      "title": "違うだよね",
+      "artist": "\"That’s not it, right?\"",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=dt7Eg8eq_Nc&t=1550s"
+      ],
+      "reviewedAt": "2026-07-30T17:51:53.158312+00:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "cleanup--wKOjcmv8Lo-10324-1b80d008",
+      "action": "drop_entry",
+      "videoId": "-wKOjcmv8Lo",
+      "seconds": 10324,
+      "title": "醍醐味」と「大きなゴミ",
+      "artist": "“The Best Part” vs. “Big Trash”",
+      "expectedMatchCount": 1,
+      "reason": "verified_translated_commentary_not_song",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=-wKOjcmv8Lo&t=10324s"
+      ],
+      "reviewedAt": "2026-07-30T17:52:01.361818+00:00",
+      "reviewedBy": "codex"
+    }
+  ],
+  "artistScopedAliases": [],
+  "safetyAssertions": [
+    {
+      "assertionId": "protect-c48ea4c1",
+      "equals": {
+        "title": "晴る",
+        "artist": "ヨルシカ"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-65cc850d",
+      "equals": {
+        "title": "晩餐歌",
+        "artist": "tuki."
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-58d67013",
+      "equals": {
+        "title": "フィナーレ。",
+        "artist": "eill"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-afb7a94a",
+      "equals": {
+        "title": "少女レイ",
+        "artist": "みきとP"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-3cbe24e8",
+      "equals": {
+        "title": "花に亡霊",
+        "artist": "ヨルシカ"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-219dbb24",
+      "equals": {
+        "title": "君の知らない物語",
+        "artist": "Supercell"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-ab5c69a7",
+      "equals": {
+        "title": "怪獣の花唄",
+        "artist": "Vaundy"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-d6970810",
+      "equals": {
+        "title": "ビビデバ",
+        "artist": "星街すいせい"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-72a0a79d",
+      "equals": {
+        "title": "ただ君に晴れ",
+        "artist": "ヨルシカ"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-38ce13d7",
+      "equals": {
+        "title": "花になって",
+        "artist": "緑黄色社会"
+      },
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
+      "expectedMutationCount": 0
+    }
+  ]
+}
