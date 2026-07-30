@@ -55,14 +55,111 @@ jobs:
       NODE_MAX_OLD_SPACE_SIZE_MB: "1536"
       TASK_CAP_BYTES: "2147483648"
       ARTIFACT_CAP_BYTES: "134217728"
+      SOURCE_BUNDLE_CAP_BYTES: "2097152"
       DISCOVERY_TIMEOUT_SECONDS: "1200"
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          clean: false
+      - name: Prepare pinned source bundle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'CHANNEL_DISCOVERY_SOURCE_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "invalid-github-sha"
+          [[ "$GITHUB_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || fail "invalid-github-repository"
+          [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] || fail "unsafe-runner-temp"
+
+          TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          SOURCE_ROOT="$TASK_ROOT/source"
+          printf 'TASK_ROOT=%s\nSOURCE_ROOT=%s\n' "$TASK_ROOT" "$SOURCE_ROOT" >> "$GITHUB_ENV"
+          expected_root="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [ "$TASK_ROOT" = "$expected_root" ] || fail "unsafe-task-root"
+          case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-channel-discovery-*) ;; *) fail "unsafe-task-root-pattern" ;; esac
+          if [ -e "$TASK_ROOT" ]; then
+            [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || fail "task-root-not-owned-directory"
+            rm -rf -- "$TASK_ROOT"
+          fi
+          mkdir -m 700 "$TASK_ROOT" "$SOURCE_ROOT"
+
+          raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
+          source_bytes=0
+          source_files=0
+          while IFS='|' read -r relative expected_bytes expected_blob_sha; do
+            [ -n "$relative" ] || continue
+            case "$relative" in
+              assets/*.js|config/*.json|scripts/*.js|scripts/*.jq|scripts/vsinger-http/*.js) ;;
+              *) fail "invalid-source-path-$relative" ;;
+            esac
+            case "$relative" in *..*|/*) fail "unsafe-source-path-$relative" ;; esac
+            [[ "$expected_bytes" =~ ^[1-9][0-9]*$ ]] || fail "invalid-source-size-$relative"
+            [[ "$expected_blob_sha" =~ ^[0-9a-f]{40}$ ]] || fail "invalid-source-sha-$relative"
+
+            target="$SOURCE_ROOT/$relative"
+            mkdir -p "$(dirname "$target")"
+            curl --fail --location --silent --show-error \
+              --connect-timeout 10 --max-time 60 --max-filesize 262144 \
+              --retry 3 --retry-all-errors \
+              --output "$target.download" "$raw_base/$relative" ||
+              fail "download-$relative"
+            [ -f "$target.download" ] && [ ! -L "$target.download" ] || fail "download-type-$relative"
+            actual_bytes="$(wc -c < "$target.download" | tr -d ' ')"
+            [ "$actual_bytes" = "$expected_bytes" ] || fail "size-$relative"
+            actual_blob_sha="$(
+              { printf 'blob %s\0' "$actual_bytes"; cat "$target.download"; } |
+                shasum | awk 'NR == 1 { print $1 }'
+            )"
+            [ "$actual_blob_sha" = "$expected_blob_sha" ] || fail "sha-$relative"
+            mv "$target.download" "$target"
+            source_bytes=$((source_bytes + actual_bytes))
+            source_files=$((source_files + 1))
+            [ "$source_bytes" -le "$SOURCE_BUNDLE_CAP_BYTES" ] || fail "source-bundle-cap"
+            printf 'CHANNEL_DISCOVERY_SOURCE_OK path=%s bytes=%s blob=%s\n' \
+              "$relative" "$actual_bytes" "$actual_blob_sha"
+          done <<'PINNED_SOURCE_FILES'
+          assets/frontend-utils.js|81218|946d916ec7af96b557a5f06003eec68578b9165a
+          assets/ranking-utils.js|59367|2623a2f5e5d9bd688e694e1759fcc85d621d746a
+          assets/source-filter.js|61184|54f8a1aacaed8471859cafd32d8fddd62ef06714
+          config/blocked-vtuber-channels.json|40392|dcd02068f31a32b654a4baf26488e16a6289ee27
+          scripts/blocked-vtuber-utils.js|13983|ae88220a840c0350d879c86b745af62951bee9cc
+          scripts/build-runtime-data.js|92299|1afab30a25df5af27917534326e6469d22c2ca94
+          scripts/channel-discovery-candidate-artifact-gate.jq|9618|54e348c83453515fa560d2a264a1307ceb8be2bb
+          scripts/channel-discovery-candidate-records-gate.jq|6993|25097ed05c3abcf616e9fcb0f3a6e3d73136d22c
+          scripts/channel-metadata-cache.js|9419|85d3caffac760d3e9e47f855157070645d81541e
+          scripts/curation.js|43979|b3bc02ce4058ec1cd30e2df5df9da941ada1d511
+          scripts/entry-repair.js|24257|970ec9d8e9bdfae21c3e904fe241547ad20de0a5
+          scripts/range-config.js|2160|49d23580a15d32aaa201a68cc64cf405087ed456
+          scripts/recent-all-continuity.js|2452|6411fe3212fc83648e962c247f7de21495783d64
+          scripts/song-aliases.js|5296|16adce1dc66253a968c8dcd7702bb5fff247f8bd
+          scripts/song-search-index.js|16185|76a920c26b01b2e3253ea52a8299602e6f82b62e
+          scripts/song-utils.js|60926|b6202d3d3186adb76dfd2beb4b8fae1cdc4f10b7
+          scripts/update-songlist.js|137229|cec90db7bb8b27f308908ce1e91d838d7d5789f1
+          scripts/video-catalog.js|18509|fa561d4780156e9a37b908cbfeb174671c3b6ffa
+          scripts/vsinger-http/html-utils.js|4045|68533aafd3df5c53c8a4fdd4b0cb416e34b764c1
+          scripts/vsinger-http/http-client.js|7000|86e7317b3e0904ade6d39945df5888e11da46562
+          scripts/vsinger-http/model.js|4678|811a8d65ae37f657717de4a8dc4c7320e00ef694
+          scripts/vsinger-http/runtime-importer.js|21502|32e39dfd70200b0c6494b254695e33108f22f2fc
+          scripts/youtube-channel-discovery-core.js|90744|fc08097cb9ccc67b3f179670b592d64ecc3fd6a8
+          scripts/youtube-channel-discovery.js|2444|1d78bdeeefe0b9dc6db6e7caf185f531cfed51b4
+          PINNED_SOURCE_FILES
+
+          [ "$source_files" -eq 24 ] || fail "source-file-count"
+          js_files="$(find "$SOURCE_ROOT" -type f -name '*.js' | wc -l | tr -d ' ')"
+          [ "$js_files" -eq 21 ] || fail "source-js-count"
+          while IFS= read -r js_file; do
+            node --check "$js_file" >/dev/null || fail "node-check-${js_file#"$SOURCE_ROOT/"}"
+          done < <(find "$SOURCE_ROOT" -type f -name '*.js' | LC_ALL=C sort)
+          NODE_OPTIONS= NODE_PATH= node -e \
+            'require(process.argv[1]); require(process.argv[2]);' \
+            "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
+            "$SOURCE_ROOT/scripts/youtube-channel-discovery-core.js" ||
+            fail "source-module-load"
+          printf 'SOURCE_BUNDLE_BYTES=%s\n' "$source_bytes" >> "$GITHUB_ENV"
+          printf 'CHANNEL_DISCOVERY_SOURCE_BUNDLE_OK files=%s bytes=%s commit=%s\n' \
+            "$source_files" "$source_bytes" "$GITHUB_SHA"
 
       - name: Run and verify candidate-only discovery
         id: candidate
@@ -83,17 +180,13 @@ jobs:
           case "$FORCE_REFRESH" in false|true) ;; *) fail "invalid-force-refresh" ;; esac
           [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] || fail "unsafe-runner-temp"
 
-          TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          EXPECTED_TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [ "$TASK_ROOT" = "$EXPECTED_TASK_ROOT" ] || fail "unexpected-task-root"
+          [ "$SOURCE_ROOT" = "$TASK_ROOT/source" ] || fail "unexpected-source-root"
+          [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || fail "missing-task-root"
+          [ -d "$SOURCE_ROOT" ] && [ ! -L "$SOURCE_ROOT" ] || fail "missing-source-root"
           NORMALIZED_CHANNEL_HANDLE="$(printf '%s' "$CHANNEL_HANDLE" | tr '[:upper:]' '[:lower:]')"
           CHANNEL_URL="https://www.youtube.com/$NORMALIZED_CHANNEL_HANDLE"
-          EXPECTED_TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          [[ "$TASK_ROOT" == "$EXPECTED_TASK_ROOT" && "$TASK_ROOT" == "$RUNNER_TEMP"/daily-song-channel-discovery-* ]] || fail "unsafe-task-root"
-          if [ -e "$TASK_ROOT" ]; then
-            [ ! -L "$TASK_ROOT" ] || fail "task-root-symlink"
-            rm -rf -- "$TASK_ROOT"
-          fi
-          mkdir -m 700 "$TASK_ROOT"
           ARTIFACT_DIR="$TASK_ROOT/artifact"
           CACHE_DIR="$TASK_ROOT/cache"
           mkdir -m 700 "$ARTIFACT_DIR" "$CACHE_DIR"
@@ -140,12 +233,6 @@ jobs:
           peak_task_bytes="$before_bytes"
           peak_rss_bytes=0
 
-          FRESH_ARGS=()
-          case "$FORCE_REFRESH" in
-            true) FRESH_ARGS=(--fresh) ;;
-            false) ;;
-          esac
-
           jq -n \
             --arg sourceCommit "$GITHUB_SHA" \
             --arg channelId "$CHANNEL_ID" \
@@ -173,27 +260,50 @@ jobs:
               candidateOnly: true
             }' > "$ARTIFACT_DIR/request.json"
 
-          NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
-            "$GITHUB_WORKSPACE/scripts/youtube-channel-discovery.js" \
-            --channel-url "$CHANNEL_URL" \
-            --expected-channel-id "$CHANNEL_ID" \
-            --expected-channel-handle "$NORMALIZED_CHANNEL_HANDLE" \
-            --channel-slug "$CHANNEL_SLUG" \
-            --source-commit "$GITHUB_SHA" \
-            --force-refresh "$FORCE_REFRESH" \
-            --output-dir "$ARTIFACT_DIR" \
-            --cache-dir "$CACHE_DIR" \
-            --max-channel-pages "$MAX_CHANNEL_PAGES" \
-            --max-videos "$MAX_VIDEOS" \
-            --max-inspect 0 \
-            --request-timeout-ms 15000 \
-            --request-interval-ms 2500 \
-            --request-jitter-ms 1000 \
-            --tab streams \
-            --tab videos \
-            --candidate-only \
-            "${FRESH_ARGS[@]}" \
-            > "$ARTIFACT_DIR/discovery.log" 2>&1 &
+          if [ "$FORCE_REFRESH" = "true" ]; then
+            NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+              "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
+              --channel-url "$CHANNEL_URL" \
+              --expected-channel-id "$CHANNEL_ID" \
+              --expected-channel-handle "$NORMALIZED_CHANNEL_HANDLE" \
+              --channel-slug "$CHANNEL_SLUG" \
+              --source-commit "$GITHUB_SHA" \
+              --force-refresh "$FORCE_REFRESH" \
+              --output-dir "$ARTIFACT_DIR" \
+              --cache-dir "$CACHE_DIR" \
+              --max-channel-pages "$MAX_CHANNEL_PAGES" \
+              --max-videos "$MAX_VIDEOS" \
+              --max-inspect 0 \
+              --request-timeout-ms 15000 \
+              --request-interval-ms 2500 \
+              --request-jitter-ms 1000 \
+              --tab streams \
+              --tab videos \
+              --candidate-only \
+              --fresh \
+              > "$ARTIFACT_DIR/discovery.log" 2>&1 &
+          else
+            NODE_OPTIONS= NODE_PATH= node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+              "$SOURCE_ROOT/scripts/youtube-channel-discovery.js" \
+              --channel-url "$CHANNEL_URL" \
+              --expected-channel-id "$CHANNEL_ID" \
+              --expected-channel-handle "$NORMALIZED_CHANNEL_HANDLE" \
+              --channel-slug "$CHANNEL_SLUG" \
+              --source-commit "$GITHUB_SHA" \
+              --force-refresh "$FORCE_REFRESH" \
+              --output-dir "$ARTIFACT_DIR" \
+              --cache-dir "$CACHE_DIR" \
+              --max-channel-pages "$MAX_CHANNEL_PAGES" \
+              --max-videos "$MAX_VIDEOS" \
+              --max-inspect 0 \
+              --request-timeout-ms 15000 \
+              --request-interval-ms 2500 \
+              --request-jitter-ms 1000 \
+              --tab streams \
+              --tab videos \
+              --candidate-only \
+              > "$ARTIFACT_DIR/discovery.log" 2>&1 &
+          fi
           discovery_pid=$!
           deadline=$((SECONDS + DISCOVERY_TIMEOUT_SECONDS))
           monitor_status=0
@@ -245,7 +355,7 @@ jobs:
             --slurpfile requestFile "$ARTIFACT_DIR/request.json" \
             --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
             --slurpfile checkpointFile "$ARTIFACT_DIR/checkpoint.json" \
-            -f "$GITHUB_WORKSPACE/scripts/channel-discovery-candidate-artifact-gate.jq" \
+            -f "$SOURCE_ROOT/scripts/channel-discovery-candidate-artifact-gate.jq" \
             "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "artifact-gate"
 
           jq -e -s \
@@ -255,10 +365,10 @@ jobs:
             --arg expectedChannelUrl "$CHANNEL_URL" \
             --argjson maxVideos "$MAX_VIDEOS" \
             --slurpfile sourceManifestFile "$ARTIFACT_DIR/manifest.json" \
-            -f "$GITHUB_WORKSPACE/scripts/channel-discovery-candidate-records-gate.jq" \
+            -f "$SOURCE_ROOT/scripts/channel-discovery-candidate-records-gate.jq" \
             "$ARTIFACT_DIR/candidate-manifest.ndjson" >/dev/null || fail "records-gate"
 
-          NODE_OPTIONS= NODE_PATH= ARTIFACT_DIR="$ARTIFACT_DIR" SOURCE_ROOT="$GITHUB_WORKSPACE" \
+          NODE_OPTIONS= NODE_PATH= ARTIFACT_DIR="$ARTIFACT_DIR" SOURCE_ROOT="$SOURCE_ROOT" \
             node "--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" - <<'VERIFY_RAW_CONTINUATIONS'
           const assert = require("node:assert/strict");
           const fs = require("node:fs");
@@ -306,9 +416,11 @@ jobs:
             --argjson peakDiscoveryRssBytes "$peak_rss_bytes" \
             --argjson afterBytes "$after_bytes" \
             --argjson taskCapBytes "$TASK_CAP_BYTES" \
+            --argjson sourceBundleBytes "$SOURCE_BUNDLE_BYTES" \
+            --argjson sourceBundleCapBytes "$SOURCE_BUNDLE_CAP_BYTES" \
             --argjson artifactBytes "$artifact_bytes" \
             --argjson artifactCapBytes "$ARTIFACT_CAP_BYTES" \
-            '{beforeBytes:$beforeBytes,peakTaskBytes:$peakTaskBytes,peakDiscoveryRssBytes:$peakDiscoveryRssBytes,afterBytes:$afterBytes,taskCapBytes:$taskCapBytes,artifactBytes:$artifactBytes,artifactCapBytes:$artifactCapBytes}' \
+            '{beforeBytes:$beforeBytes,peakTaskBytes:$peakTaskBytes,peakDiscoveryRssBytes:$peakDiscoveryRssBytes,afterBytes:$afterBytes,taskCapBytes:$taskCapBytes,sourceBundleBytes:$sourceBundleBytes,sourceBundleCapBytes:$sourceBundleCapBytes,artifactBytes:$artifactBytes,artifactCapBytes:$artifactCapBytes}' \
             > "$ARTIFACT_DIR/resource-usage.json"
 
           final_task_bytes="$(task_bytes)" || fail "task-final-sample"
@@ -354,6 +466,7 @@ jobs:
           fi
           {
             printf '### Candidate discovery resource report\n\n'
+            printf -- '- source bundle: %s bytes\n' "${SOURCE_BUNDLE_BYTES:-unavailable}"
             printf -- '- task before discovery: %s bytes\n' "${REPORT_BEFORE_BYTES:-unavailable}"
             printf -- '- peak task root: %s bytes\n' "${REPORT_PEAK_TASK_BYTES:-unavailable}"
             printf -- '- peak discovery PID RSS: %s bytes\n' "${REPORT_PEAK_RSS_BYTES:-unavailable}"
