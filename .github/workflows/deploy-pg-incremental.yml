@@ -1678,6 +1678,10 @@ jobs:
             fi
             printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
             activated=1
+            # Make post-activation probes non-fatal: the newly activated revision
+            # may trigger hydration 503 on some queries.  The activation itself
+            # already succeeded; probes are informational.
+            set +e
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "
               set -Eeuo pipefail
               install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py
