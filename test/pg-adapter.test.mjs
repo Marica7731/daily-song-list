@@ -1750,8 +1750,8 @@ for row in payload["records"]:
     assert occurrence["artist"] == occurrence["song"]["artist"]
     assert occurrence["seconds"] == occurrence["song"]["seconds"]
 
-# timestampCount alone is a positive card and raw public handle formatting is
-# preserved while comparison remains normalized.
+# timestampCount alone is a positive card.  The real preview handle wins over
+# aggregate-card formatting while comparison remains normalized.
 timestamp_only = copy.deepcopy(payload["records"][0])
 timestamp_only["count"] = 0
 timestamp_only["timestampCount"] = 1
@@ -1759,8 +1759,8 @@ timestamp_only["channelHandle"] = "/@MiXeD"
 timestamp_only["occurrences"][0]["item"]["channelHandle"] = "@mixed"
 timestamp_only["occurrences"][0]["video"]["channelHandle"] = "mixed"
 module._canonicalize_vtuber_card_preview(timestamp_only, "UC1")
-assert timestamp_only["channelHandle"] == "/@MiXeD"
-assert timestamp_only["occurrences"][0]["item"]["channelHandle"] == "/@MiXeD"
+assert timestamp_only["channelHandle"] == "@mixed"
+assert timestamp_only["occurrences"][0]["item"]["channelHandle"] == "@mixed"
 
 # A timestamp-only empty card must reach the same public page batch hydration
 # path; directly testing the canonicalizer would not lock this discovery gate.
@@ -1802,7 +1802,15 @@ card_handle_conflict["channelHandle"] = "@one"
 for nested in (card_handle_conflict["occurrences"][0]["item"],
                card_handle_conflict["occurrences"][0]["video"]):
     nested["channelHandle"] = "@other"
-rejected(card_handle_conflict, "VTuber ranking preview identity is invalid")
+module._canonicalize_vtuber_card_preview(
+    card_handle_conflict, card_handle_conflict["channelId"],
+)
+assert card_handle_conflict["channelHandle"] == "@other"
+assert card_handle_conflict["channelUrl"] == "https://www.youtube.com/@other"
+assert (
+    card_handle_conflict["occurrences"][0]["item"]
+    == card_handle_conflict["occurrences"][0]["video"]
+)
 
 tuple_handle_conflict = copy.deepcopy(payload["records"][0])
 tuple_handle_conflict["channelHandle"] = "@one"
@@ -7638,6 +7646,7 @@ large_scope = module._bounded_clicked_song_scopes(
     (),
 )
 assert len(queries) == 1
+assert "requested_groups(detail_key, title, artist)" in queries[0][0]
 assert "unnest(%s::text[], %s::text[], %s::text[])" in queries[0][0]
 assert "payload_json" not in queries[0][0]
 assert queries[0][1][0:4] == [
@@ -7723,9 +7732,11 @@ def rank(key, title, artist):
 catalog = [
     rank("unchanged::artist", "Unchanged", "Artist"),
     rank("defying::artist", "Defying Gravity", "from Wicked"),
-    rank("from y to y::artist", "from Y to Y", "Artist"),
+    # Production-shaped boundary: the persisted ranking key uses the legacy
+    # compact normalization while exact occurrences recompute a spaced key.
+    rank("fromytoy::artist", "from Y to Y", "Artist"),
     rank(
-        "a thousand miles::vanessa carlton",
+        "athousandmiles::vanessacarlton",
         "A Thousand Miles",
         "Vanessa Carlton",
     ),
@@ -7760,12 +7771,12 @@ def scalar(key, title, artist, channel_id, index=1):
     }
 
 scalars = {
-    ("from y to y::artist", SHIN): [
-        scalar("from y to y::artist", "from Y to Y", "Artist", SHIN),
+    ("fromytoy::artist", SHIN): [
+        scalar("fromytoy::artist", "from Y to Y", "Artist", SHIN),
     ],
-    ("a thousand miles::vanessa carlton", SHIN): [
+    ("athousandmiles::vanessacarlton", SHIN): [
         scalar(
-            "a thousand miles::vanessa carlton",
+            "athousandmiles::vanessacarlton",
             "A Thousand Miles",
             "Vanessa Carlton",
             SHIN,
@@ -7849,6 +7860,8 @@ def query(q):
 shin = query("@shingames7857 from Y to Y")
 assert shin["totalCount"] == 1, shin
 assert [record["title"] for record in shin["records"]] == ["from Y to Y"]
+assert shin["records"][0]["key"] == "fromytoy::artist"
+assert shin["records"][0]["displayArtist"] == "Artist"
 assert all(
     occurrence["item"]["channelId"] == SHIN
     for occurrence in shin["records"][0]["occurrences"]
@@ -7859,6 +7872,8 @@ assert thousand["totalCount"] == 1
 assert [record["title"] for record in thousand["records"]] == [
     "A Thousand Miles",
 ]
+assert thousand["records"][0]["key"] == "athousandmiles::vanessacarlton"
+assert thousand["records"][0]["displayArtist"] == "Vanessa Carlton"
 assert all(
     occurrence["item"]["channelId"] == SHIN
     for occurrence in thousand["records"][0]["occurrences"]
@@ -7875,6 +7890,28 @@ assert all(
     occurrence["item"]["channelId"] == MEDA
     for occurrence in meda["records"][0]["occurrences"]
 )
+
+# Two legacy keys cannot claim the same exact title/artist identity.  Reject
+# that malformed request before querying or hydrating any occurrence.
+try:
+    module._bounded_clicked_song_scopes(
+        object(),
+        "parent",
+        (
+            rank("legacy-one", "Same Song", "Same Artist"),
+            rank("legacy-two", "Same Song", "Same Artist"),
+        ),
+        (SHIN,),
+        "all",
+        (),
+        (),
+        {},
+        (),
+    )
+except module.PostgresAdapterError as error:
+    assert "request identity is ambiguous" in str(error)
+else:
+    raise AssertionError("ambiguous clicked-song identity was accepted")
 
 # Overlay-only candidate and runtime-replacement rows retain the exact handle
 # and residual title in the same scalar search text used by prepare(), so the
@@ -8586,6 +8623,84 @@ except module.PostgresAdapterError as error:
     )
 else:
     raise AssertionError("duplicate direct accepted identity did not fail closed")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("production KMNZ card trusts its same-channel preview handle", () => {
+  const output = runPython(`
+import copy
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+channel_id = "UCwuS0uY-Z2Gr_5OV2oFybFA"
+video_id = "7MfKPn39Jp8"
+preview_handle = "/@KMNZOFFICIAL_TINAS"
+preview_url = "https://www.youtube.com/@kmnzofficial_tinas"
+thumbnail = "https://i.ytimg.com/vi/7MfKPn39Jp8/hqdefault.jpg"
+preview_video = {
+    "videoId": video_id,
+    "channelId": channel_id,
+    "channelHandle": preview_handle,
+    "channelUrl": preview_url,
+    "thumbnailUrl": thumbnail,
+}
+payload = {
+    "type": "vtuber",
+    "key": channel_id,
+    "channelId": channel_id,
+    # These aggregate fields are stale historical metadata.
+    "channelHandle": "/@KMNZOFFICIAL",
+    "channelUrl": preview_url,
+    "count": 1,
+    "timestampCount": 1,
+    "occurrences": [{
+        "videoId": video_id,
+        "occurrenceId": "kmnz-preview",
+        "position": 1,
+        "title": "Song",
+        "artist": "Artist",
+        "seconds": 42,
+        "song": {
+            "title": "Song",
+            "artist": "Artist",
+            "seconds": 42,
+        },
+        "item": dict(preview_video),
+        "video": dict(preview_video),
+    }],
+}
+module._canonicalize_vtuber_card_preview(payload, channel_id)
+assert payload["channelId"] == channel_id
+assert payload["channelHandle"] == preview_handle
+assert payload["channelUrl"] == preview_url
+rendered = payload["occurrences"][0]
+assert rendered["videoId"] == video_id
+assert rendered["item"] == rendered["video"]
+assert rendered["item"]["channelId"] == channel_id
+assert rendered["item"]["channelHandle"] == preview_handle
+assert rendered["item"]["channelUrl"] == preview_url
+
+conflict = copy.deepcopy(payload)
+conflict["count"] = 2
+second = copy.deepcopy(conflict["occurrences"][0])
+second["occurrenceId"] = "kmnz-conflict"
+second["item"]["channelHandle"] = "/@KMNZOFFICIAL_LITA"
+second["item"]["channelUrl"] = "https://www.youtube.com/@kmnzofficial_lita"
+second["video"] = dict(second["item"])
+conflict["occurrences"].append(second)
+try:
+    module._canonicalize_vtuber_card_preview(conflict, channel_id)
+except module.PostgresAdapterError as error:
+    assert str(error) == "VTuber ranking preview identity is invalid"
+else:
+    raise AssertionError("conflicting preview handles did not fail closed")
 print("OK")
 `);
   assert.equal(output, "OK");

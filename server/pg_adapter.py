@@ -4317,13 +4317,14 @@ def _canonicalize_vtuber_card_preview(
     card_channel_id = _text(payload.get("channelId") or payload.get("key"))
     if not channel_id or card_channel_id != channel_id:
         raise PostgresAdapterError("VTuber ranking preview identity is invalid")
-    card_handle_raw = _text(payload.get("channelHandle"))
-    canonical_handle_raw = card_handle_raw
-    card_url = _text(payload.get("channelUrl"))
+    # Aggregate card handle/URL fields are historical derived metadata.  The
+    # immutable channel id above binds the card; one real preview tuple binds
+    # its current public handle.  Never let a stale aggregate handle veto a
+    # same-channel preview.
+    canonical_handle_raw = ""
 
     canonical_occurrences: list[dict[str, Any]] = []
     first_thumbnail = ""
-    canonical_url = card_url
     for source_occurrence in occurrences:
         if not isinstance(source_occurrence, Mapping):
             raise PostgresAdapterError(
@@ -4361,30 +4362,28 @@ def _canonicalize_vtuber_card_preview(
 
         item_handle_raw = _text(item.get("channelHandle"))
         video_handle_raw = _text(video.get("channelHandle"))
-        if not canonical_handle_raw:
-            canonical_handle_raw = item_handle_raw or video_handle_raw
-        normalized_handles = {
+        preview_handles = {
             normalized
             for normalized in (
-                _normalized_channel_handle(canonical_handle_raw),
                 _normalized_channel_handle(item_handle_raw),
                 _normalized_channel_handle(video_handle_raw),
             )
             if normalized
         }
-        if len(normalized_handles) != 1:
+        if len(preview_handles) != 1:
             raise PostgresAdapterError("VTuber ranking preview identity is invalid")
-        if card_url and not _channel_url_is_coherent(
-            card_url, channel_id, canonical_handle_raw
-        ):
-            raise PostgresAdapterError(
-                "VTuber ranking preview channel URL is invalid"
-            )
+        preview_handle_raw = item_handle_raw or video_handle_raw
+        preview_handle = _normalized_channel_handle(preview_handle_raw)
+        canonical_handle = _normalized_channel_handle(canonical_handle_raw)
+        if preview_handle and canonical_handle and preview_handle != canonical_handle:
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if preview_handle and not canonical_handle:
+            canonical_handle_raw = preview_handle_raw
         item_url = _text(item.get("channelUrl"))
         video_url = _text(video.get("channelUrl"))
         for nested_url, nested_handle in (
-            (item_url, item_handle_raw or canonical_handle_raw),
-            (video_url, video_handle_raw or canonical_handle_raw),
+            (item_url, item_handle_raw or video_handle_raw),
+            (video_url, video_handle_raw or item_handle_raw),
         ):
             if nested_url and not _channel_url_is_coherent(
                 nested_url, channel_id, nested_handle
@@ -4392,14 +4391,6 @@ def _canonicalize_vtuber_card_preview(
                 raise PostgresAdapterError(
                     "VTuber ranking preview channel URL is invalid"
                 )
-        if not canonical_url:
-            canonical_url = next((
-                value
-                for value in (item_url, video_url)
-                if value and _channel_url_is_coherent(
-                    value, channel_id, canonical_handle_raw
-                )
-            ), "")
         thumbnail = _text(
             item.get("thumbnailUrl")
             or item.get("videoThumbnailUrl")
@@ -4455,9 +4446,6 @@ def _canonicalize_vtuber_card_preview(
         canonical_item.update({
             "videoId": video_id,
             "channelId": channel_id,
-            "channelHandle": canonical_handle_raw,
-            "channelUrl": canonical_url
-                or _canonical_channel_url(channel_id, canonical_handle_raw),
             "thumbnailUrl": thumbnail,
             "videoThumbnailUrl": thumbnail,
         })
@@ -4469,11 +4457,11 @@ def _canonicalize_vtuber_card_preview(
         if not first_thumbnail:
             first_thumbnail = thumbnail
 
-    if not canonical_url:
-        canonical_url = _canonical_channel_url(channel_id, canonical_handle_raw)
+    canonical_url = _canonical_channel_url(channel_id, canonical_handle_raw)
     for occurrence in canonical_occurrences:
+        occurrence["item"]["channelHandle"] = canonical_handle_raw
         occurrence["item"]["channelUrl"] = canonical_url
-        occurrence["video"]["channelUrl"] = canonical_url
+        occurrence["video"] = dict(occurrence["item"])
     payload["occurrences"] = canonical_occurrences
     payload["channelId"] = channel_id
     payload["channelHandle"] = canonical_handle_raw
@@ -7239,6 +7227,15 @@ def _bounded_clicked_song_scopes(
         raise PostgresAdapterError(
             "clicked song channel result exceeded bounded group cap"
         )
+    requested_identity_keys: dict[tuple[str, str], str] = {}
+    for key, title, artist in requested:
+        identity = (_overlay_norm(title), _overlay_norm(artist))
+        existing_key = requested_identity_keys.get(identity)
+        if existing_key and existing_key != key:
+            raise PostgresAdapterError(
+                "clicked song request identity is ambiguous"
+            )
+        requested_identity_keys[identity] = key
     range_values = (
         ["all", ""] if (_text(range_id) or "all") == "all" else ["7d", ""]
     )
@@ -7318,10 +7315,16 @@ def _bounded_clicked_song_scopes(
     def selected_overlay_row(row: Mapping[str, Any]) -> dict[str, Any] | None:
         if row.get("video_tombstone"):
             return None
-        key = _runtime_view_group_key(row, "songs")
+        occurrence = _overlay_public_occurrence(
+            row.get("occurrence_payload_json")
+        )
+        key = requested_identity_keys.get((
+            _overlay_norm(row.get("title") or occurrence.get("title")),
+            _overlay_norm(row.get("artist") or occurrence.get("artist")),
+        ))
         video = _overlay_public_video(row)
         channel_id = _text(row.get("channel_id") or video.get("channelId"))
-        if key not in requested_keys or channel_id not in channel_set:
+        if not key or channel_id not in channel_set:
             return None
         selected = dict(row)
         selected["detail_key"] = key
@@ -7362,17 +7365,26 @@ def _bounded_clicked_song_scopes(
             effective[identity] = selected
 
     grouped = _overlay_candidate_groups(effective.values(), "songs")
-    return {
-        key: {
+    scoped: dict[str, dict[str, Any]] = {}
+    for group in grouped.values():
+        requested_key = requested_identity_keys.get((
+            _overlay_norm(group.get("title")),
+            _overlay_norm(group.get("artist")),
+        ))
+        if not requested_key or int(group.get("occurrenceCount") or 0) <= 0:
+            continue
+        if requested_key in scoped:
+            raise PostgresAdapterError(
+                "clicked song hydrated identity is ambiguous"
+            )
+        scoped[requested_key] = {
             "count": int(group.get("occurrenceCount") or 0),
             "videoCount": len(group.get("videoIds") or ()),
             "occurrences": tuple(
                 copy.deepcopy(group.get("occurrences") or ())
             ),
         }
-        for key, group in grouped.items()
-        if key in requested_keys and int(group.get("occurrenceCount") or 0) > 0
-    }
+    return scoped
 
 
 def _render_generic_overlay_rankings(
