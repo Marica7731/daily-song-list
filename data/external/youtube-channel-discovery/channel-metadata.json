@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-30T20:13:31.566Z",
+  "generatedAt": "2026-07-30T20:55:33.753Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-30T20:13:31.566Z",
+    "fetchedAt": "2026-07-30T20:55:33.753Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-30T20:13:31.566Z",
+    "generatedAt": "2026-07-30T20:55:33.753Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1002,
-      "parseableChannels": 980,
+      "totalChannels": 1004,
+      "parseableChannels": 982,
       "realAvatar": 643,
-      "thumbnailFallback": 359,
+      "thumbnailFallback": 361,
       "missingDisplayImage": 0,
-      "missingAvatar": 359,
+      "missingAvatar": 361,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 552
+      "skipped_collected_evidence": 554
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 530,
+      "batch_limit_reached": 532,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E8%8A%B1%E5%92%B2%E3%81%AE%E3%81%B0%E3%82%89",
+        "channelId": "UCRJshfruonj4vorWgCfyPNA",
+        "displayName": "花咲のばら",
+        "sourceUrl": "https://www.youtube.com/@%E8%8A%B1%E5%92%B2%E3%81%AE%E3%81%B0%E3%82%89",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@iyopi_asmr",
+        "channelId": "UC69utuJBl4VvLmvhzndB1iw",
+        "displayName": "双葉いよ - FutabaIyo -",
+        "sourceUrl": "https://www.youtube.com/@iyopi_asmr",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Yasumi_Ch",
+        "channelId": "UC4t5SieTiT20alR4OQDybtg",
+        "displayName": "やすみ / Yasumi",
+        "sourceUrl": "https://www.youtube.com/@Yasumi_Ch",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
         "channelId": "UC028TablIiJZW_P8DqgnX9Q",
@@ -11828,27 +11849,6 @@
         "channelId": "UC3ql_EU4JnaE3Rh3cqbHu6g",
         "displayName": "Kotoha",
         "sourceUrl": "https://www.youtube.com/@Kotoha_ktnh",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@AmazoraInori",
-        "channelId": "UCRHFjZWvlNfdn2ajZKM9G6A",
-        "displayName": "天空いのり / Amazora Inori",
-        "sourceUrl": "https://www.youtube.com/@AmazoraInori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@terryterryv",
-        "channelId": "UC1Fx5JBW4l9RFAfpqdvJVUQ",
-        "displayName": "テリー / Terry",
-        "sourceUrl": "https://www.youtube.com/@terryterryv",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@OokamiMio",
-        "channelId": "UCp-5t9SrOQwXMU7iIjQfARg",
-        "displayName": "Mio Channel 大神ミオ",
-        "sourceUrl": "https://www.youtube.com/@OokamiMio",
         "reason": "batch_limit_reached"
       }
     ]
