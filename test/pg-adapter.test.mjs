@@ -2358,12 +2358,37 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   assert.match(installSection, /warm_local_endpoint\(\) \{/u);
   assert.equal((installSection.match(/warm_local_endpoint /gu) || []).length, 4);
   const warmupSection = installSection.split('local_base="http://127.0.0.1:8765"', 2)[1]
-    .split('meta_http_code="$(curl', 1)[0];
+    .split("public_contract_retry=", 1)[0];
   assert.doesNotMatch(warmupSection, /while |until /u);
   assert.match(warmupSection, /warm_local_endpoint meta/u);
   assert.match(warmupSection, /warm_local_endpoint rankings/u);
   assert.match(warmupSection, /warm_local_endpoint negative/u);
   assert.match(warmupSection, /warm_local_endpoint source/u);
+  assert.doesNotMatch(warmupSection, /public_contract_retry/u);
+  assert.match(
+    installSection,
+    /public_contract_retry=\(--retry 3 --retry-all-errors --retry-delay 2 --retry-max-time 90\)/u,
+  );
+  assert.equal(
+    (installSection.match(/"\$\{public_contract_retry\[@\]\}"/gu) || []).length,
+    4,
+  );
+  const candidateSection = ADAPTER_WORKFLOW.split(
+    "Install verified adapter and retain rollback files until health passes",
+    1,
+  )[0];
+  assert.doesNotMatch(candidateSection, /public_contract_retry/u);
+  for (const marker of [
+    'meta_http_code="$(curl',
+    'rankings_http_code="$(curl',
+    'negative_http_code="$(curl',
+    'source_http_code="$(curl',
+  ]) {
+    const start = installSection.indexOf(marker);
+    assert.notEqual(start, -1, marker);
+    const line = installSection.slice(start, installSection.indexOf("\n", start));
+    assert.match(line, /--max-time 20 "\$\{public_contract_retry\[@\]\}"/u);
+  }
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);

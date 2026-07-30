@@ -363,7 +363,8 @@ jobs:
             "$local_base/api/rankings"
           warm_local_endpoint source "$local_base/api/sources/$source_key?page=1&pageSize=20"
 
-          meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+          public_contract_retry=(--retry 3 --retry-all-errors --retry-delay 2 --retry-max-time 90)
+          meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
             --output "$remote_root/production-public-meta.json" --write-out '%{http_code}' \
             "$public_base/api/meta")"
           test "$meta_http_code" = 200
@@ -371,12 +372,12 @@ jobs:
             '(.meta.active_revision_id // .active_revision_id // .activeRevisionId) == $expected' \
             "$remote_root/production-public-meta.json" >/dev/null
 
-          rankings_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+          rankings_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
             --output "$remote_root/production-public-page1.json" --write-out '%{http_code}' \
             "$public_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
           test "$rankings_http_code" = 200
 
-          negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+          negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
             --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
             --data-urlencode 'metric=count' --data-urlencode 'page=1' \
             --data-urlencode 'pageSize=20' \
@@ -386,7 +387,7 @@ jobs:
             "$public_base/api/rankings")"
           test "$negative_http_code" = 200
 
-          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
+          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
             --output "$remote_root/production-public-source.json" --write-out '%{http_code}' \
             "$public_base/api/sources/$source_key?page=1&pageSize=20")"
           test "$source_http_code" = 200
