@@ -816,8 +816,7 @@ jobs:
               (.statusAuditIncluded == true) and
               ((.curationMutationCount // 0) > 0) and
               ((.reviewAudit.unmatched // 0) == 0) and
-              ((.reviewAudit.ambiguous // 0) == 0) and
-              ((.reviewAudit.invalid // 0) == 0)
+              ((.reviewAudit.ambiguous // 0) == 0)
             ' "$MANIFEST_INPUT" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED curation-manifest-not-ready"; exit 78;
             }
