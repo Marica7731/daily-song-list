@@ -795,7 +795,7 @@ jobs:
               (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
               (.acceptedFiles | type == "array" and length > 0) and
               (.sourceIdentityCount | type == "number" and . > 0) and
-              (.sourceIdentityEvidence | type == "array" and length == .sourceIdentityCount) and
+              (.sourceIdentityEvidence | type == "array") and ((.sourceIdentityEvidence | length) == .sourceIdentityCount) and
               ([.sourceIdentityEvidence[].sourceDetailKey] | length == (unique | length)) and
               (all(.sourceIdentityEvidence[];
                 (.acceptedVideoCount | type == "number" and . > 0) and
