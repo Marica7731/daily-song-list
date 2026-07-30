@@ -67,6 +67,17 @@ function pinnedSourceRows(source = workflow) {
     .map((line) => line.split("|"));
 }
 
+function diagnosticFunctionBlock(source = workflow) {
+  const match = source.match(
+    / {10}# DIAGNOSTIC_FUNCTION_BEGIN\n([\s\S]*?) {10}# DIAGNOSTIC_FUNCTION_END/u,
+  );
+  assert.ok(match, "bounded discovery diagnostic function is missing");
+  return match[1]
+    .split("\n")
+    .map((line) => line.startsWith("          ") ? line.slice(10) : line)
+    .join("\n");
+}
+
 test("workflow has no repository checkout, Git command, or workspace dependency", () => {
   assert.doesNotMatch(workflow, /actions\/checkout|actions\/setup-node|GITHUB_WORKSPACE|(?:^|\s)git(?:\s|$)/mu);
   assert.match(workflow, /Prepare pinned source bundle/u);
@@ -184,6 +195,56 @@ test("raw page replay and both frozen candidate gates use only the pinned source
   assert.match(workflow, /VERIFY_RAW_CONTINUATIONS/u);
   assert.match(workflow, /\.pageEvidenceFiles\[\]/u);
   assert.match(workflow, /shasum -a 256/u);
+});
+
+test("failed discovery emits only a bounded log tail and minimal resource state", () => {
+  const diagnostic = diagnosticFunctionBlock();
+  assert.match(diagnostic, /CHANNEL_DISCOVERY_DIAGNOSTIC_BEGIN/u);
+  assert.match(diagnostic, /tail -n 80 "\$log_file" \| LC_ALL=C tail -c 16384/u);
+  assert.match(diagnostic, /CHANNEL_DISCOVERY_DIAGNOSTIC_END/u);
+  assert.doesNotMatch(diagnostic, /pages|raw-videos|CACHE_DIR|find |tar |upload/iu);
+  assert.match(
+    workflow,
+    /if \[ "\$discovery_status" -ne 0 \]; then\n {12}emit_discovery_failure_diagnostic "\$discovery_status"\n {12}fail "discovery-exit-\$discovery_status"\n {10}fi/u,
+  );
+
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "candidate-diagnostic-"));
+  const artifactDir = path.join(fixtureRoot, "artifact");
+  const cacheDir = path.join(fixtureRoot, "cache");
+  fs.mkdirSync(path.join(artifactDir, "pages"), { recursive: true });
+  fs.mkdirSync(cacheDir);
+  const logLines = Array.from(
+    { length: 120 },
+    (_, index) => `DIAGNOSTIC-LINE-${String(index + 1).padStart(3, "0")}-${"x".repeat(500)}`,
+  );
+  fs.writeFileSync(path.join(artifactDir, "discovery.log"), `${logLines.join("\n")}\n`, "utf8");
+  fs.writeFileSync(path.join(artifactDir, "pages", "secret.html"), "RAW_HTML_MUST_NOT_APPEAR", "utf8");
+  fs.writeFileSync(path.join(cacheDir, "secret.html"), "CACHE_MUST_NOT_APPEAR", "utf8");
+
+  const script = `
+    set -Eeuo pipefail
+    task_bytes() { printf '4242\\n'; }
+    ARTIFACT_DIR="$1"
+    ${diagnostic}
+    emit_discovery_failure_diagnostic 1
+  `;
+  const result = spawnSync("bash", ["-c", script, "diagnostic", artifactDir], {
+    cwd: candidateRoot,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(
+    result.stderr,
+    /CHANNEL_DISCOVERY_DIAGNOSTIC_BEGIN status=1 state=regular logBytes=[0-9]+ taskBytes=4242 tailLines=80 tailBytes=16384/u,
+  );
+  assert.match(result.stderr, /DIAGNOSTIC-LINE-120/u);
+  assert.doesNotMatch(result.stderr, /DIAGNOSTIC-LINE-001|RAW_HTML_MUST_NOT_APPEAR|CACHE_MUST_NOT_APPEAR/u);
+  const boundedTail = result.stderr
+    .split(/\n?CHANNEL_DISCOVERY_DIAGNOSTIC_BEGIN[^\n]*\n/u)[1]
+    .split(/\nCHANNEL_DISCOVERY_DIAGNOSTIC_END/u)[0];
+  assert.ok(Buffer.byteLength(boundedTail) <= 16384);
+  assert.match(result.stderr, /CHANNEL_DISCOVERY_DIAGNOSTIC_END status=1/u);
+  fs.rmSync(fixtureRoot, { recursive: true, force: true });
 });
 
 test("workflow has no accepted, PG, Urameshi, push, dispatch, or broad cancellation path", () => {

@@ -228,6 +228,31 @@ jobs:
             fi
             discovery_pid=""
           }
+          # DIAGNOSTIC_FUNCTION_BEGIN
+          emit_discovery_failure_diagnostic() {
+            local status="$1"
+            local log_file="$ARTIFACT_DIR/discovery.log"
+            local log_bytes=0
+            local diagnostic_task_bytes=0
+            local log_state="missing-or-unsafe"
+            diagnostic_task_bytes="$(task_bytes 2>/dev/null || printf '0\n')"
+            [[ "$diagnostic_task_bytes" =~ ^[0-9]+$ ]] || diagnostic_task_bytes=0
+            if [ -f "$log_file" ] && [ ! -L "$log_file" ]; then
+              log_state="regular"
+              log_bytes="$(wc -c < "$log_file" | tr -d ' ')"
+              [[ "$log_bytes" =~ ^[0-9]+$ ]] || log_bytes=0
+            fi
+            printf 'CHANNEL_DISCOVERY_DIAGNOSTIC_BEGIN status=%s state=%s logBytes=%s taskBytes=%s tailLines=80 tailBytes=16384\n' \
+              "$status" "$log_state" "$log_bytes" "$diagnostic_task_bytes" >&2
+            if [ "$log_state" = "regular" ]; then
+              LC_ALL=C tail -n 80 "$log_file" | LC_ALL=C tail -c 16384 >&2 ||
+                printf 'CHANNEL_DISCOVERY_DIAGNOSTIC_TAIL_UNAVAILABLE\n' >&2
+            else
+              printf 'CHANNEL_DISCOVERY_DIAGNOSTIC_LOG_UNAVAILABLE\n' >&2
+            fi
+            printf '\nCHANNEL_DISCOVERY_DIAGNOSTIC_END status=%s\n' "$status" >&2
+          }
+          # DIAGNOSTIC_FUNCTION_END
           finalize_step() {
             local status=$?
             trap - EXIT
@@ -339,7 +364,10 @@ jobs:
           discovery_status=$?
           set -e
           discovery_pid=""
-          [ "$discovery_status" -eq 0 ] || fail "discovery-exit-$discovery_status"
+          if [ "$discovery_status" -ne 0 ]; then
+            emit_discovery_failure_diagnostic "$discovery_status"
+            fail "discovery-exit-$discovery_status"
+          fi
 
           for required in request.json manifest.json checkpoint.json candidate-manifest.ndjson; do
             [ -s "$ARTIFACT_DIR/$required" ] && [ ! -L "$ARTIFACT_DIR/$required" ] || fail "missing-$required"
