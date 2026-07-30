@@ -5980,7 +5980,7 @@ def _canonical_accepted_reset_row(row: Mapping[str, Any]) -> dict[str, Any]:
         row.get("channel_handle") or row.get("channelHandle") or video.get("channelHandle")
     )
     if not video_id or not channel_id or not handle:
-        raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+        return None
     canonical_url = _canonical_channel_url(channel_id, handle)
     result.update({
         "channel_id": channel_id,
