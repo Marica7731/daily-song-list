@@ -2240,7 +2240,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("adapter release workflow uses one bounded quick gate around rollback-safe install", () => {
+test("adapter release separates local install checks from rollback-safe external verification", () => {
   const jobTimeout = Number(/^    timeout-minutes: (\d+)$/mu.exec(ADAPTER_WORKFLOW)?.[1]);
   assert.ok(jobTimeout > 0 && jobTimeout <= 20, `workflow timeout is ${jobTimeout}m`);
   assert.match(ADAPTER_WORKFLOW, /expected_active_revision/u);
@@ -2287,7 +2287,7 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   const encodedNegativeQueries = [
     ...ADAPTER_WORKFLOW.matchAll(/negative_query='([^']+)'/gu),
   ].map((match) => match[1]);
-  assert.equal(encodedNegativeQueries.length, 2);
+  assert.equal(encodedNegativeQueries.length, 3);
   for (const encoded of encodedNegativeQueries) {
     assert.equal(encoded, encodeURIComponent(exactNegativeQuery));
     assert.equal(decodeURIComponent(encoded), exactNegativeQuery);
@@ -2301,7 +2301,7 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
     /--get --data-urlencode 'range=all' --data-urlencode 'view=vtubers'[\s\\]+--data-urlencode 'metric=count'/u,
   );
   assert.equal(
-    (ADAPTER_WORKFLOW.match(/\/api\/sources\/\$source_key\?page=1&pageSize=20/gu) || []).length,
+    (ADAPTER_WORKFLOW.match(/\/api\/sources\/\$(?:source_key|SOURCE_KEY)\?page=1&pageSize=20/gu) || []).length,
     3,
   );
   assert.equal(
@@ -2323,31 +2323,30 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   assert.match(ADAPTER_WORKFLOW, /test "\$negative_http_code" = 200/u);
   assert.match(ADAPTER_WORKFLOW, /test "\$source_http_code" = 200/u);
   assert.match(ADAPTER_WORKFLOW, /candidate-quick-gate-passed/u);
-  assert.match(ADAPTER_WORKFLOW, /production-public-quick-gate-passed/u);
+  assert.match(ADAPTER_WORKFLOW, /installed-local-contract-passed/u);
+  assert.match(ADAPTER_WORKFLOW, /external-public-contract-passed/u);
+  assert.match(ADAPTER_WORKFLOW, /release-finalized/u);
   assert.match(ADAPTER_WORKFLOW, /trap rollback_adapter ERR/u);
-  assert.match(ADAPTER_WORKFLOW, /production-public-healthz\.json/u);
-  assert.match(ADAPTER_WORKFLOW, /--base-url "\$public_base" --skip-rankings/u);
+  assert.match(ADAPTER_WORKFLOW, /--base-url "\$PUBLIC_BASE" --skip-rankings/u);
   assert.match(ADAPTER_WORKFLOW, /ss -ltn 'sport = :18766'/u);
   assert.match(ADAPTER_WORKFLOW, /systemd-run --quiet --collect --unit="\$candidate_unit"/u);
   assert.match(ADAPTER_WORKFLOW, /--property=RuntimeMaxSec=8m/u);
   assert.match(ADAPTER_WORKFLOW, /--setenv=DAILY_SONG_PG_ADAPTER_PHASE_TRACE=1/u);
-  const installSection = ADAPTER_WORKFLOW.split("Install verified adapter and retain rollback files until health passes", 2)[1];
+  const installSection = ADAPTER_WORKFLOW
+    .split("Install verified adapter and verify the local contract", 2)[1]
+    .split("Verify installed adapter from the external runner", 1)[0];
   assert.ok(installSection);
   assert.doesNotMatch(installSection, /DAILY_SONG_PG_ADAPTER_PHASE_TRACE/u);
-  assert.match(installSection, /PUBLIC_BASE/u);
+  assert.doesNotMatch(installSection, /PUBLIC_BASE|\$public_base/u);
   assert.match(installSection, /readiness_deadline=\$\(\(SECONDS \+ 75\)\)/u);
   assert.match(installSection, /while \(\( SECONDS < readiness_deadline \)\); do/u);
   assert.match(
     installSection,
-    /--connect-timeout 3 --max-time 8[\s\\]+"\$public_base\/healthz"/u,
+    /--connect-timeout 3 --max-time 8[\s\\]+"\$local_base\/healthz"/u,
   );
   assert.match(installSection, /sleep 2/u);
   assert.match(installSection, /test "\$readiness_ready" = true/u);
   assert.doesNotMatch(installSection, /while true|until curl/u);
-  assert.doesNotMatch(
-    installSection,
-    /--connect-timeout 8 --max-time 20[\s\\]+"\$public_base\/healthz"/u,
-  );
   assert.match(installSection, /local_base="http:\/\/127\.0\.0\.1:8765"/u);
   assert.match(installSection, /local_warmup_deadline=\$\(\(SECONDS \+ 300\)\)/u);
   assert.match(installSection, /local request_timeout=90/u);
@@ -2357,24 +2356,35 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   );
   assert.match(installSection, /warm_local_endpoint\(\) \{/u);
   assert.equal((installSection.match(/warm_local_endpoint /gu) || []).length, 4);
-  const warmupSection = installSection.split('local_base="http://127.0.0.1:8765"', 2)[1]
-    .split("public_contract_retry=", 1)[0];
-  assert.doesNotMatch(warmupSection, /while |until /u);
-  assert.match(warmupSection, /warm_local_endpoint meta/u);
-  assert.match(warmupSection, /warm_local_endpoint rankings/u);
-  assert.match(warmupSection, /warm_local_endpoint negative/u);
-  assert.match(warmupSection, /warm_local_endpoint source/u);
-  assert.doesNotMatch(warmupSection, /public_contract_retry/u);
+  assert.match(installSection, /warm_local_endpoint meta/u);
+  assert.match(installSection, /warm_local_endpoint rankings/u);
+  assert.match(installSection, /warm_local_endpoint negative/u);
+  assert.match(installSection, /warm_local_endpoint source/u);
+  assert.doesNotMatch(installSection, /public_contract_retry/u);
+  assert.doesNotMatch(installSection, /production-public-/u);
+  assert.doesNotMatch(installSection, /--base-url/u);
+  assert.doesNotMatch(installSection, /installed-local-(?:meta|page1|negative|source)\.json/u);
+  assert.doesNotMatch(installSection, /ranking channel identity mismatch|source channel identity mismatch/u);
+
+  const externalSection = ADAPTER_WORKFLOW
+    .split("Verify installed adapter from the external runner", 2)[1]
+    .split("Roll back an externally rejected adapter", 1)[0];
+  assert.ok(externalSection);
+  assert.match(externalSection, /test -f '\$REMOTE_ROOT\/installed-local-contract-passed'/u);
+  assert.match(externalSection, /test -f '\$REMOTE_ROOT\/backup\/pg_adapter\.py'/u);
+  assert.match(externalSection, /test -f '\$REMOTE_ROOT\/backup\/pg_api_server\.py'/u);
+  assert.doesNotMatch(externalSection, /rollback_external_error|trap .*ERR/u);
+  assert.doesNotMatch(externalSection, /http:\/\/127\.0\.0\.1:8765/u);
   assert.match(
-    installSection,
+    externalSection,
     /public_contract_retry=\(--retry 3 --retry-all-errors --retry-delay 2 --retry-max-time 90\)/u,
   );
   assert.equal(
-    (installSection.match(/"\$\{public_contract_retry\[@\]\}"/gu) || []).length,
+    (externalSection.match(/"\$\{public_contract_retry\[@\]\}"/gu) || []).length,
     4,
   );
   const candidateSection = ADAPTER_WORKFLOW.split(
-    "Install verified adapter and retain rollback files until health passes",
+    "Install verified adapter and verify the local contract",
     1,
   )[0];
   assert.doesNotMatch(candidateSection, /public_contract_retry/u);
@@ -2384,14 +2394,68 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
     'negative_http_code="$(curl',
     'source_http_code="$(curl',
   ]) {
-    const start = installSection.indexOf(marker);
+    const start = externalSection.indexOf(marker);
     assert.notEqual(start, -1, marker);
-    const line = installSection.slice(start, installSection.indexOf("\n", start));
+    const line = externalSection.slice(start, externalSection.indexOf("\n", start));
     assert.match(line, /--max-time 20 "\$\{public_contract_retry\[@\]\}"/u);
   }
+  assert.match(externalSection, /--base-url "\$PUBLIC_BASE" --skip-rankings/u);
+  assert.match(externalSection, /production-public-meta\.json/u);
+  assert.match(externalSection, /production-public-page1\.json/u);
+  assert.match(externalSection, /production-public-negative\.json/u);
+  assert.match(externalSection, /production-public-source\.json/u);
+  assert.match(externalSection, /touch '\$REMOTE_ROOT\/external-public-contract-passed'/u);
+  assert.doesNotMatch(externalSection, /rm -rf "\$remote_root\/backup"/u);
+  assert.doesNotMatch(externalSection, /PUBLIC_QUICK_GATE_PASSED/u);
+
+  const rollbackSection = ADAPTER_WORKFLOW
+    .split("Roll back an externally rejected adapter", 2)[1]
+    .split("Finalize the externally verified adapter", 1)[0];
+  assert.ok(rollbackSection);
+  assert.match(rollbackSection, /if: failure\(\)/u);
+  assert.match(rollbackSection, /if \[ -z "\$\{REMOTE_ROOT:-\}" \]; then/u);
+  assert.match(rollbackSection, /test -f '\$REMOTE_ROOT\/installed-local-contract-passed'/u);
+  assert.match(rollbackSection, /test -f '\$REMOTE_ROOT\/backup\/pg_adapter\.py'/u);
+  assert.match(rollbackSection, /test -f '\$REMOTE_ROOT\/backup\/pg_api_server\.py'/u);
+  assert.match(rollbackSection, /rollback_deadline=\$\(\(SECONDS \+ 45\)\)/u);
+  assert.match(rollbackSection, /http:\/\/127\.0\.0\.1:8765\/healthz/u);
+  assert.match(rollbackSection, /cmp -s "\$remote_root\/backup\/pg_adapter\.py"/u);
+  assert.match(rollbackSection, /cmp -s "\$remote_root\/backup\/pg_api_server\.py"/u);
+  assert.match(rollbackSection, /touch "\$remote_root\/rollback-complete"/u);
+  assert.match(rollbackSection, /ADAPTER_EXTERNAL_CONTRACT_ROLLBACK_COMPLETE/u);
+  assert.match(rollbackSection, /ADAPTER_EXTERNAL_CONTRACT_ROLLBACK_NOT_REQUIRED/u);
+  assert.match(rollbackSection, /marker_status=\$\?/u);
+  assert.match(rollbackSection, /elif \[ "\$marker_status" -eq 1 \]; then/u);
+  assert.match(rollbackSection, /exit "\$marker_status"/u);
+  assert.doesNotMatch(rollbackSection, /PUBLIC_BASE|production-public-/u);
+
+  const finalizeSection = ADAPTER_WORKFLOW
+    .split("Finalize the externally verified adapter", 2)[1]
+    .split("Record result and cleanup", 1)[0];
+  assert.ok(finalizeSection);
+  assert.match(finalizeSection, /test -f "\$remote_root\/installed-local-contract-passed"/u);
+  assert.match(finalizeSection, /test -f "\$remote_root\/external-public-contract-passed"/u);
+  assert.match(finalizeSection, /mv "\$remote_root\/backup" "\$remote_root\/backup\.finalizing"/u);
+  assert.match(finalizeSection, /touch "\$remote_root\/release-finalized"/u);
+  assert.match(finalizeSection, /rm -rf "\$remote_root\/backup\.finalizing"/u);
+  assert.match(finalizeSection, /ADAPTER_EXTERNAL_CONTRACT_FINALIZED/u);
+  assert.match(finalizeSection, /ADAPTER_FINALIZE_ROLLBACK_COMPLETE/u);
+  assert.match(finalizeSection, /PUBLIC_QUICK_GATE_PASSED=1/u);
+  const finalizedAt = finalizeSection.indexOf('touch "$remote_root/release-finalized"');
+  const backupRemovedAt = finalizeSection.indexOf('rm -rf "$remote_root/backup.finalizing"');
+  const publicPassedAt = finalizeSection.indexOf("PUBLIC_QUICK_GATE_PASSED=1");
+  assert.ok(finalizedAt > 0 && backupRemovedAt > finalizedAt && publicPassedAt > backupRemovedAt);
+
+  const cleanupSection = ADAPTER_WORKFLOW.split("Record result and cleanup", 2)[1];
+  assert.match(cleanupSection, /if \[ ! -f "\$remote_root\/release-finalized" \]; then/u);
+  assert.match(cleanupSection, /backup_root="\$remote_root\/backup"/u);
+  assert.match(cleanupSection, /cmp -s "\$backup_root\/pg_adapter\.py"/u);
+  assert.match(cleanupSection, /cmp -s "\$backup_root\/pg_api_server\.py"/u);
+  assert.match(cleanupSection, /ADAPTER_CLEANUP_ROLLBACK_VERIFIED/u);
+  assert.match(cleanupSection, /exit "\$cleanup_status"/u);
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
-  assert.ok(blocks.length >= 6);
+  assert.ok(blocks.length >= 8);
   for (const [index, block] of blocks.entries()) {
     const normalized = block.replace(/\$\{\{[^}]+\}\}/gu, "CODEX_WORKFLOW_EXPRESSION");
     const result = spawnSync("bash", ["-n"], {

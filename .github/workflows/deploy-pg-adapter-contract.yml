@@ -277,22 +277,15 @@ jobs:
           touch "$remote_root/candidate-quick-gate-passed"
           REMOTE
 
-      - name: Install verified adapter and retain rollback files until health passes
+      - name: Install verified adapter and verify the local contract
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
           ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
-            "$REMOTE_ROOT" "$PUBLIC_BASE" "$EXPECTED_ACTIVE_REVISION" \
-            "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" \
-            "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" <<'REMOTE'
+            "$REMOTE_ROOT" "$SOURCE_KEY" <<'REMOTE'
           set -Eeuo pipefail
           remote_root="$1"
-          public_base="$2"
-          expected_active="$3"
-          source_key="$4"
-          source_channel_id="$5"
-          source_occurrence_count="$6"
-          source_video_count="$7"
+          source_key="$2"
 
           install -d -m 0755 "$remote_root/backup" /opt/culua/ytb-song-rank/server
           cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py "$remote_root/backup/pg_adapter.py"
@@ -301,6 +294,8 @@ jobs:
             install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
             install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
             systemctl restart song-rank-pg-api
+            touch "$remote_root/rollback-complete"
+            echo "ADAPTER_LOCAL_CONTRACT_ROLLBACK_COMPLETE"
           }
           trap rollback_adapter ERR
 
@@ -316,26 +311,26 @@ jobs:
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
 
+          local_base="http://127.0.0.1:8765"
           readiness_deadline=$((SECONDS + 75))
           readiness_attempt=0
           readiness_ready=false
           while (( SECONDS < readiness_deadline )); do
             ((readiness_attempt += 1))
             if curl --silent --show-error --fail --connect-timeout 3 --max-time 8 \
-                "$public_base/healthz" > "$remote_root/production-public-healthz.json" \
-              && jq -e 'type == "object"' "$remote_root/production-public-healthz.json" >/dev/null; then
+                "$local_base/healthz" > "$remote_root/installed-local-healthz.json" \
+              && jq -e 'type == "object"' "$remote_root/installed-local-healthz.json" >/dev/null; then
               readiness_ready=true
               break
             fi
-            rm -f "$remote_root/production-public-healthz.json"
-            printf 'public readiness attempt %s did not pass\n' "$readiness_attempt" >&2
+            rm -f "$remote_root/installed-local-healthz.json"
+            printf 'local readiness attempt %s did not pass\n' "$readiness_attempt" >&2
             if (( SECONDS < readiness_deadline )); then
               sleep 2
             fi
           done
           test "$readiness_ready" = true
 
-          local_base="http://127.0.0.1:8765"
           local_warmup_deadline=$((SECONDS + 300))
           warm_local_endpoint() {
             local label="$1"
@@ -362,55 +357,66 @@ jobs:
             --data "q=$negative_query" \
             "$local_base/api/rankings"
           warm_local_endpoint source "$local_base/api/sources/$source_key?page=1&pageSize=20"
+          touch "$remote_root/installed-local-contract-passed"
+          trap - ERR
+          REMOTE
+
+      - name: Verify installed adapter from the external runner
+        run: |
+          set -Eeuo pipefail
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "test -f '$REMOTE_ROOT/installed-local-contract-passed' && test -f '$REMOTE_ROOT/backup/pg_adapter.py' && test -f '$REMOTE_ROOT/backup/pg_api_server.py'"
 
           public_contract_retry=(--retry 3 --retry-all-errors --retry-delay 2 --retry-max-time 90)
           meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
-            --output "$remote_root/production-public-meta.json" --write-out '%{http_code}' \
-            "$public_base/api/meta")"
+            --output "$TASK_ROOT/production-public-meta.json" --write-out '%{http_code}' \
+            "$PUBLIC_BASE/api/meta")"
           test "$meta_http_code" = 200
-          jq -e --arg expected "$expected_active" \
+          jq -e --arg expected "$EXPECTED_ACTIVE_REVISION" \
             '(.meta.active_revision_id // .active_revision_id // .activeRevisionId) == $expected' \
-            "$remote_root/production-public-meta.json" >/dev/null
+            "$TASK_ROOT/production-public-meta.json" >/dev/null
 
           rankings_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
-            --output "$remote_root/production-public-page1.json" --write-out '%{http_code}' \
-            "$public_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
+            --output "$TASK_ROOT/production-public-page1.json" --write-out '%{http_code}' \
+            "$PUBLIC_BASE/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
           test "$rankings_http_code" = 200
 
+          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
           negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
             --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
             --data-urlencode 'metric=count' --data-urlencode 'page=1' \
             --data-urlencode 'pageSize=20' \
             --data-urlencode 'searchFields=title,channel' \
             --data "q=$negative_query" \
-            --output "$remote_root/production-public-negative.json" --write-out '%{http_code}' \
-            "$public_base/api/rankings")"
+            --output "$TASK_ROOT/production-public-negative.json" --write-out '%{http_code}' \
+            "$PUBLIC_BASE/api/rankings")"
           test "$negative_http_code" = 200
 
           source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 "${public_contract_retry[@]}" \
-            --output "$remote_root/production-public-source.json" --write-out '%{http_code}' \
-            "$public_base/api/sources/$source_key?page=1&pageSize=20")"
+            --output "$TASK_ROOT/production-public-source.json" --write-out '%{http_code}' \
+            "$PUBLIC_BASE/api/sources/$SOURCE_KEY?page=1&pageSize=20")"
           test "$source_http_code" = 200
 
           timeout --signal=TERM --kill-after=10s 3m \
-            python3 "$remote_root/server/audit-ranking-source-identities.py" \
-              --base-url "$public_base" --skip-rankings \
+            python3 "$TASK_ROOT/audit-ranking-source-identities.py" \
+              --base-url "$PUBLIC_BASE" --skip-rankings \
               --negative-query "" --page-size 20 --max-pages 1 \
               --timeout 20 --concurrency 4 \
-              --expected-active "$expected_active" \
+              --expected-active "$EXPECTED_ACTIVE_REVISION" \
               --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
               --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
               --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
               --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
-              > "$remote_root/production-public-handles.log" 2>&1
-          cat "$remote_root/production-public-handles.log"
+              > "$TASK_ROOT/production-public-handles.log" 2>&1
+          cat "$TASK_ROOT/production-public-handles.log"
 
           python3 - \
-            "$remote_root/production-public-page1.json" \
-            "$remote_root/production-public-negative.json" \
-            "$remote_root/production-public-source.json" \
-            "$source_key" "$source_channel_id" \
-            "$source_occurrence_count" "$source_video_count" <<'PY'
+            "$TASK_ROOT/production-public-page1.json" \
+            "$TASK_ROOT/production-public-negative.json" \
+            "$TASK_ROOT/production-public-source.json" \
+            "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" \
+            "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" <<'PY'
           import json
           import sys
 
@@ -484,9 +490,85 @@ jobs:
               if not item_thumbnail or item_thumbnail != video_thumbnail:
                   raise AssertionError("source thumbnail identity mismatch")
           PY
-          touch "$remote_root/production-public-quick-gate-passed"
-          rm -rf "$remote_root/backup"
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "test -f '$REMOTE_ROOT/installed-local-contract-passed' && touch '$REMOTE_ROOT/external-public-contract-passed'"
+
+      - name: Roll back an externally rejected adapter
+        if: failure()
+        run: |
+          set -Eeuo pipefail
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          if [ -z "${REMOTE_ROOT:-}" ]; then
+            echo "ADAPTER_EXTERNAL_CONTRACT_ROLLBACK_NOT_REQUIRED"
+            exit 0
+          fi
+          set +e
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "test -f '$REMOTE_ROOT/installed-local-contract-passed' && test -f '$REMOTE_ROOT/backup/pg_adapter.py' && test -f '$REMOTE_ROOT/backup/pg_api_server.py'"
+          marker_status=$?
+          set -e
+          if [ "$marker_status" -eq 0 ]; then
+            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" <<'REMOTE_ROLLBACK'
+          set -Eeuo pipefail
+          remote_root="$1"
+          install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+          install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+          systemctl restart song-rank-pg-api
+          rollback_deadline=$((SECONDS + 45))
+          rollback_ready=false
+          while (( SECONDS < rollback_deadline )); do
+            if systemctl is-active --quiet song-rank-pg-api \
+                && curl --silent --show-error --fail --connect-timeout 2 --max-time 8 \
+                  "http://127.0.0.1:8765/healthz" >/dev/null; then
+              rollback_ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$rollback_ready" = true
+          cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+          cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+          touch "$remote_root/rollback-complete"
+          echo "ADAPTER_EXTERNAL_CONTRACT_ROLLBACK_COMPLETE"
+          REMOTE_ROLLBACK
+          elif [ "$marker_status" -eq 1 ]; then
+            echo "ADAPTER_EXTERNAL_CONTRACT_ROLLBACK_NOT_REQUIRED"
+          else
+            exit "$marker_status"
+          fi
+
+      - name: Finalize the externally verified adapter
+        run: |
+          set -Eeuo pipefail
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" <<'REMOTE'
+          set -Eeuo pipefail
+          remote_root="$1"
+          rollback_adapter() {
+            local backup_root="$remote_root/backup"
+            if [ -d "$remote_root/backup.finalizing" ]; then
+              backup_root="$remote_root/backup.finalizing"
+            fi
+            install -m 0644 "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+            install -m 0644 "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+            systemctl restart song-rank-pg-api
+            rm -f "$remote_root/release-finalized"
+            touch "$remote_root/rollback-complete"
+            echo "ADAPTER_FINALIZE_ROLLBACK_COMPLETE"
+          }
+          trap rollback_adapter ERR
+          test -f "$remote_root/installed-local-contract-passed"
+          test -f "$remote_root/external-public-contract-passed"
+          test -f "$remote_root/backup/pg_adapter.py"
+          test -f "$remote_root/backup/pg_api_server.py"
+          systemctl is-active --quiet song-rank-pg-api
+          curl --silent --show-error --fail --connect-timeout 2 --max-time 8 \
+            "http://127.0.0.1:8765/healthz" >/dev/null
+          mv "$remote_root/backup" "$remote_root/backup.finalizing"
+          touch "$remote_root/release-finalized"
+          rm -rf "$remote_root/backup.finalizing"
           trap - ERR
+          echo "ADAPTER_EXTERNAL_CONTRACT_FINALIZED"
           REMOTE
           printf 'PUBLIC_QUICK_GATE_PASSED=1\n' >> "$GITHUB_ENV"
 
@@ -504,7 +586,36 @@ jobs:
           cat "$TASK_ROOT/storage-before.txt"
           echo "ADAPTER_RELEASE_STORAGE_AFTER"
           cat "$TASK_ROOT/storage-after.txt"
+          cleanup_status=0
           if [ -n "${REMOTE_ROOT:-}" ]; then
-            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "candidate_unit='daily-song-list-adapter-${GITHUB_RUN_ID}'; systemctl stop \"\$candidate_unit\" 2>/dev/null || true; systemctl reset-failed \"\$candidate_unit\" 2>/dev/null || true; rm -rf '$REMOTE_ROOT'" || true
+            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$GITHUB_RUN_ID" <<'REMOTE_CLEANUP' || cleanup_status=$?
+          set -Eeuo pipefail
+          remote_root="$1"
+          run_id="$2"
+          candidate_unit="daily-song-list-adapter-$run_id"
+          if [ ! -f "$remote_root/release-finalized" ]; then
+            backup_root="$remote_root/backup"
+            if [ -d "$remote_root/backup.finalizing" ]; then
+              backup_root="$remote_root/backup.finalizing"
+            fi
+            if [ -f "$backup_root/pg_adapter.py" ] && [ -f "$backup_root/pg_api_server.py" ]; then
+              if [ ! -f "$remote_root/rollback-complete" ] \
+                  || ! cmp -s "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py \
+                  || ! cmp -s "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py; then
+                install -m 0644 "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+                install -m 0644 "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+                systemctl restart song-rank-pg-api
+              fi
+              systemctl is-active --quiet song-rank-pg-api
+              cmp -s "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+              cmp -s "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+              echo "ADAPTER_CLEANUP_ROLLBACK_VERIFIED"
+            fi
           fi
-          rm -rf "$TASK_ROOT"
+          systemctl stop "$candidate_unit" 2>/dev/null || true
+          systemctl reset-failed "$candidate_unit" 2>/dev/null || true
+          rm -rf "$remote_root"
+          REMOTE_CLEANUP
+          fi
+          rm -rf "$TASK_ROOT" || cleanup_status=$?
+          exit "$cleanup_status"
