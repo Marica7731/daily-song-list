@@ -18,6 +18,7 @@ test("generic Mac detail workflow has exact three-video and immutable channel de
   assert.match(workflow, /^      MAX_INSPECT: "3"$/mu);
   assert.match(workflow, /^      TASK_CAP_BYTES: "2147483648"$/mu);
   assert.match(workflow, /^      NODE_MAX_OLD_SPACE_SIZE_MB: "1536"$/mu);
+  assert.match(workflow, /printf '%s\\n' "\$VIDEO_IDS" \| tr ',' '\\n'/u);
 });
 
 test("detail invocation is explicit, single-shard, bounded, and never fresh or accepted", () => {

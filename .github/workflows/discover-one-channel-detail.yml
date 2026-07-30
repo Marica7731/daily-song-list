@@ -124,7 +124,7 @@ jobs:
           printf 'NODE_BIN=%s\n' "$NODE_BIN" >> "$GITHUB_ENV"
           printf '%s\n' "$(dirname "$NODE_BIN")" >> "$GITHUB_PATH"
 
-          printf '%s' "$VIDEO_IDS" | tr ',' '\n' | sed '/^[[:space:]]*$/d;s/^[[:space:]]*//;s/[[:space:]]*$//' > "$TASK_ROOT/video-ids.txt"
+          printf '%s\n' "$VIDEO_IDS" | tr ',' '\n' | sed '/^[[:space:]]*$/d;s/^[[:space:]]*//;s/[[:space:]]*$//' > "$TASK_ROOT/video-ids.txt"
           [ "$(wc -l < "$TASK_ROOT/video-ids.txt" | tr -d ' ')" = "3" ] || fail "video-id-count"
           [ "$(LC_ALL=C sort -u "$TASK_ROOT/video-ids.txt" | wc -l | tr -d ' ')" = "3" ] || fail "duplicate-video-id"
           while IFS= read -r video_id; do
