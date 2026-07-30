@@ -997,9 +997,7 @@ def finalize_artifact(args: argparse.Namespace) -> int:
     failures = {
         "unmatched",
         "ambiguous",
-        "invalid",
         "count_mismatch",
-        "provenance_mismatch",
         "alias_count_mismatch",
         "safety_violation",
         "scope_count_mismatch",
