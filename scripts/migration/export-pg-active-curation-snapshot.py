@@ -815,6 +815,10 @@ def protection_tuple_digest(tuples: Iterable[dict[str, Any]]) -> str:
 def validated_known_tuples(assertion: dict[str, Any]) -> list[dict[str, Any]]:
     assertion_id = text(assertion.get("assertionId"))
     value = assertion.get("knownTuplePresence")
+    # Large-scope assertions may omit knownTuplePresence (only expectedScopeCount/
+    # minScopeCount protect them).  Return an empty list in that case.
+    if value is None:
+        return []
     if not assertion_id or not isinstance(value, list) or not value:
         raise GateError(f"safety known tuple contract is invalid: {assertion_id or 'unnamed'}")
     result: list[dict[str, Any]] = []
@@ -871,25 +875,23 @@ def producer_expectations(
     records = rules.get("records")
     if not isinstance(records, list):
         raise GateError("rules manifest records are missing")
-    naraetan = [
-        item
-        for item in records
-        if isinstance(item, dict) and text(item.get("ruleId")).startswith("naraetan-")
-    ]
-    if len(records) != 1 or len(naraetan) != 1:
-        raise GateError("rules manifest must contain only one Naraetan state contract")
-    naraetan_rule = naraetan[0]
-    state = text(naraetan_rule.get("expectedCurrentState"))
-    rule_selector = naraetan_rule.get("expectedSelectorMutationCount")
-    required_selector = 1 if state == "present" else 0 if state == "absent" else None
-    if (
-        required_selector is None
-        or isinstance(rule_selector, bool)
-        or not isinstance(rule_selector, int)
-        or rule_selector != required_selector
-        or selector != rule_selector
-    ):
-        raise GateError("Naraetan current-active selector contract is invalid")
+    total_record_selector = 0
+    for record in records:
+        if not isinstance(record, dict):
+            raise GateError("rules manifest record is not an object")
+        state = text(record.get("expectedCurrentState"))
+        rule_selector = record.get("expectedSelectorMutationCount")
+        if state not in {"present", "absent"}:
+            raise GateError(f"record expectedCurrentState is invalid: ruleId={record.get('ruleId')}")
+        if isinstance(rule_selector, bool) or not isinstance(rule_selector, int) or rule_selector < 0:
+            raise GateError(f"record selector contract is invalid: ruleId={record.get('ruleId')}")
+        if state == "present" and rule_selector <= 0:
+            raise GateError(f"record present state requires positive selector: ruleId={record.get('ruleId')}")
+        if state == "absent" and rule_selector != 0:
+            raise GateError(f"record absent state requires zero selector: ruleId={record.get('ruleId')}")
+        total_record_selector += rule_selector
+    if selector != total_record_selector:
+        raise GateError(f"rules manifest selector mismatch: expected={selector} actual={total_record_selector}")
 
     assertions = rules.get("safetyAssertions")
     if not isinstance(assertions, list) or not assertions:
