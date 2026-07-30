@@ -971,9 +971,8 @@ def bind_current_active_evidence(
         "snapshotOccurrenceCount": len(snapshot_rows),
         "templateRulesManifestSha256": template_sha,
         "boundRulesManifestSha256": sha256_bytes(output_path.read_bytes()),
-        "naraetanCurrentState": selector_state,
-        "expectedSelectorMutationCount": selector_mutations,
-        "expectedAliasMutationCount": len(alias_rows),
+        "expectedSelectorMutationCount": total_selector_mutations,
+        "expectedAliasMutationCount": total_alias_mutations,
         "assertions": assertion_evidence,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
