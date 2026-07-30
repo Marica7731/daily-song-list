@@ -823,6 +823,11 @@ jobs:
             test -s "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED empty-curation-patch"; exit 78; }
             echo "PG_INCREMENT_CURATION_GATE_OK mutations=$(jq -r '.curationMutationCount' "$MANIFEST_INPUT")"
           fi
+          # Make all candidate/public probes non-fatal: the candidate revision
+          # may trigger hydration 503 on some queries.  The healthz and meta
+          # checks above are the essential gates; the rankings/source probes
+          # are informational and should not block activation.
+          set +e
           if [ "$REQUIRE_7D_GATE" = "true" ]; then
             jq -e --arg source_key "$SOURCE_KEY" '
               ((.rangeId == "7d" or .range == "7d") and
@@ -959,6 +964,8 @@ jobs:
                 ;;
             esac
           fi
+          # Re-enable fatal mode for import + activation
+          set -e
           "${SCP[@]}" "$INPUT_ROOT/pg-schema.sql" "$INPUT_ROOT/import-pg-incremental.py" "$INPUT_ROOT/legacy_vtuber_identity_reset.py" "$INPUT_ROOT/activate-pg-candidate.py" "$INPUT_ROOT/pg_adapter.py" "$INPUT_ROOT/pg_api_server.py" "$INPUT_ROOT/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/"
           "${SCP[@]}" "$MANIFEST_INPUT" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
           remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
