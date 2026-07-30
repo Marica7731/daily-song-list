@@ -276,7 +276,7 @@ jobs:
           printf 'TASK_PEAK_BYTES=%s\n' "$task_peak_bytes" >> "$GITHUB_ENV"
 
       - name: Convert and finalize compact curation artifact
-        timeout-minutes: 12
+        timeout-minutes: 30
         run: |
           set -Eeuo pipefail
           SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
