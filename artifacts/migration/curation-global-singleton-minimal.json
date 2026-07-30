@@ -1,6 +1,24 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "kind": "curation-rules-manifest",
+  "status": "needs_current_active_evidence",
+  "ready": false,
+  "pendingCurrentActiveEvidence": {
+    "reason": "The Mac producer must bind exact logical-current-active counts and complete immutable tuples before conversion.",
+    "activeRevisionDispatchBaseline": "accepted_30402041297_1",
+    "controllerMustRecheckActiveRevisionImmediatelyBeforeDispatch": true,
+    "knownTupleSchema": [
+      "videoId",
+      "occurrenceId",
+      "position",
+      "seconds",
+      "sourceId",
+      "sourceHash",
+      "rawHash",
+      "rangeId"
+    ],
+    "zeroScopeIsNeverReady": true
+  },
   "sourceCommit": "1fca00967fd8755ad84a99cf4401ef3fe21c326e",
   "batchTag": "global-singleton-followup-20260726",
   "records": [
@@ -13,6 +31,8 @@
       "seconds": 9463,
       "rawHash": "66cb9e129f135600d5b881595110822a7e7bb01175eeb5d7d138763768188f1e",
       "expectedMatchCount": 1,
+      "expectedCurrentState": "needs_current_active_evidence",
+      "expectedSelectorMutationCount": "needs_current_active_evidence",
       "reason": "verified_translated_commentary_not_song",
       "note": "Official chapter remains 花に亡霊/ヨルシカ; the pinned comment places the translated sentence after the formal SONG LIST as a talk timestamp, and the live transcript is spoken commentary.",
       "evidenceUrls": [
@@ -53,6 +73,7 @@
         "title": "逆光 - replica"
       },
       "expectedScopeCount": 3,
+      "bindCurrentActiveEvidence": true,
       "expectedMutationCount": 0
     },
     {
@@ -61,6 +82,7 @@
         "title": "逆光のフリューゲル"
       },
       "expectedScopeCount": 123,
+      "bindCurrentActiveEvidence": true,
       "expectedMutationCount": 0
     },
     {
@@ -69,7 +91,8 @@
         "title": "8.32",
         "artist": "*Luna"
       },
-      "expectedScopeCount": 17,
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
       "expectedMutationCount": 0
     },
     {
@@ -78,7 +101,8 @@
         "title": "逆光",
         "artist": "Ado"
       },
-      "expectedScopeCount": 401,
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
       "expectedMutationCount": 0
     },
     {
@@ -87,7 +111,8 @@
         "channelHandle": "@urameshi_conta"
       },
       "auditedLegacyRuleCount": 27,
-      "expectedScopeCount": 3919,
+      "minScopeCount": 1,
+      "bindCurrentActiveEvidence": true,
       "expectedMutationCount": 0
     }
   ]

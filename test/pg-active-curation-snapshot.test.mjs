@@ -5,6 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 function resolvePython() {
   const defaults = process.platform === "win32" ? ["python", "python3"] : ["python3", "python"];
@@ -20,10 +21,25 @@ function resolvePython() {
 }
 
 const python = resolvePython();
-const script = path.resolve("scripts/migration/export-pg-active-curation-snapshot.py");
+const candidateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const script = path.join(candidateRoot, "scripts/migration/export-pg-active-curation-snapshot.py");
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function knownTuple(overrides = {}) {
+  return { videoId: "video", occurrenceId: "occ", position: 0, seconds: 1, sourceId: "source", sourceHash: "source-hash", rawHash: "raw-hash", rangeId: "all", ...overrides };
+}
+
+function tupleDigest(tuples) {
+  const canonical = tuples.map((item) => Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))));
+  canonical.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  return sha256(JSON.stringify(canonical));
+}
+
+function protectionContractSha(rules) {
+  return sha256(JSON.stringify(Object.fromEntries(rules.safetyAssertions.map((item) => [item.assertionId, tupleDigest(item.knownTuplePresence)]).sort(([a], [b]) => a.localeCompare(b)))));
 }
 
 function fakeAdapterSource() {
@@ -114,6 +130,8 @@ class Cursor:
         rows = []
         if normalized.startswith("BEGIN") or normalized.startswith("SET LOCAL"):
             pass
+        elif normalized.startswith("SELECT pg_try_advisory_xact_lock_shared"):
+            rows = [{"locked": True}]
         elif "FROM migration_video_rows" in normalized:
             rows = selected(OVERLAY_VIDEOS, params[0])
         elif "FROM migration_occurrence_rows" in normalized:
@@ -164,7 +182,7 @@ class Cursor:
             ))
         else:
             raise AssertionError(f"unexpected streaming SQL: {normalized}")
-        if os.environ.get("FAKE_EMPTY_ACTIVE") == "1":
+        if os.environ.get("FAKE_EMPTY_ACTIVE") == "1" and not normalized.startswith("SELECT pg_try_advisory_xact_lock_shared"):
             rows = []
         self.is_full_stream = "FROM runtime_occurrences AS o" in normalized
         self.connection.named_cursor_count += int(self.name is not None)
@@ -181,6 +199,9 @@ class Cursor:
         values = self.values[self.offset:self.offset + size]
         self.offset += len(values)
         return values
+    def fetchone(self):
+        values = self.fetchmany(1)
+        return values[0] if values else None
     def fetchall(self):
         self.connection.fetchall_called = True
         raise AssertionError("streaming exporter must not call fetchall")
@@ -442,13 +463,27 @@ test("finalize binds converter output to independently matched remote and Mac sn
     const remoteLog = path.join(root, "remote.log");
     const outputManifest = path.join(root, "manifest.json");
     const outputCheckpoint = path.join(root, "producer-checkpoint.json");
+    const snapshotSha = "a".repeat(64);
     const rulesValue = {
-      records: [{}],
+      status: "ready",
+      ready: true,
+      expectedSelectorMutationCount: 1,
+      expectedAliasMutationCount: 10,
+      records: [{
+        ruleId: "naraetan-finalize",
+        expectedCurrentState: "present",
+        expectedSelectorMutationCount: 1,
+      }],
       safetyAssertions: [
-        { assertionId: "protect-vaundy", expectedMutationCount: 0, expectedScopeCount: 3 },
-        { assertionId: "protect-flugel", expectedMutationCount: 0 },
-        { assertionId: "exclude-urameshi", expectedMutationCount: 0 },
+        { assertionId: "protect-vaundy", expectedMutationCount: 0, expectedScopeCount: 3, minScopeCount: 3, knownTuplePresence: [knownTuple({ videoId: "vaundy" })] },
+        { assertionId: "protect-flugel", expectedMutationCount: 0, minScopeCount: 2, knownTuplePresence: [knownTuple({ videoId: "flugel" })] },
+        { assertionId: "exclude-urameshi", expectedMutationCount: 0, expectedScopeCount: 1, knownTuplePresence: [knownTuple({ videoId: "urameshi" })] },
       ],
+      currentActiveEvidence: {
+        activeRevisionId: "accepted_fixture_1",
+        snapshotSha256: snapshotSha,
+        templateRulesManifestSha256: "b".repeat(64),
+      },
     };
     fs.writeFileSync(rules, JSON.stringify(rulesValue), "utf8");
     const rulesSha = sha256(fs.readFileSync(rules));
@@ -459,8 +494,9 @@ test("finalize binds converter output to independently matched remote and Mac sn
       selectorMutationCount: 1,
       aliasMutationCount: 10,
       curationMutationCount: 11,
-      snapshotSha256: "snapshot-sha",
+      snapshotSha256: snapshotSha,
       rulesManifestSha256: rulesSha,
+      protectionContractSha256: protectionContractSha(rulesValue),
     }), "utf8");
     fs.writeFileSync(review, JSON.stringify({
       summary: { accepted: 5 },
@@ -469,7 +505,11 @@ test("finalize binds converter output to independently matched remote and Mac sn
         assertionId: item.assertionId,
         status: "accepted",
         mutationCount: 0,
-        scopeRowCount: item.expectedScopeCount ?? 0,
+        scopeRowCount: item.expectedScopeCount ?? item.minScopeCount,
+        knownTupleCount: item.knownTuplePresence.length,
+        expectedKnownTupleDigest: tupleDigest(item.knownTuplePresence),
+        observedKnownTupleDigest: tupleDigest(item.knownTuplePresence),
+        knownTupleStatuses: item.knownTuplePresence.map((_, index) => ({ index, status: "present" })),
       })),
     }), "utf8");
     fs.writeFileSync(snapshotCheckpoint, JSON.stringify({
@@ -477,14 +517,14 @@ test("finalize binds converter output to independently matched remote and Mac sn
       resumable: false,
       rows: 600000,
       bytes: 123456789,
-      sha256: "snapshot-sha",
+      sha256: snapshotSha,
     }), "utf8");
     fs.writeFileSync(remoteLog, `noise\nPG_ACTIVE_CURATION_EXPORT_OK ${JSON.stringify({
       status: "ok",
       activeRevisionId: "accepted_fixture_1",
       rows: 600000,
       bytes: 123456789,
-      sha256: "snapshot-sha",
+      sha256: snapshotSha,
     })}\n`, "utf8");
 
     const result = spawnSync(python, [
@@ -499,8 +539,6 @@ test("finalize binds converter output to independently matched remote and Mac sn
       "--output-manifest", outputManifest,
       "--output-checkpoint", outputCheckpoint,
       "--expected-active-revision", "accepted_fixture_1",
-      "--expected-selector-mutations", "1",
-      "--expected-alias-mutations", "10",
       "--producer-commit", "commit-sha",
       "--producer-run-id", "123",
       "--producer-run-attempt", "1",
@@ -533,14 +571,44 @@ test("finalize rejects a ready converter when an exact protected scope count dri
     const remote = path.join(root, "remote.log");
     const output = path.join(root, "output.json");
     const producer = path.join(root, "producer.json");
-    const rulesValue = { safetyAssertions: [{ assertionId: "scope", expectedMutationCount: 0, expectedScopeCount: 3919 }] };
+    const snapshotSha = "c".repeat(64);
+    const rulesValue = {
+      status: "ready",
+      ready: true,
+      expectedSelectorMutationCount: 0,
+      expectedAliasMutationCount: 0,
+      records: [{ ruleId: "naraetan-scope", expectedCurrentState: "absent", expectedSelectorMutationCount: 0 }],
+      safetyAssertions: [{
+        assertionId: "scope", expectedMutationCount: 0, expectedScopeCount: 3919,
+        minScopeCount: 3919, knownTuplePresence: [knownTuple()],
+      }],
+      currentActiveEvidence: {
+        activeRevisionId: "accepted_fixture_1",
+        snapshotSha256: snapshotSha,
+        templateRulesManifestSha256: "d".repeat(64),
+      },
+    };
     fs.writeFileSync(rules, JSON.stringify(rulesValue));
     fs.writeFileSync(candidate, "");
-    fs.writeFileSync(converter, JSON.stringify({ kind: "curation-accepted-increment", status: "ready", selectorMutationCount: 0, aliasMutationCount: 0, curationMutationCount: 0, snapshotSha256: "sha", rulesManifestSha256: sha256(fs.readFileSync(rules)) }));
-    fs.writeFileSync(review, JSON.stringify({ summary: { accepted: 1 }, results: [{ kind: "safety_assertion", assertionId: "scope", status: "accepted", mutationCount: 0, scopeRowCount: 3918 }] }));
-    fs.writeFileSync(checkpoint, JSON.stringify({ complete: true, resumable: false, rows: 1, bytes: 1, sha256: "sha" }));
-    fs.writeFileSync(remote, `PG_ACTIVE_CURATION_EXPORT_OK ${JSON.stringify({ status: "ok", activeRevisionId: "accepted_fixture_1", rows: 1, bytes: 1, sha256: "sha" })}\n`);
-    const result = spawnSync(python, [script, "finalize", "--converter-manifest", converter, "--review", review, "--candidate", candidate, "--snapshot-checkpoint", checkpoint, "--remote-log", remote, "--rules-manifest", rules, "--output-manifest", output, "--output-checkpoint", producer, "--expected-active-revision", "accepted_fixture_1", "--expected-selector-mutations", "0", "--expected-alias-mutations", "0", "--producer-commit", "sha", "--producer-run-id", "1", "--producer-run-attempt", "1"], { encoding: "utf8" });
+    fs.writeFileSync(converter, JSON.stringify({
+      kind: "curation-accepted-increment", status: "ready", selectorMutationCount: 0,
+      aliasMutationCount: 0, curationMutationCount: 0, snapshotSha256: snapshotSha,
+      rulesManifestSha256: sha256(fs.readFileSync(rules)),
+      protectionContractSha256: protectionContractSha(rulesValue),
+    }));
+    fs.writeFileSync(review, JSON.stringify({
+      summary: { accepted: 1 },
+      results: [{
+        kind: "safety_assertion", assertionId: "scope", status: "accepted",
+        mutationCount: 0, scopeRowCount: 3918, knownTupleCount: 1,
+        expectedKnownTupleDigest: tupleDigest(rulesValue.safetyAssertions[0].knownTuplePresence),
+        observedKnownTupleDigest: tupleDigest(rulesValue.safetyAssertions[0].knownTuplePresence),
+        knownTupleStatuses: [{ index: 0, status: "present" }],
+      }],
+    }));
+    fs.writeFileSync(checkpoint, JSON.stringify({ complete: true, resumable: false, rows: 1, bytes: 1, sha256: snapshotSha }));
+    fs.writeFileSync(remote, `PG_ACTIVE_CURATION_EXPORT_OK ${JSON.stringify({ status: "ok", activeRevisionId: "accepted_fixture_1", rows: 1, bytes: 1, sha256: snapshotSha })}\n`);
+    const result = spawnSync(python, [script, "finalize", "--converter-manifest", converter, "--review", review, "--candidate", candidate, "--snapshot-checkpoint", checkpoint, "--remote-log", remote, "--rules-manifest", rules, "--output-manifest", output, "--output-checkpoint", producer, "--expected-active-revision", "accepted_fixture_1", "--producer-commit", "sha", "--producer-run-id", "1", "--producer-run-attempt", "1"], { encoding: "utf8" });
     assert.equal(result.status, 78, result.stderr);
     assert.match(result.stderr, /safety scope mismatch/);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }

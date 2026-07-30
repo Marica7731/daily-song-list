@@ -4,8 +4,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const workflowPath = path.resolve(process.env.CURATION_WORKFLOW_PATH || ".github/workflows/build-pg-curation-patch.yml");
+const candidateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const workflowPath = path.resolve(process.env.CURATION_WORKFLOW_PATH || path.join(candidateRoot, ".github/workflows/build-pg-curation-patch.yml"));
 const workflow = fs.readFileSync(workflowPath, "utf8");
 
 test("curation producer is Mac-only and never invokes the deployment consumer", () => {
@@ -41,6 +43,8 @@ test("producer has explicit expected, hard, task caps and non-resumable checkpoi
   assert.match(workflow, /default: 536870912/);
   assert.match(workflow, /default: 1073741824/);
   assert.match(workflow, /default: 2147483648/);
+  assert.match(workflow, /test "\$TASK_HARD_CAP_BYTES" -le 2147483648/);
+  assert.match(workflow, /ulimit -v 2097152/);
   assert.match(workflow, /--unit='\$REMOTE_UNIT'/);
   assert.match(workflow, /--property=MemorySwapMax=0/);
   assert.match(workflow, /systemctl stop '\$REMOTE_UNIT'/);
@@ -95,6 +99,8 @@ test("producer verifies retained audit bytes, digests, and large gzip payloads o
   assert.match(workflow, /checkpoint\/global\/inventory\.jsonl\.gz/);
   assert.match(workflow, /for payload in "\$\{retained_large_gzip\[@\]\}"; do/);
   assert.match(workflow, /retained-artifact-verification\.txt/);
+  assert.match(workflow, /bound-rules-manifest\.json/);
+  assert.match(workflow, /current-active-binding\.json/);
 });
 
 test("uploaded artifact excludes the full snapshot and contains only compact evidence", () => {
@@ -135,9 +141,13 @@ test("uploaded artifact excludes the full snapshot and contains only compact evi
   assert.match(workflow, /name: Upload compact curation producer artifact\n        if: \$\{\{ always\(\) && env\.ARTIFACT_UPLOAD_READY == 'true' \}\}/);
 });
 
-test("producer pins the current curation mutation budget", () => {
-  assert.match(workflow, /--expected-selector-mutations 0/);
-  assert.match(workflow, /--expected-alias-mutations 14/);
+test("producer derives the mutation budget only after binding current-active evidence", () => {
+  assert.match(workflow, /--bind-current-active-evidence/);
+  assert.match(workflow, /--binding-evidence-output "\$ARTIFACT_ROOT\/current-active-binding\.json"/);
+  assert.match(workflow, /--rules-manifest "\$ARTIFACT_ROOT\/bound-rules-manifest\.json"/);
+  assert.doesNotMatch(workflow, /--expected-selector-mutations/);
+  assert.doesNotMatch(workflow, /--expected-alias-mutations/);
+  assert.match(workflow, /final active drift expected=/);
 });
 
 test("producer validates the finalized artifact alias review with jq-compatible canonical bytes", () => {

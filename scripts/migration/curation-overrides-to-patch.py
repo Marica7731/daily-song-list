@@ -25,12 +25,41 @@ import unicodedata
 from typing import Any, Iterable
 
 
+class CurationBlocked(ValueError):
+    """A deliberate fail-closed gate, reported with the producer's exit 78."""
+
+
+class AssertionGateError(ValueError):
+    """A compact safety-assertion schema failure without protected tuple data."""
+
+    def __init__(self, gate: str, observed: Any, expected: Any, message: str):
+        super().__init__(message)
+        self.gate = gate
+        self.observed = observed
+        self.expected = expected
+
+
 def text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
 
 
 def norm(value: Any) -> str:
     return " ".join(unicodedata.normalize("NFKC", text(value)).casefold().split())
+
+
+def normalize_channel_handle(value: Any) -> str | None:
+    """Apply only generic handle normalization, never identity-specific logic."""
+
+    result = unicodedata.normalize("NFKC", text(value)).casefold()
+    if not result:
+        return None
+    if result.startswith("/"):
+        result = result[1:]
+    if result.startswith("@"):
+        result = result[1:]
+    if not result or result.startswith(("/", "@")):
+        return None
+    return result
 
 
 def derived_song_key(title: Any, artist: Any) -> str:
@@ -116,13 +145,7 @@ def alias_selected_identities(current: dict[str, Any], replacement: dict[str, An
 
 
 def validated_alias_source_review(identities: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Return the canonical identity ledger and its exact source-group rollup.
-
-    This is intentionally stricter than the producer's mutation accounting:
-    a legacy row produces two reviewed range projections but remains one physical
-    alias mutation.  The deploy gate verifies the same tuple key and canonical
-    bytes before it issues any source-detail request.
-    """
+    """Return the canonical identity ledger and its exact source-group rollup."""
 
     if len(identities) > 50000:
         raise ValueError("alias source review exceeds selected identity cap (50000)")
@@ -425,19 +448,117 @@ def alias_candidates(rule: dict[str, Any], by_video: dict[str, list[dict[str, An
     return sorted(candidates, key=lambda row: (text(row.get("videoId")), int(row.get("position") or 0), text(row.get("occurrenceId"))))
 
 
+SCOPE_NUMERIC_FIELDS = {"position", "seconds"}
+SCOPE_STRING_FIELDS = {
+    "videoId",
+    "occurrenceId",
+    "title",
+    "artist",
+    "sourceId",
+    "sourceHash",
+    "rawHash",
+    "rangeId",
+    "sourceSystem",
+    "songKey",
+    "channelHandle",
+}
+SCOPE_FIELDS = SCOPE_NUMERIC_FIELDS | SCOPE_STRING_FIELDS
+
+
+def value_shape(value: Any) -> str:
+    if value is None:
+        return "missing"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, int):
+        return "integer"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, list):
+        return f"list[{len(value)}]"
+    if isinstance(value, dict):
+        return f"object[{len(value)}]"
+    return type(value).__name__
+
+
+def validate_scope_selectors(assertion: dict[str, Any]) -> None:
+    exact = assertion.get("equals", {})
+    prefixes = assertion.get("startsWith", {})
+    for gate, selector in (("equals", exact), ("startsWith", prefixes)):
+        if not isinstance(selector, dict):
+            raise AssertionGateError(gate, value_shape(selector), "object", f"{gate} must be an object")
+        unknown_count = len(set(selector) - SCOPE_FIELDS)
+        if unknown_count:
+            raise AssertionGateError(
+                gate,
+                {"unknownKeyCount": unknown_count},
+                {"unknownKeyCount": 0},
+                f"{gate} contains unsupported selector fields",
+            )
+    overlap = len(set(exact) & set(prefixes))
+    if overlap:
+        raise AssertionGateError(
+            "selectors",
+            {"overlapCount": overlap},
+            {"overlapCount": 0},
+            "equals and startsWith overlap",
+        )
+    for key, value in exact.items():
+        if key in SCOPE_NUMERIC_FIELDS:
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise AssertionGateError(
+                    f"equals.{key}",
+                    value if isinstance(value, (bool, int)) else value_shape(value),
+                    "non-negative integer",
+                    f"equals.{key} must be a non-negative integer",
+                )
+        elif not isinstance(value, str) or not (normalize_channel_handle(value) if key == "channelHandle" else norm(value)):
+            raise AssertionGateError(
+                f"equals.{key}",
+                value_shape(value),
+                "non-empty string",
+                f"equals.{key} must be a non-empty string",
+            )
+    for key, value in prefixes.items():
+        if key in SCOPE_NUMERIC_FIELDS:
+            raise AssertionGateError(
+                f"startsWith.{key}",
+                value_shape(value),
+                "string selector field",
+                f"startsWith does not support numeric field {key}",
+            )
+        normalized = normalize_channel_handle(value) if key == "channelHandle" else norm(value)
+        if not isinstance(value, str) or not normalized:
+            raise AssertionGateError(
+                f"startsWith.{key}",
+                value_shape(value),
+                "non-empty string",
+                f"startsWith.{key} must be a non-empty string",
+            )
+
+
+def scope_value(key: str, value: Any) -> Any:
+    if key in SCOPE_NUMERIC_FIELDS:
+        return value
+    if key == "channelHandle":
+        return normalize_channel_handle(value)
+    return norm(value)
+
+
 def scope_matches(assertion: dict[str, Any], row: dict[str, Any]) -> bool:
     exact = assertion.get("equals", {})
     prefixes = assertion.get("startsWith", {})
-    if not isinstance(exact, dict) or not isinstance(prefixes, dict):
-        raise ValueError("safety assertion equals/startsWith must be objects")
-    def scope_norm(key: str, value: Any) -> str:
-        result = norm(value)
-        return result.lstrip("/") if key == "channelHandle" else result
-
-    return (
-        all(scope_norm(key, row.get(key)) == scope_norm(key, value) for key, value in exact.items())
-        and all(scope_norm(key, row.get(key)).startswith(scope_norm(key, value)) for key, value in prefixes.items())
-    )
+    for key, value in exact.items():
+        actual = scope_value(key, row.get(key))
+        expected = scope_value(key, value)
+        if actual is None or actual != expected:
+            return False
+    for key, value in prefixes.items():
+        actual = scope_value(key, row.get(key))
+        expected = scope_value(key, value)
+        if not isinstance(actual, str) or not isinstance(expected, str) or not actual.startswith(expected):
+            return False
+    return True
 
 
 def expected_count(rule: dict[str, Any], field: str) -> int | None:
@@ -449,9 +570,322 @@ def expected_count(rule: dict[str, Any], field: str) -> int | None:
     return value
 
 
+def assertion_count(rule: dict[str, Any], field: str, *, required: bool = False) -> int | None:
+    if field not in rule:
+        if required:
+            raise AssertionGateError(field, "missing", "non-negative integer", f"{field} is required")
+        return None
+    value = rule.get(field)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        observed = value if isinstance(value, (bool, int)) else value_shape(value)
+        raise AssertionGateError(
+            field,
+            observed,
+            "non-negative integer",
+            f"{field} must be a non-negative integer",
+        )
+    return value
+
+
+def required_count(rule: dict[str, Any], field: str) -> int:
+    if field not in rule:
+        raise ValueError(f"{field} is required")
+    value = expected_count(rule, field)
+    if value is None:
+        raise ValueError(f"{field} is required")
+    return value
+
+
+def selector_state_contract(override: dict[str, Any]) -> tuple[str, int] | None:
+    """Validate the Naraetan current-active state binding when present."""
+
+    is_naraetan = text(override.get("ruleId")).startswith("naraetan-")
+    has_contract = "expectedCurrentState" in override or "expectedSelectorMutationCount" in override
+    if not is_naraetan and not has_contract:
+        return None
+    state = text(override.get("expectedCurrentState"))
+    if state not in {"present", "absent"}:
+        raise ValueError("expectedCurrentState must be present or absent")
+    expected_mutations = required_count(override, "expectedSelectorMutationCount")
+    required_mutations = 1 if state == "present" else 0
+    if expected_mutations != required_mutations:
+        raise ValueError("expectedSelectorMutationCount conflicts with expectedCurrentState")
+    return state, expected_mutations
+
+
+KNOWN_TUPLE_FIELDS = (
+    "videoId",
+    "occurrenceId",
+    "position",
+    "seconds",
+    "sourceId",
+    "sourceHash",
+    "rawHash",
+    "rangeId",
+)
+KNOWN_TUPLE_STRING_FIELDS = tuple(field for field in KNOWN_TUPLE_FIELDS if field not in {"position", "seconds"})
+
+
+def known_tuples(assertion: dict[str, Any]) -> list[dict[str, Any]] | None:
+    if "knownTuplePresence" not in assertion:
+        return None
+    value = assertion.get("knownTuplePresence")
+    if not isinstance(value, list) or not value:
+        raise AssertionGateError(
+            "knownTuplePresence",
+            value_shape(value),
+            "non-empty list",
+            "knownTuplePresence must be a non-empty list",
+        )
+    tuples: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"index": index, "shape": value_shape(item)},
+                {"tupleShape": "object"},
+                f"knownTuplePresence[{index}] must be an object",
+            )
+        missing = [field for field in KNOWN_TUPLE_FIELDS if field not in item]
+        if missing:
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"index": index, "missingFieldCount": len(missing)},
+                {"missingFieldCount": 0},
+                f"knownTuplePresence[{index}] is incomplete",
+            )
+        unknown = sorted(set(item) - set(KNOWN_TUPLE_FIELDS))
+        if unknown:
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"index": index, "unknownFieldCount": len(unknown)},
+                {"unknownFieldCount": 0},
+                f"knownTuplePresence[{index}] has unknown fields",
+            )
+        if any(not isinstance(item[field], str) or not item[field].strip() for field in KNOWN_TUPLE_STRING_FIELDS):
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"index": index, "invalidStringFieldCount": 1},
+                {"invalidStringFieldCount": 0},
+                f"knownTuplePresence[{index}] has invalid string field",
+            )
+        if any(isinstance(item[field], bool) or not isinstance(item[field], int) or item[field] < 0 for field in ("position", "seconds")):
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"index": index, "invalidNumericFieldCount": 1},
+                {"invalidNumericFieldCount": 0},
+                f"knownTuplePresence[{index}] has invalid numeric field",
+            )
+        canonical = json.dumps({field: item[field] for field in KNOWN_TUPLE_FIELDS}, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        if canonical in seen:
+            raise AssertionGateError(
+                "knownTuplePresence",
+                {"duplicateDeclarationCount": 1},
+                {"duplicateDeclarationCount": 0},
+                "knownTuplePresence contains duplicate tuple",
+            )
+        seen.add(canonical)
+        tuples.append({field: item[field] for field in KNOWN_TUPLE_FIELDS})
+    return tuples
+
+
+def known_tuple_matches(expected: dict[str, Any], row: dict[str, Any]) -> bool:
+    for field in KNOWN_TUPLE_FIELDS:
+        actual = row.get(field)
+        wanted = expected.get(field)
+        if field in {"seconds", "position"}:
+            if actual != wanted:
+                return False
+        elif text(actual) != text(wanted):
+            return False
+    return True
+
+
+def known_tuple_digest(tuples: Iterable[dict[str, Any]]) -> str:
+    canonical = [
+        {field: item[field] for field in KNOWN_TUPLE_FIELDS}
+        for item in tuples
+    ]
+    canonical.sort(key=lambda item: json.dumps(item, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
+    return sha256_bytes(json.dumps(canonical, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8"))
+
+
+def protection_contract_sha256(digests: dict[str, str]) -> str:
+    return sha256_bytes(json.dumps(dict(sorted(digests.items())), separators=(",", ":"), sort_keys=True).encode("utf-8"))
+
+
+def coarse_selector_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the minimum stable selector identity for idempotency checks."""
+
+    seconds = override.get("seconds")
+    source_id = text(override.get("sourceId"))
+    result = [row for row in rows if row.get("seconds") == seconds]
+    if source_id:
+        result = [row for row in result if text(row.get("sourceId")) == source_id]
+    return result
+
+
+def protection_tuple_from_row(assertion_id: str, row: dict[str, Any]) -> dict[str, Any]:
+    result = {field: row.get(field) for field in KNOWN_TUPLE_FIELDS}
+    if any(not isinstance(result[field], str) or not result[field].strip() for field in KNOWN_TUPLE_STRING_FIELDS):
+        raise CurationBlocked(f"protected scope has incomplete string provenance: {assertion_id}")
+    if any(
+        isinstance(result[field], bool) or not isinstance(result[field], int) or result[field] < 0
+        for field in ("position", "seconds")
+    ):
+        raise CurationBlocked(f"protected scope has incomplete numeric provenance: {assertion_id}")
+    return result
+
+
+def bind_current_active_evidence(
+    rules_path: Path,
+    snapshot_path: Path,
+    output_path: Path,
+    evidence_path: Path,
+    active_revision_id: str,
+) -> dict[str, Any]:
+    """Bind an untrusted template to one complete logical active snapshot.
+
+    The bound rules file is run-scoped evidence. It is never written back to
+    the repository and cannot become an accepted increment automatically.
+    """
+
+    rules = read_json(rules_path)
+    if text(rules.get("status")) != "needs_current_active_evidence" or rules.get("ready") is not False:
+        raise CurationBlocked("rules template is not awaiting current-active evidence")
+    if not active_revision_id:
+        raise CurationBlocked("active revision id is required for evidence binding")
+    by_video, _, snapshot_sha = read_snapshot(snapshot_path)
+    snapshot_rows = [row for rows in by_video.values() for row in rows]
+    if not snapshot_rows:
+        raise CurationBlocked("current-active snapshot is empty")
+
+    records = rules.get("records")
+    naraetan = [
+        item for item in records
+        if isinstance(item, dict) and text(item.get("ruleId")).startswith("naraetan-")
+    ]
+    if len(records) != 1 or len(naraetan) != 1:
+        raise CurationBlocked("template must contain only the exact Naraetan selector")
+    naraetan_rule = naraetan[0]
+    if (
+        text(naraetan_rule.get("videoId")) != "lUDCE3zZmuQ"
+        or naraetan_rule.get("seconds") != 9463
+        or text(naraetan_rule.get("action")) != "drop_entry"
+    ):
+        raise CurationBlocked("Naraetan selector is not the reviewed lUDCE3zZmuQ@9463 entry")
+    exact = candidate_rows(
+        naraetan_rule,
+        by_video.get("lUDCE3zZmuQ", []),
+        "drop_entry",
+    )
+    coarse = coarse_selector_rows(naraetan_rule, by_video.get("lUDCE3zZmuQ", []))
+    if len(exact) == 1:
+        selector_state = "present"
+        selector_mutations = 1
+    elif not exact and not coarse:
+        selector_state = "absent"
+        selector_mutations = 0
+    else:
+        raise CurationBlocked(
+            f"Naraetan current-active provenance is ambiguous: exact={len(exact)} coarse={len(coarse)}"
+        )
+    naraetan_rule["expectedCurrentState"] = selector_state
+    naraetan_rule["expectedSelectorMutationCount"] = selector_mutations
+    rules["expectedSelectorMutationCount"] = selector_mutations
+
+    alias_rules = rules.get("artistScopedAliases")
+    if not isinstance(alias_rules, list) or len(alias_rules) != 1:
+        raise CurationBlocked("template must contain exactly one artist-scoped alias rule")
+    alias_rule = alias_rules[0]
+    if text(alias_rule.get("artist")) != "Ado" or text(alias_rule.get("canonicalTitle")) != "逆光":
+        raise CurationBlocked("alias rule must remain scoped to Ado 逆光")
+    alias_rows = alias_candidates(alias_rule, by_video)
+    alias_expected = expected_count(alias_rule, "expectedMatchCount")
+    if alias_expected is None or len(alias_rows) != alias_expected:
+        raise CurationBlocked(
+            f"Ado alias current-active count mismatch: expected={alias_expected} actual={len(alias_rows)}"
+        )
+    rules["expectedAliasMutationCount"] = len(alias_rows)
+
+    assertions = rules.get("safetyAssertions")
+    if not isinstance(assertions, list) or not assertions:
+        raise CurationBlocked("template safety assertions are missing")
+    assertion_evidence: list[dict[str, Any]] = []
+    for assertion in assertions:
+        if not isinstance(assertion, dict):
+            raise CurationBlocked("template safety assertion is not an object")
+        assertion_id = text(assertion.get("assertionId"))
+        if not assertion_id:
+            raise CurationBlocked("template safety assertion id is missing")
+        validate_scope_selectors(assertion)
+        matches = [row for row in snapshot_rows if scope_matches(assertion, row)]
+        observed = len(matches)
+        if observed <= 0:
+            raise CurationBlocked(f"protected scope is empty: {assertion_id}")
+        fixed = assertion.get("expectedScopeCount")
+        if fixed is not None:
+            fixed = assertion_count(assertion, "expectedScopeCount")
+            if observed != fixed:
+                raise CurationBlocked(
+                    f"protected fixed scope drift: {assertion_id} expected={fixed} actual={observed}"
+                )
+        tuples = [protection_tuple_from_row(assertion_id, row) for row in matches]
+        tuples.sort(
+            key=lambda item: json.dumps(
+                item, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+            )
+        )
+        assertion["expectedScopeCount"] = observed
+        assertion["minScopeCount"] = observed
+        assertion["knownTuplePresence"] = tuples
+        assertion["expectedMutationCount"] = 0
+        assertion.pop("bindCurrentActiveEvidence", None)
+        assertion_evidence.append({
+            "assertionId": assertion_id,
+            "scopeCount": observed,
+            "knownTupleCount": len(tuples),
+            "knownTupleDigest": known_tuple_digest(tuples),
+        })
+
+    template_sha = sha256_bytes(rules_path.read_bytes())
+    rules.pop("pendingCurrentActiveEvidence", None)
+    rules["status"] = "ready"
+    rules["ready"] = True
+    rules["currentActiveEvidence"] = {
+        "activeRevisionId": active_revision_id,
+        "snapshotSha256": snapshot_sha,
+        "snapshotOccurrenceCount": len(snapshot_rows),
+        "templateRulesManifestSha256": template_sha,
+        "boundAt": datetime.now(timezone.utc).isoformat(),
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(rules, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    evidence = {
+        "schemaVersion": 1,
+        "kind": "curation-current-active-evidence-binding",
+        "status": "ready",
+        "activeRevisionId": active_revision_id,
+        "snapshotSha256": snapshot_sha,
+        "snapshotOccurrenceCount": len(snapshot_rows),
+        "templateRulesManifestSha256": template_sha,
+        "boundRulesManifestSha256": sha256_bytes(output_path.read_bytes()),
+        "naraetanCurrentState": selector_state,
+        "expectedSelectorMutationCount": selector_mutations,
+        "expectedAliasMutationCount": len(alias_rows),
+        "assertions": assertion_evidence,
+    }
+    evidence_path.parent.mkdir(parents=True, exist_ok=True)
+    evidence_path.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return evidence
+
+
 def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_path: Path, review_path: Path) -> dict[str, Any]:
     rules_raw = rules_path.read_bytes()
     rules = read_json(rules_path)
+    if text(rules.get("status") or "ready") != "ready":
+        raise CurationBlocked("rules manifest is not ready for current-active conversion")
     by_video, video_ids, snapshot_sha = read_snapshot(snapshot_path)
     snapshot_rows = [row for rows in by_video.values() for row in rows]
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -490,23 +924,45 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         ):
             audit.append(audit_result(index, raw_override, "invalid", error="replace_entry requires replacement.title or replacement.artist"))
             continue
+        try:
+            state_contract = selector_state_contract(raw_override)
+        except ValueError as exc:
+            audit.append(audit_result(index, raw_override, "invalid", error=str(exc)))
+            continue
         candidates = candidate_rows(raw_override, rows, action)
-        same_seconds = [row for row in rows if row.get("seconds") == raw_override.get("seconds")]
-        if not candidates and not same_seconds:
-            # The exact video/time entry has disappeared from the active snapshot.
-            # This is a safe no-op; provenance mismatches at an existing time stay
-            # fail-closed below.
-            audit.append(audit_result(index, raw_override, "already_applied_absent", evidence="active snapshot has no occurrence at audited video/time"))
+        coarse_rows = coarse_selector_rows(raw_override, rows)
+        if not candidates:
+            if not coarse_rows:
+                # The video/time/source identity itself has disappeared.  This is
+                # the only selector-drift case that is an idempotent no-op.
+                if state_contract and state_contract[0] == "present":
+                    audit.append(audit_result(index, raw_override, "current_state_mismatch", evidence="expected present selector is absent"))
+                else:
+                    audit.append(audit_result(
+                        index,
+                        raw_override,
+                        "already_applied_absent",
+                        evidence="active snapshot has no audited video/time/source identity",
+                        selectorMutationCount=0,
+                    ))
+            else:
+                # A coarse identity exists, so a source/raw provenance mismatch
+                # must never be reclassified as an already-applied deletion.
+                audit.append(audit_result(
+                    index,
+                    raw_override,
+                    "provenance_mismatch",
+                    coarseMatchCount=len(coarse_rows),
+                    exactMatchCount=0,
+                    occurrenceIds=[row["occurrenceId"] for row in coarse_rows],
+                ))
+            continue
+        if state_contract and state_contract[0] == "absent":
+            audit.append(audit_result(index, raw_override, "current_state_mismatch", evidence="expected absent selector is present"))
             continue
         expected = expected_count(raw_override, "expectedMatchCount")
         if expected is not None and len(candidates) != expected:
             audit.append(audit_result(index, raw_override, "count_mismatch", matchCount=len(candidates), expectedMatchCount=expected))
-            continue
-        if len(candidates) == 0:
-            # The desired post-curation state is already true when the exact
-            # audited video/time row is absent from the active snapshot.  Keep
-            # this explicit in the audit rather than silently dropping it.
-            audit.append(audit_result(index, raw_override, "already_applied_absent", evidence="active snapshot has no occurrence at audited video/time"))
             continue
         if action == "replace_entry" and isinstance(replacement, dict):
             expected_title = norm(replacement.get("title"))
@@ -517,7 +973,8 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
                 and (not expected_artist or norm(row.get("artist")) == expected_artist)
             ]
             if len(already) == 1:
-                audit.append(audit_result(index, raw_override, "already_applied", occurrenceId=already[0]["occurrenceId"], evidence="active occurrence already equals replacement"))
+                status = "current_state_mismatch" if state_contract else "already_applied"
+                audit.append(audit_result(index, raw_override, status, occurrenceId=already[0]["occurrenceId"], evidence="active occurrence already equals replacement"))
                 continue
         if len(candidates) > 1:
             audit.append(audit_result(index, raw_override, "ambiguous", occurrenceIds=[row["occurrenceId"] for row in candidates]))
@@ -526,16 +983,17 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         if action == "drop_entry":
             mutations.append(runtime_row(raw_override, current, True, context=context))
             selector_mutations += 1
-            audit.append(audit_result(index, raw_override, "accepted", matchCount=1, occurrenceId=current["occurrenceId"], evidence="exact audited identity match"))
+            audit.append(audit_result(index, raw_override, "accepted", matchCount=1, occurrenceId=current["occurrenceId"], evidence="exact audited identity match", selectorMutationCount=1))
             continue
         expected_title = norm(replacement.get("title"))
         expected_artist = norm(replacement.get("artist"))
         if (not expected_title or norm(current.get("title")) == expected_title) and (not expected_artist or norm(current.get("artist")) == expected_artist):
-            audit.append(audit_result(index, raw_override, "already_applied", occurrenceId=current["occurrenceId"], evidence="active occurrence already equals replacement"))
+            status = "current_state_mismatch" if state_contract else "already_applied"
+            audit.append(audit_result(index, raw_override, status, occurrenceId=current["occurrenceId"], evidence="active occurrence already equals replacement"))
             continue
         mutations.append(runtime_row(raw_override, current, False, replacement, context))
         selector_mutations += 1
-        audit.append(audit_result(index, raw_override, "accepted", occurrenceId=current["occurrenceId"], evidence="video+seconds unique match"))
+        audit.append(audit_result(index, raw_override, "accepted", occurrenceId=current["occurrenceId"], evidence="video+seconds unique match", selectorMutationCount=1))
 
     for index, raw_rule in enumerate(rules.get("artistScopedAliases", [])):
         if not isinstance(raw_rule, dict):
@@ -588,10 +1046,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             "matchCount": len(candidates),
             "expectedMatchCount": expected,
             "occurrenceIds": [row["occurrenceId"] for row in candidates],
-            "selectedIdentities": sorted(
-                rule_identities,
-                key=lambda item: (item["rangeId"], item["originalGroupKey"], item["videoId"], item["occurrenceId"]),
-            ),
+            "selectedIdentities": sorted(rule_identities, key=identity_sort_key),
             "reason": text(raw_rule.get("reason")),
         })
 
@@ -602,31 +1057,125 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     ]
     for index, assertion in enumerate(rules.get("safetyAssertions", [])):
         if not isinstance(assertion, dict):
-            audit.append({"index": index, "kind": "safety_assertion", "status": "invalid", "error": "assertion is not an object"})
+            audit.append({
+                "index": index,
+                "kind": "safety_assertion",
+                "assertionId": None,
+                "status": "invalid",
+                "gate": "assertion",
+                "observed": value_shape(assertion),
+                "expected": "object",
+                "error": "assertion is not an object",
+            })
             continue
         try:
-            expected = expected_count(assertion, "expectedMutationCount")
-            expected_scope = expected_count(assertion, "expectedScopeCount")
+            validate_scope_selectors(assertion)
+            expected = assertion_count(assertion, "expectedMutationCount", required=True)
+            expected_scope = assertion_count(assertion, "expectedScopeCount")
+            minimum_scope = assertion_count(assertion, "minScopeCount")
+            required_tuples = known_tuples(assertion) or []
             scope_count = sum(1 for row in snapshot_rows if scope_matches(assertion, row))
             mutation_count = sum(1 for row in mutated_identities if scope_matches(assertion, row))
-        except ValueError as exc:
-            audit.append({"index": index, "kind": "safety_assertion", "assertionId": assertion.get("assertionId"), "status": "invalid", "error": str(exc)})
+            present_tuples = []
+            tuple_statuses = []
+            for known_index, required in enumerate(required_tuples):
+                matches = [row for row in snapshot_rows if known_tuple_matches(required, row)]
+                if not matches:
+                    tuple_status = "missing"
+                elif len(matches) != 1:
+                    tuple_status = "ambiguous"
+                elif not scope_matches(assertion, matches[0]):
+                    tuple_status = "outside_scope"
+                else:
+                    tuple_status = "present"
+                    present_tuples.append(required)
+                tuple_statuses.append({
+                    "index": known_index,
+                    "status": tuple_status,
+                    "matchCount": len(matches),
+                })
+            expected_digest = known_tuple_digest(required_tuples)
+            observed_digest = known_tuple_digest(present_tuples)
+        except AssertionGateError as exc:
+            audit.append({
+                "index": index,
+                "kind": "safety_assertion",
+                "assertionId": assertion.get("assertionId"),
+                "status": "invalid",
+                "gate": exc.gate,
+                "observed": exc.observed,
+                "expected": exc.expected,
+                "error": str(exc),
+            })
             continue
-        if expected_scope is not None and scope_count != expected_scope:
+        tuple_summary = {
+            "present": sum(item["status"] == "present" for item in tuple_statuses),
+            "missing": sum(item["status"] == "missing" for item in tuple_statuses),
+            "ambiguous": sum(item["status"] == "ambiguous" for item in tuple_statuses),
+            "outsideScope": sum(item["status"] == "outside_scope" for item in tuple_statuses),
+        }
+        if minimum_scope is not None and scope_count < minimum_scope:
+            status = "scope_count_below_minimum"
+            gate = "minScopeCount"
+            observed: Any = scope_count
+            gate_expected: Any = minimum_scope
+        elif expected_scope is not None and scope_count != expected_scope:
             status = "scope_count_mismatch"
-        elif expected is not None and mutation_count != expected:
+            gate = "expectedScopeCount"
+            observed = scope_count
+            gate_expected = expected_scope
+        elif tuple_summary["missing"]:
+            status = "known_tuple_missing"
+            gate = "knownTuplePresence"
+            observed = tuple_summary
+            gate_expected = {"exactlyOnceInScope": len(required_tuples)}
+        elif tuple_summary["ambiguous"]:
+            status = "known_tuple_ambiguous"
+            gate = "knownTuplePresence"
+            observed = tuple_summary
+            gate_expected = {"exactlyOnceInScope": len(required_tuples)}
+        elif tuple_summary["outsideScope"]:
+            status = "known_tuple_outside_scope"
+            gate = "knownTuplePresence"
+            observed = tuple_summary
+            gate_expected = {"exactlyOnceInScope": len(required_tuples)}
+        elif mutation_count != expected:
             status = "safety_violation"
+            gate = "expectedMutationCount"
+            observed = mutation_count
+            gate_expected = expected
         else:
             status = "accepted"
+            gate = "all"
+            observed = {
+                "scopeRowCount": scope_count,
+                "mutationCount": mutation_count,
+                "knownTupleCount": len(present_tuples),
+            }
+            gate_expected = {
+                "expectedScopeCount": expected_scope,
+                "minScopeCount": minimum_scope,
+                "expectedMutationCount": expected,
+                "exactlyOnceInScope": len(required_tuples),
+            }
         audit.append({
             "index": index,
             "kind": "safety_assertion",
             "assertionId": assertion.get("assertionId"),
             "status": status,
+            "gate": gate,
+            "observed": observed,
+            "expected": gate_expected,
             "scopeRowCount": scope_count,
             "expectedScopeCount": expected_scope,
+            "minScopeCount": minimum_scope,
             "mutationCount": mutation_count,
             "expectedMutationCount": expected,
+            "knownTupleCount": len(present_tuples),
+            "expectedKnownTupleCount": len(required_tuples),
+            "expectedKnownTupleDigest": expected_digest,
+            "observedKnownTupleDigest": observed_digest,
+            "knownTupleStatuses": tuple_statuses,
             "auditedLegacyRuleCount": assertion.get("auditedLegacyRuleCount"),
         })
 
@@ -642,6 +1191,11 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         raise ValueError("alias mutation count does not equal reviewed physical identity count")
     alias_source_groups_bytes = canonical_json_bytes(alias_source_groups)
     selected_identities_bytes = canonical_json_bytes(selected_identities)
+    protection_digests = {
+        text(item.get("assertionId")): text(item.get("expectedKnownTupleDigest"))
+        for item in audit
+        if item.get("kind") == "safety_assertion" and text(item.get("assertionId")) and text(item.get("expectedKnownTupleDigest"))
+    }
     review = {
         "schemaVersion": 1,
         "generatedAt": generated_at,
@@ -661,9 +1215,15 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             "ambiguous",
             "invalid",
             "count_mismatch",
+            "provenance_mismatch",
             "alias_count_mismatch",
             "safety_violation",
             "scope_count_mismatch",
+            "scope_count_below_minimum",
+            "known_tuple_missing",
+            "known_tuple_ambiguous",
+            "known_tuple_outside_scope",
+            "current_state_mismatch",
         )) else "needs_review",
         "generatedAt": generated_at,
         "rangeId": "all",
@@ -677,6 +1237,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "overrideCount": len(rules["records"]),
         "artistScopedAliasRuleCount": len(rules.get("artistScopedAliases", [])),
         "safetyAssertionCount": len(rules.get("safetyAssertions", [])),
+        "protectionContractSha256": protection_contract_sha256(protection_digests),
         "reviewAudit": counts,
         "overridesSha256": sha256_bytes(rules_raw),
         "rulesManifestSha256": sha256_bytes(rules_raw),
@@ -685,9 +1246,6 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "sourceManifestSha256": sha256_bytes((sha256_bytes(rules_raw) + snapshot_sha).encode("ascii")),
     }
     if selected_identities:
-        # This review ledger deliberately remains in the producer artifact and
-        # never enters a public API payload.  It records range projections, not
-        # database mutations, so a legacy all+7d row still has one mutation.
         manifest.update({
             "aliasSourceGroups": alias_source_groups,
             "aliasSourceGroupCount": len(alias_source_groups),
@@ -710,14 +1268,36 @@ def main() -> int:
     rules_input.add_argument("--rules-manifest", type=Path, help="Curation rules manifest with exact selectors and artist-scoped aliases")
     parser.add_argument("--snapshot", type=Path, required=True, help="NDJSON active occurrence/video snapshot, or - for stdin")
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--manifest-output", type=Path, required=True)
-    parser.add_argument("--review-output", type=Path, required=True)
+    parser.add_argument("--manifest-output", type=Path)
+    parser.add_argument("--review-output", type=Path)
+    parser.add_argument("--bind-current-active-evidence", action="store_true")
+    parser.add_argument("--binding-evidence-output", type=Path)
+    parser.add_argument("--active-revision-id")
     args = parser.parse_args()
     try:
         rules_path = args.rules_manifest or args.overrides
+        if args.bind_current_active_evidence:
+            if args.overrides or not args.binding_evidence_output or not args.active_revision_id:
+                raise ValueError(
+                    "binding requires --rules-manifest, --binding-evidence-output, and --active-revision-id"
+                )
+            evidence = bind_current_active_evidence(
+                rules_path,
+                args.snapshot,
+                args.output,
+                args.binding_evidence_output,
+                args.active_revision_id,
+            )
+            print(json.dumps({"status": "ok", **evidence}, ensure_ascii=False))
+            return 0
+        if not args.manifest_output or not args.review_output:
+            raise ValueError("conversion requires --manifest-output and --review-output")
         manifest = convert(rules_path, args.snapshot, args.output, args.manifest_output, args.review_output)
         print(json.dumps({"status": "ok", **manifest}, ensure_ascii=False))
         return 0 if manifest["status"] == "ready" else 78
+    except CurationBlocked as exc:
+        print(f"CURATION_PATCH_BLOCKED {exc}", file=sys.stderr)
+        return 78
     except Exception as exc:
         print(f"CURATION_PATCH_ERROR {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1

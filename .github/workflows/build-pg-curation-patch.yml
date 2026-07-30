@@ -108,6 +108,9 @@ jobs:
           test "$SNAPSHOT_EXPECTED_MAX_BYTES" -gt 0
           test "$SNAPSHOT_HARD_CAP_BYTES" -ge "$SNAPSHOT_EXPECTED_MAX_BYTES"
           test "$TASK_HARD_CAP_BYTES" -ge "$SNAPSHOT_HARD_CAP_BYTES"
+          test "$SNAPSHOT_EXPECTED_MAX_BYTES" -le 536870912
+          test "$SNAPSHOT_HARD_CAP_BYTES" -le 1073741824
+          test "$TASK_HARD_CAP_BYTES" -le 2147483648
           test "$ARTIFACT_RETENTION_DAYS" -ge 1
           test "$ARTIFACT_RETENTION_DAYS" -le 7
           TASK_ROOT="$(mktemp -d "${RUNNER_TEMP}/daily-song-list-curation-producer.XXXXXX")"
@@ -338,12 +341,29 @@ jobs:
         timeout-minutes: 12
         run: |
           set -Eeuo pipefail
-          python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
-            --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
-            --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
-            --output "$ARTIFACT_ROOT/candidate.ndjson" \
-            --manifest-output "$TASK_ROOT/converter-manifest.json" \
-            --review-output "$ARTIFACT_ROOT/review.json"
+          SSH=(ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
+          final_remote_active="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "sudo -u postgres psql -d song_rank -Atqc \"select state_value from migration_state where state_key='active_revision_id'\"")"
+          test "$final_remote_active" = "$EXPECTED_ACTIVE_REVISION_ID" || {
+            echo "PG_CURATION_PRODUCER_BLOCKED final active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$final_remote_active"
+            exit 78
+          }
+          (
+            ulimit -v 2097152
+            python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
+              --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
+              --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
+              --output "$ARTIFACT_ROOT/bound-rules-manifest.json" \
+              --bind-current-active-evidence \
+              --binding-evidence-output "$ARTIFACT_ROOT/current-active-binding.json" \
+              --active-revision-id "$EXPECTED_ACTIVE_REVISION_ID"
+            python3 "$PRODUCER_ROOT/scripts/migration/curation-overrides-to-patch.py" \
+              --rules-manifest "$ARTIFACT_ROOT/bound-rules-manifest.json" \
+              --snapshot "$TASK_ROOT/active-snapshot.ndjson" \
+              --output "$ARTIFACT_ROOT/candidate.ndjson" \
+              --manifest-output "$TASK_ROOT/converter-manifest.json" \
+              --review-output "$ARTIFACT_ROOT/review.json"
+          )
           task_peak_bytes="${TASK_PEAK_BYTES:-0}"
           task_after_convert_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
           if [ "$task_after_convert_bytes" -gt "$task_peak_bytes" ]; then
@@ -361,12 +381,10 @@ jobs:
             --candidate "$ARTIFACT_ROOT/candidate.ndjson" \
             --snapshot-checkpoint "$TASK_ROOT/snapshot-checkpoint.json" \
             --remote-log "$TASK_ROOT/remote-export.log" \
-            --rules-manifest "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" \
+            --rules-manifest "$ARTIFACT_ROOT/bound-rules-manifest.json" \
             --output-manifest "$ARTIFACT_ROOT/manifest.json" \
             --output-checkpoint "$ARTIFACT_ROOT/producer-checkpoint.json" \
             --expected-active-revision "$EXPECTED_ACTIVE_REVISION_ID" \
-            --expected-selector-mutations 0 \
-            --expected-alias-mutations 14 \
             --producer-commit "$GITHUB_SHA" \
             --producer-run-id "$GITHUB_RUN_ID" \
             --producer-run-attempt "$GITHUB_RUN_ATTEMPT" |
@@ -525,6 +543,8 @@ jobs:
             remote-export.log
             capture-result.json
             snapshot-checkpoint.json
+            current-active-binding.json
+            bound-rules-manifest.json
             converter-manifest.json
             finalize-result.json
           )
