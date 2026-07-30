@@ -407,6 +407,149 @@ def _source_payload_from_channel_records(
     return source_payload_from_records(enriched, key, query)
 
 
+def _source_occurrence_identity(item: Mapping[str, Any]) -> tuple[Any, ...]:
+    occurrence_id = _text(item.get("occurrenceId") or item.get("occurrence_id"))
+    if occurrence_id:
+        return ("id", occurrence_id)
+    return (
+        "tuple",
+        _text(item.get("position")),
+        _text(item.get("songKey") or item.get("song_key")),
+        item.get("seconds"),
+        _overlay_song_group_norm(item.get("title")),
+        _overlay_song_group_norm(item.get("artist")),
+    )
+
+
+def _persisted_source_records(
+    occurrences: Iterable[Mapping[str, Any]],
+    metadata: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Rebuild trusted parent records from the persisted source projection.
+
+    A historical runtime video's scalar channel columns can be stale even when
+    its source-detail occurrence contains the correct immutable channel
+    identity.  Use those persisted source rows as the parent-side authority,
+    but never accept a row whose channel identity disagrees with the requested
+    source.  Channel URLs are deliberately not identity evidence.
+    """
+
+    channel_id = _text(
+        metadata.get("channelId")
+        or metadata.get("channel_id")
+        or metadata.get("channelKey")
+        or metadata.get("channel_key")
+    )
+    channel_handle = _text(
+        metadata.get("channelHandle")
+        or metadata.get("channel_handle")
+        or metadata.get("handle")
+    ).lstrip("/@")
+    records: dict[str, dict[str, Any]] = {}
+    seen: dict[str, set[tuple[Any, ...]]] = defaultdict(set)
+    for value in occurrences:
+        item = dict(value)
+        has_nested_video = any(
+            isinstance(item.get(name), Mapping)
+            for name in ("videoPayload", "video_payload", "video", "item")
+        )
+        video = _overlay_video_projection(item)
+        video_id = _text(
+            video.get("videoId")
+            if has_nested_video else (
+                item.get("youtubeVideoId")
+                or item.get("videoId")
+                or item.get("externalVideoId")
+                or video.get("videoId")
+            )
+        )
+        if not video_id:
+            continue
+        # ``_runtime_source_occurrence`` supplements absent top-level fields
+        # from scalar columns.  Historical scalar channel identity can be
+        # stale, while the nested persisted video is the original source
+        # tuple, so prefer that nested immutable identity.
+        item_channel_id = _text(
+            video.get("channelId")
+            if has_nested_video else (
+                item.get("channelId") or video.get("channelId")
+            )
+        )
+        item_channel_handle = _text(
+            video.get("channelHandle")
+            if has_nested_video else (
+                item.get("channelHandle") or video.get("channelHandle")
+            )
+        ).lstrip("/@")
+        if channel_id:
+            if item_channel_id != channel_id:
+                continue
+        elif channel_handle and item_channel_handle != channel_handle:
+            continue
+
+        source_song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+        nested_song = (
+            source_song.get("song")
+            if isinstance(source_song.get("song"), Mapping)
+            else {}
+        )
+        occurrence = dict(nested_song)
+        occurrence.update(_overlay_public_occurrence(source_song))
+        for name in (
+            "occurrenceId", "position", "rangeId", "songKey", "seconds",
+            "title", "artist", "sourceId", "sourceSystem",
+        ):
+            if name not in occurrence and item.get(name) is not None:
+                occurrence[name] = item[name]
+        identity = _source_occurrence_identity(occurrence)
+        if identity in seen[video_id]:
+            continue
+        seen[video_id].add(identity)
+        record = records.setdefault(
+            video_id,
+            {"video": {**video, "videoId": video_id}, "occurrences": []},
+        )
+        record["occurrences"].append(occurrence)
+    return [
+        {"video": record["video"], "occurrences": tuple(record["occurrences"])}
+        for _, record in sorted(records.items())
+    ]
+
+
+def _merge_source_records(
+    records: Iterable[Mapping[str, Any]],
+    additions: Iterable[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Merge parent source records by immutable video/occurrence identity."""
+
+    merged: dict[str, dict[str, Any]] = {}
+    seen: dict[str, set[tuple[Any, ...]]] = defaultdict(set)
+    for source in (records, additions):
+        for record in source:
+            video = dict(record.get("video") or {})
+            video_id = _text(video.get("videoId"))
+            if not video_id:
+                continue
+            current = merged.setdefault(
+                video_id,
+                {"video": video, "occurrences": []},
+            )
+            for name, value in video.items():
+                if current["video"].get(name) in (None, "") and value not in (None, ""):
+                    current["video"][name] = value
+            for occurrence in record.get("occurrences", ()):
+                item = dict(occurrence)
+                identity = _source_occurrence_identity(item)
+                if identity in seen[video_id]:
+                    continue
+                seen[video_id].add(identity)
+                current["occurrences"].append(item)
+    return [
+        {"video": record["video"], "occurrences": tuple(record["occurrences"])}
+        for _, record in sorted(merged.items())
+    ]
+
+
 def _runtime_channel_source_payload(
     connection,
     revision_id: str,
@@ -426,6 +569,7 @@ def _runtime_channel_source_payload(
     channel_id = _text(metadata.get("channelId") or metadata.get("channel_id") or metadata.get("channelKey") or metadata.get("channel_key"))
     channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
     channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
+    source_query = _source_query_for_channel(key, metadata, query)
     predicates: list[str] = []
     params: list[Any] = [revision_id]
     if channel_id:
@@ -510,6 +654,22 @@ def _runtime_channel_source_payload(
     candidate_rows: tuple[Mapping[str, Any], ...] = ()
     accepted_video_resets: dict[str, dict[str, Any]] = {}
     if overlay_revision_ids:
+        options = _query_options(source_query)
+        parent_source_key = _text(
+            metadata.get("sourceDetailKey")
+            or metadata.get("source_detail_key")
+            or key
+        )
+        persisted_occurrences = _runtime_source_occurrences(
+            connection,
+            revision_id,
+            parent_source_key,
+            options["range"],
+        )
+        records = _merge_source_records(
+            records,
+            _persisted_source_records(persisted_occurrences, metadata),
+        )
         # A selected migration video row is a full-video reset even if it is
         # a tombstone or belongs to a different channel.  Remove that parent
         # video before channel filtering candidate records; otherwise a
@@ -541,7 +701,6 @@ def _runtime_channel_source_payload(
         else _runtime_tombstones(connection, overlay_revision_ids or ())
     )
     records = _apply_record_overlay(records, runtime_changes)
-    source_query = _source_query_for_channel(key, metadata, query)
     payload = _source_payload_from_channel_records(records, metadata, key, source_query)
     if payload.get("found"):
         return payload

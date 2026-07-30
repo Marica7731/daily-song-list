@@ -2974,7 +2974,10 @@ key = module._stable_key("source-vtuber", "7d", channel_id)
 metadata = {"channelId": channel_id, "channelName": "Channel 7D", "sourceDetailKey": module._stable_key("source-vtuber", "all", channel_id)}
 class Cursor:
     def execute(self, sql, params):
-        if "FROM runtime_videos" in sql:
+        if "FROM runtime_source_occurrences" in sql:
+            self.description = [("position",)]
+            self.rows = []
+        elif "FROM runtime_videos" in sql:
             self.description = [(name,) for name in ("video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "payload_json")]
             self.rows = [("old-video", "Old", "Channel 7D", channel_id, "/@channel7d", "https://youtube.com/@channel7d", 1, json.dumps({"thumbnailUrl": "https://i.ytimg.com/vi/old-video/hqdefault.jpg"}))]
         elif "FROM runtime_occurrences" in sql:
@@ -3041,6 +3044,196 @@ assert result["sourceKey"] == "all-key" and result["page"] == 1
 assert result["record"]["legacyField"] == "kept"
 assert result["record"]["sourceDetailKey"] == "all-key"
 assert result["record"]["videoCount"] == 2
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic source detail keeps persisted base rows when parent channel scalars are stale", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+channel_id = "UC8VlcljjGFb4-Ny2Heb0-ew"
+channel_handle = "/@urameshi_conta"
+source_key = module._stable_key("source-vtuber", "all", channel_id)
+metadata = {
+    "type": "vtuber",
+    "sourceDetailKey": source_key,
+    "channelId": channel_id,
+    "channelHandle": channel_handle,
+    "channelName": "Conta Urameshi",
+}
+
+def video(video_id):
+    return {
+        "videoId": video_id,
+        "channelId": channel_id,
+        "channelHandle": channel_handle,
+        "channelName": "Conta Urameshi",
+        "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+    }
+
+base_occurrences = []
+for index in range(3705):
+    video_id = f"base-{index % 272:03d}"
+    occurrence = {
+        "videoId": video_id,
+        "occurrenceId": f"base-occurrence-{index}",
+        "position": index // 272,
+        "rangeId": "all",
+        "songKey": f"base-song-{index}",
+        "seconds": index,
+        "title": f"Base song {index}",
+        "artist": "Base artist",
+    }
+    base_occurrences.append({
+        "videoId": video_id,
+        "channelId": "UCPOLLUTED-SCALAR",
+        "channelHandle": "/@polluted-scalar",
+        "item": video(video_id),
+        "song": {**occurrence, "song": occurrence, "video": video(video_id)},
+    })
+
+overlay_records = {}
+for index in range(214):
+    video_id = f"overlay-{index % 17:03d}"
+    record = overlay_records.setdefault(
+        video_id,
+        {"video": video(video_id), "occurrences": []},
+    )
+    record["occurrences"].append({
+        "occurrenceId": f"overlay-occurrence-{index}",
+        "position": index // 17,
+        "rangeId": "all",
+        "songKey": f"overlay-song-{index}",
+        "seconds": 10000 + index,
+        "title": f"Overlay song {index}",
+        "artist": "Overlay artist",
+    })
+overlay_records = [
+    {"video": record["video"], "occurrences": tuple(record["occurrences"])}
+    for record in overlay_records.values()
+]
+
+# The historical scalar channel lookup is empty.  Before this regression fix,
+# the source rebuild therefore returned only the 214/17 overlay delta.
+module._rows = lambda connection, sql, params: []
+module._runtime_source_occurrences = lambda *args: base_occurrences
+module._overlay_candidate_rows = lambda *args, **kwargs: [{"video_id": "overlay-marker"}]
+module._accepted_video_resets = lambda *args, **kwargs: {}
+module._overlay_channel_records = lambda *args, **kwargs: overlay_records
+module._runtime_tombstones = lambda *args, **kwargs: []
+
+page_one = module._runtime_channel_source_payload(
+    object(), "parent", metadata, source_key,
+    {"page": "1", "pageSize": "200"}, overlay_revision_ids=["accepted"],
+)
+page_two = module._runtime_channel_source_payload(
+    object(), "parent", metadata, source_key,
+    {"page": "2", "pageSize": "200"}, overlay_revision_ids=["accepted"],
+)
+for payload in (page_one, page_two):
+    assert payload["found"] is True
+    assert payload["sourceKey"] == source_key
+    assert payload["totalOccurrenceCount"] == 3919
+    assert payload["totalVideoCount"] == 289
+    assert payload["record"]["count"] == 3919
+    assert payload["record"]["videoCount"] == 289
+    assert all(
+        item["item"]["channelId"] == channel_id
+        and item["item"]["channelHandle"] == channel_handle
+        and item["videoId"] == item["item"]["videoId"]
+        for item in payload["record"]["occurrences"]
+    )
+assert page_one["pageCount"] == 2 and page_two["pageCount"] == 2
+assert (
+    len(page_one["record"]["occurrences"])
+    + len(page_two["record"]["occurrences"])
+) == 3919
+assert {
+    item["videoId"]
+    for item in (
+        page_one["record"]["occurrences"]
+        + page_two["record"]["occurrences"]
+    )
+} == {
+    *(f"base-{index:03d}" for index in range(272)),
+    *(f"overlay-{index:03d}" for index in range(17)),
+}
+
+# Neither a canonical-looking URL nor a matching polluted scalar identity may
+# complete a partial nested video tuple.
+assert module._persisted_source_records([{
+    "videoId": "partial",
+    "channelId": channel_id,
+    "channelHandle": channel_handle,
+    "channelUrl": f"https://www.youtube.com/channel/{channel_id}",
+    "item": {
+        "videoId": "partial",
+        "channelUrl": f"https://www.youtube.com/channel/{channel_id}",
+    },
+    "song": {"occurrenceId": "partial-occurrence", "title": "Bad", "artist": "Bad"},
+}], metadata) == []
+
+# A full-video reset is authoritative for a persisted source row with the same
+# video identity, and a later tombstone must not revive the old occurrences.
+reset_video = video("reset-video")
+reset_base = [
+    {
+        "videoId": "reset-video",
+        "item": reset_video,
+        "song": {
+            "videoId": "reset-video",
+            "occurrenceId": f"old-{index}",
+            "position": index,
+            "rangeId": "all",
+            "songKey": f"old-song-{index}",
+            "title": f"Old {index}",
+            "artist": "Old artist",
+        },
+    }
+    for index in range(2)
+]
+reset_overlay = [{
+    "video": reset_video,
+    "occurrences": ({
+        "occurrenceId": "replacement",
+        "position": 0,
+        "rangeId": "all",
+        "songKey": "replacement-song",
+        "title": "Replacement",
+        "artist": "New artist",
+    },),
+}]
+module._runtime_source_occurrences = lambda *args: reset_base
+module._accepted_video_resets = lambda *args, **kwargs: {"reset-video": {"video_id": "reset-video"}}
+module._overlay_channel_records = lambda *args, **kwargs: reset_overlay
+module._runtime_tombstones = lambda *args, **kwargs: []
+reset_result = module._runtime_channel_source_payload(
+    object(), "parent", metadata, source_key,
+    {"page": "1", "pageSize": "20"}, overlay_revision_ids=["accepted"],
+)
+assert reset_result["totalOccurrenceCount"] == 1
+assert [
+    item["song"]["occurrenceId"]
+    for item in reset_result["record"]["occurrences"]
+] == ["replacement"]
+module._runtime_tombstones = lambda *args, **kwargs: [{
+    "entityType": "occurrences",
+    "videoId": "reset-video",
+    "occurrenceId": "replacement",
+    "replacement": False,
+}]
+tombstoned = module._runtime_channel_source_payload(
+    object(), "parent", metadata, source_key,
+    {"page": "1", "pageSize": "20"}, overlay_revision_ids=["accepted"],
+)
+assert tombstoned["found"] is False
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -4346,6 +4539,8 @@ metadata = {
 }
 canonical_key = module._stable_key("source-vtuber", "all", metadata["channelId"])
 def rows(connection, sql, params):
+    if "FROM runtime_source_occurrences" in sql:
+        return []
     if "FROM runtime_videos" in sql:
         assert "channel_id = %s" in sql
         assert "channel_handle = %s" not in sql and "channel_name = %s" not in sql
