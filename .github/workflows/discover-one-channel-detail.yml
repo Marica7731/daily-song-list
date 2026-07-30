@@ -85,6 +85,17 @@ jobs:
             exit 78
           }
 
+          github_api() {
+            local endpoint="$1"
+            local output="$2"
+            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 60 \
+              --retry 3 --retry-all-errors \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              --output "$output" "https://api.github.com/repos/$GITHUB_REPOSITORY/$endpoint"
+          }
+
           [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "invalid-github-sha"
           [[ "$GITHUB_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || fail "invalid-github-repository"
           [[ "$CANDIDATE_RUN_ID" =~ ^[1-9][0-9]*$ ]] || fail "invalid-candidate-run-id"
@@ -133,7 +144,7 @@ jobs:
           printf 'VIDEO_IDS_FILE=%s\n' "$TASK_ROOT/video-ids.txt" >> "$GITHUB_ENV"
 
           tree_json="$TASK_ROOT/source-tree.json"
-          gh api "repos/$GITHUB_REPOSITORY/git/trees/$GITHUB_SHA?recursive=1" > "$tree_json"
+          github_api "git/trees/$GITHUB_SHA?recursive=1" "$tree_json"
           raw_base="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA"
           source_bytes=0
           source_files=0
@@ -203,19 +214,29 @@ jobs:
             exit 78
           }
 
+          github_api() {
+            local endpoint="$1"
+            local output="$2"
+            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 60 \
+              --retry 3 --retry-all-errors \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              --output "$output" "https://api.github.com/repos/$GITHUB_REPOSITORY/$endpoint"
+          }
+
           run_json="$TASK_ROOT/candidate-run.json"
           artifacts_json="$TASK_ROOT/candidate-artifacts.json"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN_ID" > "$run_json"
+          github_api "actions/runs/$CANDIDATE_RUN_ID" "$run_json"
           [ "$(jq -r '.conclusion' "$run_json")" = "success" ] || fail "candidate-run-not-success"
           candidate_source_commit="$(jq -r '.head_sha' "$run_json")"
           [[ "$candidate_source_commit" =~ ^[0-9a-f]{40}$ ]] || fail "candidate-source-commit"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CANDIDATE_RUN_ID/artifacts" > "$artifacts_json"
+          github_api "actions/runs/$CANDIDATE_RUN_ID/artifacts" "$artifacts_json"
           [ "$(jq --arg name "$CANDIDATE_ARTIFACT_NAME" '[.artifacts[] | select(.name == $name and .expired == false)] | length' "$artifacts_json")" = "1" ] ||
             fail "candidate-artifact-not-unique"
           candidate_artifact_id="$(jq -r --arg name "$CANDIDATE_ARTIFACT_NAME" '.artifacts[] | select(.name == $name and .expired == false) | .id' "$artifacts_json")"
           [[ "$candidate_artifact_id" =~ ^[1-9][0-9]*$ ]] || fail "candidate-artifact-id"
-          gh api -H "Accept: application/vnd.github+json" \
-            "repos/$GITHUB_REPOSITORY/actions/artifacts/$candidate_artifact_id/zip" > "$TASK_ROOT/candidate.zip"
+          github_api "actions/artifacts/$candidate_artifact_id/zip" "$TASK_ROOT/candidate.zip"
           actual_zip_sha="$(shasum -a 256 "$TASK_ROOT/candidate.zip" | awk 'NR == 1 { print $1 }')"
           [ "$actual_zip_sha" = "$CANDIDATE_ZIP_SHA256" ] || fail "candidate-zip-hash"
           /usr/bin/ditto -x -k "$TASK_ROOT/candidate.zip" "$TASK_ROOT/candidate-source"
