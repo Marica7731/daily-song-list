@@ -335,6 +335,34 @@ jobs:
           done
           test "$readiness_ready" = true
 
+          local_base="http://127.0.0.1:8765"
+          local_warmup_deadline=$((SECONDS + 300))
+          warm_local_endpoint() {
+            local label="$1"
+            shift
+            local remaining=$((local_warmup_deadline - SECONDS))
+            (( remaining > 0 ))
+            local request_timeout=90
+            if (( remaining < request_timeout )); then
+              request_timeout="$remaining"
+            fi
+            printf 'warming installed adapter endpoint=%s timeout=%ss\n' "$label" "$request_timeout"
+            curl --silent --show-error --fail --connect-timeout 2 --max-time "$request_timeout" \
+              --output /dev/null "$@"
+          }
+          warm_local_endpoint meta "$local_base/api/meta"
+          warm_local_endpoint rankings \
+            "$local_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20"
+          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
+          warm_local_endpoint negative \
+            --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
+            --data-urlencode 'metric=count' --data-urlencode 'page=1' \
+            --data-urlencode 'pageSize=20' \
+            --data-urlencode 'searchFields=title,channel' \
+            --data "q=$negative_query" \
+            "$local_base/api/rankings"
+          warm_local_endpoint source "$local_base/api/sources/$source_key?page=1&pageSize=20"
+
           meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
             --output "$remote_root/production-public-meta.json" --write-out '%{http_code}' \
             "$public_base/api/meta")"
@@ -348,7 +376,6 @@ jobs:
             "$public_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")"
           test "$rankings_http_code" = 200
 
-          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
           negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
             --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
             --data-urlencode 'metric=count' --data-urlencode 'page=1' \

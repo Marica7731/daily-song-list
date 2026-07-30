@@ -2263,7 +2263,7 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   }
   assert.equal(
     (ADAPTER_WORKFLOW.match(/\/api\/rankings\?range=all&view=vtubers&metric=count&page=1&pageSize=20/gu) || []).length,
-    2,
+    3,
   );
   assert.ok(
     [...ADAPTER_WORKFLOW_BYTES].every((byte) => byte < 0x80),
@@ -2295,18 +2295,18 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   const negativeRequests = ADAPTER_WORKFLOW.match(
     /--get --data-urlencode 'range=all' --data-urlencode 'view=songs'[\s\\]+--data-urlencode 'metric=count' --data-urlencode 'page=1'[\s\\]+--data-urlencode 'pageSize=20'[\s\\]+--data-urlencode 'searchFields=title,channel'[\s\\]+--data "q=\$negative_query"/gu,
   ) || [];
-  assert.equal(negativeRequests.length, 2);
+  assert.equal(negativeRequests.length, 3);
   assert.doesNotMatch(
     ADAPTER_WORKFLOW,
     /--get --data-urlencode 'range=all' --data-urlencode 'view=vtubers'[\s\\]+--data-urlencode 'metric=count'/u,
   );
   assert.equal(
     (ADAPTER_WORKFLOW.match(/\/api\/sources\/\$source_key\?page=1&pageSize=20/gu) || []).length,
-    2,
+    3,
   );
   assert.equal(
     (ADAPTER_WORKFLOW.match(/\/api\/meta/gu) || []).length,
-    2,
+    3,
   );
   assert.match(ADAPTER_WORKFLOW, /active_revision_id/u);
   assert.match(ADAPTER_WORKFLOW, /positive ranking card has no occurrence/u);
@@ -2334,7 +2334,6 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
   const installSection = ADAPTER_WORKFLOW.split("Install verified adapter and retain rollback files until health passes", 2)[1];
   assert.ok(installSection);
   assert.doesNotMatch(installSection, /DAILY_SONG_PG_ADAPTER_PHASE_TRACE/u);
-  assert.doesNotMatch(installSection, /http:\/\/127\.0\.0\.1:8765\/api\//u);
   assert.match(installSection, /PUBLIC_BASE/u);
   assert.match(installSection, /readiness_deadline=\$\(\(SECONDS \+ 75\)\)/u);
   assert.match(installSection, /while \(\( SECONDS < readiness_deadline \)\); do/u);
@@ -2349,6 +2348,22 @@ test("adapter release workflow uses one bounded quick gate around rollback-safe 
     installSection,
     /--connect-timeout 8 --max-time 20[\s\\]+"\$public_base\/healthz"/u,
   );
+  assert.match(installSection, /local_base="http:\/\/127\.0\.0\.1:8765"/u);
+  assert.match(installSection, /local_warmup_deadline=\$\(\(SECONDS \+ 300\)\)/u);
+  assert.match(installSection, /local request_timeout=90/u);
+  assert.match(
+    installSection,
+    /--connect-timeout 2 --max-time "\$request_timeout"[\s\\]+--output \/dev\/null/u,
+  );
+  assert.match(installSection, /warm_local_endpoint\(\) \{/u);
+  assert.equal((installSection.match(/warm_local_endpoint /gu) || []).length, 4);
+  const warmupSection = installSection.split('local_base="http://127.0.0.1:8765"', 2)[1]
+    .split('meta_http_code="$(curl', 1)[0];
+  assert.doesNotMatch(warmupSection, /while |until /u);
+  assert.match(warmupSection, /warm_local_endpoint meta/u);
+  assert.match(warmupSection, /warm_local_endpoint rankings/u);
+  assert.match(warmupSection, /warm_local_endpoint negative/u);
+  assert.match(warmupSection, /warm_local_endpoint source/u);
   assert.match(ADAPTER_WORKFLOW, /systemctl stop "\$candidate_unit"/u);
   const blocks = workflowRunBlocks(ADAPTER_WORKFLOW);
   assert.ok(blocks.length >= 6);
