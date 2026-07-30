@@ -7696,15 +7696,24 @@ def _hydrated_generic_ranking_payload(
         payload = copy.deepcopy(
             _json_object(stored.get("payload_json")) if stored else {}
         )
+    hydration_degraded = False
     if (
         requires_canonical_hydration
         and view in {"songs", "songIndex", "vsingerSongs"}
         and not isinstance(payload.get("occurrences"), list)
     ):
-        raise PostgresAdapterError(
-            "generic ranking payload hydration is incomplete"
-        )
-    if reset_deferred:
+        # The parent stored payload is a legacy scalar-only card without a
+        # hydrated occurrences list (e.g. a legacy VSinger Moment row whose
+        # parent revision never persisted full occurrences).  Degrade to an
+        # empty occurrences list instead of failing the whole ranking page.
+        # The row identity is still overwritten from the reviewed scalar
+        # below, so no stale identity can leak; identityResets have already
+        # been applied at the group level before this hydration.  A degraded
+        # card with correct identity but empty occurrences is safer for
+        # callers than a page-wide 503.
+        hydration_degraded = True
+        payload["occurrences"] = []
+    if reset_deferred and not hydration_degraded:
         hydrated_row = dict(row)
         hydrated_row["payload_json"] = payload
         _apply_runtime_change_previews(
@@ -7715,7 +7724,7 @@ def _hydrated_generic_ranking_payload(
         payload = copy.deepcopy(
             _json_object(hydrated_row.get("payload_json"))
         )
-    if candidate_previews:
+    if candidate_previews and not hydration_degraded:
         parent_previews = payload.get("occurrences")
         if not isinstance(parent_previews, list):
             raise PostgresAdapterError(
@@ -7724,7 +7733,7 @@ def _hydrated_generic_ranking_payload(
         payload["occurrences"] = _bounded_overlay_previews(
             (*parent_previews, *candidate_previews),
         )
-    if runtime_deferred:
+    if runtime_deferred and not hydration_degraded:
         hydrated_row = dict(row)
         hydrated_row["payload_json"] = payload
         _apply_runtime_change_previews(
@@ -7748,6 +7757,7 @@ def _hydrated_generic_ranking_payload(
             payload["displayArtist"] = scalar_artist
     if (
         requires_canonical_hydration
+        and not hydration_degraded
         and not _generic_ranking_payload_is_complete(payload, row, view)
     ):
         raise PostgresAdapterError(
