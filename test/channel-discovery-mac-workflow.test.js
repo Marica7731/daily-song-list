@@ -4,7 +4,6 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
-const YAML = require("yaml");
 
 const root = path.join(__dirname, "..");
 const workflowPath = path.join(root, ".github", "workflows", "discover-one-channel-candidate.yml");
@@ -35,6 +34,17 @@ function isMinimalCandidateWorkflow(source) {
   );
 }
 
+function hasJobLevelRunnerContext(source) {
+  const lines = source.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^ {4}env:\s*$/u.test(lines[index])) continue;
+    for (index += 1; index < lines.length && /^ {6}\S/u.test(lines[index]); index += 1) {
+      if (/\$\{\{\s*runner\./u.test(lines[index])) return true;
+    }
+  }
+  return false;
+}
+
 test("rejected tree 64e92f giant workflow is red and the replacement is minimal green", () => {
   const rejectedMarkers = [
     "git archive",
@@ -56,19 +66,17 @@ test("rejected tree 64e92f giant workflow is red and the replacement is minimal 
 });
 
 test("workflow dispatch contract is strict, generic, and Mac candidate-only", () => {
-  const parsed = YAML.parse(workflow);
-  assert.equal(parsed.permissions.contents, "read");
-  assert.equal(parsed.concurrency["cancel-in-progress"], false);
-  assert.deepEqual(parsed.jobs.discover["runs-on"], ["self-hosted", "macOS", "ARM64", "daily-song-list-mac"]);
-  assert.equal(parsed.jobs.discover["timeout-minutes"], 25);
-  const inputs = parsed.on.workflow_dispatch.inputs;
-  assert.equal(inputs.channel_id.required, true);
-  assert.equal(inputs.channel_handle.required, true);
-  assert.equal(inputs.channel_slug.required, true);
-  assert.deepEqual(inputs.max_channel_pages.options, ["10", "25"]);
-  assert.deepEqual(inputs.max_videos.options, ["250", "500", "1000"]);
-  assert.deepEqual(inputs.force_refresh.options, ["false", "true"]);
-  assert.equal(inputs.force_refresh.default, "false");
+  assert.match(workflow, /^permissions:\n  contents: read$/mu);
+  assert.match(workflow, /^  cancel-in-progress: false$/mu);
+  assert.match(workflow, /^    runs-on: \[self-hosted, macOS, ARM64, daily-song-list-mac\]$/mu);
+  assert.match(workflow, /^    timeout-minutes: 25$/mu);
+  for (const input of ["channel_id", "channel_handle", "channel_slug"]) {
+    assert.match(workflow, new RegExp(`^      ${input}:\\n(?: {8}.+\\n)* {8}required: true$`, "mu"));
+  }
+  assert.match(workflow, /^        options: \["10", "25"\]$/mu);
+  assert.match(workflow, /^        options: \["250", "500", "1000"\]$/mu);
+  assert.match(workflow, /^        options: \["false", "true"\]$/mu);
+  assert.match(workflow, /^        default: "false"$/mu);
   assert.match(workflow, /\[\[ "\$CHANNEL_ID" =~ \^UC\[A-Za-z0-9_-\]\{22\}\$ \]\]/u);
   assert.match(workflow, /\[\[ "\$CHANNEL_HANDLE" =~ \^@\[A-Za-z0-9._-\]\{3,30\}\$ \]\]/u);
   assert.match(workflow, /case "\$MAX_CHANNEL_PAGES" in 10\|25\)/u);
@@ -85,7 +93,14 @@ test("force refresh maps only to a literal fresh flag and defaults to continuati
 });
 
 test("one owned task root has bounded Node memory, real PID RSS, task bytes, and artifact bytes", () => {
-  assert.match(workflow, /TASK_ROOT: \$\{\{ runner\.temp \}\}\/daily-song-channel-discovery-\$\{\{ github\.run_id \}\}-\$\{\{ github\.run_attempt \}\}/u);
+  const rejectedF78JobEnv = [
+    "    env:",
+    "      TASK_ROOT: ${{ runner.temp }}/daily-song-channel-discovery-${{ github.run_id }}-${{ github.run_attempt }}",
+  ].join("\n");
+  assert.equal(hasJobLevelRunnerContext(rejectedF78JobEnv), true);
+  assert.equal(hasJobLevelRunnerContext(workflow), false);
+  assert.doesNotMatch(workflow, /^ {6}\S+:\s*.*\$\{\{\s*runner\./mu);
+  assert.match(workflow, /\[\[ "\$RUNNER_TEMP" = \/\* && -d "\$RUNNER_TEMP" && ! -L "\$RUNNER_TEMP" \]\] \|\| fail "unsafe-runner-temp"\n\n {10}TASK_ROOT="\$RUNNER_TEMP\/daily-song-channel-discovery-\$GITHUB_RUN_ID-\$GITHUB_RUN_ATTEMPT"\n {10}printf 'TASK_ROOT=%s\\n' "\$TASK_ROOT" >> "\$GITHUB_ENV"/u);
   assert.match(workflow, /EXPECTED_TASK_ROOT="\$RUNNER_TEMP\/daily-song-channel-discovery-\$GITHUB_RUN_ID-\$GITHUB_RUN_ATTEMPT"/u);
   assert.match(workflow, /NODE_MAX_OLD_SPACE_SIZE_MB: "1536"/u);
   assert.match(workflow, /TASK_CAP_BYTES: "2147483648"/u);
@@ -159,8 +174,8 @@ test("owned cleanup removes only the exact run-attempt task root and reports zer
   fs.rmSync(runnerTemp, { recursive: true, force: true });
 });
 
-test("YAML parses and every run block passes bash syntax with no GitHub expression residue", () => {
-  assert.doesNotThrow(() => YAML.parse(workflow));
+test("workflow uses no undeclared YAML module and every run block passes bash syntax with no expression residue", () => {
+  assert.doesNotMatch(fs.readFileSync(__filename, "utf8"), /require\(["']yaml["']\)/u);
   const blocks = runBlocks();
   assert.equal(blocks.length, 2);
   for (const block of blocks) {

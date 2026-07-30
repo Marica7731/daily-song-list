@@ -56,7 +56,6 @@ jobs:
       TASK_CAP_BYTES: "2147483648"
       ARTIFACT_CAP_BYTES: "134217728"
       DISCOVERY_TIMEOUT_SECONDS: "1200"
-      TASK_ROOT: ${{ runner.temp }}/daily-song-channel-discovery-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Checkout source
@@ -84,6 +83,8 @@ jobs:
           case "$FORCE_REFRESH" in false|true) ;; *) fail "invalid-force-refresh" ;; esac
           [[ "$RUNNER_TEMP" = /* && -d "$RUNNER_TEMP" && ! -L "$RUNNER_TEMP" ]] || fail "unsafe-runner-temp"
 
+          TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
           NORMALIZED_CHANNEL_HANDLE="$(printf '%s' "$CHANNEL_HANDLE" | tr '[:upper:]' '[:lower:]')"
           CHANNEL_URL="https://www.youtube.com/$NORMALIZED_CHANNEL_HANDLE"
           EXPECTED_TASK_ROOT="$RUNNER_TEMP/daily-song-channel-discovery-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
