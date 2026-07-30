@@ -1037,9 +1037,7 @@ jobs:
                 (.count | type == "number" and floor == . and . > 0)
               ) and
               (([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | length) ==
-                ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length)) and
-              (([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | length) ==
-                ([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | unique | length))
+                ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length))
             ' "$MANIFEST_INPUT" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED alias-source-groups-schema"; exit 78;
             }

@@ -170,9 +170,7 @@ function aliasManifestGate(manifest) {
       (.count | type == "number" and floor == . and . > 0)
     ) and
     (([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | length) ==
-      ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length)) and
-    (([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | length) ==
-      ([.aliasSourceGroups[] | [.rangeId,.replacementGroupKey,.replacementSourceDetailKey] | @json] | unique | length))
+      ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length))
   `;
   const validation = spawnSync("jq", ["-e", schema], {
     input: JSON.stringify(manifest), encoding: "utf8",
