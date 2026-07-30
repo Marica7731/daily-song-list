@@ -6123,6 +6123,7 @@ def _prepare_generic_overlay_rankings(
     bounded_no_search = not bool(options.get("q"))
     base_limit_clause = ""
     base_totals: dict[str, int] | None = None
+    base_window_end = 0
     if bounded_no_search:
         page_bucket = max(
             0,
@@ -6603,7 +6604,13 @@ def _prepare_generic_overlay_rankings(
             raise PostgresAdapterError(
                 "bounded generic ranking window exceeded affected group cap"
             )
-        if len(bounded_affected_keys) > _GENERIC_NO_SEARCH_AFFECTED_CUSHION:
+        if (
+            options["view"] == "vtubers"
+            and len(bounded_affected_keys)
+            > _GENERIC_NO_SEARCH_AFFECTED_CUSHION
+        ):
+            # The VTuber path replaces these rows with its exact channel
+            # aggregate below and retains its existing independent cap.
             raise PostgresAdapterError(
                 "bounded generic ranking window exceeded displacement cushion"
             )
@@ -6646,6 +6653,77 @@ def _prepare_generic_overlay_rankings(
                 for row in affected_base_rows
                 if _text(row.get("detail_key"))
             }
+            if options["view"] != "vtubers" and base_totals is not None:
+                # A lineage-wide affected-key count does not measure page
+                # displacement.  Fetch the persisted top prefix after
+                # excluding every affected key, then merge all affected
+                # groups back by exact identity below.  The persisted rank is
+                # the parent's complete metric/tie ordering, so a parent row
+                # after this prefix cannot outrank a returned unaffected row.
+                unaffected_base_rows = _rows(
+                    connection,
+                    f"""
+                    /* bounded unaffected parent ranking prefix */
+                    SELECT rank, detail_key, title, artist, name, row_count,
+                           song_count, video_count, timestamp_count,
+                           NULL::jsonb AS payload_json,
+                           '' AS search_text, '' AS channel_search_text
+                    FROM runtime_ranking_rows
+                    WHERE revision_id = %s AND range_id = %s AND view = %s
+                      AND metric = %s
+                      AND {metric_column} >= %s
+                      AND detail_key <> ALL(%s)
+                    ORDER BY rank
+                    LIMIT %s
+                    """,
+                    [
+                        parent[0],
+                        options["range"],
+                        options["view"],
+                        db_metric,
+                        int(options["minCount"]),
+                        sorted(bounded_affected_keys),
+                        base_window_end,
+                    ],
+                )
+                unaffected_detail_keys = [
+                    _text(row.get("detail_key"))
+                    for row in unaffected_base_rows
+                ]
+                if (
+                    any(not key for key in unaffected_detail_keys)
+                    or len(unaffected_detail_keys)
+                    != len(set(unaffected_detail_keys))
+                    or any(
+                        key in bounded_affected_keys
+                        for key in unaffected_detail_keys
+                    )
+                ):
+                    raise PostgresAdapterError(
+                        "bounded unaffected parent ranking prefix is invalid"
+                    )
+                affected_parent_count = sum(
+                    1
+                    for row in bounded_original_affected.values()
+                    if _overlay_rank_value(row, options["metric"])
+                    >= int(options["minCount"])
+                )
+                expected_unaffected_count = min(
+                    base_window_end,
+                    max(
+                        0,
+                        int(base_totals["totalCount"])
+                        - affected_parent_count,
+                    ),
+                )
+                if len(unaffected_base_rows) != expected_unaffected_count:
+                    raise PostgresAdapterError(
+                        "bounded unaffected parent ranking prefix is incomplete"
+                    )
+                groups = {
+                    _text(row.get("detail_key")): dict(row)
+                    for row in unaffected_base_rows
+                }
             for key, row in bounded_original_affected.items():
                 groups.setdefault(key, dict(row))
     phase_started = _phase_trace(

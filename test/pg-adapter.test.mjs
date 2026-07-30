@@ -8481,6 +8481,10 @@ def rows(_connection, sql, _params):
     if "FROM runtime_videos" in sql:
         parent_identity_queries += 1
         return []
+    if "bounded unaffected parent ranking prefix" in sql:
+        # The only persisted parent group is the affected group below, so the
+        # exact unaffected prefix is empty after detail_key <> ALL(...).
+        return []
     if "FROM runtime_ranking_rows" in sql:
         return [dict(base)]
     raise AssertionError(sql)
@@ -8806,6 +8810,177 @@ except module.PostgresAdapterError as error:
     assert str(error) == "VTuber ranking preview identity is invalid"
 else:
     raise AssertionError("conflicting preview handles did not fail closed")
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("bounded ordinary ranking reads an exact unaffected prefix beyond 4097 deletions", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+deleted = [
+    {
+        "entityType": "occurrences",
+        "rangeId": "7d",
+        "videoId": f"deleted-video-{index}",
+        "occurrenceId": f"deleted-occurrence-{index}",
+        "title": f"Deleted Song {index}",
+        "artist": "Ado",
+        "channel_id": "UC-AFFECTED",
+        "channel_handle": "/@affected",
+    }
+    for index in range(module._GENERIC_NO_SEARCH_AFFECTED_CUSHION + 1)
+]
+low_candidate = {
+    "range_id": "7d",
+    "video_id": "low-video",
+    "occurrence_id": "low-occurrence",
+    "title": "ZZZ Low Affected",
+    "artist": "Ado",
+}
+
+def ranking_row(rank, key, title, count):
+    return {
+        "rank": rank,
+        "detail_key": key,
+        "title": title,
+        "artist": "Ado",
+        "name": title,
+        "row_count": count,
+        "song_count": 1,
+        "video_count": 1,
+        "timestamp_count": count,
+        "payload_json": None,
+        "search_text": "",
+        "channel_search_text": "",
+    }
+
+deleted_parent = [
+    ranking_row(
+        index + 1,
+        f"deleted song {index}::ado",
+        f"Deleted Song {index}",
+        1,
+    )
+    for index in range(len(deleted))
+]
+unaffected = [
+    ranking_row(4098 + index, f"tie-{index}::ado", f"Tie {index}", 10)
+    for index in range(6)
+]
+# This is exactly the unsafe old prefix: 4097 deleted groups plus only four
+# unaffected rows. A low affected group loaded from outside that prefix could
+# make len(filtered) look sufficient while rank 4102 was never read.
+initial_prefix = [*deleted_parent, *unaffected[:4]]
+unaffected_query_rows = [dict(row) for row in unaffected[:5]]
+query_shapes = []
+
+def rows(_connection, sql, params):
+    if "bounded unaffected parent ranking prefix" in sql:
+        query_shapes.append("unaffected")
+        assert "detail_key <> ALL(%s)" in sql
+        assert "row_count >= %s" in sql
+        assert "ORDER BY rank" in sql
+        assert params[4] == 1
+        assert len(params[5]) == len(deleted) + 1
+        assert params[6] == module._GENERIC_NO_SEARCH_PAGE_BUCKET
+        return [dict(row) for row in unaffected_query_rows]
+    if "detail_key = ANY(%s)" in sql:
+        query_shapes.append("affected")
+        assert len(params[4]) == len(deleted) + 1
+        return [dict(row) for row in deleted_parent]
+    if "FROM runtime_ranking_rows" in sql:
+        query_shapes.append("initial")
+        assert params[-1] == (
+            module._GENERIC_NO_SEARCH_PAGE_BUCKET
+            + module._GENERIC_NO_SEARCH_AFFECTED_CUSHION
+        )
+        return [dict(row) for row in initial_prefix]
+    raise AssertionError(sql)
+
+module._rows = rows
+module._one = lambda *_args: {
+    "total_count": len(deleted_parent) + len(unaffected),
+    "total_occurrence_count": len(deleted_parent) + 60,
+    "total_song_count": len(deleted_parent) + len(unaffected),
+    "total_video_count": len(deleted_parent) + len(unaffected),
+}
+module._overlay_revision_ids = lambda *_args: ["accepted"]
+module._resolve_exact_vtuber_channel_scope = lambda *_args: None
+module._overlay_candidate_rows = lambda *_args, **_kwargs: [
+    dict(low_candidate)
+]
+module._accepted_video_resets = lambda *_args, **_kwargs: {}
+module._accepted_video_reset_changes = lambda *_args: []
+module._runtime_tombstones = lambda *_args, **_kwargs: [
+    dict(change) for change in deleted
+]
+module._validated_overlay_change_identity = (
+    lambda change, *_args, **_kwargs: (
+        str(change.get("videoId") or change.get("video_id")),
+        "UC-AFFECTED",
+    )
+)
+module._runtime_replacement_candidate_rows = lambda *_args: []
+module._enrich_runtime_original_group_counts = lambda *_args: None
+module._apply_runtime_change_previews = lambda *_args: None
+module._overlay_candidate_groups = lambda *_args: {
+    "zzz low affected::ado": {
+        "key": "zzz low affected::ado",
+        "title": "ZZZ Low Affected",
+        "artist": "Ado",
+        "name": "ZZZ Low Affected",
+        "occurrences": [],
+        "occurrenceCount": 1,
+        "videoIds": {"low-video"},
+        "songKeys": {"low-song"},
+        "search": "",
+    }
+}
+module._channel_metadata_rows = lambda *_args: []
+
+options = module._query_options({
+    "range": "7d",
+    "view": "songs",
+    "metric": "occurrences",
+    "page": "1",
+    "pageSize": "1",
+})
+prepared = module._prepare_generic_overlay_rankings(
+    object(), "active", ("parent", {"revision_id": "parent"}), options,
+)
+keys = [row["detail_key"] for row in prepared["filtered"]]
+assert keys[:5] == [f"tie-{index}::ado" for index in range(5)], keys
+assert keys[5:] == ["zzz low affected::ado"], keys
+assert "tie-5::ado" not in keys
+assert query_shapes == ["initial", "affected", "unaffected"], query_shapes
+
+# All five returned unaffected rows tie on the metric. Persisted rank supplies
+# the complete parent tie order; the unseen rank 4103 cannot precede rank 4102.
+assert [row["row_count"] for row in prepared["filtered"][:5]] == [10] * 5
+assert [row["title"] for row in prepared["filtered"][:5]] == [
+    f"Tie {index}" for index in range(5)
+]
+
+unaffected_query_rows.pop()
+try:
+    module._prepare_generic_overlay_rankings(
+        object(), "active-incomplete", ("parent", {"revision_id": "parent"}),
+        options,
+    )
+except module.PostgresAdapterError as error:
+    assert str(error) == (
+        "bounded unaffected parent ranking prefix is incomplete"
+    )
+else:
+    raise AssertionError("incomplete unaffected prefix returned a partial page")
 print("OK")
 `);
   assert.equal(output, "OK");
