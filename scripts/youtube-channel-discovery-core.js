@@ -889,7 +889,7 @@ function channelMetadataFromInitialData(data) {
 function observedChannelIdentityFromPage(data, responseUrl = "", pageUrl = "") {
   const metadata = channelMetadataFromInitialData(data);
   const metadataValue = metadata.handleUrl || metadata.channelUrl;
-  const metadataUrl = canonicalChannelIdentityUrl(metadataValue);
+  const metadataUrl = canonicalChannelMetadataIdentityUrl(metadataValue);
   if (metadataValue && !metadataUrl) throw new Error("invalid observed channel metadata URL");
   const canonicalResponseUrl = canonicalChannelResponseUrl(responseUrl);
   if (!canonicalResponseUrl) throw new Error("invalid or missing observed channel response URL");
@@ -1356,6 +1356,28 @@ function canonicalChannelIdentityUrl(value) {
 
 function isOfficialYouTubeHost(hostname) {
   return new Set(["youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com"]).has(String(hostname || "").toLocaleLowerCase("en-US"));
+}
+
+function canonicalChannelMetadataIdentityUrl(value) {
+  const text = String(value || "").normalize("NFKC").trim();
+  if (!text) return "";
+  try {
+    const url = new URL(text);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      !isOfficialYouTubeHost(url.hostname) ||
+      url.username ||
+      url.password ||
+      url.port ||
+      url.search ||
+      url.hash
+    ) return "";
+    url.protocol = "https:";
+    url.hostname = "www.youtube.com";
+    return canonicalChannelIdentityUrl(url.toString());
+  } catch {
+    return "";
+  }
 }
 
 function canonicalChannelResponseUrl(value) {

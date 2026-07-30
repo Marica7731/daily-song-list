@@ -361,6 +361,84 @@ test("channel discovery handles YouTube lockupViewModel channel pages", async ()
   );
 });
 
+test("channel discovery accepts only exact official HTTP vanity metadata identity", async () => {
+  const expectedChannelId = "UCIu1rRiQLeUU8e1saN6I0eg";
+  const expectedChannelHandle = "@noa_polaris";
+  const channelUrl = `https://www.youtube.com/${expectedChannelHandle}`;
+  const runFixture = async ({
+    metadataUrl = `http://www.youtube.com/${expectedChannelHandle}`,
+    metadataChannelId = expectedChannelId,
+    responseUrl = "",
+  } = {}) => {
+    const ownedVideo = videoRenderer("HTTPMETA001", "LIVE song", "2 days ago");
+    ownedVideo.ownerText.runs[0].navigationEndpoint.browseEndpoint = {
+      browseId: expectedChannelId,
+      canonicalBaseUrl: expectedChannelHandle,
+    };
+    const initialData = {
+      metadata: {
+        channelMetadataRenderer: {
+          title: "Noa Polaris",
+          externalId: metadataChannelId,
+          vanityChannelUrl: metadataUrl,
+        },
+      },
+      ...channelData({ videos: [ownedVideo] }),
+    };
+    const body = youtubeHtml({ initialData });
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-http-metadata-test-"));
+    return runChannelDiscovery({
+      channelUrl,
+      expectedChannelId,
+      expectedChannelHandle,
+      outputDir,
+      cacheDir: path.join(outputDir, "cache"),
+      keywords: ["LIVE"],
+      tabs: ["streams", "videos"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 0,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      forceRefresh: true,
+      sourceCommit: "a".repeat(40),
+      channelSlug: "noa-polaris",
+      candidateOnly: true,
+    }, {
+      client: {
+        metrics: { requestCount: 1 },
+        async getText(pageUrl) {
+          return { status: 200, body, url: responseUrl || pageUrl.split("?")[0], bytes: Buffer.byteLength(body), fromCache: false };
+        },
+      },
+      extractSearchItems,
+      inspectVideoSongList: async () => null,
+    });
+  };
+
+  const result = await runFixture();
+  assert.equal(result.manifest.candidateCount, 1);
+  assert.equal(result.rawVideos[0].channelUrl, channelUrl);
+
+  await assert.rejects(
+    () => runFixture({ metadataUrl: `http://youtube.example/${expectedChannelHandle}` }),
+    /invalid observed channel metadata URL/u,
+  );
+  await assert.rejects(
+    () => runFixture({ metadataUrl: "http://www.youtube.com/@other_handle" }),
+    /observed channel redirect differs/u,
+  );
+  await assert.rejects(
+    () => runFixture({ metadataUrl: `http://www.youtube.com/channel/${expectedChannelId}` }),
+    /invalid observed channel metadata URL/u,
+  );
+  await assert.rejects(
+    () => runFixture({ metadataChannelId: "UC0123456789012345678901" }),
+    /observed discovery page identity mismatch|observed channel identity mismatch/u,
+  );
+});
+
 test("runChannelDiscovery writes raw videos, parsed details, occurrences, and report", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-test-"));
   const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
