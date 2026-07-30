@@ -270,15 +270,17 @@ def read_snapshot(path: Path) -> tuple[dict[str, list[dict[str, Any]]], set[str]
             if not isinstance(item, dict):
                 raise ValueError("snapshot line must be an object")
             kind = text(item.get("kind"))
-            video_id = text(first(item, "videoId", "video_id"))
-            if not video_id:
-                raise ValueError("snapshot row missing videoId")
+            raw_video_id = first(item, "videoId", "video_id")
+            if not isinstance(raw_video_id, str) or not raw_video_id.strip():
+                raise CurationBlocked("snapshot row has invalid videoId")
+            video_id = raw_video_id.strip()
             video_ids.add(video_id)
             if kind in {"video", "videos"}:
                 continue
-            occurrence_id = text(first(item, "occurrenceId", "occurrence_id"))
-            if not occurrence_id:
-                raise ValueError(f"snapshot occurrence missing occurrenceId: {video_id}")
+            raw_occurrence_id = first(item, "occurrenceId", "occurrence_id")
+            if not isinstance(raw_occurrence_id, str) or not raw_occurrence_id.strip():
+                raise CurationBlocked(f"snapshot occurrence has invalid occurrenceId: {video_id}")
+            occurrence_id = raw_occurrence_id.strip()
             row = dict(item)
             row["videoId"] = video_id
             row["occurrenceId"] = occurrence_id
@@ -642,8 +644,8 @@ PROTECTION_DERIVED_REQUIRED_STRING_FIELDS = (
     "title",
     "sourceSystem",
     "rangeId",
-    "channelHandle",
 )
+PROTECTION_DERIVED_OPTIONAL_STRING_FIELDS = ("artist", "channelHandle")
 PROTECTION_DERIVED_SCHEMA = "derived-protection-v1"
 
 
@@ -658,8 +660,10 @@ def protection_tuple_from_row(assertion_id: str, row: dict[str, Any]) -> dict[st
     into candidate mutations or the source occurrence.
 
     Mixed real/empty source provenance is not historical absence and remains a
-    hard failure.  Likewise, incomplete lineage cannot be used to manufacture
-    protection evidence.
+    hard failure.  Core physical identity fields must be non-empty.  ``artist``
+    and ``channelHandle`` may be historically empty, but must remain strings so
+    their exact empty value is still bound into the evidence digest.  Other
+    incomplete lineage cannot be used to manufacture protection evidence.
     """
 
     result = {field: row.get(field) for field in KNOWN_TUPLE_FIELDS}
@@ -684,7 +688,10 @@ def protection_tuple_from_row(assertion_id: str, row: dict[str, Any]) -> dict[st
             for field in PROTECTION_DERIVED_REQUIRED_STRING_FIELDS
         ):
             raise CurationBlocked(f"protected scope has incomplete derived lineage: {assertion_id}")
-        if not isinstance(lineage["artist"], str):
+        if any(
+            not isinstance(lineage[field], str)
+            for field in PROTECTION_DERIVED_OPTIONAL_STRING_FIELDS
+        ):
             raise CurationBlocked(f"protected scope has incomplete derived lineage: {assertion_id}")
         if lineage["sourceSystem"].strip() != "latest_json":
             raise CurationBlocked(f"protected scope has unsupported derived lineage: {assertion_id}")

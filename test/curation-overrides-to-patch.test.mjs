@@ -838,6 +838,12 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
     const flugelRows = Array.from({ length: 123 }, (_, index) => legacyProtected(
       row(`逆光のフリューゲル ${index}`, "protected", { seconds: 2000 + index }),
     ));
+    const adoProtectedRow = legacyProtected(
+      row("逆光", "Ado", { channelHandle: "" }),
+    );
+    const urameshiProtectedRow = legacyProtected(
+      row("Urameshi protected", "", { channelHandle: " /@URAMESHI_CONTA " }),
+    );
     const rows = [
       row("translated commentary", "", {
         videoId: naraetanRule.videoId, seconds: naraetanRule.seconds,
@@ -847,8 +853,8 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
       ...vaundyRows,
       ...flugelRows,
       legacyProtected(row("8.32", "*Luna")),
-      legacyProtected(row("逆光", "Ado")),
-      legacyProtected(row("Urameshi protected", "Artist", { channelHandle: " /@URAMESHI_CONTA " })),
+      adoProtectedRow,
+      urameshiProtectedRow,
       ...Array.from({ length: 14 }, (_, index) => row(aliasRule.aliases[1], "Ado", { seconds: 3000 + index })),
     ];
     fs.writeFileSync(snapshot, rows.map(JSON.stringify).join("\n") + "\n", "utf8");
@@ -883,6 +889,20 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
         ),
       ),
     );
+    assert.ok(
+      ["sourceId", "sourceHash", "rawHash"].every(
+        (field) => new RegExp(`^derived-protection-v1:${field}:[0-9a-f]{64}$`).test(
+          byId.get("protect-ado-gyakko-canonical").knownTuplePresence[0][field],
+        ),
+      ),
+    );
+    assert.ok(
+      ["sourceId", "sourceHash", "rawHash"].every(
+        (field) => new RegExp(`^derived-protection-v1:${field}:[0-9a-f]{64}$`).test(
+          byId.get("exclude-urameshi-legacy-rules").knownTuplePresence[0][field],
+        ),
+      ),
+    );
 
     const converted = runFixture(root, "bound", boundRules, rows);
     assert.equal(converted.result.status, 0, converted.result.stderr);
@@ -911,6 +931,40 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
       if (drifted.output !== null) {
         assert.doesNotMatch(drifted.output, /derived-protection-v1/, field);
       }
+    }
+
+    const adoHandleDrift = runFixture(
+      root,
+      "bound-drift-ado-empty-channel-handle",
+      boundRules,
+      rows.map((item) => (
+        item.occurrenceId === adoProtectedRow.occurrenceId
+          ? { ...item, channelHandle: "@later-resolved-handle" }
+          : item
+      )),
+    );
+    assert.equal(adoHandleDrift.result.status, 78, adoHandleDrift.result.stderr);
+    if (adoHandleDrift.output !== null) {
+      assert.doesNotMatch(adoHandleDrift.output, /derived-protection-v1/);
+    }
+
+    const urameshiArtistDrift = runFixture(
+      root,
+      "bound-drift-urameshi-empty-artist",
+      boundRules,
+      rows.map((item) => (
+        item.occurrenceId === urameshiProtectedRow.occurrenceId
+          ? { ...item, artist: "later-resolved-artist" }
+          : item
+      )),
+    );
+    assert.equal(
+      urameshiArtistDrift.result.status,
+      78,
+      urameshiArtistDrift.result.stderr,
+    );
+    if (urameshiArtistDrift.output !== null) {
+      assert.doesNotMatch(urameshiArtistDrift.output, /derived-protection-v1/);
     }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -954,16 +1008,20 @@ test("protection projection rejects partial real provenance and never mixes deri
     assert.match(observed.result.stderr, /partial string provenance/);
     assert.equal(observed.output, null);
 
-    for (const [name, provenance, expectedError] of [
+    for (const [name, provenance, expectedError, equals] of [
       ["invalid-type", { sourceId: 1, sourceHash: 2, rawHash: 3 }, /invalid string provenance/],
       ["whitespace", { sourceId: " ", sourceHash: " ", rawHash: " " }, /invalid string provenance/],
       ["wrong-source-system", { sourceId: "", sourceHash: "", rawHash: "", sourceSystem: "accepted" }, /unsupported derived lineage/],
+      ["null-channel-handle", { channelHandle: null }, /incomplete derived lineage/],
+      ["numeric-channel-handle", { channelHandle: 42 }, /incomplete derived lineage/],
+      ["null-artist", { artist: null }, /incomplete derived lineage/, { title: "Protected" }],
+      ["numeric-artist", { artist: 42 }, /incomplete derived lineage/, { title: "Protected" }],
     ]) {
       const failed = runFixture(root, name, {
         records: [],
         safetyAssertions: [{
           assertionId: name,
-          equals: { title: "Protected", artist: "Artist" },
+          equals: equals ?? { title: "Protected", artist: "Artist" },
           expectedScopeCount: 1,
           minScopeCount: 1,
           expectedMutationCount: 0,
@@ -987,6 +1045,85 @@ test("protection projection rejects partial real provenance and never mixes deri
       assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
       assert.match(failed.result.stderr, expectedError, name);
       assert.equal(failed.output, null, name);
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("derived protection rejects invalid core physical lineage types and values", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-protection-core-lineage-"));
+  try {
+    const baseRow = {
+      videoId: "legacy-video",
+      occurrenceId: "legacy-occurrence",
+      position: 4,
+      seconds: 55,
+      title: "Protected",
+      artist: "Artist",
+      sourceId: "",
+      sourceHash: "",
+      rawHash: "",
+      sourceSystem: "latest_json",
+      rangeId: "all",
+      channelHandle: "",
+    };
+    const rules = {
+      records: [],
+      safetyAssertions: [{
+        assertionId: "invalid-core-lineage",
+        equals: { artist: "Artist" },
+        expectedScopeCount: 1,
+        minScopeCount: 1,
+        expectedMutationCount: 0,
+        knownTuplePresence: [knownTuple({
+          videoId: baseRow.videoId,
+          occurrenceId: baseRow.occurrenceId,
+          position: baseRow.position,
+          seconds: baseRow.seconds,
+        })],
+      }],
+    };
+    for (const field of ["videoId", "occurrenceId", "title", "sourceSystem", "rangeId"]) {
+      for (const value of ["", null, 42]) {
+        const name = `invalid-core-${field}-${value === null ? "null" : typeof value}`;
+        const failed = runFixture(root, name, rules, [{ ...baseRow, [field]: value }]);
+        assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
+        if (failed.result.stderr) {
+          assert.match(
+            failed.result.stderr,
+            field === "videoId"
+              ? /invalid videoId/
+              : field === "occurrenceId"
+                ? /invalid occurrenceId/
+                : /incomplete derived lineage/,
+            name,
+          );
+        }
+        if (failed.output !== null) {
+          assert.equal(failed.output, "", name);
+        }
+        if (failed.manifest !== null) {
+          assert.notEqual(failed.manifest.status, "ready", name);
+        }
+      }
+    }
+    for (const field of ["position", "seconds"]) {
+      for (const value of ["", null, "4", true, -1]) {
+        const label = value === null ? "null" : `${typeof value}-${String(value)}`;
+        const name = `invalid-core-${field}-${label}`;
+        const failed = runFixture(root, name, rules, [{ ...baseRow, [field]: value }]);
+        assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
+        if (failed.result.stderr) {
+          assert.match(failed.result.stderr, /incomplete derived lineage/, name);
+        }
+        if (failed.output !== null) {
+          assert.equal(failed.output, "", name);
+        }
+        if (failed.manifest !== null) {
+          assert.notEqual(failed.manifest.status, "ready", name);
+        }
+      }
     }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
