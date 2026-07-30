@@ -7700,19 +7700,24 @@ def _hydrated_generic_ranking_payload(
     if (
         requires_canonical_hydration
         and view in {"songs", "songIndex", "vsingerSongs"}
-        and not isinstance(payload.get("occurrences"), list)
     ):
-        # The parent stored payload is a legacy scalar-only card without a
-        # hydrated occurrences list (e.g. a legacy VSinger Moment row whose
-        # parent revision never persisted full occurrences).  Degrade to an
-        # empty occurrences list instead of failing the whole ranking page.
-        # The row identity is still overwritten from the reviewed scalar
-        # below, so no stale identity can leak; identityResets have already
-        # been applied at the group level before this hydration.  A degraded
-        # card with correct identity but empty occurrences is safer for
-        # callers than a page-wide 503.
-        hydration_degraded = True
-        payload["occurrences"] = []
+        # The parent stored payload may be a legacy scalar-only card without
+        # a hydrated occurrences list (e.g. a legacy VSinger Moment row whose
+        # parent revision never persisted full occurrences), or an empty
+        # occurrences list while the row expects a positive count.  Degrade
+        # to an empty occurrences list instead of failing the whole ranking
+        # page.  The row identity is still overwritten from the reviewed
+        # scalar below, so no stale identity can leak; identityResets have
+        # already been applied at the group level before this hydration.  A
+        # degraded card with correct identity but empty occurrences is safer
+        # for callers than a page-wide 503.
+        parent_occurrences = payload.get("occurrences")
+        parent_row_count = int(row.get("row_count") or 0)
+        if not isinstance(parent_occurrences, list):
+            hydration_degraded = True
+            payload["occurrences"] = []
+        elif parent_row_count > 0 and not parent_occurrences:
+            hydration_degraded = True
     if reset_deferred and not hydration_degraded:
         hydrated_row = dict(row)
         hydrated_row["payload_json"] = payload
