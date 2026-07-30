@@ -9005,7 +9005,7 @@ def _generic_song_source_payload(
     parent_rows = _rows(
         connection,
         """
-        SELECT o.video_id, o.occurrence_id, o.position, o.range_id, o.song_key,
+        SELECT o.video_id, o.occurrence_id, o.range_id, o.song_key,
                o.seconds, o.title, o.artist, o.source_id, o.source_system,
                o.payload_json AS occurrence_payload_json, v.title AS video_title,
                v.channel_name, v.channel_id, v.channel_handle, v.channel_url,
@@ -9019,7 +9019,7 @@ def _generic_song_source_payload(
             (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
             OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
           )
-        ORDER BY o.video_id, o.position, o.occurrence_id
+        ORDER BY o.video_id, o.occurrence_id
         LIMIT %s
         """,
         [parent_revision_id, parent_revision_id, target_key, title, artist, range_id, range_id,
