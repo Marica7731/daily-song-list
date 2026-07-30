@@ -3112,6 +3112,11 @@ def _reconcile_affected_song_counts(
 
     if view not in {"songs", "songIndex", "vsingerSongs", "artists", "videos", "vtubers"}:
         return
+    # Reconciliation only rewrites rows already present in ``groups``; it never
+    # creates a ranking group.  An empty filtered result therefore cannot be
+    # changed by scanning the affected parent occurrences.
+    if not groups:
+        return
     affected_changes = [
         change for change in changes
         if _text(change.get("entityType")) in {"occurrences", "runtime_occurrences"}

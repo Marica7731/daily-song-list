@@ -4773,6 +4773,67 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("empty ranking groups skip affected parent occurrence reconciliation", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+change = {
+    "entityType": "occurrences",
+    "videoId": "video-1",
+    "occurrenceId": "occurrence-1",
+    "title": "Target",
+    "artist": "Artist",
+}
+
+def unexpected_parent_scan(*_args):
+    raise AssertionError("empty groups reached the parent occurrence scan")
+
+module._bounded_affected_parent_occurrences = unexpected_parent_scan
+empty_groups = {}
+module._reconcile_affected_song_counts(
+    object(), "parent", (), (), (change,), empty_groups, "songs", {"range": "all"},
+)
+assert empty_groups == {}
+
+scan_calls = []
+def parent_scan(*args):
+    scan_calls.append(args)
+    return []
+
+module._bounded_affected_parent_occurrences = parent_scan
+groups = {
+    "target::artist": {
+        "detail_key": "target::artist",
+        "title": "Target",
+        "artist": "Artist",
+        "row_count": 1,
+        "song_count": 1,
+        "video_count": 1,
+        "timestamp_count": 1,
+        "payload_json": {
+            "count": 1,
+            "songCount": 1,
+            "videoCount": 1,
+            "timestampCount": 1,
+        },
+    },
+}
+module._reconcile_affected_song_counts(
+    object(), "parent", (), (), (change,), groups, "songs", {"range": "all"},
+)
+assert len(scan_calls) == 1
+assert groups["target::artist"]["row_count"] == 0
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("public artist and video rankings recount accepted reset aggregates from effective tuples", () => {
   const output = runPython(`
 import copy
