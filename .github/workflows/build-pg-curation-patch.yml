@@ -390,7 +390,7 @@ jobs:
               raise SystemExit("PG_CURATION_PRODUCER_BLOCKED " + message)
           if review is None:
               if manifest.get("aliasMutationCount") != 0: blocked("alias-source-review-missing")
-              if not isinstance(groups, list) or len(groups) != 0: blocked("alias-source-groups-schema")
+              if groups is not None and groups != []: blocked("alias-source-groups-schema")
               sys.exit(0)
           if not isinstance(review, dict) or review.get("schemaVersion") != 1:
               blocked("alias-source-review-schema")
