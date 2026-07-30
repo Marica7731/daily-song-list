@@ -200,15 +200,16 @@ jobs:
             (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
             (.acceptedFiles | type == "array" and length > 0) and
             (.sourceIdentityCount | type == "number" and . > 0) and
-            (.sourceIdentityEvidence | type == "array" and length == .sourceIdentityCount) and
+            ((.sourceIdentityEvidence | type) == "array") and
+            ((.sourceIdentityEvidence | length) == .sourceIdentityCount) and
             ([.sourceIdentityEvidence[].sourceDetailKey] | length == (unique | length)) and
             (all(.sourceIdentityEvidence[];
               (.acceptedVideoCount | type == "number" and . > 0) and
               (.acceptedOccurrenceCount | type == "number" and . > 0) and
               (.acceptedSongGroupCount | type == "number" and . > 0)
             )) and
-            ([.sourceIdentityEvidence[].acceptedVideoCount] | add == .acceptedVideoCount) and
-            ([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add == .acceptedOccurrenceCount) and
+            (([.sourceIdentityEvidence[].acceptedVideoCount] | add) == .acceptedVideoCount) and
+            (([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add) == .acceptedOccurrenceCount) and
             (.identityEvidence == .sourceIdentityEvidence[0])
           ' "$TASK_ROOT/artifact/manifest.json" >/dev/null
           patch_bytes="$(stat -c%s "$TASK_ROOT/artifact/candidate.ndjson")"

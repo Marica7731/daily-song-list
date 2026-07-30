@@ -734,6 +734,36 @@ test("accepted commits prepare a deterministic hashed artifact before the reusab
   );
 });
 
+test("accepted handoff manifest validation keeps root scope for source identity counts", () => {
+  const match = /jq -e '\n(?<program>\s+\(\.status == "ready"\)[\s\S]*?)\n\s+' "\$TASK_ROOT\/artifact\/manifest\.json"/u.exec(acceptedWorkflow);
+  assert.ok(match?.groups?.program, "accepted manifest jq validation block missing");
+  const identity = {
+    sourceDetailKey: "UCahlYbdb3AHrNQdojztSMvQ",
+    acceptedVideoCount: 2,
+    acceptedOccurrenceCount: 22,
+    acceptedSongGroupCount: 22,
+  };
+  const manifest = {
+    status: "ready",
+    handoffKind: "github-accepted-paths",
+    acceptedVideoCount: 2,
+    acceptedOccurrenceCount: 22,
+    source_commit_sha: "a".repeat(40),
+    source_base_sha: "b".repeat(40),
+    patch_sha256: "c".repeat(64),
+    accepted_files_sha256: "d".repeat(64),
+    acceptedFiles: [{ path: "accepted.json" }],
+    sourceIdentityCount: 1,
+    sourceIdentityEvidence: [identity],
+    identityEvidence: identity,
+  };
+  const validation = spawnSync("jq", ["-e", match.groups.program], {
+    input: JSON.stringify(manifest),
+    encoding: "utf8",
+  });
+  assert.equal(validation.status, 0, validation.stderr);
+});
+
 test("GitHub accepted handoffs bind and verify every distinct source probe", () => {
   assert.match(
     deployWorkflow,
@@ -767,7 +797,7 @@ test("GitHub accepted handoffs bind and verify every distinct source probe", () 
   assert.match(acceptedWorkflow, /\.acceptedSongGroupCount/u);
   assert.match(
     acceptedWorkflow,
-    /\[\.sourceIdentityEvidence\[\]\.acceptedOccurrenceCount\] \| add == \.acceptedOccurrenceCount/u,
+    /\(\[\.sourceIdentityEvidence\[\]\.acceptedOccurrenceCount\] \| add\) == \.acceptedOccurrenceCount/u,
   );
   assert.match(deployWorkflow, /\.acceptedSongGroupCount/u);
   assert.match(
