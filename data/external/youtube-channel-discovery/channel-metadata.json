@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-30T20:55:33.753Z",
+  "generatedAt": "2026-07-30T22:33:38.324Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-30T20:55:33.753Z",
+    "fetchedAt": "2026-07-30T22:33:38.324Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-30T20:55:33.753Z",
+    "generatedAt": "2026-07-30T22:33:38.324Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1004,
-      "parseableChannels": 982,
+      "totalChannels": 1005,
+      "parseableChannels": 983,
       "realAvatar": 643,
-      "thumbnailFallback": 361,
+      "thumbnailFallback": 362,
       "missingDisplayImage": 0,
-      "missingAvatar": 361,
+      "missingAvatar": 362,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 554
+      "skipped_collected_evidence": 555,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 532,
+      "batch_limit_reached": 533,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@tukimirabi",
+        "channelId": "UC28vlU5N0F5E4Cz5QfchkLQ",
+        "displayName": "月見らび-Tukimi Rabi-",
+        "sourceUrl": "https://www.youtube.com/@tukimirabi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E8%8A%B1%E5%92%B2%E3%81%AE%E3%81%B0%E3%82%89",
         "channelId": "UCRJshfruonj4vorWgCfyPNA",
@@ -11842,13 +11849,6 @@
         "channelId": "UCxc0MrPoACKTFlV24GqX2sg",
         "displayName": "峰月律-Minetsuki Ritsu- / 夢限大みゅーたいぷ",
         "sourceUrl": "https://www.youtube.com/@ritsu_yumemita",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Kotoha_ktnh",
-        "channelId": "UC3ql_EU4JnaE3Rh3cqbHu6g",
-        "displayName": "Kotoha",
-        "sourceUrl": "https://www.youtube.com/@Kotoha_ktnh",
         "reason": "batch_limit_reached"
       }
     ]
