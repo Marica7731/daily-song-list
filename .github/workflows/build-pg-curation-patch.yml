@@ -184,68 +184,6 @@ jobs:
           }
           find "$PRODUCER_ROOT" -type f -print | sort > "$TASK_ROOT/downloaded-files.txt"
 
-      - name: Verify retained curation audit and checkpoint artifacts
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -Eeuo pipefail
-          RETAINED_ROOT="$TASK_ROOT/retained-curation"
-          mkdir -p "$RETAINED_ROOT/audit" "$RETAINED_ROOT/checkpoint"
-          fetch_artifact() {
-            local artifact_id="$1" expected_bytes="$2" expected_sha="$3" destination="$4"
-            curl --fail --silent --show-error --location --retry 2 \
-              --connect-timeout 5 --max-time 120 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
-              -o "$destination"
-            test "$(stat -f%z "$destination")" = "$expected_bytes"
-            test "$(shasum -a 256 "$destination" | awk '{print $1}')" = "$expected_sha"
-            unzip -tq "$destination"
-          }
-          fetch_artifact 8633425268 136315858 \
-            20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9 \
-            "$RETAINED_ROOT/audit.zip"
-          fetch_artifact 8633419597 79947767 \
-            aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0 \
-            "$RETAINED_ROOT/checkpoint.zip"
-          unzip -q "$RETAINED_ROOT/audit.zip" -d "$RETAINED_ROOT/audit"
-          unzip -q "$RETAINED_ROOT/checkpoint.zip" -d "$RETAINED_ROOT/checkpoint"
-          retained_large_gzip=(
-            "$RETAINED_ROOT/audit/global-quality/candidate-classifications.jsonl.gz"
-            "$RETAINED_ROOT/checkpoint/global/inventory.jsonl.gz"
-          )
-          for payload in "${retained_large_gzip[@]}"; do
-            test -s "$payload" || {
-              echo "PG_CURATION_PRODUCER_BLOCKED retained large payload missing path=$payload"; exit 78;
-            }
-          done
-          test "${#retained_large_gzip[@]}" -eq 2 || {
-            echo "PG_CURATION_PRODUCER_BLOCKED retained large payload count invalid"; exit 78;
-          }
-          {
-            printf 'retainedAuditArtifactId=8633425268\nretainedAuditZipBytes=136315858\n'
-            printf 'retainedAuditZipSha256=20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9\n'
-            printf 'retainedCheckpointArtifactId=8633419597\nretainedCheckpointZipBytes=79947767\n'
-            printf 'retainedCheckpointZipSha256=aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0\n'
-            for payload in "${retained_large_gzip[@]}"; do
-              gzip -t "$payload"
-              printf 'retainedPayload=%s bytes=%s sha256=%s\n' \
-                "${payload#"$RETAINED_ROOT/"}" "$(stat -f%z "$payload")" \
-                "$(shasum -a 256 "$payload" | awk '{print $1}')"
-            done
-          } | tee "$TASK_ROOT/retained-artifact-verification.txt"
-          retained_bytes=$(( $(du -sk "$RETAINED_ROOT" | awk '{print $1}') * 1024 ))
-          test "$retained_bytes" -le "$TASK_HARD_CAP_BYTES" || {
-            echo "PG_CURATION_PRODUCER_BLOCKED retained artifact cap exceeded bytes=$retained_bytes"; exit 78;
-          }
-          task_bytes=$(( $(du -sk "$TASK_ROOT" | awk '{print $1}') * 1024 ))
-          test "$task_bytes" -le "$TASK_HARD_CAP_BYTES" || {
-            echo "PG_CURATION_PRODUCER_BLOCKED retained task cap exceeded bytes=$task_bytes cap=$TASK_HARD_CAP_BYTES"; exit 78;
-          }
-          printf 'retainedArtifactBytes=%s\nretainedStageBytes=%s\ntaskPeakBytes=%s\n' \
-            "$retained_bytes" "$task_bytes" "$task_bytes" >> "$TASK_ROOT/storage.txt"
-          printf 'TASK_PEAK_BYTES=%s\n' "$task_bytes" >> "$GITHUB_ENV"
-
       - name: Prepare bounded SSH helper
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
@@ -457,7 +395,6 @@ jobs:
           test "$ARTIFACT_ROOT" = "$TASK_ROOT/upload" || exit 78
           printf 'producerStatus=success\nrunId=%s\nrunAttempt=%s\n' \
             "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$ARTIFACT_ROOT/producer-status.txt"
-          cp "$TASK_ROOT/retained-artifact-verification.txt" "$ARTIFACT_ROOT/retained-artifact-verification.txt"
           # The first digest intentionally coexists with snapshot, converter,
           # candidate and compact evidence.  It is a real task-peak stage,
           # not an upload-ready digest yet.
@@ -538,7 +475,6 @@ jobs:
             "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$ARTIFACT_ROOT/producer-status.txt"
           evidence_files=(
             storage.txt
-            retained-artifact-verification.txt
             downloaded-files.txt
             remote-export.log
             capture-result.json
@@ -631,5 +567,5 @@ jobs:
             *) echo "PG_CURATION_PRODUCER_CLEANUP unsafe task root=$TASK_ROOT"; exit 1 ;;
           esac
           after_free_bytes=$(( $(df -k "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
-          echo "PG_CURATION_PRODUCER_CLEANUP status=$JOB_STATUS baselineFreeBytes=${BASELINE_FREE_BYTES:-unknown} taskPeakBytes=${TASK_PEAK_BYTES:-unknown} beforeCleanupBytes=$task_before_bytes afterBytes=0 afterFreeBytes=$after_free_bytes remoteCleanup=$remote_cleanup remoteSnapshotBytes=0 remoteFreeAfterBytes=$remote_free_after retained=github-artifact-only"
+          echo "PG_CURATION_PRODUCER_CLEANUP status=$JOB_STATUS baselineFreeBytes=${BASELINE_FREE_BYTES:-unknown} taskPeakBytes=${TASK_PEAK_BYTES:-unknown} beforeCleanupBytes=$task_before_bytes afterBytes=0 afterFreeBytes=$after_free_bytes remoteCleanup=$remote_cleanup remoteSnapshotBytes=0 remoteFreeAfterBytes=$remote_free_after"
           test "$remote_cleanup" = removed || test "$remote_cleanup" = not-created || exit 1

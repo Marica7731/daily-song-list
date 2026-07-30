@@ -54,7 +54,6 @@ test("producer has explicit expected, hard, task caps and non-resumable checkpoi
   assert.match(workflow, /rm -rf -- '\$REMOTE_TASK_ROOT'/);
   assert.match(workflow, /afterBytes=0 afterFreeBytes=/);
   assert.match(workflow, /remoteSnapshotBytes=0/);
-  assert.match(workflow, /retained=github-artifact-only/);
   assert.match(workflow, /"\$RUNNER_TEMP"\/daily-song-list-curation-producer\.\*/);
   assert.match(workflow, /ARTIFACT_ROOT="\$TASK_ROOT\/upload"/);
   assert.match(workflow, /test "\$ARTIFACT_ROOT" = "\$TASK_ROOT\/upload"/);
@@ -68,6 +67,7 @@ test("producer has explicit expected, hard, task caps and non-resumable checkpoi
   assert.match(workflow, /final evidence task cap exceeded/);
   assert.match(workflow, /beforeCleanupBytes=\$task_before_bytes afterBytes=0/);
   assert.doesNotMatch(workflow, /rm -rf -- "\$ARTIFACT_ROOT"/);
+  assert.doesNotMatch(workflow, /retained=github-artifact-only/);
 });
 
 test("producer records the single-root peak after conversion and before snapshot removal", () => {
@@ -84,23 +84,32 @@ test("producer records the single-root peak after conversion and before snapshot
   assert.ok(successStep.lastIndexOf('test "$task_peak_bytes" -le "$TASK_HARD_CAP_BYTES"') > beforeRemoval);
 });
 
-test("producer verifies retained audit bytes, digests, and large gzip payloads on Mac", () => {
-  assert.match(workflow, /Verify retained curation audit and checkpoint artifacts/);
-  assert.match(workflow, /actions\/artifacts\/\$artifact_id\/zip/);
-  assert.match(workflow, /20282bfb75aecb92b9e745c1c766fa6fe6a1d1719542fcb80a30a0380b8430d9/);
-  assert.match(workflow, /fetch_artifact 8633419597 79947767/);
-  assert.match(workflow, /aa7dd87987a39db9f38d8c73b52f2433c0871c90b48ed016c0079cce2e19c2e0/);
-  assert.match(workflow, /unzip -tq/);
-  assert.match(workflow, /candidate-classifications\.jsonl\.gz/);
-  assert.match(workflow, /inventory\.jsonl\.gz/);
-  assert.match(workflow, /gzip -t "\$payload"/);
-  assert.doesNotMatch(workflow, /\bmapfile\b/);
-  assert.match(workflow, /audit\/global-quality\/candidate-classifications\.jsonl\.gz/);
-  assert.match(workflow, /checkpoint\/global\/inventory\.jsonl\.gz/);
-  assert.match(workflow, /for payload in "\$\{retained_large_gzip\[@\]\}"; do/);
-  assert.match(workflow, /retained-artifact-verification\.txt/);
+test("producer has no historical retained-artifact dependency and uses only this run current-active evidence", () => {
+  for (const staleEvidence of [
+    /Verify retained curation audit and checkpoint artifacts/,
+    /actions\/artifacts\/\$artifact_id\/zip/,
+    /8633425268/,
+    /8633419597/,
+    /audit\.zip/,
+    /checkpoint\.zip/,
+    /candidate-classifications\.jsonl\.gz/,
+    /inventory\.jsonl\.gz/,
+    /RETAINED_ROOT/,
+    /retained-artifact-verification\.txt/,
+    /retainedArtifactBytes/,
+    /retainedStageBytes/,
+  ]) {
+    assert.doesNotMatch(workflow, staleEvidence);
+  }
+  assert.match(workflow, /active-snapshot\.ndjson/);
+  assert.match(workflow, /snapshot-checkpoint\.json/);
+  assert.match(workflow, /--checkpoint-output "\$SNAPSHOT_CHECKPOINT"/);
+  assert.match(workflow, /--snapshot-checkpoint "\$TASK_ROOT\/snapshot-checkpoint\.json"/);
+  assert.match(workflow, /--bind-current-active-evidence/);
   assert.match(workflow, /bound-rules-manifest\.json/);
   assert.match(workflow, /current-active-binding\.json/);
+  assert.match(workflow, /--producer-commit "\$GITHUB_SHA"/);
+  assert.match(workflow, /shasum -a 256 -c artifact-sha256\.txt/);
 });
 
 test("uploaded artifact excludes the full snapshot and contains only compact evidence", () => {
@@ -116,7 +125,6 @@ test("uploaded artifact excludes the full snapshot and contains only compact evi
   assert.match(workflow, /review\.json/);
   assert.match(workflow, /storage\.txt/);
   assert.match(workflow, /artifact-sha256\.txt/);
-  assert.match(workflow, /retained-artifact-verification\.txt/);
   assert.match(workflow, /Prepare bounded producer failure evidence/);
   assert.match(workflow, /if: failure\(\)/);
   assert.match(workflow, /oversizedFailureArtifactBytes/);
@@ -187,7 +195,7 @@ test("success evidence stabilizes final storage, bytes, peak, and digest inside 
     fs.writeFileSync(path.join(artifact, "manifest.json"), "manifest\n");
     fs.writeFileSync(path.join(artifact, "review.json"), "review\n");
     fs.writeFileSync(path.join(artifact, "producer-status.txt"), "producerStatus=success\n");
-    fs.writeFileSync(path.join(task, "storage.txt"), "baselineFreeBytes=100\nretainedStageBytes=10\nafterConvertBytes=20\n");
+    fs.writeFileSync(path.join(task, "storage.txt"), "baselineFreeBytes=100\nafterConvertBytes=20\n");
     const fixture = path.join(root, "success-evidence.sh");
     fs.writeFileSync(fixture, String.raw`set -Eeuo pipefail
 test "$ARTIFACT_ROOT" = "$TASK_ROOT/upload"
