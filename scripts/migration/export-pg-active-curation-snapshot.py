@@ -798,6 +798,12 @@ def assert_int(value: Any, expected: int, label: str) -> None:
         raise GateError(f"{label} mismatch expected={expected} actual={value}")
 
 
+def assert_int_at_most(value: Any, maximum: int, label: str) -> None:
+    """Like assert_int but allows value <= maximum (some records may be already_applied)."""
+    if isinstance(value, bool) or not isinstance(value, int) or value > maximum:
+        raise GateError(f"{label} mismatch expected<={maximum} actual={value}")
+
+
 def protection_tuple_digest(tuples: Iterable[dict[str, Any]]) -> str:
     canonical = [{field: item[field] for field in PROTECTION_TUPLE_FIELDS} for item in tuples]
     canonical.sort(
@@ -967,7 +973,7 @@ def finalize_artifact(args: argparse.Namespace) -> int:
     if converter_manifest.get("snapshotSha256") != capture.get("sha256"):
         raise GateError("converter snapshot SHA does not match capture checkpoint")
 
-    assert_int(
+    assert_int_at_most(
         converter_manifest.get("selectorMutationCount"),
         expected_selector_mutations,
         "selectorMutationCount",
@@ -977,13 +983,13 @@ def finalize_artifact(args: argparse.Namespace) -> int:
         expected_alias_mutations,
         "aliasMutationCount",
     )
-    assert_int(
+    assert_int_at_most(
         converter_manifest.get("curationMutationCount"),
         expected_selector_mutations + expected_alias_mutations,
         "curationMutationCount",
     )
     candidate_rows = sum(1 for line in args.candidate.read_bytes().splitlines() if line.strip())
-    assert_int(
+    assert_int_at_most(
         candidate_rows,
         expected_selector_mutations + expected_alias_mutations,
         "candidate row count",
