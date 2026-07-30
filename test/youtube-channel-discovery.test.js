@@ -693,10 +693,13 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     },
     ...channelData({ videos: [ownedVideo(videoId, `LIVE ${videoId}`)], continuation: token }),
   });
-  const continuationPage = (videoId, nextToken = "") =>
-    channelData({ videos: [ownedVideo(videoId, `LIVE ${videoId}`)], continuation: nextToken });
+  const continuationPage = (videoId, nextToken = "", { missingOwner = false } = {}) => {
+    const renderer = ownedVideo(videoId, `LIVE ${videoId}`);
+    if (missingOwner) delete renderer.ownerText;
+    return channelData({ videos: [renderer], continuation: nextToken });
+  };
   const responses = new Map([
-    ["STREAMS_1", continuationPage("CCCCCCCCCCC", "STREAMS_2")],
+    ["STREAMS_1", continuationPage("jsEw-2Nclgo", "STREAMS_2", { missingOwner: true })],
     ["STREAMS_2", continuationPage("DDDDDDDDDDD")],
     ["VIDEOS_1", continuationPage("GGGGGGGGGGG", "VIDEOS_2")],
     ["VIDEOS_2", continuationPage("HHHHHHHHHHH")],
@@ -745,6 +748,11 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     });
     assert.equal(result.manifest.complete, true);
     assert.deepEqual(result.manifest.pageSummaries.map((page) => page.continuationRounds), [2, 2]);
+    const inheritedOwnerRecord = result.rawVideos.find((record) => record.youtubeVideoId === "jsEw-2Nclgo");
+    assert.ok(inheritedOwnerRecord);
+    assert.equal(inheritedOwnerRecord.channelId, expectedChannelId);
+    assert.equal(inheritedOwnerRecord.discoveryEvidenceRefs[0].rendererOwnerIdentityInherited, true);
+    assert.deepEqual(result.manifest.pageSummaries[0].continuationEvidence[0].inheritedOwnerVideoIds, ["jsEw-2Nclgo"]);
     assert.equal(fs.existsSync(path.join(dir, "candidate-manifest.ndjson")), true);
     assert.equal(result.manifest.kind, "channel-discovery-source-manifest");
     assert.equal(result.manifest.pageEvidenceFiles.length, 6);
@@ -804,6 +812,62 @@ test("raw continuation bodies bind initial, inter-round, and terminal tokens dur
     assert.deepEqual(
       recomputeCandidatePageEvidence(initialBody, page, options, extractSearchItems, continuationBodies),
       { rawItemCount: 3, candidateCount: 3 },
+    );
+
+    const conflictingContinuation = continuationPage("jsEw-2Nclgo", "STREAMS_2");
+    const conflictingRenderer = conflictingContinuation.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents[0].richItemRenderer.content.videoRenderer;
+    conflictingRenderer.ownerText.runs.push({
+      text: "Other owner",
+      navigationEndpoint: {
+        browseEndpoint: {
+          browseId: "UC0123456789012345678901",
+          canonicalBaseUrl: "@other_handle",
+        },
+      },
+    });
+    const conflictingBytes = Buffer.from(JSON.stringify(conflictingContinuation), "utf8");
+    const conflictingSummary = structuredClone(page);
+    conflictingSummary.continuationEvidence[0].bytes = conflictingBytes.byteLength;
+    conflictingSummary.continuationEvidence[0].sha256 = crypto.createHash("sha256").update(conflictingBytes).digest("hex");
+    const conflictingBodies = new Map(continuationBodies);
+    conflictingBodies.set(conflictingSummary.continuationEvidence[0].evidencePath, conflictingBytes);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, conflictingSummary, options, extractSearchItems, conflictingBodies),
+      /continuation renderer has ambiguous or missing owner identity/u,
+    );
+
+    const differentOwnerContinuation = continuationPage("jsEw-2Nclgo", "STREAMS_2");
+    const differentOwnerEndpoint = differentOwnerContinuation.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents[0].richItemRenderer.content.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint;
+    differentOwnerEndpoint.browseId = "UC0123456789012345678901";
+    differentOwnerEndpoint.canonicalBaseUrl = "@other_handle";
+    const differentOwnerBytes = Buffer.from(JSON.stringify(differentOwnerContinuation), "utf8");
+    const differentOwnerSummary = structuredClone(page);
+    differentOwnerSummary.continuationEvidence[0].bytes = differentOwnerBytes.byteLength;
+    differentOwnerSummary.continuationEvidence[0].sha256 = crypto.createHash("sha256").update(differentOwnerBytes).digest("hex");
+    const differentOwnerBodies = new Map(continuationBodies);
+    differentOwnerBodies.set(differentOwnerSummary.continuationEvidence[0].evidencePath, differentOwnerBytes);
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, differentOwnerSummary, options, extractSearchItems, differentOwnerBodies),
+      /continuation renderer owner channel mismatch/u,
+    );
+
+    const missingInitialData = initialPage("INITMISS001", "STREAMS_1");
+    const missingInitialRenderer = missingInitialData.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.richGridRenderer.contents[0].richItemRenderer.content.videoRenderer;
+    delete missingInitialRenderer.ownerText;
+    const missingInitialBody = Buffer.from(youtubeHtml({ initialData: missingInitialData }), "utf8");
+    const missingInitialSummary = structuredClone(page);
+    missingInitialSummary.bytes = missingInitialBody.byteLength;
+    missingInitialSummary.rawSha256 = crypto.createHash("sha256").update(missingInitialBody).digest("hex");
+    assert.throws(
+      () => recomputeCandidatePageEvidence(missingInitialBody, missingInitialSummary, options, extractSearchItems, continuationBodies),
+      /candidate initial renderer missing immutable owner identity/u,
+    );
+
+    const unverifiedOwnerFallback = structuredClone(page);
+    unverifiedOwnerFallback.continuationEvidence[0].tokenChainSha256 = tokenHash("FORGED_TOKEN_CHAIN");
+    assert.throws(
+      () => recomputeCandidatePageEvidence(initialBody, unverifiedOwnerFallback, options, extractSearchItems, continuationBodies),
+      /missing immutable owner identity without verified continuation provenance/u,
     );
 
     const rejectedTreeSelfReportedGate = (summary) =>

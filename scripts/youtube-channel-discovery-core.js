@@ -443,6 +443,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps, pageInd
     }
     seenContinuationTokens.add(continuation);
     const requestTokenSha256 = crypto.createHash("sha256").update(continuation, "utf8").digest("hex");
+    const previousTokenChainSha256 = tokenChainSha256;
     tokenChainSha256 = crypto.createHash("sha256").update(`${tokenChainSha256}\n${requestTokenSha256}`, "utf8").digest("hex");
     await maybeDelay(options.requestIntervalMs + randomJitterMs(options.requestJitterMs));
     const continuationResult = await fetchBrowseContinuation({
@@ -477,13 +478,16 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps, pageInd
           path: continuationPath,
           sha256: continuationSha256,
           bytes: continuationRawBody.byteLength,
+          pageIndex,
           tab,
           round,
           apiPath: continuationApiPath,
           requestTokenSha256,
+          previousTokenChainSha256,
           nextTokenSha256: nextContinuation ? crypto.createHash("sha256").update(nextContinuation, "utf8").digest("hex") : "",
           tokenChainSha256,
         },
+        observedChannel,
       );
       items.push(...ownerBoundItems);
       const candidateEvidenceNowMs = Number(options.candidateEvidenceNowMs) || Date.now();
@@ -503,6 +507,7 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps, pageInd
         videoIds: uniqueStrings(ownerBoundItems.map((item) => item.videoId)).sort(),
         ownerChannelIds: uniqueStrings(ownerBoundItems.map((item) => item.rendererOwnerChannelId)).sort(),
         ownerChannelHandles: uniqueStrings(ownerBoundItems.map((item) => item.rendererOwnerChannelHandle)).sort(),
+        inheritedOwnerVideoIds: uniqueStrings(ownerBoundItems.filter((item) => item.rendererOwnerIdentityInherited).map((item) => item.videoId)).sort(),
       });
     } else {
       addCandidateItems(items, continuationResponse, deps.extractSearchItems, options, pageUrl, observedChannel);
@@ -592,37 +597,97 @@ function continuationTokenSha256(token) {
 function candidateItemsFromPage(data, extractSearchItems, options, pageUrl, observedChannel, evidence = {}) {
   const items = [];
   addCandidateItems(items, data, extractSearchItems, options, pageUrl, observedChannel, evidence);
+  if (options.candidateOnly) {
+    const expected = expectedChannelIdentity(options);
+    for (const item of items) {
+      const rendererChannelId = String(item.rendererChannelId || "").trim();
+      if (!rendererChannelId) {
+        throw new Error(`candidate initial renderer missing immutable owner identity: ${item.videoId || "unknown"}`);
+      }
+      if (rendererChannelId !== expected.expectedChannelId) {
+        throw new Error(`candidate initial renderer owner channel mismatch: ${item.videoId || "unknown"}`);
+      }
+    }
+  }
   return items;
 }
 
-function continuationCandidateItems(data, extractSearchItems, options, pageUrl, evidence) {
+function verifiedContinuationOwnerFallback(options, pageUrl, evidence, observedChannel) {
+  const expected = expectedChannelIdentity(options);
+  const pageResponseUrl = canonicalChannelResponseUrl(pageUrl);
+  const pageTab = channelTabFromPageUrl(pageUrl);
+  const pageIndex = Number(evidence?.pageIndex);
+  const round = Number(evidence?.round);
+  const requestTokenSha256 = String(evidence?.requestTokenSha256 || "");
+  const previousTokenChainSha256 = String(evidence?.previousTokenChainSha256 || "");
+  const expectedTokenChainSha256 = crypto
+    .createHash("sha256")
+    .update(`${previousTokenChainSha256}\n${requestTokenSha256}`, "utf8")
+    .digest("hex");
+  return Boolean(
+    options.candidateOnly &&
+    /^UC[A-Za-z0-9_-]{22}$/u.test(expected.expectedChannelId) &&
+    /^@[a-z0-9._-]{3,30}$/u.test(expected.expectedChannelHandle) &&
+    expected.expectedChannelUrl &&
+    pageResponseUrl &&
+    pageTab &&
+    canonicalChannelIdentityUrl(pageResponseUrl) === expected.expectedChannelUrl &&
+    String(observedChannel?.channelId || "").trim() === expected.expectedChannelId &&
+    observedChannel?.channelHandle === expected.expectedChannelHandle &&
+    observedChannel?.channelUrl === expected.expectedChannelUrl &&
+    canonicalChannelResponseUrl(observedChannel?.responseUrl) === pageResponseUrl &&
+    evidence?.kind === "youtubei-continuation" &&
+    evidence?.apiPath === "/youtubei/v1/browse" &&
+    evidence?.tab === pageTab &&
+    Number.isSafeInteger(pageIndex) &&
+    pageIndex >= 0 &&
+    Number.isSafeInteger(round) &&
+    round >= 1 &&
+    evidence?.path === `pages/${String(pageIndex).padStart(2, "0")}-${pageTab}-continuation-${String(round).padStart(3, "0")}.json` &&
+    /^[a-f0-9]{64}$/u.test(String(evidence?.sha256 || "")) &&
+    Number.isSafeInteger(evidence?.bytes) &&
+    evidence.bytes >= 0 &&
+    /^[a-f0-9]{64}$/u.test(requestTokenSha256) &&
+    (round === 1 ? previousTokenChainSha256 === "" : /^[a-f0-9]{64}$/u.test(previousTokenChainSha256)) &&
+    evidence?.tokenChainSha256 === expectedTokenChainSha256
+  );
+}
+
+function continuationCandidateItems(data, extractSearchItems, options, pageUrl, evidence, observedChannel) {
   const expected = expectedChannelIdentity(options);
   const ownerIdentities = continuationOwnerIdentitiesByVideoId(data);
   const extracted = extractSearchItems(data);
   return extracted.map((item) => {
     const owner = ownerIdentities.get(String(item.videoId || ""));
-    if (!owner?.channelId) {
+    if (!owner) {
       throw new Error(`candidate continuation renderer missing immutable owner identity: ${item.videoId || "unknown"}`);
     }
-    if (owner.channelId !== expected.expectedChannelId) {
+    const ownerIdentityInherited = owner.identityMissing === true;
+    if (ownerIdentityInherited && !verifiedContinuationOwnerFallback(options, pageUrl, evidence, observedChannel)) {
+      throw new Error(`candidate continuation renderer missing immutable owner identity without verified continuation provenance: ${item.videoId || "unknown"}`);
+    }
+    const ownerChannelId = ownerIdentityInherited ? expected.expectedChannelId : owner.channelId;
+    const ownerChannelHandle = ownerIdentityInherited ? expected.expectedChannelHandle : owner.channelHandle;
+    if (ownerChannelId !== expected.expectedChannelId) {
       throw new Error(`candidate continuation renderer owner channel mismatch: ${item.videoId || "unknown"}`);
     }
-    if (owner.channelHandle && owner.channelHandle !== expected.expectedChannelHandle) {
+    if (ownerChannelHandle && ownerChannelHandle !== expected.expectedChannelHandle) {
       throw new Error(`candidate continuation renderer owner handle mismatch: ${item.videoId || "unknown"}`);
     }
     const responseUrl = `https://www.youtube.com${evidence.apiPath}`;
     return {
       ...item,
-      channelId: owner.channelId,
+      channelId: ownerChannelId,
       channelHandle: expected.expectedChannelHandle,
-      observedChannelId: owner.channelId,
-      observedChannelHandle: owner.channelHandle || expected.expectedChannelHandle,
+      observedChannelId: ownerChannelId,
+      observedChannelHandle: ownerChannelHandle || expected.expectedChannelHandle,
       observedChannelUrl: expected.expectedChannelUrl,
       observedChannelSourceUrl: pageUrl,
       observedChannelResponseUrl: responseUrl,
-      rendererChannelId: owner.channelId,
-      rendererOwnerChannelId: owner.channelId,
-      rendererOwnerChannelHandle: owner.channelHandle,
+      rendererChannelId: ownerChannelId,
+      rendererOwnerChannelId: ownerChannelId,
+      rendererOwnerChannelHandle: ownerChannelHandle,
+      rendererOwnerIdentityInherited: ownerIdentityInherited,
       discoverySourceUrl: pageUrl,
       channelUrl: expected.expectedChannelUrl,
       singerName: options.singerName || "",
@@ -670,15 +735,21 @@ function continuationOwnerIdentitiesByVideoId(data) {
         const normalized = normalizeChannelHandle(endpoint.canonicalBaseUrl || "");
         return normalized ? `@${normalized}` : "";
       }));
-      if (channelIds.length !== 1 || channelHandles.length > 1) {
+      const identityMissing = channelIds.length === 0 && channelHandles.length === 0;
+      if (!identityMissing && (channelIds.length !== 1 || channelHandles.length > 1)) {
         throw new Error(`candidate continuation renderer has ambiguous or missing owner identity: ${videoId}`);
       }
-      const identity = { channelId: channelIds[0], channelHandle: channelHandles[0] || "" };
+      const identity = { channelId: channelIds[0] || "", channelHandle: channelHandles[0] || "", identityMissing };
       const existing = result.get(videoId);
-      if (existing && (existing.channelId !== identity.channelId || (existing.channelHandle && identity.channelHandle && existing.channelHandle !== identity.channelHandle))) {
+      if (
+        existing &&
+        !existing.identityMissing &&
+        !identity.identityMissing &&
+        (existing.channelId !== identity.channelId || (existing.channelHandle && identity.channelHandle && existing.channelHandle !== identity.channelHandle))
+      ) {
         throw new Error(`candidate continuation renderer owner identity is ambiguous: ${videoId}`);
       }
-      result.set(videoId, identity);
+      if (!existing || (existing.identityMissing && !identity.identityMissing)) result.set(videoId, identity);
     }
   }
   return result;
@@ -751,22 +822,26 @@ function recomputeCandidatePageEvidenceWithItems(rawBody, summary, options, extr
       path: continuation.evidencePath,
       sha256: continuation.sha256,
       bytes: continuation.bytes,
+      pageIndex: summary.pageIndex,
       tab: continuation.tab,
       round: continuation.round,
       apiPath: continuation.apiPath,
       requestTokenSha256: continuation.requestTokenSha256,
+      previousTokenChainSha256: continuationIndex > 0 ? continuationEvidence[continuationIndex - 1].tokenChainSha256 : "",
       tokenChainSha256: continuation.tokenChainSha256,
-    });
+    }, observed);
     const replayVideoIds = uniqueStrings(replayItems.map((item) => item.videoId)).sort();
     const replayOwnerIds = uniqueStrings(replayItems.map((item) => item.rendererOwnerChannelId)).sort();
     const replayOwnerHandles = uniqueStrings(replayItems.map((item) => item.rendererOwnerChannelHandle)).sort();
+    const replayInheritedOwnerVideoIds = uniqueStrings(replayItems.filter((item) => item.rendererOwnerIdentityInherited).map((item) => item.videoId)).sort();
     const replayCandidateCount = filterDiscoveryCandidates(replayItems, options.keywords, Number(options.candidateEvidenceNowMs) || Date.now()).length;
     if (
       replayItems.length !== continuation.rawItemCount ||
       replayCandidateCount !== continuation.candidateCount ||
       JSON.stringify(replayVideoIds) !== JSON.stringify(continuation.videoIds) ||
       JSON.stringify(replayOwnerIds) !== JSON.stringify(continuation.ownerChannelIds) ||
-      JSON.stringify(replayOwnerHandles) !== JSON.stringify(continuation.ownerChannelHandles)
+      JSON.stringify(replayOwnerHandles) !== JSON.stringify(continuation.ownerChannelHandles) ||
+      JSON.stringify(replayInheritedOwnerVideoIds) !== JSON.stringify(continuation.inheritedOwnerVideoIds)
     ) throw new Error(`candidate continuation evidence renderer binding mismatch: ${continuation.evidencePath}`);
     items.push(...replayItems);
   }
@@ -1098,6 +1173,7 @@ function discoveryEvidenceRefFromItem(item) {
     tokenChainSha256: String(item.continuationTokenChainSha256 || ""),
     rendererOwnerChannelId: String(item.rendererOwnerChannelId || ""),
     rendererOwnerChannelHandle: String(item.rendererOwnerChannelHandle || ""),
+    rendererOwnerIdentityInherited: item.rendererOwnerIdentityInherited === true,
   };
 }
 
@@ -1487,6 +1563,8 @@ function validContinuationEvidence(evidence, tab, pageIndex, continuationRounds,
       !Array.isArray(item?.videoIds) ||
       !Array.isArray(item?.ownerChannelIds) ||
       !Array.isArray(item?.ownerChannelHandles) ||
+      !Array.isArray(item?.inheritedOwnerVideoIds) ||
+      item.inheritedOwnerVideoIds.some((videoId) => !item.videoIds.includes(videoId)) ||
       seenRequestTokenHashes.has(item.requestTokenSha256) ||
       (index > 0 && evidence[index - 1]?.nextTokenSha256 !== item.requestTokenSha256)
     ) return false;
@@ -1615,6 +1693,7 @@ function validateCandidateDiscoveryEvidenceRefs(candidate, expected) {
       !/^[a-f0-9]{64}$/u.test(String(ref.requestTokenSha256 || "")) ||
       !/^[a-f0-9]{64}$/u.test(String(ref.tokenChainSha256 || "")) ||
       ref.rendererOwnerChannelId !== expected.expectedChannelId ||
+      typeof ref.rendererOwnerIdentityInherited !== "boolean" ||
       (ref.rendererOwnerChannelHandle && `@${normalizeChannelHandle(ref.rendererOwnerChannelHandle)}` !== expected.expectedChannelHandle)
     ) {
       throw new Error(`candidate continuation evidence reference is invalid for ${candidate.videoId || "candidate"}`);

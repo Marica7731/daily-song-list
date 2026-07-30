@@ -33,7 +33,7 @@ const expectedSourceFiles = new Map([
   ["scripts/vsinger-http/http-client.js", ["7000", "86e7317b3e0904ade6d39945df5888e11da46562"]],
   ["scripts/vsinger-http/model.js", ["4678", "811a8d65ae37f657717de4a8dc4c7320e00ef694"]],
   ["scripts/vsinger-http/runtime-importer.js", ["21502", "32e39dfd70200b0c6494b254695e33108f22f2fc"]],
-  ["scripts/youtube-channel-discovery-core.js", ["91309", "f9153763f979ead25a23e2bce116eb621f021d65"]],
+  ["scripts/youtube-channel-discovery-core.js", ["95845", "a6147d80cc866bbf5035c5b35c7157d6bc0c91db"]],
   ["scripts/youtube-channel-discovery.js", ["2444", "1d78bdeeefe0b9dc6db6e7caf185f531cfed51b4"]],
 ]);
 
