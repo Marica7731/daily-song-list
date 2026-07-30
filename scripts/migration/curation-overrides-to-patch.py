@@ -624,6 +624,101 @@ KNOWN_TUPLE_FIELDS = (
     "rangeId",
 )
 KNOWN_TUPLE_STRING_FIELDS = tuple(field for field in KNOWN_TUPLE_FIELDS if field not in {"position", "seconds"})
+PROTECTION_SOURCE_PROVENANCE_FIELDS = ("sourceId", "sourceHash", "rawHash")
+PROTECTION_DERIVED_LINEAGE_FIELDS = (
+    "videoId",
+    "occurrenceId",
+    "position",
+    "seconds",
+    "title",
+    "artist",
+    "sourceSystem",
+    "rangeId",
+    "channelHandle",
+)
+PROTECTION_DERIVED_REQUIRED_STRING_FIELDS = (
+    "videoId",
+    "occurrenceId",
+    "title",
+    "sourceSystem",
+    "rangeId",
+    "channelHandle",
+)
+PROTECTION_DERIVED_SCHEMA = "derived-protection-v1"
+
+
+def protection_tuple_from_row(assertion_id: str, row: dict[str, Any]) -> dict[str, Any]:
+    """Project immutable protection evidence without mutating occurrence data.
+
+    Historical ``latest_json`` rows predate comment-level source provenance and
+    legitimately have all of ``sourceId``, ``sourceHash`` and ``rawHash`` empty.
+    Such rows can still be bound to the exact active snapshot by deriving
+    domain-separated evidence from their complete immutable row lineage.  The
+    derived values exist only in the protection contract; they are never copied
+    into candidate mutations or the source occurrence.
+
+    Mixed real/empty source provenance is not historical absence and remains a
+    hard failure.  Likewise, incomplete lineage cannot be used to manufacture
+    protection evidence.
+    """
+
+    result = {field: row.get(field) for field in KNOWN_TUPLE_FIELDS}
+    source_states = {}
+    for field in PROTECTION_SOURCE_PROVENANCE_FIELDS:
+        value = row.get(field)
+        if value is None or value == "":
+            source_states[field] = "empty"
+        elif isinstance(value, str) and value.strip():
+            source_states[field] = "valid"
+        else:
+            source_states[field] = "invalid"
+    if "invalid" in source_states.values():
+        raise CurationBlocked(f"protected scope has invalid string provenance: {assertion_id}")
+    if "valid" in source_states.values() and "empty" in source_states.values():
+        raise CurationBlocked(f"protected scope has partial string provenance: {assertion_id}")
+
+    if set(source_states.values()) == {"empty"}:
+        lineage = {field: row.get(field) for field in PROTECTION_DERIVED_LINEAGE_FIELDS}
+        if any(
+            not isinstance(lineage[field], str) or not lineage[field].strip()
+            for field in PROTECTION_DERIVED_REQUIRED_STRING_FIELDS
+        ):
+            raise CurationBlocked(f"protected scope has incomplete derived lineage: {assertion_id}")
+        if not isinstance(lineage["artist"], str):
+            raise CurationBlocked(f"protected scope has incomplete derived lineage: {assertion_id}")
+        if lineage["sourceSystem"].strip() != "latest_json":
+            raise CurationBlocked(f"protected scope has unsupported derived lineage: {assertion_id}")
+        if any(
+            isinstance(lineage[field], bool)
+            or not isinstance(lineage[field], int)
+            or lineage[field] < 0
+            for field in ("position", "seconds")
+        ):
+            raise CurationBlocked(f"protected scope has incomplete derived lineage: {assertion_id}")
+        for field in PROTECTION_SOURCE_PROVENANCE_FIELDS:
+            digest_input = {
+                "field": field,
+                "lineage": lineage,
+                "schema": PROTECTION_DERIVED_SCHEMA,
+            }
+            digest = sha256_bytes(
+                json.dumps(
+                    digest_input,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    sort_keys=True,
+                ).encode("utf-8")
+            )
+            result[field] = f"{PROTECTION_DERIVED_SCHEMA}:{field}:{digest}"
+
+    if any(not isinstance(result[field], str) or not result[field].strip() for field in KNOWN_TUPLE_STRING_FIELDS):
+        raise CurationBlocked(f"protected scope has incomplete string provenance: {assertion_id}")
+    if any(
+        isinstance(result[field], bool) or not isinstance(result[field], int) or result[field] < 0
+        for field in ("position", "seconds")
+    ):
+        raise CurationBlocked(f"protected scope has incomplete numeric provenance: {assertion_id}")
+    return result
 
 
 def known_tuples(assertion: dict[str, Any]) -> list[dict[str, Any]] | None:
@@ -691,13 +786,22 @@ def known_tuples(assertion: dict[str, Any]) -> list[dict[str, Any]] | None:
 
 
 def known_tuple_matches(expected: dict[str, Any], row: dict[str, Any]) -> bool:
-    for field in KNOWN_TUPLE_FIELDS:
+    # Avoid projecting unrelated rows.  Besides being bounded, this ensures a
+    # partial-provenance row outside the declared immutable identity cannot
+    # block an otherwise independent safety assertion.
+    for field in ("videoId", "occurrenceId", "position", "seconds", "rangeId"):
         actual = row.get(field)
         wanted = expected.get(field)
-        if field in {"seconds", "position"}:
+        if field in {"position", "seconds"}:
             if actual != wanted:
                 return False
         elif text(actual) != text(wanted):
+            return False
+    projected = protection_tuple_from_row("known-tuple-match", row)
+    for field in PROTECTION_SOURCE_PROVENANCE_FIELDS:
+        actual = projected.get(field)
+        wanted = expected.get(field)
+        if text(actual) != text(wanted):
             return False
     return True
 
@@ -723,18 +827,6 @@ def coarse_selector_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]
     result = [row for row in rows if row.get("seconds") == seconds]
     if source_id:
         result = [row for row in result if text(row.get("sourceId")) == source_id]
-    return result
-
-
-def protection_tuple_from_row(assertion_id: str, row: dict[str, Any]) -> dict[str, Any]:
-    result = {field: row.get(field) for field in KNOWN_TUPLE_FIELDS}
-    if any(not isinstance(result[field], str) or not result[field].strip() for field in KNOWN_TUPLE_STRING_FIELDS):
-        raise CurationBlocked(f"protected scope has incomplete string provenance: {assertion_id}")
-    if any(
-        isinstance(result[field], bool) or not isinstance(result[field], int) or result[field] < 0
-        for field in ("position", "seconds")
-    ):
-        raise CurationBlocked(f"protected scope has incomplete numeric provenance: {assertion_id}")
     return result
 
 

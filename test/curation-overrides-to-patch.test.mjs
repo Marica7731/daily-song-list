@@ -824,19 +824,31 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
         sourceSystem: "latest_json", channelHandle: "@other", ...overrides,
       };
     };
+    const legacyProtected = (value) => ({
+      ...value,
+      sourceId: "",
+      sourceHash: "",
+      rawHash: "",
+    });
     const naraetanRule = template.records[0];
     const aliasRule = template.artistScopedAliases[0];
+    const vaundyRows = Array.from({ length: 3 }, (_, index) => legacyProtected(
+      row("逆光 - replica", "Vaundy", { seconds: 1000 + index }),
+    ));
+    const flugelRows = Array.from({ length: 123 }, (_, index) => legacyProtected(
+      row(`逆光のフリューゲル ${index}`, "protected", { seconds: 2000 + index }),
+    ));
     const rows = [
       row("translated commentary", "", {
         videoId: naraetanRule.videoId, seconds: naraetanRule.seconds,
         sourceId: naraetanRule.sourceId, sourceHash: naraetanRule.sourceHash,
         rawHash: naraetanRule.rawHash,
       }),
-      ...Array.from({ length: 3 }, (_, index) => row("逆光 - replica", "Vaundy", { seconds: 1000 + index })),
-      ...Array.from({ length: 123 }, (_, index) => row(`逆光のフリューゲル ${index}`, "protected", { seconds: 2000 + index })),
-      row("8.32", "*Luna"),
-      row("逆光", "Ado"),
-      row("Urameshi protected", "Artist", { channelHandle: " /@URAMESHI_CONTA " }),
+      ...vaundyRows,
+      ...flugelRows,
+      legacyProtected(row("8.32", "*Luna")),
+      legacyProtected(row("逆光", "Ado")),
+      legacyProtected(row("Urameshi protected", "Artist", { channelHandle: " /@URAMESHI_CONTA " })),
       ...Array.from({ length: 14 }, (_, index) => row(aliasRule.aliases[1], "Ado", { seconds: 3000 + index })),
     ];
     fs.writeFileSync(snapshot, rows.map(JSON.stringify).join("\n") + "\n", "utf8");
@@ -864,12 +876,118 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
       Object.values(byId.get("protect-luna-8-32").knownTuplePresence[0]).includes(""),
       false,
     );
+    assert.ok(
+      byId.get("protect-vaundy-gyakko-replica").knownTuplePresence.every(
+        (item) => ["sourceId", "sourceHash", "rawHash"].every(
+          (field) => new RegExp(`^derived-protection-v1:${field}:[0-9a-f]{64}$`).test(item[field]),
+        ),
+      ),
+    );
 
     const converted = runFixture(root, "bound", boundRules, rows);
     assert.equal(converted.result.status, 0, converted.result.stderr);
     assert.equal(converted.manifest.selectorMutationCount, 1);
     assert.equal(converted.manifest.aliasMutationCount, 14);
     assert.equal(converted.manifest.curationMutationCount, 15);
+    assert.doesNotMatch(converted.output, /derived-protection-v1/);
+
+    const lineageDrifts = {
+      videoId: "different-video",
+      occurrenceId: "different-occurrence",
+      position: 99999,
+      seconds: 99999,
+      title: "different title",
+      artist: "different artist",
+      sourceSystem: "different-source-system",
+      rangeId: "7d",
+      channelHandle: "@different",
+    };
+    for (const [field, value] of Object.entries(lineageDrifts)) {
+      const driftedRows = rows.map((item) => (
+        item.occurrenceId === vaundyRows[0].occurrenceId ? { ...item, [field]: value } : item
+      ));
+      const drifted = runFixture(root, `bound-drift-${field}`, boundRules, driftedRows);
+      assert.equal(drifted.result.status, 78, `${field}: ${drifted.result.stderr}`);
+      if (drifted.output !== null) {
+        assert.doesNotMatch(drifted.output, /derived-protection-v1/, field);
+      }
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("protection projection rejects partial real provenance and never mixes derived values", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-protection-partial-provenance-"));
+  try {
+    const expected = knownTuple({
+      videoId: "legacy-video",
+      occurrenceId: "legacy-occurrence",
+      position: 4,
+      seconds: 55,
+    });
+    const observed = runFixture(root, "partial", {
+      records: [],
+      safetyAssertions: [{
+        assertionId: "partial-real-provenance",
+        equals: { title: "Protected", artist: "Artist" },
+        expectedScopeCount: 1,
+        minScopeCount: 1,
+        expectedMutationCount: 0,
+        knownTuplePresence: [expected],
+      }],
+    }, [{
+      videoId: "legacy-video",
+      occurrenceId: "legacy-occurrence",
+      position: 4,
+      seconds: 55,
+      title: "Protected",
+      artist: "Artist",
+      sourceId: "real-source-id",
+      sourceHash: "",
+      rawHash: "",
+      sourceSystem: "latest_json",
+      rangeId: "all",
+      channelHandle: "@protected",
+    }]);
+    assert.equal(observed.result.status, 78, observed.result.stderr);
+    assert.match(observed.result.stderr, /partial string provenance/);
+    assert.equal(observed.output, null);
+
+    for (const [name, provenance, expectedError] of [
+      ["invalid-type", { sourceId: 1, sourceHash: 2, rawHash: 3 }, /invalid string provenance/],
+      ["whitespace", { sourceId: " ", sourceHash: " ", rawHash: " " }, /invalid string provenance/],
+      ["wrong-source-system", { sourceId: "", sourceHash: "", rawHash: "", sourceSystem: "accepted" }, /unsupported derived lineage/],
+    ]) {
+      const failed = runFixture(root, name, {
+        records: [],
+        safetyAssertions: [{
+          assertionId: name,
+          equals: { title: "Protected", artist: "Artist" },
+          expectedScopeCount: 1,
+          minScopeCount: 1,
+          expectedMutationCount: 0,
+          knownTuplePresence: [expected],
+        }],
+      }, [{
+        videoId: "legacy-video",
+        occurrenceId: "legacy-occurrence",
+        position: 4,
+        seconds: 55,
+        title: "Protected",
+        artist: "Artist",
+        sourceId: "",
+        sourceHash: "",
+        rawHash: "",
+        sourceSystem: "latest_json",
+        rangeId: "all",
+        channelHandle: "@protected",
+        ...provenance,
+      }]);
+      assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
+      assert.match(failed.result.stderr, expectedError, name);
+      assert.equal(failed.output, null, name);
+    }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
