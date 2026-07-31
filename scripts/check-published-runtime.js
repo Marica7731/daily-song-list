@@ -170,9 +170,9 @@ async function checkApiRuntime(checkedAt) {
     assertApiSuccessHeaders(sourceResponse, "api source detail");
     const source = sourceResponse.json;
     assert(source.found === true, "api source detail must be found");
-    assert(Array.isArray(source.record?.occurrences) && source.record.occurrences.length > 0, "api source detail occurrences must be non-empty");
+    assert(Array.isArray(source.record?.occurrences) && source.record?.occurrences?.length > 0, "api source detail occurrences must be non-empty");
     assert(Number(source.record?.count || 0) === Number(firstRecord.count || 0), "api source detail count must match ranking count");
-    assert(source.record.occurrences.length === Number(firstRecord.count || 0), "api source detail occurrence length must match ranking count");
+    assert(source.record?.occurrences?.length === Number(firstRecord.count || 0), "api source detail occurrence length must match ranking count");
   }
   const nemoVideos = await checkVideoSearchProbe("ネモ・テルミナス", "api/rankings?range=all&view=videos&q=%E3%83%8D%E3%83%A2%E3%83%BB%E3%83%86%E3%83%AB%E3%83%9F%E3%83%8A%E3%82%B9&pageSize=1");
   const kurageVideos = await checkVideoSearchProbe("儚牙紺 - Kurage Kon -", "api/rankings?range=all&view=videos&q=%E5%84%9A%E7%89%99%E7%B4%BA%20-%20Kurage%20Kon%20-&pageSize=1");
