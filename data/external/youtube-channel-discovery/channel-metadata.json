@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T13:17:42.793Z",
+  "generatedAt": "2026-07-31T15:39:28.848Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T13:17:42.793Z",
+    "fetchedAt": "2026-07-31T15:39:28.848Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T13:17:42.793Z",
+    "generatedAt": "2026-07-31T15:39:28.848Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1005,
-      "parseableChannels": 983,
+      "totalChannels": 1007,
+      "parseableChannels": 985,
       "realAvatar": 643,
-      "thumbnailFallback": 362,
+      "thumbnailFallback": 364,
       "missingDisplayImage": 0,
-      "missingAvatar": 362,
+      "missingAvatar": 364,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 555
+      "skipped_collected_evidence": 557
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 533,
+      "batch_limit_reached": 535,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@KokonamiIruka_Y4T4",
+        "channelId": "UCGGIGlgxXoVu1ZzbQ2XBxqQ",
+        "displayName": "小々波いるか / Kokonami Iruka【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@KokonamiIruka_Y4T4",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Shiro_zakuro",
+        "channelId": "UCPmcUzR-kh8hGVbNdYU84EA",
+        "displayName": "柘榴シロ@Zakuro shiro",
+        "sourceUrl": "https://www.youtube.com/@Shiro_zakuro",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Kaku_Nagi",
+        "channelId": "UC6mOJt9EZCxuqe5RuLT-btw",
+        "displayName": "駆空なぎ【RockSongVTuber】-Stellarhyth",
+        "sourceUrl": "https://www.youtube.com/@Kaku_Nagi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Vam0414",
         "channelId": "UCPm62fhXzHQiUupKUDlRSig",
@@ -11828,27 +11849,6 @@
         "channelId": "UCTF6upqGU4yHduecX0Oy3Pg",
         "displayName": "sh1an",
         "sourceUrl": "https://www.youtube.com/@sh1an",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Sasanone_wapo",
-        "channelId": "UCjtNkDsKWsxnZ0-ssUCFp7A",
-        "displayName": "笹ノ音わぽ / Sasanone Wapo",
-        "sourceUrl": "https://www.youtube.com/@Sasanone_wapo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yuzu_zuyuzu",
-        "channelId": "UCA-dBOiqriMhZdRYP7t8Jjg",
-        "displayName": "のりまきゆずゆ",
-        "sourceUrl": "https://www.youtube.com/@yuzu_zuyuzu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@h-menma",
-        "channelId": "UC2gVj3bLfZgxi23gBNO8ZHg",
-        "displayName": "日向猫めんま / Hinatane Menma",
-        "sourceUrl": "https://www.youtube.com/@h-menma",
         "reason": "batch_limit_reached"
       }
     ]
