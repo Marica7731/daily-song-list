@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-30T22:33:38.324Z",
+  "generatedAt": "2026-07-31T00:27:16.106Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-30T22:33:38.324Z",
+    "fetchedAt": "2026-07-31T00:27:16.106Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-30T22:33:38.324Z",
+    "generatedAt": "2026-07-31T00:27:16.106Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 555,
-      "already_cached": 665
+      "already_cached": 665,
+      "skipped_collected_evidence": 555
     },
     "failures": [],
     "skippedSummary": {
@@ -11695,6 +11695,13 @@
         "channelId": "UC69utuJBl4VvLmvhzndB1iw",
         "displayName": "双葉いよ - FutabaIyo -",
         "sourceUrl": "https://www.youtube.com/@iyopi_asmr",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@terryterryv",
+        "channelId": "UC1Fx5JBW4l9RFAfpqdvJVUQ",
+        "displayName": "テリー / Terry",
+        "sourceUrl": "https://www.youtube.com/@terryterryv",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCQEqMSX5YYpQ9-4pdMip-vg",
         "displayName": "熊乃ベアトリーチェ / Kumano BearTrice",
         "sourceUrl": "https://www.youtube.com/@KumanoBearTrice",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ritsu_yumemita",
-        "channelId": "UCxc0MrPoACKTFlV24GqX2sg",
-        "displayName": "峰月律-Minetsuki Ritsu- / 夢限大みゅーたいぷ",
-        "sourceUrl": "https://www.youtube.com/@ritsu_yumemita",
         "reason": "batch_limit_reached"
       }
     ]
