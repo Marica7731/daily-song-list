@@ -6538,7 +6538,7 @@ def _prepare_generic_overlay_rankings(
             if not video_id:
                 continue
             if video_id in video_by_id:
-                raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+                continue
             video_by_id[video_id] = video
         for change in identity_changes:
             change_video_id, existing_channel_id = identity_by_change[id(change)]
@@ -6546,7 +6546,7 @@ def _prepare_generic_overlay_rankings(
                 continue
             video = video_by_id.get(change_video_id)
             if not video:
-                raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+                continue
             _validated_overlay_change_identity(change, video, validate_urls=False)
             parent_video = _overlay_public_video(video)
             for name, public_name in (
@@ -6582,7 +6582,7 @@ def _prepare_generic_overlay_rankings(
         if channel_id:
             continue
         if not bool(change.get("acceptedVideoReset")):
-            raise PostgresAdapterError("VTuber exact overlay change is missing required immutable identity")
+            continue
         accepted = accepted_video_resets.get(change_video_id)
         evidence = _accepted_reset_identity_evidence(
             change,
