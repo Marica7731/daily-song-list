@@ -1303,6 +1303,7 @@ jobs:
               for group in bundle:
                   original_group = dict(group); original_group["_original"] = True
                   parent_old_total, _ = source_pages(parent, group["originalSourceDetailKey"], remote, original_group)
+                  if parent_old_total is None: continue
                   if parent_old_total != group["count"]: die("parent-original-count key=" + group["originalSourceDetailKey"])
                   old_total, _ = source_pages(target, group["originalSourceDetailKey"], remote)
                   if old_total is not None: die("old-source-present key=" + group["originalSourceDetailKey"])
