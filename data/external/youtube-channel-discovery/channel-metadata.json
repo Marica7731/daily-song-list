@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T08:13:54.749Z",
+  "generatedAt": "2026-07-31T11:05:42.397Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T08:13:54.749Z",
+    "fetchedAt": "2026-07-31T11:05:42.397Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T08:13:54.749Z",
+    "generatedAt": "2026-07-31T11:05:42.397Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1005,
-      "parseableChannels": 983,
+      "totalChannels": 1006,
+      "parseableChannels": 984,
       "realAvatar": 643,
-      "thumbnailFallback": 362,
+      "thumbnailFallback": 363,
       "missingDisplayImage": 0,
-      "missingAvatar": 362,
+      "missingAvatar": 363,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 555
+      "skipped_collected_evidence": 556
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 533,
+      "batch_limit_reached": 534,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11695,6 +11695,13 @@
         "channelId": "UC69utuJBl4VvLmvhzndB1iw",
         "displayName": "双葉いよ - FutabaIyo -",
         "sourceUrl": "https://www.youtube.com/@iyopi_asmr",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E3%81%9B%E3%81%AE%E3%81%9B%E3%81%AE%E3%82%93",
+        "channelId": "UC1EvGJZYQaxJf9t6gViqtZg",
+        "displayName": "せのせのん。",
+        "sourceUrl": "https://www.youtube.com/@%E3%81%9B%E3%81%AE%E3%81%9B%E3%81%AE%E3%82%93",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UC0PGk7z_FV1FFj3avz7_38A",
         "displayName": "式部めぐり / Shikibu Meguri",
         "sourceUrl": "https://www.youtube.com/@ShikibuMeguri",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KumanoBearTrice",
-        "channelId": "UCQEqMSX5YYpQ9-4pdMip-vg",
-        "displayName": "熊乃ベアトリーチェ / Kumano BearTrice",
-        "sourceUrl": "https://www.youtube.com/@KumanoBearTrice",
         "reason": "batch_limit_reached"
       }
     ]
