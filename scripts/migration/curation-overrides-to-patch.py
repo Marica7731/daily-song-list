@@ -295,7 +295,12 @@ def read_snapshot(path: Path) -> tuple[dict[str, list[dict[str, Any]]], set[str]
 
 def candidate_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]], action: str) -> list[dict[str, Any]]:
     seconds = override.get("seconds")
-    candidates = [row for row in rows if row.get("seconds") == seconds]
+    if seconds is not None:
+        candidates = [row for row in rows if row.get("seconds") == seconds]
+    else:
+        # No seconds filter: match by videoId only (for count=1 songs where
+        # videoId uniquely identifies the occurrence)
+        candidates = list(rows)
 
     expected_raw = text(override.get("rawHash"))
     if expected_raw:
