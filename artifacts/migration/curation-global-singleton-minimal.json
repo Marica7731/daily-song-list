@@ -67,5 +67,14 @@
       "auditedLegacyRuleCount": 27,
       "expectedMutationCount": 0
     }
-  ]
+  ],
+  "status": "ready",
+  "ready": true,
+  "pendingCurrentActiveEvidence": {
+    "reason": "alias merge requires current-active snapshot binding",
+    "activeRevisionDispatchBaseline": "accepted_30598319089_1",
+    "controllerMustRecheckActiveRevisionImmediatelyBeforeDispatch": true,
+    "knownTupleSchema": "videoId+seconds",
+    "zeroScopeIsNeverReady": true
+  }
 }
