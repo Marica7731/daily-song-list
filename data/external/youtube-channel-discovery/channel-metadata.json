@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T15:39:28.848Z",
+  "generatedAt": "2026-07-31T18:02:45.600Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T15:39:28.848Z",
+    "fetchedAt": "2026-07-31T18:02:45.600Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T15:39:28.848Z",
+    "generatedAt": "2026-07-31T18:02:45.600Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1007,
-      "parseableChannels": 985,
+      "totalChannels": 1008,
+      "parseableChannels": 986,
       "realAvatar": 643,
-      "thumbnailFallback": 364,
+      "thumbnailFallback": 365,
       "missingDisplayImage": 0,
-      "missingAvatar": 364,
+      "missingAvatar": 365,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@HanamiyaRica",
+        "channelId": "UCz4jhqrCfthF8NnldZeK_rw",
+        "displayName": "Rica Ch. / 花宮莉歌",
+        "sourceUrl": "https://www.youtube.com/@HanamiyaRica",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KokonamiIruka_Y4T4",
         "channelId": "UCGGIGlgxXoVu1ZzbQ2XBxqQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@sh1an",
-        "channelId": "UCTF6upqGU4yHduecX0Oy3Pg",
-        "displayName": "sh1an",
-        "sourceUrl": "https://www.youtube.com/@sh1an",
         "reason": "batch_limit_reached"
       }
     ]
