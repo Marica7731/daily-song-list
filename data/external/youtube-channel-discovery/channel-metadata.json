@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T11:05:42.397Z",
+  "generatedAt": "2026-07-31T13:17:42.793Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T11:05:42.397Z",
+    "fetchedAt": "2026-07-31T13:17:42.793Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T11:05:42.397Z",
+    "generatedAt": "2026-07-31T13:17:42.793Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1006,
-      "parseableChannels": 984,
+      "totalChannels": 1005,
+      "parseableChannels": 983,
       "realAvatar": 643,
-      "thumbnailFallback": 363,
+      "thumbnailFallback": 362,
       "missingDisplayImage": 0,
-      "missingAvatar": 363,
+      "missingAvatar": 362,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 556
+      "skipped_collected_evidence": 555
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 534,
+      "batch_limit_reached": 533,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@Vam0414",
+        "channelId": "UCPm62fhXzHQiUupKUDlRSig",
+        "displayName": "ヴァンパイアップル",
+        "sourceUrl": "https://www.youtube.com/@Vam0414",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@VermouthBelluna",
+        "channelId": "UCGPSbXH61y4l85L9XTUl2mA",
+        "displayName": "ベルモット・ベルーナ / Vermouth Belluna【APP LAND】",
+        "sourceUrl": "https://www.youtube.com/@VermouthBelluna",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@tukimirabi",
         "channelId": "UC28vlU5N0F5E4Cz5QfchkLQ",
@@ -11835,20 +11849,6 @@
         "channelId": "UC2gVj3bLfZgxi23gBNO8ZHg",
         "displayName": "日向猫めんま / Hinatane Menma",
         "sourceUrl": "https://www.youtube.com/@h-menma",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
-        "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
-        "displayName": "Sakuna Ch. 結城さくな",
-        "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShikibuMeguri",
-        "channelId": "UC0PGk7z_FV1FFj3avz7_38A",
-        "displayName": "式部めぐり / Shikibu Meguri",
-        "sourceUrl": "https://www.youtube.com/@ShikibuMeguri",
         "reason": "batch_limit_reached"
       }
     ]
