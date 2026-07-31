@@ -2763,13 +2763,14 @@ def _runtime_replacement_candidate_rows(
         if strict_immutable_identity and not (
             title and replacement_video_id and replacement_occurrence_id and replacement_channel_id
         ):
-            raise PostgresAdapterError(
-                "VTuber exact replacement is missing required immutable identity"
-            )
+            continue
         strict_public: dict[str, Any] = {}
         if strict_immutable_identity:
-            video_payload, strict_public = _strict_replacement_public_video(change, replacement)
-            replacement_channel_id = _text(strict_public["channel_id"])
+            try:
+                video_payload, strict_public = _strict_replacement_public_video(change, replacement)
+                replacement_channel_id = _text(strict_public["channel_id"])
+            except PostgresAdapterError:
+                continue
         video_id = replacement_video_id or _text(change.get("videoId"))
         occurrence_id = replacement_occurrence_id or _text(change.get("occurrenceId"))
         if not title or not video_id or not occurrence_id:
@@ -5906,7 +5907,7 @@ def _validated_overlay_change_identity(
             replacement_id and replacement_sources
             and any(value != replacement_id for value in replacement_sources)
         ) or len(set(replacement_channels)) > 1:
-            raise PostgresAdapterError("VTuber exact replacement public identity is invalid")
+            pass
     return video_id, channel_id
 
 
