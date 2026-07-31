@@ -1149,7 +1149,7 @@ jobs:
 
           def get_json(url, remote):
               if remote:
-                  command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=" + os.environ["SSH_KNOWN_HOSTS"], remote, "curl --fail-with-body --max-time 30 " + shlex.quote(url)]
+                  command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=" + os.environ["SSH_KNOWN_HOSTS"], remote, "curl -s --fail-with-body --retry 2 --max-time 30 " + shlex.quote(url)]
                   result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
                   if result.returncode:
                       die("http phase=remote detail=" + result.stderr.strip())
@@ -1218,7 +1218,11 @@ jobs:
               query = urllib.parse.urlencode({"range": group["rangeId"], "view": "songs", "metric": "occurrences", "pageSize": 100, "q": title, "searchFields": "title"})
               page, page_count, cards = 1, None, []
               while page_count is None or page <= page_count:
-                  payload = get_json(base + "/api/rankings?" + query + "&page=" + str(page), remote)
+                  try:
+                      payload = get_json(base + "/api/rankings?" + query + "&page=" + str(page), remote)
+                  except RuntimeError:
+                      if old: return
+                      raise
                   if payload.get("page") != page or not isinstance(payload.get("pageCount"), int) or payload["pageCount"] < 1 or payload["pageCount"] > MAX_PAGES:
                       die("rankings-pagination key=" + source_key)
                   page_count = payload["pageCount"] if page_count is None else page_count
