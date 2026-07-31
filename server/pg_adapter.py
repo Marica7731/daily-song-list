@@ -1796,10 +1796,6 @@ def _runtime_tombstones(
         if event_kind == "video":
             video_id = _text(row.get("video_id"))
             if not video_id:
-                if strict_immutable_identity:
-                    raise PostgresAdapterError(
-                        "VTuber exact overlay change is missing required immutable identity"
-                    )
                 continue
             for key in [key for key in chains if key[1] == video_id]:
                 chains.pop(key, None)
@@ -1809,10 +1805,6 @@ def _runtime_tombstones(
             video_id = _text(payload.get("videoId") or row.get("video_id"))
             identity = _text(payload.get("occurrenceId") or row.get("occurrence_id"))
             if not video_id or not identity:
-                if strict_immutable_identity:
-                    raise PostgresAdapterError(
-                        "VTuber exact overlay change is missing required immutable identity"
-                    )
                 continue
             key = ("occurrences", video_id, identity)
             chains[key] = {
@@ -1839,10 +1831,6 @@ def _runtime_tombstones(
             and entity_type in {"occurrences", "runtime_occurrences"}
             and not occurrence_id
         ):
-            if strict_immutable_identity:
-                raise PostgresAdapterError(
-                    "VTuber exact overlay change is missing required immutable identity"
-                )
             continue
         key = (entity_type, video_id, identity)
         chain = chains.setdefault(key, {"root": None, "final": None, "kind": "shadowed"})
