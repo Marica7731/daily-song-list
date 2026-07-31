@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T18:02:45.600Z",
+  "generatedAt": "2026-07-31T20:02:02.101Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T18:02:45.600Z",
+    "fetchedAt": "2026-07-31T20:02:02.101Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T18:02:45.600Z",
+    "generatedAt": "2026-07-31T20:02:02.101Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1008,
-      "parseableChannels": 986,
+      "totalChannels": 1009,
+      "parseableChannels": 987,
       "realAvatar": 643,
-      "thumbnailFallback": 365,
+      "thumbnailFallback": 366,
       "missingDisplayImage": 0,
-      "missingAvatar": 365,
+      "missingAvatar": 366,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 557
+      "skipped_collected_evidence": 558
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 535,
+      "batch_limit_reached": 536,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
+        "displayName": "一二美アユ ch / Hifumi Aryu",
+        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@HanamiyaRica",
         "channelId": "UCz4jhqrCfthF8NnldZeK_rw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCqskJ0nmw-_eweWfsKvbrzQ",
         "displayName": "Tirol Tsukinoki / Tirol Channel 【Nanashi-inc.】",
         "sourceUrl": "https://www.youtube.com/@Tirol_Tsukinoki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kuzen_sia",
-        "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
-        "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
-        "sourceUrl": "https://www.youtube.com/@kuzen_sia",
         "reason": "batch_limit_reached"
       }
     ]
