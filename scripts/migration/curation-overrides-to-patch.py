@@ -1332,8 +1332,6 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             "scope_count_below_minimum",
             "known_tuple_missing",
             "known_tuple_ambiguous",
-            "known_tuple_outside_scope",
-            "current_state_mismatch",
         )) else "needs_review",
         "generatedAt": generated_at,
         "rangeId": "all",

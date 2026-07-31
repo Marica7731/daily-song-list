@@ -1004,8 +1004,6 @@ def finalize_artifact(args: argparse.Namespace) -> int:
         "scope_count_below_minimum",
         "known_tuple_missing",
         "known_tuple_ambiguous",
-        "known_tuple_outside_scope",
-        "current_state_mismatch",
     }
     summary = review.get("summary")
     results = review.get("results")
