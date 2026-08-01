@@ -30,6 +30,9 @@ test("thumbnail relay is first choice and the public index loads its exact conte
   );
   assert.equal(helper("dQw4w9WgXcQ"), "/api/thumbnails/dQw4w9WgXcQ/hqdefault.jpg");
   assert.equal(helper("dQw4w9WgXcQ", "mqdefault"), "/api/thumbnails/dQw4w9WgXcQ/mqdefault.jpg");
+  assert.equal(helper("dQw4w9WgXcQ", "default"), "");
+  assert.equal(helper("dQw4w9WgXcQ", "sddefault"), "");
+  assert.equal(helper("dQw4w9WgXcQ", "maxresdefault"), "");
   assert.equal(helper("short-id"), "");
   assert.equal(helper("dQw4w9WgXcQ", "../../etc"), "");
 
@@ -44,6 +47,7 @@ test("thumbnail relay is first choice and the public index loads its exact conte
   assert.match(source, /img\.src = thumbnailCandidates\[thumbnailIndex\]/u);
   assert.match(source, /img\.addEventListener\("error"/u);
   assert.doesNotMatch(source, /data:image\/(?:png|gif|jpeg);base64,/u);
+  assert.doesNotMatch(source, /maxresdefault/u);
 });
 
 console.log("THUMBNAIL_STATIC_RELEASE_CHECK_OK");

@@ -391,9 +391,14 @@ test(
         cleanText: (value) => String(value ?? "").trim(),
       });
       assert.equal(helper("dQw4w9WgXcQ"), "/api/thumbnails/dQw4w9WgXcQ/hqdefault.jpg");
+      assert.equal(helper("dQw4w9WgXcQ", "mqdefault"), "/api/thumbnails/dQw4w9WgXcQ/mqdefault.jpg");
+      assert.equal(helper("dQw4w9WgXcQ", "default"), "");
+      assert.equal(helper("dQw4w9WgXcQ", "sddefault"), "");
+      assert.equal(helper("dQw4w9WgXcQ", "maxresdefault"), "");
       assert.equal(helper("short-id"), "");
       assert.equal(helper("dQw4w9WgXcQ", "../../etc"), "");
       assert.match(source, /const sameOrigin = sameOriginThumbnailUrl\(videoId, relayQuality\)/u);
       assert.match(source, /item\.thumbnailUrl/u);
+      assert.doesNotMatch(source, /maxresdefault/u);
     },
 );
