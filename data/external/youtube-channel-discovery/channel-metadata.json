@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-31T23:27:02.269Z",
+  "generatedAt": "2026-08-01T02:01:39.815Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-31T23:27:02.269Z",
+    "fetchedAt": "2026-08-01T02:01:39.815Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-31T23:27:02.269Z",
+    "generatedAt": "2026-08-01T02:01:39.815Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1009,
-      "parseableChannels": 987,
+      "totalChannels": 1010,
+      "parseableChannels": 988,
       "realAvatar": 643,
-      "thumbnailFallback": 366,
+      "thumbnailFallback": 367,
       "missingDisplayImage": 0,
-      "missingAvatar": 366,
+      "missingAvatar": 367,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 558
+      "skipped_collected_evidence": 559,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 536,
+      "batch_limit_reached": 537,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@Satou_Anime_ASRB",
+        "channelId": "UCqJQfY9916fdpDrKFqdYy2g",
+        "displayName": "Anime ch. 佐藤あにめ",
+        "sourceUrl": "https://www.youtube.com/@Satou_Anime_ASRB",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
         "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
@@ -11842,13 +11849,6 @@
         "channelId": "UCShx4jFm-jnLX2N4kY_YZuw",
         "displayName": "白米玄鬼",
         "sourceUrl": "https://www.youtube.com/@shirayone_genki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Tirol_Tsukinoki",
-        "channelId": "UCqskJ0nmw-_eweWfsKvbrzQ",
-        "displayName": "Tirol Tsukinoki / Tirol Channel 【Nanashi-inc.】",
-        "sourceUrl": "https://www.youtube.com/@Tirol_Tsukinoki",
         "reason": "batch_limit_reached"
       }
     ]
