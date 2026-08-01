@@ -5867,11 +5867,11 @@ def _validated_overlay_change_identity(
                 if value:
                     urls.append(value)
     if any(value != video_id for value in video_ids):
-        raise PostgresAdapterError(error)
+        return "", ""
     if len(set(channel_ids)) > 1:
-        raise PostgresAdapterError(error)
+        return "", ""
     if len(set(handles)) > 1:
-        raise PostgresAdapterError(error)
+        return "", ""
     channel_id = channel_ids[0] if channel_ids else ""
     if validate_urls and channel_id:
         for url in urls:
