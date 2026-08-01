@@ -3204,7 +3204,7 @@ def _apply_runtime_change_previews(
             )
 
 
-_MAX_AFFECTED_RUNTIME_OCCURRENCES = 50000
+_MAX_AFFECTED_RUNTIME_OCCURRENCES = 200000
 
 
 def _runtime_song_identity(row: Mapping[str, Any]) -> str:
