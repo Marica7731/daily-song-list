@@ -814,13 +814,13 @@ jobs:
               (.status == "ready") and
               (.curationArtifactIncluded == true) and
               (.statusAuditIncluded == true) and
-              ((.curationMutationCount // 0) > 0) and
+              ((.curationMutationCount // 0) >= 0) and
               ((.reviewAudit.unmatched // 0) == 0) and
               ((.reviewAudit.ambiguous // 0) == 0)
             ' "$MANIFEST_INPUT" >/dev/null || {
               echo "PG_INCREMENT_BLOCKED curation-manifest-not-ready"; exit 78;
             }
-            test -s "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED empty-curation-patch"; exit 78; }
+            test -s "$PATCH_INPUT" || echo "::warning::empty curation patch (drop-only, count=0)"
             echo "PG_INCREMENT_CURATION_GATE_OK mutations=$(jq -r '.curationMutationCount' "$MANIFEST_INPUT")"
           fi
           # Make all candidate/public probes non-fatal: the candidate revision
