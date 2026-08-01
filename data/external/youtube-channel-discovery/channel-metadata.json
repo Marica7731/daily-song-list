@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-01T02:01:39.815Z",
+  "generatedAt": "2026-08-01T03:24:31.335Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-01T02:01:39.815Z",
+    "fetchedAt": "2026-08-01T03:24:31.335Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-01T02:01:39.815Z",
+    "generatedAt": "2026-08-01T03:24:31.335Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1010,
-      "parseableChannels": 988,
+      "totalChannels": 1011,
+      "parseableChannels": 989,
       "realAvatar": 643,
-      "thumbnailFallback": 367,
+      "thumbnailFallback": 368,
       "missingDisplayImage": 0,
-      "missingAvatar": 367,
+      "missingAvatar": 368,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 559,
+      "skipped_collected_evidence": 560,
       "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 537,
+      "batch_limit_reached": 538,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11768,6 +11768,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@meica05",
+        "channelId": "UCp4G83RMBDN0EgZFSUDK7zw",
+        "displayName": "Meica05 Ch.",
+        "sourceUrl": "https://www.youtube.com/@meica05",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@Yasumi_Ch",
         "channelId": "UC4t5SieTiT20alR4OQDybtg",
         "displayName": "やすみ / Yasumi",
@@ -11842,13 +11849,6 @@
         "channelId": "UCxJ9SJLG7dA00M7VoEe4ltw",
         "displayName": "天川はの/AmakawaHano",
         "sourceUrl": "https://www.youtube.com/@amakawa_hano",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@shirayone_genki",
-        "channelId": "UCShx4jFm-jnLX2N4kY_YZuw",
-        "displayName": "白米玄鬼",
-        "sourceUrl": "https://www.youtube.com/@shirayone_genki",
         "reason": "batch_limit_reached"
       }
     ]
