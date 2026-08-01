@@ -72,6 +72,8 @@ jobs:
       - name: Create bounded task root and validate contract inputs
         run: |
           set -Eeuo pipefail
+          TASK_ROOT="$(mktemp -d "$RUNNER_TEMP/daily-song-list-adapter.XXXXXX")"
+          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
           test -n "$SOURCE_TITLE"
           test "${#SOURCE_TITLE}" -le 256
           test -n "$SOURCE_ENTITY_KEY"
@@ -87,8 +89,6 @@ jobs:
           [[ "$SOURCE_VIDEO_COUNT" =~ ^[1-9][0-9]*$ ]]
           test "$SOURCE_OCCURRENCE_COUNT" -le 200000
           test "$SOURCE_VIDEO_COUNT" -le 100000
-          TASK_ROOT="$(mktemp -d "$RUNNER_TEMP/daily-song-list-adapter.XXXXXX")"
-          printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
           {
             printf 'SOURCE_TITLE_B64=%s\n' "$(printf '%s' "$SOURCE_TITLE" | base64 -w0)"
             printf 'SOURCE_ENTITY_KEY_B64=%s\n' "$(printf '%s' "$SOURCE_ENTITY_KEY" | base64 -w0)"
@@ -205,15 +205,31 @@ jobs:
                   raise AssertionError(f"{args.phase} source page is not visible page 1/20")
               source_total_count = integer(source.get("totalCount"), "source totalCount")
               if source_total_count != args.videos:
-                  raise AssertionError(f"{args.phase} source totalCount mismatch")
+                  raise AssertionError(
+                      f"{args.phase} source totalCount mismatch "
+                      f"actual={source_total_count} expected={args.videos} "
+                      f"sourceKey={args.source_key}"
+                  )
               page_count = integer(source.get("pageCount"), "source pageCount")
               expected_page_count = max(1, (source_total_count + source_page_size - 1) // source_page_size)
               if page_count != expected_page_count:
                   raise AssertionError(f"{args.phase} source pageCount mismatch")
-              if integer(source.get("totalOccurrenceCount"), "source occurrence total") != args.occurrences:
-                  raise AssertionError(f"{args.phase} source occurrence count mismatch")
-              if integer(source.get("totalVideoCount"), "source video total") != args.videos:
-                  raise AssertionError(f"{args.phase} source video count mismatch")
+              source_occurrence_count = integer(
+                  source.get("totalOccurrenceCount"), "source occurrence total"
+              )
+              if source_occurrence_count != args.occurrences:
+                  raise AssertionError(
+                      f"{args.phase} source totalOccurrenceCount mismatch "
+                      f"actual={source_occurrence_count} expected={args.occurrences} "
+                      f"sourceKey={args.source_key}"
+                  )
+              source_video_count = integer(source.get("totalVideoCount"), "source video total")
+              if source_video_count != args.videos:
+                  raise AssertionError(
+                      f"{args.phase} source totalVideoCount mismatch "
+                      f"actual={source_video_count} expected={args.videos} "
+                      f"sourceKey={args.source_key}"
+                  )
               record = source.get("record")
               if not isinstance(record, dict):
                   raise AssertionError(f"{args.phase} source record missing")
@@ -267,6 +283,335 @@ jobs:
           PY
           chmod 700 "$TASK_ROOT/verify_contract.py"
 
+      - name: Prepare bounded upload sanitizer
+        run: |
+          set -Eeuo pipefail
+          cat > "$TASK_ROOT/sanitize_upload_tree.sh" <<'SANITIZER'
+          #!/usr/bin/env bash
+          # Build the only tree that actions/upload-artifact may read. Never follow links.
+          set -u
+          set -o pipefail
+
+          RAW_ROOT="${1:-}"
+          UPLOAD_ROOT="${2:-}"
+          TREE_MAX_BYTES=35651584
+          PAYLOAD_MAX_BYTES=35389440
+          REGULAR_MAX_BYTES=12582912
+          ARCHIVE_MAX_BYTES=16777216
+          SMALL_MAX_BYTES=1048576
+          SUMMARY_MAX_LINES=64
+
+          case "$RAW_ROOT" in
+            /*/release-evidence) ;;
+            *) printf 'SANITIZER_REFUSED rawRoot\n' >&2; exit 64 ;;
+          esac
+          case "$UPLOAD_ROOT" in
+            /*/upload-evidence) ;;
+            *) printf 'SANITIZER_REFUSED uploadRoot\n' >&2; exit 64 ;;
+          esac
+          task_root="${RAW_ROOT%/release-evidence}"
+          test "$task_root" != "$RAW_ROOT" || { printf 'SANITIZER_REFUSED taskRoot\n' >&2; exit 64; }
+          test "$UPLOAD_ROOT" = "$task_root/upload-evidence" || {
+            printf 'SANITIZER_REFUSED rootMismatch\n' >&2
+            exit 64
+          }
+          test -d "$RAW_ROOT" && test ! -L "$RAW_ROOT" || {
+            printf 'SANITIZER_REFUSED rawRootType\n' >&2
+            exit 64
+          }
+
+          case "$UPLOAD_ROOT" in
+            "$task_root"/upload-evidence) rm -rf -- "$UPLOAD_ROOT" || exit 2 ;;
+            *) printf 'SANITIZER_REFUSED unsafeCleanup\n' >&2; exit 64 ;;
+          esac
+          install -d -m 0700 "$UPLOAD_ROOT" || exit 2
+
+          violation_count=0
+          removed_count=0
+          copied_count=0
+          copied_bytes=0
+          summary_lines=0
+          SUMMARY_TMP="$task_root/upload-sanitization-summary.tmp"
+          : > "$SUMMARY_TMP"
+          chmod 600 "$SUMMARY_TMP"
+
+          record_violation() {
+            local reason="$1"
+            violation_count=$((violation_count + 1))
+            if [ "$summary_lines" -lt "$SUMMARY_MAX_LINES" ]; then
+              printf 'removed reason=%s path=[redacted]\n' "$reason" >> "$SUMMARY_TMP"
+              summary_lines=$((summary_lines + 1))
+            fi
+          }
+
+          is_allowed_regular() {
+            case "$1" in
+              evidence-manifest.txt|manifest.txt|storage-before.txt|storage-after.txt|vps-storage-before.txt|vps-storage-after.txt|\
+              cleanup-healthz.json|cleanup-meta.json|cleanup-state.txt|cleanup-summary.txt|remote-archive-failure.txt|\
+              remote-candidate-evidence.tar.gz|remote-cleanup-evidence.tar.gz) return 0 ;;
+              runner/manifest.txt|runner/storage-before.txt|runner/vps-storage-before.txt|\
+              runner/installed-healthz.json|runner/installed-meta.json|runner/installed-rankings.json|runner/installed-source.json|\
+              runner/installed-negative.headers|runner/installed-negative.json|\
+              runner/public-healthz.json|runner/public-meta.headers|runner/public-meta.json|runner/public-rankings.json|runner/public-source.json|\
+              runner/public-empty.headers|runner/public-empty.json|runner/public-contract.log|\
+              runner/public-thumbnail.headers|runner/public-invalid-thumbnail.headers|runner/public-invalid-thumbnail.body) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          is_archive() {
+            case "$1" in
+              remote-candidate-evidence.tar.gz|remote-cleanup-evidence.tar.gz) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          validate_archive() {
+            local archive="$1" validation_file="$2"
+            timeout --signal=TERM --kill-after=2s 10s python3 -B - "$archive" > "$validation_file" <<'PY'
+          import sys
+          import tarfile
+
+          archive = sys.argv[1]
+          allowed = {
+              "candidate-healthz.json", "candidate-meta.json", "candidate-rankings.json", "candidate-source.json",
+              "candidate-negative.headers", "candidate-negative.json", "candidate-channel-regression.log",
+              "candidate-thumbnail.headers", "candidate-invalid-thumbnail.headers", "candidate-invalid-thumbnail.body",
+              "candidate-unit-status.txt", "candidate-unit-journal.txt", "candidate-unit-cleanup-result.txt",
+              "install-failure-service-status.txt", "install-failure-service-journal.txt",
+              "install-service-status.txt", "install-service-journal.txt",
+              "rollback-service-status.txt", "rollback-service-journal.txt",
+              "installed-healthz.json", "installed-meta.json", "installed-rankings.json", "installed-source.json",
+              "installed-negative.headers", "installed-negative.json",
+              "rollback-healthz.json", "rollback-meta.json", "finalize-healthz.json", "finalize-meta.json",
+              "cleanup-healthz.json", "cleanup-meta.json", "cleanup-service-status.txt", "cleanup-service-journal.txt",
+              "cleanup-candidate-unit-status.txt", "cleanup-candidate-unit-journal.txt", "cleanup-candidate-unit-result.txt",
+              "release-finalized", "rollback-complete",
+          }
+          try:
+              with tarfile.open(archive, "r:gz") as stream:
+                  members = stream.getmembers()
+          except (OSError, tarfile.TarError) as exc:
+              print(f"INVALID archive={type(exc).__name__}")
+              raise SystemExit(1)
+          if not 1 <= len(members) <= 64:
+              print(f"INVALID memberCount={len(members)}")
+              raise SystemExit(1)
+          seen = set()
+          total = 0
+          for member in members:
+              name = member.name
+              if name not in allowed:
+                  print("INVALID forbiddenMember")
+                  raise SystemExit(1)
+              if name in seen:
+                  print("INVALID duplicateMember")
+                  raise SystemExit(1)
+              if not member.isfile():
+                  print("INVALID nonRegularMember")
+                  raise SystemExit(1)
+              if member.size < 0 or member.size > 12_582_912:
+                  print(f"INVALID memberBytes={member.size}")
+                  raise SystemExit(1)
+              seen.add(name)
+              total += member.size
+              if total > 33_554_432:
+                  print(f"INVALID expandedBytes={total}")
+                  raise SystemExit(1)
+          print(f"VALID members={len(members)} expandedBytes={total}")
+          PY
+          }
+
+          remove_raw_path() {
+            local path="$1"
+            if rm -f -- "$path"; then
+              removed_count=$((removed_count + 1))
+            else
+              record_violation remove_failed "${path#"$RAW_ROOT"/}"
+            fi
+          }
+
+          # First remove links, special files, forbidden names, and any file outside the explicit allowlist.
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RAW_ROOT"/}"
+            record_violation symlink "$relative"
+            remove_raw_path "$path"
+          done < <(find -P "$RAW_ROOT" -xdev -mindepth 1 -type l -print0)
+
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RAW_ROOT"/}"
+            record_violation non_regular "$relative"
+            remove_raw_path "$path"
+          done < <(find -P "$RAW_ROOT" -xdev -mindepth 1 ! -type f ! -type d ! -type l -print0)
+
+          # The staging step's raw sidecars are never uploaded; validated sidecars are regenerated.
+          for relative in remote-archive-contents.txt remote-candidate-evidence.sha256; do
+            path="$RAW_ROOT/$relative"
+            if [ -f "$path" ] && [ ! -L "$path" ]; then remove_raw_path "$path"; fi
+          done
+
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RAW_ROOT"/}"
+            case "$relative" in
+              */ssh/*|ssh/*|*/askpass/*|askpass/*|*/backup/*|backup/*|*/server/*|server/*|\
+              */secret/*|secret/*|*/secrets/*|secrets/*|*password*|*credential*|*token*)
+                record_violation forbidden_path "$relative"
+                remove_raw_path "$path"
+                continue
+                ;;
+            esac
+            if ! is_allowed_regular "$relative"; then
+              record_violation not_allowlisted "$relative"
+              remove_raw_path "$path"
+            fi
+          done < <(find -P "$RAW_ROOT" -xdev -mindepth 1 -type f -print0)
+
+          copy_regular() {
+            local relative="$1" source="$RAW_ROOT/$1" bytes destination
+            test -f "$source" && test ! -L "$source" || return 0
+            bytes="$(stat -c '%s' -- "$source" 2>/dev/null || printf invalid)"
+            if ! [[ "$bytes" =~ ^[0-9]+$ ]]; then
+              record_violation stat_failed "$relative"
+              remove_raw_path "$source"
+              return 0
+            fi
+            if [ "$bytes" -gt "$REGULAR_MAX_BYTES" ]; then
+              record_violation oversized_regular "$relative"
+              remove_raw_path "$source"
+              return 0
+            fi
+            if [ $((copied_bytes + bytes)) -gt "$PAYLOAD_MAX_BYTES" ]; then
+              record_violation tree_overflow "$relative"
+              remove_raw_path "$source"
+              return 0
+            fi
+            destination="$UPLOAD_ROOT/$relative"
+            install -d -m 0700 "$(dirname "$destination")"
+            if install -m 0600 "$source" "$destination"; then
+              copied_bytes=$((copied_bytes + bytes))
+              copied_count=$((copied_count + 1))
+            else
+              record_violation copy_failed "$relative"
+              rm -f -- "$destination" || true
+            fi
+          }
+
+          copy_archive() {
+            local relative="$1" source="$RAW_ROOT/$1" bytes validation_file output_validation destination
+            test -f "$source" && test ! -L "$source" || return 0
+            bytes="$(stat -c '%s' -- "$source" 2>/dev/null || printf invalid)"
+            validation_file="$task_root/archive-validation.$$.txt"
+            if ! [[ "$bytes" =~ ^[0-9]+$ ]] || [ "$bytes" -eq 0 ] || [ "$bytes" -gt "$ARCHIVE_MAX_BYTES" ]; then
+              record_violation archive_oversized_or_empty "$relative"
+              remove_raw_path "$source"
+              rm -f -- "$validation_file"
+              return 0
+            fi
+            if ! validate_archive "$source" "$validation_file"; then
+              reason="$(head -c 240 "$validation_file" 2>/dev/null || printf INVALID)"
+              record_violation archive_invalid "$relative:$reason"
+              remove_raw_path "$source"
+              rm -f -- "$validation_file"
+              return 0
+            fi
+            if [ $((copied_bytes + bytes)) -gt "$PAYLOAD_MAX_BYTES" ]; then
+              record_violation tree_overflow_archive "$relative"
+              remove_raw_path "$source"
+              rm -f -- "$validation_file"
+              return 0
+            fi
+            destination="$UPLOAD_ROOT/$relative"
+            output_validation="$task_root/archive-output-validation.$$.txt"
+            if install -m 0600 "$source" "$destination" && validate_archive "$destination" "$output_validation"; then
+              copied_bytes=$((copied_bytes + bytes))
+              copied_count=$((copied_count + 1))
+              if ! install -m 0600 "$output_validation" "$destination.validation.txt" || \
+                 ! sha256sum "$destination" > "$destination.sha256"; then
+                record_violation archive_sidecar_failed "$relative"
+                rm -f -- "$destination" "$destination.validation.txt" "$destination.sha256"
+                copied_bytes=$((copied_bytes - bytes))
+                copied_count=$((copied_count - 1))
+              fi
+            else
+              record_violation archive_copy_or_revalidation_failed "$relative"
+              rm -f -- "$destination" "$destination.validation.txt" "$destination.sha256"
+            fi
+            rm -f -- "$validation_file" "$output_validation"
+          }
+
+          # Essential small evidence first, then small runner data, then large runner data.
+          for relative in evidence-manifest.txt manifest.txt storage-before.txt storage-after.txt \
+            vps-storage-before.txt vps-storage-after.txt cleanup-healthz.json cleanup-meta.json \
+            cleanup-state.txt cleanup-summary.txt remote-archive-failure.txt; do
+            source="$RAW_ROOT/$relative"
+            if [ -f "$source" ] && [ ! -L "$source" ]; then
+              bytes="$(stat -c '%s' -- "$source" 2>/dev/null || printf invalid)"
+              if [[ "$bytes" =~ ^[0-9]+$ ]] && [ "$bytes" -le "$SMALL_MAX_BYTES" ]; then
+                copy_regular "$relative"
+              else
+                record_violation oversized_essential "$relative"
+                remove_raw_path "$source"
+              fi
+            fi
+          done
+
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RAW_ROOT"/}"
+            bytes="$(stat -c '%s' -- "$path" 2>/dev/null || printf invalid)"
+            if [[ "$bytes" =~ ^[0-9]+$ ]] && [ "$bytes" -le "$SMALL_MAX_BYTES" ]; then
+              copy_regular "$relative"
+            fi
+          done < <(find -P "$RAW_ROOT/runner" -xdev -type f -print0 2>/dev/null | sort -z)
+
+          while IFS= read -r -d '' path; do
+            relative="${path#"$RAW_ROOT"/}"
+            bytes="$(stat -c '%s' -- "$path" 2>/dev/null || printf invalid)"
+            if [[ "$bytes" =~ ^[0-9]+$ ]] && [ "$bytes" -gt "$SMALL_MAX_BYTES" ]; then
+              copy_regular "$relative"
+            fi
+          done < <(find -P "$RAW_ROOT/runner" -xdev -type f -print0 2>/dev/null | sort -z)
+
+          # Archives are deliberately last: a constrained tree keeps manifests/cleanup evidence first.
+          copy_archive remote-candidate-evidence.tar.gz
+          copy_archive remote-cleanup-evidence.tar.gz
+
+          printf 'sanitizerStatus=%s\nviolations=%s\nremoved=%s\ncopiedFiles=%s\ncopiedPayloadBytes=%s\n' \
+            "$([ "$violation_count" -eq 0 ] && printf clean || printf sanitized)" \
+            "$violation_count" "$removed_count" "$copied_count" "$copied_bytes" \
+            > "$UPLOAD_ROOT/upload-sanitization-summary.txt"
+          head -n "$SUMMARY_MAX_LINES" "$SUMMARY_TMP" >> "$UPLOAD_ROOT/upload-sanitization-summary.txt"
+          rm -f -- "$SUMMARY_TMP"
+
+          final_status=0
+          if find -P "$UPLOAD_ROOT" -xdev -mindepth 1 ! -type f ! -type d -print -quit | grep -q .; then
+            final_status=1
+          fi
+          final_bytes="$(du -sb "$UPLOAD_ROOT" 2>/dev/null | awk '{print $1}')"
+          if ! [[ "$final_bytes" =~ ^[0-9]+$ ]] || [ "$final_bytes" -gt "$TREE_MAX_BYTES" ]; then
+            final_status=1
+          fi
+          if [ "$final_status" -ne 0 ]; then
+            rm -rf -- "$UPLOAD_ROOT" || exit 2
+            install -d -m 0700 "$UPLOAD_ROOT" || exit 2
+            printf 'sanitizerStatus=fallback_minimal\nviolations=%s\nreason=final_validation_failed\n' \
+              "$((violation_count + 1))" > "$UPLOAD_ROOT/upload-sanitization-summary.txt"
+            violation_count=$((violation_count + 1))
+          fi
+
+          final_bytes="$(du -sb "$UPLOAD_ROOT" | awk '{print $1}')"
+          [[ "$final_bytes" =~ ^[0-9]+$ ]]
+          test "$final_bytes" -le "$TREE_MAX_BYTES"
+          test -f "$UPLOAD_ROOT/upload-sanitization-summary.txt"
+          test ! -L "$UPLOAD_ROOT/upload-sanitization-summary.txt"
+          if find -P "$UPLOAD_ROOT" -xdev -mindepth 1 ! -type f ! -type d -print -quit | grep -q .; then
+            printf 'SANITIZER_FATAL unsafeUploadTree\n' >&2
+            exit 2
+          fi
+          printf 'UPLOAD_EVIDENCE_SANITIZED bytes=%s violations=%s\n' "$final_bytes" "$violation_count"
+          test "$violation_count" -eq 0
+          SANITIZER
+          chmod 700 "$TASK_ROOT/sanitize_upload_tree.sh"
+
       - name: Fetch candidate adapter sources from this commit
         run: |
           set -Eeuo pipefail
@@ -305,6 +650,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Candidate adapter contract gate
+        id: candidate_gate
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
@@ -356,9 +702,43 @@ jobs:
           test -n "$source_entity_key"
           test "$source_entity_key" != "$source_key"
           candidate_unit="daily-song-list-adapter-${remote_root##*-}"
+          capture_candidate_unit_diagnostics() {
+            set +e
+            timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=Id,ActiveState,SubState,MainPID,ExecMainStartTimestamp,ExecMainStatus,Result \
+              "$candidate_unit" > "$remote_root/candidate-unit-status.txt.tmp" 2>&1
+            head -c 262144 "$remote_root/candidate-unit-status.txt.tmp" > "$remote_root/candidate-unit-status.txt" 2>/dev/null || true
+            rm -f -- "$remote_root/candidate-unit-status.txt.tmp"
+            timeout --signal=TERM --kill-after=2s 10s journalctl --no-pager --output=short-iso \
+              -u "$candidate_unit" -n 200 2>&1 | \
+              grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' | \
+              head -c 262144 > "$remote_root/candidate-unit-journal.txt" || true
+          }
           cleanup_candidate() {
-            systemctl stop "$candidate_unit" 2>/dev/null || true
-            systemctl reset-failed "$candidate_unit" 2>/dev/null || true
+            candidate_status=$?
+            trap - EXIT
+            set +e
+            capture_candidate_unit_diagnostics
+            candidate_cleanup_status=0
+            if systemctl show "$candidate_unit" >/dev/null 2>&1; then
+              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" 2>/dev/null || candidate_cleanup_status=$?
+            fi
+            for unused in $(seq 1 10); do
+              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
+              sleep 1
+            done
+            candidate_active_after=0
+            candidate_port_after=0
+            if systemctl is-active --quiet "$candidate_unit"; then candidate_active_after=1; candidate_cleanup_status=1; fi
+            if ss -ltn 'sport = :18766' | grep -q LISTEN; then candidate_port_after=1; candidate_cleanup_status=1; fi
+            if ! timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" 2>/dev/null; then
+              if systemctl show "$candidate_unit" >/dev/null 2>&1; then candidate_cleanup_status=1; fi
+            fi
+            printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\n' \
+              "$candidate_cleanup_status" "$candidate_active_after" "$candidate_port_after" \
+              > "$remote_root/candidate-unit-cleanup-result.txt"
+            if [ "$candidate_cleanup_status" -ne 0 ] && [ "$candidate_status" -eq 0 ]; then candidate_status=1; fi
+            exit "$candidate_status"
           }
           trap cleanup_candidate EXIT
           test "$(sha256sum "$remote_root/server/pg_adapter.py" | awk '{print $1}')" = "$expected_adapter_sha"
@@ -419,6 +799,7 @@ jobs:
           echo "PG_ADAPTER_CANDIDATE_CONTRACT_OK"
 
       - name: Install adapter candidate with two-file rollback guard
+        id: install_candidate
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
@@ -436,24 +817,49 @@ jobs:
           [[ "$expected_adapter_sha" =~ ^[0-9a-f]{64}$ ]]
           [[ "$expected_server_sha" =~ ^[0-9a-f]{64}$ ]]
           [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          capture_service_diagnostics() {
+            prefix="$1"
+            case "$prefix" in install-failure|install|rollback) ;;
+              *) return 64 ;;
+            esac
+            set +e
+            timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager               --property=Id,ActiveState,SubState,MainPID,ExecMainStartTimestamp,ExecMainStatus,Result               song-rank-pg-api.service > "$remote_root/${prefix}-service-status.txt.tmp" 2>&1
+            head -c 262144 "$remote_root/${prefix}-service-status.txt.tmp" > "$remote_root/${prefix}-service-status.txt" 2>/dev/null || true
+            rm -f -- "$remote_root/${prefix}-service-status.txt.tmp"
+            timeout --signal=TERM --kill-after=2s 10s journalctl --no-pager --output=short-iso               -u song-rank-pg-api.service -n 200 2>&1 |               grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' |               head -c 262144 > "$remote_root/${prefix}-service-journal.txt" || true
+            set -e
+          }
           install -d -m 0755 "$remote_root/backup" /opt/culua/ytb-song-rank/server
           cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py "$remote_root/backup/pg_adapter.py"
           cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py "$remote_root/backup/pg_api_server.py"
           rollback_adapter() {
+            original_status=$?
             trap - ERR
-            install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
-            install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
-            systemctl restart song-rank-pg-api
-            cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
-            cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
-            systemctl is-active --quiet song-rank-pg-api
-            ss -ltn 'sport = :8765' | grep -q LISTEN
-            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/rollback-healthz.json"
-            jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/rollback-healthz.json" >/dev/null
-            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/rollback-meta.json"
-            jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/rollback-meta.json" >/dev/null
-            touch "$remote_root/rollback-complete"
-            echo "PG_ADAPTER_ROLLBACK_RUNTIME_VERIFIED"
+            set +e
+            capture_service_diagnostics install-failure
+            rollback_status=0
+            install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py || rollback_status=$?
+            install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py || rollback_status=$?
+            systemctl restart song-rank-pg-api || rollback_status=$?
+            for unused in $(seq 1 40); do
+              if systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN; then break; fi
+              sleep 1
+            done
+            cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py || rollback_status=$?
+            cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py || rollback_status=$?
+            systemctl is-active --quiet song-rank-pg-api || rollback_status=$?
+            ss -ltn 'sport = :8765' | grep -q LISTEN || rollback_status=$?
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/rollback-healthz.json" || rollback_status=$?
+            jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/rollback-healthz.json" >/dev/null || rollback_status=$?
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/rollback-meta.json" || rollback_status=$?
+            jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/rollback-meta.json" >/dev/null || rollback_status=$?
+            capture_service_diagnostics rollback
+            if [ "$rollback_status" -eq 0 ]; then
+              touch "$remote_root/rollback-complete" || rollback_status=$?
+              echo "PG_ADAPTER_ROLLBACK_RUNTIME_VERIFIED" >&2
+            fi
+            if [ "$rollback_status" -ne 0 ]; then exit "$rollback_status"; fi
+            exit "$original_status"
           }
           trap rollback_adapter ERR
           install -m 0644 "$remote_root/server/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
@@ -467,6 +873,7 @@ jobs:
           done
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
+          capture_service_diagnostics install
           trap - ERR
           echo "PG_ADAPTER_INSTALLED_HASHES_OK"
           REMOTE
@@ -477,6 +884,7 @@ jobs:
           printf 'PG_ADAPTER_INSTALLED=1\n' >> "$GITHUB_ENV"
 
       - name: Verify installed local adapter contract
+        id: installed_contract
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
@@ -526,6 +934,7 @@ jobs:
           echo "PG_ADAPTER_INSTALLED_CONTRACT_OK"
 
       - name: Verify real public relay contract before finalize
+        id: public_contract
         run: |
           set -Eeuo pipefail
           curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 "$PUBLIC_BASE/healthz" -o "$TASK_ROOT/public-healthz.json"
@@ -562,6 +971,7 @@ jobs:
           echo "PG_ADAPTER_PUBLIC_RELAY_CONTRACT_OK"
 
       - name: Finalize only after public contract gate
+        id: finalize_release
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
@@ -595,6 +1005,111 @@ jobs:
           REMOTE
           printf 'PUBLIC_QUICK_GATE_PASSED=1\n' >> "$GITHUB_ENV"
 
+      - name: Stage bounded pre-cleanup release evidence
+        if: always() && env.TASK_ROOT != ''
+        run: |
+          set +e
+          set -o pipefail
+          capture_status=0
+          EVIDENCE_ROOT="$TASK_ROOT/release-evidence"
+          install -d -m 0700 "$EVIDENCE_ROOT" "$EVIDENCE_ROOT/runner"
+          printf 'runId=%s\nrunAttempt=%s\nheadSha=%s\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_SHA" \
+            > "$EVIDENCE_ROOT/evidence-manifest.txt"
+          LOCAL_EVIDENCE_ALLOWLIST=(
+            manifest.txt storage-before.txt vps-storage-before.txt
+            installed-healthz.json installed-meta.json installed-rankings.json installed-source.json
+            installed-negative.headers installed-negative.json
+            public-healthz.json public-meta.headers public-meta.json public-rankings.json public-source.json
+            public-empty.headers public-empty.json public-contract.log
+            public-thumbnail.headers public-invalid-thumbnail.headers public-invalid-thumbnail.body
+          )
+          local_total=0
+          for relative in "${LOCAL_EVIDENCE_ALLOWLIST[@]}"; do
+            path="$TASK_ROOT/$relative"
+            if [ -e "$path" ]; then
+              test -f "$path" && test ! -L "$path" || { capture_status=1; continue; }
+              bytes="$(stat -c '%s' -- "$path")"
+              [[ "$bytes" =~ ^[0-9]+$ ]] && test "$bytes" -le 12582912 || { capture_status=1; continue; }
+              local_total=$((local_total + bytes))
+              test "$local_total" -le 33554432 || { capture_status=1; continue; }
+              install -m 0600 "$path" "$EVIDENCE_ROOT/runner/$relative" || capture_status=$?
+            fi
+          done
+          if [ -n "${REMOTE_ROOT:-}" ]; then
+            SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+            timeout --signal=TERM --kill-after=10s 90s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+              "$REMOTE_ROOT" > "$EVIDENCE_ROOT/remote-candidate-evidence.tar.gz" <<'REMOTE_EVIDENCE'
+          set -Eeuo pipefail
+          remote_root="$1"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          REMOTE_EVIDENCE_ALLOWLIST=(
+            candidate-healthz.json candidate-meta.json candidate-rankings.json candidate-source.json
+            candidate-negative.headers candidate-negative.json candidate-channel-regression.log
+            candidate-thumbnail.headers candidate-invalid-thumbnail.headers candidate-invalid-thumbnail.body
+            candidate-unit-status.txt candidate-unit-journal.txt candidate-unit-cleanup-result.txt
+            install-failure-service-status.txt install-failure-service-journal.txt
+            install-service-status.txt install-service-journal.txt
+            rollback-service-status.txt rollback-service-journal.txt
+            installed-healthz.json installed-meta.json installed-rankings.json installed-source.json
+            installed-negative.headers installed-negative.json
+            rollback-healthz.json rollback-meta.json finalize-healthz.json finalize-meta.json
+            cleanup-healthz.json cleanup-meta.json release-finalized rollback-complete
+          )
+          selected=()
+          total=0
+          for relative in "${REMOTE_EVIDENCE_ALLOWLIST[@]}"; do
+            path="$remote_root/$relative"
+            if [ -e "$path" ]; then
+              test -f "$path"
+              test ! -L "$path"
+              bytes="$(stat -c '%s' -- "$path")"
+              [[ "$bytes" =~ ^[0-9]+$ ]]
+              test "$bytes" -le 12582912
+              total=$((total + bytes))
+              test "$total" -le 33554432
+              selected+=("$relative")
+            fi
+          done
+          test "${#selected[@]}" -gt 0
+          printf '%s\0' "${selected[@]}" | \
+            tar --create --gzip --file=- --directory="$remote_root" --null --files-from=-
+          REMOTE_EVIDENCE
+            remote_capture_status=$?
+            archive_path="$EVIDENCE_ROOT/remote-candidate-evidence.tar.gz"
+            archive_list="$EVIDENCE_ROOT/remote-archive-contents.txt"
+            archive_sha="$EVIDENCE_ROOT/remote-candidate-evidence.sha256"
+            archive_failure=""
+            if [ "$remote_capture_status" -ne 0 ]; then
+              archive_failure="remote_capture_failed status=$remote_capture_status"
+            elif [ ! -f "$archive_path" ] || [ -L "$archive_path" ] || [ ! -s "$archive_path" ]; then
+              archive_failure="archive_missing_empty_or_nonregular"
+            else
+              archive_bytes="$(stat -c '%s' -- "$archive_path" 2>/dev/null || printf invalid)"
+              if ! [[ "$archive_bytes" =~ ^[0-9]+$ ]] || [ "$archive_bytes" -gt 16777216 ]; then
+                archive_failure="archive_oversized bytes=$archive_bytes limit=16777216"
+              elif ! (ulimit -f 128; timeout --signal=TERM --kill-after=2s 10s tar -tzf "$archive_path" > "$archive_list"); then
+                archive_failure="archive_corrupt_or_listing_unbounded"
+              elif [ ! -f "$archive_list" ] || [ -L "$archive_list" ] || [ "$(stat -c '%s' -- "$archive_list")" -gt 65536 ]; then
+                archive_failure="archive_listing_invalid"
+              elif grep -Eiq '(^|/)(ssh|askpass|backup|server|secrets?)(/|$)|(^|/)\.\.?(/|$)' "$archive_list"; then
+                archive_failure="archive_forbidden_path"
+              elif ! sha256sum "$archive_path" > "$archive_sha"; then
+                archive_failure="archive_sha256_failed"
+              fi
+            fi
+            if [ -n "$archive_failure" ]; then
+              capture_status=1
+              rm -f -- "$archive_path" "$archive_list" "$archive_sha"
+              printf 'remoteArchiveAccepted=0\nreason=%s\n' "$archive_failure" > "$EVIDENCE_ROOT/remote-archive-failure.txt"
+            else
+              printf 'remoteArchiveAccepted=1\nbytes=%s\n' "$archive_bytes" >> "$EVIDENCE_ROOT/evidence-manifest.txt"
+            fi
+          fi
+          printf 'captureStatus=%s\nlocalEvidenceBytes=%s\n' "$capture_status" "$local_total" \
+            >> "$EVIDENCE_ROOT/evidence-manifest.txt"
+          exit "$capture_status"
+
       - name: Record result and rollback/cleanup on any pre-finalize failure
         if: always()
         run: |
@@ -603,9 +1118,14 @@ jobs:
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
           cleanup_status=0
           remote_cleanup_ok=0
+          EVIDENCE_ROOT=""
+          if [ -n "${TASK_ROOT:-}" ]; then
+            EVIDENCE_ROOT="$TASK_ROOT/release-evidence"
+            install -d -m 0700 "$EVIDENCE_ROOT"
+          fi
           if [ -n "${REMOTE_ROOT:-}" ]; then
             timeout --signal=TERM --kill-after=10s 240s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
-              "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION_B64" <<'REMOTE_CLEANUP'
+              "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION_B64" > "$EVIDENCE_ROOT/remote-cleanup-evidence.tar.gz" <<'REMOTE_CLEANUP'
           set -Eeuo pipefail
           decode_b64() {
             local encoded="$1" decoded
@@ -618,6 +1138,78 @@ jobs:
           [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
           [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
           candidate_unit="daily-song-list-adapter-${remote_root##*-}"
+          capture_cleanup_service_diagnostics() {
+            set +e
+            timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=Id,ActiveState,SubState,MainPID,ExecMainStartTimestamp,ExecMainStatus,Result \
+              song-rank-pg-api.service > "$remote_root/cleanup-service-status.txt.tmp" 2>&1
+            head -c 262144 "$remote_root/cleanup-service-status.txt.tmp" > "$remote_root/cleanup-service-status.txt" 2>/dev/null || true
+            rm -f -- "$remote_root/cleanup-service-status.txt.tmp"
+            timeout --signal=TERM --kill-after=2s 10s journalctl --no-pager --output=short-iso \
+              -u song-rank-pg-api.service -n 200 2>&1 | \
+              grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' | \
+              head -c 262144 > "$remote_root/cleanup-service-journal.txt" || true
+          }
+          capture_cleanup_candidate_diagnostics() {
+            set +e
+            timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=Id,ActiveState,SubState,MainPID,ExecMainStartTimestamp,ExecMainStatus,Result \
+              "$candidate_unit" > "$remote_root/cleanup-candidate-unit-status.txt.tmp" 2>&1
+            head -c 262144 "$remote_root/cleanup-candidate-unit-status.txt.tmp" > "$remote_root/cleanup-candidate-unit-status.txt" 2>/dev/null || true
+            rm -f -- "$remote_root/cleanup-candidate-unit-status.txt.tmp"
+            timeout --signal=TERM --kill-after=2s 10s journalctl --no-pager --output=short-iso \
+              -u "$candidate_unit" -n 200 2>&1 | \
+              grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' | \
+              head -c 262144 > "$remote_root/cleanup-candidate-unit-journal.txt" || true
+          }
+          finalize_remote_cleanup() {
+            original_status=$?
+            trap - EXIT ERR
+            set +e
+            capture_cleanup_service_diagnostics
+            capture_cleanup_candidate_diagnostics
+            candidate_cleanup_status=0
+            if systemctl show "$candidate_unit" >/dev/null 2>&1; then
+              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" 2>/dev/null || candidate_cleanup_status=$?
+            fi
+            for unused in $(seq 1 10); do
+              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
+              sleep 1
+            done
+            candidate_active_after=0
+            candidate_port_after=0
+            if systemctl is-active --quiet "$candidate_unit"; then candidate_active_after=1; candidate_cleanup_status=1; fi
+            if ss -ltn 'sport = :18766' | grep -q LISTEN; then candidate_port_after=1; candidate_cleanup_status=1; fi
+            if ! timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" 2>/dev/null; then
+              if systemctl show "$candidate_unit" >/dev/null 2>&1; then candidate_cleanup_status=1; fi
+            fi
+            printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\n' \
+              "$candidate_cleanup_status" "$candidate_active_after" "$candidate_port_after" \
+              > "$remote_root/cleanup-candidate-unit-result.txt"
+            selected=()
+            for relative in cleanup-healthz.json cleanup-meta.json cleanup-service-status.txt cleanup-service-journal.txt \
+              cleanup-candidate-unit-status.txt cleanup-candidate-unit-journal.txt cleanup-candidate-unit-result.txt rollback-complete; do
+              path="$remote_root/$relative"
+              if [ -f "$path" ] && [ ! -L "$path" ]; then
+                bytes="$(stat -c '%s' -- "$path" 2>/dev/null || printf invalid)"
+                if [[ "$bytes" =~ ^[0-9]+$ ]] && [ "$bytes" -le 12582912 ]; then selected+=("$relative"); fi
+              fi
+            done
+            evidence_status=0
+            if [ "${#selected[@]}" -gt 0 ]; then
+              printf '%s\0' "${selected[@]}" | tar --create --gzip --file=- --directory="$remote_root" --null --files-from=- || evidence_status=$?
+            else
+              evidence_status=1
+            fi
+            if [ "$candidate_cleanup_status" -eq 0 ]; then
+              rm -rf -- "$remote_root" || evidence_status=$?
+            else
+              evidence_status=1
+            fi
+            if [ "$original_status" -ne 0 ]; then exit "$original_status"; fi
+            exit "$evidence_status"
+          }
+          trap finalize_remote_cleanup EXIT
           if [ ! -f "$remote_root/release-finalized" ] && [ -f "$remote_root/backup/pg_adapter.py" ] && [ -f "$remote_root/backup/pg_api_server.py" ]; then
             install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
             install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
@@ -631,11 +1223,8 @@ jobs:
             curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/cleanup-meta.json"
             jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/cleanup-meta.json" >/dev/null
             touch "$remote_root/rollback-complete"
-            echo "PG_ADAPTER_CLEANUP_ROLLBACK_VERIFIED"
+            echo "PG_ADAPTER_CLEANUP_ROLLBACK_VERIFIED" >&2
           fi
-          systemctl stop "$candidate_unit" 2>/dev/null || true
-          systemctl reset-failed "$candidate_unit" 2>/dev/null || true
-          rm -rf -- "$remote_root"
           REMOTE_CLEANUP
             remote_cleanup_status=$?
             if [ "$remote_cleanup_status" -eq 0 ]; then
@@ -662,15 +1251,110 @@ jobs:
           REMOTE_VERIFY_CLEANUP
             fi
           fi
+          if [ -n "${EVIDENCE_ROOT:-}" ] && [ -n "${REMOTE_ROOT:-}" ]; then
+            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz"               > "$EVIDENCE_ROOT/cleanup-healthz.json" || cleanup_status=$?
+            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta"               > "$EVIDENCE_ROOT/cleanup-meta.json" || cleanup_status=$?
+            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s --               "$REMOTE_ROOT" > "$EVIDENCE_ROOT/cleanup-state.txt" <<'REMOTE_CLEANUP_EVIDENCE' || cleanup_status=$?
+          set -Eeuo pipefail
+          remote_root="$1"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          test ! -e "$remote_root"
+          printf 'remoteRootAbsent=1\n'
+          systemctl show --no-pager --property=Id,ActiveState,SubState,MainPID,ExecMainStartTimestamp,Result song-rank-pg-api.service
+          ss -ltn 'sport = :8765'
+          df -B1 /
+          REMOTE_CLEANUP_EVIDENCE
+          fi
           if [ -n "${TASK_ROOT:-}" ]; then
             df -B1 / > "$TASK_ROOT/storage-after.txt" || cleanup_status=$?
             printf 'finishedAt=%s\npublicQuickGatePassed=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PUBLIC_QUICK_GATE_PASSED:-0}" >> "$TASK_ROOT/manifest.txt"
             test -s "$TASK_ROOT/manifest.txt" || cleanup_status=1
             test -s "$TASK_ROOT/storage-before.txt" || cleanup_status=1
             test -s "$TASK_ROOT/storage-after.txt" || cleanup_status=1
+            if [ -n "${EVIDENCE_ROOT:-}" ]; then
+              install -m 0600 "$TASK_ROOT/manifest.txt" "$EVIDENCE_ROOT/manifest.txt" || cleanup_status=$?
+              install -m 0600 "$TASK_ROOT/storage-before.txt" "$EVIDENCE_ROOT/storage-before.txt" || cleanup_status=$?
+              install -m 0600 "$TASK_ROOT/storage-after.txt" "$EVIDENCE_ROOT/storage-after.txt" || cleanup_status=$?
+              for relative in vps-storage-before.txt vps-storage-after.txt; do
+                if [ -f "$TASK_ROOT/$relative" ] && [ ! -L "$TASK_ROOT/$relative" ]; then
+                  install -m 0600 "$TASK_ROOT/$relative" "$EVIDENCE_ROOT/$relative" || cleanup_status=$?
+                fi
+              done
+              printf 'remoteCleanupOk=%s\ncleanupStatus=%s\ncandidateGateOutcome=%s\ninstallOutcome=%s\ninstalledContractOutcome=%s\npublicContractOutcome=%s\nfinalizeOutcome=%s\n'                 "$remote_cleanup_ok" "$cleanup_status" "${{ steps.candidate_gate.outcome }}"                 "${{ steps.install_candidate.outcome }}" "${{ steps.installed_contract.outcome }}"                 "${{ steps.public_contract.outcome }}" "${{ steps.finalize_release.outcome }}"                 > "$EVIDENCE_ROOT/cleanup-summary.txt" || cleanup_status=$?
+              evidence_bytes="$(du -sb "$EVIDENCE_ROOT" | awk '{print $1}')"
+              [[ "$evidence_bytes" =~ ^[0-9]+$ ]] && test "$evidence_bytes" -le 35651584 || cleanup_status=1
+              if find "$EVIDENCE_ROOT" -type l -print -quit | grep -q .; then cleanup_status=1; fi
+            fi
             cat "$TASK_ROOT/manifest.txt" || cleanup_status=$?
             cat "$TASK_ROOT/storage-before.txt" || cleanup_status=$?
             cat "$TASK_ROOT/storage-after.txt" || cleanup_status=$?
-            rm -rf -- "$TASK_ROOT" || cleanup_status=$?
           fi
           exit "$cleanup_status"
+
+      - name: Sanitize bounded upload evidence
+        id: sanitize_upload
+        if: always() && env.TASK_ROOT != ''
+        run: |
+          set +e
+          RAW_EVIDENCE_ROOT="$TASK_ROOT/release-evidence"
+          UPLOAD_EVIDENCE_ROOT="$TASK_ROOT/upload-evidence"
+          if [ ! -f "$TASK_ROOT/sanitize_upload_tree.sh" ] || [ -L "$TASK_ROOT/sanitize_upload_tree.sh" ]; then
+            case "$TASK_ROOT" in
+              "$RUNNER_TEMP"/daily-song-list-adapter.*) ;;
+              *) echo "::error::Refusing unsafe fallback TASK_ROOT"; exit 64 ;;
+            esac
+            test "$UPLOAD_EVIDENCE_ROOT" = "$TASK_ROOT/upload-evidence" || exit 64
+            case "$UPLOAD_EVIDENCE_ROOT" in
+              "$RUNNER_TEMP"/daily-song-list-adapter.*/upload-evidence) ;;
+              *) echo "::error::Refusing unsafe fallback upload cleanup"; exit 64 ;;
+            esac
+            rm -rf -- "$UPLOAD_EVIDENCE_ROOT" || exit 2
+            install -d -m 0700 "$UPLOAD_EVIDENCE_ROOT" || exit 2
+            printf 'sanitizerStatus=fallback_minimal\nreason=sanitizer_missing_or_nonregular\n' > "$UPLOAD_EVIDENCE_ROOT/upload-sanitization-summary.txt"
+            test -f "$UPLOAD_EVIDENCE_ROOT/upload-sanitization-summary.txt" || exit 2
+            test ! -L "$UPLOAD_EVIDENCE_ROOT/upload-sanitization-summary.txt" || exit 2
+            fallback_files="$(find -P "$UPLOAD_EVIDENCE_ROOT" -xdev -type f -printf . | wc -c)"
+            fallback_bytes="$(du -sb "$UPLOAD_EVIDENCE_ROOT" | awk '{print $1}')"
+            test "$fallback_files" -eq 1 || exit 2
+            [[ "$fallback_bytes" =~ ^[0-9]+$ ]] && test "$fallback_bytes" -le 65536 || exit 2
+            if find -P "$UPLOAD_EVIDENCE_ROOT" -xdev -mindepth 1 ! -type f ! -type d -print -quit | grep -q .; then exit 2; fi
+            printf 'safe=1\n' >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          timeout --signal=TERM --kill-after=2s 20s "$TASK_ROOT/sanitize_upload_tree.sh" \
+            "$RAW_EVIDENCE_ROOT" "$UPLOAD_EVIDENCE_ROOT"
+          sanitize_status=$?
+          upload_safe=0
+          if { [ "$sanitize_status" -eq 0 ] || [ "$sanitize_status" -eq 1 ]; } && \
+             [ -d "$UPLOAD_EVIDENCE_ROOT" ] && [ ! -L "$UPLOAD_EVIDENCE_ROOT" ]; then
+            upload_bytes="$(du -sb "$UPLOAD_EVIDENCE_ROOT" 2>/dev/null | awk '{print $1}')"
+            if [[ "$upload_bytes" =~ ^[0-9]+$ ]] && [ "$upload_bytes" -le 35651584 ] && \
+               ! find -P "$UPLOAD_EVIDENCE_ROOT" -xdev -mindepth 1 ! -type f ! -type d -print -quit | grep -q .; then
+              upload_safe=1
+            fi
+          fi
+          if [ "$upload_safe" -eq 1 ]; then printf 'safe=1\n' >> "$GITHUB_OUTPUT"; fi
+          printf 'UPLOAD_SANITIZATION_STATUS=%s\n' "$sanitize_status" >> "$GITHUB_ENV"
+          exit "$sanitize_status"
+
+      - name: Upload bounded release evidence
+        if: always() && env.TASK_ROOT != '' && steps.sanitize_upload.outputs.safe == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg-adapter-contract-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.TASK_ROOT }}/upload-evidence/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+
+      - name: Remove runner evidence only after upload attempt
+        if: always() && env.TASK_ROOT != ''
+        run: |
+          set -Eeuo pipefail
+          case "$TASK_ROOT" in
+            "$RUNNER_TEMP"/daily-song-list-adapter.*) ;;
+            *) echo "::error::Refusing unsafe TASK_ROOT cleanup"; exit 1 ;;
+          esac
+          rm -rf -- "$TASK_ROOT"
+          test ! -e "$TASK_ROOT"
+          echo "PG_ADAPTER_RUNNER_EVIDENCE_CLEANUP_OK"

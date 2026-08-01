@@ -1,8 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const workflow = readFileSync(process.env.WORKFLOW_PATH, 'utf8');
+const testDir = dirname(fileURLToPath(import.meta.url));
+const defaultWorkflowPath = resolve(testDir, '..', '.github', 'workflows', 'deploy-pg-adapter-contract.yml');
+const resolveWorkflowPath = (env = process.env) => env.WORKFLOW_PATH || defaultWorkflowPath;
+const workflowPath = resolveWorkflowPath();
+const workflow = readFileSync(workflowPath, 'utf8');
+
+test('workflow path defaults from import.meta.url and still permits an env override', () => {
+  assert.equal(resolveWorkflowPath({}), defaultWorkflowPath);
+  assert.equal(
+    resolveWorkflowPath({ WORKFLOW_PATH: '/tmp/isolated-workflow.yml' }),
+    '/tmp/isolated-workflow.yml',
+  );
+  assert.ok(workflow.length > 0);
+});
 
 test('P0 is explicitly song-only with exact Haru entity and opaque detail inputs', () => {
   assert.doesNotMatch(workflow, /^\s+source_type:/m);
@@ -105,6 +120,66 @@ test('P0 has fatal preinstall, public, rollback, finalize, storage, and cleanup 
   assert.match(workflow, /test ! -e "\$remote_root"/);
   assert.doesNotMatch(workflow, /assets\/app\.js|\/assets\/app\.js|deploy-pages|deploy-vps-static/);
   assert.doesNotMatch(workflow, /rankings[^\n]*\|\| echo|source[^\n]*\|\| echo|thumbnail[^\n]*\|\| echo/);
+});
+
+test('P0 diagnostics and evidence remain fail-closed, bounded, and upload before deletion', () => {
+  for (const marker of [
+    'source totalCount mismatch ',
+    'actual={source_total_count} expected={args.videos}',
+    'sourceKey={args.source_key}',
+    'source totalVideoCount mismatch ',
+    'actual={source_video_count} expected={args.videos}',
+    'source totalOccurrenceCount mismatch ',
+    'actual={source_occurrence_count} expected={args.occurrences}',
+    'Stage bounded pre-cleanup release evidence',
+    'Prepare bounded upload sanitizer',
+    'Sanitize bounded upload evidence',
+    'UPLOAD_EVIDENCE_SANITIZED',
+    'remote-archive-failure.txt',
+    'candidate-unit-status.txt',
+    'candidate-unit-journal.txt',
+    'install-failure-service-status.txt',
+    'rollback-service-journal.txt',
+    'cleanup-service-status.txt',
+    'cleanup-service-journal.txt',
+    'REMOTE_EVIDENCE_ALLOWLIST',
+    'LOCAL_EVIDENCE_ALLOWLIST',
+    'remote-candidate-evidence.tar.gz',
+    'cleanup-healthz.json',
+    'cleanup-meta.json',
+    'cleanup-state.txt',
+    'cleanup-summary.txt',
+    'Upload bounded release evidence',
+    'actions/upload-artifact@v4',
+    'if-no-files-found: error',
+    'Remove runner evidence only after upload attempt',
+    'PG_ADAPTER_RUNNER_EVIDENCE_CLEANUP_OK',
+  ]) assert.match(workflow, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(workflow, /test "\$bytes" -le 12582912/);
+  assert.match(workflow, /test "\$total" -le 33554432/);
+  assert.match(workflow, /\[ "\$archive_bytes" -gt 16777216 \]/);
+  assert.match(workflow, /test "\$evidence_bytes" -le 35651584/);
+  assert.match(workflow, /permissions:\n\s+contents: read/);
+  assert.doesNotMatch(workflow, /contents: write|git push|gh workflow run|gh run cancel/);
+  const stage = workflow.indexOf('Stage bounded pre-cleanup release evidence');
+  const cleanup = workflow.indexOf('Record result and rollback/cleanup on any pre-finalize failure');
+  const sanitize = workflow.indexOf('Sanitize bounded upload evidence');
+  const upload = workflow.indexOf('Upload bounded release evidence');
+  const remove = workflow.indexOf('Remove runner evidence only after upload attempt');
+  assert.ok(stage >= 0 && cleanup > stage && sanitize > cleanup && upload > sanitize && remove > upload);
+  assert.equal((workflow.match(/rm -rf -- "\$TASK_ROOT"/g) ?? []).length, 1);
+  assert.ok(workflow.indexOf('rm -rf -- "$TASK_ROOT"') > upload);
+  const uploadTail = workflow.slice(upload, remove);
+  assert.match(uploadTail, /path: \$\{\{ env\.TASK_ROOT \}\}\/upload-evidence\//);
+  assert.doesNotMatch(uploadTail, /release-evidence|ssh|askpass|backup|server\//i);
+  assert.match(workflow, /rm -f -- "\$archive_path" "\$archive_list" "\$archive_sha"/);
+  assert.match(workflow, /archive_failure="archive_oversized bytes=/);
+  assert.match(workflow, /archive_failure="archive_corrupt_or_listing_unbounded"/);
+  assert.match(workflow, /archive_failure="archive_forbidden_path"/);
+  assert.match(workflow, /trap cleanup_candidate EXIT/);
+  assert.ok(workflow.indexOf('capture_candidate_unit_diagnostics') < workflow.indexOf('systemctl stop "$candidate_unit"'));
+  assert.match(workflow, /journalctl --no-pager --output=short-iso[\s\S]*-n 200/);
+  assert.match(workflow, /StrictHostKeyChecking=no/);
 });
 
 console.log('PG_ADAPTER_CONTRACT_GATES_TEST_COMPLETE');

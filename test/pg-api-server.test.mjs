@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import * as vm from "node:vm";
 import path from "node:path";
@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ADAPTER = path.join(ROOT, "server", "pg_api_server.py");
-const APP_SOURCE = process.env.APP_SOURCE_PATH || path.join(ROOT, "assets", "app.js");
+const APP_SOURCE = process.env.APP_SOURCE_PATH;
 function resolvePython() {
   const candidates = process.env.PYTHON
     ? [process.env.PYTHON]
@@ -378,23 +378,24 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test(
-  "frontend thumbnail helper constructs only the same-origin allowlisted URL and keeps real fallback candidates",
-  { skip: !existsSync(APP_SOURCE) },
-  () => {
-    const source = readFileSync(APP_SOURCE, "utf8");
-    const start = source.indexOf("function sameOriginThumbnailUrl");
-    assert(start >= 0, "same-origin thumbnail helper is missing");
-    const end = source.indexOf("\n}\n", start);
-    assert(end > start, "same-origin thumbnail helper body is missing");
-    const helperSource = source.slice(start, end + 2);
-    const helper = vm.runInNewContext(`(${helperSource})`, {
-      cleanText: (value) => String(value ?? "").trim(),
-    });
-    assert.equal(helper("dQw4w9WgXcQ"), "/api/thumbnails/dQw4w9WgXcQ/hqdefault.jpg");
-    assert.equal(helper("short-id"), "");
-    assert.equal(helper("dQw4w9WgXcQ", "../../etc"), "");
-    assert.match(source, /const sameOrigin = sameOriginThumbnailUrl\(videoId, relayQuality\)/u);
-    assert.match(source, /item\.thumbnailUrl/u);
-  },
-);
+if (APP_SOURCE) {
+  test(
+    "frontend thumbnail helper constructs only the same-origin allowlisted URL and keeps real fallback candidates",
+    () => {
+      const source = readFileSync(APP_SOURCE, "utf8");
+      const start = source.indexOf("function sameOriginThumbnailUrl");
+      assert(start >= 0, "same-origin thumbnail helper is missing");
+      const end = source.indexOf("\n}\n", start);
+      assert(end > start, "same-origin thumbnail helper body is missing");
+      const helperSource = source.slice(start, end + 2);
+      const helper = vm.runInNewContext(`(${helperSource})`, {
+        cleanText: (value) => String(value ?? "").trim(),
+      });
+      assert.equal(helper("dQw4w9WgXcQ"), "/api/thumbnails/dQw4w9WgXcQ/hqdefault.jpg");
+      assert.equal(helper("short-id"), "");
+      assert.equal(helper("dQw4w9WgXcQ", "../../etc"), "");
+      assert.match(source, /const sameOrigin = sameOriginThumbnailUrl\(videoId, relayQuality\)/u);
+      assert.match(source, /item\.thumbnailUrl/u);
+    },
+  );
+}

@@ -9401,16 +9401,32 @@ def _generic_song_source_payload(
     candidate_rows = tuple(candidate_rows) if candidate_rows is not None else tuple(
         _overlay_candidate_rows(connection, overlay_revision_ids)
     )
+    candidate_range_rows = _overlay_rows_for_range(candidate_rows, range_id)
     accepted_video_resets = dict(accepted_video_resets) if accepted_video_resets is not None else _accepted_video_resets(
         connection, overlay_revision_ids,
     )
+    candidate_range_video_ids = {
+        _text(row.get("video_id") or row.get("videoId"))
+        for row in candidate_range_rows
+        if _text(row.get("video_id") or row.get("videoId"))
+    }
+    accepted_video_resets = {
+        video_id: row
+        for video_id, row in accepted_video_resets.items()
+        if video_id in candidate_range_video_ids
+        or _text(
+            _overlay_payload(row).get("rangeId")
+            or _overlay_payload(row).get("range_id")
+            or row.get("range_id")
+            or row.get("rangeId")
+        ) == range_id
+    }
     changes = list(runtime_changes) if runtime_changes is not None else _runtime_tombstones(
         connection, overlay_revision_ids, accepted_video_resets.values() if accepted_video_resets else None,
-        candidate_rows,
+        candidate_range_rows,
     )
     changes = _overlay_rows_for_range(changes, range_id)
     replacement_rows = _runtime_replacement_candidate_rows(changes)
-    candidate_range_rows = _overlay_rows_for_range(candidate_rows, range_id)
 
     potential_video_ids = {
         _text(video_id) for video_id in accepted_video_resets if _text(video_id)
@@ -9846,6 +9862,11 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                 )
                 if song_rebuilt is not None:
                     return song_rebuilt
+                if _text(persisted_record.get("type")) == "song":
+                    # No same-range generic delta affects this persisted song.
+                    # Do not reinterpret it as a channel source merely because
+                    # a different physical range has newer migration rows.
+                    return persisted
                 if persisted_record and (
                     source_overlay_ids
                     or _text(persisted_record.get("sourceDetailKey")) != _text(key)
@@ -9886,6 +9907,8 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                     )
                     if song_rebuilt is not None:
                         return song_rebuilt
+                    if _text(persisted_record.get("type")) == "song":
+                        return persisted
                     if persisted_record:
                         repaired = _runtime_channel_source_payload(
                             connection,

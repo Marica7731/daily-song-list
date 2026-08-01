@@ -3170,7 +3170,7 @@ calls = []
 def rows(_connection, sql, params):
     calls.append((sql, list(params)))
     if "FROM runtime_source_details" in sql:
-        revision = "overlay" if mode[0] == "empty" else "parent"
+        revision = "overlay" if mode[0] in {"empty", "shrink"} else "parent"
         if mode[0] == "truncated":
             revision = "overlay"
             return [{"revision_id": revision, "range_id": "all", "payload_json": {
@@ -3183,25 +3183,33 @@ def rows(_connection, sql, params):
             }}]
         return [{"revision_id": revision, "range_id": "all", "payload_json": {
             "type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
-            "artist": "ヨルシカ", "artists": [{"name": "ヨルシカ", "count": 0}],
+            "artist": "ヨルシカ", "artists": [{"name": "ヨルシカ", "count": 1 if mode[0] == "shrink" else 0}],
             "sourceDetailKey": "source", "rangeId": "all", "occurrences": [],
-            "count": 0, "occurrenceCount": 0, "videoCount": 0,
+            "count": 1 if mode[0] == "shrink" else 0,
+            "occurrenceCount": 1 if mode[0] == "shrink" else 0,
+            "videoCount": 1 if mode[0] == "shrink" else 0,
         }}]
     if "source_occurrence_count" in sql:
         if mode[0] in {"empty", "truncated"}:
             assert params[0] == "overlay" and params[3] == "overlay"
             return [{"total_occurrence_count": 0, "total_video_count": 0,
                 "source_occurrence_count": 0}]
+        if mode[0] == "shrink":
+            assert params[0] == "overlay" and params[3] == "overlay"
+            return [{"total_occurrence_count": 1, "total_video_count": 1,
+                "source_occurrence_count": 1}]
         assert params[0] == "parent" and params[3] == "parent"
         return [{"total_occurrence_count": 1, "total_video_count": 1,
             "source_occurrence_count": 1}]
     if "GROUP BY video_id" in sql:
-        return [{"video_id": "parent-video", "first_position": 0}]
+        return [{"video_id": "overlay-video" if mode[0] == "shrink" else "parent-video",
+            "first_position": 0}]
     if "SELECT position, video_id" in sql:
-        return [{"position": 0, "video_id": "parent-video", "title": "Parent",
-            "channel_name": "Parent", "channel_id": "UCPARENT", "channel_handle": "@parent",
-            "channel_url": "https://youtube.com/@parent", "published_timestamp": 1,
-            "seconds": 2, "search_text": "parent", "payload_json": {"videoId": "parent-video"}}]
+        video_id = "overlay-video" if mode[0] == "shrink" else "parent-video"
+        return [{"position": 0, "video_id": video_id, "title": "Detail",
+            "channel_name": "Detail", "channel_id": "UCDETAIL", "channel_handle": "@detail",
+            "channel_url": "https://youtube.com/@detail", "published_timestamp": 1,
+            "seconds": 2, "search_text": "detail", "payload_json": {"videoId": video_id}}]
     raise AssertionError(sql)
 module._rows = rows
 empty = module._runtime_source_payload(
@@ -3229,6 +3237,15 @@ inherited = module._runtime_source_payload(
 assert inherited["found"] is True and inherited["sourceRevisionId"] == "parent"
 assert inherited["record"]["occurrences"][0]["videoId"] == "parent-video"
 
+mode[0] = "shrink"
+shrunk = module._runtime_source_payload(
+    object(), "parent", "source", {"range": "all", "page": "1", "pageSize": "20"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+assert shrunk["found"] is True and shrunk["sourceRevisionId"] == "overlay"
+assert shrunk["totalOccurrenceCount"] == shrunk["totalVideoCount"] == 1
+assert shrunk["record"]["occurrences"][0]["videoId"] == "overlay-video"
+
 # Once a nearest overlay detail exists, top-level source routing must not
 # invoke parent delta or channel reconstruction and revive older positions.
 module._generic_runtime_projection_revision = lambda *_: ("active", {"revision_id": "active"})
@@ -3240,6 +3257,9 @@ def forbidden(*_args, **_kwargs):
 module._generic_song_source_payload = forbidden
 module._runtime_channel_source_payload = forbidden
 assert module.source_payload(object(), "source", {"range": "all"}) == empty
+module._runtime_source_payload = lambda *_args, **_kwargs: shrunk
+assert module.source_payload(object(), "source", {"range": "all"}) == shrunk
+module._runtime_source_payload = lambda *_args, **_kwargs: empty
 
 captured = []
 marker = {"schemaVersion": 1, "found": True, "sourceKey": "source",
@@ -3374,7 +3394,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("source replacement applies the production 23 394 5 intersection without reviving parent positions", () => {
+test("source routing keeps the authoritative Haru card across the synthetic 23 394 5 generic delta", () => {
   const output = runPython(`
 import importlib.util
 spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
@@ -3410,7 +3430,8 @@ def candidate(video_index):
             "position": video_index, "rangeId": "all", "songKey": "db-haru",
             "title": "晴る", "artist": "ヨルシカ"}}
 candidates = [candidate(index) for index in range(20)]
-resets = {"affected-%02d" % index: {"video_id": "affected-%02d" % index}
+resets = {"affected-%02d" % index: {"video_id": "affected-%02d" % index,
+    "payload_json": {"rangeId": "all"}}
     for index in range(23)}
 changes = [{"entityType": "occurrences", "videoId": "affected-%02d" % index,
     "occurrenceId": "accepted-%02d" % index, "songKey": "db-haru",
@@ -3463,6 +3484,92 @@ assert not any(item["videoId"] in {"affected-00", "affected-01", "affected-02", 
     for item in payload["record"]["occurrences"])
 assert all("runtime_occurrences" not in sql for sql, _ in calls)
 assert len(affected) == 394 and len(resets) == 23 and len(changes) == 5
+
+# The helper result above remains correct for a same-range source delta.  The
+# production-shaped intersection has 23 reset videos and 394 candidate rows,
+# but every one is 7d; the all-range source must retain its authoritative
+# 4697/4485 card and bounded, unique-video page.
+page_occurrences = [{"videoId": "haru-%02d" % index,
+    "occurrenceId": "haru-occ-%02d" % index} for index in range(20)]
+authoritative = {"schemaVersion": 1, "found": True, "sourceKey": source_key,
+    "sourceRevisionId": "parent", "record": {
+        "type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+        "artist": "ヨルシカ", "displayArtist": "ヨルシカ",
+        "artists": [{"name": "ヨルシカ", "count": 4697}],
+        "sourceDetailKey": source_key, "rangeId": "all",
+        "count": 4697, "occurrenceCount": 4697, "videoCount": 4485,
+        "occurrences": page_occurrences, "occurrencePreviewLimited": True,
+    }, "page": 1, "pageSize": 20, "pageCount": 225,
+    "totalCount": 4485, "totalVideoCount": 4485,
+    "totalOccurrenceCount": 4697, "totalSongCount": 5}
+module._runtime_projection_revision = lambda *_: None
+module._generic_runtime_projection_revision = lambda *_: ("active", {"revision_id": "active"})
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["runtime", "accepted"]
+module._runtime_source_payload = lambda *_args, **_kwargs: authoritative
+cross_range_candidates = []
+for index in range(394):
+    row = candidate(index % 23)
+    row["occurrence_id"] = "cross-%03d" % index
+    row["range_id"] = "7d"
+    row["occurrence_payload_json"] = {
+        **row["occurrence_payload_json"],
+        "occurrenceId": row["occurrence_id"], "rangeId": "7d",
+    }
+    cross_range_candidates.append(row)
+cross_range_resets = {
+    "affected-%02d" % index: {
+        "video_id": "affected-%02d" % index,
+        "payload_json": {"rangeId": "7d"},
+    }
+    for index in range(23)
+}
+cross_range_changes = [{**change, "rangeId": "7d"} for change in changes]
+module._overlay_candidate_rows = lambda *_args, **_kwargs: cross_range_candidates
+module._accepted_video_resets = lambda *_args, **_kwargs: cross_range_resets
+module._runtime_tombstones = lambda *_args, **_kwargs: cross_range_changes
+module._runtime_channel_source_payload = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("song source fell through to channel reconstruction"))
+)
+result = module.source_payload(
+    object(), source_key, {"range": "all", "page": "1", "pageSize": "20"},
+)
+assert result == authoritative
+assert result["record"]["count"] == result["totalOccurrenceCount"] == 4697
+assert result["record"]["videoCount"] == result["totalCount"] == 4485
+assert result["pageCount"] == 225 and len(result["record"]["occurrences"]) == 20
+assert len({item["videoId"] for item in result["record"]["occurrences"]}) == 20
+
+# A video row with neither a same-range occurrence nor an explicit range has
+# no authority to reset either public source range.
+module._overlay_candidate_rows = lambda *_args, **_kwargs: []
+module._accepted_video_resets = lambda *_args, **_kwargs: {
+    "ambiguous-video": {"video_id": "ambiguous-video", "payload_json": {}},
+}
+module._runtime_tombstones = lambda *_args, **_kwargs: []
+assert module.source_payload(
+    object(), source_key, {"range": "all", "page": "1", "pageSize": "20"},
+) == authoritative
+
+# The range boundary is symmetric: an all-range overlay cannot reset a 7d
+# persisted song source either.
+authoritative_7d = {**authoritative,
+    "record": {**authoritative["record"], "rangeId": "7d",
+        "count": 17, "occurrenceCount": 17, "videoCount": 17,
+        "occurrences": page_occurrences[:17]},
+    "pageCount": 1, "totalCount": 17, "totalVideoCount": 17,
+    "totalOccurrenceCount": 17}
+module._runtime_source_payload = lambda *_args, **_kwargs: authoritative_7d
+module._overlay_candidate_rows = lambda *_args, **_kwargs: candidates
+module._accepted_video_resets = lambda *_args, **_kwargs: {
+    key: {**value, "payload_json": {"rangeId": "all"}}
+    for key, value in resets.items()
+}
+module._runtime_tombstones = lambda *_args, **_kwargs: changes
+result_7d = module.source_payload(
+    object(), source_key, {"range": "7d", "page": "1", "pageSize": "20"},
+)
+assert result_7d == authoritative_7d
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -6226,7 +6333,10 @@ for alias_source in alias_sources:
 
 # A full-video accepted reset removes the old parent tuple before the accepted
 # projection is added; a tombstone does not let that source revive it.
-module._accepted_video_resets = lambda *_: {"canon-000": {"video_id": "canon-000", "tombstone": True}}
+module._accepted_video_resets = lambda *_: {"canon-000": {
+    "video_id": "canon-000", "tombstone": True,
+    "payload_json": {"rangeId": "all", "deleted": True},
+}}
 module._overlay_candidate_rows = lambda *_: []
 module._runtime_tombstones = lambda *_: []
 reset = module.source_payload(object(), canonical_source)
