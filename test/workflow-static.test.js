@@ -80,6 +80,12 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(staticDeploy, /raw\.githubusercontent\.com\/Marica7731\/daily-song-list\/b108c95646f250526cbf9f08618657ff156608ec\/index\.html/u);
   assert.match(staticDeploy, /node scripts\/compact-static-index\.js rollback-index\.html/u);
   assert.match(staticDeploy, /tar -czf - --transform='s\|\^rollback-index\\\.html\$\|index\.html\|'/u);
+  assert.match(staticDeploy, /systemctl show song-rank-api\.service --no-pager -p LoadState --value/u);
+  assert.match(staticDeploy, /systemctl show song-rank-api\.service --no-pager -p ActiveState --value/u);
+  assert.match(staticDeploy, /loaded\/active\)[\s\S]*systemctl restart song-rank-api\.service/u);
+  assert.match(staticDeploy, /loaded\/inactive\|not-found\/inactive/u);
+  assert.match(staticDeploy, /CODEX_STATIC_DEPLOY_BLOCKED unexpected_legacy_service_state/u);
+  assert.doesNotMatch(staticDeploy, /systemctl list-unit-files song-rank-api\.service/u);
   assert.doesNotMatch(staticDeploy, /git fetch --quiet .*origin main/u);
   assert.doesNotMatch(staticDeploy, /git merge --ff-only/u);
 });

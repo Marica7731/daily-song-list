@@ -126,9 +126,19 @@ jobs:
               set -Eeuo pipefail
               tar -xzf - -C '${REMOTE_PROJECT_DIR}'
               test -s '${REMOTE_PROJECT_DIR}/data/ui/meta.json'
-              if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
-                systemctl restart song-rank-api
-              fi
+              legacy_load_state=\"\$(systemctl show song-rank-api.service --no-pager -p LoadState --value)\"
+              legacy_active_state=\"\$(systemctl show song-rank-api.service --no-pager -p ActiveState --value)\"
+              case \"\${legacy_load_state}/\${legacy_active_state}\" in
+                loaded/active)
+                  systemctl restart song-rank-api.service
+                  ;;
+                loaded/inactive|not-found/inactive)
+                  ;;
+                *)
+                  echo \"CODEX_STATIC_DEPLOY_BLOCKED unexpected_legacy_service_state=\${legacy_load_state}/\${legacy_active_state}\" >&2
+                  exit 1
+                  ;;
+              esac
               nginx -t
               systemctl reload nginx
             "

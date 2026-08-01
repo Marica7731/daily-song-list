@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ADAPTER = path.join(ROOT, "server", "pg_api_server.py");
-const APP_SOURCE = process.env.APP_SOURCE_PATH;
+const APP_SOURCE = process.env.APP_SOURCE_PATH || path.join(ROOT, "assets", "app.js");
 function resolvePython() {
   const candidates = process.env.PYTHON
     ? [process.env.PYTHON]
@@ -378,8 +378,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-if (APP_SOURCE) {
-  test(
+test(
     "frontend thumbnail helper constructs only the same-origin allowlisted URL and keeps real fallback candidates",
     () => {
       const source = readFileSync(APP_SOURCE, "utf8");
@@ -397,5 +396,4 @@ if (APP_SOURCE) {
       assert.match(source, /const sameOrigin = sameOriginThumbnailUrl\(videoId, relayQuality\)/u);
       assert.match(source, /item\.thumbnailUrl/u);
     },
-  );
-}
+);
