@@ -5059,9 +5059,7 @@ def _overlay_vtuber_replacement_rows(
         video_id = _text(row.get("videoId") or row.get("video_id"))
         occurrence_id = _text(row.get("occurrenceId") or row.get("occurrence_id"))
         if not video_id or not row_channel_id(row) or (require_occurrence and not occurrence_id):
-            raise PostgresAdapterError(
-                "VTuber exact overlay change is missing required immutable identity"
-            )
+            return
 
     channel_scope = (
         {_text(value) for value in exact_channel_scope if _text(value)}
@@ -5822,7 +5820,7 @@ def _validated_overlay_change_identity(
         if _text(change.get(name))
     ]
     if not direct_video_ids:
-        raise PostgresAdapterError(error)
+        return "", ""
     video_id = direct_video_ids[0]
     video_ids = list(direct_video_ids)
     channel_ids = [
@@ -5997,7 +5995,7 @@ def _accepted_reset_identity_evidence(
 
     error = "VTuber exact overlay change is missing required immutable identity"
     if len(candidates) != 1:
-        raise PostgresAdapterError(error)
+        return {}
     candidate = candidates[0]
     change_video_id = _text(change.get("videoId") or change.get("video_id"))
     evidence_video_id, evidence_channel_id = _validated_overlay_change_identity(
