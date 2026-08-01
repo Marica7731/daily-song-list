@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-01T03:24:03.794Z",
+  "generatedAt": "2026-08-01T04:31:12.550Z",
   "curationVersion": "curation-v1:df2c41fc642c",
   "curationHash": "df2c41fc642c401ea9cd87666e04a878b6965e5948126a9a60c3ec94a4cdd942",
-  "candidateCount": 3699,
+  "candidateCount": 3574,
   "inspectedCount": 20,
-  "fetchedUsableVideoCount": 6,
-  "carriedVideoCount": 2039,
+  "fetchedUsableVideoCount": 2,
+  "carriedVideoCount": 2043,
   "carryForward": {
     "enabled": true,
-    "from": "2026-08-01T02:01:12.332Z",
-    "ageHours": 1.26,
+    "from": "2026-08-01T03:24:03.794Z",
+    "ageHours": 1.02,
     "reason": "previous_latest_fresh",
     "counts": {
-      "h72": 123,
-      "month": 2039
+      "h72": 126,
+      "month": 2043
     },
-    "knownVideoSkipCount": 4795,
-    "inspectionCacheSkipCount": 2795,
-    "skippedKnownCandidateCount": 701,
+    "knownVideoSkipCount": 4803,
+    "inspectionCacheSkipCount": 2798,
+    "skippedKnownCandidateCount": 605,
     "monthBackfillEnabled": false,
     "monthRefreshReserveLimit": 8,
     "forceRefreshVideoCount": 0
@@ -31,14 +31,14 @@
       "keyword": "歌枠",
       "keywordKey": "utawaku",
       "url": "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D",
-      "itemCount": 461,
+      "itemCount": 420,
       "limit": 500,
-      "continuationRounds": 24,
+      "continuationRounds": 22,
       "reachedEnd": true,
       "truncatedByLimit": false,
       "skippedBlacklistedSource": 0,
       "skippedActiveLiveOrUpcoming": 0,
-      "collectedAt": "2026-08-01T03:17:07.524Z"
+      "collectedAt": "2026-08-01T04:25:04.994Z"
     },
     {
       "sourceGroup": "today",
@@ -46,14 +46,14 @@
       "keyword": "弾き語り",
       "keywordKey": "hikigatari",
       "url": "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBAgCGAI%253D",
-      "itemCount": 86,
+      "itemCount": 79,
       "limit": 500,
-      "continuationRounds": 5,
+      "continuationRounds": 4,
       "reachedEnd": true,
       "truncatedByLimit": false,
       "skippedBlacklistedSource": 0,
       "skippedActiveLiveOrUpcoming": 0,
-      "collectedAt": "2026-08-01T03:18:24.592Z"
+      "collectedAt": "2026-08-01T04:26:11.713Z"
     },
     {
       "sourceGroup": "month",
@@ -61,14 +61,14 @@
       "keyword": "歌枠",
       "keywordKey": "utawaku",
       "url": "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
-      "itemCount": 500,
+      "itemCount": 272,
       "limit": 500,
-      "continuationRounds": 25,
-      "reachedEnd": false,
-      "truncatedByLimit": true,
+      "continuationRounds": 14,
+      "reachedEnd": true,
+      "truncatedByLimit": false,
       "skippedBlacklistedSource": 0,
       "skippedActiveLiveOrUpcoming": 0,
-      "collectedAt": "2026-08-01T03:18:43.977Z"
+      "collectedAt": "2026-08-01T04:26:29.425Z"
     },
     {
       "sourceGroup": "month",
@@ -76,14 +76,14 @@
       "keyword": "弾き語り",
       "keywordKey": "hikigatari",
       "url": "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
-      "itemCount": 491,
+      "itemCount": 500,
       "limit": 500,
       "continuationRounds": 25,
       "reachedEnd": false,
-      "truncatedByLimit": false,
+      "truncatedByLimit": true,
       "skippedBlacklistedSource": 0,
       "skippedActiveLiveOrUpcoming": 0,
-      "collectedAt": "2026-08-01T03:20:08.405Z"
+      "collectedAt": "2026-08-01T04:27:17.970Z"
     },
     {
       "sourceGroup": "mygit_today_snapshot",
@@ -93,15 +93,15 @@
       "url": "https://raw.githubusercontent.com/Marica7731/mygit/main/data/today-snapshots/index.json",
       "limit": 0,
       "lookbackDays": 0,
-      "collectedAt": "2026-08-01T03:21:31.947Z",
+      "collectedAt": "2026-08-01T04:28:44.489Z",
       "status": "success",
-      "itemCount": 2927,
-      "rawItemCount": 3702,
-      "availableSnapshotCount": 607,
+      "itemCount": 2958,
+      "rawItemCount": 3668,
+      "availableSnapshotCount": 611,
       "snapshotCount": 7,
       "fetchedSnapshotCount": 7,
       "selectedSnapshotIds": [
-        "20260801T030859Z",
+        "20260801T040917Z",
         "20260731T235602Z",
         "20260730T235101Z",
         "20260729T235617Z",
@@ -110,7 +110,7 @@
         "20260726T235828Z"
       ],
       "fetchedSnapshotIds": [
-        "20260801T030859Z",
+        "20260801T040917Z",
         "20260731T235602Z",
         "20260730T235101Z",
         "20260729T235617Z",
@@ -123,47 +123,30 @@
   ],
   "summary": {
     "inspectedVideos": 20,
-    "selectedVideos": 6,
+    "selectedVideos": 2,
     "noUsableSongSourceVideos": 2,
     "fetchErrorVideos": 0,
-    "rejectedEntries": 11,
-    "rejectedSources": 8,
-    "acceptedSources": 7,
+    "rejectedEntries": 2,
+    "rejectedSources": 2,
+    "acceptedSources": 3,
     "rejectedEntryReasons": {
-      "obvious_non_song_text": 1,
-      "title_only_non_song_candidate": 7,
-      "empty_after_timestamp": 1,
       "likely_non_song_entry": 1,
-      "bad_title": 1
+      "title_only_non_song_candidate": 1
     },
     "rejectedSourceReasons": {
-      "no_song_after_filter": 8
+      "high_risk_source": 1,
+      "no_song_after_filter": 1
     },
     "topRejectedChannels": [
       {
-        "channelName": "白餅だんご🍡✤",
+        "channelName": "レヴィ・アタン",
         "videos": 1,
         "selectedVideos": 0,
-        "rejectedEntries": 4,
-        "rejectedSources": 2,
+        "rejectedEntries": 1,
+        "rejectedSources": 1,
         "noUsableSongSourceVideos": 1,
         "samples": [
-          "0:00:00 配信開始〜",
-          "0:04:05 オープニングMV",
-          "0:04:22 スタート！"
-        ]
-      },
-      {
-        "channelName": "Meica05 Ch.",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 3,
-        "rejectedSources": 3,
-        "noUsableSongSourceVideos": 0,
-        "samples": [
-          "0:58:02",
-          "1:31:20 reconocí ese fragmento que tarareaste 🥲",
-          "1:14:21 Umapyoi Densetsu GOD, la canta increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱"
+          "0:00:01 魔族登場・挨拶"
         ]
       },
       {
@@ -175,39 +158,6 @@
         "noUsableSongSourceVideos": 1,
         "samples": [
           "1:24:06 かわいいｗ"
-        ]
-      },
-      {
-        "channelName": "宵闇 やみの",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 1,
-        "rejectedSources": 1,
-        "noUsableSongSourceVideos": 0,
-        "samples": [
-          "0:17:00 まで期間限定配信】"
-        ]
-      },
-      {
-        "channelName": "友瀬芽梨 - 𝐓𝐨𝐦𝐨𝐬𝐞 𝐌𝐞𝐫𝐢 𖤐´-",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 1,
-        "rejectedSources": 1,
-        "noUsableSongSourceVideos": 0,
-        "samples": [
-          "0:53:26 ラストぉー！！からの入りが最強すぎてちゃんしか見えない"
-        ]
-      },
-      {
-        "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 1,
-        "rejectedSources": 0,
-        "noUsableSongSourceVideos": 0,
-        "samples": [
-          "0:07:35 声入り"
         ]
       }
     ]
@@ -301,9 +251,9 @@
   "skippedBlacklistedCandidateCount": 0,
   "videos": [
     {
-      "videoId": "X4F-kmRAt_Q",
-      "title": "まーしーの弾き語り部屋 のライブ配信",
-      "channelName": "まーしーの弾き語り部屋",
+      "videoId": "ptXxoiMNqC8",
+      "title": "【 #歌枠 / #弾き語り 】お昼の癒し弾き語り♪【 #しのの仕立て屋 / vsinger 】",
+      "channelName": "翠雨 しの",
       "keyword": "弾き語り",
       "keywords": [
         "弾き語り"
@@ -312,17 +262,17 @@
         "today"
       ],
       "publishedText": "11 分前 に配信済み",
-      "publishedTimestamp": 1785553564837,
-      "durationText": "2:05:18",
-      "commentCandidateCount": 1,
+      "publishedTimestamp": 1785557642331,
+      "durationText": "2:14:18",
+      "commentCandidateCount": 4,
       "result": "selected",
-      "selectedSongCount": 1,
-      "acceptedSourceCount": 1,
+      "selectedSongCount": 15,
+      "acceptedSourceCount": 2,
       "rejectedSourceCount": 0,
       "rejectedEntryCount": 0,
       "sources": [
         {
-          "sourceId": "description:X4F-kmRAt_Q:0aac08e2e3f8b767",
+          "sourceId": "description:ptXxoiMNqC8:0aac08e2e3f8b767",
           "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
           "sourceType": "description",
           "sourceIndex": 0,
@@ -338,8 +288,8 @@
             "confidence": 0.86,
             "reason": "timestamp_known_song",
             "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-            "sourceId": "description:X4F-kmRAt_Q:0aac08e2e3f8b767",
-            "rawTitle": "まーしーの弾き語り部屋 のライブ配信",
+            "sourceId": "description:ptXxoiMNqC8:0aac08e2e3f8b767",
+            "rawTitle": "【 #歌枠 / #弾き語り 】お昼の癒し弾き語り♪【 #しのの仕立て屋 / vsinger 】",
             "rawSourceText": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo"
           },
           "originalCount": 1,
@@ -370,7 +320,7 @@
               "artist": "Live Ao vivo",
               "raw": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo",
               "rawHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-              "sourceId": "description:X4F-kmRAt_Q:0aac08e2e3f8b767",
+              "sourceId": "description:ptXxoiMNqC8:0aac08e2e3f8b767",
               "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
               "riskReasons": []
             }
@@ -380,766 +330,226 @@
           "rejectedSamples": [],
           "rejectedEntries": [],
           "sourceText": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo",
-          "selected": true
-        }
-      ]
-    },
-    {
-      "videoId": "PxK2_SI69YM",
-      "title": "【 #歌枠 / KARAOKE 】ボカロ縛り！高評価300目指して歌う縦型歌枠だぁ！同接70人目標！ROM歓迎◎【 #新人vtuber / #Vsinger /#天ノ羽うゆ 】",
-      "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "22 時間前 に配信済み",
-      "publishedTimestamp": 1785463042059,
-      "durationText": "4:12:44 4:12:44 再生中",
-      "commentCandidateCount": 3,
-      "result": "selected",
-      "selectedSongCount": 28,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 1,
-      "sources": [
+          "selected": false
+        },
         {
-          "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-          "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
+          "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+          "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
           "sourceType": "comment",
           "sourceIndex": 0,
-          "commentId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-          "authorName": "@ましゃ_0929",
+          "commentId": "UgwqnqD0AF49qZNorhx4AaABAg",
+          "authorName": "@らぽぽ_ch",
           "reason": "",
-          "sourceScore": 572.5,
+          "sourceScore": 293,
           "riskScore": 8,
           "riskLevel": "low",
           "riskReasons": [],
           "singleSongIdentification": null,
-          "originalCount": 29,
-          "keptCount": 28,
-          "knownSongCount": 28,
-          "repairedKnownSongCount": 26,
-          "artistCount": 28,
+          "originalCount": 15,
+          "keptCount": 15,
+          "knownSongCount": 15,
+          "repairedKnownSongCount": 13,
+          "artistCount": 15,
           "unknownArtistCount": 0,
           "activityMarkerCount": 1,
-          "activityMarkerRatio": 0.034482758620689655,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 1,
-          "structuralCount": 29,
-          "sentenceLikeCount": 0,
-          "sample": [
-            "0:19:47 天才ロック",
-            "0:23:46 おべか",
-            "0:32:47 エゴロック",
-            "0:36:24 1925",
-            "0:55:17 ロストワンの号哭",
-            "1:00:44 ワールドイズマイン",
-            "1:07:29 千本桜",
-            "1:22:45 ワールズエンド・ダンスホール"
-          ],
-          "entries": [
-            {
-              "status": "accepted",
-              "time": "0:19:47",
-              "seconds": 1187,
-              "title": "天才ロック",
-              "artist": "カラスヤサボウ feat. 鏡音リン",
-              "raw": "19:47 1. 天才ロック/カラスヤサボウ feat. 鏡音リン",
-              "rawHash": "274c2ffe7c985ed84c72c1f9dbda2f1a7669d6e8a85e5ed2a9b0d99156dcd313",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:23:46",
-              "seconds": 1426,
-              "title": "おべか",
-              "artist": "すりぃ feat. 重音テト,鏡音レン",
-              "raw": "23:46 2. おべか/すりぃ feat. 重音テト,鏡音レン",
-              "rawHash": "5f08334fe59591f64313e6e302441ea012b3be4bc91e84d9d1654c549008995f",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:32:47",
-              "seconds": 1967,
-              "title": "エゴロック",
-              "artist": "すりぃ feat. 鏡音レン",
-              "raw": "32:47 3. エゴロック/すりぃ feat. 鏡音レン",
-              "rawHash": "91a6d4437d3c56444161f665ec0360e6ca496ac9e1cabee188d9206e8ad8814d",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:36:24",
-              "seconds": 2184,
-              "title": "1925",
-              "artist": "冨田悠斗(とみー/T-POCKET) feat. 初音ミク",
-              "raw": "36:24 4. 1925/冨田悠斗(とみー/T-POCKET) feat. 初音ミク",
-              "rawHash": "ccc116a4e6b608b9e47464655be5adc2d4bad96f85856213037ee3fd3adaec0f",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:55:17",
-              "seconds": 3317,
-              "title": "ロストワンの号哭",
-              "artist": "Neru feat. 鏡音リン",
-              "raw": "55:17 5. ロストワンの号哭/Neru feat. 鏡音リン",
-              "rawHash": "8e8b998981b3b057e6313d8d0f03ae62b5f1a2e25c6ba20ee64b96c1e3532e85",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:00:44",
-              "seconds": 3644,
-              "title": "ワールドイズマイン",
-              "artist": "supercell feat.初音ミク",
-              "raw": "1:00:44 6. ワールドイズマイン/supercell feat.初音ミク",
-              "rawHash": "01464b8722656da5fa41c508b4ebecbb4595f1957cb8da5c3e0b6c9135a57dc1",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:07:29",
-              "seconds": 4049,
-              "title": "千本桜",
-              "artist": "和楽器バンド",
-              "raw": "1:07:29 7. 千本桜/和楽器バンド",
-              "rawHash": "a7df01b4bd8c8c301948df999b34f2041c2d6680b1a4f259a2c1b06470b632a6",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:22:45",
-              "seconds": 4965,
-              "title": "ワールズエンド・ダンスホール",
-              "artist": "wowaka feat. 初音ミク,巡音ルカ",
-              "raw": "1:22:45 8. ワールズエンド・ダンスホール/wowaka feat. 初音ミク,巡音ルカ",
-              "rawHash": "d573033adc1ab976e392d0dea3b4107ef9188e8ade687cd58addc8432218a608",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:26:48",
-              "seconds": 5208,
-              "title": "ロミオとシンデレラ",
-              "artist": "doriko feat.初音ミク",
-              "raw": "1:26:48 9. ロミオとシンデレラ/doriko feat.初音ミク",
-              "rawHash": "68794ac9569d7434a02ea147495f1adf021886b213970732cdbcd3df8cf7f588",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:36:46",
-              "seconds": 5806,
-              "title": "天ノ弱",
-              "artist": "164 feat.GUMI",
-              "raw": "1:36:46 10. 天ノ弱/164 feat.GUMI",
-              "rawHash": "d504c20f315ae73ce337e801707ea4355402fd1aa21ed9a892a5a3a2b266f865",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:40:23",
-              "seconds": 6023,
-              "title": "深海少女",
-              "artist": "ゆうゆ feat.初音ミク",
-              "raw": "1:40:23 11. 深海少女/ゆうゆ feat.初音ミク",
-              "rawHash": "5a9a80688161da60ab0d0f485853d4fa79fe22b9b627be110fd040a0b13e547f",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:05:03",
-              "seconds": 7503,
-              "title": "マーメイド",
-              "artist": "monaca:factory(10日P) feat. GUMI",
-              "raw": "2:05:03 12. マーメイド/monaca:factory(10日P) feat. GUMI",
-              "rawHash": "38871f104bdd808a9ac79528984269fda6d4aca90f9f2ed6da5fd3c1eba4158e",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:08:44",
-              "seconds": 7724,
-              "title": "ショコラと隕石",
-              "artist": "monaca:factory(10日P) feat. GUMI",
-              "raw": "2:08:44 13. ショコラと隕石/monaca:factory(10日P) feat. GUMI",
-              "rawHash": "cd95f0d1fce7ed3ce20a01aba5c154ec0afbb2e1e1c28a6bf9c71d830845f46f",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:12:27",
-              "seconds": 7947,
-              "title": "ロキ",
-              "artist": "みきとP feat. 鏡音リン",
-              "raw": "2:12:27 14. ロキ/みきとP feat. 鏡音リン",
-              "rawHash": "a64ade06a9e08273b32a06ba17303bae431a58205ac4f29272f88e6a0048e09a",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:21:40",
-              "seconds": 8500,
-              "title": "刹那プラス",
-              "artist": "みきとP feat. 初音ミク",
-              "raw": "2:21:40 15. 刹那プラス/みきとP feat. 初音ミク",
-              "rawHash": "9f0148b76f208923856e647eb68ddb8f6bafc876e1962b9d520d4415941a7c4c",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:26:18",
-              "seconds": 8778,
-              "title": "小夜子",
-              "artist": "みきとP feat. 初音ミク",
-              "raw": "2:26:18 16. 小夜子/みきとP feat. 初音ミク",
-              "rawHash": "8c036d65c278cf6592c72309283103df862b290aa4c702f0aba052254686577f",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:33:32",
-              "seconds": 9212,
-              "title": "セツナトリップ",
-              "artist": "Last Note. feat.GUMI",
-              "raw": "2:33:32 17. セツナトリップ/Last Note. feat.GUMI",
-              "rawHash": "d5a7083834df709965e2345a5ddffef5013e7e7cd3c7da485b7c32608c4157ed",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:37:55",
-              "seconds": 9475,
-              "title": "白い雪のプリンセスは",
-              "artist": "のぼる↑ feat.初音ミク",
-              "raw": "2:37:55 18. 白い雪のプリンセスは/のぼる↑ feat.初音ミク",
-              "rawHash": "10a4c414b534e922815eecb4e95a9c0fda65bb334a953b52ac7102e364b1bf73",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:42:45",
-              "seconds": 9765,
-              "title": "メランコリック",
-              "artist": "Junky feat.鏡音リン",
-              "raw": "2:42:45 19. メランコリック/Junky feat.鏡音リン",
-              "rawHash": "120ef5b0e7e1220bce72765ed640342a026946af62e87adbd736bc6fde9b8533",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:51:50",
-              "seconds": 10310,
-              "title": "マトリョシカ",
-              "artist": "ハチ feat.初音ミク,GUMI",
-              "raw": "2:51:50 20. マトリョシカ/ハチ feat.初音ミク,GUMI",
-              "rawHash": "0cc42334254325ac75ebc80c06f280b4bf2976ebd9b5c7a078ad98a50770c035",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:55:42",
-              "seconds": 10542,
-              "title": "ダブルラリアット",
-              "artist": "アゴアニキ feat. 巡音ルカ",
-              "raw": "2:55:42 21. ダブルラリアット/アゴアニキ feat. 巡音ルカ",
-              "rawHash": "51378d6464ef5927b67141d16c4e539343cde5d1076c4736e7f4d3f9a3b95838",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:59:47",
-              "seconds": 10787,
-              "title": "心拍数# 0822",
-              "artist": "蝶々P feat. 初音ミク",
-              "raw": "2:59:47 22. 心拍数# 0822/蝶々P feat. 初音ミク",
-              "rawHash": "f732dec4b6164a167bc3dff37fe90f762b6d0f81464526f35876525f20b696b4",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:06:12",
-              "seconds": 11172,
-              "title": "KING",
-              "artist": "Kanaria feat. GUMI",
-              "raw": "3:06:12 23. KING/Kanaria feat. GUMI",
-              "rawHash": "7054dedcce27039ecb21db800c6655a681e4685656a6c8f39eac13537fc59f79",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:08:56",
-              "seconds": 11336,
-              "title": "ヒバナ",
-              "artist": "DECO*27 feat. 初音ミク",
-              "raw": "3:08:56 24. ヒバナ/DECO*27 feat. 初音ミク",
-              "rawHash": "e629cbfd2a16e05c4d5a4234ca1a7ccabbce91497c4bfd7ac63c6207c7676bb4",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:28:09",
-              "seconds": 12489,
-              "title": "カゲロウデイズ",
-              "artist": "じん feat. 初音ミク",
-              "raw": "3:28:09 25. カゲロウデイズ/じん feat. 初音ミク",
-              "rawHash": "0d933384792070947c4c3cf7e0206e574ee0337ab3a19916987adf868c2cc54a",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:35:11",
-              "seconds": 12911,
-              "title": "インビジブル",
-              "artist": "kemu feat. GUMI,鏡音リン",
-              "raw": "3:35:11 26. インビジブル/kemu feat. GUMI,鏡音リン",
-              "rawHash": "f3f7aab75202488773579b8c42160df49bb255c0d7bf0dc71f2788db4d23c06b",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:43:00",
-              "seconds": 13380,
-              "title": "恋愛裁判",
-              "artist": "40mP feat.初音ミク",
-              "raw": "3:43:00 27. 恋愛裁判/40mP feat.初音ミク",
-              "rawHash": "5d77b228feccfa3842c86b1659bda492e512472aa90b079a68613162d4f65187",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:47:11",
-              "seconds": 13631,
-              "title": "えれくとりっく・えんじぇぅ",
-              "artist": "ヤスオP feat.初音ミク",
-              "raw": "3:47:11 28. えれくとりっく・えんじぇぅ/ヤスオP feat.初音ミク",
-              "rawHash": "70354c8085acbd9194d8bfdff2cecc122039085cc992b7eac635eb0c772460c5",
-              "sourceId": "UgweVTz2cm1_XXwgUOh4AaABAg",
-              "sourceHash": "b119b604de88ebd08115f5110c1828d58ab115b5ff599c25f81ce37f6bb6a489",
-              "riskReasons": []
-            }
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "obvious_non_song_text": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:07:35",
-              "seconds": 455,
-              "title": "声入り",
-              "artist": "",
-              "line": "7:35 声入り",
-              "rawHash": "1d27e000406fd480c4d3ac75f0da50f52fe81b335dc8a1cea562245e9bb84385"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:07:35",
-              "seconds": 455,
-              "title": "声入り",
-              "artist": "",
-              "line": "7:35 声入り",
-              "rawHash": "1d27e000406fd480c4d3ac75f0da50f52fe81b335dc8a1cea562245e9bb84385"
-            }
-          ],
-          "sourceText": "セトリ＆タイムスタンプ\r\n7:35 声入り\r\n19:47 1. 天才ロック/カラスヤサボウ feat. 鏡音リン\r\n23:46 2. おべか/すりぃ feat. 重音テト,鏡音レン\r\n32:47 3. エゴロック/すりぃ feat. 鏡音レン\r\n36:24 4. 1925/冨田悠斗(とみー/T-POCKET) feat. 初音ミク\r\n55:17 5. ロストワンの号哭/Neru feat. 鏡音リン\r\n1:00:44 6. ワールドイズマイン/supercell feat.初音ミク\r\n1:07:29 7. 千本桜/和楽器バンド\r\n1:22:45 8. ワールズエンド・ダンスホール/wowaka feat. 初音ミク,巡音ルカ\r\n1:26:48 9. ロミオとシンデレラ/doriko feat.初音ミク\r\n1:36:46 10. 天ノ弱/164 feat.GUMI\r\n1:40:23 11. 深海少女/ゆうゆ feat.初音ミク\r\n2:05:03 12. マーメイド/monaca:factory(10日P) feat. GUMI\r\n2:08:44 13. ショコラと隕石/monaca:factory(10日P) feat. GUMI\r\n2:12:27 14. ロキ/みきとP feat. 鏡音リン\r\n2:21:40 15. 刹那プラス/みきとP feat. 初音ミク\r\n2:26:18 16. 小夜子/みきとP feat. 初音ミク\r\n2:33:32 17. セツナトリップ/Last Note. feat.GUMI\r\n2:37:55 18. 白い雪のプリンセスは/のぼる↑ feat.初音ミク\r\n2:42:45 19. メランコリック/Junky feat.鏡音リン\r\n2:51:50 20. マトリョシカ/ハチ feat.初音ミク,GUMI\r\n2:55:42 21. ダブルラリアット/アゴアニキ feat. 巡音ルカ\r\n2:59:47 22. 心拍数# 0822/蝶々P feat. 初音ミク\r\n3:06:12 23. KING/Kanaria feat. GUMI\r\n3:08:56 24. ヒバナ/DECO*27 feat. 初音ミク\r\n3:28:09 25. カゲロウデイズ/じん feat. 初音ミク\r\n3:35:11 26. インビジブル/kemu feat. GUMI,鏡音リン\r\n3:43:00 27. 恋愛裁判/40mP feat.初音ミク\r\n3:47:11 28. えれくとりっく・えんじぇぅ/ヤスオP feat.初音ミク",
-          "selected": true
-        },
-        {
-          "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-          "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
-          "sourceType": "comment",
-          "sourceIndex": 2,
-          "commentId": "UgxysJg9EvroO3PEBnh4AaABAg",
-          "authorName": "@March649",
-          "reason": "",
-          "sourceScore": 83,
-          "riskScore": 10,
-          "riskLevel": "low",
-          "riskReasons": [
-            "short_unknown_title"
-          ],
-          "singleSongIdentification": null,
-          "originalCount": 6,
-          "keptCount": 6,
-          "knownSongCount": 4,
-          "repairedKnownSongCount": 3,
-          "artistCount": 4,
-          "unknownArtistCount": 2,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
+          "activityMarkerRatio": 0.06666666666666667,
           "conversationEntryCount": 0,
           "conversationRatio": 0,
           "parserCorruptionCount": 0,
           "nicheCount": 0,
           "nicheRatio": 0,
           "topicCount": 0,
-          "structuralCount": 6,
+          "structuralCount": 15,
           "sentenceLikeCount": 0,
           "sample": [
-            "0:17:08 忘れろ",
-            "0:19:47 天才ロック",
-            "0:23:46 おべかすりぃ feat. 重音テト、鏡音レン",
-            "0:32:47 エゴロック",
-            "0:36:24 4.1925",
-            "0:55:17 ロストワンの号哭"
+            "0:08:55 わたがし",
+            "0:16:12 マリーゴールド",
+            "0:20:32 オレンジ",
+            "0:27:54 ぷんぷん",
+            "0:38:35 花火",
+            "0:46:38 おつかれSUMMER",
+            "0:51:57 初恋",
+            "0:57:10 ブルーアンビエンス"
           ],
           "entries": [
             {
               "status": "accepted",
-              "time": "0:17:08",
-              "seconds": 1028,
-              "title": "忘れろ",
-              "artist": "未記載",
-              "raw": "17:08 忘れろ",
-              "rawHash": "2c9a8f549a2996fdce673098e4299ce7a72702be5f667334ac6758942b93257e",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
-              "riskReasons": [
-                "short_unknown_title"
-              ]
-            },
-            {
-              "status": "accepted",
-              "time": "0:19:47",
-              "seconds": 1187,
-              "title": "天才ロック",
-              "artist": "カラスヤサボウ feat. 鏡音リン",
-              "raw": "19:47 1. 天才ロック/カラスヤサボウ feat. 鏡音リン",
-              "rawHash": "274c2ffe7c985ed84c72c1f9dbda2f1a7669d6e8a85e5ed2a9b0d99156dcd313",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
+              "time": "0:08:55",
+              "seconds": 535,
+              "title": "わたがし",
+              "artist": "back number",
+              "raw": "0:08:55 わたがし / back number",
+              "rawHash": "8afc657d678cb9c024e9ced09f0deb6a2cdb113254c4a307a42171d58451157b",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:23:46",
-              "seconds": 1426,
-              "title": "おべかすりぃ feat. 重音テト、鏡音レン",
-              "artist": "未記載",
-              "raw": "23:46 2. おべかすりぃ feat. 重音テト、鏡音レン",
-              "rawHash": "133071101c76d71538ccd143e61961b4b4956885ca52afa154e418a62161e13d",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
+              "time": "0:16:12",
+              "seconds": 972,
+              "title": "マリーゴールド",
+              "artist": "あいみょん",
+              "raw": "0:16:12 マリーゴールド / あいみょん",
+              "rawHash": "fe926944eab5399f3664a442238896228abf7420f467f91c8f234395c93904f0",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:32:47",
-              "seconds": 1967,
-              "title": "エゴロック",
-              "artist": "すりぃ feat. 鏡音レン",
-              "raw": "32:47 3. エゴロック/すりぃ feat. 鏡音レン",
-              "rawHash": "91a6d4437d3c56444161f665ec0360e6ca496ac9e1cabee188d9206e8ad8814d",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
+              "time": "0:20:32",
+              "seconds": 1232,
+              "title": "オレンジ",
+              "artist": "トーマ",
+              "raw": "0:20:32 オレンジ / トーマ",
+              "rawHash": "dd22013f42da28558981e80a4f08508d9eb6e26ceb0356aa70f69b21ac47544d",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:36:24",
-              "seconds": 2184,
-              "title": "4.1925",
-              "artist": "冨田悠斗(とみ一/T-POCKET) feat. 初音ミク",
-              "raw": "36:24 4.1925/冨田悠斗(とみ一/T-POCKET) feat. 初音ミク",
-              "rawHash": "c6853e55e7fa13db903ce82e2f40a09ccc87f239d72fe8c81d0c3c03e1308b9a",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
+              "time": "0:27:54",
+              "seconds": 1674,
+              "title": "ぷんぷん",
+              "artist": "コレサワ",
+              "raw": "0:27:54 ぷんぷん / コレサワ",
+              "rawHash": "5b43956b9665285f06b7af834eb842ed2fee6f4a4c59ce0f71657a256b1ebbae",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:55:17",
-              "seconds": 3317,
-              "title": "ロストワンの号哭",
-              "artist": "Neru feat. 鏡音リン",
-              "raw": "55:17 5. ロストワンの号哭/Neru feat. 鏡音リン",
-              "rawHash": "8e8b998981b3b057e6313d8d0f03ae62b5f1a2e25c6ba20ee64b96c1e3532e85",
-              "sourceId": "UgxysJg9EvroO3PEBnh4AaABAg",
-              "sourceHash": "604ffc6eaabf8f02e85df54a9ff7d8c6129a705ac2ef7d14d1e48916468667c8",
+              "time": "0:38:35",
+              "seconds": 2315,
+              "title": "花火",
+              "artist": "aiko",
+              "raw": "0:38:35 花火 / aiko",
+              "rawHash": "2cabdd29db83f784d3f24eb56edf0e205f23e7b6a94042228ddb85afb2f4e7ae",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
-            }
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": [],
-          "sourceText": "お疲れ様でした。\n\n17:08\n忘れろ\n\n19:47\n 1. 天才ロック/カラスヤサボウ feat. 鏡音リン\n\n23:46 \n2. おべかすりぃ feat. 重音テト、鏡音レン\n\n32:47\n3. エゴロック/すりぃ feat. 鏡音レン\n\n36:24\n 4.1925/冨田悠斗(とみ一/T-POCKET) feat. 初音ミク\n\n55:17 \n5. ロストワンの号哭/Neru feat. 鏡音リン",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "videoId": "Gphz-DcIrkk",
-      "title": "【歌枠】初見さん10人と出会いたい! #shorts #vtuber",
-      "channelName": "友瀬芽梨 - 𝐓𝐨𝐦𝐨𝐬𝐞 𝐌𝐞𝐫𝐢 𖤐´-",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "21 時間前 に配信済み",
-      "publishedTimestamp": 1785379931195,
-      "durationText": "1:00:13 1:00:13 再生中",
-      "commentCandidateCount": 8,
-      "result": "selected",
-      "selectedSongCount": 12,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 1,
-      "rejectedEntryCount": 1,
-      "sources": [
-        {
-          "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-          "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
-          "sourceType": "comment",
-          "sourceIndex": 4,
-          "commentId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-          "authorName": "@12345MINO",
-          "reason": "",
-          "sourceScore": 264,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 12,
-          "keptCount": 12,
-          "knownSongCount": 12,
-          "repairedKnownSongCount": 12,
-          "artistCount": 12,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 12,
-          "sentenceLikeCount": 0,
-          "sample": [
-            "0:00:25 ライラック",
-            "0:05:19 ヒトリゴト",
-            "0:09:26 気まぐれロマンティック",
-            "0:13:30 いーあるふぁんくらぶ",
-            "0:19:28 夢をかなえてドラえもん",
-            "0:24:02 ドライフラワー",
-            "0:29:02 竈門炭治郎のうた",
-            "0:35:25 心拍数#0822"
-          ],
-          "entries": [
+            },
             {
               "status": "accepted",
-              "time": "0:00:25",
-              "seconds": 25,
-              "title": "ライラック",
+              "time": "0:46:38",
+              "seconds": 2798,
+              "title": "おつかれSUMMER",
+              "artist": "HALCALI",
+              "raw": "0:46:38 おつかれSUMMER / HALCALI",
+              "rawHash": "379673aa271f3a28ff46c6618a6e1556422ec77af17a3db3b52775ded6cb8abf",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:51:57",
+              "seconds": 3117,
+              "title": "初恋",
+              "artist": "神はサイコロを振らない × アユニ・D(BiSH/PEDRO) × n-buna from ヨルシカ",
+              "raw": "0:51:57 初恋 / 神はサイコロを振らない × アユニ・D(BiSH/PEDRO) × n-buna from ヨルシカ",
+              "rawHash": "42ad34071b1e22b846c9ab3343d5a62a2cb726a7132455a76cf087de52ae035c",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:57:10",
+              "seconds": 3430,
+              "title": "ブルーアンビエンス",
               "artist": "Mrs. GREEN APPLE",
-              "raw": "0:25　ライラック/Mrs. GREEN APPLE",
-              "rawHash": "c133ccc8c4bfe14b57d1011ba73b7bbaaff8f5ae2f9134a85b05e9233128a1bc",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "raw": "0:57:10 ブルーアンビエンス / Mrs. GREEN APPLE",
+              "rawHash": "955d1eb3f9b5332edd784cbbdf81d79f882dd9e4db727e277b28782f71db7d04",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:05:19",
-              "seconds": 319,
-              "title": "ヒトリゴト",
-              "artist": "ClariS",
-              "raw": "5:19　ヒトリゴト/ClariS",
-              "rawHash": "5fe45456fc1a88b7a597a59922e4426f6a55d484d6d3d4726cb4d02678446526",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:09:26",
+              "seconds": 4166,
+              "title": "again",
+              "artist": "YUI",
+              "raw": "1:09:26 again / YUI",
+              "rawHash": "e121becf8bf7caf0fff1ab083138a81530f593ef861b59acb4704ad2ad94acfd",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:09:26",
-              "seconds": 566,
-              "title": "気まぐれロマンティック",
-              "artist": "いきものがかり",
-              "raw": "9:26　気まぐれロマンティック/いきものがかり",
-              "rawHash": "eafecd2bc33829eaff031b91ff0ccb4f14bd8b8f10b08ed78467c6245e0195e6",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:17:31",
+              "seconds": 4651,
+              "title": "打上花火",
+              "artist": "DAOKO×米津玄師",
+              "raw": "1:17:31 打上花火 / DAOKO×米津玄師",
+              "rawHash": "31e246185ace3e22af911b770bf81d7638db7136dd5228ca70bcd68d27e50d13",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:13:30",
-              "seconds": 810,
-              "title": "いーあるふぁんくらぶ",
-              "artist": "みきとP",
-              "raw": "13:30　いーあるふぁんくらぶ/みきとP",
-              "rawHash": "f279aa2c168de925dda80dd651d342a8912eae641a1570e6a74f259a60bc7fa5",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:26:03",
+              "seconds": 5163,
+              "title": "カタオモイ",
+              "artist": "Aimer",
+              "raw": "1:26:03 カタオモイ / Aimer",
+              "rawHash": "19bc2e7c21bdacbca07f4f23b11a6689085afc721d2b88401307d0f54ecaab6b",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:19:28",
-              "seconds": 1168,
-              "title": "夢をかなえてドラえもん",
-              "artist": "mao",
-              "raw": "19:28　夢をかなえてドラえもん/mao",
-              "rawHash": "a79ccb2498045db42a54f3de0a78a5c703505dc9a526747304e8131204265e8e",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:34:15",
+              "seconds": 5655,
+              "title": "スター",
+              "artist": "aiko",
+              "raw": "1:34:15 スター / aiko",
+              "rawHash": "51c10a404d0367185fd72fb47fe4b43e557a41f7ebcbe63fa19f087c4ba8463e",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:24:02",
-              "seconds": 1442,
-              "title": "ドライフラワー",
-              "artist": "優里",
-              "raw": "24:02　ドライフラワー/優里",
-              "rawHash": "6b946681437a50f49e4e59fdbf1f0c5922d497ccb26ad9c1cdc5503ee33495f5",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:46:52",
+              "seconds": 6412,
+              "title": "歌舞伎町の女王",
+              "artist": "椎名林檎",
+              "raw": "1:46:52 歌舞伎町の女王 / 椎名林檎",
+              "rawHash": "23d102fa65c397a20585ed5ec86fa3828732d30624f4c5fb4259daa62704e2cf",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:29:02",
-              "seconds": 1742,
-              "title": "竈門炭治郎のうた",
-              "artist": "椎名豪 featuring 中川奈美",
-              "raw": "29:02　竈門炭治郎のうた/椎名豪 featuring 中川奈美",
-              "rawHash": "7731f252d1efed7f108e90648ac0fdaa6427da7838659100dc7fc14e88a4eb38",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:52:41",
+              "seconds": 6761,
+              "title": "憂、燦々",
+              "artist": "クリープハイプ",
+              "raw": "1:52:41 憂、燦々 / クリープハイプ",
+              "rawHash": "da8ec46163c0111106c9b2545e0cb0f5d100851c4eb3f6f9716fc4707da19d4b",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             },
             {
               "status": "accepted",
-              "time": "0:35:25",
-              "seconds": 2125,
-              "title": "心拍数#0822",
-              "artist": "蝶々P feat. 初音ミク",
-              "raw": "35:25　心拍数#0822/蝶々P feat. 初音ミク",
-              "rawHash": "e5f8fb6d4fb5f877d1500daa79ed96240e3a6628e0c6c725f6dca42ae80958d5",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:40:46",
-              "seconds": 2446,
-              "title": "朝ごはんの歌",
-              "artist": "手嶌葵",
-              "raw": "40:46　朝ごはんの歌/手嶌葵",
-              "rawHash": "6315a51ab1a65da2f6097d75d93c292ea71f6208229714e21e71e0bb7668bfb6",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:43:52",
-              "seconds": 2632,
-              "title": "花束のかわりにメロディーを",
-              "artist": "清水翔太",
-              "raw": "43:52　花束のかわりにメロディーを/清水翔太",
-              "rawHash": "20c41b7aacd20d022803cb8d8e306274741091242db5149f9b6292952c4c179e",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:49:31",
-              "seconds": 2971,
-              "title": "ソワレ",
-              "artist": "星街すいせい",
-              "raw": "49:31　ソワレ/星街すいせい",
-              "rawHash": "1fc13f010967a4ad22cccaa1189658dfbc0e82b1edc8ef9fe5162a7d56b787cd",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:53:22",
-              "seconds": 3202,
-              "title": "ファンサ",
-              "artist": "mona（ＣＶ:夏川椎菜）feat.HoneyWorks",
-              "raw": "53:22　ファンサ/mona（ＣＶ:夏川椎菜）feat.HoneyWorks",
-              "rawHash": "73807b954417f6679770f8b41d1ca526015dc344b26b408dcc3f07d530d18bd3",
-              "sourceId": "UgyazkWLdjtpXUlfZsN4AaABAg",
-              "sourceHash": "6464a4edebf7ef555e171457de82a578c2f65ac4e9c2f1a32c9a1b06f18d5c86",
+              "time": "1:59:44",
+              "seconds": 7184,
+              "title": "エルマ",
+              "artist": "ヨルシカ",
+              "raw": "1:59:44 エルマ / ヨルシカ",
+              "rawHash": "bf3bffda4b3cc69c04e325a10d6903a10d36a79504634257121d6dc0122b8763",
+              "sourceId": "UgwqnqD0AF49qZNorhx4AaABAg",
+              "sourceHash": "b0f13a713ef4f43288fe196bf96b492a780228e8b8c5b74e71fb9167ae7291ba",
               "riskReasons": []
             }
           ],
@@ -1147,74 +557,15 @@
           "rejectedEntryReasons": {},
           "rejectedSamples": [],
           "rejectedEntries": [],
+          "sourceText": "🪴セトリ＆シーン🪞\r\n0:08:55 わたがし / back number\r\n0:16:12 マリーゴールド / あいみょん\r\n0:20:32 オレンジ / トーマ\r\n0:27:54 ぷんぷん / コレサワ\r\n0:38:35 花火 / aiko\r\n0:46:38 おつかれSUMMER / HALCALI\r\n0:51:57 初恋 / 神はサイコロを振らない × アユニ・D(BiSH/PEDRO) × n-buna from ヨルシカ\r\n0:57:10 ブルーアンビエンス / Mrs. GREEN APPLE\r\n1:09:26 again / YUI\r\n1:17:31 打上花火 / DAOKO×米津玄師\r\n1:26:03 カタオモイ / Aimer\r\n1:34:15 スター / aiko\r\n1:46:52 歌舞伎町の女王 / 椎名林檎\r\n1:52:41 憂、燦々 / クリープハイプ\r\n1:59:44 エルマ / ヨルシカ\r\n========================\r\n※次回の配信は、08/02(日)22時～定期配信！弾き語り\r\n※08/15(土) ぶいかふぇ♪vol.284 出演します！配信チケットあり(オリ曲も歌う予定！)\r\n※09/23(水祝) ばちゃすて！-Virtual Stage Vol.1- 出演します！配信チケットあり。(オリ曲も歌う予定！)",
           "selected": true
-        },
-        {
-          "sourceId": "UgwhXuTB9u4vXKNPvQJ4AaABAg",
-          "sourceHash": "63e3701d1e62f3d757c5cc17054335c7e498d8b3cfc6a47352fdb0d5297c1621",
-          "sourceType": "comment",
-          "sourceIndex": 5,
-          "commentId": "UgwhXuTB9u4vXKNPvQJ4AaABAg",
-          "authorName": "@ヒロ-q7k3e",
-          "reason": "no_song_after_filter",
-          "sourceScore": -6.5,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 1,
-          "structuralCount": 1,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:53:26",
-              "seconds": 3206,
-              "title": "ラストぉー！！からの入りが最強すぎてちゃんしか見えない",
-              "artist": "未記載",
-              "line": "0:53:26 ラストぉー！！からの入りが最強すぎて:_めり文字仮:ちゃんしか見えない:_助かる::_LOVE:",
-              "rawHash": "df6262d4579d058ad3c5734f0917b8ce614ac960825c16d6a5bee93674453806"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:53:26",
-              "seconds": 3206,
-              "title": "ラストぉー！！からの入りが最強すぎてちゃんしか見えない",
-              "artist": "未記載",
-              "line": "0:53:26 ラストぉー！！からの入りが最強すぎて:_めり文字仮:ちゃんしか見えない:_助かる::_LOVE:",
-              "rawHash": "df6262d4579d058ad3c5734f0917b8ce614ac960825c16d6a5bee93674453806"
-            }
-          ],
-          "sourceText": "おつめりでした☆\n\n0:53:26 ラストぉー！！からの入りが最強すぎて:_めり文字仮:ちゃんしか見えない:_助かる::_LOVE:\n\n気まぐれロマンティック、朝ごはんの歌、ファンサとめっちゃ好きな歌やし芽梨ちゃんのお歌で元気もらえる！！また次も聴きたい！約束～✨:_ぱちぱち::_ぱちぱち::_ぱちぱち:",
-          "selected": false
         }
       ]
     },
     {
-      "videoId": "uhxzoeTd4Rw",
-      "title": "【KARAOKE - 歌枠】Pasemos un buen rato juntos | お歌を歌う♪ 【Meica05】",
-      "channelName": "Meica05 Ch.",
+      "videoId": "qORiizFc_xk",
+      "title": "【#歌枠｜#SingingStream】ちょっとだけ歌うよ🎤【セルフ受肉 #VTuber】",
+      "channelName": "そらすず / SorasuZ",
       "keyword": "歌枠",
       "keywords": [
         "歌枠",
@@ -1223,501 +574,21 @@
       "sourceGroups": [
         "mygit_today_snapshot"
       ],
-      "publishedText": "21 時間前 に配信済み",
-      "publishedTimestamp": 1785293845526,
-      "durationText": "2:32:42 再生中",
-      "commentCandidateCount": 23,
-      "result": "selected",
-      "selectedSongCount": 21,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 3,
-      "rejectedEntryCount": 3,
-      "sources": [
-        {
-          "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-          "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-          "sourceType": "comment",
-          "sourceIndex": 0,
-          "commentId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-          "authorName": "@Sora-sanCh",
-          "reason": "",
-          "sourceScore": 350,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 21,
-          "keptCount": 21,
-          "knownSongCount": 21,
-          "repairedKnownSongCount": 8,
-          "artistCount": 21,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 21,
-          "sentenceLikeCount": 0,
-          "sample": [
-            "0:28:58 『 Renai Circulation 』",
-            "0:38:15 『 Don't Say Lazy 』",
-            "0:44:30 『 Ochame Kinou 』",
-            "0:50:25 『 Otsukare Summer 』",
-            "0:57:57 『 Happy Lucky Chappy 』",
-            "1:02:53 『 Odoriko 』",
-            "1:08:15 『 Usseewa 』",
-            "1:13:57 『 Umapyoi Densetsu 』"
-          ],
-          "entries": [
-            {
-              "status": "accepted",
-              "time": "0:28:58",
-              "seconds": 1738,
-              "title": "Renai Circulation",
-              "artist": "Kana Hanazawa 〔Bakemonogatari〕",
-              "raw": "28:58 『 Renai Circulation 』 - Kana Hanazawa 〔Bakemonogatari〕",
-              "rawHash": "c85fe6e7eb894977474a15324c32bb651c0ab5c43b72136a7b2fe20d5dfe2bca",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:38:15",
-              "seconds": 2295,
-              "title": "Don't Say Lazy",
-              "artist": "Yoko Hikasa 〔K-On〕",
-              "raw": "38:15 『 Don't Say Lazy 』 - Yoko Hikasa 〔K-On〕",
-              "rawHash": "8c87f654a435129d3e9f83d628f431f7fdd7f2abb988c69e92647d9b4e602cef",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:44:30",
-              "seconds": 2670,
-              "title": "Ochame Kinou",
-              "artist": "GojimajiP",
-              "raw": "44:30 『 Ochame Kinou 』 - GojimajiP",
-              "rawHash": "50117b496afeac3dd7e54d9b8063325b3e020bc642af36d6aaabe0e11085a489",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:50:25",
-              "seconds": 3025,
-              "title": "Otsukare Summer",
-              "artist": "Halcali",
-              "raw": "50:25 『 Otsukare Summer 』 - Halcali",
-              "rawHash": "0b560593165fb4dac5b421fd7bead99205edda6f1363a50a2d44eca93c6e667a",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:57:57",
-              "seconds": 3477,
-              "title": "Happy Lucky Chappy",
-              "artist": "Ano 〔Takopi No Genzai〕",
-              "raw": "57:57 『 Happy Lucky Chappy 』 - Ano 〔Takopi No Genzai〕",
-              "rawHash": "6324e46763f8d3231c02e566043aaf0c9540e487c8bf09dbc3686d837bb7663c",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:02:53",
-              "seconds": 3773,
-              "title": "Odoriko",
-              "artist": "Vaundy",
-              "raw": "1:02:53 『 Odoriko 』 - Vaundy",
-              "rawHash": "2db17fe09662b89a2a92998d070c050c369a2374bf7fa2ab9acf0c858595c848",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:08:15",
-              "seconds": 4095,
-              "title": "Usseewa",
-              "artist": "Ado",
-              "raw": "1:08:15 『 Usseewa 』 - Ado",
-              "rawHash": "e8197d611b15bd79ccbf9047f5640e4040c4a3f10cb06a3de506e0027baa2bad",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:13:57",
-              "seconds": 4437,
-              "title": "Umapyoi Densetsu",
-              "artist": "〔Uma Musume Pretty Derby〕",
-              "raw": "1:13:57 『 Umapyoi Densetsu 』 - 〔Uma Musume Pretty Derby〕",
-              "rawHash": "c11ee1f1e2ffafd25d427f670fd1e70a5ea3a4a875ada30743f53680229a013a",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:17:45",
-              "seconds": 4665,
-              "title": "Zankoku Na Tenshi no Teeze",
-              "artist": "Yoko Takahashi 〔Neon Genesis Evangelion〕",
-              "raw": "1:17:45 『 Zankoku Na Tenshi no Teeze 』 - Yoko Takahashi 〔Neon Genesis Evangelion〕",
-              "rawHash": "0e5f728c4fe53bddc5e089e90abce057b58227b5881262d52717a1418ee040fd",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:26:11",
-              "seconds": 5171,
-              "title": "Cha-La Head Cha-La",
-              "artist": "Hironobu Kageyama 〔Dragon Ball Z〕",
-              "raw": "1:26:11 『 Cha-La Head Cha-La 』 - Hironobu Kageyama 〔Dragon Ball Z〕",
-              "rawHash": "15c8552974a28380b8f152863f7db73d374dfc9bebff661a98faf0a1c3dcee59",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:31:57",
-              "seconds": 5517,
-              "title": "Blue Bird",
-              "artist": "Ikimonogakari 〔Naruto〕",
-              "raw": "1:31:57 『 Blue Bird 』 - Ikimonogakari 〔Naruto〕",
-              "rawHash": "16ff519f7c1741b41129233e12700e3e609bf3d262485f815aa228bb2922b2f6",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:35:11",
-              "seconds": 5711,
-              "title": "Silhouette",
-              "artist": "Kana-Boon 〔Naruto〕",
-              "raw": "1:35:11 『 Silhouette 』 - Kana-Boon 〔Naruto〕",
-              "rawHash": "6df666af6649f805f97769e154d343cf31e4d8502a0b2d91525b7ef856a5c66c",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:44:43",
-              "seconds": 6283,
-              "title": "Otonoke",
-              "artist": "Creepy Nuts 〔Dan Da Dan〕",
-              "raw": "1:44:43 『 Otonoke 』 - Creepy Nuts 〔Dan Da Dan〕",
-              "rawHash": "4c845b3c9a3bcf88ea58bfc49ae8f2fc6c797e6d395d87ee6c5eb10f830d0a03",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:47:46",
-              "seconds": 6466,
-              "title": "Ikanaide",
-              "artist": "Sohta",
-              "raw": "1:47:46 『 Ikanaide 』 - Sohta",
-              "rawHash": "759cb6e1c4201cf43ba9991087b890039d661c6ef52fb581904b7c211bc8ee63",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:51:45",
-              "seconds": 6705,
-              "title": "Iris Out",
-              "artist": "Kenshi Yonezu 〔Chainsaw Man〕",
-              "raw": "1:51:45 『 Iris Out 』 - Kenshi Yonezu 〔Chainsaw Man〕",
-              "rawHash": "564034d7471b5b5e3c7cb2e23855374b61d503569990a3956bace154e4e16dca",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "1:57:34",
-              "seconds": 7054,
-              "title": "Lemon",
-              "artist": "Kenshi Yonezu 〔Unnatural〕",
-              "raw": "1:57:34 『 Lemon 』 - Kenshi Yonezu 〔Unnatural〕",
-              "rawHash": "5568ca5bb9fa259afce36d768026423617eae283925cc0de5e1bbe38f475ee2c",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:04:20",
-              "seconds": 7460,
-              "title": "Ano Natsu Ga Houwa Suru",
-              "artist": "Kagamine Rin",
-              "raw": "2:04:20 『 Ano Natsu Ga Houwa Suru 』 - Kagamine Rin",
-              "rawHash": "bedbecf586e53977c570ecdb46facd5fcbc2feb2279e9ca9cc24ce403d6d5a3d",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:07:00",
-              "seconds": 7620,
-              "title": "Jane Doe",
-              "artist": "Kenshi Yonezu × Utada Hikaru 〔Chainsaw Man〕",
-              "raw": "2:07:00 『 Jane Doe 』 - Kenshi Yonezu × Utada Hikaru 〔Chainsaw Man〕",
-              "rawHash": "48707728423a3d35e3e03c22b1a5e6b041a3651d81c8a1fa873e097632229de5",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:13:44",
-              "seconds": 8024,
-              "title": "Yoru No Odoriko",
-              "artist": "Sakanaction",
-              "raw": "2:13:44 『 Yoru No Odoriko 』 - Sakanaction",
-              "rawHash": "dd7663bd4c0af538ef23a5d5a4131b71450754d0f8658fc5571c611e784f78f0",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:19:25",
-              "seconds": 8365,
-              "title": "Connect",
-              "artist": "ClariS 〔Puella Magi Madoka Magica〕",
-              "raw": "2:19:25 『 Connect 』 - ClariS 〔Puella Magi Madoka Magica〕",
-              "rawHash": "0b762924c8ad7ecd04a772f82522e94019cb9abe67b04f68b4e0b6626a360155",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "2:28:20",
-              "seconds": 8900,
-              "title": "Kickback",
-              "artist": "Kenshi Yonezu 〔Chainsaw Man〕",
-              "raw": "2:28:20 『 Kickback 』 - Kenshi Yonezu 〔Chainsaw Man〕",
-              "rawHash": "234355bc22fb1dbc3dc6b92a01cb67ed4618b57bb991128716eb5fde2348f050",
-              "sourceId": "Ugwo6y_0SxavSxbW9tJ4AaABAg",
-              "sourceHash": "e561168f3f2884938b6325b3358f53919eb602d10c25451e14a63322d6e15b6e",
-              "riskReasons": []
-            }
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": [],
-          "selected": true
-        },
-        {
-          "sourceId": "UgwyoB-KVjaaKF13ze14AaABAg",
-          "sourceHash": "b312d11a8da721f28f5802fa9490003ef4a479d345284a23014999328a2e62d7",
-          "sourceType": "comment",
-          "sourceIndex": 9,
-          "commentId": "UgwyoB-KVjaaKF13ze14AaABAg",
-          "authorName": "@kionmh7",
-          "reason": "no_song_after_filter",
-          "sourceScore": 1.5,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "empty_after_timestamp": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:58:02",
-              "seconds": 3482,
-              "title": "",
-              "artist": "",
-              "line": "58:02",
-              "rawHash": "56b156cb38edec392e5bafa971876a5108065e5d5e86e2779ee31d87010378f5"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:58:02",
-              "seconds": 3482,
-              "title": "",
-              "artist": "",
-              "line": "58:02",
-              "rawHash": "56b156cb38edec392e5bafa971876a5108065e5d5e86e2779ee31d87010378f5"
-            }
-          ],
-          "sourceText": "58:02 \n😶✨\n\n😶 V':\nAy! Justo en el kokoro. \n\n👍✨\nExcelente transmisión de karaoke.",
-          "selected": false
-        },
-        {
-          "sourceId": "Ugx64EY6os5fzjOOo854AaABAg",
-          "sourceHash": "b5736e4dcd5536847f657c4aa49a1f3cf669adc86aff6b2c57e62a74f6e7fc5f",
-          "sourceType": "comment",
-          "sourceIndex": 14,
-          "commentId": "Ugx64EY6os5fzjOOo854AaABAg",
-          "authorName": "@ShioBelmont",
-          "reason": "no_song_after_filter",
-          "sourceScore": 1.5,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:31:20",
-              "seconds": 5480,
-              "title": "reconocí ese fragmento que tarareaste 🥲",
-              "artist": "未記載",
-              "line": "Pero donde más me he emocionado es con el 1:31:20 reconocí ese fragmento que tarareaste 🥲",
-              "rawHash": "e4140858daf457e1fed51094556a34c8a01b9b243f07e670a94244e16834442e"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:31:20",
-              "seconds": 5480,
-              "title": "reconocí ese fragmento que tarareaste 🥲",
-              "artist": "未記載",
-              "line": "Pero donde más me he emocionado es con el 1:31:20 reconocí ese fragmento que tarareaste 🥲",
-              "rawHash": "e4140858daf457e1fed51094556a34c8a01b9b243f07e670a94244e16834442e"
-            }
-          ],
-          "sourceText": "Que buen karaoke Meicaaaa!! 😍\n\nPero donde más me he emocionado es con el 1:31:20 reconocí ese fragmento que tarareaste 🥲",
-          "selected": false
-        },
-        {
-          "sourceId": "UgyZSan36vWRT_7SWF94AaABAg",
-          "sourceHash": "c1781bc444e6c0057c5d8064a9ec9817306a1250535af400956cf3a892bf91dc",
-          "sourceType": "comment",
-          "sourceIndex": 15,
-          "commentId": "UgyZSan36vWRT_7SWF94AaABAg",
-          "authorName": "@AndyPérezSánchez-m5x",
-          "reason": "no_song_after_filter",
-          "sourceScore": 1.5,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:14:21",
-              "seconds": 4461,
-              "title": "Umapyoi Densetsu GOD, la canta increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱",
-              "artist": "未記載",
-              "line": "1:14:21 Umapyoi Densetsu GOD, la canta increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱",
-              "rawHash": "c1781bc444e6c0057c5d8064a9ec9817306a1250535af400956cf3a892bf91dc"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:14:21",
-              "seconds": 4461,
-              "title": "Umapyoi Densetsu GOD, la canta increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱",
-              "artist": "未記載",
-              "line": "1:14:21 Umapyoi Densetsu GOD, la canta increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱",
-              "rawHash": "c1781bc444e6c0057c5d8064a9ec9817306a1250535af400956cf3a892bf91dc"
-            }
-          ],
-          "sourceText": "1:14:21 Umapyoi Densetsu GOD, la canta  increíble, es hermoso 😭😭🙏💚🌱💚🌱💚🌱💚🌱",
-          "selected": false
-        }
-      ]
+      "publishedText": "1 日前 に配信済み",
+      "publishedTimestamp": 1785471034507,
+      "durationText": "1:28:26 再生中",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
     },
     {
-      "videoId": "M177-RP15O0",
-      "title": "노래하는 카일리 歌うカイリ Kylee Music #음악방송 #弾き語り #musiclive #韓国男子 #korean #coreano #coréen #韓国人",
-      "channelName": "노래하는 카일리 Kylee Music 歌うカイリ",
+      "videoId": "v7uGXWlerBc",
+      "title": "お昼のセイヤvideo /夜9時半の弾き語り🌻🎸 がライブ配信中！",
+      "channelName": "セイヤvideo /夜9時半の弾き語り🌻🎸",
       "keyword": "弾き語り",
       "keywords": [
         "弾き語り",
@@ -1726,9 +597,544 @@
       "sourceGroups": [
         "mygit_today_snapshot"
       ],
-      "publishedText": "21 時間前 に配信済み",
-      "publishedTimestamp": 1785207196281,
-      "durationText": "2:35:36 2:35:36 再生中",
+      "publishedText": "20 時間前 に配信済み",
+      "publishedTimestamp": 1785383545726,
+      "durationText": "45:52 再生中",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "_Z8BR4-5gkk",
+      "title": "お昼のセイヤvideo /夜9時半の弾き語り🌻🎸 がライブ配信中！",
+      "channelName": "セイヤvideo /夜9時半の弾き語り🌻🎸",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "20 時間前 に配信済み",
+      "publishedTimestamp": 1785297461873,
+      "durationText": "44:22 44:22 再生中",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "R8ZEr8dB5Pw",
+      "title": "【 歌枠/ 縦型】JUDY AND MARY さん特集で歌い魔ス！【 レヴィ・アタン 】 #shorts",
+      "channelName": "レヴィ・アタン",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "20 時間前 に配信済み",
+      "publishedTimestamp": 1785210779728,
+      "durationText": "1:57:41 1:57:41 再生中",
+      "commentCandidateCount": 11,
+      "result": "no_usable_song_source",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 1,
+      "rejectedEntryCount": 1,
+      "sources": [
+        {
+          "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+          "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+          "sourceType": "comment",
+          "sourceIndex": 0,
+          "commentId": "UgzMVPd03bu49ew8zvp4AaABAg",
+          "authorName": "@惑星ベジータの王子",
+          "reason": "high_risk_source",
+          "sourceScore": -100000,
+          "riskScore": 98,
+          "riskLevel": "high",
+          "riskReasons": [
+            "source_unknown_artist_ratio_high",
+            "kept_count_high_low_known_song_density",
+            "source_multiple_unknown_artists",
+            "short_unknown_title"
+          ],
+          "singleSongIdentification": null,
+          "originalCount": 17,
+          "keptCount": 16,
+          "knownSongCount": 0,
+          "repairedKnownSongCount": 2,
+          "artistCount": 0,
+          "unknownArtistCount": 16,
+          "activityMarkerCount": 0,
+          "activityMarkerRatio": 0,
+          "conversationEntryCount": 1,
+          "conversationRatio": 0.058823529411764705,
+          "parserCorruptionCount": 0,
+          "nicheCount": 0,
+          "nicheRatio": 0,
+          "topicCount": 1,
+          "structuralCount": 17,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:01:44 Cheese \"PIZZA\"",
+            "0:10:21 Over Drive",
+            "0:17:31 Hello!Orange Sunshine",
+            "0:24:04 くじら12号",
+            "0:30:20 POWER OF LOVE",
+            "0:37:38 そばかす",
+            "0:44:18 DAYDREAM",
+            "0:49:11 LOVER SOUL"
+          ],
+          "entries": [
+            {
+              "status": "accepted",
+              "time": "0:01:44",
+              "seconds": 104,
+              "title": "Cheese \"PIZZA\"",
+              "artist": "未記載",
+              "raw": "0:01:44 Cheese \"PIZZA\"",
+              "rawHash": "aee9edb0015967d32555f8dc91f50c8fc1a5ef1181eb52570682279f2a4f0bec",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:10:21",
+              "seconds": 621,
+              "title": "Over Drive",
+              "artist": "未記載",
+              "raw": "0:10:21 Over Drive",
+              "rawHash": "c6a275806f035ede4a6425fe7c89ac62a34973da9395ef05898e62d4f8b486d5",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:17:31",
+              "seconds": 1051,
+              "title": "Hello!Orange Sunshine",
+              "artist": "未記載",
+              "raw": "0:17:31 Hello!Orange Sunshine",
+              "rawHash": "52cc7f7063f194533d82076dc448072eaa02406c53a3503f219d1fc4e24e13d0",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:24:04",
+              "seconds": 1444,
+              "title": "くじら12号",
+              "artist": "未記載",
+              "raw": "0:24:04 くじら12号",
+              "rawHash": "bdc24ba3a711408bcedac750dad2d26b4052c3f76eaaaad275fe0dcbfde32644",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:30:20",
+              "seconds": 1820,
+              "title": "POWER OF LOVE",
+              "artist": "未記載",
+              "raw": "0:30:20 POWER OF LOVE",
+              "rawHash": "7c8ac841084c1887eb1f18ff1aa20caf6feab2bba0566182b7a91f42609b6474",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:37:38",
+              "seconds": 2258,
+              "title": "そばかす",
+              "artist": "未記載",
+              "raw": "0:37:38 そばかす",
+              "rawHash": "7300a35d7af5d5f145f1a108bd4ba59ee7a092186001e0712f1fe727b38fb84f",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": [
+                "short_unknown_title"
+              ]
+            },
+            {
+              "status": "accepted",
+              "time": "0:44:18",
+              "seconds": 2658,
+              "title": "DAYDREAM",
+              "artist": "未記載",
+              "raw": "0:44:18 DAYDREAM",
+              "rawHash": "6cb7f7323ce1e46f27e032b68de63a64debd5a6a74b347c5a261f96132620d9a",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:49:11",
+              "seconds": 2951,
+              "title": "LOVER SOUL",
+              "artist": "未記載",
+              "raw": "0:49:11 LOVER SOUL",
+              "rawHash": "cf905d889e6a989553f577b094fd442fb672feb59656b00a4dbf28328985f061",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:56:21",
+              "seconds": 3381,
+              "title": "クラシック",
+              "artist": "未記載",
+              "raw": "0:56:21 クラシック",
+              "rawHash": "2a4f168045c74a229a6bf4287874e521f25361692eb867093f2cf6a8214d5792",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:05:37",
+              "seconds": 3937,
+              "title": "散歩道",
+              "artist": "未記載",
+              "raw": "1:05:37 散歩道",
+              "rawHash": "ffe1a0c719ffac86b40be1977ea5c3507a00e7736ff4fc0b04a1a50c2ea03fd2",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": [
+                "short_unknown_title"
+              ]
+            },
+            {
+              "status": "accepted",
+              "time": "1:15:25",
+              "seconds": 4525,
+              "title": "ラッキープール",
+              "artist": "未記載",
+              "raw": "1:15:25 ラッキープール",
+              "rawHash": "160d3ff75a4a9f784c9daeebbc63991048e6a5cd3208c15d6eba1e223fb95dc4",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:21:52",
+              "seconds": 4912,
+              "title": "イロトリドリ ノ セカイ",
+              "artist": "未記載",
+              "raw": "1:21:52 イロトリドリ ノ セカイ",
+              "rawHash": "c1ac0bc0a5463deee7f6ffe8ba3c95fc5d9452a5392f756bd3147da4edaa0d21",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:30:14",
+              "seconds": 5414,
+              "title": "ラブリーベイベー",
+              "artist": "未記載",
+              "raw": "1:30:14 ラブリーベイベー",
+              "rawHash": "f74abb21e5a4e34e3a1b08d82bb7f84ef1c103f0231544fe0c37a532b9935e2b",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:36:11",
+              "seconds": 5771,
+              "title": "motto",
+              "artist": "未記載",
+              "raw": "1:36:11 motto",
+              "rawHash": "815238565791bc5d9d94c6577387755c8bbc8bd293af09ee80b2ba4be5db1b4d",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:44:07",
+              "seconds": 6247,
+              "title": "ドキドキ",
+              "artist": "未記載",
+              "raw": "1:44:07 ドキドキ",
+              "rawHash": "7f88b6ba3acd44bb7e85cbed47fc3ec97bf65bfb17e31fbb152e9ccc5df14d60",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": [
+                "short_unknown_title"
+              ]
+            },
+            {
+              "status": "accepted",
+              "time": "1:52:22",
+              "seconds": 6742,
+              "title": "小さな頃から",
+              "artist": "未記載",
+              "raw": "1:52:22 小さな頃から",
+              "rawHash": "92c29c15d7471aef8c6d05397e2173e1843248150eb1b484f7e2fc8bab8d482f",
+              "sourceId": "UgzMVPd03bu49ew8zvp4AaABAg",
+              "sourceHash": "9830ba4fab8aa7c6e59dd8f9ecaacb404626d4bc58e536cc070b7d34f3ae0a21",
+              "riskReasons": []
+            }
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "likely_non_song_entry": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:00:01",
+              "seconds": 1,
+              "title": "魔族登場・挨拶",
+              "artist": "未記載",
+              "line": "0:00:01 魔族登場・挨拶",
+              "rawHash": "dfd04a2bda5841ab52ca70121bd18a99588f5121ff79397beea9e92c3f3b59e9"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:00:01",
+              "seconds": 1,
+              "title": "魔族登場・挨拶",
+              "artist": "未記載",
+              "line": "0:00:01 魔族登場・挨拶",
+              "rawHash": "dfd04a2bda5841ab52ca70121bd18a99588f5121ff79397beea9e92c3f3b59e9"
+            }
+          ],
+          "sourceText": "【歌枠/縦型】\nJUDY AND MARY特集\nタイムスタンプ\n0:00:01 魔族登場・挨拶\n0:01:44 Cheese \"PIZZA\"\n0:10:21 Over Drive\n0:17:31 Hello!Orange Sunshine\n0:24:04 くじら12号\n0:30:20 POWER OF LOVE\n0:37:38 そばかす\n0:44:18 DAYDREAM\n0:49:11 LOVER SOUL\n0:56:21 クラシック\n1:05:37 散歩道\n1:15:25 ラッキープール\n1:21:52 イロトリドリ ノ セカイ\n1:30:14 ラブリーベイベー\n1:36:11 motto\n1:44:07 ドキドキ\n1:52:22 小さな頃から\n\n【マイクラ配信へ続く】\n\nアーティスト縛りで2時間歌えるのはなかなかやるな。懐かしい曲ばかりで良かったぞ。\nフンッ",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "videoId": "NkBIVavFC-w",
+      "title": "ランチタイムにジャズピアノの弾き語り🎹🎤On The Sunny Side Of The Streetなど",
+      "channelName": "タカヒロの即興ジャズラウンジ",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "20 時間前 に配信済み",
+      "publishedTimestamp": 1785124268851,
+      "durationText": "20:53 20:53 再生中",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "RYXStTOBEqk",
+      "title": "Jjmmy Age - Cosmic Funk × 弾き語りLIVE - \"DAISOの500円のデジタル腕時計\"と\"宇宙と繋がる白のふんどし\" 2026.7.25",
+      "channelName": "Jimmy Age",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "20 時間前",
+      "publishedTimestamp": 1785038392359,
+      "durationText": "25:27 25:27 再生中",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "28nnEXzAnsI",
+      "title": "裏口オフェンダー弾き語りUP'N NIGHT vol.3 Rudie's yokohama.2026.7.25",
+      "channelName": "UP'N NIGHT",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "18 分前",
+      "publishedTimestamp": 1785557222331,
+      "durationText": "31:32",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "FzLMw4vBVxE",
+      "title": "Dark Thriller × アコギ弾き語り - \"フェミニンとマーガリンが許せない女\"と\"バターみたいな白のふんどし\" - Jjmmy Age 2026.8.1",
+      "channelName": "Jimmy Age",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "25 分前",
+      "publishedTimestamp": 1785556802331,
+      "durationText": "24:40",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "2F0IufK06go",
+      "title": "ソロ弾き語りライブ（練習会） 20260731 山手インバーハウスにて",
+      "channelName": "eikofuku",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "47 分前",
+      "publishedTimestamp": 1785555482331,
+      "durationText": "27:01",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "l6sy83Jw-0M",
+      "title": "【 #歌枠 /#KARAOKE 】８月を元気にお迎えする歌枠【狼朗ハツキ/声優Vtuber】",
+      "channelName": "狼朗ハツキ - Rourou Hatsuki -",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "1 時間前 に配信済み",
+      "publishedTimestamp": 1785554702331,
+      "durationText": "2:55:59",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "d6UAHkvB5f0",
+      "title": "【 #歌枠 】初見さん5人目標で歌うよ～！🎵☀ 初見さん歓迎◎ Singing #メイサオンステージ",
+      "channelName": "神崎メイサ / Kanzaki Meisa",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "1 時間前 に配信済み",
+      "publishedTimestamp": 1785554702331,
+      "durationText": "2:46:25",
+      "commentCandidateCount": 4,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "e_LxMXAHuWY",
+      "title": "【＃歌枠】初見さん歓迎✨登録者500人を目指して歌う！【唄猫がじ/個人Vtuber】",
+      "channelName": "唄猫がじ",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "1 時間前 に配信済み",
+      "publishedTimestamp": 1785554702331,
+      "durationText": "2:07:57",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "LambD5F9Jks",
+      "title": "노래하는 카일리 歌うカイリ Kylee Music #음악방송 #弾き語り #musiclive #韓国男子 #korean #coreano #coréen #韓国人",
+      "channelName": "노래하는 카일리 Kylee Music 歌うカイリ",
+      "keyword": "弾き語り",
+      "keywords": [
+        "弾き語り",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "month",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "2 時間前 に配信済み",
+      "publishedTimestamp": 1785551102331,
+      "durationText": "3:01:58",
       "commentCandidateCount": 1,
       "result": "no_timestamp_candidates",
       "selectedSongCount": 0,
@@ -1738,20 +1144,44 @@
       "sources": []
     },
     {
-      "videoId": "uBdWI8r-8H8",
-      "title": "弾き語りアコギ歌謡曲とか",
-      "channelName": "ギターの練習",
+      "videoId": "65Pr8l2zB60",
+      "title": "〖 #作業用 ✧ #弾き語り ✧ #ASMR 〗まったりとした夏の朝の空気、おいし～🌱〖 幸世いのり 〗",
+      "channelName": "幸世いのり / Shiawase Inori",
       "keyword": "弾き語り",
       "keywords": [
         "弾き語り",
         "mygit今日快照"
       ],
       "sourceGroups": [
+        "today",
+        "month",
         "mygit_today_snapshot"
       ],
-      "publishedText": "21 時間前 に配信済み",
-      "publishedTimestamp": 1785120668851,
-      "durationText": "52:10 再生中",
+      "publishedText": "2 時間前 に配信済み",
+      "publishedTimestamp": 1785551102331,
+      "durationText": "2:14:05",
+      "commentCandidateCount": 1,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "4yNP7kKFwJE",
+      "title": "【朝活歌枠】朝から歌いたいっ♪【眠屋敷べるる】",
+      "channelName": "眠屋敷べるる",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠"
+      ],
+      "sourceGroups": [
+        "today"
+      ],
+      "publishedText": "1 時間前 に配信済み",
+      "publishedTimestamp": 1785554702331,
+      "durationText": "3:13:05",
       "commentCandidateCount": 0,
       "result": "no_timestamp_candidates",
       "selectedSongCount": 0,
@@ -1761,20 +1191,19 @@
       "sources": []
     },
     {
-      "videoId": "tGOF3WbzZcM",
-      "title": "2026年7月25日 愛知県高浜市 ラ ペーニャ オープンマイク ひろしげソロ弾き語り",
-      "channelName": "高浜のうたうたい☆ひろしげ",
+      "videoId": "M2khLuJTi2g",
+      "title": "おしゃべりすずこ 1179回目 2026.(2/5)",
+      "channelName": "藤鈴呼",
       "keyword": "弾き語り",
       "keywords": [
-        "弾き語り",
-        "mygit今日快照"
+        "弾き語り"
       ],
       "sourceGroups": [
-        "mygit_today_snapshot"
+        "today"
       ],
-      "publishedText": "21 時間前",
-      "publishedTimestamp": 1785034792359,
-      "durationText": "20:41 再生中",
+      "publishedText": "1 時間前",
+      "publishedTimestamp": 1785554702331,
+      "durationText": "1:00:01",
       "commentCandidateCount": 0,
       "result": "no_timestamp_candidates",
       "selectedSongCount": 0,
@@ -1782,6 +1211,294 @@
       "rejectedSourceCount": 0,
       "rejectedEntryCount": 0,
       "sources": []
+    },
+    {
+      "videoId": "5FizO84wp4U",
+      "title": "【#歌枠￤低音】ソロイベントが決まったよ #始発歌枠￤J-POP / ボカロ / アニソン￤#sh1arch1ve【sh1an￤Vsinger￤Vtuber】",
+      "channelName": "𝐬𝐡𝟏𝐚𝐧",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "2 時間前 に配信済み",
+      "publishedTimestamp": 1785551102331,
+      "durationText": "6:11:23",
+      "commentCandidateCount": 0,
+      "result": "no_timestamp_candidates",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": []
+    },
+    {
+      "videoId": "uBLHw4ibJsM",
+      "title": "【#歌枠 #singingstream 】7月ももう終わり？！土曜の定期歌枠 🧸 July already over?! Chill Singing Stream #kumastream",
+      "channelName": "夏白くぅま",
+      "keyword": "歌枠",
+      "keywords": [
+        "歌枠",
+        "mygit今日快照"
+      ],
+      "sourceGroups": [
+        "today",
+        "mygit_today_snapshot"
+      ],
+      "publishedText": "2 時間前 に配信済み",
+      "publishedTimestamp": 1785551102331,
+      "durationText": "3:24:01",
+      "commentCandidateCount": 1,
+      "result": "selected",
+      "selectedSongCount": 16,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 0,
+      "rejectedEntryCount": 0,
+      "sources": [
+        {
+          "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+          "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+          "sourceType": "comment",
+          "sourceIndex": 0,
+          "commentId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+          "authorName": "@姫竜佐人",
+          "reason": "",
+          "sourceScore": 285,
+          "riskScore": 0,
+          "riskLevel": "low",
+          "riskReasons": [],
+          "singleSongIdentification": null,
+          "originalCount": 16,
+          "keptCount": 16,
+          "knownSongCount": 16,
+          "repairedKnownSongCount": 8,
+          "artistCount": 16,
+          "unknownArtistCount": 0,
+          "activityMarkerCount": 0,
+          "activityMarkerRatio": 0,
+          "conversationEntryCount": 0,
+          "conversationRatio": 0,
+          "parserCorruptionCount": 0,
+          "nicheCount": 0,
+          "nicheRatio": 0,
+          "topicCount": 0,
+          "structuralCount": 16,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:15:19 カタオモイ",
+            "0:34:49 【Kataomoi",
+            "0:45:43 小夜子",
+            "0:56:27 【World Lampshade",
+            "1:06:24 【Shinunoga E-Wa",
+            "1:15:59 【Planetes",
+            "1:30:52 【Anatani Deawanakereba Kasetsutouka",
+            "1:41:23 HAPPY BIRTHDAY"
+          ],
+          "entries": [
+            {
+              "status": "accepted",
+              "time": "0:15:19",
+              "seconds": 919,
+              "title": "カタオモイ",
+              "artist": "Aimer",
+              "raw": "15:19 カタオモイ / Aimer",
+              "rawHash": "ece7b77187dfdd24a5d473de1848790fa3c6cda98f7a3954b77134dbed8384b7",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:34:49",
+              "seconds": 2089,
+              "title": "Kataomoi",
+              "artist": "Aimer",
+              "raw": "34:49 【Kataomoi - Aimer】",
+              "rawHash": "6978d7a4f9d571e85cb31eb874041f482fcef9551ba7202aecfcc635808caccd",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:45:43",
+              "seconds": 2743,
+              "title": "小夜子",
+              "artist": "みきとP",
+              "raw": "45:43 小夜子 / みきとP 【Sayoko - MikitoP】",
+              "rawHash": "5bf2a66a5a19fa0a5961bea54bf8abaf68e18133188f6feb3d41e5650d0c0766",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "0:56:27",
+              "seconds": 3387,
+              "title": "World Lampshade",
+              "artist": "buzzG",
+              "raw": "56:27 【World Lampshade - buzzG】",
+              "rawHash": "ff5ce0fbcdfe1a2555a21921e4fd00436cedec80a318a146e8599fb6a5937bca",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:06:24",
+              "seconds": 3984,
+              "title": "Shinunoga E-Wa",
+              "artist": "Fujii Kaze",
+              "raw": "1:06:24 【Shinunoga E-Wa - Fujii Kaze】",
+              "rawHash": "8ad92de5b39fec565eb7a4de31262f02672d7860ebff4ce5756587b23d007a8e",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:15:59",
+              "seconds": 4559,
+              "title": "Planetes",
+              "artist": "seiza",
+              "raw": "1:15:59 【Planetes - seiza】",
+              "rawHash": "85247576139a3f552730c2f89b9ad874c81f8582b3b0ff7984c6c6a8ab671395",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:30:52",
+              "seconds": 5452,
+              "title": "Anatani Deawanakereba Kasetsutouka",
+              "artist": "Aimer",
+              "raw": "1:30:52 【Anatani Deawanakereba Kasetsutouka - Aimer】",
+              "rawHash": "a274f8159fa683e19ca36a2161cc9f3496b6ec7addbfa812e03b04ac5992bb10",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:41:23",
+              "seconds": 6083,
+              "title": "HAPPY BIRTHDAY",
+              "artist": "back number",
+              "raw": "1:41:23 HAPPY BIRTHDAY / back number",
+              "rawHash": "810de9d4133cf1d7ea9ee10bcef53d4abb2c6b5301e2d133f455ab2f07c8e396",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "1:50:40",
+              "seconds": 6640,
+              "title": "Fuyu no hanashi",
+              "artist": "Centimillimental",
+              "raw": "1:50:40 【 Fuyu no hanashi - Centimillimental】",
+              "rawHash": "e7ddb4423263233cf8c344ad0d12181a586a94bdfb3b2c5672d41ed1c1b4054e",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:05:02",
+              "seconds": 7502,
+              "title": "115 man Kilo no Film",
+              "artist": "Official higedan dism",
+              "raw": "2:05:02 【115 man Kilo no Film - Official higedan dism】",
+              "rawHash": "e255be538e5f660c4b8e7e4482d61b435460923f8d8d9d608c18f1e223963dfa",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:20:18",
+              "seconds": 8418,
+              "title": "Hello",
+              "artist": "How Are You - Hoehoe-P",
+              "raw": "2:20:18 【Hello/How Are You - Hoehoe-P】",
+              "rawHash": "247d24440f1e93932e7c4ac6cdbaabbc503d4faaa7943b0e681c7619a17b5752",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:32:10",
+              "seconds": 9130,
+              "title": "Calc",
+              "artist": "JimmyThumb-P",
+              "raw": "2:32:10 【Calc. - JimmyThumb-P】",
+              "rawHash": "4123a924c63b2e08beee75cbdfbb5269948ce1230072ff088fa119c048de6203",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:41:13",
+              "seconds": 9673,
+              "title": "phony",
+              "artist": "Tsumiki",
+              "raw": "2:41:13 【phony - Tsumiki】",
+              "rawHash": "b21d27cb8e4a34a3c7fb9c50a5c25d2c1ff454fa5b1cc963f97eef28326a7b94",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:50:39",
+              "seconds": 10239,
+              "title": "おやすみ泣き声、さよなら歌姫",
+              "artist": "クリープハイプ",
+              "raw": "2:50:39 おやすみ泣き声、さよなら歌姫 / クリープハイプ",
+              "rawHash": "319996a804bbc689c8144a956f949e563a29def7ff34455a4ceecab046efb8bd",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "2:59:52",
+              "seconds": 10792,
+              "title": "Goodbye song princess, it's the last song",
+              "artist": "CreepHyp",
+              "raw": "2:59:52 【Goodbye song princess, it's the last song - CreepHyp】",
+              "rawHash": "749f69063ad2653caaeed641bebf2da8095f9d95a0e4432fac5a81b57dc1fd66",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            },
+            {
+              "status": "accepted",
+              "time": "3:11:48",
+              "seconds": 11508,
+              "title": "Brave Heart",
+              "artist": "Ayumi Miyazaki",
+              "raw": "3:11:48 【Brave Heart - Ayumi Miyazaki】",
+              "rawHash": "eba72359a795a6fc9b95930f2176d771696bb4ac06cfc983e828885de4770ccb",
+              "sourceId": "Ugx4HDiIhPH-j4Jr-V54AaABAg",
+              "sourceHash": "16d219c7542111b05c1e4b51d03da072a54d610c75fdf0c65b4af0507ff4a09d",
+              "riskReasons": []
+            }
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": [],
+          "selected": true
+        }
+      ]
     },
     {
       "videoId": "ih-TC7IxFSg",
@@ -1794,13 +1511,12 @@
       ],
       "sourceGroups": [
         "today",
-        "month",
         "mygit_today_snapshot"
       ],
-      "publishedText": "1 時間前 に配信済み",
-      "publishedTimestamp": 1785550624837,
+      "publishedText": "3 時間前 に配信済み",
+      "publishedTimestamp": 1785547502331,
       "durationText": "2:53:11",
-      "commentCandidateCount": 6,
+      "commentCandidateCount": 7,
       "result": "no_usable_song_source",
       "selectedSongCount": 0,
       "acceptedSourceCount": 0,
@@ -1868,935 +1584,6 @@
           "selected": false
         }
       ]
-    },
-    {
-      "videoId": "LambD5F9Jks",
-      "title": "노래하는 카일리 歌うカイリ Kylee Music #음악방송 #弾き語り #musiclive #韓国男子 #korean #coreano #coréen #韓国人",
-      "channelName": "노래하는 카일리 Kylee Music 歌うカイリ",
-      "keyword": "弾き語り",
-      "keywords": [
-        "弾き語り",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "month",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "1 時間前 に配信済み",
-      "publishedTimestamp": 1785550624837,
-      "durationText": "3:01:58",
-      "commentCandidateCount": 1,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "65Pr8l2zB60",
-      "title": "〖 #作業用 ✧ #弾き語り ✧ #ASMR 〗まったりとした夏の朝の空気、おいし～🌱〖 幸世いのり 〗",
-      "channelName": "幸世いのり / Shiawase Inori",
-      "keyword": "弾き語り",
-      "keywords": [
-        "弾き語り",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "month",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "1 時間前 に配信済み",
-      "publishedTimestamp": 1785550624837,
-      "durationText": "2:14:05",
-      "commentCandidateCount": 1,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "pjRP52_WyJ4",
-      "title": "収録配信🎸セイヤvideo /夜9時半の弾き語り🌻🎸 がライブ配信中！",
-      "channelName": "セイヤvideo /夜9時半の弾き語り🌻🎸",
-      "keyword": "弾き語り",
-      "keywords": [
-        "弾き語り",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "2 時間前 に配信済み",
-      "publishedTimestamp": 1785547024837,
-      "durationText": "45:07",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "FdpUxRbPbyk",
-      "title": "【#歌枠┋#karaoke 】おはよっ.ᐟ.ᐟお歌をうたいますっ.ᐟ.ᐟ🔆✨【モニカ・メロディア/Varium】",
-      "channelName": "Monica Ch. モニカ・メロディア",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "month",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "3 時間前 に配信済み",
-      "publishedTimestamp": 1785543424837,
-      "durationText": "1:38:53",
-      "commentCandidateCount": 20,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "w92UPkrbKOQ",
-      "title": "【＃歌枠】夜更かし組おいで！1曲きいてこ～！ #歌枠 #個人Vtuber #Vtuber雑談",
-      "channelName": "MUZU‐むずちゃんねる‐【Vtuber】",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "3 時間前 に配信済み",
-      "publishedTimestamp": 1785543424837,
-      "durationText": "6:22:57",
-      "commentCandidateCount": 5,
-      "result": "selected",
-      "selectedSongCount": 26,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": [
-        {
-          "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-          "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-          "sourceType": "comment",
-          "sourceIndex": 1,
-          "commentId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-          "authorName": "@CrystellarFlash",
-          "reason": "",
-          "sourceScore": 487,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 26,
-          "keptCount": 26,
-          "knownSongCount": 26,
-          "repairedKnownSongCount": 16,
-          "artistCount": 26,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 26,
-          "sentenceLikeCount": 0,
-          "sample": [
-            "0:21:34 Don't Think.Feel",
-            "0:27:12 シャカビーチ ～Laka Laka La～",
-            "0:33:32 BABY BORN & GO",
-            "0:38:52 シャルマンノウラ",
-            "0:44:36 浮世CROSSING",
-            "0:53:51 妄想感傷代償連盟",
-            "0:58:44 敗北の少年",
-            "3:26:58 綺麗事"
-          ],
-          "entries": [
-            {
-              "status": "accepted",
-              "time": "0:21:34",
-              "seconds": 1294,
-              "title": "Don't Think.Feel",
-              "artist": "UVERworld",
-              "raw": "21:34 ①Don't Think.Feel/UVERworld",
-              "rawHash": "d6ccd9f47fb8a73e3eb3da5ecf4d5af478f3b10ec7ff0a69c3a067fc93929cdf",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:27:12",
-              "seconds": 1632,
-              "title": "シャカビーチ ～Laka Laka La～",
-              "artist": "UVERworld",
-              "raw": "27:12 ②シャカビーチ ～Laka Laka La～/UVERworld",
-              "rawHash": "4e80c0f45002f2967d3cf8946bfa4ad166bc25a7c9314435e818d3160bd24ad1",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:33:32",
-              "seconds": 2012,
-              "title": "BABY BORN & GO",
-              "artist": "UVERworld",
-              "raw": "33:32 ③BABY BORN & GO/UVERworld",
-              "rawHash": "131f4434805a65791db70ddaf86e0ae80ca18782dbf6fc9d549606107e99b403",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:38:52",
-              "seconds": 2332,
-              "title": "シャルマンノウラ",
-              "artist": "UVERworld",
-              "raw": "38:52 ④シャルマンノウラ/UVERworld",
-              "rawHash": "0f0f882c9ca321918f1c7990c5b4b19ace85c0a152da0d0b999804fdd75e2858",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:44:36",
-              "seconds": 2676,
-              "title": "浮世CROSSING",
-              "artist": "UVERworld",
-              "raw": "44:36 ⑤浮世CROSSING/UVERworld",
-              "rawHash": "a88577b15f77ddd535791b122e5d98b32f5726d094fdc5dcec5699281e4a2a90",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:53:51",
-              "seconds": 3231,
-              "title": "妄想感傷代償連盟",
-              "artist": "DECO*27",
-              "raw": "53:51 ⑥妄想感傷代償連盟/DECO*27",
-              "rawHash": "ef83cb51a07becaa3550d755ec5840d96e35718689e5fff2979303797ea23bfd",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "0:58:44",
-              "seconds": 3524,
-              "title": "敗北の少年",
-              "artist": "PENGUIN RESEARCH",
-              "raw": "58:44 ⑦敗北の少年/PENGUIN RESEARCH",
-              "rawHash": "26342f7b7c85099f4e23e0e26026ac5ca6de0ab681f16ef3fa7bd9f1b866de01",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:26:58",
-              "seconds": 12418,
-              "title": "綺麗事",
-              "artist": "星街すいせい",
-              "raw": "3:26:58 ⑧綺麗事/星街すいせい",
-              "rawHash": "93228c99dec2f96c7ae9040231cc7a631fcc3d4f6cb68fc96d10b088d33afac0",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:32:48",
-              "seconds": 12768,
-              "title": "Andromeda",
-              "artist": "星街すいせい",
-              "raw": "3:32:48 ⑨Andromeda/星街すいせい",
-              "rawHash": "e4dafa18b6ae798acd828536ac3eb1b71179fac75acd1a0bbf742f003eb5fb3a",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:38:19",
-              "seconds": 13099,
-              "title": "Beautiful World",
-              "artist": "宇多田ヒカル",
-              "raw": "3:38:19 ⑩Beautiful World/宇多田ヒカル",
-              "rawHash": "7d4fd508fac260e5e4304ba2cea49b55b0321d9e5fe7758b2328660c0d75fd5f",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:46:17",
-              "seconds": 13577,
-              "title": "Velonica",
-              "artist": "Aqua Timez",
-              "raw": "3:46:17 ⑪Velonica/Aqua Timez",
-              "rawHash": "ffc4a950d04fcc11f92f866971a5407ace1c7dd1a59cfdff43edaf0a73d17184",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:52:07",
-              "seconds": 13927,
-              "title": "ALONES",
-              "artist": "Aqua Timez",
-              "raw": "3:52:07 ⑫ALONES/Aqua Timez",
-              "rawHash": "bc7b71cf42d7176ffe8d7bb8693626b619dbb89a6e10c9686442b2e545414bc0",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "3:56:57",
-              "seconds": 14217,
-              "title": "決意の朝に",
-              "artist": "Aqua Timez",
-              "raw": "3:56:57 ⑬決意の朝に/Aqua Timez",
-              "rawHash": "28e95ec741db9b3d9491720a64420f25de41b010f78c7b2cd0b98af6eabaac77",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "4:03:43",
-              "seconds": 14623,
-              "title": "カルマ",
-              "artist": "BUMP OF CHICKEN",
-              "raw": "4:03:43 ⑭カルマ/BUMP OF CHICKEN",
-              "rawHash": "ae2c8675a04683303b3e577a9db350709216d92657209fa18ad4f0557fee5b57",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "4:07:53",
-              "seconds": 14873,
-              "title": "千本桜",
-              "artist": "和楽器バンド",
-              "raw": "4:07:53 ⑮千本桜/和楽器バンド",
-              "rawHash": "143e8ebd538eedf49b61b5b4bcc2b4c63383cd58c5d5a9791e443fbb90902ff4",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "4:38:49",
-              "seconds": 16729,
-              "title": "うどんかぞえうた",
-              "artist": "知久寿焼とうどんオールスターズ",
-              "raw": "4:38:49 ⑯うどんかぞえうた/知久寿焼とうどんオールスターズ",
-              "rawHash": "36e52de7e796f3362d3ad055566506cec0b3e17d9523742ea221e7379ec41b7c",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "4:41:18",
-              "seconds": 16878,
-              "title": "青雲のうた",
-              "artist": "森田公一",
-              "raw": "4:41:18 ⑰青雲のうた/森田公一",
-              "rawHash": "ea3b9d4df1fa5f77ce36ef9b721ca61f66dccf86423e77e2cad2b152c3db66d7",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:02:50",
-              "seconds": 18170,
-              "title": "ミカヅキ",
-              "artist": "さユり",
-              "raw": "5:02:50 ⑱ミカヅキ/さユり",
-              "rawHash": "c32b896cde858dc04fa2010e858cb8b4f1be3172cd6378f7330012dcec835fec",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:10:17",
-              "seconds": 18617,
-              "title": "ニルヴァーナ",
-              "artist": "MUCC",
-              "raw": "5:10:17 ⑲ニルヴァーナ/MUCC",
-              "rawHash": "d4a66d74da7c1dc596f2be9235edc696b95ad48f839408c516f4df293eb91462",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:25:19",
-              "seconds": 19519,
-              "title": "まるつけ",
-              "artist": "ギヴン",
-              "raw": "5:25:19 ⑳まるつけ/ギヴン",
-              "rawHash": "95deaa2d60e0b79e1ff16841aabcb480df1ac7d61ace0a9b918feaf01d7053d0",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:32:39",
-              "seconds": 19959,
-              "title": "スカー",
-              "artist": "キタニタツヤ",
-              "raw": "5:32:39 ㉑スカー/キタニタツヤ",
-              "rawHash": "fdacb03627c9bab8d8bcc3306a847f471d62a83ad33766740f3db97aa45eee94",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:37:14",
-              "seconds": 20234,
-              "title": "紅蓮華",
-              "artist": "LiSA",
-              "raw": "5:37:14 ㉒紅蓮華/LiSA",
-              "rawHash": "0a9de4116210115f8d3e0fe2fa2edb3bbaf1fff2781c8eea193f81b158349a84",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:42:27",
-              "seconds": 20547,
-              "title": "炎",
-              "artist": "LiSA",
-              "raw": "5:42:27 ㉓炎/LiSA",
-              "rawHash": "4e940debc78b2e3f8e8ae4cffc252f93bead8b5d5388a168a7eefdfb8d9a8655",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "5:56:57",
-              "seconds": 21417,
-              "title": "残響散歌",
-              "artist": "Aimer",
-              "raw": "5:56:57 ㉔残響散歌/Aimer",
-              "rawHash": "b73156cf5d0b489501b59b473c8a684ee9161d7ea7974a6ae4633131b35983d2",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "6:01:24",
-              "seconds": 21684,
-              "title": "朝ANSWER",
-              "artist": "PENGIN",
-              "raw": "6:01:24 ㉕朝ANSWER/PENGIN",
-              "rawHash": "77f2fdf22f7c46d2ef08f502e0ca565bfcb5435091d0ee4694784ad52cb742c0",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            },
-            {
-              "status": "accepted",
-              "time": "6:06:08",
-              "seconds": 21968,
-              "title": "輝いた",
-              "artist": "シギ",
-              "raw": "6:06:08 ㉖輝いた/シギ",
-              "rawHash": "25d059a7d243f4eaf8b23084cc6e097ad8043747612bd1546bcc398786a159ac",
-              "sourceId": "Ugxf8cV9-ktNlYs7c1h4AaABAg",
-              "sourceHash": "33170fd2ee686f2c07c140e98b10b907d5124b9705dc639035a139b5c9de135c",
-              "riskReasons": []
-            }
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": [],
-          "selected": true
-        }
-      ]
-    },
-    {
-      "videoId": "_ftqeuZYS1s",
-      "title": "早く起きたからお話したりギター弾き語り配信",
-      "channelName": "ういちチャンネル",
-      "keyword": "弾き語り",
-      "keywords": [
-        "弾き語り",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "month",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "4 時間前 に配信済み",
-      "publishedTimestamp": 1785539824837,
-      "durationText": "2:02:19",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "lA40ZkpWGmE",
-      "title": "顔がない日【#歌枠/#karaoke】",
-      "channelName": "刻瑛ぱる / Tokie Partita",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "4 時間前 に配信済み",
-      "publishedTimestamp": 1785539824837,
-      "durationText": "5:12:49",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "l6sy83Jw-0M",
-      "title": "【 #歌枠 /#KARAOKE 】８月を元気にお迎えする歌枠【狼朗ハツキ/声優Vtuber】",
-      "channelName": "狼朗ハツキ - Rourou Hatsuki -",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠"
-      ],
-      "sourceGroups": [
-        "today"
-      ],
-      "publishedText": "45 分前 に配信済み",
-      "publishedTimestamp": 1785551524837,
-      "durationText": "2:55:59",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "I5f8BmS5oBI",
-      "title": "【歌枠】【雑談】みんなお話しながらカラオケ大会しよ〜！",
-      "channelName": "宵闇 やみの",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "4 時間前 に配信済み",
-      "publishedTimestamp": 1785539824837,
-      "durationText": "1:10:02",
-      "commentCandidateCount": 2,
-      "result": "selected",
-      "selectedSongCount": 1,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 1,
-      "rejectedEntryCount": 1,
-      "sources": [
-        {
-          "sourceId": "description:I5f8BmS5oBI:5cf3f5679a2dc143",
-          "sourceHash": "5cf3f5679a2dc1433d94323882ae819e14cfb9aec2ccbf22ac5b212cd1280411",
-          "sourceType": "description",
-          "sourceIndex": 0,
-          "commentId": "",
-          "authorName": "",
-          "reason": "no_song_after_filter",
-          "sourceScore": -8,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 1,
-          "structuralCount": 0,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:17:00",
-              "seconds": 1020,
-              "title": "まで期間限定配信】",
-              "artist": "未記載",
-              "line": "【公式アニメ】『ボボボーボ・ボーボボ』第1話 「毛魂」と書いて「スパークリング」と読ませたい…【8月6日(木)17:00まで期間限定配信】",
-              "rawHash": "5cf3f5679a2dc1433d94323882ae819e14cfb9aec2ccbf22ac5b212cd1280411"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:17:00",
-              "seconds": 1020,
-              "title": "まで期間限定配信】",
-              "artist": "未記載",
-              "line": "【公式アニメ】『ボボボーボ・ボーボボ』第1話 「毛魂」と書いて「スパークリング」と読ませたい…【8月6日(木)17:00まで期間限定配信】",
-              "rawHash": "5cf3f5679a2dc1433d94323882ae819e14cfb9aec2ccbf22ac5b212cd1280411"
-            }
-          ],
-          "sourceText": "【公式アニメ】『ボボボーボ・ボーボボ』第1話　「毛魂」と書いて「スパークリング」と読ませたい…【8月6日(木)17:00まで期間限定配信】",
-          "selected": false
-        },
-        {
-          "sourceId": "description:I5f8BmS5oBI:0aac08e2e3f8b767",
-          "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-          "sourceType": "description",
-          "sourceIndex": 1,
-          "commentId": "",
-          "authorName": "",
-          "reason": "",
-          "sourceScore": 13,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": {
-            "identificationSource": "timestamp_comment",
-            "confidence": 0.86,
-            "reason": "timestamp_known_song",
-            "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-            "sourceId": "description:I5f8BmS5oBI:0aac08e2e3f8b767",
-            "rawTitle": "【歌枠】【雑談】みんなお話しながらカラオケ大会しよ〜！",
-            "rawSourceText": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo"
-          },
-          "originalCount": 1,
-          "keptCount": 1,
-          "knownSongCount": 1,
-          "repairedKnownSongCount": 0,
-          "artistCount": 1,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sentenceLikeCount": 0,
-          "sample": [
-            "0:04:00 24/07/2026"
-          ],
-          "entries": [
-            {
-              "status": "accepted",
-              "time": "0:04:00",
-              "seconds": 240,
-              "title": "24/07/2026",
-              "artist": "Live Ao vivo",
-              "raw": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo",
-              "rawHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-              "sourceId": "description:I5f8BmS5oBI:0aac08e2e3f8b767",
-              "sourceHash": "0aac08e2e3f8b7673b7eae64b1c5dbe7e8051947bfe96246f3e877543cfe9afa",
-              "riskReasons": []
-            }
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": [],
-          "sourceText": "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo",
-          "selected": true
-        }
-      ]
-    },
-    {
-      "videoId": "OqzmmjbjgPA",
-      "title": "【#歌枠￤#karaoke】高評価50＆同接30を目指してボカロ多めの朝活🐰🩵【#個人VTuber #てんは】",
-      "channelName": "てんは",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠"
-      ],
-      "sourceGroups": [
-        "today"
-      ],
-      "publishedText": "4 時間前 に配信済み",
-      "publishedTimestamp": 1785539824837,
-      "durationText": "1:56:17",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
-      "videoId": "V6lCjxhwg_Y",
-      "title": "【 #歌枠 】クラウドファンディング200％突破！現地100名動員に向け挑戦中の恋の歌枠💓 【 #VTuber / #白餅だんご】",
-      "channelName": "白餅だんご🍡✤",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "month",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "6 時間前 に配信済み",
-      "publishedTimestamp": 1785532624837,
-      "durationText": "6:56:30",
-      "commentCandidateCount": 4,
-      "result": "no_usable_song_source",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 2,
-      "rejectedEntryCount": 4,
-      "sources": [
-        {
-          "sourceId": "UgygIkhe04-vjURmT3d4AaABAg",
-          "sourceHash": "65502c29c6f815501ada9f7c566428d873fceb3edb6150f27b9aaa80a6040bdf",
-          "sourceType": "comment",
-          "sourceIndex": 1,
-          "commentId": "UgygIkhe04-vjURmT3d4AaABAg",
-          "authorName": "@BT__bt2879",
-          "reason": "no_song_after_filter",
-          "sourceScore": -11.5,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 3,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 2,
-          "structuralCount": 3,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 3,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 2,
-            "likely_non_song_entry": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:00:00",
-              "seconds": 0,
-              "title": "配信開始〜",
-              "artist": "未記載",
-              "line": "0:00 配信開始〜",
-              "rawHash": "54842fc108ee30824e89bdf6cb6a5a185e9456a58b2a4d9fff27d464b2f35e12"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:04:05",
-              "seconds": 245,
-              "title": "オープニングMV",
-              "artist": "未記載",
-              "line": "4:05 オープニングMV",
-              "rawHash": "f4633300fed1b1ffcfaa37673af28633e710617ba84f7dc657d55bf2a6eab2d8"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:04:22",
-              "seconds": 262,
-              "title": "スタート！",
-              "artist": "未記載",
-              "line": "4:22 スタート！",
-              "rawHash": "4401f0a24fcd09c9960cbe1671dc348db0c137792ef215a4d4541be77ca2d1ca"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:00:00",
-              "seconds": 0,
-              "title": "配信開始〜",
-              "artist": "未記載",
-              "line": "0:00 配信開始〜",
-              "rawHash": "54842fc108ee30824e89bdf6cb6a5a185e9456a58b2a4d9fff27d464b2f35e12"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:04:05",
-              "seconds": 245,
-              "title": "オープニングMV",
-              "artist": "未記載",
-              "line": "4:05 オープニングMV",
-              "rawHash": "f4633300fed1b1ffcfaa37673af28633e710617ba84f7dc657d55bf2a6eab2d8"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:04:22",
-              "seconds": 262,
-              "title": "スタート！",
-              "artist": "未記載",
-              "line": "4:22 スタート！",
-              "rawHash": "4401f0a24fcd09c9960cbe1671dc348db0c137792ef215a4d4541be77ca2d1ca"
-            }
-          ],
-          "sourceText": "おつもちだんごーでしたー！\n0:00 配信開始〜\n4:05 オープニングMV\n4:22 スタート！",
-          "selected": false
-        },
-        {
-          "sourceId": "UgzsbH2GAAI4DGwj9LR4AaABAg",
-          "sourceHash": "ef8e0fa1c2231c77e2c053ceb10c8f0dba999f7aec5e097d40feabea289be0a5",
-          "sourceType": "comment",
-          "sourceIndex": 3,
-          "commentId": "UgzsbH2GAAI4DGwj9LR4AaABAg",
-          "authorName": "@ちゃんけん-b6w",
-          "reason": "no_song_after_filter",
-          "sourceScore": 0,
-          "riskScore": 0,
-          "riskLevel": "low",
-          "riskReasons": [],
-          "singleSongIdentification": null,
-          "originalCount": 1,
-          "keptCount": 0,
-          "knownSongCount": 0,
-          "repairedKnownSongCount": 0,
-          "artistCount": 0,
-          "unknownArtistCount": 0,
-          "activityMarkerCount": 0,
-          "activityMarkerRatio": 0,
-          "conversationEntryCount": 0,
-          "conversationRatio": 0,
-          "parserCorruptionCount": 0,
-          "nicheCount": 0,
-          "nicheRatio": 0,
-          "topicCount": 0,
-          "structuralCount": 0,
-          "sentenceLikeCount": 0,
-          "sample": [],
-          "entries": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "bad_title": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "bad_title",
-              "time": "6:45:29",
-              "seconds": 24329,
-              "title": "～✦•✤ ✌('ω'✌ )ｾﾝｷｭｰ( ✌'ω')✌",
-              "artist": "未記載",
-              "line": "✤•✦直近のｽｹｼ\"ｭｰﾙ6:45:29～✦•✤ ✌︎('ω'✌︎ )ｾﾝｷｭｰ( ✌︎'ω')✌︎",
-              "rawHash": "b7deeaf05f6d0d5aa9b173751e253bcff723e8b6123edab0f861218bd1e11424"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "bad_title",
-              "time": "6:45:29",
-              "seconds": 24329,
-              "title": "～✦•✤ ✌('ω'✌ )ｾﾝｷｭｰ( ✌'ω')✌",
-              "artist": "未記載",
-              "line": "✤•✦直近のｽｹｼ\"ｭｰﾙ6:45:29～✦•✤ ✌︎('ω'✌︎ )ｾﾝｷｭｰ( ✌︎'ω')✌︎",
-              "rawHash": "b7deeaf05f6d0d5aa9b173751e253bcff723e8b6123edab0f861218bd1e11424"
-            }
-          ],
-          "sourceText": "✤•✦直近のｽｹｼ\"ｭｰﾙ6:45:29～✦•✤  ✌︎('ω'✌︎ )ｾﾝｷｭｰ( ✌︎'ω')✌︎ \n7時間近くの配信にもなると､じゃんけんタイムも二回になるんですねw w w",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "videoId": "TFZ1H_VMXNQ",
-      "title": "【歌枠/karaoke 】初見初コメ大歓迎🌟＼✨定期6時間歌枠配信✨／7月の最後の夜🌃新しい歌声🎶🙌見つけてみませんか🫣❓ボカロ・アニソン多め！ROM専大歓迎🌟【人間科おくら/新人vtuber】",
-      "channelName": "人間科おくら / Ningenka Okra",
-      "keyword": "歌枠",
-      "keywords": [
-        "歌枠",
-        "mygit今日快照"
-      ],
-      "sourceGroups": [
-        "today",
-        "mygit_today_snapshot"
-      ],
-      "publishedText": "6 時間前 に配信済み",
-      "publishedTimestamp": 1785532624837,
-      "durationText": "6:10:47",
-      "commentCandidateCount": 0,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
     }
   ],
   "songSearch": {
