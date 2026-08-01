@@ -5878,7 +5878,7 @@ def _validated_overlay_change_identity(
             if not _channel_url_is_coherent(url, channel_id, "") and not any(
                 _channel_url_is_coherent(url, channel_id, handle) for handle in handles
             ):
-                raise PostgresAdapterError(error)
+                return "", ""
     # ReplacementVideoPayload is evidence for the new-side tuple, whose video
     # may deliberately differ from this change's removed video.  Keep the
     # existing strict replacement error contract while rejecting mismatched
@@ -6013,7 +6013,7 @@ def _accepted_reset_identity_evidence(
         or not evidence_channel_id
         or not evidence_handle
     ):
-        raise PostgresAdapterError(error)
+        return {}
     # Existing parent/scalar/payload identity is evidence too.  It must agree
     # with this selected projection before it can fill the missing channel.
     _validated_overlay_change_identity(change, candidate, validate_urls=False)
