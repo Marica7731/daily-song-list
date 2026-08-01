@@ -182,4 +182,43 @@ test('P0 diagnostics and evidence remain fail-closed, bounded, and upload before
   assert.match(workflow, /StrictHostKeyChecking=no/);
 });
 
+test('v5b transient cleanup helpers and outer archive arrays stay fail-closed', () => {
+  const helperPattern = /^ {10}cleanup_candidate_unit\(\) \{\n[\s\S]*?^ {10}\}\n^ {10}(?:cleanup_candidate|finalize_remote_cleanup)\(\) \{/gm;
+  const helperMatches = [...workflow.matchAll(helperPattern)];
+  assert.equal(helperMatches.length, 2);
+  const helpers = helperMatches.map((match) => match[0]
+    .replace(/\n {10}(?:cleanup_candidate|finalize_remote_cleanup)\(\) \{$/, '')
+    .replace(/^ {10}/gm, ''));
+  assert.equal(helpers[0], helpers[1]);
+  for (const helper of helpers) {
+    assert.match(helper, /local active_after=0/);
+    assert.match(helper, /local port_after=0/);
+    assert.doesNotMatch(helper, /candidate_active_after|candidate_port_after/);
+    assert.match(helper, /resetStatus=%s/);
+    assert.match(helper, /failedBefore=%s/);
+    assert.match(helper, /failedAfter=%s/);
+    assert.ok(helper.indexOf('failed_before=1') < helper.indexOf('systemctl stop "$candidate_unit"'));
+    for (const [status, state] of [
+      ['show_before_status', 'state_before'],
+      ['show_after_stop_status', 'state_after_stop'],
+      ['show_after_reset_status', 'state_after_reset'],
+    ]) {
+      assert.match(helper, new RegExp(String.raw`if \[ "\$${status}" -eq 0 \] && \[ -n "\$${state}" \]`));
+      assert.doesNotMatch(helper, new RegExp(String.raw`elif \[ "\$${status}" -eq 1 \]`));
+    }
+    assert.doesNotMatch(helper, /show_(?:before|after_stop|after_reset)_status"\] -eq 1/);
+  }
+  const arrayCount = '$' + '{#selected[@]}';
+  const arrayValues = '$' + '{selected[@]}';
+  const outer = workflow.match(/<<'REMOTE_CLEANUP'\n([\s\S]*?)\n          REMOTE_CLEANUP/);
+  assert.ok(outer);
+  assert.ok(outer[1].includes(arrayCount));
+  assert.ok(outer[1].includes(arrayValues));
+  assert.ok(!outer[1].includes('\\' + arrayCount));
+  assert.ok(!outer[1].includes('\\' + arrayValues));
+  const helperCall = workflow.indexOf('cleanup_candidate_unit "$remote_root/cleanup-candidate-unit-result.txt"');
+  const rootDelete = workflow.lastIndexOf('rm -rf -- "$remote_root"');
+  assert.ok(helperCall >= 0 && rootDelete > helperCall);
+});
+
 console.log('PG_ADAPTER_CONTRACT_GATES_TEST_COMPLETE');

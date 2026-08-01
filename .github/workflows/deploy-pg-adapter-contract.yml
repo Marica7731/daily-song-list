@@ -714,29 +714,131 @@ jobs:
               grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' | \
               head -c 262144 > "$remote_root/candidate-unit-journal.txt" || true
           }
+          cleanup_candidate_unit() {
+            local output_path="$1"
+            local cleanup_status=0
+            local show_before_status=0
+            local show_after_stop_status=0
+            local show_after_reset_status=0
+            local reset_status=0
+            local stop_status=0
+            local unit_present_before=0
+            local unit_present_after_stop=0
+            local unit_present_after=0
+            local active_after=0
+            local port_after=0
+            local failed_before=0
+            local failed_after=0
+            local load_state_before=""
+            local active_state_before=""
+            local sub_state_before=""
+            local result_before=""
+            local load_state_after_stop=""
+            local active_state_after_stop=""
+            local sub_state_after_stop=""
+            local result_after_stop=""
+            local load_state_after=""
+            local active_state_after=""
+            local sub_state_after=""
+            local result_after=""
+            local state_before=""
+            local state_after_stop=""
+            local state_after_reset=""
+
+            state_before="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_before_status=$?
+            if [ "$show_before_status" -eq 0 ] && [ -n "$state_before" ]; then
+              load_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_before" != "not-found" ]; then
+                unit_present_before=1
+                if [ "$active_state_before" = "failed" ] || \
+                   { [ -n "$result_before" ] && [ "$result_before" != "success" ]; }; then
+                  failed_before=1
+                fi
+              fi
+            else
+              cleanup_status=1
+            fi
+            if [ "$unit_present_before" -eq 1 ]; then
+              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" >/dev/null 2>&1
+              stop_status=$?
+            fi
+
+            for unused in $(seq 1 10); do
+              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
+              sleep 1
+            done
+
+            state_after_stop="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_after_stop_status=$?
+            if [ "$show_after_stop_status" -eq 0 ] && [ -n "$state_after_stop" ]; then
+              load_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_after_stop" != "not-found" ]; then
+                unit_present_after_stop=1
+                if [ "$active_state_after_stop" = "failed" ] || \
+                   { [ -n "$result_after_stop" ] && [ "$result_after_stop" != "success" ]; }; then
+                  failed_before=1
+                fi
+              fi
+            else
+              cleanup_status=1
+            fi
+
+            timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" >/dev/null 2>&1
+            reset_status=$?
+
+            state_after_reset="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_after_reset_status=$?
+            if [ "$show_after_reset_status" -eq 0 ] && [ -n "$state_after_reset" ]; then
+              load_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_after" != "not-found" ]; then unit_present_after=1; fi
+            else
+              cleanup_status=1
+            fi
+
+            if [ "$active_state_after" = "failed" ] || [ "$result_after" = "failed" ]; then
+              failed_after=1
+            fi
+            if systemctl is-active --quiet "$candidate_unit"; then active_after=1; else active_after=0; fi
+            if ss -ltn 'sport = :18766' | grep -q LISTEN; then port_after=1; else port_after=0; fi
+            if [ "$failed_before" -ne 0 ] || [ "$failed_after" -ne 0 ]; then cleanup_status=1; fi
+            if [ "$stop_status" -ne 0 ] || [ "$active_after" -ne 0 ] || [ "$port_after" -ne 0 ]; then
+              cleanup_status=1
+            fi
+            if [ "$unit_present_after" -eq 1 ]; then
+              if [ "$active_state_after" != "inactive" ] || [ "$sub_state_after" != "dead" ] || [ "$result_after" != "success" ]; then
+                cleanup_status=1
+              fi
+            fi
+
+            if ! printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\nresetStatus=%s\nfailedBefore=%s\nfailedAfter=%s\nunitPresentAfter=%s\nactiveStateAfter=%s\nsubStateAfter=%s\nresultAfter=%s\nshowStatusBefore=%s\nshowStatusAfterStop=%s\nshowStatusAfter=%s\n' \
+              "$stop_status" "$active_after" "$port_after" "$reset_status" \
+              "$failed_before" "$failed_after" "$unit_present_after" "$active_state_after" \
+              "$sub_state_after" "$result_after" "$show_before_status" "$show_after_stop_status" \
+              "$show_after_reset_status" > "$output_path"; then
+              cleanup_status=1
+            fi
+            return "$cleanup_status"
+          }
           cleanup_candidate() {
             candidate_status=$?
             trap - EXIT
             set +e
             capture_candidate_unit_diagnostics
-            candidate_cleanup_status=0
-            if systemctl show "$candidate_unit" >/dev/null 2>&1; then
-              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" 2>/dev/null || candidate_cleanup_status=$?
-            fi
-            for unused in $(seq 1 10); do
-              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
-              sleep 1
-            done
-            candidate_active_after=0
-            candidate_port_after=0
-            if systemctl is-active --quiet "$candidate_unit"; then candidate_active_after=1; candidate_cleanup_status=1; fi
-            if ss -ltn 'sport = :18766' | grep -q LISTEN; then candidate_port_after=1; candidate_cleanup_status=1; fi
-            if ! timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" 2>/dev/null; then
-              if systemctl show "$candidate_unit" >/dev/null 2>&1; then candidate_cleanup_status=1; fi
-            fi
-            printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\n' \
-              "$candidate_cleanup_status" "$candidate_active_after" "$candidate_port_after" \
-              > "$remote_root/candidate-unit-cleanup-result.txt"
+            cleanup_candidate_unit "$remote_root/candidate-unit-cleanup-result.txt"
+            candidate_cleanup_status=$?
             if [ "$candidate_cleanup_status" -ne 0 ] && [ "$candidate_status" -eq 0 ]; then candidate_status=1; fi
             exit "$candidate_status"
           }
@@ -1162,30 +1264,132 @@ jobs:
               grep -Eiv 'password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?://[^[:space:]]*@' | \
               head -c 262144 > "$remote_root/cleanup-candidate-unit-journal.txt" || true
           }
+          cleanup_candidate_unit() {
+            local output_path="$1"
+            local cleanup_status=0
+            local show_before_status=0
+            local show_after_stop_status=0
+            local show_after_reset_status=0
+            local reset_status=0
+            local stop_status=0
+            local unit_present_before=0
+            local unit_present_after_stop=0
+            local unit_present_after=0
+            local active_after=0
+            local port_after=0
+            local failed_before=0
+            local failed_after=0
+            local load_state_before=""
+            local active_state_before=""
+            local sub_state_before=""
+            local result_before=""
+            local load_state_after_stop=""
+            local active_state_after_stop=""
+            local sub_state_after_stop=""
+            local result_after_stop=""
+            local load_state_after=""
+            local active_state_after=""
+            local sub_state_after=""
+            local result_after=""
+            local state_before=""
+            local state_after_stop=""
+            local state_after_reset=""
+
+            state_before="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_before_status=$?
+            if [ "$show_before_status" -eq 0 ] && [ -n "$state_before" ]; then
+              load_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_before="$(printf '%s\n' "$state_before" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_before" != "not-found" ]; then
+                unit_present_before=1
+                if [ "$active_state_before" = "failed" ] || \
+                   { [ -n "$result_before" ] && [ "$result_before" != "success" ]; }; then
+                  failed_before=1
+                fi
+              fi
+            else
+              cleanup_status=1
+            fi
+            if [ "$unit_present_before" -eq 1 ]; then
+              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" >/dev/null 2>&1
+              stop_status=$?
+            fi
+
+            for unused in $(seq 1 10); do
+              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
+              sleep 1
+            done
+
+            state_after_stop="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_after_stop_status=$?
+            if [ "$show_after_stop_status" -eq 0 ] && [ -n "$state_after_stop" ]; then
+              load_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_after_stop="$(printf '%s\n' "$state_after_stop" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_after_stop" != "not-found" ]; then
+                unit_present_after_stop=1
+                if [ "$active_state_after_stop" = "failed" ] || \
+                   { [ -n "$result_after_stop" ] && [ "$result_after_stop" != "success" ]; }; then
+                  failed_before=1
+                fi
+              fi
+            else
+              cleanup_status=1
+            fi
+
+            timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" >/dev/null 2>&1
+            reset_status=$?
+
+            state_after_reset="$(timeout --signal=TERM --kill-after=2s 10s systemctl show --no-pager \
+              --property=LoadState,ActiveState,SubState,Result "$candidate_unit" 2>/dev/null)"
+            show_after_reset_status=$?
+            if [ "$show_after_reset_status" -eq 0 ] && [ -n "$state_after_reset" ]; then
+              load_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "LoadState" { print $2; exit }')"
+              active_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "ActiveState" { print $2; exit }')"
+              sub_state_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "SubState" { print $2; exit }')"
+              result_after="$(printf '%s\n' "$state_after_reset" | awk -F= '$1 == "Result" { print $2; exit }')"
+              if [ "$load_state_after" != "not-found" ]; then unit_present_after=1; fi
+            else
+              cleanup_status=1
+            fi
+
+            if [ "$active_state_after" = "failed" ] || [ "$result_after" = "failed" ]; then
+              failed_after=1
+            fi
+            if systemctl is-active --quiet "$candidate_unit"; then active_after=1; else active_after=0; fi
+            if ss -ltn 'sport = :18766' | grep -q LISTEN; then port_after=1; else port_after=0; fi
+            if [ "$failed_before" -ne 0 ] || [ "$failed_after" -ne 0 ]; then cleanup_status=1; fi
+            if [ "$stop_status" -ne 0 ] || [ "$active_after" -ne 0 ] || [ "$port_after" -ne 0 ]; then
+              cleanup_status=1
+            fi
+            if [ "$unit_present_after" -eq 1 ]; then
+              if [ "$active_state_after" != "inactive" ] || [ "$sub_state_after" != "dead" ] || [ "$result_after" != "success" ]; then
+                cleanup_status=1
+              fi
+            fi
+
+            if ! printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\nresetStatus=%s\nfailedBefore=%s\nfailedAfter=%s\nunitPresentAfter=%s\nactiveStateAfter=%s\nsubStateAfter=%s\nresultAfter=%s\nshowStatusBefore=%s\nshowStatusAfterStop=%s\nshowStatusAfter=%s\n' \
+              "$stop_status" "$active_after" "$port_after" "$reset_status" \
+              "$failed_before" "$failed_after" "$unit_present_after" "$active_state_after" \
+              "$sub_state_after" "$result_after" "$show_before_status" "$show_after_stop_status" \
+              "$show_after_reset_status" > "$output_path"; then
+              cleanup_status=1
+            fi
+            return "$cleanup_status"
+          }
           finalize_remote_cleanup() {
             original_status=$?
             trap - EXIT ERR
             set +e
             capture_cleanup_service_diagnostics
             capture_cleanup_candidate_diagnostics
-            candidate_cleanup_status=0
-            if systemctl show "$candidate_unit" >/dev/null 2>&1; then
-              timeout --signal=TERM --kill-after=2s 15s systemctl stop "$candidate_unit" 2>/dev/null || candidate_cleanup_status=$?
-            fi
-            for unused in $(seq 1 10); do
-              if ! systemctl is-active --quiet "$candidate_unit" && ! ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
-              sleep 1
-            done
-            candidate_active_after=0
-            candidate_port_after=0
-            if systemctl is-active --quiet "$candidate_unit"; then candidate_active_after=1; candidate_cleanup_status=1; fi
-            if ss -ltn 'sport = :18766' | grep -q LISTEN; then candidate_port_after=1; candidate_cleanup_status=1; fi
-            if ! timeout --signal=TERM --kill-after=2s 10s systemctl reset-failed "$candidate_unit" 2>/dev/null; then
-              if systemctl show "$candidate_unit" >/dev/null 2>&1; then candidate_cleanup_status=1; fi
-            fi
-            printf 'stopStatus=%s\nactiveAfter=%s\nport18766After=%s\n' \
-              "$candidate_cleanup_status" "$candidate_active_after" "$candidate_port_after" \
-              > "$remote_root/cleanup-candidate-unit-result.txt"
+            cleanup_candidate_unit "$remote_root/cleanup-candidate-unit-result.txt"
+            candidate_cleanup_status=$?
             selected=()
             for relative in cleanup-healthz.json cleanup-meta.json cleanup-service-status.txt cleanup-service-journal.txt \
               cleanup-candidate-unit-status.txt cleanup-candidate-unit-journal.txt cleanup-candidate-unit-result.txt rollback-complete; do

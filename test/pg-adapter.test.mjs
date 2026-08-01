@@ -10145,3 +10145,99 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("generic meta uses nearest full runtime parent through incremental chain", () => {
+  assert.equal(
+    path.resolve(ADAPTER),
+    path.resolve(ROOT, "server", "pg_adapter.py"),
+  );
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter_meta_parent_regression", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+revisions = {
+    "active-overlay": {
+        "revision_id": "active-overlay",
+        "parent_revision_id": "intermediate-overlay",
+        "status": "active",
+        "manifest_json": {
+            "runtimeProjection": True,
+            "incrementalOverlay": True,
+            "parent_revision_id": "candidate-manifest-spoof",
+        },
+        "source_manifest_sha256": "candidate-source",
+        "content_sha256": "candidate-content",
+        "activated_at": "candidate-time",
+    },
+    "intermediate-overlay": {
+        "revision_id": "intermediate-overlay",
+        "parent_revision_id": "full-runtime",
+        "status": "active",
+        "manifest_json": {
+            "runtimeProjection": True,
+            "incrementalOverlay": True,
+            "parent_revision_id": "intermediate-manifest-spoof",
+        },
+    },
+    "full-runtime": {
+        "revision_id": "full-runtime",
+        "parent_revision_id": "historical-full",
+        "status": "active",
+        "manifest_json": {
+            "runtimeProjection": True,
+            "incrementalOverlay": False,
+            "parent_revision_id": "full-manifest-spoof",
+        },
+    },
+}
+
+revision_calls = []
+
+def one(_connection, sql, params=None):
+    values = tuple(params or ())
+    if "FROM migration_state" in sql:
+        return {"state_value": "active-overlay"}
+    if "FROM migration_revisions" in sql:
+        revision_id = values[0]
+        revision_calls.append(revision_id)
+        return revisions.get(revision_id)
+    raise AssertionError(sql)
+
+def rows(_connection, sql, params=None):
+    if "information_schema.tables" in sql:
+        return []
+    if "FROM runtime_meta" in sql:
+        assert tuple(params) == ("full-runtime",)
+        return [{"key": "latest_songs", "value": 12}]
+    raise AssertionError(sql)
+
+module._one = one
+module._rows = rows
+module._overlay_revision_ids = lambda *_args: []
+module._apply_generic_overlay_meta_counts = (
+    lambda _connection, _parent_revision_id, _overlay_revision_ids, counts: dict(counts)
+)
+
+payload = module.meta_payload(object())
+assert revision_calls == [
+    "active-overlay",
+    "intermediate-overlay",
+    "full-runtime",
+], revision_calls
+assert payload["meta"]["active_revision_id"] == "active-overlay"
+assert payload["meta"]["parent_revision_id"] == "full-runtime"
+assert payload["meta"]["parent_revision_id"] not in {
+    "candidate-manifest-spoof",
+    "intermediate-manifest-spoof",
+    "full-manifest-spoof",
+}
+assert payload["counts"]["songs"] == 12
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
