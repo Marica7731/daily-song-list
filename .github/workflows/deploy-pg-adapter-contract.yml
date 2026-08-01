@@ -934,6 +934,42 @@ jobs:
           install -d -m 0755 "$remote_root/backup" /opt/culua/ytb-song-rank/server
           cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py "$remote_root/backup/pg_adapter.py"
           cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py "$remote_root/backup/pg_api_server.py"
+          wait_for_service_contract_inner() {
+            local deadline_seconds="$1"
+            shift
+            local base_url="$1"
+            local health_path="$2"
+            local meta_path="$3"
+            local expected_revision="$4"
+            local deadline=$((SECONDS + deadline_seconds))
+            while [ "$SECONDS" -lt "$deadline" ]; do
+              if timeout --signal=TERM --kill-after=1s 3s systemctl is-active --quiet song-rank-pg-api &&
+                 timeout --signal=TERM --kill-after=1s 3s ss -ltn 'sport = :8765' | grep -q LISTEN; then
+                if timeout --signal=TERM --kill-after=1s 8s curl --fail --silent --show-error \
+                     --connect-timeout 2 --max-time 5 "$base_url/healthz" > "$health_path" &&
+                   timeout --signal=TERM --kill-after=1s 3s jq -e \
+                     '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' \
+                     "$health_path" >/dev/null &&
+                   timeout --signal=TERM --kill-after=1s 8s curl --fail --silent --show-error \
+                     --connect-timeout 2 --max-time 5 "$base_url/api/meta" > "$meta_path" &&
+                   timeout --signal=TERM --kill-after=1s 3s jq -e --arg expected "$expected_revision" \
+                     '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' \
+                     "$meta_path" >/dev/null; then
+                  return 0
+                fi
+              fi
+              [ "$SECONDS" -lt "$deadline" ] || break
+              sleep 1
+            done
+            return 1
+          }
+          wait_for_service_contract() {
+            local deadline_seconds="${READINESS_DEADLINE_SECONDS:-45}"
+            [[ "$deadline_seconds" =~ ^[1-9][0-9]*$ ]]
+            timeout --signal=TERM --kill-after=2s "${deadline_seconds}s" \
+              bash -c "$(declare -f wait_for_service_contract_inner); wait_for_service_contract_inner \"\$@\"" \
+              p0-readiness "$deadline_seconds" "$@"
+          }
           rollback_adapter() {
             original_status=$?
             trap - ERR
@@ -943,10 +979,10 @@ jobs:
             install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py || rollback_status=$?
             install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py || rollback_status=$?
             systemctl restart song-rank-pg-api || rollback_status=$?
-            for unused in $(seq 1 40); do
-              if systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN; then break; fi
-              sleep 1
-            done
+            if ! wait_for_service_contract "http://127.0.0.1:8765" \
+              "$remote_root/rollback-healthz.json" "$remote_root/rollback-meta.json" "$expected_revision"; then
+              rollback_status=1
+            fi
             cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py || rollback_status=$?
             cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py || rollback_status=$?
             systemctl is-active --quiet song-rank-pg-api || rollback_status=$?
@@ -1035,41 +1071,139 @@ jobs:
             --occurrences "$SOURCE_OCCURRENCE_COUNT" --videos "$SOURCE_VIDEO_COUNT"
           echo "PG_ADAPTER_INSTALLED_CONTRACT_OK"
 
-      - name: Verify real public relay contract before finalize
+      - name: Verify real public TLS relay contract through VPS before finalize
         id: public_contract
         run: |
           set -Eeuo pipefail
-          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 "$PUBLIC_BASE/healthz" -o "$TASK_ROOT/public-healthz.json"
-          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$TASK_ROOT/public-healthz.json" >/dev/null
-          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-meta.headers" "$PUBLIC_BASE/api/meta" -o "$TASK_ROOT/public-meta.json"
-          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
-            --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
-            --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
-            --data-urlencode 'searchFields=title' --data-urlencode "q=$SOURCE_TITLE" --data-urlencode "release=$GITHUB_RUN_ID" \
-            "$PUBLIC_BASE/api/rankings" -o "$TASK_ROOT/public-rankings.json"
-          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
-            --data-urlencode "release=$GITHUB_RUN_ID" "$PUBLIC_BASE/api/sources/$SOURCE_KEY?page=1&pageSize=20" -o "$TASK_ROOT/public-source.json"
-          code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-empty.headers" -o "$TASK_ROOT/public-empty.json" -w '%{http_code}' --get --data-urlencode "release=$GITHUB_RUN_ID" "$PUBLIC_BASE/api/sources/")"
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          public_rankings_release="release=$GITHUB_RUN_ID"
+          public_source_release="release=$GITHUB_RUN_ID"
+          public_empty_release="release=$GITHUB_RUN_ID"
+          timeout --signal=TERM --kill-after=10s 120s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$PUBLIC_BASE" "$THUMBNAIL_PATH_PREFIX" \
+            "$public_rankings_release" "$public_source_release" "$public_empty_release" \
+            "$SOURCE_TITLE_B64" "$SOURCE_ENTITY_KEY_B64" "$SOURCE_KEY_B64" \
+            "$SOURCE_OCCURRENCE_COUNT_B64" "$SOURCE_VIDEO_COUNT_B64" "$EXPECTED_ACTIVE_REVISION_B64" <<'REMOTE_PUBLIC'
+          set -Eeuo pipefail
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
+          }
+          remote_root="$1"
+          public_base="$2"
+          thumbnail_prefix="$3"
+          rankings_release="$4"
+          source_release="$5"
+          empty_release="$6"
+          source_title="$(decode_b64 "$7")"
+          source_entity_key="$(decode_b64 "$8")"
+          source_key="$(decode_b64 "$9")"
+          expected_occurrences="$(decode_b64 "${10}")"
+          expected_videos="$(decode_b64 "${11}")"
+          expected_revision="$(decode_b64 "${12}")"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$public_base" == https://ytb-song-rank.culua.com ]]
+          [[ "$public_base" != *$'\n'* && "$public_base" != *$'\r'* ]]
+          [[ "$thumbnail_prefix" == /api/thumbnails ]]
+          [[ "$rankings_release" =~ ^release=[0-9]+$ ]]
+          [[ "$source_release" =~ ^release=[0-9]+$ ]]
+          [[ "$empty_release" =~ ^release=[0-9]+$ ]]
+          [[ "$source_key" =~ ^[0-9a-f]{16}([0-9a-f]{8})?$ ]]
+          [[ "$expected_occurrences" =~ ^[1-9][0-9]*$ ]]
+          [[ "$expected_videos" =~ ^[1-9][0-9]*$ ]]
+          [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          test -n "$source_title"
+          test -n "$source_entity_key"
+          test "$source_entity_key" != "$source_key"
+          base_url="$public_base"
+          PUBLIC_BASE="$public_base"
+          THUMBNAIL_PATH_PREFIX="$thumbnail_prefix"
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            "$base_url/healthz" -o "$remote_root/public-healthz.json"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' \
+            "$remote_root/public-healthz.json" >/dev/null
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
+            -D "$remote_root/public-meta.headers" "$base_url/api/meta" -o "$remote_root/public-meta.json"
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
+            --data-urlencode 'range=all' --data-urlencode 'view=songs' \
+            --data-urlencode 'metric=occurrences' --data-urlencode 'page=1' \
+            --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
+            --data-urlencode 'searchFields=title' --data-urlencode "q=$source_title" \
+            --data-urlencode "$rankings_release" \
+            "$base_url/api/rankings" -o "$remote_root/public-rankings.json"
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
+            --data-urlencode "$source_release" \
+            "$base_url/api/sources/$source_key?page=1&pageSize=20" \
+            -o "$remote_root/public-source.json"
+          code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
+            -D "$remote_root/public-empty.headers" -o "$remote_root/public-empty.json" \
+            -w '%{http_code}' --get --data-urlencode "$empty_release" \
+            "$base_url/api/sources/")"
           test "$code" = 400
-          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$TASK_ROOT/public-empty.headers"
-          jq -e '.error == "bad_request"' "$TASK_ROOT/public-empty.json" >/dev/null
-          python3 "$TASK_ROOT/verify_contract.py" --phase public --meta "$TASK_ROOT/public-meta.json" \
-            --rankings "$TASK_ROOT/public-rankings.json" --source "$TASK_ROOT/public-source.json" \
-            --revision "$EXPECTED_ACTIVE_REVISION" --source-entity-key "$SOURCE_ENTITY_KEY" --source-key "$SOURCE_KEY" --source-title "$SOURCE_TITLE" \
-            --occurrences "$SOURCE_OCCURRENCE_COUNT" --videos "$SOURCE_VIDEO_COUNT" > "$TASK_ROOT/public-contract.log"
-          public_video_id="$(sed -n 's/.*videoId=\([^ ]*\).*/\1/p' "$TASK_ROOT/public-contract.log" | tail -n1)"
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$remote_root/public-empty.headers"
+          jq -e '.error == "bad_request"' "$remote_root/public-empty.json" >/dev/null
+          python3 "$remote_root/server/verify_contract.py" --phase public \
+            --meta "$remote_root/public-meta.json" --rankings "$remote_root/public-rankings.json" \
+            --source "$remote_root/public-source.json" --revision "$expected_revision" \
+            --source-entity-key "$source_entity_key" --source-key "$source_key" \
+            --source-title "$source_title" --occurrences "$expected_occurrences" \
+            --videos "$expected_videos" > "$remote_root/public-contract.log"
+          public_video_id="$(sed -n 's/.*videoId=\([^ ]*\).*/\1/p' "$remote_root/public-contract.log" | tail -n1)"
           [[ "$public_video_id" =~ ^[A-Za-z0-9_-]{11}$ ]]
           thumbnail_url="$PUBLIC_BASE$THUMBNAIL_PATH_PREFIX/$public_video_id/hqdefault.jpg"
-          thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-thumbnail.headers" -o "$TASK_ROOT/public-thumbnail.image" -w '%{http_code}' "$thumbnail_url")"
+          thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
+            -D "$remote_root/public-thumbnail.headers" -o "$remote_root/public-thumbnail.image" \
+            -w '%{http_code}' "$thumbnail_url")"
           test "$thumbnail_code" = 200
-          grep -Eiq '^Content-Type:[[:space:]]*image/' "$TASK_ROOT/public-thumbnail.headers"
-          test -s "$TASK_ROOT/public-thumbnail.image"
-          thumbnail_mime="$(file --brief --mime-type "$TASK_ROOT/public-thumbnail.image")"
-          test "$thumbnail_mime" = image/jpeg -o "$thumbnail_mime" = image/png -o "$thumbnail_mime" = image/webp -o "$thumbnail_mime" = image/gif
-          invalid_thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-invalid-thumbnail.headers" -o "$TASK_ROOT/public-invalid-thumbnail.body" -w '%{http_code}' "$PUBLIC_BASE$THUMBNAIL_PATH_PREFIX/invalid/hqdefault.jpg")"
+          grep -Eiq '^Content-Type:[[:space:]]*image/' "$remote_root/public-thumbnail.headers"
+          test -s "$remote_root/public-thumbnail.image"
+          thumbnail_mime="$(file --brief --mime-type "$remote_root/public-thumbnail.image")"
+          test "$thumbnail_mime" = image/jpeg -o "$thumbnail_mime" = image/png \
+            -o "$thumbnail_mime" = image/webp -o "$thumbnail_mime" = image/gif
+          invalid_thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
+            -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' \
+            -D "$remote_root/public-invalid-thumbnail.headers" \
+            -o "$remote_root/public-invalid-thumbnail.body" -w '%{http_code}' \
+            "$base_url$thumbnail_prefix/invalid/hqdefault.jpg")"
           test "$invalid_thumbnail_code" = 400
-          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$TASK_ROOT/public-invalid-thumbnail.headers"
-          jq -e '.error == "bad_request"' "$TASK_ROOT/public-invalid-thumbnail.body" >/dev/null
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' \
+            "$remote_root/public-invalid-thumbnail.headers"
+          jq -e '.error == "bad_request"' "$remote_root/public-invalid-thumbnail.body" >/dev/null
+          rm -f -- "$remote_root/public-thumbnail.image"
+          echo "PG_ADAPTER_PUBLIC_RELAY_CONTRACT_OK"
+          REMOTE_PUBLIC
+          timeout --signal=TERM --kill-after=10s 60s scp "${SSH_OPTS[@]}" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-healthz.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-meta.headers" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-meta.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-rankings.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-source.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-empty.headers" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-empty.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-contract.log" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-thumbnail.headers" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-invalid-thumbnail.headers" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/public-invalid-thumbnail.body" \
+            "$TASK_ROOT/"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' \
+            "$TASK_ROOT/public-healthz.json" >/dev/null
+          python3 "$TASK_ROOT/verify_contract.py" --phase public \
+            --meta "$TASK_ROOT/public-meta.json" --rankings "$TASK_ROOT/public-rankings.json" \
+            --source "$TASK_ROOT/public-source.json" --revision "$EXPECTED_ACTIVE_REVISION" \
+            --source-entity-key "$SOURCE_ENTITY_KEY" --source-key "$SOURCE_KEY" \
+            --source-title "$SOURCE_TITLE" --occurrences "$SOURCE_OCCURRENCE_COUNT" \
+            --videos "$SOURCE_VIDEO_COUNT"
+          grep -Eq "^CONTRACT_VERIFIED phase=public videoId=[A-Za-z0-9_-]{11} occurrences=${SOURCE_OCCURRENCE_COUNT} videos=${SOURCE_VIDEO_COUNT}$" \
+            "$TASK_ROOT/public-contract.log"
+          printf 'publicContractTransport=ssh-vps\n' >> "$TASK_ROOT/manifest.txt"
           echo "PG_ADAPTER_PUBLIC_RELAY_CONTRACT_OK"
 
       - name: Finalize only after public contract gate
@@ -1414,10 +1548,48 @@ jobs:
             exit "$evidence_status"
           }
           trap finalize_remote_cleanup EXIT
+          wait_for_service_contract_inner() {
+            local deadline_seconds="$1"
+            shift
+            local base_url="$1"
+            local health_path="$2"
+            local meta_path="$3"
+            local expected_revision="$4"
+            local deadline=$((SECONDS + deadline_seconds))
+            while [ "$SECONDS" -lt "$deadline" ]; do
+              if timeout --signal=TERM --kill-after=1s 3s systemctl is-active --quiet song-rank-pg-api &&
+                 timeout --signal=TERM --kill-after=1s 3s ss -ltn 'sport = :8765' | grep -q LISTEN; then
+                if timeout --signal=TERM --kill-after=1s 8s curl --fail --silent --show-error \
+                     --connect-timeout 2 --max-time 5 "$base_url/healthz" > "$health_path" &&
+                   timeout --signal=TERM --kill-after=1s 3s jq -e \
+                     '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' \
+                     "$health_path" >/dev/null &&
+                   timeout --signal=TERM --kill-after=1s 8s curl --fail --silent --show-error \
+                     --connect-timeout 2 --max-time 5 "$base_url/api/meta" > "$meta_path" &&
+                   timeout --signal=TERM --kill-after=1s 3s jq -e --arg expected "$expected_revision" \
+                     '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' \
+                     "$meta_path" >/dev/null; then
+                  return 0
+                fi
+              fi
+              [ "$SECONDS" -lt "$deadline" ] || break
+              sleep 1
+            done
+            return 1
+          }
+          wait_for_service_contract() {
+            local deadline_seconds="${READINESS_DEADLINE_SECONDS:-45}"
+            [[ "$deadline_seconds" =~ ^[1-9][0-9]*$ ]]
+            timeout --signal=TERM --kill-after=2s "${deadline_seconds}s" \
+              bash -c "$(declare -f wait_for_service_contract_inner); wait_for_service_contract_inner \"\$@\"" \
+              p0-readiness "$deadline_seconds" "$@"
+          }
           if [ ! -f "$remote_root/release-finalized" ] && [ -f "$remote_root/backup/pg_adapter.py" ] && [ -f "$remote_root/backup/pg_api_server.py" ]; then
             install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
             install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
             systemctl restart song-rank-pg-api
+            wait_for_service_contract "http://127.0.0.1:8765" \
+              "$remote_root/cleanup-healthz.json" "$remote_root/cleanup-meta.json" "$expected_revision"
             cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
             cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
             systemctl is-active --quiet song-rank-pg-api
