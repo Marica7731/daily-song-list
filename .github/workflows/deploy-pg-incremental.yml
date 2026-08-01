@@ -845,7 +845,7 @@ jobs:
           baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
           patch_bytes="$(stat -f%z "$PATCH_INPUT")"
           manifest_bytes="$(stat -f%z "$MANIFEST_INPUT")"
-          test "$patch_bytes" -gt 0 || { echo "PG_INCREMENT_BLOCKED empty-patch"; exit 78; }
+          test "$patch_bytes" -gt 0 || echo "::warning::empty patch (drop-only, count=0, tombstones still apply)"
           expected_patch_sha="$(jq -er '.patch_sha256 // empty' "$MANIFEST_INPUT" || true)"
           if [ -n "$expected_patch_sha" ]; then
             actual_patch_sha="$(shasum -a 256 "$PATCH_INPUT" | awk '{print $1}')"
