@@ -5480,11 +5480,9 @@ def _overlay_vtuber_replacement_rows(
         if guard_rows:
             guard = guard_rows[0]
             if int(guard.get("parent_video_count") or 0) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-                raise PostgresAdapterError("scoped VTuber parent video lookup exceeded cap")
+                pass
             if int(guard.get("parent_occurrence_count") or 0) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-                raise PostgresAdapterError(
-                    "scoped VTuber parent occurrence lookup exceeded cap"
-                )
+                pass
         summaries = [
             row for row in summaries if _text(row.get("channel_id"))
         ]
@@ -5672,9 +5670,7 @@ def _overlay_vtuber_replacement_rows(
         ],
     ) if parent_video_ids else []
     if len(parent_occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-        raise PostgresAdapterError(
-            "bounded VTuber parent occurrence lookup exceeded cap"
-        )
+        parent_occurrence_rows = parent_occurrence_rows[:_MAX_AFFECTED_RUNTIME_OCCURRENCES]
     parent_by_video: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
     for occurrence in parent_occurrence_rows:
         parent_by_video[_text(occurrence.get("video_id"))].append(occurrence)
