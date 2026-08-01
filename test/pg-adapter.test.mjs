@@ -25,7 +25,9 @@ const ADAPTER_WORKFLOW_PATH = path.join(
   "workflows",
   "deploy-pg-adapter-contract.yml",
 );
-const ADAPTER_WORKFLOW_BYTES = fs.readFileSync(ADAPTER_WORKFLOW_PATH);
+const ADAPTER_WORKFLOW_BYTES = fs.existsSync(ADAPTER_WORKFLOW_PATH)
+  ? fs.readFileSync(ADAPTER_WORKFLOW_PATH)
+  : Buffer.from("");
 const ADAPTER_WORKFLOW = ADAPTER_WORKFLOW_BYTES.toString("utf8");
 
 function workflowRunBlocks(workflow) {
@@ -2944,19 +2946,23 @@ spec.loader.exec_module(module)
 class Cursor:
     def execute(self, sql, params):
         if "runtime_source_details" in sql:
-            self.description = [("payload_json",)]
-            self.rows = [(json.dumps({
+            self.description = [("revision_id",), ("range_id",), ("payload_json",)]
+            self.rows = [("rev", "all", json.dumps({
                 "sourceDetailKey": "src-noa",
                 "channelName": "Noa",
                 "occurrences": [{"videoId": "legacy-preview", "thumbnailUrl": "legacy.jpg"}],
                 "songs": ["Song A", "Song B", "Song C"],
-            }),)]
+            }))]
+        elif "source_occurrence_count" in sql:
+            self.description = [("total_occurrence_count",), ("total_video_count",), ("source_occurrence_count",)]
+            self.rows = [(3, 3, 3)]
+        elif "GROUP BY video_id" in sql:
+            self.description = [("video_id",), ("first_position",)]
+            self.rows = [("video-c", 2)]
         elif "runtime_source_occurrences" in sql:
-            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
+            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "search_text", "payload_json")]
             self.rows = [
-                (0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, None, json.dumps({"thumbnailUrl": "a.jpg"})),
-                (1, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 30, json.dumps({"thumbnailUrl": "b.jpg"})),
-                (2, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 60, json.dumps({"thumbnailUrl": "c.jpg"})),
+                (2, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 60, "c noa", json.dumps({"thumbnailUrl": "c.jpg"})),
             ]
         else:
             raise AssertionError(sql)
@@ -2973,6 +2979,490 @@ assert page["pageCount"] == 2 and page["totalCount"] == 3
 assert page["record"]["occurrences"] == [{"thumbnailUrl": "c.jpg", "videoId": "video-c", "title": "C", "channelName": "Noa", "channelId": "channel", "channelHandle": "@noa", "channelUrl": "https://youtube.com/@noa", "publishedAt": 3, "seconds": 60}]
 assert page["record"]["occurrencePreviewLimited"] is True
 assert module._runtime_source_occurrence({"video_id": "video-null", "seconds": None, "payload_json": "{}"})["seconds"] is None
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement query normalization matches the published searchScope contract", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+song = module._query_options({"q": "naretan", "searchFields": "title,artist"})
+assert song["searchScope"] == "song" and song["searchFields"] == ["title", "artist"]
+assert module.rankings_payload_from_records([], {
+    "range": "all", "view": "songs", "q": "naretan",
+    "searchFields": "title,artist", "pageSize": "5",
+})["searchScope"] == "song"
+mixed = module._query_options({"q": "naretan", "searchFields": "title,channel"})
+assert mixed["searchScope"] == "source" and mixed["searchFields"] == ["title", "channel"]
+explicit = module._query_options({"q": "naretan", "searchScope": "channel",
+    "searchFields": "title,artist"})
+assert explicit["searchScope"] == "channel"
+assert module._query_options({"searchScope": "songs"})["searchScope"] == "song"
+for query in ({"searchScope": "wrong"}, {"searchFields": "title,wrong"}):
+    try:
+        module._query_options(query)
+        raise AssertionError("invalid search contract was accepted")
+    except ValueError:
+        pass
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement pager keeps Haru counts variants range and literal search bounded", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+calls = []
+haru_key = "01fc9d6830d3c230"
+small_key = "969a36392237f00d"
+artists = [{"name": name, "count": count} for name, count in (
+    ("ヨルシカ", 4600), ("Yorushika", 40), ("suis", 30),
+    ("n-buna", 20), ("ヨルシカ feat.suis", 7),
+)]
+def physical(video_id, position):
+    return {"position": position, "video_id": video_id, "title": "Haru cover",
+        "channel_name": "Singer", "channel_id": "UC" + video_id,
+        "channel_handle": "@" + video_id, "channel_url": "https://youtube.com/@" + video_id,
+        "published_timestamp": position, "seconds": 30 + position,
+        "search_text": "haru singer " + video_id,
+        "payload_json": {"thumbnailUrl": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg",
+            "item": {"videoId": video_id},
+            "song": {"title": "晴る", "artist": "ヨルシカ"}}}
+def rows(_connection, sql, params):
+    params = list(params)
+    calls.append((sql, params))
+    if "FROM runtime_source_details" in sql:
+        key, range_id = params[1], params[2]
+        assert params[0] == ["overlay-new", "parent"]
+        return [{"revision_id": "parent", "range_id": range_id, "payload_json": {
+            "type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+            "artist": "ヨルシカ", "displayArtist": "ヨルシカ", "artists": artists,
+            "sourceDetailKey": key, "rangeId": range_id,
+            "occurrences": [{"videoId": "legacy-preview"}],
+        }}]
+    if "source_occurrence_count" in sql:
+        key, range_id = params[1], params[2]
+        assert params[4] == key and params[5] == range_id
+        if "ILIKE" in sql:
+            slash = chr(92)
+            assert params[-1] == "%100" + slash + "%" + slash + "_mix" + slash + slash + "x%", params
+            return [{"total_occurrence_count": 0, "total_video_count": 0,
+                "source_occurrence_count": 4697}]
+        if key == haru_key:
+            return [{"total_occurrence_count": 4697, "total_video_count": 4485,
+                "source_occurrence_count": 4697}]
+        assert key == small_key and range_id == "7d"
+        return [{"total_occurrence_count": 17, "total_video_count": 17,
+            "source_occurrence_count": 17}]
+    if "GROUP BY video_id" in sql:
+        if "ILIKE" in sql:
+            return []
+        if params[1] == haru_key:
+            if params[-2] == 20:
+                return [{"video_id": "haru-%02d" % index, "first_position": index}
+                    for index in range(20)]
+            return [{"video_id": "haru-c", "first_position": 2},
+                {"video_id": "haru-d", "first_position": 3}]
+        return [{"video_id": "small-a", "first_position": 0}]
+    if "SELECT position, video_id" in sql:
+        selected = list(params[-2])
+        result = [physical(video_id, index + 2) for index, video_id in enumerate(selected)]
+        if len(selected) == 20:
+            result.append(physical(selected[0], 100))
+        return result
+    raise AssertionError(sql)
+module._rows = rows
+
+page = module._runtime_source_payload(
+    object(), "parent", haru_key, {"range": "all", "page": "2", "pageSize": "2"},
+    overlay_revision_ids=["overlay-new"],
+)
+assert page["found"] is True and page["sourceRevisionId"] == "parent"
+assert page["sourceKey"] == haru_key and page["record"]["sourceDetailKey"] == haru_key
+assert page["record"]["key"] == "晴る::ヨルシカ" and page["record"]["artists"] == artists
+assert page["pageCount"] == 2243 and page["totalCount"] == 4485
+assert page["totalOccurrenceCount"] == page["record"]["occurrenceCount"] == 4697
+assert [item["videoId"] for item in page["record"]["occurrences"]] == ["haru-c", "haru-d"]
+
+page20 = module._runtime_source_payload(
+    object(), "parent", haru_key, {"range": "all", "page": "1", "pageSize": "20"},
+    overlay_revision_ids=["overlay-new"],
+)
+page20_occurrences = page20["record"]["occurrences"]
+assert page20["pageCount"] == 225 and page20["totalVideoCount"] == 4485
+assert len({item["videoId"] for item in page20_occurrences}) == 20
+assert len(page20_occurrences) == 21
+assert sum(item["videoId"] == "haru-00" for item in page20_occurrences) == 2
+
+query_q = "100%_mix" + chr(92) + "x"
+empty_search = module._runtime_source_payload(
+    object(), "parent", haru_key,
+    {"range": "all", "q": query_q, "page": "1", "pageSize": "2"},
+    overlay_revision_ids=["overlay-new"],
+)
+assert empty_search["found"] is True and empty_search["totalOccurrenceCount"] == 0
+assert empty_search["record"]["occurrences"] == []
+
+small = module._runtime_source_payload(
+    object(), "parent", small_key, {"range": "7d", "page": "1", "pageSize": "1"},
+    overlay_revision_ids=["overlay-new"],
+)
+assert small["found"] is True and small["totalOccurrenceCount"] == 17
+assert small["pageCount"] == 17 and small["record"]["rangeId"] == "7d"
+assert all("runtime_occurrences" not in sql for sql, _ in calls)
+physical_sql = "\\n".join(sql for sql, _ in calls if "runtime_source_occurrences" in sql)
+for forbidden in ("occurrence_id", "song_key", " artist,"):
+    assert forbidden not in physical_sql, forbidden
+assert "search_text ILIKE %s" in physical_sql and "LIMIT %s" in physical_sql
+
+class OverflowRows:
+    def __len__(self):
+        return module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
+def overflow_rows(_connection, sql, params):
+    if "source_occurrence_count" in sql:
+        return [{"total_occurrence_count": 1, "total_video_count": 1,
+            "source_occurrence_count": 1}]
+    if "GROUP BY video_id" in sql:
+        return [{"video_id": "overflow", "first_position": 0}]
+    if "SELECT position, video_id" in sql:
+        assert params[-1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
+        return OverflowRows()
+    raise AssertionError(sql)
+module._rows = overflow_rows
+try:
+    module._runtime_source_table_page(
+        object(), "parent", haru_key, {"range": "all", "page": "1", "pageSize": "1"},
+    )
+    raise AssertionError("source hydration cap was not enforced")
+except module.PostgresAdapterError:
+    pass
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement nearest detail distinguishes absence inheritance from explicit empty authority", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+try:
+    module.source_payload(object(), "  ", {"range": "all"})
+    raise AssertionError("empty source key was not rejected")
+except ValueError as error:
+    assert str(error) == "source key is required"
+mode = ["empty"]
+calls = []
+def rows(_connection, sql, params):
+    calls.append((sql, list(params)))
+    if "FROM runtime_source_details" in sql:
+        revision = "overlay" if mode[0] == "empty" else "parent"
+        if mode[0] == "truncated":
+            revision = "overlay"
+            return [{"revision_id": revision, "range_id": "all", "payload_json": {
+                "type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+                "artist": "ヨルシカ", "sourceDetailKey": "source", "rangeId": "all",
+                "occurrences": [{"videoId": "preview-a"}, {"videoId": "preview-b"},
+                    {"videoId": "preview-c"}],
+                "count": 4697, "occurrenceCount": 4697, "videoCount": 4485,
+                "occurrencePreviewLimited": True,
+            }}]
+        return [{"revision_id": revision, "range_id": "all", "payload_json": {
+            "type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+            "artist": "ヨルシカ", "artists": [{"name": "ヨルシカ", "count": 0}],
+            "sourceDetailKey": "source", "rangeId": "all", "occurrences": [],
+            "count": 0, "occurrenceCount": 0, "videoCount": 0,
+        }}]
+    if "source_occurrence_count" in sql:
+        if mode[0] in {"empty", "truncated"}:
+            assert params[0] == "overlay" and params[3] == "overlay"
+            return [{"total_occurrence_count": 0, "total_video_count": 0,
+                "source_occurrence_count": 0}]
+        assert params[0] == "parent" and params[3] == "parent"
+        return [{"total_occurrence_count": 1, "total_video_count": 1,
+            "source_occurrence_count": 1}]
+    if "GROUP BY video_id" in sql:
+        return [{"video_id": "parent-video", "first_position": 0}]
+    if "SELECT position, video_id" in sql:
+        return [{"position": 0, "video_id": "parent-video", "title": "Parent",
+            "channel_name": "Parent", "channel_id": "UCPARENT", "channel_handle": "@parent",
+            "channel_url": "https://youtube.com/@parent", "published_timestamp": 1,
+            "seconds": 2, "search_text": "parent", "payload_json": {"videoId": "parent-video"}}]
+    raise AssertionError(sql)
+module._rows = rows
+empty = module._runtime_source_payload(
+    object(), "parent", "source", {"range": "all"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+assert empty["found"] is True and empty["sourceRevisionId"] == "overlay"
+assert empty["record"]["occurrenceCount"] == 0 and empty["record"]["occurrences"] == []
+
+mode[0] = "truncated"
+try:
+    module._runtime_source_payload(
+        object(), "parent", "source", {"range": "all"},
+        allow_derived=False, overlay_revision_ids=["overlay"],
+    )
+    raise AssertionError("preview-only authoritative source was accepted as a complete page")
+except module.PostgresAdapterError as error:
+    assert "physical occurrence rows" in str(error)
+
+mode[0] = "inherit"
+inherited = module._runtime_source_payload(
+    object(), "parent", "source", {"range": "all", "page": "1", "pageSize": "1"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+assert inherited["found"] is True and inherited["sourceRevisionId"] == "parent"
+assert inherited["record"]["occurrences"][0]["videoId"] == "parent-video"
+
+# Once a nearest overlay detail exists, top-level source routing must not
+# invoke parent delta or channel reconstruction and revive older positions.
+module._generic_runtime_projection_revision = lambda *_: ("active", {"revision_id": "active"})
+module._generic_parent_runtime_revision = lambda *_: ("parent", {"revision_id": "parent"})
+module._overlay_revision_ids = lambda *_: ["overlay"]
+module._runtime_source_payload = lambda *_args, **_kwargs: empty
+def forbidden(*_args, **_kwargs):
+    raise AssertionError("authoritative overlay detail was rebuilt")
+module._generic_song_source_payload = forbidden
+module._runtime_channel_source_payload = forbidden
+assert module.source_payload(object(), "source", {"range": "all"}) == empty
+
+captured = []
+marker = {"schemaVersion": 1, "found": True, "sourceKey": "source",
+    "record": {"sourceDetailKey": "source", "occurrenceCount": 1}}
+module._overlay_revision_ids = lambda *_: ["newer", "overlay"]
+def apply_newer(_connection, base_revision, _record, _key, _query, revision_ids):
+    captured.append((base_revision, list(revision_ids)))
+    return marker
+module._generic_song_source_payload = apply_newer
+assert module.source_payload(object(), "source", {"range": "all"}) == marker
+assert captured == [("overlay", ["newer"])]
+
+# Re-import to exercise the real fail-closed helper after the routing sentinel.
+spec2 = importlib.util.spec_from_file_location("pg_adapter_identity", ${JSON.stringify(ADAPTER)})
+module2 = importlib.util.module_from_spec(spec2)
+sys.modules[spec2.name] = module2
+spec2.loader.exec_module(module2)
+blocked = module2._generic_song_source_payload(
+    object(), "parent",
+    {"type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+        "displayArtist": "ヨルシカ", "sourceDetailKey": "source"},
+    "source", {"range": "all"}, ["overlay"], [], {}, [],
+)
+assert blocked["found"] is False and blocked["sourceDetailState"] == "missing_exact_song_identity"
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement rejects a zero-count preview-only detail without physical rows", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def rows(_connection, sql, params):
+    if "FROM runtime_source_details" in sql:
+        assert list(params)[0] == ["overlay", "parent"]
+        return [{"revision_id": "overlay", "range_id": "all", "payload_json": {
+            "type": "song", "key": "Song::Artist", "title": "Song",
+            "artist": "Artist", "sourceDetailKey": "opaque", "rangeId": "all",
+            "occurrences": [], "count": 0, "occurrenceCount": 0, "videoCount": 0,
+            "occurrencePreviewLimited": True,
+        }}]
+    if "source_occurrence_count" in sql:
+        assert list(params)[:4] == ["overlay", "opaque", "all", "overlay"]
+        return [{"total_occurrence_count": 0, "total_video_count": 0,
+            "source_occurrence_count": 0}]
+    raise AssertionError(sql)
+
+module._rows = rows
+try:
+    module._runtime_source_payload(
+        object(), "parent", "opaque", {"range": "all", "page": "1", "pageSize": "20"},
+        allow_derived=False, overlay_revision_ids=["overlay"],
+    )
+    raise AssertionError("zero-count preview-only detail did not fail closed")
+except module.PostgresAdapterError as error:
+    assert "physical occurrence rows" in str(error)
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement complete embedded fallback pages unique videos and hydrates siblings", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+occurrences = [
+    {"videoId": "video-00", "occurrenceId": "video-00-a"},
+    {"videoId": "video-00", "occurrenceId": "video-00-b"},
+]
+occurrences.extend(
+    {"videoId": "video-%02d" % index, "occurrenceId": "video-%02d-a" % index}
+    for index in range(1, 21)
+)
+
+def rows(_connection, sql, params):
+    if "FROM runtime_source_details" in sql:
+        return [{"revision_id": "overlay", "range_id": "all", "payload_json": {
+            "type": "song", "key": "Song::Artist", "title": "Song",
+            "artist": "Artist", "sourceDetailKey": "opaque", "rangeId": "all",
+            "occurrences": occurrences, "count": 22, "occurrenceCount": 22,
+            "videoCount": 21, "occurrencePreviewLimited": False,
+        }}]
+    if "source_occurrence_count" in sql:
+        return [{"total_occurrence_count": 0, "total_video_count": 0,
+            "source_occurrence_count": 0}]
+    raise AssertionError(sql)
+
+module._rows = rows
+page_one = module._runtime_source_payload(
+    object(), "parent", "opaque", {"range": "all", "page": "1", "pageSize": "20"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+page_two = module._runtime_source_payload(
+    object(), "parent", "opaque", {"range": "all", "page": "2", "pageSize": "20"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+page_one_rows = page_one["record"]["occurrences"]
+page_two_rows = page_two["record"]["occurrences"]
+assert page_one["page"] == 1 and page_two["page"] == 2
+assert page_one["pageSize"] == page_two["pageSize"] == 20
+assert page_one["pageCount"] == page_two["pageCount"] == 2
+assert page_one["totalCount"] == page_two["totalCount"] == 21
+assert page_one["totalVideoCount"] == page_two["totalVideoCount"] == 21
+assert page_one["totalOccurrenceCount"] == page_two["totalOccurrenceCount"] == 22
+assert page_one["record"]["occurrenceCount"] == page_two["record"]["occurrenceCount"] == 22
+assert len({item["videoId"] for item in page_one_rows}) == 20
+assert len(page_one_rows) == 21
+assert sum(item["videoId"] == "video-00" for item in page_one_rows) == 2
+assert [item["videoId"] for item in page_two_rows] == ["video-20"]
+assert page_one["record"]["occurrencePreviewLimited"] is True
+assert page_two["record"]["occurrencePreviewLimited"] is True
+
+unpaged = module._runtime_source_payload(
+    object(), "parent", "opaque", {"range": "all"},
+    allow_derived=False, overlay_revision_ids=["overlay"],
+)
+assert "page" not in unpaged and len(unpaged["record"]["occurrences"]) == 22
+assert unpaged["record"]["occurrencePreviewLimited"] is False
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("source replacement applies the production 23 394 5 intersection without reviving parent positions", () => {
+  const output = runPython(`
+import importlib.util
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+import sys
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+source_key = "01fc9d6830d3c230"
+def source_row(video_id, occurrence_id, position):
+    return {"position": position, "video_id": video_id, "title": "Haru cover",
+        "channel_name": "Singer", "channel_id": "UC" + video_id,
+        "channel_handle": "@" + video_id, "channel_url": "https://youtube.com/@" + video_id,
+        "published_timestamp": position, "seconds": position,
+        "search_text": "晴る ヨルシカ " + video_id,
+        "payload_json": {"video": {"videoId": video_id, "channelId": "UC" + video_id,
+            "channelName": "Singer", "thumbnailUrl": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg"},
+            "occurrenceId": occurrence_id, "position": position, "rangeId": "all",
+            "songKey": "db-haru", "title": "晴る", "artist": "ヨルシカ"}}
+affected = []
+for position in range(394):
+    video_id = "affected-%02d" % (position % 23)
+    affected.append(source_row(video_id, "old-%03d" % position, position))
+def candidate(video_index):
+    video_id = "affected-%02d" % video_index
+    occurrence_id = "accepted-%02d" % video_index
+    return {"revision_id": "accepted", "video_id": video_id,
+        "occurrence_id": occurrence_id, "position": video_index, "range_id": "all",
+        "song_key": "db-haru", "title": "晴る", "artist": "ヨルシカ",
+        "video_tombstone": False,
+        "video_payload_json": {"videoId": video_id, "channelId": "UC" + video_id,
+            "channelName": "Singer", "thumbnailUrl": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg"},
+        "occurrence_payload_json": {"videoId": video_id, "occurrenceId": occurrence_id,
+            "position": video_index, "rangeId": "all", "songKey": "db-haru",
+            "title": "晴る", "artist": "ヨルシカ"}}
+candidates = [candidate(index) for index in range(20)]
+resets = {"affected-%02d" % index: {"video_id": "affected-%02d" % index}
+    for index in range(23)}
+changes = [{"entityType": "occurrences", "videoId": "affected-%02d" % index,
+    "occurrenceId": "accepted-%02d" % index, "songKey": "db-haru",
+    "title": "晴る", "artist": "ヨルシカ", "rangeId": "all"}
+    for index in range(4)]
+changes.append({"entityType": "occurrences", "videoId": "affected-04",
+    "occurrenceId": "accepted-04", "songKey": "db-haru", "title": "晴る",
+    "artist": "ヨルシカ", "rangeId": "all", "replacement": True,
+    "replacementPayload": {"videoId": "affected-04", "occurrenceId": "accepted-04",
+        "songKey": "other", "title": "Other", "artist": "Other", "rangeId": "all"},
+    "replacementVideoPayload": candidates[4]["video_payload_json"]})
+calls = []
+def rows(_connection, sql, params):
+    params = list(params)
+    calls.append((sql, params))
+    if "WITH overlay_videos" in sql:
+        assert len(params[0]) == 15 and len(params[5]) == 23
+        return [{"video_id": "affected-05", "first_position": 5},
+            {"video_id": "unaffected", "first_position": 500}]
+    if "count(*) AS total_occurrence_count" in sql:
+        assert params[:3] == ["parent", source_key, "all"]
+        return [{"total_occurrence_count": 4697, "total_video_count": 4485,
+            "max_position": 4696}]
+    if "FROM runtime_source_occurrences" in sql and "video_id = ANY" in sql:
+        requested = set(params[-2])
+        assert params[0:3] == ["parent", source_key, "all"]
+        assert params[-1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
+        if "unaffected" in requested:
+            return [source_row("unaffected", "unaffected-occ", 500)]
+        assert requested == set(resets)
+        return list(affected)
+    raise AssertionError(sql)
+module._rows = rows
+persisted = {"type": "song", "key": "晴る::ヨルシカ", "title": "晴る",
+    "artist": "ヨルシカ", "displayArtist": "ヨルシカ",
+    "artists": [{"name": "ヨルシカ", "count": 4697}],
+    "sourceDetailKey": source_key, "rangeId": "all", "songCount": 1}
+payload = module._generic_song_source_payload(
+    object(), "parent", persisted, source_key,
+    {"range": "all", "page": "1", "pageSize": "2"}, ["accepted", "runtime"],
+    candidates, resets, changes,
+)
+assert payload["found"] is True
+assert payload["totalOccurrenceCount"] == payload["record"]["occurrenceCount"] == 4318
+assert payload["totalVideoCount"] == payload["record"]["videoCount"] == 4477
+assert payload["record"]["artists"] == [{"name": "ヨルシカ", "count": 4318}]
+assert payload["pageCount"] == 2239
+assert [item["videoId"] for item in payload["record"]["occurrences"]] == ["affected-05", "unaffected"]
+assert not any(item["videoId"] in {"affected-00", "affected-01", "affected-02", "affected-03", "affected-04"}
+    for item in payload["record"]["occurrences"])
+assert all("runtime_occurrences" not in sql for sql, _ in calls)
+assert len(affected) == 394 and len(resets) == 23 and len(changes) == 5
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -4409,7 +4899,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("unpaged source detail provides one real-video preview per song", () => {
+test("unpaged source detail returns every occurrence inside its bounded default page", () => {
   const output = runPython(`
 import importlib.util
 import json
@@ -4421,15 +4911,21 @@ spec.loader.exec_module(module)
 class Cursor:
     def execute(self, sql, params):
         if "runtime_source_details" in sql:
-            self.description = [("payload_json",)]
-            self.rows = [(json.dumps({"sourceDetailKey": "src-noa", "rangeId": "all", "occurrencePreviewLimited": True, "occurrences": [{"videoId": "legacy", "thumbnailUrl": "legacy.jpg"}]}),)]
+            self.description = [("revision_id",), ("range_id",), ("payload_json",)]
+            self.rows = [("rev", "all", json.dumps({"sourceDetailKey": "src-noa", "rangeId": "all", "occurrencePreviewLimited": True, "occurrences": [{"videoId": "legacy", "thumbnailUrl": "legacy.jpg"}]}))]
+        elif "source_occurrence_count" in sql:
+            self.description = [("total_occurrence_count",), ("total_video_count",), ("source_occurrence_count",)]
+            self.rows = [(4, 4, 4)]
+        elif "GROUP BY video_id" in sql:
+            self.description = [("video_id",), ("first_position",)]
+            self.rows = [("video-a", 0), ("video-a2", 1), ("video-b", 2), ("video-c", 3)]
         elif "runtime_source_occurrences" in sql:
-            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "payload_json")]
+            self.description = [(name,) for name in ("position", "video_id", "title", "channel_name", "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds", "search_text", "payload_json")]
             self.rows = [
-                (0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, 0, json.dumps({"item": {"videoId": "video-a", "thumbnailUrl": "a.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
-                (1, "video-a2", "A2", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 1, json.dumps({"item": {"videoId": "video-a2", "thumbnailUrl": "a2.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
-                (2, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 2, json.dumps({"item": {"videoId": "video-b", "thumbnailUrl": "b.jpg"}, "song": {"songKey": "song-b", "title": "Song B"}})),
-                (3, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 4, 3, json.dumps({"item": {"videoId": "video-c", "thumbnailUrl": "c.jpg"}, "song": {"songKey": "song-c", "title": "Song C"}})),
+                (0, "video-a", "A", "Noa", "channel", "@noa", "https://youtube.com/@noa", 1, 0, "a", json.dumps({"item": {"videoId": "video-a", "thumbnailUrl": "a.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
+                (1, "video-a2", "A2", "Noa", "channel", "@noa", "https://youtube.com/@noa", 2, 1, "a2", json.dumps({"item": {"videoId": "video-a2", "thumbnailUrl": "a2.jpg"}, "song": {"songKey": "song-a", "title": "Song A"}})),
+                (2, "video-b", "B", "Noa", "channel", "@noa", "https://youtube.com/@noa", 3, 2, "b", json.dumps({"item": {"videoId": "video-b", "thumbnailUrl": "b.jpg"}, "song": {"songKey": "song-b", "title": "Song B"}})),
+                (3, "video-c", "C", "Noa", "channel", "@noa", "https://youtube.com/@noa", 4, 3, "c", json.dumps({"item": {"videoId": "video-c", "thumbnailUrl": "c.jpg"}, "song": {"songKey": "song-c", "title": "Song C"}})),
             ]
         else:
             raise AssertionError(sql)
@@ -4441,8 +4937,8 @@ result = module._runtime_source_payload(Connection(), "rev", "src-noa")
 assert result["found"] is True
 assert result["record"]["occurrenceCount"] == 4 and result["record"]["videoCount"] == 4
 previews = result["record"]["occurrences"]
-assert [item["item"]["thumbnailUrl"] for item in previews] == ["a.jpg", "b.jpg", "c.jpg"]
-assert {item["item"]["videoId"] for item in previews} == {"video-a", "video-b", "video-c"}
+assert [item["item"]["thumbnailUrl"] for item in previews] == ["a.jpg", "a2.jpg", "b.jpg", "c.jpg"]
+assert {item["item"]["videoId"] for item in previews} == {"video-a", "video-a2", "video-b", "video-c"}
 print("OK")
 `);
   assert.equal(output, "OK");
@@ -5595,8 +6091,10 @@ assert len(module._production_source_detail_key_for_group("artists", "all", "ado
 assert len(module._production_source_detail_key_for_group("vtubers", "all", "UCADO")) == 16
 assert module._production_source_detail_key_for_group("videos", "all", "video-a") == ""
 def persisted(key, song_key, title):
-    return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": {
-        "type": "song", "key": song_key, "title": title, "displayArtist": "Ado",
+    return {"schemaVersion": 1, "found": True, "sourceKey": key,
+        "sourceRevisionId": "parent", "record": {
+        "type": "song", "key": song_key, "title": title, "artist": "Ado",
+        "displayArtist": "Ado", "artists": [{"name": "Ado", "count": 0}],
         "rangeId": "all", "sourceDetailKey": key, "sourceDetailPath": "",
         "legacyField": "kept",
     }}
@@ -5664,14 +6162,50 @@ module._rows = rows
 # The runtime table stores the DB song key, while the persisted public source
 # key is the normalised display key.  Keep the SQL fixture faithful: each old
 # alias group gets only its own parent rows, never a mocked cross-group scan.
+def source_row(row, position):
+    payload = dict(row["occurrence_payload_json"])
+    payload["video"] = dict(row["video_payload_json"])
+    return {"position": position, "video_id": row["video_id"],
+        "title": row["video_title"], "channel_name": row["channel_name"],
+        "channel_id": row["channel_id"], "channel_handle": row["channel_handle"],
+        "channel_url": row["channel_url"], "published_timestamp": position,
+        "seconds": row["seconds"], "search_text": row["title"] + " " + row["artist"],
+        "payload_json": payload}
+source_rows = {
+    canonical_source: [source_row(row, index) for index, row in enumerate(canonical_parent)],
+}
+for source_key, (song_key, _title) in alias_sources.items():
+    source_rows[source_key] = [
+        source_row(row, index) for index, row in enumerate(alias_parent)
+        if row["song_key"] == song_key
+    ]
 def selected_rows(_connection, sql, params):
-    if "FROM runtime_occurrences AS o" in sql:
-        assert "o.song_key = %s" in sql and "LIMIT %s" in sql
-        if str(params[2]).startswith("alias-"):
-            return [row for row in alias_parent if row["song_key"] == params[2]]
-        if params[2] == "new-db-key" or params[3] == "New overlay song":
-            return []
-        return list(canonical_parent)
+    params = list(params)
+    if "WITH overlay_videos" in sql:
+        source_key = params[3]
+        excluded = set(params[5])
+        videos = {}
+        for row in source_rows.get(source_key, []):
+            if row["video_id"] not in excluded:
+                videos[row["video_id"]] = min(
+                    videos.get(row["video_id"], row["position"]), row["position"],
+                )
+        for video_id, position in zip(params[0], params[1]):
+            videos[video_id] = position
+        ordered = sorted(videos.items(), key=lambda item: (item[1], item[0]))
+        limit, offset = params[-2], params[-1]
+        return [{"video_id": video_id, "first_position": position}
+            for video_id, position in ordered[offset:offset + limit]]
+    if "count(*) AS total_occurrence_count" in sql:
+        rows = source_rows.get(params[1], [])
+        return [{"total_occurrence_count": len(rows),
+            "total_video_count": len({row["video_id"] for row in rows}),
+            "max_position": max((row["position"] for row in rows), default=0)}]
+    if "FROM runtime_source_occurrences" in sql and "video_id = ANY" in sql:
+        requested = set(params[-2])
+        assert params[-1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
+        return [row for row in source_rows.get(params[1], [])
+            if row["video_id"] in requested]
     if "runtime_ranking_rows" in sql:
         return []
     raise AssertionError(sql)
@@ -6351,7 +6885,12 @@ def source_rows(_connection, sql, params):
     raise AssertionError(sql)
 module._rows = source_rows
 try:
-    module._runtime_source_payload(object(), "parent", "source", {"page": "1"}, overlay_revision_ids=["accepted"])
+    module._generic_song_source_payload(
+        object(), "parent",
+        {"type": "song", "key": "song::artist", "title": "Song",
+            "artist": "Artist", "sourceDetailKey": "source"},
+        "source", {"page": "1"}, ["accepted"],
+    )
     raise AssertionError("accepted video fallback cap was not enforced")
 except module.PostgresAdapterError: pass
 assert any("migration_video_rows" in sql for sql, _ in source_calls)

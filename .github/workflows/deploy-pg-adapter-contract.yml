@@ -3,25 +3,40 @@ name: Deploy PostgreSQL adapter contract
 on:
   workflow_dispatch:
     inputs:
-      source_key:
-        description: "Source detail key used for the live contract probe"
+      source_title:
+        description: "Exact song title for a song source"
         required: true
-        default: "29ae50b7975dbdcf"
+        default: "晴る"
         type: string
-      source_channel_id:
-        description: "Exact channelId expected for source_key"
+      source_entity_key:
+        description: "Exact canonical song entity key; never the opaque source detail key"
         required: true
-        default: ""
+        default: "晴る::ヨルシカ"
+        type: string
+      source_key:
+        description: "Exact opaque source detail key"
+        required: true
+        default: "01fc9d6830d3c230"
         type: string
       source_occurrence_count:
-        description: "Exact active occurrence count expected for source_key"
+        description: "Exact active occurrence count"
         required: true
-        default: ""
+        default: "4697"
         type: string
       source_video_count:
-        description: "Exact active video count expected for source_key"
+        description: "Exact active video count"
         required: true
-        default: ""
+        default: "4485"
+        type: string
+      channel_regression_handle:
+        description: "Known channel positive regression handle"
+        required: true
+        default: "@shingames7857"
+        type: string
+      channel_regression_id:
+        description: "Known channel positive regression channelId"
+        required: true
+        default: "UC5zO6IFsWSUHMYgJMv81XKg"
         type: string
       expected_active_revision:
         description: "Active revision CAS captured before dispatch"
@@ -39,37 +54,220 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Candidate and installed-public quick gates are independently bounded;
-    # reserve enough time for rollback and cleanup without exhaustive paging.
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
+      SOURCE_TITLE: ${{ inputs.source_title }}
+      SOURCE_ENTITY_KEY: ${{ inputs.source_entity_key }}
       SOURCE_KEY: ${{ inputs.source_key }}
-      SOURCE_CHANNEL_ID: ${{ inputs.source_channel_id }}
       SOURCE_OCCURRENCE_COUNT: ${{ inputs.source_occurrence_count }}
       SOURCE_VIDEO_COUNT: ${{ inputs.source_video_count }}
+      CHANNEL_REGRESSION_HANDLE: ${{ inputs.channel_regression_handle }}
+      CHANNEL_REGRESSION_ID: ${{ inputs.channel_regression_id }}
       EXPECTED_ACTIVE_REVISION: ${{ inputs.expected_active_revision }}
       PUBLIC_BASE: "https://ytb-song-rank.culua.com"
+      THUMBNAIL_PATH_PREFIX: "/api/thumbnails"
     steps:
-      - name: Create bounded task root
+      - name: Create bounded task root and validate contract inputs
         run: |
           set -Eeuo pipefail
-          test -n "$SOURCE_KEY"
-          test -n "$SOURCE_CHANNEL_ID"
-          test -n "$SOURCE_OCCURRENCE_COUNT"
-          test -n "$SOURCE_VIDEO_COUNT"
-          test -n "$EXPECTED_ACTIVE_REVISION"
-          [[ "$SOURCE_OCCURRENCE_COUNT" =~ ^[0-9]+$ ]]
-          [[ "$SOURCE_VIDEO_COUNT" =~ ^[0-9]+$ ]]
+          test -n "$SOURCE_TITLE"
+          test "${#SOURCE_TITLE}" -le 256
+          test -n "$SOURCE_ENTITY_KEY"
+          test "${#SOURCE_ENTITY_KEY}" -le 512
+          test "$SOURCE_ENTITY_KEY" != "$SOURCE_KEY"
+          [[ "$SOURCE_TITLE" != *$'\n'* && "$SOURCE_TITLE" != *$'\r'* ]]
+          [[ "$SOURCE_ENTITY_KEY" != *$'\n'* && "$SOURCE_ENTITY_KEY" != *$'\r'* ]]
+          [[ "$SOURCE_KEY" =~ ^[0-9a-f]{16}([0-9a-f]{8})?$ ]]
+          [[ "$EXPECTED_ACTIVE_REVISION" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          [[ "$CHANNEL_REGRESSION_HANDLE" =~ ^@[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$CHANNEL_REGRESSION_ID" =~ ^UC[A-Za-z0-9_-]{20,}$ ]]
+          [[ "$SOURCE_OCCURRENCE_COUNT" =~ ^[1-9][0-9]*$ ]]
+          [[ "$SOURCE_VIDEO_COUNT" =~ ^[1-9][0-9]*$ ]]
+          test "$SOURCE_OCCURRENCE_COUNT" -le 200000
+          test "$SOURCE_VIDEO_COUNT" -le 100000
           TASK_ROOT="$(mktemp -d "$RUNNER_TEMP/daily-song-list-adapter.XXXXXX")"
           printf 'TASK_ROOT=%s\n' "$TASK_ROOT" >> "$GITHUB_ENV"
+          {
+            printf 'SOURCE_TITLE_B64=%s\n' "$(printf '%s' "$SOURCE_TITLE" | base64 -w0)"
+            printf 'SOURCE_ENTITY_KEY_B64=%s\n' "$(printf '%s' "$SOURCE_ENTITY_KEY" | base64 -w0)"
+            printf 'SOURCE_KEY_B64=%s\n' "$(printf '%s' "$SOURCE_KEY" | base64 -w0)"
+            printf 'SOURCE_OCCURRENCE_COUNT_B64=%s\n' "$(printf '%s' "$SOURCE_OCCURRENCE_COUNT" | base64 -w0)"
+            printf 'SOURCE_VIDEO_COUNT_B64=%s\n' "$(printf '%s' "$SOURCE_VIDEO_COUNT" | base64 -w0)"
+            printf 'CHANNEL_REGRESSION_HANDLE_B64=%s\n' "$(printf '%s' "$CHANNEL_REGRESSION_HANDLE" | base64 -w0)"
+            printf 'CHANNEL_REGRESSION_ID_B64=%s\n' "$(printf '%s' "$CHANNEL_REGRESSION_ID" | base64 -w0)"
+            printf 'EXPECTED_ACTIVE_REVISION_B64=%s\n' "$(printf '%s' "$EXPECTED_ACTIVE_REVISION" | base64 -w0)"
+          } >> "$GITHUB_ENV"
           df -B1 / > "$TASK_ROOT/storage-before.txt"
-          printf 'runId=%s\nstartedAt=%s\nsourceKey=%s\nsourceChannelId=%s\nsourceOccurrenceCount=%s\nsourceVideoCount=%s\nexpectedActiveRevision=%s\n' \
-            "$GITHUB_RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" \
+          printf 'runId=%s\nsourceType=song\nsourceTitle=%s\nsourceEntityKey=%s\nsourceKey=%s\nsourceOccurrenceCount=%s\nsourceVideoCount=%s\nexpectedActiveRevision=%s\n' \
+            "$GITHUB_RUN_ID" "$SOURCE_TITLE" "$SOURCE_ENTITY_KEY" "$SOURCE_KEY" \
             "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" "$EXPECTED_ACTIVE_REVISION" > "$TASK_ROOT/manifest.txt"
 
-      - name: Fetch adapter sources from this commit
+      - name: Prepare independent contract verifier
+        run: |
+          set -Eeuo pipefail
+          cat > "$TASK_ROOT/verify_contract.py" <<'PY'
+          import argparse
+          import json
+          import sys
+
+          def text(value):
+              return str(value).strip() if value is not None else ""
+
+          def integer(value, label):
+              try:
+                  result = int(value)
+              except (TypeError, ValueError) as exc:
+                  raise AssertionError(f"{label} is not an integer") from exc
+              if result < 0:
+                  raise AssertionError(f"{label} is negative")
+              return result
+
+          def first(mapping, *keys):
+              for key in keys:
+                  value = mapping.get(key)
+                  if value not in (None, ""):
+                      return value
+              return None
+
+          def load(path):
+              with open(path, encoding="utf-8") as stream:
+                  value = json.load(stream)
+              if not isinstance(value, dict):
+                  raise AssertionError(f"{path} is not an object")
+              return value
+
+          def visible_video(occurrence, label):
+              if not isinstance(occurrence, dict):
+                  raise AssertionError(f"{label} occurrence is not an object")
+              item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}
+              video = occurrence.get("video") if isinstance(occurrence.get("video"), dict) else {}
+              ids = [text(occurrence.get("videoId")), text(item.get("videoId")), text(video.get("videoId"))]
+              ids = [value for value in ids if value]
+              if not ids or len(set(ids)) != 1:
+                  raise AssertionError(f"{label} video identity mismatch")
+              thumbs = [text(item.get("thumbnailUrl") or item.get("videoThumbnailUrl")), text(video.get("thumbnailUrl") or video.get("videoThumbnailUrl"))]
+              thumbs = [value for value in thumbs if value]
+              if thumbs and len(set(thumbs)) != 1:
+                  raise AssertionError(f"{label} thumbnail identity mismatch")
+              return ids[0]
+
+          def gate(args):
+              meta = load(args.meta)
+              meta_root = meta.get("meta") if isinstance(meta.get("meta"), dict) else meta
+              if args.revision and text(meta_root.get("active_revision_id") or meta_root.get("activeRevisionId")) != args.revision:
+                  raise AssertionError(f"{args.phase} active revision mismatch")
+              if text(meta_root.get("migration_status") or meta_root.get("migrationStatus")) != "active":
+                  raise AssertionError(f"{args.phase} migration status mismatch")
+
+              rankings = load(args.rankings)
+              if text(rankings.get("searchScope")) != "song":
+                  raise AssertionError(f"{args.phase} rankings searchScope is not song")
+              records = rankings.get("records")
+              if not isinstance(records, list) or not records:
+                  raise AssertionError(f"{args.phase} rankings has no visible rows")
+              matching = []
+              for card_candidate in records:
+                  if not isinstance(card_candidate, dict):
+                      continue
+                  source_detail_key = text(first(card_candidate, "sourceDetailKey", "source_detail_key"))
+                  if source_detail_key == args.source_key:
+                      matching.append(card_candidate)
+              if not matching:
+                  raise AssertionError(f"{args.phase} rankings card identity is not visible")
+              card = matching[0]
+              card_key = text(first(card, "key", "songKey", "entityKey", "sourceKey"))
+              card_title = text(first(card, "title", "songTitle", "displayTitle"))
+              card_source_detail_key = text(first(card, "sourceDetailKey", "source_detail_key"))
+              if card_key != args.source_entity_key:
+                  raise AssertionError(f"{args.phase} rankings entity key mismatch")
+              if card_source_detail_key != args.source_key or card_key == card_source_detail_key:
+                  raise AssertionError(f"{args.phase} rankings source detail identity mismatch")
+              if card_title != args.source_title:
+                  raise AssertionError(f"{args.phase} rankings card title mismatch")
+              card_count = integer(first(card, "count", "occurrenceCount", "timestampCount"), "ranking card count")
+              if card_count != args.occurrences:
+                  raise AssertionError(f"{args.phase} rankings card count mismatch")
+              card_videos = integer(first(card, "videoCount", "videos"), "ranking card video count")
+              if card_videos != args.videos:
+                  raise AssertionError(f"{args.phase} rankings card video count mismatch")
+              visible = card.get("occurrences")
+              if not isinstance(visible, list) or not visible:
+                  raise AssertionError(f"{args.phase} rankings card has no visible occurrence")
+              video_id = visible_video(visible[0], f"{args.phase} rankings")
+
+              source = load(args.source)
+              if source.get("found") is not True or text(source.get("sourceKey")) != args.source_key:
+                  raise AssertionError(f"{args.phase} source key was not found")
+              source_page_size = integer(source.get("pageSize"), "source pageSize")
+              if integer(source.get("page"), "source page") != 1 or source_page_size != 20:
+                  raise AssertionError(f"{args.phase} source page is not visible page 1/20")
+              source_total_count = integer(source.get("totalCount"), "source totalCount")
+              if source_total_count != args.videos:
+                  raise AssertionError(f"{args.phase} source totalCount mismatch")
+              page_count = integer(source.get("pageCount"), "source pageCount")
+              expected_page_count = max(1, (source_total_count + source_page_size - 1) // source_page_size)
+              if page_count != expected_page_count:
+                  raise AssertionError(f"{args.phase} source pageCount mismatch")
+              if integer(source.get("totalOccurrenceCount"), "source occurrence total") != args.occurrences:
+                  raise AssertionError(f"{args.phase} source occurrence count mismatch")
+              if integer(source.get("totalVideoCount"), "source video total") != args.videos:
+                  raise AssertionError(f"{args.phase} source video count mismatch")
+              record = source.get("record")
+              if not isinstance(record, dict):
+                  raise AssertionError(f"{args.phase} source record missing")
+              if text(record.get("sourceDetailKey")) != args.source_key:
+                  raise AssertionError(f"{args.phase} source detail key mismatch")
+              if text(record.get("key")) != args.source_entity_key or text(record.get("key")) != card_key:
+                  raise AssertionError(f"{args.phase} source/card key mismatch")
+              if text(record.get("key")) == text(record.get("sourceDetailKey")):
+                  raise AssertionError(f"{args.phase} entity key conflates opaque source detail key")
+              if text(record.get("title")) != card_title or text(record.get("title")) != args.source_title:
+                  raise AssertionError(f"{args.phase} source/card title mismatch")
+              if text(record.get("type")) != "song":
+                  raise AssertionError(f"{args.phase} source type mismatch")
+              if integer(first(record, "count", "occurrenceCount", "timestampCount"), "source record count") != args.occurrences:
+                  raise AssertionError(f"{args.phase} source record occurrence count mismatch")
+              if integer(first(record, "videoCount", "videos"), "source record video count") != args.videos:
+                  raise AssertionError(f"{args.phase} source record video count mismatch")
+              occurrences = record.get("occurrences")
+              if not isinstance(occurrences, list) or not occurrences:
+                  raise AssertionError(f"{args.phase} source page has no visible occurrence")
+              page_video_ids = set()
+              for index, occurrence in enumerate(occurrences):
+                  current = visible_video(occurrence, f"{args.phase} source[{index}]")
+                  page_video_ids.add(current)
+              expected_page_videos = min(source_page_size, args.videos)
+              if len(page_video_ids) != expected_page_videos:
+                  raise AssertionError(
+                      f"{args.phase} source first-page video coverage mismatch "
+                      f"expected={expected_page_videos} actual={len(page_video_ids)}"
+                  )
+              print(f"CONTRACT_VERIFIED phase={args.phase} videoId={video_id} occurrences={args.occurrences} videos={args.videos}")
+              return video_id
+
+          parser = argparse.ArgumentParser()
+          parser.add_argument("--phase", required=True)
+          parser.add_argument("--meta", required=True)
+          parser.add_argument("--rankings", required=True)
+          parser.add_argument("--source", required=True)
+          parser.add_argument("--revision", required=True)
+          parser.add_argument("--source-entity-key", required=True)
+          parser.add_argument("--source-key", required=True)
+          parser.add_argument("--source-title", required=True)
+          parser.add_argument("--occurrences", type=int, required=True)
+          parser.add_argument("--videos", type=int, required=True)
+          args = parser.parse_args()
+          try:
+              gate(args)
+          except (AssertionError, KeyError, TypeError, ValueError) as exc:
+              print(f"CONTRACT_GATE_FAILED phase={args.phase} error={exc}", file=sys.stderr)
+              raise SystemExit(1)
+          PY
+          chmod 700 "$TASK_ROOT/verify_contract.py"
+
+      - name: Fetch candidate adapter sources from this commit
         run: |
           set -Eeuo pipefail
           RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
@@ -81,7 +279,10 @@ jobs:
           for filename in sys.argv[1:]:
               compile(open(filename, encoding="utf-8").read(), filename, "exec")
           PY
-          sha256sum "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$TASK_ROOT/audit-ranking-source-identities.py" >> "$TASK_ROOT/manifest.txt"
+          PG_ADAPTER_SHA256="$(sha256sum "$TASK_ROOT/pg_adapter.py" | awk '{print $1}')"
+          PG_API_SERVER_SHA256="$(sha256sum "$TASK_ROOT/pg_api_server.py" | awk '{print $1}')"
+          printf 'PG_ADAPTER_SHA256=%s\nPG_API_SERVER_SHA256=%s\n' "$PG_ADAPTER_SHA256" "$PG_API_SERVER_SHA256" >> "$GITHUB_ENV"
+          printf 'candidate.pg_adapter_sha256=%s\ncandidate.pg_api_server_sha256=%s\n' "$PG_ADAPTER_SHA256" "$PG_API_SERVER_SHA256" >> "$TASK_ROOT/manifest.txt"
 
       - name: Prepare bounded SSH helper
         env:
@@ -103,342 +304,373 @@ jobs:
             echo "DISPLAY=daily-song-list"
           } >> "$GITHUB_ENV"
 
-      - name: Start candidate and run minimal quick gate
+      - name: Candidate adapter contract gate
         run: |
           set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
           REMOTE_ROOT="/tmp/daily-song-list-adapter-${GITHUB_RUN_ID}"
           printf 'REMOTE_ROOT=%s\n' "$REMOTE_ROOT" >> "$GITHUB_ENV"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; rm -rf '$REMOTE_ROOT' /tmp/daily-song-list-adapter-30256082805; install -d -m 0755 '$REMOTE_ROOT/server'; install -m 0644 /dev/null '$REMOTE_ROOT/placeholder';"
-          scp "${SSH_OPTS[@]}" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$TASK_ROOT/audit-ranking-source-identities.py" "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/server/"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION" "$SOURCE_KEY" "$SOURCE_CHANNEL_ID" "$SOURCE_OCCURRENCE_COUNT" "$SOURCE_VIDEO_COUNT" <<'REMOTE'
+          timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" <<'REMOTE_SETUP'
           set -Eeuo pipefail
           remote_root="$1"
-          expected_active="$2"
-          source_key="$3"
-          source_channel_id="$4"
-          source_occurrence_count="$5"
-          source_video_count="$6"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          rm -rf -- "$remote_root"
+          install -d -m 0755 "$remote_root/server"
+          REMOTE_SETUP
+          timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 /" | tee "$TASK_ROOT/vps-storage-before.txt"
+          vps_storage_before_bytes="$(awk 'NR==2 {print $4}' "$TASK_ROOT/vps-storage-before.txt")"
+          [[ "$vps_storage_before_bytes" =~ ^[0-9]+$ ]]
+          printf 'vpsStorageBeforeBytes=%s\n' "$vps_storage_before_bytes" >> "$TASK_ROOT/manifest.txt"
+          timeout --signal=TERM --kill-after=10s 60s scp "${SSH_OPTS[@]}" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$TASK_ROOT/audit-ranking-source-identities.py" "$TASK_ROOT/verify_contract.py" "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/server/"
+          timeout --signal=TERM --kill-after=10s 360s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION_B64" "$SOURCE_TITLE_B64" "$SOURCE_ENTITY_KEY_B64" "$SOURCE_KEY_B64" \
+            "$SOURCE_OCCURRENCE_COUNT_B64" "$SOURCE_VIDEO_COUNT_B64" "$CHANNEL_REGRESSION_HANDLE_B64" "$CHANNEL_REGRESSION_ID_B64" \
+            "$PG_ADAPTER_SHA256" "$PG_API_SERVER_SHA256" <<'REMOTE'
+          set -Eeuo pipefail
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
+          }
+          remote_root="$1"
+          expected_active="$(decode_b64 "$2")"
+          source_title="$(decode_b64 "$3")"
+          source_entity_key="$(decode_b64 "$4")"
+          source_key="$(decode_b64 "$5")"
+          expected_occurrences="$(decode_b64 "$6")"
+          expected_videos="$(decode_b64 "$7")"
+          regression_handle="$(decode_b64 "$8")"
+          regression_id="$(decode_b64 "$9")"
+          expected_adapter_sha="${10}"
+          expected_server_sha="${11}"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$source_key" =~ ^[0-9a-f]{16}([0-9a-f]{8})?$ ]]
+          [[ "$expected_active" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          [[ "$expected_occurrences" =~ ^[1-9][0-9]*$ ]]
+          [[ "$expected_videos" =~ ^[1-9][0-9]*$ ]]
+          [[ "$regression_handle" =~ ^@[A-Za-z0-9._-]{1,100}$ ]]
+          [[ "$regression_id" =~ ^UC[A-Za-z0-9_-]{20,}$ ]]
+          test -n "$source_title"
+          test -n "$source_entity_key"
+          test "$source_entity_key" != "$source_key"
           candidate_unit="daily-song-list-adapter-${remote_root##*-}"
           cleanup_candidate() {
             systemctl stop "$candidate_unit" 2>/dev/null || true
             systemctl reset-failed "$candidate_unit" 2>/dev/null || true
           }
           trap cleanup_candidate EXIT
-          systemd-run --quiet --collect --unit="$candidate_unit" \
-            --uid=www-data --property=RuntimeMaxSec=8m \
-            --setenv=PGHOST=/var/run/postgresql \
-            --setenv=PGDATABASE=song_rank \
-            --setenv=PGUSER=www-data \
-            --setenv=DAILY_SONG_PG_ADAPTER_PHASE_TRACE=1 \
-            --setenv=PYTHONPATH="$remote_root/server" \
-            /usr/bin/python3 "$remote_root/server/pg_api_server.py" \
-              --host 127.0.0.1 --port 18766
-          systemctl show "$candidate_unit" --property MainPID --value > "$remote_root/candidate.pid"
-          for unused in $(seq 1 20); do
-            systemctl is-active --quiet "$candidate_unit" || {
-              journalctl -u "$candidate_unit" -n 80 --no-pager
-              exit 1
-            }
-            ss -ltn 'sport = :18766' | grep -q LISTEN && break
+          test "$(sha256sum "$remote_root/server/pg_adapter.py" | awk '{print $1}')" = "$expected_adapter_sha"
+          test "$(sha256sum "$remote_root/server/pg_api_server.py" | awk '{print $1}')" = "$expected_server_sha"
+          systemd-run --quiet --collect --unit="$candidate_unit" --uid=www-data --property=RuntimeMaxSec=8m \
+            --setenv=PGHOST=/var/run/postgresql --setenv=PGDATABASE=song_rank --setenv=PGUSER=www-data \
+            --setenv=PYTHONPATH="$remote_root/server" /usr/bin/python3 "$remote_root/server/pg_api_server.py" --host 127.0.0.1 --port 18766
+          for unused in $(seq 1 30); do
+            if systemctl is-active --quiet "$candidate_unit" && ss -ltn 'sport = :18766' | grep -q LISTEN; then break; fi
             sleep 1
           done
           systemctl is-active --quiet "$candidate_unit"
           ss -ltn 'sport = :18766' | grep -q LISTEN
           base_url="http://127.0.0.1:18766"
-          curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
-            "$base_url/healthz" > "$remote_root/candidate-healthz.json" || {
-              journalctl -u "$candidate_unit" -n 80 --no-pager
-              exit 1
-            }
-          jq -e 'type == "object"' "$remote_root/candidate-healthz.json" >/dev/null
-
-          meta_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
-            --output "$remote_root/candidate-meta.json" --write-out '%{http_code}' \
-            "$base_url/api/meta")"
-          test "$meta_http_code" = 200
-          jq -e --arg expected "$expected_active" \
-            '(.meta.active_revision_id // .active_revision_id // .activeRevisionId) == $expected' \
-            "$remote_root/candidate-meta.json" >/dev/null
-
-          rankings_http_code="$(curl --silent --show-error --connect-timeout 8 --max-time 20 \
-            --output "$remote_root/candidate-page1.json" --write-out '%{http_code}' \
-            "$base_url/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20")" || true
-          test "$rankings_http_code" = 200 || echo "WARN: rankings probe non-fatal (http=$rankings_http_code)"
-
-          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
-          negative_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
-            --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
-            --data-urlencode 'metric=count' --data-urlencode 'page=1' \
-            --data-urlencode 'pageSize=20' \
-            --data-urlencode 'searchFields=title,channel' \
-            --data "q=$negative_query" \
-            --output "$remote_root/candidate-negative.json" --write-out '%{http_code}' \
-            "$base_url/api/rankings")"
-          test "$negative_http_code" = 200
-
-          source_http_code="$(curl --silent --show-error --fail --connect-timeout 8 --max-time 20 \
-            --output "$remote_root/candidate-source.json" --write-out '%{http_code}' \
-            "$base_url/api/sources/$source_key?page=1&pageSize=20")"
-          test "$source_http_code" = 200
-
-          timeout --signal=TERM --kill-after=10s 3m \
-            python3 "$remote_root/server/audit-ranking-source-identities.py" \
-              --base-url "$base_url" --skip-rankings \
-              --negative-query "" --page-size 20 --max-pages 1 \
-              --timeout 20 --concurrency 4 \
-              --expected-active "$expected_active" \
-              --channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA' \
-              --channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg' \
-              --channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ' \
-              --channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew' \
-              > "$remote_root/candidate-handles.log" 2>&1
-          cat "$remote_root/candidate-handles.log"
-
-          python3 - \
-            "$remote_root/candidate-page1.json" \
-            "$remote_root/candidate-negative.json" \
-            "$remote_root/candidate-source.json" \
-            "$source_key" "$source_channel_id" \
-            "$source_occurrence_count" "$source_video_count" <<'PY'
-          import json
-          import sys
-
-          page_path, negative_path, source_path = sys.argv[1:4]
-          source_key, source_channel_id = sys.argv[4:6]
-          expected_occurrences, expected_videos = map(int, sys.argv[6:8])
-
-          with open(page_path, encoding="utf-8") as stream:
-              page = json.load(stream)
-          records = page.get("records")
-          if not isinstance(records, list):
-              raise AssertionError("ranking records are missing")
-          for card in records:
-              count = int(card.get("count") or card.get("timestampCount") or 0)
-              if count <= 0:
-                  continue
-              occurrences = card.get("occurrences")
-              if not isinstance(occurrences, list) or not occurrences:
-                  raise AssertionError("positive ranking card has no occurrence")
-              channel_id = str(card.get("channelId") or "")
-              if not channel_id:
-                  raise AssertionError("ranking channel identity mismatch")
-              for occurrence in occurrences:
-                  item = occurrence.get("item") or {}
-                  video = occurrence.get("video") or {}
-                  if item.get("channelId") != channel_id or video.get("channelId") != channel_id:
-                      raise AssertionError("ranking channel identity mismatch")
-                  item_video_id = str(item.get("videoId") or "")
-                  video_video_id = str(video.get("videoId") or "")
-                  occurrence_video_id = str(occurrence.get("videoId") or item_video_id)
-                  if not item_video_id or item_video_id != video_video_id or item_video_id != occurrence_video_id:
-                      raise AssertionError("ranking video identity mismatch")
-                  item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
-                  video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
-                  if not item_thumbnail or item_thumbnail != video_thumbnail:
-                      raise AssertionError("ranking thumbnail identity mismatch")
-
-          with open(negative_path, encoding="utf-8") as stream:
-              negative = json.load(stream)
-          if negative.get("records") or int(negative.get("totalCount") or 0) != 0:
-              raise AssertionError("negative ranking query returned records")
-
-          with open(source_path, encoding="utf-8") as stream:
-              source = json.load(stream)
-          if source.get("found") is not True or source.get("sourceKey") != source_key:
-              raise AssertionError("source input identity mismatch")
-          if int(source.get("page") or 0) != 1 or int(source.get("pageSize") or 0) != 20:
-              raise AssertionError("source page mismatch")
-          if int(source.get("totalOccurrenceCount") or -1) != expected_occurrences:
-              raise AssertionError("source occurrence total mismatch")
-          if int(source.get("totalVideoCount") or -1) != expected_videos:
-              raise AssertionError("source video total mismatch")
-          record = source.get("record") or {}
-          if record.get("sourceDetailKey") != source_key or record.get("channelId") != source_channel_id:
-              raise AssertionError("source channel identity mismatch")
-          source_occurrences = record.get("occurrences")
-          if not isinstance(source_occurrences, list) or (expected_occurrences > 0 and not source_occurrences):
-              raise AssertionError("source page has no occurrence")
-          for occurrence in source_occurrences:
-              item = occurrence.get("item") or {}
-              video = occurrence.get("video") or {}
-              if item.get("channelId") != source_channel_id or video.get("channelId") != source_channel_id:
-                  raise AssertionError("source channel identity mismatch")
-              occurrence_video_id = str(occurrence.get("videoId") or "")
-              item_video_id = str(item.get("videoId") or "")
-              video_video_id = str(video.get("videoId") or "")
-              if not occurrence_video_id or occurrence_video_id != item_video_id or occurrence_video_id != video_video_id:
-                  raise AssertionError("source video identity mismatch")
-              item_thumbnail = str(item.get("thumbnailUrl") or item.get("videoThumbnailUrl") or "")
-              video_thumbnail = str(video.get("thumbnailUrl") or video.get("videoThumbnailUrl") or "")
-              if not item_thumbnail or item_thumbnail != video_thumbnail:
-                  raise AssertionError("source thumbnail identity mismatch")
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 "$base_url/healthz" > "$remote_root/candidate-healthz.json"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/candidate-healthz.json" >/dev/null
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 "$base_url/api/meta" > "$remote_root/candidate-meta.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 --get \
+            --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
+            --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
+            --data-urlencode 'searchFields=title' --data-urlencode "q=$source_title" \
+            "$base_url/api/rankings" > "$remote_root/candidate-rankings.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 \
+            "$base_url/api/sources/$source_key?page=1&pageSize=20" > "$remote_root/candidate-source.json"
+          python3 - "$remote_root/candidate-negative.headers" "$remote_root/candidate-negative.json" "$base_url/api/sources/" <<'PY'
+          import sys, urllib.error, urllib.request
+          headers_path, body_path, url = sys.argv[1:]
+          request = urllib.request.Request(url, method="GET")
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  status = response.status; headers = response.headers; body = response.read()
+          except urllib.error.HTTPError as exc:
+              status = exc.code; headers = exc.headers; body = exc.read()
+          if status != 400 or headers.get("Cache-Control", "").lower() != "no-store":
+              raise SystemExit(f"candidate empty source gate failed status={status} cache={headers.get('Cache-Control')!r}")
+          open(headers_path, "wb").write(str(headers).encode())
+          open(body_path, "wb").write(body)
           PY
-          touch "$remote_root/candidate-quick-gate-passed"
+          jq -e '.error == "bad_request"' "$remote_root/candidate-negative.json" >/dev/null
+          python3 "$remote_root/server/audit-ranking-source-identities.py" --base-url "$base_url" --skip-rankings \
+            --negative-query "" --page-size 20 --max-pages 1 --timeout 20 --concurrency 4 --expected-active "$expected_active" \
+            --channel-probe "$regression_handle=$regression_id" > "$remote_root/candidate-channel-regression.log" 2>&1
+          grep -qx 'IDENTITY_AUDIT_COMPLETE' "$remote_root/candidate-channel-regression.log"
+          python3 "$remote_root/server/verify_contract.py" --meta "$remote_root/candidate-meta.json" --rankings "$remote_root/candidate-rankings.json" --source "$remote_root/candidate-source.json" \
+            --phase candidate --revision "$expected_active" --source-entity-key "$source_entity_key" --source-key "$source_key" \
+            --source-title "$source_title" --occurrences "$expected_occurrences" --videos "$expected_videos"
+          candidate_thumbnail_code="$(curl --silent --show-error --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$remote_root/candidate-thumbnail.headers" -o "$remote_root/candidate-thumbnail.image" -w '%{http_code}' "$base_url/api/thumbnails/dQw4w9WgXcQ/hqdefault.jpg")"
+          test "$candidate_thumbnail_code" = 200
+          grep -Eiq '^Content-Type:[[:space:]]*image/' "$remote_root/candidate-thumbnail.headers"
+          test -s "$remote_root/candidate-thumbnail.image"
+          candidate_thumbnail_mime="$(file --brief --mime-type "$remote_root/candidate-thumbnail.image")"
+          test "$candidate_thumbnail_mime" = image/jpeg -o "$candidate_thumbnail_mime" = image/png -o "$candidate_thumbnail_mime" = image/webp -o "$candidate_thumbnail_mime" = image/gif
+          candidate_invalid_thumbnail_code="$(curl --silent --show-error --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$remote_root/candidate-invalid-thumbnail.headers" -o "$remote_root/candidate-invalid-thumbnail.body" -w '%{http_code}' "$base_url/api/thumbnails/invalid/hqdefault.jpg")"
+          test "$candidate_invalid_thumbnail_code" = 400
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$remote_root/candidate-invalid-thumbnail.headers"
+          jq -e '.error == "bad_request"' "$remote_root/candidate-invalid-thumbnail.body" >/dev/null
           REMOTE
+          echo "PG_ADAPTER_CANDIDATE_CONTRACT_OK"
 
-      - name: Install verified adapter and verify the local contract
+      - name: Install adapter candidate with two-file rollback guard
         run: |
           set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
-            "$REMOTE_ROOT" "$SOURCE_KEY" <<'REMOTE'
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          timeout --signal=TERM --kill-after=10s 180s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$PG_ADAPTER_SHA256" "$PG_API_SERVER_SHA256" "$EXPECTED_ACTIVE_REVISION_B64" <<'REMOTE'
           set -Eeuo pipefail
-          remote_root="$1"
-          source_key="$2"
-
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
+          }
+          remote_root="$1"; expected_adapter_sha="$2"; expected_server_sha="$3"; expected_revision="$(decode_b64 "$4")"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$expected_adapter_sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$expected_server_sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
           install -d -m 0755 "$remote_root/backup" /opt/culua/ytb-song-rank/server
           cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py "$remote_root/backup/pg_adapter.py"
           cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py "$remote_root/backup/pg_api_server.py"
           rollback_adapter() {
+            trap - ERR
             install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
             install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
             systemctl restart song-rank-pg-api
+            cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+            cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+            systemctl is-active --quiet song-rank-pg-api
+            ss -ltn 'sport = :8765' | grep -q LISTEN
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/rollback-healthz.json"
+            jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/rollback-healthz.json" >/dev/null
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/rollback-meta.json"
+            jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/rollback-meta.json" >/dev/null
             touch "$remote_root/rollback-complete"
-            echo "ADAPTER_LOCAL_CONTRACT_ROLLBACK_COMPLETE"
+            echo "PG_ADAPTER_ROLLBACK_RUNTIME_VERIFIED"
           }
           trap rollback_adapter ERR
-
           install -m 0644 "$remote_root/server/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
           install -m 0644 "$remote_root/server/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+          test "$(sha256sum /opt/culua/ytb-song-rank/server/pg_adapter.py | awk '{print $1}')" = "$expected_adapter_sha"
+          test "$(sha256sum /opt/culua/ytb-song-rank/server/pg_api_server.py | awk '{print $1}')" = "$expected_server_sha"
           systemctl restart song-rank-pg-api
-          for unused in $(seq 1 20); do
-            systemctl is-active --quiet song-rank-pg-api \
-              && ss -ltn 'sport = :8765' | grep -q LISTEN \
-              && break
+          for unused in $(seq 1 40); do
+            if systemctl is-active --quiet song-rank-pg-api && ss -ltn 'sport = :8765' | grep -q LISTEN; then break; fi
             sleep 1
           done
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
-
-          local_base="http://127.0.0.1:8765"
-          readiness_deadline=$((SECONDS + 75))
-          readiness_attempt=0
-          readiness_ready=false
-          while (( SECONDS < readiness_deadline )); do
-            ((readiness_attempt += 1))
-            if curl --silent --show-error --fail --connect-timeout 3 --max-time 8 \
-                "$local_base/healthz" > "$remote_root/installed-local-healthz.json" \
-              && jq -e 'type == "object"' "$remote_root/installed-local-healthz.json" >/dev/null; then
-              readiness_ready=true
-              break
-            fi
-            rm -f "$remote_root/installed-local-healthz.json"
-            printf 'local readiness attempt %s did not pass\n' "$readiness_attempt" >&2
-            if (( SECONDS < readiness_deadline )); then
-              sleep 2
-            fi
-          done
-          test "$readiness_ready" = true
-
-          local_warmup_deadline=$((SECONDS + 300))
-          warm_local_endpoint() {
-            local label="$1"
-            shift
-            local remaining=$((local_warmup_deadline - SECONDS))
-            (( remaining > 0 ))
-            local request_timeout=90
-            if (( remaining < request_timeout )); then
-              request_timeout="$remaining"
-            fi
-            printf 'warming installed adapter endpoint=%s timeout=%ss\n' "$label" "$request_timeout"
-            curl --silent --show-error --fail --connect-timeout 2 --max-time "$request_timeout" \
-              --output /dev/null "$@"
-          }
-          warm_local_endpoint meta "$local_base/api/meta"
-          warm_local_endpoint rankings \
-            "$local_base/api/rankings?range=all&view=vtubers&metric=count&page=1&pageSize=20"
-          negative_query='%40shingames7857%20%E5%85%A8%E5%8A%9B%E3%82%AD%E3%83%B3%E3%82%B0'
-          warm_local_endpoint negative \
-            --get --data-urlencode 'range=all' --data-urlencode 'view=songs' \
-            --data-urlencode 'metric=count' --data-urlencode 'page=1' \
-            --data-urlencode 'pageSize=20' \
-            --data-urlencode 'searchFields=title,channel' \
-            --data "q=$negative_query" \
-            "$local_base/api/rankings"
-          warm_local_endpoint source "$local_base/api/sources/$source_key?page=1&pageSize=20"
-          touch "$remote_root/installed-local-contract-passed"
           trap - ERR
+          echo "PG_ADAPTER_INSTALLED_HASHES_OK"
           REMOTE
+          timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 /" | tee "$TASK_ROOT/vps-storage-peak.txt"
+          vps_storage_peak_bytes="$(awk 'NR==2 {print $4}' "$TASK_ROOT/vps-storage-peak.txt")"
+          [[ "$vps_storage_peak_bytes" =~ ^[0-9]+$ ]]
+          printf 'vpsStoragePeakBytes=%s\n' "$vps_storage_peak_bytes" >> "$TASK_ROOT/manifest.txt"
+          printf 'PG_ADAPTER_INSTALLED=1\n' >> "$GITHUB_ENV"
 
-      - name: Finalize the locally verified adapter
+      - name: Verify installed local adapter contract
         run: |
           set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" <<'REMOTE'
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          timeout --signal=TERM --kill-after=10s 180s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$SOURCE_TITLE_B64" "$SOURCE_KEY_B64" <<'REMOTE'
           set -Eeuo pipefail
-          remote_root="$1"
-          rollback_adapter() {
-            local backup_root="$remote_root/backup"
-            if [ -d "$remote_root/backup.finalizing" ]; then
-              backup_root="$remote_root/backup.finalizing"
-            fi
-            install -m 0644 "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
-            install -m 0644 "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
-            systemctl restart song-rank-pg-api
-            rm -f "$remote_root/release-finalized"
-            touch "$remote_root/rollback-complete"
-            echo "ADAPTER_FINALIZE_ROLLBACK_COMPLETE"
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
           }
-          trap rollback_adapter ERR
-          test -f "$remote_root/installed-local-contract-passed"
-          test -f "$remote_root/backup/pg_adapter.py"
-          test -f "$remote_root/backup/pg_api_server.py"
+          remote_root="$1"; source_title="$(decode_b64 "$2")"; source_key="$(decode_b64 "$3")"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$source_key" =~ ^[0-9a-f]{16}([0-9a-f]{8})?$ ]]
+          test -n "$source_title"
+          base_url="http://127.0.0.1:8765"
           systemctl is-active --quiet song-rank-pg-api
-          curl --silent --show-error --fail --connect-timeout 2 --max-time 8 \
-            "http://127.0.0.1:8765/healthz" >/dev/null
-          mv "$remote_root/backup" "$remote_root/backup.finalizing"
+          ss -ltn 'sport = :8765' | grep -q LISTEN
+          curl --fail --silent --show-error --max-time 20 "$base_url/healthz" > "$remote_root/installed-healthz.json"
+          curl --fail --silent --show-error --max-time 20 "$base_url/api/meta" > "$remote_root/installed-meta.json"
+          curl --fail --silent --show-error --max-time 20 --get \
+            --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
+            --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
+            --data-urlencode 'searchFields=title' --data-urlencode "q=$source_title" \
+            "$base_url/api/rankings" > "$remote_root/installed-rankings.json"
+          curl --fail --silent --show-error --max-time 20 \
+            "$base_url/api/sources/$source_key?page=1&pageSize=20" > "$remote_root/installed-source.json"
+          code="$(curl --silent --show-error --max-time 20 -D "$remote_root/installed-negative.headers" \
+            -o "$remote_root/installed-negative.json" -w '%{http_code}' "$base_url/api/sources/")"
+          test "$code" = 400
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$remote_root/installed-negative.headers"
+          jq -e '.error == "bad_request"' "$remote_root/installed-negative.json" >/dev/null
+          REMOTE
+          timeout --signal=TERM --kill-after=10s 60s scp "${SSH_OPTS[@]}" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/installed-healthz.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/installed-meta.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/installed-rankings.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/installed-source.json" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/installed-negative.json" "$TASK_ROOT/"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$TASK_ROOT/installed-healthz.json" >/dev/null
+          python3 "$TASK_ROOT/verify_contract.py" --phase installed --meta "$TASK_ROOT/installed-meta.json" \
+            --rankings "$TASK_ROOT/installed-rankings.json" --source "$TASK_ROOT/installed-source.json" \
+            --revision "$EXPECTED_ACTIVE_REVISION" --source-entity-key "$SOURCE_ENTITY_KEY" --source-key "$SOURCE_KEY" --source-title "$SOURCE_TITLE" \
+            --occurrences "$SOURCE_OCCURRENCE_COUNT" --videos "$SOURCE_VIDEO_COUNT"
+          echo "PG_ADAPTER_INSTALLED_CONTRACT_OK"
+
+      - name: Verify real public relay contract before finalize
+        run: |
+          set -Eeuo pipefail
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 "$PUBLIC_BASE/healthz" -o "$TASK_ROOT/public-healthz.json"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$TASK_ROOT/public-healthz.json" >/dev/null
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-meta.headers" "$PUBLIC_BASE/api/meta" -o "$TASK_ROOT/public-meta.json"
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
+            --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
+            --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
+            --data-urlencode 'searchFields=title' --data-urlencode "q=$SOURCE_TITLE" --data-urlencode "release=$GITHUB_RUN_ID" \
+            "$PUBLIC_BASE/api/rankings" -o "$TASK_ROOT/public-rankings.json"
+          curl --fail --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' --get \
+            --data-urlencode "release=$GITHUB_RUN_ID" "$PUBLIC_BASE/api/sources/$SOURCE_KEY?page=1&pageSize=20" -o "$TASK_ROOT/public-source.json"
+          code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-empty.headers" -o "$TASK_ROOT/public-empty.json" -w '%{http_code}' --get --data-urlencode "release=$GITHUB_RUN_ID" "$PUBLIC_BASE/api/sources/")"
+          test "$code" = 400
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$TASK_ROOT/public-empty.headers"
+          jq -e '.error == "bad_request"' "$TASK_ROOT/public-empty.json" >/dev/null
+          python3 "$TASK_ROOT/verify_contract.py" --phase public --meta "$TASK_ROOT/public-meta.json" \
+            --rankings "$TASK_ROOT/public-rankings.json" --source "$TASK_ROOT/public-source.json" \
+            --revision "$EXPECTED_ACTIVE_REVISION" --source-entity-key "$SOURCE_ENTITY_KEY" --source-key "$SOURCE_KEY" --source-title "$SOURCE_TITLE" \
+            --occurrences "$SOURCE_OCCURRENCE_COUNT" --videos "$SOURCE_VIDEO_COUNT" > "$TASK_ROOT/public-contract.log"
+          public_video_id="$(sed -n 's/.*videoId=\([^ ]*\).*/\1/p' "$TASK_ROOT/public-contract.log" | tail -n1)"
+          [[ "$public_video_id" =~ ^[A-Za-z0-9_-]{11}$ ]]
+          thumbnail_url="$PUBLIC_BASE$THUMBNAIL_PATH_PREFIX/$public_video_id/hqdefault.jpg"
+          thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-thumbnail.headers" -o "$TASK_ROOT/public-thumbnail.image" -w '%{http_code}' "$thumbnail_url")"
+          test "$thumbnail_code" = 200
+          grep -Eiq '^Content-Type:[[:space:]]*image/' "$TASK_ROOT/public-thumbnail.headers"
+          test -s "$TASK_ROOT/public-thumbnail.image"
+          thumbnail_mime="$(file --brief --mime-type "$TASK_ROOT/public-thumbnail.image")"
+          test "$thumbnail_mime" = image/jpeg -o "$thumbnail_mime" = image/png -o "$thumbnail_mime" = image/webp -o "$thumbnail_mime" = image/gif
+          invalid_thumbnail_code="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' -D "$TASK_ROOT/public-invalid-thumbnail.headers" -o "$TASK_ROOT/public-invalid-thumbnail.body" -w '%{http_code}' "$PUBLIC_BASE$THUMBNAIL_PATH_PREFIX/invalid/hqdefault.jpg")"
+          test "$invalid_thumbnail_code" = 400
+          grep -Eiq '^Cache-Control:[[:space:]]*no-store[[:space:]]*$' "$TASK_ROOT/public-invalid-thumbnail.headers"
+          jq -e '.error == "bad_request"' "$TASK_ROOT/public-invalid-thumbnail.body" >/dev/null
+          echo "PG_ADAPTER_PUBLIC_RELAY_CONTRACT_OK"
+
+      - name: Finalize only after public contract gate
+        run: |
+          set -Eeuo pipefail
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          timeout --signal=TERM --kill-after=10s 120s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$PG_ADAPTER_SHA256" "$PG_API_SERVER_SHA256" "$EXPECTED_ACTIVE_REVISION_B64" <<'REMOTE'
+          set -Eeuo pipefail
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
+          }
+          remote_root="$1"; expected_adapter_sha="$2"; expected_server_sha="$3"; expected_revision="$(decode_b64 "$4")"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$expected_adapter_sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$expected_server_sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          test -d "$remote_root/backup"
+          test "$(sha256sum /opt/culua/ytb-song-rank/server/pg_adapter.py | awk '{print $1}')" = "$expected_adapter_sha"
+          test "$(sha256sum /opt/culua/ytb-song-rank/server/pg_api_server.py | awk '{print $1}')" = "$expected_server_sha"
+          test -f "$remote_root/rollback-complete" && { echo "PG_ADAPTER_BLOCKED rollback-already-used"; exit 78; }
+          systemctl is-active --quiet song-rank-pg-api
+          ss -ltn 'sport = :8765' | grep -q LISTEN
+          curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/finalize-healthz.json"
+          jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/finalize-healthz.json" >/dev/null
+          curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/finalize-meta.json"
+          jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/finalize-meta.json" >/dev/null
           touch "$remote_root/release-finalized"
-          rm -rf "$remote_root/backup.finalizing"
-          trap - ERR
-          echo "ADAPTER_LOCAL_CONTRACT_FINALIZED"
+          echo "PG_ADAPTER_CONTRACT_FINALIZED"
           REMOTE
           printf 'PUBLIC_QUICK_GATE_PASSED=1\n' >> "$GITHUB_ENV"
 
-      - name: Record result and cleanup
+      - name: Record result and rollback/cleanup on any pre-finalize failure
         if: always()
         run: |
           set +e
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          df -B1 / > "$TASK_ROOT/storage-after.txt"
-          printf 'finishedAt=%s\npublicQuickGatePassed=%s\n' \
-            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PUBLIC_QUICK_GATE_PASSED:-0}" >> "$TASK_ROOT/manifest.txt"
-          echo "ADAPTER_RELEASE_MANIFEST"
-          cat "$TASK_ROOT/manifest.txt"
-          echo "ADAPTER_RELEASE_STORAGE_BEFORE"
-          cat "$TASK_ROOT/storage-before.txt"
-          echo "ADAPTER_RELEASE_STORAGE_AFTER"
-          cat "$TASK_ROOT/storage-after.txt"
+          set -o pipefail
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
           cleanup_status=0
+          remote_cleanup_ok=0
           if [ -n "${REMOTE_ROOT:-}" ]; then
-            ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$GITHUB_RUN_ID" <<'REMOTE_CLEANUP' || cleanup_status=$?
+            timeout --signal=TERM --kill-after=10s 240s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+              "$REMOTE_ROOT" "$EXPECTED_ACTIVE_REVISION_B64" <<'REMOTE_CLEANUP'
           set -Eeuo pipefail
-          remote_root="$1"
-          run_id="$2"
-          candidate_unit="daily-song-list-adapter-$run_id"
-          if [ ! -f "$remote_root/release-finalized" ]; then
-            backup_root="$remote_root/backup"
-            if [ -d "$remote_root/backup.finalizing" ]; then
-              backup_root="$remote_root/backup.finalizing"
-            fi
-            if [ -f "$backup_root/pg_adapter.py" ] && [ -f "$backup_root/pg_api_server.py" ]; then
-              if [ ! -f "$remote_root/rollback-complete" ] \
-                  || ! cmp -s "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py \
-                  || ! cmp -s "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py; then
-                install -m 0644 "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
-                install -m 0644 "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
-                systemctl restart song-rank-pg-api
-              fi
-              systemctl is-active --quiet song-rank-pg-api
-              cmp -s "$backup_root/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
-              cmp -s "$backup_root/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
-              echo "ADAPTER_CLEANUP_ROLLBACK_VERIFIED"
-            fi
+          decode_b64() {
+            local encoded="$1" decoded
+            [[ "$encoded" =~ ^[A-Za-z0-9+/]*={0,2}$ ]]
+            decoded="$(printf '%s' "$encoded" | base64 --decode)"
+            test "$(printf '%s' "$decoded" | base64 -w0)" = "$encoded"
+            printf '%s' "$decoded"
+          }
+          remote_root="$1"; expected_revision="$(decode_b64 "$2")"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          [[ "$expected_revision" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]
+          candidate_unit="daily-song-list-adapter-${remote_root##*-}"
+          if [ ! -f "$remote_root/release-finalized" ] && [ -f "$remote_root/backup/pg_adapter.py" ] && [ -f "$remote_root/backup/pg_api_server.py" ]; then
+            install -m 0644 "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+            install -m 0644 "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+            systemctl restart song-rank-pg-api
+            cmp -s "$remote_root/backup/pg_adapter.py" /opt/culua/ytb-song-rank/server/pg_adapter.py
+            cmp -s "$remote_root/backup/pg_api_server.py" /opt/culua/ytb-song-rank/server/pg_api_server.py
+            systemctl is-active --quiet song-rank-pg-api
+            ss -ltn 'sport = :8765' | grep -q LISTEN
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/cleanup-healthz.json"
+            jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/cleanup-healthz.json" >/dev/null
+            curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/cleanup-meta.json"
+            jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/cleanup-meta.json" >/dev/null
+            touch "$remote_root/rollback-complete"
+            echo "PG_ADAPTER_CLEANUP_ROLLBACK_VERIFIED"
           fi
           systemctl stop "$candidate_unit" 2>/dev/null || true
           systemctl reset-failed "$candidate_unit" 2>/dev/null || true
-          rm -rf "$remote_root"
+          rm -rf -- "$remote_root"
           REMOTE_CLEANUP
+            remote_cleanup_status=$?
+            if [ "$remote_cleanup_status" -eq 0 ]; then
+              remote_cleanup_ok=1
+            else
+              cleanup_status=$remote_cleanup_status
+            fi
           fi
-          rm -rf "$TASK_ROOT" || cleanup_status=$?
+          if [ -n "${TASK_ROOT:-}" ] && [ -n "${REMOTE_ROOT:-}" ]; then
+            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 /" | tee "$TASK_ROOT/vps-storage-after.txt" || cleanup_status=$?
+            if [ -s "$TASK_ROOT/vps-storage-after.txt" ]; then
+              vps_storage_after_bytes="$(awk 'NR==2 {print $4}' "$TASK_ROOT/vps-storage-after.txt")"
+              [[ "$vps_storage_after_bytes" =~ ^[0-9]+$ ]] || cleanup_status=1
+              printf 'vpsStorageAfterBytes=%s\n' "$vps_storage_after_bytes" >> "$TASK_ROOT/manifest.txt"
+            else
+              cleanup_status=1
+            fi
+            if [ "$remote_cleanup_ok" -eq 1 ]; then
+              timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" <<'REMOTE_VERIFY_CLEANUP' || cleanup_status=$?
+          set -Eeuo pipefail
+          remote_root="$1"
+          [[ "$remote_root" =~ ^/tmp/daily-song-list-adapter-[0-9]+$ ]]
+          test ! -e "$remote_root"
+          REMOTE_VERIFY_CLEANUP
+            fi
+          fi
+          if [ -n "${TASK_ROOT:-}" ]; then
+            df -B1 / > "$TASK_ROOT/storage-after.txt" || cleanup_status=$?
+            printf 'finishedAt=%s\npublicQuickGatePassed=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${PUBLIC_QUICK_GATE_PASSED:-0}" >> "$TASK_ROOT/manifest.txt"
+            test -s "$TASK_ROOT/manifest.txt" || cleanup_status=1
+            test -s "$TASK_ROOT/storage-before.txt" || cleanup_status=1
+            test -s "$TASK_ROOT/storage-after.txt" || cleanup_status=1
+            cat "$TASK_ROOT/manifest.txt" || cleanup_status=$?
+            cat "$TASK_ROOT/storage-before.txt" || cleanup_status=$?
+            cat "$TASK_ROOT/storage-after.txt" || cleanup_status=$?
+            rm -rf -- "$TASK_ROOT" || cleanup_status=$?
+          fi
           exit "$cleanup_status"

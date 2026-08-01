@@ -8256,6 +8256,72 @@ def _bool_query(query: Mapping[str, Any], key: str, default: bool = False) -> bo
     raise ValueError(f"{key} must be 0 or 1")
 
 
+def _normalize_search_scope(value: Any) -> str:
+    scope = _text(value or "all").strip().casefold().replace("_", "-")
+    aliases = {
+        "": "all", "all": "all", "any": "all", "full": "all",
+        "song": "song", "songs": "song", "entity": "entity",
+        "title": "title", "artist": "artist", "artists": "artist",
+        "singer": "artist", "channel": "channel", "channels": "channel",
+        "vtuber": "channel", "video": "video", "videos": "video",
+        "source": "source", "sources": "source",
+    }
+    if scope not in aliases:
+        raise ValueError(
+            "searchScope must be all, song, entity, title, artist, channel, video, or source"
+        )
+    return aliases[scope]
+
+
+def _normalize_search_fields(value: Any) -> list[str] | None:
+    text = _text(value).strip()
+    if not text:
+        return None
+    if text.casefold() in {"all", "any", "*"}:
+        return []
+    aliases = {
+        "title": "title", "song": "title", "name": "title",
+        "artist": "artist", "artists": "artist", "singer": "artist",
+        "channel": "channel", "channels": "channel", "vtuber": "channel",
+        "video": "video", "videos": "video",
+        "source": "source", "sources": "source",
+    }
+    fields: list[str] = []
+    for raw_field in re.split(r"[,| ]+", text):
+        field = raw_field.strip().casefold().replace("_", "-")
+        if not field:
+            continue
+        if field not in aliases:
+            raise ValueError(
+                "searchFields must contain title, artist, channel, video, or source"
+            )
+        normalized = aliases[field]
+        if normalized not in fields:
+            fields.append(normalized)
+    return fields
+
+
+def _search_scope_from_fields(fields: Sequence[str] | None) -> str:
+    values = list(fields or ())
+    if not values:
+        return "all"
+    if values == ["title"]:
+        return "title"
+    if values == ["artist"]:
+        return "artist"
+    if values == ["channel"]:
+        return "channel"
+    if values == ["video"]:
+        return "video"
+    if values == ["source"]:
+        return "source"
+    if set(values) == {"title", "artist"}:
+        return "song"
+    if any(field in {"channel", "video", "source"} for field in values):
+        return "source"
+    return "all"
+
+
 def _query_options(query: Mapping[str, Any] | None) -> dict[str, Any]:
     query = query or {}
     range_id = _first(query, "range", "all")
@@ -8271,9 +8337,13 @@ def _query_options(query: Mapping[str, Any] | None) -> dict[str, Any]:
     metric = _first(query, "metric", "count")
     if metric not in {"count", "occurrences", "songs", "videos"}:
         raise ValueError("metric must be occurrences, count, songs, or videos")
-    scope = _first(query, "searchScope", _first(query, "searchField", "all")) or "all"
+    scope = _normalize_search_scope(
+        _first(query, "searchScope", _first(query, "searchField", "all"))
+    )
     fields_value = _first(query, "searchFields", "")
-    fields = [field.strip() for field in fields_value.split(",") if field.strip()] or None
+    fields = _normalize_search_fields(fields_value)
+    if fields is not None and scope == "all":
+        scope = _search_scope_from_fields(fields)
     return {
         "range": range_id,
         "view": view,
@@ -8847,6 +8917,127 @@ def _recount_source_detail(record: Mapping[str, Any], occurrences: Iterable[Mapp
     return result
 
 
+def _escape_source_search_pattern(value: Any) -> str:
+    """Escape a literal source query for PostgreSQL ``ILIKE``."""
+
+    return _text(value).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def _runtime_source_table_page(
+    connection,
+    revision_id: str,
+    key: str,
+    query: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Read one bounded page from one authoritative physical source revision."""
+
+    raw_query = query or {}
+    options = _query_options(raw_query)
+    search_predicate = ""
+    search_params: list[Any] = []
+    if options["q"]:
+        search_predicate = " AND search_text ILIKE %s ESCAPE E'\\\\'"
+        search_params.append(f"%{_escape_source_search_pattern(options['q'])}%")
+    where = (
+        "revision_id = %s AND source_key = %s AND range_id = %s"
+        + search_predicate
+    )
+    where_params: list[Any] = [revision_id, key, options["range"], *search_params]
+    summary_rows = _rows(
+        connection,
+        f"""
+        SELECT count(*) AS total_occurrence_count,
+               count(DISTINCT video_id) AS total_video_count,
+               (
+                 SELECT count(*)
+                 FROM runtime_source_occurrences AS physical
+                 WHERE physical.revision_id = %s
+                   AND physical.source_key = %s
+                   AND physical.range_id = %s
+               ) AS source_occurrence_count
+        FROM runtime_source_occurrences
+        WHERE {where}
+        """,
+        [revision_id, key, options["range"], *where_params],
+    )
+    summary = summary_rows[0] if summary_rows else {}
+    total_occurrence_count = int(summary.get("total_occurrence_count") or 0)
+    total_video_count = int(summary.get("total_video_count") or 0)
+    source_occurrence_count = int(summary.get("source_occurrence_count") or 0)
+    if not source_occurrence_count:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
+
+    page_size = options["pageSize"]
+    page_count = max(1, math.ceil(total_video_count / page_size))
+    page = min(options["page"], page_count)
+    page_rows = _rows(
+        connection,
+        f"""
+        SELECT video_id, min(position) AS first_position
+        FROM runtime_source_occurrences
+        WHERE {where}
+        GROUP BY video_id
+        ORDER BY first_position, video_id
+        LIMIT %s OFFSET %s
+        """,
+        [*where_params, page_size, (page - 1) * page_size],
+    )
+    selected_video_ids = [
+        _text(row.get("video_id"))
+        for row in page_rows[:page_size]
+        if _text(row.get("video_id"))
+    ]
+    occurrence_rows: list[Mapping[str, Any]] = []
+    if selected_video_ids:
+        occurrence_rows = _rows(
+            connection,
+            f"""
+            SELECT position, video_id, title, channel_name, channel_id,
+                   channel_handle, channel_url, published_timestamp, seconds,
+                   search_text, payload_json
+            FROM runtime_source_occurrences
+            WHERE {where} AND video_id = ANY(%s::text[])
+            ORDER BY position, video_id
+            LIMIT %s
+            """,
+            [
+                *where_params,
+                selected_video_ids,
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            ],
+        )
+    if len(occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("source page occurrence lookup exceeded bounded cap")
+    occurrences = [_runtime_source_occurrence(row) for row in occurrence_rows]
+    record = {
+        "sourceDetailKey": key,
+        "rangeId": options["range"],
+        "occurrences": occurrences,
+        "count": total_occurrence_count,
+        "occurrenceCount": total_occurrence_count,
+        "timestampCount": total_occurrence_count,
+        "videoCount": total_video_count,
+        "sourceFilterQuery": options["q"],
+        "occurrencePreviewLimited": total_occurrence_count > len(occurrences),
+    }
+    response: dict[str, Any] = {
+        "schemaVersion": 1,
+        "found": True,
+        "sourceKey": key,
+        "record": record,
+    }
+    if any(field in raw_query for field in ("page", "pageSize")):
+        response.update({
+            "page": page,
+            "pageSize": page_size,
+            "pageCount": page_count,
+            "totalCount": total_video_count,
+            "totalVideoCount": total_video_count,
+            "totalOccurrenceCount": total_occurrence_count,
+        })
+    return response
+
+
 def _runtime_source_payload(
     connection,
     revision_id: str,
@@ -8855,10 +9046,23 @@ def _runtime_source_payload(
     allow_derived: bool = True,
     overlay_revision_ids: Sequence[str] | None = None,
 ) -> dict[str, Any]:
+    raw_query = query or {}
+    options = _query_options(raw_query)
+    lineage_revision_ids = list(dict.fromkeys([
+        *(_text(value) for value in (overlay_revision_ids or ()) if _text(value)),
+        _text(revision_id),
+    ]))
     rows = _rows(
         connection,
-        "SELECT payload_json FROM runtime_source_details WHERE revision_id = %s AND source_key = %s",
-        [revision_id, key],
+        """
+        SELECT revision_id, range_id, payload_json
+        FROM runtime_source_details
+        WHERE revision_id::text = ANY(%s::text[])
+          AND source_key = %s AND range_id = %s
+        ORDER BY array_position(%s::text[], revision_id::text)
+        LIMIT 1
+        """,
+        [lineage_revision_ids, key, options["range"], lineage_revision_ids],
     )
     if not rows:
         if not allow_derived:
@@ -8876,58 +9080,115 @@ def _runtime_source_payload(
         except Exception:
             pass
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
+    detail_revision_id = _text(rows[0].get("revision_id")) or revision_id
     record = _json_object(rows[0].get("payload_json"))
-    query = query or {}
-    overlay_changes = _runtime_tombstones(connection, overlay_revision_ids or ())
-    if any(field in query for field in ("page", "pageSize")):
-        options = _query_options(query)
-        range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
-        occurrences = _runtime_source_occurrences(connection, revision_id, key, range_id)
-        if not occurrences:
-            occurrences = list(record.get("occurrences") or [])
-        occurrences = _apply_source_overlay(occurrences, overlay_changes)
-        if options["q"]:
-            occurrences = [item for item in occurrences if options["q"] in json.dumps(item, ensure_ascii=False).casefold()]
-        video_keys: list[str] = []
-        for item in occurrences:
-            video_key = _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId"))
-            if video_key not in video_keys:
-                video_keys.append(video_key)
-        page_count = max(1, math.ceil(len(video_keys) / options["pageSize"]))
-        page = min(options["page"], page_count)
-        selected = set(video_keys[(page - 1) * options["pageSize"] : page * options["pageSize"]])
-        record = dict(record)
-        record["occurrences"] = [item for item in occurrences if _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId")) in selected]
-        record["sourceFilterQuery"] = options["q"]
-        record = _recount_source_detail(record, occurrences)
-        record["occurrencePreviewLimited"] = len(record["occurrences"]) < len(occurrences)
-        return {
-            "schemaVersion": 1, "found": True, "sourceKey": key, "record": record,
-            "page": page, "pageSize": options["pageSize"], "pageCount": page_count,
-            "totalCount": len(video_keys), "totalVideoCount": len(video_keys),
-            "totalOccurrenceCount": len(occurrences),
-        }
-    if record.get("occurrencePreviewLimited") and not query.get("q"):
-        options = _query_options(query)
-        range_id = _text(record.get("rangeId") or record.get("range_id")) or options["range"]
-        occurrences = _runtime_source_occurrences(connection, revision_id, key, range_id)
-        if occurrences:
-            occurrences = _apply_source_overlay(occurrences, overlay_changes)
-            previews = _source_song_previews(occurrences)
-            if previews:
-                video_keys = {
-                    _text(item.get("youtubeVideoId") or item.get("videoId") or item.get("externalVideoId"))
-                    for item in occurrences
-                }
-                record = dict(record)
-                record["occurrences"] = previews
-                record = _recount_source_detail(record, occurrences)
-                record["occurrencePreviewLimited"] = len(previews) < len(occurrences)
-    if overlay_changes and isinstance(record.get("occurrences"), list):
-        record = dict(record)
-        record["occurrences"] = _apply_source_overlay(record["occurrences"], overlay_changes)
-        record = _recount_source_detail(record, record["occurrences"])
-    return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
+    paged = _runtime_source_table_page(
+        connection, detail_revision_id, key, raw_query,
+    )
+    if paged.get("found"):
+        result = dict(paged)
+        page_record = dict(paged.get("record") or {})
+        merged = {**dict(record), **page_record}
+        # Aggregate identity belongs to the persisted source detail.  Physical
+        # source rows own only the bounded page and recomputed counts.
+        for name in (
+            "type", "key", "title", "workTitle", "artist", "displayArtist",
+            "artists", "variantLabels", "searchText", "sortKey",
+        ):
+            if name in record:
+                merged[name] = record[name]
+        merged["sourceDetailKey"] = key
+        result["record"] = merged
+        result["sourceRevisionId"] = detail_revision_id
+        return result
+
+    # A nearest detail row without physical occurrences is authoritative.  It
+    # can be an explicit empty projection or a small compatibility preview; do
+    # not fall through to an older parent source revision.
+    raw_embedded = record.get("occurrences") or ()
+    embedded = [
+        dict(item) for item in raw_embedded
+        if isinstance(item, Mapping)
+    ]
+    declared_occurrences = int(
+        record.get("occurrenceCount") or record.get("count") or len(embedded)
+    )
+    if (
+        bool(record.get("occurrencePreviewLimited"))
+        or declared_occurrences > len(embedded)
+        or len(embedded) > _MAX_AFFECTED_RUNTIME_OCCURRENCES
+    ):
+        raise PostgresAdapterError(
+            "authoritative source detail is missing its physical occurrence rows"
+        )
+    for item in embedded:
+        video_id = _text(
+            item.get("youtubeVideoId")
+            or item.get("videoId")
+            or item.get("externalVideoId")
+        )
+        if not video_id:
+            raise PostgresAdapterError(
+                "authoritative source detail occurrence is missing video identity"
+            )
+    if options["q"]:
+        embedded = [
+            item for item in embedded
+            if options["q"] in json.dumps(item, ensure_ascii=False).casefold()
+        ]
+    video_keys: list[str] = []
+    seen_video_keys: set[str] = set()
+    for item in embedded:
+        video_id = _text(
+            item.get("youtubeVideoId")
+            or item.get("videoId")
+            or item.get("externalVideoId")
+        )
+        if video_id not in seen_video_keys:
+            seen_video_keys.add(video_id)
+            video_keys.append(video_id)
+    page_size = options["pageSize"]
+    page_count = max(1, math.ceil(len(video_keys) / page_size))
+    page = min(options["page"], page_count)
+    selected_video_ids = set(
+        video_keys[(page - 1) * page_size : page * page_size]
+    )
+    page_occurrences = [
+        item for item in embedded
+        if _text(
+            item.get("youtubeVideoId")
+            or item.get("videoId")
+            or item.get("externalVideoId")
+        ) in selected_video_ids
+    ]
+    result_record = dict(record)
+    result_record["occurrences"] = page_occurrences
+    result_record["sourceDetailKey"] = key
+    result_record["sourceFilterQuery"] = options["q"]
+    total_occurrences = len(embedded)
+    total_videos = len(video_keys)
+    result_record["count"] = total_occurrences
+    result_record["occurrenceCount"] = total_occurrences
+    result_record["timestampCount"] = total_occurrences
+    result_record["videoCount"] = total_videos
+    result_record["occurrencePreviewLimited"] = total_occurrences > len(result_record["occurrences"])
+    response: dict[str, Any] = {
+        "schemaVersion": 1,
+        "found": True,
+        "sourceKey": key,
+        "sourceRevisionId": detail_revision_id,
+        "record": result_record,
+    }
+    if any(field in raw_query for field in ("page", "pageSize")):
+        response.update({
+            "page": page,
+            "pageSize": page_size,
+            "pageCount": page_count,
+            "totalCount": total_videos,
+            "totalVideoCount": total_videos,
+            "totalOccurrenceCount": total_occurrences,
+        })
+    return response
 
 
 def _overlay_source_record(row: Mapping[str, Any]) -> dict[str, Any] | None:
@@ -8955,6 +9216,152 @@ def _overlay_source_record(row: Mapping[str, Any]) -> dict[str, Any] | None:
     return {"video": video, "occurrences": (occurrence,)}
 
 
+def _source_song_identity_evidence(
+    value: Mapping[str, Any],
+) -> tuple[dict[tuple[str, str], tuple[str, str]], set[str]]:
+    """Extract exact stored song tuples without using aggregate displayArtist."""
+
+    pairs: dict[tuple[str, str], tuple[str, str]] = {}
+    song_keys: set[str] = set()
+    queue: list[Any] = [value]
+    visited = 0
+    while queue:
+        current = queue.pop()
+        visited += 1
+        if visited > 512:
+            raise PostgresAdapterError("source song identity evidence exceeded bounded shape")
+        if isinstance(current, Mapping):
+            song_key = _text(current.get("songKey") or current.get("song_key"))
+            if song_key:
+                song_keys.add(song_key)
+            title = _text(current.get("title") or current.get("workTitle"))
+            if title and "artist" in current and current.get("artist") is not None:
+                artist = _text(current.get("artist"))
+                pairs.setdefault(
+                    (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+                    (title, artist),
+                )
+            for name in (
+                "song", "songs", "occurrences", "item", "payload",
+                "record", "sourceIdentity", "source_identity",
+                "replacementPayload", "originalIdentity",
+            ):
+                nested = current.get(name)
+                if isinstance(nested, (Mapping, list, tuple)):
+                    queue.append(nested)
+        elif isinstance(current, (list, tuple)):
+            queue.extend(current)
+
+    title = _text(value.get("title") or value.get("workTitle"))
+    if title and "artist" in value and value.get("artist") is not None:
+        artist = _text(value.get("artist"))
+        pairs.setdefault(
+            (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+            (title, artist),
+        )
+    artists = value.get("artists")
+    if title and isinstance(artists, list):
+        for artist_value in artists:
+            if isinstance(artist_value, Mapping):
+                artist = _text(artist_value.get("name") or artist_value.get("artist"))
+            else:
+                artist = _text(artist_value)
+            if artist:
+                pairs.setdefault(
+                    (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+                    (title, artist),
+                )
+    return pairs, song_keys
+
+
+def _source_record_identity(record: Mapping[str, Any]) -> tuple[str, str]:
+    video = record.get("video") if isinstance(record.get("video"), Mapping) else {}
+    occurrences = record.get("occurrences") or ()
+    occurrence = occurrences[0] if occurrences and isinstance(occurrences[0], Mapping) else {}
+    video_id = _text(video.get("videoId") or occurrence.get("videoId"))
+    occurrence_id = _text(occurrence.get("occurrenceId") or occurrence.get("occurrence_id"))
+    if not occurrence_id:
+        occurrence_id = "tuple:" + "\x1f".join((
+            _text(occurrence.get("position")),
+            _text(occurrence.get("songKey") or occurrence.get("song_key")),
+            _text(occurrence.get("title")),
+            _text(occurrence.get("artist")),
+        ))
+    return video_id, occurrence_id
+
+
+def _source_records_as_occurrences(
+    records: Iterable[Mapping[str, Any]],
+    options: Mapping[str, Any],
+    canonical_song_key: str,
+) -> list[dict[str, Any]]:
+    """Render exact effective records in the persisted source occurrence shape."""
+
+    values: list[dict[str, Any]] = []
+    for record in records:
+        video = dict(record.get("video") or {})
+        occurrences = []
+        for occurrence in record.get("occurrences") or ():
+            item = dict(occurrence)
+            item["songKey"] = canonical_song_key
+            occurrences.append(item)
+        projected = {"video": video, "occurrences": tuple(occurrences)}
+        for item in _occurrences_for_range(projected, options["range"]):
+            if _matches(item, options, ("title", "artist", "channel", "video", "source")):
+                values.append(item)
+    return values
+
+
+def _source_occurrence_field(value: Mapping[str, Any], field: str) -> str:
+    """Read one public aggregate field from nested source occurrence shapes."""
+
+    queue: list[Any] = [value]
+    visited = 0
+    while queue:
+        current = queue.pop()
+        visited += 1
+        if visited > 128:
+            break
+        if isinstance(current, Mapping):
+            candidate = _text(current.get(field))
+            if candidate:
+                return candidate
+            for name in ("song", "item", "video", "payload"):
+                nested = current.get(name)
+                if isinstance(nested, Mapping):
+                    queue.append(nested)
+    return ""
+
+
+def _adjust_source_count_list(
+    current: Any,
+    before: Iterable[Mapping[str, Any]],
+    after: Iterable[Mapping[str, Any]],
+    field: str,
+) -> list[dict[str, Any]]:
+    counts: dict[str, int] = defaultdict(int)
+    if isinstance(current, list):
+        for item in current:
+            if not isinstance(item, Mapping):
+                continue
+            name = _text(item.get("name"))
+            if name:
+                counts[name] += int(item.get("count") or 0)
+    for item in before:
+        name = _source_occurrence_field(item, field)
+        if name:
+            counts[name] -= 1
+    for item in after:
+        name = _source_occurrence_field(item, field)
+        if name:
+            counts[name] += 1
+    return [
+        {"name": name, "count": count}
+        for name, count in sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))
+        if count > 0
+    ]
+
+
 def _generic_song_source_payload(
     connection,
     parent_revision_id: str,
@@ -8966,66 +9373,30 @@ def _generic_song_source_payload(
     accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
     runtime_changes: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    """Rebuild one affected generic song source from bounded effective tuples.
-
-    A song source is not a channel source: a curation replacement can move an
-    occurrence from a different persisted source into this group.  Read only
-    the exact parent song key, then apply the selected accepted-video boundary
-    and final runtime chain.  ``None`` means this persisted detail is not a
-    song detail; a false result is authoritative for a recognised song key.
-    """
+    """Rebuild one affected song from an indexed source seed and bounded deltas."""
 
     if _text(persisted_record.get("type")) != "song":
         return None
     options = _query_options(query)
-    range_id = _text(persisted_record.get("rangeId") or persisted_record.get("range_id")) or options["range"]
+    range_id = options["range"]
     target_key = _text(persisted_record.get("key"))
-    title = _text(persisted_record.get("title"))
-    artist = _text(persisted_record.get("displayArtist") or persisted_record.get("artist"))
     if not target_key:
         return None
-
-    parent_rows = _rows(
-        connection,
-        """
-        SELECT o.video_id, o.occurrence_id, o.range_id, o.song_key,
-               o.seconds, o.title, o.artist, o.source_id, o.source_system,
-               o.payload_json AS occurrence_payload_json, v.title AS video_title,
-               v.channel_name, v.channel_id, v.channel_handle, v.channel_url,
-               v.published_timestamp AS published_at, v.payload_json AS video_payload_json
-        FROM runtime_occurrences AS o
-        JOIN runtime_videos AS v
-          ON v.revision_id = o.revision_id AND v.video_id = o.video_id
-        WHERE o.revision_id = %s AND v.revision_id = %s
-          AND (o.song_key = %s OR (o.title = %s AND o.artist = %s))
-          AND (
-            (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
-            OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
-          )
-        ORDER BY o.video_id, o.occurrence_id
-        LIMIT %s
-        """,
-        [parent_revision_id, parent_revision_id, target_key, title, artist, range_id, range_id,
-         _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
-    )
-    if len(parent_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-        raise PostgresAdapterError("generic song source parent lookup exceeded bounded occurrence cap")
+    exact_pairs, exact_song_keys = _source_song_identity_evidence(persisted_record)
+    if not exact_pairs and not exact_song_keys:
+        return {
+            "schemaVersion": 1,
+            "found": False,
+            "sourceKey": requested_key,
+            "sourceDetailBlocked": True,
+            "sourceDetailState": "missing_exact_song_identity",
+        }
 
     def same_target(row: Mapping[str, Any]) -> bool:
-        row_key = _text(row.get("song_key") or row.get("songKey"))
-        if row_key and row_key == target_key:
+        pairs, keys = _source_song_identity_evidence(row)
+        if exact_song_keys & keys:
             return True
-        return bool(title) and (
-            _overlay_song_group_norm(row.get("title")) == _overlay_song_group_norm(title)
-            and _overlay_song_group_norm(row.get("artist")) == _overlay_song_group_norm(artist)
-        )
-
-    effective: dict[tuple[str, str], dict[str, Any]] = {}
-    for row in parent_rows:
-        record = _overlay_source_record(row)
-        if record:
-            occurrence = record["occurrences"][0]
-            effective[(video_id := _text(occurrence.get("videoId")), _text(occurrence.get("occurrenceId")))] = record
+        return bool(set(exact_pairs) & set(pairs))
 
     candidate_rows = tuple(candidate_rows) if candidate_rows is not None else tuple(
         _overlay_candidate_rows(connection, overlay_revision_ids)
@@ -9033,23 +9404,80 @@ def _generic_song_source_payload(
     accepted_video_resets = dict(accepted_video_resets) if accepted_video_resets is not None else _accepted_video_resets(
         connection, overlay_revision_ids,
     )
-    for identity in list(effective):
-        if identity[0] in accepted_video_resets:
-            effective.pop(identity, None)
-    for row in _overlay_rows_for_range(candidate_rows, range_id):
-        if row.get("video_tombstone") or not same_target(row):
-            continue
-        record = _overlay_source_record(row)
-        if record:
-            occurrence = record["occurrences"][0]
-            effective[(_text(occurrence.get("videoId")), _text(occurrence.get("occurrenceId")))] = record
-
     changes = list(runtime_changes) if runtime_changes is not None else _runtime_tombstones(
         connection, overlay_revision_ids, accepted_video_resets.values() if accepted_video_resets else None,
         candidate_rows,
     )
     changes = _overlay_rows_for_range(changes, range_id)
     replacement_rows = _runtime_replacement_candidate_rows(changes)
+    candidate_range_rows = _overlay_rows_for_range(candidate_rows, range_id)
+
+    potential_video_ids = {
+        _text(video_id) for video_id in accepted_video_resets if _text(video_id)
+    }
+    relevant_change = False
+    for row in (*candidate_range_rows, *changes, *replacement_rows):
+        entity_type = _text(row.get("entityType") or row.get("entity_type"))
+        if same_target(row) or entity_type in {"videos", "runtime_videos"}:
+            video_id = _text(row.get("video_id") or row.get("videoId"))
+            if video_id:
+                potential_video_ids.add(video_id)
+            relevant_change = relevant_change or same_target(row)
+
+    affected_source_rows: list[dict[str, Any]] = []
+    if potential_video_ids:
+        affected_source_rows = _rows(
+            connection,
+            """
+            SELECT position, video_id, title, channel_name, channel_id,
+                   channel_handle, channel_url, published_timestamp, seconds,
+                   search_text, payload_json
+            FROM runtime_source_occurrences
+            WHERE revision_id = %s AND source_key = %s AND range_id = %s
+              AND video_id = ANY(%s::text[])
+            ORDER BY position, video_id
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                requested_key,
+                range_id,
+                sorted(potential_video_ids),
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            ],
+        )
+    if len(affected_source_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("affected source seed exceeded bounded occurrence cap")
+    if not affected_source_rows and not relevant_change:
+        return None
+
+    effective: dict[tuple[str, str], dict[str, Any]] = {}
+    before_public: list[dict[str, Any]] = []
+    before_anchor: dict[str, int] = {}
+    for row in affected_source_rows:
+        public = _runtime_source_occurrence(row)
+        before_public.append(public)
+        video_id = _text(row.get("video_id"))
+        position = int(row.get("position") or 0)
+        before_anchor[video_id] = min(before_anchor.get(video_id, position), position)
+        for record in _persisted_source_records((public,), {}):
+            effective[_source_record_identity(record)] = record
+
+    full_video_changes = {
+        _text(row.get("videoId") or row.get("video_id"))
+        for row in changes
+        if _text(row.get("entityType") or row.get("entity_type"))
+        in {"videos", "runtime_videos"}
+    }
+    for identity in list(effective):
+        if identity[0] in accepted_video_resets or identity[0] in full_video_changes:
+            effective.pop(identity, None)
+    for row in candidate_range_rows:
+        if row.get("video_tombstone") or not same_target(row):
+            continue
+        record = _overlay_source_record(row)
+        if record:
+            effective[_source_record_identity(record)] = record
     for change in changes:
         if not same_target(change):
             continue
@@ -9059,29 +9487,194 @@ def _generic_song_source_payload(
             continue
         record = _overlay_source_record(row)
         if record:
-            occurrence = record["occurrences"][0]
-            effective[(_text(occurrence.get("videoId")), _text(occurrence.get("occurrenceId")))] = record
+            effective[_source_record_identity(record)] = record
 
-    records = [record for _, record in sorted(effective.items())]
-    # ``runtime_occurrences.song_key`` is the authoritative storage identity;
-    # a legacy parent card may expose a normalized display key instead.  Build
-    # through the real occurrence key, then retain the requested public source
-    # key/path below rather than assuming those two identities are identical.
-    first_song_key = _text(records[0]["occurrences"][0].get("songKey")) if records else target_key
-    canonical_key = _stable_key("source-song", range_id, first_song_key)
-    rebuilt = source_payload_from_records(records, canonical_key, query)
-    if not rebuilt.get("found"):
-        return {"schemaVersion": 1, "found": False, "sourceKey": requested_key}
-    rebuilt = dict(rebuilt)
-    record = {**dict(persisted_record), **dict(rebuilt.get("record") or {})}
-    record["key"] = target_key
-    record["title"] = title
-    record["displayArtist"] = artist
+    effective_records = [record for _, record in sorted(effective.items())]
+    after_public = _source_records_as_occurrences(effective_records, options, target_key)
+    raw_query = query or {}
+    search_predicate = ""
+    search_params: list[Any] = []
+    if options["q"]:
+        search_predicate = " AND search_text ILIKE %s ESCAPE E'\\\\'"
+        search_params.append(f"%{_escape_source_search_pattern(options['q'])}%")
+    base_where = (
+        "revision_id = %s AND source_key = %s AND range_id = %s"
+        + search_predicate
+    )
+    base_params: list[Any] = [
+        parent_revision_id, requested_key, range_id, *search_params,
+    ]
+    base_summary_rows = _rows(
+        connection,
+        f"""
+        SELECT count(*) AS total_occurrence_count,
+               count(DISTINCT video_id) AS total_video_count,
+               coalesce(max(position), 0) AS max_position
+        FROM runtime_source_occurrences
+        WHERE {base_where}
+        """,
+        base_params,
+    )
+    base_summary = base_summary_rows[0] if base_summary_rows else {}
+    base_occurrence_count = int(base_summary.get("total_occurrence_count") or 0)
+    base_video_count = int(base_summary.get("total_video_count") or 0)
+    max_position = int(base_summary.get("max_position") or 0)
+
+    before_filtered = [
+        row for row in affected_source_rows
+        if not options["q"]
+        or options["q"] in _text(row.get("search_text")).casefold()
+    ]
+    before_filtered_videos = {
+        _text(row.get("video_id")) for row in before_filtered if _text(row.get("video_id"))
+    }
+    after_filtered_videos = {
+        _text(item.get("videoId")) for item in after_public if _text(item.get("videoId"))
+    }
+    total_occurrence_count = max(
+        0, base_occurrence_count - len(before_filtered) + len(after_public),
+    )
+    total_video_count = max(
+        0, base_video_count - len(before_filtered_videos) + len(after_filtered_videos),
+    )
+    page_size = options["pageSize"]
+    page_count = max(1, math.ceil(total_video_count / page_size))
+    page = min(options["page"], page_count)
+    affected_video_ids = sorted({
+        _text(row.get("video_id"))
+        for row in affected_source_rows
+        if _text(row.get("video_id"))
+    } | potential_video_ids)
+    after_video_positions: dict[str, int] = {}
+    for index, video_id in enumerate(sorted(after_filtered_videos)):
+        after_video_positions[video_id] = before_anchor.get(
+            video_id, max_position + index + 1,
+        )
+    overlay_video_ids = [
+        video_id
+        for video_id, _ in sorted(
+            after_video_positions.items(), key=lambda item: (item[1], item[0]),
+        )
+    ]
+    overlay_positions = [after_video_positions[video_id] for video_id in overlay_video_ids]
+    page_rows = _rows(
+        connection,
+        f"""
+        WITH overlay_videos(video_id, first_position) AS (
+          SELECT * FROM unnest(%s::text[], %s::bigint[])
+        ), effective_videos AS (
+          SELECT video_id, min(position)::bigint AS first_position
+          FROM runtime_source_occurrences
+          WHERE {base_where}
+            AND NOT (video_id = ANY(%s::text[]))
+          GROUP BY video_id
+          UNION ALL
+          SELECT video_id, first_position FROM overlay_videos
+        )
+        SELECT video_id, first_position
+        FROM effective_videos
+        ORDER BY first_position, video_id
+        LIMIT %s OFFSET %s
+        """,
+        [
+            overlay_video_ids,
+            overlay_positions,
+            *base_params,
+            affected_video_ids,
+            page_size,
+            (page - 1) * page_size,
+        ],
+    )
+    selected_video_ids = [
+        _text(row.get("video_id"))
+        for row in page_rows[:page_size]
+        if _text(row.get("video_id"))
+    ]
+    selected_parent_ids = [
+        video_id for video_id in selected_video_ids if video_id not in after_video_positions
+    ]
+    selected_parent_rows: list[dict[str, Any]] = []
+    if selected_parent_ids:
+        selected_parent_rows = _rows(
+            connection,
+            f"""
+            SELECT position, video_id, title, channel_name, channel_id,
+                   channel_handle, channel_url, published_timestamp, seconds,
+                   search_text, payload_json
+            FROM runtime_source_occurrences
+            WHERE {base_where} AND video_id = ANY(%s::text[])
+            ORDER BY position, video_id
+            LIMIT %s
+            """,
+            [
+                *base_params,
+                selected_parent_ids,
+                _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+            ],
+        )
+    if len(selected_parent_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError("effective source hydration exceeded bounded cap")
+    page_occurrences_by_video: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    selected_parent_public = _source_records_as_occurrences(
+        _persisted_source_records(
+            (_runtime_source_occurrence(row) for row in selected_parent_rows),
+            {},
+        ),
+        options,
+        target_key,
+    )
+    for item in selected_parent_public:
+        page_occurrences_by_video[_text(item.get("videoId"))].append(item)
+    for item in after_public:
+        video_id = _text(item.get("videoId"))
+        if video_id in after_video_positions:
+            page_occurrences_by_video[video_id].append(dict(item))
+    page_occurrences = [
+        item
+        for video_id in selected_video_ids
+        for item in page_occurrences_by_video.get(video_id, ())
+    ]
+
+    record = dict(persisted_record)
+    record["occurrences"] = page_occurrences
     record["sourceDetailKey"] = requested_key
     record["sourceDetailPath"] = _text(record.get("sourceDetailPath"))
-    rebuilt["sourceKey"] = requested_key
-    rebuilt["record"] = record
-    return rebuilt
+    record["rangeId"] = range_id
+    record["count"] = total_occurrence_count
+    record["occurrenceCount"] = total_occurrence_count
+    record["timestampCount"] = total_occurrence_count
+    record["videoCount"] = total_video_count
+    record["sourceFilterQuery"] = options["q"]
+    record["occurrencePreviewLimited"] = total_occurrence_count > len(page_occurrences)
+    unfiltered_after = _source_records_as_occurrences(
+        effective_records, {**dict(options), "q": "", "searchTokens": []}, target_key,
+    )
+    record["artists"] = _adjust_source_count_list(
+        record.get("artists"), before_public, unfiltered_after, "artist",
+    )
+    record["channels"] = _adjust_source_count_list(
+        record.get("channels"), before_public, unfiltered_after, "channelName",
+    )
+    total_song_count = int(record.get("songCount") or len(record.get("artists") or ()))
+    if not total_occurrence_count and not options["q"]:
+        return {"schemaVersion": 1, "found": False, "sourceKey": requested_key}
+    response: dict[str, Any] = {
+        "schemaVersion": 1,
+        "found": bool(total_occurrence_count or options["q"]),
+        "sourceKey": requested_key,
+        "record": record,
+    }
+    if any(field in raw_query for field in ("page", "pageSize")):
+        response.update({
+            "page": page,
+            "pageSize": page_size,
+            "pageCount": page_count,
+            "totalCount": total_video_count,
+            "totalVideoCount": total_video_count,
+            "totalOccurrenceCount": total_occurrence_count,
+            "totalSongCount": total_song_count,
+        })
+    return response
 
 
 def _generic_overlay_song_source_for_key(
@@ -9130,7 +9723,9 @@ def _generic_overlay_song_source_for_key(
     group_key, (title, artist) = next(iter(targets.items()))
     synthetic = {
         "type": "song", "key": group_key, "title": title,
-        "displayArtist": artist, "rangeId": options["range"],
+        "artist": artist, "displayArtist": artist,
+        "artists": [{"name": artist, "count": 0}] if artist else [],
+        "rangeId": options["range"],
         "sourceDetailKey": requested_key,
     }
     return _generic_song_source_payload(
@@ -9188,7 +9783,33 @@ def _has_trusted_source_channel_identity(record: Mapping[str, Any]) -> bool:
     )
 
 
+def _source_detail_delta_lineage(
+    overlay_revision_ids: Sequence[str],
+    detail_revision_id: str,
+    parent_revision_id: str,
+) -> tuple[str, list[str]]:
+    """Return the authoritative source base and only its newer overlay tail."""
+
+    overlays = [_text(value) for value in overlay_revision_ids if _text(value)]
+    detail_revision_id = _text(detail_revision_id)
+    parent_revision_id = _text(parent_revision_id)
+    if not detail_revision_id:
+        return parent_revision_id, overlays
+    if detail_revision_id == parent_revision_id:
+        return detail_revision_id, overlays
+    try:
+        detail_index = overlays.index(detail_revision_id)
+    except ValueError as error:
+        raise PostgresAdapterError(
+            "authoritative source detail is outside the active overlay lineage"
+        ) from error
+    return detail_revision_id, overlays[:detail_index]
+
+
 def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    key = _text(key).strip()
+    if not key:
+        raise ValueError("source key is required")
     runtime = _runtime_projection_revision(connection)
     if runtime:
         persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
@@ -9212,25 +9833,36 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
             persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
             if persisted.get("found"):
                 persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                source_base_revision, source_overlay_ids = _source_detail_delta_lineage(
+                    overlay_ids,
+                    _text(persisted.get("sourceRevisionId")),
+                    parent[0],
+                )
+                if not source_overlay_ids:
+                    return persisted
                 song_rebuilt = _generic_song_source_payload(
-                    connection, parent[0], persisted_record, key, query, overlay_ids,
-                ) if overlay_ids else None
+                    connection, source_base_revision, persisted_record, key, query,
+                    source_overlay_ids,
+                )
                 if song_rebuilt is not None:
                     return song_rebuilt
                 if persisted_record and (
-                    overlay_ids
+                    source_overlay_ids
                     or _text(persisted_record.get("sourceDetailKey")) != _text(key)
                 ):
                     # A parent projection can retain an all-range payload under
                     # a 7d key, and accepted overlays add rows that do not exist
                     # in the persisted parent source detail.  Rebuild only this
                     # channel while retaining every existing public field.
-                    repaired = _runtime_channel_source_payload(connection, parent[0], persisted_record, key, query, overlay_revision_ids=overlay_ids)
+                    repaired = _runtime_channel_source_payload(
+                        connection, source_base_revision, persisted_record, key, query,
+                        overlay_revision_ids=source_overlay_ids,
+                    )
                     if repaired.get("found"):
                         repaired = dict(repaired)
                         repaired["record"] = {**dict(persisted_record), **dict(repaired.get("record") or {})}
                         return repaired
-                    if overlay_ids and _has_trusted_source_channel_identity(persisted_record):
+                    if source_overlay_ids and _has_trusted_source_channel_identity(persisted_record):
                         # A full-video reset/tombstone is authoritative for an
                         # exact persisted channel identity.  Do not revive the
                         # parent source when its final record set is empty.
@@ -9241,19 +9873,27 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                 persisted = _runtime_source_payload(connection, parent[0], resolved_key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
                 if persisted.get("found"):
                     persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                    source_base_revision, source_overlay_ids = _source_detail_delta_lineage(
+                        overlay_ids,
+                        _text(persisted.get("sourceRevisionId")),
+                        parent[0],
+                    )
+                    if not source_overlay_ids:
+                        return persisted
                     song_rebuilt = _generic_song_source_payload(
-                        connection, parent[0], persisted_record, resolved_key, query, overlay_ids,
-                    ) if overlay_ids else None
+                        connection, source_base_revision, persisted_record, resolved_key,
+                        query, source_overlay_ids,
+                    )
                     if song_rebuilt is not None:
                         return song_rebuilt
                     if persisted_record:
                         repaired = _runtime_channel_source_payload(
                             connection,
-                            parent[0],
+                            source_base_revision,
                             persisted_record,
                             resolved_key,
                             query,
-                            overlay_revision_ids=overlay_ids,
+                            overlay_revision_ids=source_overlay_ids,
                         )
                         if repaired.get("found"):
                             repaired = dict(repaired)
@@ -9262,7 +9902,7 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                                 **dict(repaired.get("record") or {}),
                             }
                             return repaired
-                        if overlay_ids and _has_trusted_source_channel_identity(persisted_record):
+                        if source_overlay_ids and _has_trusted_source_channel_identity(persisted_record):
                             return repaired
                     return persisted
             overlay_song = _generic_overlay_song_source_for_key(
