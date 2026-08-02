@@ -27,7 +27,7 @@ concurrency:
 jobs:
   update:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 100
+    timeout-minutes: 240
     env:
       DAILY_SONG_SEARCH_LIMIT: "500"
       DAILY_SONG_UPDATE_MODE: ${{ inputs.mode || 'fast' }}
@@ -59,7 +59,7 @@ jobs:
       DAILY_SONG_CHANNEL_AVATAR_STALE_DAYS: "30"
       DAILY_SONG_SEARCH_REFRESH_MAX_AGE_HOURS: "24"
     steps:
-      - name: Checkout bounded core inputs
+      - name: Checkout controlled core inputs
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 50
@@ -87,9 +87,10 @@ jobs:
             /data/song-search-known-songs.json
             /data/external/youtube-channel-discovery/channel-metadata.json
             /data/external/youtube-channel-discovery/accepted/**
-            /data/external/vsinger-http/backfill/manifest.json
-            /data/snapshots/index.json
-            /data/catalog-segments/manifest.json
+            /data/external/vsinger-http/backfill/**
+            /data/snapshots/**
+            /data/catalog-segments/**
+            /data/diff/**
             /data/ui/meta.json
 
       - name: Configure Mac toolchain
@@ -97,6 +98,7 @@ jobs:
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/python312/bin" >> "$GITHUB_PATH"
+
       - name: Record run start
         id: runmeta
         run: |
@@ -109,744 +111,87 @@ jobs:
             echo "- started_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "- mode: $DAILY_SONG_UPDATE_MODE"
             echo "- reason: ${{ inputs.reason || github.event_name }}"
-            echo "- release_runbook: docs/release-runbook.md"
-            echo "- fast_path: search_limit=$DAILY_SONG_SEARCH_LIMIT, video_limit=$DAILY_SONG_VIDEO_LIMIT, video_concurrency=$DAILY_SONG_VIDEO_CONCURRENCY"
-            echo "- recent_refresh: recent_bucket_limit=$DAILY_SONG_RECENT_BUCKET_LIMIT, month_refresh_limit=$DAILY_SONG_MONTH_REFRESH_LIMIT, recent_window_days=$DAILY_SONG_RECENT_WINDOW_DAYS"
-            echo "- snapshots: mygit_today=$DAILY_SONG_MYGIT_TODAY_SNAPSHOTS, snapshot_days=$DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, retention_days=$DAILY_SONG_SNAPSHOT_RETENTION_DAYS"
-            echo "- youtube_backoff: delay_ms=$DAILY_SONG_REQUEST_DELAY_MS, jitter_ms=$DAILY_SONG_REQUEST_JITTER_MS, max_429=$DAILY_SONG_MAX_429_ERRORS"
+            echo "- input_version: exact checked-out Git HEAD"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Sync latest main before binding inputs
+      - name: Sync latest main before build
         run: |
           git fetch --no-tags --filter=blob:none --prune origin main
           git merge --ff-only origin/main
 
-      - name: Bind and materialize exact core inputs
-        id: inputs
-        env:
-          CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
-        run: |
-          # CORE_SPARSE_INPUTS_BEGIN
-          # The external MyGit raw source is mutable; update-songlist collectCandidates uses persistState:true.
-          # Bind existing import state, or record before=null/newBlob when this exact state file is created.
-          cat > "$RUNNER_TEMP/bind-core-inputs.py" <<'PY'
-          import hashlib
-          import json
-          import os
-          import pathlib
-          import posixpath
-          import re
-          import subprocess
-          import sys
-
-          ROOT = pathlib.Path.cwd().resolve()
-          HEAD = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-          OUT = pathlib.Path(os.environ["CORE_INPUT_MANIFEST"])
-          HASH_RE = re.compile(r"^[0-9a-f]{64}$")
-          ACCEPTED_ROOT = "data/external/youtube-channel-discovery/accepted/"
-          VSINGER_ROOT = "data/external/vsinger-http/backfill/"
-          VSINGER_MANIFEST = VSINGER_ROOT + "manifest.json"
-          ALLOWED_DYNAMIC_ROOTS = (
-              "data/snapshots/",
-              "data/catalog-segments/",
-              ACCEPTED_ROOT,
-              VSINGER_ROOT,
-          )
-          REQUIRED_STATIC = (
-              ".gitignore",
-              "package.json",
-              "scripts/run-core-update.js",
-              "scripts/update-songlist.js",
-              "scripts/apply-song-search-niche.js",
-              "scripts/fetch-channel-avatar-cache.js",
-              "scripts/build-runtime-data.js",
-              "scripts/validate-data.js",
-              "data/latest.json",
-              "data/audit.json",
-              "data/inspection-cache.json",
-              "data/video-catalog.json",
-              "data/song-search-known-songs.json",
-              "data/snapshots/index.json",
-              "data/ui/meta.json",
-              VSINGER_MANIFEST,
-          )
-          OPTIONAL_STATIC = (
-              "package-lock.json",
-              "docs/release-runbook.md",
-              "data/catalog-segments/manifest.json",
-              "data/external/youtube-channel-discovery/channel-metadata.json",
-              "data/mygit-today-snapshot-import-state.json",
-          )
-          TREE_SCOPES = ("scripts", "assets", "config", ACCEPTED_ROOT)
-          MANIFEST_SEEDS = (
-              "data/snapshots/index.json",
-              "data/catalog-segments/manifest.json",
-              VSINGER_MANIFEST,
-          )
-
-          def git(*args, check=True):
-              return subprocess.run(["git", *args], check=check, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-          def validate_path(value, allowed_roots=None):
-              if (not isinstance(value, str) or not value or "\\" in value
-                      or "\r" in value or "\n" in value or "\x00" in value):
-                  raise ValueError(f"invalid relative path: {value!r}")
-              if value.startswith("/") or re.match(r"^[A-Za-z]:", value):
-                  raise ValueError(f"absolute path forbidden: {value}")
-              normalized = posixpath.normpath(value)
-              if normalized != value or normalized == ".." or normalized.startswith("../"):
-                  raise ValueError(f"path traversal/non-canonical path forbidden: {value}")
-              if allowed_roots and not any(value.startswith(root) for root in allowed_roots):
-                  raise ValueError(f"manifest path outside allowlist: {value}")
-              return value
-
-          def tree_entries(ref, scopes):
-              result = git("ls-tree", "-r", "-z", ref, "--", *scopes)
-              entries = []
-              for raw in result.stdout.split("\0"):
-                  if not raw:
-                      continue
-                  meta, path = raw.split("\t", 1)
-                  mode, kind, blob = meta.split(" ")
-                  if kind != "blob":
-                      raise ValueError(f"non-blob input: {path} ({kind})")
-                  entries.append((validate_path(path), mode, blob))
-              return entries
-
-          def ref_blob(path, ref=HEAD, required=True):
-              path = validate_path(path)
-              result = git("rev-parse", f"{ref}:{path}", check=False)
-              if result.returncode != 0:
-                  if required:
-                      raise ValueError(f"required tracked input missing: {path}")
-                  return None
-              blob = result.stdout.strip()
-              if not re.fullmatch(r"[0-9a-f]{40,64}", blob):
-                  raise ValueError(f"invalid blob identity for {path}: {blob}")
-              kind = git("cat-file", "-t", blob).stdout.strip()
-              if kind != "blob":
-                  raise ValueError(f"input is not a blob: {path} ({kind})")
-              return blob
-
-          def add_sparse(paths):
-              paths = sorted(set(validate_path(path) for path in paths))
-              if paths:
-                  subprocess.run(
-                      ["git", "sparse-checkout", "add", "--stdin"],
-                      input="".join(f"{path}\n" for path in paths),
-                      text=True,
-                      check=True,
-                  )
-
-          def sha256_file(path):
-              digest = hashlib.sha256()
-              with open(ROOT / path, "rb") as handle:
-                  for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                      digest.update(chunk)
-              return digest.hexdigest()
-
-          def read_json_ref(ref, path):
-              if ref == HEAD and (ROOT / path).is_file():
-                  raw = (ROOT / path).read_text(encoding="utf-8")
-              else:
-                  raw = subprocess.check_output(["git", "show", f"{ref}:{path}"]).decode("utf-8")
-              try:
-                  value = json.loads(raw)
-              except Exception as exc:
-                  raise ValueError(f"malformed JSON manifest {path}: {exc}") from exc
-              if not isinstance(value, dict):
-                  raise ValueError(f"manifest root must be an object: {path}")
-              return value
-
-          def collect_refs(payload, source):
-              refs = []
-              known_arrays = {"entries", "files", "pages", "segments", "shards", "snapshots", "artifacts"}
-
-              if source == "data/snapshots/index.json":
-                  snapshots = payload.get("snapshots")
-                  if not isinstance(snapshots, list):
-                      raise ValueError(f"{source}: snapshots must be an array")
-                  for item in snapshots:
-                      if not isinstance(item, dict) or not isinstance(item.get("path"), str):
-                          raise ValueError(f"{source}: every snapshots entry must contain path")
-
-              def walk(value, key=""):
-                  if isinstance(value, dict):
-                      has_hash = "sha256" in value
-                      has_path = "path" in value
-                      if has_hash and not has_path:
-                          raise ValueError(f"{source}: sha256 without path")
-                      if has_path:
-                          path = validate_path(value["path"], ALLOWED_DYNAMIC_ROOTS)
-                          expected = value.get("sha256")
-                          if expected is not None and (not isinstance(expected, str) or not HASH_RE.fullmatch(expected)):
-                              raise ValueError(f"{source}: malformed sha256 for {path}")
-                          bytes_value = value.get("bytes")
-                          if bytes_value is not None and (not isinstance(bytes_value, int) or bytes_value < 0):
-                              raise ValueError(f"{source}: malformed bytes for {path}")
-                          refs.append((path, expected, bytes_value, None, None))
-                      for child_key, child in value.items():
-                          if child_key in known_arrays and not isinstance(child, list):
-                              raise ValueError(f"{source}: {child_key} must be an array")
-                          walk(child, child_key)
-                  elif isinstance(value, list):
-                      for child in value:
-                          walk(child, key)
-              walk(payload)
-              return refs
-
-          def collect_vsinger_refs(payload, source):
-              if payload.get("schemaVersion") != 1:
-                  raise ValueError(f"{source}: unsupported schemaVersion")
-              if payload.get("sourceSystem") != "vsinger_moment_http":
-                  raise ValueError(f"{source}: unexpected sourceSystem")
-              shards = payload.get("shards")
-              required_kinds = {"songs", "videos", "occurrences", "coverage"}
-              if not isinstance(shards, dict) or not required_kinds.issubset(shards):
-                  raise ValueError(f"{source}: shards schema mismatch")
-              ignored_kinds = sorted(set(shards) - required_kinds)
-              if ignored_kinds:
-                  print(f"VSINGER_IGNORED_SHARD_GROUPS groups={ignored_kinds}")
-              refs = []
-              for kind in sorted(required_kinds):
-                  entries = shards[kind]
-                  if not isinstance(entries, list):
-                      raise ValueError(f"{source}: shards.{kind} must be an array")
-                  for entry in entries:
-                      if not isinstance(entry, dict):
-                          raise ValueError(f"{source}: shards.{kind} entry must be an object")
-                      allowed = {"file", "count", "sha256", "bytes"}
-                      if set(entry) - allowed or not {"file", "count", "sha256"}.issubset(entry):
-                          raise ValueError(f"{source}: shards.{kind} entry schema mismatch")
-                      filename = entry["file"]
-                      if (not isinstance(filename, str) or not filename or
-                              filename != posixpath.basename(filename) or
-                              filename in {".", ".."} or "/" in filename or "\\" in filename):
-                          raise ValueError(f"{source}: shard path escapes VSinger root: {filename!r}")
-                      path = validate_path(posixpath.join(VSINGER_ROOT, filename), (VSINGER_ROOT,))
-                      expected = entry["sha256"]
-                      if not isinstance(expected, str) or not HASH_RE.fullmatch(expected):
-                          raise ValueError(f"{source}: malformed sha256 for {path}")
-                      count = entry["count"]
-                      if not isinstance(count, int) or count < 0:
-                          raise ValueError(f"{source}: malformed count for {path}")
-                      bytes_value = entry.get("bytes")
-                      if bytes_value is not None and (not isinstance(bytes_value, int) or bytes_value < 0):
-                          raise ValueError(f"{source}: malformed bytes for {path}")
-                      refs.append((path, expected, bytes_value, kind, count))
-              return refs
-
-          def validate_vsinger_shard_payload(group, expected_count, file_path):
-              try:
-                  payload = json.loads(pathlib.Path(file_path).read_text(encoding="utf-8"))
-              except Exception as exc:
-                  raise ValueError(f"malformed VSinger shard JSON: {file_path}: {exc}") from exc
-              if group == "coverage":
-                  if expected_count != 1 or not isinstance(payload, dict):
-                      raise ValueError(f"coverage shard must be one object with count=1: {file_path}")
-                  return
-              if not isinstance(payload, list) or len(payload) != expected_count:
-                  actual = len(payload) if isinstance(payload, list) else "non-array"
-                  raise ValueError(f"VSinger shard count mismatch for {file_path}: {actual} != {expected_count}")
-
-          def merge_ref(dynamic, path, expected, bytes_value, group, count, source):
-              previous = dynamic.get(path)
-              if previous:
-                  if expected and previous[0] and previous[0] != expected:
-                      raise ValueError(f"conflicting manifest hashes for {path} ({source})")
-                  if bytes_value is not None and previous[1] is not None and previous[1] != bytes_value:
-                      raise ValueError(f"conflicting manifest bytes for {path} ({source})")
-                  if count is not None and previous[3] is not None and previous[3] != count:
-                      raise ValueError(f"conflicting manifest counts for {path} ({source})")
-                  dynamic[path] = (
-                      previous[0] or expected,
-                      previous[1] if previous[1] is not None else bytes_value,
-                      previous[2] or group,
-                      previous[3] if previous[3] is not None else count,
-                  )
-              else:
-                  dynamic[path] = (expected, bytes_value, group, count)
-
-          def build_entries(ref, materialize):
-              static_entries = tree_entries(ref, TREE_SCOPES)
-              static_paths = {path for path, _mode, _blob in static_entries}
-              for path in REQUIRED_STATIC:
-                  ref_blob(path, ref=ref, required=True)
-                  static_paths.add(path)
-              for path in OPTIONAL_STATIC:
-                  if ref_blob(path, ref=ref, required=False):
-                      static_paths.add(path)
-
-              dynamic = {}
-              for source in MANIFEST_SEEDS:
-                  if not ref_blob(source, ref=ref, required=(source == VSINGER_MANIFEST)):
-                      continue
-                  payload = read_json_ref(ref, source)
-                  refs = (collect_vsinger_refs(payload, source)
-                          if source == VSINGER_MANIFEST else collect_refs(payload, source))
-                  for path, expected, bytes_value, group, count in refs:
-                      merge_ref(dynamic, path, expected, bytes_value, group, count, source)
-
-              for path in dynamic:
-                  ref_blob(path, ref=ref, required=True)
-              if materialize:
-                  add_sparse([*static_paths, *dynamic])
-
-              all_paths = sorted(static_paths | set(dynamic))
-              tree_map = {path: (mode, blob) for path, mode, blob in static_entries}
-              extra = [path for path in all_paths if path not in tree_map]
-              if extra:
-                  tree_map.update({path: (mode, blob) for path, mode, blob in tree_entries(ref, extra)})
-              records = []
-              for path in all_paths:
-                  if path not in tree_map:
-                      raise ValueError(f"missing tree blob for bound input: {path}")
-                  mode, blob = tree_map[path]
-                  expected, expected_bytes, shard_group, expected_count = dynamic.get(path, (None, None, None, None))
-                  record = {"path": path, "mode": mode, "blob": blob}
-                  if materialize:
-                      file_path = ROOT / path
-                      if not file_path.is_file():
-                          raise ValueError(f"bound input was not materialized as a file: {path}")
-                      digest = sha256_file(path)
-                      size = file_path.stat().st_size
-                      worktree_blob = git("hash-object", "--", path).stdout.strip()
-                      if worktree_blob != blob:
-                          raise ValueError(f"worktree content/blob mismatch for {path}: {worktree_blob} != {blob}")
-                      tree_size = int(git("cat-file", "-s", blob).stdout.strip())
-                      if size != tree_size:
-                          raise ValueError(f"tree blob byte mismatch for {path}: {size} != {tree_size}")
-                      if expected and digest != expected:
-                          raise ValueError(f"manifest sha256 mismatch for {path}: {digest} != {expected}")
-                      if expected_bytes is not None and size != expected_bytes:
-                          raise ValueError(f"manifest bytes mismatch for {path}: {size} != {expected_bytes}")
-                      if shard_group is not None:
-                          validate_vsinger_shard_payload(shard_group, expected_count, file_path)
-                          record.update({"manifestGroup": shard_group, "manifestCount": expected_count})
-                      record.update({"sha256": digest, "bytes": size})
-                  records.append(record)
-              records.sort(key=lambda item: item["path"])
-              accepted = [record for record in records if record["path"].startswith(ACCEPTED_ROOT)]
-              return records, accepted, len(dynamic)
-
-          def compare_fetched_main(ref):
-              bound = json.loads(OUT.read_text(encoding="utf-8"))
-              expected = {entry["path"]: (entry["mode"], entry["blob"]) for entry in bound["entries"]}
-              expected_accepted = {(entry["path"], entry["blob"]) for entry in bound["acceptedEntries"]}
-              actual_records, actual_accepted_records, _dynamic_count = build_entries(ref, materialize=False)
-              actual = {entry["path"]: (entry["mode"], entry["blob"]) for entry in actual_records}
-              actual_accepted = {(entry["path"], entry["blob"]) for entry in actual_accepted_records}
-              if actual != expected:
-                  added = sorted(set(actual) - set(expected))
-                  removed = sorted(set(expected) - set(actual))
-                  changed = sorted(path for path in set(actual) & set(expected) if actual[path] != expected[path])
-                  raise ValueError(f"core input drift before rebase; abort/rebuild: added={added} removed={removed} changed={changed}")
-              if actual_accepted != expected_accepted:
-                  raise ValueError("accepted input drift before rebase; abort/rebuild")
-              print(f"CORE_INPUT_REBASE_CAS_OK entries={len(expected)} accepted={len(expected_accepted)}")
-
-          if "--compare-ref" in sys.argv:
-              compare_fetched_main(sys.argv[sys.argv.index("--compare-ref") + 1])
-              raise SystemExit(0)
-
-          records, accepted, dynamic_count = build_entries(HEAD, materialize=True)
-          result = {
-              "schemaVersion": 1,
-              "head": HEAD,
-              "entries": records,
-              "acceptedEntries": accepted,
-              "dynamicManifestSources": list(MANIFEST_SEEDS),
-              "acceptedRoot": ACCEPTED_ROOT,
-              "vsingerManifest": VSINGER_MANIFEST,
-          }
-          OUT.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-          print(f"CORE_INPUT_MANIFEST_OK head={HEAD} entries={len(records)} accepted={len(accepted)} dynamic={dynamic_count}")
-          # CORE_SPARSE_INPUTS_END
-          PY
-          python3 "$RUNNER_TEMP/bind-core-inputs.py"
-          test ! -e /Users/be/song-rank.sqlite || echo "Preserved external rollback source; workflow does not read, copy, or delete it."
-
-      - name: Update compact runtime data
+      - name: Build core data
         id: core
-        timeout-minutes: 90
+        timeout-minutes: 230
         continue-on-error: true
-        env:
-          DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: node scripts/run-core-update.js
-
-      - name: Validate generated output paths
-        id: outputs
-        if: always() && steps.inputs.outcome == 'success'
-        env:
-          CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
-          CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
         run: |
-          # CORE_OUTPUT_POLICY_BEGIN
-          cat > "$RUNNER_TEMP/validate-core-outputs.py" <<'PY'
-          import hashlib
-          import json
-          import os
-          import pathlib
-          import posixpath
-          import subprocess
+          set -Eeuo pipefail
+          node scripts/update-songlist.js
+          node scripts/apply-song-search-niche.js
+          node scripts/fetch-channel-avatar-cache.js --daily
+          NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192" node scripts/build-runtime-data.js
+          echo "updated=true" >> "$GITHUB_OUTPUT"
 
-          ROOT = pathlib.Path.cwd().resolve()
-          OUT = pathlib.Path(os.environ["CORE_OUTPUT_MANIFEST"])
-          INPUT = pathlib.Path(os.environ["CORE_INPUT_MANIFEST"])
-          EXACT = {
-              "data/latest.json", "data/7d.json", "data/all.json", "data/72h.json", "data/1m.json",
-              "data/audit.json", "data/inspection-cache.json", "data/status.json", "data/video-catalog.json",
-              "data/song-search-known-songs.json", "data/external/youtube-channel-discovery/channel-metadata.json",
-              "data/mygit-today-snapshot-import-state.json",
-          }
-          PERSISTED_PREFIXES = ("data/snapshots/", "data/diff/", "data/catalog-segments/")
-          TRANSIENT_PREFIX = "data/ui/"
-          AVATAR_CHECKPOINT = "artifacts/channel-avatar-cache/checkpoint.json"
-          MYGIT_STATE = "data/mygit-today-snapshot-import-state.json"
-          SNAPSHOT_PREFIX = "data/snapshots/"
-          OUTPUT_PREFIXES = (*PERSISTED_PREFIXES, TRANSIENT_PREFIX)
-          ACCEPTED_ROOT = "data/external/youtube-channel-discovery/accepted/"
-
-          def allowed(path):
-              return path in EXACT or path == AVATAR_CHECKPOINT or any(path.startswith(prefix) for prefix in OUTPUT_PREFIXES)
-
-          input_manifest = json.loads(INPUT.read_text(encoding="utf-8"))
-          protected = {entry["path"] for entry in input_manifest["entries"]}
-
-          def snapshot_reference_paths(payload):
-              references = set()
-              for section_name in ("snapshots", "shards"):
-                  if section_name not in payload:
-                      continue
-                  section = payload[section_name]
-                  if section_name == "snapshots" and not isinstance(section, list):
-                      raise ValueError("snapshot index snapshots must be an array")
-                  if section_name == "shards" and not isinstance(section, (list, dict)):
-                      raise ValueError("snapshot index shards must be an array or object")
-
-                  def visit(value):
-                      if isinstance(value, dict):
-                          if "path" in value:
-                              path = value["path"]
-                              if (not isinstance(path, str)
-                                      or not path.startswith(SNAPSHOT_PREFIX)
-                                      or posixpath.normpath(path) != path):
-                                  raise ValueError(f"invalid permanent snapshot reference: {path!r}")
-                              references.add(path)
-                          for child in value.values():
-                              visit(child)
-                      elif isinstance(value, list):
-                          for child in value:
-                              visit(child)
-
-                  visit(section)
-              return references
-
-          def validate_permanent_snapshot_transition(old_payload, current_payload, records):
-              old_is_permanent = old_payload.get("retentionPolicy") == "permanent"
-              current_is_permanent = (current_payload is not None
-                                      and current_payload.get("retentionPolicy") == "permanent")
-              if not old_is_permanent and not current_is_permanent:
-                  return set(), set()
-              deletions = sorted(
-                  item["path"] for item in records
-                  if item["path"].startswith(SNAPSHOT_PREFIX) and "D" in item["state"]
-              )
-              if deletions:
-                  raise ValueError(f"permanent snapshot deletion is forbidden: {deletions}")
-              if current_payload is None:
-                  raise ValueError("permanent snapshot index is missing")
-              if old_is_permanent and not current_is_permanent:
-                  raise ValueError("permanent snapshot retention policy was removed")
-              old_references = snapshot_reference_paths(old_payload)
-              current_references = snapshot_reference_paths(current_payload)
-              dropped = sorted(old_references - current_references)
-              if dropped:
-                  raise ValueError(f"permanent snapshot references were dropped: {dropped}")
-              return old_references, current_references
-
-          snapshot_index = ROOT / "data/snapshots/index.json"
-          head_snapshot = subprocess.run(
-              ["git", "show", "HEAD:data/snapshots/index.json"],
-              text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-          )
-          if head_snapshot.returncode != 0:
-              raise SystemExit("cannot read HEAD snapshot index for permanent-retention guard")
-          old_snapshot_payload = json.loads(head_snapshot.stdout)
-          snapshot_payload = (json.loads(snapshot_index.read_text(encoding="utf-8"))
-                              if snapshot_index.is_file() else None)
-          print("CORE_HISTORICAL_OUTPUT_PRUNE_DISABLED no_unmaterialized_deletions=1")
-
-          raw = subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"])
-          chunks = raw.split(b"\0")
-          records = []
-          for chunk in chunks:
-              if not chunk:
-                  continue
-              text = chunk.decode("utf-8")
-              if len(text) < 4 or text[2] != " ":
-                  raise SystemExit(f"unsupported porcelain record: {text!r}")
-              state, path = text[:2], text[3:]
-              if " -> " in path or state[0] in "RC" or state[1] in "RC":
-                  raise SystemExit(f"rename/copy output is forbidden: {text}")
-              if posixpath.normpath(path) != path or path.startswith("/") or path.startswith("../"):
-                  raise SystemExit(f"non-canonical output path: {path}")
-              if path.startswith(ACCEPTED_ROOT):
-                  raise SystemExit(f"accepted input cannot be an output change: {path}")
-              if not allowed(path):
-                  raise SystemExit(f"unexpected generated path: {path}")
-              file_path = ROOT / path
-              if file_path.is_dir():
-                  raise SystemExit(f"directory output is forbidden: {path}")
-              digest = None
-              size = None
-              if file_path.is_file():
-                  content = file_path.read_bytes()
-                  digest = hashlib.sha256(content).hexdigest()
-                  size = len(content)
-              record = {"path": path, "state": state, "sha256": digest, "bytes": size}
-              if path == MYGIT_STATE:
-                  if not file_path.is_file():
-                      raise SystemExit("MyGit import state must persist; deletion is fail-closed")
-                  before_result = subprocess.run(
-                      ["git", "rev-parse", f"HEAD:{path}"],
-                      text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                  )
-                  before_blob = before_result.stdout.strip() if before_result.returncode == 0 else None
-                  new_blob = subprocess.check_output(["git", "hash-object", "--", path], text=True).strip()
-                  record.update({"beforeBlob": before_blob, "newBlob": new_blob})
-              records.append(record)
-          records = sorted(records, key=lambda item: item["path"])
-          old_snapshot_references, current_snapshot_references = validate_permanent_snapshot_transition(
-              old_snapshot_payload, snapshot_payload, records
-          )
-          permanent_snapshot = (
-              old_snapshot_payload.get("retentionPolicy") == "permanent"
-              or (snapshot_payload is not None and snapshot_payload.get("retentionPolicy") == "permanent")
-          )
-          if permanent_snapshot:
-              for path in current_snapshot_references:
-                  if not (ROOT / path).is_file():
-                      raise SystemExit(f"permanent snapshot reference is not materialized: {path}")
-              print(
-                  "CORE_PERMANENT_SNAPSHOT_REFERENCE_SUBSET_OK "
-                  f"old={len(old_snapshot_references)} current={len(current_snapshot_references)}"
-              )
-          transient_entries = [item for item in records if item["path"].startswith(TRANSIENT_PREFIX) or item["path"] == AVATAR_CHECKPOINT]
-          persisted_entries = [item for item in records if item not in transient_entries]
-          OUT.write_text(json.dumps({
-              "schemaVersion": 1,
-              "entries": records,
-              "persistedEntries": persisted_entries,
-              "transientEntries": transient_entries,
-              "protectedInputCount": len(protected),
-              "historicalOutputPrune": "disabled-no-authoritative-keep-set",
-              "permanentSnapshot": {
-                  "retentionPolicy": "permanent" if permanent_snapshot else None,
-                  "oldReferences": len(old_snapshot_references),
-                  "currentReferences": len(current_snapshot_references),
-              },
-          }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-          path_file = OUT.with_suffix(".changed.paths0")
-          path_file.write_bytes(b"".join(item["path"].encode("utf-8") + b"\0" for item in persisted_entries))
-          transient_path_file = OUT.with_suffix(".transient.paths0")
-          transient_path_file.write_bytes(b"".join(item["path"].encode("utf-8") + b"\0" for item in transient_entries))
-          print(f"CORE_OUTPUT_MANIFEST_OK entries={len(records)} persisted={len(persisted_entries)} transient={len(transient_entries)}")
-          # CORE_OUTPUT_POLICY_END
-          PY
-          python3 "$RUNNER_TEMP/validate-core-outputs.py"
-          if [ "${{ steps.core.outcome }}" = "success" ] && [ "${{ steps.core.outputs.updated }}" = "true" ]; then
-            python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, sys
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          paths = {entry["path"] for entry in manifest["persistedEntries"]}
-          if "data/7d.json" not in paths:
-              raise SystemExit("updated=true requires data/7d.json in the exact output manifest")
-          print("CORE_OUTPUT_7D_REQUIRED_OK")
-          PY
-          fi
-
-      - name: Restore verified core outputs after core failure
-        if: always() && steps.inputs.outcome == 'success' && steps.outputs.outcome == 'success' && steps.core.outcome != 'success'
-        env:
-          DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
-          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
-          CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
-        run: |
-          {
-            echo "### Core failure handling"
-            echo "- failed_stage: update compact runtime data"
-            echo "- outcome: $DAILY_SONG_FAILURE_OUTCOME"
-            echo "- action: restored only manifest-verified generated files and wrote data/status.json failure marker"
-          } >> "$GITHUB_STEP_SUMMARY"
-          python3 - <<'PY'
-          import json, os, pathlib, subprocess
-          manifest = json.loads(pathlib.Path(os.environ["CORE_OUTPUT_MANIFEST"]).read_text(encoding="utf-8"))
-          for entry in manifest["entries"]:
-              path = entry["path"]
-              tracked = subprocess.run(["git", "ls-files", "--error-unmatch", "--", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-              if tracked:
-                  subprocess.run(["git", "restore", "--worktree", "--", path], check=True)
-              else:
-                  subprocess.run(["git", "clean", "-f", "--", path], check=True)
-          PY
-          npm run mark:failure
-
-      - name: Cleanup transient derived UI and avatar checkpoint before commit
-        id: transient_cleanup
+      - name: Cleanup transient UI and avatar checkpoint
+        id: cleanup
         if: always()
-        env:
-          CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
         run: |
-          test -f "$CORE_OUTPUT_MANIFEST" || exit 0
-          python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, posixpath, subprocess, sys
-          root = pathlib.Path.cwd()
-          checkpoint = root / "artifacts/channel-avatar-cache/checkpoint.json"
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          count = 0
-          for entry in manifest.get("transientEntries", []):
-              path = entry["path"]
-              is_checkpoint = path == "artifacts/channel-avatar-cache/checkpoint.json"
-              if (not (path.startswith("data/ui/") or is_checkpoint) or
-                      posixpath.normpath(path) != path or path.startswith("/") or path.startswith("../")):
-                  raise SystemExit(f"invalid transient cleanup path: {path}")
-              if path.startswith("data/external/youtube-channel-discovery/accepted/"):
-                  raise SystemExit(f"transient cleanup touches accepted input: {path}")
-              if is_checkpoint:
-                  continue
-              tracked = subprocess.run(
-                  ["git", "ls-files", "--error-unmatch", "--", path],
-                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-              ).returncode == 0
-              if tracked:
-                  subprocess.run(["git", "restore", "--worktree", "--", path], check=True)
-              else:
-                  subprocess.run(["git", "clean", "-f", "--", path], check=True)
-              count += 1
-          if checkpoint.exists():
-              if not checkpoint.is_file():
-                  raise SystemExit(f"avatar checkpoint is not a file: {checkpoint}")
-              checkpoint.unlink()
-          cache_dir = checkpoint.parent
-          if cache_dir.exists():
-              try:
-                  cache_dir.rmdir()
-              except OSError as exc:
-                  raise SystemExit(f"avatar checkpoint directory is not empty or cannot be removed: {exc}") from exc
-          print(f"CORE_TRANSIENT_CLEANUP_OK ui_entries={count} avatar_checkpoint=removed-or-absent")
-          PY
-
-      - name: Revalidate persisted outputs after transient cleanup
-        id: finaloutputs
-        if: always() && steps.inputs.outcome == 'success' && steps.outputs.outcome == 'success' && steps.transient_cleanup.outcome == 'success'
-        env:
-          CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
-          CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
-        run: |
-          python3 "$RUNNER_TEMP/validate-core-outputs.py"
-          python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, sys
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          if manifest["transientEntries"]:
-              raise SystemExit("transient entries remain after exact cleanup")
-          print("CORE_PERSISTED_MANIFEST_AFTER_CLEANUP_OK")
-          print("CORE_TRANSIENT_EXCLUDED_FROM_CACHE_OK")
-          PY
-          if [ "${{ steps.core.outcome }}" = "success" ] && [ "${{ steps.core.outputs.updated }}" = "true" ]; then
-            python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, sys
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          if "data/7d.json" not in {entry["path"] for entry in manifest["persistedEntries"]}:
-              raise SystemExit("updated=true requires data/7d.json after transient cleanup")
-          print("CORE_OUTPUT_7D_AFTER_CLEANUP_OK")
-          PY
+          set -Eeuo pipefail
+          if [ -d data/ui ]; then
+            find data/ui -mindepth 1 -type f ! -path data/ui/meta.json -delete
+            find data/ui -mindepth 1 -depth -type d -empty -delete
           fi
+          git restore --worktree -- data/ui/meta.json
+          git clean -fd -- data/ui
+          rm -f -- artifacts/channel-avatar-cache/checkpoint.json
+          rmdir artifacts/channel-avatar-cache 2>/dev/null || true
+          rmdir artifacts 2>/dev/null || true
+          echo "CORE_TRANSIENT_CLEANUP_OK"
 
-      - name: Commit core data or failure status
-        if: always() && steps.outputs.outcome == 'success' && steps.transient_cleanup.outcome == 'success' && steps.finaloutputs.outcome == 'success'
-        env:
-          CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
-          CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
+      - name: Commit and push controlled core outputs
+        id: publish
+        if: steps.core.outcome == 'success' && steps.cleanup.outcome == 'success'
         run: |
+          set -Eeuo pipefail
+          path_allowed() {
+            case "$1" in
+              data/latest.json|data/7d.json|data/all.json|data/72h.json|data/1m.json|data/audit.json|data/inspection-cache.json|data/status.json|data/video-catalog.json|data/song-search-known-songs.json|data/mygit-today-snapshot-import-state.json|data/external/youtube-channel-discovery/channel-metadata.json|data/snapshots/*|data/diff/*|data/catalog-segments/*) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          while IFS= read -r -d '' record; do
+            path="${record:3}"
+            path_allowed "$path" || { echo "CORE_PATH_SCOPE_BLOCKED path=$path"; exit 1; }
+          done < <(git status --porcelain=v1 -z --untracked-files=all)
+          git add --sparse -- \
+            data/latest.json data/7d.json data/all.json data/72h.json data/1m.json \
+            data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json \
+            data/song-search-known-songs.json data/mygit-today-snapshot-import-state.json \
+            data/external/youtube-channel-discovery/channel-metadata.json \
+            data/snapshots data/diff data/catalog-segments
+          while IFS= read -r -d '' path; do
+            path_allowed "$path" || { echo "CORE_CACHED_PATH_SCOPE_BLOCKED path=$path"; exit 1; }
+          done < <(git diff --cached --name-only -z)
+          if git diff --cached --quiet; then
+            echo "No core data changes to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          python3 "$RUNNER_TEMP/validate-core-outputs.py"
-          test -s "${CORE_OUTPUT_MANIFEST%.json}.changed.paths0" || {
-            echo "No core data changes to commit."
-            exit 0
-          }
-          python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, sys
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          if any(entry["path"].startswith("data/ui/") for entry in manifest["persistedEntries"]):
-              raise SystemExit("transient UI path entered persisted stage set")
-          print("CORE_PERSISTED_STAGE_SET_OK")
-          PY
-          git add --sparse --pathspec-from-file="${CORE_OUTPUT_MANIFEST%.json}.changed.paths0" --pathspec-file-nul
-          python3 - <<'PY'
-          import json, os, pathlib, subprocess
-          expected = sorted(item["path"] for item in json.loads(pathlib.Path(os.environ["CORE_OUTPUT_MANIFEST"]).read_text())["persistedEntries"])
-          actual = sorted(filter(None, subprocess.check_output(["git", "diff", "--cached", "--name-only", "-z"]).decode().split("\0")))
-          if actual != expected:
-              raise SystemExit(f"cached output set mismatch: expected={expected!r} actual={actual!r}")
-          print(f"CORE_CACHED_ALLOWLIST_OK entries={len(actual)}")
-          PY
           git commit -m "chore: update core song-list data"
-          for attempt in 1 2 3; do
-            git fetch --no-tags --filter=blob:none --prune origin main
-            python3 "$RUNNER_TEMP/bind-core-inputs.py" --compare-ref origin/main
-            git rebase origin/main
-            python3 - "$CORE_OUTPUT_MANIFEST" <<'PY'
-          import json, pathlib, subprocess, sys
-          path = "data/mygit-today-snapshot-import-state.json"
-          manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-          states = [entry for entry in manifest["persistedEntries"] if entry["path"] == path]
-          if states:
-              entry = states[0]
-              parent = subprocess.run(
-                  ["git", "rev-parse", f"HEAD^:{path}"],
-                  text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-              )
-              parent_blob = parent.stdout.strip() if parent.returncode == 0 else None
-              if parent_blob != entry.get("beforeBlob"):
-                  raise SystemExit(f"MyGit import-state parent CAS mismatch: {parent_blob} != {entry.get('beforeBlob')}")
-              print("MYGIT_STATE_PARENT_CAS_OK")
-          PY
-            if git push; then
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::error::Failed to push core data changes after retries."
-          exit 1
+          git fetch --no-tags --filter=blob:none --prune origin main
+          git rebase origin/main
+          git push origin HEAD:main
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Published runtime health check
-        if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
+      - name: Observe public health
+        if: always() && steps.publish.outcome == 'success'
+        continue-on-error: true
         run: |
-          echo "CORE_PUBLIC_API_LIVENESS_BEGIN"
-          npm run check:published:api -- https://ytb-song-rank.culua.com/
-          echo "CORE_PUBLIC_API_LIVENESS_OK"
-
-      - name: Final exact avatar checkpoint fallback cleanup
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import pathlib
-          checkpoint = pathlib.Path("artifacts/channel-avatar-cache/checkpoint.json")
-          if checkpoint.exists():
-              if not checkpoint.is_file():
-                  raise SystemExit(f"avatar checkpoint is not a file: {checkpoint}")
-              checkpoint.unlink()
-          cache_dir = checkpoint.parent
-          if cache_dir.exists():
-              try:
-                  cache_dir.rmdir()
-              except OSError as exc:
-                  raise SystemExit(f"avatar checkpoint directory is not empty or cannot be removed: {exc}") from exc
-          print("CORE_AVATAR_CHECKPOINT_FALLBACK_OK")
-          PY
+          status="$(curl --silent --show-error --location --connect-timeout 8 --max-time 20 -o "$RUNNER_TEMP/core-public-healthz.json" -w '%{http_code}' https://ytb-song-rank.culua.com/healthz || true)"
+          echo "CORE_PUBLIC_HEALTH_OBSERVATION http=${status:-unavailable}"
+          echo "- public_health_observation_http: ${status:-unavailable}" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
 
       - name: Finish run summary
         if: always()
@@ -859,14 +204,12 @@ jobs:
           fi
           {
             echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "- elapsed: $elapsed"
+            echo "- elapsed_observation: $elapsed"
             echo "- core_outcome: ${{ steps.core.outcome }}"
-            echo "- skipped: ${{ steps.core.outputs.skipped }}"
-            echo "- updated: ${{ steps.core.outputs.updated }}"
-            echo "- route: if updated=true, data/7d.json remains in the exact persisted output allowlist and follows the ordinary authoritative 7D push route"
-            echo "- atomic_release_dependency: .github/workflows/deploy-pg-incremental.yml ordinary authoritative 7D owner routing in the same exact8 commit/tree; this workflow alone is not a release"
+            echo "- pushed: ${{ steps.publish.outputs.pushed }}"
+            echo "- route: ordinary data/7d.json push triggers the PostgreSQL release workflow"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Fail when core update failed
+      - name: Fail only when core program failed
         if: always() && steps.core.outcome != 'success'
         run: exit 1

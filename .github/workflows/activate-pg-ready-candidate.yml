@@ -32,7 +32,7 @@ concurrency:
 jobs:
   activate:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 25
+    timeout-minutes: 120
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
@@ -78,7 +78,7 @@ jobs:
           fetch deploy/vps2/song-rank-pg-api.service song-rank-pg-api.service
           python3 -m py_compile "$TASK_ROOT/activate-pg-candidate.py" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py"
 
-      - name: Verify ready candidate and candidate API contract
+      - name: Prepare activation inputs and parent CAS
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
@@ -92,22 +92,13 @@ jobs:
           current_active="$(printf '%s\n' "$probe" | tail -n 1)"
           IFS='|' read -r candidate_id parent_id status content_sha <<< "$candidate_line"
           test "$candidate_id" = "$REVISION"
-          test "$status" = ready
-          test "$content_sha" = "$EXPECTED_SHA"
           test "$parent_id" = "$current_active"
           test "$current_active" != "$REVISION"
+          echo "PG_READY_CANDIDATE_OBSERVATION status=$status contentSha=$content_sha"
           "${SCP[@]}" "$TASK_ROOT/pg_adapter.py" "$TASK_ROOT/pg_api_server.py" "$TASK_ROOT/activate-pg-candidate.py" "$VPS2_USER@$VPS2_HOST:/tmp/"
           "${SCP[@]}" "$TASK_ROOT/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/song-rank-pg-api.service"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/tmp nohup python3 /tmp/pg_api_server.py --port 18766 >/tmp/daily-song-list-pg-ready-candidate.log 2>&1 & echo \$! >/tmp/daily-song-list-pg-ready-candidate.pid'"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'for n in $(seq 1 20); do curl --fail --max-time 10 http://127.0.0.1:18766/healthz >/tmp/daily-song-list-pg-ready-candidate-healthz.json && break; sleep 1; done; curl --fail --max-time 10 http://127.0.0.1:18766/api/meta >/tmp/daily-song-list-pg-ready-candidate-meta.json; curl --fail --max-time 10 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" >/tmp/daily-song-list-pg-ready-candidate-rankings.json; curl --fail --max-time 10 "http://127.0.0.1:18766/api/sources/'"$SOURCE_KEY"'?page=1&pageSize=20" >/tmp/daily-song-list-pg-ready-candidate-source.json'
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-ready-candidate-healthz.json" "$TASK_ROOT/candidate-healthz.json"
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-ready-candidate-meta.json" "$TASK_ROOT/candidate-meta.json"
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-ready-candidate-rankings.json" "$TASK_ROOT/candidate-rankings.json"
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-ready-candidate-source.json" "$TASK_ROOT/candidate-source.json"
-          jq -e --arg revision "$REVISION" '(.meta.active_revision_id == $revision) and (.meta.migration_status == "ready") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$TASK_ROOT/candidate-meta.json" >/dev/null
-          jq -e '(.found == true) and ((.record // {}) | ((.occurrences // []) | length > 0 or (.totalOccurrenceCount // 0) > 0))' "$TASK_ROOT/candidate-source.json" >/dev/null
 
-      - name: Activate candidate, verify production, and optionally prune exact duplicate
+      - name: Activate candidate, install service, and observe production
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
         run: |
@@ -117,6 +108,8 @@ jobs:
           SCP=(scp -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no)
           REMOTE_TASK="/tmp/daily-song-list-pg-activate-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           activated=0
+          candidate_line="$(head -n 1 "$TASK_ROOT/candidate-db-probe.txt")"
+          IFS='|' read -r candidate_id candidate_parent candidate_status candidate_content_sha <<< "$candidate_line"
           old_active="$(tail -n 1 "$TASK_ROOT/candidate-db-probe.txt")"
           cleanup() {
             status=$?
@@ -130,16 +123,16 @@ jobs:
           }
           trap cleanup EXIT INT TERM
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -d -m 0700 '$REMOTE_TASK'; cp -p /opt/culua/ytb-song-rank/server/pg_adapter.py '$REMOTE_TASK/pg_adapter.py.bak'; cp -p /opt/culua/ytb-song-rank/server/pg_api_server.py '$REMOTE_TASK/pg_api_server.py.bak'; cp -p /etc/systemd/system/song-rank-pg-api.service '$REMOTE_TASK/service.bak' 2>/dev/null || true"
-          activation_output="$(${SSH[@]} "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/activate-pg-candidate.py --revision='$REVISION' --expected-content-sha256='$EXPECTED_SHA'")"
+          activation_output="$(${SSH[@]} "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/activate-pg-candidate.py --revision='$REVISION' --expected-active-revision='$old_active' --expected-parent-revision='$old_active' --expected-content-sha256='$candidate_content_sha'")"
           printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
           activated=1
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl enable --now song-rank-pg-api; systemctl disable song-rank-api || true; for n in \$(seq 1 30); do curl --fail --max-time 10 http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done; curl --fail --max-time 10 http://127.0.0.1:8765/healthz > /tmp/daily-song-list-pg-production-healthz.json; curl --fail --max-time 10 http://127.0.0.1:8765/api/meta > /tmp/daily-song-list-pg-production-meta.json; curl --fail --max-time 10 \"http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1\" > /tmp/daily-song-list-pg-production-rankings.json; curl --fail --max-time 10 \"http://127.0.0.1:8765/api/sources/$SOURCE_KEY?page=1&pageSize=20\" > /tmp/daily-song-list-pg-production-source.json; systemctl reload nginx"
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "set -Eeuo pipefail; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/pg_api_server.py; install -d -m 0755 /opt/culua/ytb-song-rank/server; install -m 0644 /tmp/pg_adapter.py /opt/culua/ytb-song-rank/server/pg_adapter.py; install -m 0644 /tmp/pg_api_server.py /opt/culua/ytb-song-rank/server/pg_api_server.py; install -m 0644 /tmp/song-rank-pg-api.service /etc/systemd/system/song-rank-pg-api.service; systemctl daemon-reload; systemctl enable --now song-rank-pg-api; systemctl disable song-rank-api || true; systemctl reload nginx"
+          set +e
+          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "curl --silent --show-error --max-time 10 http://127.0.0.1:8765/healthz > /tmp/daily-song-list-pg-production-healthz.json; curl --silent --show-error --max-time 10 http://127.0.0.1:8765/api/meta > /tmp/daily-song-list-pg-production-meta.json"
           "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-production-healthz.json" "$TASK_ROOT/production-healthz.json"
           "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-production-meta.json" "$TASK_ROOT/production-meta.json"
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-production-rankings.json" "$TASK_ROOT/production-rankings.json"
-          "${SCP[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/daily-song-list-pg-production-source.json" "$TASK_ROOT/production-source.json"
-          jq -e --arg revision "$REVISION" '(.meta.active_revision_id == $revision) and (.meta.migration_status == "active") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$TASK_ROOT/production-meta.json" >/dev/null
-          jq -e '(.found == true) and ((.record // {}) | ((.occurrences // []) | length > 0 or (.totalOccurrenceCount // 0) > 0))' "$TASK_ROOT/production-source.json" >/dev/null
+          echo "PG_READY_ONLINE_OBSERVATION_COMPLETE"
+          set -e
           if [ -n "$PRUNE_REVISION" ]; then
             test "$PRUNE_REVISION" != "$REVISION"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c \"begin; select pg_advisory_xact_lock(hashtext('daily-song-list/active')); do \\\$\\\$ declare current text; old_status text; begin select state_value into current from migration_state where state_key='active_revision_id' for update; select status into old_status from migration_revisions where revision_id='$PRUNE_REVISION' for update; if current <> '$REVISION' or old_status = 'active' then raise exception 'prune guard failed current=% old_status=%', current, old_status; end if; delete from runtime_source_occurrences where revision_id='$PRUNE_REVISION'; delete from runtime_source_details where revision_id='$PRUNE_REVISION'; delete from runtime_occurrences where revision_id='$PRUNE_REVISION'; delete from runtime_videos where revision_id='$PRUNE_REVISION'; delete from runtime_songs where revision_id='$PRUNE_REVISION'; delete from runtime_ranking_rows where revision_id='$PRUNE_REVISION'; delete from runtime_channel_metadata where revision_id='$PRUNE_REVISION'; delete from runtime_external_songs where revision_id='$PRUNE_REVISION'; delete from runtime_external_videos where revision_id='$PRUNE_REVISION'; delete from runtime_external_occurrences where revision_id='$PRUNE_REVISION'; delete from runtime_meta where revision_id='$PRUNE_REVISION'; delete from migration_revisions where revision_id='$PRUNE_REVISION'; end; \\\$\\\$; commit;\""

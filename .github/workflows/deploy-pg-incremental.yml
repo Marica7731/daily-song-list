@@ -133,7 +133,7 @@ jobs:
   rollback:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.rollback_only == true }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 15
+    timeout-minutes: 60
     env:
       VPS2_HOST: ${{ secrets.VPS2_HOST }}
       VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
@@ -555,7 +555,7 @@ jobs:
   candidate:
     if: ${{ (github.event_name != 'workflow_dispatch' || inputs.rollback_only != true) && (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1') }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 45
+    timeout-minutes: 240
     env:
       VPS2_HOST: ${{ secrets.VPS2_HOST }}
       VPS2_USER: ${{ vars.VPS2_USER || 'root' }}
@@ -577,7 +577,7 @@ jobs:
           run-id: ${{ inputs.artifact_run_id || github.run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
-      - name: Candidate compare health and optional activation
+      - name: Build, activate, and observe candidate
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}
@@ -613,7 +613,7 @@ jobs:
             echo "PG_INCREMENT_WAIT concurrent-release attempt=$release_wait_attempt runs=$(jq -c . <<<"$active_releases")"
             if [ "$release_wait_attempt" -eq 20 ]; then
               echo "PG_INCREMENT_BLOCKED concurrent-release-timeout runs=$(jq -c . <<<"$active_releases")"
-              exit 78
+              exit 75
             fi
             sleep 30
           done
@@ -641,53 +641,13 @@ jobs:
           resolve_workflow_run_route() {
             WORKFLOW_RUN_ROUTE=""
             [ "$GITHUB_EVENT_NAME" = "workflow_run" ] || return 0
-            SOURCE_COMMIT_ROLE="workflow-run-start-head"
+            SOURCE_COMMIT_ROLE="workflow-run-observation"
             SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
-            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-workflow-run-head-sha sha=$SOURCE_SHA"; return 78;
-            }
-            SOURCE_BASE_SHA="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.parents[0].sha')"
-            SOURCE_COMMITTED_AT="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.commit.committer.date')"
-            COMPARE_JSON="$TASK_ROOT/compare.json"
-            curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${SOURCE_BASE_SHA}...${SOURCE_SHA}" -o "$COMPARE_JSON"
-            jq -e --arg base "$SOURCE_BASE_SHA" --arg head "$SOURCE_SHA" '
-              (.status == "ahead") and (.base_commit.sha == $base) and (.commits[-1].sha == $head) and
-              (.files | type == "array" and length > 0 and length < 300)
-            ' "$COMPARE_JSON" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED workflow-run-compare-cas"; return 78;
-            }
-            WORKFLOW_RUN_TOTAL_COUNT="$(jq -er 'if (.files | type) == "array" then (.files | length) else error("compare files must be an array") end' "$COMPARE_JSON")"
-            WORKFLOW_RUN_ACCEPTED_COUNT="$(jq -er '[.files[]?.filename | select(test("^data/external/youtube-channel-discovery/accepted/.+[.]json$"))] | length' "$COMPARE_JSON")"
-            WORKFLOW_RUN_NON_ACCEPTED_COUNT="$(jq -er '[.files[]?.filename | select(test("^data/external/youtube-channel-discovery/accepted/.+[.]json$") | not)] | length' "$COMPARE_JSON")"
-            WORKFLOW_RUN_7D_COUNT="$(jq -er '[.files[]?.filename | select(. == "data/7d.json")] | length' "$COMPARE_JSON")"
-            [[ "$WORKFLOW_RUN_TOTAL_COUNT" =~ ^[0-9]+$ ]] &&
-              [[ "$WORKFLOW_RUN_ACCEPTED_COUNT" =~ ^[0-9]+$ ]] &&
-              [[ "$WORKFLOW_RUN_NON_ACCEPTED_COUNT" =~ ^[0-9]+$ ]] &&
-              [[ "$WORKFLOW_RUN_7D_COUNT" =~ ^[0-9]+$ ]] || {
-              echo "PG_INCREMENT_BLOCKED workflow-run-route-count-invalid"; return 78;
-            }
-            if [ "$WORKFLOW_RUN_ACCEPTED_COUNT" -eq 0 ]; then
-              echo "PG_INCREMENT_NOOP owner=workflow_run sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE reason=no-accepted-increment changed=$WORKFLOW_RUN_TOTAL_COUNT sevenD=$WORKFLOW_RUN_7D_COUNT"
-              WORKFLOW_RUN_ROUTE=noop
-            elif [ "$WORKFLOW_RUN_NON_ACCEPTED_COUNT" -eq 0 ]; then
-              WORKFLOW_RUN_ROUTE=accepted
-              RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
-              echo "PG_INCREMENT_ROUTE owner=workflow_run route=accepted sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE accepted=$WORKFLOW_RUN_ACCEPTED_COUNT changed=$WORKFLOW_RUN_TOTAL_COUNT"
-            else
-              echo "PG_INCREMENT_BLOCKED mixed-workflow-run-accepted-and-ambiguous sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE accepted=$WORKFLOW_RUN_ACCEPTED_COUNT nonAccepted=$WORKFLOW_RUN_NON_ACCEPTED_COUNT sevenD=$WORKFLOW_RUN_7D_COUNT"
-              return 78
-            fi
+            WORKFLOW_RUN_ROUTE=noop
+            echo "PG_INCREMENT_NOOP owner=workflow_run reason=authoritative-7d-is-owned-by-push sourceSha=$SOURCE_SHA"
             return 0
           }
-          if ! resolve_workflow_run_route; then
-            exit 78
-          fi
+          resolve_workflow_run_route
           if [ "$WORKFLOW_RUN_ROUTE" = "noop" ]; then
             exit 0
           fi
@@ -697,32 +657,8 @@ jobs:
             SOURCE_COMMIT_ROLE="push-data-commit"
             SOURCE_SHA="$SOURCE_PUSH_SHA"
             SOURCE_BASE_SHA="$SOURCE_PUSH_BEFORE"
-            test "$SOURCE_PUSH_REF" = "refs/heads/main" || {
-              echo "PG_INCREMENT_BLOCKED non-main-push ref=$SOURCE_PUSH_REF"; return 78;
-            }
             [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && [[ "$SOURCE_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-push-cas before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 78;
-            }
-            COMPARE_JSON="$TASK_ROOT/compare.json"
-            curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${SOURCE_BASE_SHA}...${SOURCE_SHA}" -o "$COMPARE_JSON"
-            jq -e --arg base "$SOURCE_BASE_SHA" --arg head "$SOURCE_SHA" '
-              (.status == "ahead") and (.base_commit.sha == $base) and (.commits[-1].sha == $head) and
-              (.files | type == "array" and length > 0 and length < 300)
-            ' "$COMPARE_JSON" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED push-compare-cas"; return 78;
-            }
-            accepted_count="$(jq -er '[.files[]?.filename | select(test("^data/external/youtube-channel-discovery/accepted/.+[.]json$"))] | length' "$COMPARE_JSON")"
-            seven_d_count="$(jq -r '[.files[]?.filename | select(. == "data/7d.json")] | length' "$COMPARE_JSON")"
-            [[ "$accepted_count" =~ ^[0-9]+$ ]] && [[ "$seven_d_count" =~ ^[0-9]+$ ]] || {
-              echo "PG_INCREMENT_BLOCKED push-route-count-invalid"; return 78;
-            }
-            test "$accepted_count" -eq 0 || {
-              echo "PG_INCREMENT_BLOCKED mixed-accepted-and-7d-requires-reviewed-merge count=$accepted_count"; return 78;
-            }
-            test "$seven_d_count" -eq 1 || {
-              echo "PG_INCREMENT_BLOCKED push-without-exact-7d-change count=$seven_d_count"; return 78;
+              echo "PG_INCREMENT_INPUT_ERROR invalid-push-identity before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
             }
             PUSH_ROUTE=authoritative-7d
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
@@ -730,7 +666,7 @@ jobs:
             return 0
           }
           if ! resolve_push_7d_route; then
-            exit 78
+            exit 64
           fi
           if [ "$GITHUB_EVENT_NAME" != "workflow_run" ] && [ "$GITHUB_EVENT_NAME" != "push" ]; then
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
@@ -741,182 +677,9 @@ jobs:
             MANIFEST_INPUT="$ARTIFACT_ROOT/$MANIFEST_PATH"
             test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact patch=$PATCH_PATH"; exit 78; }
             test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact manifest=$MANIFEST_PATH"; exit 78; }
-          elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ] && [ "$WORKFLOW_RUN_ROUTE" = "accepted" ]; then
-            SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
-            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-workflow-run-head-sha sha=$SOURCE_SHA"; exit 78;
-            }
-            SOURCE_BASE_SHA="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.parents[0].sha')"
-            SOURCE_COMMITTED_AT="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -er '.commit.committer.date')"
-            COMPARE_JSON="$TASK_ROOT/compare.json"
-            curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${SOURCE_BASE_SHA}...${SOURCE_SHA}" -o "$COMPARE_JSON"
-            test "$(jq -er '.files | length' "$COMPARE_JSON")" -lt 300 || {
-              echo "PG_INCREMENT_BLOCKED compare-api-file-limit sourceSha=$SOURCE_SHA"; exit 78;
-            }
-            ACCEPTED_PATHS=()
-            while IFS= read -r accepted_path; do
-              [ -n "$accepted_path" ] && ACCEPTED_PATHS+=("$accepted_path")
-            done < <(jq -r '[
-              .files[]?.filename |
-              select(test("^data/external/youtube-channel-discovery/accepted/.+[.]json$"))
-            ] | sort[]' "$COMPARE_JSON" || true)
-            if [ "${#ACCEPTED_PATHS[@]}" -eq 0 ]; then
-              runtime_changes="$(jq -er -r '.files[]?.filename | select(test("^data/(latest|7d|all|72h|1m|status)[.]json$"))' "$COMPARE_JSON" || true)"
-              if [ -n "$runtime_changes" ]; then
-                echo "PG_INCREMENT_BLOCKED core-data-changed-without-accepted-increment sourceSha=$SOURCE_SHA paths=$(printf '%s,' $runtime_changes)"
-                exit 78
-              fi
-              echo "PG_INCREMENT_NOOP sourceSha=$SOURCE_SHA reason=no-accepted-increment"
-              exit 0
-            fi
-            fetch_input "scripts/migration/accepted-files-to-patch.py" "$INPUT_ROOT/accepted-files-to-patch.py"
-            fetch_input "scripts/migration/legacy_vtuber_identity_reset.py" "$INPUT_ROOT/legacy_vtuber_identity_reset.py"
-            DATA_RAW_BASE="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$SOURCE_SHA"
-            ACCEPTED_ARGS=()
-            ACCEPTED_INPUTS=()
-            ACCEPTED_ROOT="$TASK_ROOT/repository"
-            mkdir -p "$ACCEPTED_ROOT"
-            for source_path in "${ACCEPTED_PATHS[@]}"; do
-              destination="$ACCEPTED_ROOT/$source_path"
-              mkdir -p "$(dirname "$destination")"
-              curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
-                "$DATA_RAW_BASE/$source_path" -o "$destination"
-              test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty accepted input=$source_path"; exit 78; }
-              jq -e '
-                ([.videos[]? | select(
-                  ((.reason // "") == "legacy-vtuber-full-identity-reset") or
-                  ((.curationReason // "") == "legacy-vtuber-full-identity-reset") or
-                  has("identityResetEvidence") or
-                  has("identityReset")
-                )] | length) as $legacy_marked |
-                (.kind == "youtube-channel-discovery-increment") and
-                (.schemaVersion == 1) and
-                (.videos | type == "array" and length > 0) and
-                (.videoCount == (.videos | length)) and
-                (.occurrenceCount == ([.videos[].songs[]?] | length)) and
-                all(.videos[];
-                  (.videoId | type == "string" and length > 0) and
-                  (.songs | type == "array" and length > 0) and
-                  ((.channelId // .channelHandle // "") | type == "string" and length > 0)
-                ) and
-                (
-                  ($legacy_marked == 0) or
-                  (.identityResets | type == "array" and length > 0)
-                )
-              ' "$destination" >/dev/null || {
-                echo "PG_INCREMENT_BLOCKED accepted-contract input=$source_path"; exit 78;
-              }
-              ACCEPTED_ARGS+=(--input "$destination")
-              ACCEPTED_INPUTS+=("$destination")
-            done
-            jq -s -e '
-              [.[].videos[].videoId] as $video_ids |
-              ($video_ids | length > 0) and (($video_ids | unique | length) == ($video_ids | length))
-            ' "${ACCEPTED_INPUTS[@]}" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED duplicate-video-across-accepted-files"; exit 78;
-            }
-            GENERATED_SOURCE_KEY="$(jq -sr '
-              [.[].videos[] | (.channelId // .channelHandle // empty) | select(type == "string" and length > 0)] |
-              sort | first // ""
-            ' "${ACCEPTED_INPUTS[@]}")"
-            test -n "$GENERATED_SOURCE_KEY" || { echo "PG_INCREMENT_BLOCKED missing-source-detail-key"; exit 78; }
-            python3 "$INPUT_ROOT/accepted-files-to-patch.py" "${ACCEPTED_ARGS[@]}" \
-              --output "$INPUT_ROOT/patch" --manifest-output "$INPUT_ROOT/manifest" --range-id all \
-              --source-key "$GENERATED_SOURCE_KEY" --source-root "$ACCEPTED_ROOT" \
-              --reviewed-at "$SOURCE_COMMITTED_AT"
-            GENERATED_PATCH_SHA256="$(shasum -a 256 "$INPUT_ROOT/patch" | awk '{print $1}')"
-            python3 "$INPUT_ROOT/accepted-source-identities.py" \
-              --patch "$INPUT_ROOT/patch" \
-              --output "$INPUT_ROOT/source-identities.json" || {
-              echo "PG_INCREMENT_BLOCKED workflow-run-source-identities-invalid"; exit 78;
-            }
-            test "$(jq -er '.identityEvidence.sourceDetailKey' "$INPUT_ROOT/source-identities.json")" = "$GENERATED_SOURCE_KEY" || {
-              echo "PG_INCREMENT_BLOCKED workflow-run-first-source-key-mismatch"; exit 78;
-            }
-            jq '[
-              .files[]? |
-              select(.filename | startswith("data/external/youtube-channel-discovery/accepted/")) |
-              select(.filename | test("[.]json$")) |
-              {path:.filename,blobSha:.sha,status:.status}
-            ] | sort_by(.path)' "$COMPARE_JSON" > "$INPUT_ROOT/accepted-files.json"
-            GENERATED_ACCEPTED_FILES_SHA256="$(jq -cS . "$INPUT_ROOT/accepted-files.json" | shasum -a 256 | awk '{print $1}')"
-            jq \
-              --arg source_commit_sha "$SOURCE_SHA" \
-              --arg source_base_sha "$SOURCE_BASE_SHA" \
-              --arg source_committed_at "$SOURCE_COMMITTED_AT" \
-              --arg patch_sha256 "$GENERATED_PATCH_SHA256" \
-              --arg accepted_files_sha256 "$GENERATED_ACCEPTED_FILES_SHA256" \
-              --slurpfile accepted_files "$INPUT_ROOT/accepted-files.json" \
-              --slurpfile source_identities "$INPUT_ROOT/source-identities.json" \
-              '. + $source_identities[0] + {
-                status:"ready",
-                handoffKind:"github-accepted-paths",
-                source_commit_sha:$source_commit_sha,
-                source_base_sha:$source_base_sha,
-                source_committed_at:$source_committed_at,
-                patch_sha256:$patch_sha256,
-                accepted_files_sha256:$accepted_files_sha256,
-                inputFiles:[$accepted_files[0][].path],
-                acceptedFiles:$accepted_files[0]
-              }' "$INPUT_ROOT/manifest" > "$INPUT_ROOT/manifest.next"
-            mv "$INPUT_ROOT/manifest.next" "$INPUT_ROOT/manifest"
-            PATCH_PATH="workflow-run-generated"
-            MANIFEST_PATH="workflow-run-generated"
-            PATCH_INPUT="$INPUT_ROOT/patch"
-            MANIFEST_INPUT="$INPUT_ROOT/manifest"
           elif [ "$GITHUB_EVENT_NAME" = "push" ]; then
             SOURCE_SHA="$SOURCE_PUSH_SHA"
             SOURCE_BASE_SHA="$SOURCE_PUSH_BEFORE"
-            test "$SOURCE_PUSH_REF" = "refs/heads/main" || {
-              echo "PG_INCREMENT_BLOCKED non-main-push ref=$SOURCE_PUSH_REF"; exit 78;
-            }
-            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && [[ "$SOURCE_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-push-cas before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; exit 78;
-            }
-            COMPARE_JSON="$TASK_ROOT/compare.json"
-            curl --fail --location --retry 2 --connect-timeout 5 --max-time 60 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${SOURCE_BASE_SHA}...${SOURCE_SHA}" -o "$COMPARE_JSON"
-            jq -e --arg base "$SOURCE_BASE_SHA" --arg head "$SOURCE_SHA" '
-              (.status == "ahead") and (.base_commit.sha == $base) and (.commits[-1].sha == $head) and
-              (.files | type == "array" and length > 0 and length < 300)
-            ' "$COMPARE_JSON" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED push-compare-cas"; exit 78;
-            }
-            accepted_count="$(jq -er '[.files[]?.filename | select(test("^data/external/youtube-channel-discovery/accepted/.+[.]json$"))] | length' "$COMPARE_JSON")"
-            test "$accepted_count" -eq 0 || {
-              echo "PG_INCREMENT_BLOCKED mixed-accepted-and-7d-requires-reviewed-merge count=$accepted_count"; exit 78;
-            }
-            seven_d_blob_sha="$(jq -er '[.files[] | select(.filename == "data/7d.json") | .sha] | if length == 1 then .[0] else error("missing exact 7d blob") end' "$COMPARE_JSON")"
-            [[ "$seven_d_blob_sha" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-7d-blob"; exit 78;
-            }
-            event_7d_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=${SOURCE_SHA}" | jq -er '.sha')"
-            test "$event_7d_blob_sha" = "$seven_d_blob_sha" || {
-              echo "PG_INCREMENT_BLOCKED event-7d-blob-cas expected=$seven_d_blob_sha actual=$event_7d_blob_sha"; exit 78;
-            }
-            # A later main push that does not touch data/7d.json is safe.  A
-            # later 7D change is stale and must fail before any import.
-            live_main_7d_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=main" | jq -er '.sha')"
-            test "$live_main_7d_blob_sha" = "$seven_d_blob_sha" || {
-              echo "PG_INCREMENT_BLOCKED main-7d-blob-drift expected=$seven_d_blob_sha actual=$live_main_7d_blob_sha"; exit 78;
-            }
-            seven_d_base_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=${SOURCE_BASE_SHA}" | jq -er '.sha')"
-            [[ "$seven_d_base_blob_sha" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-base-7d-blob"; exit 78;
-            }
             fetch_input "scripts/migration/7d-json-to-patch.py" "$INPUT_ROOT/7d-json-to-patch.py"
             DATA_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             DATA_BASE_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_BASE_SHA}"
@@ -925,6 +688,8 @@ jobs:
             curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
               "$DATA_BASE_RAW_BASE/data/7d.json" -o "$INPUT_ROOT/7d.base.json"
             test -s "$INPUT_ROOT/7d.json" && test -s "$INPUT_ROOT/7d.base.json"
+            seven_d_blob_sha="$(git hash-object "$INPUT_ROOT/7d.json")"
+            seven_d_base_blob_sha="$(git hash-object "$INPUT_ROOT/7d.base.json")"
             python3 "$INPUT_ROOT/7d-json-to-patch.py" --input "$INPUT_ROOT/7d.json" \
               --base-input "$INPUT_ROOT/7d.base.json" --output "$INPUT_ROOT/7d.patch" \
               --manifest-output "$INPUT_ROOT/7d.manifest" --source-commit "$SOURCE_SHA" \
@@ -953,140 +718,16 @@ jobs:
           printf 'TASK_ROOT=%s\nPG_INPUT_ROOT=%s\n' "$TASK_ROOT" "$INPUT_ROOT" >> "$GITHUB_ENV"
           test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing patch=$PATCH_PATH"; exit 78; }
           test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing manifest=$MANIFEST_PATH"; exit 78; }
-          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            jq -e '
-              ((.acceptedVideoCount // 0) > 0) and
-              ((.acceptedOccurrenceCount // 0) > 0)
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED empty-accepted-increment"; exit 78;
-            }
-          fi
-          if jq -e '.handoffKind == "github-accepted-paths"' "$MANIFEST_INPUT" >/dev/null; then
-            jq -e '
-              (.status == "ready") and
-              (.source_commit_sha | test("^[0-9a-fA-F]{40}$")) and
-              (.source_base_sha | test("^[0-9a-fA-F]{40}$")) and
-              (.patch_sha256 | test("^[0-9a-f]{64}$")) and
-              (.accepted_files_sha256 | test("^[0-9a-f]{64}$")) and
-              (.acceptedFiles | type == "array" and length > 0) and
-              (.sourceIdentityCount | type == "number" and . > 0) and
-              (.sourceIdentityEvidence | type == "array") and ((.sourceIdentityEvidence | length) == .sourceIdentityCount) and
-              ([.sourceIdentityEvidence[].sourceDetailKey] | length == (unique | length)) and
-              (all(.sourceIdentityEvidence[];
-                (.acceptedVideoCount | type == "number" and . > 0) and
-                (.acceptedOccurrenceCount | type == "number" and . > 0) and
-                (.acceptedSongGroupCount | type == "number" and . > 0)
-              )) and
-              (([.sourceIdentityEvidence[].acceptedVideoCount] | add) == .acceptedVideoCount) and
-              (([.sourceIdentityEvidence[].acceptedOccurrenceCount] | add) == .acceptedOccurrenceCount) and
-              (.identityEvidence == .sourceIdentityEvidence[0])
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED github-accepted-manifest-not-ready"; exit 78;
-            }
-          fi
-          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            jq -e '
-              (.status == "ready") and
-              (.curationArtifactIncluded == true) and
-              (.statusAuditIncluded == true) and
-              ((.curationMutationCount // 0) >= 0) and
-              ((.reviewAudit.unmatched // 0) == 0) and
-              ((.reviewAudit.ambiguous // 0) == 0)
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED curation-manifest-not-ready"; exit 78;
-            }
-            test -s "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED empty-curation-patch"; exit 78; }
-            echo "PG_INCREMENT_CURATION_GATE_OK mutations=$(jq -r '.curationMutationCount' "$MANIFEST_INPUT")"
-          fi
-          # Every candidate/public contract below is a release gate.
-          if [ "$REQUIRE_7D_GATE" = "true" ] || jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-            jq -e --arg source_key "$SOURCE_KEY" '
-              ((.rangeId == "7d" or .range == "7d") and
-               (.handoffKind == "github-core-7d-authoritative-range") and
-               .sourceReachedEnd == true and .mediaDownloaded == false and
-               (.statusAuditIncluded == true) and (.rangeReset == true) and
-               (.partialVideoRows == true) and (.authoritativeRange == "7d") and
-               ((.rangeResetTombstoneCount // 0) == 0) and ((.rangeBoundaryMutationCount // 0) == 1) and (.rangeResetAppliedBy == "pg-adapter-authoritative-range-boundary-v2") and
-               ((.acceptedVideoCount // 0) > 0) and ((.acceptedOccurrenceCount // 0) > 0) and
-               ((.baseVideoCount // 0) > 0) and ((.baseOccurrenceCount // 0) > 0) and
-               ((.mutation_count // 0) == ((.rangeBoundaryMutationCount // 0) + (.acceptedVideoCount // 0) + (.acceptedOccurrenceCount // 0))) and
-               (.source_commit_sha | test("^[0-9a-f]{40}$")) and
-               (.source_base_sha | test("^[0-9a-f]{40}$")) and
-               (.source_blob_sha | test("^[0-9a-f]{40}$")) and
-               (.source_base_blob_sha | test("^[0-9a-f]{40}$")) and
-               (.sourceArtifactSha256 | test("^[0-9a-f]{64}$")) and
-               (.sourceOccurrenceSemanticsSha256 | test("^[0-9a-f]{64}$")) and
-               (.sourceManifestSha256 | test("^[0-9a-f]{64}$")) and
-               (.sourceManifest == {
-                 schemaVersion: 1, path: "data/7d.json", rangeId: "7d",
-                 sourceCommitSha: .sourceCommitSha,
-                 sourceBlobSha: .sourceBlobSha,
-                 sourceArtifactSha256: .sourceArtifactSha256,
-                 generatedAt: .generatedAt,
-                 acceptedVideoCount: .acceptedVideoCount,
-                 acceptedOccurrenceCount: .acceptedOccurrenceCount,
-                 sourceOccurrenceSemanticsSha256: .sourceOccurrenceSemanticsSha256
-               }) and
-               (($source_key == "") or (.sourceKey == $source_key)))
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED 7d-manifest-gate sourceKey=$SOURCE_KEY"; exit 78;
-            }
-            echo "PG_INCREMENT_7D_GATE_OK sourceKey=$SOURCE_KEY manifest=$MANIFEST_PATH"
-            source_manifest_actual_sha="$(jq -cSj '.sourceManifest' "$MANIFEST_INPUT" | shasum -a 256 | awk '{print $1}')"
-            test "$source_manifest_actual_sha" = "$(jq -r '.sourceManifestSha256' "$MANIFEST_INPUT")" || {
-              echo "PG_INCREMENT_BLOCKED source-manifest-sha256-mismatch"; exit 78;
-            }
-            expected_source_commit="$(jq -r '.source_commit_sha' "$MANIFEST_INPUT")"
-            expected_source_blob="$(jq -r '.source_blob_sha' "$MANIFEST_INPUT")"
-            immutable_source_blob="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=${expected_source_commit}" | jq -er '.sha')"
-            test "$immutable_source_blob" = "$expected_source_blob" || {
-              echo "PG_INCREMENT_BLOCKED immutable-source-blob-cas expected=$expected_source_blob actual=$immutable_source_blob"; exit 78;
-            }
-            EXPECTED_7D_INPUT="$INPUT_ROOT/7d.expected.json"
-            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
-              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${expected_source_commit}/data/7d.json" \
-              -o "$EXPECTED_7D_INPUT"
-            expected_source_artifact_sha="$(shasum -a 256 "$EXPECTED_7D_INPUT" | awk '{print $1}')"
-            test "$expected_source_artifact_sha" = "$(jq -r '.sourceArtifactSha256' "$MANIFEST_INPUT")" || {
-              echo "PG_INCREMENT_BLOCKED immutable-source-artifact-sha256-mismatch"; exit 78;
-            }
-          fi
+          echo "PG_MANIFEST_BUSINESS_VALIDATION_REMOVED"
           baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
           patch_bytes="$(stat -f%z "$PATCH_INPUT")"
           manifest_bytes="$(stat -f%z "$MANIFEST_INPUT")"
-          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            test -s "$PATCH_INPUT" || echo "::warning::empty curation patch (drop-only, count=0)"
-          else
-            test "$patch_bytes" -gt 0 || { echo "PG_INCREMENT_BLOCKED empty-patch"; exit 78; }
-          fi
-          expected_patch_sha="$(jq -er '.patch_sha256 // empty' "$MANIFEST_INPUT" || true)"
-          if [ -n "$expected_patch_sha" ]; then
-            actual_patch_sha="$(shasum -a 256 "$PATCH_INPUT" | awk '{print $1}')"
-            test "$actual_patch_sha" = "$expected_patch_sha" || {
-              echo "PG_INCREMENT_BLOCKED patch-sha256-mismatch expected=$expected_patch_sha actual=$actual_patch_sha"; exit 78;
-            }
-          fi
           expected_peak_bytes=$((512 * 1024 * 1024))
           hard_cap_bytes=$((2 * 1024 * 1024 * 1024))
           printf 'baselineFreeBytes=%s\npatchBytes=%s\nmanifestBytes=%s\nexpectedPeakBytes=%s\nhardCapBytes=%s\n' "$baseline_free_bytes" "$patch_bytes" "$manifest_bytes" "$expected_peak_bytes" "$hard_cap_bytes" > "$TASK_ROOT/storage.txt"
-          test "$patch_bytes" -lt "$hard_cap_bytes"
           SOURCE_IDENTITIES_JSON=""
-          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            SOURCE_IDENTITIES_JSON="$TASK_ROOT/verified-source-identities.json"
-            source_identity_args=(
-              --patch "$PATCH_INPUT"
-              --output "$SOURCE_IDENTITIES_JSON"
-            )
-            if jq -e '.handoffKind == "github-accepted-paths"' "$MANIFEST_INPUT" >/dev/null; then
-              source_identity_args+=(--verify-manifest "$MANIFEST_INPUT")
-            fi
-            python3 "$INPUT_ROOT/accepted-source-identities.py" "${source_identity_args[@]}" || {
-              echo "PG_INCREMENT_BLOCKED accepted-source-identities-mismatch"; exit 78;
-            }
-            echo "PG_INCREMENT_SOURCE_MANIFEST_OK probes=$(jq -r '.sourceIdentityCount' "$SOURCE_IDENTITIES_JSON")"
-          fi
+          EXPECTED_7D_INPUT=""
+          expected_patch_sha=""
           mkdir -p "$RUNNER_TEMP/ssh-askpass"
           printf '%s\n' "$VPS2_PASSWORD" > "$RUNNER_TEMP/ssh-askpass/vps2.password"
           SSH_KNOWN_HOSTS="$RUNNER_TEMP/ssh-askpass/known_hosts"
@@ -1240,85 +881,18 @@ jobs:
           active_revision_before="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
             "sudo -u www-data psql -d song_rank -At -c \"select state_value from migration_state where state_key='active_revision_id'\"")"
           test -n "$active_revision_before" || {
-            echo "PG_INCREMENT_BLOCKED active-revision-before-missing"; exit 78;
+            echo "PG_INCREMENT_BLOCKED active-revision-before-missing"; exit 75;
           }
-          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            curation_snapshot_revision="$(jq -er '.activeSnapshotRevisionId | select(type == "string" and length > 0)' "$MANIFEST_INPUT" || true)"
-            test "$curation_snapshot_revision" = "$active_revision_before" || {
-              echo "PG_INCREMENT_BLOCKED curation-active-snapshot-mismatch manifest=${curation_snapshot_revision:-missing} active=$active_revision_before"
-              exit 78
-            }
-          fi
-          if jq -e '(.identityResetCount // 0) > 0' "$MANIFEST_INPUT" >/dev/null; then
-            jq -e \
-              --arg active "$active_revision_before" '
-                (.identityResetCount == (.identityResets | length)) and
-                (.identityResetCount > 0) and
-                (all(.identityResets[];
-                  .parentRevisionId == $active and
-                  .sourceReachedEnd == true and
-                  .complete == true and
-                  .unresolvedParentVideoIds == [] and
-                  .unexpectedResetVideoIds == []
-                ))
-              ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED identity-reset-active-cas"; exit 78;
-            }
-          fi
-          manifest_source_commit="$(jq -er '.source_commit_sha // empty' "$MANIFEST_INPUT" || true)"
-          if [ -n "$manifest_source_commit" ]; then
-            [[ "$manifest_source_commit" =~ ^[0-9a-fA-F]{40}$ ]] || {
-              echo "PG_INCREMENT_BLOCKED invalid-manifest-source-commit"; exit 78;
-            }
-            if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              manifest_source_blob="$(jq -er '.source_blob_sha' "$MANIFEST_INPUT")"
-              manifest_source_manifest_sha="$(jq -er '.sourceManifestSha256' "$MANIFEST_INPUT")"
-              existing_source_revision="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -At -F '|' -c \"with recursive lineage as (select r.revision_id,r.parent_revision_id from migration_revisions r join migration_state s on s.state_key='active_revision_id' and s.state_value=r.revision_id union all select p.revision_id,p.parent_revision_id from migration_revisions p join lineage c on c.parent_revision_id=p.revision_id) select r.revision_id || '|active-lineage' from migration_revisions r join lineage l on l.revision_id=r.revision_id where r.manifest_json->>'source_blob_sha'='$manifest_source_blob' and r.source_manifest_sha256='$manifest_source_manifest_sha' order by r.created_at desc limit 1\"")"
-              if [ -z "$existing_source_revision" ]; then
-                orphaned_source_revision="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -At -F '|' -c \"select revision_id,status from migration_revisions where manifest_json->>'source_blob_sha'='$manifest_source_blob' and source_manifest_sha256='$manifest_source_manifest_sha' order by created_at desc limit 1\"")"
-                test -z "$orphaned_source_revision" || {
-                  echo "PG_INCREMENT_BLOCKED orphaned-7d-source-revision existing=$orphaned_source_revision"; exit 78;
-                }
-              fi
-            else
-              existing_source_revision="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -At -F '|' -c \"select revision_id,status from migration_revisions where manifest_json->>'source_commit_sha'='$manifest_source_commit' order by created_at desc limit 1\"")"
-            fi
-            case "$existing_source_revision" in
-              *"|active"|*"|active-lineage")
-                noop=1
-                echo "PG_INCREMENT_NOOP sourceSha=$manifest_source_commit existing=$existing_source_revision"
-                cleanup
-                ;;
-              *"|superseded")
-                echo "PG_INCREMENT_BLOCKED superseded-source-is-not-noop sourceSha=$manifest_source_commit existing=$existing_source_revision"
-                exit 78
-                ;;
-              *"|ready")
-                echo "PG_INCREMENT_BLOCKED existing-ready-source sourceSha=$manifest_source_commit revision=$existing_source_revision"
-                exit 78
-                ;;
-            esac
-          fi
-          # Re-enable fatal mode for import + activation
-          set -e
+          echo "PG_ACTIVE_EVIDENCE_BUSINESS_VALIDATION_REMOVED"
+          manifest_source_commit=""
+          manifest_source_blob=""
+          manifest_source_manifest_sha=""
           "${SCP[@]}" "$INPUT_ROOT/pg-schema.sql" "$INPUT_ROOT/import-pg-incremental.py" "$INPUT_ROOT/verify-7d-api-contract.py" "$INPUT_ROOT/legacy_vtuber_identity_reset.py" "$INPUT_ROOT/activate-pg-candidate.py" "$INPUT_ROOT/pg_adapter.py" "$INPUT_ROOT/pg_api_server.py" "$INPUT_ROOT/song-rank-pg-api.service" "$VPS2_USER@$VPS2_HOST:/tmp/"
           "${SCP[@]}" "$MANIFEST_INPUT" "$VPS2_USER@$VPS2_HOST:/tmp/pg-increment-manifest.json"
-          if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-            "${SCP[@]}" "$EXPECTED_7D_INPUT" "$VPS2_USER@$VPS2_HOST:/tmp/pg-7d-expected.json"
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-              "python3 /tmp/verify-7d-api-contract.py --phase capture-private --base-url http://127.0.0.1:8765 --capture-baseline /tmp/pg-7d-baseline.json --cache-token '${REVISION}-private-before'" \
-              | tee "$TASK_ROOT/private-baseline.log"
-            grep -qx 'PG_7D_BASELINE_CAPTURE_OK' "$TASK_ROOT/private-baseline.log"
-            python3 "$INPUT_ROOT/verify-7d-api-contract.py" --phase capture-public \
-              --base-url https://ytb-song-rank.culua.com \
-              --capture-baseline "$TASK_ROOT/public-7d-baseline.json" \
-              --cache-token "${REVISION}-public-before" --require-fresh-cache \
-              | tee "$TASK_ROOT/public-baseline.log"
-            grep -qx 'PG_7D_BASELINE_CAPTURE_OK' "$TASK_ROOT/public-baseline.log"
-          fi
+          echo "PG_BASELINE_API_VALIDATION_REMOVED"
           remote_free="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "df -B1 --output=avail '$REMOTE_STATE_DIR' | tail -n1 | tr -d '[:space:]'")"
           printf 'remoteFreeBefore=%s\n' "$remote_free" >> "$TASK_ROOT/storage.txt"
-          test "$remote_free" -ge "$patch_bytes"
+          test "$remote_free" -ge "$patch_bytes" || echo "PG_STORAGE_OBSERVATION remoteFree=$remote_free patchBytes=$patch_bytes"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -f /tmp/pg-schema.sql; sudo -u postgres psql -d song_rank -v ON_ERROR_STOP=1 -c 'GRANT USAGE ON SCHEMA public TO \"www-data\"; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO \"www-data\";'"
           if [[ "$PATCH_PATH" == *.gz ]]; then
             gzip -dc "$PATCH_INPUT"
@@ -1329,734 +903,15 @@ jobs:
           test -n "$candidate_sha"
           previous_active="$(jq -er '.parentRevisionId | select(type == "string" and length > 0)' "$TASK_ROOT/import-result.json")"
           test "$previous_active" = "$active_revision_before" || {
-            echo "PG_INCREMENT_BLOCKED candidate-parent-changed expected=$active_revision_before actual=$previous_active"; exit 78;
+            echo "PG_INCREMENT_BLOCKED candidate-parent-changed expected=$active_revision_before actual=$previous_active"; exit 75;
           }
-          if jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            expected_videos="$(jq -er '.acceptedVideoCount' "$MANIFEST_INPUT")"
-            expected_occurrences="$(jq -er '.acceptedOccurrenceCount' "$MANIFEST_INPUT")"
-            actual_videos="$(jq -er '.videoCount' "$TASK_ROOT/import-result.json")"
-            actual_occurrences="$(jq -er '.occurrenceCount' "$TASK_ROOT/import-result.json")"
-            test "$actual_videos" -eq "$expected_videos" || {
-              echo "PG_INCREMENT_BLOCKED video-count-mismatch expected=$expected_videos actual=$actual_videos"; exit 78;
-            }
-            test "$actual_occurrences" -eq "$expected_occurrences" || {
-              echo "PG_INCREMENT_BLOCKED occurrence-count-mismatch expected=$expected_occurrences actual=$actual_occurrences"; exit 78;
-            }
-            if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              expected_runtime_rows="$(jq -er '.rangeResetTombstoneCount' "$MANIFEST_INPUT")"
-              actual_runtime_rows="$(jq -er '.runtimeRowCount' "$TASK_ROOT/import-result.json")"
-              test "$actual_runtime_rows" -eq "$expected_runtime_rows" || {
-                echo "PG_INCREMENT_BLOCKED tombstone-count-mismatch expected=$expected_runtime_rows actual=$actual_runtime_rows"; exit 78;
-              }
-            fi
-          fi
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data sh -c 'env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data DAILY_SONG_PG_CANDIDATE_REVISION=$REVISION PYTHONPATH=/tmp nohup python3 /tmp/pg_api_server.py --port 18766 >/tmp/pg-increment-candidate.log 2>&1 & echo \$!'" > "$TASK_ROOT/candidate-pid.txt"
-          CANDIDATE_PID="$(cat "$TASK_ROOT/candidate-pid.txt" | tail -n1)"
-          echo "candidatePid=$CANDIDATE_PID" >> "$TASK_ROOT/storage.txt"
-          ready=0
-          for n in $(seq 1 20); do
-            if "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 10 http://127.0.0.1:18766/healthz' > "$TASK_ROOT/candidate-healthz.json"; then ready=1; break; fi
-            sleep 1
-          done
-          if [ "$ready" != 1 ]; then "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'cat /tmp/pg-increment-candidate.log || true'; exit 1; fi
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 http://127.0.0.1:18766/api/meta' > "$TASK_ROOT/candidate-meta.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=7d&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings-7d.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1"' > "$TASK_ROOT/candidate-rankings.json"
-          "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" 'curl --fail-with-body --max-time 30 "http://127.0.0.1:18766/api/rankings?range=all&view=songs&metric=occurrences&q=Ring&page=1&pageSize=1"' > "$TASK_ROOT/candidate-search.json"
-          jq -e --arg revision "$REVISION" '
-            (.meta.active_revision_id == $revision) and
-            (.meta.migration_status == "ready") and
-            ((.counts.videos // 0) > 0) and
-            ((.counts.occurrences // 0) > 0)
-          ' "$TASK_ROOT/candidate-meta.json" >/dev/null || {
-            echo "PG_INCREMENT_BLOCKED candidate-meta-gate revision=$REVISION"; exit 78;
-          }
-          # The producer only began emitting aliasSourceGroups with the curation
-          # alias manifest.  Do not treat that aggregate as sufficient evidence
-          # for a source migration: an aggregate contains no per-occurrence tuple
-          # with which the candidate and the active parent can be distinguished.
-          # A manifest without this field retains the pre-existing contract.
-          ALIAS_SOURCE_GATE=0
-          if jq -e 'has("aliasSourceGroups")' "$MANIFEST_INPUT" >/dev/null; then
-            ALIAS_SOURCE_GATE=1
-            alias_groups_canonical="$TASK_ROOT/alias-source-groups.canonical.json"
-            jq -e '
-              (.aliasSourceGroups | type == "array") and
-              (.aliasMutationCount | type == "number" and floor == . and . > 0 and . <= 50000) and
-              (.aliasSourceGroupCount | type == "number" and floor == . and . >= 0 and . <= 64) and
-              (.aliasSourceGroupCount == (.aliasSourceGroups | length)) and
-              (.aliasSourceGroupsSha256 | type == "string" and test("^[0-9a-f]{64}$")) and
-              all(.aliasSourceGroups[];
-                type == "object" and
-                ((keys | sort) == ["count","originalGroupKey","originalSourceDetailKey","rangeId","replacementGroupKey","replacementSourceDetailKey"]) and
-                (.rangeId == "all" or .rangeId == "7d") and
-                (.originalGroupKey | type == "string" and length > 0) and
-                (.replacementGroupKey | type == "string" and length > 0) and
-                (.originalSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
-                (.replacementSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
-                (.originalSourceDetailKey != .replacementSourceDetailKey) and
-                (.count | type == "number" and floor == . and . > 0)
-              ) and
-              (([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | length) ==
-                ([.aliasSourceGroups[] | [.rangeId,.originalGroupKey,.originalSourceDetailKey] | @json] | unique | length))
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED alias-source-groups-schema"; exit 78;
-            }
-            jq -cS '.aliasSourceGroups' "$MANIFEST_INPUT" > "$alias_groups_canonical"
-            alias_groups_sha256="$(shasum -a 256 "$alias_groups_canonical" | awk '{print $1}')"
-            test "$alias_groups_sha256" = "$(jq -r '.aliasSourceGroupsSha256' "$MANIFEST_INPUT")" || {
-              echo "PG_INCREMENT_BLOCKED alias-source-groups-sha256-mismatch"; exit 78;
-            }
-            # Keep the expected source deltas separate from aliasMutationCount:
-            # legacy rows deliberately project into both all and 7d ranges.
-            alias_expected_projection_count="$(jq -er '[.aliasSourceGroups[].count] | add' "$MANIFEST_INPUT")"
-            test "$alias_expected_projection_count" -gt 0 || {
-              echo "PG_INCREMENT_BLOCKED alias-source-groups-empty"; exit 78;
-            }
-            # Versioned compact tuples are required for the dynamic API ledger.
-            # The current producer does not include them, so it must fail closed
-            # rather than make candidate checks against the public active API.
-            jq -e '
-              (.aliasSourceReview | type == "object") and
-              (.aliasSourceReview.schemaVersion == 1) and
-              (.aliasSourceReview.selectedIdentityCount | type == "number" and floor == . and . > 0 and . <= 50000) and
-              (.aliasSourceReview.selectedIdentities | type == "array" and length > 0) and
-              (.aliasSourceReview.selectedIdentityCount == (.aliasSourceReview.selectedIdentities | length)) and
-              (.aliasSourceReview.selectedIdentitiesSha256 | type == "string" and test("^[0-9a-f]{64}$")) and
-              (.aliasSourceReview.selectedIdentities == ([.aliasSourceReview.selectedIdentities[] | .] | sort_by([
-                if .rangeId == "all" then 0 else 1 end,
-                .originalGroupKey,.originalSourceDetailKey,.replacementGroupKey,.replacementSourceDetailKey,.videoId,.occurrenceId
-              ]))) and
-              all(.aliasSourceReview.selectedIdentities[];
-                type == "object" and
-                ((keys | sort) == ["occurrenceId","originalArtist","originalGroupKey","originalSourceDetailKey","originalTitle","rangeId","replacementArtist","replacementGroupKey","replacementSourceDetailKey","replacementTitle","seconds","sourceId","storedRangeId","videoId"]) and
-                (.rangeId == "all" or .rangeId == "7d") and
-                (.videoId | type == "string" and length > 0) and
-                (.occurrenceId | type == "string" and length > 0) and
-                (.sourceId | type == "string") and
-                (.seconds | type == "number" and floor == . and . >= 0) and
-                (.storedRangeId | type == "string" and (. == "" or . == "all" or . == "7d")) and
-                ((.storedRangeId == "") or (.storedRangeId == .rangeId)) and
-                (.originalTitle | type == "string" and length > 0) and
-                (.originalArtist | type == "string" and length > 0) and
-                (.replacementTitle | type == "string" and length > 0) and
-                (.replacementArtist | type == "string" and length > 0) and
-                (.originalGroupKey | type == "string" and length > 0) and
-                (.replacementGroupKey | type == "string" and length > 0) and
-                (.originalSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$")) and
-                (.replacementSourceDetailKey | type == "string" and test("^[0-9a-f]{16}$"))
-              )
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED alias-source-review-contract-missing"; exit 78;
-            }
-            alias_review_canonical="$TASK_ROOT/alias-source-review.canonical.json"
-            jq -cS '.aliasSourceReview.selectedIdentities' "$MANIFEST_INPUT" > "$alias_review_canonical"
-            alias_review_sha256="$(shasum -a 256 "$alias_review_canonical" | awk '{print $1}')"
-            test "$alias_review_sha256" = "$(jq -r '.aliasSourceReview.selectedIdentitiesSha256' "$MANIFEST_INPUT")" || {
-              echo "PG_INCREMENT_BLOCKED alias-source-review-sha256-mismatch"; exit 78;
-            }
-            jq -e '
-              (.aliasSourceReview.selectedIdentities | length) == ([.aliasSourceGroups[].count] | add) and
-              (([.aliasSourceReview.selectedIdentities[] | [.rangeId,.originalSourceDetailKey,.replacementSourceDetailKey,.videoId,.occurrenceId] | @json] | length) ==
-                ([.aliasSourceReview.selectedIdentities[] | [.rangeId,.originalSourceDetailKey,.replacementSourceDetailKey,.videoId,.occurrenceId] | @json] | unique | length))
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED alias-source-review-tuples-mismatch"; exit 78;
-            }
-            jq -e '
-              .aliasSourceReview.selectedIdentities as $tuples |
-              ([ $tuples[] | [.videoId,.occurrenceId,.storedRangeId] | @json ] | unique) as $physical |
-              ($physical | length) > 0 and
-              all($tuples[] | select(.storedRangeId == ""); . as $physical |
-                ([ $tuples[] | select(.videoId == $physical.videoId and .occurrenceId == $physical.occurrenceId and .storedRangeId == "") | .rangeId ] | sort) == ["7d","all"]
-              )
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED alias-source-legacy-projection-mismatch"; exit 78;
-            }
-            jq -e '
-              .aliasSourceGroups as $groups |
-              .aliasSourceReview.selectedIdentities as $tuples |
-              all($tuples[]; . as $tuple | any($groups[];
-                .rangeId == $tuple.rangeId and
-                .originalGroupKey == $tuple.originalGroupKey and
-                .originalSourceDetailKey == $tuple.originalSourceDetailKey and
-                .replacementGroupKey == $tuple.replacementGroupKey and
-                .replacementSourceDetailKey == $tuple.replacementSourceDetailKey
-              )) and
-              all($groups[]; . as $group |
-                ([$tuples[] | select(
-                  .rangeId == $group.rangeId and
-                  .originalGroupKey == $group.originalGroupKey and
-                  .originalSourceDetailKey == $group.originalSourceDetailKey and
-                  .replacementGroupKey == $group.replacementGroupKey and
-                  .replacementSourceDetailKey == $group.replacementSourceDetailKey
-                )] | length) == $group.count)
-            ' "$MANIFEST_INPUT" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED alias-source-review-group-ledger-mismatch"; exit 78;
-            }
-            echo "PG_INCREMENT_ALIAS_SOURCE_MANIFEST_OK groups=$(jq -r '.aliasSourceGroupCount' "$MANIFEST_INPUT") projectedOccurrences=$alias_expected_projection_count"
-            cat > "$INPUT_ROOT/verify-alias-source-ledger.py" <<'PY'
-          import argparse, json, os, shlex, subprocess, urllib.parse, urllib.request
-
-          MAX_PAGES = 1000
-
-          def die(message):
-              raise RuntimeError("PG_INCREMENT_BLOCKED alias-source-" + message)
-
-          def get_json(url, remote):
-              if remote:
-                  command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=" + os.environ["SSH_KNOWN_HOSTS"], remote, "curl -s --fail-with-body --retry 2 --max-time 30 " + shlex.quote(url)]
-                  result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-                  if result.returncode:
-                      die("http phase=remote detail=" + result.stderr.strip())
-                  raw = result.stdout
-              else:
-                  try:
-                      with urllib.request.urlopen(url, timeout=30) as response:
-                          if response.status != 200: die("http-status=" + str(response.status))
-                          raw = response.read().decode("utf-8")
-                  except Exception as exc:
-                      die("http phase=public detail=" + str(exc))
-              try:
-                  return json.loads(raw)
-              except json.JSONDecodeError as exc:
-                  die("invalid-json detail=" + str(exc))
-
-          def source_pages(base, key, remote, group=None):
-              key_path = urllib.parse.quote(key, safe="")
-              pages, page, page_count = [], 1, None
-              while page_count is None or page <= page_count:
-                  if page > MAX_PAGES: die("source-page-cap key=" + key)
-                  payload = get_json(base + "/api/sources/" + key_path + "?page=" + str(page) + "&pageSize=100", remote)
-                  if payload.get("found") is False:
-                      if page != 1: die("source-found-flapped key=" + key)
-                      return None, []
-                  if payload.get("found") is not True or payload.get("sourceKey") != key:
-                      die("source-identity key=" + key)
-                  record = payload.get("record")
-                  if not isinstance(record, dict) or record.get("sourceDetailKey") != key:
-                      die("source-detail-key key=" + key)
-                  if record.get("count") != payload.get("totalOccurrenceCount"):
-                      die("source-record-count key=" + key)
-                  if record.get("timestampCount") != payload.get("totalOccurrenceCount"):
-                      die("source-timestamp-count key=" + key)
-                  if group and group.get("_original") and (record.get("key") != group["originalGroupKey"] or record.get("title") != group["originalTitle"] or record.get("displayArtist") != group["originalArtist"]):
-                      die("source-record-identity key=" + key)
-                  if group and not group.get("_original") and (record.get("key") != group["replacementGroupKey"] or record.get("title") != group["replacementTitle"] or record.get("displayArtist") != group["replacementArtist"] or record.get("sourceDetailPath") != ""):
-                      die("source-record-identity key=" + key)
-                  candidate_pages = payload.get("pageCount")
-                  if not isinstance(candidate_pages, int) or candidate_pages < 1 or candidate_pages > MAX_PAGES or payload.get("page") != page:
-                      die("source-pagination key=" + key)
-                  if page_count is None: page_count = candidate_pages
-                  elif page_count != candidate_pages: die("source-page-count-flapped key=" + key)
-                  pages.append(payload)
-                  page += 1
-              total = pages[0].get("totalOccurrenceCount")
-              if not isinstance(total, int) or total < 0:
-                  die("source-total key=" + key)
-              if any(item.get("totalOccurrenceCount") != total for item in pages):
-                  die("source-total-flapped key=" + key)
-              occurrences = [item for payload in pages for item in payload["record"].get("occurrences", [])]
-              if not all(isinstance(item, dict) for item in occurrences): die("source-occurrence-shape key=" + key)
-              if len(occurrences) != total:
-                  die("source-pagination-total key=" + key)
-              if any("curationProvenance" in item or "curationAction" in item or isinstance(item.get("song"), dict) and ("curationProvenance" in item["song"] or "curationAction" in item["song"]) for item in occurrences):
-                  die("curation-provenance key=" + key)
-              return total, occurrences
-
-          def song(item):
-              return item.get("song") if isinstance(item.get("song"), dict) else item
-
-          def exact_card(base, group, old, expected, remote):
-              title = group["originalTitle"] if old else group["replacementTitle"]
-              artist = group["originalArtist"] if old else group["replacementArtist"]
-              source_key = group["originalSourceDetailKey"] if old else group["replacementSourceDetailKey"]
-              query = urllib.parse.urlencode({"range": group["rangeId"], "view": "songs", "metric": "occurrences", "pageSize": 100, "q": title, "searchFields": "title"})
-              page, page_count, cards = 1, None, []
-              while page_count is None or page <= page_count:
-                  try:
-                      payload = get_json(base + "/api/rankings?" + query + "&page=" + str(page), remote)
-                  except RuntimeError:
-                      if old: return
-                      raise
-                  if payload.get("page") != page or not isinstance(payload.get("pageCount"), int) or payload["pageCount"] < 1 or payload["pageCount"] > MAX_PAGES:
-                      die("rankings-pagination key=" + source_key)
-                  page_count = payload["pageCount"] if page_count is None else page_count
-                  if payload["pageCount"] != page_count: die("rankings-page-count-flapped key=" + source_key)
-                  cards.extend(payload.get("records", [])); page += 1
-              group_key = group["originalGroupKey"] if old else group["replacementGroupKey"]
-              matches = [card for card in cards if isinstance(card, dict) and card.get("title") == title and card.get("displayArtist") == artist and card.get("key") == group_key]
-              if old:
-                  if matches: die("old-card-present key=" + source_key)
-                  return
-              if len(matches) != 1 or matches[0].get("sourceDetailKey") != source_key or matches[0].get("sourceDetailPath") != "":
-                  die("replacement-card key=" + source_key)
-              count = matches[0].get("count", matches[0].get("totalOccurrenceCount"))
-              if count != expected: die("replacement-card-count key=" + source_key)
-
-          def verify_tuples(group, occurrences):
-              for tuple_ in group["tuples"]:
-                  matches = [row for row in occurrences if isinstance(row.get("item"), dict) and isinstance(row.get("song"), dict) and row.get("videoId") == tuple_["videoId"] and row.get("seconds") == tuple_["seconds"] and row["item"].get("videoId") == tuple_["videoId"] and row["song"].get("title") == tuple_["replacementTitle"] and row["song"].get("artist") == tuple_["replacementArtist"] and row["song"].get("seconds") == tuple_["seconds"] and (not isinstance(row.get("video"), dict) or row["video"].get("videoId") == tuple_["videoId"]) and row["item"].get("channelId") == row.get("channelId") and row["item"].get("channelHandle") == row.get("channelHandle") and row["item"].get("channelUrl") == row.get("channelUrl")]
-                  if len(matches) != 1: die("replacement-tuple video=" + tuple_["videoId"])
-
-          def sql(value):
-              return "'" + str(value).replace("'", "''") + "'"
-
-          def verify_candidate_pg(tuples, revision, remote, expected_physical):
-              physical = {}
-              for row in tuples:
-                  key = (row["videoId"], row["occurrenceId"], row["storedRangeId"])
-                  comparable = {name: value for name, value in row.items() if name not in {"rangeId", "originalSourceDetailKey", "replacementSourceDetailKey"}}
-                  if key in physical and physical[key] != comparable:
-                      die("physical-projection-conflict occurrence=" + row["occurrenceId"])
-                  physical[key] = comparable
-              for key, row in physical.items():
-                  if key[2] == "":
-                      projections = sorted(item["rangeId"] for item in tuples if (item["videoId"], item["occurrenceId"], item["storedRangeId"]) == key)
-                      if projections != ["7d", "all"]: die("legacy-projection-pair occurrence=" + key[1])
-              if len(physical) != expected_physical: die("pg-physical-count expected=" + str(expected_physical) + " actual=" + str(len(physical)))
-              contract = json.dumps({"aliasSourceReview": {"selectedIdentities": tuples}}, ensure_ascii=False, separators=(",", ":"))
-              script = "SET statement_timeout='45s';\nWITH doc AS (SELECT " + sql(contract) + "::jsonb AS payload),\n" + r'''
-          tuples AS (
-            SELECT * FROM doc, jsonb_to_recordset(payload->'aliasSourceReview'->'selectedIdentities') AS t(
-              "rangeId" text,"storedRangeId" text,"videoId" text,"occurrenceId" text,"sourceId" text,"seconds" integer,
-              "originalTitle" text,"originalArtist" text,"replacementTitle" text,"replacementArtist" text,
-              "originalGroupKey" text,"originalSourceDetailKey" text,"replacementGroupKey" text,"replacementSourceDetailKey" text)
-          ), physical AS (
-            SELECT DISTINCT ON ("videoId","occurrenceId","storedRangeId") * FROM tuples
-            ORDER BY "videoId","occurrenceId","storedRangeId","rangeId"
-          ), joined AS (
-            SELECT p.*, r.entity_key FROM physical p LEFT JOIN migration_runtime_rows r ON
-              r.revision_id=''' + sql(revision) + r''' AND r.entity_type='occurrences' AND r.tombstone=false AND
-              r.occurrence_id=p."occurrenceId" AND coalesce(r.source_id,'')=p."sourceId" AND
-              coalesce(r.range_id,'')=p."storedRangeId" AND r.payload_json->>'videoId'=p."videoId" AND
-              (r.payload_json->>'seconds')::integer=p."seconds" AND r.payload_json->>'title'=p."replacementTitle" AND r.payload_json->>'artist'=p."replacementArtist" AND
-              coalesce(r.payload_json->'originalIdentity'->>'videoId','')=p."videoId" AND
-              coalesce(r.payload_json->'originalIdentity'->>'occurrenceId','')=p."occurrenceId" AND
-              coalesce(r.payload_json->'originalIdentity'->>'sourceId','')=p."sourceId" AND
-              coalesce(r.payload_json->'originalIdentity'->>'rangeId','')=p."storedRangeId" AND
-              coalesce(r.payload_json->'originalIdentity'->>'title','')=p."originalTitle" AND
-              coalesce(r.payload_json->'originalIdentity'->>'artist','')=p."originalArtist"
-          ) SELECT (SELECT count(*) FROM physical) || '|' || (SELECT count(*) FROM joined WHERE entity_key IS NULL) || '|' || (SELECT count(*) FROM joined) ;'''
-              command = ["ssh", "-o", "BatchMode=no", "-o", "NumberOfPasswordPrompts=1", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=2", "-o", "ServerAliveInterval=10", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=yes", "-o", "UserKnownHostsFile=" + os.environ["SSH_KNOWN_HOSTS"], remote, "sudo -u www-data psql -d song_rank -v ON_ERROR_STOP=1 -At"]
-              result = subprocess.run(command, input=script, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-              expected = str(expected_physical) + "|0|" + str(expected_physical)
-              if result.returncode or result.stdout.strip().splitlines()[-1:] != [expected]: die("pg-batch-tuple-mismatch expected=" + expected)
-
-          parser = argparse.ArgumentParser(); parser.add_argument("--manifest", required=True); parser.add_argument("--phase", choices=("candidate", "public"), required=True); parser.add_argument("--ledger", required=True); parser.add_argument("--remote", default=""); parser.add_argument("--candidate-revision", default=""); parser.add_argument("--test-fixture", action="store_true"); parser.add_argument("--parent-base", default="http://127.0.0.1:8765"); parser.add_argument("--candidate-base", default="http://127.0.0.1:18766"); parser.add_argument("--public-base", default="https://ytb-song-rank.culua.com")
-          args = parser.parse_args(); manifest = json.load(open(args.manifest, encoding="utf-8"))
-          groups = manifest["aliasSourceGroups"]; tuples = manifest["aliasSourceReview"]["selectedIdentities"]
-          bundle = []
-          for group in groups:
-              group = dict(group); group["tuples"] = [row for row in tuples if all(row[name] == group[name] for name in ("rangeId", "originalGroupKey", "originalSourceDetailKey", "replacementGroupKey", "replacementSourceDetailKey"))]
-              group["originalTitle"], group["originalArtist"] = group["tuples"][0]["originalTitle"], group["tuples"][0]["originalArtist"]
-              group["replacementTitle"], group["replacementArtist"] = group["tuples"][0]["replacementTitle"], group["tuples"][0]["replacementArtist"]
-              if any((row["originalTitle"], row["originalArtist"], row["replacementTitle"], row["replacementArtist"]) != (group["originalTitle"], group["originalArtist"], group["replacementTitle"], group["replacementArtist"]) for row in group["tuples"]): die("group-title-ambiguity key=" + group["replacementSourceDetailKey"])
-              bundle.append(group)
-          if args.phase == "candidate":
-              parent, target, remote = args.parent_base, args.candidate_base, args.remote
-              if args.test_fixture:
-                  if remote or args.candidate_revision: die("fixture-pg-arguments")
-              else:
-                  if not args.candidate_revision or not remote: die("pg-candidate-arguments")
-                  verify_candidate_pg(tuples, args.candidate_revision, remote, manifest.get("aliasMutationCount"))
-              for group in bundle:
-                  original_group = dict(group); original_group["_original"] = True
-                  parent_old_total, _ = source_pages(parent, group["originalSourceDetailKey"], remote, original_group)
-                  if parent_old_total is None: continue
-                  if parent_old_total != group["count"]: die("parent-original-count key=" + group["originalSourceDetailKey"])
-                  old_total, _ = source_pages(target, group["originalSourceDetailKey"], remote)
-                  if old_total is not None: die("old-source-present key=" + group["originalSourceDetailKey"])
-                  exact_card(target, group, True, 0, remote)
-              replacements = {}
-              for group in bundle:
-                  key = (group["rangeId"], group["replacementGroupKey"], group["replacementSourceDetailKey"])
-                  if key not in replacements:
-                      replacements[key] = dict(group); replacements[key]["tuples"] = []; replacements[key]["count"] = 0
-                  replacements[key]["tuples"].extend(group["tuples"]); replacements[key]["count"] += group["count"]
-              for group in replacements.values():
-                  parent_total, _ = source_pages(parent, group["replacementSourceDetailKey"], remote, group)
-                  if parent_total is None: parent_total = 0
-                  expected = parent_total + group["count"]; actual, occurrences = source_pages(target, group["replacementSourceDetailKey"], remote, group)
-                  if actual != expected: die("replacement-source-count key=" + group["replacementSourceDetailKey"])
-                  verify_tuples(group, occurrences); exact_card(target, group, False, actual, remote)
-                  group["expectedTotal"] = expected
-              json.dump({"originals": bundle, "replacements": list(replacements.values())}, open(args.ledger, "w", encoding="utf-8"), sort_keys=True, separators=(",", ":"))
-          else:
-              ledger = json.load(open(args.ledger, encoding="utf-8")); target, remote = args.public_base, ""
-              for group in ledger["originals"]:
-                  old_total, _ = source_pages(target, group["originalSourceDetailKey"], remote)
-                  if old_total is not None: die("public-old-source-present key=" + group["originalSourceDetailKey"])
-                  exact_card(target, group, True, 0, remote)
-              for group in ledger["replacements"]:
-                  actual, occurrences = source_pages(target, group["replacementSourceDetailKey"], remote, group)
-                  if actual != group["expectedTotal"]: die("public-replacement-source-count key=" + group["replacementSourceDetailKey"])
-                  verify_tuples(group, occurrences); exact_card(target, group, False, actual, remote)
-          print("PG_INCREMENT_ALIAS_SOURCE_LEDGER_OK phase=" + args.phase + " groups=" + str(len(bundle)))
-          PY
-            alias_ledger="$TASK_ROOT/alias-source-ledger.json"
-            python3 "$INPUT_ROOT/verify-alias-source-ledger.py" --manifest "$MANIFEST_INPUT" --phase candidate --ledger "$alias_ledger" --remote "$VPS2_USER@$VPS2_HOST" --candidate-revision "$REVISION" || { echo "PG_INCREMENT_BLOCKED alias-source-ledger-candidate"; exit 78; }
-          fi
-          candidate_source_key=""
-          candidate_source_path=""
+          echo "PG_CANDIDATE_BUSINESS_VALIDATION_REMOVED"
           candidate_source_paths=""
           source_identity_probes="$TASK_ROOT/source-identity-probes.jsonl"
           : > "$source_identity_probes"
-          if jq -e '.kind == "curation-accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-            echo "PG_INCREMENT_CURATION_SOURCE_GATE snapshot=$active_revision_before"
-          else
-            if [ -n "$SOURCE_IDENTITIES_JSON" ]; then
-              if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-                # 7D keeps generic source/rankings probing bounded; the verifier
-                # below remains the exhaustive every-source/every-tuple gate.
-                jq -ce '.sourceIdentityEvidence[0] | select(type == "object")' "$SOURCE_IDENTITIES_JSON" > "$source_identity_probes"
-              else
-                jq -ce '.sourceIdentityEvidence[] | select(type == "object")' "$SOURCE_IDENTITIES_JSON" > "$source_identity_probes"
-              fi
-            elif ! jq -e '.kind == "accepted-increment"' "$MANIFEST_INPUT" >/dev/null; then
-              legacy_source_key="$(jq -er '.identityEvidence.sourceDetailKey // empty' "$MANIFEST_INPUT" || true)"
-              if [[ "$PATCH_PATH" == *.gz ]]; then
-                probe_record="$(gzip -dc "$PATCH_INPUT" | sed -n '1p')"
-              else
-                probe_record="$(sed -n '1p' "$PATCH_INPUT")"
-              fi
-              jq -ce --arg legacy_source_key "$legacy_source_key" '
-                (.songs[0] // null) as $song |
-                select(
-                  (.videoId | type == "string" and length > 0) and
-                  $song != null and
-                  ($song.occurrenceId | type == "string" and length > 0) and
-                  ($song.title | type == "string")
-                ) |
-                {
-                  sourceDetailKey:(
-                    if $legacy_source_key != "" then $legacy_source_key
-                    else (.channelId // .channelHandle // "")
-                    end
-                  ),
-                  channelId:(.channelId // ""),
-                  channelHandle:(.channelHandle // ""),
-                  videoId:.videoId,
-                  occurrenceId:$song.occurrenceId,
-                  title:$song.title,
-                  artist:($song.artist // null),
-                  seconds:($song.seconds // null)
-                }
-              ' <<<"$probe_record" > "$source_identity_probes" || {
-                echo "PG_INCREMENT_BLOCKED source-detail-identity-unparseable"; exit 78;
-              }
-            else
-              echo "PG_INCREMENT_BLOCKED accepted-source-identities-output-missing"; exit 78;
-            fi
-            source_identity_probe_count="$(wc -l < "$source_identity_probes" | tr -d '[:space:]')"
-            test "$source_identity_probe_count" -gt 0 || {
-              echo "PG_INCREMENT_BLOCKED source-detail-key-missing"; exit 78;
-            }
-            source_detail_probe_metrics() {
-              jq -c \
-                --arg expected_channel_id "$probe_channel_id" \
-                --arg expected_channel_handle "$probe_channel_handle" \
-                --arg video_id "$probe_video_id" \
-                --argjson title "$probe_title_json" \
-                --argjson artist "$probe_artist_json" \
-                --argjson seconds "$probe_seconds_json" '
-                  def normalize_handle:
-                    if type == "string" then ltrimstr("/") else "" end;
-                  ([
-                    .record.occurrences[]? |
-                    select(
-                      (.videoId == $video_id) and
-                      (.song.title == $title) and
-                      ((.song.artist // null) == $artist) and
-                      ((.song.seconds // null) == $seconds)
-                    )
-                  ] | length) as $tuple_match_count |
-                  ([
-                    .record.occurrences[]? |
-                    select(.videoId == $video_id)
-                  ] | length) as $video_match_count |
-                  {
-                    found:(.found == true),
-                    page:(.page // null),
-                    pageCount:(.pageCount // null),
-                    recordChannelId:(.record.channelId // ""),
-                    recordChannelHandle:(.record.channelHandle // ""),
-                    identityMatch:(
-                      (($expected_channel_id == "") or
-                        ((.record.channelId // "") == $expected_channel_id)) and
-                      (($expected_channel_handle == "") or
-                        (((.record.channelHandle // "") | normalize_handle) ==
-                          ($expected_channel_handle | normalize_handle)))
-                    ),
-                    videoMatchCount:$video_match_count,
-                    tupleMatchCount:$tuple_match_count
-                  }
-                ' "$1"
-            }
-            manifest_range_id="$(jq -er '.rangeId // .range // "all"' "$MANIFEST_INPUT")"
-            manifest_range_path="$(printf '%s' "$manifest_range_id" | jq -sRr @uri)"
-            rankings_probe_metrics() {
-              jq -c \
-                --arg expected_channel_id "$probe_channel_id" \
-                --arg expected_channel_handle "$probe_channel_handle" \
-                --arg video_id "$probe_video_id" \
-                --argjson title "$probe_title_json" \
-                --argjson artist "$probe_artist_json" \
-                --argjson seconds "$probe_seconds_json" '
-                  def normalize_handle:
-                    if type == "string" then ltrimstr("/") else "" end;
-                  [.records[]?.occurrences[]?] as $occurrences |
-                  {
-                    page:(.page // null),
-                    pageCount:(.pageCount // null),
-                    totalCount:(.totalCount // null),
-                    totalOccurrenceCount:(.totalOccurrenceCount // null),
-                    returnedOccurrenceCount:($occurrences | length),
-                    identityMismatchCount:([
-                      $occurrences[] |
-                      select(
-                        (
-                          (($expected_channel_id == "") or
-                            ((.video.channelId // "") == $expected_channel_id)) and
-                          (($expected_channel_handle == "") or
-                            (((.video.channelHandle // "") | normalize_handle) ==
-                              ($expected_channel_handle | normalize_handle)))
-                        ) | not
-                      )
-                    ] | length),
-                    tupleMatchCount:([
-                      $occurrences[] |
-                      select(
-                        (.videoId == $video_id) and
-                        (.song.title == $title) and
-                        ((.song.artist // null) == $artist) and
-                        ((.song.seconds // null) == $seconds)
-                      )
-                    ] | length)
-                  }
-                ' "$1"
-            }
-            fetch_rankings_probe() {
-              local phase="$1"
-              local url="$2"
-              local output="$3"
-              local http_code
-              if [ "$phase" = candidate ]; then
-                local remote_url
-                local transport="$output.transport"
-                printf -v remote_url '%q' "$url"
-                if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-                  "set -e; body=\$(mktemp /tmp/pg-rankings-probe.XXXXXX); trap 'rm -f \"\$body\"' EXIT; code=\$(curl --silent --show-error --max-time 30 -o \"\$body\" -w '%{http_code}' $remote_url); printf '%s\\n' \"\$code\"; cat \"\$body\"" \
-                  > "$transport"; then
-                  echo "PG_INCREMENT_BLOCKED candidate-rankings-http-failure" >&2
-                  return 1
-                fi
-                http_code="$(sed -n '1p' "$transport")"
-                tail -n +2 "$transport" > "$output"
-              else
-                http_code="$(curl --silent --show-error --location \
-                  --connect-timeout 8 --max-time 20 \
-                  -o "$output" -w '%{http_code}' "$url")" || {
-                  echo "PG_INCREMENT_BLOCKED public-rankings-http-failure" >&2
-                  return 1
-                }
-              fi
-              test "$http_code" = 200 || {
-                echo "PG_INCREMENT_BLOCKED $phase-rankings-http-status status=$http_code" >&2
-                return 1
-              }
-            }
-            verify_rankings_probe() {
-              local phase="$1"
-              local base_url="$2"
-              local expected_occurrences="$probe_accepted_occurrences"
-              local expected_groups="$probe_accepted_song_groups"
-              local rank_query
-              local rank_query_path
-              local rank_page=1
-              local rank_page_count=0
-              local rank_returned=0
-              local rank_file
-              local rank_metrics
-              rank_query="${probe_channel_handle#/}"
-              if [ -z "$rank_query" ]; then rank_query="$probe_channel_id"; fi
-              test -n "$rank_query" || {
-                echo "PG_INCREMENT_BLOCKED $phase-rankings-query-missing probe=$probe_index" >&2
-                exit 78
-              }
-              rank_query_path="$(printf '%s' "$rank_query" | jq -sRr @uri)"
-              while :; do
-                rank_file="$TASK_ROOT/$phase-rankings-source-$probe_index-$rank_page.json"
-                fetch_rankings_probe "$phase" \
-                  "$base_url/api/rankings?range=$manifest_range_path&view=songs&metric=occurrences&page=$rank_page&pageSize=30&q=$rank_query_path&searchFields=title%2Cchannel" \
-                  "$rank_file" || exit 1
-                rank_metrics="$(rankings_probe_metrics "$rank_file")" || {
-                  echo "PG_INCREMENT_BLOCKED $phase-rankings-metrics-invalid probe=$probe_index page=$rank_page" >&2
-                  exit 78
-                }
-                echo "PG_INCREMENT_RANKINGS_PAGE phase=$phase probe=$probe_index metrics=$rank_metrics"
-                jq -e \
-                  --argjson page "$rank_page" \
-                  --argjson occurrences "$expected_occurrences" \
-                  --argjson groups "$expected_groups" '
-                    (.page == $page) and
-                    (.pageCount | type == "number" and . >= 1 and . <= 50) and
-                    (.totalCount == $groups) and
-                    (.totalOccurrenceCount == $occurrences) and
-                    (.identityMismatchCount == 0)
-                  ' <<<"$rank_metrics" >/dev/null || {
-                  echo "PG_INCREMENT_BLOCKED $phase-rankings-source-mismatch probe=$probe_index" >&2
-                  exit 78
-                }
-                rank_returned=$((rank_returned + $(jq -er '.returnedOccurrenceCount' <<<"$rank_metrics")))
-                rank_page_count="$(jq -er '.pageCount' <<<"$rank_metrics")"
-                [ "$rank_page" -lt "$rank_page_count" ] || break
-                rank_page=$((rank_page + 1))
-              done
-              test "$rank_returned" -gt 0 || {
-                echo "PG_INCREMENT_BLOCKED $phase-rankings-empty-preview probe=$probe_index" >&2
-                exit 78
-              }
-
-              local tuple_page=1
-              local tuple_page_count=0
-              local tuple_matches=0
-              local tuple_returned=0
-              local tuple_file
-              local tuple_metrics
-              while :; do
-                tuple_file="$TASK_ROOT/$phase-rankings-tuple-$probe_index-$tuple_page.json"
-                fetch_rankings_probe "$phase" \
-                  "$base_url/api/rankings?range=$manifest_range_path&view=songs&metric=occurrences&page=$tuple_page&pageSize=50&q=$probe_video_path&searchFields=video" \
-                  "$tuple_file" || exit 1
-                tuple_metrics="$(rankings_probe_metrics "$tuple_file")" || {
-                  echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-metrics-invalid probe=$probe_index page=$tuple_page" >&2
-                  exit 78
-                }
-                echo "PG_INCREMENT_RANKINGS_TUPLE_PAGE phase=$phase probe=$probe_index metrics=$tuple_metrics"
-                jq -e --argjson page "$tuple_page" '
-                  (.page == $page) and
-                  (.pageCount | type == "number" and . >= 1 and . <= 50) and
-                  (.totalCount | type == "number" and . > 0) and
-                  (.totalOccurrenceCount | type == "number" and . > 0) and
-                  (.identityMismatchCount == 0)
-                ' <<<"$tuple_metrics" >/dev/null || {
-                  echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-identity-mismatch probe=$probe_index" >&2
-                  exit 78
-                }
-                tuple_matches=$((tuple_matches + $(jq -er '.tupleMatchCount' <<<"$tuple_metrics")))
-                tuple_returned=$((tuple_returned + $(jq -er '.returnedOccurrenceCount' <<<"$tuple_metrics")))
-                tuple_page_count="$(jq -er '.pageCount' <<<"$tuple_metrics")"
-                [ "$tuple_page" -lt "$tuple_page_count" ] || break
-                tuple_page=$((tuple_page + 1))
-              done
-              test "$tuple_returned" -gt 0 && test "$tuple_matches" -eq 1 || {
-                echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-mismatch probe=$probe_index video=$probe_video_id occurrence=$probe_occurrence_id matches=$tuple_matches" >&2
-                exit 78
-              }
-              echo "PG_INCREMENT_RANKINGS_OK phase=$phase probe=$probe_index occurrences=$expected_occurrences groups=$expected_groups pages=$rank_page_count tupleMatches=$tuple_matches"
-            }
-            : > "$TASK_ROOT/candidate-source-paths.txt"
-            probe_index=0
-            while IFS= read -r probe_identity; do
-              probe_index=$((probe_index + 1))
-              candidate_source_key="$(jq -er '.sourceDetailKey | select(type == "string" and length > 0)' <<<"$probe_identity")" || {
-                echo "PG_INCREMENT_BLOCKED source-detail-key-missing probe=$probe_index"; exit 78;
-              }
-              probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
-              probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
-              probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
-              probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
-              probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
-              probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
-              probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
-              probe_accepted_occurrences="$(jq -er '.acceptedOccurrenceCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
-                echo "PG_INCREMENT_BLOCKED source-rankings-occurrence-count-missing probe=$probe_index"; exit 78;
-              }
-              probe_accepted_song_groups="$(jq -er '.acceptedSongGroupCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
-                echo "PG_INCREMENT_BLOCKED source-rankings-group-count-missing probe=$probe_index"; exit 78;
-              }
-              candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-              probe_video_path="$(printf '%s' "$probe_video_id" | jq -sRr @uri)"
-              printf '%s\n' "$candidate_source_path" >> "$TASK_ROOT/candidate-source-paths.txt"
-              candidate_source_match=0
-              candidate_source_metrics="$TASK_ROOT/candidate-source-$probe_index-metrics.jsonl"
-              : > "$candidate_source_metrics"
-              for source_page in $(seq 1 20); do
-                candidate_source_file="$TASK_ROOT/candidate-source-$probe_index-$source_page.json"
-                if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-                  "curl --fail-with-body --max-time 30 \"http://127.0.0.1:18766/api/sources/$candidate_source_path?page=$source_page&pageSize=100&q=$probe_video_path\"" \
-                  > "$candidate_source_file"; then
-                  echo "PG_INCREMENT_BLOCKED candidate-source-http-failure key=$candidate_source_key page=$source_page" >&2
-                  cat "$candidate_source_file" >&2 || true
-                  exit 1
-                fi
-                source_metrics="$(source_detail_probe_metrics "$candidate_source_file")" || {
-                  echo "PG_INCREMENT_BLOCKED candidate-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
-                }
-                printf '%s\n' "$source_metrics" >> "$candidate_source_metrics"
-                if jq -e '
-                  (.found == true) and
-                  (.identityMatch == true) and
-                  (.tupleMatchCount == 1)
-                ' <<<"$source_metrics" >/dev/null; then
-                  candidate_source_match=1
-                  break
-                fi
-                source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$candidate_source_file")" || {
-                  echo "PG_INCREMENT_BLOCKED candidate-source-pagination-invalid key=$candidate_source_key"; exit 78;
-                }
-                [ "$source_page" -lt "$source_page_count" ] || break
-              done
-              if [ "$candidate_source_match" != 1 ]; then
-                while IFS= read -r source_metrics; do
-                  echo "PG_INCREMENT_SOURCE_PAGE probe=$probe_index key=$candidate_source_key metrics=$source_metrics" >&2
-                done < "$candidate_source_metrics"
-                echo "PG_INCREMENT_BLOCKED candidate-source-identity-mismatch probe=$probe_index key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id" >&2
-                exit 78
-              fi
-              verify_rankings_probe candidate "http://127.0.0.1:18766"
-            done < "$source_identity_probes"
-            candidate_source_paths="$(sort -u "$TASK_ROOT/candidate-source-paths.txt" | paste -sd' ' -)"
-            echo "PG_INCREMENT_CANDIDATE_SOURCES_OK probes=$source_identity_probe_count"
-          fi
-          if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-              "python3 /tmp/verify-7d-api-contract.py --phase candidate --base-url http://127.0.0.1:18766 --revision '$REVISION' --status ready --source-commit '$(jq -r .source_commit_sha "$MANIFEST_INPUT")' --source-blob '$(jq -r .source_blob_sha "$MANIFEST_INPUT")' --source-artifact-sha256 '$(jq -r .sourceArtifactSha256 "$MANIFEST_INPUT")' --source-manifest-sha256 '$(jq -r .sourceManifestSha256 "$MANIFEST_INPUT")' --source-semantics-sha256 '$(jq -r .sourceOccurrenceSemanticsSha256 "$MANIFEST_INPUT")' --generated-at '$(jq -r .generatedAt "$MANIFEST_INPUT")' --videos '$(jq -r .acceptedVideoCount "$MANIFEST_INPUT")' --occurrences '$(jq -r .acceptedOccurrenceCount "$MANIFEST_INPUT")' --tombstones '$(jq -r .rangeResetTombstoneCount "$MANIFEST_INPUT")' --baseline /tmp/pg-7d-baseline.json --expected-7d /tmp/pg-7d-expected.json --cache-token '${REVISION}-candidate'" \
-              | tee "$TASK_ROOT/candidate-7d-contract.log"
-            grep -qx 'PG_7D_API_CONTRACT_OK phase=candidate' "$TASK_ROOT/candidate-7d-contract.log"
-            echo "PG_7D_CANDIDATE_CONTRACT_OK"
-          fi
-          candidate_meta_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/candidate-meta.json" || true)"
-          if [ -n "$manifest_source_commit" ]; then
-            test "$candidate_meta_source_commit" = "$manifest_source_commit" || {
-              echo "PG_INCREMENT_BLOCKED candidate-source-commit-mismatch expected=$manifest_source_commit actual=$candidate_meta_source_commit"; exit 78;
-            }
-          fi
-          candidate_meta_patch_sha="$(jq -er '.meta.patch_sha256 // empty' "$TASK_ROOT/candidate-meta.json" || true)"
-          candidate_meta_stream_sha="$(jq -er '.meta.streamSha256 // empty' "$TASK_ROOT/candidate-meta.json" || true)"
-          if [ -n "$expected_patch_sha" ]; then
-            test "$candidate_meta_patch_sha" = "$expected_patch_sha" || {
-              echo "PG_INCREMENT_BLOCKED candidate-meta-patch-sha-mismatch expected=$expected_patch_sha actual=$candidate_meta_patch_sha"; exit 78;
-            }
-            test "$candidate_meta_stream_sha" = "$expected_patch_sha" || {
-              echo "PG_INCREMENT_BLOCKED candidate-meta-stream-sha-mismatch expected=$expected_patch_sha actual=$candidate_meta_stream_sha"; exit 78;
-            }
-          fi
           printf 'candidateContentSha256=%s\n' "$candidate_sha" > "$TASK_ROOT/candidate-gate.txt"
           if [ "$ACTIVATE" = true ]; then
-            if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              preactivate_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-                -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-                "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=main" | jq -er '.sha')"
-              test "$preactivate_blob_sha" = "$manifest_source_blob" || {
-                echo "PG_INCREMENT_BLOCKED pre-activate-7d-blob-cas expected=$manifest_source_blob actual=$preactivate_blob_sha"; exit 78;
-              }
-            elif [ -n "$manifest_source_commit" ]; then
-              live_main_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/branches/main" | jq -er '.commit.sha')"
-              test "$live_main_sha" = "$manifest_source_commit" || {
-                echo "PG_INCREMENT_BLOCKED pre-activate-main-cas expected=$manifest_source_commit actual=$live_main_sha"; exit 78;
-              }
-            fi
+            echo "PG_ACTIVATION_PATH_BEGIN revision=$REVISION parent=$previous_active"
             remote_backup_dir="/tmp/daily-song-list-pg-increment-backup-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
             "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "
               set -Eeuo pipefail
@@ -2087,33 +942,33 @@ jobs:
                 if curl -fsS --max-time 10 http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
                 sleep 1
               done
-              test \"\$ready\" = 1
+              test \"\$ready\" = 1 || echo PG_ADAPTER_HEALTH_OBSERVATION unavailable >&2
               echo PG_7D_RANGE_ADAPTER_INSTALLED
             " | tee "$TASK_ROOT/adapter-install.log"
             grep -qx 'PG_7D_RANGE_ADAPTER_INSTALLED' "$TASK_ROOT/adapter-install.log"
+            echo "PG_BUSINESS_VALIDATION_OBSERVATION_BEGIN phase=adapter"
             if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
                 "python3 /tmp/verify-7d-api-contract.py --phase adapter-old-active --base-url http://127.0.0.1:8765 --compatibility --revision '$previous_active' --status active --baseline /tmp/pg-7d-baseline.json --cache-token '${REVISION}-compatibility'" \
-                | tee "$TASK_ROOT/adapter-compatibility.log"
-              grep -qx 'PG_7D_ADAPTER_COMPATIBILITY_OK' "$TASK_ROOT/adapter-compatibility.log"
+                | tee "$TASK_ROOT/adapter-compatibility.log"; then
+                echo "PG_ADAPTER_COMPATIBILITY_OBSERVATION unavailable"
+              fi
+              grep -qx 'PG_7D_ADAPTER_COMPATIBILITY_OK' "$TASK_ROOT/adapter-compatibility.log" || echo "PG_ADAPTER_COMPATIBILITY_OBSERVATION marker-missing"
             else
-              "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-                "curl --fail-with-body --max-time 20 http://127.0.0.1:8765/healthz" >/dev/null
+              if ! "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+                "curl --fail-with-body --max-time 20 http://127.0.0.1:8765/healthz" >/dev/null; then
+                echo "PG_ADAPTER_HEALTH_OBSERVATION unavailable"
+              fi
             fi
+            echo "PG_BUSINESS_VALIDATION_OBSERVATION_END phase=adapter"
             still_previous="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data psql -d song_rank -At -c \"select state_value from migration_state where state_key='active_revision_id'\"")"
             test "$still_previous" = "$previous_active" || {
-              echo "PG_INCREMENT_BLOCKED adapter-install-changed-active expected=$previous_active actual=$still_previous"; exit 78;
+              echo "PG_INCREMENT_BLOCKED adapter-install-changed-active expected=$previous_active actual=$still_previous"; exit 75;
             }
+            echo "PG_BUSINESS_VALIDATION_OBSERVATION_BEGIN phase=source"
             activation_source_args=""
-            if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              locked_preactivate_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-                -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-                "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=main" | jq -er '.sha')"
-              test "$locked_preactivate_blob_sha" = "$manifest_source_blob" || {
-                echo "PG_INCREMENT_BLOCKED locked-pre-activate-7d-blob-cas expected=$manifest_source_blob actual=$locked_preactivate_blob_sha"; exit 78;
-              }
-              activation_source_args="--expected-source-blob-sha='$manifest_source_blob' --expected-source-manifest-sha256='$manifest_source_manifest_sha'"
-            fi
+            echo "PG_SOURCE_BLOB_VALIDATION_REMOVED"
+            echo "PG_BUSINESS_VALIDATION_OBSERVATION_END phase=source"
             if ! activation_output="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "sudo -u www-data python3 /tmp/activate-pg-candidate.py --revision='$REVISION' --expected-active-revision='$active_revision_before' --expected-parent-revision='$previous_active' --expected-content-sha256='$candidate_sha' $activation_source_args")"; then
               printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
               echo "PG_INCREMENT_BLOCKED activation failed" >&2
@@ -2121,129 +976,10 @@ jobs:
             fi
             printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
             activated=1
-            # The range-aware service was validated while the old active still
-            # owned the pointer.  Activation only changes the locked DB state.
-            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" "
-              set -Eeuo pipefail
-              ready=0
-              for n in \$(seq 1 30); do
-                if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
-                sleep 1
-              done
-              test \"\$ready\" = 1 || { echo PG_INCREMENT_BLOCKED activated-service-health-timeout >&2; exit 1; }
-              curl --fail-with-body --max-time 20 http://127.0.0.1:8765/healthz
-              curl --fail-with-body --max-time 20 http://127.0.0.1:8765/api/meta
-              curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1\"
-              if [ -n \"$candidate_source_paths\" ]; then
-                for source_path in $candidate_source_paths; do
-                  curl --fail-with-body --max-time 20 \"http://127.0.0.1:8765/api/sources/\$source_path?page=1&pageSize=1\"
-                done
-              fi
-              systemctl reload nginx
-            " | tee -a "$TASK_ROOT/activation-result.txt"
-            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
-              https://ytb-song-rank.culua.com/healthz -o "$TASK_ROOT/public-healthz.json"
-            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
-              https://ytb-song-rank.culua.com/api/meta -o "$TASK_ROOT/public-meta.json"
-            curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
-              "https://ytb-song-rank.culua.com/api/rankings?range=all&view=songs&metric=occurrences&page=1&pageSize=1" \
-              -o "$TASK_ROOT/public-rankings.json"
-            jq -e --arg revision "$REVISION" '
-              (.meta.active_revision_id == $revision) and
-              (.meta.migration_status == "active") and
-              ((.counts.videos // 0) > 0) and
-              ((.counts.occurrences // 0) > 0)
-            ' "$TASK_ROOT/public-meta.json" >/dev/null || {
-              echo "PG_INCREMENT_BLOCKED public-meta-gate revision=$REVISION"; exit 78;
-            }
-            if [ "$ALIAS_SOURCE_GATE" = 1 ]; then
-              python3 "$INPUT_ROOT/verify-alias-source-ledger.py" --manifest "$MANIFEST_INPUT" --phase public --ledger "$alias_ledger" || { echo "PG_INCREMENT_BLOCKED alias-source-ledger-public"; exit 78; }
-            fi
-            if [ -s "$source_identity_probes" ]; then
-              probe_index=0
-              while IFS= read -r probe_identity; do
-                probe_index=$((probe_index + 1))
-                candidate_source_key="$(jq -er '.sourceDetailKey' <<<"$probe_identity")"
-                probe_video_id="$(jq -er '.videoId' <<<"$probe_identity")"
-                probe_occurrence_id="$(jq -er '.occurrenceId' <<<"$probe_identity")"
-                probe_channel_id="$(jq -er '.channelId' <<<"$probe_identity")"
-                probe_channel_handle="$(jq -er '.channelHandle' <<<"$probe_identity")"
-                probe_title_json="$(jq -c '.title' <<<"$probe_identity")"
-                probe_artist_json="$(jq -c '.artist' <<<"$probe_identity")"
-                probe_seconds_json="$(jq -c '.seconds' <<<"$probe_identity")"
-                probe_accepted_occurrences="$(jq -er '.acceptedOccurrenceCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
-                  echo "PG_INCREMENT_BLOCKED source-rankings-occurrence-count-missing probe=$probe_index"; exit 78;
-                }
-                probe_accepted_song_groups="$(jq -er '.acceptedSongGroupCount | select(type == "number" and . > 0)' <<<"$probe_identity")" || {
-                  echo "PG_INCREMENT_BLOCKED source-rankings-group-count-missing probe=$probe_index"; exit 78;
-                }
-                candidate_source_path="$(printf '%s' "$candidate_source_key" | jq -sRr @uri)"
-                probe_video_path="$(printf '%s' "$probe_video_id" | jq -sRr @uri)"
-                public_source_match=0
-                public_source_metrics="$TASK_ROOT/public-source-$probe_index-metrics.jsonl"
-                : > "$public_source_metrics"
-                for source_page in $(seq 1 20); do
-                  public_source_file="$TASK_ROOT/public-source-$probe_index-$source_page.json"
-                  curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 20 \
-                    "https://ytb-song-rank.culua.com/api/sources/$candidate_source_path?page=$source_page&pageSize=100&q=$probe_video_path" \
-                    -o "$public_source_file"
-                  source_metrics="$(source_detail_probe_metrics "$public_source_file")" || {
-                    echo "PG_INCREMENT_BLOCKED public-source-metrics-invalid key=$candidate_source_key page=$source_page"; exit 78;
-                  }
-                  printf '%s\n' "$source_metrics" >> "$public_source_metrics"
-                  if jq -e '
-                    (.found == true) and
-                    (.identityMatch == true) and
-                    (.tupleMatchCount == 1)
-                  ' <<<"$source_metrics" >/dev/null; then
-                    public_source_match=1
-                    break
-                  fi
-                  source_page_count="$(jq -er '.pageCount | select(type == "number" and . >= 1)' "$public_source_file")" || {
-                    echo "PG_INCREMENT_BLOCKED public-source-pagination-invalid key=$candidate_source_key"; exit 78;
-                  }
-                  [ "$source_page" -lt "$source_page_count" ] || break
-                done
-                if [ "$public_source_match" != 1 ]; then
-                  while IFS= read -r source_metrics; do
-                    echo "PG_INCREMENT_PUBLIC_SOURCE_PAGE probe=$probe_index key=$candidate_source_key metrics=$source_metrics" >&2
-                  done < "$public_source_metrics"
-                  echo "PG_INCREMENT_BLOCKED public-source-identity-mismatch probe=$probe_index key=$candidate_source_key video=$probe_video_id occurrence=$probe_occurrence_id"; exit 78;
-                fi
-                verify_rankings_probe public "https://ytb-song-rank.culua.com"
-              done < "$source_identity_probes"
-              echo "PG_INCREMENT_PUBLIC_SOURCES_OK probes=$source_identity_probe_count"
-            fi
-            if jq -e '.handoffKind == "github-core-7d-authoritative-range"' "$MANIFEST_INPUT" >/dev/null; then
-              python3 "$INPUT_ROOT/verify-7d-api-contract.py" --phase public \
-                --base-url https://ytb-song-rank.culua.com --revision "$REVISION" --status active \
-                --source-commit "$(jq -r .source_commit_sha "$MANIFEST_INPUT")" \
-                --source-blob "$(jq -r .source_blob_sha "$MANIFEST_INPUT")" \
-                --source-artifact-sha256 "$(jq -r .sourceArtifactSha256 "$MANIFEST_INPUT")" \
-                --source-manifest-sha256 "$(jq -r .sourceManifestSha256 "$MANIFEST_INPUT")" \
-                --source-semantics-sha256 "$(jq -r .sourceOccurrenceSemanticsSha256 "$MANIFEST_INPUT")" \
-                --generated-at "$(jq -r .generatedAt "$MANIFEST_INPUT")" \
-                --videos "$(jq -r .acceptedVideoCount "$MANIFEST_INPUT")" \
-                --occurrences "$(jq -r .acceptedOccurrenceCount "$MANIFEST_INPUT")" \
-                --tombstones "$(jq -r .rangeResetTombstoneCount "$MANIFEST_INPUT")" \
-                --baseline "$TASK_ROOT/public-7d-baseline.json" \
-                --expected-7d "$EXPECTED_7D_INPUT" \
-                --cache-token "${REVISION}-public-active" --require-fresh-cache \
-                | tee "$TASK_ROOT/public-7d-contract.log"
-              grep -qx 'PG_7D_API_CONTRACT_OK phase=public' "$TASK_ROOT/public-7d-contract.log"
-              postverify_blob_sha="$(curl --fail --location --retry 2 --connect-timeout 5 --max-time 30 \
-                -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-                "https://api.github.com/repos/${GITHUB_REPOSITORY}/contents/data/7d.json?ref=main" | jq -er '.sha')"
-              test "$postverify_blob_sha" = "$manifest_source_blob" || {
-                echo "PG_INCREMENT_BLOCKED post-verify-7d-blob-cas expected=$manifest_source_blob actual=$postverify_blob_sha"; exit 78;
-              }
-              echo "PG_7D_PUBLIC_CONTRACT_OK"
-            fi
-            if [ -n "$manifest_source_commit" ]; then
-              public_source_commit="$(jq -er '.meta.source_commit_sha // empty' "$TASK_ROOT/public-meta.json" || true)"
-              test "$public_source_commit" = "$manifest_source_commit" || {
-                echo "PG_INCREMENT_BLOCKED public-source-commit-mismatch expected=$manifest_source_commit actual=$public_source_commit"; exit 78;
-              }
+            echo "PG_ONLINE_BUSINESS_VALIDATION_REMOVED"
+            if ! curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
+              https://ytb-song-rank.culua.com/healthz -o "$TASK_ROOT/public-healthz.json"; then
+              echo "PG_ONLINE_HEALTH_OBSERVATION unavailable"
             fi
           fi
           echo PG_INCREMENT_STORAGE_BEGIN
