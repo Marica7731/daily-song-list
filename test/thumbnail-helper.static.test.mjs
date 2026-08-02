@@ -50,4 +50,30 @@ test("thumbnail relay is first choice and the public index loads its exact conte
   assert.doesNotMatch(source, /maxresdefault/u);
 });
 
+test("runtime source detail requests are scoped to the active range", () => {
+  const source = readFileSync(APP, "utf8");
+  const helperStart = source.indexOf("function sourceDetailPathWithRange");
+  assert(helperStart >= 0, "source-detail range helper missing");
+  const helperEnd = source.indexOf("\n}\n", helperStart);
+  assert(helperEnd > helperStart, "source-detail range helper body missing");
+  const helper = Function(
+    "state",
+    "isRuntimeSourceDetailPath",
+    "cleanText",
+    "URLSearchParams",
+    `return (${source.slice(helperStart, helperEnd + 2)});`,
+  )(
+    { range: "7d" },
+    (value) => String(value || "").includes("/api/sources/"),
+    (value) => String(value ?? "").trim(),
+    URLSearchParams,
+  );
+
+  assert.equal(helper("/api/sources/c246e336b14376e1a9d20f45"), "/api/sources/c246e336b14376e1a9d20f45?range=7d");
+  assert.equal(helper("/api/sources/key?range=all&page=2"), "/api/sources/key?range=7d&page=2");
+  assert.equal(helper("data/sources/key.json"), "data/sources/key.json");
+  assert.match(source, /async function loadSourceDetailOccurrences[\s\S]+const requestPath = sourceDetailPathWithRange\(path\)/u);
+  assert.match(source, /function sourceDetailPagePath[\s\S]+const requestPath = sourceDetailPathWithRange\(path\)/u);
+});
+
 console.log("THUMBNAIL_STATIC_RELEASE_CHECK_OK");
