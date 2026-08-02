@@ -822,7 +822,7 @@ test("GitHub accepted handoffs bind and verify every distinct source probe", () 
   );
   assert.match(
     deployWorkflow,
-    /jq -ce '\.sourceIdentityEvidence\[\]' "\$SOURCE_IDENTITIES_JSON"/u,
+    /jq -ce '\.sourceIdentityEvidence\[\] \| select\(type == "object"\)' "\$SOURCE_IDENTITIES_JSON"/u,
   );
   assert.match(deployWorkflow, /source_identity_probe_count/u);
   assert.match(deployWorkflow, /while IFS= read -r probe_identity; do/u);
@@ -934,9 +934,99 @@ test("PG release fails closed, verifies its real source, and rolls back post-act
     /cleanup\(\) \{\s+status=\$\?\s+set \+e/u,
     "cleanup must preserve the original status and disable errexit before rollback",
   );
-  assert.match(deployWorkflow, /pg_adapter\.py\.bak/u);
-  assert.match(deployWorkflow, /systemctl disable --now song-rank-api/u);
+  assert.match(deployWorkflow, /backup_file \/opt\/culua\/ytb-song-rank\/pg_adapter\.py root-pg-adapter/u);
+  assert.match(deployWorkflow, /restore_file \/opt\/culua\/ytb-song-rank\/pg_adapter\.py root-pg-adapter/u);
+  assert.doesNotMatch(deployWorkflow, /systemctl (?:disable|enable|restart|stop)(?: --now)? song-rank-api(?:\.service)?/u);
+  assert.match(deployWorkflow, /systemctl restart song-rank-pg-api/u);
   assert.match(deployWorkflow, /https:\/\/ytb-song-rank\.culua\.com\/healthz/u);
+});
+
+test("rankings release gate enforces exact per-source totals and one exact tuple", () => {
+  const start = deployWorkflow.indexOf("            verify_rankings_probe() {");
+  const end = deployWorkflow.indexOf(
+    "\n            : > \"$TASK_ROOT/candidate-source-paths.txt\"",
+    start,
+  );
+  assert.ok(start >= 0 && end > start, "verify_rankings_probe function must be extractable");
+  const functionSource = deployWorkflow.slice(start, end).replace(/^ {12}/gmu, "");
+
+  function runGate({ occurrences, groups, channel = {}, tuple = {} }) {
+    const channelMetrics = {
+      page: 1,
+      pageCount: 1,
+      totalCount: groups,
+      totalOccurrenceCount: occurrences,
+      identityMismatchCount: 0,
+      returnedOccurrenceCount: Math.min(occurrences, 30),
+      tupleMatchCount: 0,
+      ...channel,
+    };
+    const tupleMetrics = {
+      page: 1,
+      pageCount: 1,
+      totalCount: 1,
+      totalOccurrenceCount: 1,
+      identityMismatchCount: 0,
+      returnedOccurrenceCount: 1,
+      tupleMatchCount: 1,
+      ...tuple,
+    };
+    const script = `
+set -Eeuo pipefail
+TASK_ROOT="$(mktemp -d)"
+trap 'rm -rf -- "$TASK_ROOT"' EXIT
+probe_accepted_occurrences="$EXPECTED_OCCURRENCES"
+probe_accepted_song_groups="$EXPECTED_GROUPS"
+probe_channel_handle="@fixture"
+probe_channel_id="UCfixture"
+manifest_range_path="all"
+probe_index="1"
+probe_video_path="video-fixture"
+probe_video_id="video-fixture"
+probe_occurrence_id="occurrence-fixture"
+fetch_rankings_probe() { printf '{}\\n' > "$3"; }
+rankings_probe_metrics() {
+  case "$1" in
+    *rankings-source*) printf '%s\\n' "$CHANNEL_METRICS" ;;
+    *rankings-tuple*) printf '%s\\n' "$TUPLE_METRICS" ;;
+    *) return 78 ;;
+  esac
+}
+${functionSource}
+verify_rankings_probe candidate "http://127.0.0.1:18766"
+`;
+    return spawnSync("bash", ["-c", script], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        EXPECTED_OCCURRENCES: String(occurrences),
+        EXPECTED_GROUPS: String(groups),
+        CHANNEL_METRICS: JSON.stringify(channelMetrics),
+        TUPLE_METRICS: JSON.stringify(tupleMetrics),
+      },
+    });
+  }
+
+  for (const expected of [
+    { occurrences: 4, groups: 2 },
+    { occurrences: 7, groups: 3 },
+  ]) {
+    const result = runGate(expected);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /PG_INCREMENT_RANKINGS_OK/u);
+  }
+  for (const invalid of [
+    { occurrences: 4, groups: 2, channel: { totalOccurrenceCount: 5 } },
+    { occurrences: 4, groups: 2, channel: { totalCount: 3 } },
+    { occurrences: 4, groups: 2, channel: { identityMismatchCount: 1 } },
+    { occurrences: 4, groups: 2, tuple: { identityMismatchCount: 1 } },
+    { occurrences: 4, groups: 2, tuple: { tupleMatchCount: 0 } },
+    { occurrences: 4, groups: 2, tuple: { tupleMatchCount: 2 } },
+    { occurrences: 4, groups: 2, tuple: { returnedOccurrenceCount: 0 } },
+  ]) {
+    const result = runGate(invalid);
+    assert.notEqual(result.status, 0, `invalid rankings fixture passed: ${JSON.stringify(invalid)}`);
+  }
 });
 
 test("workflow-run accepted conversion sorts repository paths and uses a stable source root", () => {

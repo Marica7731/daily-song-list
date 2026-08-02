@@ -1900,9 +1900,9 @@ jobs:
                   --argjson groups "$expected_groups" '
                     (.page == $page) and
                     (.pageCount | type == "number" and . >= 1 and . <= 50) and
-                    (.totalCount > 0) and
-                    (.totalOccurrenceCount | type == "number" and . > 0) and
-                    (.identityMismatchCount | type == "number" and . <= 1000)
+                    (.totalCount == $groups) and
+                    (.totalOccurrenceCount == $occurrences) and
+                    (.identityMismatchCount == 0)
                   ' <<<"$rank_metrics" >/dev/null || {
                   echo "PG_INCREMENT_BLOCKED $phase-rankings-source-mismatch probe=$probe_index" >&2
                   exit 78
@@ -1938,7 +1938,7 @@ jobs:
                   (.pageCount | type == "number" and . >= 1 and . <= 50) and
                   (.totalCount | type == "number" and . > 0) and
                   (.totalOccurrenceCount | type == "number" and . > 0) and
-                  (.identityMismatchCount | type == "number" and . <= 1000)
+                  (.identityMismatchCount == 0)
                 ' <<<"$tuple_metrics" >/dev/null || {
                   echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-identity-mismatch probe=$probe_index" >&2
                   exit 78
@@ -1949,7 +1949,7 @@ jobs:
                 [ "$tuple_page" -lt "$tuple_page_count" ] || break
                 tuple_page=$((tuple_page + 1))
               done
-              test "$tuple_returned" -gt 0 || {
+              test "$tuple_returned" -gt 0 && test "$tuple_matches" -eq 1 || {
                 echo "PG_INCREMENT_BLOCKED $phase-rankings-tuple-mismatch probe=$probe_index video=$probe_video_id occurrence=$probe_occurrence_id matches=$tuple_matches" >&2
                 exit 78
               }

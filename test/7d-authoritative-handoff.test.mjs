@@ -2,20 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const converter = process.env.CONVERTER_PATH;
-const importer = process.env.IMPORTER_PATH;
-const adapter = process.env.ADAPTER_PATH;
-const verifier = process.env.VERIFIER_PATH;
-const activator = process.env.ACTIVATOR_PATH;
-const workflowPath = process.env.WORKFLOW_PATH;
-const python = process.env.PYTHON || process.env.PYTHON3 || 'python';
-for (const [label, value] of Object.entries({ converter, importer, adapter, verifier, activator, workflowPath })) {
-  assert.ok(value, `${label} env is required`);
-}
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const converter = process.env.CONVERTER_PATH || join(repositoryRoot, 'scripts/migration/7d-json-to-patch.py');
+const importer = process.env.IMPORTER_PATH || join(repositoryRoot, 'scripts/migration/import-pg-incremental.py');
+const adapter = process.env.ADAPTER_PATH || join(repositoryRoot, 'server/pg_adapter.py');
+const verifier = process.env.VERIFIER_PATH || join(repositoryRoot, 'scripts/migration/verify-7d-api-contract.py');
+const activator = process.env.ACTIVATOR_PATH || join(repositoryRoot, 'scripts/migration/activate-pg-candidate.py');
+const workflowPath = process.env.WORKFLOW_PATH || join(repositoryRoot, '.github/workflows/deploy-pg-incremental.yml');
+const python = process.env.PYTHON || process.env.PYTHON3 || 'python3';
 const workflow = readFileSync(workflowPath, 'utf8');
 const activatorSource = readFileSync(activator, 'utf8');
 const adapterSource = readFileSync(adapter, 'utf8');

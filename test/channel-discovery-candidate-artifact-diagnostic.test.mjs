@@ -7,18 +7,15 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const candidateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const repositoryRoot = path.resolve(candidateRoot, "..");
 const diagnosticPath = path.join(
   candidateRoot,
   "scripts",
   "channel-discovery-candidate-artifact-diagnostic.jq",
 );
-const authoritativeGate = spawnSync(
-  "git",
-  ["show", "0e670fd15cc960e3b1cac43bc89bd76164a4e5a6:scripts/channel-discovery-candidate-artifact-gate.jq"],
-  { cwd: repositoryRoot, encoding: "utf8" },
+const authoritativeGateSource = fs.readFileSync(
+  path.join(candidateRoot, "scripts", "channel-discovery-candidate-artifact-gate.jq"),
+  "utf8",
 );
-assert.equal(authoritativeGate.status, 0, authoritativeGate.stderr);
 const sourceCommit = "a".repeat(40);
 const channelId = "UCAAAAAAAAAAAAAAAAAAAAAA";
 const channelHandle = "@fixture_channel";
@@ -146,7 +143,7 @@ function runDiagnostic(value) {
     fs.writeFileSync(manifestPath, `${JSON.stringify(value.manifest)}\n`);
     fs.writeFileSync(checkpointPath, `${JSON.stringify(value.checkpoint)}\n`);
     fs.writeFileSync(recordsPath, value.records.map((record) => JSON.stringify(record)).join("\n") + "\n");
-    fs.writeFileSync(authoritativeGatePath, authoritativeGate.stdout);
+    fs.writeFileSync(authoritativeGatePath, authoritativeGateSource);
     const commonArgs = [
       "-s",
       "--arg", "expectedSourceCommit", sourceCommit,
