@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-02T15:15:18.796Z",
+  "generatedAt": "2026-08-02T18:37:25.188Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-02T15:15:18.796Z",
+    "fetchedAt": "2026-08-02T18:37:25.188Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-02T15:15:18.796Z",
+    "generatedAt": "2026-08-02T18:37:25.188Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1016,
-      "parseableChannels": 994,
+      "totalChannels": 1017,
+      "parseableChannels": 995,
       "realAvatar": 645,
-      "thumbnailFallback": 371,
+      "thumbnailFallback": 372,
       "missingDisplayImage": 0,
-      "missingAvatar": 371,
+      "missingAvatar": 372,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 563
+      "skipped_collected_evidence": 564
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 541,
+      "batch_limit_reached": 542,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11723,6 +11723,13 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mayoielena",
+        "channelId": "UCFTXAOZwu4RDbaZdQZB8MvQ",
+        "displayName": "未宵エレナ Mayoi Elena ch",
+        "sourceUrl": "https://www.youtube.com/@mayoielena",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCZraj85SULrawKpNdiH1pGw",
         "displayName": "菓嫁アツナ",
         "sourceUrl": "https://www.youtube.com/@atsuna717",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
-        "channelId": "UC028TablIiJZW_P8DqgnX9Q",
-        "displayName": "灼楽えん-syakura en-",
-        "sourceUrl": "https://www.youtube.com/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
         "reason": "batch_limit_reached"
       }
     ]
