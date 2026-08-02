@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-02T03:43:24.967Z",
+  "generatedAt": "2026-08-02T09:22:14.072Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-02T03:43:24.967Z",
+    "fetchedAt": "2026-08-02T09:22:14.072Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-02T03:43:24.967Z",
+    "generatedAt": "2026-08-02T09:22:14.072Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1011,
-      "parseableChannels": 989,
+      "totalChannels": 1012,
+      "parseableChannels": 990,
       "realAvatar": 643,
-      "thumbnailFallback": 368,
+      "thumbnailFallback": 369,
       "missingDisplayImage": 0,
-      "missingAvatar": 368,
+      "missingAvatar": 369,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 665,
-      "skipped_collected_evidence": 560
+      "skipped_collected_evidence": 561
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 538,
+      "batch_limit_reached": 539,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11681,6 +11681,13 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@yukiniwa9996",
+        "channelId": "UC8tHkrGhnSrUHXZ5-qi2AtA",
+        "displayName": "雪ニワ - yukiniwa -",
+        "sourceUrl": "https://www.youtube.com/@yukiniwa9996",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
         "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
         "sourceUrl": "https://www.youtube.com/@teikobonbonch3548",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@akari0415",
-        "channelId": "UC7wZb5INldbGweowOhBIs8Q",
-        "displayName": "石狩あかり/あおぎり高校",
-        "sourceUrl": "https://www.youtube.com/@akari0415",
         "reason": "batch_limit_reached"
       }
     ]

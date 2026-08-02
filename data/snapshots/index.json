@@ -1,20 +1,34 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-02T03:43:06.858Z",
+  "generatedAt": "2026-08-02T09:22:02.905Z",
   "retentionPolicy": "permanent",
   "retentionDays": null,
   "cadence": "hourly",
-  "latestSnapshotId": "20260802T030000Z",
-  "snapshotCount": 2,
+  "latestSnapshotId": "20260802T090000Z",
+  "snapshotCount": 3,
   "shards": [
     {
       "id": "2026-08",
       "path": "data/snapshots/index/2026/08.json",
-      "snapshotCount": 2,
-      "latestSnapshotId": "20260802T030000Z"
+      "snapshotCount": 3,
+      "latestSnapshotId": "20260802T090000Z"
     }
   ],
   "snapshots": [
+    {
+      "id": "20260802T090000Z",
+      "file": "20260802T090000Z.json",
+      "path": "data/snapshots/20260802T090000Z.json",
+      "generatedAt": "2026-08-02T09:21:46.527Z",
+      "capturedAt": "2026-08-02T09:21:46.527Z",
+      "curationVersion": "curation-v1:9edbc1fcd3da",
+      "curationHash": "9edbc1fcd3da7840be9f121577ecb3da17f8d08b670d24b919f6fe0655f05100",
+      "label": "08/02 下午05:21",
+      "itemCounts": {
+        "7d": 99,
+        "all": 2056
+      }
+    },
     {
       "id": "20260802T030000Z",
       "file": "20260802T030000Z.json",
