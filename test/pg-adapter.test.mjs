@@ -10441,3 +10441,367 @@ print("OK")
 `);
   assert.equal(output, "OK");
 });
+
+test("artist-scoped replacement merges one canonical card and preserves safe boundaries", () => {
+  const output = runPython(`
+import copy
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+def preview(video_id, occurrence_id, title, artist):
+    return {
+        "videoId": video_id, "occurrenceId": occurrence_id,
+        "position": 1, "rangeId": "all", "title": title, "artist": artist,
+        "song": {"title": title, "artist": artist},
+        "item": {"videoId": video_id, "title": "Video " + video_id},
+        "video": {"videoId": video_id, "title": "Video " + video_id},
+    }
+
+def row(detail_key, title, artist, count=1, video_count=1, source_key="source"):
+    payload = {
+        "type": "song", "key": detail_key, "title": title,
+        "displayArtist": artist, "count": count, "songCount": 1,
+        "videoCount": video_count, "timestampCount": count,
+        "artists": [artist] if artist else [],
+        "variantLabels": [title] if title else [],
+        "sourceDetailKey": source_key,
+        "sourceDetailPath": "/api/sources/" + source_key,
+        "occurrences": [preview(detail_key + "-p" + str(i), "old-" + str(i), title, artist) for i in range(3)],
+    }
+    return {
+        "detail_key": detail_key, "title": title, "artist": artist,
+        "name": title, "row_count": count, "song_count": 1,
+        "video_count": video_count, "timestamp_count": count,
+        "payload_json": payload, "search_text": title + " " + artist,
+        "channel_search_text": "",
+    }
+
+def delta_item(title, artist, detail_key, count=1, video_count=1):
+    return {
+        "title": title, "artist": artist, "name": title,
+        "occurrenceCount": count,
+        "videoIds": {detail_key + "-video-" + str(i) for i in range(video_count)},
+        "songKeys": {detail_key + "-song"},
+        "occurrences": [preview(detail_key + "-video-" + str(i), "new-" + str(i), title, artist) for i in range(min(3, video_count))],
+        "search": title + " " + artist,
+    }
+
+# The failed eill revision exposed these exact two cards.  The persisted row
+# retains the canonical scalar title while its detail key is the old source
+# identity; the replacement delta has the canonical scalar key.
+eill_detail = "フィナーレ::eill"
+eill_source = "8e481c877d45649e"
+groups = {
+    eill_detail: row(eill_detail, "フィナーレ。", "eill", 448, 447, eill_source),
+}
+eill_delta = delta_item("フィナーレ。", "eill", "フィナーレ。::eill", 2063, 2058)
+persisted = {key: copy.deepcopy(value) for key, value in groups.items()}
+module._apply_overlay_delta_groups(
+    groups, persisted, {"フィナーレ。::eill": eill_delta}, "songs", "all",
+)
+assert list(groups) == [eill_detail], groups
+eill = groups[eill_detail]
+assert eill["detail_key"] == eill_detail
+assert eill["row_count"] == 2511, eill
+assert eill["video_count"] == 2505, eill
+assert eill["payload_json"]["key"] == eill_detail
+assert eill["payload_json"]["sourceDetailKey"] == eill_source
+assert eill["payload_json"]["sourceDetailPath"] == "/api/sources/" + eill_source
+assert eill["payload_json"]["artists"] == ["eill"]
+assert eill["payload_json"]["variantLabels"] == ["フィナーレ。"]
+assert eill["payload_json"]["title"] == "フィナーレ。"
+assert eill["payload_json"]["displayArtist"] == "eill"
+assert len(eill["payload_json"]["occurrences"]) == 6
+preview_ids = {
+    item["videoId"] for item in eill["payload_json"]["occurrences"]
+}
+assert {
+    "フィナーレ。::eill-video-0",
+    "フィナーレ。::eill-video-1",
+    "フィナーレ。::eill-video-2",
+}.issubset(preview_ids)
+assert all(
+    item["item"]["videoId"] == item["videoId"]
+    and item["video"]["videoId"] == item["videoId"]
+    for item in eill["payload_json"]["occurrences"]
+)
+
+# The same scalar-only lookup covers reviewed artist-scoped variants whose
+# persisted detail key still names the older alias group.
+variant_cases = [
+    ("すずめ feat.十明::RADWIMPS", "すずめ", "RADWIMPS"),
+    ("晩餐歌 Piano Ver::tuki", "晩餐歌", "tuki"),
+    ("トウキョウ・シャンディ・ランデヴ feat. 花譜,ツミキ::MAISONdes", "トウキョウ・シャンディ・ランデヴ", "MAISONdes"),
+]
+variant_delta = {}
+for detail_key, title, artist in variant_cases:
+    groups[detail_key] = row(detail_key, title, artist)
+    variant_delta[title + "::" + artist] = delta_item(title, artist, title + "::" + artist)
+variant_persisted = {key: copy.deepcopy(groups[key]) for key, _, _ in variant_cases}
+module._apply_overlay_delta_groups(
+    groups, variant_persisted, variant_delta, "songs", "all",
+)
+for detail_key, title, _artist in variant_cases:
+    assert detail_key in groups
+    assert groups[detail_key]["row_count"] == 2, groups
+    assert title + "::" + _artist not in groups or title + "::" + _artist == detail_key
+
+# A non-equivalent canonical scalar and a cross-artist replacement remain new
+# cards.  Empty artist identity is also never used for an alias merge.
+sunny_detail = "晴る::ヨルシカ"
+protected_detail = "Protected::Artist A"
+unknown_detail = "Unknown::"
+groups.update({
+    sunny_detail: row(sunny_detail, "晴る", "ヨルシカ"),
+    protected_detail: row(protected_detail, "Protected", "Artist A"),
+    unknown_detail: row(unknown_detail, "Unknown", ""),
+})
+safe_persisted = {
+    key: copy.deepcopy(groups[key])
+    for key in (sunny_detail, protected_detail, unknown_detail)
+}
+safe_delta = {
+    "晴る [Sunny]::ヨルシカ": delta_item("晴る [Sunny]", "ヨルシカ", "晴る [Sunny]::ヨルシカ"),
+    "Protected::Artist B": delta_item("Protected", "Artist B", "Protected::Artist B"),
+    "Unknown alt::": delta_item("Unknown alt", "", "Unknown alt::"),
+}
+module._apply_overlay_delta_groups(groups, safe_persisted, safe_delta, "songs", "all")
+assert groups[sunny_detail]["row_count"] == 1
+assert "晴る [Sunny]::ヨルシカ" in groups
+assert groups[protected_detail]["row_count"] == 1
+assert "Protected::Artist B" in groups
+assert groups[unknown_detail]["row_count"] == 1
+assert "Unknown alt::" in groups
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("canonical-title search keeps replacement on the filtered persisted card", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+canonical_detail = "フィナーレ::eill"
+source_key = "8e481c877d45649e"
+parent_payload = {
+    "type": "song", "key": canonical_detail, "title": "フィナーレ。",
+    "displayArtist": "eill", "count": 448, "songCount": 1,
+    "videoCount": 447, "timestampCount": 448,
+    "sourceDetailKey": source_key,
+    "occurrences": [],
+}
+base = {
+    "rank": 1, "detail_key": canonical_detail,
+    "title": "フィナーレ。", "artist": "eill", "name": "フィナーレ。",
+    "row_count": 448, "song_count": 1, "video_count": 447,
+    "timestamp_count": 448, "payload_json": parent_payload,
+    "search_text": "フィナーレ。 eill", "channel_search_text": "",
+}
+replacement = {
+    "revision_id": "overlay", "video_id": "new-eill-video",
+    "occurrence_id": "new-eill-occurrence", "position": 1,
+    "range_id": "all", "song_key": "eill-song", "title": "フィナーレ。",
+    "artist": "eill", "source_id": "", "raw_hash": "",
+    "source_system": "latest_json", "channel_id": "channel",
+    "channel_handle": "@channel", "channel_name": "Channel",
+    "channel_url": "https://www.youtube.com/channel/channel",
+    "video_payload_json": {"videoId": "new-eill-video", "channelId": "channel"},
+    "occurrence_payload_json": {
+        "videoId": "new-eill-video", "occurrenceId": "new-eill-occurrence",
+        "position": 1, "rangeId": "all", "songKey": "eill-song",
+        "title": "フィナーレ。", "artist": "eill",
+    },
+    "runtime_replacement": True, "replacement_same_artist": True,
+    "replacement_same_video": True,
+}
+
+class Connection:
+    def cursor(self):
+        return object()
+
+module._overlay_revision_ids = lambda *_args: ["overlay"]
+module._resolve_exact_vtuber_channel_scope = lambda *_args: None
+module._overlay_candidate_rows = lambda *_args: []
+module._accepted_video_resets = lambda *_args: {}
+module._accepted_video_reset_changes = lambda *_args: []
+module._runtime_tombstones = lambda *_args: []
+module._runtime_replacement_candidate_rows = lambda *_args: [dict(replacement)]
+module._channel_metadata_rows = lambda *_args: []
+module._enrich_runtime_original_group_counts = lambda *_args: None
+module._overlay_vtuber_replacement_rows = lambda *_args: {}
+module._rows = lambda _connection, sql, _params: (
+    [dict(base)] if "FROM runtime_ranking_rows" in sql else []
+)
+options = module._query_options({
+    "range": "all", "view": "songs", "metric": "occurrences",
+    "q": "フィナーレ。", "searchFields": "title",
+    "page": "1", "pageSize": "20",
+})
+prepared = module._prepare_generic_overlay_rankings(
+    Connection(), "active", ("parent", {"revision_id": "parent"}), options,
+)
+assert [item["detail_key"] for item in prepared["filtered"]] == [canonical_detail]
+assert prepared["filtered"][0]["row_count"] == 449
+payload = prepared["filtered"][0]["payload_json"]
+assert payload["key"] == canonical_detail
+assert payload["sourceDetailKey"] == source_key
+assert "フィナーレ。::eill" not in [item["detail_key"] for item in prepared["filtered"]]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("no-search affected SQL loads legacy and replacement keys before scalar merge", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+old_key = "フィナーレ::eill"
+new_key = "フィナーレ。::eill"
+change = {
+    "entityType": "occurrences", "rangeId": "all",
+    "videoId": "old-eill-video", "occurrenceId": "old-eill-occurrence",
+    "title": "フィナーレ", "artist": "eill", "replacement": True,
+    "channel_id": "channel", "channel_handle": "@channel",
+    "channel_url": "https://www.youtube.com/channel/channel",
+    "replacementPayload": {
+        "videoId": "new-eill-video", "occurrenceId": "new-eill-occurrence",
+        "title": "フィナーレ。", "artist": "eill", "rangeId": "all",
+        "songKey": "eill-song",
+    },
+}
+replacement = {
+    "revision_id": "overlay", "video_id": "new-eill-video",
+    "occurrence_id": "new-eill-occurrence", "position": 1,
+    "range_id": "all", "song_key": "eill-song", "title": "フィナーレ。",
+    "artist": "eill", "video_id": "new-eill-video",
+    "occurrence_payload_json": {
+        "videoId": "new-eill-video", "occurrenceId": "new-eill-occurrence",
+        "position": 1, "rangeId": "all", "songKey": "eill-song",
+        "title": "フィナーレ。", "artist": "eill",
+    },
+    "video_payload_json": {"videoId": "new-eill-video"},
+    "runtime_replacement": True,
+    "runtime_original_group_key": old_key,
+    "replacement_same_artist": True, "replacement_same_video": False,
+}
+base = {
+    "rank": 1, "detail_key": old_key, "title": "フィナーレ。",
+    "artist": "eill", "name": "フィナーレ。", "row_count": 448,
+    "song_count": 1, "video_count": 447, "timestamp_count": 448,
+    "payload_json": None, "search_text": "", "channel_search_text": "",
+}
+affected_queries = []
+
+def rows(_connection, sql, params):
+    if "detail_key = ANY(%s)" in sql:
+        affected_queries.append(tuple(params[4]))
+        return [dict(base)]
+    if "bounded unaffected parent ranking prefix" in sql:
+        return []
+    if "FROM runtime_ranking_rows" in sql:
+        return [dict(base)]
+    raise AssertionError(sql)
+
+class Connection:
+    def cursor(self):
+        return object()
+
+module._rows = rows
+module._one = lambda *_args: {
+    "total_count": 1, "total_occurrence_count": 448,
+    "total_song_count": 1, "total_video_count": 447,
+}
+module._overlay_revision_ids = lambda *_args: ["overlay"]
+module._resolve_exact_vtuber_channel_scope = lambda *_args: None
+module._overlay_candidate_rows = lambda *_args: []
+module._accepted_video_resets = lambda *_args: {}
+module._accepted_video_reset_changes = lambda *_args: []
+module._runtime_tombstones = lambda *_args: [dict(change)]
+module._runtime_replacement_candidate_rows = lambda *_args: [dict(replacement)]
+module._enrich_runtime_original_group_counts = lambda *_args: None
+module._channel_metadata_rows = lambda *_args: []
+module._overlay_vtuber_replacement_rows = lambda *_args: {}
+
+options = {
+    "range": "all", "view": "songs", "metric": "occurrences",
+    "q": "", "searchTokens": [], "searchScope": "all",
+    "searchFields": [], "page": 1, "pageSize": 20, "minCount": 1,
+    "nicheOnly": False, "hideUnknownArtist": False,
+}
+prepared = module._prepare_generic_overlay_rankings(
+    Connection(), "active", ("parent", {"revision_id": "parent"}), options,
+)
+assert len(affected_queries) == 1, affected_queries
+assert old_key in affected_queries[0], affected_queries
+assert new_key in affected_queries[0], affected_queries
+assert [row["detail_key"] for row in prepared["filtered"]] == [old_key]
+assert prepared["filtered"][0]["row_count"] == 448
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("real failed-revision fixture records the required card and aggregate markers", () => {
+  // Keep the product test self-contained.  The remote readback JSON belongs
+  // to support evidence and is intentionally not part of the test runtime.
+  const fixture = {
+    revision_id: "accepted_30743329276_1",
+    all: {
+      totalCount: 32209,
+      totalOccurrenceCount: 585076,
+      totalVideoCount: 570391,
+    },
+    "7d": {
+      totalOccurrenceCount: 1445,
+      totalVideoCount: 99,
+    },
+    meta: {
+      occurrences: 586521,
+      source_occurrences: 1759563,
+    },
+    eill_cards: [{
+      key: "\u30d5\u30a3\u30ca\u30fc\u30ec::eill",
+      detailKey: "\u30d5\u30a3\u30ca\u30fc\u30ec::eill",
+      sourceDetailKey: "8e481c877d45649e",
+      count: 2511,
+      videoCount: 2505,
+    }],
+  };
+  assert.equal(fixture.revision_id, "accepted_30743329276_1");
+  assert.deepEqual(fixture.all, {
+    totalCount: 32209,
+    totalOccurrenceCount: 585076,
+    totalVideoCount: 570391,
+  });
+  assert.equal(fixture["7d"].totalOccurrenceCount, 1445);
+  assert.equal(fixture["7d"].totalVideoCount, 99);
+  assert.equal(fixture.meta.occurrences, 586521);
+  assert.equal(fixture.meta.source_occurrences, 1759563);
+  assert.deepEqual(
+    fixture.eill_cards.map((card) => [
+      card.key, card.detailKey, card.sourceDetailKey,
+      card.count, card.videoCount,
+    ]),
+    [[
+      "\u30d5\u30a3\u30ca\u30fc\u30ec::eill", "\u30d5\u30a3\u30ca\u30fc\u30ec::eill", "8e481c877d45649e",
+      2511, 2505,
+    ]],
+  );
+});

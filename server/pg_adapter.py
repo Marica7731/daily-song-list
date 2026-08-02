@@ -3807,6 +3807,137 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
     return groups
 
 
+def _canonical_overlay_delta_group_key(
+    groups: Mapping[str, Mapping[str, Any]],
+    persisted_rows: Mapping[str, Mapping[str, Any]],
+    replacement_key: str,
+    item: Mapping[str, Any],
+    view: str,
+) -> str:
+    """Route a replacement to one matching affected persisted scalar row.
+
+    The accepted replacement title/artist is the canonical scalar identity.
+    Only the bounded affected parent rows are eligible, and a match must be
+    unique.  This deliberately does not use the old/original group key: an
+    alias can have a different persisted key even when its replacement belongs
+    to an existing canonical card.
+    """
+
+    if view not in {"songs", "songIndex", "vsingerSongs"}:
+        return replacement_key
+    replacement_identity = (
+        _overlay_song_group_norm(item.get("title")),
+        _overlay_song_group_norm(item.get("artist")),
+    )
+    if not replacement_identity[0] or not replacement_identity[1]:
+        return replacement_key
+    matches: set[str] = set()
+    for mapping_key, row in persisted_rows.items():
+        row_identity = (
+            _overlay_song_group_norm(row.get("title")),
+            _overlay_song_group_norm(row.get("artist")),
+        )
+        if row_identity != replacement_identity:
+            continue
+        detail_key = _text(row.get("detail_key")) or _text(mapping_key)
+        if detail_key and detail_key in groups:
+            matches.add(detail_key)
+    return next(iter(matches)) if len(matches) == 1 else replacement_key
+
+
+def _apply_overlay_delta_groups(
+    groups: dict[str, dict[str, Any]],
+    persisted_rows: Mapping[str, Mapping[str, Any]],
+    delta: Mapping[str, Mapping[str, Any]],
+    view: str,
+    range_id: str,
+    exact_vtuber_rows: Mapping[str, Mapping[str, Any]] | None = None,
+) -> None:
+    """Apply bounded candidate deltas without losing canonical parent identity."""
+
+    exact_vtuber_rows = exact_vtuber_rows or {}
+    for key, item in delta.items():
+        if key in exact_vtuber_rows:
+            continue
+        target_key = _canonical_overlay_delta_group_key(
+            groups, persisted_rows, key, item, view,
+        )
+        row = groups.get(target_key)
+        if row is None:
+            count = int(item.get("occurrenceCount", len(item["occurrences"])))
+            video_count = len(item["videoIds"])
+            song_count = len(item["songKeys"])
+            payload = {
+                "type": "video" if view == "videos" else "artist" if view == "artists" else "vtuber" if view == "vtubers" else "song",
+                "key": target_key, "title": item["title"], "displayArtist": item["artist"],
+                "name": item["name"], "count": count, "videoCount": video_count,
+                "songCount": song_count, "timestampCount": count,
+                "occurrences": item["occurrences"][:20],
+            }
+            source_detail_key = _production_source_detail_key_for_group(
+                view, range_id, target_key,
+            )
+            if source_detail_key:
+                payload["sourceDetailKey"] = source_detail_key
+                payload["sourceDetailPath"] = ""
+            groups[target_key] = {
+                "detail_key": target_key, "title": item["title"],
+                "artist": item["artist"], "name": item["name"],
+                "row_count": count, "song_count": song_count,
+                "video_count": video_count, "timestamp_count": count,
+                "payload_json": payload, "search_text": item["search"],
+                "channel_search_text": item["search"],
+            }
+            continue
+
+        row["row_count"] = int(row.get("row_count") or 0) + int(
+            item.get("occurrenceCount", len(item["occurrences"]))
+        )
+        if view in {"songs", "songIndex", "vsingerSongs"}:
+            # These views already represent one canonical title/artist song
+            # group.  A full-video refresh can remove one video's tuples while
+            # another video keeps the group alive; do not count that song twice.
+            row["song_count"] = max(
+                int(row.get("song_count") or 0), len(item["songKeys"]),
+            )
+        else:
+            row["song_count"] = int(row.get("song_count") or 0) + len(
+                item["songKeys"]
+            )
+        row["video_count"] = int(row.get("video_count") or 0) + len(
+            item["videoIds"]
+        )
+        row["timestamp_count"] = int(row.get("timestamp_count") or 0) + int(
+            item.get("occurrenceCount", len(item["occurrences"]))
+        )
+        payload = _json_object(row.get("payload_json"))
+        if payload:
+            payload.update({
+                "count": row["row_count"],
+                "songCount": row["song_count"],
+                "videoCount": row["video_count"],
+                "timestampCount": row["timestamp_count"],
+            })
+            if isinstance(payload.get("occurrences"), list):
+                payload["occurrences"] = _bounded_overlay_previews(
+                    (*payload["occurrences"], *item["occurrences"]),
+                )
+            row["payload_json"] = payload
+        elif item["occurrences"]:
+            # The bounded scalar parent deliberately has no JSON payload.
+            # Retain only the public preview tuples needed by a returned card;
+            # render hydrates them against the exact parent payload.
+            deferred = row.get("_deferred_candidate_previews", ())
+            if not isinstance(deferred, (list, tuple)):
+                raise PostgresAdapterError(
+                    "deferred candidate preview state is invalid"
+                )
+            row["_deferred_candidate_previews"] = _bounded_overlay_previews(
+                (*deferred, *item["occurrences"]),
+            )
+        row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
+
+
 def _overlay_rows_for_range(
     rows: Iterable[Mapping[str, Any]], range_id: str,
 ) -> list[Mapping[str, Any]]:
@@ -6334,6 +6465,18 @@ def _prepare_generic_overlay_rankings(
         base_params,
     )
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
+    # Search requests do not enter the bounded no-search affected window.
+    # Snapshot their filtered parent scalar identities before any tombstone or
+    # candidate mutation so canonical replacement lookup remains available.
+    filtered_persisted_scalar_rows = {
+        key: {
+            "detail_key": row.get("detail_key"),
+            "title": row.get("title"),
+            "artist": row.get("artist"),
+        }
+        for key, row in groups.items()
+        if key
+    }
     phase_started = _phase_trace("base", phase_started)
     direct_overlay_revision_ids = (
         tuple(overlay_ids)
@@ -7101,68 +7244,15 @@ def _prepare_generic_overlay_rankings(
         for key, row in exact_vtuber_rows.items():
             if int(row.get("row_count") or 0) == 0:
                 groups.pop(key, None)
-    for key, item in delta.items():
-        if key in exact_vtuber_rows:
-            continue
-        row = groups.get(key)
-        if row is None:
-            count = int(item.get("occurrenceCount", len(item["occurrences"])))
-            video_count = len(item["videoIds"])
-            song_count = len(item["songKeys"])
-            payload = {
-                "type": "video" if options["view"] == "videos" else "artist" if options["view"] == "artists" else "vtuber" if options["view"] == "vtubers" else "song",
-                "key": key, "title": item["title"], "displayArtist": item["artist"],
-                "name": item["name"], "count": count, "videoCount": video_count,
-                "songCount": song_count, "timestampCount": count,
-                "occurrences": item["occurrences"][:20],
-            }
-            source_detail_key = _production_source_detail_key_for_group(
-                options["view"], options["range"], key,
-            )
-            if source_detail_key:
-                payload["sourceDetailKey"] = source_detail_key
-                payload["sourceDetailPath"] = ""
-            row = {"detail_key": key, "title": item["title"], "artist": item["artist"], "name": item["name"], "row_count": count, "song_count": song_count, "video_count": video_count, "timestamp_count": count, "payload_json": payload, "search_text": item["search"], "channel_search_text": item["search"]}
-            groups[key] = row
-        else:
-            row["row_count"] = int(row.get("row_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
-            if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
-                # These views already represent one canonical title/artist
-                # song group.  A full-video refresh can remove one video's
-                # tuples while another video keeps the group alive; adding
-                # the refreshed tuples must not count that same song twice.
-                row["song_count"] = max(
-                    int(row.get("song_count") or 0),
-                    len(item["songKeys"]),
-                )
-            else:
-                row["song_count"] = int(row.get("song_count") or 0) + len(item["songKeys"])
-            row["video_count"] = int(row.get("video_count") or 0) + len(item["videoIds"])
-            row["timestamp_count"] = int(row.get("timestamp_count") or 0) + int(item.get("occurrenceCount", len(item["occurrences"])))
-            payload = _json_object(row.get("payload_json"))
-            if payload:
-                payload.update({"count": row["row_count"], "songCount": row["song_count"], "videoCount": row["video_count"], "timestampCount": row["timestamp_count"]})
-                if isinstance(payload.get("occurrences"), list):
-                    payload["occurrences"] = _bounded_overlay_previews(
-                        (*payload["occurrences"], *item["occurrences"]),
-                    )
-                row["payload_json"] = payload
-            elif item["occurrences"]:
-                # The bounded scalar parent deliberately has no JSON payload.
-                # Retain only the public preview tuples needed by a returned
-                # card; render will merge them into the exact parent payload
-                # and hydrate their immutable video/occurrence identities.
-                deferred = row.get("_deferred_candidate_previews", ())
-                if not isinstance(deferred, (list, tuple)):
-                    raise PostgresAdapterError(
-                        "deferred candidate preview state is invalid"
-                    )
-                row["_deferred_candidate_previews"] = (
-                    _bounded_overlay_previews(
-                        (*deferred, *item["occurrences"]),
-                    )
-                )
-            row["search_text"] = f"{row.get('search_text', '')} {item['search']}"
+    persisted_scalar_rows = (
+        bounded_original_affected
+        if bounded_no_search
+        else filtered_persisted_scalar_rows
+    )
+    _apply_overlay_delta_groups(
+        groups, persisted_scalar_rows, delta,
+        options["view"], options["range"], exact_vtuber_rows,
+    )
     if options["view"] != "vtubers":
         _apply_runtime_tombstone_groups(
             groups, generic_runtime_changes, options["view"],
