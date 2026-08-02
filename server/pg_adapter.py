@@ -1278,6 +1278,25 @@ def _overlay_candidate_rows(
     return resolved
 
 
+def _is_partial_range_video_row(row: Mapping[str, Any]) -> bool:
+    """Identify the reviewed 7D metadata-only video-row contract."""
+
+    if "partial_range_reset" in row or "partial_range_id" in row:
+        return (
+            row.get("partial_range_reset") is True
+            and _text(row.get("partial_range_id")) == "7d"
+        )
+    raw_payload = row.get("payload_json")
+    if raw_payload is None:
+        return False
+    payload = _json_object(raw_payload)
+    if isinstance(payload.get("payload"), Mapping):
+        payload = dict(payload["payload"])
+    return payload.get("partialRangeReset") is True and _text(
+        payload.get("rangeId") or payload.get("range")
+    ) == "7d"
+
+
 def _accepted_video_resets(
     connection, revision_ids: Sequence[str], include_payload: bool = True,
     strict_video_id: bool = False,
@@ -1321,7 +1340,9 @@ def _accepted_video_resets(
         f"""
         SELECT revision_id, video_id, title AS video_title, channel_name,
                channel_id, channel_handle, channel_url, published_at,
-               tombstone, {payload} AS payload_json
+               tombstone, {payload} AS payload_json,
+               (payload_json->>'partialRangeReset' = 'true') AS partial_range_reset,
+               payload_json->>'rangeId' AS partial_range_id
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
           {scope_clause}
@@ -1336,6 +1357,8 @@ def _accepted_video_resets(
         )
     selected: dict[str, dict[str, Any]] = {}
     for row in sorted(rows, key=lambda item: priority.get(_text(item.get("revision_id")), len(priority))):
+        if _is_partial_range_video_row(row):
+            continue
         video_id = _text(row.get("video_id"))
         if not video_id and strict_video_id:
             raise PostgresAdapterError("VTuber accepted video reset is missing required immutable identity")
@@ -7685,6 +7708,13 @@ def _hydrated_generic_ranking_payload(
         requires_canonical_hydration
         and view in {"songs", "songIndex", "vsingerSongs"}
     ):
+        if not parent_stored_found:
+            # The parent revision has no stored payload at all for this
+            # card; a counts-only affected card cannot be hydrated and
+            # must fail closed before the legacy degradation path.
+            raise PostgresAdapterError(
+                "generic ranking payload hydration is incomplete"
+            )
         # The parent stored payload may be a legacy scalar-only card without
         # a hydrated occurrences list (e.g. a legacy VSinger Moment row whose
         # parent revision never persisted full occurrences), or an empty
@@ -7749,13 +7779,6 @@ def _hydrated_generic_ranking_payload(
         and not hydration_degraded
         and not _generic_ranking_payload_is_complete(payload, row, view)
     ):
-        if not parent_stored_found:
-            # The parent revision has no stored payload at all for this
-            # card; a counts-only affected card cannot be hydrated and
-            # must fail closed.
-            raise PostgresAdapterError(
-                "generic ranking payload hydration is incomplete"
-            )
         # The parent stored payload exists but is incomplete (legacy
         # VSinger Moment scalar card, stale schema, etc).  Degrade to an
         # empty-occurrences card with the reviewed scalar identity
@@ -8082,15 +8105,34 @@ def _load_generic_runtime_snapshot(connection, revision_id: str, revision: Mappi
     else:
         overlay_lineage = _revision_lineage(connection, revision_id)
 
+    authoritative_7d_ids = _authoritative_7d_overlay_ids(
+        connection, overlay_lineage,
+    )
+    authoritative_7d_reset = (
+        authoritative_7d_ids[-1] if authoritative_7d_ids else ""
+    )
     for revision_key in reversed(overlay_lineage):
+        if revision_key == authoritative_7d_reset:
+            for video_id in list(occurrences):
+                occurrences[video_id] = [
+                    item for item in occurrences[video_id]
+                    if _text(item.get("rangeId")) not in {"7d", ""}
+                ]
         video_rows = _rows(connection, "SELECT video_id, title, channel_name, channel_id, channel_handle, channel_url, published_at, tombstone, payload_json FROM migration_video_rows WHERE revision_id = %s", [revision_key])
         occurrence_rows = _rows(connection, "SELECT video_id, occurrence_key, occurrence_id, position, range_id, song_key, seconds, title, artist, source_id, raw_hash, source_system, payload_json FROM migration_occurrence_rows WHERE revision_id = %s ORDER BY video_id, position, occurrence_key", [revision_key])
-        replacement_ids = { _text(row.get("video_id")) for row in video_rows }
+        partial_video_ids = {
+            _text(row.get("video_id"))
+            for row in video_rows if _is_partial_range_video_row(row)
+        }
+        replacement_ids = {
+            _text(row.get("video_id"))
+            for row in video_rows if not _is_partial_range_video_row(row)
+        }
         for video_id in replacement_ids:
             occurrences[video_id] = []
         for row in video_rows:
             video_id = _text(row.get("video_id"))
-            if row.get("tombstone"):
+            if row.get("tombstone") and video_id not in partial_video_ids:
                 videos.pop(video_id, None)
                 occurrences.pop(video_id, None)
                 continue
@@ -8099,10 +8141,22 @@ def _load_generic_runtime_snapshot(connection, revision_id: str, revision: Mappi
                 payload = dict(payload["payload"])
             payload.update({"videoId": video_id, "title": payload.get("title", row.get("title")), "channelName": payload.get("channelName", row.get("channel_name")), "channelId": payload.get("channelId", row.get("channel_id")), "channelHandle": payload.get("channelHandle", row.get("channel_handle")), "channelUrl": payload.get("channelUrl", row.get("channel_url")), "publishedAt": payload.get("publishedAt", row.get("published_at"))})
             videos[video_id] = payload
+        accepted_range_identities: set[tuple[str, str, str]] = set()
         for row in occurrence_rows:
             video_id = _text(row.get("video_id"))
+            occurrence_id = _text(row.get("occurrence_id"))
+            range_id = _text(row.get("range_id"))
             payload = _json_object(row.get("payload_json"))
             payload.update({"videoId": video_id, "occurrenceId": row.get("occurrence_id"), "position": row.get("position"), "rangeId": row.get("range_id"), "songKey": row.get("song_key"), "seconds": row.get("seconds"), "title": row.get("title"), "artist": row.get("artist"), "sourceId": row.get("source_id"), "rawHash": row.get("raw_hash"), "sourceSystem": row.get("source_system")})
+            accepted_range_identities.add((video_id, occurrence_id, range_id))
+            if video_id in partial_video_ids:
+                occurrences[video_id] = [
+                    item for item in occurrences.get(video_id, [])
+                    if not (
+                        _text(item.get("occurrenceId")) == occurrence_id
+                        and _text(item.get("rangeId")) == range_id
+                    )
+                ]
             occurrences[video_id].append(payload)
 
         rows_by_key: dict[tuple[str, str], dict[str, Any]] = {}
@@ -8127,7 +8181,13 @@ def _load_generic_runtime_snapshot(connection, revision_id: str, revision: Mappi
                 if not video_id:
                     continue
                 occurrence_id = _text(_runtime_payload_field(payload, row, "occurrenceId", "occurrence_id")) or _text(row.get("entity_key"))
-                existing = [item for item in occurrences[video_id] if _text(item.get("occurrenceId")) != occurrence_id]
+                range_id = _text(_runtime_payload_field(payload, row, "rangeId", "range_id"))
+                if row.get("tombstone") and (video_id, occurrence_id, range_id) in accepted_range_identities:
+                    continue
+                existing = [item for item in occurrences[video_id] if not (
+                    _text(item.get("occurrenceId")) == occurrence_id
+                    and _text(item.get("rangeId")) == range_id
+                )]
                 if not row.get("tombstone"):
                     position = _runtime_payload_field(payload, row, "position")
                     try: position = int(position)
@@ -8400,6 +8460,14 @@ def _load_snapshot(connection) -> _Snapshot:
             raise PostgresAdapterError(f"active revision does not exist: {current}")
         lineage.append(row)
         current = _text(row.get("parent_revision_id"))
+
+    active_manifest = _json_object(lineage[0].get("manifest_json")) if lineage else {}
+    if (
+        active_manifest.get("rangeReset") is True
+        and active_manifest.get("partialVideoRows") is True
+        and _text(active_manifest.get("authoritativeRange")) == "7d"
+    ):
+        return _load_generic_runtime_snapshot(connection, revision_id, lineage[0])
 
     videos: dict[str, dict[str, Any]] = {}
     occurrences: dict[str, list[dict[str, Any]]] = {}
@@ -9750,12 +9818,174 @@ def _generic_overlay_song_source_for_key(
     )
 
 
+def _authoritative_7d_overlay_ids(
+    connection, overlay_revision_ids: Sequence[str],
+) -> tuple[str, ...]:
+    """Return descendants through the newest reviewed 7D boundary."""
+
+    revision_ids = tuple(
+        _text(value) for value in overlay_revision_ids if _text(value)
+    )
+    if not revision_ids or not hasattr(connection, "cursor"):
+        return ()
+    rows = _rows(
+        connection,
+        """SELECT revision_id, manifest_json FROM migration_revisions
+           WHERE revision_id = ANY(%s) ORDER BY revision_id LIMIT %s""",
+        [list(revision_ids), len(revision_ids) + 1],
+    )
+    if len(rows) > len(revision_ids):
+        raise PostgresAdapterError(
+            "authoritative 7d manifest lookup exceeded lineage bound"
+        )
+    manifests = {
+        _text(row.get("revision_id")): _json_object(row.get("manifest_json"))
+        for row in rows
+    }
+    for index, revision_key in enumerate(revision_ids):
+        manifest = manifests.get(revision_key, {})
+        if (
+            manifest.get("handoffKind")
+                == "github-core-7d-authoritative-range"
+            and manifest.get("rangeReset") is True
+            and manifest.get("partialVideoRows") is True
+            and manifest.get("authoritativeRange") == "7d"
+            and manifest.get("rangeResetAppliedBy")
+                == "pg-adapter-authoritative-range-boundary-v2"
+            and manifest.get("rangeBoundaryMutationCount") == 1
+            and manifest.get("rangeResetTombstoneCount") == 0
+        ):
+            return revision_ids[: index + 1]
+    return ()
+
+
+def _authoritative_7d_records(
+    connection, overlay_revision_ids: Sequence[str],
+) -> tuple[dict[str, Any], ...]:
+    """Resolve the bounded post-boundary 7D tuples without the full parent."""
+
+    authoritative_ids = _authoritative_7d_overlay_ids(
+        connection, overlay_revision_ids,
+    )
+    if not authoritative_ids:
+        return ()
+    candidate_rows = tuple(_overlay_rows_for_range(
+        _overlay_candidate_rows(connection, authoritative_ids), "7d",
+    ))
+    if len(candidate_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "authoritative 7d candidate exceeded bounded occurrence cap"
+        )
+    accepted_resets = _accepted_video_resets(
+        connection, authoritative_ids, False,
+    )
+    changes = tuple(_overlay_rows_for_range(
+        _runtime_tombstones(
+            connection,
+            authoritative_ids,
+            accepted_resets.values() if accepted_resets else None,
+            candidate_rows,
+        ),
+        "7d",
+    ))
+    effective: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in candidate_rows:
+        if row.get("video_tombstone"):
+            continue
+        record = _overlay_source_record(row)
+        if not record:
+            continue
+        occurrence = record["occurrences"][0]
+        identity = (
+            _text(occurrence.get("videoId")),
+            _text(occurrence.get("occurrenceId")),
+        )
+        if not all(identity):
+            raise PostgresAdapterError(
+                "authoritative 7d candidate is missing immutable identity"
+            )
+        if identity in effective:
+            raise PostgresAdapterError(
+                "authoritative 7d candidate repeats immutable identity"
+            )
+        effective[identity] = record
+    for change in changes:
+        identity = (
+            _text(change.get("videoId") or change.get("video_id")),
+            _text(change.get("occurrenceId") or change.get("occurrence_id")),
+        )
+        if all(identity):
+            effective.pop(identity, None)
+    for row in _runtime_replacement_candidate_rows(changes):
+        record = _overlay_source_record(row)
+        if not record:
+            continue
+        occurrence = record["occurrences"][0]
+        identity = (
+            _text(occurrence.get("videoId")),
+            _text(occurrence.get("occurrenceId")),
+        )
+        if all(identity):
+            effective[identity] = record
+    grouped: dict[str, dict[str, Any]] = {}
+    for identity, record in sorted(effective.items()):
+        video_id = identity[0]
+        current = grouped.get(video_id)
+        if current is None:
+            grouped[video_id] = {
+                "video": dict(record["video"]),
+                "occurrences": [dict(record["occurrences"][0])],
+            }
+        else:
+            if _text(current["video"].get("channelId")) != _text(
+                record["video"].get("channelId")
+            ):
+                raise PostgresAdapterError(
+                    "authoritative 7d video has conflicting channel identity"
+                )
+            current["occurrences"].append(
+                dict(record["occurrences"][0])
+            )
+    records = tuple(
+        {
+            "video": item["video"],
+            "occurrences": tuple(sorted(
+                item["occurrences"],
+                key=lambda occurrence: (
+                    int(occurrence.get("position") or 0),
+                    _text(occurrence.get("occurrenceId")),
+                ),
+            )),
+        }
+        for _video_id, item in sorted(grouped.items())
+    )
+    if not records or not any(record["occurrences"] for record in records):
+        raise PostgresAdapterError(
+            "authoritative 7d boundary resolved to an empty projection"
+        )
+    return records
+
+
 def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
         return _runtime_rankings_payload(connection, runtime[0], query)
     generic_runtime = _generic_runtime_projection_revision(connection)
     if generic_runtime:
+        parent = _generic_parent_runtime_revision(
+            connection, generic_runtime[0], generic_runtime[1],
+        )
+        if parent:
+            overlay_ids = _overlay_revision_ids(
+                connection, generic_runtime[0], parent[0],
+            )
+            if (
+                _query_options(query).get("range") == "7d"
+                and _authoritative_7d_overlay_ids(connection, overlay_ids)
+            ):
+                return rankings_payload_from_records(
+                    _authoritative_7d_records(connection, overlay_ids), query,
+                )
         return _generic_overlay_rankings_payload(connection, generic_runtime[0], generic_runtime[1], query)
     snapshot = _load_snapshot(connection)
     return rankings_payload_from_records(snapshot.records, query)
@@ -9846,9 +10076,28 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
         parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
         if parent:
             overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent[0])
+            authoritative_7d_ids = _authoritative_7d_overlay_ids(
+                connection, overlay_ids,
+            )
+            authoritative_7d = (
+                source_payload_from_records(
+                    _authoritative_7d_records(connection, overlay_ids), key, query,
+                )
+                if (
+                    authoritative_7d_ids
+                    and _query_options(query).get("range") == "7d"
+                )
+                else None
+            )
+            if authoritative_7d and authoritative_7d.get("found"):
+                return authoritative_7d
             persisted = _runtime_source_payload(connection, parent[0], key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
             if persisted.get("found"):
                 persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                if authoritative_7d_ids and _text(
+                    persisted_record.get("rangeId") or persisted_record.get("range_id")
+                ) == "7d":
+                    return {"schemaVersion": 1, "found": False, "sourceKey": key}
                 source_base_revision, source_overlay_ids = _source_detail_delta_lineage(
                     overlay_ids,
                     _text(persisted.get("sourceRevisionId")),
@@ -9894,6 +10143,10 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                 persisted = _runtime_source_payload(connection, parent[0], resolved_key, query, allow_derived=False, overlay_revision_ids=overlay_ids)
                 if persisted.get("found"):
                     persisted_record = persisted.get("record") if isinstance(persisted.get("record"), Mapping) else {}
+                    if authoritative_7d_ids and _text(
+                        persisted_record.get("rangeId") or persisted_record.get("range_id")
+                    ) == "7d":
+                        return {"schemaVersion": 1, "found": False, "sourceKey": resolved_key}
                     source_base_revision, source_overlay_ids = _source_detail_delta_lineage(
                         overlay_ids,
                         _text(persisted.get("sourceRevisionId")),
@@ -10372,6 +10625,54 @@ def meta_payload(connection) -> dict[str, Any]:
                 _GENERIC_META_COUNTS_CACHE.pop(next(iter(_GENERIC_META_COUNTS_CACHE)))
             _GENERIC_META_COUNTS_CACHE[cache_key] = dict(cached_counts)
         counts = {**counts, **cached_counts}
+        authoritative_7d_ids = _authoritative_7d_overlay_ids(
+            connection, overlay_ids,
+        )
+        if authoritative_7d_ids:
+            authoritative_records = _authoritative_7d_records(
+                connection, overlay_ids,
+            )
+            authoritative_occurrences = sum(
+                len(record["occurrences"])
+                for record in authoritative_records
+            )
+            expected_occurrences = int(
+                candidate_manifest.get("acceptedOccurrenceCount") or 0
+            )
+            if (
+                authoritative_occurrences <= 0
+                or (
+                    len(authoritative_7d_ids) == 1
+                    and (
+                        expected_occurrences <= 0
+                        or authoritative_occurrences != expected_occurrences
+                    )
+                )
+            ):
+                raise PostgresAdapterError(
+                    "authoritative 7d meta occurrence count mismatch"
+                )
+            all_payload = _generic_overlay_rankings_payload(
+                connection,
+                generic_runtime[0],
+                generic_runtime[1],
+                {
+                    "range": "all", "view": "songs",
+                    "metric": "occurrences", "page": 1,
+                    "pageSize": 1,
+                },
+            )
+            all_occurrences = int(
+                all_payload.get("totalOccurrenceCount") or 0
+            )
+            if all_occurrences <= 0:
+                raise PostgresAdapterError(
+                    "authoritative 7d meta all-range baseline is empty"
+                )
+            counts["occurrences"] = (
+                all_occurrences + authoritative_occurrences
+            )
+            counts["source_occurrences"] = 3 * counts["occurrences"]
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),

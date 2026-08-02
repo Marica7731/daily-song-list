@@ -46,6 +46,20 @@ def json_object(value: Any) -> dict[str, Any]:
     return {}
 
 
+def canonical_sha256(value: Any) -> str:
+    encoded = json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def lowercase_hex(value: Any, length: int) -> bool:
+    candidate = text(value)
+    return len(candidate) == length and all(
+        character in "0123456789abcdef" for character in candidate
+    )
+
+
 def active_id(cur) -> str:
     cur.execute("SELECT state_value FROM migration_state WHERE state_key='active_revision_id'")
     row = cur.fetchone()
@@ -228,6 +242,85 @@ def first_present(mapping: dict[str, Any], *keys: str) -> Any:
     return None
 
 
+
+def authoritative_7d_manifest(manifest: dict[str, Any]) -> bool:
+    return manifest.get("handoffKind") == "github-core-7d-authoritative-range"
+
+
+def validate_authoritative_7d_manifest(manifest: dict[str, Any]) -> None:
+    if not authoritative_7d_manifest(manifest):
+        return
+    positive = (
+        "mutation_count", "acceptedVideoCount", "acceptedOccurrenceCount",
+        "baseVideoCount", "baseOccurrenceCount", "rangeBoundaryMutationCount",
+    )
+    if not (
+        manifest.get("status") == "ready"
+        and manifest.get("rangeId") == "7d"
+        and manifest.get("authoritativeRange") == "7d"
+        and manifest.get("rangeReset") is True
+        and manifest.get("partialVideoRows") is True
+        and manifest.get("rangeResetAppliedBy") == "pg-adapter-authoritative-range-boundary-v2"
+        and manifest.get("rangeResetTombstoneCount") == 0
+        and manifest.get("sourceReachedEnd") is True
+        and manifest.get("mediaDownloaded") is False
+        and manifest.get("statusAuditIncluded") is True
+        and all(isinstance(manifest.get(key), int) and manifest[key] > 0 for key in positive)
+        and lowercase_hex(manifest.get("patch_sha256"), 64)
+        and lowercase_hex(manifest.get("sourceBlobSha"), 40)
+        and manifest.get("sourceBlobSha") == manifest.get("source_blob_sha")
+        and lowercase_hex(manifest.get("sourceArtifactSha256"), 64)
+        and lowercase_hex(manifest.get("sourceOccurrenceSemanticsSha256"), 64)
+        and lowercase_hex(manifest.get("sourceManifestSha256"), 64)
+    ):
+        raise ValueError("authoritative 7d manifest contract is incomplete")
+    expected = (
+        manifest["rangeBoundaryMutationCount"]
+        + manifest["acceptedVideoCount"]
+        + manifest["acceptedOccurrenceCount"]
+    )
+    if manifest["mutation_count"] != expected:
+        raise ValueError("authoritative 7d mutation_count mismatch")
+    source_manifest = manifest.get("sourceManifest")
+    expected_source_manifest = {
+        "schemaVersion": 1,
+        "path": "data/7d.json",
+        "rangeId": "7d",
+        "sourceCommitSha": manifest.get("sourceCommitSha"),
+        "sourceBlobSha": manifest.get("sourceBlobSha"),
+        "sourceArtifactSha256": manifest.get("sourceArtifactSha256"),
+        "generatedAt": manifest.get("generatedAt"),
+        "acceptedVideoCount": manifest.get("acceptedVideoCount"),
+        "acceptedOccurrenceCount": manifest.get("acceptedOccurrenceCount"),
+        "sourceOccurrenceSemanticsSha256": manifest.get(
+            "sourceOccurrenceSemanticsSha256"
+        ),
+    }
+    if source_manifest != expected_source_manifest:
+        raise ValueError("authoritative 7d source manifest fields mismatch")
+    if canonical_sha256(source_manifest) != manifest["sourceManifestSha256"]:
+        raise ValueError("authoritative 7d source manifest SHA-256 mismatch")
+
+
+def validate_authoritative_7d_record(record: dict[str, Any], manifest: dict[str, Any]) -> str:
+    if not authoritative_7d_manifest(manifest):
+        return "legacy"
+    if record.get("kind") == "runtime" or record.get("entityType"):
+        raise ValueError("authoritative 7d boundary cannot mix runtime rows")
+    songs = record.get("songs")
+    if not (
+        record.get("partialRangeReset") is True
+        and record.get("rangeId") == "7d"
+        and isinstance(songs, list) and songs
+        and all(isinstance(song, dict) and song.get("rangeId") == "7d" for song in songs)
+        and record.get("sourceCommitSha") == manifest.get("sourceCommitSha")
+        and record.get("sourceBlobSha") == manifest.get("sourceBlobSha")
+        and record.get("sourceArtifactSha256") == manifest.get("sourceArtifactSha256")
+    ):
+        raise ValueError("authoritative 7d video contract is invalid")
+    return "video"
+
+
 def insert_video(cur, revision_id: str, record: dict[str, Any], generated_at: str) -> tuple[str, int]:
     video_id = text(record.get("videoId", record.get("video_id")))
     if not video_id:
@@ -303,7 +396,7 @@ def insert_runtime_row(cur, revision_id: str, record: dict[str, Any]) -> str:
     return entity_type
 
 
-def finalize(conn, revision_id: str, parent: str, manifest: dict[str, Any], stream_hash: str, videos: int, occurrences: int, activate: bool) -> dict[str, Any]:
+def finalize(conn, revision_id: str, parent: str, manifest: dict[str, Any], stream_hash: str, videos: int, occurrences: int, runtime_rows: int, activate: bool) -> dict[str, Any]:
     with conn.transaction():
         with conn.cursor() as cur:
             cur.execute("SELECT parent_revision_id,status FROM migration_revisions WHERE revision_id=%s FOR UPDATE", (revision_id,))
@@ -311,7 +404,7 @@ def finalize(conn, revision_id: str, parent: str, manifest: dict[str, Any], stre
             if not row or row[1] != "draft":
                 raise RuntimeError(f"candidate is not draft: {revision_id}")
             content = hashlib.sha256(json.dumps({"manifest": manifest, "streamSha256": stream_hash, "videos": videos, "occurrences": occurrences}, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-            merged = {**manifest, "runtimeProjection": True, "incrementalOverlay": True, "streamSha256": stream_hash, "acceptedVideoCount": videos, "acceptedOccurrenceCount": occurrences}
+            merged = {**manifest, "runtimeProjection": True, "incrementalOverlay": True, "streamSha256": stream_hash, "acceptedVideoCount": videos, "acceptedOccurrenceCount": occurrences, "runtimeRowCount": runtime_rows}
             cur.execute("UPDATE migration_revisions SET status='ready',manifest_json=%s::jsonb,content_sha256=%s,video_count=%s,occurrence_count=%s WHERE revision_id=%s", (json.dumps(merged, ensure_ascii=False), content, videos, occurrences, revision_id))
             if activate:
                 cur.execute("SELECT state_value FROM migration_state WHERE state_key='active_revision_id' FOR UPDATE")
@@ -322,7 +415,7 @@ def finalize(conn, revision_id: str, parent: str, manifest: dict[str, Any], stre
                     cur.execute("UPDATE migration_revisions SET status='superseded' WHERE revision_id=%s AND status='active'", (current,))
                 cur.execute("UPDATE migration_revisions SET status='active',activated_at=CURRENT_TIMESTAMP WHERE revision_id=%s", (revision_id,))
                 cur.execute("UPDATE migration_state SET state_value=%s WHERE state_key='active_revision_id'", (revision_id,))
-            return {"revisionId": revision_id, "parentRevisionId": parent, "videoCount": videos, "occurrenceCount": occurrences, "contentSha256": content, "activated": activate}
+            return {"revisionId": revision_id, "parentRevisionId": parent, "videoCount": videos, "occurrenceCount": occurrences, "runtimeRowCount": runtime_rows, "contentSha256": content, "activated": activate}
 
 
 def main() -> int:
@@ -332,6 +425,7 @@ def main() -> int:
     parser.add_argument("--activate", action="store_true")
     args = parser.parse_args()
     manifest = json.loads(args.manifest_file.read_text(encoding="utf-8"))
+    validate_authoritative_7d_manifest(manifest)
     generated_at = datetime.now(timezone.utc).isoformat()
     conn = psycopg.connect("dbname=song_rank")
     digest = hashlib.sha256()
@@ -359,6 +453,7 @@ def main() -> int:
             record = json.loads(raw)
             if not isinstance(record, dict):
                 raise ValueError("accepted increment line must be an object")
+            validate_authoritative_7d_record(record, manifest)
             require_identity_reset_expectations(record, reset_expectations)
             if reset_expectations:
                 if record.get("kind") == "runtime" or record.get("entityType") or record.get("entity_type"):
@@ -400,7 +495,17 @@ def main() -> int:
                 raise ValueError(
                     "identity reset patch totals disagree with manifest",
                 )
-        result = finalize(conn, args.revision, parent, manifest, digest.hexdigest(), counts["videos"], counts["occurrences"], args.activate)
+        if authoritative_7d_manifest(manifest):
+            if counts["videos"] != manifest["acceptedVideoCount"]:
+                raise ValueError("authoritative 7d video count mismatch")
+            if counts["occurrences"] != manifest["acceptedOccurrenceCount"]:
+                raise ValueError("authoritative 7d occurrence count mismatch")
+            if counts["runtimeRows"] != 0:
+                raise ValueError("authoritative 7d boundary cannot contain runtime rows")
+        result = finalize(
+            conn, args.revision, parent, manifest, digest.hexdigest(),
+            counts["videos"], counts["occurrences"], counts["runtimeRows"], args.activate,
+        )
         print(json.dumps({"status": "ok", **result}, ensure_ascii=False))
         return 0
     except Exception as exc:
