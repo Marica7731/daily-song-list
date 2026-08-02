@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-01T04:31:39.929Z",
+  "generatedAt": "2026-08-02T03:43:24.967Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-01T04:31:39.929Z",
+    "fetchedAt": "2026-08-02T03:43:24.967Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-01T04:31:39.929Z",
+    "generatedAt": "2026-08-02T03:43:24.967Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@kuzen_sia",
+        "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
+        "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
+        "sourceUrl": "https://www.youtube.com/@kuzen_sia",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Satou_Anime_ASRB",
         "channelId": "UCqJQfY9916fdpDrKFqdYy2g",
@@ -11842,13 +11849,6 @@
         "channelId": "UC7wZb5INldbGweowOhBIs8Q",
         "displayName": "石狩あかり/あおぎり高校",
         "sourceUrl": "https://www.youtube.com/@akari0415",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@amakawa_hano",
-        "channelId": "UCxJ9SJLG7dA00M7VoEe4ltw",
-        "displayName": "天川はの/AmakawaHano",
-        "sourceUrl": "https://www.youtube.com/@amakawa_hano",
         "reason": "batch_limit_reached"
       }
     ]
