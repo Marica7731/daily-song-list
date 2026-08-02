@@ -1841,6 +1841,11 @@ def _runtime_tombstones(
             identity = _text(payload.get("occurrenceId") or row.get("occurrence_id"))
             if not video_id or not identity:
                 continue
+            # Accepted occurrence projections and generic runtime curation
+            # rows describe the same physical tuple through two historical
+            # entity-type spellings.  They must share one chain; otherwise a
+            # replacement is rooted at the old parent tuple even after the
+            # accepted projection has already reset that tuple.
             key = ("occurrences", video_id, identity)
             chains[key] = {
                 "root": payload,
@@ -1867,7 +1872,12 @@ def _runtime_tombstones(
             and not occurrence_id
         ):
             continue
-        key = (entity_type, video_id, identity)
+        chain_entity_type = (
+            "occurrences"
+            if entity_type in {"occurrences", "runtime_occurrences"}
+            else entity_type
+        )
+        key = (chain_entity_type, video_id, identity)
         chain = chains.setdefault(key, {"root": None, "final": None, "kind": "shadowed"})
         if not row.get("tombstone") and not isinstance(original, Mapping):
             # A later accepted/runtime projection without curation provenance
@@ -1903,6 +1913,20 @@ def _runtime_tombstones(
         payload.setdefault("sourceSystem", row.get("source_system"))
         payload.setdefault("rangeId", row.get("range_id"))
         payload.setdefault("entityKey", row.get("entity_key"))
+        original_identity = (
+            payload.get("originalIdentity")
+            if isinstance(payload.get("originalIdentity"), Mapping)
+            else final_payload.get("originalIdentity")
+        )
+        if isinstance(original_identity, Mapping):
+            for field in ("title", "artist", "songKey", "sourceId"):
+                if not _text(payload.get(field)) and _text(original_identity.get(field)):
+                    payload[field] = original_identity.get(field)
+        final_range_id = _text(
+            final_payload.get("rangeId") or final_payload.get("range_id")
+        )
+        if final_range_id:
+            payload["rangeId"] = final_range_id
         payload["entityType"] = _text(row.get("entity_type"))
         payload["revisionId"] = _text(row.get("revision_id"))
         payload["replacement"] = chain.get("kind") == "replacement"
@@ -3067,6 +3091,75 @@ def _apply_runtime_tombstone_groups(
                 if target_song_title_norm and target_song_artist_norm
                 else ()
             )
+            if len(candidate_group_keys) > 1:
+                exact_identity = (
+                    _overlay_norm(change.get("title"))
+                    + "::"
+                    + _overlay_norm(change.get("artist"))
+                )
+                exact_matches = tuple(
+                    key
+                    for key in candidate_group_keys
+                    if (
+                        _overlay_norm(groups[key].get("title"))
+                        + "::"
+                        + _overlay_norm(groups[key].get("artist"))
+                    ) == exact_identity
+                )
+                candidate_group_keys = (
+                    exact_matches[:1]
+                    if exact_matches
+                    else (min(candidate_group_keys),)
+                )
+            if not candidate_group_keys and replacement:
+                replacement_payload = _json_object(
+                    change.get("replacementPayload")
+                )
+                old_title_norm = _overlay_song_group_norm(change.get("title"))
+                replacement_title_norm = _overlay_song_group_norm(
+                    replacement_payload.get("title")
+                )
+                same_artist = (
+                    _overlay_song_group_norm(change.get("artist"))
+                    == _overlay_song_group_norm(replacement_payload.get("artist"))
+                )
+                if not (
+                    same_artist
+                    and replacement_title_norm
+                    and replacement_title_norm != old_title_norm
+                    and replacement_title_norm in old_title_norm
+                ):
+                    continue
+                replacement_identity = (
+                    f"{replacement_title_norm}::"
+                    f"{_overlay_song_group_norm(replacement_payload.get('artist'))}"
+                )
+                replacement_group_keys = (
+                    group_keys_by_identity.get(replacement_identity, ())
+                    if replacement_identity != "::"
+                    else ()
+                )
+                if len(replacement_group_keys) > 1:
+                    replacement_exact_identity = (
+                        _overlay_norm(replacement_payload.get("title"))
+                        + "::"
+                        + _overlay_norm(replacement_payload.get("artist"))
+                    )
+                    replacement_exact_matches = tuple(
+                        key
+                        for key in replacement_group_keys
+                        if (
+                            _overlay_norm(groups[key].get("title"))
+                            + "::"
+                            + _overlay_norm(groups[key].get("artist"))
+                        ) == replacement_exact_identity
+                    )
+                    replacement_group_keys = (
+                        replacement_exact_matches[:1]
+                        if replacement_exact_matches
+                        else (min(replacement_group_keys),)
+                    )
+                candidate_group_keys = replacement_group_keys
         elif view == "artists":
             target_artist = _overlay_norm(change.get("artist"))
             candidate_group_keys = group_keys_by_identity.get(target_artist, ())
@@ -9941,6 +10034,11 @@ def _authoritative_7d_records(
     )
     if not authoritative_ids:
         return ()
+    # The newest reviewed 7d boundary is the complete public range reset.
+    # Replaying newer alias/curation revisions here would append their 7d
+    # rows to that authoritative set; those revisions belong to the all-range
+    # mutation delta instead.
+    authoritative_ids = authoritative_ids[-1:]
     candidate_rows = tuple(_overlay_rows_for_range(
         _overlay_candidate_rows(connection, authoritative_ids), "7d",
     ))
@@ -10564,6 +10662,8 @@ def _apply_generic_overlay_meta_counts(
         for change in runtime_changes
         if _text(change.get("revisionId") or change.get("revision_id"))
         in public_overlay_id_set
+        and _text(change.get("rangeId") or change.get("range_id"))
+        in {"", "all"}
         and _text(change.get("entityType") or change.get("entity_type"))
         in {"occurrences", "runtime_occurrences"}
     )

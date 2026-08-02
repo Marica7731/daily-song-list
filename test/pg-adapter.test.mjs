@@ -10280,6 +10280,9 @@ module._authoritative_7d_overlay_ids = lambda *_args: ("authoritative-7d",)
 module._authoritative_7d_records = lambda *_args: (
     {"occurrences": [{"rangeId": "7d"}]},
 ) * 1566
+module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("meta entered full rankings payload"))
+)
 payload = module.meta_payload(object())
 assert payload["counts"]["occurrences"] == 586642, payload
 assert payload["counts"]["source_occurrences"] == 1759926, payload
@@ -10312,6 +10315,128 @@ module._apply_runtime_tombstone_groups(
     "songs",
 )
 assert groups == before, groups
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("song replacement selection decrements one physical group only", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+groups = {
+    "canonical": {
+        "detail_key": "canonical", "title": "逆光", "artist": "Ado",
+        "row_count": 10, "timestamp_count": 10, "video_count": 4,
+        "payload_json": None,
+    },
+    "punctuation-variant": {
+        "detail_key": "punctuation-variant", "title": "逆光!", "artist": "Ado",
+        "row_count": 8, "timestamp_count": 8, "video_count": 3,
+        "payload_json": None,
+    },
+}
+module._apply_runtime_tombstone_groups(
+    groups,
+    [{
+        "entityType": "occurrences", "title": "逆光", "artist": "Ado",
+        "videoId": "video", "occurrenceId": "occurrence", "replacement": True,
+        "replacementPayload": {"title": "逆光", "artist": "Ado", "videoId": "video"},
+        "originalGroupVideoOccurrenceCount": 1,
+    }],
+    "songs",
+)
+assert groups["canonical"]["row_count"] == 9, groups
+assert groups["punctuation-variant"]["row_count"] == 8, groups
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("song replacement fallback selects an existing alias group without guessing unrelated groups", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+groups = {
+    "canonical": {
+        "detail_key": "canonical", "title": "逆光", "artist": "Ado",
+        "row_count": 12, "timestamp_count": 12, "video_count": 5,
+        "payload_json": None,
+    },
+    "new-artist": {
+        "detail_key": "new-artist", "title": "Glassy Sky", "artist": "Donna Burke",
+        "row_count": 7, "timestamp_count": 7, "video_count": 4,
+        "payload_json": None,
+    },
+}
+module._apply_runtime_tombstone_groups(
+    groups,
+    [
+        {
+            "entityType": "occurrences", "title": "逆光 (ウタ from ONE PIECE FILM RED)",
+            "artist": "Ado", "videoId": "ado-video", "occurrenceId": "ado-occurrence",
+            "replacement": True,
+            "replacementPayload": {"title": "逆光", "artist": "Ado", "videoId": "ado-video"},
+            "originalGroupVideoOccurrenceCount": 1,
+        },
+        {
+            "entityType": "occurrences", "title": "Glassy Sky", "artist": "未記載",
+            "videoId": "glass-video", "occurrenceId": "glass-occurrence", "replacement": True,
+            "replacementPayload": {"title": "Glassy Sky", "artist": "Donna Burke", "videoId": "glass-video"},
+            "originalGroupVideoOccurrenceCount": 1,
+        },
+    ],
+    "songs",
+)
+assert groups["canonical"]["row_count"] == 11, groups
+assert groups["new-artist"]["row_count"] == 7, groups
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("authoritative 7d resolver uses only the newest boundary group", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+calls = []
+candidate = {
+    "video_id": "boundary-video", "occurrence_id": "boundary-occurrence",
+    "range_id": "7d", "title": "Boundary", "artist": "Artist",
+}
+module._authoritative_7d_overlay_ids = lambda *_args: ("top-alias", "boundary")
+module._overlay_candidate_rows = lambda _connection, revision_ids: (
+    calls.append(tuple(revision_ids)) or [dict(candidate)]
+)
+module._overlay_rows_for_range = lambda rows, _range: tuple(rows)
+module._accepted_video_resets = lambda *_args: {}
+module._runtime_tombstones = lambda *_args: []
+module._overlay_source_record = lambda row: {
+    "video": {"videoId": row["video_id"], "channelId": "channel"},
+    "occurrences": [{
+        "videoId": row["video_id"], "occurrenceId": row["occurrence_id"],
+        "title": row["title"], "artist": row["artist"], "rangeId": "7d",
+    }],
+}
+module._runtime_replacement_candidate_rows = lambda *_args: []
+records = module._authoritative_7d_records(object(), ("top-alias", "boundary"))
+assert calls == [("boundary",)], calls
+assert sum(len(record["occurrences"]) for record in records) == 1, records
 print("OK")
 `);
   assert.equal(output, "OK");
