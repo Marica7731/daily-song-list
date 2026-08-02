@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-02T11:43:24.865Z",
+  "generatedAt": "2026-08-02T13:50:34.448Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-02T11:43:24.865Z",
+    "fetchedAt": "2026-08-02T13:50:34.448Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-02T11:43:24.865Z",
+    "generatedAt": "2026-08-02T13:50:34.448Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1013,
-      "parseableChannels": 991,
+      "totalChannels": 1015,
+      "parseableChannels": 993,
       "realAvatar": 644,
-      "thumbnailFallback": 369,
+      "thumbnailFallback": 371,
       "missingDisplayImage": 0,
-      "missingAvatar": 369,
+      "missingAvatar": 371,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 561
+      "skipped_collected_evidence": 563,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 539,
+      "batch_limit_reached": 541,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@0hinarysan",
+        "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
+        "displayName": "INARI",
+        "sourceUrl": "https://www.youtube.com/@0hinarysan",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@xxhacucoxx_Celestial",
+        "channelId": "UCXyAitTabBsoRclTn_Gq-eA",
+        "displayName": "xxhacucoxx ch. 白白虹",
+        "sourceUrl": "https://www.youtube.com/@xxhacucoxx_Celestial",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RirisyaMusic",
+        "channelId": "UC1ucgoC_sGww_Euu5iMqpQw",
+        "displayName": "凛々咲 / Ririsya",
+        "sourceUrl": "https://www.youtube.com/@RirisyaMusic",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@teikobonbonch3548",
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
@@ -11803,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@atsuna717",
+        "channelId": "UCZraj85SULrawKpNdiH1pGw",
+        "displayName": "菓嫁アツナ",
+        "sourceUrl": "https://www.youtube.com/@atsuna717",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
         "channelId": "UC028TablIiJZW_P8DqgnX9Q",
         "displayName": "灼楽えん-syakura en-",
@@ -11821,34 +11849,6 @@
         "channelId": "UC_4QF0dL-9XI9VajsNkMtmQ",
         "displayName": "Rei7 / Reina【にじさんじ】",
         "sourceUrl": "https://www.youtube.com/@Rei7_Y4T4",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@HibachiMana",
-        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
-        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@HibachiMana",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@nanasehikage",
-        "channelId": "UCu5yCEYvYDz020eKXzFCH9g",
-        "displayName": "奈々瀬ひかげ / Nanase Hikage",
-        "sourceUrl": "https://www.youtube.com/@nanasehikage",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShiroseIsumi",
-        "channelId": "UCHVSA2OScyef9W7OwPGgJ9w",
-        "displayName": "城瀬いすみ / Shirose Isumi【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@ShiroseIsumi",
         "reason": "batch_limit_reached"
       }
     ]
