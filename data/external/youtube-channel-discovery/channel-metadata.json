@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-02T21:10:27.505Z",
+  "generatedAt": "2026-08-02T22:08:44.199Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-02T21:10:27.505Z",
+    "fetchedAt": "2026-08-02T22:08:44.199Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-02T21:10:27.505Z",
+    "generatedAt": "2026-08-02T22:08:44.199Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1018,
-      "parseableChannels": 996,
+      "totalChannels": 1019,
+      "parseableChannels": 997,
       "realAvatar": 645,
-      "thumbnailFallback": 373,
+      "thumbnailFallback": 374,
       "missingDisplayImage": 0,
-      "missingAvatar": 373,
+      "missingAvatar": 374,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 665,
-      "skipped_collected_evidence": 565
+      "skipped_collected_evidence": 566,
+      "already_cached": 665
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 543,
+      "batch_limit_reached": 544,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@RuridoriKafka",
+        "channelId": "UC3oBWCwi2UtckYvMbtIOWVA",
+        "displayName": "Ruridori Kafka / 璃鳥歌深【IZIGENIA】",
+        "sourceUrl": "https://www.youtube.com/@RuridoriKafka",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KaguraMea",
         "channelId": "UCWCc8tO-uUl_7SJXIKJACMw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCp4G83RMBDN0EgZFSUDK7zw",
         "displayName": "Meica05 Ch.",
         "sourceUrl": "https://www.youtube.com/@meica05",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Yasumi_Ch",
-        "channelId": "UC4t5SieTiT20alR4OQDybtg",
-        "displayName": "やすみ / Yasumi",
-        "sourceUrl": "https://www.youtube.com/@Yasumi_Ch",
         "reason": "batch_limit_reached"
       }
     ]
