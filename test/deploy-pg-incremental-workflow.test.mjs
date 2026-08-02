@@ -588,7 +588,7 @@ test("PG incremental dispatch can resume only an explicit same-repository artifa
   assert.match(deployWorkflow, /if: \$\{\{ inputs\.artifact_name != '' \}\}/u);
 });
 
-test("rollback-only is a dispatch-time locked artifact-free CAS restore with exact online gates", () => {
+test("rollback-only keeps transactional CAS hard and makes online business checks observational", () => {
   const rollbackJob = workflowJob(deployWorkflow, "rollback", "candidate");
   assert.match(deployWorkflow, /rollback_only:/u);
   for (const input of [
@@ -629,12 +629,12 @@ test("rollback-only is a dispatch-time locked artifact-free CAS restore with exa
   assert.match(rollbackJob, /invalid-current-revision/u);
   assert.match(rollbackJob, /invalid-target-revision/u);
   assert.match(rollbackJob, /invalid-target-content-sha256/u);
-  assert.match(rollbackJob, /invalid-source-key/u);
-  assert.match(rollbackJob, /invalid-source-channel-id/u);
-  assert.match(rollbackJob, /invalid-source-channel-handle/u);
-  assert.match(rollbackJob, /invalid-source-occurrence-count/u);
-  assert.match(rollbackJob, /invalid-source-video-count/u);
-  assert.match(rollbackJob, /invalid-source-tuple-json/u);
+  assert.doesNotMatch(rollbackJob, /invalid-source-(?:key|channel|occurrence|video|tuple)/u);
+  assert.doesNotMatch(
+    rollbackJob,
+    /required_rollback_input in[\s\S]*EXPECTED_SOURCE_/u,
+    "source evidence must not participate in rollback admission",
+  );
   assert.match(rollbackJob, /exit 78/u);
   assert.match(rollbackJob, /PG_ROLLBACK_WAIT concurrent-release/u);
   assert.match(rollbackJob, /pg_advisory_xact_lock\(hashtext\('daily-song-list\/active'\)\)/u);
@@ -653,28 +653,10 @@ test("rollback-only is a dispatch-time locked artifact-free CAS restore with exa
     "all three rollback updates must assert exactly one affected row",
   );
   assert.match(rollbackJob, /systemctl restart song-rank-pg-api/u);
-  assert.match(rollbackJob, /api\/sources\/\$source_key_path\?page=\$source_page&pageSize=100/u);
-  assert.match(rollbackJob, /source_returned_occurrences.*EXPECTED_SOURCE_OCCURRENCE_COUNT/u);
-  assert.match(rollbackJob, /public-source-pagination-video-mismatch/u);
-  assert.match(rollbackJob, /public-source-tuple-mismatch/u);
-  assert.match(rollbackJob, /occurrenceIdentityMismatchCount/u);
-  assert.match(rollbackJob, /source_tuple_matches.*-eq 1/u);
-  assert.match(rollbackJob, /audit-ranking-source-identities\.py/u);
-  assert.match(rollbackJob, /timeout --signal=TERM --kill-after=15s 12m/u);
-  for (const requiredAuditArgument of [
-    "--range all --range 7d",
-    "--metric count --metric songs --metric videos",
-    "--page-size 200 --max-pages 20 --timeout 60",
-    "--channel-probe '@shingames7857=UC5zO6IFsWSUHMYgJMv81XKg'",
-    "--channel-probe '@MEDAzcd=UC0HX1e5jJnhN5Xn0epV2wzA'",
-    "--channel-probe '@mikoto_songs=UCkZif4byA067Xl_c199w3BQ'",
-    "--channel-probe '@urameshi_conta=UC8VlcljjGFb4-Ny2Heb0-ew'",
-  ]) {
-    assert.ok(rollbackJob.includes(requiredAuditArgument), `missing P0 audit argument: ${requiredAuditArgument}`);
-  }
-  assert.doesNotMatch(rollbackJob, /--negative-query\s+''/u);
-  assert.match(rollbackJob, /IDENTITY_AUDIT_COMPLETE/u);
-  assert.match(rollbackJob, /PG_ROLLBACK_PUBLIC_OK/u);
+  assert.doesNotMatch(rollbackJob, /api\/sources\/|audit-ranking-source-identities|IDENTITY_AUDIT_COMPLETE/u);
+  assert.doesNotMatch(rollbackJob, /public-source-(?:pagination|tuple|identity|http)/u);
+  assert.match(rollbackJob, /PG_ROLLBACK_OBSERVATION post-rollback-health-meta-checks-failed/u);
+  assert.match(rollbackJob, /PG_ROLLBACK_OBSERVATION_COMPLETE/u);
   assert.match(rollbackJob, /PG_ROLLBACK_CLEANUP/u);
   assert.match(
     rollbackJob,
