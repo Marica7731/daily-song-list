@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 3,
+  "status": "BOUND_V4",
+  "releaseEligible": false,
+  "candidateBaseEvidenceCommit": "e62c54af84a2eb2551e7bdee75112fa6fd4fc2d5",
+  "sourceCommitBinding": "dispatch source_commit; checkout HEAD and github.sha must be the same exact 40-hex commit",
+  "allowedProviderPaths": [
+    "scripts/migration/snapshot-enrichment-provider.mjs"
+  ],
+  "providerV4": {
+    "path": "scripts/migration/snapshot-enrichment-provider.mjs",
+    "version": "snapshot-enrichment-provider-v4",
+    "sha256": "69ba77c64b6c39fe117018b582d486e2f49080227b04457d31f3a838dbee7ae1",
+    "contract": "luna-max-mac-enrichment/v4-candidate",
+    "requiredBeforeDispatch": true,
+    "batchFatalWrapperShape": true,
+    "batchFatalInvalidInputOrClosure": true,
+    "mustNotBind": [
+      "scripts/migration/snapshot-enrichment-provider.mjs@v3-rejected",
+      "snapshot-enrichment-provider-v2",
+      ".codex-snapshot-enrichment-provider-v2/provider.mjs"
+    ],
+    "requiredHeaderFields": [
+      "provider",
+      "contract",
+      "sampleSha256",
+      "sampleCount",
+      "expectedIds",
+      "recordCount",
+      "needsReviewCount",
+      "releaseReady"
+    ]
+  },
+  "adapterV4": {
+    "path": "scripts/migration/snapshot-enrichment-adapter.py",
+    "version": "snapshot-enrichment-provider-v4-adapter",
+    "sha256": "465477bfbc7daa8e3542eba553d729af1b5172d74f520dfd0f1c8a59f7e35588",
+    "requiredBeforeDispatch": true
+  },
+  "v4EvidenceManifest": {
+    "path": "test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json",
+    "sha256": "fd6ec1dfe36949dba6a1dbdcb8f5dd230f20af3de9f2aa9eca635175f5c3e97b"
+  },
+  "rejectedV3Evidence": {
+    "providerSha256": "237a22cec513329d43e122aea2f2d72243cdd020d4554edd124bc7bd36d65de8",
+    "adapterSha256": "b00afb937d86763ebc5bab517130ba155e9d8ce688f4cfee08de47faa71db1d1",
+    "reason": "retained outside formal projection; v3 wrapper-shape and field-type defects were rejected"
+  },
+  "productPaths": [
+    {
+      "path": "scripts/update-songlist.js",
+      "export": "fetchVideoSongList",
+      "role": "returns {detail,audit}; detail:null means no usable timestamp source"
+    },
+    {
+      "path": "scripts/youtube-channel-discovery-core.js",
+      "export": "enrichDetail",
+      "role": "existing enrichment normalization"
+    },
+    {
+      "path": "scripts/youtube-channel-discovery-core.js",
+      "export": "occurrenceRecordsFromDetail",
+      "role": "existing occurrence adapter"
+    }
+  ],
+  "wrapperRules": {
+    "fetchResultShape": "{detail,audit}",
+    "shapeViolation": "batch_fatal_nonzero",
+    "detailNull": "needs_review_no_timestamp_source",
+    "auditRetention": "copy into every enriched record and artifact",
+    "emptySongs": "never ok; never publishable",
+    "emptyProvenance": "needs_review, not ok",
+    "invalidFieldType": "needs_review or batch contract error; never ok",
+    "eventTime": "explicit provider/source field only; no publishedTimestamp or wall-clock fallback",
+    "releaseRoute": null,
+    "releaseRouteStatus": "not_computed"
+  }
+}

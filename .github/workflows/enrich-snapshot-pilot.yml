@@ -1,0 +1,96 @@
+name: enrich-snapshot-pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact 40-hex commit selected for this dispatch; must equal github.sha and checkout HEAD
+        required: true
+        type: string
+      sample_id:
+        description: One sample for debug or both in fixed Jul29 then Jul22 order
+        required: true
+        type: choice
+        options:
+          - both
+          - jul29-25
+          - jul22-19
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enrich-snapshot-pilot-singleton
+  cancel-in-progress: false
+
+jobs:
+  pilot:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 240
+    steps:
+      - name: Checkout the exact dispatch source commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify source and branch CAS, then run sequential pilot
+        id: pilot
+        shell: bash
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          SAMPLE_ID: ${{ inputs.sample_id }}
+          DISPATCH_SHA: ${{ github.sha }}
+          BRANCH_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          pilot="$root/scripts/migration/enrich-snapshot-pilot.sh"
+          catalog="$root/test/fixtures/snapshot-pilot/catalog.json"
+          binding="$root/scripts/migration/snapshot-enrichment-provider-binding.json"
+          if [[ ! "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo 'source_commit must be exactly 40 lowercase hexadecimal characters' >&2
+            exit 2
+          fi
+          if [[ "$BRANCH_REF" != 'refs/heads/main' ]]; then
+            echo "source branch CAS mismatch expected=refs/heads/main actual=$BRANCH_REF" >&2
+            exit 2
+          fi
+          if [[ "$SOURCE_COMMIT" != "$DISPATCH_SHA" ]]; then
+            echo "source_commit/github.sha CAS mismatch expected=$SOURCE_COMMIT actual=$DISPATCH_SHA" >&2
+            exit 2
+          fi
+          actual_head="$(git -C "$root" rev-parse HEAD)"
+          if [[ "$actual_head" != "$SOURCE_COMMIT" ]]; then
+            echo "checkout HEAD CAS mismatch expected=$SOURCE_COMMIT actual=$actual_head" >&2
+            exit 2
+          fi
+          test -f "$pilot"
+          test -f "$catalog"
+          test -f "$binding"
+          run_root="$RUNNER_TEMP/enrich-snapshot-pilot-${GITHUB_RUN_ID}"
+          lock_dir="$RUNNER_TEMP/enrich-snapshot-pilot-singleton.lock"
+          if ! mkdir "$lock_dir"; then
+            echo 'another pilot is using the Mac runner.temp root' >&2
+            exit 2
+          fi
+          trap 'rmdir "$lock_dir"' EXIT
+          bash "$pilot" \
+            --workspace "$root" \
+            --catalog "$catalog" \
+            --binding-manifest "$binding" \
+            --sample-id "$SAMPLE_ID" \
+            --source-commit "$SOURCE_COMMIT" \
+            --output-root "$run_root"
+
+      - name: Upload candidate artifact only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enrich-snapshot-pilot-${{ github.run_id }}-${{ inputs.sample_id }}
+          path: ${{ runner.temp }}/enrich-snapshot-pilot-${{ github.run_id }}/
+          if-no-files-found: error
+
+      # Deliberately no product data write, PG, commit, push, dispatch, activate,
+      # service restart, or release step.

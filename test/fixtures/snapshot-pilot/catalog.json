@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 3,
+  "status": "CANDIDATE_ONLY",
+  "releaseEligible": false,
+  "candidateBaseEvidenceCommit": "e62c54af84a2eb2551e7bdee75112fa6fd4fc2d5",
+  "fixtureRoot": "test/fixtures/snapshot-pilot",
+  "allowedFixturePaths": [
+    "test/fixtures/snapshot-pilot/jul29-sample25.json.gz",
+    "test/fixtures/snapshot-pilot/jul22-sample19.json.gz"
+  ],
+  "materialization": {
+    "localOnly": true,
+    "network": false,
+    "compression": "gzip",
+    "deterministicCommand": "gzip -n",
+    "fixtureCommitMustEqualSourceCommit": true,
+    "controllerAbsolutePathsAllowed": false,
+    "dispatchInputsMayContainRawBytes": false
+  },
+  "samples": {
+    "jul29-25": {
+      "fixturePath": "test/fixtures/snapshot-pilot/jul29-sample25.json.gz",
+      "sourceFormat": "json-array",
+      "sampleSha256": "4b53aeb1a7b72c4efc34c6fa972b60a245e6a6bda49868f38d145fdc4c220fcf",
+      "sampleBytes": 99538,
+      "gzipSha256": "243ed8d6ea0ee6213fbdaa51d5b36e51028eb08c50c0830f53f42bf236fbb769",
+      "gzipBytes": 6759,
+      "count": 25,
+      "sampleDate": "2026-07-29",
+      "routeSignature": "7d=24,all=1",
+      "routeCounts": {
+        "7d": 24,
+        "all": 1
+      },
+      "eventDateCounts": {
+        "2026-07-25": 1,
+        "2026-07-28": 6,
+        "2026-07-29": 18
+      }
+    },
+    "jul22-19": {
+      "fixturePath": "test/fixtures/snapshot-pilot/jul22-sample19.json.gz",
+      "sourceFormat": "json-object-with-videos",
+      "sampleSha256": "e882b4387553f67c86db53877d025614d5fc808104490c3cdbbc195a4e697eb6",
+      "sampleBytes": 1608333,
+      "gzipSha256": "1f7875bb8b3254a1573b986215694810bdbfc5af1713656a316cbfc75bcf2e79",
+      "gzipBytes": 117728,
+      "count": 19,
+      "sampleDate": "2026-07-22",
+      "routeSignature": "all=19",
+      "routeCounts": {
+        "all": 19
+      },
+      "occurrenceCount": 456,
+      "eventDateCounts": {
+        "2026-07-22": 456
+      }
+    }
+  }
+}

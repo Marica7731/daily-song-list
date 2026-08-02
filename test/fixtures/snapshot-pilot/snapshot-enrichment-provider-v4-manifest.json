@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "provider": "snapshot-enrichment-provider-v4",
+  "contract": "luna-max-mac-enrichment/v4-candidate",
+  "candidateOnly": true,
+  "releaseReady": false,
+  "network": false,
+  "productWrites": false,
+  "commit": false,
+  "push": false,
+  "dispatch": false,
+  "activate": false,
+  "base": {
+    "remote": "origin/main",
+    "commit": "e62c54af84a2eb2551e7bdee75112fa6fd4fc2d5",
+    "scripts": {
+      "scripts/update-songlist.js": {
+        "sha256": "6c42239b7583e5263438db88462fd057afe803b30e41a6fd7f4418d3d9bd7482",
+        "blobBytes": 137485
+      },
+      "scripts/youtube-channel-discovery-core.js": {
+        "sha256": "12d09b19552b90744e0520db6d51dfdce7de937f3352dafed44ddc64e289455a",
+        "blobBytes": 101850
+      }
+    }
+  },
+  "frozenInputs": {
+    "fixtures/jul29-sample25.json": {
+      "sha256": "4b53aeb1a7b72c4efc34c6fa972b60a245e6a6bda49868f38d145fdc4c220fcf",
+      "shape": "array",
+      "count": 25,
+      "source": ".codex-snapshot-jul29-sample-v3/sample25.json"
+    },
+    "fixtures/jul22-sample19.json": {
+      "sha256": "23c435526ec19fad12987d819edaae9bee0109c54e5ee6e6fce4bdaa0119af62",
+      "shape": "object.videos",
+      "count": 19,
+      "source": ".codex-snapshot-jul22-mac-sample-v2/sample19.json"
+    }
+  },
+  "evidence": {
+    "currentMain": "current-main-function-evidence.txt",
+    "sourceLineRanges": {
+      "fetchVideoSongList": "scripts/update-songlist.js:1213-1327",
+      "enrichDetail": "scripts/youtube-channel-discovery-core.js:1397-1411",
+      "occurrenceRecordsFromDetail": "scripts/youtube-channel-discovery-core.js:1413-1444"
+    },
+    "exports": [
+      "fetchVideoSongList",
+      "enrichDetail",
+      "occurrenceRecordsFromDetail"
+    ]
+  },
+  "candidateFiles": [
+    "CODEX_GOAL.md",
+    "README.md",
+    "adapter.py",
+    "build_manifest.py",
+    "checker.py",
+    "contract.json",
+    "current-main-function-evidence.txt",
+    "diff-inventory.json",
+    "diff.patch",
+    "field-source-matrix.json",
+    "fixtures/jul22-sample19.json",
+    "fixtures/jul29-sample25.json",
+    "provider.mjs",
+    "results/focused-test-result.json",
+    "runbook",
+    "test.mjs"
+  ],
+  "candidateHashFile": "candidate-files.sha256.json",
+  "manifestHashFile": "manifest.sha256",
+  "testCommand": "timeout 60s node .codex-snapshot-enrichment-provider-v4/test.mjs",
+  "checkerCommand": "timeout 30s python3 .codex-snapshot-enrichment-provider-v4/checker.py --root .codex-snapshot-enrichment-provider-v4",
+  "notVerified": [
+    "Mac runner execution",
+    "production fetch/network behavior",
+    "product-path integration",
+    "releaseRoute/releaseCutoff decision at publish time",
+    "commit, push, dispatch, activation, restart, and online verification"
+  ]
+}
