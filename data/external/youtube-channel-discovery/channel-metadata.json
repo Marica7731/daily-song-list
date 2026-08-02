@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-02T13:50:34.448Z",
+  "generatedAt": "2026-08-02T15:15:18.796Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-02T13:50:34.448Z",
+    "fetchedAt": "2026-08-02T15:15:18.796Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-02T13:50:34.448Z",
+    "generatedAt": "2026-08-02T15:15:18.796Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,9 +11657,9 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1015,
-      "parseableChannels": 993,
-      "realAvatar": 644,
+      "totalChannels": 1016,
+      "parseableChannels": 994,
+      "realAvatar": 645,
       "thumbnailFallback": 371,
       "missingDisplayImage": 0,
       "missingAvatar": 371,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 563,
-      "already_cached": 665
+      "already_cached": 665,
+      "skipped_collected_evidence": 563
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@KaguraMea",
+        "channelId": "UCWCc8tO-uUl_7SJXIKJACMw",
+        "displayName": "神楽めあ / KaguraMea",
+        "sourceUrl": "https://www.youtube.com/@KaguraMea",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@H.Midori-Ch-",
+        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
+        "displayName": "H.Midori Ch🍃葉山翠",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@0hinarysan",
         "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
@@ -11835,20 +11849,6 @@
         "channelId": "UC028TablIiJZW_P8DqgnX9Q",
         "displayName": "灼楽えん-syakura en-",
         "sourceUrl": "https://www.youtube.com/@%E7%81%BC%E6%A5%BD%E3%81%88%E3%82%93-syakuraen",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Nekozaki_Roi",
-        "channelId": "UCjvncTrq_44m3znLtmQk5pg",
-        "displayName": "Roi Ch.猫崎ロイ",
-        "sourceUrl": "https://www.youtube.com/@Nekozaki_Roi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Rei7_Y4T4",
-        "channelId": "UC_4QF0dL-9XI9VajsNkMtmQ",
-        "displayName": "Rei7 / Reina【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@Rei7_Y4T4",
         "reason": "batch_limit_reached"
       }
     ]
