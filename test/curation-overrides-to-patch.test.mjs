@@ -21,6 +21,7 @@ function resolvePython() {
 }
 
 const python = resolvePython();
+process.env.PYTHONIOENCODING = "utf-8";
 const candidateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const script = path.join(candidateRoot, "scripts/migration/curation-overrides-to-patch.py");
 const localMinimalRulesManifest = path.join(candidateRoot, "artifacts/migration/p2-curation-rules.json");
@@ -657,11 +658,11 @@ test("merged P2 manifest stays observable until Mac supplies current-active evid
       { kind: "video", videoId: "lUDCE3zZmuQ" },
       {
         videoId: "lUDCE3zZmuQ",
-        occurrenceId: "occ-naraetan-9463",
+        occurrenceId: "f35b292b485512e0ee7bfcec",
         position: 24,
         seconds: 9463,
-        title: "Even in a life full of hardships...",
-        artist: "",
+        title: "辛いことがある人生でも",
+        artist: "Even in a life full of hardships",
         sourceId: "Ugxw2-DEUVx0aNsvVyR4AaABAg",
         sourceHash: "5a84ddcb0ff7c6f66409f9d5b93f1c0c258769dbe6ad300a6b27a1907a37c07f",
         rawHash: "66cb9e129f135600d5b881595110822a7e7bb01175eeb5d7d138763768188f1e",
@@ -864,8 +865,8 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
       row("Urameshi protected", "", { channelHandle: " /@URAMESHI_CONTA " }),
     );
     const rows = [
-      row("translated commentary", "", {
-        videoId: naraetanRule.videoId, seconds: naraetanRule.seconds,
+      row(naraetanRule.title, naraetanRule.artist, {
+        videoId: naraetanRule.videoId, occurrenceId: naraetanRule.occurrenceId, seconds: naraetanRule.seconds,
         sourceId: naraetanRule.sourceId, sourceHash: naraetanRule.sourceHash,
         rawHash: naraetanRule.rawHash,
       }),
@@ -1260,6 +1261,30 @@ test("remote-main alias ledger remains deterministic after scope-v4 integration"
     );
     assert.deepEqual(second.manifest.aliasSourceReview, first.manifest.aliasSourceReview);
     assert.equal(second.manifest.aliasSourceGroupsSha256, first.manifest.aliasSourceGroupsSha256);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+test("Naraetan 9463 full product overlay emits exactly one drop", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-naraetan-luna-full-overlay-"));
+  try {
+    const formalRules = JSON.parse(fs.readFileSync(localMinimalRulesManifest, "utf8"));
+    const snapshotRows = [
+      { videoId: "lUDCE3zZmuQ", occurrenceId: "f35b292b485512e0ee7bfcec", position: 0, seconds: 9463, title: "辛いことがある人生でも", artist: "Even in a life full of hardships", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "lUDCE3zZmuQ", occurrenceId: "naraetan-5069", position: 1, seconds: 5069, title: "chat at 5069", artist: "Naraetan", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "lUDCE3zZmuQ", occurrenceId: "naraetan-9888", position: 2, seconds: 9888, title: "comment at 9888", artist: "Naraetan", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "aDoRevSong1", occurrenceId: "protected-ado", position: 0, seconds: 9463, title: "逆光", artist: "Ado", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "luna832song", occurrenceId: "protected-luna", position: 0, seconds: 9463, title: "8.32", artist: "*Luna", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "fluegel0011", occurrenceId: "protected-fluegel", position: 0, seconds: 9463, title: "逆光のフリューゲル", artist: "翼", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "vndyreplica", occurrenceId: "protected-vaundy", position: 0, seconds: 9463, title: "逆光 - replica", artist: "Vaundy", sourceId: "", sourceHash: "", rawHash: "", rangeId: "all", sourceSystem: "latest_json" },
+    ];
+    const observed = runFixture(root, "naraetan-full-overlay", formalRules, snapshotRows);
+    assert.equal(observed.result.status, 0, observed.result.stderr);
+    const rows = observed.output.trim() ? observed.output.trim().split("\n").map(JSON.parse) : [];
+    assert.deepEqual(rows.map((row) => row.entityKey), ["f35b292b485512e0ee7bfcec"]);
+    assert.equal(rows[0].tombstone, true);
+    assert.equal(observed.manifest.curationMutationCount, 1);
+    assert.equal(observed.manifest.selectorMutationCount, 1);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

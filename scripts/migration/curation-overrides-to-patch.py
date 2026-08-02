@@ -302,16 +302,20 @@ def candidate_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]], act
         # videoId uniquely identifies the occurrence)
         candidates = list(rows)
 
+    expected_occurrence = text(override.get("occurrenceId"))
+    if expected_occurrence:
+        candidates = [row for row in candidates if text(row.get("occurrenceId")) == expected_occurrence]
+
     expected_raw = text(override.get("rawHash"))
-    if expected_raw:
+    if expected_raw and not expected_occurrence:
         candidates = [row for row in candidates if text(row.get("rawHash")) == expected_raw]
 
     expected_source_hash = text(override.get("sourceHash"))
-    if expected_source_hash:
+    if expected_source_hash and not expected_occurrence:
         candidates = [row for row in candidates if text(row.get("sourceHash")) == expected_source_hash]
 
     expected_source = text(override.get("sourceId"))
-    if expected_source:
+    if expected_source and not expected_occurrence:
         candidates = [row for row in candidates if text(row.get("sourceId")) == expected_source]
 
     # drop_entry carries the original title and artist.  replace_entry does
@@ -874,8 +878,11 @@ def coarse_selector_rows(override: dict[str, Any], rows: Iterable[dict[str, Any]
     """Return the minimum stable selector identity for idempotency checks."""
 
     seconds = override.get("seconds")
+    occurrence_id = text(override.get("occurrenceId"))
     source_id = text(override.get("sourceId"))
     result = [row for row in rows if row.get("seconds") == seconds]
+    if occurrence_id:
+        return [row for row in result if text(row.get("occurrenceId")) == occurrence_id]
     if source_id:
         result = [row for row in result if text(row.get("sourceId")) == source_id]
     return result
