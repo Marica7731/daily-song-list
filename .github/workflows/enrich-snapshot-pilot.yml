@@ -33,6 +33,48 @@ jobs:
         with:
           ref: ${{ inputs.source_commit }}
           fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/enrich-snapshot-pilot.yml
+            assets/frontend-utils.js
+            assets/ranking-utils.js
+            assets/source-filter.js
+            config/blocked-vtuber-channels.json
+            config/blocked-vtuber-local-channels.json
+            config/curation-overrides.json
+            config/known-song-artist-overrides.json
+            config/non-song-rules.json
+            config/song-aliases.json
+            config/song-search-known-overrides.json
+            data/song-search-known-songs.json
+            scripts/blocked-vtuber-utils.js
+            scripts/build-runtime-data.js
+            scripts/channel-metadata-cache.js
+            scripts/curation.js
+            scripts/entry-repair.js
+            scripts/migration/enrich-snapshot-pilot.sh
+            scripts/migration/materialize-snapshot-pilot.py
+            scripts/migration/run-snapshot-enrichment-pilot.py
+            scripts/migration/snapshot-enrichment-adapter.py
+            scripts/migration/snapshot-enrichment-provider-binding.json
+            scripts/migration/snapshot-enrichment-provider.mjs
+            scripts/migration/snapshot-pilot-event-preview.py
+            scripts/migration/snapshot-pilot-field-matrix.py
+            scripts/range-config.js
+            scripts/recent-all-continuity.js
+            scripts/song-aliases.js
+            scripts/song-search-index.js
+            scripts/song-utils.js
+            scripts/update-songlist.js
+            scripts/video-catalog.js
+            scripts/vsinger-http/html-utils.js
+            scripts/vsinger-http/model.js
+            scripts/vsinger-http/runtime-importer.js
+            scripts/youtube-channel-discovery-core.js
+            test/fixtures/snapshot-pilot/catalog.json
+            test/fixtures/snapshot-pilot/jul22-sample19.json.gz
+            test/fixtures/snapshot-pilot/jul29-sample25.json.gz
+            test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json
           persist-credentials: false
 
       - name: Verify source and branch CAS, then run sequential pilot
