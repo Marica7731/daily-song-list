@@ -55,6 +55,11 @@ _VTUBER_REPLACEMENT_CACHE_LOCK = threading.RLock()
 # map, never record/payload data: a changed active pointer produces a different
 # key and a process restart simply recomputes it from PostgreSQL.
 _GENERIC_META_COUNTS_CACHE: dict[tuple[str, str, tuple[str, ...]], dict[str, int]] = {}
+_GENERIC_META_COUNTS_CACHE_CAP = 8
+_GENERIC_META_COUNTS_FLIGHTS: dict[
+    tuple[str, str, tuple[str, ...]], "_MetaCountsFlight",
+] = {}
+_GENERIC_META_COUNTS_LOCK = threading.RLock()
 # A complete prepared aggregate is large on the production runtime.  One
 # entry is enough to coalesce the concurrent pages for the active spec, while
 # retaining prior range/metric/search aggregates would exceed the candidate's
@@ -105,6 +110,13 @@ class _RankingPreparationFlight:
     event: threading.Event
     error: BaseException | None = None
     result: Mapping[str, Any] | None = None
+
+
+@dataclass
+class _MetaCountsFlight:
+    event: threading.Event
+    error: BaseException | None = None
+    result: Mapping[str, int] | None = None
 
 
 @dataclass(frozen=True)
@@ -3043,42 +3055,40 @@ def _apply_runtime_tombstone_groups(
                 continue
             if view in {"videos", "vtubers"} and bool(change.get("replacementSameVideo")):
                 continue
-        target_title = _overlay_norm(change.get("title"))
-        target_artist = _overlay_norm(change.get("artist"))
         target_video = _text(change.get("videoId") or change.get("video_id"))
-        target_channel = _overlay_norm(change.get("channelId") or change.get("channel_id") or change.get("channelHandle") or change.get("channel_handle") or change.get("channelName") or change.get("channel_name"))
         if view in {"songs", "songIndex", "vsingerSongs"}:
-            candidate_group_keys = group_keys_by_identity.get(
-                f"{_overlay_song_group_norm(target_title)}::"
-                f"{_overlay_song_group_norm(target_artist)}",
-                (),
+            target_song_title_norm = _overlay_song_group_norm(change.get("title"))
+            target_song_artist_norm = _overlay_song_group_norm(change.get("artist"))
+            target_song_identity = (
+                f"{target_song_title_norm}::{target_song_artist_norm}"
+            )
+            candidate_group_keys = (
+                group_keys_by_identity.get(target_song_identity, ())
+                if target_song_title_norm and target_song_artist_norm
+                else ()
             )
         elif view == "artists":
+            target_artist = _overlay_norm(change.get("artist"))
             candidate_group_keys = group_keys_by_identity.get(target_artist, ())
         elif view == "videos":
             candidate_group_keys = group_keys_by_identity.get(target_video, ())
         else:
+            target_channel = _overlay_norm(change.get("channelId") or change.get("channel_id") or change.get("channelHandle") or change.get("channel_handle") or change.get("channelName") or change.get("channel_name"))
             candidate_group_keys = tuple(groups)
         for key in candidate_group_keys:
             row = groups.get(key)
             if row is None:
                 continue
-            row_title = _overlay_norm(row.get("title"))
-            row_artist = _overlay_norm(row.get("artist"))
-            row_name = _overlay_norm(row.get("name"))
-            row_search = _overlay_norm(f"{row.get('search_text', '')} {row.get('channel_search_text', '')}")
             if view in {"songs", "songIndex", "vsingerSongs"}:
-                matched = bool(
-                    target_title
-                    and target_artist
-                    and _overlay_song_group_norm(row_title) == _overlay_song_group_norm(target_title)
-                    and _overlay_song_group_norm(row_artist) == _overlay_song_group_norm(target_artist)
-                )
+                matched = True
             elif view == "artists":
+                row_artist = _overlay_norm(row.get("artist"))
                 matched = bool(target_artist and (row_artist == target_artist or _overlay_norm(row.get("detail_key")) == target_artist))
             elif view == "videos":
                 matched = bool(target_video and _text(row.get("detail_key")) == target_video)
             else:
+                row_name = _overlay_norm(row.get("name"))
+                row_search = _overlay_norm(f"{row.get('search_text', '')} {row.get('channel_search_text', '')}")
                 matched = bool(target_channel and (target_channel in row_search or target_channel == row_name or target_channel == _overlay_norm(row.get("detail_key"))))
             if not matched:
                 continue
@@ -3086,11 +3096,16 @@ def _apply_runtime_tombstone_groups(
             row["timestamp_count"] = max(0, int(row.get("timestamp_count") or 0) - 1)
             video_key = (key, target_video)
             original_video_group_count = int(change.get("originalGroupVideoOccurrenceCount") or 0)
-            removed_video_group_count = removal_counts[(
-                _overlay_song_group_norm(change.get("title")),
-                _overlay_song_group_norm(change.get("artist")),
-                target_video,
-            )]
+            if view in {"songs", "songIndex", "vsingerSongs"}:
+                removed_video_group_count = removal_counts[
+                    (target_song_title_norm, target_song_artist_norm, target_video)
+                ]
+            else:
+                removed_video_group_count = removal_counts[(
+                    _overlay_song_group_norm(change.get("title")),
+                    _overlay_song_group_norm(change.get("artist")),
+                    target_video,
+                )]
             if (
                 view in {"songs", "songIndex", "vsingerSongs"}
                 and target_video
@@ -6699,25 +6714,38 @@ def _prepare_generic_overlay_rankings(
                     connection,
                     f"""
                     /* bounded unaffected parent ranking prefix */
-                    SELECT rank, detail_key, title, artist, name, row_count,
-                           song_count, video_count, timestamp_count,
+                    WITH affected_keys(detail_key) AS MATERIALIZED (
+                        SELECT DISTINCT affected.detail_key
+                        FROM unnest(%s::text[]) AS affected(detail_key)
+                    )
+                    SELECT parent_row.rank, parent_row.detail_key,
+                           parent_row.title, parent_row.artist,
+                           parent_row.name, parent_row.row_count,
+                           parent_row.song_count, parent_row.video_count,
+                           parent_row.timestamp_count,
                            NULL::jsonb AS payload_json,
                            '' AS search_text, '' AS channel_search_text
-                    FROM runtime_ranking_rows
-                    WHERE revision_id = %s AND range_id = %s AND view = %s
-                      AND metric = %s
-                      AND {metric_column} >= %s
-                      AND detail_key <> ALL(%s)
-                    ORDER BY rank
+                    FROM runtime_ranking_rows AS parent_row
+                    WHERE parent_row.revision_id = %s
+                      AND parent_row.range_id = %s
+                      AND parent_row.view = %s
+                      AND parent_row.metric = %s
+                      AND parent_row.{metric_column} >= %s
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM affected_keys
+                          WHERE affected_keys.detail_key = parent_row.detail_key
+                      )
+                    ORDER BY parent_row.rank
                     LIMIT %s
                     """,
                     [
+                        sorted(bounded_affected_keys),
                         parent[0],
                         options["range"],
                         options["view"],
                         db_metric,
                         int(options["minCount"]),
-                        sorted(bounded_affected_keys),
                         base_window_end,
                     ],
                 )
@@ -7276,6 +7304,50 @@ def _cached_generic_ranking_preparation(
         _GENERIC_RANKING_PREPARATION_FLIGHTS.pop(key, None)
         flight.event.set()
     return prepared
+
+
+def _cached_generic_meta_counts(
+    key: tuple[str, str, tuple[str, ...]],
+    build,
+) -> dict[str, int]:
+    """Compute one immutable overlay count map per revision, with single-flight."""
+
+    with _GENERIC_META_COUNTS_LOCK:
+        cached = _GENERIC_META_COUNTS_CACHE.get(key)
+        if cached is not None:
+            return dict(cached)
+        flight = _GENERIC_META_COUNTS_FLIGHTS.get(key)
+        if flight is None:
+            flight = _MetaCountsFlight(threading.Event())
+            _GENERIC_META_COUNTS_FLIGHTS[key] = flight
+            leader = True
+        else:
+            leader = False
+    if not leader:
+        flight.event.wait()
+        if flight.error is not None:
+            raise flight.error
+        if flight.result is not None:
+            return dict(flight.result)
+        raise PostgresAdapterError(
+            "generic overlay meta count preparation completed without a result"
+        )
+    try:
+        computed = dict(build())
+    except BaseException as exc:
+        with _GENERIC_META_COUNTS_LOCK:
+            flight.error = exc
+            _GENERIC_META_COUNTS_FLIGHTS.pop(key, None)
+            flight.event.set()
+        raise
+    with _GENERIC_META_COUNTS_LOCK:
+        flight.result = dict(computed)
+        if len(_GENERIC_META_COUNTS_CACHE) >= _GENERIC_META_COUNTS_CACHE_CAP:
+            _GENERIC_META_COUNTS_CACHE.pop(next(iter(_GENERIC_META_COUNTS_CACHE)))
+        _GENERIC_META_COUNTS_CACHE[key] = dict(computed)
+        _GENERIC_META_COUNTS_FLIGHTS.pop(key, None)
+        flight.event.set()
+    return computed
 
 
 def _scoped_clicked_song_payload(
@@ -10616,14 +10688,12 @@ def meta_payload(connection) -> dict[str, Any]:
         })
         overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent_id)
         cache_key = (generic_runtime[0], parent_id, tuple(overlay_ids))
-        cached_counts = _GENERIC_META_COUNTS_CACHE.get(cache_key)
-        if cached_counts is None:
-            cached_counts = _apply_generic_overlay_meta_counts(
+        cached_counts = _cached_generic_meta_counts(
+            cache_key,
+            lambda: _apply_generic_overlay_meta_counts(
                 connection, parent_id, overlay_ids, counts,
-            )
-            if len(_GENERIC_META_COUNTS_CACHE) >= 8:
-                _GENERIC_META_COUNTS_CACHE.pop(next(iter(_GENERIC_META_COUNTS_CACHE)))
-            _GENERIC_META_COUNTS_CACHE[cache_key] = dict(cached_counts)
+            ),
+        )
         counts = {**counts, **cached_counts}
         authoritative_7d_ids = _authoritative_7d_overlay_ids(
             connection, overlay_ids,
@@ -10652,27 +10722,20 @@ def meta_payload(connection) -> dict[str, Any]:
                 raise PostgresAdapterError(
                     "authoritative 7d meta occurrence count mismatch"
                 )
-            all_payload = _generic_overlay_rankings_payload(
-                connection,
-                generic_runtime[0],
-                generic_runtime[1],
-                {
-                    "range": "all", "view": "songs",
-                    "metric": "occurrences", "page": 1,
-                    "pageSize": 1,
-                },
-            )
-            all_occurrences = int(
-                all_payload.get("totalOccurrenceCount") or 0
-            )
+            # ``counts`` is the parent all-range baseline after the exact,
+            # bounded overlay reconciliation above.  That reconciliation
+            # includes the authoritative 7d overlay in ``overlay_ids``; the
+            # records above are only a manifest/boundary validator.  Do not
+            # add ``authoritative_occurrences`` a second time.
+            #
+            # Do not synchronously build a ranking page from /api/meta: that
+            # turns a health/meta probe into a full 32k-row overlay replay.
+            all_occurrences = int(counts.get("occurrences") or 0)
             if all_occurrences <= 0:
                 raise PostgresAdapterError(
                     "authoritative 7d meta all-range baseline is empty"
                 )
-            counts["occurrences"] = (
-                all_occurrences + authoritative_occurrences
-            )
-            counts["source_occurrences"] = 3 * counts["occurrences"]
+            counts["occurrences"] = all_occurrences
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),

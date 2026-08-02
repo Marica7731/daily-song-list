@@ -9540,11 +9540,13 @@ query_shapes = []
 def rows(_connection, sql, params):
     if "bounded unaffected parent ranking prefix" in sql:
         query_shapes.append("unaffected")
-        assert "detail_key <> ALL(%s)" in sql
+        assert "WITH affected_keys(detail_key) AS MATERIALIZED" in sql
+        assert "NOT EXISTS" in sql
+        assert "detail_key <> ALL(%s)" not in sql
         assert "row_count >= %s" in sql
-        assert "ORDER BY rank" in sql
-        assert params[4] == 1
-        assert len(params[5]) == len(deleted) + 1
+        assert "ORDER BY parent_row.rank" in sql
+        assert params[5] == 1
+        assert len(params[0]) == len(deleted) + 1
         assert params[6] == module._GENERIC_NO_SEARCH_PAGE_BUCKET
         return [dict(row) for row in unaffected_query_rows]
     if "detail_key = ANY(%s)" in sql:
@@ -10237,6 +10239,78 @@ assert payload["meta"]["parent_revision_id"] not in {
     "full-manifest-spoof",
 }
 assert payload["counts"]["songs"] == 12
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic meta authoritative 7d plus alias counts are not double counted", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_META_COUNTS_CACHE.clear()
+module._GENERIC_META_COUNTS_FLIGHTS.clear()
+module._runtime_projection_revision = lambda _c: None
+module._generic_runtime_projection_revision = lambda _c: (
+    "auth-plus-alias",
+    {"status": "active", "manifest_json": {"acceptedOccurrenceCount": 1566}},
+)
+module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
+    "parent", {"manifest_json": {}}
+)
+module._overlay_revision_ids = lambda *_args: ["authoritative-7d", "alias"]
+module._rows = lambda _c, sql, _params: (
+    [{"key": "latest_occurrences", "value": 585076},
+     {"key": "source_occurrences_rows", "value": 1755228}]
+    if "runtime_meta" in sql else []
+)
+module._apply_generic_overlay_meta_counts = lambda _c, _p, _o, counts: {
+    **counts, "occurrences": 586642, "source_occurrences": 1759926,
+}
+module._authoritative_7d_overlay_ids = lambda *_args: ("authoritative-7d",)
+module._authoritative_7d_records = lambda *_args: (
+    {"occurrences": [{}]},
+) * 1566
+module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("meta must not build rankings"))
+)
+payload = module.meta_payload(object())
+assert payload["counts"]["occurrences"] == 586642, payload
+assert payload["counts"]["source_occurrences"] == 1759926, payload
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("empty songs identity does not mutate an empty-key group", () => {
+  const output = runPython(`
+import copy
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+groups = {
+    "::": {
+        "detail_key": "::", "title": "", "artist": "", "name": "",
+        "row_count": 2, "timestamp_count": 2, "video_count": 1,
+        "payload_json": None, "search_text": "", "channel_search_text": "",
+    }
+}
+before = copy.deepcopy(groups)
+module._apply_runtime_tombstone_groups(
+    groups,
+    [{"entityType": "occurrences", "title": "", "artist": "", "videoId": "empty-video"}],
+    "songs",
+)
+assert groups == before, groups
 print("OK")
 `);
   assert.equal(output, "OK");
