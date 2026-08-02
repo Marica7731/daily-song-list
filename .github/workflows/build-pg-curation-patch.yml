@@ -6,7 +6,7 @@ on:
       rules_manifest_path:
         description: "Repository-relative audited curation rules manifest"
         required: true
-        default: "artifacts/migration/curation-global-singleton-minimal.json"
+        default: "artifacts/migration/p2-curation-rules.json"
       rules_manifest_sha256:
         description: "Approved SHA-256 of the rules manifest"
         required: true
@@ -38,7 +38,7 @@ on:
       rules_manifest_path:
         type: string
         required: false
-        default: "artifacts/migration/curation-global-singleton-minimal.json"
+        default: "artifacts/migration/p2-curation-rules.json"
       rules_manifest_sha256:
         type: string
         required: true
@@ -178,8 +178,8 @@ jobs:
           done
           actual_rules_sha="$(shasum -a 256 "$PRODUCER_ROOT/$RULES_MANIFEST_PATH" | awk '{print $1}')"
           test "$actual_rules_sha" = "$RULES_MANIFEST_SHA256" || {
-            echo "PG_CURATION_PRODUCER_OBSERVATION rules SHA expected=$RULES_MANIFEST_SHA256 actual=$actual_rules_sha"
-            true
+            echo "PG_CURATION_PRODUCER_INTEGRITY_FAILED rules SHA expected=$RULES_MANIFEST_SHA256 actual=$actual_rules_sha" >&2
+            exit 78
           }
           find "$PRODUCER_ROOT" -type f -print | sort > "$TASK_ROOT/downloaded-files.txt"
 
@@ -215,13 +215,11 @@ jobs:
           read -r remote_active remote_db_bytes remote_free_bytes <<< "$remote_probe"
           requested_active="$EXPECTED_ACTIVE_REVISION_ID"
           test "$remote_active" = "$EXPECTED_ACTIVE_REVISION_ID" || {
-            echo "PG_CURATION_PRODUCER_OBSERVATION active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$remote_active"
-            true
+            echo "PG_CURATION_PRODUCER_PARENT_CAS_FAILED expected=$EXPECTED_ACTIVE_REVISION_ID actual=$remote_active" >&2
+            exit 75
           }
-          export EXPECTED_ACTIVE_REVISION_ID="$remote_active"
-          printf 'EXPECTED_ACTIVE_REVISION_ID=%s\n' "$remote_active" >> "$GITHUB_ENV"
           {
-            echo "- requested_active_revision_observation: $requested_active"
+            echo "- requested_active_revision: $requested_active"
             echo "- producer_active_revision: $remote_active"
           } >> "$GITHUB_STEP_SUMMARY"
           test "$remote_db_bytes" -gt 0 || echo "PG_CURATION_PRODUCER_OBSERVATION remotePgBytes=$remote_db_bytes"
@@ -289,8 +287,8 @@ jobs:
           final_remote_active="$("${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
             "sudo -u postgres psql -d song_rank -Atqc \"select state_value from migration_state where state_key='active_revision_id'\"")"
           test "$final_remote_active" = "$EXPECTED_ACTIVE_REVISION_ID" || {
-            echo "PG_CURATION_PRODUCER_OBSERVATION final active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$final_remote_active"
-            true
+            echo "PG_CURATION_PRODUCER_PARENT_CAS_FAILED final active drift expected=$EXPECTED_ACTIVE_REVISION_ID actual=$final_remote_active" >&2
+            exit 75
           }
           readonly MAC_CONVERTER_RSS_LIMIT_BYTES=0
           run_with_rss_watchdog() {
@@ -395,13 +393,16 @@ jobs:
             (
               cd "$ARTIFACT_ROOT"
               shasum -a 256 -c artifact-sha256.txt
-            ) || echo "PG_CURATION_PRODUCER_OBSERVATION artifact digest mismatch"
+            ) || {
+              echo "PG_CURATION_PRODUCER_INTEGRITY_FAILED artifact digest mismatch" >&2
+              exit 78
+            }
             final_upload_verified=true
             break
           done
           test "$final_upload_verified" = true || {
-            echo "PG_CURATION_PRODUCER_OBSERVATION final evidence peak did not stabilize"
-            true
+            echo "PG_CURATION_PRODUCER_INTEGRITY_FAILED final evidence peak did not stabilize" >&2
+            exit 78
           }
           printf 'TASK_PEAK_BYTES=%s\n' "$task_peak_bytes" >> "$GITHUB_ENV"
           printf 'ARTIFACT_UPLOAD_READY=true\nARTIFACT_UPLOAD_PATH=%s\n' "$ARTIFACT_ROOT" >> "$GITHUB_ENV"

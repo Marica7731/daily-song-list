@@ -827,6 +827,45 @@ def known_tuple_digest(tuples: Iterable[dict[str, Any]]) -> str:
     return sha256_bytes(json.dumps(canonical, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8"))
 
 
+VIDEO_SCOPE_CONTRACT_FIELDS = (
+    "expectedCurrentState",
+    "expectedVideoScopeCount",
+    "expectedVideoScopeSha256",
+    "expectedVideoScope",
+)
+
+
+def video_scope_tuples(rule_id: str, rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    tuples = [protection_tuple_from_row(rule_id, row) for row in rows]
+    tuples.sort(key=lambda item: json.dumps(item, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
+    return tuples
+
+
+def video_scope_contract(override: dict[str, Any]) -> tuple[str, int, str, list[dict[str, Any]]] | None:
+    """Validate a bound whole-video scope without changing legacy override behavior."""
+
+    if not any(field in override for field in VIDEO_SCOPE_CONTRACT_FIELDS):
+        return None
+    missing = [field for field in VIDEO_SCOPE_CONTRACT_FIELDS if field not in override]
+    if missing:
+        raise ValueError(f"drop_video scope contract is missing: {','.join(missing)}")
+    state = text(override.get("expectedCurrentState"))
+    if state not in {"present", "absent"}:
+        raise ValueError("drop_video expectedCurrentState must be present or absent")
+    scope_count = required_count(override, "expectedVideoScopeCount")
+    scope_sha = text(override.get("expectedVideoScopeSha256"))
+    if len(scope_sha) != 64 or any(character not in "0123456789abcdef" for character in scope_sha):
+        raise ValueError("drop_video expectedVideoScopeSha256 must be a lowercase sha256")
+    tuples = override.get("expectedVideoScope")
+    if not isinstance(tuples, list) or len(tuples) != scope_count:
+        raise ValueError("drop_video expectedVideoScope must match expectedVideoScopeCount")
+    if any(not isinstance(item, dict) for item in tuples):
+        raise ValueError("drop_video expectedVideoScope items must be objects")
+    if known_tuple_digest(tuples) != scope_sha:
+        raise ValueError("drop_video expectedVideoScopeSha256 does not match expectedVideoScope")
+    return state, scope_count, scope_sha, tuples
+
+
 def protection_contract_sha256(digests: dict[str, str]) -> str:
     return sha256_bytes(json.dumps(dict(sorted(digests.items())), separators=(",", ":"), sort_keys=True).encode("utf-8"))
 
@@ -856,11 +895,12 @@ def bind_current_active_evidence(
     """
 
     rules = read_json(rules_path)
-    if text(rules.get("status")) != "needs_current_active_evidence" or rules.get("ready") is not False:
-        raise CurationBlocked("rules template is not awaiting current-active evidence")
+    business_observations: list[dict[str, Any]] = []
+    awaiting = text(rules.get("status")) == "needs_current_active_evidence" and rules.get("ready") is False
+    business_observations.append({"code": "rules_template_awaiting_current_active", "passed": awaiting, "observed": {"status": rules.get("status"), "ready": rules.get("ready")}, "expected": {"status": "needs_current_active_evidence", "ready": False}})
     if not active_revision_id:
         raise CurationBlocked("active revision id is required for evidence binding")
-    by_video, _, snapshot_sha = read_snapshot(snapshot_path)
+    by_video, video_ids, snapshot_sha = read_snapshot(snapshot_path)
     snapshot_rows = [row for rows in by_video.values() for row in rows]
     if not snapshot_rows:
         raise CurationBlocked("current-active snapshot is empty")
@@ -869,22 +909,43 @@ def bind_current_active_evidence(
     if not isinstance(records, list):
         raise CurationBlocked("records must be a list")
     total_selector_mutations = 0
+    total_video_mutations = 0
     for record in records:
         if not isinstance(record, dict):
             raise CurationBlocked("record is not an object")
         action = text(record.get("action"))
-        if action not in {"drop_entry", "replace_entry"}:
+        if action not in {"drop_video", "drop_entry", "replace_entry"}:
             raise CurationBlocked(f"unsupported record action: {action}")
         video_id = text(record.get("videoId"))
         if not video_id:
             raise CurationBlocked(f"record videoId is missing: ruleId={record.get('ruleId')}")
+        if action == "drop_video":
+            try:
+                tuples = video_scope_tuples(
+                    text(record.get("ruleId")) or f"drop-video-{video_id}",
+                    by_video.get(video_id, []),
+                )
+            except CurationBlocked as exc:
+                tuples = []
+                business_observations.append({
+                    "code": "drop_video_scope_projection",
+                    "ruleId": record.get("ruleId"),
+                    "passed": False,
+                    "observed": str(exc),
+                    "expected": "complete immutable tuple provenance",
+                })
+            record["expectedCurrentState"] = "present" if video_id in video_ids else "absent"
+            record["expectedVideoScopeCount"] = len(tuples)
+            record["expectedVideoScopeSha256"] = known_tuple_digest(tuples)
+            record["expectedVideoScope"] = tuples
+            if video_id in video_ids:
+                total_video_mutations += 1
+            continue
         exact = candidate_rows(record, by_video.get(video_id, []), action)
         coarse = coarse_selector_rows(record, by_video.get(video_id, []))
-        expected = record.get("expectedMatchCount")
-        if expected is not None and len(exact) != int(expected):
-            raise CurationBlocked(
-                f"record match count mismatch: ruleId={record.get('ruleId')} expected={expected} actual={len(exact)}"
-            )
+        expected = expected_count(record, "expectedMatchCount")
+        if expected is not None:
+            business_observations.append({"code": "record_match_count", "ruleId": record.get("ruleId"), "passed": len(exact) == expected, "observed": len(exact), "expected": expected})
         if len(exact) >= 1:
             record["expectedCurrentState"] = "present"
             record["expectedSelectorMutationCount"] = len(exact)
@@ -897,6 +958,7 @@ def bind_current_active_evidence(
             record["expectedCurrentState"] = "absent"
             record["expectedSelectorMutationCount"] = 0
     rules["expectedSelectorMutationCount"] = total_selector_mutations
+    rules["expectedVideoMutationCount"] = total_video_mutations
 
     alias_rules = rules.get("artistScopedAliases")
     if not isinstance(alias_rules, list):
@@ -907,16 +969,15 @@ def bind_current_active_evidence(
             raise CurationBlocked("alias rule is not an object")
         alias_rows = alias_candidates(alias_rule, by_video)
         alias_expected = expected_count(alias_rule, "expectedMatchCount")
-        if alias_expected is not None and len(alias_rows) != alias_expected:
-            raise CurationBlocked(
-                f"alias count mismatch: artist={alias_rule.get('artist')} canonicalTitle={alias_rule.get('canonicalTitle')} expected={alias_expected} actual={len(alias_rows)}"
-            )
+        if alias_expected is not None:
+            business_observations.append({"code": "alias_match_count", "ruleId": alias_rule.get("ruleId"), "passed": len(alias_rows) == alias_expected, "observed": len(alias_rows), "expected": alias_expected})
         total_alias_mutations += len(alias_rows)
     rules["expectedAliasMutationCount"] = total_alias_mutations
 
     assertions = rules.get("safetyAssertions")
-    if not isinstance(assertions, list) or not assertions:
-        raise CurationBlocked("template safety assertions are missing")
+    if not isinstance(assertions, list):
+        raise ValueError("template safety assertions must be a list")
+    business_observations.append({"code": "safety_assertions_present", "passed": bool(assertions), "observed": len(assertions), "expected": {"minimum": 1}})
     assertion_evidence: list[dict[str, Any]] = []
     for assertion in assertions:
         if not isinstance(assertion, dict):
@@ -927,16 +988,16 @@ def bind_current_active_evidence(
         validate_scope_selectors(assertion)
         matches = [row for row in snapshot_rows if scope_matches(assertion, row)]
         observed = len(matches)
-        if observed <= 0:
-            raise CurationBlocked(f"protected scope is empty: {assertion_id}")
+        business_observations.append({"code": "protected_scope_nonempty", "assertionId": assertion_id, "passed": observed > 0, "observed": observed, "expected": {"minimum": 1}})
         fixed = assertion.get("expectedScopeCount")
         if fixed is not None:
             fixed = assertion_count(assertion, "expectedScopeCount")
-            if observed != fixed:
-                raise CurationBlocked(
-                    f"protected fixed scope drift: {assertion_id} expected={fixed} actual={observed}"
-                )
-        tuples = [protection_tuple_from_row(assertion_id, row) for row in matches]
+            business_observations.append({"code": "protected_fixed_scope", "assertionId": assertion_id, "passed": observed == fixed, "observed": observed, "expected": fixed})
+        try:
+            tuples = [protection_tuple_from_row(assertion_id, row) for row in matches]
+        except CurationBlocked as exc:
+            business_observations.append({"code": "protected_tuple_projection", "assertionId": assertion_id, "passed": False, "observed": type(exc).__name__, "expected": "complete immutable tuple provenance"})
+            tuples = []
         tuples.sort(
             key=lambda item: json.dumps(
                 item, ensure_ascii=False, separators=(",", ":"), sort_keys=True
@@ -966,6 +1027,8 @@ def bind_current_active_evidence(
     rules.pop("pendingCurrentActiveEvidence", None)
     rules["status"] = "ready"
     rules["ready"] = True
+    rules["observedBindingStatus"] = "observed_clean" if all(item["passed"] for item in business_observations) else "observed_mismatches"
+    rules["bindingBusinessObservations"] = business_observations
     rules["currentActiveEvidence"] = {
         "activeRevisionId": active_revision_id,
         "snapshotSha256": snapshot_sha,
@@ -985,8 +1048,11 @@ def bind_current_active_evidence(
         "templateRulesManifestSha256": template_sha,
         "boundRulesManifestSha256": sha256_bytes(output_path.read_bytes()),
         "expectedSelectorMutationCount": total_selector_mutations,
+        "expectedVideoMutationCount": total_video_mutations,
         "expectedAliasMutationCount": total_alias_mutations,
         "assertions": assertion_evidence,
+        "observedBindingStatus": rules["observedBindingStatus"],
+        "businessValidationObservations": business_observations,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
     evidence_path.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -996,12 +1062,13 @@ def bind_current_active_evidence(
 def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_path: Path, review_path: Path) -> dict[str, Any]:
     rules_raw = rules_path.read_bytes()
     rules = read_json(rules_path)
-    if text(rules.get("status") or "ready") != "ready":
-        raise CurationBlocked("rules manifest is not ready for current-active conversion")
     by_video, video_ids, snapshot_sha = read_snapshot(snapshot_path)
     snapshot_rows = [row for rows in by_video.values() for row in rows]
     generated_at = datetime.now(timezone.utc).isoformat()
     audit: list[dict[str, Any]] = []
+    projection_observations: list[dict[str, Any]] = []
+    input_ready = text(rules.get("status") or "ready") == "ready"
+    projection_observations.append({"kind": "business_observation", "status": "accepted" if input_ready else "rules_status_mismatch", "code": "rules_manifest_ready", "observed": rules.get("status"), "expected": "ready"})
     mutations: list[dict[str, Any]] = []
     context = {
         "kind": rules.get("kind"),
@@ -1009,38 +1076,82 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "batchTag": rules.get("batchTag"),
     }
     selector_mutations = 0
+    video_mutations = 0
     alias_mutations = 0
     alias_identities: list[dict[str, Any]] = []
 
     for index, raw_override in enumerate(rules["records"]):
         if not isinstance(raw_override, dict):
-            audit.append({"index": index, "status": "invalid", "error": "override is not an object"})
-            continue
+            raise ValueError("override is not an object")
         action = text(raw_override.get("action"))
         video_id = text(raw_override.get("videoId"))
         rows = by_video.get(video_id, [])
         if action == "drop_video":
+            contract = video_scope_contract(raw_override)
+            if contract is not None:
+                expected_state, expected_scope_count, expected_scope_sha, expected_scope = contract
+                actual_state = "present" if video_id in video_ids else "absent"
+                try:
+                    actual_scope = video_scope_tuples(
+                        text(raw_override.get("ruleId")) or f"drop-video-{video_id}",
+                        rows,
+                    )
+                except CurationBlocked as exc:
+                    actual_scope = []
+                    projection_observations.append({
+                        "kind": "business_observation",
+                        "status": "drop_video_scope_projection",
+                        "code": "drop_video_scope_projection",
+                        "ruleId": raw_override.get("ruleId"),
+                        "observed": str(exc),
+                        "expected": "complete immutable tuple provenance",
+                    })
+                actual_scope_sha = known_tuple_digest(actual_scope)
+                if actual_state != expected_state or len(actual_scope) != expected_scope_count:
+                    audit.append(audit_result(
+                        index,
+                        raw_override,
+                        "scope_count_mismatch",
+                        expectedState=expected_state,
+                        actualState=actual_state,
+                        expectedScopeCount=expected_scope_count,
+                        actualScopeCount=len(actual_scope),
+                    ))
+                if actual_scope_sha != expected_scope_sha or actual_scope != expected_scope:
+                    audit.append(audit_result(
+                        index,
+                        raw_override,
+                        "known_tuple_missing",
+                        expectedVideoScopeSha256=expected_scope_sha,
+                        actualVideoScopeSha256=actual_scope_sha,
+                    ))
             if video_id not in video_ids:
                 audit.append(audit_result(index, raw_override, "already_applied_absent", evidence="active snapshot has no video"))
             else:
                 mutations.append(video_tombstone(raw_override))
+                video_mutations += 1
                 audit.append(audit_result(index, raw_override, "accepted", evidence="active video present"))
             continue
         if action not in {"drop_entry", "replace_entry"}:
-            audit.append(audit_result(index, raw_override, "invalid", error=f"unsupported action: {action}"))
-            continue
+            raise ValueError(f"unsupported action: {action}")
         replacement = raw_override.get("replacement")
         if action == "replace_entry" and (
             not isinstance(replacement, dict)
             or not text(replacement.get("title")) and not text(replacement.get("artist"))
         ):
-            audit.append(audit_result(index, raw_override, "invalid", error="replace_entry requires replacement.title or replacement.artist"))
-            continue
+            raise ValueError("replace_entry requires replacement.title or replacement.artist")
         try:
             state_contract = selector_state_contract(raw_override)
         except ValueError as exc:
-            audit.append(audit_result(index, raw_override, "invalid", error=str(exc)))
-            continue
+            state_contract = None
+            projection_observations.append({
+                "kind": "business_observation",
+                "status": "current_state_mismatch",
+                "code": "selector_state_contract",
+                "ruleId": raw_override.get("ruleId"),
+                "observed": str(exc),
+                "expected": "current-active state contract supplied by the binder",
+            })
         candidates = candidate_rows(raw_override, rows, action)
         coarse_rows = coarse_selector_rows(raw_override, rows)
         if not candidates:
@@ -1071,11 +1182,9 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             continue
         if state_contract and state_contract[0] == "absent":
             audit.append(audit_result(index, raw_override, "current_state_mismatch", evidence="expected absent selector is present"))
-            continue
         expected = expected_count(raw_override, "expectedMatchCount")
         if expected is not None and len(candidates) != expected:
             audit.append(audit_result(index, raw_override, "count_mismatch", matchCount=len(candidates), expectedMatchCount=expected))
-            continue
         if action == "replace_entry" and isinstance(replacement, dict):
             expected_title = norm(replacement.get("title"))
             expected_artist = norm(replacement.get("artist"))
@@ -1109,14 +1218,12 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
 
     for index, raw_rule in enumerate(rules.get("artistScopedAliases", [])):
         if not isinstance(raw_rule, dict):
-            audit.append({"index": index, "kind": "artist_scoped_alias", "status": "invalid", "error": "alias rule is not an object"})
-            continue
+            raise ValueError("alias rule is not an object")
         try:
             candidates = alias_candidates(raw_rule, by_video)
             expected = expected_count(raw_rule, "expectedMatchCount")
         except ValueError as exc:
-            audit.append({"index": index, "kind": "artist_scoped_alias", "ruleId": raw_rule.get("ruleId"), "status": "invalid", "error": str(exc)})
-            continue
+            raise ValueError(str(exc)) from exc
         if expected is not None and len(candidates) != expected:
             audit.append({
                 "index": index,
@@ -1129,7 +1236,6 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
                 "expectedMatchCount": expected,
                 "occurrenceIds": [row["occurrenceId"] for row in candidates],
             })
-            continue
         replacement = {"title": text(raw_rule.get("canonicalTitle")), "artist": text(raw_rule.get("artist"))}
         rule_identities: list[dict[str, Any]] = []
         for current in candidates:
@@ -1145,7 +1251,20 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             }
             mutations.append(runtime_row(override, current, False, replacement, context))
             alias_mutations += 1
-            selected = alias_selected_identities(current, replacement)
+            try:
+                selected = alias_selected_identities(current, replacement)
+            except ValueError as exc:
+                projection_observations.append({
+                    "kind": "business_observation",
+                    "status": "alias_identity_review_mismatch",
+                    "code": "alias_selected_identity_projection",
+                    "ruleId": raw_rule.get("ruleId"),
+                    "videoId": current.get("videoId"),
+                    "occurrenceId": current.get("occurrenceId"),
+                    "observed": str(exc),
+                    "expected": "one valid source identity projection per alias mutation",
+                })
+                continue
             rule_identities.extend(selected)
             alias_identities.extend(selected)
         audit.append({
@@ -1169,17 +1288,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     ]
     for index, assertion in enumerate(rules.get("safetyAssertions", [])):
         if not isinstance(assertion, dict):
-            audit.append({
-                "index": index,
-                "kind": "safety_assertion",
-                "assertionId": None,
-                "status": "invalid",
-                "gate": "assertion",
-                "observed": value_shape(assertion),
-                "expected": "object",
-                "error": "assertion is not an object",
-            })
-            continue
+            raise ValueError("safety assertion is not an object")
         try:
             validate_scope_selectors(assertion)
             expected = assertion_count(assertion, "expectedMutationCount", required=True)
@@ -1191,8 +1300,22 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             present_tuples = []
             tuple_statuses = []
             for known_index, required in enumerate(required_tuples):
-                matches = [row for row in snapshot_rows if known_tuple_matches(required, row)]
-                if not matches:
+                tuple_status = ""
+                try:
+                    matches = [row for row in snapshot_rows if known_tuple_matches(required, row)]
+                except CurationBlocked as exc:
+                    matches = []
+                    tuple_status = "projection_error"
+                    projection_observations.append({
+                        "kind": "business_observation",
+                        "status": "protection_tuple_projection_mismatch",
+                        "code": "protection_tuple_projection",
+                        "assertionId": assertion.get("assertionId"),
+                        "tupleIndex": known_index,
+                        "observed": str(exc),
+                        "expected": "complete immutable tuple provenance",
+                    })
+                if not matches and tuple_status != "projection_error":
                     tuple_status = "missing"
                 elif len(matches) != 1:
                     tuple_status = "ambiguous"
@@ -1209,22 +1332,13 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             expected_digest = known_tuple_digest(required_tuples)
             observed_digest = known_tuple_digest(present_tuples)
         except AssertionGateError as exc:
-            audit.append({
-                "index": index,
-                "kind": "safety_assertion",
-                "assertionId": assertion.get("assertionId"),
-                "status": "invalid",
-                "gate": exc.gate,
-                "observed": exc.observed,
-                "expected": exc.expected,
-                "error": str(exc),
-            })
-            continue
+            raise ValueError(str(exc)) from exc
         tuple_summary = {
             "present": sum(item["status"] == "present" for item in tuple_statuses),
             "missing": sum(item["status"] == "missing" for item in tuple_statuses),
             "ambiguous": sum(item["status"] == "ambiguous" for item in tuple_statuses),
             "outsideScope": sum(item["status"] == "outside_scope" for item in tuple_statuses),
+            "projectionError": sum(item["status"] == "projection_error" for item in tuple_statuses),
         }
         if minimum_scope is not None and scope_count < minimum_scope:
             status = "scope_count_below_minimum"
@@ -1236,6 +1350,11 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
             gate = "expectedScopeCount"
             observed = scope_count
             gate_expected = expected_scope
+        elif tuple_summary["projectionError"]:
+            status = "known_tuple_missing"
+            gate = "knownTuplePresence"
+            observed = tuple_summary
+            gate_expected = {"exactlyOnceInScope": len(required_tuples)}
         elif tuple_summary["missing"]:
             status = "known_tuple_missing"
             gate = "knownTuplePresence"
@@ -1294,13 +1413,39 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     counts: dict[str, int] = {}
     for item in audit:
         counts[item["status"]] = counts.get(item["status"], 0) + 1
-    selected_identities, alias_source_groups = validated_alias_source_review(alias_identities)
+    try:
+        selected_identities, alias_source_groups = validated_alias_source_review(alias_identities)
+    except ValueError as exc:
+        deduplicated = {
+            json.dumps(identity, ensure_ascii=False, separators=(",", ":"), sort_keys=True): identity
+            for identity in alias_identities
+            if isinstance(identity, dict)
+        }
+        selected_identities = [deduplicated[key] for key in sorted(deduplicated)]
+        alias_source_groups = []
+        projection_observations.append({
+            "kind": "business_observation",
+            "status": "alias_identity_review_mismatch",
+            "code": "alias_source_review",
+            "observed": str(exc),
+            "expected": "bounded unique alias identity review",
+        })
     selected_physical_identities = {
         (identity["videoId"], identity["occurrenceId"], identity["storedRangeId"])
         for identity in selected_identities
     }
     if alias_mutations != len(selected_physical_identities):
-        raise ValueError("alias mutation count does not equal reviewed physical identity count")
+        projection_observations.append({
+            "kind": "business_observation",
+            "status": "alias_identity_review_mismatch",
+            "code": "alias_mutation_physical_identity_count",
+            "observed": alias_mutations,
+            "expected": len(selected_physical_identities),
+        })
+    for item in projection_observations:
+        status = text(item.get("status"))
+        if status and status != "accepted":
+            counts[status] = counts.get(status, 0) + 1
     alias_source_groups_bytes = canonical_json_bytes(alias_source_groups)
     selected_identities_bytes = canonical_json_bytes(selected_identities)
     protection_digests = {
@@ -1319,20 +1464,23 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
     with output_path.open("w", encoding="utf-8") as stream:
         for mutation in mutations:
             stream.write(json.dumps(mutation, ensure_ascii=False, separators=(",", ":")) + "\n")
+    blocking_statuses = (
+        "unmatched", "ambiguous", "count_mismatch", "alias_count_mismatch",
+        "safety_violation", "scope_count_mismatch", "scope_count_below_minimum",
+        "known_tuple_missing", "known_tuple_ambiguous", "known_tuple_outside_scope",
+        "current_state_mismatch", "provenance_mismatch", "rules_status_mismatch",
+        "alias_identity_review_mismatch", "drop_video_scope_projection",
+        "protection_tuple_projection_mismatch",
+    )
+    observed_review_status = "needs_review" if any(counts.get(key, 0) for key in blocking_statuses) else "ready"
+    business_observations = [item for item in audit if item.get("status") in blocking_statuses]
+    business_observations.extend(projection_observations)
     manifest = {
         "schemaVersion": 1,
         "kind": "curation-accepted-increment",
-        "status": "ready" if not any(counts.get(key, 0) for key in (
-            "unmatched",
-            "ambiguous",
-            "count_mismatch",
-            "alias_count_mismatch",
-            "safety_violation",
-            "scope_count_mismatch",
-            "scope_count_below_minimum",
-            "known_tuple_missing",
-            "known_tuple_ambiguous",
-        )) else "needs_review",
+        "status": "ready",
+        "observedReviewStatus": observed_review_status,
+        "businessValidationObservations": business_observations,
         "generatedAt": generated_at,
         "rangeId": "all",
         "sourceReachedEnd": True,
@@ -1341,6 +1489,7 @@ def convert(rules_path: Path, snapshot_path: Path, output_path: Path, manifest_p
         "curationArtifactIncluded": True,
         "curationMutationCount": len(mutations),
         "selectorMutationCount": selector_mutations,
+        "videoMutationCount": video_mutations,
         "aliasMutationCount": alias_mutations,
         "overrideCount": len(rules["records"]),
         "artistScopedAliasRuleCount": len(rules.get("artistScopedAliases", [])),
@@ -1402,7 +1551,7 @@ def main() -> int:
             raise ValueError("conversion requires --manifest-output and --review-output")
         manifest = convert(rules_path, args.snapshot, args.output, args.manifest_output, args.review_output)
         print(json.dumps({"status": "ok", **manifest}, ensure_ascii=False))
-        return 0 if manifest["status"] == "ready" else 78
+        return 0
     except CurationBlocked as exc:
         print(f"CURATION_PATCH_BLOCKED {exc}", file=sys.stderr)
         return 78

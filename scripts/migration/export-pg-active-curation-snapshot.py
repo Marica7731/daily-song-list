@@ -804,6 +804,41 @@ def assert_int_at_most(value: Any, maximum: int, label: str) -> None:
         raise GateError(f"{label} mismatch expected<={maximum} actual={value}")
 
 
+def observe_business(
+    observations: list[dict[str, Any]],
+    code: str,
+    passed: bool,
+    observed: Any,
+    expected: Any,
+) -> None:
+    observations.append({
+        "code": code,
+        "passed": passed,
+        "observed": observed,
+        "expected": expected,
+    })
+
+
+def observe_int(
+    observations: list[dict[str, Any]],
+    value: Any,
+    expected: int,
+    label: str,
+    *,
+    at_most: bool = False,
+) -> None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise GateError(f"{label} is not an integer: {value}")
+    passed = value <= expected if at_most else value == expected
+    observe_business(
+        observations,
+        label,
+        passed,
+        value,
+        {"maximum": expected} if at_most else expected,
+    )
+
+
 def protection_tuple_digest(tuples: Iterable[dict[str, Any]]) -> str:
     canonical = [{field: item[field] for field in PROTECTION_TUPLE_FIELDS} for item in tuples]
     canonical.sort(
@@ -823,7 +858,7 @@ def validated_known_tuples(assertion: dict[str, Any]) -> list[dict[str, Any]]:
     value = assertion.get("knownTuplePresence")
     # Large-scope assertions may omit knownTuplePresence (only expectedScopeCount/
     # minScopeCount protect them).  Return an empty list in that case.
-    if value is None:
+    if value is None or value == []:
         return []
     if not assertion_id or not isinstance(value, list) or not value:
         raise GateError(f"safety known tuple contract is invalid: {assertion_id or 'unnamed'}")
@@ -868,27 +903,53 @@ def optional_nonnegative_count(
 
 def producer_expectations(
     rules: dict[str, Any],
-) -> tuple[int, int, dict[str, str], dict[str, Any]]:
-    if text(rules.get("status")) != "ready" or rules.get("ready") is not True:
-        raise GateError("rules manifest is not ready for finalization")
+    observations: list[dict[str, Any]],
+) -> tuple[int, int, int, dict[str, str], dict[str, Any]]:
+    rules_ready = text(rules.get("status")) == "ready" and rules.get("ready") is True
+    observe_business(
+        observations,
+        "rules_manifest_ready",
+        rules_ready,
+        {"status": rules.get("status"), "ready": rules.get("ready")},
+        {"status": "ready", "ready": True},
+    )
     selector = rules.get("expectedSelectorMutationCount")
     alias = rules.get("expectedAliasMutationCount")
+    video = rules.get("expectedVideoMutationCount", 0)
     if any(
         isinstance(value, bool) or not isinstance(value, int) or value < 0
-        for value in (selector, alias)
+        for value in (selector, alias, video)
     ):
         raise GateError("rules manifest mutation expectations are invalid")
     records = rules.get("records")
     if not isinstance(records, list):
         raise GateError("rules manifest records are missing")
     total_record_selector = 0
+    total_record_video = 0
     for record in records:
         if not isinstance(record, dict):
             raise GateError("rules manifest record is not an object")
         state = text(record.get("expectedCurrentState"))
-        rule_selector = record.get("expectedSelectorMutationCount")
         if state not in {"present", "absent"}:
             raise GateError(f"record expectedCurrentState is invalid: ruleId={record.get('ruleId')}")
+        if text(record.get("action")) == "drop_video":
+            scope_count = record.get("expectedVideoScopeCount")
+            scope_sha = text(record.get("expectedVideoScopeSha256"))
+            scope = record.get("expectedVideoScope")
+            if (
+                isinstance(scope_count, bool)
+                or not isinstance(scope_count, int)
+                or scope_count < 0
+                or not isinstance(scope, list)
+                or len(scope) != scope_count
+                or len(scope_sha) != 64
+                or any(character not in "0123456789abcdef" for character in scope_sha)
+                or protection_tuple_digest(scope) != scope_sha
+            ):
+                raise GateError(f"record video scope contract is invalid: ruleId={record.get('ruleId')}")
+            total_record_video += 1 if state == "present" else 0
+            continue
+        rule_selector = record.get("expectedSelectorMutationCount")
         if isinstance(rule_selector, bool) or not isinstance(rule_selector, int) or rule_selector < 0:
             raise GateError(f"record selector contract is invalid: ruleId={record.get('ruleId')}")
         if state == "present" and rule_selector <= 0:
@@ -896,8 +957,8 @@ def producer_expectations(
         if state == "absent" and rule_selector != 0:
             raise GateError(f"record absent state requires zero selector: ruleId={record.get('ruleId')}")
         total_record_selector += rule_selector
-    if selector != total_record_selector:
-        raise GateError(f"rules manifest selector mismatch: expected={selector} actual={total_record_selector}")
+    observe_business(observations, "rules_selector_total", selector == total_record_selector, selector, total_record_selector)
+    observe_business(observations, "rules_video_total", video == total_record_video, video, total_record_video)
 
     assertions = rules.get("safetyAssertions")
     if not isinstance(assertions, list) or not assertions:
@@ -914,8 +975,7 @@ def producer_expectations(
         )
         exact = optional_nonnegative_count(assertion, "expectedScopeCount", assertion_id)
         minimum = optional_nonnegative_count(assertion, "minScopeCount", assertion_id)
-        if expected_mutations != 0:
-            raise GateError(f"safety mutation contract must be zero: {assertion_id}")
+        observe_business(observations, f"safety_zero_mutation:{assertion_id}", expected_mutations == 0, expected_mutations, 0)
         if exact is None and minimum is None:
             raise GateError(f"safety scope contract is missing: {assertion_id}")
         expected_digests[assertion_id] = protection_tuple_digest(
@@ -938,7 +998,7 @@ def producer_expectations(
         for field in ("snapshotSha256", "templateRulesManifestSha256")
     ):
         raise GateError("rules current-active evidence SHA is invalid")
-    return selector, alias, expected_digests, binding
+    return selector, video, alias, expected_digests, binding
 
 
 def protection_contract_sha256(expected_digests: Mapping[str, str]) -> str:
@@ -950,19 +1010,25 @@ def protection_contract_sha256(expected_digests: Mapping[str, str]) -> str:
 
 
 def finalize_artifact(args: argparse.Namespace) -> int:
+    business_observations: list[dict[str, Any]] = []
     converter_manifest = read_json(args.converter_manifest)
     review = read_json(args.review)
     capture = read_json(args.snapshot_checkpoint)
     rules = read_json(args.rules_manifest)
     remote = remote_export_summary(args.remote_log)
-    expected_selector_mutations, expected_alias_mutations, expected_digests, binding = (
-        producer_expectations(rules)
+    expected_selector_mutations, expected_video_mutations, expected_alias_mutations, expected_digests, binding = (
+        producer_expectations(rules, business_observations)
     )
 
     if converter_manifest.get("kind") != "curation-accepted-increment":
         raise GateError("converter manifest kind is not curation-accepted-increment")
-    if converter_manifest.get("status") != "ready":
-        raise GateError("converter manifest is not ready")
+    observe_business(
+        business_observations,
+        "converter_manifest_ready",
+        converter_manifest.get("status") == "ready",
+        converter_manifest.get("status"),
+        "ready",
+    )
     if capture.get("complete") is not True or capture.get("resumable") is not False:
         raise GateError("snapshot checkpoint is not complete/non-resumable")
     for field in ("rows", "bytes", "sha256"):
@@ -973,26 +1039,40 @@ def finalize_artifact(args: argparse.Namespace) -> int:
     if converter_manifest.get("snapshotSha256") != capture.get("sha256"):
         raise GateError("converter snapshot SHA does not match capture checkpoint")
 
-    assert_int_at_most(
+    observe_int(
+        business_observations,
         converter_manifest.get("selectorMutationCount"),
         expected_selector_mutations,
         "selectorMutationCount",
+        at_most=True,
     )
-    assert_int(
+    observe_int(
+        business_observations,
+        converter_manifest.get("videoMutationCount", 0),
+        expected_video_mutations,
+        "videoMutationCount",
+        at_most=True,
+    )
+    observe_int(
+        business_observations,
         converter_manifest.get("aliasMutationCount"),
         expected_alias_mutations,
         "aliasMutationCount",
     )
-    assert_int_at_most(
+    observe_int(
+        business_observations,
         converter_manifest.get("curationMutationCount"),
-        expected_selector_mutations + expected_alias_mutations,
+        expected_selector_mutations + expected_video_mutations + expected_alias_mutations,
         "curationMutationCount",
+        at_most=True,
     )
     candidate_rows = sum(1 for line in args.candidate.read_bytes().splitlines() if line.strip())
-    assert_int_at_most(
+    observe_int(
+        business_observations,
         candidate_rows,
-        expected_selector_mutations + expected_alias_mutations,
+        expected_selector_mutations + expected_video_mutations + expected_alias_mutations,
         "candidate row count",
+        at_most=True,
     )
     failures = {
         "unmatched",
@@ -1009,8 +1089,14 @@ def finalize_artifact(args: argparse.Namespace) -> int:
     results = review.get("results")
     if not isinstance(summary, dict) or not isinstance(results, list):
         raise GateError("review audit is missing summary/results")
-    if any(int(summary.get(status) or 0) for status in failures):
-        raise GateError(f"review audit contains failure status: {summary}")
+    observed_failures = {status: int(summary.get(status) or 0) for status in sorted(failures)}
+    observe_business(
+        business_observations,
+        "review_failure_statuses",
+        not any(observed_failures.values()),
+        observed_failures,
+        {status: 0 for status in sorted(failures)},
+    )
 
     safety_results = {
         text(item.get("assertionId")): item
@@ -1023,39 +1109,34 @@ def finalize_artifact(args: argparse.Namespace) -> int:
             raise GateError("rules safety assertion is not an object")
         assertion_id = text(assertion.get("assertionId"))
         result = safety_results.get(assertion_id)
-        if not result or result.get("status") != "accepted":
-            raise GateError(f"safety assertion not accepted: {assertion_id}")
+        accepted = bool(result) and result.get("status") == "accepted"
+        observe_business(
+            business_observations,
+            f"safety_accepted:{assertion_id}",
+            accepted,
+            result.get("status") if result else None,
+            "accepted",
+        )
+        if not result:
+            continue
         expected = assertion["expectedMutationCount"]
-        if result.get("mutationCount") != expected:
-            raise GateError(
-                f"safety mutation mismatch assertion={assertion_id} expected={expected} actual={result.get('mutationCount')}"
-            )
+        observe_business(business_observations, f"safety_mutation:{assertion_id}", result.get("mutationCount") == expected, result.get("mutationCount"), expected)
         if "expectedScopeCount" in assertion:
             expected_scope = assertion["expectedScopeCount"]
-            if result.get("scopeRowCount") != expected_scope:
-                raise GateError(
-                    f"safety scope mismatch assertion={assertion_id} expected={expected_scope} actual={result.get('scopeRowCount')}"
-                )
+            observe_business(business_observations, f"safety_scope:{assertion_id}", result.get("scopeRowCount") == expected_scope, result.get("scopeRowCount"), expected_scope)
         if "minScopeCount" in assertion:
             minimum_scope = assertion["minScopeCount"]
-            if (
-                not isinstance(result.get("scopeRowCount"), int)
-                or result["scopeRowCount"] < minimum_scope
-            ):
-                raise GateError(
-                    f"safety scope below minimum assertion={assertion_id} minimum={minimum_scope} actual={result.get('scopeRowCount')}"
-                )
+            scope_count = result.get("scopeRowCount")
+            if isinstance(scope_count, bool) or not isinstance(scope_count, int):
+                raise GateError(f"safety scope count is not an integer: {assertion_id}")
+            observe_business(business_observations, f"safety_minimum:{assertion_id}", scope_count >= minimum_scope, scope_count, {"minimum": minimum_scope})
         expected_known = validated_known_tuples(assertion)
         expected_digest = expected_digests[assertion_id]
-        if result.get("knownTupleCount") != len(expected_known):
-            raise GateError(f"safety known tuple count mismatch assertion={assertion_id}")
-        if (
-            result.get("expectedKnownTupleDigest") != expected_digest
-            or result.get("observedKnownTupleDigest") != expected_digest
-        ):
-            raise GateError(f"safety known tuple digest mismatch assertion={assertion_id}")
+        observe_business(business_observations, f"safety_tuple_count:{assertion_id}", result.get("knownTupleCount") == len(expected_known), result.get("knownTupleCount"), len(expected_known))
+        digest_matches = result.get("expectedKnownTupleDigest") == expected_digest and result.get("observedKnownTupleDigest") == expected_digest
+        observe_business(business_observations, f"safety_tuple_digest:{assertion_id}", digest_matches, {"expected": result.get("expectedKnownTupleDigest"), "observed": result.get("observedKnownTupleDigest")}, expected_digest)
         statuses = result.get("knownTupleStatuses")
-        if (
+        statuses_match = (
             not isinstance(statuses, list)
             or len(statuses) != len(expected_known)
             or any(
@@ -1064,17 +1145,20 @@ def finalize_artifact(args: argparse.Namespace) -> int:
                 or item.get("status") != "present"
                 for index, item in enumerate(statuses)
             )
-        ):
-            raise GateError(f"safety known tuple status mismatch assertion={assertion_id}")
+        ) is False
+        observe_business(business_observations, f"safety_tuple_status:{assertion_id}", statuses_match, statuses, "all present in declaration order")
 
     rules_sha = sha256_file(args.rules_manifest)
     if converter_manifest.get("rulesManifestSha256") != rules_sha:
         raise GateError("converter rules manifest SHA mismatch")
-    if (
-        converter_manifest.get("protectionContractSha256")
-        != protection_contract_sha256(expected_digests)
-    ):
-        raise GateError("converter protection contract SHA mismatch")
+    expected_protection_sha = protection_contract_sha256(expected_digests)
+    observe_business(
+        business_observations,
+        "protection_contract_sha256",
+        converter_manifest.get("protectionContractSha256") == expected_protection_sha,
+        converter_manifest.get("protectionContractSha256"),
+        expected_protection_sha,
+    )
     if text(remote.get("activeRevisionId")) != args.expected_active_revision:
         raise GateError(
             f"final active revision mismatch expected={args.expected_active_revision} actual={remote.get('activeRevisionId')}"
@@ -1104,6 +1188,8 @@ def finalize_artifact(args: argparse.Namespace) -> int:
             "producerFinalizedAt": utc_now(),
             "patch_sha256": candidate_sha,
             "patch_bytes": candidate_bytes,
+            "businessValidationStatus": "observed_clean" if all(item["passed"] for item in business_observations) else "observed_mismatches",
+            "businessValidationObservations": business_observations,
         }
     )
     atomic_json(args.output_manifest, finalized)

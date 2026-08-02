@@ -1,5 +1,9 @@
 {
   "schemaVersion": 1,
+  "kind": "curation-rules-manifest",
+  "sourceCommit": "3bed0fe4a777fb44a7ac0ad4b68125ee06be5b58",
+  "baseProductRef": "108a67568c0f9b3d8773adad1375cdc112a06061",
+  "batchTag": "p2-merged-manifest-v1",
   "records": [
     {
       "ruleId": "main-curation-fe27a1cefeeadc07f0de9089",
@@ -1720,5 +1724,192 @@
       "reviewedAt": "2026-07-26T16:36:56+08:00",
       "reviewedBy": "codex"
     }
-  ]
+  ],
+  "artistScopedAliases": [
+    {
+      "artist": "AliA",
+      "canonicalTitle": "かくれんぼ",
+      "aliases": [
+        "Kakurenbo",
+        "かくれんぼ"
+      ],
+      "reason": "verified_same_song"
+    },
+    {
+      "artist": "ヨルシカ",
+      "canonicalTitle": "晴る",
+      "aliases": [
+        "晴る",
+        "晴る [Sunny]",
+        "晴る [Piano ver.]",
+        "晴る\tヨルシカ"
+      ],
+      "reason": "verified_same_song"
+    },
+    {
+      "artist": "tuki.",
+      "canonicalTitle": "晩餐歌",
+      "aliases": [
+        "晩餐歌",
+        "晩餐歌 Piano Ver",
+        "晩餐歌 (Bansanka)",
+        "晩餐歌[Bansanka]",
+        "『晩餐歌』Tuki"
+      ],
+      "reason": "verified_same_song"
+    },
+    {
+      "artist": "緑黄色社会",
+      "canonicalTitle": "花になって",
+      "aliases": [
+        "花になって",
+        "⭐花になって",
+        "花になって - Be a flower",
+        "Be a Flower/Hana ni Natte (花になって)"
+      ],
+      "reason": "verified_same_song"
+    },
+    {
+      "artist": "初星学園",
+      "canonicalTitle": "自己肯定感爆上げ↑↑しゅきしゅきソング",
+      "aliases": [
+        "自己肯定感爆上げ↑↑しゅきしゅきソング",
+        "自己肯定感爆上げ↑↑しゅきしゅきソング(学園アイドルマスター)",
+        "自己肯定感爆上げ↑↑しゅきしゅきソング（学園アイドルマスター）",
+        "53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング",
+        "自己肯定感爆上げしゅきしゅきソング"
+      ],
+      "reason": "verified_same_song"
+    },
+    {
+      "artist": "eill",
+      "canonicalTitle": "フィナーレ。",
+      "aliases": [
+        "フィナーレ",
+        "フィナーレ。"
+      ],
+      "reason": "official_title_punctuation"
+    },
+    {
+      "artist": "RADWIMPS",
+      "canonicalTitle": "すずめ",
+      "aliases": [
+        "すずめ",
+        "すずめ feat.十明"
+      ],
+      "reason": "feat_in_title_should_merge_to_main"
+    },
+    {
+      "artist": "MAISONdes",
+      "canonicalTitle": "トウキョウ・シャンディ・ランデヴ",
+      "aliases": [
+        "トウキョウ・シャンディ・ランデヴ",
+        "トウキョウ・シャンディ・ランデヴ feat. 花譜,ツミキ"
+      ],
+      "reason": "feat_in_title_should_merge_to_main"
+    },
+    {
+      "artist": "MIMI",
+      "canonicalTitle": "今はいいんだよ。",
+      "aliases": [
+        "今はいいんだよ。",
+        "今はいいんだよ。feat.可不"
+      ],
+      "reason": "feat_in_title_should_merge_to_main"
+    },
+    {
+      "artist": "MAISONdes",
+      "canonicalTitle": "アイタリナイ",
+      "aliases": [
+        "アイタリナイ",
+        "アイタリナイ feat. yama, ニト"
+      ],
+      "reason": "feat_in_title_should_merge_to_main"
+    },
+    {
+      "artist": "バルーン",
+      "canonicalTitle": "シャルル",
+      "aliases": [
+        "シャルル",
+        "シャルル feat. flower"
+      ],
+      "reason": "feat_in_title_should_merge_to_main"
+    },
+    {
+      "ruleId": "ado-gyakko-official-album-title",
+      "artist": "Ado",
+      "canonicalTitle": "逆光",
+      "aliases": [
+        "逆光",
+        "逆光(ウタ from ONE PIECE FILM RED)",
+        "逆光 (ウタ from ONE PIECE FILM RED)",
+        "逆光（ウタ from ONE PIECE FILM RED）",
+        "⭐逆光（ウタfrom ONE PIECE FILM RED）"
+      ],
+      "expectedMatchCount": 14,
+      "reason": "verified_same_song_official_album_title",
+      "evidenceUrls": [
+        "https://sp.universal-music.co.jp/ado/uta-no-uta/",
+        "https://www.youtube.com/watch?v=Vx0HGME8hWw&t=2667s"
+      ],
+      "reviewedAt": "2026-07-26T16:36:56+08:00",
+      "reviewedBy": "codex"
+    }
+  ],
+  "safetyAssertions": [
+    {
+      "assertionId": "protect-vaundy-gyakko-replica",
+      "equals": {
+        "artist": "Vaundy",
+        "title": "逆光 - replica"
+      },
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-gyakko-no-flugel",
+      "startsWith": {
+        "title": "逆光のフリューゲル"
+      },
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-luna-8-32",
+      "equals": {
+        "artist": "*Luna",
+        "title": "8.32"
+      },
+      "minScopeCount": 1,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "protect-ado-gyakko-canonical",
+      "equals": {
+        "artist": "Ado",
+        "title": "逆光"
+      },
+      "minScopeCount": 1,
+      "expectedMutationCount": 0
+    },
+    {
+      "assertionId": "exclude-urameshi-legacy-rules",
+      "equals": {
+        "channelHandle": "@urameshi_conta"
+      },
+      "auditedLegacyRuleCount": 27,
+      "expectedMutationCount": 0
+    }
+  ],
+  "status": "needs_current_active_evidence",
+  "ready": false,
+  "pendingCurrentActiveEvidence": {
+    "reason": "merged rules require binding to the complete current-active snapshot",
+    "activeRevisionDispatchBaseline": "accepted_30732634993_1",
+    "parentRevisionDispatchBaseline": "accepted_30675758006_1",
+    "remoteMainRebaseBaseline": "108a67568c0f9b3d8773adad1375cdc112a06061",
+    "commitParentPolicy": "dispatch-time-latest-main",
+    "controllerMustRecheckActiveRevisionImmediatelyBeforeDispatch": true,
+    "knownTupleSchema": "videoId+seconds",
+    "dropVideoScopeSchema": "complete-video-scope-v1",
+    "zeroScopeIsNeverReady": true
+  }
 }

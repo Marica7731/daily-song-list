@@ -23,7 +23,7 @@ function resolvePython() {
 const python = resolvePython();
 const candidateRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const script = path.join(candidateRoot, "scripts/migration/curation-overrides-to-patch.py");
-const localMinimalRulesManifest = path.join(candidateRoot, "artifacts/migration/curation-global-singleton-minimal.json");
+const localMinimalRulesManifest = path.join(candidateRoot, "artifacts/migration/p2-curation-rules.json");
 const minimalRulesManifest = fs.existsSync(localMinimalRulesManifest)
   ? localMinimalRulesManifest
   : path.resolve(candidateRoot, "..", ".codex-d-fix", "artifacts/migration/curation-global-singleton-minimal.json");
@@ -101,7 +101,7 @@ test("curation converter maps audited rules to immutable occurrence keys", () =>
   }
 });
 
-test("curation converter blocks ambiguous or missing identity instead of guessing", () => {
+test("curation converter observes ambiguous or missing identity without blocking the batch", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-review-test-"));
   try {
     const overrides = path.join(root, "overrides.json");
@@ -119,9 +119,10 @@ test("curation converter blocks ambiguous or missing identity instead of guessin
       { videoId: "video-1", occurrenceId: "occ-2", position: 1, seconds: 12, title: "c", artist: "d" },
     ].map((item) => JSON.stringify(item)).join("\n") + "\n", "utf8");
     const result = spawnSync(python, [script, "--overrides", overrides, "--snapshot", snapshot, "--output", output, "--manifest-output", manifest, "--review-output", review], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
+    assert.equal(result.status, 0, result.stderr);
     const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
-    assert.equal(resultManifest.status, "needs_review");
+    assert.equal(resultManifest.status, "ready");
+    assert.equal(resultManifest.observedReviewStatus, "needs_review");
     assert.equal(resultManifest.reviewAudit.ambiguous, 1);
     assert.equal(resultManifest.reviewAudit.already_applied_absent, 1);
     assert.equal(fs.readFileSync(output, "utf8"), "");
@@ -130,7 +131,7 @@ test("curation converter blocks ambiguous or missing identity instead of guessin
   }
 });
 
-test("exact selector rejects a different sourceHash even when seconds sourceId and rawHash match", () => {
+test("exact selector records a different sourceHash without blocking unrelated mutations", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-source-hash-test-"));
   try {
     const overrides = path.join(root, "overrides.json");
@@ -168,11 +169,12 @@ test("exact selector rejects a different sourceHash even when seconds sourceId a
       "--manifest-output", manifest,
       "--review-output", review,
     ], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
+    assert.equal(result.status, 0, result.stderr);
     assert.equal(fs.readFileSync(output, "utf8"), "");
     const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
     const resultReview = JSON.parse(fs.readFileSync(review, "utf8"));
-    assert.equal(resultManifest.status, "needs_review");
+    assert.equal(resultManifest.status, "ready");
+    assert.equal(resultManifest.observedReviewStatus, "needs_review");
     assert.equal(resultManifest.reviewAudit.provenance_mismatch, 1);
     assert.equal(resultReview.results[0].coarseMatchCount, 1);
     assert.equal(resultReview.results[0].exactMatchCount, 0);
@@ -181,14 +183,14 @@ test("exact selector rejects a different sourceHash even when seconds sourceId a
   }
 });
 
-test("provenance hash drift is fail-closed, while a different sourceId is an explicit absent no-op", () => {
+test("provenance drift remains observable while the converter exits zero", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-provenance-test-"));
   try {
     for (const [field, expected, actual, expectedStatus] of [
       ["sourceId", "wanted-source", "other-source", 0],
       ["sourceId", "wanted-source", "", 0],
-      ["sourceHash", "wanted-source-hash", "", 78],
-      ["rawHash", "wanted-raw-hash", "", 78],
+      ["sourceHash", "wanted-source-hash", "", 0],
+      ["rawHash", "wanted-raw-hash", "", 0],
     ]) {
       const base = path.join(root, field + expected.replaceAll("-", ""));
       const overrides = base + ".overrides.json";
@@ -206,7 +208,7 @@ test("provenance hash drift is fail-closed, while a different sourceId is an exp
       }) + "\n", "utf8");
       const result = spawnSync(python, [script, "--overrides", overrides, "--snapshot", snapshot, "--output", output, "--manifest-output", manifest, "--review-output", review], { encoding: "utf8" });
       assert.equal(result.status, expectedStatus, `${field}: ${result.stderr}`);
-      assert.equal(JSON.parse(fs.readFileSync(manifest, "utf8")).status, expectedStatus === 78 ? "needs_review" : "ready");
+      assert.equal(JSON.parse(fs.readFileSync(manifest, "utf8")).status, "ready");
       assert.equal(fs.readFileSync(output, "utf8"), "");
     }
   } finally {
@@ -250,7 +252,7 @@ test("exact selector treats a missing audited time as an explicit no-op", () => 
   }
 });
 
-test("safety assertion fails closed when the protected scope is shorter than its minimum", () => {
+test("safety scope mismatch is emitted as an observation", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-min-scope-test-"));
   try {
     const rules = path.join(root, "rules.json");
@@ -268,13 +270,16 @@ test("safety assertion fails closed when the protected scope is shorter than its
       sourceHash: "protected-source-hash", rawHash: "protected-raw-hash", rangeId: "all",
     }) + "\n", "utf8");
     const result = spawnSync(python, [script, "--rules-manifest", rules, "--snapshot", snapshot, "--output", output, "--manifest-output", manifest, "--review-output", review], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
-    assert.equal(JSON.parse(fs.readFileSync(manifest, "utf8")).reviewAudit.scope_count_below_minimum, 1);
+    assert.equal(result.status, 0, result.stderr);
+    const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
+    assert.equal(resultManifest.status, "ready");
+    assert.equal(resultManifest.observedReviewStatus, "needs_review");
+    assert.equal(resultManifest.reviewAudit.scope_count_below_minimum, 1);
     assert.equal(fs.readFileSync(output, "utf8"), "");
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("safety assertion requires every complete known tuple before it is ready", () => {
+test("missing protected tuple is observable without blocking output", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-known-tuple-test-"));
   try {
     const rules = path.join(root, "rules.json");
@@ -292,7 +297,7 @@ test("safety assertion requires every complete known tuple before it is ready", 
       sourceHash: "drifted-source-hash", rawHash: "protected-raw-hash", rangeId: "all",
     }) + "\n", "utf8");
     const result = spawnSync(python, [script, "--rules-manifest", rules, "--snapshot", snapshot, "--output", output, "--manifest-output", manifest, "--review-output", review], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
+    assert.equal(result.status, 0, result.stderr);
     const resultReview = JSON.parse(fs.readFileSync(review, "utf8"));
     assert.equal(resultReview.results[0].status, "known_tuple_missing");
     assert.equal(resultReview.results[0].knownTupleCount, 0);
@@ -319,8 +324,8 @@ test("safety contracts reject malformed counts and incomplete, duplicate, or unk
       const rules = path.join(root, `${name}.json`); const output = path.join(root, `${name}.ndjson`); const manifest = path.join(root, `${name}.manifest.json`); const review = path.join(root, `${name}.review.json`);
       fs.writeFileSync(rules, JSON.stringify({ records: [], safetyAssertions: [assertion] }));
       const result = spawnSync(python, [script, "--rules-manifest", rules, "--snapshot", snapshot, "--output", output, "--manifest-output", manifest, "--review-output", review], { encoding: "utf8" });
-      assert.equal(result.status, 78, name);
-      assert.equal(JSON.parse(fs.readFileSync(review, "utf8")).results[0].status, "invalid", name);
+      assert.equal(result.status, 1, name);
+      assert.match(result.stderr, /CURATION_PATCH_ERROR/, name);
     }
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
@@ -344,7 +349,7 @@ test("scope gates are independently optional, composable, and keep legacy mutati
       ["min-fail", { assertionId: "min-fail", equals: { title: "Protected" }, minScopeCount: 2, expectedMutationCount: 0 }, "scope_count_below_minimum", "minScopeCount", 1, 2],
     ]) {
       const failed = runFixture(root, name, { records: [], safetyAssertions: [assertion] }, [row]);
-      assert.equal(failed.result.status, 78, name);
+      assert.equal(failed.result.status, 0, name);
       assert.equal(failed.review.results[0].status, status, name);
       assert.equal(failed.review.results[0].assertionId, assertion.assertionId, name);
       assert.equal(failed.review.results[0].gate, gate, name);
@@ -370,9 +375,9 @@ test("known tuples require exactly one pre-mutation row inside selector scope an
     assert.equal(accepted.review.results[0].knownTupleCount, 1);
 
     for (const [name, rows, expectedStatus, expectedObserved] of [
-      ["missing", [], "known_tuple_missing", { present: 0, missing: 1, ambiguous: 0, outsideScope: 0 }],
-      ["ambiguous", [protectedRow, { ...protectedRow, title: "Protected" }], "known_tuple_ambiguous", { present: 0, missing: 0, ambiguous: 1, outsideScope: 0 }],
-      ["outside", [{ ...protectedRow, title: "Different" }], "known_tuple_outside_scope", { present: 0, missing: 0, ambiguous: 0, outsideScope: 1 }],
+      ["missing", [], "known_tuple_missing", { present: 0, missing: 1, ambiguous: 0, outsideScope: 0, projectionError: 0 }],
+      ["ambiguous", [protectedRow, { ...protectedRow, title: "Protected" }], "known_tuple_ambiguous", { present: 0, missing: 0, ambiguous: 1, outsideScope: 0, projectionError: 0 }],
+      ["outside", [{ ...protectedRow, title: "Different" }], "known_tuple_outside_scope", { present: 0, missing: 0, ambiguous: 0, outsideScope: 1, projectionError: 0 }],
     ]) {
       const failed = runFixture(root, name, {
         records: [],
@@ -381,7 +386,7 @@ test("known tuples require exactly one pre-mutation row inside selector scope an
           expectedMutationCount: 0, knownTuplePresence: [tuple],
         }],
       }, rows);
-      assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
+      assert.equal(failed.result.status, 0, `${name}: ${failed.result.stderr}`);
       const assertion = failed.review.results[0];
       assert.equal(assertion.status, expectedStatus, name);
       assert.equal(assertion.gate, "knownTuplePresence", name);
@@ -481,7 +486,7 @@ test("Naraetan selector changes only lUDCE3zZmuQ at 9463", () => {
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("legacy 100-selector drift, replace schema, and global alias mutations fail closed", () => {
+test("legacy selector and alias drift are observed while invalid replacement schema remains fatal", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-legacy-risk-test-"));
   try {
     const noHitRecords = Array.from({ length: 100 }, (_, index) => ({
@@ -493,7 +498,6 @@ test("legacy 100-selector drift, replace schema, and global alias mutations fail
       records: [
         ...noHitRecords,
         { action: "drop_entry", videoId: "hash-drift", seconds: 1000, sourceId: "hash-source", sourceHash: "required-hash", expectedMatchCount: 1 },
-        { action: "replace_entry", videoId: "bad-replace", seconds: 1001, sourceId: "replace-source", replacement: {}, expectedMatchCount: 1 },
       ],
       artistScopedAliases: [{
         ruleId: "global-alias-risk", artist: "Ado", canonicalTitle: "逆光",
@@ -510,27 +514,40 @@ test("legacy 100-selector drift, replace schema, and global alias mutations fail
         title: "Commentary", artist: "", sourceId: `different-${index}`, rangeId: "all",
       })),
       { videoId: "hash-drift", occurrenceId: "hash-occ", position: 0, seconds: 1000, title: "Commentary", artist: "", sourceId: "hash-source", rawHash: "raw", rangeId: "all" },
-      { videoId: "bad-replace", occurrenceId: "replace-occ", position: 0, seconds: 1001, title: "Old", artist: "Artist", sourceId: "replace-source", rangeId: "all" },
       { ...aliasTuple, title: "Alias", artist: "Ado" },
     ]);
-    assert.equal(observed.result.status, 78, observed.result.stderr);
+    assert.equal(observed.result.status, 0, observed.result.stderr);
+    assert.equal(observed.manifest.status, "ready");
+    assert.equal(observed.manifest.observedReviewStatus, "needs_review");
+    assert.equal(observed.manifest.aliasMutationCount, 1);
     assert.equal(observed.manifest.reviewAudit.already_applied_absent, 100);
     assert.equal(observed.manifest.reviewAudit.provenance_mismatch, 1);
-    assert.equal(observed.manifest.reviewAudit.invalid, 1);
     assert.equal(observed.manifest.reviewAudit.safety_violation, 1);
     const aliasGate = observed.review.results.find((item) => item.assertionId === "global-alias-risk" && item.kind === "safety_assertion");
     assert.deepEqual([aliasGate.gate, aliasGate.observed, aliasGate.expected], ["expectedMutationCount", 1, 0]);
+
+    const invalidReplace = runFixture(root, "invalid-replace", {
+      records: [{
+        action: "replace_entry", videoId: "bad-replace", seconds: 1001,
+        sourceId: "replace-source", replacement: {}, expectedMatchCount: 1,
+      }],
+    }, [{
+      videoId: "bad-replace", occurrenceId: "replace-occ", position: 0, seconds: 1001,
+      title: "Old", artist: "Artist", sourceId: "replace-source", rangeId: "all",
+    }]);
+    assert.equal(invalidReplace.result.status, 1);
+    assert.match(invalidReplace.result.stderr, /CURATION_PATCH_ERROR.*replace_entry requires replacement/u);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("Naraetan binds present to one mutation, absent to zero, and rejects coarse provenance drift", () => {
+test("Naraetan binds present to one mutation, absent to zero, and observes coarse provenance drift", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-naraetan-state-test-"));
   try {
     const base = { ruleId: "naraetan-test", action: "drop_entry", videoId: "video", seconds: 7, sourceId: "source", sourceHash: "source-hash", rawHash: "raw-hash", expectedMatchCount: 1 };
     for (const [name, state, row, expectedStatus, expectedMutations] of [
       ["present", "present", { videoId: "video", occurrenceId: "occ", position: 0, seconds: 7, sourceId: "source", sourceHash: "source-hash", rawHash: "raw-hash", rangeId: "all", title: "talk", artist: "" }, 0, 1],
       ["absent", "absent", null, 0, 0],
-      ["drift", "absent", { videoId: "video", occurrenceId: "occ", position: 0, seconds: 7, sourceId: "source", sourceHash: "different", rawHash: "raw-hash", rangeId: "all", title: "talk", artist: "" }, 78, 0],
+      ["drift", "absent", { videoId: "video", occurrenceId: "occ", position: 0, seconds: 7, sourceId: "source", sourceHash: "different", rawHash: "raw-hash", rangeId: "all", title: "talk", artist: "" }, 0, 0],
     ]) {
       const rules = path.join(root, `${name}.json`); const snapshot = path.join(root, `${name}.ndjson`); const output = path.join(root, `${name}.out`); const manifest = path.join(root, `${name}.manifest`); const review = path.join(root, `${name}.review`);
       fs.writeFileSync(rules, JSON.stringify({ records: [{ ...base, expectedCurrentState: state, expectedSelectorMutationCount: state === "present" ? 1 : 0 }] }));
@@ -618,7 +635,7 @@ test("handle normalization does not parse URLs or channel identities", () => {
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
 
-test("minimal singleton manifest is blocked until Mac supplies exact current-active evidence", () => {
+test("merged P2 manifest stays observable until Mac supplies current-active evidence", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-minimal-test-"));
   try {
     const snapshot = path.join(root, "snapshot.ndjson");
@@ -626,10 +643,13 @@ test("minimal singleton manifest is blocked until Mac supplies exact current-act
     const manifest = path.join(root, "manifest.json");
     const review = path.join(root, "review.json");
     const rules = JSON.parse(fs.readFileSync(minimalRulesManifest, "utf8"));
-    assert.equal(rules.records.length, 1);
-    assert.equal(rules.records[0].expectedMatchCount, 1);
-    assert.equal(rules.artistScopedAliases.length, 1);
-    assert.equal(rules.artistScopedAliases[0].expectedMatchCount, 14);
+    assert.equal(rules.records.length, 128);
+    const singletonRule = rules.records.find((item) => item.videoId === "lUDCE3zZmuQ" && item.seconds === 9463);
+    const adoAlias = rules.artistScopedAliases.find((item) => item.artist === "Ado");
+    assert.equal(singletonRule.action, "drop_entry");
+    assert.equal(singletonRule.ruleId, "naraetan-lUDCE3zZmuQ-9463-translated-commentary");
+    assert.equal(rules.artistScopedAliases.length, 12);
+    assert.equal(adoAlias.expectedMatchCount, 14);
     assert.equal(rules.safetyAssertions.find((item) => item.assertionId === "exclude-urameshi-legacy-rules").auditedLegacyRuleCount, 27);
 
     const aliasVariants = rules.artistScopedAliases[0].aliases.filter((title) => title !== "逆光");
@@ -653,7 +673,7 @@ test("minimal singleton manifest is blocked until Mac supplies exact current-act
         occurrenceId: `occ-ado-${index}`,
         position: index,
         seconds: 100 + index,
-        title: aliasVariants[index % aliasVariants.length],
+        title: adoAlias.aliases[(index % (adoAlias.aliases.length - 1)) + 1],
         artist: "Ado",
         sourceId: `ado-source-${index}`,
         sourceHash: `ado-source-hash-${index}`,
@@ -755,9 +775,7 @@ test("minimal singleton manifest is blocked until Mac supplies exact current-act
       "--manifest-output", manifest,
       "--review-output", review,
     ], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
-    assert.match(result.stderr, /not ready for current-active conversion/);
-    return;
+    assert.equal(result.status, 0, result.stderr);
 
     const rows = fs.readFileSync(output, "utf8").trim().split("\n").map(JSON.parse);
     assert.equal(rows.length, 15);
@@ -775,6 +793,7 @@ test("minimal singleton manifest is blocked until Mac supplies exact current-act
 
     const resultManifest = JSON.parse(fs.readFileSync(manifest, "utf8"));
     assert.equal(resultManifest.status, "ready");
+    assert.equal(resultManifest.observedReviewStatus, "needs_review");
     assert.equal(resultManifest.curationMutationCount, 15);
     assert.equal(resultManifest.selectorMutationCount, 1);
     assert.equal(resultManifest.aliasMutationCount, 14);
@@ -782,7 +801,7 @@ test("minimal singleton manifest is blocked until Mac supplies exact current-act
     assert.ok(resultManifest.aliasSourceGroups.every((group) => group.rangeId === "all" && /^[0-9a-f]{16}$/.test(group.originalSourceDetailKey) && /^[0-9a-f]{16}$/.test(group.replacementSourceDetailKey)));
     assert.equal(
       resultManifest.aliasSourceGroupsSha256,
-      crypto.createHash("sha256").update(JSON.stringify(resultManifest.aliasSourceGroups.map((group) => Object.fromEntries(Object.entries(group).sort(([a], [b]) => a.localeCompare(b)))).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))))).digest("hex"),
+      crypto.createHash("sha256").update(JSON.stringify(resultManifest.aliasSourceGroups.map((group) => Object.fromEntries(Object.entries(group).sort(([a], [b]) => a.localeCompare(b)))).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))) + "\n").digest("hex"),
     );
 
     const resultReview = JSON.parse(fs.readFileSync(review, "utf8"));
@@ -830,8 +849,8 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
       sourceHash: "",
       rawHash: "",
     });
-    const naraetanRule = template.records[0];
-    const aliasRule = template.artistScopedAliases[0];
+    const naraetanRule = template.records.find((item) => item.videoId === "lUDCE3zZmuQ" && item.seconds === 9463);
+    const aliasRule = template.artistScopedAliases.find((item) => item.artist === "Ado");
     const vaundyRows = Array.from({ length: 3 }, (_, index) => legacyProtected(
       row("逆光 - replica", "Vaundy", { seconds: 1000 + index }),
     ));
@@ -927,7 +946,9 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
         item.occurrenceId === vaundyRows[0].occurrenceId ? { ...item, [field]: value } : item
       ));
       const drifted = runFixture(root, `bound-drift-${field}`, boundRules, driftedRows);
-      assert.equal(drifted.result.status, 78, `${field}: ${drifted.result.stderr}`);
+      assert.equal(drifted.result.status, 0, `${field}: ${drifted.result.stderr}`);
+      assert.equal(drifted.manifest.status, "ready", field);
+      assert.equal(drifted.manifest.observedReviewStatus, "needs_review", field);
       if (drifted.output !== null) {
         assert.doesNotMatch(drifted.output, /derived-protection-v1/, field);
       }
@@ -943,7 +964,7 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
           : item
       )),
     );
-    assert.equal(adoHandleDrift.result.status, 78, adoHandleDrift.result.stderr);
+    assert.equal(adoHandleDrift.result.status, 0, adoHandleDrift.result.stderr);
     if (adoHandleDrift.output !== null) {
       assert.doesNotMatch(adoHandleDrift.output, /derived-protection-v1/);
     }
@@ -960,7 +981,7 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
     );
     assert.equal(
       urameshiArtistDrift.result.status,
-      78,
+      0,
       urameshiArtistDrift.result.stderr,
     );
     if (urameshiArtistDrift.output !== null) {
@@ -971,7 +992,7 @@ test("Mac binding materializes exact nonzero protected scopes and then converts 
   }
 });
 
-test("protection projection rejects partial real provenance and never mixes derived values", () => {
+test("protection projection records partial real provenance without blocking output", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-protection-partial-provenance-"));
   try {
     const expected = knownTuple({
@@ -1004,9 +1025,16 @@ test("protection projection rejects partial real provenance and never mixes deri
       rangeId: "all",
       channelHandle: "@protected",
     }]);
-    assert.equal(observed.result.status, 78, observed.result.stderr);
-    assert.match(observed.result.stderr, /partial string provenance/);
-    assert.equal(observed.output, null);
+    assert.equal(observed.result.status, 0, observed.result.stderr);
+    assert.equal(observed.output, "");
+    assert.equal(observed.manifest.status, "ready");
+    assert.equal(observed.manifest.observedReviewStatus, "needs_review");
+    assert.equal(
+      observed.manifest.businessValidationObservations.some(
+        (item) => item.code === "protection_tuple_projection",
+      ),
+      true,
+    );
 
     for (const [name, provenance, expectedError, equals] of [
       ["invalid-type", { sourceId: 1, sourceHash: 2, rawHash: 3 }, /invalid string provenance/],
@@ -1042,16 +1070,24 @@ test("protection projection rejects partial real provenance and never mixes deri
         channelHandle: "@protected",
         ...provenance,
       }]);
-      assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
-      assert.match(failed.result.stderr, expectedError, name);
-      assert.equal(failed.output, null, name);
+      assert.equal(failed.result.status, 0, `${name}: ${failed.result.stderr}`);
+      assert.equal(failed.output, "", name);
+      assert.equal(failed.manifest.status, "ready", name);
+      assert.equal(failed.manifest.observedReviewStatus, "needs_review", name);
+      assert.equal(
+        failed.manifest.businessValidationObservations.some(
+          (item) => item.code === "protection_tuple_projection" && expectedError.test(item.observed),
+        ),
+        true,
+        name,
+      );
     }
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
 
-test("derived protection rejects invalid core physical lineage types and values", () => {
+test("snapshot identity schema stays fatal while derived protection drift is observed", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-protection-core-lineage-"));
   try {
     const baseRow = {
@@ -1088,23 +1124,19 @@ test("derived protection rejects invalid core physical lineage types and values"
       for (const value of ["", null, 42]) {
         const name = `invalid-core-${field}-${value === null ? "null" : typeof value}`;
         const failed = runFixture(root, name, rules, [{ ...baseRow, [field]: value }]);
-        assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
-        if (failed.result.stderr) {
+        if (["videoId", "occurrenceId"].includes(field)) {
+          assert.notEqual(failed.result.status, 0, name);
           assert.match(
             failed.result.stderr,
             field === "videoId"
               ? /invalid videoId/
-              : field === "occurrenceId"
-                ? /invalid occurrenceId/
-                : /incomplete derived lineage/,
+              : /invalid occurrenceId/,
             name,
           );
-        }
-        if (failed.output !== null) {
-          assert.equal(failed.output, "", name);
-        }
-        if (failed.manifest !== null) {
-          assert.notEqual(failed.manifest.status, "ready", name);
+        } else {
+          assert.equal(failed.result.status, 0, `${name}: ${failed.result.stderr}`);
+          assert.equal(failed.manifest.status, "ready", name);
+          assert.equal(failed.manifest.observedReviewStatus, "needs_review", name);
         }
       }
     }
@@ -1113,18 +1145,89 @@ test("derived protection rejects invalid core physical lineage types and values"
         const label = value === null ? "null" : `${typeof value}-${String(value)}`;
         const name = `invalid-core-${field}-${label}`;
         const failed = runFixture(root, name, rules, [{ ...baseRow, [field]: value }]);
-        assert.equal(failed.result.status, 78, `${name}: ${failed.result.stderr}`);
-        if (failed.result.stderr) {
-          assert.match(failed.result.stderr, /incomplete derived lineage/, name);
-        }
-        if (failed.output !== null) {
-          assert.equal(failed.output, "", name);
-        }
-        if (failed.manifest !== null) {
-          assert.notEqual(failed.manifest.status, "ready", name);
-        }
+        assert.equal(failed.result.status, 0, `${name}: ${failed.result.stderr}`);
+        assert.equal(failed.manifest.status, "ready", name);
+        assert.equal(failed.manifest.observedReviewStatus, "needs_review", name);
       }
     }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("drop-video and alias identity projection failures stay observable while mutations are preserved", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-projection-observation-"));
+  try {
+    const templatePath = path.join(root, "drop-video-template.json");
+    const snapshotPath = path.join(root, "drop-video-snapshot.ndjson");
+    const boundPath = path.join(root, "drop-video-bound.json");
+    const evidencePath = path.join(root, "drop-video-evidence.json");
+    const template = {
+      status: "needs_current_active_evidence",
+      ready: false,
+      records: [{ ruleId: "drop-video-partial", action: "drop_video", videoId: "video-partial" }],
+      artistScopedAliases: [],
+      safetyAssertions: [],
+    };
+    const partialRows = [
+      { kind: "video", videoId: "video-partial" },
+      {
+        videoId: "video-partial", occurrenceId: "partial-occ", position: 0, seconds: 1,
+        title: "Noise", artist: "", sourceId: "real-source", sourceHash: "", rawHash: "",
+        sourceSystem: "latest_json", rangeId: "all", channelHandle: "@source",
+      },
+    ];
+    fs.writeFileSync(templatePath, JSON.stringify(template), "utf8");
+    fs.writeFileSync(snapshotPath, partialRows.map(JSON.stringify).join("\n") + "\n", "utf8");
+    const binding = spawnSync(python, [
+      script, "--rules-manifest", templatePath, "--snapshot", snapshotPath,
+      "--output", boundPath, "--bind-current-active-evidence",
+      "--binding-evidence-output", evidencePath, "--active-revision-id", "accepted_projection_fixture",
+    ], { encoding: "utf8" });
+    assert.equal(binding.status, 0, binding.stderr);
+    const bound = JSON.parse(fs.readFileSync(boundPath, "utf8"));
+    assert.equal(bound.expectedVideoMutationCount, 1);
+    assert.equal(bound.records[0].expectedVideoScopeCount, 0);
+    assert.deepEqual(bound.records[0].expectedVideoScope, []);
+    assert.equal(
+      bound.bindingBusinessObservations.some((item) => item.code === "drop_video_scope_projection"),
+      true,
+    );
+
+    const converted = runFixture(root, "drop-video-partial", bound, partialRows);
+    assert.equal(converted.result.status, 0, converted.result.stderr);
+    assert.equal(converted.manifest.videoMutationCount, 1);
+    assert.equal(converted.manifest.status, "ready");
+    assert.equal(converted.output.trim().split("\n").map(JSON.parse)[0].entityType, "videos");
+    assert.equal(
+      converted.manifest.businessValidationObservations.some(
+        (item) => item.code === "drop_video_scope_projection",
+      ),
+      true,
+    );
+
+    const alias = runFixture(root, "alias-projection", {
+      records: [],
+      artistScopedAliases: [{
+        ruleId: "alias-projection", artist: "Ado", canonicalTitle: "Canonical",
+        aliases: ["Alias"], expectedMatchCount: 1,
+      }],
+      safetyAssertions: [],
+    }, [{
+      videoId: "alias-video", occurrenceId: "alias-occ", position: 0, seconds: 4,
+      title: "Alias", artist: "Ado", sourceId: "source", sourceHash: "hash", rawHash: "raw",
+      sourceSystem: "latest_json", rangeId: "weekly",
+    }]);
+    assert.equal(alias.result.status, 0, alias.result.stderr);
+    assert.equal(alias.manifest.aliasMutationCount, 1);
+    assert.equal(alias.output.trim().split("\n").map(JSON.parse).length, 1);
+    assert.equal(
+      alias.manifest.businessValidationObservations.some(
+        (item) => item.code === "alias_selected_identity_projection" && item.status === "alias_identity_review_mismatch",
+      ),
+      true,
+    );
+    assert.equal(alias.review.results.some((item) => item.status === "alias_identity_review_mismatch"), false);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

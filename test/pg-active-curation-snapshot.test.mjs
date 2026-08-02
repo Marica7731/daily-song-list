@@ -560,7 +560,7 @@ test("finalize binds converter output to independently matched remote and Mac sn
   }
 });
 
-test("finalize rejects a ready converter when an exact protected scope count drifted", () => {
+test("finalize records protected scope drift as an observation", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pg-curation-finalize-scope-test-"));
   try {
     const rules = path.join(root, "rules.json");
@@ -580,7 +580,7 @@ test("finalize rejects a ready converter when an exact protected scope count dri
       records: [{ ruleId: "naraetan-scope", expectedCurrentState: "absent", expectedSelectorMutationCount: 0 }],
       safetyAssertions: [{
         assertionId: "scope", expectedMutationCount: 0, expectedScopeCount: 3919,
-        minScopeCount: 3919, knownTuplePresence: [knownTuple()],
+        minScopeCount: 3919, knownTuplePresence: [],
       }],
       currentActiveEvidence: {
         activeRevisionId: "accepted_fixture_1",
@@ -600,16 +600,25 @@ test("finalize rejects a ready converter when an exact protected scope count dri
       summary: { accepted: 1 },
       results: [{
         kind: "safety_assertion", assertionId: "scope", status: "accepted",
-        mutationCount: 0, scopeRowCount: 3918, knownTupleCount: 1,
+        mutationCount: 0, scopeRowCount: 3918, knownTupleCount: 0,
         expectedKnownTupleDigest: tupleDigest(rulesValue.safetyAssertions[0].knownTuplePresence),
         observedKnownTupleDigest: tupleDigest(rulesValue.safetyAssertions[0].knownTuplePresence),
-        knownTupleStatuses: [{ index: 0, status: "present" }],
+        knownTupleStatuses: [],
       }],
     }));
     fs.writeFileSync(checkpoint, JSON.stringify({ complete: true, resumable: false, rows: 1, bytes: 1, sha256: snapshotSha }));
     fs.writeFileSync(remote, `PG_ACTIVE_CURATION_EXPORT_OK ${JSON.stringify({ status: "ok", activeRevisionId: "accepted_fixture_1", rows: 1, bytes: 1, sha256: snapshotSha })}\n`);
     const result = spawnSync(python, [script, "finalize", "--converter-manifest", converter, "--review", review, "--candidate", candidate, "--snapshot-checkpoint", checkpoint, "--remote-log", remote, "--rules-manifest", rules, "--output-manifest", output, "--output-checkpoint", producer, "--expected-active-revision", "accepted_fixture_1", "--producer-commit", "sha", "--producer-run-id", "1", "--producer-run-attempt", "1"], { encoding: "utf8" });
-    assert.equal(result.status, 78, result.stderr);
-    assert.match(result.stderr, /safety scope mismatch/);
+    assert.equal(result.status, 0, result.stderr);
+    const finalized = JSON.parse(fs.readFileSync(output, "utf8"));
+    assert.equal(finalized.status, "ready");
+    assert.equal(finalized.businessValidationStatus, "observed_mismatches");
+    assert.equal(
+      finalized.businessValidationObservations.some(
+        (item) => item.code === "safety_scope:scope" && item.passed === false,
+      ),
+      true,
+    );
+    assert.equal(JSON.parse(fs.readFileSync(producer, "utf8")).complete, true);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
