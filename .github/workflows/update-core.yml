@@ -122,6 +122,7 @@ jobs:
           git merge --ff-only origin/main
 
       - name: Bind and materialize exact core inputs
+        id: inputs
         env:
           CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
         run: |
@@ -187,7 +188,8 @@ jobs:
               return subprocess.run(["git", *args], check=check, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
           def validate_path(value, allowed_roots=None):
-              if not isinstance(value, str) or not value or "\\" in value or "\x00" in value:
+              if (not isinstance(value, str) or not value or "\\" in value
+                      or "\r" in value or "\n" in value or "\x00" in value):
                   raise ValueError(f"invalid relative path: {value!r}")
               if value.startswith("/") or re.match(r"^[A-Za-z]:", value):
                   raise ValueError(f"absolute path forbidden: {value}")
@@ -227,9 +229,14 @@ jobs:
               return blob
 
           def add_sparse(paths):
-              paths = sorted(set(paths))
+              paths = sorted(set(validate_path(path) for path in paths))
               if paths:
-                  subprocess.run(["git", "sparse-checkout", "add", "--no-cone", "--", *paths], check=True)
+                  subprocess.run(
+                      ["git", "sparse-checkout", "add", "--stdin"],
+                      input="".join(f"{path}\n" for path in paths),
+                      text=True,
+                      check=True,
+                  )
 
           def sha256_file(path):
               digest = hashlib.sha256()
@@ -470,7 +477,7 @@ jobs:
 
       - name: Validate generated output paths
         id: outputs
-        if: always()
+        if: always() && steps.inputs.outcome == 'success'
         env:
           CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
           CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
@@ -661,7 +668,7 @@ jobs:
           fi
 
       - name: Restore verified core outputs after core failure
-        if: always() && steps.core.outcome != 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.outputs.outcome == 'success' && steps.core.outcome != 'success'
         env:
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
           DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
@@ -733,7 +740,7 @@ jobs:
 
       - name: Revalidate persisted outputs after transient cleanup
         id: finaloutputs
-        if: always() && steps.transient_cleanup.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.outputs.outcome == 'success' && steps.transient_cleanup.outcome == 'success'
         env:
           CORE_INPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-inputs.json
           CORE_OUTPUT_MANIFEST: ${{ runner.temp }}/daily-song-core-outputs.json
