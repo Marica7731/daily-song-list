@@ -33,6 +33,14 @@ on:
         description: "Optional producing workflow run ID for artifact_name"
         required: false
         default: ""
+      source_sha:
+        description: "Optional authoritative data/7d.json commit for a controlled resume"
+        required: false
+        default: ""
+      source_base_sha:
+        description: "Parent commit for source_sha when resuming authoritative 7D"
+        required: false
+        default: ""
       rollback_only:
         description: "Emergency CAS rollback only; never downloads or imports an artifact"
         required: true
@@ -587,6 +595,8 @@ jobs:
           SOURCE_PUSH_SHA: ${{ github.sha || '' }}
           SOURCE_PUSH_REF: ${{ github.ref || '' }}
           WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha || '' }}
+          SOURCE_MANUAL_SHA: ${{ inputs.source_sha || '' }}
+          SOURCE_MANUAL_BASE_SHA: ${{ inputs.source_base_sha || '' }}
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_HOST" || { echo "PG_INCREMENT_BLOCKED missing VPS2_HOST"; exit 78; }
@@ -641,15 +651,23 @@ jobs:
           resolve_workflow_run_route() {
             WORKFLOW_RUN_ROUTE=""
             [ "$GITHUB_EVENT_NAME" = "workflow_run" ] || return 0
-            SOURCE_COMMIT_ROLE="workflow-run-observation"
-            SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
-            WORKFLOW_RUN_ROUTE=noop
-            echo "PG_INCREMENT_NOOP owner=workflow_run reason=authoritative-7d-is-owned-by-push sourceSha=$SOURCE_SHA"
+            SOURCE_COMMIT_ROLE="workflow-run-current-main"
+            SOURCE_SHA="$(curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" | jq -r '.object.sha // empty')"
+            SOURCE_BASE_SHA="$(curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -r '.parents[0].sha // empty')"
+            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && [[ "$SOURCE_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+              echo "PG_INCREMENT_INPUT_ERROR invalid-workflow-run-current-main before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
+            }
+            WORKFLOW_RUN_ROUTE=authoritative-7d
+            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
+            echo "PG_INCREMENT_ROUTE owner=workflow_run route=authoritative-7d workflowHead=$WORKFLOW_RUN_HEAD_SHA sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE"
             return 0
           }
-          resolve_workflow_run_route
-          if [ "$WORKFLOW_RUN_ROUTE" = "noop" ]; then
-            exit 0
+          if ! resolve_workflow_run_route; then
+            exit 64
           fi
           resolve_push_7d_route() {
             PUSH_ROUTE=""
@@ -668,7 +686,26 @@ jobs:
           if ! resolve_push_7d_route; then
             exit 64
           fi
-          if [ "$GITHUB_EVENT_NAME" != "workflow_run" ] && [ "$GITHUB_EVENT_NAME" != "push" ]; then
+          resolve_manual_7d_route() {
+            MANUAL_7D_ROUTE=""
+            [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || return 0
+            [ -z "$ARTIFACT_NAME" ] || return 0
+            [ -n "$SOURCE_MANUAL_SHA" ] || return 0
+            SOURCE_COMMIT_ROLE="controlled-manual-7d-resume"
+            SOURCE_SHA="$SOURCE_MANUAL_SHA"
+            SOURCE_BASE_SHA="$SOURCE_MANUAL_BASE_SHA"
+            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && [[ "$SOURCE_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+              echo "PG_INCREMENT_INPUT_ERROR invalid-manual-identity before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
+            }
+            MANUAL_7D_ROUTE=authoritative-7d
+            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
+            echo "PG_INCREMENT_ROUTE owner=workflow_dispatch route=authoritative-7d sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE"
+            return 0
+          }
+          if ! resolve_manual_7d_route; then
+            exit 64
+          fi
+          if [ -z "$WORKFLOW_RUN_ROUTE" ] && [ -z "$PUSH_ROUTE" ] && [ -z "$MANUAL_7D_ROUTE" ]; then
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
           fi
           fetch_input "scripts/migration/accepted-source-identities.py" "$INPUT_ROOT/accepted-source-identities.py"
@@ -677,9 +714,9 @@ jobs:
             MANIFEST_INPUT="$ARTIFACT_ROOT/$MANIFEST_PATH"
             test -f "$PATCH_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact patch=$PATCH_PATH"; exit 78; }
             test -f "$MANIFEST_INPUT" || { echo "PG_INCREMENT_BLOCKED missing artifact manifest=$MANIFEST_PATH"; exit 78; }
-          elif [ "$GITHUB_EVENT_NAME" = "push" ]; then
-            SOURCE_SHA="$SOURCE_PUSH_SHA"
-            SOURCE_BASE_SHA="$SOURCE_PUSH_BEFORE"
+          elif [ "$PUSH_ROUTE" = "authoritative-7d" ] || \
+               [ "$WORKFLOW_RUN_ROUTE" = "authoritative-7d" ] || \
+               [ "$MANUAL_7D_ROUTE" = "authoritative-7d" ]; then
             fetch_input "scripts/migration/7d-json-to-patch.py" "$INPUT_ROOT/7d-json-to-patch.py"
             DATA_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             DATA_BASE_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_BASE_SHA}"
@@ -709,7 +746,8 @@ jobs:
           fetch_input "server/pg_adapter.py" "$INPUT_ROOT/pg_adapter.py"
           fetch_input "server/pg_api_server.py" "$INPUT_ROOT/pg_api_server.py"
           fetch_input "deploy/vps2/song-rank-pg-api.service" "$INPUT_ROOT/song-rank-pg-api.service"
-          if [ -z "$ARTIFACT_NAME" ] && [ "$GITHUB_EVENT_NAME" != "push" ] && [ "$GITHUB_EVENT_NAME" != "workflow_run" ]; then
+          if [ -z "$ARTIFACT_NAME" ] && [ "$GITHUB_EVENT_NAME" != "push" ] && \
+             [ "$GITHUB_EVENT_NAME" != "workflow_run" ] && [ "$MANUAL_7D_ROUTE" != "authoritative-7d" ]; then
             fetch_input "$PATCH_PATH" "$INPUT_ROOT/patch"
             fetch_input "$MANIFEST_PATH" "$INPUT_ROOT/manifest"
             PATCH_INPUT="$INPUT_ROOT/patch"
