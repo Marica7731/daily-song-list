@@ -624,6 +624,8 @@ test("rollback-only keeps transactional CAS hard and makes online business check
     rollbackJob,
     /github\.event_name == 'workflow_dispatch' && inputs\.rollback_only == true/u,
   );
+  assert.match(rollbackJob, /runs-on: ubuntu-latest/u);
+  assert.doesNotMatch(rollbackJob, /\/Users\/be/u);
   assert.doesNotMatch(rollbackJob, /download-artifact|ARTIFACT_NAME|import-pg-incremental|activate-pg-candidate/u);
   assert.match(rollbackJob, /missing-\$\{required_rollback_input,,\}/u);
   assert.match(rollbackJob, /invalid-current-revision/u);

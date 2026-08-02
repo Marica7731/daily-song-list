@@ -140,7 +140,7 @@ concurrency:
 jobs:
   rollback:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.rollback_only == true }}
-    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       VPS2_HOST: ${{ secrets.VPS2_HOST }}
@@ -226,7 +226,7 @@ jobs:
             fi
             before_cleanup_bytes=$(( $(du -sk "$TASK_ROOT" 2>/dev/null | awk '{print $1}') * 1024 ))
             rm -rf -- "$TASK_ROOT"
-            after_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+            after_free_bytes=$(( $(df -k "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
             retained=unchanged
             if [ "$pointer_committed" = 1 ] && [ "$noop" = 1 ]; then
               retained=target-already-active
@@ -239,7 +239,7 @@ jobs:
             exit "$status"
           }
           trap cleanup EXIT INT TERM
-          baseline_free_bytes=$(( $(df -k /Users/be | awk 'NR==2 {print $4}') * 1024 ))
+          baseline_free_bytes=$(( $(df -k "$RUNNER_TEMP" | awk 'NR==2 {print $4}') * 1024 ))
           ASKPASS_ROOT="$TASK_ROOT/ssh-askpass"
           mkdir -p "$ASKPASS_ROOT"
           ROLLBACK_PASSWORD_FILE="$ASKPASS_ROOT/vps2.password"
