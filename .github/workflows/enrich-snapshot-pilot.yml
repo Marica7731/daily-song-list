@@ -77,6 +77,41 @@ jobs:
             test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json
           persist-credentials: false
 
+      - name: Configure and verify Mac Node toolchain
+        id: toolchain
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          toolchain_paths=(
+            "/Users/be/.local/bin"
+            "/Users/be/.local/codex-toolchains/node/bin"
+            "/Users/be/.local/codex-toolchains/python312/bin"
+          )
+          for path in "${toolchain_paths[@]}"; do
+            echo "$path" >> "$GITHUB_PATH"
+          done
+          export PATH="${toolchain_paths[0]}:${toolchain_paths[1]}:${toolchain_paths[2]}:$PATH"
+          node_path="$(command -v node || true)"
+          if [[ -z "$node_path" || ! -x "$node_path" ]]; then
+            {
+              echo 'MAC_NODE_TOOLCHAIN_MISSING'
+              echo "PATH=$PATH"
+              echo "command -v node=${node_path:-<missing>}"
+              for path in "${toolchain_paths[@]}"; do
+                if [[ -x "$path/node" ]]; then
+                  echo "candidate=$path/node executable"
+                else
+                  echo "candidate=$path/node missing_or_not_executable"
+                fi
+              done
+              echo "runner_os=$(uname -a)"
+              echo "workspace=${GITHUB_WORKSPACE:-<unset>}"
+            } >&2
+            exit 127
+          fi
+          echo "MAC_NODE_TOOLCHAIN_OK path=$node_path"
+          node --version
+
       - name: Verify source and branch CAS, then run sequential pilot
         id: pilot
         shell: bash
