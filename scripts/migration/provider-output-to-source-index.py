@@ -174,6 +174,27 @@ def occurrence_list(record: dict[str, Any], video_id: str) -> list[dict[str, Any
             if not all(isinstance(item, dict) for item in value):
                 fail("OCCURRENCE_SHAPE_INVALID", f"{video_id}: {key}")
             if not value:
+                diagnostic = record.get("diagnostic")
+                detail_null = (
+                    record.get("detailNull") is True
+                    or record.get("status") == "detail_null"
+                    or isinstance(diagnostic, dict) and diagnostic.get("code") == "detail_null"
+                )
+                if detail_null:
+                    return [
+                        {
+                            "__generatedSentinel": True,
+                            "occurrenceId": f"{video_id}:sentinel",
+                            "videoId": video_id,
+                            "position": 0,
+                            "sourceLineOrdinal": 0,
+                            "sourceOccurrenceOrdinal": 0,
+                            "sourceStartOffsetUtf16": 0,
+                            "isSentinel": True,
+                            "detailNull": True,
+                            "status": "detail_null",
+                        }
+                    ]
                 fail("OCCURRENCES_EMPTY", f"{video_id}")
             return value
     fail("OCCURRENCES_MISSING", f"{video_id}: provider output has no occurrences/songs")
@@ -228,6 +249,39 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
             offset = occurrence.get("sourceStartOffsetUtf16", occurrence.get("sourceStartOffset"))
             if any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in (line, ordinal, offset)):
                 fail("SOURCE_POSITION_MISSING", f"{video_id}/{occurrence_id}")
+            if occurrence.get("__generatedSentinel") is True:
+                position_key = (video_id, line, ordinal, offset)
+                if position_key in seen_positions:
+                    fail("SOURCE_POSITION_COLLISION", f"{video_id}/{occurrence_id}")
+                seen_positions.add(position_key)
+                normalized = {
+                    "videoId": video_id,
+                    "occurrenceId": occurrence_id,
+                    "position": position,
+                    "sourceLineOrdinal": line,
+                    "sourceOccurrenceOrdinal": ordinal,
+                    "sourceStartOffsetUtf16": offset,
+                    "sourceId": None,
+                    "sourceHash": None,
+                    "rawHash": None,
+                    "sourcePath": None,
+                    "sourceBytesPath": None,
+                    "sourceComplete": False,
+                    "sourceVerified": False,
+                    "needsReview": True,
+                    "sourceObservation": {
+                        "code": "DETAIL_NULL_SENTINEL",
+                        "status": "observation_only",
+                        "reason": f"{video_id}: provider returned explicit detail-null record",
+                    },
+                    "eventTime": event,
+                    "isSentinel": True,
+                    "detailNull": True,
+                    "status": "detail_null",
+                }
+                normalized_rows.append(normalized)
+                all_rows.append(normalized)
+                continue
             direct = source_fields(occurrence)
             source = {**base, **{k: v for k, v in direct.items() if v is not None}}
             source_id = source.get("sourceId")
