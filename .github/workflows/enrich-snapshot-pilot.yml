@@ -31,11 +31,55 @@ jobs:
       SOURCE_COMMIT: ${{ inputs.source_commit }}
       ROUTE_AS_OF_UTC: ${{ inputs.route_as_of_utc }}
     steps:
-      - name: Check out exact current source commit
+      - name: Check out exact current source commit with sparse blob filter
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_commit }}
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/enrich-snapshot-pilot.yml
+            assets/frontend-utils.js
+            assets/ranking-utils.js
+            assets/source-filter.js
+            config/blocked-vtuber-channels.json
+            config/blocked-vtuber-local-channels.json
+            config/curation-overrides.json
+            config/known-song-artist-overrides.json
+            config/non-song-rules.json
+            config/snapshot-recovery/jul29-artist-binding.v2.json
+            config/song-aliases.json
+            config/song-search-known-overrides.json
+            data/song-search-known-songs.json
+            scripts/blocked-vtuber-utils.js
+            scripts/build-runtime-data.js
+            scripts/channel-metadata-cache.js
+            scripts/curation.js
+            scripts/entry-repair.js
+            scripts/migration/materialize-two-day-rerun.py
+            scripts/migration/provider-output-to-source-index.py
+            scripts/migration/run-snapshot-enrichment-pilot.py
+            scripts/migration/snapshot-enrichment-adapter.py
+            scripts/migration/snapshot-enrichment-provider-binding.json
+            scripts/migration/snapshot-enrichment-provider.mjs
+            scripts/migration/snapshot-pilot-linkage.py
+            scripts/range-config.js
+            scripts/recent-all-continuity.js
+            scripts/song-aliases.js
+            scripts/song-search-index.js
+            scripts/song-utils.js
+            scripts/update-songlist.js
+            scripts/video-catalog.js
+            scripts/vsinger-http/html-utils.js
+            scripts/vsinger-http/model.js
+            scripts/vsinger-http/runtime-importer.js
+            scripts/youtube-channel-discovery-core.js
+            test/fixtures/snapshot-pilot/catalog.json
+            test/fixtures/snapshot-pilot/jul22-sample19.json.gz
+            test/fixtures/snapshot-pilot/jul29-sample25.json.gz
+            test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json
+            tests/test_two_day_rerun.py
           persist-credentials: false
 
       - name: Download fixed source artifact across run
@@ -86,7 +130,69 @@ jobs:
             --materialized-root "$RUNNER_TEMP/two-day-rerun/materialized" \
             --output-root "$RUNNER_TEMP/two-day-rerun/candidate" \
             --route-as-of-utc "$ROUTE_AS_OF_UTC" \
-            --source-commit "$SOURCE_COMMIT"
+            --source-commit "$SOURCE_COMMIT" \
+            --artist-bindings "$GITHUB_WORKSPACE/config/snapshot-recovery/jul29-artist-binding.v2.json"
+
+      - name: Verify sparse dependency closure and temp artifact boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          root="$GITHUB_WORKSPACE"
+          artifact_root="$RUNNER_TEMP/two-day-rerun/source-artifact"
+          case "$artifact_root" in
+            "$root"/*) echo 'network artifact must remain outside sparse workspace' >&2; exit 2 ;;
+          esac
+          while IFS= read -r required; do
+            required="${required#  }"
+            [[ "$required" != ' '* ]] || { echo "unexpected sparse path indentation" >&2; exit 2; }
+            [[ -z "$required" || "$required" == \#* ]] && continue
+            test -f "$root/$required" || { echo "sparse dependency missing: $required" >&2; exit 2; }
+          done <<'SPARSE_PATHS'
+            .github/workflows/enrich-snapshot-pilot.yml
+            assets/frontend-utils.js
+            assets/ranking-utils.js
+            assets/source-filter.js
+            config/blocked-vtuber-channels.json
+            config/blocked-vtuber-local-channels.json
+            config/curation-overrides.json
+            config/known-song-artist-overrides.json
+            config/non-song-rules.json
+            config/snapshot-recovery/jul29-artist-binding.v2.json
+            config/song-aliases.json
+            config/song-search-known-overrides.json
+            data/song-search-known-songs.json
+            scripts/blocked-vtuber-utils.js
+            scripts/build-runtime-data.js
+            scripts/channel-metadata-cache.js
+            scripts/curation.js
+            scripts/entry-repair.js
+            scripts/migration/materialize-two-day-rerun.py
+            scripts/migration/provider-output-to-source-index.py
+            scripts/migration/run-snapshot-enrichment-pilot.py
+            scripts/migration/snapshot-enrichment-adapter.py
+            scripts/migration/snapshot-enrichment-provider-binding.json
+            scripts/migration/snapshot-enrichment-provider.mjs
+            scripts/migration/snapshot-pilot-linkage.py
+            scripts/range-config.js
+            scripts/recent-all-continuity.js
+            scripts/song-aliases.js
+            scripts/song-search-index.js
+            scripts/song-utils.js
+            scripts/update-songlist.js
+            scripts/video-catalog.js
+            scripts/vsinger-http/html-utils.js
+            scripts/vsinger-http/model.js
+            scripts/vsinger-http/runtime-importer.js
+            scripts/youtube-channel-discovery-core.js
+            test/fixtures/snapshot-pilot/catalog.json
+            test/fixtures/snapshot-pilot/jul22-sample19.json.gz
+            test/fixtures/snapshot-pilot/jul29-sample25.json.gz
+            test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json
+            tests/test_two_day_rerun.py
+          SPARSE_PATHS
+          test ! -e "$root/data/all.json"
+          test ! -e "$root/data/latest.json"
+          test ! -e "$root/data/video-catalog.json"
 
       - name: Upload not-for-release candidate evidence
         if: always()
