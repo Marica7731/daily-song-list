@@ -154,7 +154,7 @@ jobs:
             --arg expected "$SOURCE_ARTIFACT_DIGEST" \
             --arg actual "$actual_digest" \
             --slurpfile bound "$bound_file" \
-            '{status:"VERIFIED",source:{runId:$bound[0].workflowRunId,artifactId:$bound[0].id,artifactName:$bound[0].name,workflowRunHeadSha:$bound[0].workflowRunHeadSha,expired:$bound[0].expired},expectedDigest:$expected,actualDigest:$actual,metadataUrl:$metadata_url,verification:"github-artifact-rest-metadata-v1"}' \
+            '{runId:$bound[0].workflowRunId,artifactId:$bound[0].id,status:"VERIFIED",source:{runId:$bound[0].workflowRunId,artifactId:$bound[0].id,artifactName:$bound[0].name,workflowRunHeadSha:$bound[0].workflowRunHeadSha,expired:$bound[0].expired},expectedDigest:$expected,actualDigest:$actual,metadataUrl:$metadata_url,verification:"github-artifact-rest-metadata-v1"}' \
             > "$RUNNER_TEMP/two-day-rerun/download-proof.json"
 
       - name: Materialize raw-input and input-manifest only
