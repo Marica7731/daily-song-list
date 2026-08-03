@@ -251,7 +251,7 @@ jobs:
               sleep 2
             done
             test -n "$run_id"
-            gh run watch "$run_id" --exit-status
+            gh run watch "$run_id" --exit-status >&2
             printf '%s\n' "$run_id"
           }
           import_run="$(dispatch_and_wait .github/workflows/deploy-pg-incremental.yml \
@@ -334,7 +334,7 @@ jobs:
               sleep 2
             done
             test -n "$run_id"
-            gh run watch "$run_id" --exit-status
+            gh run watch "$run_id" --exit-status >&2
             printf '%s\n' "$run_id"
           }
           phase2_parent="$(jq -r '.phase2.parent' "$OUTPUT_ROOT/orchestrator-manifest.json")"
