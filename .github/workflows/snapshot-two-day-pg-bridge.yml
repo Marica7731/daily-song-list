@@ -58,6 +58,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/migration
+            scripts/orchestrator
+            test/pg-bridge-v2-focused.test.py
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
       - name: Download exact Mac rerun artifact
         id: rerun_download
         uses: actions/download-artifact@v4
@@ -147,6 +154,13 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/migration
+            scripts/orchestrator
+            test/pg-bridge-v2-focused.test.py
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
       - name: Download exact Mac rerun artifact
         id: rerun_download
         uses: actions/download-artifact@v4
