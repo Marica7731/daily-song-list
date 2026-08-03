@@ -17,14 +17,13 @@ name: enrich-jul29-9-video-metadata
         required: false
         default: ""
         type: string
-      yt_dlp_executable:
-        description: Existing yt-dlp executable on the Mac runner
-        required: true
-        default: yt-dlp
-        type: string
 
 permissions:
   contents: read
+
+env:
+  YT_DLP_VERSION: "2026.03.17"
+  YT_DLP_URL: https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp_macos
 
 concurrency:
   group: enrich-jul29-9-video-metadata-singleton
@@ -50,7 +49,6 @@ jobs:
         shell: bash
         env:
           SOURCE_COMMIT: ${{ inputs.source_commit }}
-          YT_DLP_EXECUTABLE: ${{ inputs.yt_dlp_executable }}
         run: |
           set -Eeuo pipefail
           [[ "$SOURCE_COMMIT" =~ ^[0-9a-fA-F]{40}$ ]] || { echo 'source_commit must be a full SHA' >&2; exit 2; }
@@ -60,24 +58,28 @@ jobs:
           fi
           test -f "$product_root/scripts/migration/fetch-nine-video-metadata.py"
           test -f "$product_root/config/snapshot-recovery/jul29-9-video-ids.json"
-          resolved_yt_dlp=''
-          if [[ "$YT_DLP_EXECUTABLE" == */* ]]; then
-            if [[ -x "$YT_DLP_EXECUTABLE" ]]; then
-              resolved_yt_dlp="$(cd "$(dirname "$YT_DLP_EXECUTABLE")" && pwd)/$(basename "$YT_DLP_EXECUTABLE")"
-            fi
-          elif command_path="$(command -v "$YT_DLP_EXECUTABLE" 2>/dev/null)"; then
-            resolved_yt_dlp="$(cd "$(dirname "$command_path")" && pwd)/$(basename "$command_path")"
-          fi
-          if [[ -z "$resolved_yt_dlp" ]]; then
-            venv_dir="$RUNNER_TEMP/jul29-metadata-venv"
-            python3 -m venv "$venv_dir"
-            "$venv_dir/bin/pip" install --disable-pip-version-check --no-input yt-dlp
-            resolved_yt_dlp="$venv_dir/bin/yt-dlp"
-          fi
-          test -x "$resolved_yt_dlp"
+          ytdlp_root="$RUNNER_TEMP/jul29-metadata-yt-dlp-${GITHUB_RUN_ID}"
+          mkdir -p "$ytdlp_root"
+          standalone_yt_dlp="$ytdlp_root/yt-dlp_macos"
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 120 \
+            "$YT_DLP_URL" --output "$standalone_yt_dlp"
+          chmod 700 "$standalone_yt_dlp"
+          test -x "$standalone_yt_dlp"
+          actual_version="$($standalone_yt_dlp --version)"
+          test "$actual_version" = "$YT_DLP_VERSION"
+          wrapper="$ytdlp_root/yt-dlp"
+          cat > "$wrapper" <<EOF
+          #!/usr/bin/env bash
+          set -Eeuo pipefail
+          exec "$standalone_yt_dlp" --ignore-config --no-cache-dir --no-update "\$@"
+          EOF
+          chmod 700 "$wrapper"
+          resolved_yt_dlp="$wrapper"
           "$resolved_yt_dlp" --version
+          printf 'YTDLP_ROOT=%s\n' "$ytdlp_root" >> "$GITHUB_ENV"
           printf 'RESOLVED_YT_DLP=%s\n' "$resolved_yt_dlp" >> "$GITHUB_ENV"
           printf 'yt_dlp_path=%s\n' "$resolved_yt_dlp" >> "$GITHUB_STEP_SUMMARY"
+          printf 'yt_dlp_version=%s\n' "$actual_version" >> "$GITHUB_STEP_SUMMARY"
           python3 --version
 
       - name: Run nine-video metadata-only candidate
@@ -121,5 +123,15 @@ jobs:
             ${{ runner.temp }}/jul29-nine-video-metadata-${{ github.run_id }}/metadata.ndjson
             ${{ runner.temp }}/jul29-nine-video-metadata-${{ github.run_id }}/manifest.json
           if-no-files-found: warn
+
+      - name: Cleanup pinned yt-dlp
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          expected_root="$RUNNER_TEMP/jul29-metadata-yt-dlp-${GITHUB_RUN_ID}"
+          if [[ -n "${YTDLP_ROOT:-}" && "$YTDLP_ROOT" == "$expected_root" && -d "$YTDLP_ROOT" ]]; then
+            rm -rf -- "$YTDLP_ROOT"
+          fi
 
       # Deliberately no product/index/PG write, commit, push, activation, or restart.
