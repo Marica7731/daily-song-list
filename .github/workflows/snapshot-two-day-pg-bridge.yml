@@ -276,7 +276,7 @@ jobs:
           grep -q 'PG_READY_ONLINE_OBSERVATION_COMPLETE' "$RUNNER_TEMP/phase1-activation.log"
           activation_json="$(grep -Eo '\{[^{}]*"status"[[:space:]]*:[[:space:]]*"ok"[^{}]*\}' "$RUNNER_TEMP/phase1-activation.log" | tail -n 1)"
           test -n "$activation_json"
-          actual_activated="$(jq -r '.actualActivatedRevision // .actual_activated_revision // .revisionId // empty' <<<"$activation_json")"
+          actual_activated="$(jq -r '.activeRevisionId // .actualActivatedRevision // .actual_activated_revision // .revisionId // empty' <<<"$activation_json")"
           test "$actual_activated" = "$phase1_revision"
           jq -n \
             --arg revision "$actual_activated" \
