@@ -9124,9 +9124,7 @@ def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
             f"{payload_json}->'payload'->'video'->>'channelUrl'",
         ),
         "video": (
-            "NULLIF(btrim(occurrence.title), '')",
-            "NULLIF(btrim(occurrence.video_id), '')",
-            f"{payload_json}->'item'->>'title'",
+            "public.daily_song_source_video_search_text(occurrence.title, occurrence.video_id, occurrence.payload_json)",
         ),
         "source": (
             "occurrence.source_id",
