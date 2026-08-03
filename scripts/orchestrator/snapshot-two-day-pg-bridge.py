@@ -145,6 +145,7 @@ def write_handoff(
         "candidateOnly": True,
         "phaseOrder": ["phase1:7d", "phase2:all"],
         "phase1Status": phase1_status,
+        "phase2Status": phase1_status if phase2 is not None else None,
         "phase1": {"path": "phase1", **dict(phase1)},
         "phase2": {"path": "phase2", **dict(phase2)} if phase2 else None,
         "parentCas": {
