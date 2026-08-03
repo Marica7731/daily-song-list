@@ -114,7 +114,6 @@ jobs:
           PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
           OUTPUT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/output"
           test -n "$EXPECTED_ACTIVE_REVISION"
-          [[ "$EXPECTED_ACTIVE_REVISION" != *'${{'* ]] && [[ "$EXPECTED_ACTIVE_REVISION" != *placeholder* ]]
           ACTIVE_PROOF="$RUNNER_TEMP/two-day-pg-bridge/active-revision-proof.json"
           jq -n --arg revision "$EXPECTED_ACTIVE_REVISION" \
             '{kind:"active-revision-proof",verified:true,locked:true,actual_active_revision:$revision,evidence:"public-meta-observation",hardGate:"deploy importer parent CAS"}' > "$ACTIVE_PROOF"
@@ -201,7 +200,6 @@ jobs:
           PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
           OUTPUT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/output"
           test -n "$EXPECTED_ACTIVE_REVISION"
-          [[ "$EXPECTED_ACTIVE_REVISION" != *'${{'* ]] && [[ "$EXPECTED_ACTIVE_REVISION" != *placeholder* ]]
           ACTIVE_PROOF="$RUNNER_TEMP/two-day-pg-bridge/active-revision-proof.json"
           jq -n --arg revision "$EXPECTED_ACTIVE_REVISION" \
             '{kind:"active-revision-proof",verified:true,locked:true,actual_active_revision:$revision,evidence:"public-meta-observation",hardGate:"deploy importer parent CAS"}' > "$ACTIVE_PROOF"
