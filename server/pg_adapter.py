@@ -237,6 +237,65 @@ def _json_object(value: Any) -> dict[str, Any]:
     return {}
 
 
+def _project_runtime_video_payload(
+    row: Mapping[str, Any],
+    *,
+    view: str,
+) -> dict[str, Any] | None:
+    """Project a runtime video card without fabricating non-video IDs."""
+
+    payload = copy.deepcopy(_json_object(row.get("payload_json")))
+    if view != "videos":
+        return payload
+    detail_key = _text(row.get("detail_key"))
+    if not re.fullmatch(r"[A-Za-z0-9_-]{11}", detail_key):
+        return None
+    explicit_id = _text(payload.get("videoId"))
+    metadata = _overlay_public_video(row)
+    metadata_id = _text(metadata.get("videoId"))
+    if explicit_id and explicit_id != detail_key:
+        raise PostgresAdapterError(
+            f"payload.videoId {explicit_id!r} conflicts with detail_key {detail_key!r}"
+        )
+    if metadata_id and metadata_id != detail_key:
+        raise PostgresAdapterError(
+            f"video metadata videoId {metadata_id!r} conflicts with detail_key {detail_key!r}"
+        )
+    if not explicit_id:
+        payload["videoId"] = detail_key
+    for name in ("title", "channelId", "channelName", "publishedAt"):
+        if not _text(payload.get(name)) and metadata.get(name) not in (None, ""):
+            payload[name] = metadata[name]
+    return payload
+
+
+def _project_runtime_video_records(
+    response: Mapping[str, Any],
+    *,
+    view: str,
+) -> dict[str, Any]:
+    """Apply the row projection to runtime/generic public video records."""
+
+    if view != "videos":
+        return dict(response)
+    records = response.get("records")
+    if not isinstance(records, list):
+        return dict(response)
+    projected: list[Any] = []
+    for record in records:
+        if not isinstance(record, Mapping):
+            projected.append(record)
+            continue
+        payload = _project_runtime_video_payload(
+            {"detail_key": record.get("key"), "payload_json": record},
+            view=view,
+        )
+        projected.append(dict(record) if payload is None else payload)
+    result = dict(response)
+    result["records"] = projected
+    return result
+
+
 def _channel_metadata_rows(
     connection,
     revision_ids: Sequence[str],
@@ -10229,7 +10288,10 @@ def _authoritative_7d_records(
 def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
-        return _runtime_rankings_payload(connection, runtime[0], query)
+        return _project_runtime_video_records(
+            _runtime_rankings_payload(connection, runtime[0], query),
+            view=_query_options(query)["view"],
+        )
     generic_runtime = _generic_runtime_projection_revision(connection)
     if generic_runtime:
         parent = _generic_parent_runtime_revision(
@@ -10246,7 +10308,12 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
                 return rankings_payload_from_records(
                     _authoritative_7d_records(connection, overlay_ids), query,
                 )
-        return _generic_overlay_rankings_payload(connection, generic_runtime[0], generic_runtime[1], query)
+        return _project_runtime_video_records(
+            _generic_overlay_rankings_payload(
+                connection, generic_runtime[0], generic_runtime[1], query,
+            ),
+            view=_query_options(query)["view"],
+        )
     snapshot = _load_snapshot(connection)
     return rankings_payload_from_records(snapshot.records, query)
 

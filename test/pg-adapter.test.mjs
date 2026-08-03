@@ -76,6 +76,44 @@ function runPython(script) {
   return result.stdout.trim();
 }
 
+function projectRuntimeVideo(row) {
+  const encoded = JSON.stringify(JSON.stringify(row));
+  const view = JSON.stringify(row.view ?? "");
+  return JSON.parse(runPython(`
+import importlib.util
+import json
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+row = json.loads(${encoded})
+result = module._project_runtime_video_payload(row, view=${view})
+print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
+`));
+}
+
+function runtimeVideoProjectionError(row) {
+  const encoded = JSON.stringify(JSON.stringify(row));
+  const view = JSON.stringify(row.view ?? "");
+  return runPython(`
+import importlib.util
+import json
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+row = json.loads(${encoded})
+try:
+    module._project_runtime_video_payload(row, view=${view})
+except module.PostgresAdapterError as exc:
+    print(str(exc))
+else:
+    raise AssertionError("expected a fail-closed video identity conflict")
+`);
+}
+
 test("adapter parses without creating pycache files", () => {
   runPython(`compile(open(${JSON.stringify(ADAPTER)}, encoding="utf-8").read(), ${JSON.stringify(ADAPTER)}, "exec")`);
   runPython(`compile(open(${JSON.stringify(IDENTITY_AUDIT)}, encoding="utf-8").read(), ${JSON.stringify(IDENTITY_AUDIT)}, "exec")`);
@@ -10804,4 +10842,96 @@ test("real failed-revision fixture records the required card and aggregate marke
       2511, 2505,
     ]],
   );
+});
+
+test("focused before shape gets canonical videoId and metadata overlay", () => {
+  const result = projectRuntimeVideo({
+    view: "videos",
+    detail_key: "1b9E79L7PmQ",
+    payload_json: {
+      type: "video",
+      key: "1b9E79L7PmQ",
+      title: "Opening",
+      count: 88,
+      occurrences: [{ videoId: "1b9E79L7PmQ", position: 0 }],
+    },
+    video_payload_json: {
+      payload: {
+        videoId: "1b9E79L7PmQ",
+        title: "Jul22 stream",
+        channelId: "UC1JuhRTsFgZvi2ie2dTUxbg",
+        channelName: "Jul22 channel",
+        publishedAt: "2026-07-22T16:18:31Z",
+      },
+    },
+  });
+  assert.equal(result.videoId, "1b9E79L7PmQ");
+  assert.equal(result.channelId, "UC1JuhRTsFgZvi2ie2dTUxbg");
+  assert.equal(result.channelName, "Jul22 channel");
+  assert.equal(result.publishedAt, "2026-07-22T16:18:31Z");
+  assert.equal(result.count, 88);
+  assert.equal(result.occurrences[0].videoId, "1b9E79L7PmQ");
+});
+
+test("focused songs and artists remain untouched", () => {
+  const payload = { key: "song-key", title: "Opening", count: 88 };
+  assert.deepEqual(
+    projectRuntimeVideo({
+      view: "songs",
+      detail_key: "1b9E79L7PmQ",
+      payload_json: payload,
+      video_payload_json: { channelName: "must not leak" },
+    }),
+    payload,
+  );
+  assert.deepEqual(
+    projectRuntimeVideo({
+      view: "artists",
+      detail_key: "1b9E79L7PmQ",
+      payload_json: payload,
+      video_payload_json: { channelName: "must not leak" },
+    }),
+    payload,
+  );
+});
+
+test("focused valid video payload is unchanged", () => {
+  const payload = {
+    type: "video",
+    key: "1b9E79L7PmQ",
+    videoId: "1b9E79L7PmQ",
+    title: "Opening",
+    channelName: "existing",
+    count: 88,
+    occurrences: [{ videoId: "1b9E79L7PmQ", position: 0 }],
+  };
+  assert.deepEqual(
+    projectRuntimeVideo({
+      view: "videos",
+      detail_key: "1b9E79L7PmQ",
+      payload_json: payload,
+    }),
+    payload,
+  );
+});
+
+test("focused conflicting explicit ID fails closed", () => {
+  const error = runtimeVideoProjectionError({
+    view: "videos",
+    detail_key: "1b9E79L7PmQ",
+    payload_json: { key: "1b9E79L7PmQ", videoId: "K3UF2497gTA" },
+  });
+  assert.match(error, /payload\.videoId/);
+  assert.match(error, /1b9E79L7PmQ/);
+});
+
+test("focused empty and non-video keys do not fabricate an ID", () => {
+  for (const detail_key of ["", "not-a-video-key", "all:1b9E79L7PmQ"]) {
+    const result = projectRuntimeVideo({
+      view: "videos",
+      detail_key,
+      payload_json: { key: detail_key, title: "Opening" },
+    });
+    assert.equal(result, null, detail_key);
+  }
 });
