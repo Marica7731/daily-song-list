@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-03T15:02:48.841Z",
+  "generatedAt": "2026-08-03T17:13:46.602Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-03T15:02:48.841Z",
+    "fetchedAt": "2026-08-03T17:13:46.602Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-03T15:02:48.841Z",
+    "generatedAt": "2026-08-03T17:13:46.602Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1022,
-      "parseableChannels": 1000,
+      "totalChannels": 1027,
+      "parseableChannels": 1005,
       "realAvatar": 646,
-      "thumbnailFallback": 376,
+      "thumbnailFallback": 381,
       "missingDisplayImage": 0,
-      "missingAvatar": 376,
+      "missingAvatar": 381,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 567,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 571
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 545,
+      "batch_limit_reached": 549,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@koinumamiya",
+        "channelId": "UCXUu1nCtDMAbasD0wAK1cdw",
+        "displayName": "恋沼ミヤ-koinuma miya-",
+        "sourceUrl": "https://www.youtube.com/@koinumamiya",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@yura_ayami",
+        "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
+        "displayName": "綾見ユラ / YuraAyami",
+        "sourceUrl": "https://www.youtube.com/@yura_ayami",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@yoisaki_meine",
         "channelId": "UCfwabonojH3KEHd8jNInjqw",
@@ -11702,6 +11716,13 @@
         "channelId": "UC3oBWCwi2UtckYvMbtIOWVA",
         "displayName": "Ruridori Kafka / 璃鳥歌深【IZIGENIA】",
         "sourceUrl": "https://www.youtube.com/@RuridoriKafka",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Richi_Masumi",
+        "channelId": "UCrpjMT3h20PjTgMHluY25LA",
+        "displayName": "真澄りち / Richi Masumi",
+        "sourceUrl": "https://www.youtube.com/@Richi_Masumi",
         "reason": "batch_limit_reached"
       },
       {
@@ -11828,27 +11849,6 @@
         "channelId": "UCGPSbXH61y4l85L9XTUl2mA",
         "displayName": "ベルモット・ベルーナ / Vermouth Belluna【APP LAND】",
         "sourceUrl": "https://www.youtube.com/@VermouthBelluna",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tukimirabi",
-        "channelId": "UC28vlU5N0F5E4Cz5QfchkLQ",
-        "displayName": "月見らび-Tukimi Rabi-",
-        "sourceUrl": "https://www.youtube.com/@tukimirabi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E8%8A%B1%E5%92%B2%E3%81%AE%E3%81%B0%E3%82%89",
-        "channelId": "UCRJshfruonj4vorWgCfyPNA",
-        "displayName": "花咲のばら",
-        "sourceUrl": "https://www.youtube.com/@%E8%8A%B1%E5%92%B2%E3%81%AE%E3%81%B0%E3%82%89",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@iyopi_asmr",
-        "channelId": "UC69utuJBl4VvLmvhzndB1iw",
-        "displayName": "双葉いよ - FutabaIyo -",
-        "sourceUrl": "https://www.youtube.com/@iyopi_asmr",
         "reason": "batch_limit_reached"
       }
     ]
