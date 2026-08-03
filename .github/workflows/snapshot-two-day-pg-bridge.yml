@@ -1,24 +1,40 @@
-name: Candidate two-day PG bridge v1
+name: Candidate two-day PG bridge v2
 
-# Intended product location after total-control review:
+# Product overlay target:
 # .github/workflows/snapshot-two-day-pg-bridge.yml
-# Existing live entrypoints used below:
+# Existing live entrypoints:
 # .github/workflows/deploy-pg-incremental.yml
 # .github/workflows/activate-pg-ready-candidate.yml
 
 on:
   workflow_dispatch:
     inputs:
-      artifact_root:
-        description: "Formal linkage artifact root: linked-output.ndjson, marker, and three closed reports"
+      rerun_run_id:
+        description: "Exact Mac rerun workflow run ID"
+        required: true
+        type: string
+      rerun_artifact_id:
+        description: "Exact Mac rerun artifact ID"
+        required: true
+        type: string
+      rerun_artifact_name:
+        description: "Exact producer artifact name"
+        required: true
+        type: string
+      rerun_artifact_digest:
+        description: "Exact GitHub artifact digest"
+        required: true
+        type: string
+      rerun_source_head:
+        description: "Exact source head recorded by the producer"
         required: true
         type: string
       route_as_of:
         description: "UTC routeAsOf used for inclusive seven-day routing"
         required: true
         type: string
-      active_revision_proof:
-        description: "Verified locked proof containing the real current active revision"
+      expected_active_revision:
+        description: "Expected current active revision from public metadata; deploy parent CAS is hard"
         required: true
         type: string
       execute:
@@ -32,7 +48,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: daily-song-list-pg-bridge-v1
+  group: daily-song-list-pg-bridge-v2
   cancel-in-progress: false
 
 jobs:
@@ -42,42 +58,86 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Stage formal linkage artifact under runner temp
+      - name: Download exact Mac rerun artifact
+        id: rerun_download
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.rerun_run_id }}
+          artifact-ids: ${{ inputs.rerun_artifact_id }}
+          path: ${{ runner.temp }}/two-day-pg-bridge/download
+          github-token: ${{ github.token }}
+      - name: Verify exact producer artifact and stage formal input
         env:
-          SOURCE_ARTIFACT_ROOT: ${{ inputs.artifact_root }}
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.rerun_run_id }}
+          ARTIFACT_ID: ${{ inputs.rerun_artifact_id }}
+          ARTIFACT_NAME: ${{ inputs.rerun_artifact_name }}
+          ARTIFACT_DIGEST: ${{ inputs.rerun_artifact_digest }}
+          SOURCE_HEAD: ${{ inputs.rerun_source_head }}
+          DOWNLOADED_DIGEST: ${{ steps.rerun_download.outputs.artifact-digest }}
         run: |
           set -Eeuo pipefail
-          ARTIFACT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/artifact"
-          test -d "$SOURCE_ARTIFACT_ROOT"
-          mkdir -p "$ARTIFACT_ROOT"
-          cp -a "$SOURCE_ARTIFACT_ROOT"/. "$ARTIFACT_ROOT"/
-          test -f "$ARTIFACT_ROOT/linked-output.ndjson"
-          test -f "$ARTIFACT_ROOT/linked-output.ndjson.marker"
-          test -f "$ARTIFACT_ROOT/occurrence-closure.json"
-          test -f "$ARTIFACT_ROOT/artist-binding-report.json"
-          test -f "$ARTIFACT_ROOT/release-route-report.json"
-      - name: Run v1 candidate tests
+          test "$ARTIFACT_NAME" = "enrich-snapshot-pilot-two-day-candidate-$RUN_ID"
+          test "$DOWNLOADED_DIGEST" = "$ARTIFACT_DIGEST"
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] && [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$SOURCE_HEAD" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$ARTIFACT_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID" |
+            jq -e --arg name "$ARTIFACT_NAME" --arg run "$RUN_ID" --arg head "$SOURCE_HEAD" \
+              '.name == $name and (.workflow_run.id | tostring) == $run and .workflow_run.head_sha == $head and .expired == false' >/dev/null
+          PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
+          test -d "$PRODUCER_ROOT"
+          summary="$PRODUCER_ROOT/candidate/pilot-summary.json"
+          test -f "$summary"
+          jq -e --arg head "$SOURCE_HEAD" \
+            '.sourceCommit == $head and .releaseEligible == false and .pg == false' \
+            "$summary" >/dev/null
+          jq -n \
+            --arg run "$RUN_ID" \
+            --arg id "$ARTIFACT_ID" \
+            --arg name "$ARTIFACT_NAME" \
+            --arg digest "$ARTIFACT_DIGEST" \
+            --arg head "$SOURCE_HEAD" \
+            '{kind:"github-artifact-download-proof",status:"VERIFIED",workflowName:"enrich-snapshot-pilot",runId:$run,artifactId:$id,artifactName:$name,artifactDigest:$digest,sourceHead:$head}' \
+            > "$PRODUCER_ROOT/artifact-download-proof.json"
+      - name: Run candidate contract tests
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-        run: python3 "$GITHUB_WORKSPACE/test/snapshot-two-day-pg-bridge.test.py"
+        run: python3 "$GITHUB_WORKSPACE/test/pg-bridge-v2-focused.test.py"
       - name: Build phase1 candidate only
         env:
-          ACTIVE_PROOF: ${{ inputs.active_revision_proof }}
+          EXPECTED_ACTIVE_REVISION: ${{ inputs.expected_active_revision }}
           ROUTE_AS_OF: ${{ inputs.route_as_of }}
         run: |
           set -Eeuo pipefail
-          ARTIFACT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/artifact"
+          PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
           OUTPUT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/output"
+          test -n "$EXPECTED_ACTIVE_REVISION"
+          [[ "$EXPECTED_ACTIVE_REVISION" != *'${{'* ]] && [[ "$EXPECTED_ACTIVE_REVISION" != *placeholder* ]]
+          ACTIVE_PROOF="$RUNNER_TEMP/two-day-pg-bridge/active-revision-proof.json"
+          jq -n --arg revision "$EXPECTED_ACTIVE_REVISION" \
+            '{kind:"active-revision-proof",verified:true,locked:true,actual_active_revision:$revision,evidence:"public-meta-observation",hardGate:"deploy importer parent CAS"}' > "$ACTIVE_PROOF"
           python3 "$GITHUB_WORKSPACE/scripts/orchestrator/snapshot-two-day-pg-bridge.py" \
-            --phase phase1 --artifact-root "$ARTIFACT_ROOT" --output-root "$OUTPUT_ROOT" \
-            --route-as-of "$ROUTE_AS_OF" --active-proof "$ACTIVE_PROOF"
+            --phase phase1 \
+            --artifact-root "$PRODUCER_ROOT" \
+            --artifact-proof "$PRODUCER_ROOT/artifact-download-proof.json" \
+            --output-root "$OUTPUT_ROOT" \
+            --route-as-of "$ROUTE_AS_OF" \
+            --active-proof "$ACTIVE_PROOF"
           test -f "$OUTPUT_ROOT/phase1/candidate.ndjson"
           test -f "$OUTPUT_ROOT/phase1/manifest.json"
-          jq -e '.status == "READY_CANDIDATE_ONLY" and .actualIo.dbMutationCount == 0 and .actualIo.activationPerformed == false and .actualIo.dispatchPerformed == false' \
-            "$OUTPUT_ROOT/orchestrator-manifest.json"
+          jq -e '
+            .status == "CODE_CANDIDATE_ONLY" and
+            .phase1.rangeId == "7d" and
+            .phase1.releaseRoute == "7d" and
+            .actualIo.dbMutationCount == 0 and
+            .actualIo.activationPerformed == false and
+            .actualIo.dispatchPerformed == false
+          ' "$OUTPUT_ROOT/orchestrator-manifest.json"
       - uses: actions/upload-artifact@v4
         with:
-          name: two-day-pg-bridge-candidate-${{ github.run_id }}
+          name: two-day-pg-bridge-phase1-${{ github.run_id }}
           path: ${{ runner.temp }}/two-day-pg-bridge/output
           if-no-files-found: error
           retention-days: 7
@@ -88,37 +148,79 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
-      - name: Stage formal linkage artifact under runner temp
+      - name: Download exact Mac rerun artifact
+        id: rerun_download
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.rerun_run_id }}
+          artifact-ids: ${{ inputs.rerun_artifact_id }}
+          path: ${{ runner.temp }}/two-day-pg-bridge/download
+          github-token: ${{ github.token }}
+      - name: Verify exact producer artifact and stage formal input
         env:
-          SOURCE_ARTIFACT_ROOT: ${{ inputs.artifact_root }}
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.rerun_run_id }}
+          ARTIFACT_ID: ${{ inputs.rerun_artifact_id }}
+          ARTIFACT_NAME: ${{ inputs.rerun_artifact_name }}
+          ARTIFACT_DIGEST: ${{ inputs.rerun_artifact_digest }}
+          SOURCE_HEAD: ${{ inputs.rerun_source_head }}
+          DOWNLOADED_DIGEST: ${{ steps.rerun_download.outputs.artifact-digest }}
         run: |
           set -Eeuo pipefail
-          ARTIFACT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/artifact"
-          test -d "$SOURCE_ARTIFACT_ROOT"
-          mkdir -p "$ARTIFACT_ROOT"
-          cp -a "$SOURCE_ARTIFACT_ROOT"/. "$ARTIFACT_ROOT"/
-          test -f "$ARTIFACT_ROOT/linked-output.ndjson"
-          test -f "$ARTIFACT_ROOT/linked-output.ndjson.marker"
-          test -f "$ARTIFACT_ROOT/occurrence-closure.json"
-          test -f "$ARTIFACT_ROOT/artist-binding-report.json"
-          test -f "$ARTIFACT_ROOT/release-route-report.json"
+          test "$ARTIFACT_NAME" = "enrich-snapshot-pilot-two-day-candidate-$RUN_ID"
+          test "$DOWNLOADED_DIGEST" = "$ARTIFACT_DIGEST"
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] && [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
+          [[ "$SOURCE_HEAD" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$ARTIFACT_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID" |
+            jq -e --arg name "$ARTIFACT_NAME" --arg run "$RUN_ID" --arg head "$SOURCE_HEAD" \
+              '.name == $name and (.workflow_run.id | tostring) == $run and .workflow_run.head_sha == $head and .expired == false' >/dev/null
+          PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
+          test -d "$PRODUCER_ROOT"
+          summary="$PRODUCER_ROOT/candidate/pilot-summary.json"
+          test -f "$summary"
+          jq -e --arg head "$SOURCE_HEAD" \
+            '.sourceCommit == $head and .releaseEligible == false and .pg == false' \
+            "$summary" >/dev/null
+          jq -n \
+            --arg run "$RUN_ID" \
+            --arg id "$ARTIFACT_ID" \
+            --arg name "$ARTIFACT_NAME" \
+            --arg digest "$ARTIFACT_DIGEST" \
+            --arg head "$SOURCE_HEAD" \
+            '{kind:"github-artifact-download-proof",status:"VERIFIED",workflowName:"enrich-snapshot-pilot",runId:$run,artifactId:$id,artifactName:$name,artifactDigest:$digest,sourceHead:$head}' \
+            > "$PRODUCER_ROOT/artifact-download-proof.json"
       - name: Run contract tests and build phase1
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-          ACTIVE_PROOF: ${{ inputs.active_revision_proof }}
+          EXPECTED_ACTIVE_REVISION: ${{ inputs.expected_active_revision }}
           ROUTE_AS_OF: ${{ inputs.route_as_of }}
         run: |
           set -Eeuo pipefail
-          ARTIFACT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/artifact"
+          PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
           OUTPUT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/output"
-          python3 "$GITHUB_WORKSPACE/test/snapshot-two-day-pg-bridge.test.py"
+          test -n "$EXPECTED_ACTIVE_REVISION"
+          [[ "$EXPECTED_ACTIVE_REVISION" != *'${{'* ]] && [[ "$EXPECTED_ACTIVE_REVISION" != *placeholder* ]]
+          ACTIVE_PROOF="$RUNNER_TEMP/two-day-pg-bridge/active-revision-proof.json"
+          jq -n --arg revision "$EXPECTED_ACTIVE_REVISION" \
+            '{kind:"active-revision-proof",verified:true,locked:true,actual_active_revision:$revision,evidence:"public-meta-observation",hardGate:"deploy importer parent CAS"}' > "$ACTIVE_PROOF"
+          python3 "$GITHUB_WORKSPACE/test/pg-bridge-v2-focused.test.py"
           python3 "$GITHUB_WORKSPACE/scripts/orchestrator/snapshot-two-day-pg-bridge.py" \
-            --phase phase1 --artifact-root "$ARTIFACT_ROOT" --output-root "$OUTPUT_ROOT" \
-            --route-as-of "$ROUTE_AS_OF" --active-proof "$ACTIVE_PROOF"
+            --phase phase1 \
+            --artifact-root "$PRODUCER_ROOT" \
+            --artifact-proof "$PRODUCER_ROOT/artifact-download-proof.json" \
+            --output-root "$OUTPUT_ROOT" \
+            --route-as-of "$ROUTE_AS_OF" \
+            --active-proof "$ACTIVE_PROOF"
           test -f "$OUTPUT_ROOT/phase1/candidate.ndjson"
           test -f "$OUTPUT_ROOT/phase1/manifest.json"
-          jq -e '.status == "READY_CANDIDATE_ONLY" and .phase1.parent != null and .actualIo.dbMutationCount == 0' \
-            "$OUTPUT_ROOT/orchestrator-manifest.json"
+          jq -e '
+            .status == "CODE_CANDIDATE_ONLY" and
+            .phase1.rangeId == "7d" and
+            .phase1.parent != null and
+            .actualIo.dbMutationCount == 0
+          ' "$OUTPUT_ROOT/orchestrator-manifest.json"
       - uses: actions/upload-artifact@v4
         with:
           name: two-day-pg-bridge-phase1-${{ github.run_id }}
@@ -130,13 +232,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -Eeuo pipefail
-          : "Live inputs: artifact_name, artifact_run_id, patch_path, manifest_path, activate, rollback_only"
-          : "Live activation inputs: revision, expected_content_sha256"
+          : "Live bridge dispatch uses exact phase artifacts and the deploy workflow's CAS gates"
           test -n "$GH_TOKEN"
       - name: Import and locked-activate phase1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ROUTE_AS_OF: ${{ inputs.route_as_of }}
           BRANCH: ${{ github.ref_name }}
           ARTIFACT_NAME: two-day-pg-bridge-phase1-${{ github.run_id }}
         run: |
@@ -157,9 +257,13 @@ jobs:
             printf '%s\n' "$run_id"
           }
           import_run="$(dispatch_and_wait .github/workflows/deploy-pg-incremental.yml \
-            -f artifact_name="$ARTIFACT_NAME" -f artifact_run_id="$GITHUB_RUN_ID" \
-            -f patch_path=phase1/candidate.ndjson -f manifest_path=phase1/manifest.json \
-            -f activate=false -f rollback_only=false)"
+            -f artifact_name="$ARTIFACT_NAME" \
+            -f artifact_run_id="$GITHUB_RUN_ID" \
+            -f patch_path=phase1/candidate.ndjson \
+            -f manifest_path=phase1/manifest.json \
+            -f activate=false \
+            -f rollback_only=false \
+            -f require_7d_gate=true)"
           gh run view "$import_run" --log > "$RUNNER_TEMP/phase1-import.log"
           phase1_result="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase1-import.log" | tail -n 1)"
           test -n "$phase1_result"
@@ -168,32 +272,45 @@ jobs:
           phase1_revision="$(jq -r '.revisionId' <<<"$phase1_result")"
           phase1_content="$(jq -r '.contentSha256' <<<"$phase1_result")"
           activation_run="$(dispatch_and_wait .github/workflows/activate-pg-ready-candidate.yml \
-            -f revision="$phase1_revision" -f expected_content_sha256="$phase1_content")"
+            -f revision="$phase1_revision" \
+            -f expected_content_sha256="$phase1_content")"
           gh run view "$activation_run" --log > "$RUNNER_TEMP/phase1-activation.log"
           grep -q 'PG_READY_ONLINE_OBSERVATION_COMPLETE' "$RUNNER_TEMP/phase1-activation.log"
           activation_json="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase1-activation.log" | tail -n 1)"
           test -n "$activation_json"
           actual_activated="$(jq -r '.actualActivatedRevision // .actual_activated_revision // .revisionId // empty' <<<"$activation_json")"
           test "$actual_activated" = "$phase1_revision"
-          jq -n --arg revision "$actual_activated" --arg parent "$expected_parent" --arg content "$phase1_content" --arg run "$activation_run" \
+          jq -n \
+            --arg revision "$actual_activated" \
+            --arg parent "$expected_parent" \
+            --arg content "$phase1_content" \
+            --arg run "$activation_run" \
             '{kind:"phase1-activation-proof",verified:true,locked:true,actual_activated_revision:$revision,parent_revision_id:$parent,content_sha256:$content,activation_run_id:$run}' \
             > "$RUNNER_TEMP/phase1-activation-proof.json"
-      - name: Build phase2 only after phase1 proof
+      - name: Build phase2 historical all
         env:
           ROUTE_AS_OF: ${{ inputs.route_as_of }}
           PHASE1_PROOF: ${{ runner.temp }}/phase1-activation-proof.json
         run: |
           set -Eeuo pipefail
-          ARTIFACT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/artifact"
+          PRODUCER_ROOT="$RUNNER_TEMP/two-day-pg-bridge/download"
           OUTPUT_ROOT="$RUNNER_TEMP/two-day-pg-bridge/output"
           python3 "$GITHUB_WORKSPACE/scripts/orchestrator/snapshot-two-day-pg-bridge.py" \
-            --phase phase2 --artifact-root "$ARTIFACT_ROOT" --output-root "$OUTPUT_ROOT" \
-            --route-as-of "$ROUTE_AS_OF" --active-proof "$PHASE1_PROOF" \
+            --phase phase2 \
+            --artifact-root "$PRODUCER_ROOT" \
+            --artifact-proof "$PRODUCER_ROOT/artifact-download-proof.json" \
+            --output-root "$OUTPUT_ROOT" \
+            --route-as-of "$ROUTE_AS_OF" \
             --phase1-activation-proof "$PHASE1_PROOF"
           test -f "$OUTPUT_ROOT/phase2/candidate.ndjson"
           test -f "$OUTPUT_ROOT/phase2/manifest.json"
-          jq -e '.phase2.parent == .parentCas.phase2Parent and .phase2Status == "phase2-candidate-generated-after-verified-proof"' \
-            "$OUTPUT_ROOT/orchestrator-manifest.json"
+          jq -e '
+            .status == "CODE_CANDIDATE_ONLY" and
+            .phase2.rangeId == "all" and
+            .phase2.releaseRoute == "all" and
+            .phase2.parent == .parentCas.phase2Parent and
+            .phase2Status == "phase2-candidate-generated-after-verified-proof"
+          ' "$OUTPUT_ROOT/orchestrator-manifest.json"
       - uses: actions/upload-artifact@v4
         with:
           name: two-day-pg-bridge-phase2-${{ github.run_id }}
@@ -224,9 +341,13 @@ jobs:
           }
           phase2_parent="$(jq -r '.phase2.parent' "$OUTPUT_ROOT/orchestrator-manifest.json")"
           import_run="$(dispatch_and_wait .github/workflows/deploy-pg-incremental.yml \
-            -f artifact_name="$ARTIFACT_NAME" -f artifact_run_id="$GITHUB_RUN_ID" \
-            -f patch_path=phase2/candidate.ndjson -f manifest_path=phase2/manifest.json \
-            -f activate=false -f rollback_only=false)"
+            -f artifact_name="$ARTIFACT_NAME" \
+            -f artifact_run_id="$GITHUB_RUN_ID" \
+            -f patch_path=phase2/candidate.ndjson \
+            -f manifest_path=phase2/manifest.json \
+            -f activate=false \
+            -f rollback_only=false \
+            -f require_7d_gate=false)"
           gh run view "$import_run" --log > "$RUNNER_TEMP/phase2-import.log"
           phase2_result="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase2-import.log" | tail -n 1)"
           test -n "$phase2_result"
@@ -234,7 +355,8 @@ jobs:
           phase2_revision="$(jq -r '.revisionId' <<<"$phase2_result")"
           phase2_content="$(jq -r '.contentSha256' <<<"$phase2_result")"
           activation_run="$(dispatch_and_wait .github/workflows/activate-pg-ready-candidate.yml \
-            -f revision="$phase2_revision" -f expected_content_sha256="$phase2_content")"
+            -f revision="$phase2_revision" \
+            -f expected_content_sha256="$phase2_content")"
           gh run view "$activation_run" --log > "$RUNNER_TEMP/phase2-activation.log"
           grep -q 'PG_READY_ONLINE_OBSERVATION_COMPLETE' "$RUNNER_TEMP/phase2-activation.log"
           grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase2-activation.log" | tail -n 1

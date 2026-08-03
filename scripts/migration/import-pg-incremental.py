@@ -205,7 +205,7 @@ def occurrence_rows(record: dict[str, Any], video_id: str) -> list[tuple[Any, ..
         if range_id is None:
             range_id = first_present(record, "rangeId", "range_id")
         if range_id is None:
-            range_id = "7d"
+            raise ValueError("occurrence rangeId is missing")
         song_key = first_present(item, "songKey", "song_key")
         if song_key is None:
             song_key = derived_song_key(title, artist)
@@ -521,3 +521,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
