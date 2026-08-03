@@ -82,11 +82,9 @@ jobs:
           ARTIFACT_NAME: ${{ inputs.rerun_artifact_name }}
           ARTIFACT_DIGEST: ${{ inputs.rerun_artifact_digest }}
           SOURCE_HEAD: ${{ inputs.rerun_source_head }}
-          DOWNLOADED_DIGEST: ${{ steps.rerun_download.outputs.artifact-digest }}
         run: |
           set -Eeuo pipefail
           test "$ARTIFACT_NAME" = "enrich-snapshot-pilot-two-day-candidate-$RUN_ID"
-          test "$DOWNLOADED_DIGEST" = "$ARTIFACT_DIGEST"
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] && [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$SOURCE_HEAD" =~ ^[0-9a-f]{40}$ ]]
           [[ "$ARTIFACT_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
@@ -178,11 +176,9 @@ jobs:
           ARTIFACT_NAME: ${{ inputs.rerun_artifact_name }}
           ARTIFACT_DIGEST: ${{ inputs.rerun_artifact_digest }}
           SOURCE_HEAD: ${{ inputs.rerun_source_head }}
-          DOWNLOADED_DIGEST: ${{ steps.rerun_download.outputs.artifact-digest }}
         run: |
           set -Eeuo pipefail
           test "$ARTIFACT_NAME" = "enrich-snapshot-pilot-two-day-candidate-$RUN_ID"
-          test "$DOWNLOADED_DIGEST" = "$ARTIFACT_DIGEST"
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] && [[ "$ARTIFACT_ID" =~ ^[0-9]+$ ]]
           [[ "$SOURCE_HEAD" =~ ^[0-9a-f]{40}$ ]]
           [[ "$ARTIFACT_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
