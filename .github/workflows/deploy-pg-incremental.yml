@@ -429,7 +429,7 @@ jobs:
           cleanup
 
   candidate:
-    if: ${{ (github.event_name != 'workflow_dispatch' || inputs.rollback_only != true) && (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1') }}
+    if: ${{ (github.event_name != 'workflow_dispatch' || inputs.rollback_only != true) && (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || github.event_name == 'push' || github.event_name == 'workflow_call' || vars.DAILY_SONG_PG_INCREMENTAL_ENABLED == '1') }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 240
     env:
@@ -453,7 +453,12 @@ jobs:
           run-id: ${{ inputs.artifact_run_id || github.run_id }}
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
+      - name: No-op unsuccessful producer workflow_run
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
+        run: |
+          echo "PG_INCREMENT_NOOP owner=workflow_run reason=producer-conclusion-${{ github.event.workflow_run.conclusion || 'missing' }}"
       - name: Build, activate, and observe candidate
+        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}
@@ -462,15 +467,16 @@ jobs:
           SOURCE_PUSH_BEFORE: ${{ github.event.before || '' }}
           SOURCE_PUSH_SHA: ${{ github.sha || '' }}
           SOURCE_PUSH_REF: ${{ github.ref || '' }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || '' }}
+          WORKFLOW_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt || '' }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion || '' }}
           WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha || '' }}
+          WORKFLOW_RUN_HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name || '' }}
+          WORKFLOW_RUN_ARTIFACT_PREFIX: daily-song-list-authoritative-7d
           SOURCE_MANUAL_SHA: ${{ inputs.source_sha || '' }}
           SOURCE_MANUAL_BASE_SHA: ${{ inputs.source_base_sha || '' }}
         run: |
           set -Eeuo pipefail
-          test -n "$VPS2_HOST" || { echo "PG_INCREMENT_BLOCKED missing VPS2_HOST"; exit 78; }
-          test -n "$VPS2_USER" || { echo "PG_INCREMENT_BLOCKED missing VPS2_USER"; exit 78; }
-          test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
-          test -n "$VPS2_KNOWN_HOSTS" || { echo "PG_INCREMENT_BLOCKED missing VPS2_KNOWN_HOSTS"; exit 78; }
           for release_wait_attempt in $(seq 1 20); do
             active_releases="$(
               for release_status in in_progress queued; do
@@ -517,22 +523,198 @@ jobs:
               "$RAW_BASE/$source_path" -o "$destination"
             test -s "$destination" || { echo "PG_INCREMENT_BLOCKED empty input=$source_path"; exit 78; }
           }
+          WORKFLOW_RUN_ROUTE=""
+          WORKFLOW_RUN_NOOP=0
+          WORKFLOW_RUN_NOOP_REASON=""
+          WORKFLOW_RUN_ARTIFACT_ID=""
+          WORKFLOW_RUN_ARTIFACT_NAME=""
+          WORKFLOW_RUN_ARTIFACT_SIZE=""
+          WORKFLOW_RUN_EVIDENCE_ROOT=""
+          WORKFLOW_RUN_DATA_PATH=""
+          workflow_run_noop() {
+            WORKFLOW_RUN_NOOP=1
+            WORKFLOW_RUN_NOOP_REASON="$1"
+            return 0
+          }
+          workflow_run_hard_fail() {
+            echo "PG_INCREMENT_INPUT_ERROR owner=workflow_run reason=$1" >&2
+            return 64
+          }
           resolve_workflow_run_route() {
             WORKFLOW_RUN_ROUTE=""
             [ "$GITHUB_EVENT_NAME" = "workflow_run" ] || return 0
-            SOURCE_COMMIT_ROLE="workflow-run-current-main"
-            SOURCE_SHA="$(curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" | jq -r '.object.sha // empty')"
-            SOURCE_BASE_SHA="$(curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
-              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" | jq -r '.parents[0].sha // empty')"
-            [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && [[ "$SOURCE_BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "PG_INCREMENT_INPUT_ERROR invalid-workflow-run-current-main before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
+            if [ "$WORKFLOW_RUN_CONCLUSION" != "success" ]; then
+              workflow_run_noop "producer-conclusion-${WORKFLOW_RUN_CONCLUSION:-missing}"
+              return 0
+            fi
+            [[ "$WORKFLOW_RUN_ID" =~ ^[0-9]+$ ]] || {
+              workflow_run_hard_fail invalid-producer-run-id; return 64;
             }
+            [[ "$WORKFLOW_RUN_ATTEMPT" =~ ^[0-9]+$ ]] || {
+              workflow_run_hard_fail invalid-producer-run-attempt; return 64;
+            }
+            [[ "$WORKFLOW_RUN_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+              workflow_run_hard_fail invalid-producer-head-sha; return 64;
+            }
+            [ "$WORKFLOW_RUN_HEAD_REPOSITORY" = "$GITHUB_REPOSITORY" ] || {
+              workflow_run_hard_fail producer-repository-mismatch; return 64;
+            }
+            EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME="${WORKFLOW_RUN_ARTIFACT_PREFIX}-${WORKFLOW_RUN_ID}-${WORKFLOW_RUN_ATTEMPT}"
+            producer_run_json="$TASK_ROOT/workflow-run.json"
+            if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}" \
+              -o "$producer_run_json"; then
+              workflow_run_hard_fail producer-run-api-failed; return 64
+            fi
+            if ! jq -e --argjson run_id "$WORKFLOW_RUN_ID" --argjson run_attempt "$WORKFLOW_RUN_ATTEMPT" \
+              --arg repo "$GITHUB_REPOSITORY" --arg sha "$WORKFLOW_RUN_HEAD_SHA" '
+              (.id == $run_id) and
+              (.run_attempt == $run_attempt) and
+              (.conclusion == "success") and
+              (.head_sha == $sha) and
+              (.head_repository.full_name == $repo)
+            ' "$producer_run_json" >/dev/null; then
+              workflow_run_hard_fail producer-run-binding-mismatch; return 64
+            fi
+            producer_artifacts_json="$TASK_ROOT/workflow-run-artifacts.json"
+            if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/artifacts?per_page=100" \
+              -o "$producer_artifacts_json"; then
+              workflow_run_hard_fail producer-artifact-api-failed; return 64
+            fi
+            if ! jq -e '.total_count | type == "number"' "$producer_artifacts_json" >/dev/null || \
+               ! jq -e '.artifacts | type == "array"' "$producer_artifacts_json" >/dev/null; then
+              workflow_run_hard_fail malformed-producer-artifact-response; return 64
+            fi
+            artifact_count="$(jq -er '.total_count' "$producer_artifacts_json")" || {
+              workflow_run_hard_fail producer-artifact-count-unreadable; return 64;
+            }
+            artifact_item_count="$(jq -er '.artifacts | length' "$producer_artifacts_json")" || {
+              workflow_run_hard_fail producer-artifact-items-unreadable; return 64;
+            }
+            if [ "$artifact_count" -eq 0 ]; then
+              [ "$artifact_item_count" -eq 0 ] || {
+                workflow_run_hard_fail inconsistent-zero-artifact-response; return 64;
+              }
+              workflow_run_noop no-producer-artifacts
+              return 0
+            fi
+            [ "$artifact_item_count" -gt 0 ] || {
+              workflow_run_hard_fail missing-artifact-items; return 64;
+            }
+            matching_artifact_count="$(jq -er --arg expected "$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME" \
+              '[.artifacts[] | select(.name == $expected)] | length' "$producer_artifacts_json")" || {
+              workflow_run_hard_fail artifact-name-selection-failed; return 64;
+            }
+            if [ "$matching_artifact_count" -eq 0 ]; then
+              workflow_run_noop no-valid-authoritative-7d-evidence
+              return 0
+            fi
+            [ "$matching_artifact_count" -eq 1 ] || {
+              workflow_run_hard_fail ambiguous-authoritative-7d-artifact-name; return 64;
+            }
+            matched_artifact_json="$TASK_ROOT/workflow-run-authoritative-7d-artifact.json"
+            if ! jq -e --arg expected "$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME" \
+              '[.artifacts[] | select(.name == $expected)][0]' "$producer_artifacts_json" > "$matched_artifact_json"; then
+              workflow_run_hard_fail artifact-selection-failed; return 64
+            fi
+            if ! jq -e --argjson run_id "$WORKFLOW_RUN_ID" --arg head "$WORKFLOW_RUN_HEAD_SHA" \
+              --arg expected "$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME" '
+              (.name == $expected) and
+              (.expired == false) and
+              (.size_in_bytes | type == "number" and . > 0) and
+              (.workflow_run.id == $run_id) and
+              (.workflow_run.head_sha == $head)
+            ' "$matched_artifact_json" >/dev/null; then
+              workflow_run_hard_fail artifact-run-head-binding-mismatch; return 64
+            fi
+            if ! WORKFLOW_RUN_ARTIFACT_ID="$(jq -er '.id | select(type == "number")' "$matched_artifact_json")"; then
+              workflow_run_hard_fail artifact-id-unreadable; return 64
+            fi
+            if ! WORKFLOW_RUN_ARTIFACT_SIZE="$(jq -er '.size_in_bytes | select(type == "number" and . > 0)' "$matched_artifact_json")"; then
+              workflow_run_hard_fail artifact-size-unreadable; return 64
+            fi
+            WORKFLOW_RUN_ARTIFACT_NAME="$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME"
+            artifact_zip="$TASK_ROOT/workflow-run-authoritative-7d.zip"
+            if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${WORKFLOW_RUN_ARTIFACT_ID}/zip" \
+              -o "$artifact_zip"; then
+              workflow_run_hard_fail artifact-download-failed; return 64
+            fi
+            test -s "$artifact_zip" || {
+              workflow_run_hard_fail artifact-download-empty; return 64;
+            }
+            artifact_members="$TASK_ROOT/workflow-run-authoritative-7d.members"
+            if ! unzip -Z1 "$artifact_zip" > "$artifact_members"; then
+              workflow_run_hard_fail artifact-list-failed; return 64
+            fi
+            if grep -Eq '(^/|(^|/)\.\.(/|$)|\\)' "$artifact_members"; then
+              workflow_run_hard_fail artifact-path-traversal; return 64
+            fi
+            WORKFLOW_RUN_EVIDENCE_ROOT="$TASK_ROOT/workflow-run-authoritative-7d"
+            mkdir -p "$WORKFLOW_RUN_EVIDENCE_ROOT"
+            if ! unzip -q "$artifact_zip" -d "$WORKFLOW_RUN_EVIDENCE_ROOT"; then
+              workflow_run_hard_fail artifact-extract-failed; return 64
+            fi
+            WORKFLOW_RUN_DATA_PATH="$WORKFLOW_RUN_EVIDENCE_ROOT/7d.json"
+            artifact_manifest="$WORKFLOW_RUN_EVIDENCE_ROOT/authoritative-7d-manifest.json"
+            test -f "$WORKFLOW_RUN_DATA_PATH" || {
+              workflow_run_hard_fail missing-artifact-7d-json; return 64;
+            }
+            test -f "$artifact_manifest" || {
+              workflow_run_hard_fail missing-artifact-manifest; return 64;
+            }
+            if ! jq -e 'type == "object"' "$WORKFLOW_RUN_DATA_PATH" >/dev/null; then
+              workflow_run_hard_fail invalid-artifact-7d-json; return 64
+            fi
+            if ! artifact_data_sha="$(shasum -a 256 "$WORKFLOW_RUN_DATA_PATH" | awk '{print $1}')"; then
+              workflow_run_hard_fail artifact-7d-sha-failed; return 64
+            fi
+            [[ "$artifact_data_sha" =~ ^[0-9a-f]{64}$ ]] || {
+              workflow_run_hard_fail invalid-artifact-7d-sha; return 64;
+            }
+            if ! jq -e --argjson run_id "$WORKFLOW_RUN_ID" --argjson run_attempt "$WORKFLOW_RUN_ATTEMPT" \
+              --arg artifact_name "$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME" --arg repo "$GITHUB_REPOSITORY" \
+              --arg head "$WORKFLOW_RUN_HEAD_SHA" --arg data_sha "$artifact_data_sha" '
+              (.schemaVersion == 1) and
+              (.route == "authoritative-7d") and
+              (.artifactName == $artifact_name) and
+              (.producerRunId == $run_id) and
+              (.producerRunAttempt == $run_attempt) and
+              (.producerRepository == $repo) and
+              (.producerHeadSha == $head) and
+              (.sourceSha == $head) and
+              (.sourceBaseSha | type == "string" and test("^[0-9a-f]{40}$")) and
+              (.dataPath == "7d.json") and
+              (.dataSha256 == $data_sha)
+            ' "$artifact_manifest" >/dev/null; then
+              workflow_run_hard_fail artifact-manifest-binding-failed; return 64
+            fi
+            SOURCE_COMMIT_ROLE="workflow-run-authoritative-7d-artifact"
+            SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
+            SOURCE_BASE_SHA="$(jq -er '.sourceBaseSha' "$artifact_manifest")" || {
+              workflow_run_hard_fail artifact-source-base-unreadable; return 64;
+            }
+            source_commit_json="$TASK_ROOT/workflow-run-source-commit.json"
+            if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_SHA}" \
+              -o "$source_commit_json"; then
+              workflow_run_hard_fail source-commit-api-failed; return 64
+            fi
+            if ! jq -e --arg source "$SOURCE_SHA" --arg base "$SOURCE_BASE_SHA" --arg repo "$GITHUB_REPOSITORY" '
+              (.sha == $source) and
+              (.repository.full_name == $repo) and
+              (.parents[0].sha == $base)
+            ' "$source_commit_json" >/dev/null; then
+              workflow_run_hard_fail source-commit-binding-failed; return 64
+            fi
             WORKFLOW_RUN_ROUTE=authoritative-7d
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
-            echo "PG_INCREMENT_ROUTE owner=workflow_run route=authoritative-7d workflowHead=$WORKFLOW_RUN_HEAD_SHA sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE"
+            echo "PG_INCREMENT_ROUTE owner=workflow_run route=authoritative-7d workflowRunId=$WORKFLOW_RUN_ID workflowRunAttempt=$WORKFLOW_RUN_ATTEMPT workflowHead=$WORKFLOW_RUN_HEAD_SHA sourceSha=$SOURCE_SHA sourceBaseSha=$SOURCE_BASE_SHA sourceRole=$SOURCE_COMMIT_ROLE producerArtifactId=$WORKFLOW_RUN_ARTIFACT_ID producerArtifactName=$WORKFLOW_RUN_ARTIFACT_NAME producerArtifactBytes=$WORKFLOW_RUN_ARTIFACT_SIZE"
             return 0
           }
           if ! resolve_workflow_run_route; then
@@ -574,7 +756,22 @@ jobs:
           if ! resolve_manual_7d_route; then
             exit 64
           fi
-          if [ -z "$WORKFLOW_RUN_ROUTE" ] && [ -z "$PUSH_ROUTE" ] && [ -z "$MANUAL_7D_ROUTE" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            if [ "$WORKFLOW_RUN_NOOP" = 1 ]; then
+              echo "PG_INCREMENT_NOOP owner=workflow_run reason=$WORKFLOW_RUN_NOOP_REASON workflowRunId=${WORKFLOW_RUN_ID:-unknown}"
+              exit 0
+            fi
+            [ "$WORKFLOW_RUN_ROUTE" = "authoritative-7d" ] || {
+              echo "PG_INCREMENT_INPUT_ERROR owner=workflow_run reason=unresolved-producer-route" >&2
+              exit 64
+            }
+          fi
+          test -n "$VPS2_HOST" || { echo "PG_INCREMENT_BLOCKED missing VPS2_HOST"; exit 78; }
+          test -n "$VPS2_USER" || { echo "PG_INCREMENT_BLOCKED missing VPS2_USER"; exit 78; }
+          test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
+          test -n "$VPS2_KNOWN_HOSTS" || { echo "PG_INCREMENT_BLOCKED missing VPS2_KNOWN_HOSTS"; exit 78; }
+          if [ -z "$WORKFLOW_RUN_ROUTE" ] && [ -z "$PUSH_ROUTE" ] && [ -z "$MANUAL_7D_ROUTE" ] && \
+             [ "$GITHUB_EVENT_NAME" != "workflow_run" ]; then
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
           fi
           fetch_input "scripts/migration/accepted-source-identities.py" "$INPUT_ROOT/accepted-source-identities.py"
@@ -589,8 +786,12 @@ jobs:
             fetch_input "scripts/migration/7d-json-to-patch.py" "$INPUT_ROOT/7d-json-to-patch.py"
             DATA_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             DATA_BASE_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_BASE_SHA}"
-            curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
-              "$DATA_RAW_BASE/data/7d.json" -o "$INPUT_ROOT/7d.json"
+            if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+              cp "$WORKFLOW_RUN_DATA_PATH" "$INPUT_ROOT/7d.json"
+            else
+              curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
+                "$DATA_RAW_BASE/data/7d.json" -o "$INPUT_ROOT/7d.json"
+            fi
             curl --fail --location --retry 2 --retry-all-errors --connect-timeout 5 --max-time 60 \
               "$DATA_BASE_RAW_BASE/data/7d.json" -o "$INPUT_ROOT/7d.base.json"
             test -s "$INPUT_ROOT/7d.json" && test -s "$INPUT_ROOT/7d.base.json"
