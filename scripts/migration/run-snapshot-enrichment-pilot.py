@@ -36,6 +36,8 @@ EXPECTED = {
         "sentinelOccurrences": 0,
     },
 }
+RAW_ROUTE_SAMPLE_ID = "jul22-19"
+RAW_ROUTE_LINKAGE_SAMPLE_ID = "jul22-raw456"
 
 
 class RejectError(ValueError):
@@ -114,7 +116,7 @@ def load_materialized(root: Path, route: str) -> dict[str, Any]:
     return manifest
 
 
-def sample_input(materialized_root: Path, sample_id: str) -> tuple[Path, dict[str, Any], list[str]]:
+def sample_input(materialized_root: Path, sample_id: str) -> tuple[Path, dict[str, Any], dict[str, Any], list[str]]:
     base = materialized_root / "input" / sample_id
     raw_path = base / "raw-input" / "sample.json"
     manifest = read_json(base / "input-manifest.json")
@@ -126,7 +128,111 @@ def sample_input(materialized_root: Path, sample_id: str) -> tuple[Path, dict[st
     metadata = read_json(base / "metadata.json")
     if not isinstance(metadata, dict) or metadata.get("providerInput") is not False:
         reject(f"materialized-input-metadata-mismatch:{sample_id}")
-    return raw_path, manifest, [item for item in expected_ids if isinstance(item, str)]
+    return raw_path, manifest, metadata, [item for item in expected_ids if isinstance(item, str)]
+
+
+def validate_raw_route_input(
+    raw_path: Path,
+    input_manifest: dict[str, Any],
+    metadata: dict[str, Any],
+    expected_ids: list[str],
+    args: argparse.Namespace,
+    cutoff: str,
+) -> dict[str, Any]:
+    """Validate the authoritative raw all=19/456 spine before bypassing enrichment."""
+    if metadata.get("sampleId") != RAW_ROUTE_SAMPLE_ID:
+        reject("raw-route-sample-id-mismatch")
+    if metadata.get("linkageSampleId") != RAW_ROUTE_LINKAGE_SAMPLE_ID:
+        reject("raw-route-linkage-sample-id-mismatch")
+    if metadata.get("providerInput") is not False:
+        reject("raw-route-provider-input-must-be-false")
+    if metadata.get("routeAsOfUtc") != args.route_as_of_utc:
+        reject("raw-route-metadata-route-as-of-mismatch")
+    if metadata.get("releaseCutoffUtc") != cutoff:
+        reject("raw-route-metadata-cutoff-mismatch")
+
+    raw = read_json(raw_path)
+    if not isinstance(raw, dict) or raw.get("trialRoute") != "all":
+        reject("raw-route-input-not-all-object")
+    videos = raw.get("videos")
+    if not isinstance(videos, list) or len(videos) != EXPECTED[RAW_ROUTE_SAMPLE_ID]["videoCount"]:
+        reject("raw-route-video-count-mismatch")
+    if raw.get("videoCount") != len(videos) or raw.get("occurrenceCount") != EXPECTED[RAW_ROUTE_SAMPLE_ID]["realOccurrences"]:
+        reject("raw-route-top-level-count-mismatch")
+    actual_ids: list[str] = []
+    occurrence_ids: set[str] = set()
+    occurrence_count = 0
+    for video in videos:
+        if not isinstance(video, dict) or not isinstance(video.get("videoId"), str):
+            reject("raw-route-video-shape-invalid")
+        video_id = video["videoId"]
+        actual_ids.append(video_id)
+        occurrences = video.get("occurrences")
+        if not isinstance(occurrences, list) or video.get("occurrenceCount") != len(occurrences):
+            reject(f"raw-route-occurrence-list-invalid:{video_id}")
+        for occurrence in occurrences:
+            if not isinstance(occurrence, dict):
+                reject(f"raw-route-occurrence-shape-invalid:{video_id}")
+            occurrence_id = occurrence.get("occurrenceId")
+            if not isinstance(occurrence_id, str) or not occurrence_id:
+                reject(f"raw-route-occurrence-id-invalid:{video_id}")
+            if occurrence_id in occurrence_ids:
+                reject(f"raw-route-duplicate-occurrence:{occurrence_id}")
+            occurrence_ids.add(occurrence_id)
+            if occurrence.get("videoId") != video_id:
+                reject(f"raw-route-occurrence-video-mismatch:{occurrence_id}")
+            occurrence_count += 1
+    if actual_ids != expected_ids or len(set(actual_ids)) != len(actual_ids):
+        reject("raw-route-video-id-spine-mismatch")
+    if occurrence_count != EXPECTED[RAW_ROUTE_SAMPLE_ID]["realOccurrences"] or len(occurrence_ids) != occurrence_count:
+        reject("raw-route-occurrence-count-or-spine-mismatch")
+    raw_meta = input_manifest.get("rawInput")
+    if not isinstance(raw_meta, dict) or raw_meta.get("count") != len(videos) or raw_meta.get("sha256") != sha256_file(raw_path):
+        reject("raw-route-input-manifest-hash-or-count-mismatch")
+    return {
+        "status": "READY_FOR_PHASE2_ALL",
+        "sampleId": RAW_ROUTE_SAMPLE_ID,
+        "linkageSampleId": RAW_ROUTE_LINKAGE_SAMPLE_ID,
+        "providerInput": False,
+        "linkageSkipped": True,
+        "providerSkipped": True,
+        "bridgeSkipped": True,
+        "videoCount": len(videos),
+        "realOccurrenceCount": occurrence_count,
+        "occurrenceIdCount": len(occurrence_ids),
+        "inputSha256": sha256_file(raw_path),
+        "inputBytes": raw_path.stat().st_size,
+        "routeAsOfUtc": args.route_as_of_utc,
+        "releaseCutoffUtc": cutoff,
+        "sourceCommit": args.source_commit,
+    }
+
+
+def run_raw_route(
+    args: argparse.Namespace,
+    output: Path,
+    raw_path: Path,
+    input_manifest: dict[str, Any],
+    metadata: dict[str, Any],
+    expected_ids: list[str],
+    cutoff: str,
+) -> dict[str, Any]:
+    raw_evidence = validate_raw_route_input(raw_path, input_manifest, metadata, expected_ids, args, cutoff)
+    input_root = args.materialized_root / "input" / RAW_ROUTE_SAMPLE_ID
+    (output / "raw-input").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(raw_path, output / "raw-input" / "sample.json")
+    shutil.copyfile(input_root / "input-manifest.json", output / "input-manifest.json")
+    shutil.copyfile(input_root / "expected-ids.json", output / "expected-ids.json")
+    shutil.copyfile(input_root / "metadata.json", output / "metadata.json")
+    raw_evidence["copiedRawInputSha256"] = sha256_file(output / "raw-input" / "sample.json")
+    if raw_evidence["copiedRawInputSha256"] != raw_evidence["inputSha256"]:
+        reject("raw-route-copied-input-hash-mismatch")
+    write_json(output / "raw-route-report.json", raw_evidence)
+    write_json(output / "closure-report.json", {
+        "schemaVersion": "two-day-raw-route/v1",
+        **raw_evidence,
+    })
+    return raw_evidence
 
 
 def provider_fixture_paths(root: Path, sample_id: str) -> tuple[Path, Path, Path]:
@@ -166,12 +272,18 @@ def validate_linkage_reports(linkage_root: Path, route: str, cutoff: str) -> dic
 def run_one(args: argparse.Namespace, materialized: dict[str, Any], sample_id: str, output: Path, cutoff: str) -> dict[str, Any]:
     output.mkdir(parents=True, exist_ok=True)
     spec = EXPECTED[sample_id]
-    raw_path, input_manifest, expected_ids = sample_input(args.materialized_root, sample_id)
+    raw_path, input_manifest, metadata, expected_ids = sample_input(args.materialized_root, sample_id)
     if len(expected_ids) != spec["videoCount"]:
         reject(f"expected-id-count-mismatch:{sample_id}")
     raw_meta = input_manifest.get("rawInput")
     if not isinstance(raw_meta, dict) or raw_meta.get("count") != spec["videoCount"]:
         reject(f"raw-manifest-count-mismatch:{sample_id}")
+    if (
+        sample_id == RAW_ROUTE_SAMPLE_ID
+        and metadata.get("providerInput") is False
+        and metadata.get("linkageSampleId") == RAW_ROUTE_LINKAGE_SAMPLE_ID
+    ):
+        return run_raw_route(args, output, raw_path, input_manifest, metadata, expected_ids, cutoff)
     provider_path = output / "provider.ndjson"
     capture_path = output / "source-capture.ndjson"
     provider_source_root = args.source_root
