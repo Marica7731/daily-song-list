@@ -49,6 +49,7 @@ SUPPORTED_VIEWS = {"songs", "songIndex", "artists", "videos", "vtubers", "vsinge
 MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
 MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
+MAX_RANKING_PREVIEW_VIDEOS = 3
 _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
 _VTUBER_REPLACEMENT_CACHE_LOCK = threading.RLock()
 # Generic increments are immutable.  Keep only their small derived meta count
@@ -6584,13 +6585,43 @@ def _prepare_generic_overlay_rankings(
                     else " AND FALSE"
                 )
     else:
-        for token in options["searchTokens"]:
-            search_clause += " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
-            needle = f"%{token}%"
-            base_params.extend([needle, needle])
+        if options["view"] not in {"songs", "songIndex"}:
+            for token in options["searchTokens"]:
+                search_clause += " AND (search_text ILIKE %s OR channel_search_text ILIKE %s)"
+                needle = f"%{token}%"
+                base_params.extend([needle, needle])
+        else:
+            search_columns = {
+                "title": "title",
+                "artist": "artist",
+                "channel": "channel_search_text",
+            }
+            search_fields = _effective_search_fields(options)
+            # Video/source are payload-only fields.  Do not substitute the
+            # legacy aggregate search_text: mixed rows must be filtered by the
+            # bounded payload helper after the row is selected.
+            if not any(field in {"video", "source"} for field in search_fields):
+                for token in options["searchTokens"]:
+                    predicates: list[str] = []
+                    for field in search_fields:
+                        column = search_columns.get(field)
+                        if not column:
+                            continue
+                        predicates.append(f"{column} ILIKE %s ESCAPE E'\\\\'")
+                        base_params.append(f"%{_sql_like_literal(token)}%")
+                    search_clause += (
+                        " AND (" + " OR ".join(predicates) + ")"
+                        if predicates
+                        else " AND FALSE"
+                    )
     base_payload_select = (
         "payload_json"
-        if options["view"] == "vtubers" and exact_channel_scope is not None
+        if (
+            options["view"] == "vtubers" and exact_channel_scope is not None
+        ) or any(
+            field in {"video", "source"}
+            for field in _effective_search_fields(options)
+        )
         else "NULL::jsonb AS payload_json"
     )
     bounded_no_search = not bool(options.get("q"))
@@ -6663,6 +6694,14 @@ def _prepare_generic_overlay_rankings(
         """,
         base_params,
     )
+    if options["searchTokens"] and any(
+        field in {"video", "source"}
+        for field in _effective_search_fields(options)
+    ):
+        base_rows = [
+            row for row in base_rows
+            if _public_row_matches_search(row, options)
+        ]
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
     # Search requests do not enter the bounded no-search affected window.
     # Snapshot their filtered parent scalar identities before any tombstone or
@@ -7237,15 +7276,11 @@ def _prepare_generic_overlay_rankings(
     if options["searchTokens"] and options["view"] != "vtubers":
         generic_candidate_rows = [
             row for row in generic_candidate_rows
-            if _matches_search_tokens(
-                _overlay_candidate_search_text(row), options["searchTokens"],
-            )
+            if _public_row_matches_search(row, options)
         ]
         generic_replacement_rows = [
             row for row in generic_replacement_rows
-            if _matches_search_tokens(
-                _overlay_candidate_search_text(row), options["searchTokens"],
-            )
+            if _public_row_matches_search(row, options)
         ]
         visible_group_keys = {
             key
@@ -7377,15 +7412,15 @@ def _prepare_generic_overlay_rankings(
     ):
         candidate_rows = [
             row for row in candidate_rows
-            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+            if _public_row_matches_search(row, options)
         ]
         exact_candidate_rows = tuple(
             row for row in exact_candidate_rows
-            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+            if _public_row_matches_search(row, options)
         )
         exact_replacement_rows = tuple(
             row for row in exact_replacement_rows
-            if _matches_search_tokens(_overlay_candidate_search_text(row), options["searchTokens"])
+            if _public_row_matches_search(row, options)
         )
     # Exact VTuber aggregation owns the complete effective tuple set for every
     # affected channel, including channels whose final count is zero.  Building
@@ -7496,9 +7531,7 @@ def _prepare_generic_overlay_rankings(
                 and not bool(row.get("_residual_match"))
             ):
                 continue
-        elif options["searchTokens"] and not _matches_search_tokens(
-            search, options["searchTokens"],
-        ):
+        elif options["searchTokens"] and not _public_row_matches_search(row, options):
             continue
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
@@ -8457,7 +8490,7 @@ def _render_generic_overlay_rankings(
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
-        "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+        "searchScope": options["searchScope"], "searchFields": _public_search_fields(options),
         "page": options["page"], "pageSize": options["pageSize"], "totalCount": total,
         "filteredBaseCount": total,
         "totalOccurrenceCount": total_occurrence_count,
@@ -8880,6 +8913,151 @@ def _matches_search_tokens(search_text: object, tokens: Iterable[str]) -> bool:
     return all(token in haystack for token in tokens)
 
 
+_DEFAULT_SEARCH_FIELDS = ("title", "artist", "channel")
+_ALL_SEARCH_FIELDS = ("title", "artist", "channel", "video", "source")
+_SEARCH_FIELDS = set(_ALL_SEARCH_FIELDS)
+
+
+def _effective_search_fields(options: Mapping[str, Any]) -> tuple[str, ...]:
+    """Resolve omitted fields to the UI default without widening to video text."""
+
+    raw_fields = options.get("searchFields")
+    if isinstance(raw_fields, str):
+        raw_fields = (raw_fields,)
+    if raw_fields is not None:
+        # _normalize_search_fields uses [] as the intentional representation
+        # of the public searchFields=all selection.  It is not omission.
+        if not raw_fields:
+            return _ALL_SEARCH_FIELDS
+        fields = tuple(
+            field
+            for field in dict.fromkeys(
+                _text(value).casefold() for value in raw_fields
+            )
+            if field in _SEARCH_FIELDS
+        )
+        return fields or _DEFAULT_SEARCH_FIELDS
+    if not _text(options.get("q")):
+        return ()
+    scope = _text(options.get("searchScope") or "all").casefold()
+    if scope in _SEARCH_FIELDS:
+        return (scope,)
+    # The UI has title/artist/channel checked by default.  ``song`` is also
+    # the server-normalized scope for the song view when fields are omitted.
+    return _DEFAULT_SEARCH_FIELDS
+
+
+def _public_search_fields(options: Mapping[str, Any]) -> list[str]:
+    """Expose the effective fields while keeping an empty-query response lean."""
+
+    if _text(options.get("view")) not in {"songs", "songIndex"}:
+        return list(options.get("searchFields") or ()) if _text(options.get("q")) else []
+    return list(_effective_search_fields(options)) if _text(options.get("q")) else []
+
+
+def _runtime_row_search_texts(row: Mapping[str, Any]) -> dict[str, str]:
+    """Separate persisted ranking text into title/artist/channel/video fields."""
+
+    payload = _json_object(row.get("payload_json"))
+    title_values: list[Any] = [
+        row.get("title"), payload.get("title"), payload.get("songTitle"),
+    ]
+    artist_values: list[Any] = [
+        row.get("artist"), payload.get("artist"), payload.get("displayArtist"),
+    ]
+    channel_values: list[Any] = [
+        row.get("channel_search_text"), payload.get("channelName"),
+        payload.get("channelId"), payload.get("channelHandle"),
+        payload.get("channelUrl"),
+    ]
+    video_values: list[Any] = []
+    source_values: list[Any] = []
+    top_video = payload.get("video")
+    if isinstance(top_video, Mapping):
+        video_values.extend((top_video.get("title"), top_video.get("videoId")))
+    occurrences = payload.get("occurrences")
+    if isinstance(occurrences, list):
+        for occurrence in occurrences:
+            if not isinstance(occurrence, Mapping):
+                continue
+            item = occurrence.get("item")
+            if not isinstance(item, Mapping):
+                item = occurrence.get("video")
+            item = item if isinstance(item, Mapping) else occurrence
+            song = occurrence.get("song")
+            song = song if isinstance(song, Mapping) else {}
+            title_values.append(song.get("title"))
+            artist_values.append(song.get("artist"))
+            channel_values.extend((
+                item.get("channelName"), item.get("channelId"),
+                item.get("channelHandle"), item.get("channelUrl"),
+            ))
+            video_values.extend((item.get("title"), item.get("videoId")))
+            source_values.extend((song.get("sourceId"), song.get("sourceSystem")))
+
+    def joined(values: Iterable[Any]) -> str:
+        return " ".join(_text(value) for value in values if _text(value)).casefold()
+
+    texts = {
+        "title": joined(title_values),
+        "artist": joined(artist_values),
+        "channel": joined(channel_values),
+        "video": joined(video_values),
+        "source": joined(source_values),
+    }
+    # Overlay rows expose their public tuple separately.  Do not let the
+    # legacy aggregate used to build ``channel_search_text`` leak video text
+    # back into the channel field.
+    if any(
+        _text(row.get(name))
+        for name in ("channel_name", "channel_id", "channel_handle", "channel_url")
+    ):
+        texts["channel"] = joined(
+            row.get(name)
+            for name in ("channel_name", "channel_id", "channel_handle", "channel_url")
+        )
+    if any(_text(row.get(name)) for name in ("video_title", "video_id")):
+        texts["video"] = joined((row.get("video_title"), row.get("video_id")))
+    if any(_text(row.get(name)) for name in ("source_id", "source_system")):
+        texts["source"] = joined((row.get("source_id"), row.get("source_system")))
+    return texts
+
+
+def _runtime_row_matches_search(
+    row: Mapping[str, Any],
+    options: Mapping[str, Any],
+) -> bool:
+    """Match every token against only the explicitly/effectively selected fields."""
+
+    tokens = tuple(
+        _text(token).casefold()
+        for token in (options.get("searchTokens") or ())
+        if _text(token)
+    )
+    if not tokens:
+        return True
+    fields = _effective_search_fields(options)
+    texts = _runtime_row_search_texts(row)
+    return all(
+        any(token in texts.get(field, "") for field in fields)
+        for token in tokens
+    )
+
+
+def _public_row_matches_search(
+    row: Mapping[str, Any],
+    options: Mapping[str, Any],
+) -> bool:
+    """Use the new separated contract only for ordinary song rankings."""
+
+    if _text(options.get("view")) in {"songs", "songIndex"}:
+        return _runtime_row_matches_search(row, options)
+    return _matches_search_tokens(
+        _text(row.get("search_text")) + " " + _text(row.get("channel_search_text")),
+        options.get("searchTokens") or (),
+    )
+
+
 def _load_snapshot(connection) -> _Snapshot:
     ensure_schema(connection)
     runtime = _runtime_projection_revision(connection)
@@ -9034,15 +9212,20 @@ def _matches(occurrence: Mapping[str, Any], query: Mapping[str, Any], default_fi
     q = query["q"]
     if not q:
         return True
-    fields = query.get("searchFields") or {
-        "song": ("title", "artist"),
-        "artist": ("artist",),
-        "channel": ("channel",),
-        "source": ("source",),
-        "video": ("video",),
-        "title": ("title",),
-        "all": default_fields,
-    }.get(query.get("searchScope", "all"), default_fields)
+    if _text(query.get("view")) in {"songs", "songIndex"}:
+        fields = _effective_search_fields(query) or default_fields
+    elif query.get("searchFields") is not None:
+        fields = tuple(query.get("searchFields") or default_fields)
+    else:
+        fields = {
+            "song": ("title", "artist"),
+            "artist": ("artist",),
+            "channel": ("channel",),
+            "source": ("source",),
+            "video": ("video",),
+            "title": ("title",),
+            "all": default_fields,
+        }.get(query.get("searchScope", "all"), default_fields)
     return any(q in _field_text(occurrence, field) for field in fields)
 
 
@@ -9191,7 +9374,7 @@ def rankings_payload_from_records(records: Iterable[Mapping[str, Any]], query: M
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
         "searchScope": options["searchScope"],
-        "searchFields": options["searchFields"] or [], "page": options["page"],
+        "searchFields": _public_search_fields(options), "page": options["page"],
         "pageSize": options["pageSize"], "totalCount": len(groups),
         "filteredBaseCount": len(base_groups), "totalOccurrenceCount": total_occurrences,
         "totalSongCount": len({_song_key(row["song"]) for group in groups for row in group["occurrences"]}),
@@ -9245,6 +9428,202 @@ def source_payload_from_records(records: Iterable[Mapping[str, Any]], key: str, 
     return {"schemaVersion": 1, "found": False, "sourceKey": key}
 
 
+def _ranking_preview_video_id(item: Mapping[str, Any]) -> str:
+    """Return the public video identity from one persisted ranking preview."""
+
+    if not isinstance(item, Mapping):
+        return ""
+    nested = item.get("item")
+    if isinstance(nested, Mapping):
+        nested_id = _text(
+            nested.get("videoId")
+            or nested.get("video_id")
+            or nested.get("youtubeVideoId")
+        )
+        if nested_id:
+            return nested_id
+    return _text(
+        item.get("videoId")
+        or item.get("video_id")
+        or item.get("youtubeVideoId")
+    )
+
+
+def _ranking_preview_target(
+    payload: Mapping[str, Any],
+    occurrences: Sequence[Mapping[str, Any]],
+) -> int:
+    declared = payload.get("distinctVideoCount")
+    if declared is None:
+        declared = payload.get("videoCount")
+    try:
+        target = max(0, int(declared or 0))
+    except (TypeError, ValueError):
+        target = 0
+    if not target:
+        target = len({
+            video_id
+            for video_id in (_ranking_preview_video_id(item) for item in occurrences)
+            if video_id
+        })
+    return min(MAX_RANKING_PREVIEW_VIDEOS, target)
+
+
+def _merge_ranking_preview_items(
+    current: Sequence[Mapping[str, Any]],
+    additions: Sequence[Mapping[str, Any]],
+    target: int,
+) -> list[dict[str, Any]]:
+    merged: list[dict[str, Any]] = []
+    seen_video_ids: set[str] = set()
+    for item in (*current, *additions):
+        if not isinstance(item, Mapping):
+            continue
+        video_id = _ranking_preview_video_id(item)
+        if video_id and video_id in seen_video_ids:
+            continue
+        if video_id:
+            seen_video_ids.add(video_id)
+        merged.append(dict(item))
+        if target and len(seen_video_ids) >= target:
+            break
+    return merged
+
+
+def _hydrate_runtime_ranking_song_previews(
+    connection,
+    revision_id: str,
+    range_id: str,
+    view: str,
+    payloads: Sequence[dict[str, Any]],
+) -> None:
+    """Batch-fill short persisted song-card previews from source occurrences.
+
+    "runtime_ranking_rows.payload_json" is intentionally bounded, while the
+    matching "runtime_source_occurrences" rows retain the complete source
+    identity.  Read one page of source keys in one query; never issue one
+    source query per returned card.
+    """
+
+    if view not in {"songs", "songIndex", "vsingerSongs"} or not payloads:
+        return
+
+    requested_keys: list[str] = []
+    for payload in payloads:
+        if not isinstance(payload, Mapping):
+            continue
+        current = payload.get("occurrences")
+        current_items = current if isinstance(current, list) else []
+        target = _ranking_preview_target(payload, current_items)
+        existing_video_ids = {
+            _ranking_preview_video_id(item)
+            for item in current_items
+            if _ranking_preview_video_id(item)
+        }
+        source_key = _text(payload.get("sourceDetailKey"))
+        if source_key and len(existing_video_ids) < target and source_key not in requested_keys:
+            requested_keys.append(source_key)
+
+    additions_by_key: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    if requested_keys:
+        source_rows = _rows(
+            connection,
+            """
+            WITH RECURSIVE requested AS (
+                SELECT source_key, ordinality
+                FROM unnest(%s::text[]) WITH ORDINALITY
+                    AS request(source_key, ordinality)
+            ),
+            lineage AS (
+                SELECT revision_id, parent_revision_id, 0 AS lineage_depth
+                FROM migration_revisions
+                WHERE revision_id = %s
+                UNION ALL
+                SELECT parent.revision_id, parent.parent_revision_id,
+                       lineage.lineage_depth + 1
+                FROM migration_revisions AS parent
+                JOIN lineage
+                  ON parent.revision_id = lineage.parent_revision_id
+            ),
+            authorities AS (
+                SELECT DISTINCT ON (detail.source_key)
+                       detail.source_key,
+                       detail.revision_id AS authority_revision
+                FROM runtime_source_details AS detail
+                JOIN requested AS request
+                  ON request.source_key = detail.source_key
+                JOIN lineage
+                  ON lineage.revision_id = detail.revision_id
+                WHERE detail.range_id = %s
+                ORDER BY detail.source_key, lineage.lineage_depth
+            ),
+            per_video AS (
+                SELECT authority.source_key, o.position, o.video_id,
+                       o.title, o.channel_name, o.channel_id,
+                       o.channel_handle, o.channel_url,
+                       o.published_timestamp, o.seconds,
+                       o.payload_json,
+                       row_number() OVER (
+                           PARTITION BY authority.source_key, o.video_id
+                           ORDER BY o.position, o.video_id
+                       ) AS same_video_rank
+                FROM authorities AS authority
+                JOIN runtime_source_occurrences AS o
+                  ON o.revision_id = authority.authority_revision
+                 AND o.source_key = authority.source_key
+                WHERE o.range_id = %s
+                  AND o.video_id IS NOT NULL
+            ),
+            distinct_videos AS (
+                SELECT per_video.*,
+                       row_number() OVER (
+                           PARTITION BY per_video.source_key
+                           ORDER BY per_video.position, per_video.video_id
+                       ) AS source_video_rank
+                FROM per_video
+                WHERE per_video.same_video_rank = 1
+            )
+            SELECT distinct_videos.source_key,
+                   distinct_videos.position,
+                   distinct_videos.video_id,
+                   distinct_videos.title,
+                   distinct_videos.channel_name,
+                   distinct_videos.channel_id,
+                   distinct_videos.channel_handle,
+                   distinct_videos.channel_url,
+                   distinct_videos.published_timestamp,
+                   distinct_videos.seconds,
+                   distinct_videos.payload_json
+            FROM distinct_videos
+            JOIN requested
+              ON requested.source_key = distinct_videos.source_key
+            WHERE distinct_videos.source_video_rank <= %s
+            ORDER BY requested.ordinality,
+                     distinct_videos.position,
+                     distinct_videos.video_id
+            """,
+            [requested_keys, revision_id, range_id, range_id, MAX_RANKING_PREVIEW_VIDEOS],
+        )
+        for row in source_rows:
+            source_key = _text(row.get("source_key"))
+            item = _runtime_source_occurrence(row)
+            if source_key and _ranking_preview_video_id(item):
+                additions_by_key[source_key].append(item)
+
+    for payload in payloads:
+        if not isinstance(payload, Mapping):
+            continue
+        current = payload.get("occurrences")
+        current_items = current if isinstance(current, list) else []
+        target = _ranking_preview_target(payload, current_items)
+        source_key = _text(payload.get("sourceDetailKey"))
+        payload["occurrences"] = _merge_ranking_preview_items(
+            current_items,
+            additions_by_key.get(source_key, ()),
+            target,
+        )
+
+
 def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     options = _query_options(query)
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
@@ -9289,10 +9668,11 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
                 payload = _apply_channel_metadata(payload, row, metadata, options["range"])
             payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
             records.append(payload)
+        _hydrate_runtime_ranking_song_previews(connection, revision_id, options["range"], options["view"], records)
         return {
             "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
             "metric": "occurrences" if options["metric"] == "count" else options["metric"],
-            "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+            "searchScope": options["searchScope"], "searchFields": _public_search_fields(options),
             "page": options["page"], "pageSize": options["pageSize"], "totalCount": total_count,
             "filteredBaseCount": total_count,
             "totalOccurrenceCount": int(summary.get("total_occurrence_count") or 0),
@@ -9303,7 +9683,7 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     rows = _rows(
         connection,
         """
-        SELECT rank, row_count, song_count, video_count, timestamp_count,
+        SELECT rank, title, artist, name, row_count, song_count, video_count, timestamp_count,
                payload_json, search_text, channel_search_text
         FROM runtime_ranking_rows
         WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
@@ -9314,10 +9694,7 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     if options["searchTokens"]:
         rows = [
             row for row in rows
-            if _matches_search_tokens(
-                _text(row.get("search_text")) + " " + _text(row.get("channel_search_text")),
-                options["searchTokens"],
-            )
+            if _public_row_matches_search(row, options)
         ]
     rows = [row for row in rows if int(row.get("row_count") or 0) >= options["minCount"]]
     total_occurrences = sum(int(row.get("row_count") or 0) for row in rows)
@@ -9333,10 +9710,11 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
             payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
         records.append(payload)
+    _hydrate_runtime_ranking_song_previews(connection, revision_id, options["range"], options["view"], records)
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
-        "searchScope": options["searchScope"], "searchFields": options["searchFields"] or [],
+        "searchScope": options["searchScope"], "searchFields": _public_search_fields(options),
         "page": options["page"], "pageSize": options["pageSize"], "totalCount": len(rows),
         "filteredBaseCount": len(rows), "totalOccurrenceCount": total_occurrences,
         "totalSongCount": total_songs, "totalVideoCount": total_videos, "pageCount": page_count,
