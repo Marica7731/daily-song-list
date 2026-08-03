@@ -6694,20 +6694,13 @@ def _prepare_generic_overlay_rankings(
         """,
         base_params,
     )
-    source_token_matches = _runtime_source_search_matches(
-        connection,
-        revision_id,
-        options,
-        db_metric,
-        ranking_revision_id=parent[0],
-    )
     if options["searchTokens"] and any(
         field in {"video", "source"}
         for field in _effective_search_fields(options)
     ):
         base_rows = [
             row for row in base_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         ]
     groups = { _text(row.get("detail_key")): dict(row) for row in base_rows }
     # Search requests do not enter the bounded no-search affected window.
@@ -7283,11 +7276,11 @@ def _prepare_generic_overlay_rankings(
     if options["searchTokens"] and options["view"] != "vtubers":
         generic_candidate_rows = [
             row for row in generic_candidate_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         ]
         generic_replacement_rows = [
             row for row in generic_replacement_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         ]
         visible_group_keys = {
             key
@@ -7419,15 +7412,15 @@ def _prepare_generic_overlay_rankings(
     ):
         candidate_rows = [
             row for row in candidate_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         ]
         exact_candidate_rows = tuple(
             row for row in exact_candidate_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         )
         exact_replacement_rows = tuple(
             row for row in exact_replacement_rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         )
     # Exact VTuber aggregation owns the complete effective tuple set for every
     # affected channel, including channels whose final count is zero.  Building
@@ -7538,9 +7531,7 @@ def _prepare_generic_overlay_rankings(
                 and not bool(row.get("_residual_match"))
             ):
                 continue
-        elif options["searchTokens"] and not _public_row_matches_search(
-            row, options, source_token_matches,
-        ):
+        elif options["searchTokens"] and not _public_row_matches_search(row, options):
             continue
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
