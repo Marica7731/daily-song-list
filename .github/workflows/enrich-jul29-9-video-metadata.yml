@@ -1,0 +1,106 @@
+name: enrich-jul29-9-video-metadata
+
+"on":
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact source commit to check out; no branch-floating run
+        required: true
+        type: string
+      input_path:
+        description: Frozen nine-video input path relative to the product root
+        required: true
+        default: config/snapshot-recovery/jul29-9-video-ids.json
+        type: string
+      fixture_path:
+        description: Optional local yt-dlp JSON fixture; leave empty for Mac metadata lookup
+        required: false
+        default: ""
+        type: string
+      yt_dlp_executable:
+        description: Existing yt-dlp executable on the Mac runner
+        required: true
+        default: yt-dlp
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enrich-jul29-9-video-metadata-singleton
+  cancel-in-progress: false
+
+jobs:
+  metadata:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact source commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify candidate files and runner tool
+        shell: bash
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          YT_DLP_EXECUTABLE: ${{ inputs.yt_dlp_executable }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-fA-F]{40}$ ]] || { echo 'source_commit must be a full SHA' >&2; exit 2; }
+          product_root="$GITHUB_WORKSPACE"
+          if test -d "$GITHUB_WORKSPACE/product" && test -f "$GITHUB_WORKSPACE/product/scripts/migration/fetch-nine-video-metadata.py"; then
+            product_root="$GITHUB_WORKSPACE/product"
+          fi
+          test -f "$product_root/scripts/migration/fetch-nine-video-metadata.py"
+          test -f "$product_root/config/snapshot-recovery/jul29-9-video-ids.json"
+          command -v "$YT_DLP_EXECUTABLE" >/dev/null 2>&1
+          "$YT_DLP_EXECUTABLE" --version
+          python3 --version
+
+      - name: Run nine-video metadata-only candidate
+        shell: bash
+        env:
+          INPUT_PATH: ${{ inputs.input_path }}
+          FIXTURE_PATH: ${{ inputs.fixture_path }}
+          YT_DLP_EXECUTABLE: ${{ inputs.yt_dlp_executable }}
+        run: |
+          set -Eeuo pipefail
+          product_root="$GITHUB_WORKSPACE"
+          if test -d "$GITHUB_WORKSPACE/product" && test -f "$GITHUB_WORKSPACE/product/scripts/migration/fetch-nine-video-metadata.py"; then
+            product_root="$GITHUB_WORKSPACE/product"
+          fi
+          input_path="$product_root/$INPUT_PATH"
+          script_path="$product_root/scripts/migration/fetch-nine-video-metadata.py"
+          artifact_root="$RUNNER_TEMP/jul29-nine-video-metadata-${GITHUB_RUN_ID}"
+          mkdir -p "$artifact_root"
+          args=(
+            --input "$input_path"
+            --output "$artifact_root/metadata.ndjson"
+            --manifest "$artifact_root/manifest.json"
+            --yt-dlp "$YT_DLP_EXECUTABLE"
+          )
+          if test -n "$FIXTURE_PATH"; then
+            args+=(--fixture "$product_root/$FIXTURE_PATH")
+          fi
+          python3 "$script_path" "${args[@]}"
+          test -s "$artifact_root/metadata.ndjson"
+          test -s "$artifact_root/manifest.json"
+          grep -q '"candidateOnly":true' "$artifact_root/manifest.json"
+          grep -q '"releaseEligible":false' "$artifact_root/manifest.json"
+          grep -q '"metadataOnly":true' "$artifact_root/manifest.json"
+          printf 'artifact_root=%s\n' "$artifact_root" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload candidate artifact only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jul29-nine-video-metadata-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/jul29-nine-video-metadata-${{ github.run_id }}/metadata.ndjson
+            ${{ runner.temp }}/jul29-nine-video-metadata-${{ github.run_id }}/manifest.json
+          if-no-files-found: warn
+
+      # Deliberately no product/index/PG write, commit, push, activation, or restart.
