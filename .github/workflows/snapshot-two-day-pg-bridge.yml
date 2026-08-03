@@ -263,7 +263,7 @@ jobs:
             -f rollback_only=false \
             -f require_7d_gate=true)"
           gh run view "$import_run" --log > "$RUNNER_TEMP/phase1-import.log"
-          phase1_result="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase1-import.log" | tail -n 1)"
+          phase1_result="$(grep -Eo '\{[^{}]*"status"[[:space:]]*:[[:space:]]*"ok"[^{}]*\}' "$RUNNER_TEMP/phase1-import.log" | tail -n 1)"
           test -n "$phase1_result"
           expected_parent="$(jq -r '.phase1.parent' "$OUTPUT_ROOT/orchestrator-manifest.json")"
           jq -e --arg expected "$expected_parent" '.status == "ok" and .parentRevisionId == $expected' <<<"$phase1_result" >/dev/null
@@ -274,7 +274,7 @@ jobs:
             -f expected_content_sha256="$phase1_content")"
           gh run view "$activation_run" --log > "$RUNNER_TEMP/phase1-activation.log"
           grep -q 'PG_READY_ONLINE_OBSERVATION_COMPLETE' "$RUNNER_TEMP/phase1-activation.log"
-          activation_json="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase1-activation.log" | tail -n 1)"
+          activation_json="$(grep -Eo '\{[^{}]*"status"[[:space:]]*:[[:space:]]*"ok"[^{}]*\}' "$RUNNER_TEMP/phase1-activation.log" | tail -n 1)"
           test -n "$activation_json"
           actual_activated="$(jq -r '.actualActivatedRevision // .actual_activated_revision // .revisionId // empty' <<<"$activation_json")"
           test "$actual_activated" = "$phase1_revision"
@@ -347,7 +347,7 @@ jobs:
             -f rollback_only=false \
             -f require_7d_gate=false)"
           gh run view "$import_run" --log > "$RUNNER_TEMP/phase2-import.log"
-          phase2_result="$(grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase2-import.log" | tail -n 1)"
+          phase2_result="$(grep -Eo '\{[^{}]*"status"[[:space:]]*:[[:space:]]*"ok"[^{}]*\}' "$RUNNER_TEMP/phase2-import.log" | tail -n 1)"
           test -n "$phase2_result"
           jq -e --arg expected "$phase2_parent" '.status == "ok" and .parentRevisionId == $expected' <<<"$phase2_result" >/dev/null
           phase2_revision="$(jq -r '.revisionId' <<<"$phase2_result")"
@@ -357,5 +357,5 @@ jobs:
             -f expected_content_sha256="$phase2_content")"
           gh run view "$activation_run" --log > "$RUNNER_TEMP/phase2-activation.log"
           grep -q 'PG_READY_ONLINE_OBSERVATION_COMPLETE' "$RUNNER_TEMP/phase2-activation.log"
-          grep -Eo '\{"status":"ok"[^}]*\}' "$RUNNER_TEMP/phase2-activation.log" | tail -n 1
+          grep -Eo '\{[^{}]*"status"[[:space:]]*:[[:space:]]*"ok"[^{}]*\}' "$RUNNER_TEMP/phase2-activation.log" | tail -n 1
           echo PG_READY_ONLINE_OBSERVATION_COMPLETE
