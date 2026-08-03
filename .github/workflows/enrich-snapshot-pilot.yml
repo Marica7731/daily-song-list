@@ -1,173 +1,96 @@
-name: enrich-snapshot-pilot
+name: enrich-snapshot-pilot-linkage-v2
 
 on:
   workflow_dispatch:
     inputs:
       source_commit:
-        description: Exact 40-hex commit selected for this dispatch; must equal github.sha and checkout HEAD
+        description: Exact main commit; checkout HEAD must equal it
         required: true
         type: string
       sample_id:
-        description: One sample for debug or both in fixed Jul29 then Jul22 order
+        description: One frozen day; both is executed Jul29 then Jul22
         required: true
         type: choice
         options:
           - both
-          - jul29-25
-          - jul22-19
+          - jul29-sample25
+          - jul22-raw456
+      release_cutoff_utc:
+        description: Inclusive 7D lower-bound in UTC
+        required: true
+        type: string
+      raw_input:
+        description: Read-only materialized raw input path
+        required: true
+        type: string
+      provider_ndjson:
+        description: Read-only provider NDJSON path
+        required: true
+        type: string
+      artist_bindings:
+        description: Versioned 12-row sidecar path
+        required: true
+        type: string
+      source_index:
+        description: Formal source index mapping IDs to immutable source paths/URLs
+        required: true
+        type: string
+      formal_source_candidate:
+        description: Pinned formal source candidate metadata
+        required: true
+        default: config/snapshot-recovery/formal-source-candidate.json
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: enrich-snapshot-pilot-singleton
+  group: enrich-snapshot-pilot-linkage-v2-singleton
   cancel-in-progress: false
 
 jobs:
-  pilot:
+  candidate:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 240
     steps:
-      - name: Checkout the exact dispatch source commit
+      - name: Checkout exact dispatch source commit
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_commit }}
           fetch-depth: 1
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            .github/workflows/enrich-snapshot-pilot.yml
-            assets/frontend-utils.js
-            assets/ranking-utils.js
-            assets/source-filter.js
-            config/blocked-vtuber-channels.json
-            config/blocked-vtuber-local-channels.json
-            config/curation-overrides.json
-            config/known-song-artist-overrides.json
-            config/non-song-rules.json
-            config/song-aliases.json
-            config/song-search-known-overrides.json
-            data/song-search-known-songs.json
-            scripts/blocked-vtuber-utils.js
-            scripts/build-runtime-data.js
-            scripts/channel-metadata-cache.js
-            scripts/curation.js
-            scripts/entry-repair.js
-            scripts/migration/enrich-snapshot-pilot.sh
-            scripts/migration/materialize-snapshot-pilot.py
-            scripts/migration/run-snapshot-enrichment-pilot.py
-            scripts/migration/snapshot-enrichment-adapter.py
-            scripts/migration/snapshot-enrichment-provider-binding.json
-            scripts/migration/snapshot-enrichment-provider.mjs
-            scripts/migration/snapshot-pilot-event-preview.py
-            scripts/migration/snapshot-pilot-field-matrix.py
-            scripts/range-config.js
-            scripts/recent-all-continuity.js
-            scripts/song-aliases.js
-            scripts/song-search-index.js
-            scripts/song-utils.js
-            scripts/update-songlist.js
-            scripts/video-catalog.js
-            scripts/vsinger-http/html-utils.js
-            scripts/vsinger-http/model.js
-            scripts/vsinger-http/runtime-importer.js
-            scripts/youtube-channel-discovery-core.js
-            test/fixtures/snapshot-pilot/catalog.json
-            test/fixtures/snapshot-pilot/jul22-sample19.json.gz
-            test/fixtures/snapshot-pilot/jul29-sample25.json.gz
-            test/fixtures/snapshot-pilot/snapshot-enrichment-provider-v4-manifest.json
           persist-credentials: false
-
-      - name: Configure and verify Mac Node toolchain
-        id: toolchain
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          toolchain_paths=(
-            "/Users/be/.local/bin"
-            "/Users/be/.local/codex-toolchains/node/bin"
-            "/Users/be/.local/codex-toolchains/python312/bin"
-          )
-          for path in "${toolchain_paths[@]}"; do
-            echo "$path" >> "$GITHUB_PATH"
-          done
-          export PATH="${toolchain_paths[0]}:${toolchain_paths[1]}:${toolchain_paths[2]}:$PATH"
-          node_path="$(command -v node || true)"
-          if [[ -z "$node_path" || ! -x "$node_path" ]]; then
-            {
-              echo 'MAC_NODE_TOOLCHAIN_MISSING'
-              echo "PATH=$PATH"
-              echo "command -v node=${node_path:-<missing>}"
-              for path in "${toolchain_paths[@]}"; do
-                if [[ -x "$path/node" ]]; then
-                  echo "candidate=$path/node executable"
-                else
-                  echo "candidate=$path/node missing_or_not_executable"
-                fi
-              done
-              echo "runner_os=$(uname -a)"
-              echo "workspace=${GITHUB_WORKSPACE:-<unset>}"
-            } >&2
-            exit 127
-          fi
-          echo "MAC_NODE_TOOLCHAIN_OK path=$node_path"
-          node --version
-
-      - name: Verify source and branch CAS, then run sequential pilot
-        id: pilot
+      - name: Run read-only source capture and linkage candidate
         shell: bash
         env:
           SOURCE_COMMIT: ${{ inputs.source_commit }}
           SAMPLE_ID: ${{ inputs.sample_id }}
-          DISPATCH_SHA: ${{ github.sha }}
-          BRANCH_REF: ${{ github.ref }}
+          RELEASE_CUTOFF_UTC: ${{ inputs.release_cutoff_utc }}
+          RAW_INPUT: ${{ inputs.raw_input }}
+          PROVIDER_NDJSON: ${{ inputs.provider_ndjson }}
+          ARTIST_BINDINGS: ${{ inputs.artist_bindings }}
+          SOURCE_INDEX: ${{ inputs.source_index }}
+          FORMAL_SOURCE: ${{ inputs.formal_source_candidate }}
         run: |
-          set -euo pipefail
-          root="$GITHUB_WORKSPACE"
-          pilot="$root/scripts/migration/enrich-snapshot-pilot.sh"
-          catalog="$root/test/fixtures/snapshot-pilot/catalog.json"
-          binding="$root/scripts/migration/snapshot-enrichment-provider-binding.json"
-          if [[ ! "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
-            echo 'source_commit must be exactly 40 lowercase hexadecimal characters' >&2
-            exit 2
-          fi
-          if [[ "$BRANCH_REF" != 'refs/heads/main' ]]; then
-            echo "source branch CAS mismatch expected=refs/heads/main actual=$BRANCH_REF" >&2
-            exit 2
-          fi
-          if [[ "$SOURCE_COMMIT" != "$DISPATCH_SHA" ]]; then
-            echo "source_commit/github.sha CAS mismatch expected=$SOURCE_COMMIT actual=$DISPATCH_SHA" >&2
-            exit 2
-          fi
-          actual_head="$(git -C "$root" rev-parse HEAD)"
-          if [[ "$actual_head" != "$SOURCE_COMMIT" ]]; then
-            echo "checkout HEAD CAS mismatch expected=$SOURCE_COMMIT actual=$actual_head" >&2
-            exit 2
-          fi
-          test -f "$pilot"
-          test -f "$catalog"
-          test -f "$binding"
-          run_root="$RUNNER_TEMP/enrich-snapshot-pilot-${GITHUB_RUN_ID}"
-          lock_dir="$RUNNER_TEMP/enrich-snapshot-pilot-singleton.lock"
-          if ! mkdir "$lock_dir"; then
-            echo 'another pilot is using the Mac runner.temp root' >&2
-            exit 2
-          fi
-          trap 'rmdir "$lock_dir"' EXIT
-          bash "$pilot" \
-            --workspace "$root" \
-            --catalog "$catalog" \
-            --binding-manifest "$binding" \
+          set -Eeuo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main ]]
+          actual_head="$(git rev-parse HEAD)"
+          [[ "$actual_head" == "$SOURCE_COMMIT" ]]
+          out="$RUNNER_TEMP/enrich-snapshot-pilot-linkage-v2-${GITHUB_RUN_ID}"
+          python3 scripts/migration/run-snapshot-enrichment-pilot.py \
             --sample-id "$SAMPLE_ID" \
             --source-commit "$SOURCE_COMMIT" \
-            --output-root "$run_root"
-
+            --raw-input "$RAW_INPUT" \
+            --provider-ndjson "$PROVIDER_NDJSON" \
+            --artist-bindings "$ARTIST_BINDINGS" \
+            --source-index "$SOURCE_INDEX" \
+            --formal-source-candidate "$FORMAL_SOURCE" \
+            --release-cutoff-utc "$RELEASE_CUTOFF_UTC" \
+            --output-root "$out"
       - name: Upload candidate artifact only
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: enrich-snapshot-pilot-${{ github.run_id }}-${{ inputs.sample_id }}
-          path: ${{ runner.temp }}/enrich-snapshot-pilot-${{ github.run_id }}/
+          name: enrich-snapshot-pilot-linkage-v2-${{ github.run_id }}-${{ inputs.sample_id }}
+          path: ${{ runner.temp }}/enrich-snapshot-pilot-linkage-v2-${{ github.run_id }}/
           if-no-files-found: error
-
-      # Deliberately no product data write, PG, commit, push, dispatch, activate,
-      # service restart, or release step.
+      # No product data, PG, import, commit, push, dispatch, activation, or restart.

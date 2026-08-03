@@ -1411,36 +1411,83 @@ function enrichDetail(detail, candidate, singerName = "") {
 }
 
 function occurrenceRecordsFromDetail(detail, singerName = "") {
-  return (detail.songs || []).map((song) => ({
-    sourceSystem: SOURCE_SYSTEM,
-    channelUrl: detail.discoveryChannelUrl || "",
-    channelId: detail.channelId || "",
-    channelHandle: detail.channelHandle || "",
-    singerName: singerName || detail.discoverySingerName || "",
-    youtubeVideoId: detail.videoId,
-    youtubeUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${Number(song.seconds) || 0}s`,
-    videoTitle: detail.title || "",
-    channelName: detail.channelName || "",
-    thumbnailUrl: detail.thumbnailUrl || `https://i.ytimg.com/vi/${detail.videoId}/hqdefault.jpg`,
-    streamedAt: timestampToIso(detail.publishedTimestamp),
-    publishedAt: timestampToIso(detail.publishedTimestamp),
-    seconds: Number(song.seconds) || 0,
-    timestampText: song.time || secondsToTimestamp(Number(song.seconds) || 0),
-    rawTitle: song.raw || song.title || "",
-    rawArtist: song.artist || "",
-    cleanedTitle: song.title || "",
-    cleanedArtist: song.artist || "",
-    sourceText: song.raw || "",
-    sourceUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${Number(song.seconds) || 0}s`,
-    verificationStatus: "youtube_discovered",
-    matchedKeywords: detail.matchedKeywords || [],
-    provenance: {
-      kind: detail.sourceQuality?.sourceType ? `${detail.sourceQuality.sourceType}_timestamp` : "comment_or_description_timestamp",
-      sourceId: song.sourceId || detail.selectedSourceId || "",
-      sourceHash: song.sourceHash || detail.selectedSourceHash || "",
-      rawHash: song.rawHash || hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
-    },
-  }));
+  const explicitEventTime = Object.prototype.hasOwnProperty.call(detail || {}, "eventTime") ? detail.eventTime : null;
+  const explicitEventTimeIso =
+    typeof explicitEventTime === "string" ? explicitEventTime.trim() || null : timestampToIso(explicitEventTime) || null;
+  const records = (detail.songs || []).map((song) => {
+    const seconds = Number(song.seconds) || 0;
+    const position = song.position ?? null;
+    const sourceId = song.sourceId || detail.selectedSourceId || "";
+    const sourceHash = song.sourceHash || detail.selectedSourceHash || "";
+    const rawHash = song.rawHash || "";
+    const existingOccurrenceId = typeof song.occurrenceId === "string" && song.occurrenceId.trim() ? song.occurrenceId : null;
+    const generatedOccurrenceId =
+      !existingOccurrenceId &&
+      detail.videoId &&
+      Number.isSafeInteger(position) &&
+      sourceId &&
+      sourceHash &&
+      rawHash
+        ? `${detail.videoId}:${position}:${seconds}`
+        : null;
+    return {
+      sourceSystem: SOURCE_SYSTEM,
+      channelUrl: detail.discoveryChannelUrl || "",
+      channelId: detail.channelId || "",
+      channelHandle: detail.channelHandle || "",
+      singerName: singerName || detail.discoverySingerName || "",
+      youtubeVideoId: detail.videoId,
+      youtubeUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${seconds}s`,
+      videoTitle: detail.title || "",
+      channelName: detail.channelName || "",
+      thumbnailUrl: detail.thumbnailUrl || `https://i.ytimg.com/vi/${detail.videoId}/hqdefault.jpg`,
+      eventTime: explicitEventTimeIso,
+      streamedAt: explicitEventTimeIso,
+      publishedAt: timestampToIso(detail.publishedTimestamp),
+      occurrenceId: existingOccurrenceId || generatedOccurrenceId,
+      position,
+      sourceLineOrdinal: song.sourceLineOrdinal ?? null,
+      sourceOccurrenceOrdinal: song.sourceOccurrenceOrdinal ?? null,
+      sourceStartOffset: song.sourceStartOffset ?? null,
+      needsReview: song.needsReview === true || !existingOccurrenceId && !generatedOccurrenceId,
+      seconds,
+      timestampText: song.time || secondsToTimestamp(seconds),
+      rawTitle: song.raw || song.title || "",
+      rawArtist: song.artist || "",
+      cleanedTitle: song.title || "",
+      cleanedArtist: song.artist || "",
+      sourceText: song.raw || "",
+      sourceUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${seconds}s`,
+      verificationStatus: "youtube_discovered",
+      matchedKeywords: detail.matchedKeywords || [],
+      provenance: {
+        kind: detail.sourceQuality?.sourceType ? `${detail.sourceQuality.sourceType}_timestamp` : "comment_or_description_timestamp",
+        sourceId,
+        sourceHash,
+        rawHash,
+        position,
+        sourceLineOrdinal: song.sourceLineOrdinal ?? null,
+        sourceOccurrenceOrdinal: song.sourceOccurrenceOrdinal ?? null,
+        sourceStartOffset: song.sourceStartOffset ?? null,
+      },
+    };
+  });
+  const seen = new Map();
+  for (const record of records) {
+    if (!record.occurrenceId) continue;
+    const previous = seen.get(record.occurrenceId);
+    if (previous) {
+      previous.occurrenceId = null;
+      previous.needsReview = true;
+      previous.positionCollision = true;
+      record.occurrenceId = null;
+      record.needsReview = true;
+      record.positionCollision = true;
+      continue;
+    }
+    seen.set(record.occurrenceId, record);
+  }
+  return records;
 }
 
 function reportMarkdown(manifest, rawVideos, details, occurrences) {

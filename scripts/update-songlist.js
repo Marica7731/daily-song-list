@@ -1252,7 +1252,7 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
   for (const sourceRecord of comments) {
     const { text } = sourceRecord;
     const rejectedEntries = [];
-    const songs = parseTimestampSongs([text], {
+    const songs = parseTimestampSongs([{ ...sourceRecord, text, videoId: candidate.videoId }], {
       onReject: (entry) => rejectedEntries.push(compactRejectedEntry(entry)),
     });
     if (!songs.length && !rejectedEntries.length) continue;
@@ -1303,6 +1303,13 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
       selectedSourceHash,
       songs: selected.map(normalizeParsedSong).map((song, index) => ({
         index: index + 1,
+        occurrenceId: song.occurrenceId || null,
+        position: Number.isInteger(song.position) ? song.position : null,
+        sourceLineOrdinal: Number.isInteger(song.sourceLineOrdinal) ? song.sourceLineOrdinal : null,
+        sourceOccurrenceOrdinal: Number.isInteger(song.sourceOccurrenceOrdinal) ? song.sourceOccurrenceOrdinal : null,
+        sourceStartOffset: Number.isInteger(song.sourceStartOffset) ? song.sourceStartOffset : null,
+        positionCollision: song.positionCollision === true,
+        needsReview: song.needsReview === true || song.positionCollision === true,
         time: song.time,
         seconds: song.seconds,
         title: song.title,
@@ -1363,7 +1370,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const sourceText = sourceRecord.text || "";
   const sourceType = sourceRecord.sourceType || "unknown";
   const sourceId = sourceRecord.sourceId || "";
-  const sourceHash = sourceRecord.sourceHash || hashNormalizedText(sourceText);
+  const sourceHash = sourceRecord.sourceHash || "";
   const lookup = curationContext.songSearchLookup || null;
   const aliasContext = curationContext.songAliasContext || loadSongAliasContext();
   const sourceContext = { candidate, sourceRecord };
@@ -2734,7 +2741,7 @@ function dedupeMergedSongs(songs) {
   const seen = new Set();
   const result = [];
   for (const song of songs) {
-    const key = `${song.seconds}:${song.title}`;
+    const key = song.occurrenceId || (Number.isInteger(song.position) ? `${song.seconds}:${song.title}:${song.position}` : `${song.seconds}:${song.title}`);
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(song);

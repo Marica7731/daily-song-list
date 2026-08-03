@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 5,
+  "status": "BOUND_V6_CANDIDATE",
+  "candidateOnly": true,
+  "releaseEligible": false,
+  "provider": {
+    "identity": "youtube_channel_discovery",
+    "contract": "luna-max-mac-enrichment/v6-linkage-candidate",
+    "sourceCommits": {
+      "formalRepo": "1880eb412c20dadfb1ba2b843f24d10cfec6fd77",
+      "mygit": "36ee3a8b9f32e829fb52119852cadb68db445320"
+    },
+    "input": "provider NDJSON is read-only and must retain its authoritative row order",
+    "duplicateMissingUnmatched": "batch-fatal-exit-78"
+  },
+  "formalSource": {
+    "candidatePath": "config/snapshot-recovery/formal-source-candidate.json",
+    "capturePath": "scripts/migration/collect-formal-source.py",
+    "requiredOutputs": [
+      "source-manifest.json",
+      "occurrence-spine.ndjson",
+      "closure-report.json"
+    ],
+    "missingSourceOrConflict": "exit-78"
+  },
+  "linkage": {
+    "scriptPath": "scripts/migration/snapshot-pilot-linkage.py",
+    "runnerPath": "scripts/migration/run-snapshot-enrichment-pilot.py",
+    "jul22Spine": "authoritative videoId:position:seconds order; provider enrichment cannot rewrite it",
+    "jul29Rows": "existing stable occurrenceId plus sourceId/sourceHash/rawHash and complete source proof only"
+  },
+  "artistSidecar": {
+    "path": "config/snapshot-recovery/jul29-artist-binding.v2.json",
+    "tupleFields": [
+      "day",
+      "videoId",
+      "position",
+      "seconds",
+      "title",
+      "sourceId",
+      "sourceHash",
+      "rawHash"
+    ],
+    "accepted": 12,
+    "needsReviewExcluded": 11,
+    "detailNullSentinelsExcluded": 16,
+    "consumer": "snapshot-pilot-linkage.py::artist"
+  },
+  "reports": [
+    "occurrence-closure.json",
+    "artist-binding-report.json",
+    "release-route-report.json"
+  ],
+  "artifactSha256": {
+    "scripts/song-utils.js": "a8f1621a82dcb37f1d25f374d2630e54085deadee8391c2b6a75f464aa90f123",
+    "scripts/entry-repair.js": "3e27b48c6ea18166b5c56631d86dedb931ae982d923ccdb1389fe6d76df52d1f",
+    "scripts/update-songlist.js": "1745bb7b4207390307bfffa207d88dacf5e409bc809da8b48c1b8262aac71066",
+    "scripts/youtube-channel-discovery-core.js": "88eac66afc5faf4f849330b0b3750e94ba76cefa19e72c9ea27bb4c11badb1d4",
+    "scripts/migration/snapshot-enrichment-provider.mjs": "1adf71cb10d2b1d2e31f461694fd09b645ce19ae9ca130138b4782c9725228e6",
+    ".github/workflows/enrich-snapshot-pilot.yml": "b9e20e49e922b9320a6abbf4d387c76e0acbabcce621b5210d1432cb99e3ee5d",
+    "scripts/migration/run-snapshot-enrichment-pilot.py": "52e73c4b540fbae7d409f1ecc8a18c500796c4c93bcb30fd6515e4272e6487c2",
+    "scripts/migration/snapshot-pilot-linkage.py": "acbbc2576f4cbf1a3c138656363b30bdab931033e0825f608a56f374c9a4e2d3",
+    "scripts/migration/collect-formal-source.py": "543fa03092335831e71f533741305e9d5af4f60da072d2e276b39988c60f6aab",
+    "config/snapshot-recovery/formal-source-candidate.json": "9c80362bc9d28746a37936c81925cc75f9b3af1fa141edcad8c8262815deb459",
+    "config/snapshot-recovery/jul29-artist-binding.v2.json": "970f9a7371b2e152b4fdb5b618266ec83d6595766aa36f559f29c7af744fb8b3",
+    "test/snapshot-pilot-linkage-v2.test.py": "99692fc9e8386dfe94702576259c4002b519f43c2a94bf1c7631ee5f8fbd37cb",
+    "test/snapshot-pilot-linkage.test.py": "b68ed167e1b1376d16ea0738587b631ae1bdb15414316dcb75480d787f03085f",
+    "config/snapshot-recovery/snapshot-enrichment-provider-binding-v2.json": "6661bb6d775a83a42cf828e7d1ca7a09c2da1b0b1a0f756d40e580e158200bc1"
+  },
+  "activationCount": 0,
+  "NOT_FOR_RELEASE": true,
+  "selfHashRule": "sha256(final UTF-8 JSON with this artifactSha256 self entry replaced by SELF_SHA256_NON_RECURSIVE; non-recursive)"
+}

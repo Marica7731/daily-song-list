@@ -1,7 +1,9 @@
+const { createHash } = require("node:crypto");
 const { cleanSongTitleNoise, isBlockedSongEntry, isChatReactionShoutText } = require("../assets/source-filter");
 const { isActivityMarkerTitle } = require("./curation");
 
 const TIMESTAMP_RE = /(?<![\dA-Za-z_:])(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?!\d)/;
+const STRICT_TITLE_ARTIST_DELIMITER = "\u2502";
 const TIMESTAMP_TOKEN_RE = /(?<![\dA-Za-z_:])(?:[\[【(（]\s*)?(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?:\s*[\]】)）])?(?!\d)/g;
 const INDEX_RE =
   /^\s*(?:[⟦［\[]\s*#?[\d０-９]{1,3}\s*[⟧］\]]\s*|[#＃]?[\d０-９]{1,3}[)）、:：]\s*|[#＃]?[\d０-９]{1,3}[.．](?![\d０-９])\s*|[#＃]?[\d０-９]{1,3}\s+)/;
@@ -55,14 +57,59 @@ function normalizeCommentText(text) {
     .replace(/\u200b/g, "");
 }
 
+function stableSourceRawHash(text) {
+  return createHash("sha256").update(String(text || ""), "utf8").digest("hex");
+}
+
+function sourceLineRecords(text) {
+  const value = String(text || "");
+  const lines = [];
+  let start = 0;
+  let index = 0;
+  while (index <= value.length) {
+    const atEnd = index === value.length;
+    const ch = value[index];
+    if (!atEnd && ch !== "\n" && ch !== "\r") {
+      index += 1;
+      continue;
+    }
+    lines.push({
+      text: value.slice(start, index),
+      sourceLineOrdinal: lines.length + 1,
+      sourceLineStartOffset: start,
+    });
+    if (atEnd) break;
+    index += ch === "\r" && value[index + 1] === "\n" ? 2 : 1;
+    start = index;
+  }
+  return lines;
+}
+
+function sourceInputRecord(comment, options = {}) {
+  const source = comment && typeof comment === "object" ? comment : { text: comment };
+  const text = typeof source.text === "string" ? source.text : "";
+  return {
+    text,
+    sourceId: String(source.sourceId || options.sourceId || "").trim(),
+    sourceHash: String(source.sourceHash || options.sourceHash || "").trim(),
+    videoId: String(source.videoId || options.videoId || "").trim(),
+  };
+}
+
 function parseTimestampSongs(comments, options = {}) {
   const songs = [];
   const onReject = typeof options.onReject === "function" ? options.onReject : null;
   for (const comment of comments || []) {
-    for (const rawLine of mergeSplitTimelineLines(comment)) {
-      const line = rawLine.trim();
+    const source = sourceInputRecord(comment, options);
+    if (!source.text) continue;
+    for (const rawLine of mergeSplitTimelineLines(source.text, { withSourcePosition: true })) {
+      const line = String(rawLine.text || "").trim();
       const match = TIMESTAMP_RE.exec(line);
       if (!match) continue;
+      const sourceStartOffset =
+        Number.isInteger(rawLine.sourceStartOffset) ? rawLine.sourceStartOffset + match.index : null;
+      const sourcePositionReady =
+        Boolean(source.sourceId && source.sourceHash && source.videoId) && Number.isInteger(sourceStartOffset);
 
       const time = normalizeCommentTime(match[0]);
       let tail = stripLeadingTimelineDecorations(line.slice(match.index + match[0].length));
@@ -111,8 +158,32 @@ function parseTimestampSongs(comments, options = {}) {
         title,
         artist,
         raw: line,
+        sourceId: source.sourceId || null,
+        sourceHash: source.sourceHash || null,
+        rawHash: stableSourceRawHash(line),
+        sourceLineOrdinal: rawLine.sourceLineOrdinal ?? null,
+        sourceOccurrenceOrdinal: rawLine.sourceOccurrenceOrdinal ?? null,
+        sourceStartOffset,
+        position: sourceStartOffset,
+        occurrenceId: sourcePositionReady ? `${source.videoId}:${sourceStartOffset}:${timeToSeconds(time)}` : null,
+        needsReview: !sourcePositionReady,
       });
     }
+  }
+  const seenOccurrenceIds = new Map();
+  for (const song of songs) {
+    if (!song.occurrenceId) continue;
+    const previous = seenOccurrenceIds.get(song.occurrenceId);
+    if (previous) {
+      previous.occurrenceId = null;
+      previous.needsReview = true;
+      previous.positionCollision = true;
+      song.occurrenceId = null;
+      song.needsReview = true;
+      song.positionCollision = true;
+      continue;
+    }
+    seenOccurrenceIds.set(song.occurrenceId, song);
   }
   return dedupeSongs(songs);
 }
@@ -662,11 +733,30 @@ function normalizeReactionActivityText(text) {
 }
 
 function splitTitleArtist(text) {
+  const strict = parseStrictTitleArtist(text);
+  if (strict) return strict;
+  if (String(text || "").includes(STRICT_TITLE_ARTIST_DELIMITER)) {
+    return [cleanSongOrArtistPart(text), "未記載"];
+  }
   const parsed = extractSongArtistCore(text);
   if (parsed) return parsed;
   const symbolicPerformer = extractTitleWithSymbolicPerformer(text);
   if (symbolicPerformer) return symbolicPerformer;
   return [cleanSongOrArtistPart(text), "未記載"];
+}
+
+function parseStrictTitleArtist(text) {
+  const value = String(text || "").trim();
+  const delimiterCount = [...value].filter((char) => char === STRICT_TITLE_ARTIST_DELIMITER).length;
+  if (delimiterCount !== 1) return null;
+  const index = value.indexOf(STRICT_TITLE_ARTIST_DELIMITER);
+  const rawTitle = value.slice(0, index).trim();
+  const rawArtist = value.slice(index + STRICT_TITLE_ARTIST_DELIMITER.length).trim();
+  if (!rawTitle || !rawArtist) return null;
+  const title = cleanSongOrArtistPart(rawTitle);
+  const artist = cleanArtistPart(rawArtist);
+  if (!title || !artist || isBadSongField(title) || isBadSongField(artist)) return null;
+  return [title, artist];
 }
 
 function extractTitleWithSymbolicPerformer(text) {
@@ -677,7 +767,103 @@ function extractTitleWithSymbolicPerformer(text) {
   return title && !isBadSongField(title) ? [title, "未記載"] : null;
 }
 
-function mergeSplitTimelineLines(text) {
+function sourceTimelineLine(text, source, sourceStartOffset = null, sourceOccurrenceOrdinal = null) {
+  return {
+    text,
+    sourceLineOrdinal: source?.sourceLineOrdinal ?? null,
+    sourceOccurrenceOrdinal,
+    sourceStartOffset,
+  };
+}
+
+function splitCollapsedTimelineLineWithSourcePosition(sourceLine) {
+  const original = String(sourceLine?.text || "");
+  const normalized = normalizeTimelineChars(original).trim();
+  if (!normalized) return [];
+  const leadingTrim = original.length - original.trimStart().length;
+  const timestampRegex = new RegExp(TIMESTAMP_RE.source, "gu");
+  const matches = [...normalized.matchAll(timestampRegex)];
+  if (matches.length <= 1) {
+    const match = matches[0];
+    return [
+      sourceTimelineLine(
+        normalized,
+        sourceLine,
+        match ? (sourceLine.sourceLineStartOffset ?? 0) + leadingTrim : null,
+        match ? 1 : null,
+      ),
+    ];
+  }
+  const chunks = [];
+  const prefix = normalized.slice(0, matches[0].index).trim();
+  if (prefix) chunks.push(sourceTimelineLine(prefix, sourceLine, null, null));
+  for (let index = 0; index < matches.length; index += 1) {
+    const start = matches[index].index;
+    const end = matches[index + 1]?.index ?? normalized.length;
+    const chunk = normalized.slice(start, end).trim();
+    if (!chunk) continue;
+    chunks.push(
+      sourceTimelineLine(
+        chunk,
+        sourceLine,
+        (sourceLine.sourceLineStartOffset ?? 0) + leadingTrim + start,
+        index + 1,
+      ),
+    );
+  }
+  return chunks;
+}
+
+function mergeSplitTimelineLinesWithSourcePosition(text) {
+  const lines = [];
+  for (const sourceLine of sourceLineRecords(text)) {
+    lines.push(...splitCollapsedTimelineLineWithSourcePosition(sourceLine));
+  }
+  const lineText = (line) => String(line?.text || "").trim();
+  const merged = [];
+  const push = (textValue, sourceLine) => {
+    const text = String(textValue || "").trim();
+    if (text) merged.push(sourceTimelineLine(text, sourceLine, sourceLine?.sourceStartOffset ?? null, sourceLine?.sourceOccurrenceOrdinal ?? null));
+  };
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lineText(lines[index]);
+    const next = lineText(lines[index + 1]);
+    const next2 = lineText(lines[index + 2]);
+    const next3 = lineText(lines[index + 3]);
+    if (
+      /^\d{1,3}$/.test(line) &&
+      isStartTimestampMarkerLine(next) &&
+      isTimestampOnlyLine(next2) &&
+      next3 &&
+      !isTimestampOnlyLine(next3) &&
+      !isObviouslyNonSongText(next3)
+    ) {
+      const timestamp = extractPrimaryTimestamp(next);
+      if (timestamp) push(`${timestamp} ${next3}`, lines[index + 1]);
+      index += 3;
+      continue;
+    }
+    if (isSongArtistOnlyLine(line) && isTimestampOnlyLine(next)) {
+      const timestamp = extractPrimaryTimestamp(next);
+      if (timestamp) push(`${timestamp} ${line}`, lines[index + 1]);
+      index += 1;
+      continue;
+    }
+    if (isTimestampOnlyLine(line)) {
+      const timestamp = extractPrimaryTimestamp(line);
+      if (timestamp && next && !isTimestampOnlyLine(next) && !isObviouslyNonSongText(next)) {
+        push(`${timestamp} ${next}`, lines[index]);
+        index += 1;
+        continue;
+      }
+    }
+    push(line, lines[index]);
+  }
+  return merged;
+}
+
+function mergeSplitTimelineLines(text, options = {}) {
+  if (options.withSourcePosition) return mergeSplitTimelineLinesWithSourcePosition(text);
   const lines = [];
   const rawLines = normalizeCommentText(text).split("\n");
   for (const line of rawLines) {
@@ -726,7 +912,14 @@ function mergeSplitTimelineLines(text) {
   return merged;
 }
 
-function splitCollapsedTimelineLine(line) {
+function splitCollapsedTimelineLine(line, options = {}) {
+  if (options.withSourcePosition) {
+    return splitCollapsedTimelineLineWithSourcePosition({
+      text: line,
+      sourceLineOrdinal: options.sourceLineOrdinal,
+      sourceLineStartOffset: options.sourceLineStartOffset,
+    });
+  }
   const source = normalizeTimelineChars(line).trim();
   if (!source) return [];
   TIMESTAMP_TOKEN_RE.lastIndex = 0;
@@ -1044,10 +1237,23 @@ function dedupeSongs(songs) {
     }
     deduped.push(song);
   }
-  return deduped.sort((a, b) => a.seconds - b.seconds);
+  return deduped.sort(
+    (a, b) =>
+      a.seconds - b.seconds ||
+      (Number.isInteger(a.sourceStartOffset) ? a.sourceStartOffset : Number.MAX_SAFE_INTEGER) -
+        (Number.isInteger(b.sourceStartOffset) ? b.sourceStartOffset : Number.MAX_SAFE_INTEGER),
+  );
 }
 
 function isNearDuplicateSong(left, right) {
+  if (
+    left?.occurrenceId ||
+    right?.occurrenceId ||
+    Number.isInteger(left?.sourceStartOffset) ||
+    Number.isInteger(right?.sourceStartOffset)
+  ) {
+    return false;
+  }
   return songKey(left.title) === songKey(right.title) && artistsCompatible(left.artist, right.artist) && Math.abs(left.seconds - right.seconds) <= 3;
 }
 

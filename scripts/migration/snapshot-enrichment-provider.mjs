@@ -33,7 +33,18 @@ const RECORD_FIELDS = [
   'audit',
 ];
 
-const SONG_FIELDS = ['occurrenceId', 'seconds', 'title', 'artist', 'source'];
+const SONG_FIELDS = [
+  'occurrenceId',
+  'position',
+  'sourceLineOrdinal',
+  'sourceOccurrenceOrdinal',
+  'sourceStartOffset',
+  'needsReview',
+  'seconds',
+  'title',
+  'artist',
+  'source',
+];
 const SOURCE_FIELDS = ['sourceId', 'sourceHash', 'rawHash', 'sourcePath', 'sourceSystem', 'provenance'];
 
 function fail(message, exitCode = 2) {
@@ -179,15 +190,10 @@ function isCanonicalIsoUtc(value) {
 
 export function eventTimeOf(value) {
   if (!isObject(value)) return null;
-  const direct = firstEvidence(
-    value.eventTime,
-    value.publishedAtIso,
-    value.publishedAt,
-    value.publishedTimestampIsoUtc,
-  );
+  const direct = firstEvidence(value.eventTime);
   if (typeof direct === 'string') return dateStringToIso(direct);
   if (typeof direct === 'number') return timestampToIso(direct);
-  return timestampToIso(value.publishedTimestamp);
+  return null;
 }
 
 function sourceField(record, source, provenance, key) {
@@ -197,6 +203,25 @@ function sourceField(record, source, provenance, key) {
 function numericSeconds(...values) {
   for (const value of values) {
     if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return value;
+  }
+  return null;
+}
+
+function integerPosition(...values) {
+  for (const value of values) {
+    if (Number.isSafeInteger(value)) return value;
+    if (typeof value === 'string' && /^\d+$/u.test(value.trim())) {
+      const parsed = Number(value);
+      if (Number.isSafeInteger(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function preservePosition(...values) {
+  for (const value of values) {
+    if (Number.isSafeInteger(value)) return value;
+    if (typeof value === 'string' && value.trim() !== '') return value;
   }
   return null;
 }
@@ -213,6 +238,19 @@ function songFromOccurrence(record) {
       occurrence?.id,
       record?.id,
     ),
+    position: preservePosition(record?.position, occurrence?.position, song?.position),
+    sourceLineOrdinal: integerPosition(record?.sourceLineOrdinal, occurrence?.sourceLineOrdinal, song?.sourceLineOrdinal),
+    sourceOccurrenceOrdinal: integerPosition(
+      record?.sourceOccurrenceOrdinal,
+      occurrence?.sourceOccurrenceOrdinal,
+      song?.sourceOccurrenceOrdinal,
+    ),
+    sourceStartOffset: integerPosition(record?.sourceStartOffset, occurrence?.sourceStartOffset, song?.sourceStartOffset),
+    needsReview:
+      record?.needsReview === true ||
+      record?.positionCollision === true ||
+      occurrence?.needsReview === true ||
+      song?.needsReview === true,
     seconds: numericSeconds(record?.seconds, occurrence?.seconds, song?.seconds),
     title: firstString(record?.title, record?.cleanedTitle, record?.rawTitle, song?.title),
     artist: firstString(record?.artist, record?.cleanedArtist, record?.rawArtist, song?.artist),
@@ -239,6 +277,7 @@ function missingRequirements(record, detailPresent) {
     const song = record.songs[index];
     const prefix = `songs[${index}]`;
     if (nonEmptyString(song.occurrenceId) === null) missing.push(`${prefix}.occurrenceId`);
+    if (song.needsReview === true) missing.push(`${prefix}.needsReview`);
     if (typeof song.seconds !== 'number' || !Number.isFinite(song.seconds) || song.seconds < 0) {
       missing.push(`${prefix}.seconds`);
     }

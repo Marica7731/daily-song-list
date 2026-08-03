@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
 const { canonicalizeArtistName } = require("../assets/ranking-utils");
+const STRICT_TITLE_ARTIST_DELIMITER = "\u2502";
 
 const UNKNOWN_ARTIST = "未記載";
 const ROOT = path.resolve(__dirname, "..");
@@ -55,9 +56,13 @@ function repairParsedEntry(song, lookupInput = null) {
   }
 
   const delimiterRepair = bestDelimiterRepairCandidate(song, lookup);
-  if (delimiterRepair && shouldApplyDelimiterRepair(song, delimiterRepair, lookup)) {
+  const isStrictDelimiterRepair = delimiterRepair?.delimiter === STRICT_TITLE_ARTIST_DELIMITER;
+  const shouldApplyCandidate = isStrictDelimiterRepair
+    ? shouldApplyStrictDelimiterRepair(delimiterRepair)
+    : shouldApplyDelimiterRepair(song, delimiterRepair, lookup);
+  if (delimiterRepair && shouldApplyCandidate) {
     title = delimiterRepair.title;
-    artist = delimiterRepair.artist;
+    if (!isStrictDelimiterRepair || isUnknownArtist(artist)) artist = delimiterRepair.artist;
     repairs.push("delimiter_split");
   }
 
@@ -146,6 +151,8 @@ function findKnownSongArtistOverride(title, artist, context = loadKnownSongArtis
 }
 
 function bestDelimiterRepairCandidate(song, lookupInput = null) {
+  const strict = bestStrictDelimiterRepairCandidate(song);
+  if (strict) return strict;
   const lookup = normalizeLookup(lookupInput);
   const texts = candidateSourceTexts(song);
   let best = null;
@@ -157,6 +164,45 @@ function bestDelimiterRepairCandidate(song, lookupInput = null) {
     }
   }
   return best;
+}
+
+function bestStrictDelimiterRepairCandidate(song) {
+  for (const text of candidateSourceTexts(song)) {
+    const candidate = strictDelimiterRepairCandidate(text);
+    if (candidate) return candidate;
+  }
+  return null;
+}
+
+function strictDelimiterRepairCandidate(text) {
+  const value = String(text || "").trim();
+  const delimiterCount = [...value].filter((char) => char === STRICT_TITLE_ARTIST_DELIMITER).length;
+  if (delimiterCount !== 1) return null;
+  const index = value.indexOf(STRICT_TITLE_ARTIST_DELIMITER);
+  const rawTitle = value.slice(0, index).trim();
+  const rawArtist = value.slice(index + STRICT_TITLE_ARTIST_DELIMITER.length).trim();
+  if (!rawTitle || !rawArtist || !isValidStrictTitleCandidate(rawTitle)) return null;
+  const title = cleanSafeTitleCandidate(rawTitle);
+  const artist = cleanSafeArtistCandidate(rawArtist);
+  if (!title || !isValidStrictTitleCandidate(title) || !artist || isBadArtistCandidate(artist)) return null;
+  return {
+    index,
+    delimiter: STRICT_TITLE_ARTIST_DELIMITER,
+    title,
+    artist,
+    rawTitle,
+    rawArtist,
+    score: 1,
+    reasons: ["strict_delimiter", "non_empty_parts"],
+  };
+}
+
+function isValidStrictTitleCandidate(value) {
+  const title = String(value || "").trim();
+  if (!title) return false;
+  const timestamp = title.match(/(?<![\dA-Za-z_:])(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?!\d)/u);
+  if (timestamp && timestamp[0] === title) return false;
+  return /[A-Za-z0-9ぁ-んァ-ヶ一-龯々]/u.test(title);
 }
 
 function titleArtistSplitCandidates(text) {
@@ -440,6 +486,10 @@ function shouldApplyDelimiterRepair(song, candidate, lookup) {
   if (isUnknownArtist(currentArtist) && songSearchRecognition(candidate, lookup).knownTitleArtist) return true;
   if (isUnknownArtist(currentArtist) && candidate.score >= 4 && isLikelyArtistCredit(candidate.artist)) return true;
   return cleanSafeTitleCandidate(currentTitle) !== candidate.title && songSearchRecognition(candidate, lookup).knownTitle;
+}
+
+function shouldApplyStrictDelimiterRepair(candidate) {
+  return Boolean(candidate && candidate.score > 0);
 }
 
 function isDateSlashAt(text, index) {
