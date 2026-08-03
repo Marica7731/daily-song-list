@@ -9072,70 +9072,82 @@ def _runtime_row_search_texts(row: Mapping[str, Any]) -> dict[str, str]:
 _RANKING_SOURCE_SEARCH_MATCH_CAP = 4096
 
 
+def _runtime_source_payload_json_expression(alias: str = "occurrence") -> str:
+    """Parse text payloads without allowing malformed rows to abort search."""
+
+    trimmed = f"NULLIF(btrim({alias}.payload_json), '')"
+    return (
+        "(CASE WHEN pg_input_is_valid("
+        f"{trimmed}, 'jsonb'"
+        f") THEN {trimmed}::jsonb ELSE '{{}}'::jsonb END)"
+    )
+
+
 def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
     """Return exact source-occurrence expressions for selected public fields."""
 
+    payload_json = _runtime_source_payload_json_expression()
     expressions = {
         "title": (
-            "occurrence.payload_json->>'songTitle'",
-            "occurrence.payload_json->'song'->>'title'",
-            "occurrence.payload_json->'payload'->>'songTitle'",
-            "occurrence.payload_json->'payload'->'song'->>'title'",
+            f"{payload_json}->>'songTitle'",
+            f"{payload_json}->'song'->>'title'",
+            f"{payload_json}->'payload'->>'songTitle'",
+            f"{payload_json}->'payload'->'song'->>'title'",
         ),
         "artist": (
             "occurrence.artist",
-            "occurrence.payload_json->>'artist'",
-            "occurrence.payload_json->'song'->>'artist'",
-            "occurrence.payload_json->'payload'->>'artist'",
-            "occurrence.payload_json->'payload'->'song'->>'artist'",
+            f"{payload_json}->>'artist'",
+            f"{payload_json}->'song'->>'artist'",
+            f"{payload_json}->'payload'->>'artist'",
+            f"{payload_json}->'payload'->'song'->>'artist'",
         ),
         "channel": (
             "occurrence.channel_name",
             "occurrence.channel_id",
             "occurrence.channel_handle",
             "occurrence.channel_url",
-            "occurrence.payload_json->>'channelName'",
-            "occurrence.payload_json->>'channelId'",
-            "occurrence.payload_json->>'channelHandle'",
-            "occurrence.payload_json->>'channelUrl'",
-            "occurrence.payload_json->'video'->>'channelName'",
-            "occurrence.payload_json->'video'->>'channelId'",
-            "occurrence.payload_json->'video'->>'channelHandle'",
-            "occurrence.payload_json->'video'->>'channelUrl'",
-            "occurrence.payload_json->'item'->>'channelName'",
-            "occurrence.payload_json->'item'->>'channelId'",
-            "occurrence.payload_json->'item'->>'channelHandle'",
-            "occurrence.payload_json->'item'->>'channelUrl'",
-            "occurrence.payload_json->'payload'->'video'->>'channelName'",
-            "occurrence.payload_json->'payload'->'video'->>'channelId'",
-            "occurrence.payload_json->'payload'->'video'->>'channelHandle'",
-            "occurrence.payload_json->'payload'->'video'->>'channelUrl'",
+            f"{payload_json}->>'channelName'",
+            f"{payload_json}->>'channelId'",
+            f"{payload_json}->>'channelHandle'",
+            f"{payload_json}->>'channelUrl'",
+            f"{payload_json}->'video'->>'channelName'",
+            f"{payload_json}->'video'->>'channelId'",
+            f"{payload_json}->'video'->>'channelHandle'",
+            f"{payload_json}->'video'->>'channelUrl'",
+            f"{payload_json}->'item'->>'channelName'",
+            f"{payload_json}->'item'->>'channelId'",
+            f"{payload_json}->'item'->>'channelHandle'",
+            f"{payload_json}->'item'->>'channelUrl'",
+            f"{payload_json}->'payload'->'video'->>'channelName'",
+            f"{payload_json}->'payload'->'video'->>'channelId'",
+            f"{payload_json}->'payload'->'video'->>'channelHandle'",
+            f"{payload_json}->'payload'->'video'->>'channelUrl'",
         ),
         "video": (
             "occurrence.title",
             "occurrence.video_id",
-            "occurrence.payload_json->>'title'",
-            "occurrence.payload_json->>'videoId'",
-            "occurrence.payload_json->'video'->>'title'",
-            "occurrence.payload_json->'video'->>'videoId'",
-            "occurrence.payload_json->'item'->>'title'",
-            "occurrence.payload_json->'item'->>'videoId'",
-            "occurrence.payload_json->'payload'->'video'->>'title'",
-            "occurrence.payload_json->'payload'->'video'->>'videoId'",
-            "occurrence.payload_json->'payload'->'item'->>'title'",
-            "occurrence.payload_json->'payload'->'item'->>'videoId'",
+            f"{payload_json}->>'title'",
+            f"{payload_json}->>'videoId'",
+            f"{payload_json}->'video'->>'title'",
+            f"{payload_json}->'video'->>'videoId'",
+            f"{payload_json}->'item'->>'title'",
+            f"{payload_json}->'item'->>'videoId'",
+            f"{payload_json}->'payload'->'video'->>'title'",
+            f"{payload_json}->'payload'->'video'->>'videoId'",
+            f"{payload_json}->'payload'->'item'->>'title'",
+            f"{payload_json}->'payload'->'item'->>'videoId'",
         ),
         "source": (
             "occurrence.source_id",
             "occurrence.source_system",
-            "occurrence.payload_json->>'sourceId'",
-            "occurrence.payload_json->>'sourceSystem'",
-            "occurrence.payload_json->'song'->>'sourceId'",
-            "occurrence.payload_json->'song'->>'sourceSystem'",
-            "occurrence.payload_json->'payload'->>'sourceId'",
-            "occurrence.payload_json->'payload'->>'sourceSystem'",
-            "occurrence.payload_json->'payload'->'song'->>'sourceId'",
-            "occurrence.payload_json->'payload'->'song'->>'sourceSystem'",
+            f"{payload_json}->>'sourceId'",
+            f"{payload_json}->>'sourceSystem'",
+            f"{payload_json}->'song'->>'sourceId'",
+            f"{payload_json}->'song'->>'sourceSystem'",
+            f"{payload_json}->'payload'->>'sourceId'",
+            f"{payload_json}->'payload'->>'sourceSystem'",
+            f"{payload_json}->'payload'->'song'->>'sourceId'",
+            f"{payload_json}->'payload'->'song'->>'sourceSystem'",
         ),
     }
     selected: list[str] = []
