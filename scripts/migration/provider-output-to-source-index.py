@@ -208,6 +208,7 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         elif video_id in capture_by_video:
             base = {**capture_by_video[video_id], **{k: v for k, v in base.items() if v is not None}}
         source_key: tuple[str, str, str, str | None] | None = None
+        source_consensus: list[Any] | None = None
         normalized_rows: list[dict[str, Any]] = []
         row_sentinel = record.get("detailNull") is True or record.get("status") == "detail_null"
         for occurrence in occurrences:
@@ -257,15 +258,45 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
                 if sha256_file(resolved_path) != raw_hash.lower():
                     fail("RAW_HASH_MISMATCH", f"{video_id}/{occurrence_id}")
             key = (source_id, source_hash.lower(), raw_hash.lower(), relative_path)
+            metadata_observation = None
             if source_key is None:
                 source_key = key
+                source_consensus = list(key)
             elif source_key != key:
-                fail("SOURCE_METADATA_CONFLICT", video_id)
-            position_key = (source_id, line, ordinal, offset)
+                metadata_observation = {
+                    "code": "SOURCE_METADATA_CONFLICT",
+                    "status": "observation",
+                    "reason": f"{video_id}: provenance metadata differs within video",
+                    "canonical": {
+                        "sourceId": source_key[0],
+                        "sourceHash": source_key[1],
+                        "rawHash": source_key[2],
+                        "sourceBytesPath": source_key[3],
+                    },
+                    "observed": {
+                        "sourceId": key[0],
+                        "sourceHash": key[1],
+                        "rawHash": key[2],
+                        "sourceBytesPath": key[3],
+                    },
+                }
+                assert source_consensus is not None
+                source_consensus = [
+                    previous if previous == observed else None
+                    for previous, observed in zip(source_consensus, key)
+                ]
+            position_key = (video_id, line, ordinal, offset)
             if position_key in seen_positions:
                 fail("SOURCE_POSITION_COLLISION", f"{video_id}/{occurrence_id}")
             seen_positions.add(position_key)
             sentinel = row_sentinel or occurrence.get("isSentinel") is True or occurrence.get("detailNull") is True
+            if metadata_observation is not None:
+                source_observation = {
+                    **metadata_observation,
+                    "sidecar": sidecar_observation,
+                }
+            else:
+                source_observation = sidecar_observation
             normalized = {key: value for key, value in occurrence.items() if key not in {"source", "sourceCapture"}}
             normalized.update(
                 {
@@ -282,8 +313,8 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
                     "sourceBytesPath": relative_path,
                     "sourceComplete": source_complete,
                     "sourceVerified": source_verified,
-                    "needsReview": occurrence.get("needsReview") is True or not source_verified,
-                    "sourceObservation": sidecar_observation,
+                    "needsReview": occurrence.get("needsReview") is True or not source_verified or metadata_observation is not None,
+                    "sourceObservation": source_observation,
                     "eventTime": event,
                     "isSentinel": sentinel,
                 }
@@ -295,8 +326,9 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
             all_rows.append(normalized)
         source_path = None
         source_bytes_path = None
-        if source_key is not None and source_key[3] is not None:
-            source_bytes_path = source_key[3]
+        consensus_path = source_consensus[3] if source_consensus else None
+        if consensus_path is not None:
+            source_bytes_path = consensus_path
             source_path = (
                 str((args.source_root / source_bytes_path).resolve())
                 if not Path(source_bytes_path).is_absolute()
@@ -305,11 +337,11 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         rows_by_video[video_id] = {
             "videoId": video_id,
             "eventTime": event,
-            "sourceId": source_key[0] if source_key else None,
-            "sourceHash": source_key[1] if source_key else None,
-            "rawHash": source_key[2] if source_key else None,
+            "sourceId": source_consensus[0] if source_consensus else None,
+            "sourceHash": source_consensus[1] if source_consensus else None,
+            "rawHash": source_consensus[2] if source_consensus else None,
             "sourcePath": source_path,
-            "sourceBytesPath": source_bytes_path,
+            "sourceBytesPath": consensus_path,
             "sourceComplete": all(row["sourceComplete"] for row in normalized_rows),
             "sourceVerified": all(row["sourceVerified"] for row in normalized_rows),
             "needsReview": any(row["needsReview"] for row in normalized_rows),
