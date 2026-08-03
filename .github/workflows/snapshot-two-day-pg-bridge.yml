@@ -246,7 +246,7 @@ jobs:
             started="$(date -u +%s)"
             gh workflow run "$workflow" --ref "$BRANCH" "$@" >/dev/null
             for _ in $(seq 1 30); do
-              run_id="$(gh run list --workflow "$workflow" --limit 10 --json databaseId,createdAt --jq --arg started "$started" '[.[] | select((.createdAt | fromdateiso8601) >= ($started | tonumber))] | .[0].databaseId // empty')"
+              run_id="$(gh run list --workflow "$workflow" --limit 10 --json databaseId,createdAt | jq -r --argjson started "$started" '[.[] | select((.createdAt | fromdateiso8601) >= $started)] | .[0].databaseId // empty')"
               test -n "$run_id" && break
               sleep 2
             done
@@ -329,7 +329,7 @@ jobs:
             started="$(date -u +%s)"
             gh workflow run "$workflow" --ref "$BRANCH" "$@" >/dev/null
             for _ in $(seq 1 30); do
-              run_id="$(gh run list --workflow "$workflow" --limit 10 --json databaseId,createdAt --jq --arg started "$started" '[.[] | select((.createdAt | fromdateiso8601) >= ($started | tonumber))] | .[0].databaseId // empty')"
+              run_id="$(gh run list --workflow "$workflow" --limit 10 --json databaseId,createdAt | jq -r --argjson started "$started" '[.[] | select((.createdAt | fromdateiso8601) >= $started)] | .[0].databaseId // empty')"
               test -n "$run_id" && break
               sleep 2
             done
