@@ -8278,6 +8278,7 @@ def _hydrated_generic_ranking_payload(
 
 def _render_generic_overlay_rankings(
     connection,
+    ranking_revision_id: str,
     prepared: Mapping[str, Any],
     query: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
@@ -8425,6 +8426,13 @@ def _render_generic_overlay_rankings(
         payload["rank"] = index
         records.append(payload)
     _hydrate_overlay_page_previews(connection, candidate_rows, records)
+    _hydrate_runtime_ranking_song_previews(
+        connection,
+        ranking_revision_id,
+        options["range"],
+        options["view"],
+        records,
+    )
     if options["view"] == "vtubers":
         missing_preview_channels: list[str] = []
         records_by_channel: dict[str, dict[str, Any]] = {}
@@ -8517,7 +8525,9 @@ def _generic_overlay_rankings_payload(
         key,
         lambda: _prepare_generic_overlay_rankings(connection, revision_id, parent, options),
     )
-    return _render_generic_overlay_rankings(connection, prepared, query)
+    return _render_generic_overlay_rankings(
+        connection, revision_id, prepared, query,
+    )
 
 
 def _revision_lineage(connection, revision_id: str) -> list[str]:
