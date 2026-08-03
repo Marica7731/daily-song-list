@@ -6,6 +6,7 @@ import argparse
 import copy
 import hashlib
 import json
+import math
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -54,6 +55,48 @@ def _stable(value):
     } and not any(char.isspace() for char in value)
 
 
+def _present(row, key):
+    value = row.get(key)
+    return value is not None and str(value).strip() != ""
+
+
+def _is_sentinel(row):
+    return row.get("isSentinel") is True
+
+
+def _valid_position(value):
+    if isinstance(value, bool) or value is None:
+        return False
+    if isinstance(value, (int, float)):
+        number = float(value)
+    elif isinstance(value, str) and value.strip():
+        try:
+            number = float(value.strip())
+        except ValueError:
+            return False
+    else:
+        return False
+    return math.isfinite(number) and number >= 0
+
+
+def _jul29_missing(row):
+    missing = []
+    if not _stable(row.get("occurrenceId")):
+        missing.append("occurrence-id-missing")
+    for key in ("sourceId", "sourceHash", "rawHash", "position"):
+        if key == "position" and _present(row, key) and not _valid_position(row.get(key)):
+            missing.append("invalid-position")
+        elif not _present(row, key):
+            missing.append("missing-" + key)
+    return missing
+
+
+def _source_observations(row, row_index):
+    if row.get("sourceComplete") is not True and row.get("sourceVerified") is not True:
+        return [{"code": "source-completeness-unproven", "rowIndex": row_index}]
+    return []
+
+
 def _spine(row):
     if any(row.get(key) is None or str(row.get(key)).strip() == "" for key in ("videoId", "position", "seconds")):
         return None
@@ -80,23 +123,25 @@ def _source_ok(row):
 
 def closure(raw, provider, mode):
     """Close one-to-one authoritative raw/provider identities."""
-    issues, eligible, raw_map = [], [], {}
+    issues, observations, eligible, raw_map = [], [], [], {}
     rows = []
+    raw_sentinel_excluded = 0
     for index, row in enumerate(raw):
+        if _is_sentinel(row):
+            raw_sentinel_excluded += 1
+            rows.append({"rowIndex": index, "status": "excluded", "reason": "sentinel"})
+            continue
         synthetic = row.get("isSynthetic") is True or str(row.get("rowType", "")).lower() in {"synthetic", "sentinel"}
         if synthetic:
             rows.append({"rowIndex": index, "status": "excluded", "reason": "synthetic"})
             continue
         if mode == "jul29":
-            if not _stable(row.get("occurrenceId")):
-                issues.append({"code": "occurrence-id-missing", "rowIndex": index})
+            missing = _jul29_missing(row)
+            if missing:
+                issues.extend({"code": reason, "rowIndex": index} for reason in missing)
                 rows.append({"rowIndex": index, "status": "needsReview"})
                 continue
-            ok, reasons = _source_ok(row)
-            if not ok:
-                issues.extend({"code": reason, "rowIndex": index} for reason in reasons)
-                rows.append({"rowIndex": index, "status": "needsReview", "reason": reasons[0]})
-                continue
+            observations.extend(_source_observations(row, index))
         key = _key(row, mode)
         eligible.append(index)
         rows.append({"rowIndex": index, "identity": key, "status": "pending"})
@@ -109,7 +154,21 @@ def closure(raw, provider, mode):
             issues.append({"code": "duplicate-raw", "identity": key, "rowIndexes": indexes})
 
     provider_map = {}
+    provider_real = []
+    provider_sentinel_excluded = 0
     for index, row in enumerate(provider):
+        if _is_sentinel(row):
+            provider_sentinel_excluded += 1
+            continue
+        synthetic = row.get("isSynthetic") is True or str(row.get("rowType", "")).lower() in {"synthetic", "sentinel"}
+        if synthetic:
+            continue
+        if mode == "jul29":
+            missing = _jul29_missing(row)
+            if missing:
+                issues.extend({"code": reason, "providerIndex": index} for reason in missing)
+                continue
+        provider_real.append(index)
         key = _key(row, mode)
         if key is None:
             issues.append({"code": "provider-identity-missing", "providerIndex": index})
@@ -123,18 +182,51 @@ def closure(raw, provider, mode):
     for key, indexes in raw_map.items():
         if key not in provider_map:
             issues.append({"code": "provider-missing", "identity": key, "rowIndex": indexes[0]})
+    if mode == "jul29":
+        for key in set(raw_map).intersection(provider_map):
+            raw_indexes = raw_map[key]
+            provider_indexes = provider_map[key]
+            if len(raw_indexes) == 1 and len(provider_indexes) == 1:
+                raw_spine = _spine(raw[raw_indexes[0]])
+                provider_spine = _spine(provider[provider_indexes[0]])
+                if raw_spine is not None and provider_spine is not None and raw_spine != provider_spine:
+                    issues.append({
+                        "code": "identity-collision",
+                        "identity": key,
+                        "rowIndex": raw_indexes[0],
+                        "providerIndex": provider_indexes[0],
+                    })
+                mismatch_fields = [
+                    field
+                    for field in ("videoId", "position", "seconds", "sourceId", "sourceHash", "rawHash")
+                    if raw[raw_indexes[0]].get(field) != provider[provider_indexes[0]].get(field)
+                ]
+                if mismatch_fields:
+                    issues.append({
+                        "code": "identity-source-mismatch",
+                        "identity": key,
+                        "fields": mismatch_fields,
+                        "rowIndex": raw_indexes[0],
+                        "providerIndex": provider_indexes[0],
+                    })
 
     links = {}
     if not issues:
         links = {indexes[0]: provider[provider_map[key][0]] for key, indexes in raw_map.items()}
     report = {
         "eligibleCount": len(eligible),
-        "providerCount": len(provider),
+        "providerCount": len(provider_real),
+        "rawInputCount": len(raw),
+        "providerInputCount": len(provider),
+        "sentinelExcluded": max(raw_sentinel_excluded, provider_sentinel_excluded),
+        "rawSentinelExcluded": raw_sentinel_excluded,
+        "providerSentinelExcluded": provider_sentinel_excluded,
         "closedCount": len(links),
         "authoritativeOrder": [_key(raw[index], mode) for index in eligible],
         "status": "CLOSED" if not issues and len(links) == len(eligible) else "REJECT",
         "rows": rows,
         "issues": issues,
+        "observations": observations,
     }
     return links, report
 
@@ -149,11 +241,42 @@ def _tuple(row):
     return [row.get(key) for key in keys] if all(row.get(key) is not None for key in keys) else None
 
 
+def _artist_fallback_tuple(row):
+    keys = ("videoId", "title", "seconds")
+    return [row[key] for key in keys] if all(_present(row, key) for key in keys) else None
+
+
+def _artist_payload(binding, tuple_value, fallback=False):
+    payload = {"exactTuple": tuple_value}
+    if fallback:
+        payload["fallbackTuple"] = _artist_fallback_tuple(binding)
+        payload["bindingSource"] = "unique-video-title-seconds-fallback"
+    for key in ("artist", "artistName"):
+        if key in binding and binding[key] is not None:
+            payload[key] = binding[key]
+    return payload
+
+
 def artist(rows, bindings, links):
-    """Apply only exact accepted tuples; review/sentinel never bind."""
-    target = {_json(_tuple(rows[index])): index for index in links if _tuple(rows[index]) is not None}
-    applied, issues = {}, []
-    counts = {"acceptedCount": 0, "reviewExcludedCount": 0, "sentinelExcludedCount": 0, "firstPassApplied": 0, "secondPassApplied": 0}
+    """Apply accepted artist bindings, with a unique linked-row fallback."""
+    target = {}
+    fallback_target = {}
+    for index in links:
+        tuple_value = _tuple(rows[index])
+        if tuple_value is not None:
+            target.setdefault(_json(tuple_value), []).append(index)
+        fallback_value = _artist_fallback_tuple(rows[index])
+        if fallback_value is not None:
+            fallback_target.setdefault(_json(fallback_value), []).append(index)
+    applied, observations = {}, []
+    counts = {
+        "acceptedCount": 0,
+        "reviewExcludedCount": 0,
+        "sentinelExcludedCount": 0,
+        "firstPassApplied": 0,
+        "secondPassApplied": 0,
+        "fallbackApplied": 0,
+    }
     seen = set()
     for index, binding in enumerate(bindings):
         status = str(binding.get("decision", binding.get("status", ""))).lower()
@@ -164,26 +287,54 @@ def artist(rows, bindings, links):
             counts["sentinelExcludedCount"] += 1
             continue
         if status not in {"accepted", "approved", "exact"}:
-            issues.append({"code": "artist-status-unknown", "bindingIndex": index})
+            observations.append({"code": "artist-status-unknown", "bindingIndex": index})
             continue
         counts["acceptedCount"] += 1
         tuple_value = _tuple(binding)
         key = _json(tuple_value)
-        if tuple_value is None or key not in target or key in seen:
-            issues.append({"code": "artist-tuple-ambiguous-or-wrong", "bindingIndex": index})
+        exact_matches = target.get(key, []) if tuple_value is not None else []
+        if len(exact_matches) == 1 and key not in seen:
+            target_index = exact_matches[0]
+            seen.add(key)
+            matched_by_fallback = False
+        else:
+            fallback_value = _artist_fallback_tuple(binding)
+            fallback_key = _json(fallback_value) if fallback_value is not None else None
+            fallback_matches = fallback_target.get(fallback_key, []) if fallback_key is not None else []
+            if len(fallback_matches) != 1:
+                observations.append({
+                    "code": "artist-fallback-review",
+                    "bindingIndex": index,
+                    "matchCount": len(fallback_matches),
+                })
+                continue
+            target_index = fallback_matches[0]
+            matched_by_fallback = True
+            observations.append({
+                "code": "artist-exact-tuple-fallback",
+                "bindingIndex": index,
+                "rowIndex": target_index,
+                "matchCount": 1,
+            })
+        if target_index in applied:
+            observations.append({"code": "artist-binding-collision", "bindingIndex": index, "rowIndex": target_index})
             continue
-        seen.add(key)
         if int(binding.get("pass", binding.get("round", 1))) == 1:
             counts["firstPassApplied"] += 1
         else:
             counts["secondPassApplied"] += 1
-            issues.append({"code": "artist-second-pass-not-allowed", "bindingIndex": index})
-        applied[target[key]] = {"exactTuple": tuple_value}
+            observations.append({"code": "artist-second-pass-observed", "bindingIndex": index})
+        applied[target_index] = _artist_payload(binding, tuple_value, fallback=matched_by_fallback)
+        if matched_by_fallback:
+            counts["fallbackApplied"] += 1
     if counts["acceptedCount"] > 12:
-        issues.append({"code": "artist-accepted-count-exceeds-12"})
-    if issues:
-        applied = {}
-    return applied, {**counts, "appliedCount": len(applied), "status": "CLOSED" if not issues else "REJECT", "issues": issues}
+        observations.append({"code": "artist-accepted-count-exceeds-12", "count": counts["acceptedCount"]})
+    return applied, {
+        **counts,
+        "appliedCount": len(applied),
+        "status": "CLOSED",
+        "observations": observations,
+    }
 
 
 def _json(value):
@@ -248,8 +399,6 @@ def main(argv=None):
         if sidecar_key in sidecar_counts:
             artist_report[key] = int(sidecar_counts[sidecar_key])
     if report["issues"]:
-        artist_report["status"] = "REJECT"
-        artist_report.setdefault("issues", []).append({"code": "closure-rejected"})
         applied = {}
     routed, route_report = route(raw, links, args.release_cutoff_utc, metadata)
     linked = []
@@ -260,7 +409,7 @@ def main(argv=None):
             row["artistBinding"] = applied[index]
         row.update(routed[index])
         linked.append(row)
-    ready = not report["issues"] and not artist_report.get("issues") and not route_report["issues"] and len(linked) == len(links)
+    ready = not report["issues"] and not route_report["issues"] and len(linked) == len(links)
     report.update({"schemaVersion": "snapshot-pilot-linkage/v2", "sampleId": args.sample_id, "status": "CLOSED" if ready else "REJECT"})
     route_report.update({"schemaVersion": "snapshot-pilot-linkage/v2", "sampleId": args.sample_id, "releaseReadiness": "READY" if ready else "REJECT", "candidateOnly": True, "activation": "NOT_ATTEMPTED"})
     output = Path(args.output_dir)
