@@ -167,6 +167,37 @@ jobs:
             --output-root "$RUNNER_TEMP/two-day-rerun/materialized" \
             --route-as-of-utc "$ROUTE_AS_OF_UTC"
 
+      - name: Configure Node runtime
+        id: configure-node
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node_candidates=(
+            "/Users/be/actions-runner/externals/node20/bin/node"
+            "/opt/homebrew/bin/node"
+            "/usr/local/bin/node"
+          )
+          selected_node=''
+          for candidate in "${node_candidates[@]}"; do
+            if test -x "$candidate"; then
+              selected_node="$candidate"
+              break
+            fi
+          done
+          if [[ -z "$selected_node" ]]; then
+            echo "node executable not found in runner externals/node20/bin, /opt/homebrew/bin/node, or /usr/local/bin/node" >&2
+            exit 78
+          fi
+          node_dir="$(dirname "$selected_node")"
+          printf '%s\n' "$node_dir" >> "$GITHUB_PATH"
+          export PATH="$node_dir:$PATH"
+          node_version="$(node --version)"
+          printf 'node_path=%s\nnode_version=%s\n' "$selected_node" "$node_version" > "$RUNNER_TEMP/two-day-rerun/node-runtime.txt"
+          {
+            printf '### Node runtime\n'
+            printf -- '- path: `%s`\n' "$selected_node"
+            printf -- '- version: `%s`\n' "$node_version"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Run fresh provider, source bridge, and linkage both
         shell: bash
         run: |
