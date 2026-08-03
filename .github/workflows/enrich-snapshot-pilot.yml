@@ -27,7 +27,9 @@ jobs:
     env:
       SOURCE_RUN_ID: "30765216583"
       SOURCE_ARTIFACT_ID: "8838723011"
+      SOURCE_ARTIFACT_NAME: "enrich-snapshot-pilot-30765216583-both"
       SOURCE_ARTIFACT_DIGEST: "sha256:414372e0fedbfe94d6b187df75ec35e12dc3af70061d678eb29ab56fc0ec3fa1"
+      SOURCE_HEAD_SHA: "1880eb412c20dadfb1ba2b843f24d10cfec6fd77"
       SOURCE_COMMIT: ${{ inputs.source_commit }}
       ROUTE_AS_OF_UTC: ${{ inputs.route_as_of_utc }}
     steps:
@@ -99,16 +101,60 @@ jobs:
           test "$GITHUB_REF" = refs/heads/main
           [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
-          actual_digest='${{ steps.download.outputs.artifact-digest }}'
+          test -n "$GITHUB_API_URL"
+          test -n "$GITHUB_REPOSITORY"
+          metadata_url="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT_ID"
+          metadata_file="$RUNNER_TEMP/two-day-rerun/artifact-metadata.json"
+          bound_file="$RUNNER_TEMP/two-day-rerun/artifact-binding.json"
+          mkdir -p "$RUNNER_TEMP/two-day-rerun"
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --retry 1 \
+            --connect-timeout 10 \
+            --max-time 30 \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            -H 'Authorization: Bearer ${{ github.token }}' \
+            "$metadata_url" \
+            > "$metadata_file"
+          jq -e \
+            --arg expected_id "$SOURCE_ARTIFACT_ID" \
+            --arg expected_name "$SOURCE_ARTIFACT_NAME" \
+            --arg expected_digest "$SOURCE_ARTIFACT_DIGEST" \
+            --arg expected_run "$SOURCE_RUN_ID" \
+            --arg expected_head "$SOURCE_HEAD_SHA" \
+            'def fail($message): error($message);
+             . as $m
+             | if (($m | type) != "object") then fail("artifact metadata is not an object")
+               elif (($m.id | tostring) != $expected_id) then fail("artifact id mismatch")
+               elif (($m.name | type) != "string" or $m.name != $expected_name) then fail("artifact name mismatch")
+               elif (($m.digest | type) != "string" or $m.digest != $expected_digest) then fail("artifact digest mismatch")
+               elif (($m.expired | type) != "boolean" or $m.expired != false) then fail("artifact is expired")
+               elif (($m.workflow_run.id | tostring) != $expected_run) then fail("workflow run id mismatch")
+               elif (($m.workflow_run.head_sha | type) != "string" or $m.workflow_run.head_sha != $expected_head) then fail("workflow head sha mismatch")
+               else {
+                 id: ($m.id | tostring),
+                 name: $m.name,
+                 digest: $m.digest,
+                 expired: $m.expired,
+                 workflowRunId: ($m.workflow_run.id | tostring),
+                 workflowRunHeadSha: $m.workflow_run.head_sha
+               }
+               end' \
+            "$metadata_file" \
+            > "$bound_file"
+          actual_digest="$(jq -er '.digest | select(type == "string" and length > 0)' "$bound_file")"
           test -n "$actual_digest"
           test "$actual_digest" = "$SOURCE_ARTIFACT_DIGEST"
-          mkdir -p "$RUNNER_TEMP/two-day-rerun"
           jq -n \
-            --arg run "$SOURCE_RUN_ID" \
-            --arg artifact "$SOURCE_ARTIFACT_ID" \
+            --arg metadata_url "$metadata_url" \
             --arg expected "$SOURCE_ARTIFACT_DIGEST" \
             --arg actual "$actual_digest" \
-            '{status:"VERIFIED",runId:$run,artifactId:$artifact,expectedDigest:$expected,actualDigest:$actual}' \
+            --slurpfile bound "$bound_file" \
+            '{status:"VERIFIED",source:{runId:$bound[0].workflowRunId,artifactId:$bound[0].id,artifactName:$bound[0].name,workflowRunHeadSha:$bound[0].workflowRunHeadSha,expired:$bound[0].expired},expectedDigest:$expected,actualDigest:$actual,metadataUrl:$metadata_url,verification:"github-artifact-rest-metadata-v1"}' \
             > "$RUNNER_TEMP/two-day-rerun/download-proof.json"
 
       - name: Materialize raw-input and input-manifest only
