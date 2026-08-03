@@ -9087,11 +9087,6 @@ def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
     """Return exact source-occurrence expressions for selected public fields."""
 
     payload_json = _runtime_source_payload_json_expression()
-    video_payload_json = (
-        "(CASE WHEN NULLIF(btrim(occurrence.title), '') IS NULL "
-        "AND NULLIF(btrim(occurrence.video_id), '') IS NULL "
-        f"THEN {payload_json} ELSE NULL::jsonb END)"
-    )
     expressions = {
         "title": (
             f"{payload_json}->>'songTitle'",
@@ -9131,16 +9126,7 @@ def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
         "video": (
             "NULLIF(btrim(occurrence.title), '')",
             "NULLIF(btrim(occurrence.video_id), '')",
-            f"{video_payload_json}->>'title'",
-            f"{video_payload_json}->>'videoId'",
-            f"{video_payload_json}->'video'->>'title'",
-            f"{video_payload_json}->'video'->>'videoId'",
-            f"{video_payload_json}->'item'->>'title'",
-            f"{video_payload_json}->'item'->>'videoId'",
-            f"{video_payload_json}->'payload'->'video'->>'title'",
-            f"{video_payload_json}->'payload'->'video'->>'videoId'",
-            f"{video_payload_json}->'payload'->'item'->>'title'",
-            f"{video_payload_json}->'payload'->'item'->>'videoId'",
+            f"{payload_json}->'item'->>'title'",
         ),
         "source": (
             "occurrence.source_id",
