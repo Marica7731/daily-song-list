@@ -9033,197 +9033,9 @@ def _runtime_row_search_texts(row: Mapping[str, Any]) -> dict[str, str]:
     return texts
 
 
-_RANKING_SOURCE_SEARCH_MATCH_CAP = 4096
-
-
-def _runtime_row_source_key(row: Mapping[str, Any]) -> str:
-    payload = _json_object(row.get("payload_json"))
-    return _text(row.get("detail_key") or payload.get("sourceDetailKey"))
-
-
-def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
-    """Return exact source-occurrence expressions for selected public fields."""
-
-    expressions = {
-        "title": (
-            "occurrence.payload_json->>'songTitle'",
-            "occurrence.payload_json->'song'->>'title'",
-            "occurrence.payload_json->'payload'->>'songTitle'",
-            "occurrence.payload_json->'payload'->'song'->>'title'",
-        ),
-        "artist": (
-            "occurrence.artist",
-            "occurrence.payload_json->>'artist'",
-            "occurrence.payload_json->'song'->>'artist'",
-            "occurrence.payload_json->'payload'->>'artist'",
-            "occurrence.payload_json->'payload'->'song'->>'artist'",
-        ),
-        "channel": (
-            "occurrence.channel_name",
-            "occurrence.channel_id",
-            "occurrence.channel_handle",
-            "occurrence.channel_url",
-            "occurrence.payload_json->>'channelName'",
-            "occurrence.payload_json->>'channelId'",
-            "occurrence.payload_json->>'channelHandle'",
-            "occurrence.payload_json->>'channelUrl'",
-            "occurrence.payload_json->'video'->>'channelName'",
-            "occurrence.payload_json->'video'->>'channelId'",
-            "occurrence.payload_json->'video'->>'channelHandle'",
-            "occurrence.payload_json->'video'->>'channelUrl'",
-            "occurrence.payload_json->'item'->>'channelName'",
-            "occurrence.payload_json->'item'->>'channelId'",
-            "occurrence.payload_json->'item'->>'channelHandle'",
-            "occurrence.payload_json->'item'->>'channelUrl'",
-            "occurrence.payload_json->'payload'->'video'->>'channelName'",
-            "occurrence.payload_json->'payload'->'video'->>'channelId'",
-            "occurrence.payload_json->'payload'->'video'->>'channelHandle'",
-            "occurrence.payload_json->'payload'->'video'->>'channelUrl'",
-        ),
-        "video": (
-            "occurrence.title",
-            "occurrence.video_id",
-            "occurrence.payload_json->>'title'",
-            "occurrence.payload_json->>'videoId'",
-            "occurrence.payload_json->'video'->>'title'",
-            "occurrence.payload_json->'video'->>'videoId'",
-            "occurrence.payload_json->'item'->>'title'",
-            "occurrence.payload_json->'item'->>'videoId'",
-            "occurrence.payload_json->'payload'->'video'->>'title'",
-            "occurrence.payload_json->'payload'->'video'->>'videoId'",
-            "occurrence.payload_json->'payload'->'item'->>'title'",
-            "occurrence.payload_json->'payload'->'item'->>'videoId'",
-        ),
-        "source": (
-            "occurrence.source_id",
-            "occurrence.source_system",
-            "occurrence.payload_json->>'sourceId'",
-            "occurrence.payload_json->>'sourceSystem'",
-            "occurrence.payload_json->'song'->>'sourceId'",
-            "occurrence.payload_json->'song'->>'sourceSystem'",
-            "occurrence.payload_json->'payload'->>'sourceId'",
-            "occurrence.payload_json->'payload'->>'sourceSystem'",
-            "occurrence.payload_json->'payload'->'song'->>'sourceId'",
-            "occurrence.payload_json->'payload'->'song'->>'sourceSystem'",
-        ),
-    }
-    selected: list[str] = []
-    for field in fields:
-        for expression in expressions.get(field, ()):
-            if expression not in selected:
-                selected.append(expression)
-    return tuple(selected)
-
-
-def _runtime_source_search_matches(
-    connection,
-    revision_id: str,
-    options: Mapping[str, Any],
-    db_metric: str,
-    ranking_revision_id: str | None = None,
-) -> dict[str, set[str]]:
-    """Find ranking source keys through one bounded active-lineage SQL query.
-
-    Ranking cards carry only a short occurrence preview.  For explicit
-    video/source/all fields, the authoritative source detail and its physical
-    occurrences are searched in one set-based query.  No legacy aggregate
-    ``search_text`` is consulted and no source query is issued per card.
-    """
-
-    if (
-        _text(options.get("view")) not in {"songs", "songIndex"}
-        or not options.get("searchTokens")
-    ):
-        return {}
-    fields = _effective_search_fields(options)
-    if not any(field in {"video", "source"} for field in fields):
-        return {}
-    expressions = _runtime_source_field_expressions(fields)
-    if not expressions:
-        return {}
-    requested_values = ", ".join("(%s, %s)" for _ in options["searchTokens"])
-    requested_params: list[Any] = []
-    for token in options["searchTokens"]:
-        requested_params.extend((
-            _text(token).casefold(),
-            f"%{_sql_like_literal(token)}%",
-        ))
-    ranking_revision = _text(ranking_revision_id or revision_id)
-    rows = _rows(
-        connection,
-        f"""
-        WITH RECURSIVE active_lineage AS (
-            SELECT revision_id, parent_revision_id, 0 AS lineage_depth
-            FROM migration_revisions
-            WHERE revision_id = %s
-            UNION ALL
-            SELECT parent.revision_id, parent.parent_revision_id,
-                   active_lineage.lineage_depth + 1
-            FROM migration_revisions AS parent
-            JOIN active_lineage
-              ON parent.revision_id = active_lineage.parent_revision_id
-        ), authorities AS (
-            SELECT DISTINCT ON (detail.source_key)
-                   detail.source_key,
-                   detail.revision_id AS authority_revision
-            FROM runtime_source_details AS detail
-            JOIN active_lineage
-              ON active_lineage.revision_id = detail.revision_id
-            WHERE detail.range_id = %s
-            ORDER BY detail.source_key, active_lineage.lineage_depth
-        ), requested(token, needle) AS (
-            VALUES {requested_values}
-        )
-        SELECT DISTINCT ranking.detail_key AS source_key, requested.token
-        FROM runtime_ranking_rows AS ranking
-        JOIN authorities
-          ON authorities.source_key = ranking.detail_key
-        JOIN runtime_source_occurrences AS occurrence
-          ON occurrence.revision_id = authorities.authority_revision
-         AND occurrence.source_key = authorities.source_key
-        CROSS JOIN requested
-        WHERE ranking.revision_id = %s
-          AND ranking.range_id = %s
-          AND ranking.view = %s
-          AND ranking.metric = %s
-          AND ranking.row_count >= %s
-          AND occurrence.range_id = %s
-          AND ({" OR ".join(
-              f"coalesce({expression}, '') ILIKE requested.needle ESCAPE E'\\\\'"
-              for expression in expressions
-          )})
-        LIMIT %s
-        """,
-        [
-            _text(revision_id),
-            _text(options["range"]),
-            *requested_params,
-            ranking_revision,
-            _text(options["range"]),
-            _text(options["view"]),
-            db_metric,
-            int(options["minCount"]),
-            _text(options["range"]),
-            _RANKING_SOURCE_SEARCH_MATCH_CAP + 1,
-        ],
-    )
-    if len(rows) > _RANKING_SOURCE_SEARCH_MATCH_CAP:
-        raise PostgresAdapterError(
-            "ranking source search candidate set exceeded bounded cap"
-        )
-    matches: dict[str, set[str]] = defaultdict(set)
-    for row in rows:
-        source_key = _text(row.get("source_key") or row.get("detail_key"))
-        token = _text(row.get("token")).casefold()
-        if source_key and token:
-            matches[source_key].add(token)
-    return matches
-
-
 def _runtime_row_matches_search(
     row: Mapping[str, Any],
     options: Mapping[str, Any],
-    source_token_matches: Mapping[str, set[str]] | None = None,
 ) -> bool:
     """Match every token against only the explicitly/effectively selected fields."""
 
@@ -9236,13 +9048,8 @@ def _runtime_row_matches_search(
         return True
     fields = _effective_search_fields(options)
     texts = _runtime_row_search_texts(row)
-    source_tokens = (source_token_matches or {}).get(
-        _runtime_row_source_key(row),
-        set(),
-    )
     return all(
-        token in source_tokens
-        or any(token in texts.get(field, "") for field in fields)
+        any(token in texts.get(field, "") for field in fields)
         for token in tokens
     )
 
@@ -9250,12 +9057,11 @@ def _runtime_row_matches_search(
 def _public_row_matches_search(
     row: Mapping[str, Any],
     options: Mapping[str, Any],
-    source_token_matches: Mapping[str, set[str]] | None = None,
 ) -> bool:
     """Use the new separated contract only for ordinary song rankings."""
 
     if _text(options.get("view")) in {"songs", "songIndex"}:
-        return _runtime_row_matches_search(row, options, source_token_matches)
+        return _runtime_row_matches_search(row, options)
     return _matches_search_tokens(
         _text(row.get("search_text")) + " " + _text(row.get("channel_search_text")),
         options.get("searchTokens") or (),
@@ -9895,13 +9701,10 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         """,
         [revision_id, options["range"], options["view"], db_metric],
     )
-    source_token_matches = _runtime_source_search_matches(
-        connection, revision_id, options, db_metric,
-    )
     if options["searchTokens"]:
         rows = [
             row for row in rows
-            if _public_row_matches_search(row, options, source_token_matches)
+            if _public_row_matches_search(row, options)
         ]
     rows = [row for row in rows if int(row.get("row_count") or 0) >= options["minCount"]]
     total_occurrences = sum(int(row.get("row_count") or 0) for row in rows)
