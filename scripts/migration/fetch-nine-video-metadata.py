@@ -291,7 +291,7 @@ def execute(args: argparse.Namespace) -> None:
                 raise CandidateError(f"fixture is missing {video_id}")
             raw = fixture[video_id]
         else:
-            raw = run_ytdlp(video["url"], video_id, args.ytdlp)
+            raw = run_ytdlp(video["url"], video_id, args.yt_dlp)
         records.append(provider_record(video, raw, input_path, config))
     if len(records) != EXPECTED_VIDEO_COUNT:
         raise CandidateError(f"expected {EXPECTED_VIDEO_COUNT} output records, got {len(records)}")

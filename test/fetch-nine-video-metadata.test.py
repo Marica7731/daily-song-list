@@ -8,6 +8,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "migration" / "fetch-nine-video-metadata.py"
@@ -147,6 +148,43 @@ class FetchNineVideoMetadataTest(unittest.TestCase):
                 MODULE.NEEDS_REVIEW_EXIT,
             )
             self.assertFalse(output_path.exists())
+
+    def test_non_fixture_path_passes_resolved_executable_and_writes_nine_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            input_path = root / "input.json"
+            output_path = root / "metadata.ndjson"
+            manifest_path = root / "manifest.json"
+            input_path.write_text(json.dumps(make_config()), encoding="utf-8")
+            fixture_by_id = {record["id"]: record for record in make_fixture()}
+            resolved_executable = "/runner/temp/jul29-metadata-venv/bin/yt-dlp"
+            calls: list[tuple[str, str, str]] = []
+
+            def fake_run_ytdlp(url: str, video_id: str, executable: str) -> dict:
+                calls.append((url, video_id, executable))
+                return fixture_by_id[video_id]
+
+            with patch.object(MODULE, "run_ytdlp", side_effect=fake_run_ytdlp):
+                result = MODULE.main(
+                    [
+                        "--input",
+                        str(input_path),
+                        "--output",
+                        str(output_path),
+                        "--manifest",
+                        str(manifest_path),
+                        "--yt-dlp",
+                        resolved_executable,
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+            self.assertEqual(len(calls), 9)
+            self.assertEqual({call[2] for call in calls}, {resolved_executable})
+            self.assertEqual({call[1] for call in calls}, {video_id for video_id, _count in VIDEO_IDS})
+            records = [json.loads(line) for line in output_path.read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(len(records), 9)
+            self.assertEqual(sum(record["occurrenceBinding"]["expectedOccurrenceCount"] for record in records), 90)
 
 
 if __name__ == "__main__":
