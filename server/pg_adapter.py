@@ -296,6 +296,94 @@ def _project_runtime_video_records(
     return result
 
 
+def _project_generic_overlay_video_records(
+    connection,
+    revision_ids: Sequence[str],
+    response: Mapping[str, Any],
+    *,
+    view: str,
+) -> dict[str, Any]:
+    """Hydrate returned generic video cards from exact active overlay rows."""
+
+    result = _project_runtime_video_records(response, view=view)
+    if view != "videos":
+        return result
+    records = result.get("records")
+    if not isinstance(records, list) or not records:
+        return result
+    ordered_revisions = [
+        _text(revision_id) for revision_id in revision_ids if _text(revision_id)
+    ]
+    video_ids = list(dict.fromkeys(
+        _text(record.get("videoId") or record.get("key"))
+        for record in records if isinstance(record, Mapping)
+    ))
+    video_ids = [
+        video_id for video_id in video_ids
+        if re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id)
+    ]
+    if not ordered_revisions or not video_ids:
+        return result
+    rows = _rows(
+        connection,
+        """
+        /* bounded active-overlay video-card metadata */
+        SELECT revision_id, video_id, title, channel_name, channel_id,
+               channel_handle, channel_url, published_at, tombstone,
+               payload_json
+        FROM migration_video_rows
+        WHERE revision_id = ANY(%s) AND video_id = ANY(%s)
+        ORDER BY array_position(%s::text[], revision_id), video_id
+        """,
+        [ordered_revisions, video_ids, ordered_revisions],
+    )
+    metadata_by_video: dict[str, dict[str, Any] | None] = {}
+    for row in rows:
+        video_id = _text(row.get("video_id"))
+        if video_id not in video_ids or video_id in metadata_by_video:
+            continue
+        if bool(row.get("tombstone")):
+            metadata_by_video[video_id] = None
+            continue
+        source_row = dict(row)
+        source_row["video_payload_json"] = row.get("payload_json")
+        metadata = _overlay_public_video(source_row)
+        metadata_id = _text(metadata.get("videoId"))
+        if metadata_id and metadata_id != video_id:
+            raise PostgresAdapterError(
+                f"video metadata videoId {metadata_id!r} conflicts with overlay video_id {video_id!r}"
+            )
+        metadata_by_video[video_id] = metadata
+
+    range_id = _text(result.get("rangeId"))
+    projected: list[Any] = []
+    public_fields = (
+        "title", "channelId", "channelName", "channelHandle", "channelUrl",
+        "publishedAt", "publishedTimestamp", "sourceSystem", "rangeId",
+    )
+    for record in records:
+        if not isinstance(record, Mapping):
+            projected.append(record)
+            continue
+        payload = dict(record)
+        video_id = _text(payload.get("videoId") or payload.get("key"))
+        metadata = metadata_by_video.get(video_id)
+        if metadata:
+            for name in public_fields:
+                if metadata.get(name) not in (None, ""):
+                    payload[name] = copy.deepcopy(metadata[name])
+            payload["videoId"] = video_id
+            if _text(metadata.get("title")) and "name" in payload:
+                payload["name"] = metadata["title"]
+            if range_id:
+                payload["sourceDetailKey"] = _stable_key(
+                    "source-video", range_id, video_id,
+                )
+        projected.append(payload)
+    result["records"] = projected
+    return result
+
+
 def _channel_metadata_rows(
     connection,
     revision_ids: Sequence[str],
@@ -10297,6 +10385,7 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
         parent = _generic_parent_runtime_revision(
             connection, generic_runtime[0], generic_runtime[1],
         )
+        overlay_ids: Sequence[str] = ()
         if parent:
             overlay_ids = _overlay_revision_ids(
                 connection, generic_runtime[0], parent[0],
@@ -10308,7 +10397,9 @@ def rankings_payload(connection, query: Mapping[str, Any] | None = None) -> dict
                 return rankings_payload_from_records(
                     _authoritative_7d_records(connection, overlay_ids), query,
                 )
-        return _project_runtime_video_records(
+        return _project_generic_overlay_video_records(
+            connection,
+            overlay_ids,
             _generic_overlay_rankings_payload(
                 connection, generic_runtime[0], generic_runtime[1], query,
             ),

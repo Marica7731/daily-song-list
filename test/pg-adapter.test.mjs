@@ -119,6 +119,60 @@ test("adapter parses without creating pycache files", () => {
   runPython(`compile(open(${JSON.stringify(IDENTITY_AUDIT)}, encoding="utf-8").read(), ${JSON.stringify(IDENTITY_AUDIT)}, "exec")`);
 });
 
+test("focused runtime video ranking cards project bounded active-overlay metadata", () => {
+  const fixture = JSON.parse(
+    fs.readFileSync(path.join(TEST_DIR, "..", "..", "fixture", "runtime-video-rankings.json"), "utf8"),
+  );
+  const output = runPython(`
+import importlib.util
+import json
+import sys
+
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+fixture = json.loads(${JSON.stringify(JSON.stringify(fixture))})
+row = fixture["runtimeVideoRow"]
+
+def rows(_connection, sql, params):
+    assert "FROM migration_video_rows" in sql
+    assert list(params[0]) == ["accepted-current", "accepted-parent"]
+    assert list(params[1]) == [row["video_id"]]
+    assert list(params[2]) == ["accepted-current", "accepted-parent"]
+    return [row]
+
+module._rows = rows
+result = module._project_generic_overlay_video_records(
+    object(), ("accepted-current", "accepted-parent"),
+    fixture["response"], view="videos",
+)
+record = result["records"][0]
+assert record["videoId"] == row["video_id"]
+assert record["channelId"] == "UC-authoritative"
+assert record["channelName"] == "Authoritative Channel"
+assert record["publishedAt"] == "2026-07-22T00:00:00Z"
+assert record["publishedTimestamp"] == 1784678400000
+assert record["sourceSystem"] == "youtube_channel_discovery"
+assert record["rangeId"] == "all"
+assert record["sourceDetailKey"] == module._stable_key(
+    "source-video", "all", row["video_id"],
+)
+assert record["title"] == "Authoritative Jul22 video"
+assert record["name"] == "Authoritative Jul22 video"
+assert record["count"] == 88
+assert record["timestampCount"] == 88
+assert record["songCount"] == 44
+assert record["videoCount"] == 1
+assert "totalOccurrenceCount" not in record
+assert module._project_generic_overlay_video_records(
+    object(), ("accepted-current",), fixture["response"], view="songs",
+) == fixture["response"]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("page-1 VTuber preparation keeps accepted overlay aggregation inside PostgreSQL", () => {
   const output = runPython(`
 import importlib.util
