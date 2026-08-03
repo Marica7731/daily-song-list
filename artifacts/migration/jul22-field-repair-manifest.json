@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "accepted-increment",
+  "sourceKey": "snapshot-recovery-jul22",
+  "rangeId": "all",
+  "range": "all",
+  "sourceReachedEnd": true,
+  "mediaDownloaded": false,
+  "statusAuditIncluded": false,
+  "inputFiles": [
+    "artifacts/migration/jul22-field-repair.ndjson"
+  ],
+  "sourceManifestSha256": "3ee4629ee5cfbd7953bed261c571746a1add902e58d1c9b1547e64263a44407f",
+  "sourceBaseCommit": "2880c8aa9051a51009980115b1149e4b0ebcb499",
+  "acceptedVideoCount": 1,
+  "acceptedOccurrenceCount": 88,
+  "rangeIds": [
+    "all"
+  ],
+  "sourceSystems": [
+    "youtube_channel_discovery"
+  ],
+  "reviewAudit": {},
+  "patch_sha256": "b0e05819a117aff1f92bd9ecc10b05ef374d0ea9ce2162ba20cefbe390adf6b6",
+  "patchSha256": "b0e05819a117aff1f92bd9ecc10b05ef374d0ea9ce2162ba20cefbe390adf6b6",
+  "patch": {
+    "productPath": "artifacts/migration/jul22-field-repair.ndjson",
+    "sha256": "b0e05819a117aff1f92bd9ecc10b05ef374d0ea9ce2162ba20cefbe390adf6b6",
+    "bytes": 301316
+  },
+  "candidate": {
+    "productPath": "artifacts/migration/jul22-field-repair.ndjson",
+    "sha256": "b0e05819a117aff1f92bd9ecc10b05ef374d0ea9ce2162ba20cefbe390adf6b6",
+    "bytes": 301316,
+    "videoCount": 1,
+    "occurrenceCount": 88,
+    "rangeId": "all",
+    "sourceSongsCanonicalSha256": "7be6f2e09a8d38f97942b31ee3caf43d366680f9f039d53605d252d160733576",
+    "sourceOccurrencesCanonicalSha256": "4b76576c65ca235d8bcd13f2473d38fbc953ce33fa1c8ef203572c9e8f43d811"
+  },
+  "sourceEvidence": {
+    "formalInputSha256": "ed7c5d443ddfd0b09980005adba7182070ae8fb356c75023630909b2a5ff5ecc",
+    "formalFixtureSha256": "3ee4629ee5cfbd7953bed261c571746a1add902e58d1c9b1547e64263a44407f",
+    "formalSourceVideoCount": 19,
+    "formalSourceOccurrenceCount": 456,
+    "targetVideoId": "1b9E79L7PmQ",
+    "targetOccurrenceCount": 88
+  },
+  "metadataEvidence": {
+    "provider": "yt-dlp standalone single-video probe",
+    "ytDlpVersion": "2026.07.23.234303",
+    "probeUrl": "https://www.youtube.com/watch?v=1b9E79L7PmQ",
+    "observed": {
+      "videoId": "1b9E79L7PmQ",
+      "title": "【#歌枠】週の真ん中！最高の発表もあります【ボイトレVTuber / みかん先生】",
+      "channelId": "UC1JuhRTsFgZvi2ie2dTUxbg",
+      "channelName": "みかんとボーカルノート",
+      "publishedAt": "2026-07-22T16:18:31Z",
+      "thumbnail": "https://i.ytimg.com/vi/1b9E79L7PmQ/sddefault.jpg?v=6a3a3d48",
+      "videoUrl": "https://www.youtube.com/watch?v=1b9E79L7PmQ",
+      "duration": 14501
+    },
+    "candidateFilledFields": [
+      "thumbnail",
+      "duration"
+    ],
+    "candidatePreservedSourceFields": [
+      "videoId",
+      "title",
+      "channelId",
+      "channelName",
+      "publishedAt",
+      "videoUrl"
+    ],
+    "publishedAtEvidence": "frozen formal source publishedAt; yt-dlp upload_date=20260722",
+    "historicalTitlePreserved": "【#歌枠】週の真ん中！最高の発表もあります🦘🌙【ボイトレVTuber / みかん先生】",
+    "observedTitleWasNotApplied": true
+  },
+  "controllerCAS": {
+    "expectedActiveParent": "accepted_30836268898_1",
+    "inputOnly": true,
+    "bindAtImport": true
+  },
+  "importer": {
+    "entrypoint": "scripts/migration/import-pg-incremental.py",
+    "sourceBaseCommit": "2880c8aa9051a51009980115b1149e4b0ebcb499",
+    "blobSha": "7cc348916f39e71d95d03c0ce0c7fb73f0c0c36a",
+    "acceptedIncrementShape": "top-level videoId + songs[]",
+    "metadataColumns": [
+      "title",
+      "channelName",
+      "channelId",
+      "publishedAt"
+    ],
+    "payloadPreserves": [
+      "thumbnail",
+      "videoUrl",
+      "duration",
+      "songs",
+      "occurrences"
+    ]
+  },
+  "productPaths": {
+    "candidate": "artifacts/migration/jul22-field-repair.ndjson",
+    "manifest": "artifacts/migration/jul22-field-repair-manifest.json"
+  }
+}
