@@ -60,8 +60,24 @@ jobs:
           fi
           test -f "$product_root/scripts/migration/fetch-nine-video-metadata.py"
           test -f "$product_root/config/snapshot-recovery/jul29-9-video-ids.json"
-          command -v "$YT_DLP_EXECUTABLE" >/dev/null 2>&1
-          "$YT_DLP_EXECUTABLE" --version
+          resolved_yt_dlp=''
+          if [[ "$YT_DLP_EXECUTABLE" == */* ]]; then
+            if [[ -x "$YT_DLP_EXECUTABLE" ]]; then
+              resolved_yt_dlp="$(cd "$(dirname "$YT_DLP_EXECUTABLE")" && pwd)/$(basename "$YT_DLP_EXECUTABLE")"
+            fi
+          elif command_path="$(command -v "$YT_DLP_EXECUTABLE" 2>/dev/null)"; then
+            resolved_yt_dlp="$(cd "$(dirname "$command_path")" && pwd)/$(basename "$command_path")"
+          fi
+          if [[ -z "$resolved_yt_dlp" ]]; then
+            venv_dir="$RUNNER_TEMP/jul29-metadata-venv"
+            python3 -m venv "$venv_dir"
+            "$venv_dir/bin/pip" install --disable-pip-version-check --no-input yt-dlp
+            resolved_yt_dlp="$venv_dir/bin/yt-dlp"
+          fi
+          test -x "$resolved_yt_dlp"
+          "$resolved_yt_dlp" --version
+          printf 'RESOLVED_YT_DLP=%s\n' "$resolved_yt_dlp" >> "$GITHUB_ENV"
+          printf 'yt_dlp_path=%s\n' "$resolved_yt_dlp" >> "$GITHUB_STEP_SUMMARY"
           python3 --version
 
       - name: Run nine-video metadata-only candidate
@@ -69,7 +85,6 @@ jobs:
         env:
           INPUT_PATH: ${{ inputs.input_path }}
           FIXTURE_PATH: ${{ inputs.fixture_path }}
-          YT_DLP_EXECUTABLE: ${{ inputs.yt_dlp_executable }}
         run: |
           set -Eeuo pipefail
           product_root="$GITHUB_WORKSPACE"
@@ -84,7 +99,7 @@ jobs:
             --input "$input_path"
             --output "$artifact_root/metadata.ndjson"
             --manifest "$artifact_root/manifest.json"
-            --yt-dlp "$YT_DLP_EXECUTABLE"
+            --yt-dlp "$RESOLVED_YT_DLP"
           )
           if test -n "$FIXTURE_PATH"; then
             args+=(--fixture "$product_root/$FIXTURE_PATH")
