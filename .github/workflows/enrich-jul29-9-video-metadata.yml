@@ -41,6 +41,10 @@ jobs:
           ref: ${{ inputs.source_commit }}
           fetch-depth: 1
           persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/migration/fetch-nine-video-metadata.py
+            config/snapshot-recovery/jul29-9-video-ids.json
 
       - name: Verify candidate files and runner tool
         shell: bash
