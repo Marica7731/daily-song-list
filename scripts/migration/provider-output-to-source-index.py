@@ -3,6 +3,8 @@
 
 The bridge never derives occurrence IDs, positions, source IDs, or source
 bytes.  A missing or conflicting field is a not-ready result (exit 78).
+A missing local source sidecar is retained as observation-only when the
+provider has already supplied a stable identity, event time, and position.
 """
 
 from __future__ import annotations
@@ -205,7 +207,7 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
             base = {**capture_by_id[base["sourceId"]], **{k: v for k, v in base.items() if v is not None}}
         elif video_id in capture_by_video:
             base = {**capture_by_video[video_id], **{k: v for k, v in base.items() if v is not None}}
-        source_key: tuple[str, str, str, str] | None = None
+        source_key: tuple[str, str, str, str | None] | None = None
         normalized_rows: list[dict[str, Any]] = []
         row_sentinel = record.get("detailNull") is True or record.get("status") == "detail_null"
         for occurrence in occurrences:
@@ -237,9 +239,23 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
             if not isinstance(raw_hash, str) or not SHA256.fullmatch(raw_hash):
                 fail("HASH_INVALID", f"{video_id}/{occurrence_id}:rawHash")
             path_value = source.get("sourcePath") or source.get("sourceBytesPath")
-            relative_path, resolved_path = checked_source_path(args.source_root, path_value, video_id)
-            if sha256_file(resolved_path) != raw_hash.lower():
-                fail("RAW_HASH_MISMATCH", f"{video_id}/{occurrence_id}")
+            sidecar_observation = None
+            source_complete = True
+            source_verified = True
+            relative_path: str | None = None
+            resolved_path: Path | None = None
+            if path_value is None or (isinstance(path_value, str) and not path_value.strip()):
+                sidecar_observation = {
+                    "code": "PROVIDER_RAW_SIDECAR_REQUIRED",
+                    "status": "observation_only",
+                    "reason": f"{video_id}: local source bytes path is required",
+                }
+                source_complete = False
+                source_verified = False
+            else:
+                relative_path, resolved_path = checked_source_path(args.source_root, path_value, video_id)
+                if sha256_file(resolved_path) != raw_hash.lower():
+                    fail("RAW_HASH_MISMATCH", f"{video_id}/{occurrence_id}")
             key = (source_id, source_hash.lower(), raw_hash.lower(), relative_path)
             if source_key is None:
                 source_key = key
@@ -262,10 +278,12 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
                     "sourceId": source_id,
                     "sourceHash": source_hash.lower(),
                     "rawHash": raw_hash.lower(),
-                    "sourcePath": str(resolved_path),
+                    "sourcePath": str(resolved_path) if resolved_path is not None else None,
                     "sourceBytesPath": relative_path,
-                    "sourceComplete": True,
-                    "sourceVerified": True,
+                    "sourceComplete": source_complete,
+                    "sourceVerified": source_verified,
+                    "needsReview": occurrence.get("needsReview") is True or not source_verified,
+                    "sourceObservation": sidecar_observation,
                     "eventTime": event,
                     "isSentinel": sentinel,
                 }
@@ -275,14 +293,27 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
                 normalized["status"] = "detail_null"
             normalized_rows.append(normalized)
             all_rows.append(normalized)
+        source_path = None
+        source_bytes_path = None
+        if source_key is not None and source_key[3] is not None:
+            source_bytes_path = source_key[3]
+            source_path = (
+                str((args.source_root / source_bytes_path).resolve())
+                if not Path(source_bytes_path).is_absolute()
+                else source_bytes_path
+            )
         rows_by_video[video_id] = {
             "videoId": video_id,
             "eventTime": event,
             "sourceId": source_key[0] if source_key else None,
             "sourceHash": source_key[1] if source_key else None,
             "rawHash": source_key[2] if source_key else None,
-            "sourcePath": str((args.source_root / source_key[3]).resolve()) if source_key and not Path(source_key[3]).is_absolute() else source_key[3] if source_key else None,
-            "sourceBytesPath": source_key[3] if source_key else None,
+            "sourcePath": source_path,
+            "sourceBytesPath": source_bytes_path,
+            "sourceComplete": all(row["sourceComplete"] for row in normalized_rows),
+            "sourceVerified": all(row["sourceVerified"] for row in normalized_rows),
+            "needsReview": any(row["needsReview"] for row in normalized_rows),
+            "sourceObservationOnly": any(row["sourceObservation"] is not None for row in normalized_rows),
             "occurrences": sorted(normalized_rows, key=lambda row: (row["sourceLineOrdinal"], row["sourceOccurrenceOrdinal"], row["occurrenceId"])),
         }
     actual_ids = sorted(rows_by_video)
@@ -302,6 +333,10 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         "videoCount": len(actual_ids),
         "realOccurrenceCount": real,
         "sentinelOccurrenceCount": sentinel,
+        "sourceStatus": "OBSERVATION_ONLY" if any(row["sourceObservation"] is not None for row in all_rows) else "VERIFIED",
+        "sourceObservationOnlyCount": sum(row["sourceObservation"] is not None for row in all_rows),
+        "needsReviewCount": sum(row["needsReview"] for row in all_rows),
+        "releaseEligible": True,
         "providerOutputSha256": sha256_file(args.provider_output),
         "sources": [rows_by_video[key] for key in actual_ids],
         "occurrences": sorted(all_rows, key=lambda row: (row["videoId"], row["sourceLineOrdinal"], row["sourceOccurrenceOrdinal"], row["occurrenceId"])),
