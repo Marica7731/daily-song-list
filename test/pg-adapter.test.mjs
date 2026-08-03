@@ -136,11 +136,33 @@ fixture = json.loads(${JSON.stringify(JSON.stringify(fixture))})
 row = fixture["runtimeVideoRow"]
 
 def rows(_connection, sql, params):
-    assert "FROM migration_video_rows" in sql
-    assert list(params[0]) == ["accepted-current", "accepted-parent"]
+    if "FROM migration_video_rows" in sql:
+        assert list(params[0]) == ["accepted-current", "accepted-parent"]
+        assert list(params[1]) == [row["video_id"]]
+        assert list(params[2]) == ["accepted-current", "accepted-parent"]
+        return [row]
+    assert "FROM migration_occurrence_rows" in sql
+    assert list(params[0]) == ["accepted-current"]
     assert list(params[1]) == [row["video_id"]]
-    assert list(params[2]) == ["accepted-current", "accepted-parent"]
-    return [row]
+    return [
+        {
+            "revision_id": "accepted-current",
+            "video_id": row["video_id"],
+            "occurrence_key": f"occ-{index}",
+            "occurrence_id": f"occ-{index}",
+            "position": index,
+            "range_id": "all",
+            "song_key": f"song-{index % 44}",
+            "seconds": index * 10,
+            "title": f"Song {index % 44}",
+            "artist": f"Artist {index % 7}",
+            "source_id": "source-jul22",
+            "raw_hash": f"raw-{index}",
+            "source_system": "youtube_channel_discovery",
+            "payload_json": {},
+        }
+        for index in range(88)
+    ]
 
 module._rows = rows
 result = module._project_generic_overlay_video_records(
@@ -164,6 +186,9 @@ assert record["count"] == 88
 assert record["timestampCount"] == 88
 assert record["songCount"] == 44
 assert record["videoCount"] == 1
+assert len(record["songs"]) == 88
+assert record["songs"][0]["occurrenceId"] == "occ-0"
+assert record["songs"][87]["position"] == 87
 assert "totalOccurrenceCount" not in record
 assert module._project_generic_overlay_video_records(
     object(), ("accepted-current",), fixture["response"], view="songs",

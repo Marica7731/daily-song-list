@@ -338,6 +338,7 @@ def _project_generic_overlay_video_records(
         [ordered_revisions, video_ids, ordered_revisions],
     )
     metadata_by_video: dict[str, dict[str, Any] | None] = {}
+    metadata_revision_by_video: dict[str, str] = {}
     for row in rows:
         video_id = _text(row.get("video_id"))
         if video_id not in video_ids or video_id in metadata_by_video:
@@ -354,6 +355,55 @@ def _project_generic_overlay_video_records(
                 f"video metadata videoId {metadata_id!r} conflicts with overlay video_id {video_id!r}"
             )
         metadata_by_video[video_id] = metadata
+        metadata_revision_by_video[video_id] = _text(row.get("revision_id"))
+
+    selected_revisions = list(dict.fromkeys(
+        revision_id for revision_id in metadata_revision_by_video.values()
+        if revision_id
+    ))
+    songs_by_video: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    if selected_revisions:
+        occurrence_rows = _rows(
+            connection,
+            """
+            /* bounded active-overlay video-card songs */
+            SELECT revision_id, video_id, occurrence_key, occurrence_id,
+                   position, range_id, song_key, seconds, title, artist,
+                   source_id, raw_hash, source_system, payload_json
+            FROM migration_occurrence_rows
+            WHERE revision_id = ANY(%s) AND video_id = ANY(%s)
+            ORDER BY video_id, position, occurrence_key
+            """,
+            [selected_revisions, video_ids],
+        )
+        for row in occurrence_rows:
+            video_id = _text(row.get("video_id"))
+            if (
+                video_id not in metadata_revision_by_video
+                or _text(row.get("revision_id"))
+                != metadata_revision_by_video[video_id]
+            ):
+                continue
+            source = _json_object(row.get("payload_json"))
+            nested_song = source.get("song")
+            song = dict(nested_song) if isinstance(nested_song, Mapping) else source
+            scalar_fields = {
+                "videoId": row.get("video_id"),
+                "occurrenceId": row.get("occurrence_id") or row.get("occurrence_key"),
+                "position": row.get("position"),
+                "rangeId": row.get("range_id"),
+                "songKey": row.get("song_key"),
+                "seconds": row.get("seconds"),
+                "title": row.get("title"),
+                "artist": row.get("artist"),
+                "sourceId": row.get("source_id"),
+                "rawHash": row.get("raw_hash"),
+                "sourceSystem": row.get("source_system"),
+            }
+            for name, value in scalar_fields.items():
+                if value is not None and value != "":
+                    song[name] = value
+            songs_by_video[video_id].append(song)
 
     range_id = _text(result.get("rangeId"))
     projected: list[Any] = []
@@ -379,6 +429,8 @@ def _project_generic_overlay_video_records(
                 payload["sourceDetailKey"] = _stable_key(
                     "source-video", range_id, video_id,
                 )
+            if not isinstance(payload.get("songs"), list) or not payload["songs"]:
+                payload["songs"] = copy.deepcopy(songs_by_video.get(video_id, []))
         projected.append(payload)
     result["records"] = projected
     return result
