@@ -6614,16 +6614,29 @@ def _prepare_generic_overlay_rankings(
                         if predicates
                         else " AND FALSE"
                     )
+    (
+        source_search_cte,
+        source_search_condition,
+        source_cte_params,
+        source_outer_params,
+    ) = _runtime_source_search_sql(options, revision_id, parent[0], "ranking")
+    source_search_sql_active = bool(source_search_condition)
     base_payload_select = (
-        "payload_json"
-        if (
-            options["view"] == "vtubers" and exact_channel_scope is not None
-        ) or any(
-            field in {"video", "source"}
-            for field in _effective_search_fields(options)
+        _runtime_ranking_light_payload_select("ranking")
+        if source_search_sql_active
+        else (
+            "payload_json"
+            if (
+                options["view"] == "vtubers" and exact_channel_scope is not None
+            ) or any(
+                field in {"video", "source"}
+                for field in _effective_search_fields(options)
+            )
+            else "NULL::jsonb AS payload_json"
         )
-        else "NULL::jsonb AS payload_json"
     )
+    if source_search_sql_active:
+        search_select = "'' AS search_text, ranking.channel_search_text"
     bounded_no_search = not bool(options.get("q"))
     base_limit_clause = ""
     base_totals: dict[str, int] | None = None
@@ -6681,23 +6694,42 @@ def _prepare_generic_overlay_rankings(
                     aggregate.get("total_video_count") or 0
                 ),
             }
+    base_from = (
+        "eligible_ranking AS ranking"
+        if source_search_sql_active
+        else "runtime_ranking_rows AS ranking"
+    )
+    base_where = (
+        f"WHERE TRUE{source_search_condition}"
+        if source_search_sql_active
+        else (
+            "WHERE ranking.revision_id = %s AND ranking.range_id = %s "
+            "AND ranking.view = %s AND ranking.metric = %s"
+            f"{search_clause}"
+        )
+    )
+    base_query_params = (
+        [*source_cte_params, *source_outer_params]
+        if source_search_sql_active
+        else base_params
+    )
     base_rows = _rows(
         connection,
         f"""
+        {source_search_cte}
         SELECT rank, detail_key, title, artist, name, row_count, song_count,
                video_count, timestamp_count, {base_payload_select}, {search_select}
-        FROM runtime_ranking_rows
-        WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
-          {search_clause}
+        FROM {base_from}
+        {base_where}
         ORDER BY rank
         {base_limit_clause}
         """,
-        base_params,
+        base_query_params,
     )
     if options["searchTokens"] and any(
         field in {"video", "source"}
         for field in _effective_search_fields(options)
-    ):
+    ) and not source_search_sql_active:
         base_rows = [
             row for row in base_rows
             if _public_row_matches_search(row, options)
@@ -7531,7 +7563,11 @@ def _prepare_generic_overlay_rankings(
                 and not bool(row.get("_residual_match"))
             ):
                 continue
-        elif options["searchTokens"] and not _public_row_matches_search(row, options):
+        elif (
+            options["searchTokens"]
+            and not source_search_sql_active
+            and not _public_row_matches_search(row, options)
+        ):
             continue
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
@@ -9033,6 +9069,243 @@ def _runtime_row_search_texts(row: Mapping[str, Any]) -> dict[str, str]:
     return texts
 
 
+_RANKING_SOURCE_SEARCH_MATCH_CAP = 4096
+
+
+def _runtime_source_field_expressions(fields: Iterable[str]) -> tuple[str, ...]:
+    """Return exact source-occurrence expressions for selected public fields."""
+
+    expressions = {
+        "title": (
+            "occurrence.payload_json->>'songTitle'",
+            "occurrence.payload_json->'song'->>'title'",
+            "occurrence.payload_json->'payload'->>'songTitle'",
+            "occurrence.payload_json->'payload'->'song'->>'title'",
+        ),
+        "artist": (
+            "occurrence.artist",
+            "occurrence.payload_json->>'artist'",
+            "occurrence.payload_json->'song'->>'artist'",
+            "occurrence.payload_json->'payload'->>'artist'",
+            "occurrence.payload_json->'payload'->'song'->>'artist'",
+        ),
+        "channel": (
+            "occurrence.channel_name",
+            "occurrence.channel_id",
+            "occurrence.channel_handle",
+            "occurrence.channel_url",
+            "occurrence.payload_json->>'channelName'",
+            "occurrence.payload_json->>'channelId'",
+            "occurrence.payload_json->>'channelHandle'",
+            "occurrence.payload_json->>'channelUrl'",
+            "occurrence.payload_json->'video'->>'channelName'",
+            "occurrence.payload_json->'video'->>'channelId'",
+            "occurrence.payload_json->'video'->>'channelHandle'",
+            "occurrence.payload_json->'video'->>'channelUrl'",
+            "occurrence.payload_json->'item'->>'channelName'",
+            "occurrence.payload_json->'item'->>'channelId'",
+            "occurrence.payload_json->'item'->>'channelHandle'",
+            "occurrence.payload_json->'item'->>'channelUrl'",
+            "occurrence.payload_json->'payload'->'video'->>'channelName'",
+            "occurrence.payload_json->'payload'->'video'->>'channelId'",
+            "occurrence.payload_json->'payload'->'video'->>'channelHandle'",
+            "occurrence.payload_json->'payload'->'video'->>'channelUrl'",
+        ),
+        "video": (
+            "occurrence.title",
+            "occurrence.video_id",
+            "occurrence.payload_json->>'title'",
+            "occurrence.payload_json->>'videoId'",
+            "occurrence.payload_json->'video'->>'title'",
+            "occurrence.payload_json->'video'->>'videoId'",
+            "occurrence.payload_json->'item'->>'title'",
+            "occurrence.payload_json->'item'->>'videoId'",
+            "occurrence.payload_json->'payload'->'video'->>'title'",
+            "occurrence.payload_json->'payload'->'video'->>'videoId'",
+            "occurrence.payload_json->'payload'->'item'->>'title'",
+            "occurrence.payload_json->'payload'->'item'->>'videoId'",
+        ),
+        "source": (
+            "occurrence.source_id",
+            "occurrence.source_system",
+            "occurrence.payload_json->>'sourceId'",
+            "occurrence.payload_json->>'sourceSystem'",
+            "occurrence.payload_json->'song'->>'sourceId'",
+            "occurrence.payload_json->'song'->>'sourceSystem'",
+            "occurrence.payload_json->'payload'->>'sourceId'",
+            "occurrence.payload_json->'payload'->>'sourceSystem'",
+            "occurrence.payload_json->'payload'->'song'->>'sourceId'",
+            "occurrence.payload_json->'payload'->'song'->>'sourceSystem'",
+        ),
+    }
+    selected: list[str] = []
+    for field in fields:
+        for expression in expressions.get(field, ()):
+            if expression not in selected:
+                selected.append(expression)
+    return tuple(selected)
+
+
+def _runtime_ranking_field_expressions(
+    alias: str, fields: Iterable[str],
+) -> tuple[str, ...]:
+    expressions = {
+        # Keep payload_json out of the ranking CTE.  Occurrence details are
+        # searched in SQL; Python receives only scalar page candidates.
+        "title": (f"{alias}.title",),
+        "artist": (f"{alias}.artist",),
+        "channel": (f"{alias}.channel_search_text",),
+    }
+    selected: list[str] = []
+    for field in fields:
+        for expression in expressions.get(field, ()):
+            if expression not in selected:
+                selected.append(expression)
+    return tuple(selected)
+
+
+def _runtime_source_search_sql(
+    options: Mapping[str, Any],
+    active_revision_id: str,
+    ranking_revision_id: str | None = None,
+    ranking_alias: str = "ranking",
+) -> tuple[str, str, list[Any], list[Any]]:
+    """Build one bounded source-key CTE and its correlated ranking predicate."""
+
+    if (
+        _text(options.get("view")) not in {"songs", "songIndex"}
+        or not options.get("searchTokens")
+    ):
+        return "", "", [], []
+    fields = _effective_search_fields(options)
+    if not any(field in {"video", "source"} for field in fields):
+        return "", "", [], []
+    occurrence_expressions = _runtime_source_field_expressions(fields)
+    if not occurrence_expressions:
+        return "", "", [], []
+    ranking_revision = _text(ranking_revision_id or active_revision_id)
+    requested_values = ", ".join("(%s, %s)" for _ in options["searchTokens"])
+    requested_params: list[Any] = []
+    for token in options["searchTokens"]:
+        requested_params.extend((
+            _text(token).casefold(),
+            f"%{_sql_like_literal(token)}%",
+        ))
+    occurrence_predicate = " OR ".join(
+        f"coalesce({expression}, '') ILIKE requested.needle ESCAPE E'\\\\'"
+        for expression in occurrence_expressions
+    )
+    db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    source_cte = f"""
+        WITH RECURSIVE active_lineage AS (
+            SELECT revision_id, parent_revision_id, 0 AS lineage_depth
+            FROM migration_revisions
+            WHERE revision_id = %s
+            UNION ALL
+            SELECT parent.revision_id, parent.parent_revision_id,
+                   active_lineage.lineage_depth + 1
+            FROM migration_revisions AS parent
+            JOIN active_lineage
+              ON parent.revision_id = active_lineage.parent_revision_id
+        ), authorities AS (
+            SELECT DISTINCT ON (detail.source_key)
+                   detail.source_key,
+                   detail.revision_id AS authority_revision
+            FROM runtime_source_details AS detail
+            JOIN active_lineage
+              ON active_lineage.revision_id = detail.revision_id
+            WHERE detail.range_id = %s
+            ORDER BY detail.source_key, active_lineage.lineage_depth
+        ), requested(token, needle) AS (
+            VALUES {requested_values}
+        ), eligible_ranking AS MATERIALIZED (
+            SELECT ranking.rank, ranking.detail_key, ranking.title,
+                   ranking.artist, ranking.name, ranking.row_count,
+                   ranking.song_count, ranking.video_count,
+                   ranking.timestamp_count, ranking.channel_search_text
+            FROM runtime_ranking_rows AS ranking
+            WHERE ranking.revision_id = %s
+              AND ranking.range_id = %s
+              AND ranking.view = %s
+              AND ranking.metric = %s
+              AND ranking.row_count >= %s
+        ), matched_source_tokens AS MATERIALIZED (
+            SELECT DISTINCT occurrence.source_key, requested.token
+            FROM authorities
+            JOIN runtime_source_occurrences AS occurrence
+              ON occurrence.revision_id = authorities.authority_revision
+             AND occurrence.source_key = authorities.source_key
+            JOIN eligible_ranking AS eligible
+              ON eligible.detail_key = occurrence.source_key
+            CROSS JOIN requested
+            WHERE occurrence.range_id = %s
+              AND ({occurrence_predicate})
+            ORDER BY occurrence.source_key, requested.token
+            LIMIT %s
+        )
+    """
+    scalar_expressions = _runtime_ranking_field_expressions(
+        ranking_alias, fields,
+    )
+    conditions: list[str] = []
+    outer_params: list[Any] = []
+    for token in options["searchTokens"]:
+        scalar_clauses = [
+            f"coalesce({expression}, '') ILIKE %s ESCAPE E'\\\\'"
+            for expression in scalar_expressions
+        ]
+        outer_params.extend(
+            f"%{_sql_like_literal(token)}%"
+            for _ in scalar_clauses
+        )
+        source_clause = (
+            "EXISTS ("
+            "SELECT 1 FROM matched_source_tokens AS matched "
+            f"WHERE matched.source_key = {ranking_alias}.detail_key "
+            "AND matched.token = %s)"
+        )
+        outer_params.append(_text(token).casefold())
+        conditions.append(
+            "(" + " OR ".join((*scalar_clauses, source_clause)) + ")"
+        )
+    return (
+        source_cte,
+        " AND " + " AND ".join(conditions),
+        [
+            _text(active_revision_id),
+            _text(options["range"]),
+            *requested_params,
+            ranking_revision,
+            _text(options["range"]),
+            _text(options["view"]),
+            db_metric,
+            int(options["minCount"]),
+            _text(options["range"]),
+            _RANKING_SOURCE_SEARCH_MATCH_CAP + 1,
+        ],
+        outer_params,
+    )
+
+
+def _runtime_ranking_light_payload_select(alias: str) -> str:
+    """Return a scalar-only payload; page hydration fills occurrences once."""
+
+    return f"""
+        jsonb_build_object(
+            'type', 'song',
+            'key', {alias}.detail_key,
+            'title', {alias}.title,
+            'displayArtist', coalesce({alias}.artist, ''),
+            'count', {alias}.row_count,
+            'songCount', {alias}.song_count,
+            'videoCount', {alias}.video_count,
+            'timestampCount', {alias}.timestamp_count,
+            'sourceDetailKey', {alias}.detail_key,
+            'occurrences', '[]'::jsonb
+        ) AS payload_json
+    """
+
+
 def _runtime_row_matches_search(
     row: Mapping[str, Any],
     options: Mapping[str, Any],
@@ -9690,18 +9963,55 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
             "totalVideoCount": int(summary.get("total_video_count") or 0),
             "pageCount": page_count, "compact": options["compact"], "records": records,
         }
+    (
+        source_search_cte,
+        source_search_condition,
+        source_cte_params,
+        source_outer_params,
+    ) = _runtime_source_search_sql(options, revision_id, revision_id, "ranking")
+    source_search_sql_active = bool(source_search_condition)
+    payload_select = (
+        _runtime_ranking_light_payload_select("ranking")
+        if source_search_sql_active
+        else "ranking.payload_json"
+    )
+    search_select = (
+        "'' AS search_text, ranking.channel_search_text"
+        if source_search_sql_active
+        else "ranking.search_text, ranking.channel_search_text"
+    )
+    ranking_from = (
+        "eligible_ranking AS ranking"
+        if source_search_sql_active
+        else "runtime_ranking_rows AS ranking"
+    )
+    ranking_scope_clause = (
+        ""
+        if source_search_sql_active
+        else (
+            " AND ranking.revision_id = %s AND ranking.range_id = %s"
+            " AND ranking.view = %s AND ranking.metric = %s"
+        )
+    )
     rows = _rows(
         connection,
-        """
-        SELECT rank, title, artist, name, row_count, song_count, video_count, timestamp_count,
-               payload_json, search_text, channel_search_text
-        FROM runtime_ranking_rows
-        WHERE revision_id = %s AND range_id = %s AND view = %s AND metric = %s
-        ORDER BY rank
+        f"""
+        {source_search_cte}
+        SELECT ranking.rank, ranking.title, ranking.artist, ranking.name,
+               ranking.row_count, ranking.song_count, ranking.video_count,
+               ranking.timestamp_count, {payload_select}, {search_select}
+        FROM {ranking_from}
+        WHERE TRUE{source_search_condition}
+        {ranking_scope_clause}
+        ORDER BY ranking.rank
         """,
-        [revision_id, options["range"], options["view"], db_metric],
+        (
+            [*source_cte_params, *source_outer_params]
+            if source_search_sql_active
+            else [revision_id, options["range"], options["view"], db_metric]
+        ),
     )
-    if options["searchTokens"]:
+    if options["searchTokens"] and not source_search_sql_active:
         rows = [
             row for row in rows
             if _public_row_matches_search(row, options)
