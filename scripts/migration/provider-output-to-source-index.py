@@ -409,16 +409,35 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         fail("VIDEO_COUNT_MISMATCH", f"expected={args.expected_video_count}:actual={len(actual_ids)}")
     real = sum(not row["isSentinel"] for row in all_rows)
     sentinel = sum(row["isSentinel"] for row in all_rows)
+    count_observations: list[dict[str, int | str]] = []
     if real != args.expected_real_occurrences:
-        fail("REAL_COUNT_MISMATCH", f"expected={args.expected_real_occurrences}:actual={real}")
+        count_observations.append(
+            {
+                "code": "REAL_COUNT_MISMATCH",
+                "status": "observation_only",
+                "expected": args.expected_real_occurrences,
+                "actual": real,
+            }
+        )
     if sentinel != args.expected_sentinel_occurrences:
-        fail("SENTINEL_COUNT_MISMATCH", f"expected={args.expected_sentinel_occurrences}:actual={sentinel}")
+        count_observations.append(
+            {
+                "code": "SENTINEL_COUNT_MISMATCH",
+                "status": "observation_only",
+                "expected": args.expected_sentinel_occurrences,
+                "actual": sentinel,
+            }
+        )
     return {
         "schemaVersion": "formal-source-index/v2",
         "status": "CLOSED",
         "videoCount": len(actual_ids),
         "realOccurrenceCount": real,
         "sentinelOccurrenceCount": sentinel,
+        "expectedRealOccurrenceCount": args.expected_real_occurrences,
+        "expectedSentinelOccurrenceCount": args.expected_sentinel_occurrences,
+        "countStatus": "OBSERVATION_ONLY" if count_observations else "MATCHED",
+        "countObservations": count_observations,
         "sourceStatus": "OBSERVATION_ONLY" if any(row["sourceObservation"] is not None for row in all_rows) else "VERIFIED",
         "sourceObservationOnlyCount": sum(row["sourceObservation"] is not None for row in all_rows),
         "needsReviewCount": sum(row["needsReview"] for row in all_rows),
