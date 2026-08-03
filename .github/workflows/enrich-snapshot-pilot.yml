@@ -1,96 +1,101 @@
-name: enrich-snapshot-pilot-linkage-v2
+name: enrich-snapshot-pilot
 
 on:
   workflow_dispatch:
     inputs:
       source_commit:
-        description: Exact main commit; checkout HEAD must equal it
+        description: Exact current-main commit to check out
         required: true
         type: string
-      sample_id:
-        description: One frozen day; both is executed Jul29 then Jul22
+      route_as_of_utc:
+        description: Explicit UTC route as-of; the inclusive lower bound is seven days earlier
         required: true
-        type: choice
-        options:
-          - both
-          - jul29-sample25
-          - jul22-raw456
-      release_cutoff_utc:
-        description: Inclusive 7D lower-bound in UTC
-        required: true
-        type: string
-      raw_input:
-        description: Read-only materialized raw input path
-        required: true
-        type: string
-      provider_ndjson:
-        description: Read-only provider NDJSON path
-        required: true
-        type: string
-      artist_bindings:
-        description: Versioned 12-row sidecar path
-        required: true
-        type: string
-      source_index:
-        description: Formal source index mapping IDs to immutable source paths/URLs
-        required: true
-        type: string
-      formal_source_candidate:
-        description: Pinned formal source candidate metadata
-        required: true
-        default: config/snapshot-recovery/formal-source-candidate.json
         type: string
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
-  group: enrich-snapshot-pilot-linkage-v2-singleton
+  group: enrich-snapshot-pilot-two-day-singleton
   cancel-in-progress: false
 
 jobs:
-  candidate:
+  rerun:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 240
+    env:
+      SOURCE_RUN_ID: "30765216583"
+      SOURCE_ARTIFACT_ID: "8838723011"
+      SOURCE_ARTIFACT_DIGEST: "sha256:414372e0fedbfe94d6b187df75ec35e12dc3af70061d678eb29ab56fc0ec3fa1"
+      SOURCE_COMMIT: ${{ inputs.source_commit }}
+      ROUTE_AS_OF_UTC: ${{ inputs.route_as_of_utc }}
     steps:
-      - name: Checkout exact dispatch source commit
+      - name: Check out exact current source commit
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_commit }}
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
-      - name: Run read-only source capture and linkage candidate
+
+      - name: Download fixed source artifact across run
+        id: download
+        uses: actions/download-artifact@v4
+        with:
+          repository: ${{ github.repository }}
+          run-id: 30765216583
+          artifact-ids: "8838723011"
+          path: ${{ runner.temp }}/two-day-rerun/source-artifact
+          github-token: ${{ github.token }}
+
+      - name: Verify checkout and artifact identity
         shell: bash
-        env:
-          SOURCE_COMMIT: ${{ inputs.source_commit }}
-          SAMPLE_ID: ${{ inputs.sample_id }}
-          RELEASE_CUTOFF_UTC: ${{ inputs.release_cutoff_utc }}
-          RAW_INPUT: ${{ inputs.raw_input }}
-          PROVIDER_NDJSON: ${{ inputs.provider_ndjson }}
-          ARTIST_BINDINGS: ${{ inputs.artist_bindings }}
-          SOURCE_INDEX: ${{ inputs.source_index }}
-          FORMAL_SOURCE: ${{ inputs.formal_source_candidate }}
         run: |
           set -Eeuo pipefail
-          [[ "$GITHUB_REF" == refs/heads/main ]]
-          actual_head="$(git rev-parse HEAD)"
-          [[ "$actual_head" == "$SOURCE_COMMIT" ]]
-          out="$RUNNER_TEMP/enrich-snapshot-pilot-linkage-v2-${GITHUB_RUN_ID}"
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          actual_digest='${{ steps.download.outputs.artifact-digest }}'
+          test -n "$actual_digest"
+          test "$actual_digest" = "$SOURCE_ARTIFACT_DIGEST"
+          mkdir -p "$RUNNER_TEMP/two-day-rerun"
+          jq -n \
+            --arg run "$SOURCE_RUN_ID" \
+            --arg artifact "$SOURCE_ARTIFACT_ID" \
+            --arg expected "$SOURCE_ARTIFACT_DIGEST" \
+            --arg actual "$actual_digest" \
+            '{status:"VERIFIED",runId:$run,artifactId:$artifact,expectedDigest:$expected,actualDigest:$actual}' \
+            > "$RUNNER_TEMP/two-day-rerun/download-proof.json"
+
+      - name: Materialize raw-input and input-manifest only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/migration/materialize-two-day-rerun.py \
+            --artifact-root "$RUNNER_TEMP/two-day-rerun/source-artifact" \
+            --download-proof "$RUNNER_TEMP/two-day-rerun/download-proof.json" \
+            --output-root "$RUNNER_TEMP/two-day-rerun/materialized" \
+            --route-as-of-utc "$ROUTE_AS_OF_UTC"
+
+      - name: Run fresh provider, source bridge, and linkage both
+        shell: bash
+        run: |
+          set -Eeuo pipefail
           python3 scripts/migration/run-snapshot-enrichment-pilot.py \
-            --sample-id "$SAMPLE_ID" \
-            --source-commit "$SOURCE_COMMIT" \
-            --raw-input "$RAW_INPUT" \
-            --provider-ndjson "$PROVIDER_NDJSON" \
-            --artist-bindings "$ARTIST_BINDINGS" \
-            --source-index "$SOURCE_INDEX" \
-            --formal-source-candidate "$FORMAL_SOURCE" \
-            --release-cutoff-utc "$RELEASE_CUTOFF_UTC" \
-            --output-root "$out"
-      - name: Upload candidate artifact only
+            --source-root "$GITHUB_WORKSPACE" \
+            --materialized-root "$RUNNER_TEMP/two-day-rerun/materialized" \
+            --output-root "$RUNNER_TEMP/two-day-rerun/candidate" \
+            --route-as-of-utc "$ROUTE_AS_OF_UTC" \
+            --source-commit "$SOURCE_COMMIT"
+
+      - name: Upload not-for-release candidate evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: enrich-snapshot-pilot-linkage-v2-${{ github.run_id }}-${{ inputs.sample_id }}
-          path: ${{ runner.temp }}/enrich-snapshot-pilot-linkage-v2-${{ github.run_id }}/
-          if-no-files-found: error
-      # No product data, PG, import, commit, push, dispatch, activation, or restart.
+          name: enrich-snapshot-pilot-two-day-candidate-${{ github.run_id }}
+          path: ${{ runner.temp }}/two-day-rerun/
+          if-no-files-found: warn
+          retention-days: 14
+
+# Candidate workflow only: no PG, product writes, activation, commit, push,
+# dispatch, restart, or release claim.
