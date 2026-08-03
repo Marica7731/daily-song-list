@@ -73,6 +73,7 @@ jobs:
           run-id: ${{ inputs.rerun_run_id }}
           artifact-ids: ${{ inputs.rerun_artifact_id }}
           path: ${{ runner.temp }}/two-day-pg-bridge/download
+          merge-multiple: true
           github-token: ${{ github.token }}
       - name: Verify exact producer artifact and stage formal input
         env:
@@ -161,6 +162,7 @@ jobs:
           run-id: ${{ inputs.rerun_run_id }}
           artifact-ids: ${{ inputs.rerun_artifact_id }}
           path: ${{ runner.temp }}/two-day-pg-bridge/download
+          merge-multiple: true
           github-token: ${{ github.token }}
       - name: Verify exact producer artifact and stage formal input
         env:
