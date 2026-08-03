@@ -480,6 +480,7 @@ jobs:
               done | jq -sr --argjson current_run "$GITHUB_RUN_ID" '
                 [.[].workflow_runs[] |
                   select(.id != $current_run) |
+                  select(.name != "Candidate two-day PG bridge v2") |
                   select(.name | test("PostgreSQL|PG|7D"; "i")) |
                   {id,name,status,head_sha}
                 ] | unique_by(.id)
