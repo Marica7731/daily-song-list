@@ -4767,11 +4767,22 @@ def _bounded_final_vtuber_previews(
             "video": dict(video),
         }
         previews[channel_id] = preview
-    if set(previews) != set(requested_channels):
-        raise PostgresAdapterError(
-            "bounded VTuber preview query returned an inexact channel set"
-        )
+    # A positive aggregate can outlive its source preview (for example when a
+    # legacy channel has no surviving parent video in this range).  That is a
+    # non-critical presentation gap, not a database or identity failure.  The
+    # caller records the missing channel and keeps its reviewed scalar card.
+    # Rows that are returned still pass the strict identity and thumbnail
+    # checks above; SQL/connection errors and cap violations still propagate.
     return previews
+
+
+def _mark_vtuber_preview_unavailable(payload: dict[str, Any]) -> None:
+    """Keep a reviewed VTuber scalar card when only its optional preview is absent."""
+
+    payload["occurrences"] = []
+    payload["occurrencePreviewLimited"] = False
+    payload["occurrencePreviewDegraded"] = True
+    payload["occurrencePreviewDiagnostic"] = "preview_unavailable"
 
 
 def _canonicalize_vtuber_card_preview(
@@ -4788,15 +4799,22 @@ def _canonicalize_vtuber_card_preview(
         raise PostgresAdapterError("VTuber ranking card count is invalid") from exc
     if not positive:
         return
-    occurrences = payload.get("occurrences")
-    if not isinstance(occurrences, list) or not occurrences:
-        raise PostgresAdapterError(
-            "positive VTuber ranking card has no canonical occurrence preview"
-        )
     channel_id = _text(expected_channel_id)
     card_channel_id = _text(payload.get("channelId") or payload.get("key"))
     if not channel_id or card_channel_id != channel_id:
         raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+    occurrences = payload.get("occurrences")
+    if not isinstance(occurrences, list) or not occurrences:
+        if (
+            payload.get("occurrencePreviewDegraded") is True
+            and payload.get("occurrencePreviewDiagnostic")
+            == "preview_unavailable"
+        ):
+            payload["occurrences"] = []
+            return
+        raise PostgresAdapterError(
+            "positive VTuber ranking card has no canonical occurrence preview"
+        )
     # Aggregate card handle/URL fields are historical derived metadata.  The
     # immutable channel id above binds the card; one real preview tuple binds
     # its current public handle.  Never let a stale aggregate handle veto a
@@ -8507,27 +8525,25 @@ def _render_generic_overlay_rankings(
                 if channel_id not in overlay_previews
             ]
         if missing_preview_channels:
-            try:
-                hydrated_parent_previews = _bounded_final_vtuber_previews(
-                    connection,
-                    parent_revision_id,
-                    missing_preview_channels,
-                    options["range"],
-                    excluded_video_ids=preview_excluded_video_ids,
-                    excluded_occurrence_ids=preview_excluded_occurrence_ids,
-                    niche_only=bool(options.get("nicheOnly")),
-                    hide_unknown_artist=bool(options.get("hideUnknownArtist")),
-                )
-            except PostgresAdapterError as exc:
-                if str(exc) == (
-                    "bounded VTuber preview query returned an inexact channel set"
-                ):
-                    raise PostgresAdapterError(
-                        "positive VTuber ranking card has no canonical occurrence preview"
-                    ) from exc
-                raise
+            hydrated_parent_previews = _bounded_final_vtuber_previews(
+                connection,
+                parent_revision_id,
+                missing_preview_channels,
+                options["range"],
+                excluded_video_ids=preview_excluded_video_ids,
+                excluded_occurrence_ids=preview_excluded_occurrence_ids,
+                niche_only=bool(options.get("nicheOnly")),
+                hide_unknown_artist=bool(options.get("hideUnknownArtist")),
+            )
             for channel_id, preview in hydrated_parent_previews.items():
                 records_by_channel[channel_id]["occurrences"] = [preview]
+            missing_preview_channels = [
+                channel_id
+                for channel_id in missing_preview_channels
+                if channel_id not in hydrated_parent_previews
+            ]
+        for channel_id in missing_preview_channels:
+            _mark_vtuber_preview_unavailable(records_by_channel[channel_id])
         for record in records:
             channel_id = _text(record.get("channelId") or record.get("key"))
             _canonicalize_vtuber_card_preview(record, channel_id)
