@@ -9273,7 +9273,7 @@ def _runtime_source_search_sql(
             {matched_source_from}
             WHERE occurrence.range_id = %s
               AND ({occurrence_predicate})
-            ORDER BY occurrence.source_key, {source_token_alias}.token
+            ORDER BY {source_match_key}, {source_token_alias}.token
             LIMIT %s
         )
     """
