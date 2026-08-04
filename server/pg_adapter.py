@@ -16,6 +16,7 @@ objects needed by ``song_rank_api.py``.
 from __future__ import annotations
 
 from collections import OrderedDict, defaultdict
+from copy import deepcopy
 import copy
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -29,6 +30,244 @@ import threading
 import time
 import unicodedata
 from typing import Any, Iterable, Mapping, Sequence
+
+COMPACT_VTUBER_PREVIEW_LIMIT = 3
+_DROP_KEYS = frozenset({
+    "occurrences",
+    "songs",
+    "payload",
+    "payload_json",
+    "occurrence_payload_json",
+    "video_payload_json",
+})
+_SOURCE_KEYS = (
+    "sourceDetailKey",
+    "sourceKey",
+    "sourceId",
+    "sourceSystem",
+    "sourceUrl",
+    "sourcePath",
+)
+_DEFERRED_ID_KEYS = frozenset({
+    "videoId", "video_id", "occurrenceId", "occurrence_id", "position",
+    "rangeId", "range_id", "songKey", "song_key", "sourceId", "source_id",
+    "sourceSystem", "source_system", "sourceDetailKey", "sourceKey",
+    "sourceUrl", "sourcePath", "channelId", "channel_id", "channelHandle",
+    "channel_handle", "channelName", "channel_name", "entityType",
+    "entity_type", "acceptedVideoReset", "runtime_replacement", "title",
+    "artist", "name", "channelUrl", "channel_url", "count", "songCount",
+    "videoCount", "timestampCount",
+})
+
+
+def _source_identity(item: Mapping[str, Any]) -> str:
+    for key in _SOURCE_KEYS:
+        value = _text(item.get(key))
+        if value:
+            return f"{key}:{value}"
+    song = item.get("song")
+    if isinstance(song, Mapping):
+        for key in _SOURCE_KEYS:
+            value = _text(song.get(key))
+            if value:
+                return f"song.{key}:{value}"
+    # Unknown-source previews are bounded to one entry and never presented as
+    # multiple distinct sources.
+    return "source:unknown"
+
+
+def distinct_source_previews(
+    occurrences: Iterable[Mapping[str, Any]],
+    *,
+    limit: int = COMPACT_VTUBER_PREVIEW_LIMIT,
+) -> list[dict[str, Any]]:
+    """Return at most ``limit`` first-seen source previews without duplicates."""
+
+    previews: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for occurrence in occurrences:
+        if not isinstance(occurrence, Mapping):
+            continue
+        source = _source_identity(occurrence)
+        if source in seen:
+            continue
+        seen.add(source)
+        preview = deepcopy(dict(occurrence))
+        for key in _DROP_KEYS:
+            preview.pop(key, None)
+        previews.append(preview)
+        if len(previews) >= max(0, int(limit)):
+            break
+    return previews
+
+
+def compact_vtuber_ranking_card(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Project one compact VTuber card to scalars plus three source previews."""
+
+    compact: dict[str, Any] = {}
+    for key, value in record.items():
+        if key in _DROP_KEYS or key.startswith("_"):
+            continue
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            compact[key] = deepcopy(value)
+    occurrences = record.get("occurrences")
+    previews = distinct_source_previews(
+        occurrences if isinstance(occurrences, list) else (),
+    )
+    compact["occurrences"] = previews
+    compact["sourcePreviewCount"] = len(previews)
+    try:
+        occurrence_count = int(record.get("count") or record.get("timestampCount") or 0)
+    except (TypeError, ValueError):
+        occurrence_count = 0
+    compact["occurrencePreviewLimited"] = bool(
+        record.get("occurrencePreviewLimited") or occurrence_count > len(previews)
+    )
+    return compact
+
+
+def preparation_cache_key(
+    active_revision_id: str,
+    options: Mapping[str, Any],
+) -> tuple[Any, ...]:
+    """Key expensive preparation by active projection and filter, never page."""
+
+    fields = tuple(sorted(_text(value) for value in (options.get("searchFields") or ()) if _text(value)))
+    filter_key = (
+        _text(options.get("q")),
+        _text(options.get("searchScope") or "all"),
+        fields,
+        int(options.get("minCount") or 0),
+        bool(options.get("nicheOnly")),
+        bool(options.get("hideUnknownArtist")),
+    )
+    return (
+        "vtuber-ranking-preparation-v2",
+        _text(active_revision_id),
+        _text(options.get("range")),
+        _text(options.get("view")),
+        _text(options.get("metric")),
+        filter_key,
+    )
+
+
+def _compact_deferred_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        compacted = {
+            key: deepcopy(item)
+            for key, item in value.items()
+            if key in _DEFERRED_ID_KEYS
+            and (item is None or isinstance(item, (str, int, float, bool)))
+        }
+        for nested_key in ("item", "video"):
+            nested = value.get(nested_key)
+            if isinstance(nested, Mapping):
+                nested_compacted = {
+                    key: deepcopy(item)
+                    for key, item in nested.items()
+                    if key in _DEFERRED_ID_KEYS
+                    and (item is None or isinstance(item, (str, int, float, bool)))
+                }
+                if nested_compacted:
+                    compacted[nested_key] = nested_compacted
+        return compacted
+    if isinstance(value, (list, tuple)):
+        return tuple(
+            compacted
+            for item in value
+            if (compacted := _compact_deferred_value(item))
+        )
+    return None
+
+
+def _fallback_vtuber_payload(row: Mapping[str, Any]) -> dict[str, Any]:
+    channel_id = row.get("channelId") or row.get("channel_id") or row.get("detail_key")
+    count = row.get("count")
+    if count is None:
+        count = row.get("row_count")
+    return {
+        "type": "vtuber",
+        "key": channel_id,
+        "channelId": channel_id,
+        "channelName": row.get("channelName") or row.get("channel_name"),
+        "channelHandle": row.get("channelHandle") or row.get("channel_handle"),
+        "channelUrl": row.get("channelUrl") or row.get("channel_url"),
+        "name": row.get("name"),
+        "sourceDetailKey": row.get("sourceDetailKey"),
+        "count": count,
+        "songCount": row.get("song_count"),
+        "videoCount": row.get("video_count"),
+        "timestampCount": row.get("timestamp_count") or count,
+        "occurrences": [],
+    }
+
+
+def _compact_vtuber_row(row: Mapping[str, Any]) -> dict[str, Any]:
+    compact = {
+        key: deepcopy(value)
+        for key, value in row.items()
+        if key not in _DROP_KEYS
+        and not key.endswith("_payload")
+        and not key.endswith("_payload_json")
+        and not key.startswith("_deferred_")
+    }
+    payload = row.get("payload_json")
+    if not isinstance(payload, Mapping):
+        payload = _fallback_vtuber_payload(row)
+    compact_payload = compact_vtuber_ranking_card(payload)
+    deferred_previews = _compact_deferred_value(
+        row.get("_deferred_candidate_previews", ())
+    )
+    if not compact_payload.get("occurrences") and deferred_previews:
+        compact_payload["occurrences"] = distinct_source_previews(deferred_previews)
+        compact_payload["sourcePreviewCount"] = len(compact_payload["occurrences"])
+    compact["payload_json"] = compact_payload
+    for key, value in row.items():
+        if key.startswith("_deferred_"):
+            compacted = _compact_deferred_value(value)
+            if compacted:
+                compact[key] = compacted
+    return compact
+
+
+def scalar_ranking_row(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Keep VTuber identity and bounded previews while dropping payload graphs."""
+
+    return _compact_vtuber_row(row)
+
+
+def scalar_preparation(
+    prepared: Mapping[str, Any],
+    *,
+    view: str | None = None,
+) -> dict[str, Any]:
+    """Project only VTuber preparation; preserve all other view contracts."""
+
+    cached = deepcopy(dict(prepared))
+    if _text(view) not in {"vtubers", "vtuberRank"}:
+        return cached
+    cached["clickedSongScopes"] = {}
+    for key in ("filtered", "candidateRows"):
+        rows = cached.get(key)
+        if isinstance(rows, (list, tuple)):
+            cached[key] = tuple(
+                scalar_ranking_row(row) for row in rows if isinstance(row, Mapping)
+            )
+    return cached
+
+
+def page_limit_offset(page: int, page_size: int) -> tuple[str, tuple[int, int]]:
+    """Describe the only page-dependent SQL operation for a prepared ranking."""
+
+    safe_page = max(1, int(page))
+    safe_size = max(1, int(page_size))
+    return "LIMIT %s OFFSET %s", (safe_size, (safe_page - 1) * safe_size)
+
+
+def adjacent_prefetch_allowed(view: str) -> bool:
+    """Temporarily keep VTuber page loads from issuing adjacent requests."""
+
+    return _text(view) != "vtuberRank"
 
 
 REQUIRED_TABLES = (
@@ -66,7 +305,7 @@ _GENERIC_META_COUNTS_LOCK = threading.RLock()
 # retaining prior range/metric/search aggregates would exceed the candidate's
 # 2 GiB memory envelope.
 _GENERIC_RANKING_PREPARATION_CAP = 1
-_GENERIC_NO_SEARCH_PAGE_BUCKET = 5
+_GENERIC_NO_SEARCH_PREPARATION_WINDOW = 50000
 _GENERIC_NO_SEARCH_AFFECTED_CUSHION = 4096
 _GENERIC_RANKING_PREPARATION_MAX_BYTES = 16 * 1024 * 1024
 _GENERIC_RANKING_PREPARATION_MAX_OCCURRENCES = 4096
@@ -6703,16 +6942,10 @@ def _prepare_generic_overlay_rankings(
     base_totals: dict[str, int] | None = None
     base_window_end = 0
     if bounded_no_search:
-        page_bucket = max(
-            0,
-            (int(options["page"]) - 1) // _GENERIC_NO_SEARCH_PAGE_BUCKET,
-        )
-        base_window_end = (
-            (page_bucket + 1)
-            * _GENERIC_NO_SEARCH_PAGE_BUCKET
-            * int(options["pageSize"])
-        )
-        base_limit = base_window_end + _GENERIC_NO_SEARCH_AFFECTED_CUSHION
+        # Preparation is shared by every page and page size.  Keep this as a
+        # fixed scalar window; page selection happens after preparation.
+        base_window_end = _GENERIC_NO_SEARCH_PREPARATION_WINDOW
+        base_limit = base_window_end
         if base_limit > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
             raise PostgresAdapterError(
                 "generic ranking page exceeds bounded SQL window"
@@ -7744,34 +7977,15 @@ def _generic_ranking_preparation_key(
 ) -> tuple[Any, ...]:
     """Identify only inputs that alter the expensive immutable aggregate."""
 
-    key = (
-        revision_id,
-        parent_revision_id,
-        _text(options.get("range")),
-        _text(options.get("view")),
-        _text(options.get("metric")),
-        _text(options.get("q")),
-        _text(options.get("searchScope")),
-        tuple(_text(value) for value in (options.get("searchFields") or ())),
-        int(options.get("minCount") or 0),
-        bool(options.get("nicheOnly")),
-        bool(options.get("hideUnknownArtist")),
-    )
-    if not _text(options.get("q")):
-        page = max(1, int(options.get("page") or 1))
-        page_size = max(1, int(options.get("pageSize") or 1))
-        key = (
-            *key,
-            "bounded-window",
-            (page - 1) // _GENERIC_NO_SEARCH_PAGE_BUCKET,
-            page_size,
-        )
-    return key
+    del parent_revision_id
+    return preparation_cache_key(revision_id, options)
 
 
 def _cached_generic_ranking_preparation(
     key: tuple[Any, ...],
     build,
+    *,
+    view: str | None = None,
 ) -> Mapping[str, Any]:
     """Return one successful immutable preparation, with bounded single-flight."""
 
@@ -7804,12 +8018,13 @@ def _cached_generic_ranking_preparation(
         raise
     with _GENERIC_RANKING_PREPARATION_LOCK:
         flight.result = prepared
+        cache_value = scalar_preparation(prepared, view=view)
         if _cache_value_is_bounded(
-            prepared,
+            cache_value,
             max_bytes=_GENERIC_RANKING_PREPARATION_MAX_BYTES,
             max_occurrences=_GENERIC_RANKING_PREPARATION_MAX_OCCURRENCES,
         ):
-            _GENERIC_RANKING_PREPARATION_CACHE[key] = prepared
+            _GENERIC_RANKING_PREPARATION_CACHE[key] = cache_value
             _GENERIC_RANKING_PREPARATION_CACHE.move_to_end(key)
             while len(_GENERIC_RANKING_PREPARATION_CACHE) > _GENERIC_RANKING_PREPARATION_CAP:
                 _GENERIC_RANKING_PREPARATION_CACHE.popitem(last=False)
@@ -7817,6 +8032,59 @@ def _cached_generic_ranking_preparation(
         flight.event.set()
     return prepared
 
+
+def _sql_page_slice_prepared_rows(
+    connection,
+    rows: Sequence[Mapping[str, Any]],
+    options: Mapping[str, Any],
+) -> tuple[dict[str, Any], ...]:
+    """Select only the requested page from a scalar prepared-rank plan."""
+
+    row_by_key: dict[str, Mapping[str, Any]] = {}
+    scalar_rows: list[dict[str, Any]] = []
+    for prepared_rank, row in enumerate(rows):
+        detail_key = _text(row.get("detail_key"))
+        if not detail_key:
+            raise PostgresAdapterError("generic ranking page plan is missing detail identity")
+        if detail_key in row_by_key:
+            raise PostgresAdapterError("generic ranking page plan has duplicate detail identity")
+        row_by_key[detail_key] = row
+        scalar_rows.append({
+            "detail_key": detail_key,
+            "prepared_rank": prepared_rank,
+        })
+    limit_sql, limit_params = page_limit_offset(
+        options["page"], options["pageSize"],
+    )
+    selected = _rows(
+        connection,
+        f"""
+        WITH prepared_rows AS (
+            SELECT detail_key, prepared_rank
+            FROM jsonb_to_recordset(%s::jsonb)
+                AS item(detail_key text, prepared_rank integer)
+        )
+        SELECT detail_key, prepared_rank
+        FROM prepared_rows
+        ORDER BY prepared_rank
+        {limit_sql}
+        """,
+        [json.dumps(scalar_rows, ensure_ascii=False), *limit_params],
+    )
+    page: list[dict[str, Any]] = []
+    for selected_row in selected:
+        detail_key = _text(selected_row.get("detail_key"))
+        source = row_by_key.get(detail_key)
+        if source is None:
+            raise PostgresAdapterError("generic ranking SQL page returned unknown detail identity")
+        try:
+            prepared_rank = int(selected_row.get("prepared_rank"))
+        except (TypeError, ValueError) as exc:
+            raise PostgresAdapterError("generic ranking SQL page returned invalid rank") from exc
+        selected_copy = dict(source)
+        selected_copy["_prepared_rank"] = prepared_rank
+        page.append(selected_copy)
+    return tuple(page)
 
 def _cached_generic_meta_counts(
     key: tuple[str, str, tuple[str, ...]],
@@ -8503,8 +8771,22 @@ def _render_generic_overlay_rankings(
             int(row.get("video_count") or 0) for row in render_rows
         )
     offset = (options["page"] - 1) * options["pageSize"]
+    if options["view"] == "vtubers":
+        render_rows = _sql_page_slice_prepared_rows(
+            connection, render_rows, options,
+        )
     records = []
-    for index, row in enumerate(render_rows[offset:offset + options["pageSize"]], start=offset + 1):
+    if options["view"] == "vtubers":
+        ranked_rows = (
+            (int(row.get("_prepared_rank") or 0) + 1, row)
+            for row in render_rows
+        )
+    else:
+        ranked_rows = enumerate(
+            render_rows[offset:offset + options["pageSize"]],
+            start=offset + 1,
+        )
+    for index, row in ranked_rows:
         payload = _hydrated_generic_ranking_payload(
             connection,
             parent_revision_id,
@@ -8590,6 +8872,8 @@ def _render_generic_overlay_rankings(
         for record in records:
             channel_id = _text(record.get("channelId") or record.get("key"))
             _canonicalize_vtuber_card_preview(record, channel_id)
+        if options["compact"]:
+            records = [compact_vtuber_ranking_card(record) for record in records]
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -8619,6 +8903,7 @@ def _generic_overlay_rankings_payload(
     prepared = _cached_generic_ranking_preparation(
         key,
         lambda: _prepare_generic_overlay_rankings(connection, revision_id, parent, options),
+        view=options["view"],
     )
     return _render_generic_overlay_rankings(
         connection, revision_id, prepared, query,
@@ -10112,6 +10397,8 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         records = []
         for row in rows:
             payload = _json_object(row.get("payload_json"))
+            if options["compact"] and options["view"] == "vtubers":
+                payload = compact_vtuber_ranking_card(payload)
             if options["view"] == "vtubers":
                 payload = _apply_channel_metadata(payload, row, metadata, options["range"])
             payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
@@ -10191,6 +10478,8 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     records = []
     for row in rows[offset : offset + options["pageSize"]]:
         payload = _json_object(row.get("payload_json"))
+        if options["compact"] and options["view"] == "vtubers":
+            payload = compact_vtuber_ranking_card(payload)
         if options["view"] == "vtubers":
             payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
