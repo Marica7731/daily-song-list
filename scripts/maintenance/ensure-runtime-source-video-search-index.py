@@ -16,6 +16,9 @@ FUNCTION_SIGNATURE = f"{FUNCTION_NAME}(text,text,text)"
 INDEX_EXPRESSION = (
     "public.daily_song_source_video_search_text(title, video_id, payload_json)"
 )
+INDEX_EXPRESSION_UNQUALIFIED = (
+    "daily_song_source_video_search_text(title, video_id, payload_json)"
+)
 
 CREATE_FUNCTION_SQL = r"""
 CREATE OR REPLACE FUNCTION public.daily_song_source_video_search_text(
@@ -149,7 +152,10 @@ def _definition_matches(state: dict[str, Any]) -> bool:
         state["valid"]
         and state["ready"]
         and " USING gin " in f" {definition} "
-        and INDEX_EXPRESSION in definition
+        and (
+            INDEX_EXPRESSION in definition
+            or INDEX_EXPRESSION_UNQUALIFIED in definition
+        )
         and "gin_trgm_ops" in definition
     )
 
