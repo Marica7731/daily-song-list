@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-04T03:27:13.439Z",
+  "generatedAt": "2026-08-04T09:52:03.730Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-04T03:27:13.439Z",
+    "fetchedAt": "2026-08-04T09:52:03.730Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-04T03:27:13.439Z",
+    "generatedAt": "2026-08-04T09:52:03.730Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1028,
-      "parseableChannels": 1006,
+      "totalChannels": 1031,
+      "parseableChannels": 1009,
       "realAvatar": 646,
-      "thumbnailFallback": 382,
+      "thumbnailFallback": 385,
       "missingDisplayImage": 0,
-      "missingAvatar": 382,
+      "missingAvatar": 385,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 572
+      "skipped_collected_evidence": 574,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 550,
+      "batch_limit_reached": 552,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@sumica-",
+        "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
+        "displayName": "-sumica-澄花",
+        "sourceUrl": "https://www.youtube.com/@sumica-%E6%BE%84%E8%8A%B1",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@kugaleo_Q",
+        "channelId": "UCmpEFsiD67ZOjn2CCJoo1mw",
+        "displayName": "久我レオ / Kuga Leo",
+        "sourceUrl": "https://www.youtube.com/@kugaleo_Q",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@tsuna_nekota",
         "channelId": "UCIjdfjcSaEgdjwbgjxC3ZWg",
@@ -11709,6 +11723,13 @@
         "channelId": "UCKVQ9q8o_HPoMzf0bdUpgpw",
         "displayName": "伊達つかさ / Date Tsukasa",
         "sourceUrl": "https://www.youtube.com/@Unifee_date",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E5%A4%A9%E7%80%AC%E3%82%85%E3%82%85",
+        "channelId": "UCYYvJHfujamYw0FHV9o9XCw",
+        "displayName": "天瀬ゅゅ / Amase Yuyu",
+        "sourceUrl": "https://www.youtube.com/@%E5%A4%A9%E7%80%AC%E3%82%85%E3%82%85",
         "reason": "batch_limit_reached"
       },
       {
@@ -11803,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@RuraCh.",
+        "channelId": "UC23wkiGKkM6RJGTYmcoSpzg",
+        "displayName": "Rura Ch. 朱音るら",
+        "sourceUrl": "https://www.youtube.com/@RuraCh.",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@Satou_Anime_ASRB",
         "channelId": "UCqJQfY9916fdpDrKFqdYy2g",
         "displayName": "Anime ch. 佐藤あにめ",
@@ -11821,34 +11849,6 @@
         "channelId": "UCz4jhqrCfthF8NnldZeK_rw",
         "displayName": "Rica Ch. / 花宮莉歌",
         "sourceUrl": "https://www.youtube.com/@HanamiyaRica",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KokonamiIruka_Y4T4",
-        "channelId": "UCGGIGlgxXoVu1ZzbQ2XBxqQ",
-        "displayName": "小々波いるか / Kokonami Iruka【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@KokonamiIruka_Y4T4",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shiro_zakuro",
-        "channelId": "UCPmcUzR-kh8hGVbNdYU84EA",
-        "displayName": "柘榴シロ@Zakuro shiro",
-        "sourceUrl": "https://www.youtube.com/@Shiro_zakuro",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Kaku_Nagi",
-        "channelId": "UC6mOJt9EZCxuqe5RuLT-btw",
-        "displayName": "駆空なぎ【RockSongVTuber】-Stellarhyth",
-        "sourceUrl": "https://www.youtube.com/@Kaku_Nagi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Vam0414",
-        "channelId": "UCPm62fhXzHQiUupKUDlRSig",
-        "displayName": "ヴァンパイアップル",
-        "sourceUrl": "https://www.youtube.com/@Vam0414",
         "reason": "batch_limit_reached"
       }
     ]
