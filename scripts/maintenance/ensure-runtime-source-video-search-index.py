@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION public.daily_song_source_video_search_text(
 RETURNS text
 LANGUAGE plpgsql
 IMMUTABLE
-PARALLEL SAFE
+PARALLEL UNSAFE
 CALLED ON NULL INPUT
 AS $function$
 DECLARE
