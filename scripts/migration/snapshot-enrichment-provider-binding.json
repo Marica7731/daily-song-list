@@ -10,7 +10,7 @@
   "providerV4": {
     "path": "scripts/migration/snapshot-enrichment-provider.mjs",
     "version": "snapshot-enrichment-provider-v4",
-    "sha256": "69ba77c64b6c39fe117018b582d486e2f49080227b04457d31f3a838dbee7ae1",
+    "sha256": "2210d5749757b33e72530cfba051a069e03aab50935c763366acb337d5a5f35a",
     "contract": "luna-max-mac-enrichment/v4-candidate",
     "requiredBeforeDispatch": true,
     "batchFatalWrapperShape": true,
@@ -71,7 +71,7 @@
     "emptySongs": "never ok; never publishable",
     "emptyProvenance": "needs_review, not ok",
     "invalidFieldType": "needs_review or batch contract error; never ok",
-    "eventTime": "explicit provider/source field only; no publishedTimestamp or wall-clock fallback",
+    "eventTime": "canonical eventTime from immutable eventTime, publishedAtIso, publishedAt, publishedTimestampIsoUtc, or publishedTimestamp source fields; no wall-clock fallback",
     "releaseRoute": null,
     "releaseRouteStatus": "not_computed"
   }

@@ -190,10 +190,15 @@ function isCanonicalIsoUtc(value) {
 
 export function eventTimeOf(value) {
   if (!isObject(value)) return null;
-  const direct = firstEvidence(value.eventTime);
+  const direct = firstEvidence(
+    value.eventTime,
+    value.publishedAtIso,
+    value.publishedAt,
+    value.publishedTimestampIsoUtc,
+  );
   if (typeof direct === 'string') return dateStringToIso(direct);
   if (typeof direct === 'number') return timestampToIso(direct);
-  return null;
+  return timestampToIso(value.publishedTimestamp);
 }
 
 function sourceField(record, source, provenance, key) {
