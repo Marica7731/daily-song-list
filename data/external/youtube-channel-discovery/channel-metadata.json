@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-04T12:13:07.789Z",
+  "generatedAt": "2026-08-04T15:18:47.393Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-04T12:13:07.789Z",
+    "fetchedAt": "2026-08-04T15:18:47.393Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-04T12:13:07.789Z",
+    "generatedAt": "2026-08-04T15:18:47.393Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@kaonya5",
+        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
+        "displayName": "訛音屋 / Kaonya",
+        "sourceUrl": "https://www.youtube.com/@kaonya5",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KaguraTomyoji",
+        "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
+        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
+        "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KitamiYusei",
         "channelId": "UCcx3crxPFi006DUhb_YU-tw",
@@ -11835,20 +11849,6 @@
         "channelId": "UCFTXAOZwu4RDbaZdQZB8MvQ",
         "displayName": "未宵エレナ Mayoi Elena ch",
         "sourceUrl": "https://www.youtube.com/@mayoielena",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yukiniwa9996",
-        "channelId": "UC8tHkrGhnSrUHXZ5-qi2AtA",
-        "displayName": "雪ニワ - yukiniwa -",
-        "sourceUrl": "https://www.youtube.com/@yukiniwa9996",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RuraCh.",
-        "channelId": "UC23wkiGKkM6RJGTYmcoSpzg",
-        "displayName": "Rura Ch. 朱音るら",
-        "sourceUrl": "https://www.youtube.com/@RuraCh.",
         "reason": "batch_limit_reached"
       }
     ]
