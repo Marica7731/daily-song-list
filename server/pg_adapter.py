@@ -9785,6 +9785,29 @@ def _ranking_preview_target(
     return min(MAX_RANKING_PREVIEW_VIDEOS, target)
 
 
+def _runtime_ranking_preview_source_key(
+    payload: Mapping[str, Any],
+    range_id: str,
+    view: str,
+) -> str:
+    """Resolve the internal source lookup key without changing the public key.
+
+    Source-search ranking rows use a scalar light payload.  That payload may
+    carry ``detail_key`` as a temporary sourceDetailKey, while persisted
+    source occurrences use the canonical exporter key.  Keep the response
+    field untouched and repair only the bounded lookup route.
+    """
+
+    public_key = _text(payload.get("sourceDetailKey"))
+    group_key = _text(payload.get("key"))
+    canonical_key = _production_source_detail_key_for_group(
+        view, range_id, group_key,
+    )
+    if canonical_key and (not public_key or public_key == group_key):
+        return canonical_key
+    return public_key
+
+
 def _merge_ranking_preview_items(
     current: Sequence[Mapping[str, Any]],
     additions: Sequence[Mapping[str, Any]],
@@ -9836,7 +9859,9 @@ def _hydrate_runtime_ranking_song_previews(
             for item in current_items
             if _ranking_preview_video_id(item)
         }
-        source_key = _text(payload.get("sourceDetailKey"))
+        source_key = _runtime_ranking_preview_source_key(
+            payload, range_id, view,
+        )
         if source_key and len(existing_video_ids) < target and source_key not in requested_keys:
             requested_keys.append(source_key)
 
@@ -9932,7 +9957,9 @@ def _hydrate_runtime_ranking_song_previews(
         current = payload.get("occurrences")
         current_items = current if isinstance(current, list) else []
         target = _ranking_preview_target(payload, current_items)
-        source_key = _text(payload.get("sourceDetailKey"))
+        source_key = _runtime_ranking_preview_source_key(
+            payload, range_id, view,
+        )
         payload["occurrences"] = _merge_ranking_preview_items(
             current_items,
             additions_by_key.get(source_key, ()),
