@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-04T09:52:03.730Z",
+  "generatedAt": "2026-08-04T12:13:07.789Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-04T09:52:03.730Z",
+    "fetchedAt": "2026-08-04T12:13:07.789Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-04T09:52:03.730Z",
+    "generatedAt": "2026-08-04T12:13:07.789Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1031,
-      "parseableChannels": 1009,
+      "totalChannels": 1035,
+      "parseableChannels": 1013,
       "realAvatar": 646,
-      "thumbnailFallback": 385,
+      "thumbnailFallback": 389,
       "missingDisplayImage": 0,
-      "missingAvatar": 385,
+      "missingAvatar": 389,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 574,
+      "skipped_collected_evidence": 578,
       "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 552,
+      "batch_limit_reached": 556,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@KitamiYusei",
+        "channelId": "UCcx3crxPFi006DUhb_YU-tw",
+        "displayName": "北見遊征 / Kitami Yusei【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@KitamiYusei",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@masaya1957",
+        "channelId": "UCZKmYYlgo4mspRprTK1OP5w",
+        "displayName": "石垣島からフォークソング【Masaya&Yuzo】",
+        "sourceUrl": "https://www.youtube.com/@masaya1957",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@sumica-",
         "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
@@ -11789,6 +11803,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@tsukushi_aria",
+        "channelId": "UC5XQhzMH08PgWa4Zp02Gcsw",
+        "displayName": "月紫アリア / Tsukushi Aria",
+        "sourceUrl": "https://www.youtube.com/@tsukushi_aria",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@teikobonbonch3548",
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
         "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
@@ -11828,27 +11849,6 @@
         "channelId": "UC23wkiGKkM6RJGTYmcoSpzg",
         "displayName": "Rura Ch. 朱音るら",
         "sourceUrl": "https://www.youtube.com/@RuraCh.",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Satou_Anime_ASRB",
-        "channelId": "UCqJQfY9916fdpDrKFqdYy2g",
-        "displayName": "Anime ch. 佐藤あにめ",
-        "sourceUrl": "https://www.youtube.com/@Satou_Anime_ASRB",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
-        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
-        "displayName": "一二美アユ ch / Hifumi Aryu",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@HanamiyaRica",
-        "channelId": "UCz4jhqrCfthF8NnldZeK_rw",
-        "displayName": "Rica Ch. / 花宮莉歌",
-        "sourceUrl": "https://www.youtube.com/@HanamiyaRica",
         "reason": "batch_limit_reached"
       }
     ]
