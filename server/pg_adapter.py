@@ -9785,6 +9785,42 @@ def _ranking_preview_target(
     return min(MAX_RANKING_PREVIEW_VIDEOS, target)
 
 
+def _normalize_ranking_preview_occurrence(
+    item: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Project nested source fields into the public ranking-preview shape."""
+
+    result = dict(item)
+    nested_item = item.get("item") if isinstance(item.get("item"), Mapping) else {}
+    nested_video = item.get("video") if isinstance(item.get("video"), Mapping) else {}
+    song = item.get("song") if isinstance(item.get("song"), Mapping) else {}
+
+    fields = {
+        "videoId": (item.get("videoId"), nested_item.get("videoId"), nested_video.get("videoId"), song.get("videoId")),
+        "seconds": (item.get("seconds"), song.get("seconds"), nested_item.get("seconds"), nested_video.get("seconds")),
+        "title": (item.get("title"), nested_item.get("title"), nested_video.get("title"), song.get("title")),
+        "channelHandle": (item.get("channelHandle"), nested_item.get("channelHandle"), nested_video.get("channelHandle")),
+        "channelId": (item.get("channelId"), nested_item.get("channelId"), nested_video.get("channelId")),
+        "channelName": (item.get("channelName"), nested_item.get("channelName"), nested_video.get("channelName")),
+        "channelUrl": (item.get("channelUrl"), nested_item.get("channelUrl"), nested_video.get("channelUrl")),
+        "publishedAt": (
+            item.get("publishedAt"),
+            nested_item.get("publishedAt"),
+            nested_item.get("publishedTimestamp"),
+            nested_video.get("publishedAt"),
+            nested_video.get("publishedTimestamp"),
+        ),
+    }
+    for name, values in fields.items():
+        if result.get(name) not in (None, ""):
+            continue
+        for value in values:
+            if value not in (None, ""):
+                result[name] = value
+                break
+    return result
+
+
 def _runtime_ranking_preview_source_key(
     payload: Mapping[str, Any],
     range_id: str,
@@ -9818,12 +9854,13 @@ def _merge_ranking_preview_items(
     for item in (*current, *additions):
         if not isinstance(item, Mapping):
             continue
-        video_id = _ranking_preview_video_id(item)
+        normalized = _normalize_ranking_preview_occurrence(item)
+        video_id = _ranking_preview_video_id(normalized)
         if video_id and video_id in seen_video_ids:
             continue
         if video_id:
             seen_video_ids.add(video_id)
-        merged.append(dict(item))
+        merged.append(normalized)
         if target and len(seen_video_ids) >= target:
             break
     return merged
