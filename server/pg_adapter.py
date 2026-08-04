@@ -9368,10 +9368,19 @@ def _public_row_matches_search(
 
     if _text(options.get("view")) in {"songs", "songIndex"}:
         return _runtime_row_matches_search(row, options)
-    return _matches_search_tokens(
-        _text(row.get("search_text")) + " " + _text(row.get("channel_search_text")),
-        options.get("searchTokens") or (),
+    persisted_search = (
+        _text(row.get("search_text"))
+        + " "
+        + _text(row.get("channel_search_text"))
     )
+    if _matches_search_tokens(persisted_search, options.get("searchTokens") or ()):
+        return True
+    if not persisted_search.strip():
+        return _matches_search_tokens(
+            _overlay_candidate_search_text(row),
+            options.get("searchTokens") or (),
+        )
+    return False
 
 
 def _load_snapshot(connection) -> _Snapshot:
