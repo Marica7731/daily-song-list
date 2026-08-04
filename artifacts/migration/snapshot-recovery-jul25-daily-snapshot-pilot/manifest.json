@@ -1,0 +1,152 @@
+{
+  "acceptedInputSha256": "de0d3c20e5aa6870b7cb1cd8e3af58bc30bd77135fb5bb13e7e25ae20dd51e64",
+  "acceptedOccurrenceCount": 378,
+  "acceptedVideoCount": 26,
+  "artifactStatus": "candidate-only; source-ready and candidate-ready; not committed, activated, or online-verified",
+  "artifacts": {
+    "accepted.json": {
+      "bytes": 1330733,
+      "path": "accepted.json",
+      "sha256": "de0d3c20e5aa6870b7cb1cd8e3af58bc30bd77135fb5bb13e7e25ae20dd51e64"
+    },
+    "candidate.ndjson": {
+      "bytes": 1003033,
+      "path": "candidate.ndjson",
+      "sha256": "2e6cbd358a768d184c08ae4c633a40418299565c5fa3500683a65e47df081501"
+    },
+    "field-matrix.json": {
+      "bytes": 927609,
+      "path": "field-matrix.json",
+      "sha256": "17f51ab39e09e0eedd80b5acb9e1eb02471a208405d5b02425e9fa1b509d4c9a"
+    },
+    "identity-evidence.json": {
+      "bytes": 221606,
+      "path": "identity-evidence.json",
+      "sha256": "1bbe84e5ac062ae1e1b51db5e157a715b93bc7a59710d4c0faaa43ea18e85d07"
+    },
+    "source.raw.ndjson": {
+      "bytes": 251232,
+      "path": "source.raw.ndjson",
+      "sha256": "1f87aec452be54dd0e9ed2b79e8e1231ae9289d7e1cc374e696c62ecdcba6bc9"
+    },
+    "status-audit.json": {
+      "bytes": 83414,
+      "path": "status-audit.json",
+      "sha256": "b77a2668a70eea12a35f1f56e22ae123ee8baede7563650421ec79c6ba65de90"
+    }
+  },
+  "candidateNdjsonBytes": 1003033,
+  "candidateNdjsonNonEmptyLines": 26,
+  "candidateNdjsonSha256": "2e6cbd358a768d184c08ae4c633a40418299565c5fa3500683a65e47df081501",
+  "candidateOnly": true,
+  "candidateState": "CANDIDATE_READY",
+  "deliveryGates": {
+    "activation": false,
+    "commit": false,
+    "dispatch": false,
+    "onlineVerified": false,
+    "push": false
+  },
+  "eventTimeMax": "2026-07-25T20:00:25.518Z",
+  "eventTimeMin": "2026-07-25T02:25:54.976Z",
+  "expected": {
+    "occurrences": 378,
+    "reviewedUnknown": 9,
+    "videos": 26
+  },
+  "fieldMatrix": {
+    "path": "field-matrix.json",
+    "sha256": "17f51ab39e09e0eedd80b5acb9e1eb02471a208405d5b02425e9fa1b509d4c9a",
+    "status": "CANDIDATE_READY"
+  },
+  "fieldMatrixCounts": {
+    "missing": {
+      "eventTime": 0,
+      "identity": 0,
+      "rawHash": 0,
+      "songArtist": 9,
+      "songTitle": 0,
+      "sourceHash": 0,
+      "sourceId": 0,
+      "sourcePath": 0,
+      "sourceText": 0,
+      "sourceUrl": 0
+    },
+    "occurrences": 378,
+    "reviewedUnknown": 9,
+    "uniqueOccurrenceKeys": 378,
+    "videos": 26
+  },
+  "identityEvidence": {
+    "path": "identity-evidence.json",
+    "reviewedUnknown": 9,
+    "sha256": "1bbe84e5ac062ae1e1b51db5e157a715b93bc7a59710d4c0faaa43ea18e85d07",
+    "sourceIdentityCount": 378
+  },
+  "inputFiles": [
+    "source.raw.ndjson"
+  ],
+  "inventoryPath": ".codex-snapshot-family-inventory-primary/inventory.json",
+  "inventorySha256": "c08134bd0a77fcd9d3d3051e7ae50e411c5e1d78720edaf65781a4f75c392d17",
+  "kind": "accepted-increment",
+  "mediaDownloaded": false,
+  "parentCas": {
+    "activationReady": false,
+    "casRequired": true,
+    "intendedParentRevisionId": null,
+    "rebindAtDispatchRequired": true
+  },
+  "range": "all",
+  "rangeId": "all",
+  "rangeIds": [
+    "all"
+  ],
+  "reviewedUnknownOccurrenceCount": 9,
+  "route": "historical-all",
+  "routeAsOf": "2026-08-04T07:09:23.000Z",
+  "routeUnit": "daily-song-snapshot-youtube-search/2026-07-25",
+  "schemaVersion": 1,
+  "sourceCapture": {
+    "bytes": 35666202,
+    "encoding": "UTF-8",
+    "filteredArtifact": {
+      "bytes": 251232,
+      "path": "source.raw.ndjson",
+      "sha256": "1f87aec452be54dd0e9ed2b79e8e1231ae9289d7e1cc374e696c62ecdcba6bc9"
+    },
+    "immutable": true,
+    "path": "data/snapshots/20260725T220000Z.json",
+    "sha256": "b6261145793d2c3bb2b425d5110988f15c96442c0cf8ec1c3d39ce0115d867ff",
+    "status": "SOURCE_READY"
+  },
+  "sourceCommit": null,
+  "sourceFamily": "daily-song-snapshot-youtube-search",
+  "sourceInputSha256": "b6261145793d2c3bb2b425d5110988f15c96442c0cf8ec1c3d39ce0115d867ff",
+  "sourceKey": "daily-song-snapshot-youtube-search/2026-07-25",
+  "sourceManifestSha256": "b6261145793d2c3bb2b425d5110988f15c96442c0cf8ec1c3d39ce0115d867ff",
+  "sourceReachedEnd": true,
+  "sourceSystems": [
+    "daily-song-snapshot-youtube-search"
+  ],
+  "status": "CANDIDATE_READY",
+  "statusAuditIncluded": true,
+  "statusAuditSha256": "b77a2668a70eea12a35f1f56e22ae123ee8baede7563650421ec79c6ba65de90",
+  "statusAuditSummary": {
+    "acceptedOccurrenceCount": 378,
+    "acceptedVideoCount": 26,
+    "duplicate": 0,
+    "duplicateCount": 0,
+    "hardMissingCount": 0,
+    "invalid": 0,
+    "invalidCount": 0,
+    "isolationCount": 0,
+    "resolved": 369,
+    "resolvedCount": 369,
+    "review": 9,
+    "reviewCount": 9,
+    "reviewedUnknown": 9,
+    "reviewedUnknownCount": 9,
+    "total": 378,
+    "videoCount": 26
+  }
+}
