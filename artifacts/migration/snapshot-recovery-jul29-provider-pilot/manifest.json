@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "kind": "accepted-increment",
+  "generatedAt": "2026-08-04T04:03:47+00:00",
+  "sourceKey": "snapshot-recovery-jul29-provider-pilot",
+  "rangeId": "7d",
+  "range": "7d",
+  "sourceReachedEnd": true,
+  "mediaDownloaded": false,
+  "statusAuditIncluded": true,
+  "inputFiles": [
+    "accepted.json"
+  ],
+  "sourceManifestSha256": "60710a79824a6174efb99d0de1ac6b19e97f9f392f33f18552c2c49b716eb50a",
+  "acceptedVideoCount": 1,
+  "acceptedOccurrenceCount": 5,
+  "rangeIds": [
+    "7d"
+  ],
+  "sourceSystems": [
+    "youtube_channel_discovery"
+  ],
+  "reviewAudit": {
+    "total": 5,
+    "resolved": 5,
+    "resolvedCount": 5,
+    "review": 0,
+    "reviewCount": 0,
+    "needsReview": 0,
+    "invalid": 0,
+    "invalidCount": 0,
+    "duplicate": 0,
+    "duplicateCount": 0,
+    "unmatched": 0,
+    "ambiguous": 0
+  },
+  "candidateState": "CANDIDATE_READY",
+  "route": "authoritative-7d",
+  "routeUnit": "youtube_channel_discovery/2026-07-29",
+  "routeAsOf": "2026-08-04T04:03:47Z",
+  "eventTimeMin": "2026-07-29T14:57:25Z",
+  "eventTimeMax": "2026-07-29T14:57:25Z",
+  "expectedPilot": {
+    "videos": 1,
+    "occurrences": 5
+  },
+  "sourceCaptureKey": "snapshot-recovery-jul29-provider-pilot",
+  "sourceCapture": {
+    "path": "reacquired-provider.raw.ndjson",
+    "sha256": "09dc0f2a7540525b67f593db22c60f2b49b33d672902040afb885d284b3ddc94",
+    "bytes": 35551,
+    "encoding": "UTF-8",
+    "newline": "LF",
+    "status": "SOURCE_READY",
+    "historicalOriginalBytes": false
+  },
+  "fieldMatrix": {
+    "path": "field-matrix-2026-07-29.json",
+    "sha256": "42ccda3262a5d3e9db9a39b02b31539f39514b425b8e1a529a195d66b3b3f746",
+    "status": "SOURCE_READY"
+  },
+  "acceptedInputSha256": "60710a79824a6174efb99d0de1ac6b19e97f9f392f33f18552c2c49b716eb50a",
+  "candidateNdjsonSha256": "7f72ecffe775682f83353caccfc565cf53d906941a0f14f5540e45696fbc088a",
+  "patch_sha256": "7f72ecffe775682f83353caccfc565cf53d906941a0f14f5540e45696fbc088a",
+  "candidateNdjsonBytes": 17683,
+  "candidateNdjsonNonEmptyLines": 1,
+  "identityEvidence": {
+    "identityEvidence": {
+      "acceptedOccurrenceCount": 5,
+      "acceptedSongGroupCount": 5,
+      "acceptedVideoCount": 1,
+      "artist": "Orangestar",
+      "channelHandle": "",
+      "channelId": "UCZLHpSQ_ajJqLSIySBB5F4g",
+      "occurrenceId": "-2XWRPr7DXI:104:3305",
+      "seconds": 3305,
+      "sourceDetailKey": "UCZLHpSQ_ajJqLSIySBB5F4g",
+      "title": "アスノヨゾラ哨戒班",
+      "videoId": "-2XWRPr7DXI"
+    },
+    "sourceIdentityCount": 1,
+    "sourceIdentityEvidence": [
+      {
+        "acceptedOccurrenceCount": 5,
+        "acceptedSongGroupCount": 5,
+        "acceptedVideoCount": 1,
+        "artist": "Orangestar",
+        "channelHandle": "",
+        "channelId": "UCZLHpSQ_ajJqLSIySBB5F4g",
+        "occurrenceId": "-2XWRPr7DXI:104:3305",
+        "seconds": 3305,
+        "sourceDetailKey": "UCZLHpSQ_ajJqLSIySBB5F4g",
+        "title": "アスノヨゾラ哨戒班",
+        "videoId": "-2XWRPr7DXI"
+      }
+    ]
+  },
+  "statusAuditSha256": "998b8b3f2df71bf14c73ae081431d7537f4e0c07b756268ac52e502342278d74",
+  "statusAuditSummary": {
+    "total": 5,
+    "resolved": 5,
+    "resolvedCount": 5,
+    "review": 0,
+    "reviewCount": 0,
+    "needsReview": 0,
+    "invalid": 0,
+    "invalidCount": 0,
+    "duplicate": 0,
+    "duplicateCount": 0,
+    "unmatched": 0,
+    "ambiguous": 0
+  },
+  "parentCas": {
+    "intendedParentRevisionId": "accepted_30870596907_1",
+    "rebindAtDispatchRequired": true,
+    "casRequired": true,
+    "activationReady": false,
+    "currentActivationReadiness": false,
+    "note": "Provisional parent only; dispatch must re-read the active revision and bind parent CAS before any activation attempt."
+  },
+  "jul28Isolation": {
+    "excludedEventTimeDate": "2026-07-28",
+    "fieldMatrixRowCountExcluded": 0,
+    "rawRecordCountExcluded": 1,
+    "rawVideoIdsExcluded": [
+      "-37IvEbCilw"
+    ],
+    "rawEventTimesExcluded": [
+      "2026-07-28T23:57:25.526Z"
+    ],
+    "missingSourceTextDiagnostic": [
+      [
+        "songs[0].source.sourcePath",
+        "songs[1].source.sourcePath",
+        "songs[2].source.sourcePath",
+        "songs[3].source.sourcePath",
+        "songs[4].source.sourcePath",
+        "songs[5].source.sourcePath",
+        "songs[6].source.sourcePath",
+        "songs[7].source.sourcePath",
+        "songs[8].source.sourcePath",
+        "songs[9].source.sourcePath",
+        "songs[10].source.sourcePath",
+        "songs[11].source.sourcePath",
+        "songs[12].source.sourcePath",
+        "songs[13].source.sourcePath",
+        "songs[14].source.sourcePath",
+        "songs[15].source.sourcePath",
+        "songs[16].source.sourcePath"
+      ]
+    ],
+    "includedInCandidate": false,
+    "missingSourceTextMayRemainIsolated": true
+  },
+  "producerContract": {
+    "acceptedToPatch": "scripts/migration/accepted-files-to-patch.py",
+    "identityEvidence": "scripts/migration/accepted-source-identities.py",
+    "pgConsumer": "scripts/migration/pg-incremental.mjs",
+    "pgRunner": "scripts/migration/run-pg-incremental.mjs",
+    "authoritative7dArtifactResume": ".github/workflows/deploy-pg-incremental.yml",
+    "require7dGate": true,
+    "legacyAcceptedIncrementCallerIsAuthoritative7dEvidence": false,
+    "recordShape": "one accepted video object per NDJSON line; songs preserve one row per occurrence"
+  },
+  "deliveryGates": {
+    "commit": false,
+    "push": false,
+    "dispatch": false,
+    "activation": false,
+    "onlineVerified": false
+  },
+  "artifactStatus": "candidate-only; not committed, activated, or online-verified"
+}

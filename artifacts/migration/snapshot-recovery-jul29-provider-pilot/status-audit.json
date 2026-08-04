@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "kind": "snapshot-recovery-status-audit",
+  "status": "ok",
+  "sourceKey": "snapshot-recovery-jul29-provider-pilot",
+  "route": "authoritative-7d",
+  "routeUnit": "youtube_channel_discovery/2026-07-29",
+  "fieldMatrix": {
+    "path": "field-matrix-2026-07-29.json",
+    "sha256": "42ccda3262a5d3e9db9a39b02b31539f39514b425b8e1a529a195d66b3b3f746"
+  },
+  "summary": {
+    "total": 5,
+    "resolved": 5,
+    "resolvedCount": 5,
+    "review": 0,
+    "reviewCount": 0,
+    "needsReview": 0,
+    "invalid": 0,
+    "invalidCount": 0,
+    "duplicate": 0,
+    "duplicateCount": 0,
+    "unmatched": 0,
+    "ambiguous": 0
+  },
+  "rows": [
+    {
+      "videoId": "-2XWRPr7DXI",
+      "occurrenceId": "-2XWRPr7DXI:31:118",
+      "position": 31,
+      "status": "resolved",
+      "needsReview": false,
+      "invalid": false,
+      "duplicate": false
+    },
+    {
+      "videoId": "-2XWRPr7DXI",
+      "occurrenceId": "-2XWRPr7DXI:61:1927",
+      "position": 61,
+      "status": "resolved",
+      "needsReview": false,
+      "invalid": false,
+      "duplicate": false
+    },
+    {
+      "videoId": "-2XWRPr7DXI",
+      "occurrenceId": "-2XWRPr7DXI:104:3305",
+      "position": 104,
+      "status": "resolved",
+      "needsReview": false,
+      "invalid": false,
+      "duplicate": false
+    },
+    {
+      "videoId": "-2XWRPr7DXI",
+      "occurrenceId": "-2XWRPr7DXI:142:4215",
+      "position": 142,
+      "status": "resolved",
+      "needsReview": false,
+      "invalid": false,
+      "duplicate": false
+    },
+    {
+      "videoId": "-2XWRPr7DXI",
+      "occurrenceId": "-2XWRPr7DXI:175:4545",
+      "position": 175,
+      "status": "resolved",
+      "needsReview": false,
+      "invalid": false,
+      "duplicate": false
+    }
+  ]
+}
