@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-04T21:19:14.087Z",
+  "generatedAt": "2026-08-04T22:24:51.459Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-04T21:19:14.087Z",
+    "fetchedAt": "2026-08-04T22:24:51.459Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-04T21:19:14.087Z",
+    "generatedAt": "2026-08-04T22:24:51.459Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1036,
-      "parseableChannels": 1014,
+      "totalChannels": 1038,
+      "parseableChannels": 1016,
       "realAvatar": 646,
-      "thumbnailFallback": 390,
+      "thumbnailFallback": 392,
       "missingDisplayImage": 0,
-      "missingAvatar": 390,
+      "missingAvatar": 392,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 579
+      "skipped_collected_evidence": 581
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 557,
+      "batch_limit_reached": 559,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
@@ -11775,6 +11775,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@harpsingmiyuki",
+        "channelId": "UC5ORYx_8m9q2CcDYFsNvOMw",
+        "displayName": "Miyuki_ハーピストみゆき_ハープ弾き語り",
+        "sourceUrl": "https://www.youtube.com/@harpsingmiyuki",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@RuridoriKafka",
         "channelId": "UC3oBWCwi2UtckYvMbtIOWVA",
         "displayName": "Ruridori Kafka / 璃鳥歌深【IZIGENIA】",
@@ -11842,13 +11849,6 @@
         "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
         "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
         "sourceUrl": "https://www.youtube.com/@kuzen_sia",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kurumizawamomo",
-        "channelId": "UCxrmkJf_X1Yhte_a4devFzA",
-        "displayName": "胡桃澤もも / kurumizawamomo",
-        "sourceUrl": "https://www.youtube.com/@kurumizawamomo",
         "reason": "batch_limit_reached"
       }
     ]
