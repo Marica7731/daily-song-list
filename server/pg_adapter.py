@@ -9192,11 +9192,39 @@ def _runtime_source_search_sql(
             _text(token).casefold(),
             f"%{_sql_like_literal(token)}%",
         ))
+    video_only_source_search = set(fields) == {"video"}
+    source_token_alias = "candidate" if video_only_source_search else "requested"
     occurrence_predicate = " OR ".join(
-        f"coalesce({expression}, '') ILIKE requested.needle ESCAPE E'\\\\'"
+        f"coalesce({expression}, '') ILIKE {source_token_alias}.needle ESCAPE E'\\\\'"
         for expression in occurrence_expressions
     )
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    source_candidate_cte = ""
+    matched_source_from = """
+            FROM authorities
+            JOIN runtime_source_occurrences AS occurrence
+              ON occurrence.revision_id = authorities.authority_revision
+             AND occurrence.source_key = authorities.source_key
+            JOIN eligible_ranking AS eligible
+              ON eligible.detail_key = occurrence.source_key
+            CROSS JOIN requested
+    """
+    if video_only_source_search:
+        source_candidate_cte = """, source_search_candidates AS MATERIALIZED (
+            SELECT DISTINCT eligible.detail_key, requested.token, requested.needle
+            FROM eligible_ranking AS eligible
+            CROSS JOIN requested
+            WHERE coalesce(eligible.search_text, '')
+                  ILIKE requested.needle ESCAPE E'\\\\'
+        )"""
+        matched_source_from = """
+            FROM source_search_candidates AS candidate
+            JOIN authorities
+              ON authorities.source_key = candidate.detail_key
+            JOIN runtime_source_occurrences AS occurrence
+              ON occurrence.revision_id = authorities.authority_revision
+             AND occurrence.source_key = candidate.detail_key
+        """
     source_cte = f"""
         WITH RECURSIVE active_lineage AS (
             SELECT revision_id, parent_revision_id, 0 AS lineage_depth
@@ -9223,25 +9251,20 @@ def _runtime_source_search_sql(
             SELECT ranking.rank, ranking.detail_key, ranking.title,
                    ranking.artist, ranking.name, ranking.row_count,
                    ranking.song_count, ranking.video_count,
-                   ranking.timestamp_count, ranking.channel_search_text
+                   ranking.timestamp_count, ranking.search_text,
+                   ranking.channel_search_text
             FROM runtime_ranking_rows AS ranking
             WHERE ranking.revision_id = %s
               AND ranking.range_id = %s
               AND ranking.view = %s
               AND ranking.metric = %s
               AND ranking.row_count >= %s
-        ), matched_source_tokens AS MATERIALIZED (
-            SELECT DISTINCT occurrence.source_key, requested.token
-            FROM authorities
-            JOIN runtime_source_occurrences AS occurrence
-              ON occurrence.revision_id = authorities.authority_revision
-             AND occurrence.source_key = authorities.source_key
-            JOIN eligible_ranking AS eligible
-              ON eligible.detail_key = occurrence.source_key
-            CROSS JOIN requested
+        ){source_candidate_cte}, matched_source_tokens AS MATERIALIZED (
+            SELECT DISTINCT occurrence.source_key, {source_token_alias}.token
+            {matched_source_from}
             WHERE occurrence.range_id = %s
               AND ({occurrence_predicate})
-            ORDER BY occurrence.source_key, requested.token
+            ORDER BY occurrence.source_key, {source_token_alias}.token
             LIMIT %s
         )
     """
