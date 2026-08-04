@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-04T17:39:04.626Z",
+  "generatedAt": "2026-08-04T19:23:32.415Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-04T17:39:04.626Z",
+    "fetchedAt": "2026-08-04T19:23:32.415Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-04T17:39:04.626Z",
+    "generatedAt": "2026-08-04T19:23:32.415Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1035,
-      "parseableChannels": 1013,
+      "totalChannels": 1036,
+      "parseableChannels": 1014,
       "realAvatar": 646,
-      "thumbnailFallback": 389,
+      "thumbnailFallback": 390,
       "missingDisplayImage": 0,
-      "missingAvatar": 389,
+      "missingAvatar": 390,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 578
+      "skipped_collected_evidence": 579,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 556,
+      "batch_limit_reached": 557,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E8%8A%B1%E7%8B%A9%E3%81%8F%E3%82%8C%E3%81%AF",
+        "channelId": "UCTc1UmDEUlUTKCceMmLfsag",
+        "displayName": "花狩くれは",
+        "sourceUrl": "https://www.youtube.com/@%E8%8A%B1%E7%8B%A9%E3%81%8F%E3%82%8C%E3%81%AF",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kaonya5",
         "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
@@ -11842,13 +11849,6 @@
         "channelId": "UCxrmkJf_X1Yhte_a4devFzA",
         "displayName": "胡桃澤もも / kurumizawamomo",
         "sourceUrl": "https://www.youtube.com/@kurumizawamomo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mayoielena",
-        "channelId": "UCFTXAOZwu4RDbaZdQZB8MvQ",
-        "displayName": "未宵エレナ Mayoi Elena ch",
-        "sourceUrl": "https://www.youtube.com/@mayoielena",
         "reason": "batch_limit_reached"
       }
     ]
