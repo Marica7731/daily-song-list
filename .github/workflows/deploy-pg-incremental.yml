@@ -673,12 +673,19 @@ jobs:
             if ! artifact_data_sha="$(shasum -a 256 "$WORKFLOW_RUN_DATA_PATH" | awk '{print $1}')"; then
               workflow_run_hard_fail artifact-7d-sha-failed; return 64
             fi
+            if ! artifact_blob_sha="$(git hash-object "$WORKFLOW_RUN_DATA_PATH")"; then
+              workflow_run_hard_fail artifact-7d-blob-sha-failed; return 64
+            fi
             [[ "$artifact_data_sha" =~ ^[0-9a-f]{64}$ ]] || {
               workflow_run_hard_fail invalid-artifact-7d-sha; return 64;
             }
+            [[ "$artifact_blob_sha" =~ ^[0-9a-f]{40}$ ]] || {
+              workflow_run_hard_fail invalid-artifact-7d-blob-sha; return 64;
+            }
             if ! jq -e --argjson run_id "$WORKFLOW_RUN_ID" --argjson run_attempt "$WORKFLOW_RUN_ATTEMPT" \
               --arg artifact_name "$EXPECTED_WORKFLOW_RUN_ARTIFACT_NAME" --arg repo "$GITHUB_REPOSITORY" \
-              --arg head "$WORKFLOW_RUN_HEAD_SHA" --arg data_sha "$artifact_data_sha" '
+              --arg head "$WORKFLOW_RUN_HEAD_SHA" --arg data_sha "$artifact_data_sha" \
+              --arg blob_sha "$artifact_blob_sha" '
               (.schemaVersion == 1) and
               (.route == "authoritative-7d") and
               (.artifactName == $artifact_name) and
@@ -686,7 +693,8 @@ jobs:
               (.producerRunAttempt == $run_attempt) and
               (.producerRepository == $repo) and
               (.producerHeadSha == $head) and
-              (.sourceSha == $head) and
+              (.sourceSha | type == "string" and test("^[0-9a-f]{40}$")) and
+              (.sourceBlobSha == $blob_sha) and
               (.sourceBaseSha | type == "string" and test("^[0-9a-f]{40}$")) and
               (.dataPath == "7d.json") and
               (.dataSha256 == $data_sha)
@@ -694,9 +702,14 @@ jobs:
               workflow_run_hard_fail artifact-manifest-binding-failed; return 64
             fi
             SOURCE_COMMIT_ROLE="workflow-run-authoritative-7d-artifact"
-            SOURCE_SHA="$WORKFLOW_RUN_HEAD_SHA"
+            if ! SOURCE_SHA="$(jq -er '.sourceSha | select(type == "string" and test("^[0-9a-f]{40}$"))' "$artifact_manifest")"; then
+              workflow_run_hard_fail artifact-source-sha-unreadable; return 64;
+            fi
             SOURCE_BASE_SHA="$(jq -er '.sourceBaseSha' "$artifact_manifest")" || {
               workflow_run_hard_fail artifact-source-base-unreadable; return 64;
+            }
+            artifact_source_blob_sha="$(jq -er '.sourceBlobSha' "$artifact_manifest")" || {
+              workflow_run_hard_fail artifact-source-blob-unreadable; return 64;
             }
             source_commit_json="$TASK_ROOT/workflow-run-source-commit.json"
             if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 30 \
@@ -714,6 +727,15 @@ jobs:
             fi
             WORKFLOW_RUN_ROUTE=authoritative-7d
             RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
+            source_data_probe="$TASK_ROOT/workflow-run-source-7d.json"
+            if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
+              "$RAW_BASE/data/7d.json" -o "$source_data_probe"; then
+              workflow_run_hard_fail source-commit-7d-fetch-failed; return 64
+            fi
+            source_blob_probe="$(git hash-object "$source_data_probe")"
+            [ "$source_blob_probe" = "$artifact_source_blob_sha" ] || {
+              workflow_run_hard_fail source-commit-7d-blob-mismatch; return 64;
+            }
             echo "PG_INCREMENT_ROUTE owner=workflow_run route=authoritative-7d workflowRunId=$WORKFLOW_RUN_ID workflowRunAttempt=$WORKFLOW_RUN_ATTEMPT workflowHead=$WORKFLOW_RUN_HEAD_SHA sourceSha=$SOURCE_SHA sourceBaseSha=$SOURCE_BASE_SHA sourceRole=$SOURCE_COMMIT_ROLE producerArtifactId=$WORKFLOW_RUN_ARTIFACT_ID producerArtifactName=$WORKFLOW_RUN_ARTIFACT_NAME producerArtifactBytes=$WORKFLOW_RUN_ARTIFACT_SIZE"
             return 0
           }

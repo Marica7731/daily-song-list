@@ -184,6 +184,62 @@ jobs:
           git push origin HEAD:main
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare authoritative 7D producer artifact
+        id: authoritative_7d
+        if: steps.publish.outputs.pushed == 'true'
+        run: |
+          set -Eeuo pipefail
+          test -s data/7d.json || { echo "AUTHORITATIVE_7D_PRODUCER_BLOCKED missing-data-7d" >&2; exit 1; }
+          source_sha="$(git rev-parse HEAD)"
+          source_base_sha="$(git rev-parse "${source_sha}^")"
+          source_blob_sha="$(git rev-parse "${source_sha}:data/7d.json")"
+          data_sha="$(shasum -a 256 data/7d.json | awk '{print $1}')"
+          artifact_name="daily-song-list-authoritative-7d-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          artifact_root="$RUNNER_TEMP/daily-song-list-authoritative-7d"
+          rm -rf -- "$artifact_root"
+          mkdir -p -- "$artifact_root"
+          cp -- data/7d.json "$artifact_root/7d.json"
+          created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          jq -n \
+            --arg artifact_name "$artifact_name" \
+            --arg producer_run_id "$GITHUB_RUN_ID" \
+            --arg producer_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg producer_repo "$GITHUB_REPOSITORY" \
+            --arg producer_head "$GITHUB_SHA" \
+            --arg producer_ref "$GITHUB_REF" \
+            --arg source_sha "$source_sha" \
+            --arg source_base_sha "$source_base_sha" \
+            --arg source_blob_sha "$source_blob_sha" \
+            --arg data_sha "$data_sha" \
+            --arg created_at "$created_at" \
+            '{
+              schemaVersion: 1,
+              route: "authoritative-7d",
+              artifactName: $artifact_name,
+              producerRunId: ($producer_run_id | tonumber),
+              producerRunAttempt: ($producer_run_attempt | tonumber),
+              producerRepository: $producer_repo,
+              producerHeadSha: $producer_head,
+              producerRef: $producer_ref,
+              sourceSha: $source_sha,
+              sourceBaseSha: $source_base_sha,
+              sourceBlobSha: $source_blob_sha,
+              dataPath: "7d.json",
+              dataSha256: $data_sha,
+              createdAt: $created_at
+            }' > "$artifact_root/authoritative-7d-manifest.json"
+          echo "artifact_name=$artifact_name" >> "$GITHUB_OUTPUT"
+          echo "AUTHORITATIVE_7D_PRODUCER_READY artifact=$artifact_name producerHead=$GITHUB_SHA sourceSha=$source_sha sourceBaseSha=$source_base_sha sourceBlobSha=$source_blob_sha"
+
+      - name: Upload authoritative 7D producer artifact
+        if: steps.authoritative_7d.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.authoritative_7d.outputs.artifact_name }}
+          path: ${{ runner.temp }}/daily-song-list-authoritative-7d
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Observe public health
         if: always() && steps.publish.outcome == 'success'
         continue-on-error: true
