@@ -9200,6 +9200,7 @@ def _runtime_source_search_sql(
     )
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
     source_candidate_cte = ""
+    source_match_key = "occurrence.source_key"
     matched_source_from = """
             FROM authorities
             JOIN runtime_source_occurrences AS occurrence
@@ -9210,20 +9211,27 @@ def _runtime_source_search_sql(
             CROSS JOIN requested
     """
     if video_only_source_search:
-        source_candidate_cte = """, source_search_candidates AS MATERIALIZED (
-            SELECT DISTINCT eligible.detail_key, requested.token, requested.needle
+        eligible_payload_json = _runtime_source_payload_json_expression("eligible")
+        source_candidate_cte = f""", source_search_candidates AS MATERIALIZED (
+            SELECT DISTINCT eligible.detail_key,
+                   coalesce(
+                       {eligible_payload_json}->>'sourceDetailKey',
+                       eligible.detail_key
+                   ) AS source_detail_key,
+                   requested.token, requested.needle
             FROM eligible_ranking AS eligible
             CROSS JOIN requested
             WHERE coalesce(eligible.search_text, '')
                   ILIKE requested.needle ESCAPE E'\\\\'
         )"""
+        source_match_key = "candidate.detail_key"
         matched_source_from = """
             FROM source_search_candidates AS candidate
             JOIN authorities
-              ON authorities.source_key = candidate.detail_key
+              ON authorities.source_key = candidate.source_detail_key
             JOIN runtime_source_occurrences AS occurrence
               ON occurrence.revision_id = authorities.authority_revision
-             AND occurrence.source_key = candidate.detail_key
+             AND occurrence.source_key = candidate.source_detail_key
         """
     source_cte = f"""
         WITH RECURSIVE active_lineage AS (
@@ -9251,7 +9259,7 @@ def _runtime_source_search_sql(
             SELECT ranking.rank, ranking.detail_key, ranking.title,
                    ranking.artist, ranking.name, ranking.row_count,
                    ranking.song_count, ranking.video_count,
-                   ranking.timestamp_count, ranking.search_text,
+                   ranking.timestamp_count, ranking.search_text, ranking.payload_json,
                    ranking.channel_search_text
             FROM runtime_ranking_rows AS ranking
             WHERE ranking.revision_id = %s
@@ -9260,7 +9268,8 @@ def _runtime_source_search_sql(
               AND ranking.metric = %s
               AND ranking.row_count >= %s
         ){source_candidate_cte}, matched_source_tokens AS MATERIALIZED (
-            SELECT DISTINCT occurrence.source_key, {source_token_alias}.token
+            SELECT DISTINCT {source_match_key} AS source_key,
+                            {source_token_alias}.token
             {matched_source_from}
             WHERE occurrence.range_id = %s
               AND ({occurrence_predicate})
