@@ -4525,13 +4525,33 @@ def _bounded_direct_overlay_vtuber_previews(
             raise PostgresAdapterError(
                 "bounded direct overlay VTuber preview query returned an invalid identity"
             )
+        row_handle = _text(row.get("channel_handle"))
+        video_handle = _text(video.get("channelHandle"))
+        if (
+            row_handle
+            and video_handle
+            and _normalized_channel_handle(row_handle)
+            != _normalized_channel_handle(video_handle)
+        ):
+            raise PostgresAdapterError(
+                "bounded direct overlay VTuber preview query returned an invalid identity"
+            )
+        expected_handle = row_handle or video_handle
+        for channel_url in (
+            _text(row.get("channel_url")),
+            _text(video.get("channelUrl")),
+        ):
+            if channel_url and not _channel_url_is_coherent(
+                channel_url, channel_id, expected_handle
+            ):
+                raise PostgresAdapterError(
+                    "bounded direct overlay VTuber preview query returned an invalid identity"
+                )
         thumbnail = _text(
             video.get("thumbnailUrl") or video.get("videoThumbnailUrl")
         )
         if not thumbnail_matches_video(thumbnail, video_id):
-            raise PostgresAdapterError(
-                "bounded direct overlay VTuber preview query returned an invalid thumbnail"
-            )
+            continue
         handle = _text(video.get("channelHandle"))
         video.update({
             "channelId": channel_id,
