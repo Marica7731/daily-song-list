@@ -1,0 +1,209 @@
+name: Enrich snapshot recovery source
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact main commit containing the frozen recovery inputs
+        required: true
+        type: string
+      sample_path:
+        description: Repository-relative provider sample path
+        required: true
+        default: artifacts/migration/snapshot-recovery-jul27-enrichment/input/jul27-provider-sample.json
+        type: string
+      input_manifest_path:
+        description: Repository-relative recovery input manifest path
+        required: true
+        default: artifacts/migration/snapshot-recovery-jul27-enrichment/input/jul27-input-manifest.json
+        type: string
+      source_path:
+        description: Repository-relative immutable raw source path
+        required: true
+        default: artifacts/migration/snapshot-recovery-jul27-enrichment/source/2026-07-27/20260727T234940Z.json
+        type: string
+      expected_sample_sha256:
+        description: Exact provider sample SHA-256
+        required: true
+        default: 4c345fbf1638e16fbe920a3f0a5e19eeed34c53eedeff182ec07d4b44b9bad60
+        type: string
+      expected_input_manifest_sha256:
+        description: Exact input manifest SHA-256
+        required: true
+        default: 645d3027d46d2cd4c44feb80d221044f38a8f217256de8dca9de3f209cec7fe8
+        type: string
+      expected_source_sha256:
+        description: Exact raw source SHA-256
+        required: true
+        default: 11dc67759e2e2e1527122e274baf1c3e7717197083a9dab94414ab15fc832693
+        type: string
+      expected_video_count:
+        description: Exact distinct provider input count
+        required: true
+        default: "302"
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: snapshot-recovery-enrichment-provider-singleton
+  cancel-in-progress: false
+
+jobs:
+  provider:
+    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    timeout-minutes: 240
+    env:
+      SOURCE_COMMIT: ${{ inputs.source_commit }}
+      SAMPLE_PATH: ${{ inputs.sample_path }}
+      INPUT_MANIFEST_PATH: ${{ inputs.input_manifest_path }}
+      SOURCE_PATH: ${{ inputs.source_path }}
+      EXPECTED_SAMPLE_SHA256: ${{ inputs.expected_sample_sha256 }}
+      EXPECTED_INPUT_MANIFEST_SHA256: ${{ inputs.expected_input_manifest_sha256 }}
+      EXPECTED_SOURCE_SHA256: ${{ inputs.expected_source_sha256 }}
+      EXPECTED_VIDEO_COUNT: ${{ inputs.expected_video_count }}
+    steps:
+      - name: Check out exact source commit with sparse dependency closure
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/enrich-snapshot-recovery.yml
+            artifacts/migration/snapshot-recovery-jul27-enrichment
+            assets/frontend-utils.js
+            assets/ranking-utils.js
+            assets/source-filter.js
+            config/blocked-vtuber-channels.json
+            config/blocked-vtuber-local-channels.json
+            config/curation-overrides.json
+            config/known-song-artist-overrides.json
+            config/non-song-rules.json
+            config/song-aliases.json
+            config/song-search-known-overrides.json
+            data/song-search-known-songs.json
+            scripts/blocked-vtuber-utils.js
+            scripts/build-runtime-data.js
+            scripts/channel-metadata-cache.js
+            scripts/curation.js
+            scripts/entry-repair.js
+            scripts/migration/check-snapshot-enrichment-provider.py
+            scripts/migration/snapshot-enrichment-provider.mjs
+            scripts/range-config.js
+            scripts/recent-all-continuity.js
+            scripts/song-aliases.js
+            scripts/song-search-index.js
+            scripts/song-utils.js
+            scripts/update-songlist.js
+            scripts/video-catalog.js
+            scripts/vsinger-http/html-utils.js
+            scripts/vsinger-http/model.js
+            scripts/vsinger-http/runtime-importer.js
+            scripts/youtube-channel-discovery-core.js
+          persist-credentials: false
+
+      - name: Configure Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify immutable inputs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          for bound_path in "$SAMPLE_PATH" "$INPUT_MANIFEST_PATH" "$SOURCE_PATH"; do
+            case "$bound_path" in
+              ''|/*|*..*) echo "recovery input path escaped repository: $bound_path" >&2; exit 2 ;;
+            esac
+          done
+          python3 scripts/migration/check-snapshot-enrichment-provider.py \
+            --sample "$SAMPLE_PATH" \
+            --input-manifest "$INPUT_MANIFEST_PATH" \
+            --source "$SOURCE_PATH" \
+            --expected-sample-sha256 "$EXPECTED_SAMPLE_SHA256" \
+            --expected-input-manifest-sha256 "$EXPECTED_INPUT_MANIFEST_SHA256" \
+            --expected-source-sha256 "$EXPECTED_SOURCE_SHA256" \
+            --expected-count "$EXPECTED_VIDEO_COUNT" \
+            --source-commit "$SOURCE_COMMIT" \
+            --preflight-only
+
+      - name: Run controlled repository provider
+        id: run-provider
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          artifact_root="$RUNNER_TEMP/snapshot-recovery-jul27-provider"
+          mkdir -p "$artifact_root"
+          started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          set +e
+          node scripts/migration/snapshot-enrichment-provider.mjs \
+            --sample "$SAMPLE_PATH" \
+            --expected-sha "$EXPECTED_SAMPLE_SHA256" \
+            --expected-count "$EXPECTED_VIDEO_COUNT" \
+            --out "$artifact_root/provider.ndjson" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            > "$artifact_root/provider.stdout" \
+            2> "$artifact_root/provider.stderr"
+          provider_rc=$?
+          set -e
+          finished_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          jq -n \
+            --arg sourceCommit "$SOURCE_COMMIT" \
+            --arg sampleSha256 "$EXPECTED_SAMPLE_SHA256" \
+            --arg startedAt "$started_at" \
+            --arg finishedAt "$finished_at" \
+            --argjson exitCode "$provider_rc" \
+            '{sourceCommit:$sourceCommit,sampleSha256:$sampleSha256,startedAt:$startedAt,finishedAt:$finishedAt,exitCode:$exitCode}' \
+            > "$artifact_root/provider-process.json"
+          if (( provider_rc != 0 )); then
+            cat "$artifact_root/provider.stderr" >&2
+            exit "$provider_rc"
+          fi
+
+      - name: Summarize field completeness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          artifact_root="$RUNNER_TEMP/snapshot-recovery-jul27-provider"
+          python3 scripts/migration/check-snapshot-enrichment-provider.py \
+            --sample "$SAMPLE_PATH" \
+            --input-manifest "$INPUT_MANIFEST_PATH" \
+            --source "$SOURCE_PATH" \
+            --expected-sample-sha256 "$EXPECTED_SAMPLE_SHA256" \
+            --expected-input-manifest-sha256 "$EXPECTED_INPUT_MANIFEST_SHA256" \
+            --expected-source-sha256 "$EXPECTED_SOURCE_SHA256" \
+            --expected-count "$EXPECTED_VIDEO_COUNT" \
+            --source-commit "$SOURCE_COMMIT" \
+            --provider "$artifact_root/provider.ndjson" \
+            --process "$artifact_root/provider-process.json" \
+            --summary "$artifact_root/field-completeness.json"
+          cat "$artifact_root/field-completeness.json" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload provider and field evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-recovery-jul27-provider-${{ github.run_id }}
+          path: ${{ runner.temp }}/snapshot-recovery-jul27-provider/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Clean exact runner temp evidence
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          artifact_root="$RUNNER_TEMP/snapshot-recovery-jul27-provider"
+          case "$artifact_root" in
+            "$RUNNER_TEMP"/*) ;;
+            *) echo "refusing cleanup outside RUNNER_TEMP" >&2; exit 2 ;;
+          esac
+          rm -rf -- "$artifact_root"
+
+# Provider evidence only. No database candidate, commit, push, activation, or release claim.
