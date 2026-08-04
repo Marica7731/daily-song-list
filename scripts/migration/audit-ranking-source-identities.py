@@ -17,6 +17,11 @@ from urllib.request import Request, urlopen
 
 
 SOURCE_PAGE_SIZE = 20
+ALLOWED_PREVIEW_DEGRADED_DIAGNOSTICS = frozenset({
+    "thumbnail_unavailable",
+    "preview_payload_invalid",
+    "preview_unavailable",
+})
 
 
 def text(value: Any) -> str:
@@ -399,7 +404,16 @@ def audit_record(record: Mapping[str, Any]) -> set[str]:
         problems.add("card_channel_url_mismatch")
 
     occurrences = record.get("occurrences")
-    if occurrences is None or occurrences == []:
+    if occurrences == []:
+        if (
+            record.get("occurrencePreviewDegraded") is True
+            and text(record.get("occurrencePreviewDiagnostic"))
+            in ALLOWED_PREVIEW_DEGRADED_DIAGNOSTICS
+        ):
+            return problems
+        problems.add("missing_card_occurrences")
+        return problems
+    if occurrences is None:
         problems.add("missing_card_occurrences")
         return problems
     if not isinstance(occurrences, list):
