@@ -4776,13 +4776,16 @@ def _bounded_final_vtuber_previews(
     return previews
 
 
-def _mark_vtuber_preview_unavailable(payload: dict[str, Any]) -> None:
+def _mark_vtuber_preview_unavailable(
+    payload: dict[str, Any],
+    diagnostic: str = "preview_unavailable",
+) -> None:
     """Keep a reviewed VTuber scalar card when only its optional preview is absent."""
 
     payload["occurrences"] = []
     payload["occurrencePreviewLimited"] = False
     payload["occurrencePreviewDegraded"] = True
-    payload["occurrencePreviewDiagnostic"] = "preview_unavailable"
+    payload["occurrencePreviewDiagnostic"] = diagnostic
 
 
 def _canonicalize_vtuber_card_preview(
@@ -4821,13 +4824,15 @@ def _canonicalize_vtuber_card_preview(
     # same-channel preview.
     canonical_handle_raw = ""
 
+    def degrade(diagnostic: str) -> None:
+        _mark_vtuber_preview_unavailable(payload, diagnostic)
+
     canonical_occurrences: list[dict[str, Any]] = []
     first_thumbnail = ""
     for source_occurrence in occurrences:
         if not isinstance(source_occurrence, Mapping):
-            raise PostgresAdapterError(
-                "positive VTuber ranking card has no canonical occurrence preview"
-            )
+            degrade("preview_payload_invalid")
+            return
         occurrence = dict(source_occurrence)
         item_source = (
             occurrence.get("item")
@@ -4842,34 +4847,53 @@ def _canonicalize_vtuber_card_preview(
         if not isinstance(item_source, Mapping) or not isinstance(
             video_source, Mapping
         ):
-            raise PostgresAdapterError(
-                "positive VTuber ranking card has no canonical occurrence preview"
-            )
+            degrade("preview_payload_invalid")
+            return
         item = dict(item_source)
         video = dict(video_source)
-        video_id = _text(item.get("videoId"))
+        item_video_id = _text(item.get("videoId"))
+        video_video_id = _text(video.get("videoId"))
         occurrence_video_id = _text(occurrence.get("videoId"))
         if (
-            not video_id
-            or (occurrence_video_id and occurrence_video_id != video_id)
-            or _text(video.get("videoId")) != video_id
-            or _text(item.get("channelId")) != channel_id
-            or _text(video.get("channelId")) != channel_id
+            item_video_id
+            and video_video_id
+            and item_video_id != video_video_id
+        ) or (
+            occurrence_video_id
+            and item_video_id
+            and occurrence_video_id != item_video_id
+        ) or (
+            occurrence_video_id
+            and video_video_id
+            and occurrence_video_id != video_video_id
         ):
             raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if not item_video_id or not video_video_id:
+            degrade("preview_payload_invalid")
+            return
+        video_id = item_video_id
+
+        item_channel_id = _text(item.get("channelId"))
+        video_channel_id = _text(video.get("channelId"))
+        if item_channel_id and video_channel_id and item_channel_id != video_channel_id:
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if item_channel_id and item_channel_id != channel_id:
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if video_channel_id and video_channel_id != channel_id:
+            raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if not item_channel_id or not video_channel_id:
+            degrade("preview_payload_invalid")
+            return
 
         item_handle_raw = _text(item.get("channelHandle"))
         video_handle_raw = _text(video.get("channelHandle"))
-        preview_handles = {
-            normalized
-            for normalized in (
-                _normalized_channel_handle(item_handle_raw),
-                _normalized_channel_handle(video_handle_raw),
-            )
-            if normalized
-        }
-        if len(preview_handles) != 1:
+        item_handle = _normalized_channel_handle(item_handle_raw)
+        video_handle = _normalized_channel_handle(video_handle_raw)
+        if item_handle and video_handle and item_handle != video_handle:
             raise PostgresAdapterError("VTuber ranking preview identity is invalid")
+        if not item_handle and not video_handle:
+            degrade("preview_payload_invalid")
+            return
         preview_handle_raw = item_handle_raw or video_handle_raw
         preview_handle = _normalized_channel_handle(preview_handle_raw)
         canonical_handle = _normalized_channel_handle(canonical_handle_raw)
@@ -4902,15 +4926,16 @@ def _canonicalize_vtuber_card_preview(
             if nested_thumbnail and not thumbnail_matches_video(
                 nested_thumbnail, video_id
             ):
-                raise PostgresAdapterError(
-                    "VTuber ranking preview thumbnail is invalid"
-                )
+                degrade("thumbnail_unavailable")
+                return
         if not thumbnail_matches_video(thumbnail, video_id):
-            raise PostgresAdapterError("VTuber ranking preview thumbnail is invalid")
+            degrade("thumbnail_unavailable")
+            return
 
         song = occurrence.get("song")
         if song is not None and not isinstance(song, Mapping):
-            raise PostgresAdapterError("VTuber ranking preview song tuple is invalid")
+            degrade("preview_payload_invalid")
+            return
         song = dict(song or {})
         for field in ("occurrenceId", "position"):
             value = occurrence.get(field) if field in occurrence else song.get(field)
@@ -4920,17 +4945,15 @@ def _canonicalize_vtuber_card_preview(
             outer_present = field in occurrence
             song_present = field in song
             if not outer_present and not song_present:
-                raise PostgresAdapterError(
-                    "VTuber ranking preview song tuple is invalid"
-                )
+                degrade("preview_payload_invalid")
+                return
             if (
                 outer_present
                 and song_present
                 and occurrence.get(field) != song.get(field)
             ):
-                raise PostgresAdapterError(
-                    "VTuber ranking preview song tuple is invalid"
-                )
+                degrade("preview_payload_invalid")
+                return
             value = occurrence.get(field) if outer_present else song.get(field)
             occurrence[field] = value
             song[field] = value

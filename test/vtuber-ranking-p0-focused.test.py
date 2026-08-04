@@ -61,6 +61,14 @@ def rank12_card() -> dict:
     }
 
 
+def configure_render_fixture(adapter) -> None:
+    adapter._apply_channel_metadata = lambda payload, row, metadata, range_id: payload
+    adapter._hydrate_overlay_page_previews = lambda *args, **kwargs: None
+    adapter._hydrate_runtime_ranking_song_previews = lambda *args, **kwargs: None
+    adapter._bounded_direct_overlay_vtuber_previews = lambda *args, **kwargs: {}
+    adapter._bounded_final_vtuber_previews = lambda *args, **kwargs: {}
+
+
 def test_missing_preview_keeps_reviewed_scalars() -> None:
     adapter = load_adapter()
     card = rank11_card()
@@ -140,13 +148,137 @@ def test_returned_identity_conflict_still_fails() -> None:
         raise AssertionError("returned channel identity conflict was degraded")
 
 
+def test_invalid_thumbnail_degrades_without_identity_change() -> None:
+    adapter = load_adapter()
+    for thumbnail in (
+        "https://i.ytimg.com/vi/OtherVideo01/hqdefault.jpg",
+        "",
+    ):
+        card = rank12_card()
+        original = {
+            key: card[key]
+            for key in ("key", "channelId", "count", "timestampCount", "songCount", "videoCount", "sourceDetailKey")
+        }
+        occurrence = card["occurrences"][0]
+        occurrence["item"]["thumbnailUrl"] = thumbnail
+        occurrence["video"]["thumbnailUrl"] = thumbnail
+
+        adapter._canonicalize_vtuber_card_preview(card, card["channelId"])
+
+        assert card["occurrences"] == []
+        assert card["occurrencePreviewDegraded"] is True
+        assert card["occurrencePreviewDiagnostic"] == "thumbnail_unavailable"
+        for key, value in original.items():
+            assert card[key] == value
+
+
+def test_non_identity_preview_payload_degrades() -> None:
+    adapter = load_adapter()
+    card = rank12_card()
+    card["occurrences"][0]["song"]["title"] = "payload title mismatch"
+
+    adapter._canonicalize_vtuber_card_preview(card, card["channelId"])
+
+    assert card["occurrences"] == []
+    assert card["occurrencePreviewDegraded"] is True
+    assert card["occurrencePreviewDiagnostic"] == "preview_payload_invalid"
+    assert card["count"] == 5781
+    assert card["songCount"] == 958
+    assert card["videoCount"] == 339
+    assert card["sourceDetailKey"] == "rank12-fixture-source"
+
+
+def test_channel_video_handle_url_identity_conflicts_still_fail() -> None:
+    adapter = load_adapter()
+
+    cases = []
+    video_conflict = rank12_card()
+    video_conflict["occurrences"][0]["video"]["videoId"] = "OtherVideo01"
+    cases.append(video_conflict)
+
+    handle_conflict = rank12_card()
+    handle_conflict["occurrences"][0]["video"]["channelHandle"] = "/@otherfixture"
+    cases.append(handle_conflict)
+
+    url_conflict = rank12_card()
+    url_conflict["occurrences"][0]["item"]["channelUrl"] = (
+        "https://www.youtube.com/channel/UC-other"
+    )
+    cases.append(url_conflict)
+
+    for card in cases:
+        try:
+            adapter._canonicalize_vtuber_card_preview(card, card["channelId"])
+        except adapter.PostgresAdapterError as exc:
+            assert str(exc) in {
+                "VTuber ranking preview identity is invalid",
+                "VTuber ranking preview channel URL is invalid",
+            }
+        else:
+            raise AssertionError("channel/video/handle/url identity conflict was degraded")
+
+
+def test_channel_search_thumbnail_fixture_does_not_503() -> None:
+    adapter = load_adapter()
+    configure_render_fixture(adapter)
+    card = rank12_card()
+    card["occurrences"][0]["item"]["thumbnailUrl"] = (
+        "https://i.ytimg.com/vi/OtherVideo01/hqdefault.jpg"
+    )
+    card["occurrences"][0]["video"]["thumbnailUrl"] = (
+        "https://i.ytimg.com/vi/OtherVideo01/hqdefault.jpg"
+    )
+    row = {
+        "detail_key": card["channelId"],
+        "row_count": card["count"],
+        "song_count": card["songCount"],
+        "video_count": card["videoCount"],
+        "timestamp_count": card["timestampCount"],
+        "payload_json": card,
+    }
+
+    result = adapter._render_generic_overlay_rankings(
+        None,
+        "accepted_30903093948_1",
+        {
+            "filtered": [row],
+            "metadata": {},
+            "candidateRows": (),
+            "parentRevisionId": "full_runtime_30257210187_1",
+            "aggregateTotals": {
+                "totalCount": 1,
+                "totalOccurrenceCount": card["count"],
+                "totalSongCount": card["songCount"],
+                "totalVideoCount": card["videoCount"],
+            },
+        },
+        {
+            "range": "all",
+            "view": "vtubers",
+            "metric": "videos",
+            "page": 1,
+            "pageSize": 20,
+            "q": "@shingames7857",
+            "searchFields": "channel",
+            "compact": 1,
+        },
+    )
+
+    assert result["page"] == 1
+    assert result["pageSize"] == 20
+    assert len(result["records"]) == 1
+    record = result["records"][0]
+    assert record["count"] == card["count"]
+    assert record["songCount"] == card["songCount"]
+    assert record["videoCount"] == card["videoCount"]
+    assert record["sourceDetailKey"] == card["sourceDetailKey"]
+    assert record["occurrences"] == []
+    assert record["occurrencePreviewDiagnostic"] == "thumbnail_unavailable"
+
+
 def test_page_one_thirty_preserves_rank_counts_and_rank12_preview() -> None:
     adapter = load_adapter()
-    adapter._apply_channel_metadata = lambda payload, row, metadata, range_id: payload
-    adapter._hydrate_overlay_page_previews = lambda *args, **kwargs: None
-    adapter._hydrate_runtime_ranking_song_previews = lambda *args, **kwargs: None
-    adapter._bounded_direct_overlay_vtuber_previews = lambda *args, **kwargs: {}
-    adapter._bounded_final_vtuber_previews = lambda *args, **kwargs: {}
+    configure_render_fixture(adapter)
 
     rows = []
     expected_counts = {}
@@ -240,6 +372,10 @@ def main() -> None:
         test_identity_conflict_still_fails_even_when_preview_is_degraded,
         test_missing_parent_rows_are_a_subset_not_an_identity_error,
         test_returned_identity_conflict_still_fails,
+        test_invalid_thumbnail_degrades_without_identity_change,
+        test_non_identity_preview_payload_degrades,
+        test_channel_video_handle_url_identity_conflicts_still_fail,
+        test_channel_search_thumbnail_fixture_does_not_503,
         test_page_one_thirty_preserves_rank_counts_and_rank12_preview,
     ]
     failures = []
