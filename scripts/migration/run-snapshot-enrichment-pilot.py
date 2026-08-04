@@ -282,6 +282,7 @@ def run_one(args: argparse.Namespace, materialized: dict[str, Any], sample_id: s
         sample_id == RAW_ROUTE_SAMPLE_ID
         and metadata.get("providerInput") is False
         and metadata.get("linkageSampleId") == RAW_ROUTE_LINKAGE_SAMPLE_ID
+        and not args.force_provider_for_raw_route
     ):
         return run_raw_route(args, output, raw_path, input_manifest, metadata, expected_ids, cutoff)
     provider_path = output / "provider.ndjson"
@@ -426,6 +427,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--linkage-script", type=Path)
     parser.add_argument("--artist-bindings", type=Path)
     parser.add_argument("--provider-fixture-root", type=Path)
+    parser.add_argument(
+        "--sample-id",
+        dest="sample_ids",
+        action="append",
+        choices=EXPECTED_ORDER,
+        help="Run only the selected materialized package; repeat to preserve an explicit order.",
+    )
+    parser.add_argument(
+        "--force-provider-for-raw-route",
+        action="store_true",
+        help="Run the repository provider for jul22-19 instead of the legacy raw-route bypass.",
+    )
     args = parser.parse_args(argv)
     output = args.output_root.resolve()
     if output.exists() and any(output.iterdir()):
@@ -449,8 +462,11 @@ def main(argv: list[str] | None = None) -> int:
         expected_cutoff = route - timedelta(days=7)
         if cutoff != expected_cutoff.strftime("%Y-%m-%dT%H:%M:%SZ"):
             reject("materialized-cutoff-mismatch")
+        selected_samples = tuple(args.sample_ids or EXPECTED_ORDER)
+        if len(set(selected_samples)) != len(selected_samples):
+            reject("duplicate-selected-sample")
         results = []
-        for sample_id in EXPECTED_ORDER:
+        for sample_id in selected_samples:
             results.append(run_one(args, materialized, sample_id, output / sample_id, cutoff))
         summary = {
             "schemaVersion": "two-day-selfcontained-rerun/v2",
@@ -462,9 +478,10 @@ def main(argv: list[str] | None = None) -> int:
             "sourceCommit": args.source_commit,
             "routeAsOfUtc": args.route_as_of_utc,
             "releaseCutoffUtc": cutoff,
-            "sequence": list(EXPECTED_ORDER),
+            "sequence": list(selected_samples),
             "samples": results,
             "providerInput": False,
+            "rawRouteProviderMode": "provider" if args.force_provider_for_raw_route else "legacy-bypass",
             "externalPrerequisite": "formal Mac provider run must produce local source raw sidecars; provider URLs are rejected",
         }
         write_json(output / "pilot-summary.json", summary)

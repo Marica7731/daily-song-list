@@ -11,6 +11,19 @@ on:
         description: Explicit UTC route as-of; the inclusive lower bound is seven days earlier
         required: true
         type: string
+      sample_id:
+        description: Exact materialized package to run without executing the sibling date
+        required: true
+        default: jul22-19
+        type: choice
+        options:
+          - jul22-19
+          - jul29-25
+      force_provider_for_raw_route:
+        description: Run fresh provider/linkage for jul22 instead of the legacy raw-only bypass
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   actions: read
@@ -32,6 +45,8 @@ jobs:
       SOURCE_HEAD_SHA: "1880eb412c20dadfb1ba2b843f24d10cfec6fd77"
       SOURCE_COMMIT: ${{ inputs.source_commit }}
       ROUTE_AS_OF_UTC: ${{ inputs.route_as_of_utc }}
+      SAMPLE_ID: ${{ inputs.sample_id }}
+      FORCE_PROVIDER_FOR_RAW_ROUTE: ${{ inputs.force_provider_for_raw_route }}
     steps:
       - name: Check out exact current source commit with sparse blob filter
         uses: actions/checkout@v4
@@ -190,13 +205,19 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          python3 scripts/migration/run-snapshot-enrichment-pilot.py \
-            --source-root "$GITHUB_WORKSPACE" \
-            --materialized-root "$RUNNER_TEMP/two-day-rerun/materialized" \
-            --output-root "$RUNNER_TEMP/two-day-rerun/candidate" \
-            --route-as-of-utc "$ROUTE_AS_OF_UTC" \
-            --source-commit "$SOURCE_COMMIT" \
+          runner_args=(
+            --source-root "$GITHUB_WORKSPACE"
+            --materialized-root "$RUNNER_TEMP/two-day-rerun/materialized"
+            --output-root "$RUNNER_TEMP/two-day-rerun/candidate"
+            --route-as-of-utc "$ROUTE_AS_OF_UTC"
+            --source-commit "$SOURCE_COMMIT"
             --artist-bindings "$GITHUB_WORKSPACE/config/snapshot-recovery/jul29-artist-binding.v2.json"
+            --sample-id "$SAMPLE_ID"
+          )
+          if [[ "$FORCE_PROVIDER_FOR_RAW_ROUTE" == "true" ]]; then
+            runner_args+=(--force-provider-for-raw-route)
+          fi
+          python3 scripts/migration/run-snapshot-enrichment-pilot.py "${runner_args[@]}"
 
       - name: Verify sparse dependency closure and temp artifact boundary
         shell: bash
