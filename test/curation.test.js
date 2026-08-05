@@ -99,6 +99,74 @@ test("curation overrides drop, replace, force keep, and carry forward videos", (
   );
 });
 
+test("occurrenceId selectors remain exact when legacy source provenance is unavailable", () => {
+  const validation = validateCurationOverrides({
+    schemaVersion: 1,
+    records: [
+      {
+        action: "drop_entry",
+        videoId: "AAAAAAAAAAA",
+        occurrenceId: "occurrence-drop",
+        seconds: 10,
+      },
+      {
+        action: "replace_entry",
+        videoId: "AAAAAAAAAAA",
+        occurrenceId: "occurrence-replace",
+        seconds: 20,
+        rawHash: "raw-replace",
+        replacement: { title: "Fixed", artist: "Artist" },
+      },
+    ],
+  });
+
+  assert.equal(validation.valid, true, validation.errors.join("\n"));
+  assert.equal(validation.overrides.records[0].occurrenceId, "occurrence-drop");
+
+  const curated = applyCurationToVideos(
+    [
+      {
+        videoId: "AAAAAAAAAAA",
+        songs: [
+          { title: "drop", artist: "Talk", seconds: 10, occurrenceId: "occurrence-drop", rawHash: "" },
+          { title: "keep", artist: "Song", seconds: 10, occurrenceId: "occurrence-near", rawHash: "" },
+          { title: "typo", artist: "Unknown", seconds: 20, occurrenceId: "occurrence-replace", rawHash: "raw-replace" },
+        ],
+      },
+    ],
+    { overrides: validation.overrides },
+  );
+
+  assert.deepEqual(curated[0].songs.map((entry) => entry.occurrenceId), ["occurrence-near", "occurrence-replace"]);
+  assert.deepEqual(curated[0].songs.map((entry) => [entry.title, entry.artist]), [
+    ["keep", "Song"],
+    ["Fixed", "Artist"],
+  ]);
+
+  const missingIdentity = validateCurationOverrides({
+    schemaVersion: 1,
+    records: [{ action: "drop_entry", videoId: "AAAAAAAAAAA", seconds: 10 }],
+  });
+  assert.equal(missingIdentity.valid, false);
+  assert.equal(missingIdentity.errors.some((message) => message.includes("occurrenceId or sourceId/sourceHash")), true);
+
+  const conflictingIdentity = validateCurationOverrides({
+    schemaVersion: 1,
+    records: [
+      { action: "drop_entry", videoId: "AAAAAAAAAAA", occurrenceId: "same-occurrence", seconds: 10 },
+      {
+        action: "replace_entry",
+        videoId: "AAAAAAAAAAA",
+        occurrenceId: "same-occurrence",
+        seconds: 10,
+        replacement: { title: "Other" },
+      },
+    ],
+  });
+  assert.equal(conflictingIdentity.valid, false);
+  assert.equal(conflictingIdentity.errors.some((message) => message.includes("conflicts with another override")), true);
+});
+
 test("curation classifies parser corruptions and conversation-only rows", () => {
   assert.equal(
     isParserCorruptionEntry({

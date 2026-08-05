@@ -64,6 +64,7 @@ function normalizeOverrideRecord(record) {
   const normalized = {
     action,
     videoId: String(record?.videoId || "").trim(),
+    occurrenceId: String(record?.occurrenceId || "").trim(),
     sourceId: String(record?.sourceId || "").trim(),
     sourceHash: String(record?.sourceHash || "").trim(),
     seconds: Number.isInteger(seconds) ? seconds : seconds,
@@ -110,9 +111,11 @@ function validateCurationOverrides(value) {
     if (!VALID_ACTIONS.has(record.action)) errors.push(`${label}.action invalid: ${record.action || "(missing)"}`);
     if (!isValidVideoId(record.videoId)) errors.push(`${label}.videoId invalid or missing`);
     if (ENTRY_ACTIONS.has(record.action)) {
-      if (!record.sourceId && !record.sourceHash) errors.push(`${label} must include sourceId or sourceHash`);
+      if (!record.occurrenceId && !record.sourceId && !record.sourceHash) {
+        errors.push(`${label} must include occurrenceId or sourceId/sourceHash`);
+      }
       if (!Number.isInteger(record.seconds) || record.seconds < 0) errors.push(`${label}.seconds must be a non-negative integer`);
-      if (!record.rawHash) errors.push(`${label}.rawHash missing`);
+      if (!record.occurrenceId && !record.rawHash) errors.push(`${label}.rawHash missing`);
     }
     if (SOURCE_ACTIONS.has(record.action) && !record.sourceId && !record.sourceHash) {
       errors.push(`${label} must include sourceId or sourceHash`);
@@ -177,6 +180,9 @@ function overrideConflictKey(record) {
   if (record.action === "upsert_video") return `upsert:${record.videoId}`;
   if (record.action === "force_refresh") return `refresh:${record.videoId}`;
   if (record.action === "reject_source") return `source:${record.videoId}:${sourceKey}`;
+  if (ENTRY_ACTIONS.has(record.action) && record.occurrenceId) {
+    return `entry:${record.videoId}:occurrence:${record.occurrenceId}`;
+  }
   if (!sourceKey || !Number.isInteger(record.seconds) || !record.rawHash) return "";
   return `entry:${record.videoId}:${sourceKey}:${record.seconds}:${record.rawHash}`;
 }
@@ -185,6 +191,7 @@ function stableRecordFingerprint(record) {
   return JSON.stringify({
     action: record.action,
     videoId: record.videoId,
+    occurrenceId: record.occurrenceId,
     sourceId: record.sourceId,
     sourceHash: record.sourceHash,
     seconds: record.seconds,
@@ -813,6 +820,7 @@ function matchesAnyOverride(records, action, context) {
 function matchesOverride(record, { videoId, source = {}, song = {} }) {
   if (record.videoId !== videoId) return false;
   if (record.action === "drop_video") return true;
+  if (record.occurrenceId && record.occurrenceId !== String(song.occurrenceId || "").trim()) return false;
   if (record.sourceId && record.sourceId !== source.sourceId && record.sourceId !== song.sourceId) return false;
   if (record.sourceHash && record.sourceHash !== source.sourceHash && record.sourceHash !== song.sourceHash) return false;
   if (ENTRY_ACTIONS.has(record.action)) {
