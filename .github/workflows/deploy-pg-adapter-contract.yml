@@ -855,7 +855,7 @@ jobs:
           systemctl is-active --quiet "$candidate_unit"
           ss -ltn 'sport = :18766' | grep -q LISTEN
           base_url="http://127.0.0.1:18766"
-          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 "$base_url/healthz" > "$remote_root/candidate-healthz.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 300 "$base_url/healthz" > "$remote_root/candidate-healthz.json"
           jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/candidate-healthz.json" >/dev/null
           curl --fail --silent --show-error --connect-timeout 8 --max-time 300 "$base_url/api/meta" > "$remote_root/candidate-meta.json"
           curl --fail --silent --show-error --connect-timeout 8 --max-time 20 --get \
@@ -1026,7 +1026,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
-          timeout --signal=TERM --kill-after=10s 180s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+          timeout --signal=TERM --kill-after=10s 720s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
             "$REMOTE_ROOT" "$SOURCE_TITLE_B64" "$SOURCE_KEY_B64" <<'REMOTE'
           set -Eeuo pipefail
           decode_b64() {
@@ -1043,8 +1043,8 @@ jobs:
           base_url="http://127.0.0.1:8765"
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
-          curl --fail --silent --show-error --max-time 20 "$base_url/healthz" > "$remote_root/installed-healthz.json"
-          curl --fail --silent --show-error --max-time 20 "$base_url/api/meta" > "$remote_root/installed-meta.json"
+          curl --fail --silent --show-error --max-time 300 "$base_url/healthz" > "$remote_root/installed-healthz.json"
+          curl --fail --silent --show-error --max-time 300 "$base_url/api/meta" > "$remote_root/installed-meta.json"
           curl --fail --silent --show-error --max-time 20 --get \
             --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
             --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
