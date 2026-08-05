@@ -3484,6 +3484,8 @@ def _apply_runtime_tombstone_groups(
     changes: Sequence[Mapping[str, Any]],
     view: str,
     deferred_preview_key: str = "_deferred_runtime_preview_changes",
+    *,
+    allow_accepted_reset_detail_fallback: bool = False,
 ) -> None:
     decremented_videos: set[tuple[str, str]] = set()
     removal_counts: dict[tuple[str, str, str], int] = defaultdict(int)
@@ -3494,13 +3496,18 @@ def _apply_runtime_tombstone_groups(
             _text(change.get("videoId") or change.get("video_id")),
         )] += 1
     group_keys_by_identity: dict[str, list[str]] = defaultdict(list)
+    detail_group_keys_by_identity: dict[str, list[str]] = defaultdict(list)
     if view in {"songs", "songIndex", "vsingerSongs"}:
         for key, row in groups.items():
             identity = (
                 f"{_overlay_song_group_norm(row.get('title'))}::"
                 f"{_overlay_song_group_norm(row.get('artist'))}"
             )
-            group_keys_by_identity[identity].append(key)
+            if identity and key not in group_keys_by_identity[identity]:
+                group_keys_by_identity[identity].append(key)
+            detail_identity = _overlay_norm(row.get("detail_key"))
+            if detail_identity and key not in detail_group_keys_by_identity[detail_identity]:
+                detail_group_keys_by_identity[detail_identity].append(key)
     elif view == "artists":
         for key, row in groups.items():
             for identity in {
@@ -3535,6 +3542,16 @@ def _apply_runtime_tombstone_groups(
                 if target_song_title_norm
                 else ()
             )
+            if (
+                allow_accepted_reset_detail_fallback
+                and
+                not candidate_group_keys
+                and bool(change.get("acceptedVideoReset"))
+            ):
+                detail_group_keys = detail_group_keys_by_identity.get(
+                    _runtime_change_group_key(change, view), ()
+                )
+                candidate_group_keys = detail_group_keys
             if len(candidate_group_keys) > 1:
                 exact_identity = (
                     _overlay_norm(change.get("title"))
@@ -7083,6 +7100,27 @@ def _prepare_generic_overlay_rankings(
         exact_channel_scope if options["view"] == "vtubers" else None,
         exact_parent_video_ids if exact_channel_scope is not None else None,
     )
+    candidate_range_rows = tuple(
+        _overlay_rows_for_range(candidate_rows, options["range"])
+    )
+    candidate_range_video_ids = {
+        _text(row.get("video_id") or row.get("videoId"))
+        for row in candidate_range_rows
+        if _text(row.get("video_id") or row.get("videoId"))
+    }
+    if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
+        accepted_video_resets = {
+            video_id: row
+            for video_id, row in accepted_video_resets.items()
+            if video_id in candidate_range_video_ids
+            or _text(
+                _overlay_payload(row).get("rangeId")
+                or _overlay_payload(row).get("range_id")
+                or row.get("range_id")
+                or row.get("rangeId")
+            ) == options["range"]
+        }
+    candidate_rows = list(candidate_range_rows)
     if options["view"] == "vtubers" and accepted_video_resets:
         # A selected accepted reset is immutable evidence.  Its historical
         # public URL is derived metadata and is never allowed to veto or
@@ -7140,7 +7178,7 @@ def _prepare_generic_overlay_rankings(
         exact_parent_video_ids if exact_channel_scope is not None else None,
     )
     phase_started = _phase_trace("reset", phase_started)
-    candidate_rows = _overlay_rows_for_range(candidate_rows, options["range"])
+    candidate_rows = list(candidate_range_rows)
     runtime_changes = _overlay_rows_for_range(runtime_changes_all, options["range"])
     # The exact VTuber query is physical-range scoped.  Do not pass the
     # lineage-wide candidate list: a legacy/all row must not leak into 7d,
@@ -7678,6 +7716,7 @@ def _prepare_generic_overlay_rankings(
             generic_reset_changes,
             options["view"],
             "_deferred_reset_preview_changes",
+            allow_accepted_reset_detail_fallback=True,
         )
         _apply_runtime_change_previews(
             groups, generic_reset_changes, options["view"],
@@ -12488,7 +12527,11 @@ def _generic_public_all_range_baseline(
         for row in groups.values()
     )
     _apply_runtime_tombstone_groups(
-        groups, reset_changes, "songs", "_aggregate_reset_previews",
+        groups,
+        reset_changes,
+        "songs",
+        "_aggregate_reset_previews",
+        allow_accepted_reset_detail_fallback=True,
     )
     delta = _overlay_candidate_groups(
         (*candidate_rows, *replacement_rows), "songs",
