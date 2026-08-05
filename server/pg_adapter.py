@@ -12140,8 +12140,7 @@ def _authoritative_7d_meta_deltas(
     return {
         key: current[key] - previous[key]
         for key in (
-            "videos", "songs", "occurrences", "ranking_rows",
-            "source_occurrences",
+            "videos", "songs", "ranking_rows",
         )
     }
 
@@ -12678,6 +12677,11 @@ def meta_payload(connection) -> dict[str, Any]:
                 len(record["occurrences"])
                 for record in authoritative_records
             )
+            authoritative_source_occurrences = sum(
+                _meta_source_occurrence_units(occurrence)
+                for record in authoritative_records
+                for occurrence in record["occurrences"]
+            )
             expected_occurrences = int(
                 candidate_manifest.get("acceptedOccurrenceCount") or 0
             )
@@ -12705,14 +12709,25 @@ def meta_payload(connection) -> dict[str, Any]:
                 authoritative_records,
             )
             for key in (
-                "videos", "songs", "occurrences", "ranking_rows",
-                "source_occurrences",
+                "videos", "songs", "ranking_rows",
             ):
                 counts[key] = max(
                     0,
                     int(counts.get(key) or 0)
                     + int(authoritative_deltas.get(key) or 0),
                 )
+            counts["occurrences"] = max(
+                0,
+                parent_all_occurrences
+                + alias_curation_occurrence_delta
+                + authoritative_occurrences,
+            )
+            counts["source_occurrences"] = max(
+                0,
+                parent_source_occurrences
+                + alias_curation_source_delta
+                + authoritative_source_occurrences,
+            )
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),

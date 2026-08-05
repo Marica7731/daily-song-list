@@ -10616,9 +10616,9 @@ assert apply_calls == [
 assert payload["counts"] == {
     "videos": 11,
     "songs": 22,
-    "occurrences": 105,
+    "occurrences": 106,
     "ranking_rows": 35,
-    "source_occurrences": 315,
+    "source_occurrences": 318,
     "channel_metadata": 0,
     "external_songs": 0,
     "external_videos": 0,
