@@ -12474,18 +12474,14 @@ def meta_payload(connection) -> dict[str, Any]:
             baseline_overlay_revision_ids = tuple(
                 overlay_ids[len(authoritative_7d_ids):]
             )
-            # The reviewed 7d boundary is reconciled by the bounded
-            # authoritative aggregate below.  Generic all-range
-            # reconciliation still includes newer alias/curation revisions
-            # and older lineage, but never the boundary itself.
-            generic_reconciliation_overlay_ids = (
-                *public_mutation_overlay_ids,
-                *baseline_overlay_revision_ids,
-            )
         else:
             public_mutation_overlay_ids = tuple(overlay_ids)
             baseline_overlay_revision_ids = ()
-            generic_reconciliation_overlay_ids = tuple(overlay_ids)
+        # Keep the reviewed boundary out of the public all-range baseline, but
+        # retain the complete lineage for video/song/ranking-row accounting.
+        # ``public_mutation_overlay_ids`` still prevents accepted 7d rows from
+        # being counted as a second public occurrence delta.
+        generic_reconciliation_overlay_ids = tuple(overlay_ids)
         public_baseline_occurrences, public_baseline_source_occurrences = (
             _generic_public_all_range_baseline(
                 connection, parent_id, baseline_overlay_revision_ids,

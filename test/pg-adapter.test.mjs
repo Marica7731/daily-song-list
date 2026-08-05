@@ -10408,7 +10408,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("generic meta keeps the authoritative 7d boundary out of generic helpers", () => {
+test("generic meta excludes the 7d boundary from all-range baseline only", () => {
   const output = runPython(`
 import importlib.util
 import sys
@@ -10468,7 +10468,11 @@ module._rows = lambda _c, sql, _params: (
 payload = module.meta_payload(object())
 assert baseline_calls == [("parent", ("older-curation",))], baseline_calls
 assert apply_calls == [
-    ("parent", ("newer-alias", "older-curation"), ("newer-alias",)),
+    (
+        "parent",
+        ("newer-alias", "authoritative-boundary", "older-curation"),
+        ("newer-alias",),
+    ),
 ], apply_calls
 assert payload["counts"] == {
     "videos": 11,
