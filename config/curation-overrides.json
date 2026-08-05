@@ -1725,6 +1725,50 @@
       ],
       "reviewedAt": "2026-07-26T16:36:56+08:00",
       "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "naraetan-b0JjQSNTHU4-19483-2026-goal",
+      "action": "drop_entry",
+      "videoId": "b0JjQSNTHU4",
+      "occurrenceId": "a9c13606d48073ead93d75bf",
+      "seconds": 19483,
+      "title": "2026年の目標",
+      "artist": "Goals for",
+      "expectedCurrentState": "present",
+      "expectedSelectorMutationCount": 1,
+      "expectedMatchCount": 1,
+      "reason": "user_confirmed_non_song_segment",
+      "note": "User requested removal of this exact @naraetanV goals/talk marker; it is not a song.",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=b0JjQSNTHU4&t=19483s"
+      ],
+      "reviewedAt": "2026-08-05T12:49:07+08:00",
+      "reviewedBy": "codex"
+    },
+    {
+      "ruleId": "naraetan-aPsKoVWQs-E-3293-butter-fly",
+      "action": "replace_entry",
+      "videoId": "aPsKoVWQs-E",
+      "occurrenceId": "aPsKoVWQs-E:21:3293",
+      "seconds": 3293,
+      "rawHash": "25b69001260d5f2e31f9c8b9e8c3c4011671d79e62c1c3f7231a9f9bc01c1eae",
+      "title": "Butter-Fly/和田光司 https://www.youtube.com/watch?v=emj_7G0y6n8",
+      "artist": "",
+      "expectedCurrentState": "present",
+      "expectedSelectorMutationCount": 1,
+      "expectedMatchCount": 1,
+      "reason": "user_confirmed_song_identity_correction",
+      "note": "Normalize only the exact @naraetanV occurrence whose slash-delimited text identifies the song and artist.",
+      "evidenceUrls": [
+        "https://www.youtube.com/watch?v=aPsKoVWQs-E&t=3293s",
+        "https://www.youtube.com/watch?v=emj_7G0y6n8"
+      ],
+      "reviewedAt": "2026-08-05T12:49:07+08:00",
+      "reviewedBy": "codex",
+      "replacement": {
+        "title": "Butter-Fly",
+        "artist": "和田光司"
+      }
     }
   ]
 }

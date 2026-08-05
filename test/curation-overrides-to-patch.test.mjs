@@ -102,6 +102,47 @@ test("curation converter maps audited rules to immutable occurrence keys", () =>
   }
 });
 
+
+
+test("mixed Naraetan batch drops one non-song row and corrects one exact song identity", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-naraetan-mixed-batch-"));
+  try {
+    const dropRule = {
+      ruleId: "naraetan-b0JjQSNTHU4-19483-2026-goal", action: "drop_entry",
+      videoId: "b0JjQSNTHU4", occurrenceId: "a9c13606d48073ead93d75bf", seconds: 19483,
+      title: "2026年の目標", artist: "Goals for", expectedCurrentState: "present",
+      expectedSelectorMutationCount: 1, expectedMatchCount: 1, reason: "user_confirmed_non_song_segment",
+    };
+    const replaceRule = {
+      ruleId: "naraetan-aPsKoVWQs-E-3293-butter-fly", action: "replace_entry",
+      videoId: "aPsKoVWQs-E", occurrenceId: "aPsKoVWQs-E:21:3293", seconds: 3293,
+      rawHash: "25b69001260d5f2e31f9c8b9e8c3c4011671d79e62c1c3f7231a9f9bc01c1eae",
+      title: "Butter-Fly/和田光司 https://www.youtube.com/watch?v=emj_7G0y6n8", artist: "",
+      expectedCurrentState: "present", expectedSelectorMutationCount: 1, expectedMatchCount: 1,
+      reason: "user_confirmed_song_identity_correction", replacement: { title: "Butter-Fly", artist: "和田光司" },
+    };
+    const observed = runFixture(root, "naraetan-mixed", { records: [dropRule, replaceRule] }, [
+      { videoId: "b0JjQSNTHU4", occurrenceId: "a9c13606d48073ead93d75bf", seconds: 19483, title: "2026年の目標", artist: "Goals for", rangeId: "all", sourceSystem: "latest_json" },
+      { videoId: "aPsKoVWQs-E", occurrenceId: "aPsKoVWQs-E:21:3293", position: 21, seconds: 3293, title: "Butter-Fly/和田光司 https://www.youtube.com/watch?v=emj_7G0y6n8", artist: "", rawHash: "25b69001260d5f2e31f9c8b9e8c3c4011671d79e62c1c3f7231a9f9bc01c1eae", rangeId: "all", sourceSystem: "youtube_channel_discovery" },
+      { videoId: "aPsKoVWQs-E", occurrenceId: "naraetan-control", position: 22, seconds: 3333, title: "Protected Neighbor", artist: "Protected Artist", rangeId: "all", sourceSystem: "youtube_channel_discovery" },
+    ]);
+    assert.equal(observed.result.status, 0, observed.result.stderr);
+    const rows = observed.output.trim().split("\n").map(JSON.parse);
+    assert.equal(rows.length, 2);
+    assert.equal(rows[0].entityKey, "a9c13606d48073ead93d75bf");
+    assert.equal(rows[0].tombstone, true);
+    assert.equal(rows[1].entityKey, "aPsKoVWQs-E:21:3293");
+    assert.equal(rows[1].tombstone, false);
+    assert.equal(rows[1].payload.title, "Butter-Fly");
+    assert.equal(rows[1].payload.artist, "和田光司");
+    assert.equal(rows.some((row) => row.entityKey === "naraetan-control"), false);
+    assert.equal(observed.manifest.curationMutationCount, 2);
+    assert.equal(observed.manifest.selectorMutationCount, 2);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("curation converter observes ambiguous or missing identity without blocking the batch", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "curation-patch-review-test-"));
   try {
@@ -644,7 +685,7 @@ test("merged P2 manifest stays observable until Mac supplies current-active evid
     const manifest = path.join(root, "manifest.json");
     const review = path.join(root, "review.json");
     const rules = JSON.parse(fs.readFileSync(minimalRulesManifest, "utf8"));
-    assert.equal(rules.records.length, 128);
+    assert.equal(rules.records.length, 130);
     const singletonRule = rules.records.find((item) => item.videoId === "lUDCE3zZmuQ" && item.seconds === 9463);
     const adoAlias = rules.artistScopedAliases.find((item) => item.artist === "Ado");
     assert.equal(singletonRule.action, "drop_entry");
