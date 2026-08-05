@@ -1958,7 +1958,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("scalar overlay rankings admit a mature lineage while detailed payload remains bounded", () => {
+test("unscoped overlay reconstruction admits mature lineages for rankings and source detail", () => {
   const output = runPython(`
 import importlib.util
 import sys
@@ -1993,14 +1993,11 @@ def rows(_connection, sql, params):
 module._rows = rows
 scalar = module._overlay_candidate_rows(object(), ["accepted"], False)
 assert len(scalar) == 1 and scalar[0]["occurrence_id"] == "occ-a"
-try:
-    module._overlay_candidate_rows(object(), ["accepted"], True)
-    raise AssertionError("detailed payload cap was not enforced")
-except module.PostgresAdapterError as error:
-    assert "occurrence lookup exceeded bounded cap" in str(error)
+detailed = module._overlay_candidate_rows(object(), ["accepted"], True)
+assert len(detailed) == 1 and detailed[0]["occurrence_id"] == "occ-a"
 assert limits == [
-    module._MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES + 1,
-    module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+    module._MAX_UNSCOPED_OVERLAY_OCCURRENCES + 1,
+    module._MAX_UNSCOPED_OVERLAY_OCCURRENCES + 1,
 ]
 print("OK")
 `);

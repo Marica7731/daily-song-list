@@ -1655,8 +1655,8 @@ def _overlay_candidate_rows(
             _text(range_id) or "all",
         ))
     occurrence_limit = (
-        _MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES
-        if not include_payload and scope is None
+        _MAX_UNSCOPED_OVERLAY_OCCURRENCES
+        if scope is None
         else _MAX_AFFECTED_RUNTIME_OCCURRENCES
     )
     occurrence_params.append(occurrence_limit + 1)
@@ -3780,7 +3780,7 @@ def _apply_runtime_change_previews(
 
 
 _MAX_AFFECTED_RUNTIME_OCCURRENCES = 50000
-_MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES = 250000
+_MAX_UNSCOPED_OVERLAY_OCCURRENCES = 250000
 
 
 def _runtime_song_identity(row: Mapping[str, Any]) -> str:
