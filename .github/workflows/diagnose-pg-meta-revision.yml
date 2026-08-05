@@ -158,7 +158,8 @@ jobs:
           PY
           chmod 0644 "$remote_root/diagnose.py"
           timeout --signal=TERM --kill-after=10s 150s sudo -u www-data \
-            env PYTHONPATH=/opt/culua/ytb-song-rank/server \
+            env PGHOST=/var/run/postgresql PGDATABASE=song_rank PGUSER=www-data \
+            PYTHONPATH=/opt/culua/ytb-song-rank/server \
             python3 "$remote_root/diagnose.py" "$target_revision"
           REMOTE
           diagnostic_rc=$?
