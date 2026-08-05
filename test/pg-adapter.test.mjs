@@ -10394,9 +10394,25 @@ module._apply_generic_overlay_meta_counts = lambda _c, _p, _o, counts, *_args: {
     **counts, "occurrences": 586642, "source_occurrences": 1759926,
 }
 module._authoritative_7d_overlay_ids = lambda *_args: ("authoritative-7d",)
-module._authoritative_7d_records = lambda *_args: (
-    {"occurrences": [{"rangeId": "7d"}]},
-) * 1566
+def authoritative_records(_c, ids):
+    if tuple(ids) != ("authoritative-7d", "alias"):
+        return ()
+    return ({
+        "video": {
+            "videoId": "authoritative-video",
+            "channelId": "authoritative-channel",
+            "channelName": "Authoritative Channel",
+        },
+        "occurrences": [{
+            "videoId": "authoritative-video",
+            "occurrenceId": f"authoritative-{index}",
+            "rangeId": "7d",
+            "songKey": f"authoritative-song-{index}",
+            "title": f"Authoritative Song {index}",
+            "artist": "Authoritative Artist",
+        } for index in range(1566)],
+    },)
+module._authoritative_7d_records = authoritative_records
 module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
     (_ for _ in ()).throw(AssertionError("meta entered full rankings payload"))
 )
@@ -10408,7 +10424,7 @@ print("OK")
   assert.equal(output, "OK");
 });
 
-test("generic meta excludes the 7d boundary from all-range baseline only", () => {
+test("generic meta excludes the 7d boundary from both generic helpers", () => {
   const output = runPython(`
 import importlib.util
 import sys
@@ -10430,8 +10446,9 @@ module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
 module._overlay_revision_ids = lambda *_args: [
     "newer-alias", "authoritative-boundary", "older-curation",
 ]
-module._authoritative_7d_overlay_ids = lambda *_args: (
-    "newer-alias", "authoritative-boundary",
+module._authoritative_7d_overlay_ids = lambda _c, ids: (
+    ("newer-alias", "authoritative-boundary")
+    if "authoritative-boundary" in ids else ()
 )
 baseline_calls = []
 module._generic_public_all_range_baseline = (
@@ -10454,6 +10471,10 @@ module._apply_generic_overlay_meta_counts = apply
 module._authoritative_7d_records = lambda *_args: (
     {"occurrences": [{"rangeId": "7d"}, {"rangeId": "7d"}]},
 )
+module._authoritative_7d_meta_deltas = lambda *_args: {
+    "videos": 0, "songs": 0, "occurrences": 2,
+    "ranking_rows": 0, "source_occurrences": 6,
+}
 module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
     (_ for _ in ()).throw(AssertionError("meta entered full rankings payload"))
 )
@@ -10466,12 +10487,12 @@ module._rows = lambda _c, sql, _params: (
 )
 
 payload = module.meta_payload(object())
-assert baseline_calls == [("parent", ("older-curation",))], baseline_calls
+assert baseline_calls == [("parent", ())], baseline_calls
 assert apply_calls == [
     (
         "parent",
-        ("newer-alias", "authoritative-boundary", "older-curation"),
-        ("newer-alias",),
+        ("newer-alias", "older-curation"),
+        ("newer-alias", "older-curation"),
     ),
 ], apply_calls
 assert payload["counts"] == {
@@ -10480,6 +10501,124 @@ assert payload["counts"] == {
     "occurrences": 106,
     "ranking_rows": 33,
     "source_occurrences": 318,
+    "channel_metadata": 0,
+    "external_songs": 0,
+    "external_videos": 0,
+    "external_occurrences": 0,
+}, payload
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic meta replaces the previous authoritative 7d aggregate", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_META_COUNTS_CACHE.clear()
+module._GENERIC_META_COUNTS_FLIGHTS.clear()
+module._runtime_projection_revision = lambda _c: None
+module._generic_runtime_projection_revision = lambda _c: (
+    "new-active",
+    {"status": "active", "manifest_json": {"acceptedOccurrenceCount": 2}},
+)
+module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
+    "full-parent", {"manifest_json": {}}
+)
+lineage = ["new-boundary", "previous-alias-newer", "previous-boundary"] + [
+    f"previous-old-{index}" for index in range(35)
+]
+module._overlay_revision_ids = lambda *_args: list(lineage)
+authoritative_id_calls = []
+def authoritative_ids(_c, ids):
+    ids = tuple(ids)
+    authoritative_id_calls.append(ids)
+    if "new-boundary" in ids:
+        return ("new-boundary",)
+    if "previous-boundary" in ids:
+        return ("previous-alias-newer", "previous-boundary")
+    return ()
+module._authoritative_7d_overlay_ids = authoritative_ids
+
+def record(video_id, occurrence_values, channel_id):
+    return {
+        "video": {
+            "videoId": video_id,
+            "channelId": channel_id,
+            "channelName": channel_id,
+        },
+        "occurrences": tuple({
+            "videoId": video_id,
+            "occurrenceId": occurrence_id,
+            "rangeId": "7d",
+            "songKey": song_key,
+            "title": title,
+            "artist": "Artist",
+            "sourceSystem": "core",
+        } for occurrence_id, song_key, title in occurrence_values),
+    }
+
+new_records = (
+    record("new-video", (("new-a", "song-a", "Song A"),
+                          ("new-b", "song-b", "Song B")), "channel-new"),
+)
+old_records = (
+    record("old-video", (("old-a", "song-a", "Song A"),), "channel-old"),
+)
+def authoritative_records(_c, ids):
+    return new_records if tuple(ids) == tuple(lineage) else old_records
+module._authoritative_7d_records = authoritative_records
+
+baseline_calls = []
+def baseline(_c, parent, overlays):
+    baseline_calls.append((parent, tuple(overlays)))
+    return (100, 300)
+module._generic_public_all_range_baseline = baseline
+apply_calls = []
+def apply(_c, parent, overlays, counts, public_overlays):
+    apply_calls.append((parent, tuple(overlays), tuple(public_overlays)))
+    return {**counts, "videos": counts["videos"] + 1,
+            "songs": counts["songs"] + 1,
+            "ranking_rows": counts["ranking_rows"] + 1,
+            "_public_occurrence_delta": 4,
+            "_public_source_occurrence_delta": 12}
+module._apply_generic_overlay_meta_counts = apply
+module._rows = lambda _c, sql, _params: (
+    [{"key": "latest_videos", "value": 10},
+     {"key": "latest_songs", "value": 20},
+     {"key": "latest_occurrences", "value": 999},
+     {"key": "latest_ranking_rows", "value": 30},
+     {"key": "source_occurrences_rows", "value": 999}]
+    if "runtime_meta" in sql else []
+)
+module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("meta entered full rankings payload"))
+)
+module.rankings_payload_from_records = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("meta rendered rankings payload"))
+)
+
+payload = module.meta_payload(object())
+assert authoritative_id_calls == [
+    tuple(lineage), tuple(lineage[1:]),
+], authoritative_id_calls
+assert baseline_calls == [
+    ("full-parent", tuple(lineage[3:])),
+], baseline_calls
+assert apply_calls == [
+    ("full-parent", tuple(lineage[1:]), ("previous-alias-newer",)),
+], apply_calls
+assert payload["counts"] == {
+    "videos": 11,
+    "songs": 22,
+    "occurrences": 105,
+    "ranking_rows": 35,
+    "source_occurrences": 315,
     "channel_metadata": 0,
     "external_songs": 0,
     "external_videos": 0,
@@ -10508,7 +10647,8 @@ module._generic_runtime_projection_revision = lambda _c: (
 module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
     "parent", {"manifest_json": {}}
 )
-module._overlay_revision_ids = lambda *_args: ["overlay"]
+old_lineage = [f"old-layer-{index}" for index in range(37)]
+module._overlay_revision_ids = lambda *_args: list(old_lineage)
 module._authoritative_7d_overlay_ids = lambda *_args: ()
 baseline_calls = []
 module._generic_public_all_range_baseline = (
@@ -10532,7 +10672,9 @@ module._rows = lambda _c, _sql, _params: [
 
 payload = module.meta_payload(object())
 assert baseline_calls == [("parent", ())], baseline_calls
-assert apply_calls == [("parent", ("overlay",), ("overlay",))], apply_calls
+assert apply_calls == [
+    ("parent", tuple(old_lineage), tuple(old_lineage)),
+], apply_calls
 assert payload["counts"]["occurrences"] == 100, payload
 assert payload["counts"]["source_occurrences"] == 300, payload
 print("OK")

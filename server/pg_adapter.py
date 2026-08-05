@@ -12019,6 +12019,133 @@ def _meta_source_occurrence_units(item: Mapping[str, Any]) -> int:
     return 3 if _text(item.get("range_id") or item.get("rangeId")) else 6
 
 
+def _authoritative_7d_record_aggregate(
+    records: Iterable[Mapping[str, Any]],
+) -> dict[str, int]:
+    """Aggregate one bounded authoritative 7d projection without rendering it."""
+
+    records = tuple(records)
+    occurrence_count = sum(
+        len(record.get("occurrences") or ())
+        for record in records
+    )
+    if occurrence_count > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "authoritative 7d aggregate exceeded bounded occurrence cap"
+        )
+    video_ids = {
+        _text((record.get("video") or {}).get("videoId"))
+        for record in records
+    }
+    song_keys = {
+        _song_key(occurrence)
+        for record in records
+        for occurrence in record.get("occurrences") or ()
+        if _song_key(occurrence)
+    }
+    ranking_rows = 0
+    ranking_shapes = (
+        ("songs", ("count", "videos")),
+        ("songIndex", ("count",)),
+        ("artists", ("count", "videos")),
+        ("videos", ("count",)),
+        ("vtubers", ("count", "songs", "videos")),
+        ("vsingerSongs", ("count",)),
+    )
+    for view, metrics in ranking_shapes:
+        for metric in metrics:
+            ranking_rows += len(_entity_groups(
+                records,
+                _query_options({
+                    "range": "7d", "view": view, "metric": metric,
+                }),
+            ))
+    return {
+        "videos": len({video_id for video_id in video_ids if video_id}),
+        "songs": len(song_keys),
+        "occurrences": occurrence_count,
+        "ranking_rows": ranking_rows,
+        "source_occurrences": sum(
+            _meta_source_occurrence_units(occurrence)
+            for record in records
+            for occurrence in record.get("occurrences") or ()
+        ),
+    }
+
+
+def _authoritative_7d_runtime_aggregate(
+    connection,
+    parent_revision_id: str,
+) -> dict[str, int]:
+    """Read the parent 7d aggregate scalars when no older boundary is present."""
+
+    aggregate = _one(
+        connection,
+        """
+        SELECT
+          COALESCE(SUM(row_count) FILTER (
+              WHERE view = 'songs' AND metric = 'count'
+          ), 0) AS occurrence_count,
+          COUNT(*) FILTER (
+              WHERE view = 'videos' AND metric = 'count'
+          ) AS video_count,
+          COUNT(*) FILTER (
+              WHERE view = 'songs' AND metric = 'count'
+          ) AS song_count,
+          COUNT(*) AS ranking_row_count
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s
+          AND range_id = '7d'
+          AND row_count >= 1
+          AND (
+            (view = 'songs' AND metric IN ('count', 'videos'))
+            OR (view = 'songIndex' AND metric = 'count')
+            OR (view = 'artists' AND metric IN ('count', 'videos'))
+            OR (view = 'videos' AND metric = 'count')
+            OR (view = 'vtubers' AND metric IN ('count', 'songs', 'videos'))
+            OR (view = 'vsingerSongs' AND metric = 'count')
+          )
+        """,
+        [parent_revision_id],
+    ) or {}
+    occurrence_count = int(aggregate.get("occurrence_count") or 0)
+    return {
+        "videos": int(aggregate.get("video_count") or 0),
+        "songs": int(aggregate.get("song_count") or 0),
+        "occurrences": occurrence_count,
+        "ranking_rows": int(aggregate.get("ranking_row_count") or 0),
+        "source_occurrences": occurrence_count * 3,
+    }
+
+
+def _authoritative_7d_meta_deltas(
+    connection,
+    parent_revision_id: str,
+    previous_overlay_revision_ids: Sequence[str],
+    authoritative_records: Sequence[Mapping[str, Any]],
+) -> dict[str, int]:
+    """Return the bounded old-to-new 7d aggregate delta for generic meta."""
+
+    previous_records = _authoritative_7d_records(
+        connection, previous_overlay_revision_ids,
+    ) if previous_overlay_revision_ids else ()
+    previous = (
+        _authoritative_7d_record_aggregate(previous_records)
+        if previous_records
+        else _authoritative_7d_runtime_aggregate(
+            connection, parent_revision_id,
+        )
+    )
+    current = _authoritative_7d_record_aggregate(authoritative_records)
+    return {
+        key: current[key] - previous[key]
+        for key in (
+            "videos", "songs", "occurrences", "ranking_rows",
+            "source_occurrences",
+        )
+    }
+
+
 def _apply_generic_overlay_meta_counts(
     connection,
     parent_revision_id: str,
@@ -12467,21 +12594,46 @@ def meta_payload(connection) -> dict[str, Any]:
         # before that boundary are newer alias/curation mutations.  Older
         # generic lineage is already absorbed by the public all-range parent
         # baseline and must not be replayed as a second physical delta.
+        current_newer_mutation_ids: tuple[str, ...] = ()
+        previous_overlay_ids: tuple[str, ...] = ()
+        previous_public_mutation_ids: tuple[str, ...] = ()
         if authoritative_7d_ids:
-            public_mutation_overlay_ids = tuple(
+            current_newer_mutation_ids = tuple(
                 overlay_ids[: len(authoritative_7d_ids) - 1]
             )
-            baseline_overlay_revision_ids = tuple(
+            previous_overlay_ids = tuple(
                 overlay_ids[len(authoritative_7d_ids):]
+            )
+            previous_authoritative_7d_ids = _authoritative_7d_overlay_ids(
+                connection, previous_overlay_ids,
+            )
+            if previous_authoritative_7d_ids:
+                previous_public_mutation_ids = tuple(
+                    previous_overlay_ids[:
+                        len(previous_authoritative_7d_ids) - 1
+                    ]
+                )
+                baseline_overlay_revision_ids = tuple(
+                    previous_overlay_ids[len(previous_authoritative_7d_ids):]
+                )
+            else:
+                previous_public_mutation_ids = previous_overlay_ids
+                baseline_overlay_revision_ids = ()
+            public_mutation_overlay_ids = (
+                *current_newer_mutation_ids,
+                *previous_public_mutation_ids,
+            )
+            # The current boundary is replaced by the bounded old-to-new 7d
+            # aggregate below.  Keep the previous active lineage in generic
+            # reconciliation, but never replay it as the all-range baseline.
+            generic_reconciliation_overlay_ids = (
+                *current_newer_mutation_ids,
+                *previous_overlay_ids,
             )
         else:
             public_mutation_overlay_ids = tuple(overlay_ids)
             baseline_overlay_revision_ids = ()
-        # Keep the reviewed boundary out of the public all-range baseline, but
-        # retain the complete lineage for video/song/ranking-row accounting.
-        # ``public_mutation_overlay_ids`` still prevents accepted 7d rows from
-        # being counted as a second public occurrence delta.
-        generic_reconciliation_overlay_ids = tuple(overlay_ids)
+            generic_reconciliation_overlay_ids = tuple(overlay_ids)
         public_baseline_occurrences, public_baseline_source_occurrences = (
             _generic_public_all_range_baseline(
                 connection, parent_id, baseline_overlay_revision_ids,
@@ -12546,23 +12698,21 @@ def meta_payload(connection) -> dict[str, Any]:
                 raise PostgresAdapterError(
                     "authoritative 7d meta all-range baseline is empty"
                 )
-            authoritative_source_occurrences = sum(
-                _meta_source_occurrence_units(occurrence)
-                for record in authoritative_records
-                for occurrence in record["occurrences"]
+            authoritative_deltas = _authoritative_7d_meta_deltas(
+                connection,
+                parent_id,
+                previous_overlay_ids,
+                authoritative_records,
             )
-            counts["occurrences"] = max(
-                0,
-                parent_all_occurrences
-                + alias_curation_occurrence_delta
-                + authoritative_occurrences,
-            )
-            counts["source_occurrences"] = max(
-                0,
-                parent_source_occurrences
-                + alias_curation_source_delta
-                + authoritative_source_occurrences,
-            )
+            for key in (
+                "videos", "songs", "occurrences", "ranking_rows",
+                "source_occurrences",
+            ):
+                counts[key] = max(
+                    0,
+                    int(counts.get(key) or 0)
+                    + int(authoritative_deltas.get(key) or 0),
+                )
         return {"schemaVersion": 1, "meta": meta, "counts": {
             "videos": counts.get("videos", 0), "songs": counts.get("songs", counts.get("latest_songs", 0)),
             "occurrences": counts.get("occurrences", 0), "ranking_rows": counts.get("ranking_rows", counts.get("latest_ranking_rows", 0)),
