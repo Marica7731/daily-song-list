@@ -1,0 +1,189 @@
+name: Diagnose PostgreSQL meta revision
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision_id:
+        description: Preserved PostgreSQL revision to inspect read-only
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      TARGET_REVISION: ${{ inputs.revision_id }}
+    steps:
+      - name: Prepare bounded SSH helper
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$VPS2_PASSWORD"
+          task_root="$RUNNER_TEMP/pg-meta-diagnostic-$GITHUB_RUN_ID"
+          install -d -m 0700 "$task_root/ssh"
+          printf '%s\n' "$VPS2_PASSWORD" > "$task_root/ssh/password"
+          chmod 600 "$task_root/ssh/password"
+          cat > "$task_root/ssh/askpass.sh" <<'SH'
+          #!/bin/sh
+          exec cat "$TASK_ROOT/ssh/password"
+          SH
+          chmod 700 "$task_root/ssh/askpass.sh"
+          {
+            echo "TASK_ROOT=$task_root"
+            echo "SSH_ASKPASS=$task_root/ssh/askpass.sh"
+            echo "SSH_ASKPASS_REQUIRE=force"
+            echo "DISPLAY=codex-pg-meta-diagnostic"
+          } >> "$GITHUB_ENV"
+
+      - name: Inspect preserved revision without activation
+        run: |
+          set -Eeuo pipefail
+          [[ "$TARGET_REVISION" =~ ^[A-Za-z0-9._-]{1,128}$ ]]
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8 -o ServerAliveInterval=10 -o ServerAliveCountMax=3)
+          set +e
+          timeout --signal=TERM --kill-after=10s 180s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$TARGET_REVISION" > "$TASK_ROOT/diagnostic.log" 2>&1 <<'REMOTE'
+          set -Eeuo pipefail
+          target_revision="$1"
+          [[ "$target_revision" =~ ^[A-Za-z0-9._-]{1,128}$ ]]
+          remote_root="$(mktemp -d /tmp/daily-song-list-meta-diagnostic.XXXXXX)"
+          trap 'rm -rf -- "$remote_root"' EXIT INT TERM
+          cat > "$remote_root/diagnose.py" <<'PY'
+          import json
+          import sys
+          import time
+          import traceback
+
+          sys.path.insert(0, "/opt/culua/ytb-song-rank/server")
+          import pg_adapter as adapter
+
+          target_revision = sys.argv[1]
+          connection = adapter.connect_from_env()
+          revision = adapter._one(
+              connection,
+              "SELECT * FROM migration_revisions WHERE revision_id = %s",
+              [target_revision],
+          )
+          if not revision:
+              raise RuntimeError("target revision does not exist")
+
+          original_projection = adapter._generic_runtime_projection_revision
+          adapter._generic_runtime_projection_revision = lambda _connection: (
+              target_revision,
+              revision,
+          )
+
+          trace_names = (
+              "_overlay_revision_ids",
+              "_authoritative_7d_overlay_ids",
+              "_generic_public_all_range_baseline",
+              "_apply_generic_overlay_meta_counts",
+              "_authoritative_7d_records",
+          )
+          originals = {}
+          for name in trace_names:
+              original = getattr(adapter, name)
+              originals[name] = original
+
+              def traced(*args, __name=name, __original=original, **kwargs):
+                  started = time.monotonic()
+                  print(f"TRACE_START {__name}", flush=True)
+                  try:
+                      result = __original(*args, **kwargs)
+                  except Exception as exc:
+                      elapsed = time.monotonic() - started
+                      print(
+                          f"TRACE_ERROR {__name} elapsed={elapsed:.6f} "
+                          f"type={type(exc).__name__} message={exc}",
+                          flush=True,
+                      )
+                      raise
+                  elapsed = time.monotonic() - started
+                  shape = len(result) if hasattr(result, "__len__") else "scalar"
+                  print(
+                      f"TRACE_OK {__name} elapsed={elapsed:.6f} shape={shape}",
+                      flush=True,
+                  )
+                  return result
+
+              setattr(adapter, name, traced)
+
+          print(
+              "TARGET "
+              + json.dumps(
+                  {
+                      "revisionId": target_revision,
+                      "status": str(revision.get("status") or ""),
+                      "parentRevisionId": str(revision.get("parent_revision_id") or ""),
+                      "contentSha256": str(revision.get("content_sha256") or ""),
+                  },
+                  sort_keys=True,
+              ),
+              flush=True,
+          )
+          started = time.monotonic()
+          try:
+              payload = adapter.meta_payload(connection)
+              print(
+                  "META_OK "
+                  + json.dumps(
+                      {
+                          "elapsedSeconds": round(time.monotonic() - started, 6),
+                          "activeRevisionId": payload.get("meta", {}).get("active_revision_id"),
+                          "counts": payload.get("counts", {}),
+                      },
+                      sort_keys=True,
+                  ),
+                  flush=True,
+              )
+          except Exception:
+              print(
+                  f"META_ERROR elapsedSeconds={time.monotonic() - started:.6f}",
+                  flush=True,
+              )
+              traceback.print_exc()
+              raise
+          finally:
+              adapter._generic_runtime_projection_revision = original_projection
+              close = getattr(connection, "close", None)
+              if close:
+                  close()
+          PY
+          chmod 0644 "$remote_root/diagnose.py"
+          timeout --signal=TERM --kill-after=10s 150s sudo -u www-data \
+            env PYTHONPATH=/opt/culua/ytb-song-rank/server \
+            python3 "$remote_root/diagnose.py" "$target_revision"
+          REMOTE
+          diagnostic_rc=$?
+          set -e
+          sed -E '/password|passwd|secret|token|authorization|cookie|credential|askpass|database_url|dsn|postgres(ql)?:\/\/[^[:space:]]*@/Id' \
+            "$TASK_ROOT/diagnostic.log" | head -c 524288 > "$TASK_ROOT/diagnostic.sanitized.log"
+          test -s "$TASK_ROOT/diagnostic.sanitized.log"
+          printf 'diagnosticExit=%s\n' "$diagnostic_rc" > "$TASK_ROOT/summary.txt"
+          grep -E '^(TARGET|TRACE_|META_)' "$TASK_ROOT/diagnostic.sanitized.log" >> "$TASK_ROOT/summary.txt" || true
+          cat "$TASK_ROOT/summary.txt"
+
+      - name: Upload sanitized diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg-meta-diagnostic-${{ github.run_id }}-1
+          path: |
+            ${{ env.TASK_ROOT }}/diagnostic.sanitized.log
+            ${{ env.TASK_ROOT }}/summary.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Cleanup local secret material
+        if: always()
+        run: |
+          set +e
+          if [ -n "${TASK_ROOT:-}" ] && [[ "$TASK_ROOT" == "$RUNNER_TEMP"/pg-meta-diagnostic-* ]]; then
+            rm -rf -- "$TASK_ROOT/ssh"
+          fi
