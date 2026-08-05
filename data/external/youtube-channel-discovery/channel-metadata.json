@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-05T04:58:04.205Z",
+  "generatedAt": "2026-08-05T14:07:30.472Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-05T04:58:04.205Z",
+    "fetchedAt": "2026-08-05T14:07:30.472Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-05T04:58:04.205Z",
+    "generatedAt": "2026-08-05T14:07:30.472Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1038,
-      "parseableChannels": 1016,
+      "totalChannels": 1039,
+      "parseableChannels": 1017,
       "realAvatar": 646,
-      "thumbnailFallback": 392,
+      "thumbnailFallback": 393,
       "missingDisplayImage": 0,
-      "missingAvatar": 392,
+      "missingAvatar": 393,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 581
+      "skipped_collected_evidence": 582
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 559,
+      "batch_limit_reached": 560,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@NightMea-pokev",
+        "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
+        "displayName": "悪夢メア / Night Mea",
+        "sourceUrl": "https://www.youtube.com/@NightMea-pokev",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E8%8A%B1%E7%8B%A9%E3%81%8F%E3%82%8C%E3%81%AF",
         "channelId": "UCTc1UmDEUlUTKCceMmLfsag",
@@ -11842,13 +11849,6 @@
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
         "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
         "sourceUrl": "https://www.youtube.com/@teikobonbonch3548",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kuzen_sia",
-        "channelId": "UCNlXowdnNnHlAe6Kvk7ASHQ",
-        "displayName": "玖染しあ / Kuzen Sia【とーぶい】",
-        "sourceUrl": "https://www.youtube.com/@kuzen_sia",
         "reason": "batch_limit_reached"
       }
     ]
