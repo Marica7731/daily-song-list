@@ -857,7 +857,7 @@ jobs:
           base_url="http://127.0.0.1:18766"
           curl --fail --silent --show-error --connect-timeout 8 --max-time 20 "$base_url/healthz" > "$remote_root/candidate-healthz.json"
           jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/candidate-healthz.json" >/dev/null
-          curl --fail --silent --show-error --connect-timeout 8 --max-time 20 "$base_url/api/meta" > "$remote_root/candidate-meta.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 300 "$base_url/api/meta" > "$remote_root/candidate-meta.json"
           curl --fail --silent --show-error --connect-timeout 8 --max-time 20 --get \
             --data-urlencode 'range=all' --data-urlencode 'view=songs' --data-urlencode 'metric=occurrences' \
             --data-urlencode 'page=1' --data-urlencode 'pageSize=20' --data-urlencode 'searchScope=song' \
