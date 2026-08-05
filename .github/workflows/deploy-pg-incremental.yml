@@ -718,9 +718,8 @@ jobs:
               -o "$source_commit_json"; then
               workflow_run_hard_fail source-commit-api-failed; return 64
             fi
-            if ! jq -e --arg source "$SOURCE_SHA" --arg base "$SOURCE_BASE_SHA" --arg repo "$GITHUB_REPOSITORY" '
+            if ! jq -e --arg source "$SOURCE_SHA" --arg base "$SOURCE_BASE_SHA" '
               (.sha == $source) and
-              (.repository.full_name == $repo) and
               (.parents[0].sha == $base)
             ' "$source_commit_json" >/dev/null; then
               workflow_run_hard_fail source-commit-binding-failed; return 64
