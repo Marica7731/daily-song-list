@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-05T18:22:54.296Z",
+  "generatedAt": "2026-08-05T19:51:58.843Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-05T18:22:54.296Z",
+    "fetchedAt": "2026-08-05T19:51:58.843Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-05T18:22:54.296Z",
+    "generatedAt": "2026-08-05T19:51:58.843Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11658,7 +11658,7 @@
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
       "totalChannels": 1041,
-      "parseableChannels": 1019,
+      "parseableChannels": 1020,
       "realAvatar": 646,
       "thumbnailFallback": 395,
       "missingDisplayImage": 0,
@@ -11667,13 +11667,13 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 583,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 582
     },
     "failures": [],
     "skippedSummary": {
       "batch_limit_reached": 561,
-      "missing_channel_url_or_handle": 22
+      "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
       {
@@ -11824,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@devilithviolustre",
+        "channelId": "UCkcenwQpQwgNkG2sl28Az-A",
+        "displayName": "Devilith Violustre",
+        "sourceUrl": "https://www.youtube.com/@devilithviolustre",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@KaguraMea",
         "channelId": "UCWCc8tO-uUl_7SJXIKJACMw",
         "displayName": "神楽めあ / KaguraMea",
@@ -11842,13 +11849,6 @@
         "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
         "displayName": "INARI",
         "sourceUrl": "https://www.youtube.com/@0hinarysan",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@xxhacucoxx_Celestial",
-        "channelId": "UCXyAitTabBsoRclTn_Gq-eA",
-        "displayName": "xxhacucoxx ch. 白白虹",
-        "sourceUrl": "https://www.youtube.com/@xxhacucoxx_Celestial",
         "reason": "batch_limit_reached"
       }
     ]
