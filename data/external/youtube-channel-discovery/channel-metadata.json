@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-05T16:19:57.019Z",
+  "generatedAt": "2026-08-05T18:22:54.296Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-05T16:19:57.019Z",
+    "fetchedAt": "2026-08-05T18:22:54.296Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-05T16:19:57.019Z",
+    "generatedAt": "2026-08-05T18:22:54.296Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,18 +11657,18 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1040,
-      "parseableChannels": 1018,
+      "totalChannels": 1041,
+      "parseableChannels": 1019,
       "realAvatar": 646,
-      "thumbnailFallback": 394,
+      "thumbnailFallback": 395,
       "missingDisplayImage": 0,
-      "missingAvatar": 394,
+      "missingAvatar": 395,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 583
+      "skipped_collected_evidence": 583,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@MikuroKotonoha",
+        "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
+        "displayName": "言ノ葉みくろ / Mikuro Kotonoha🍨🍦",
+        "sourceUrl": "https://www.youtube.com/@MikuroKotonoha",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@HimemoriLuna",
         "channelId": "UCa9Y57gfeY0Zro_noHRVrnw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCXyAitTabBsoRclTn_Gq-eA",
         "displayName": "xxhacucoxx ch. 白白虹",
         "sourceUrl": "https://www.youtube.com/@xxhacucoxx_Celestial",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RirisyaMusic",
-        "channelId": "UC1ucgoC_sGww_Euu5iMqpQw",
-        "displayName": "凛々咲 / Ririsya",
-        "sourceUrl": "https://www.youtube.com/@RirisyaMusic",
         "reason": "batch_limit_reached"
       }
     ]
