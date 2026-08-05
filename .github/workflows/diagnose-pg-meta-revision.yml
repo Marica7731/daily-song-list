@@ -53,6 +53,7 @@ jobs:
           target_revision="$1"
           [[ "$target_revision" =~ ^[A-Za-z0-9._-]{1,128}$ ]]
           remote_root="$(mktemp -d /tmp/daily-song-list-meta-diagnostic.XXXXXX)"
+          chmod 0755 "$remote_root"
           trap 'rm -rf -- "$remote_root"' EXIT INT TERM
           cat > "$remote_root/diagnose.py" <<'PY'
           import json
