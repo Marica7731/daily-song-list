@@ -3527,7 +3527,7 @@ def _apply_runtime_tombstone_groups(
             )
             candidate_group_keys = (
                 group_keys_by_identity.get(target_song_identity, ())
-                if target_song_title_norm and target_song_artist_norm
+                if target_song_title_norm
                 else ()
             )
             if len(candidate_group_keys) > 1:
