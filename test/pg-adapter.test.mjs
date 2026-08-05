@@ -1958,6 +1958,55 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("scalar overlay rankings admit a mature lineage while detailed payload remains bounded", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+video = {
+    "revision_id": "accepted", "video_id": "video-a", "video_title": "Video",
+    "channel_name": "Channel", "channel_id": "UC1", "channel_handle": "@one",
+    "channel_url": "https://youtube.com/@one", "published_at": None,
+    "video_payload_json": None, "video_tombstone": False,
+}
+occurrence = {
+    "revision_id": "accepted", "video_id": "video-a", "occurrence_id": "occ-a",
+    "position": 0, "range_id": "all", "song_key": "song-a", "seconds": 18,
+    "title": "Song", "artist": "Artist", "source_id": "source-a",
+    "raw_hash": "raw-a", "source_system": "fixture",
+    "occurrence_payload_json": None,
+}
+limits = []
+def rows(_connection, sql, params):
+    if "FROM migration_video_rows" in sql:
+        assert params[-1] == module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1
+        return [video]
+    if "FROM migration_occurrence_rows AS o" in sql:
+        limits.append(params[-1])
+        return [occurrence] * (module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
+    raise AssertionError(sql)
+
+module._rows = rows
+scalar = module._overlay_candidate_rows(object(), ["accepted"], False)
+assert len(scalar) == 1 and scalar[0]["occurrence_id"] == "occ-a"
+try:
+    module._overlay_candidate_rows(object(), ["accepted"], True)
+    raise AssertionError("detailed payload cap was not enforced")
+except module.PostgresAdapterError as error:
+    assert "occurrence lookup exceeded bounded cap" in str(error)
+assert limits == [
+    module._MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES + 1,
+    module._MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+]
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("generic cold meta cache is revision-bound and ranking previews hydrate only returned tuples", () => {
   const output = runPython(`
 import importlib.util

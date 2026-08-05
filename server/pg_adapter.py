@@ -1654,7 +1654,12 @@ def _overlay_candidate_rows(
             _text(range_id) or "all",
             _text(range_id) or "all",
         ))
-    occurrence_params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
+    occurrence_limit = (
+        _MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES
+        if not include_payload and scope is None
+        else _MAX_AFFECTED_RUNTIME_OCCURRENCES
+    )
+    occurrence_params.append(occurrence_limit + 1)
     occurrence_rows = _rows(
         connection,
         f"""
@@ -1671,7 +1676,7 @@ def _overlay_candidate_rows(
         """,
         occurrence_params,
     )
-    if len(occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+    if len(occurrence_rows) > occurrence_limit:
         raise PostgresAdapterError("overlay candidate occurrence lookup exceeded bounded cap")
     occurrence_rows.sort(key=lambda row: (
         priority.get(_text(row.get("revision_id")), len(priority)),
@@ -3775,6 +3780,7 @@ def _apply_runtime_change_previews(
 
 
 _MAX_AFFECTED_RUNTIME_OCCURRENCES = 50000
+_MAX_SCALAR_OVERLAY_RANKING_OCCURRENCES = 250000
 
 
 def _runtime_song_identity(row: Mapping[str, Any]) -> str:
