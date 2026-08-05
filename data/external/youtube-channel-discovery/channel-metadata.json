@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-05T14:07:30.472Z",
+  "generatedAt": "2026-08-05T16:19:57.019Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-05T14:07:30.472Z",
+    "fetchedAt": "2026-08-05T16:19:57.019Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-05T14:07:30.472Z",
+    "generatedAt": "2026-08-05T16:19:57.019Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1039,
-      "parseableChannels": 1017,
+      "totalChannels": 1040,
+      "parseableChannels": 1018,
       "realAvatar": 646,
-      "thumbnailFallback": 393,
+      "thumbnailFallback": 394,
       "missingDisplayImage": 0,
-      "missingAvatar": 393,
+      "missingAvatar": 394,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 582
+      "skipped_collected_evidence": 583
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 560,
+      "batch_limit_reached": 561,
       "missing_channel_url_or_handle": 22
     },
     "skippedSamples": [
+      {
+        "handle": "/@HimemoriLuna",
+        "channelId": "UCa9Y57gfeY0Zro_noHRVrnw",
+        "displayName": "Luna Ch. 姫森ルーナ",
+        "sourceUrl": "https://www.youtube.com/@HimemoriLuna",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@MachitaChima",
+        "channelId": "UCo7TRj3cS-f_1D9ZDmuTsjw",
+        "displayName": "町田ちま【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@MachitaChima",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@NightMea-pokev",
         "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
@@ -11835,20 +11849,6 @@
         "channelId": "UC1ucgoC_sGww_Euu5iMqpQw",
         "displayName": "凛々咲 / Ririsya",
         "sourceUrl": "https://www.youtube.com/@RirisyaMusic",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tsukushi_aria",
-        "channelId": "UC5XQhzMH08PgWa4Zp02Gcsw",
-        "displayName": "月紫アリア / Tsukushi Aria",
-        "sourceUrl": "https://www.youtube.com/@tsukushi_aria",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@teikobonbonch3548",
-        "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
-        "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
-        "sourceUrl": "https://www.youtube.com/@teikobonbonch3548",
         "reason": "batch_limit_reached"
       }
     ]
