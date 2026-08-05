@@ -117,7 +117,7 @@ jobs:
       - name: Sync latest main before build
         run: |
           git fetch --no-tags --filter=blob:none --prune origin main
-          git merge --ff-only origin/main
+          git merge --ff-only FETCH_HEAD
 
       - name: Build core data
         id: core
@@ -180,7 +180,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: update core song-list data"
           git fetch --no-tags --filter=blob:none --prune origin main
-          git rebase origin/main
+          git rebase FETCH_HEAD
           git push origin HEAD:main
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
