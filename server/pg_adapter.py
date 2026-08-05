@@ -12467,14 +12467,25 @@ def meta_payload(connection) -> dict[str, Any]:
         # before that boundary are newer alias/curation mutations.  Older
         # generic lineage is already absorbed by the public all-range parent
         # baseline and must not be replayed as a second physical delta.
-        public_mutation_overlay_ids = (
-            tuple(overlay_ids[: len(authoritative_7d_ids) - 1])
-            if authoritative_7d_ids
-            else tuple(overlay_ids)
-        )
-        baseline_overlay_revision_ids = tuple(
-            overlay_ids[len(public_mutation_overlay_ids):]
-        )
+        if authoritative_7d_ids:
+            public_mutation_overlay_ids = tuple(
+                overlay_ids[: len(authoritative_7d_ids) - 1]
+            )
+            baseline_overlay_revision_ids = tuple(
+                overlay_ids[len(authoritative_7d_ids):]
+            )
+            # The reviewed 7d boundary is reconciled by the bounded
+            # authoritative aggregate below.  Generic all-range
+            # reconciliation still includes newer alias/curation revisions
+            # and older lineage, but never the boundary itself.
+            generic_reconciliation_overlay_ids = (
+                *public_mutation_overlay_ids,
+                *baseline_overlay_revision_ids,
+            )
+        else:
+            public_mutation_overlay_ids = tuple(overlay_ids)
+            baseline_overlay_revision_ids = ()
+            generic_reconciliation_overlay_ids = tuple(overlay_ids)
         public_baseline_occurrences, public_baseline_source_occurrences = (
             _generic_public_all_range_baseline(
                 connection, parent_id, baseline_overlay_revision_ids,
@@ -12491,7 +12502,7 @@ def meta_payload(connection) -> dict[str, Any]:
             lambda: _apply_generic_overlay_meta_counts(
                 connection,
                 parent_id,
-                overlay_ids,
+                generic_reconciliation_overlay_ids,
                 counts,
                 public_mutation_overlay_ids,
             ),

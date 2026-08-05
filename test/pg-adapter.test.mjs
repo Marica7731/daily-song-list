@@ -10408,6 +10408,134 @@ print("OK")
   assert.equal(output, "OK");
 });
 
+test("generic meta keeps the authoritative 7d boundary out of generic helpers", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_META_COUNTS_CACHE.clear()
+module._GENERIC_META_COUNTS_FLIGHTS.clear()
+module._runtime_projection_revision = lambda _c: None
+module._generic_runtime_projection_revision = lambda _c: (
+    "new-active",
+    {"status": "active", "manifest_json": {"acceptedOccurrenceCount": 2}},
+)
+module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
+    "parent", {"manifest_json": {}}
+)
+module._overlay_revision_ids = lambda *_args: [
+    "newer-alias", "authoritative-boundary", "older-curation",
+]
+module._authoritative_7d_overlay_ids = lambda *_args: (
+    "newer-alias", "authoritative-boundary",
+)
+baseline_calls = []
+module._generic_public_all_range_baseline = (
+    lambda _c, parent, overlays: (
+        baseline_calls.append((parent, tuple(overlays))) or (100, 300)
+    )
+)
+apply_calls = []
+def apply(_c, parent, overlays, counts, public_overlays):
+    apply_calls.append((parent, tuple(overlays), tuple(public_overlays)))
+    return {
+        **counts,
+        "videos": 11,
+        "songs": 22,
+        "ranking_rows": 33,
+        "_public_occurrence_delta": 4,
+        "_public_source_occurrence_delta": 12,
+    }
+module._apply_generic_overlay_meta_counts = apply
+module._authoritative_7d_records = lambda *_args: (
+    {"occurrences": [{"rangeId": "7d"}, {"rangeId": "7d"}]},
+)
+module._generic_overlay_rankings_payload = lambda *_args, **_kwargs: (
+    (_ for _ in ()).throw(AssertionError("meta entered full rankings payload"))
+)
+module._rows = lambda _c, sql, _params: (
+    [{"key": "latest_videos", "value": 10},
+     {"key": "latest_songs", "value": 20},
+     {"key": "latest_occurrences", "value": 999},
+     {"key": "latest_ranking_rows", "value": 30},
+     {"key": "source_occurrences_rows", "value": 999}]
+)
+
+payload = module.meta_payload(object())
+assert baseline_calls == [("parent", ("older-curation",))], baseline_calls
+assert apply_calls == [
+    ("parent", ("newer-alias", "older-curation"), ("newer-alias",)),
+], apply_calls
+assert payload["counts"] == {
+    "videos": 11,
+    "songs": 22,
+    "occurrences": 106,
+    "ranking_rows": 33,
+    "source_occurrences": 318,
+    "channel_metadata": 0,
+    "external_songs": 0,
+    "external_videos": 0,
+    "external_occurrences": 0,
+}, payload
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
+test("generic meta does not duplicate overlay ids without a 7d boundary", () => {
+  const output = runPython(`
+import importlib.util
+import sys
+spec = importlib.util.spec_from_file_location("pg_adapter", ${JSON.stringify(ADAPTER)})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+module._GENERIC_META_COUNTS_CACHE.clear()
+module._GENERIC_META_COUNTS_FLIGHTS.clear()
+module._runtime_projection_revision = lambda _c: None
+module._generic_runtime_projection_revision = lambda _c: (
+    "active", {"status": "active", "manifest_json": {}}
+)
+module._generic_parent_runtime_revision = lambda _c, _r, _rev: (
+    "parent", {"manifest_json": {}}
+)
+module._overlay_revision_ids = lambda *_args: ["overlay"]
+module._authoritative_7d_overlay_ids = lambda *_args: ()
+baseline_calls = []
+module._generic_public_all_range_baseline = (
+    lambda _c, parent, overlays: (
+        baseline_calls.append((parent, tuple(overlays))) or (100, 300)
+    )
+)
+apply_calls = []
+def apply(_c, parent, overlays, counts, public_overlays):
+    apply_calls.append((parent, tuple(overlays), tuple(public_overlays)))
+    return {**counts, "_public_occurrence_delta": 0,
+            "_public_source_occurrence_delta": 0}
+module._apply_generic_overlay_meta_counts = apply
+module._rows = lambda _c, _sql, _params: [
+    {"key": "latest_videos", "value": 10},
+    {"key": "latest_songs", "value": 20},
+    {"key": "latest_occurrences", "value": 999},
+    {"key": "latest_ranking_rows", "value": 30},
+    {"key": "source_occurrences_rows", "value": 999},
+]
+
+payload = module.meta_payload(object())
+assert baseline_calls == [("parent", ())], baseline_calls
+assert apply_calls == [("parent", ("overlay",), ("overlay",))], apply_calls
+assert payload["counts"]["occurrences"] == 100, payload
+assert payload["counts"]["source_occurrences"] == 300, payload
+print("OK")
+`);
+  assert.equal(output, "OK");
+});
+
 test("empty songs identity does not mutate an empty-key group", () => {
   const output = runPython(`
 import copy
