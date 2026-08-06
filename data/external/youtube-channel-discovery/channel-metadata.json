@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-06T03:25:47.481Z",
+  "generatedAt": "2026-08-06T06:44:50.785Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-06T03:25:47.481Z",
+    "fetchedAt": "2026-08-06T06:44:50.785Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-06T03:25:47.481Z",
+    "generatedAt": "2026-08-06T06:44:50.785Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1041,
-      "parseableChannels": 1020,
+      "totalChannels": 1042,
+      "parseableChannels": 1021,
       "realAvatar": 646,
-      "thumbnailFallback": 395,
+      "thumbnailFallback": 396,
       "missingDisplayImage": 0,
-      "missingAvatar": 395,
+      "missingAvatar": 396,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 582
+      "skipped_collected_evidence": 583
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 561,
+      "batch_limit_reached": 562,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
@@ -11702,6 +11702,13 @@
         "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
         "displayName": "悪夢メア / Night Mea",
         "sourceUrl": "https://www.youtube.com/@NightMea-pokev",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@aka_yukana",
+        "channelId": "UC7JL5MlJkx3vqKZq9gdxy2g",
+        "displayName": "紅月夢叶 / Akatsuki Yukana",
+        "sourceUrl": "https://www.youtube.com/@aka_yukana",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
         "displayName": "H.Midori Ch🍃葉山翠",
         "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@0hinarysan",
-        "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
-        "displayName": "INARI",
-        "sourceUrl": "https://www.youtube.com/@0hinarysan",
         "reason": "batch_limit_reached"
       }
     ]
