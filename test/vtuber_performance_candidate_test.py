@@ -298,7 +298,7 @@ def test_vtuber_adjacent_prefetch_is_off_and_other_views_remain_allowed() -> Non
 def test_generic_overlay_compacts_after_preview_hydration() -> None:
     source = inspect.getsource(MODULE._render_generic_overlay_rankings)
     canonical = source.index("_canonicalize_vtuber_card_preview(record, channel_id)")
-    compact = source.index("records = [compact_vtuber_ranking_card(record) for record in records]")
+    compact = source.index("compact_ranking_payloads(records, options[\"view\"])")
     assert canonical < compact
 
 

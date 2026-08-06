@@ -442,6 +442,24 @@ def make_handler(
             rid = request_id(self.headers)
             parsed = urlparse(self.path)
             source_route = parsed.path.startswith("/api/sources/")
+            # Per-request observability baseline: every response records
+            # request id, active revision/content SHA (when the payload
+            # carries them), cache mode, db/prepare/serialize/total
+            # milliseconds and response bytes in headers and the access log.
+            self._dsl = {
+                "rid": rid,
+                "method": method,
+                "path": parsed.path,
+                "started": time.monotonic(),
+                "db_ms": None,
+                "prepare_ms": None,
+                "serialize_ms": None,
+                "revision": None,
+                "content_sha": None,
+                "request_cache": str(self.headers.get("Cache-Control", "")).strip() or "-",
+                "response_cache": "",
+                "bytes": 0,
+            }
             try:
                 thumbnail = _thumbnail_route(parsed.path)
                 if thumbnail is not None:
@@ -484,6 +502,14 @@ def make_handler(
                         payload = source_payload(connection, source_key, query)
                 finally:
                     _close(connection)
+                if isinstance(payload, dict):
+                    meta_fields = payload.get("meta") or payload
+                    revision = str(meta_fields.get("active_revision_id") or "").strip()
+                    content_sha = str(meta_fields.get("content_sha256") or "").strip()
+                    if revision:
+                        self._dsl["revision"] = revision
+                    if content_sha:
+                        self._dsl["content_sha"] = content_sha
                 self.send_json(HTTPStatus.OK, payload, rid)
             except ValueError as exc:
                 self.send_json(
@@ -638,6 +664,8 @@ def make_handler(
             if result.last_modified and "\r" not in result.last_modified and "\n" not in result.last_modified:
                 self.send_header("Last-Modified", result.last_modified)
             self.end_headers()
+            self._dsl["response_cache"] = THUMBNAIL_CACHE_CONTROL
+            self._dsl["bytes"] = max(0, int(content_length or 0))
             if method == "GET" and body:
                 self.wfile.write(body)
 
@@ -649,13 +677,23 @@ def make_handler(
             write_body: bool = True,
             extra_headers: dict[str, str] | None = None,
         ) -> None:
+            started = time.monotonic()
             body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str).encode("utf-8")
+            self._dsl["serialize_ms"] = round((time.monotonic() - started) * 1000, 2)
+            self._dsl["bytes"] = len(body)
+            self._dsl["response_cache"] = "public, max-age=30" if status == HTTPStatus.OK else "no-store"
             self.send_response(int(status))
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("X-Request-Id", rid)
-            self.send_header("Cache-Control", "public, max-age=30" if status == HTTPStatus.OK else "no-store")
+            self.send_header("Cache-Control", self._dsl["response_cache"])
+            if self._dsl["revision"]:
+                self.send_header("X-Active-Revision", self._dsl["revision"])
+            if self._dsl["content_sha"]:
+                self.send_header("X-Content-Sha256", self._dsl["content_sha"])
+            if status == HTTPStatus.OK and self._dsl["serialize_ms"] is not None:
+                self.send_header("X-Duration-Ms", f"{self._dsl['serialize_ms']:.2f}")
             for name, value in (extra_headers or {}).items():
                 self.send_header(name, value)
             self.end_headers()
@@ -663,7 +701,31 @@ def make_handler(
                 self.wfile.write(body)
 
         def log_message(self, format: str, *args: object) -> None:  # noqa: A002
-            sys.stderr.write("%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format % args))
+            dsl = getattr(self, "_dsl", None)
+            if dsl is None:
+                sys.stderr.write(
+                    "%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format % args)
+                )
+                return
+            line = format % args
+            status = "-"
+            parts = line.split()
+            if len(parts) >= 2:
+                status = parts[1]
+            total_ms = round((time.monotonic() - dsl["started"]) * 1000, 2)
+            db_ms = f"{dsl['db_ms']:.2f}" if dsl["db_ms"] is not None else "-"
+            serialize_ms = f"{dsl['serialize_ms']:.2f}" if dsl["serialize_ms"] is not None else "-"
+            sys.stderr.write(
+                "req_metric rid=%s method=%s path=%s status=%s bytes=%d "
+                "total_ms=%.2f db_ms=%s serialize_ms=%s cache_req=%s cache_resp=%s "
+                "revision=%s content_sha=%s %s\n"
+                % (
+                    dsl["rid"], dsl["method"], dsl["path"], status,
+                    dsl["bytes"], total_ms, db_ms, serialize_ms,
+                    dsl["request_cache"], dsl["response_cache"], dsl["revision"] or "-",
+                    dsl["content_sha"] or "-", line,
+                )
+            )
 
     return PgApiHandler
 
