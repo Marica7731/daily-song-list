@@ -168,9 +168,12 @@ jobs:
             exit 0
           fi
 
-          if [[ "${sshd_config_rc}" != "0" ]]; then
+          if [[ "${sudo_available}" == "true" && "${sshd_config_rc}" != "0" ]]; then
             echo "MAC_SSH_REPAIR_BLOCKED_INVALID_SSHD_CONFIG"
             exit 67
+          fi
+          if [[ "${sudo_available}" != "true" && "${sshd_config_rc}" != "0" ]]; then
+            echo "MAC_SSH_REPAIR_OBSERVATION_NONROOT_SSHD_TEST rc=${sshd_config_rc}"
           fi
 
           timestamp="$(/bin/date -u +%Y%m%dT%H%M%SZ)"
