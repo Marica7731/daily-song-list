@@ -9024,8 +9024,7 @@ function renderVideo(item) {
   const count = document.createElement("div");
   count.className = "song-count";
   const matchCount = item._songSearchMatchCount || 0;
-  const declaredCount = Number(item.count) || Number(item.songCount) || item.songs?.length || 0;
-  count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${declaredCount} 首`;
+  count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${item.songs?.length || 0} 首`;
   const headingActions = document.createElement("div");
   headingActions.className = "video-heading-actions";
   headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist ui-chip ui-chip-icon"));
