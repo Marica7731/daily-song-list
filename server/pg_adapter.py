@@ -126,6 +126,76 @@ def compact_vtuber_ranking_card(record: Mapping[str, Any]) -> dict[str, Any]:
     return compact
 
 
+# Scalars that must never leak into compact list cards even though they are
+# strings: the persisted search text is a single-card-megabyte field and is
+# only used server-side for query matching.
+_COMPACT_DROP_SCALAR_KEYS = frozenset({"searchText"})
+# Count lists that can grow with the group (channels on a popular song) but
+# are not read by the compact card meta.  They are dropped from compact cards;
+# the full source detail API still returns them.
+_COMPACT_DROP_LIST_KEYS = frozenset({"channels"})
+# Small count lists that the compact card meta reads directly and that stay
+# bounded by distinct entity count.
+_COMPACT_KEEP_LIST_KEYS = frozenset({"artists", "songs"})
+
+
+def compact_ranking_card(record: Mapping[str, Any], view: str) -> dict[str, Any]:
+    """Project any compact ranking card to scalars plus a bounded preview.
+
+    The compact list contract keeps card scalars, the stable source detail
+    key and at most three distinct-video previews; full occurrence/song
+    payloads are served by the source detail API.  Count lists that the UI
+    card meta reads directly (artists for songs, songs for artists/vtubers)
+    are retained because they are small and already bounded.
+    """
+
+    compact: dict[str, Any] = {}
+    for key, value in record.items():
+        if key in _COMPACT_KEEP_LIST_KEYS and isinstance(value, list):
+            compact[key] = deepcopy(value)
+            continue
+        if key in _DROP_KEYS or key in _COMPACT_DROP_SCALAR_KEYS or key.startswith("_"):
+            continue
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            compact[key] = deepcopy(value)
+    occurrences = record.get("occurrences")
+    previews = distinct_source_previews(
+        occurrences if isinstance(occurrences, list) else (),
+    )
+    compact["occurrences"] = previews
+    compact["sourcePreviewCount"] = len(previews)
+    if view == "videos":
+        songs = record.get("songs")
+        if isinstance(songs, list):
+            compact["songs"] = [deepcopy(item) for item in songs[:COMPACT_VTUBER_PREVIEW_LIMIT]]
+            compact["songPreviewCount"] = len(compact["songs"])
+    try:
+        occurrence_count = int(record.get("count") or record.get("timestampCount") or 0)
+    except (TypeError, ValueError):
+        occurrence_count = 0
+    compact["occurrencePreviewLimited"] = bool(
+        record.get("occurrencePreviewLimited") or occurrence_count > len(previews)
+    )
+    return compact
+
+
+def compact_ranking_payloads(
+    records: Sequence[Mapping[str, Any]],
+    view: str,
+) -> list[dict[str, Any]]:
+    """Project compact cards after hydration for any ranking view.
+
+    VTubers keep the established scalar-plus-three-preview shape that the
+    frontend already renders; the other views use the generalized compact
+    card which additionally retains the small count lists the card meta
+    reads (artists for songs, songs for artists/vtubers).
+    """
+
+    if view == "vtubers":
+        return [compact_vtuber_ranking_card(record) for record in records]
+    return [compact_ranking_card(record, view) for record in records]
+
+
 def preparation_cache_key(
     active_revision_id: str,
     options: Mapping[str, Any],
@@ -8918,7 +8988,7 @@ def _render_generic_overlay_rankings(
             channel_id = _text(record.get("channelId") or record.get("key"))
             _canonicalize_vtuber_card_preview(record, channel_id)
         if options["compact"]:
-            records = [compact_vtuber_ranking_card(record) for record in records]
+            records = compact_ranking_payloads(records, options["view"])
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -10081,9 +10151,9 @@ def rankings_payload_from_records(records: Iterable[Mapping[str, Any]], query: M
     for index, group in enumerate(page_groups, start=offset + 1):
         payload = _group_payload(group, options)
         payload["rank"] = index
-        if options["compact"] and options["view"] == "vtubers":
-            payload["occurrencePreviewLimited"] = len(group["occurrences"]) > len(payload["occurrences"])
         result_records.append(payload)
+    if options["compact"]:
+        result_records = compact_ranking_payloads(result_records, options["view"])
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -10442,13 +10512,13 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         records = []
         for row in rows:
             payload = _json_object(row.get("payload_json"))
-            if options["compact"] and options["view"] == "vtubers":
-                payload = compact_vtuber_ranking_card(payload)
             if options["view"] == "vtubers":
                 payload = _apply_channel_metadata(payload, row, metadata, options["range"])
             payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
             records.append(payload)
         _hydrate_runtime_ranking_song_previews(connection, revision_id, options["range"], options["view"], records)
+        if options["compact"]:
+            records = compact_ranking_payloads(records, options["view"])
         return {
             "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
             "metric": "occurrences" if options["metric"] == "count" else options["metric"],
@@ -10523,13 +10593,13 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
     records = []
     for row in rows[offset : offset + options["pageSize"]]:
         payload = _json_object(row.get("payload_json"))
-        if options["compact"] and options["view"] == "vtubers":
-            payload = compact_vtuber_ranking_card(payload)
         if options["view"] == "vtubers":
             payload = _apply_channel_metadata(payload, row, metadata, options["range"])
         payload["rank"] = int(row.get("rank") or payload.get("rank") or 0)
         records.append(payload)
     _hydrate_runtime_ranking_song_previews(connection, revision_id, options["range"], options["view"], records)
+    if options["compact"]:
+        records = compact_ranking_payloads(records, options["view"])
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
