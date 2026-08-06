@@ -12,6 +12,7 @@ on:
         type: choice
         options:
           - diagnose
+          - process-audit
           - repair
 
 permissions:
@@ -41,9 +42,15 @@ jobs:
           ssh_dir="${target_home}/.ssh"
           auth_file="${ssh_dir}/authorized_keys"
 
-          if [[ "${RECOVERY_MODE}" != "diagnose" && "${RECOVERY_MODE}" != "repair" ]]; then
+          if [[ "${RECOVERY_MODE}" != "diagnose" && "${RECOVERY_MODE}" != "process-audit" && "${RECOVERY_MODE}" != "repair" ]]; then
             echo "MAC_SSH_RECOVERY_INVALID_MODE"
             exit 64
+          fi
+
+          if [[ "${RECOVERY_MODE}" == "process-audit" ]]; then
+            printf 'MAC_SSH_PROCESS_AUDIT shell_pid=%s shell_ppid=%s\n' "$$" "${PPID}"
+            ulimit -a
+            exec /bin/ps -Ao pid=,ppid=,user=,state=,etime=,comm=
           fi
 
           if ! /usr/bin/dscl . -read "/Users/${target_user}" NFSHomeDirectory >/dev/null 2>&1; then
