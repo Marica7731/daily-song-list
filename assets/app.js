@@ -3551,8 +3551,13 @@ async function requestApiViewPage(request, range) {
   if (filters.nicheOnly) params.set("nicheOnly", "1");
   if (filters.hideUnknownArtist) params.set("hideUnknownArtist", "1");
   if (request.view === "vtuberRank") params.set("compact", "1");
+  // Versioned immutable URL: bind the request to the current release SHA so
+  // the browser/edge may cache it long-term.  The server /api/meta short
+  // cache is what discovers a new SHA.
+  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";
+  if (releaseVersion) params.set("v", releaseVersion);
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
-    cache: "no-cache",
+    cache: releaseVersion ? "force-cache" : "default",
     signal: request.signal,
   });
   assertApiRankingPayload(payload);
@@ -4417,26 +4422,12 @@ function requestIndexBucketModel(result) {
 }
 
 function scheduleAdjacentRequestPagePrefetch(result) {
-  if (result?.view === "vtuberRank") return;
-  if (!result || !canUseRequestRuntime(result.range)) return;
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (connection?.saveData) return;
-  const run = () => {
-    for (const page of [result.pageInfo.page - 1, result.pageInfo.page + 1]) {
-      if (page < 1 || page > result.pageInfo.pageCount) continue;
-      requestViewPage({
-        range: result.range,
-        view: result.view,
-        rankMetric: result.metric,
-        filters: requestFilterState(),
-        page,
-        pageSize: result.pageSize,
-        prefetch: true,
-      }).catch(() => {});
-    }
-  };
-  if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1400 });
-  else window.setTimeout(run, 300);
+  // Adjacent-page prefetch is disabled until the pagination contract and CDN
+  // caching are proven correct: it caused silent page=2 downloads and extra
+  // origin load.  Re-enable only with saveData/effective-type gates and a
+  // low-priority, cancellable fetch.
+  void result;
+  return;
 }
 
 function currentGroup() {
@@ -9024,8 +9015,7 @@ function renderVideo(item) {
   const count = document.createElement("div");
   count.className = "song-count";
   const matchCount = item._songSearchMatchCount || 0;
-  const declaredCount = Number(item.count) || Number(item.songCount) || item.songs?.length || 0;
-  count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${declaredCount} 首`;
+  count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${item.songs?.length || 0} 首`;
   const headingActions = document.createElement("div");
   headingActions.className = "video-heading-actions";
   headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist ui-chip ui-chip-icon"));

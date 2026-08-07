@@ -279,6 +279,8 @@ const state = {
   snapshots: [],
   currentSnapshotPath: SNAPSHOT_LATEST_PATH,
   range: "7d",
+  rangeIntent: "7d",
+  initializationMetaPending: true,
   view: "songRank",
   filter: "",
   searchScope: "all",
@@ -466,6 +468,8 @@ async function init() {
   setupSnapshotLoader();
   setupControlsObserver();
   applyInitialUrlState();
+  state.rangeIntent = canonicalRangeId(state.range);
+  state.initializationMetaPending = true;
   bindEvents();
   syncControlsFromState();
   setupBackToTopButton();
@@ -490,6 +494,9 @@ async function init() {
     state.runtimeMeta = staticMeta;
   }
   const meta = state.runtimeMeta;
+  state.initializationMetaPending = false;
+  const requestedRange = canonicalRangeId(state.rangeIntent || initialRange);
+  state.range = requestedRange;
   state.status = mergeRuntimeStatus(meta.status || null, await statusPromise, meta);
   startStatusTicker();
   renderStatus(state.status);
@@ -500,18 +507,22 @@ async function init() {
   normalizeTrendStateForRuntime();
   syncControlsFromState();
   const requestedSnapshotPath = state.currentSnapshotPath;
-  if (requestedSnapshotPath === SNAPSHOT_LATEST_PATH && canUseRequestRuntime(state.range)) {
+  setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === requestedRange) || els.rangeTabs[0]);
+  if (requestedSnapshotPath === SNAPSHOT_LATEST_PATH && canUseRequestRuntime(requestedRange)) {
     applyRequestRuntimeShell();
     render({ syncUrl: false });
   } else {
-    const rangePayload = await measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange));
-    if (state.range !== initialRange) {
-      await loadRuntimeRange(state.range);
+    const rangePayload = await measureAsync("fetch-active-range", () => loadRuntimeRange(requestedRange));
+    const activeRange = canonicalRangeId(state.rangeIntent || state.range || requestedRange);
+    if (activeRange !== requestedRange) await loadRuntimeRange(activeRange);
+    const activePayload = state.runtimeRangePayloads.get(activeRange) || rangePayload;
+    if (isCurrentRangeIntent(activeRange)) {
+      await applyRuntimeRangePayload(activePayload, {
+        resetPage: false,
+        syncUrl: false,
+        expectedRange: activeRange,
+      });
     }
-    await applyRuntimeRangePayload(state.runtimeRangePayloads.get(state.range) || rangePayload, {
-      resetPage: false,
-      syncUrl: false,
-    });
   }
   if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
     await loadSnapshotPath(requestedSnapshotPath, SNAPSHOT_LATEST_PATH);
@@ -2254,10 +2265,18 @@ async function switchRange(nextRange, options = {}) {
   if (!nextRange || state.range === nextRange) return;
   const previousRange = state.range;
   state.range = nextRange;
+  state.rangeIntent = nextRange;
   state.expandedRows.clear();
   resetPagination();
   setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === nextRange) || els.rangeTabs[0]);
   if (!isLatestSnapshot()) {
+    renderOrSyncUrl(options);
+    return;
+  }
+
+  if (state.initializationMetaPending) {
+    // Meta is the gate for range loading. Keep the skeleton and retain only
+    // the newest intent; init loads that intent after meta becomes available.
     renderOrSyncUrl(options);
     return;
   }
@@ -2274,18 +2293,25 @@ async function switchRange(nextRange, options = {}) {
     renderOrSyncUrl(options);
     scheduleCurrentRankDiffLoad();
   } catch (error) {
+    if (!isCurrentRangeIntent(nextRange)) return;
     state.range = previousRange;
+    state.rangeIntent = previousRange;
     setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === previousRange) || els.rangeTabs[0]);
     renderOrSyncUrl({ syncUrl: false });
     showToast(`范围读取失败，已保留当前内容：${error.message}`);
   }
 }
 
+function isCurrentRangeIntent(rangeId) {
+  return canonicalRangeId(rangeId) === canonicalRangeId(state.rangeIntent || state.range);
+}
+
 async function ensureLatestRange(rangeId) {
   rangeId = canonicalRangeId(rangeId);
   if (state.payload?.groups?.[rangeId]) return state.payload.groups[rangeId];
   const payload = await loadRuntimeRange(rangeId);
-  await applyRuntimeRangePayload(payload, { resetPage: false, syncUrl: false, merge: true });
+  if (!isCurrentRangeIntent(rangeId)) return state.payload;
+  await applyRuntimeRangePayload(payload, { resetPage: false, syncUrl: false, merge: true, expectedRange: rangeId });
   return state.payload?.groups?.[rangeId];
 }
 
@@ -2503,6 +2529,7 @@ function isPartialRuntimePayload(payload) {
 
 async function applyRuntimeRangePayload(rangePayload, options = {}) {
   const rangeId = canonicalRangeId(rangePayload?.id || state.range);
+  if (options.expectedRange && !isCurrentRangeIntent(options.expectedRange)) return;
   rangePayload = normalizeRuntimeRangePayload(rangePayload, rangeId);
   window.FrontendUtils.validateRuntimeRangePayload(rangePayload, {
     rangeId,
@@ -2516,6 +2543,7 @@ async function applyRuntimeRangePayload(rangePayload, options = {}) {
   if (!options.merge) state.rangeCache.clear();
   await prewarmRangeCache(prepared.groups?.[rangeId], SNAPSHOT_LATEST_PATH, rangeId);
   await yieldToBrowser();
+  if (options.expectedRange && !isCurrentRangeIntent(options.expectedRange)) return;
   if (options.merge && state.payload?.groups) {
     const merged = {
       ...state.payload,
@@ -3300,6 +3328,7 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
       perfMeasure("first-content", renderMark);
     }
     perfMeasure("render-request", renderMark);
+    if (result.view !== "vtuberRank")
     scheduleAdjacentRequestPagePrefetch(result);
     scheduleCurrentRankDiffLoad();
   } catch (error) {
@@ -3522,8 +3551,13 @@ async function requestApiViewPage(request, range) {
   if (filters.nicheOnly) params.set("nicheOnly", "1");
   if (filters.hideUnknownArtist) params.set("hideUnknownArtist", "1");
   if (request.view === "vtuberRank") params.set("compact", "1");
+  // Versioned immutable URL: bind the request to the current release SHA so
+  // the browser/edge may cache it long-term.  The server /api/meta short
+  // cache is what discovers a new SHA.
+  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";
+  if (releaseVersion) params.set("v", releaseVersion);
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
-    cache: "no-cache",
+    cache: releaseVersion ? "force-cache" : "default",
     signal: request.signal,
   });
   assertApiRankingPayload(payload);
@@ -4388,25 +4422,12 @@ function requestIndexBucketModel(result) {
 }
 
 function scheduleAdjacentRequestPagePrefetch(result) {
-  if (!result || !canUseRequestRuntime(result.range)) return;
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (connection?.saveData) return;
-  const run = () => {
-    for (const page of [result.pageInfo.page - 1, result.pageInfo.page + 1]) {
-      if (page < 1 || page > result.pageInfo.pageCount) continue;
-      requestViewPage({
-        range: result.range,
-        view: result.view,
-        rankMetric: result.metric,
-        filters: requestFilterState(),
-        page,
-        pageSize: result.pageSize,
-        prefetch: true,
-      }).catch(() => {});
-    }
-  };
-  if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1400 });
-  else window.setTimeout(run, 300);
+  // Adjacent-page prefetch is disabled until the pagination contract and CDN
+  // caching are proven correct: it caused silent page=2 downloads and extra
+  // origin load.  Re-enable only with saveData/effective-type gates and a
+  // low-priority, cancellable fetch.
+  void result;
+  return;
 }
 
 function currentGroup() {
@@ -6349,13 +6370,30 @@ function incrementCanonicalSongCount(map, title) {
   map.get(key).count += 1;
 }
 
+function validSongArtistCandidate(value) {
+  const candidate = cleanText(value);
+  return candidate && !window.RankingUtils.isUnknownArtistName(candidate) ? candidate : "";
+}
+
+function fallbackSongArtist(record) {
+  const displayArtist = validSongArtistCandidate(record?.displayArtist);
+  if (displayArtist) return displayArtist;
+  const occurrences = Array.isArray(record?.occurrences) ? record.occurrences : [];
+  for (const occurrence of occurrences) {
+    const artist = validSongArtistCandidate(occurrence?.song?.artist);
+    if (artist) return artist;
+  }
+  return "";
+}
+
 function songMeta(record) {
   const artists = sortedCountEntries(record.artists);
   const knownArtists = artists.filter((entry) => !window.RankingUtils.isUnknownArtistName(entry.name));
-  const dominantArtist = (knownArtists.length ? knownArtists : artists)[0]?.name || "";
+  const dominantArtist = knownArtists[0]?.name || "";
+  const fallbackArtist = dominantArtist ? "" : fallbackSongArtist(record);
   return {
-    primary: dominantArtist || "待补歌手",
-    missingPrimary: !artists.length,
+    primary: dominantArtist || fallbackArtist || "待补歌手",
+    missingPrimary: !dominantArtist && !fallbackArtist,
     badges: isNicheRecord(record) ? ["小众"] : [],
   };
 }

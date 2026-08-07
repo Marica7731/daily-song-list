@@ -142,9 +142,6 @@ jobs:
               total=int(first.get("totalCount") or 0)
               pages=max(1, math.ceil(total/200))
               plist=[first]
-              # all only needs pages 1-3 for pagination depth; 7d full
-              if rng=="all":
-                  pages=min(pages, 3)
               for pg in range(2, pages+1):
                   plist.append(fetch(f"/api/rankings?range={rng}&view={v}&metric={met}&page={pg}&pageSize=200&compact=1"))
               for i,p in enumerate(plist, start=1):
