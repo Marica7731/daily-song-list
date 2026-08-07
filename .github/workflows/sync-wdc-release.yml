@@ -132,6 +132,7 @@ jobs:
                   combos.append(("7d",v,met))
                   combos.append(("all",v,met))
           shutil.rmtree(OUT, ignore_errors=True)
+          shutil.rmtree("/tmp/dsl-wdc-bundles", ignore_errors=True)
           OUT.mkdir(parents=True)
           files=0
           for rng,v,met in combos:
