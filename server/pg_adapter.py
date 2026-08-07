@@ -81,20 +81,29 @@ def distinct_source_previews(
     *,
     limit: int = COMPACT_VTUBER_PREVIEW_LIMIT,
 ) -> list[dict[str, Any]]:
-    """Return at most ``limit`` first-seen source previews without duplicates."""
+    """Return at most ``limit`` first-seen previews from distinct videos.
+
+    The compact contract is "at most three distinct ``videoId`` previews", so
+    previews are deduplicated by video id first (matching the hydrated merge
+    that already produced distinct videos) and only fall back to the persisted
+    source identity when no video id is present.  Without this, a card whose
+    preview rows lack a ``sourceDetailKey``/``sourceId`` collapses every
+    preview to the same ``source:unknown`` identity.
+    """
 
     previews: list[dict[str, Any]] = []
     seen: set[str] = set()
     for occurrence in occurrences:
         if not isinstance(occurrence, Mapping):
             continue
-        source = _source_identity(occurrence)
-        if source in seen:
+        video_id = _text(occurrence.get("videoId") or (occurrence.get("item") or {}).get("videoId"))
+        key = f"video:{video_id}" if video_id else _source_identity(occurrence)
+        if key in seen:
             continue
-        seen.add(source)
+        seen.add(key)
         preview = deepcopy(dict(occurrence))
-        for key in _DROP_KEYS:
-            preview.pop(key, None)
+        for drop_key in _DROP_KEYS:
+            preview.pop(drop_key, None)
         previews.append(preview)
         if len(previews) >= max(0, int(limit)):
             break

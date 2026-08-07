@@ -46,6 +46,53 @@ def _occurrence(video_id: str, source_id: str) -> dict:
     }
 
 
+def test_distinct_videos_without_source_identity_keep_three_previews() -> None:
+    """Compact previews must deduplicate by videoId, not by source identity.
+
+    Song cards whose preview rows lack a sourceDetailKey/sourceId previously
+    collapsed all previews to the same 'source:unknown' identity and showed
+    only one preview even when the card had thousands of distinct videos.
+    """
+    card = MODULE.compact_ranking_card(
+        {
+            "type": "song", "key": "song-x", "title": "T",
+            "displayArtist": "A", "count": 10, "songCount": 0, "videoCount": 8,
+            "timestampCount": 10, "sourceDetailKey": "source-song:x",
+            "artists": [{"name": "A", "count": 10}],
+            "occurrences": [
+                {"videoId": "v1", "title": "a", "item": {"videoId": "v1"}},
+                {"videoId": "v2", "title": "b", "item": {"videoId": "v2"}},
+                {"videoId": "v3", "title": "c", "item": {"videoId": "v3"}},
+                {"videoId": "v4", "title": "d", "item": {"videoId": "v4"}},
+            ],
+        },
+        "songs",
+    )
+    previews = card["occurrences"]
+    assert len(previews) == 3
+    assert {p["videoId"] for p in previews} == {"v1", "v2", "v3"}
+    assert card["sourcePreviewCount"] == 3
+
+
+def test_duplicate_video_ids_collapse_in_distinct_previews() -> None:
+    card = MODULE.compact_ranking_card(
+        {
+            "type": "song", "key": "song-y", "title": "T",
+            "displayArtist": "A", "count": 3, "songCount": 0, "videoCount": 2,
+            "timestampCount": 3, "sourceDetailKey": "source-song:y",
+            "artists": [{"name": "A", "count": 3}],
+            "occurrences": [
+                {"videoId": "v1", "title": "a", "item": {"videoId": "v1"}},
+                {"videoId": "v1", "title": "a2", "item": {"videoId": "v1"}},
+                {"videoId": "v2", "title": "b", "item": {"videoId": "v2"}},
+            ],
+        },
+        "songs",
+    )
+    assert len(card["occurrences"]) == 2
+    assert {p["videoId"] for p in card["occurrences"]} == {"v1", "v2"}
+
+
 def test_song_compact_drops_searchtext_and_channels_keeps_artists() -> None:
     card = MODULE.compact_ranking_card(
         {
@@ -143,6 +190,8 @@ if __name__ == "__main__":
         test_artist_compact_keeps_song_count_list,
         test_dispatcher_preserves_vtuber_three_preview_shape,
         test_dispatcher_generalizes_non_vtuber_views,
+        test_distinct_videos_without_source_identity_keep_three_previews,
+        test_duplicate_video_ids_collapse_in_distinct_previews,
     ]
     for test in tests:
         test()
