@@ -61,11 +61,17 @@ jobs:
             echo "DISPLAY=daily-song-list"
           } >> "$GITHUB_ENV"
 
-      - name: Check active revision changed (via old-site public API)
+      - name: Check active revision changed (local 8765 via SSH, public fallback)
         id: check
         run: |
           set -Eeuo pipefail
-          ACTIVE_JSON="$(curl -s --max-time 90 "${PUBLIC_BASE}/api/meta" || true)"
+          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          ACTIVE_JSON="$(ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "timeout 60 curl -s --max-time 50 http://127.0.0.1:8765/api/meta 2>/dev/null || true" 2>/dev/null || true)"
+          if [ -z "$ACTIVE_JSON" ] || ! printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;json.load(sys.stdin)" 2>/dev/null; then
+            echo "LOCAL_META_UNAVAILABLE; trying public fallback"
+            ACTIVE_JSON="$(curl -s --max-time 90 "${PUBLIC_BASE}/api/meta" || true)"
+          fi
           if [ -z "$ACTIVE_JSON" ] || ! printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;json.load(sys.stdin)" 2>/dev/null; then
             echo "PUBLIC_META_UNAVAILABLE"
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -74,8 +80,6 @@ jobs:
           CURRENT_ACTIVE=$(printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;print(json.load(sys.stdin).get('meta',{}).get('active_revision_id',''))")
           CONTENT=$(printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;print(json.load(sys.stdin).get('meta',{}).get('content_sha256',''))")
           echo "current_active=$CURRENT_ACTIVE content=${CONTENT:0:16}"
-          # previous active is persisted on the old VPS /tmp (survives runs)
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
           PREV="$(ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "cat /tmp/dsl-wdc-last-active 2>/dev/null || true" 2>/dev/null || true)"
           echo "prev_active=$PREV"
           if [ "$CURRENT_ACTIVE" = "$PREV" ] && [ -n "$CURRENT_ACTIVE" ] && [ "$FORCE" != "true" ]; then
