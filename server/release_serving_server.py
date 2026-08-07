@@ -44,6 +44,17 @@ SUPPORTED_METRICS = {"occurrences", "songs", "videos"}
 METRIC_ALIASES = {"count": "occurrences"}
 MAX_PAGE_SIZE = 200
 
+# The shadow host has no search index or thumbnail origin of its own: the
+# release bundle only freezes compact ranking pages.  Dynamic search and
+# thumbnail requests are therefore proxied to the old production API for the
+# shadow transition (the same transitional pattern as /api/sources).  Plain
+# pagination still reads the local immutable release files.
+OLD_ORIGIN_HOST = "ytb-song-rank.culua.com"
+THUMBNAIL_ROUTE_RE = re.compile(
+    r"^/api/thumbnails/([A-Za-z0-9_-]{11})/"
+    r"(default|mqdefault|hqdefault|sddefault|maxresdefault)\.jpg$"
+)
+
 OLD_ORIGIN_HOST = "ytb-song-rank.culua.com"
 SOURCE_PROXY_TIMEOUT = 30
 
@@ -180,6 +191,38 @@ def make_handler(store: ReleaseStore, proxy_host: str = OLD_ORIGIN_HOST) -> Call
         finally:
             connection.close()
 
+    def proxy_search(query: dict[str, list[str]]) -> dict[str, Any]:
+        """Proxy a rankings request that carries a text filter to the old API.
+
+        The release bundle only freezes unfiltered compact pages; text search
+        needs the full source index, which lives on the old production
+        PostgreSQL.  Forward the exact query string so results match the old
+        site during the shadow transition.
+        """
+        from urllib.parse import urlencode
+        params = {k: v[-1] for k, v in query.items() if v}
+        path = "/api/rankings?" + urlencode(params)
+        connection = http.client.HTTPSConnection(proxy_host, timeout=SOURCE_PROXY_TIMEOUT)
+        try:
+            connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
+            response = connection.getresponse()
+            body = response.read()
+            return json.loads(body)
+        finally:
+            connection.close()
+
+    def proxy_thumbnail(video_id: str, quality: str) -> tuple[int, str, bytes]:
+        """Forward one allowlisted thumbnail to the old site's same-origin relay."""
+        path = f"/api/thumbnails/{video_id}/{quality}.jpg"
+        connection = http.client.HTTPSConnection(proxy_host, timeout=SOURCE_PROXY_TIMEOUT)
+        try:
+            connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
+            response = connection.getresponse()
+            body = response.read()
+            return response.status, response.getheader("Content-Type", "image/jpeg"), body
+        finally:
+            connection.close()
+
     class ReleaseHandler(BaseHTTPRequestHandler):
         server_version = "daily-song-list-release-serving/1"
 
@@ -193,6 +236,27 @@ def make_handler(store: ReleaseStore, proxy_host: str = OLD_ORIGIN_HOST) -> Call
             parsed = urlparse(self.path)
             query = parse_qs(parsed.query, keep_blank_values=True)
             try:
+                thumbnail_match = THUMBNAIL_ROUTE_RE.fullmatch(parsed.path)
+                if thumbnail_match:
+                    status, content_type, body = proxy_thumbnail(
+                        thumbnail_match.group(1), thumbnail_match.group(2)
+                    )
+                    if status != HTTPStatus.OK:
+                        self._send_json(
+                            HTTPStatus.BAD_GATEWAY,
+                            {"error": "thumbnail_upstream", "message": "thumbnail upstream error"},
+                            rid,
+                            started,
+                        )
+                        return
+                    self.send_response(HTTPStatus.OK)
+                    self.send_header("Content-Type", content_type)
+                    self.send_header("Content-Length", str(len(body)))
+                    self.send_header("Cache-Control", "public, max-age=86400, immutable")
+                    self.send_header("X-Request-Id", rid)
+                    self.end_headers()
+                    self.wfile.write(body)
+                    return
                 if parsed.path == "/healthz":
                     payload = store.health()
                     status = HTTPStatus.OK if payload.get("status") == "ok" else HTTPStatus.SERVICE_UNAVAILABLE
@@ -202,6 +266,12 @@ def make_handler(store: ReleaseStore, proxy_host: str = OLD_ORIGIN_HOST) -> Call
                     self._send_json(HTTPStatus.OK, store.meta(), rid, started)
                     return
                 if parsed.path == "/api/rankings":
+                    q = _query_value(query, "q")
+                    if q:
+                        # Text search is not in the release bundle; proxy to old site.
+                        payload = proxy_search(query)
+                        self._send_json(HTTPStatus.OK, payload, rid, started)
+                        return
                     range_id = _query_value(query, "range") or "all"
                     view = _query_value(query, "view") or "songs"
                     metric = _query_value(query, "metric") or "occurrences"
