@@ -122,7 +122,8 @@ jobs:
               last=None
               for attempt in range(5):
                   try:
-                      with urllib.request.urlopen(BASE+path, timeout=300) as r:
+                      req=urllib.request.Request(BASE+path, headers={"Connection":"close"})
+                      with urllib.request.urlopen(req, timeout=300) as r:
                           return json.load(r)
                   except Exception as exc:
                       last=exc
@@ -160,7 +161,7 @@ jobs:
               rng,v,met=combo
               return rng,v,met,pg,fetch(f"/api/rankings?range={rng}&view={v}&metric={met}&page={pg}&pageSize=200&compact=1")
           tasks=[]
-          with ThreadPoolExecutor(max_workers=4) as ex:
+          with ThreadPoolExecutor(max_workers=3) as ex:
               for combo,(_,pages) in firsts.items():
                   for pg in range(2, pages+1):
                       tasks.append(ex.submit(pull, combo, pg))
