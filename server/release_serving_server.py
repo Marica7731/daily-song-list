@@ -277,9 +277,20 @@ def make_handler(store: ReleaseStore, proxy_host: str = OLD_ORIGIN_HOST) -> Call
     return ReleaseHandler
 
 
-def serve(releases_root: Path, host: str, port: int) -> None:
+def make_server(host: str, port: int, backlog: int, store: ReleaseStore) -> ThreadingHTTPServer:
+    class _ReleaseHTTPServer(ThreadingHTTPServer):
+        daemon_threads = True
+
+        def __init__(self) -> None:
+            self.request_queue_size = max(16, int(backlog))
+            super().__init__((host, port), make_handler(store))
+
+    return _ReleaseHTTPServer()
+
+
+def serve(releases_root: Path, host: str, port: int, backlog: int = 128) -> None:
     store = ReleaseStore(releases_root)
-    server = ThreadingHTTPServer((host, port), make_handler(store))
+    server = make_server(host, port, backlog, store)
     try:
         server.serve_forever()
     finally:
@@ -291,12 +302,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--releases-root", required=True, type=Path)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=18777)
+    parser.add_argument("--backlog", type=int, default=128)
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    serve(args.releases_root, args.host, args.port)
+    serve(args.releases_root, args.host, args.port, args.backlog)
     return 0
 
 
