@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T10:49:06.078Z",
+  "generatedAt": "2026-08-07T12:33:08.042Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T10:49:06.078Z",
+    "fetchedAt": "2026-08-07T12:33:08.042Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T10:49:06.078Z",
+    "generatedAt": "2026-08-07T12:33:08.042Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1046,
-      "parseableChannels": 1025,
+      "totalChannels": 1047,
+      "parseableChannels": 1026,
       "realAvatar": 646,
-      "thumbnailFallback": 400,
+      "thumbnailFallback": 401,
       "missingDisplayImage": 0,
-      "missingAvatar": 400,
+      "missingAvatar": 401,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 586
+      "skipped_collected_evidence": 587,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 565,
+      "batch_limit_reached": 566,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@OtonoseKanade",
+        "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
+        "displayName": "Kanade Ch. 音乃瀬奏 ‐ ReGLOSS",
+        "sourceUrl": "https://www.youtube.com/@OtonoseKanade",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@YACHIHONOKAch",
         "channelId": "UCQJoP9OHhKqUHiIDCMp412w",
@@ -11842,13 +11849,6 @@
         "channelId": "UCYYvJHfujamYw0FHV9o9XCw",
         "displayName": "天瀬ゅゅ / Amase Yuyu",
         "sourceUrl": "https://www.youtube.com/@%E5%A4%A9%E7%80%AC%E3%82%85%E3%82%85",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@VIER_Nynpro",
-        "channelId": "UCUZsNTEVYLyYI3FPqYrpm_A",
-        "displayName": "VIER",
-        "sourceUrl": "https://www.youtube.com/@VIER_Nynpro",
         "reason": "batch_limit_reached"
       }
     ]
