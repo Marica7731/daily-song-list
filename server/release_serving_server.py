@@ -278,7 +278,7 @@ class ReleaseStore:
                 "views": ["songs", "vtubers", "videos"],
                 "metrics": ["occurrences", "songs", "videos"],
                 "localSources": serving_sqlite,
-                "localSearch": False,
+                "localSearch": serving_sqlite,
             },
         }
 
