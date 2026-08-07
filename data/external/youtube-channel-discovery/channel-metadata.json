@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T09:48:29.998Z",
+  "generatedAt": "2026-08-07T10:49:06.078Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T09:48:29.998Z",
+    "fetchedAt": "2026-08-07T10:49:06.078Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T09:48:29.998Z",
+    "generatedAt": "2026-08-07T10:49:06.078Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1044,
-      "parseableChannels": 1023,
+      "totalChannels": 1046,
+      "parseableChannels": 1025,
       "realAvatar": 646,
-      "thumbnailFallback": 398,
+      "thumbnailFallback": 400,
       "missingDisplayImage": 0,
-      "missingAvatar": 398,
+      "missingAvatar": 400,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 585,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 586
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 564,
+      "batch_limit_reached": 565,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@YACHIHONOKAch",
+        "channelId": "UCQJoP9OHhKqUHiIDCMp412w",
+        "displayName": "HONOKA Ch. 陽茅ほのか",
+        "sourceUrl": "https://www.youtube.com/@YACHIHONOKAch",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Vam0414",
         "channelId": "UCPm62fhXzHQiUupKUDlRSig",
@@ -11730,6 +11737,13 @@
         "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
         "displayName": "悪夢メア / Night Mea",
         "sourceUrl": "https://www.youtube.com/@NightMea-pokev",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@168suzuri",
+        "channelId": "UCvX58P82G9lmi4agewGJeMw",
+        "displayName": "彩華すゞり / Iroha Suzuri",
+        "sourceUrl": "https://www.youtube.com/@168suzuri",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UCUZsNTEVYLyYI3FPqYrpm_A",
         "displayName": "VIER",
         "sourceUrl": "https://www.youtube.com/@VIER_Nynpro",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@harpsingmiyuki",
-        "channelId": "UC5ORYx_8m9q2CcDYFsNvOMw",
-        "displayName": "Miyuki_ハーピストみゆき_ハープ弾き語り",
-        "sourceUrl": "https://www.youtube.com/@harpsingmiyuki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RuridoriKafka",
-        "channelId": "UC3oBWCwi2UtckYvMbtIOWVA",
-        "displayName": "Ruridori Kafka / 璃鳥歌深【IZIGENIA】",
-        "sourceUrl": "https://www.youtube.com/@RuridoriKafka",
         "reason": "batch_limit_reached"
       }
     ]
