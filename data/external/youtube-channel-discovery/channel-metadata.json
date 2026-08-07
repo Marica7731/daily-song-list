@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T01:04:59.394Z",
+  "generatedAt": "2026-08-07T04:01:21.883Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T01:04:59.394Z",
+    "fetchedAt": "2026-08-07T04:01:21.883Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T01:04:59.394Z",
+    "generatedAt": "2026-08-07T04:01:21.883Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1042,
-      "parseableChannels": 1021,
+      "totalChannels": 1043,
+      "parseableChannels": 1022,
       "realAvatar": 646,
-      "thumbnailFallback": 396,
+      "thumbnailFallback": 397,
       "missingDisplayImage": 0,
-      "missingAvatar": 396,
+      "missingAvatar": 397,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 583
+      "skipped_collected_evidence": 584
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 562,
+      "batch_limit_reached": 563,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@Himemiya_Yunon",
+        "channelId": "UClUhwFI_6rgUD4aWPOl52mg",
+        "displayName": "姫宮ゆのん",
+        "sourceUrl": "https://www.youtube.com/@Himemiya_Yunon",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MikuroKotonoha",
         "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCWCc8tO-uUl_7SJXIKJACMw",
         "displayName": "神楽めあ / KaguraMea",
         "sourceUrl": "https://www.youtube.com/@KaguraMea",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
         "reason": "batch_limit_reached"
       }
     ]
