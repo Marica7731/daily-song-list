@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T08:08:17.112Z",
+  "generatedAt": "2026-08-07T09:48:29.998Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T08:08:17.112Z",
+    "fetchedAt": "2026-08-07T09:48:29.998Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T08:08:17.112Z",
+    "generatedAt": "2026-08-07T09:48:29.998Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,30 +11657,44 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1043,
-      "parseableChannels": 1022,
+      "totalChannels": 1044,
+      "parseableChannels": 1023,
       "realAvatar": 646,
-      "thumbnailFallback": 397,
+      "thumbnailFallback": 398,
       "missingDisplayImage": 0,
-      "missingAvatar": 397,
+      "missingAvatar": 398,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 584
+      "skipped_collected_evidence": 585,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 563,
+      "batch_limit_reached": 564,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@Vam0414",
+        "channelId": "UCPm62fhXzHQiUupKUDlRSig",
+        "displayName": "ヴァンパイアップル",
+        "sourceUrl": "https://www.youtube.com/@Vam0414",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Himemiya_Yunon",
         "channelId": "UClUhwFI_6rgUD4aWPOl52mg",
         "displayName": "姫宮ゆのん",
         "sourceUrl": "https://www.youtube.com/@Himemiya_Yunon",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@himitunoemiruchan",
+        "channelId": "UC8jJYVPTNRpQfNme0SQuqNg",
+        "displayName": "ひみつのえみるちゃん💘😎himitunoemiru",
+        "sourceUrl": "https://www.youtube.com/@himitunoemiruchan",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UC3oBWCwi2UtckYvMbtIOWVA",
         "displayName": "Ruridori Kafka / 璃鳥歌深【IZIGENIA】",
         "sourceUrl": "https://www.youtube.com/@RuridoriKafka",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Richi_Masumi",
-        "channelId": "UCrpjMT3h20PjTgMHluY25LA",
-        "displayName": "真澄りち / Richi Masumi",
-        "sourceUrl": "https://www.youtube.com/@Richi_Masumi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@devilithviolustre",
-        "channelId": "UCkcenwQpQwgNkG2sl28Az-A",
-        "displayName": "Devilith Violustre",
-        "sourceUrl": "https://www.youtube.com/@devilithviolustre",
         "reason": "batch_limit_reached"
       }
     ]
