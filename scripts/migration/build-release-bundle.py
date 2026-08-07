@@ -150,7 +150,7 @@ def build_bundle(
     for entry, (json_path, rel) in zip(page_entries, page_files):
         assert entry["path"] == rel
         target = bundle_dir / rel
-        target.parent.mkdir(parents=True)
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(stable_gzip(canonical_json(json.loads(json_path.read_text(encoding="utf-8")))))
     return content_sha, bundle_dir
 

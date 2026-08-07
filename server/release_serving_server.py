@@ -40,6 +40,8 @@ REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,96}$")
 SUPPORTED_RANGES = {"all", "7d"}
 SUPPORTED_VIEWS = {"songs", "vtubers", "videos"}
 SUPPORTED_METRICS = {"occurrences", "songs", "videos"}
+# The public adapter treats metric=count as an alias for occurrences.
+METRIC_ALIASES = {"count": "occurrences"}
 MAX_PAGE_SIZE = 200
 
 OLD_ORIGIN_HOST = "ytb-song-rank.culua.com"
@@ -203,6 +205,7 @@ def make_handler(store: ReleaseStore, proxy_host: str = OLD_ORIGIN_HOST) -> Call
                     range_id = _query_value(query, "range") or "all"
                     view = _query_value(query, "view") or "songs"
                     metric = _query_value(query, "metric") or "occurrences"
+                    metric = METRIC_ALIASES.get(metric, metric)
                     page = _int_query(query, "page", 1)
                     requested_size = _int_query(query, "pageSize", 50)
                     if requested_size > MAX_PAGE_SIZE:
