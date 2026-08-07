@@ -114,17 +114,23 @@ jobs:
           import json, math, sys, shutil, time, random
           from pathlib import Path
           import urllib.request
+          import urllib.error
           from concurrent.futures import ThreadPoolExecutor, as_completed
           BASE="http://127.0.0.1:8765"
           OUT=Path("/tmp/dsl-wdc-pages")
           expected=sys.argv[1]
           def fetch(path):
               last=None
-              for attempt in range(5):
+              for attempt in range(6):
                   try:
                       req=urllib.request.Request(BASE+path, headers={"Connection":"close"})
-                      with urllib.request.urlopen(req, timeout=300) as r:
+                      with urllib.request.urlopen(req, timeout=480) as r:
                           return json.load(r)
+                  except urllib.error.HTTPError as exc:
+                      # 503 = old production saturated; back off hard so the
+                      # deep all/videos pages stop cascading into 503 storms.
+                      last=exc
+                      time.sleep(30*(attempt+1)+random.uniform(0,2) if exc.code==503 else 2*(attempt+1)+random.uniform(0,1))
                   except Exception as exc:
                       last=exc
                       time.sleep(2*(attempt+1)+random.uniform(0,1))
@@ -161,7 +167,7 @@ jobs:
               rng,v,met=combo
               return rng,v,met,pg,fetch(f"/api/rankings?range={rng}&view={v}&metric={met}&page={pg}&pageSize=200&compact=1")
           tasks=[]
-          with ThreadPoolExecutor(max_workers=3) as ex:
+          with ThreadPoolExecutor(max_workers=2) as ex:
               for combo,(_,pages) in firsts.items():
                   for pg in range(2, pages+1):
                       tasks.append(ex.submit(pull, combo, pg))
