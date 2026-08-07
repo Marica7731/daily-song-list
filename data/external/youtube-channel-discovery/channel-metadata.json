@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T04:01:21.883Z",
+  "generatedAt": "2026-08-07T06:27:43.244Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T04:01:21.883Z",
+    "fetchedAt": "2026-08-07T06:27:43.244Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T04:01:21.883Z",
+    "generatedAt": "2026-08-07T06:27:43.244Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11681,6 +11681,13 @@
         "channelId": "UClUhwFI_6rgUD4aWPOl52mg",
         "displayName": "姫宮ゆのん",
         "sourceUrl": "https://www.youtube.com/@Himemiya_Yunon",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@UtaneSuzukami",
+        "channelId": "UCyJGAJVreS_FKL_uRydg9cw",
+        "displayName": "鈴神うたね / Suzukami Utane",
+        "sourceUrl": "https://www.youtube.com/@UtaneSuzukami",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCkcenwQpQwgNkG2sl28Az-A",
         "displayName": "Devilith Violustre",
         "sourceUrl": "https://www.youtube.com/@devilithviolustre",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KaguraMea",
-        "channelId": "UCWCc8tO-uUl_7SJXIKJACMw",
-        "displayName": "神楽めあ / KaguraMea",
-        "sourceUrl": "https://www.youtube.com/@KaguraMea",
         "reason": "batch_limit_reached"
       }
     ]
