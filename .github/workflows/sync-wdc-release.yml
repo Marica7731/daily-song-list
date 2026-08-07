@@ -43,12 +43,14 @@ jobs:
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           WDC_SSH_PRIVATE_KEY: ${{ secrets.WDC_SSH_PRIVATE_KEY }}
+          WDC_KNOWN_HOSTS: ${{ secrets.WDC_KNOWN_HOSTS }}
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD"
           mkdir -p /tmp/ssh
           printf '%s\n' "$VPS2_PASSWORD" > /tmp/ssh/vps2-password
           printf '%s\n' "$WDC_SSH_PRIVATE_KEY" > /tmp/ssh/wdc-key
+          printf '%s\n' "$WDC_KNOWN_HOSTS" > /tmp/ssh/wdc-knownhosts
           chmod 600 /tmp/ssh/vps2-password /tmp/ssh/wdc-key
           cat > /tmp/ssh/vps2-askpass.sh <<'SH'
           #!/bin/sh
@@ -59,6 +61,7 @@ jobs:
             echo "SSH_ASKPASS=/tmp/ssh/vps2-askpass.sh"
             echo "SSH_ASKPASS_REQUIRE=force"
             echo "DISPLAY=daily-song-list"
+            echo "WDC_KNOWN_HOSTS_FILE=/tmp/ssh/wdc-knownhosts"
           } >> "$GITHUB_ENV"
 
       - name: Check active revision changed (local 8765 via SSH, public fallback)
@@ -175,7 +178,7 @@ jobs:
           mkdir -p /tmp/bundle
           ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "cd /tmp/dsl-wdc-bundles && tar czf /tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz '$BUNDLE_SHA' && ls -la /tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz"
           scp "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz" /tmp/bundle/
-          WDC_SSH=(-o StrictHostKeyChecking=no -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
+          WDC_SSH=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
           scp "${WDC_SSH[@]}" /tmp/bundle/dsl-wdc-${BUNDLE_SHA}.tar.gz "$WDC_USER@$WDC_HOST:/tmp/"
           ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- "$BUNDLE_SHA" "$WDC_RELEASES_ROOT" <<'REMOTE'
           set -Eeuo pipefail
