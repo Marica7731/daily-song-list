@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T20:51:51.470Z",
+  "generatedAt": "2026-08-07T21:05:33.234Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T20:51:51.470Z",
+    "fetchedAt": "2026-08-07T21:05:33.234Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T20:51:51.470Z",
+    "generatedAt": "2026-08-07T21:05:33.234Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1049,
-      "parseableChannels": 1028,
+      "totalChannels": 1051,
+      "parseableChannels": 1030,
       "realAvatar": 646,
-      "thumbnailFallback": 403,
+      "thumbnailFallback": 405,
       "missingDisplayImage": 0,
-      "missingAvatar": 403,
+      "missingAvatar": 405,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 587
+      "skipped_collected_evidence": 589
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 566,
+      "batch_limit_reached": 568,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
@@ -11831,6 +11831,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Sakura_mochimochi",
+        "channelId": "UCLOnKw76ypBM5PeYr4OdkJQ",
+        "displayName": "Sakura CH.餅々さくら",
+        "sourceUrl": "https://www.youtube.com/@Sakura_mochimochi",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@tsuna_nekota",
         "channelId": "UCIjdfjcSaEgdjwbgjxC3ZWg",
         "displayName": "猫汰つな / Nekota Tsuna",
@@ -11842,13 +11849,6 @@
         "channelId": "UCXUu1nCtDMAbasD0wAK1cdw",
         "displayName": "恋沼ミヤ-koinuma miya-",
         "sourceUrl": "https://www.youtube.com/@koinumamiya",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yura_ayami",
-        "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
-        "displayName": "綾見ユラ / YuraAyami",
-        "sourceUrl": "https://www.youtube.com/@yura_ayami",
         "reason": "batch_limit_reached"
       }
     ]
