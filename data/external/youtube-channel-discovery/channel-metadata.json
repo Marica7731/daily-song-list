@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T12:33:08.042Z",
+  "generatedAt": "2026-08-07T15:07:33.730Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T12:33:08.042Z",
+    "fetchedAt": "2026-08-07T15:07:33.730Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T12:33:08.042Z",
+    "generatedAt": "2026-08-07T15:07:33.730Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,18 +11657,18 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1047,
-      "parseableChannels": 1026,
+      "totalChannels": 1048,
+      "parseableChannels": 1027,
       "realAvatar": 646,
-      "thumbnailFallback": 401,
+      "thumbnailFallback": 402,
       "missingDisplayImage": 0,
-      "missingAvatar": 401,
+      "missingAvatar": 402,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 587,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 587
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@yoisaki_meine",
+        "channelId": "UCfwabonojH3KEHd8jNInjqw",
+        "displayName": "宵咲メイネ / Yoisaki Meine",
+        "sourceUrl": "https://www.youtube.com/@yoisaki_meine",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@ShiranuiFlare",
+        "channelId": "UCvInZx9h3jC2JzsIzoOebWg",
+        "displayName": "Flare Ch. 不知火フレア",
+        "sourceUrl": "https://www.youtube.com/@ShiranuiFlare",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@OtonoseKanade",
         "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
@@ -11831,24 +11845,10 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@yoisaki_meine",
-        "channelId": "UCfwabonojH3KEHd8jNInjqw",
-        "displayName": "宵咲メイネ / Yoisaki Meine",
-        "sourceUrl": "https://www.youtube.com/@yoisaki_meine",
-        "reason": "batch_limit_reached"
-      },
-      {
         "handle": "/@Unifee_date",
         "channelId": "UCKVQ9q8o_HPoMzf0bdUpgpw",
         "displayName": "伊達つかさ / Date Tsukasa",
         "sourceUrl": "https://www.youtube.com/@Unifee_date",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E5%A4%A9%E7%80%AC%E3%82%85%E3%82%85",
-        "channelId": "UCYYvJHfujamYw0FHV9o9XCw",
-        "displayName": "天瀬ゅゅ / Amase Yuyu",
-        "sourceUrl": "https://www.youtube.com/@%E5%A4%A9%E7%80%AC%E3%82%85%E3%82%85",
         "reason": "batch_limit_reached"
       }
     ]
