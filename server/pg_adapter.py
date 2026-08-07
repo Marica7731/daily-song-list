@@ -8987,8 +8987,8 @@ def _render_generic_overlay_rankings(
         for record in records:
             channel_id = _text(record.get("channelId") or record.get("key"))
             _canonicalize_vtuber_card_preview(record, channel_id)
-        if options["compact"]:
-            records = compact_ranking_payloads(records, options["view"])
+    if options["compact"]:
+        records = compact_ranking_payloads(records, options["view"])
     return {
         "schemaVersion": 1, "rangeId": options["range"], "view": options["view"],
         "metric": "occurrences" if options["metric"] == "count" else options["metric"],
