@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T18:00:01.543Z",
+  "generatedAt": "2026-08-07T19:13:05.448Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T18:00:01.543Z",
+    "fetchedAt": "2026-08-07T19:13:05.448Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T18:00:01.543Z",
+    "generatedAt": "2026-08-07T19:13:05.448Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1048,
-      "parseableChannels": 1027,
+      "totalChannels": 1049,
+      "parseableChannels": 1028,
       "realAvatar": 646,
-      "thumbnailFallback": 402,
+      "thumbnailFallback": 403,
       "missingDisplayImage": 0,
-      "missingAvatar": 402,
+      "missingAvatar": 403,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
@@ -11681,6 +11681,13 @@
         "channelId": "UCXw752V8J8yl_kkiEycyyqg",
         "displayName": "えん / neG",
         "sourceUrl": "https://www.youtube.com/@neG_ch",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@sumica-",
+        "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
+        "displayName": "-sumica-澄花",
+        "sourceUrl": "https://www.youtube.com/@sumica-%E6%BE%84%E8%8A%B1",
         "reason": "batch_limit_reached"
       },
       {
@@ -11814,13 +11821,6 @@
         "channelId": "UCZKmYYlgo4mspRprTK1OP5w",
         "displayName": "石垣島からフォークソング【Masaya&Yuzo】",
         "sourceUrl": "https://www.youtube.com/@masaya1957",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@sumica-",
-        "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
-        "displayName": "-sumica-澄花",
-        "sourceUrl": "https://www.youtube.com/@sumica-%E6%BE%84%E8%8A%B1",
         "reason": "batch_limit_reached"
       },
       {
