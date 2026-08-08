@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T13:09:18.734Z",
+  "generatedAt": "2026-08-08T13:57:59.868Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T13:09:18.734Z",
+    "fetchedAt": "2026-08-08T13:57:59.868Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T13:09:18.734Z",
+    "generatedAt": "2026-08-08T13:57:59.868Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1066,
-      "parseableChannels": 1045,
+      "totalChannels": 1068,
+      "parseableChannels": 1047,
       "realAvatar": 647,
-      "thumbnailFallback": 419,
+      "thumbnailFallback": 421,
       "missingDisplayImage": 0,
-      "missingAvatar": 419,
+      "missingAvatar": 421,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 600
+      "skipped_collected_evidence": 602,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 579,
+      "batch_limit_reached": 581,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@konekomiu",
+        "channelId": "UCaGQRHO_siHMRkCsfvTcSMg",
+        "displayName": "氷猫みう",
+        "sourceUrl": "https://www.youtube.com/@konekomiu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mozuhiyoko",
+        "channelId": "UCHZMxlogafenHdQd9u1JWTg",
+        "displayName": "百舌鳥ひよこ ch / Mozu hiyoko.",
+        "sourceUrl": "https://www.youtube.com/@mozuhiyoko",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@otodayori",
         "channelId": "UCkJ8WSMjoTMdprPe_dFZJ-A",
@@ -11835,20 +11849,6 @@
         "channelId": "UCa9Y57gfeY0Zro_noHRVrnw",
         "displayName": "Luna Ch. 姫森ルーナ",
         "sourceUrl": "https://www.youtube.com/@HimemoriLuna",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MachitaChima",
-        "channelId": "UCo7TRj3cS-f_1D9ZDmuTsjw",
-        "displayName": "町田ちま【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@MachitaChima",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@NightMea-pokev",
-        "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
-        "displayName": "悪夢メア / Night Mea",
-        "sourceUrl": "https://www.youtube.com/@NightMea-pokev",
         "reason": "batch_limit_reached"
       }
     ]
