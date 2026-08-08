@@ -686,10 +686,14 @@ def _local_source_payload(sqlite_path: Path, key: str, query: dict[str, list[str
     conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     try:
-        row = conn.execute(
-            "SELECT total_count, video_count FROM source_summary WHERE range_id=? AND source_key=?",
-            (range_id, key),
-        ).fetchone()
+        try:
+            row = conn.execute(
+                "SELECT total_count, video_count FROM source_summary WHERE range_id=? AND source_key=?",
+                (range_id, key),
+            ).fetchone()
+        except sqlite3.OperationalError:
+            # v2 schema (source_details only) has no source_summary table.
+            return None
         if row is None:
             return {"schemaVersion": 1, "found": False, "sourceKey": key}
         total = int(row["total_count"])
