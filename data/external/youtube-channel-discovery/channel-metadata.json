@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T22:44:04.515Z",
+  "generatedAt": "2026-08-08T23:42:53.853Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T22:44:04.515Z",
+    "fetchedAt": "2026-08-08T23:42:53.853Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T22:44:04.515Z",
+    "generatedAt": "2026-08-08T23:42:53.853Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1072,
-      "parseableChannels": 1051,
+      "totalChannels": 1074,
+      "parseableChannels": 1053,
       "realAvatar": 647,
-      "thumbnailFallback": 425,
+      "thumbnailFallback": 427,
       "missingDisplayImage": 0,
-      "missingAvatar": 425,
+      "missingAvatar": 427,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 606
+      "skipped_collected_evidence": 608
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 585,
+      "batch_limit_reached": 587,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
+        "channelId": "UCx3FdASxZpgILDwDv7MQYRg",
+        "displayName": "琥珀ひなた",
+        "sourceUrl": "https://www.youtube.com/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hm_pkr",
+        "channelId": "UC5HTrmQDKhsEFCvYs7AQz9A",
+        "displayName": "日向ぽかり Pokari Hinata",
+        "sourceUrl": "https://www.youtube.com/@hm_pkr",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@yura_ayami",
         "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
@@ -11835,20 +11849,6 @@
         "channelId": "UCYmDWU3__JeCOahxfHgpvYg",
         "displayName": "のりTube / のりほ",
         "sourceUrl": "https://www.youtube.com/@noritube_noriho",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Himemiya_Yunon",
-        "channelId": "UClUhwFI_6rgUD4aWPOl52mg",
-        "displayName": "姫宮ゆのん",
-        "sourceUrl": "https://www.youtube.com/@Himemiya_Yunon",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@wadatsumi_yohira",
-        "channelId": "UCoOPu8WqToJ4jHbBXY6NPrA",
-        "displayName": "Yohira ch. 渉海よひら",
-        "sourceUrl": "https://www.youtube.com/@wadatsumi_yohira",
         "reason": "batch_limit_reached"
       }
     ]
