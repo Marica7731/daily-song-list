@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T08:01:18.486Z",
+  "generatedAt": "2026-08-08T08:59:02.883Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T08:01:18.486Z",
+    "fetchedAt": "2026-08-08T08:59:02.883Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T08:01:18.486Z",
+    "generatedAt": "2026-08-08T08:59:02.883Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1058,
-      "parseableChannels": 1037,
+      "totalChannels": 1060,
+      "parseableChannels": 1039,
       "realAvatar": 646,
-      "thumbnailFallback": 412,
+      "thumbnailFallback": 414,
       "missingDisplayImage": 0,
-      "missingAvatar": 412,
+      "missingAvatar": 414,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 596
+      "skipped_collected_evidence": 597
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 575,
+      "batch_limit_reached": 576,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@Unifee_akechi",
+        "channelId": "UCrDRepCC81GaakxeWwJhMFA",
+        "displayName": "明智光月 / akechi mitsuki",
+        "sourceUrl": "https://www.youtube.com/@Unifee_akechi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@myth_hydrangea",
+        "channelId": "UCDpX_q4mlkbuPJbY6h62eHQ",
+        "displayName": "妃那子 / HINAKO",
+        "sourceUrl": "https://www.youtube.com/@myth_hydrangea",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@IRyS",
         "channelId": "UC8rcEBzJSleTkf_-agPM20g",
@@ -11835,20 +11849,6 @@
         "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
         "displayName": "燈明寺かぐら - Tomyoji Kagura -",
         "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KitamiYusei",
-        "channelId": "UCcx3crxPFi006DUhb_YU-tw",
-        "displayName": "北見遊征 / Kitami Yusei【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@KitamiYusei",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@masaya1957",
-        "channelId": "UCZKmYYlgo4mspRprTK1OP5w",
-        "displayName": "石垣島からフォークソング【Masaya&Yuzo】",
-        "sourceUrl": "https://www.youtube.com/@masaya1957",
         "reason": "batch_limit_reached"
       }
     ]
