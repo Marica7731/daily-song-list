@@ -613,17 +613,30 @@ def _local_source_payload(sqlite_path: Path, key: str, query: dict[str, list[str
             (range_id, key, page_size, offset),
         ).fetchall()
         records = [json.loads(r["payload_json"]) for r in rows]
+        # Match the old production /api/sources contract so the frontend's
+        # normalizeSourceDetailOccurrences sees record.occurrences (each entry
+        # carries song/item/video).  The previous `records`-only shape made the
+        # frontend fall through to [] and rendered "no displayable sources".
         return {
             "schemaVersion": 1,
             "found": True,
             "sourceKey": key,
+            "record": {
+                "type": "",
+                "key": key,
+                "title": "",
+                "sourceDetailKey": key,
+                "count": total,
+                "videoCount": int(row["video_count"]),
+                "timestampCount": total,
+                "occurrences": records,
+            },
             "page": page,
             "pageSize": page_size,
             "totalCount": total,
             "totalOccurrenceCount": total,
             "totalVideoCount": int(row["video_count"]),
             "pageCount": page_count,
-            "records": records,
         }
     finally:
         conn.close()

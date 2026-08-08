@@ -136,8 +136,10 @@ def main() -> int:
             payload = json.loads(resp.read())
             assert payload.get("found") is True, payload
             assert payload.get("totalCount") == 3, payload.get("totalCount")
-            assert len(payload.get("records", [])) == 3
-            assert payload["records"][0]["videoId"] in {"v1", "v2", "v3"}
+            record = payload.get("record") or {}
+            occ = record.get("occurrences") or []
+            assert len(occ) == 3, occ
+            assert occ[0]["videoId"] in {"v1", "v2", "v3"}
             # FTS search
             conn.request("GET", "/api/rankings?range=7d&view=songs&metric=occurrences&q=YOASOBI")
             resp = conn.getresponse()
