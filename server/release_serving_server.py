@@ -477,7 +477,11 @@ def make_handler(store: ReleaseStore) -> Callable:
                             self._send_json(HTTPStatus.NOT_FOUND, {"error": "release_page_missing"}, rid, started)
                             return
                         body_size = len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-                        _RESPONSE_CACHE.put(resp_key, (payload,), body_size)
+                        # Store the raw payload (not a tuple): _BoundedCache.get
+                        # already returns (value, byte_size), so cached[0] IS the
+                        # payload.  Wrapping here double-nested it and the HIT
+                        # path serialized a top-level JSON array.
+                        _RESPONSE_CACHE.put(resp_key, payload, body_size)
                         server_timing = f"lookup;dur={int((time.monotonic() - t0) * 1000)}"
                         self._send_json(HTTPStatus.OK, payload, rid, started, cache="MISS", release_sha=sha, data_source="local-release", server_timing=server_timing)
                     return
