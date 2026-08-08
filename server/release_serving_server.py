@@ -197,13 +197,41 @@ class ReleaseStore:
             _CHUNK_CACHE.put(cache_key, records, chunk_size)
             return records
 
+    def _chunk_count(self, sha: str, range_id: str, view: str, metric: str) -> int:
+        base = self.release_dir(sha) / "rankings" / range_id / view / metric
+        if not base.is_dir():
+            return 0
+        n = 0
+        for _ in base.glob("page-*.json.gz"):
+            n += 1
+        return n
+
+    def _chunk_record_count(self, sha: str, range_id: str, view: str, metric: str, chunk_page: int) -> int:
+        """Number of records in one chunk (None if the chunk is absent)."""
+        cache_key = (sha, range_id, view, metric, chunk_page, "n")
+        cached = _SERIES_TOTAL_CACHE.get(cache_key)
+        if cached is not None:
+            return cached[0]
+        page_path = (
+            self.release_dir(sha)
+            / "rankings" / range_id / view / metric / f"page-{chunk_page:04d}.json.gz"
+        )
+        if not page_path.exists():
+            return -1
+        with gzip.open(page_path, "rt", encoding="utf-8") as stream:
+            payload = json.load(stream)
+        records = payload.get("records")
+        n = len(records) if isinstance(records, list) else 0
+        _SERIES_TOTAL_CACHE.put(cache_key, n, 64)
+        return n
+
     def _series_total(self, sha: str, range_id: str, view: str, metric: str) -> int:
         """True total record count for a (range/view/metric) series.
 
-        The release chunks are 200-record pages frozen from the old API; the
-        first chunk's payload carries the authoritative totalCount.  Using the
-        chunk length here would report only 200 (or the tail chunk length) for
-        multi-chunk series, breaking pageCount/totalCount on the client.
+        The old API's page-1 totalCount can overstate the real traversable
+        count (e.g. it advertises 34313 but only 34132 records exist across
+        172 chunks).  Trust the frozen chunks: find the last non-empty chunk
+        (binary search) and compute the real total from its prefix count.
         """
         cache_key = (sha, range_id, view, metric)
         cached = _SERIES_TOTAL_CACHE.get(cache_key)
@@ -214,15 +242,23 @@ class ReleaseStore:
             cached = _SERIES_TOTAL_CACHE.get(cache_key)
             if cached is not None:
                 return cached[0]
-            page_path = (
-                self.release_dir(sha)
-                / "rankings" / range_id / view / metric / "page-0001.json.gz"
-            )
+            n_chunks = self._chunk_count(sha, range_id, view, metric)
             total = 0
-            if page_path.exists():
-                with gzip.open(page_path, "rt", encoding="utf-8") as stream:
-                    payload = json.load(stream)
-                total = int(payload.get("totalCount") or 0)
+            if n_chunks > 0:
+                # Chunks are prefix-contiguous; binary search last non-empty.
+                lo, hi = 1, n_chunks
+                last_non_empty = 0
+                last_count = 0
+                while lo <= hi:
+                    mid = (lo + hi) // 2
+                    cnt = self._chunk_record_count(sha, range_id, view, metric, mid)
+                    if cnt > 0:
+                        last_non_empty = mid
+                        last_count = cnt
+                        lo = mid + 1
+                    else:
+                        hi = mid - 1
+                total = (last_non_empty - 1) * CHUNK_SIZE + last_count
             _SERIES_TOTAL_CACHE.put(cache_key, total, 64)
             return total
 

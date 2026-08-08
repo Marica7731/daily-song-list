@@ -89,6 +89,37 @@ def main() -> int:
         p200 = store.rankings_page("all", "songs", "occurrences", 172, 200)
         assert p200["totalCount"] == TOTAL
         assert p200["pageCount"] == CHUNKS
+
+    # Scenario: old API advertises totalCount=34313 but the frozen chunks only
+    # hold 34132 records (last chunk 132).  The serving total must reflect the
+    # real traversable count, not the inflated header.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        sha = "b" * 64
+        d = root / sha / "rankings" / "all" / "songs" / "occurrences"
+        d.mkdir(parents=True)
+        for chunk in range(1, CHUNKS + 1):
+            n = 200 if chunk < CHUNKS else 132
+            records = [{"key": f"v{chunk:03d}-{i:03d}"} for i in range(n)]
+            payload = {"schemaVersion": 1, "rangeId": "all", "view": "songs",
+                       "metric": "occurrences", "page": chunk, "pageSize": 200,
+                       "totalCount": 34313, "pageCount": CHUNKS, "records": records}
+            raw = json.dumps(payload, separators=(",", ":")).encode()
+            with gzip.open(d / f"page-{chunk:04d}.json.gz", "wt", encoding="utf-8") as f:
+                f.write(raw.decode())
+        (root / sha / "meta.json").write_text('{"activeRevisionId":"r"}', encoding="utf-8")
+        (root / sha / "manifest.json").write_text("{}", encoding="utf-8")
+        (root / "meta").mkdir(parents=True)
+        (root / "meta" / "current.json").write_text(json.dumps({"contentSha256": sha}), encoding="utf-8")
+        store = m.ReleaseStore(root)
+        p = store.rankings_page("all", "songs", "occurrences", 1707, 20)
+        # real total = 171*200 + 132 = 34332? No: chunks 1..171 full (200 each) + chunk172=132
+        real_total = 171 * 200 + 132
+        assert p["totalCount"] == real_total, (p["totalCount"], real_total)
+        assert p["pageCount"] == (real_total + 19) // 20, p["pageCount"]
+        last_real = store.rankings_page("all", "songs", "occurrences",
+                                        (real_total + 19) // 20, 20)
+        assert len(last_real["records"]) == real_total % 20, len(last_real["records"])
     print("SLICED_PAGINATION_TOTALCOUNT_OK")
     return 0
 
