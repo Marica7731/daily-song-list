@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T13:57:59.868Z",
+  "generatedAt": "2026-08-08T14:45:24.543Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T13:57:59.868Z",
+    "fetchedAt": "2026-08-08T14:45:24.543Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T13:57:59.868Z",
+    "generatedAt": "2026-08-08T14:45:24.543Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@MomoseNina",
+        "channelId": "UCGCNass-jSHshAHA4ufX3Ng",
+        "displayName": "桃瀬にな / Nina Momose",
+        "sourceUrl": "https://www.youtube.com/@MomoseNina",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@konekomiu",
         "channelId": "UCaGQRHO_siHMRkCsfvTcSMg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
         "displayName": "言ノ葉みくろ / Mikuro Kotonoha🍨🍦",
         "sourceUrl": "https://www.youtube.com/@MikuroKotonoha",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@HimemoriLuna",
-        "channelId": "UCa9Y57gfeY0Zro_noHRVrnw",
-        "displayName": "Luna Ch. 姫森ルーナ",
-        "sourceUrl": "https://www.youtube.com/@HimemoriLuna",
         "reason": "batch_limit_reached"
       }
     ]
