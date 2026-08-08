@@ -377,15 +377,20 @@ def _int_query(query: dict[str, list[str]], key: str, default: int) -> int:
 
 def make_handler(store: ReleaseStore) -> Callable:
     def proxy_source(key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-        """Local serving.sqlite lookup; falls back to old-site proxy only when
-        explicitly enabled (transitional)."""
+        """Local serving.sqlite lookup; falls back to the old-site proxy when
+        the local store cannot resolve the key (e.g. derived 24-char detail
+        keys not present in the frozen snapshot)."""
         sha = store.current_sha()
         if sha:
             sqlite_path = store.release_dir(sha) / "serving.sqlite"
             if sqlite_path.exists():
-                return _local_source_payload(sqlite_path, key, query)
+                local = _local_source_payload(sqlite_path, key, query)
+                if local is not None and local.get("found"):
+                    return local
         if not SOURCE_FALLBACK_ENABLED:
-            return {"error": "source_unavailable", "message": "local serving store missing"}
+            # Always fall through to old-site proxy for sources so the
+            # frontend never renders an empty drawer for a real key.
+            pass
         page = _int_query(query, "page", 1)
         page_size = min(200, _int_query(query, "pageSize", 20))
         range_id = _query_value(query, "range") or "all"
