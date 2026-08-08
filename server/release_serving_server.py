@@ -111,6 +111,7 @@ class _BoundedCache:
 
 _CHUNK_CACHE = _BoundedCache(CACHE_MAX_BYTES, CHUNK_MAX_ENTRIES)
 _RESPONSE_CACHE = _BoundedCache(CACHE_MAX_BYTES, CACHE_MAX_ENTRIES)
+_SERIES_TOTAL_CACHE = _BoundedCache(1_048_576, 256)  # totalCount per (sha,range,view,metric)
 _LOCK_REGISTRY: dict[tuple[Any, ...], threading.Lock] = {}
 _LOCK_REGISTRY_GUARD = threading.Lock()
 
@@ -175,12 +176,12 @@ class ReleaseStore:
         cache_key = (sha, range_id, view, metric, chunk_page)
         cached = _CHUNK_CACHE.get(cache_key)
         if cached is not None:
-            return cached
+            return cached[0]
         lock = _key_lock(("chunk",) + cache_key)
         with lock:
             cached = _CHUNK_CACHE.get(cache_key)
             if cached is not None:
-                return cached
+                return cached[0]
             page_path = (
                 self.release_dir(sha)
                 / "rankings" / range_id / view / metric / f"page-{chunk_page:04d}.json.gz"
@@ -195,6 +196,35 @@ class ReleaseStore:
             chunk_size = len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
             _CHUNK_CACHE.put(cache_key, records, chunk_size)
             return records
+
+    def _series_total(self, sha: str, range_id: str, view: str, metric: str) -> int:
+        """True total record count for a (range/view/metric) series.
+
+        The release chunks are 200-record pages frozen from the old API; the
+        first chunk's payload carries the authoritative totalCount.  Using the
+        chunk length here would report only 200 (or the tail chunk length) for
+        multi-chunk series, breaking pageCount/totalCount on the client.
+        """
+        cache_key = (sha, range_id, view, metric)
+        cached = _SERIES_TOTAL_CACHE.get(cache_key)
+        if cached is not None:
+            return cached[0]
+        lock = _key_lock(("total",) + cache_key)
+        with lock:
+            cached = _SERIES_TOTAL_CACHE.get(cache_key)
+            if cached is not None:
+                return cached[0]
+            page_path = (
+                self.release_dir(sha)
+                / "rankings" / range_id / view / metric / "page-0001.json.gz"
+            )
+            total = 0
+            if page_path.exists():
+                with gzip.open(page_path, "rt", encoding="utf-8") as stream:
+                    payload = json.load(stream)
+                total = int(payload.get("totalCount") or 0)
+            _SERIES_TOTAL_CACHE.put(cache_key, total, 64)
+            return total
 
     def rankings_page(
         self,
@@ -224,12 +254,11 @@ class ReleaseStore:
                 pass
             else:
                 records.extend(chunk2)
-        total = len(chunk1)
-        if last_chunk != first_chunk:
-            total = len(records)
-        else:
-            # total is chunk length; correct totalCount comes from chunk 1 payload.
-            total = len(chunk1)
+        total = self._series_total(sha, range_id, view, metric)
+        if total == 0:
+            # Fall back to chunk length only when the series payload lacks a
+            # totalCount (defensive; never let pageCount collapse to a chunk).
+            total = len(chunk1) if last_chunk == first_chunk else len(records)
         sliced = records[start % CHUNK_SIZE: start % CHUNK_SIZE + page_size]
         page_count = max(1, (total + page_size - 1) // page_size)
         return {
