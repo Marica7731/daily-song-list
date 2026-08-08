@@ -621,11 +621,12 @@ def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, 
     conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     try:
+        range_id = _query_value(query, "range") or "all"
         try:
             row = conn.execute(
-                "SELECT source_key, type, title, display_artist, count, video_count, occurrences_json"
-                " FROM source_details WHERE source_key=?",
-                (key,),
+                "SELECT song_key, occurrences_json FROM source_details"
+                " WHERE source_key=? AND range_id=?",
+                (key, range_id),
             ).fetchone()
         except sqlite3.OperationalError:
             # v1 schema (occurrences/source_members/source_summary) has no
@@ -639,8 +640,9 @@ def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, 
             occurrences = []
         if not isinstance(occurrences, list):
             occurrences = []
-        total = int(row["count"] or len(occurrences))
-        video_count = int(row["video_count"] or 0)
+        total = len(occurrences)
+        video_ids = {str(o.get("videoId") or "") for o in occurrences if isinstance(o, dict) and o.get("videoId")}
+        video_count = len(video_ids)
         page_count = max(1, (total + page_size - 1) // page_size)
         offset = (page - 1) * page_size
         paged = occurrences[offset:offset + page_size]
@@ -649,10 +651,10 @@ def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, 
             "found": True,
             "sourceKey": key,
             "record": {
-                "type": row["type"] or "song",
-                "key": row["source_key"],
-                "title": row["title"] or "",
-                "displayArtist": row["display_artist"] or "",
+                "type": "song",
+                "key": key,
+                "title": "",
+                "displayArtist": "",
                 "count": total,
                 "videoCount": video_count,
                 "timestampCount": total,
