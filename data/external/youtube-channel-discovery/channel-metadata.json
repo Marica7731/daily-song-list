@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-07T23:46:14.685Z",
+  "generatedAt": "2026-08-08T02:10:41.825Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-07T23:46:14.685Z",
+    "fetchedAt": "2026-08-08T02:10:41.825Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-07T23:46:14.685Z",
+    "generatedAt": "2026-08-08T02:10:41.825Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1054,
-      "parseableChannels": 1033,
+      "totalChannels": 1055,
+      "parseableChannels": 1034,
       "realAvatar": 646,
-      "thumbnailFallback": 408,
+      "thumbnailFallback": 409,
       "missingDisplayImage": 0,
-      "missingAvatar": 408,
+      "missingAvatar": 409,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 592
+      "skipped_collected_evidence": 593,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 571,
+      "batch_limit_reached": 572,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@KureaShuri",
+        "channelId": "UCZjjxaAK8FIB50pjYQ1BwRg",
+        "displayName": "Shuri Ch. 紅愛しゅり",
+        "sourceUrl": "https://www.youtube.com/@KureaShuri",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@neG_ch",
         "channelId": "UCXw752V8J8yl_kkiEycyyqg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCLOnKw76ypBM5PeYr4OdkJQ",
         "displayName": "Sakura CH.餅々さくら",
         "sourceUrl": "https://www.youtube.com/@Sakura_mochimochi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tsuna_nekota",
-        "channelId": "UCIjdfjcSaEgdjwbgjxC3ZWg",
-        "displayName": "猫汰つな / Nekota Tsuna",
-        "sourceUrl": "https://www.youtube.com/@tsuna_nekota",
         "reason": "batch_limit_reached"
       }
     ]
