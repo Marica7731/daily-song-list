@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T02:10:41.825Z",
+  "generatedAt": "2026-08-08T03:47:35.899Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T02:10:41.825Z",
+    "fetchedAt": "2026-08-08T03:47:35.899Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T02:10:41.825Z",
+    "generatedAt": "2026-08-08T03:47:35.899Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1055,
-      "parseableChannels": 1034,
+      "totalChannels": 1056,
+      "parseableChannels": 1035,
       "realAvatar": 646,
-      "thumbnailFallback": 409,
+      "thumbnailFallback": 410,
       "missingDisplayImage": 0,
-      "missingAvatar": 409,
+      "missingAvatar": 410,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 593,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 594
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 572,
+      "batch_limit_reached": 573,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@toiroyua",
+        "channelId": "UCZWswSfrDTv0PbwHG774VRg",
+        "displayName": "兎彩ゆあ💎toiroyua",
+        "sourceUrl": "https://www.youtube.com/@toiroyua",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KureaShuri",
         "channelId": "UCZjjxaAK8FIB50pjYQ1BwRg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCmpEFsiD67ZOjn2CCJoo1mw",
         "displayName": "久我レオ / Kuga Leo",
         "sourceUrl": "https://www.youtube.com/@kugaleo_Q",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Sakura_mochimochi",
-        "channelId": "UCLOnKw76ypBM5PeYr4OdkJQ",
-        "displayName": "Sakura CH.餅々さくら",
-        "sourceUrl": "https://www.youtube.com/@Sakura_mochimochi",
         "reason": "batch_limit_reached"
       }
     ]
