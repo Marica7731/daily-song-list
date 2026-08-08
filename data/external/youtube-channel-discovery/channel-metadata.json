@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T05:58:03.074Z",
+  "generatedAt": "2026-08-08T07:10:09.116Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T05:58:03.074Z",
+    "fetchedAt": "2026-08-08T07:10:09.116Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T05:58:03.074Z",
+    "generatedAt": "2026-08-08T07:10:09.116Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1057,
-      "parseableChannels": 1036,
+      "totalChannels": 1058,
+      "parseableChannels": 1037,
       "realAvatar": 646,
-      "thumbnailFallback": 411,
+      "thumbnailFallback": 412,
       "missingDisplayImage": 0,
-      "missingAvatar": 411,
+      "missingAvatar": 412,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 595
+      "skipped_collected_evidence": 596
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 574,
+      "batch_limit_reached": 575,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@IRyS",
+        "channelId": "UC8rcEBzJSleTkf_-agPM20g",
+        "displayName": "IRyS Ch. hololive-EN",
+        "sourceUrl": "https://www.youtube.com/@IRyS",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@toiroyua",
         "channelId": "UCZWswSfrDTv0PbwHG774VRg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCZKmYYlgo4mspRprTK1OP5w",
         "displayName": "石垣島からフォークソング【Masaya&Yuzo】",
         "sourceUrl": "https://www.youtube.com/@masaya1957",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kugaleo_Q",
-        "channelId": "UCmpEFsiD67ZOjn2CCJoo1mw",
-        "displayName": "久我レオ / Kuga Leo",
-        "sourceUrl": "https://www.youtube.com/@kugaleo_Q",
         "reason": "batch_limit_reached"
       }
     ]
