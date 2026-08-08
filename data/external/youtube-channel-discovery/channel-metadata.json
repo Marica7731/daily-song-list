@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T10:47:52.266Z",
+  "generatedAt": "2026-08-08T11:43:10.663Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T10:47:52.266Z",
+    "fetchedAt": "2026-08-08T11:43:10.663Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T10:47:52.266Z",
+    "generatedAt": "2026-08-08T11:43:10.663Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1062,
-      "parseableChannels": 1041,
-      "realAvatar": 646,
-      "thumbnailFallback": 416,
+      "totalChannels": 1066,
+      "parseableChannels": 1045,
+      "realAvatar": 647,
+      "thumbnailFallback": 419,
       "missingDisplayImage": 0,
-      "missingAvatar": 416,
+      "missingAvatar": 419,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 599
+      "skipped_collected_evidence": 600
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 578,
+      "batch_limit_reached": 579,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@himenoaimu",
+        "channelId": "UCoHsW282iYqPmZZ5617cg2w",
+        "displayName": "姫乃あいむ",
+        "sourceUrl": "https://www.youtube.com/@himenoaimu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KugaTsubaki",
+        "channelId": "UCiMrvZ_l8lw42T8amrGCFNQ",
+        "displayName": "Tsubaki Ch. 九娥つばき",
+        "sourceUrl": "https://www.youtube.com/@KugaTsubaki",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Unifee_akechi",
         "channelId": "UCrDRepCC81GaakxeWwJhMFA",
@@ -11744,6 +11758,13 @@
         "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
         "displayName": "Kanade Ch. 音乃瀬奏 ‐ ReGLOSS",
         "sourceUrl": "https://www.youtube.com/@OtonoseKanade",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@_AkaneRin_",
+        "channelId": "UCu40QKlXxrj-S4s-Fw3kEPQ",
+        "displayName": "朱音りん / Akane Rin",
+        "sourceUrl": "https://www.youtube.com/@_AkaneRin_",
         "reason": "batch_limit_reached"
       },
       {
@@ -11828,27 +11849,6 @@
         "channelId": "UC7JL5MlJkx3vqKZq9gdxy2g",
         "displayName": "紅月夢叶 / Akatsuki Yukana",
         "sourceUrl": "https://www.youtube.com/@aka_yukana",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E8%8A%B1%E7%8B%A9%E3%81%8F%E3%82%8C%E3%81%AF",
-        "channelId": "UCTc1UmDEUlUTKCceMmLfsag",
-        "displayName": "花狩くれは",
-        "sourceUrl": "https://www.youtube.com/@%E8%8A%B1%E7%8B%A9%E3%81%8F%E3%82%8C%E3%81%AF",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kaonya5",
-        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
-        "displayName": "訛音屋 / Kaonya",
-        "sourceUrl": "https://www.youtube.com/@kaonya5",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KaguraTomyoji",
-        "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
-        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
-        "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
         "reason": "batch_limit_reached"
       }
     ]
