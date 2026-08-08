@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T19:57:38.491Z",
+  "generatedAt": "2026-08-08T20:46:19.002Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T19:57:38.491Z",
+    "fetchedAt": "2026-08-08T20:46:19.002Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T19:57:38.491Z",
+    "generatedAt": "2026-08-08T20:46:19.002Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1070,
-      "parseableChannels": 1049,
+      "totalChannels": 1071,
+      "parseableChannels": 1050,
       "realAvatar": 647,
-      "thumbnailFallback": 423,
+      "thumbnailFallback": 424,
       "missingDisplayImage": 0,
-      "missingAvatar": 423,
+      "missingAvatar": 424,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 604
+      "skipped_collected_evidence": 605
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 583,
+      "batch_limit_reached": 584,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
@@ -11845,10 +11845,10 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@himitunoemiruchan",
-        "channelId": "UC8jJYVPTNRpQfNme0SQuqNg",
-        "displayName": "ひみつのえみるちゃん💘😎himitunoemiru",
-        "sourceUrl": "https://www.youtube.com/@himitunoemiruchan",
+        "handle": "/@wadatsumi_yohira",
+        "channelId": "UCoOPu8WqToJ4jHbBXY6NPrA",
+        "displayName": "Yohira ch. 渉海よひら",
+        "sourceUrl": "https://www.youtube.com/@wadatsumi_yohira",
         "reason": "batch_limit_reached"
       }
     ]
