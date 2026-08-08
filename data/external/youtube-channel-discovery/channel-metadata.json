@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T11:43:10.663Z",
+  "generatedAt": "2026-08-08T13:09:18.734Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T11:43:10.663Z",
+    "fetchedAt": "2026-08-08T13:09:18.734Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T11:43:10.663Z",
+    "generatedAt": "2026-08-08T13:09:18.734Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@otodayori",
+        "channelId": "UCkJ8WSMjoTMdprPe_dFZJ-A",
+        "displayName": "otodayori【ギター弾き語り】",
+        "sourceUrl": "https://www.youtube.com/@otodayori",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hananokimaru",
+        "channelId": "UCmB1E78Kdgd9z6hN3ONRKow",
+        "displayName": "花ノ木まる ✿ Hananoki Maru",
+        "sourceUrl": "https://www.youtube.com/@hananokimaru",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@himenoaimu",
         "channelId": "UCoHsW282iYqPmZZ5617cg2w",
@@ -11835,20 +11849,6 @@
         "channelId": "UCF9E9Rqxp0tioragc0B3dLQ",
         "displayName": "悪夢メア / Night Mea",
         "sourceUrl": "https://www.youtube.com/@NightMea-pokev",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@168suzuri",
-        "channelId": "UCvX58P82G9lmi4agewGJeMw",
-        "displayName": "彩華すゞり / Iroha Suzuri",
-        "sourceUrl": "https://www.youtube.com/@168suzuri",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aka_yukana",
-        "channelId": "UC7JL5MlJkx3vqKZq9gdxy2g",
-        "displayName": "紅月夢叶 / Akatsuki Yukana",
-        "sourceUrl": "https://www.youtube.com/@aka_yukana",
         "reason": "batch_limit_reached"
       }
     ]
