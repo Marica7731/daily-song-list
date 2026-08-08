@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-08T14:45:24.543Z",
+  "generatedAt": "2026-08-08T15:44:09.158Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-08T14:45:24.543Z",
+    "fetchedAt": "2026-08-08T15:44:09.158Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-08T14:45:24.543Z",
+    "generatedAt": "2026-08-08T15:44:09.158Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1068,
-      "parseableChannels": 1047,
+      "totalChannels": 1069,
+      "parseableChannels": 1048,
       "realAvatar": 647,
-      "thumbnailFallback": 421,
+      "thumbnailFallback": 422,
       "missingDisplayImage": 0,
-      "missingAvatar": 421,
+      "missingAvatar": 422,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 602,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 603
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 581,
+      "batch_limit_reached": 582,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@AZKi",
+        "channelId": "UC0TXe_LYZ4scaW2XMyi5_kw",
+        "displayName": "AZKi Channel",
+        "sourceUrl": "https://www.youtube.com/@AZKi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MomoseNina",
         "channelId": "UCGCNass-jSHshAHA4ufX3Ng",
@@ -11842,13 +11849,6 @@
         "channelId": "UCyJGAJVreS_FKL_uRydg9cw",
         "displayName": "鈴神うたね / Suzukami Utane",
         "sourceUrl": "https://www.youtube.com/@UtaneSuzukami",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MikuroKotonoha",
-        "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
-        "displayName": "言ノ葉みくろ / Mikuro Kotonoha🍨🍦",
-        "sourceUrl": "https://www.youtube.com/@MikuroKotonoha",
         "reason": "batch_limit_reached"
       }
     ]
