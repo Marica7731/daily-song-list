@@ -70,7 +70,10 @@ THUMBNAIL_CACHE_CONTROL = "public, max-age=86400, immutable"
 # Old-origin fallback for /api/sources and search.  Disabled by default once
 # a local serving.sqlite exists; kept only for the transitional shadow phase.
 OLD_ORIGIN_HOST = "ytb-song-rank.culua.com"
-SOURCE_PROXY_TIMEOUT = 5.0
+# Old-site source detail can take 30-90s on the all range (deep PG query);
+# the proxy must not time out before the upstream finishes, or the frontend
+# drawer fails on the first card.
+SOURCE_PROXY_TIMEOUT = 180.0
 SOURCE_FALLBACK_ENABLED = False  # flips to True only if serving.sqlite is absent
 
 
@@ -376,6 +379,29 @@ def _int_query(query: dict[str, list[str]], key: str, default: int) -> int:
 
 
 def make_handler(store: ReleaseStore) -> Callable:
+    def _proxy_get(path: str) -> dict[str, Any] | None:
+        """GET the old-site API with retries; returns None only after the
+        upstream consistently fails.  The old production API intermittently
+        drops connections on slow all-range source queries, so one retry with
+        a short backoff makes the drawer succeed instead of 504ing."""
+        last: Exception | None = None
+        for attempt in range(3):
+            connection = http.client.HTTPSConnection(OLD_ORIGIN_HOST, timeout=SOURCE_PROXY_TIMEOUT)
+            try:
+                connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
+                response = connection.getresponse()
+                body = response.read()
+                if not body.strip():
+                    raise RuntimeError("empty upstream body")
+                return json.loads(body)
+            except Exception as exc:  # noqa: BLE001
+                last = exc
+                time.sleep(2 * (attempt + 1))
+            finally:
+                connection.close()
+        print(f"  proxy_source upstream failed for {path}: {last}", flush=True)
+        return None
+
     def proxy_source(key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
         """Local serving.sqlite lookup; falls back to the old-site proxy when
         the local store cannot resolve the key (e.g. derived 24-char detail
@@ -384,25 +410,18 @@ def make_handler(store: ReleaseStore) -> Callable:
         if sha:
             sqlite_path = store.release_dir(sha) / "serving.sqlite"
             if sqlite_path.exists():
+                # v2 schema: source_details keyed by the 24-char public key.
+                local = _local_source_details_payload(sqlite_path, key, query)
+                if local is not None and local.get("found"):
+                    return local
                 local = _local_source_payload(sqlite_path, key, query)
                 if local is not None and local.get("found"):
                     return local
-        if not SOURCE_FALLBACK_ENABLED:
-            # Always fall through to old-site proxy for sources so the
-            # frontend never renders an empty drawer for a real key.
-            pass
         page = _int_query(query, "page", 1)
         page_size = min(200, _int_query(query, "pageSize", 20))
         range_id = _query_value(query, "range") or "all"
         path = f"/api/sources/{key}?page={page}&pageSize={page_size}&range={range_id}"
-        connection = http.client.HTTPSConnection(OLD_ORIGIN_HOST, timeout=SOURCE_PROXY_TIMEOUT)
-        try:
-            connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
-            response = connection.getresponse()
-            body = response.read()
-            return json.loads(body)
-        finally:
-            connection.close()
+        return _proxy_get(path)
 
     def proxy_search(query: dict[str, list[str]]) -> dict[str, Any] | None:
         """Local FTS when serving.sqlite present; else transitional proxy (if enabled)."""
@@ -581,6 +600,74 @@ def make_handler(store: ReleaseStore) -> Callable:
                 connection.close()
 
     return ReleaseHandler
+
+
+def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
+    """Read one source page from the v2 source_details table.
+
+    The v2 schema is built from NON-COMPACT ranking pages: each row is keyed
+    by the 24-char public sourceDetailKey and carries the full occurrences
+    list, so the frontend source drawer is served locally with the complete
+    data (no old-site proxy).
+    """
+    try:
+        import sqlite3
+    except ImportError:  # pragma: no cover
+        return None
+    if not sqlite_path.exists():
+        return None
+    page = _int_query(query, "page", 1)
+    page_size = min(200, _int_query(query, "pageSize", 20))
+    conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        try:
+            row = conn.execute(
+                "SELECT source_key, type, title, display_artist, count, video_count, occurrences_json"
+                " FROM source_details WHERE source_key=?",
+                (key,),
+            ).fetchone()
+        except sqlite3.OperationalError:
+            # v1 schema (occurrences/source_members/source_summary) has no
+            # source_details table; caller falls back to v1 then proxy.
+            return None
+        if row is None:
+            return {"schemaVersion": 1, "found": False, "sourceKey": key}
+        try:
+            occurrences = json.loads(row["occurrences_json"])
+        except (TypeError, ValueError):
+            occurrences = []
+        if not isinstance(occurrences, list):
+            occurrences = []
+        total = int(row["count"] or len(occurrences))
+        video_count = int(row["video_count"] or 0)
+        page_count = max(1, (total + page_size - 1) // page_size)
+        offset = (page - 1) * page_size
+        paged = occurrences[offset:offset + page_size]
+        return {
+            "schemaVersion": 1,
+            "found": True,
+            "sourceKey": key,
+            "record": {
+                "type": row["type"] or "song",
+                "key": row["source_key"],
+                "title": row["title"] or "",
+                "displayArtist": row["display_artist"] or "",
+                "count": total,
+                "videoCount": video_count,
+                "timestampCount": total,
+                "occurrences": paged,
+                "sourceDetailKey": key,
+            },
+            "page": page,
+            "pageSize": page_size,
+            "pageCount": page_count,
+            "totalCount": total,
+            "totalVideoCount": video_count,
+            "totalOccurrenceCount": total,
+        }
+    finally:
+        conn.close()
 
 
 def _local_source_payload(sqlite_path: Path, key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
