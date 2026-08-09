@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T17:44:53.630Z",
+  "generatedAt": "2026-08-09T18:58:59.442Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T17:44:53.630Z",
+    "fetchedAt": "2026-08-09T18:58:59.442Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T17:44:53.630Z",
+    "generatedAt": "2026-08-09T18:58:59.442Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1083,
-      "parseableChannels": 1062,
+      "totalChannels": 1085,
+      "parseableChannels": 1065,
       "realAvatar": 647,
-      "thumbnailFallback": 436,
+      "thumbnailFallback": 438,
       "missingDisplayImage": 0,
-      "missingAvatar": 436,
+      "missingAvatar": 438,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 617
+      "skipped_collected_evidence": 617,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 596,
-      "missing_channel_url_or_handle": 21
+      "batch_limit_reached": 597,
+      "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@dantencho",
+        "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
+        "displayName": "Tencho Ch.  萌水 団",
+        "sourceUrl": "https://www.youtube.com/@dantencho",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
         "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCZWswSfrDTv0PbwHG774VRg",
         "displayName": "兎彩ゆあ💎toiroyua",
         "sourceUrl": "https://www.youtube.com/@toiroyua",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KureaShuri",
-        "channelId": "UCZjjxaAK8FIB50pjYQ1BwRg",
-        "displayName": "Shuri Ch. 紅愛しゅり",
-        "sourceUrl": "https://www.youtube.com/@KureaShuri",
         "reason": "batch_limit_reached"
       }
     ]
