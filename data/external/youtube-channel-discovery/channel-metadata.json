@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T22:46:06.688Z",
+  "generatedAt": "2026-08-09T23:45:07.910Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T22:46:06.688Z",
+    "fetchedAt": "2026-08-09T23:45:07.910Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T22:46:06.688Z",
+    "generatedAt": "2026-08-09T23:45:07.910Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11744,6 +11744,13 @@
         "channelId": "UCtWH0tVAcUcSm4v96H5cAqQ",
         "displayName": "Pico Ch. 倉夢ぴこ 【Phase Connect】",
         "sourceUrl": "https://www.youtube.com/@grampico",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Gato_utane",
+        "channelId": "UCE6w5FzazXE9i3wwrVJPbhg",
+        "displayName": "詠音ガト",
+        "sourceUrl": "https://www.youtube.com/@Gato_utane",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCDpX_q4mlkbuPJbY6h62eHQ",
         "displayName": "妃那子 / HINAKO",
         "sourceUrl": "https://www.youtube.com/@myth_hydrangea",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@IRyS",
-        "channelId": "UC8rcEBzJSleTkf_-agPM20g",
-        "displayName": "IRyS Ch. hololive-EN",
-        "sourceUrl": "https://www.youtube.com/@IRyS",
         "reason": "batch_limit_reached"
       }
     ]
