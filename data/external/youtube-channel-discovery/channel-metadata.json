@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T14:02:32.478Z",
+  "generatedAt": "2026-08-09T14:49:08.873Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T14:02:32.478Z",
+    "fetchedAt": "2026-08-09T14:49:08.873Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T14:02:32.478Z",
+    "generatedAt": "2026-08-09T14:49:08.873Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 615,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 615
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@0hinarysan",
+        "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
+        "displayName": "INARI",
+        "sourceUrl": "https://www.youtube.com/@0hinarysan",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@UtaneSuzukami",
+        "channelId": "UCyJGAJVreS_FKL_uRydg9cw",
+        "displayName": "鈴神うたね / Suzukami Utane",
+        "sourceUrl": "https://www.youtube.com/@UtaneSuzukami",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
         "channelId": "UC3TvY0biJcMRzQyu5hyOkXw",
@@ -11835,20 +11849,6 @@
         "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
         "displayName": "-sumica-澄花",
         "sourceUrl": "https://www.youtube.com/@sumica-%E6%BE%84%E8%8A%B1",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yoisaki_meine",
-        "channelId": "UCfwabonojH3KEHd8jNInjqw",
-        "displayName": "宵咲メイネ / Yoisaki Meine",
-        "sourceUrl": "https://www.youtube.com/@yoisaki_meine",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShiranuiFlare",
-        "channelId": "UCvInZx9h3jC2JzsIzoOebWg",
-        "displayName": "Flare Ch. 不知火フレア",
-        "sourceUrl": "https://www.youtube.com/@ShiranuiFlare",
         "reason": "batch_limit_reached"
       }
     ]
