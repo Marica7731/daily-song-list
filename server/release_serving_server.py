@@ -403,33 +403,34 @@ def make_handler(store: ReleaseStore) -> Callable:
         return None
 
     def proxy_source(key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-        """Local serving.sqlite lookup; falls back to the old-site proxy when
-        the local store cannot resolve the key (e.g. derived 24-char detail
-        keys not present in the frozen snapshot)."""
+        """Local serving.sqlite only.  When the local store cannot resolve the
+        key, return a structured not-found error instead of silently proxying
+        the old site (which hid data gaps behind 30-180s waits)."""
         sha = store.current_sha()
         if sha:
             sqlite_path = store.release_dir(sha) / "serving.sqlite"
             if sqlite_path.exists():
-                # v2 schema: source_details keyed by the 24-char public key.
                 local = _local_source_details_payload(sqlite_path, key, query)
                 if local is not None and local.get("found"):
                     return local
                 local = _local_source_payload(sqlite_path, key, query)
                 if local is not None and local.get("found"):
                     return local
-        page = _int_query(query, "page", 1)
-        page_size = min(200, _int_query(query, "pageSize", 20))
-        range_id = _query_value(query, "range") or "all"
-        path = f"/api/sources/{key}?page={page}&pageSize={page_size}&range={range_id}"
-        return _proxy_get(path)
+        return {
+            "error": "source_not_found_in_local_release",
+            "range": _query_value(query, "range") or "all",
+            "sourceKey": key,
+            "releaseSha": sha or "",
+        }
 
     def proxy_search(query: dict[str, list[str]]) -> dict[str, Any] | None:
-        """Local FTS when serving.sqlite present; else transitional proxy (if enabled)."""
+        """Local FTS when serving.sqlite present; else structured error."""
         sha = store.current_sha()
         if sha:
             sqlite_path = store.release_dir(sha) / "serving.sqlite"
             if sqlite_path.exists():
                 return _local_search_payload(sqlite_path, query)
+        return {"error": "search_not_ready_in_local_release", "range": _query_value(query, "range") or "all"}
         if not SOURCE_FALLBACK_ENABLED:
             return {"error": "search_unavailable", "message": "local search index missing"}
         params = {k: v[-1] for k, v in query.items() if v}
@@ -603,12 +604,14 @@ def make_handler(store: ReleaseStore) -> Callable:
 
 
 def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-    """Read one source page from the v2 source_details table.
+    """Read one source page from the canonical (v3) schema.
 
-    The v2 schema is built from NON-COMPACT ranking pages: each row is keyed
-    by the 24-char public sourceDetailKey and carries the full occurrences
-    list, so the frontend source drawer is served locally with the complete
-    data (no old-site proxy).
+    Canonical schema (see build-canonical-sqlite.py) keeps the DB's own
+    source_key and pages by distinct videoId (video-paged source response),
+    matching the old authoritative contract:
+      source_details(range_id, source_key, entity_type, entity_key, payload_json)
+      source_videos(range_id, source_key, video_order, video_id)
+      source_occurrences(range_id, source_key, position, video_id, payload_json)
     """
     try:
         import sqlite3
@@ -618,55 +621,81 @@ def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, 
         return None
     page = _int_query(query, "page", 1)
     page_size = min(200, _int_query(query, "pageSize", 20))
+    range_id = _query_value(query, "range") or "all"
     conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     try:
-        range_id = _query_value(query, "range") or "all"
         try:
-            row = conn.execute(
-                "SELECT song_key, occurrences_json FROM source_details"
-                " WHERE source_key=? AND range_id=?",
-                (key, range_id),
+            detail = conn.execute(
+                "SELECT entity_type, entity_key, payload_json FROM source_details"
+                " WHERE range_id=? AND source_key=?",
+                (range_id, key),
             ).fetchone()
         except sqlite3.OperationalError:
-            # v1 schema (occurrences/source_members/source_summary) has no
-            # source_details table; caller falls back to v1 then proxy.
+            # older schema (v1/v2) has no canonical tables; caller falls back.
             return None
-        if row is None:
+        if detail is None:
             return {"schemaVersion": 1, "found": False, "sourceKey": key}
+        # video-paged: distinct videoIds in page order
+        videos = conn.execute(
+            "SELECT video_id FROM source_videos WHERE range_id=? AND source_key=?"
+            " ORDER BY video_order LIMIT ? OFFSET ?",
+            (range_id, key, page_size, (page - 1) * page_size),
+        ).fetchall()
+        total_video_count = int(
+            conn.execute(
+                "SELECT count(*) FROM source_videos WHERE range_id=? AND source_key=?",
+                (range_id, key),
+            ).fetchone()[0]
+        )
+        video_ids = [r["video_id"] for r in videos]
+        occurrences: list[dict[str, Any]] = []
+        total_occurrence_count = 0
+        if video_ids:
+            placeholders = ",".join("?" * len(video_ids))
+            rows = conn.execute(
+                "SELECT position, video_id, payload_json FROM source_occurrences"
+                f" WHERE range_id=? AND source_key=? AND video_id IN ({placeholders})"
+                " ORDER BY position",
+                (range_id, key, *video_ids),
+            ).fetchall()
+            occurrences = [json.loads(r["payload_json"]) for r in rows]
+            total_occurrence_count = int(
+                conn.execute(
+                    "SELECT count(*) FROM source_occurrences WHERE range_id=? AND source_key=?",
+                    (range_id, key),
+                ).fetchone()[0]
+            )
+        # entity identity from the source detail payload (canonical record)
+        record_payload: dict[str, Any] = {}
         try:
-            occurrences = json.loads(row["occurrences_json"])
+            record_payload = json.loads(detail["payload_json"]) if detail["payload_json"] else {}
         except (TypeError, ValueError):
-            occurrences = []
-        if not isinstance(occurrences, list):
-            occurrences = []
-        total = len(occurrences)
-        video_ids = {str(o.get("videoId") or "") for o in occurrences if isinstance(o, dict) and o.get("videoId")}
-        video_count = len(video_ids)
-        page_count = max(1, (total + page_size - 1) // page_size)
-        offset = (page - 1) * page_size
-        paged = occurrences[offset:offset + page_size]
+            record_payload = {}
+        if not isinstance(record_payload, dict):
+            record_payload = {}
+        page_count = max(1, (total_video_count + page_size - 1) // page_size)
         return {
             "schemaVersion": 1,
             "found": True,
             "sourceKey": key,
             "record": {
-                "type": "song",
-                "key": key,
-                "title": "",
-                "displayArtist": "",
-                "count": total,
-                "videoCount": video_count,
-                "timestampCount": total,
-                "occurrences": paged,
+                "type": detail["entity_type"] or record_payload.get("type") or "song",
+                "key": detail["entity_key"] or record_payload.get("key") or key,
+                "title": record_payload.get("title") or record_payload.get("workTitle") or "",
+                "displayArtist": record_payload.get("displayArtist") or record_payload.get("artist") or "",
+                "count": total_occurrence_count,
+                "videoCount": total_video_count,
+                "timestampCount": total_occurrence_count,
+                "occurrences": occurrences,
                 "sourceDetailKey": key,
             },
             "page": page,
             "pageSize": page_size,
             "pageCount": page_count,
-            "totalCount": total,
-            "totalVideoCount": video_count,
-            "totalOccurrenceCount": total,
+            "totalCount": total_video_count,
+            "totalVideoCount": total_video_count,
+            "totalOccurrenceCount": total_occurrence_count,
         }
     finally:
         conn.close()
