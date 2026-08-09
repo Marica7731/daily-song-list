@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T15:45:26.343Z",
+  "generatedAt": "2026-08-09T16:51:10.344Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T15:45:26.343Z",
+    "fetchedAt": "2026-08-09T16:51:10.344Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T15:45:26.343Z",
+    "generatedAt": "2026-08-09T16:51:10.344Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1081,
-      "parseableChannels": 1060,
+      "totalChannels": 1083,
+      "parseableChannels": 1062,
       "realAvatar": 647,
-      "thumbnailFallback": 434,
+      "thumbnailFallback": 436,
       "missingDisplayImage": 0,
-      "missingAvatar": 434,
+      "missingAvatar": 436,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 615
+      "skipped_collected_evidence": 617,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 594,
+      "batch_limit_reached": 596,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
+        "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
+        "displayName": "Sakuna Ch. 結城さくな",
+        "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@NekomyaCh.",
+        "channelId": "UCJX2-_5O1MdgnXpCGRJPgXw",
+        "displayName": "猫宮ふわり",
+        "sourceUrl": "https://www.youtube.com/@NekomyaCh.",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@0hinarysan",
         "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
@@ -11835,20 +11849,6 @@
         "channelId": "UCZjjxaAK8FIB50pjYQ1BwRg",
         "displayName": "Shuri Ch. 紅愛しゅり",
         "sourceUrl": "https://www.youtube.com/@KureaShuri",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@neG_ch",
-        "channelId": "UCXw752V8J8yl_kkiEycyyqg",
-        "displayName": "えん / neG",
-        "sourceUrl": "https://www.youtube.com/@neG_ch",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@sumica-",
-        "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
-        "displayName": "-sumica-澄花",
-        "sourceUrl": "https://www.youtube.com/@sumica-%E6%BE%84%E8%8A%B1",
         "reason": "batch_limit_reached"
       }
     ]
