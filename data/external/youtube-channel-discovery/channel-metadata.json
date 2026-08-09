@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T13:12:38.679Z",
+  "generatedAt": "2026-08-09T14:02:32.478Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T13:12:38.679Z",
+    "fetchedAt": "2026-08-09T14:02:32.478Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T13:12:38.679Z",
+    "generatedAt": "2026-08-09T14:02:32.478Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1078,
-      "parseableChannels": 1057,
+      "totalChannels": 1081,
+      "parseableChannels": 1060,
       "realAvatar": 647,
-      "thumbnailFallback": 431,
+      "thumbnailFallback": 434,
       "missingDisplayImage": 0,
-      "missingAvatar": 431,
+      "missingAvatar": 434,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 612
+      "skipped_collected_evidence": 615,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 591,
+      "batch_limit_reached": 594,
       "missing_channel_url_or_handle": 21
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
+        "channelId": "UC3TvY0biJcMRzQyu5hyOkXw",
+        "displayName": "大石昌良の弾き語りラボ",
+        "sourceUrl": "https://www.youtube.com/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@YakonHibana",
+        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
+        "displayName": "夜紺 火花 / Yakon Hibana",
+        "sourceUrl": "https://www.youtube.com/@YakonHibana",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@SuzukiMasaru",
+        "channelId": "UCryOPk2GZ1meIDt53tL30Tw",
+        "displayName": "鈴木勝 / Suzuki Masaru【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@SuzukiMasaru",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@grampico",
         "channelId": "UCtWH0tVAcUcSm4v96H5cAqQ",
@@ -11828,27 +11849,6 @@
         "channelId": "UCvInZx9h3jC2JzsIzoOebWg",
         "displayName": "Flare Ch. 不知火フレア",
         "sourceUrl": "https://www.youtube.com/@ShiranuiFlare",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@OtonoseKanade",
-        "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
-        "displayName": "Kanade Ch. 音乃瀬奏 ‐ ReGLOSS",
-        "sourceUrl": "https://www.youtube.com/@OtonoseKanade",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@_AkaneRin_",
-        "channelId": "UCu40QKlXxrj-S4s-Fw3kEPQ",
-        "displayName": "朱音りん / Akane Rin",
-        "sourceUrl": "https://www.youtube.com/@_AkaneRin_",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YACHIHONOKAch",
-        "channelId": "UCQJoP9OHhKqUHiIDCMp412w",
-        "displayName": "HONOKA Ch. 陽茅ほのか",
-        "sourceUrl": "https://www.youtube.com/@YACHIHONOKAch",
         "reason": "batch_limit_reached"
       }
     ]
