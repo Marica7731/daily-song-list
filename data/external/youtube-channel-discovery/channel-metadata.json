@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-09T20:02:20.559Z",
+  "generatedAt": "2026-08-09T20:48:46.337Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-09T20:02:20.559Z",
+    "fetchedAt": "2026-08-09T20:48:46.337Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-09T20:02:20.559Z",
+    "generatedAt": "2026-08-09T20:48:46.337Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1086,
-      "parseableChannels": 1066,
+      "totalChannels": 1087,
+      "parseableChannels": 1067,
       "realAvatar": 648,
-      "thumbnailFallback": 438,
+      "thumbnailFallback": 439,
       "missingDisplayImage": 0,
-      "missingAvatar": 438,
+      "missingAvatar": 439,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 617,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 618
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 597,
+      "batch_limit_reached": 598,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
@@ -11681,6 +11681,13 @@
         "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
         "displayName": "Tencho Ch.  萌水 団",
         "sourceUrl": "https://www.youtube.com/@dantencho",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Saetsuki_Rei",
+        "channelId": "UC637kgL_I6NKVkTZ46x3Cyg",
+        "displayName": "冴月零 -Saetsuki Re:i-",
+        "sourceUrl": "https://www.youtube.com/@Saetsuki_Rei",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UC8rcEBzJSleTkf_-agPM20g",
         "displayName": "IRyS Ch. hololive-EN",
         "sourceUrl": "https://www.youtube.com/@IRyS",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@toiroyua",
-        "channelId": "UCZWswSfrDTv0PbwHG774VRg",
-        "displayName": "兎彩ゆあ💎toiroyua",
-        "sourceUrl": "https://www.youtube.com/@toiroyua",
         "reason": "batch_limit_reached"
       }
     ]
