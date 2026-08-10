@@ -567,6 +567,13 @@ class SnapshotPageBuilder:
         self.overlay_ids: tuple[str, ...] = ()
         self.authoritative_ids: tuple[str, ...] = ()
         self.authoritative_records = None
+        # One builder owns one repeatable-read snapshot and one active
+        # revision.  Reuse exact affected-group scalars across metric/scope
+        # combinations without leaking state into online requests or later
+        # releases.
+        self.reconciliation_counts: dict[
+            tuple[str, str, str, str], tuple[int, int, int]
+        ] = {}
 
         generic_probe = getattr(adapter, "_generic_runtime_projection_revision", None)
         if not callable(generic_probe):
@@ -621,6 +628,7 @@ class SnapshotPageBuilder:
             revision_id,
             self.parent,
             options,
+            reconciliation_counts=self.reconciliation_counts,
         )
 
         def render(page: int) -> Mapping[str, Any]:

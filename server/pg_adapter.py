@@ -29,7 +29,7 @@ import sys
 import threading
 import time
 import unicodedata
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, MutableMapping, Sequence
 
 COMPACT_VTUBER_PREVIEW_LIMIT = 3
 _DROP_KEYS = frozenset({
@@ -4136,6 +4136,10 @@ def _reconcile_affected_song_counts(
     groups: dict[str, dict[str, Any]],
     view: str,
     options: Mapping[str, Any],
+    *,
+    reconciliation_counts: MutableMapping[
+        tuple[str, str, str, str], tuple[int, int, int]
+    ] | None = None,
 ) -> None:
     """Recompute distinct songs from bounded parent and overlay occurrence sets."""
 
@@ -4168,6 +4172,39 @@ def _reconcile_affected_song_counts(
     }
     affected_keys.intersection_update(group_keys)
     if not affected_keys:
+        return
+    range_id = _text(options.get("range")) or "all"
+    cached_counts: dict[str, tuple[int, int, int]] = {}
+    if reconciliation_counts is not None:
+        for key in affected_keys:
+            cached = reconciliation_counts.get(
+                (parent_revision_id, range_id, view, key)
+            )
+            if cached is not None:
+                cached_counts[key] = cached
+        affected_keys.difference_update(cached_counts)
+
+    def apply_counts(counts: Mapping[str, tuple[int, int, int]]) -> None:
+        for row in groups.values():
+            key = _runtime_view_group_key(row, view)
+            values = counts.get(key)
+            if values is None:
+                continue
+            row_count, song_count, video_count = values
+            row["song_count"] = song_count
+            row["row_count"] = row_count
+            row["timestamp_count"] = row_count
+            row["video_count"] = video_count
+            payload = _json_object(row.get("payload_json"))
+            if payload:
+                payload["songCount"] = song_count
+                payload["count"] = row_count
+                payload["timestampCount"] = row_count
+                payload["videoCount"] = video_count
+                row["payload_json"] = payload
+
+    if not affected_keys:
+        apply_counts(cached_counts)
         return
     relevant_changes = [
         change
@@ -4279,29 +4316,24 @@ def _reconcile_affected_song_counts(
     for row in overlay_effective.values():
         accumulate(row)
 
-    for row in groups.values():
-        key = _runtime_view_group_key(row, view)
-        if key not in affected_keys:
-            continue
-        song_count = len(songs_by_group.get(key, set()))
-        row_count = row_counts.get(key, 0)
-        video_count = len(videos_by_group.get(key, set()))
-        row["song_count"] = song_count
-        # The streamed projection applies selected accepted-video resets plus
-        # final candidate/replacement rows before computing exact scalars.
-        # Every public grouping (not only songs) must use it: incrementally
-        # adding an accepted reset otherwise double-counts its old video in
-        # artist/video/channel aggregates.
-        row["row_count"] = row_count
-        row["timestamp_count"] = row_count
-        row["video_count"] = video_count
-        payload = _json_object(row.get("payload_json"))
-        if payload:
-            payload["songCount"] = song_count
-            payload["count"] = row_count
-            payload["timestampCount"] = row_count
-            payload["videoCount"] = video_count
-            row["payload_json"] = payload
+    computed_counts = {
+        key: (
+            row_counts.get(key, 0),
+            len(songs_by_group.get(key, set())),
+            len(videos_by_group.get(key, set())),
+        )
+        for key in affected_keys
+    }
+    if reconciliation_counts is not None:
+        for key, values in computed_counts.items():
+            reconciliation_counts[
+                (parent_revision_id, range_id, view, key)
+            ] = values
+    # The streamed projection applies selected accepted-video resets plus
+    # final candidate/replacement rows before computing exact scalars. Every
+    # public grouping must use it; immutable snapshot builds may reuse these
+    # exact scalars for the same parent/range/view across metric and scope.
+    apply_counts({**cached_counts, **computed_counts})
 
 
 def _overlay_candidate_search_text(row: Mapping[str, Any]) -> str:
@@ -6990,6 +7022,10 @@ def _prepare_generic_overlay_rankings(
     revision_id: str,
     parent: tuple[str, Mapping[str, Any]],
     options: Mapping[str, Any],
+    *,
+    reconciliation_counts: MutableMapping[
+        tuple[str, str, str, str], tuple[int, int, int]
+    ] | None = None,
 ) -> Mapping[str, Any]:
     """Build the page-independent generic overlay aggregate once per spec."""
 
@@ -8073,6 +8109,7 @@ def _prepare_generic_overlay_rankings(
             groups,
             options["view"],
             options,
+            reconciliation_counts=reconciliation_counts,
         )
     phase_started = _phase_trace("reconcile", phase_started)
     filtered = []
