@@ -41,6 +41,7 @@ SOURCE_KEY_RE=re.compile(r"^[^/\\\x00]{1,512}$")
 THUMBNAIL_RE=re.compile(r"^/api/thumbnails/([A-Za-z0-9_-]{11})/(default|mqdefault|hqdefault|sddefault|maxresdefault)\.jpg$")
 METRIC_ALIASES={"count":"occurrences"}
 DB_METRIC_CANDIDATES={"occurrences":("count","occurrences"),"songs":("songs",),"videos":("videos",)}
+SEARCH_FIELDS={"title","artist","channel","video","source"}
 
 
 class ApiError(Exception):
@@ -118,6 +119,16 @@ def qint(query:Mapping[str,list[str]],key:str,default:int,*,minimum:int=1,maximu
     return max(minimum,min(maximum,value))
 
 
+def qpagination(query:Mapping[str,list[str]],key:str,default:int,*,maximum:int)->int:
+    raw=qvalue(query,key)
+    if not raw:return default
+    try:value=int(raw)
+    except (TypeError,ValueError) as exc:raise ApiError(400,"invalid_pagination",f"{key} must be an integer",field=key,value=raw) from exc
+    if value<1 or value>maximum:
+        raise ApiError(400,"invalid_pagination",f"{key} is out of range",field=key,value=value,minimum=1,maximum=maximum)
+    return value
+
+
 def qbool(query:Mapping[str,list[str]],key:str)->bool:return qvalue(query,key).casefold() in {"1","true","yes","on"}
 
 def like_escape(value:str)->str:return value.replace("\\","\\\\").replace("%","\\%").replace("_","\\_")
@@ -132,7 +143,7 @@ def compact_record(record:Mapping[str,Any],view:str)->dict[str,Any]:
         if key.startswith("_") or key in drop:continue
         if isinstance(value,(str,int,float,bool)) or value is None:result[key]=deepcopy(value)
         elif key=="artists" and isinstance(value,list):result[key]=deepcopy(value)
-        elif key=="songs" and isinstance(value,list) and view!="vtubers":result[key]=deepcopy(value[:3] if view=="videos" else value)
+        elif key=="songs" and isinstance(value,list) and view!="vtubers":result[key]=deepcopy(value[:3] if view in {"artists","videos"} else value)
     previews=[];seen=set()
     for item in record.get("occurrences") or []:
         if not isinstance(item,Mapping):continue
@@ -342,7 +353,7 @@ class ReleaseStore:
         combined=list(first)
         if last_chunk!=first_chunk:combined.extend(self.chunk_records(sha,range_id,view,metric,last_chunk) or [])
         records=combined[start%CHUNK_SIZE:start%CHUNK_SIZE+page_size];total=self.series_total(sha,range_id,view,metric)
-        return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"page":page,"pageSize":page_size,
+        return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":"all","page":page,"pageSize":page_size,
                 "totalCount":total,"filteredBaseCount":total,"pageCount":max(1,math.ceil(total/page_size)),"compact":True,"records":records}
 
     def resolve_db_metric(self,connection:sqlite3.Connection,range_id:str,view:str,metric:str)->str|None:
@@ -354,6 +365,12 @@ class ReleaseStore:
         q=qvalue(query,"q").casefold();min_count=qint(query,"minCount",1,minimum=0,maximum=2_147_483_647)
         scope=scope_key(qbool(query,"nicheOnly"),qbool(query,"hideUnknownArtist"));search_scope=qvalue(query,"searchScope","all")
         search_fields={x.strip() for x in qvalue(query,"searchFields").split(",") if x.strip()}
+        invalid_fields=sorted(search_fields-SEARCH_FIELDS)
+        if invalid_fields:raise ApiError(400,"invalid_search_fields","searchFields contains unsupported values",fields=invalid_fields)
+        if not search_fields and search_scope!="all":
+            mapped_scope="channel" if search_scope in {"channel","vtuber"} else search_scope
+            if mapped_scope not in SEARCH_FIELDS:raise ApiError(400,"invalid_search_scope","searchScope is unsupported",searchScope=search_scope)
+            search_fields={mapped_scope}
         with closing(self.open_db(sha)) as connection:
             db_metric=self.resolve_db_metric(connection,range_id,view,metric)
             if db_metric is None:raise ApiError(404,"ranking_series_missing","ranking series missing",range=range_id,view=view,metric=metric)
@@ -366,7 +383,7 @@ class ReleaseStore:
                         "SELECT count(*) FROM ranking_rows WHERE range_id=? AND view=? AND metric=? AND scope_key='all'",
                         (range_id,view,db_metric),
                     ).fetchone()
-                    return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"searchScope":search_scope,
+                    return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":scope,"searchScope":search_scope,
                             "searchFields":sorted(search_fields),"page":1,"pageSize":page_size,"totalCount":0,
                             "filteredBaseCount":int(base[0] or 0),"totalOccurrenceCount":0,"totalSongCount":0,
                             "totalVideoCount":0,"pageCount":1,"compact":True,"records":[]}
@@ -375,10 +392,10 @@ class ReleaseStore:
             conditions=["ranking_rows.range_id=?","ranking_rows.view=?","ranking_rows.metric=?","ranking_rows.scope_key=?"];params:list[Any]=[range_id,view,db_metric,scope]
             metric_column={"occurrences":"row_count","songs":"song_count","videos":"video_count"}.get(metric,"row_count")
             conditions.append(f"ranking_rows.{metric_column}>=?");params.append(min_count)
-            tokens=[x for x in q.split() if x];channel_only=search_scope in {"channel","vtuber"} or search_fields=={"channel"}
+            tokens=[x for x in q.split() if x];channel_only=search_fields=={"channel"}
             tokenizer_row=connection.execute("SELECT value FROM serving_meta WHERE key='search_tokenizer'").fetchone()
             tokenizer=str(tokenizer_row[0] if tokenizer_row else "")
-            use_fts=bool(tokens) and tokenizer=="trigram" and all(len(token)>=3 for token in tokens)
+            use_fts=bool(tokens) and tokenizer=="trigram" and all(len(token)>=3 for token in tokens) and (not search_fields or channel_only)
             from_clause="ranking_rows"
             if use_fts:
                 from_clause="ranking_rows JOIN ranking_search_fts ON ranking_search_fts.rowid=ranking_rows.id"
@@ -389,8 +406,20 @@ class ReleaseStore:
             else:
                 for token in tokens:
                     pattern=f"%{like_escape(token)}%"
-                    if channel_only:conditions.append("lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
-                    else:conditions.append("(lower(ranking_rows.search_text) LIKE lower(?) ESCAPE '\\' OR lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\')");params.extend([pattern,pattern])
+                    if not search_fields:
+                        conditions.append("(lower(ranking_rows.search_text) LIKE lower(?) ESCAPE '\\' OR lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\')");params.extend([pattern,pattern])
+                        continue
+                    field_clauses=[]
+                    if "title" in search_fields:
+                        field_clauses.append("lower(ranking_rows.title) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if "artist" in search_fields:
+                        field_clauses.append("lower(ranking_rows.artist) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                        if view=="artists":field_clauses.append("lower(ranking_rows.name) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if "channel" in search_fields:
+                        field_clauses.append("lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if search_fields & {"video","source"}:
+                        field_clauses.append("lower(ranking_rows.search_text) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    conditions.append("("+" OR ".join(field_clauses)+")")
             where=" AND ".join(conditions)
             summary=connection.execute(f"SELECT count(*),coalesce(sum(ranking_rows.row_count),0),coalesce(sum(ranking_rows.song_count),0),coalesce(sum(ranking_rows.video_count),0) FROM {from_clause} WHERE {where}",params).fetchone()
             total=int(summary[0] or 0);page_count=max(1,math.ceil(total/page_size));page=min(page,page_count)
@@ -398,7 +427,7 @@ class ReleaseStore:
             records=[]
             for row in rows:
                 payload=json_object(row["payload_json"]);payload["rank"]=int(row["rank"] or payload.get("rank") or 0);records.append(compact_record(payload,view))
-            return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"searchScope":search_scope,
+            return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":scope,"searchScope":search_scope,
                     "searchFields":sorted(search_fields),"page":page,"pageSize":page_size,"totalCount":total,"filteredBaseCount":total,
                     "totalOccurrenceCount":int(summary[1] or 0),"totalSongCount":int(summary[2] or 0),"totalVideoCount":int(summary[3] or 0),
                     "pageCount":page_count,"compact":True,"records":records}
@@ -406,7 +435,7 @@ class ReleaseStore:
     def ranking_page(self,query:Mapping[str,list[str]])->tuple[str,dict[str,Any],str]:
         sha=self.resolve_sha(qvalue(query,"v"));self.require_ready(sha);range_id=qvalue(query,"range","all");view=qvalue(query,"view","songs")
         raw_metric=qvalue(query,"metric","occurrences");metric=METRIC_ALIASES.get(raw_metric,raw_metric)
-        page=qint(query,"page",1,maximum=10_000_000);page_size=qint(query,"pageSize",30)
+        page=qpagination(query,"page",1,maximum=10_000_000);page_size=qpagination(query,"pageSize",30,maximum=MAX_PAGE_SIZE)
         dynamic=bool(qvalue(query,"q") or qint(query,"minCount",1,minimum=0,maximum=2_147_483_647)>1 or qbool(query,"nicheOnly") or qbool(query,"hideUnknownArtist"))
         if not dynamic:
             payload=self.static_page(sha,range_id,view,metric,page,page_size)
@@ -414,7 +443,7 @@ class ReleaseStore:
         return sha,self.dynamic_page(sha,query,range_id,view,metric,page,page_size),"local-serving-sqlite"
 
     def source_page(self,sha:str,source_key:str,query:Mapping[str,list[str]])->dict[str,Any]:
-        self.require_ready(sha);range_id=qvalue(query,"range","all");page=qint(query,"page",1,maximum=10_000_000);page_size=qint(query,"pageSize",20)
+        self.require_ready(sha);range_id=qvalue(query,"range","all");page=qpagination(query,"page",1,maximum=10_000_000);page_size=qpagination(query,"pageSize",20,maximum=MAX_PAGE_SIZE)
         q=qvalue(query,"q").casefold();niche=qbool(query,"nicheOnly");hide_unknown=qbool(query,"hideUnknownArtist")
         with closing(self.open_db(sha)) as connection:
             detail=connection.execute("SELECT payload_json FROM source_details WHERE range_id=? AND source_key=?",(range_id,source_key)).fetchone()

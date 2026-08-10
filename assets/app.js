@@ -29,7 +29,7 @@ const METADATA_REQUEST_TIMEOUT_MS = 8_000;
 const DEFAULT_REQUEST_TIMEOUT_MS = 20_000;
 const RUNTIME_API_FALLBACK_CAPABILITIES = Object.freeze({
   ranges: ["7d", "all"],
-  views: ["songs", "vtubers", "videos"],
+  views: ["songs", "artists", "vtubers", "videos"],
   metrics: ["occurrences", "songs", "videos"],
   rankingScopes: ["all", "niche", "visible", "visibleNiche"],
   localSources: true,
@@ -3695,7 +3695,9 @@ async function requestApiViewPage(request, range) {
     view: request.view,
     apiView,
     metric: request.view === "songRank" || request.view === "artistRank" || request.view === "vtuberRank" ? metricName : "index",
-    scopeKey: "all",
+    scopeKey: cleanText(payload.scopeKey) || (filters.nicheOnly
+      ? (filters.hideUnknownArtist ? "visibleNiche" : "niche")
+      : (filters.hideUnknownArtist ? "visible" : "all")),
     pageSize,
     totalCount: Number(payload.totalCount) || 0,
     pageCount: Number(payload.pageCount) || 1,
@@ -4382,7 +4384,7 @@ function renderRequestedPageResult(result, options = {}) {
         count: rankValueForRequestRecord(record, result.metric),
         countUnit: result.metric === "videos" ? "视频" : "次",
         occurrences: record.occurrences,
-        songCount: record.songs.size,
+        songCount: songCountForRecord(record),
         songPreview: artistSongPreview(record),
         getSongGroups: () => getArtistSongGroups(record),
         trend: trendForKey("artistRank", record.key),
@@ -5067,7 +5069,7 @@ function renderArtistRank(group, rangeCache, selection) {
         count: rankValue(record),
         countUnit: rankCountUnit(),
         occurrences: record.occurrences,
-        songCount: record.songs.size,
+        songCount: songCountForRecord(record),
         songPreview: artistSongPreview(record),
         getSongGroups: () => getArtistSongGroups(record),
         trend: trendForRecord("artistRank", record),
@@ -6534,7 +6536,7 @@ function songMeta(record) {
 function artistMeta(record) {
   const songs = sortedDisplaySongEntries(record.songs);
   return {
-    primary: songs.length ? songs.slice(0, 3).map(formatCountEntry).join("、") : `${record.songs.size} 首歌曲`,
+    primary: songs.length ? songs.slice(0, 3).map(formatCountEntry).join("、") : `${songCountForRecord(record)} 首歌曲`,
     missingPrimary: false,
   };
 }
@@ -7553,12 +7555,13 @@ function occurrenceSongMatchesAnyKey(occurrence, keys) {
 
 async function loadSourceDetailOccurrences(path, key = "") {
   const requestPath = sourceDetailPathWithRange(path);
-  const cacheKey = key ? `${requestPath}#${key}` : requestPath;
+  const cacheKey = key ? `all:${requestPath}#${key}` : `all:${requestPath}`;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
   if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
   const sourceCacheMode = isRuntimeSourceDetailPath(path) && runtimeReleaseVersion() ? "force-cache" : cacheModeForPath(path);
-  const load = readJson(requestPath, { cache: sourceCacheMode })
-    .then((payload) => normalizeSourceDetailOccurrences(payload, key))
+  const load = (isRuntimeSourceDetailPath(path)
+    ? loadAllRuntimeSourceDetailOccurrences(path, key)
+    : readJson(requestPath, { cache: sourceCacheMode }).then((payload) => normalizeSourceDetailOccurrences(payload, key)))
     .then((occurrences) => {
       state.sourceDetailCache.set(cacheKey, occurrences);
       return occurrences;
@@ -7568,6 +7571,19 @@ async function loadSourceDetailOccurrences(path, key = "") {
     });
   state.sourceDetailLoads.set(cacheKey, load);
   return load;
+}
+
+async function loadAllRuntimeSourceDetailOccurrences(path, key = "") {
+  const pageSize = 200;
+  const first = await loadSourceDetailPage(path, key, { page: 1, pageSize });
+  const pageCount = Math.max(1, Number(first?.pageInfo?.pageCount) || 1);
+  if (pageCount === 1) return first.occurrences || [];
+  const remaining = await Promise.all(
+    Array.from({ length: pageCount - 1 }, (_, index) =>
+      loadSourceDetailPage(path, key, { page: index + 2, pageSize }),
+    ),
+  );
+  return [first, ...remaining].flatMap((page) => page?.occurrences || []);
 }
 
 async function loadSourceDetailPage(path, key = "", options = {}) {

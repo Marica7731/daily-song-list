@@ -36,7 +36,7 @@ def load(name:str,path:Path):
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
 pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH)
-ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
+ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
 def card(rank:int,range_id:str,key:str="")->dict:
@@ -58,6 +58,8 @@ def create_source_db(path:Path)->None:
     c.execute("INSERT INTO meta VALUES(?,?)",("active_revision_id",REV))
     for range_id,key in (("all",ALL_KEY),("7d",SEVEN_KEY)):
         c.execute("INSERT INTO source_details VALUES(?,?,?,?,?)",(key,range_id,"song","song-hare",json.dumps({"title":"ただ君に晴れ","artist":"ヨルシカ","sourceDetailKey":key},ensure_ascii=False)))
+    c.execute("INSERT INTO source_details VALUES(?,?,?,?,?)",(MANY_KEY,"all","song","song-many",json.dumps({"title":"Many videos","artist":"Fixture","sourceDetailKey":MANY_KEY})))
+    c.execute("INSERT INTO source_details VALUES(?,?,?,?,?)",(EMPTY_KEY,"all","song","song-empty",json.dumps({"title":"Empty detail","artist":"Fixture","sourceDetailKey":EMPTY_KEY})))
     rows=[(1,"videoAAAAAA",0,0),(2,"videoAAAAAA",1,0),(3,"videoBBBBBB",0,0),(4,"videoCCCCCC",0,0),(5,"videoCCCCCC",0,1)]
     for pos,video,niche,unknown in rows:
         payload={"videoId":video,"title":video,"channelName":"Fixture","channelId":"UCfixture","seconds":100+pos}
@@ -66,8 +68,13 @@ def create_source_db(path:Path)->None:
     payload={"videoId":"video7DDDDD","title":"7d","channelName":"Fixture","channelId":"UCfixture","seconds":1}
     c.execute("INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
               (SEVEN_KEY,"7d",1,"video7DDDDD","7d","Fixture","UCfixture","@fixture","https://youtube.com/@fixture",1700000001,1,0,0,"ただ君に晴れ ヨルシカ",json.dumps(payload,ensure_ascii=False)))
+    for pos in range(32):
+        video_index=max(0,pos-1);video=f"many{video_index:07d}"
+        payload={"videoId":video,"title":f"Many {video_index}","channelName":"Fixture","channelId":"UCfixture","seconds":pos}
+        c.execute("INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                  (MANY_KEY,"all",pos,video,payload["title"],"Fixture","UCfixture","@fixture","https://youtube.com/@fixture",1700001000+pos,pos,0,0,f"Many videos Fixture {video}",json.dumps(payload)))
     for range_id,count in (("all",250),("7d",3)):
-        for view in ("songs","vtubers","videos"):
+        for view in ("songs","artists","vtubers","videos"):
             for db_metric in ("count","songs","videos"):
                 for rank in range(1,count+1):
                     key=ALL_KEY if range_id=="all" and rank==1 else SEVEN_KEY if range_id=="7d" and rank==1 else ""
@@ -84,8 +91,23 @@ def create_source_db(path:Path)->None:
                             {"videoId":"videoDDDDDD","seconds":5},
                         ]
                         search_text += " " + ("x" * 70000)
+                    if view=="artists":
+                        value["name"]=value["artist"]
+                        value["songCount"]=5 if rank==1 else 1
+                        value["songs"]=[{"name":f"Artist song {index}","count":index} for index in range(1,value["songCount"]+1)]
                     c.execute("INSERT INTO ranking_rows VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                              (f"{range_id}-{view}-{db_metric}-{rank}",range_id,view,db_metric,"all",rank,key,value["title"],value["artist"],value["title"],value["count"],1,value["videoCount"],value["count"],json.dumps(value,ensure_ascii=False),search_text,"Fixture @fixture"))
+                              (f"{range_id}-{view}-{db_metric}-{rank}",range_id,view,db_metric,"all",rank,key,value["title"],value["artist"],value.get("name",value["title"]),value["count"],value.get("songCount",1),value["videoCount"],value["count"],json.dumps(value,ensure_ascii=False),search_text,"Fixture @fixture"))
+                first=card(1,range_id,ALL_KEY if range_id=="all" else SEVEN_KEY)
+                if view=="artists":
+                    first.update({"name":first["artist"],"songCount":5,"songs":[{"name":f"Artist song {index}","count":index} for index in range(1,6)]})
+                for scope in ("niche","visible","visibleNiche"):
+                    c.execute("INSERT INTO ranking_rows VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                              (f"{range_id}-{view}-{db_metric}-{scope}",range_id,view,db_metric,scope,1,first.get("sourceDetailKey",""),first["title"],first["artist"],first.get("name",first["title"]),first["count"],first.get("songCount",1),first["videoCount"],first["count"],json.dumps(first,ensure_ascii=False),f"{first['title']} {first['artist']}","Fixture @fixture"))
+    scope_counts={f"{row[0]}/{row[1]}/{row[2]}/{row[3]}":int(row[4]) for row in c.execute(
+        "SELECT range_id,view,metric,scope_key,count(*) FROM ranking_rows GROUP BY range_id,view,metric,scope_key"
+    )}
+    c.execute("INSERT INTO meta VALUES(?,?)",("ranking_scope_counts_json",json.dumps(scope_counts,sort_keys=True,separators=(",",":"))))
+    c.execute("INSERT INTO meta VALUES(?,?)",("ranking_scope_series",str(len(scope_counts))))
     c.commit();c.close()
 
 
@@ -119,7 +141,7 @@ class FakeSnapshotPageBuilder:
     def __init__(self,_connection):pass
     def build_combo(self,range_id,view,metric,scope_key="all"):
         def render(page):
-            key=f"source-{range_id}-{view}" if view in {"songs","vtubers"} else ""
+            key=f"source-{range_id}-{view}" if view in {"songs","artists","vtubers"} else ""
             record={"rank":1,"type":view[:-1] if view.endswith("s") else view,
                     "key":f"{range_id}-{view}","title":f"{range_id} {view}","displayArtist":"Fixture",
                     "name":f"{range_id} {view}","count":3,"songCount":2,"videoCount":2,
@@ -149,7 +171,7 @@ def fake_pg_source(_connection,key,query):
                             "channelUrl":"https://youtube.com/@fixture","publishedAt":"2026-08-10T00:00:00Z",
                             "seconds":index,"song":{"songKey":f"song-{index%2}","title":f"Song {index%2}",
                                                         "artist":"Fixture","isNiche":index%2==0}})
-    record={"type":"song" if "songs" in key else "vtuber","key":key,
+    record={"type":"song" if "songs" in key else "artist" if "artists" in key else "vtuber","key":key,
             "sourceDetailKey":key,"rangeId":range_id,"count":201,"videoCount":201,
             "timestampCount":201,"occurrences":occurrences}
     return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
@@ -170,8 +192,8 @@ class Tests(unittest.TestCase):
     def tearDown(self):shutil.rmtree(self.temp,ignore_errors=True)
 
     def test_canonical_keys_and_coverage(self):
-        self.assertEqual(self.materialized["records"],2277)
-        self.assertEqual(self.materialized["pages"],27)
+        self.assertEqual(self.materialized["records"],3036)
+        self.assertEqual(self.materialized["pages"],36)
         with closing(sqlite3.connect(self.serving)) as c:
             keys=set(c.execute("SELECT range_id,source_key FROM source_details"));meta=dict(c.execute("SELECT key,value FROM serving_meta"))
         self.assertIn(("all",ALL_KEY),keys);self.assertIn(("7d",SEVEN_KEY),keys);self.assertEqual(meta["canonical_source_key"],"copied-from-source_details");self.assertEqual(self.build["validation"]["coverage"]["missing"],0)
@@ -191,7 +213,7 @@ class Tests(unittest.TestCase):
 
     def test_health_and_release_artifacts(self):
         health=self.store.health();self.assertEqual(health["status"],"ok",health);self.assertEqual(health["releaseContentSha"],self.sha);self.assertEqual(health["serverCommit"],SERVER_COMMIT);self.assertEqual(health["buildLogicSha"],"b"*64);self.assertEqual(health["searchTokenizer"],"trigram");self.assertEqual(health["localSourcesRanges"],["7d","all"]);self.assertFalse(health["oldOriginDependency"]);self.assertFalse(health["sourceFallbackEnabled"])
-        self.assertEqual(set(health["views"]),{"songs","vtubers","videos"});self.assertEqual(set(health["metrics"]),{"occurrences","songs","videos"})
+        self.assertEqual(set(health["views"]),{"songs","artists","vtubers","videos"});self.assertEqual(set(health["metrics"]),{"occurrences","songs","videos"})
         manifest=json.loads((self.release/"manifest.json").read_text());artifacts={x["path"] for x in manifest["artifacts"]};self.assertEqual(artifacts,{"serving.sqlite","artifacts/release_serving_server.py"})
 
     def test_missing_required_series_fails_closed(self):
@@ -256,9 +278,43 @@ class Tests(unittest.TestCase):
         p1=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&page=1&pageSize=2"));p2=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&page=2&pageSize=2"))
         self.assertEqual((p1["totalVideoCount"],p1["totalOccurrenceCount"],p1["pageCount"]),(3,5,2));self.assertEqual([x["videoId"] for x in p1["record"]["occurrences"]],["videoAAAAAA","videoAAAAAA","videoBBBBBB"]);self.assertEqual([x["videoId"] for x in p2["record"]["occurrences"]],["videoCCCCCC","videoCCCCCC"])
 
+    def test_source_31_distinct_videos_cross_pages_without_losing_occurrences(self):
+        pages=[self.store.source_page(self.sha,MANY_KEY,parse_qs(f"range=all&page={page}&pageSize=10")) for page in range(1,5)]
+        self.assertTrue(all((item["totalVideoCount"],item["totalOccurrenceCount"],item["pageCount"])==(31,32,4) for item in pages))
+        self.assertEqual(len(pages[0]["record"]["occurrences"]),11)
+        self.assertEqual([item["videoId"] for item in pages[0]["record"]["occurrences"][:2]],["many0000000","many0000000"])
+        self.assertEqual(sum(len(item["record"]["occurrences"]) for item in pages),32)
+
+    def test_empty_source_and_invalid_pages_are_explicit(self):
+        empty=self.store.source_page(self.sha,EMPTY_KEY,parse_qs("range=all&page=1&pageSize=20"))
+        self.assertEqual((empty["totalVideoCount"],empty["totalOccurrenceCount"],empty["pageCount"]),(0,0,1))
+        self.assertEqual(empty["record"]["occurrences"],[])
+        for query in ("range=all&page=zero","range=all&page=0","range=all&pageSize=201"):
+            with self.assertRaises(server.ApiError) as raised:self.store.source_page(self.sha,EMPTY_KEY,parse_qs(query))
+            self.assertEqual((raised.exception.status,raised.exception.code),(400,"invalid_pagination"))
+
     def test_search_and_filters_local(self):
         _,payload,source=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&q=ただ君に晴れ&pageSize=30"));self.assertEqual(source,"local-serving-sqlite");self.assertEqual(payload["totalCount"],1)
+        first_title=payload["records"][0]["title"]
+        first_artist=payload["records"][0]["artist"]
+        _,title_only,_=self.store.ranking_page(parse_qs(f"range=all&view=songs&metric=count&q={first_title}&searchFields=title"))
+        _,wrong_field,_=self.store.ranking_page(parse_qs(f"range=all&view=songs&metric=count&q={first_title}&searchFields=artist"))
+        _,artist_only,_=self.store.ranking_page(parse_qs(f"range=all&view=songs&metric=count&q={first_artist}&searchFields=artist"))
+        self.assertEqual((title_only["totalCount"],wrong_field["totalCount"],artist_only["totalCount"]),(1,0,1))
+        self.assertEqual(len({record["key"] for record in title_only["records"]}),len(title_only["records"]))
+        _,scoped,_=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&nicheOnly=1&hideUnknownArtist=1"))
+        self.assertEqual((scoped["scopeKey"],scoped["totalCount"]),("visibleNiche",1))
+        self.assertNotEqual(scoped["totalCount"],self.store.series_total(self.sha,"all","songs","occurrences"))
         niche=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&nicheOnly=1"));visible=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&hideUnknownArtist=1"));self.assertEqual((niche["totalOccurrenceCount"],niche["totalVideoCount"]),(1,1));self.assertEqual((visible["totalOccurrenceCount"],visible["totalVideoCount"]),(4,3))
+
+    def test_artist_cards_keep_scalar_count_and_three_previews_for_all_metrics(self):
+        for range_id in ("7d","all"):
+            for metric in ("occurrences","songs","videos"):
+                _,payload,_=self.store.ranking_page(parse_qs(f"range={range_id}&view=artists&metric={metric}&page=1&pageSize=30"))
+                self.assertGreater(payload["totalCount"],0)
+                record=payload["records"][0]
+                self.assertEqual(record["songCount"],5)
+                self.assertEqual(len(record["songs"]),3)
 
     def test_missing_source_fails_fast_no_proxy(self):
         start=time.monotonic()
@@ -281,44 +337,45 @@ class Tests(unittest.TestCase):
             result=pg_materializer.materialize(pages,meta,canonical,REV)
         self.assertTrue(connection.closed)
         self.assertGreaterEqual(connection.rollbacks,1)
-        self.assertEqual(len(list(pages.rglob("page-*.json"))),18)
-        self.assertEqual(result["ranking_scope_series"],72)
-        self.assertEqual(result["ranking_rows"],72)
-        self.assertEqual(result["source_details"],4)
-        self.assertEqual(result["source_occurrences"],804)
+        self.assertEqual(len(list(pages.rglob("page-*.json"))),24)
+        self.assertEqual(result["ranking_scope_series"],96)
+        self.assertEqual(result["ranking_rows"],96)
+        self.assertEqual(result["source_details"],6)
+        self.assertEqual(result["source_occurrences"],1206)
         with closing(sqlite3.connect(canonical)) as database:
             scope_marker=json.loads(dict(database.execute("SELECT key,value FROM meta"))["ranking_scope_counts_json"])
             scopes={row[0] for row in database.execute("SELECT DISTINCT scope_key FROM ranking_rows")}
             source_counts=dict(database.execute("SELECT range_id,count(*) FROM source_occurrences GROUP BY range_id"))
-        self.assertEqual(len(scope_marker),72)
+        self.assertEqual(len(scope_marker),96)
         self.assertEqual(scopes,{"all","niche","visible","visibleNiche"})
-        self.assertEqual(source_counts,{"7d":402,"all":402})
+        self.assertEqual(source_counts,{"7d":603,"all":603})
         serving=self.temp/"pg-serving.sqlite"
         built=builder.build_serving_store(canonical,pages,serving,active_revision_id=REV)
-        self.assertEqual(len(built["validation"]["rankingScopes"]),72)
+        self.assertEqual(len(built["validation"]["rankingScopes"]),96)
 
     def test_zero_count_filtered_scope_is_declared_and_served(self):
         canonical=self.temp/"zero-scope.sqlite";shutil.copyfile(self.snapshot,canonical)
         expected={}
         with closing(sqlite3.connect(canonical)) as database:
+            database.execute("DELETE FROM ranking_rows WHERE scope_key!='all'")
             for range_id,view,metric,count in database.execute(
                 "SELECT range_id,view,metric,count(*) FROM ranking_rows "
-                "GROUP BY range_id,view,metric ORDER BY range_id,view,metric"
+                "WHERE scope_key='all' GROUP BY range_id,view,metric ORDER BY range_id,view,metric"
             ):
                 expected[f"{range_id}/{view}/{metric}/all"]=int(count)
                 for scope in ("niche","visible","visibleNiche"):
                     expected[f"{range_id}/{view}/{metric}/{scope}"]=0
-            database.execute("INSERT INTO meta(key,value) VALUES(?,?)",(
+            database.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)",(
                 "ranking_scope_counts_json",json.dumps(expected,sort_keys=True,separators=(",",":")),
             ))
-            database.execute("INSERT INTO meta(key,value) VALUES(?,?)",(
+            database.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)",(
                 "ranking_scope_series",str(len(expected)),
             ))
             database.commit()
         zero_serving=self.temp/"zero-serving.sqlite"
         built=builder.build_serving_store(canonical,self.pages,zero_serving,active_revision_id=REV)
         marker="all/songs/count/visibleNiche"
-        self.assertEqual(len(built["validation"]["rankingScopes"]),72)
+        self.assertEqual(len(built["validation"]["rankingScopes"]),96)
         self.assertEqual(built["validation"]["rankingScopes"][marker],0)
 
         def open_zero(_sha):

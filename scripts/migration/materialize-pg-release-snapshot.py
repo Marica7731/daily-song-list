@@ -23,7 +23,7 @@ import pg_adapter as adapter
 
 
 RANGES = ("7d", "all")
-VIEWS = ("songs", "vtubers", "videos")
+VIEWS = ("songs", "artists", "vtubers", "videos")
 METRICS = ("occurrences", "songs", "videos")
 PAGE_SIZE = 200
 SCOPES = (

@@ -288,7 +288,7 @@ def compact_ranking_payload(value: Any, view: str) -> str:
         if key == "artists" and isinstance(item,list):
             compact[key] = item
         elif key == "songs" and isinstance(item,list) and view != "vtubers":
-            compact[key] = item[:3] if view == "videos" else item
+            compact[key] = item[:3] if view in {"artists", "videos"} else item
         elif item is None or isinstance(item,(str,int,float,bool)):
             compact[key] = item
     previews = distinct_previews(payload.get("occurrences"))

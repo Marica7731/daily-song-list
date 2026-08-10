@@ -79,7 +79,7 @@ def _compact_record(record: Mapping[str, Any], view: str) -> dict[str, Any]:
         if key.startswith("_") or key in DROP_RECORD_KEYS or key in DROP_COMPACT_SCALARS:
             continue
         if key in KEEP_COMPACT_LISTS and isinstance(value, list):
-            if view == "videos" and key == "songs":
+            if view in {"artists", "videos"} and key == "songs":
                 compact[key] = deepcopy(value[:3])
                 compact["songPreviewCount"] = len(compact[key])
             elif view == "vtubers" and key == "songs":
@@ -234,7 +234,7 @@ def materialize(
     *,
     active_revision_id: str,
     ranges: Sequence[str] = ("7d", "all"),
-    views: Sequence[str] = ("songs", "vtubers", "videos"),
+    views: Sequence[str] = ("songs", "artists", "vtubers", "videos"),
     metrics: Sequence[str] = OUTPUT_METRICS,
 ) -> dict[str, Any]:
     if not source_db.is_file():
@@ -313,7 +313,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--active-revision-id", required=True)
     parser.add_argument("--ranges", default="7d,all")
-    parser.add_argument("--views", default="songs,vtubers,videos")
+    parser.add_argument("--views", default="songs,artists,vtubers,videos")
     parser.add_argument("--metrics", default=",".join(OUTPUT_METRICS))
     return parser.parse_args(argv)
 
