@@ -1,0 +1,40 @@
+[Unit]
+Description=daily-song-list immutable release API (WDC)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=daily-song-list
+Group=daily-song-list
+WorkingDirectory=/opt/culua/ytb-song-rank
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/culua/ytb-song-rank/server/release_serving_server.py --releases-root /opt/culua/ytb-song-rank/releases --host 127.0.0.1 --port 18777 --backlog 128
+Restart=on-failure
+RestartSec=2s
+TimeoutStartSec=30s
+TimeoutStopSec=20s
+KillSignal=SIGTERM
+
+# The serving process is read-only.  Releases and the server program are
+# written only by the root-owned deployment script before service restart.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0027
+MemoryMax=1G
+TasksMax=256
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

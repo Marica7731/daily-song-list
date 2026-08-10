@@ -1,4 +1,4 @@
-name: Sync WDC release from old site
+name: Sync complete immutable release to WDC
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: "Force rebuild even if active revision is unchanged"
+        description: "Rebuild even when active revision and build logic are unchanged"
         required: false
         default: "false"
 
@@ -14,16 +14,20 @@ permissions:
   contents: read
 
 concurrency:
-  group: daily-song-list-wdc-release-sync
+  group: daily-song-list-wdc-release-sync-v3
   cancel-in-progress: false
 
 env:
   VPS2_HOST: ${{ secrets.VPS2_HOST }}
   VPS2_USER: "root"
+  # This must be set only after a read-only VPS2 preflight verifies the canonical path.
+  VPS2_RUNTIME_DB: ${{ vars.VPS2_RUNTIME_DB }}
   WDC_HOST: ${{ secrets.WDC_HOST }}
   WDC_USER: ${{ secrets.WDC_USER }}
   WDC_RELEASES_ROOT: "/opt/culua/ytb-song-rank/releases"
-  PUBLIC_BASE: "https://ytb-song-rank.culua.com"
+  WDC_SERVER_PATH: "/opt/culua/ytb-song-rank/server/release_serving_server.py"
+  WDC_SERVICE: "daily-song-list-api"
+  WDC_API_PORT: "18777"
   FORCE: ${{ inputs.force || 'false' }}
 
 jobs:
@@ -31,15 +35,48 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 600
     environment: wdc-shadow
+
     steps:
-      - name: Checkout migration scripts
+      - name: Checkout complete serving implementation
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
+            server/release_serving_server.py
+            scripts/migration/snapshot-runtime-db.py
+            scripts/migration/materialize-ranking-pages.py
+            scripts/migration/build-serving-store.py
             scripts/migration/build-release-bundle.py
-            scripts/migration/build-serving-sqlite.py
-            scripts/migration/materialize-pg-release-snapshot.py
+            scripts/migration/patch-next-frontend.py
+            deploy/install-wdc-release.sh
+            .github/workflows/sync-wdc-release.yml
+            tests/test_next_serving_v3.py
+
+      - name: Run release regression tests
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile \
+            server/release_serving_server.py \
+            scripts/migration/snapshot-runtime-db.py \
+            scripts/migration/materialize-ranking-pages.py \
+            scripts/migration/build-serving-store.py \
+            scripts/migration/build-release-bundle.py \
+            scripts/migration/patch-next-frontend.py
+          bash -n deploy/install-wdc-release.sh
+          PYTHONWARNINGS=error::ResourceWarning \
+            python3 -m unittest discover -s tests -p 'test_next_serving_v3.py' -v
+          BUILD_LOGIC_SHA="$({
+            sha256sum server/release_serving_server.py
+            sha256sum scripts/migration/snapshot-runtime-db.py
+            sha256sum scripts/migration/materialize-ranking-pages.py
+            sha256sum scripts/migration/build-serving-store.py
+            sha256sum scripts/migration/build-release-bundle.py
+            sha256sum deploy/install-wdc-release.sh
+            sha256sum .github/workflows/sync-wdc-release.yml
+          } | sha256sum | awk '{print $1}')"
+          echo "BUILD_LOGIC_SHA=$BUILD_LOGIC_SHA" >> "$GITHUB_ENV"
+          echo "build logic: $BUILD_LOGIC_SHA"
 
       - name: Prepare SSH helpers
         env:
@@ -49,11 +86,21 @@ jobs:
         run: |
           set -Eeuo pipefail
           test -n "$VPS2_PASSWORD"
+          test -n "$WDC_SSH_PRIVATE_KEY"
+          test -n "$WDC_KNOWN_HOSTS"
+          test -n "$VPS2_RUNTIME_DB" || {
+            echo "VPS2_RUNTIME_DB repository/environment variable is required" >&2
+            exit 64
+          }
+          [[ "$VPS2_RUNTIME_DB" =~ ^/[A-Za-z0-9._/-]+$ ]] || {
+            echo "VPS2_RUNTIME_DB must be a shell-safe absolute path" >&2
+            exit 64
+          }
           mkdir -p /tmp/ssh
           printf '%s\n' "$VPS2_PASSWORD" > /tmp/ssh/vps2-password
           printf '%s\n' "$WDC_SSH_PRIVATE_KEY" > /tmp/ssh/wdc-key
           printf '%s\n' "$WDC_KNOWN_HOSTS" > /tmp/ssh/wdc-knownhosts
-          chmod 600 /tmp/ssh/vps2-password /tmp/ssh/wdc-key
+          chmod 600 /tmp/ssh/vps2-password /tmp/ssh/wdc-key /tmp/ssh/wdc-knownhosts
           cat > /tmp/ssh/vps2-askpass.sh <<'SH'
           #!/bin/sh
           exec cat /tmp/ssh/vps2-password
@@ -63,195 +110,292 @@ jobs:
             echo "SSH_ASKPASS=/tmp/ssh/vps2-askpass.sh"
             echo "SSH_ASKPASS_REQUIRE=force"
             echo "DISPLAY=daily-song-list"
-            echo "WDC_KNOWN_HOSTS_FILE=/tmp/ssh/wdc-knownhosts"
           } >> "$GITHUB_ENV"
 
-      - name: Check active revision changed (local 8765 via SSH, public fallback)
+      - name: Compare active revision and deployed build logic
         id: check
         run: |
           set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
-          ACTIVE_JSON="$(ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" \
-            "timeout 60 curl -s --max-time 50 http://127.0.0.1:8765/api/meta 2>/dev/null || true" 2>/dev/null || true)"
-          if [ -z "$ACTIVE_JSON" ] || ! printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;json.load(sys.stdin)" 2>/dev/null; then
-            echo "LOCAL_META_UNAVAILABLE; trying public fallback"
-            ACTIVE_JSON="$(curl -s --max-time 90 "${PUBLIC_BASE}/api/meta" || true)"
-          fi
-          if [ -z "$ACTIVE_JSON" ] || ! printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;json.load(sys.stdin)" 2>/dev/null; then
-            echo "PUBLIC_META_UNAVAILABLE"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          CURRENT_ACTIVE=$(printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;print(json.load(sys.stdin).get('meta',{}).get('active_revision_id',''))")
-          CONTENT=$(printf '%s' "$ACTIVE_JSON" | python3 -c "import json,sys;print(json.load(sys.stdin).get('meta',{}).get('content_sha256',''))")
-          echo "current_active=$CURRENT_ACTIVE content=${CONTENT:0:16}"
-          PREV="$(ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "cat /tmp/dsl-wdc-last-active 2>/dev/null || true" 2>/dev/null || true)"
-          echo "prev_active=$PREV"
-          if [ "$CURRENT_ACTIVE" = "$PREV" ] && [ -n "$CURRENT_ACTIVE" ] && [ "$FORCE" != "true" ]; then
+          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=8 -i /tmp/ssh/wdc-key)
+
+          ACTIVE_JSON="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta" 2>/dev/null)"
+          CURRENT_ACTIVE="$(printf '%s' "$ACTIVE_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("meta",{}).get("active_revision_id", ""))')"
+          CURRENT_CONTENT="$(printf '%s' "$ACTIVE_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("meta",{}).get("content_sha256", ""))')"
+          test -n "$CURRENT_ACTIVE" || { echo "old production returned no active revision" >&2; exit 65; }
+          [[ "$CURRENT_ACTIVE" =~ ^[A-Za-z0-9._:-]{1,200}$ ]] || {
+            echo "old production returned an unsafe active revision marker" >&2
+            exit 65
+          }
+
+          DEPLOYED_HEALTH="$(ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" \
+            "curl --silent --show-error --max-time 5 http://127.0.0.1:$WDC_API_PORT/healthz 2>/dev/null || true" 2>/dev/null || true)"
+          DEPLOYED_STATUS="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status", ""))' 2>/dev/null || true)"
+          DEPLOYED_ACTIVE="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("activeRevision", ""))' 2>/dev/null || true)"
+          DEPLOYED_LOGIC="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("buildLogicSha", ""))' 2>/dev/null || true)"
+          DEPLOYED_RELEASE="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("releaseContentSha", ""))' 2>/dev/null || true)"
+
+          echo "old active=$CURRENT_ACTIVE content=${CURRENT_CONTENT:0:16}"
+          echo "wdc status=${DEPLOYED_STATUS:-none} active=${DEPLOYED_ACTIVE:-none} release=${DEPLOYED_RELEASE:0:16} logic=${DEPLOYED_LOGIC:-none}"
+          if [[ "$DEPLOYED_STATUS" == "ok" \
+             && "$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$ \
+             && "$CURRENT_ACTIVE" == "$DEPLOYED_ACTIVE" \
+             && "$BUILD_LOGIC_SHA" == "$DEPLOYED_LOGIC" \
+             && "$FORCE" != "true" ]]; then
             echo "NO_CHANGE"
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          echo "CHANGED_TO $CURRENT_ACTIVE"
-          echo "$CURRENT_ACTIVE" > /tmp/current-active.txt
           echo "skip=false" >> "$GITHUB_OUTPUT"
           echo "active=$CURRENT_ACTIVE" >> "$GITHUB_OUTPUT"
-          echo "content=$CONTENT" >> "$GITHUB_OUTPUT"
+          echo "content=$CURRENT_CONTENT" >> "$GITHUB_OUTPUT"
 
-      - name: Materialize + build bundle on old production (read-only)
+      - name: Materialize pages and canonical serving store on VPS2
         if: steps.check.outputs.skip != 'true'
         id: materialize
+        env:
+          ACTIVE: ${{ steps.check.outputs.active }}
         run: |
           set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
-          REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "mkdir -p '$REMOTE_ROOT'"
-          scp "${SSH_OPTS[@]}" scripts/migration/build-release-bundle.py scripts/migration/build-serving-sqlite.py scripts/migration/materialize-pg-release-snapshot.py "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/"
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$REMOTE_ROOT" "$ACTIVE" "$GITHUB_RUN_ID" <<'REMOTE'
+          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
+          REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "remote_root=$REMOTE_ROOT" >> "$GITHUB_OUTPUT"
+          ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "mkdir -p '$REMOTE_ROOT'"
+          scp "${VPS2_SSH[@]}" \
+            server/release_serving_server.py \
+            scripts/migration/snapshot-runtime-db.py \
+            scripts/migration/materialize-ranking-pages.py \
+            scripts/migration/build-serving-store.py \
+            scripts/migration/build-release-bundle.py \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/"
+
+          ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$ACTIVE" "$VPS2_RUNTIME_DB" "$GITHUB_SHA" "$BUILD_LOGIC_SHA" \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'REMOTE'
           set -Eeuo pipefail
-          remote_root="$1"; expected_active="$2"; run_id="$3"
+          remote_root="$1"
+          expected_active="$2"
+          runtime_db="$3"
+          server_commit="$4"
+          build_logic_sha="$5"
+          run_id="$6"
+          run_attempt="$7"
+          test -r "$runtime_db" || { echo "RUNTIME_DB_MISSING $runtime_db" >&2; exit 66; }
           cd "$remote_root"
-          rm -rf -- /tmp/dsl-wdc-pages /tmp/dsl-wdc-bundles
-          rm -f -- /tmp/dsl-wdc-meta.json
-          install -d -o www-data -g www-data -m 0750 /tmp/dsl-wdc-pages
-          systemd-run --quiet --wait --pipe --collect \
-            --unit="dsl-wdc-snapshot-$run_id" \
-            --uid=www-data --gid=www-data \
-            --property=MemoryMax=700M \
-            --property=Nice=15 \
-            --property=CPUWeight=10 \
-            --property=IOWeight=10 \
-            --property=RuntimeMaxSec=32400 \
-            --property=WorkingDirectory=/opt/culua/ytb-song-rank \
-            --setenv=PGHOST=/var/run/postgresql \
-            --setenv=PGDATABASE=song_rank \
-            --setenv=PGUSER=www-data \
-            --setenv=PYTHONPATH=/opt/culua/ytb-song-rank/server \
-            /usr/bin/python3 "$remote_root/materialize-pg-release-snapshot.py" \
-              --output /tmp/dsl-wdc-pages \
-              --meta-output /tmp/dsl-wdc-meta.json \
-              --expected-revision "$expected_active"
-          test -s /tmp/dsl-wdc-meta.json
-          snapshot_active="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['active_revision_id'])")"
-          snapshot_parent="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['parent_revision_id'])")"
-          snapshot_source="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['source_commit_sha'])")"
-          snapshot_built="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['built_at'])")"
-          snapshot_latest="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['latest_generated_at'])")"
-          snapshot_pages="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['page_files'])")"
-          actual_pages="$(find /tmp/dsl-wdc-pages -type f -name 'page-*.json' | wc -l)"
-          test "$snapshot_active" = "$expected_active"
-          [[ "$snapshot_parent" =~ ^[A-Za-z0-9._:-]+$ ]]
-          [[ "$snapshot_source" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$snapshot_pages" =~ ^[0-9]+$ ]]
-          test "$snapshot_pages" -ge 18
-          test "$actual_pages" = "$snapshot_pages"
-          python3 build-release-bundle.py \
-            --input /tmp/dsl-wdc-pages --output /tmp/dsl-wdc-bundles \
-            --active-revision-id "$snapshot_active" \
-            --expected-parent-revision-id "$snapshot_parent" \
-            --source-commit-sha "$snapshot_source" \
-            --generated-at "$snapshot_built" \
-            --latest-event-time "$snapshot_latest"
-          BUNDLE_DIR=$(ls -dt /tmp/dsl-wdc-bundles/*/ | head -1)
-          python3 build-serving-sqlite.py --bundle-dir "$BUNDLE_DIR"
-          REMOTE
-          BUNDLE_DIR=$(ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "ls -dt /tmp/dsl-wdc-bundles/*/ | head -1" 2>/dev/null || true)
-          BUNDLE_SHA=$(basename "$BUNDLE_DIR")
-          echo "bundle_sha=$BUNDLE_SHA"
-          echo "bundle_sha=$BUNDLE_SHA" >> "$GITHUB_OUTPUT"
-        env:
-          ACTIVE: ${{ steps.check.outputs.active }}
+          pages_root="$remote_root/pages"
+          bundles_root="$remote_root/bundles"
+          serving_db="$remote_root/serving.sqlite"
+          runtime_snapshot="$remote_root/runtime-snapshot.sqlite"
+          meta_file="$remote_root/source-meta.json"
+          rm -rf "$pages_root" "$bundles_root" "$serving_db" "$runtime_snapshot"
+          mkdir -p "$pages_root" "$bundles_root"
 
-      - name: Deploy bundle to vps-wdc
-        if: steps.check.outputs.skip != 'true'
-        run: |
-          set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
-          BUNDLE_SHA="${{ steps.materialize.outputs.bundle_sha }}"
-          test -n "$BUNDLE_SHA" || { echo "no bundle sha"; exit 66; }
-          mkdir -p /tmp/bundle
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "cd /tmp/dsl-wdc-bundles && tar czf /tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz '$BUNDLE_SHA' && ls -la /tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz"
-          scp "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST:/tmp/dsl-wdc-${BUNDLE_SHA}.tar.gz" /tmp/bundle/
-          WDC_SSH=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
-          scp "${WDC_SSH[@]}" /tmp/bundle/dsl-wdc-${BUNDLE_SHA}.tar.gz "$WDC_USER@$WDC_HOST:/tmp/"
-          ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- "$BUNDLE_SHA" "$WDC_RELEASES_ROOT" "$ACTIVE" <<'REMOTE'
-          set -Eeuo pipefail
-          sha="$1"; root="$2"; expected_active="$3"
-          cd /tmp
-          test -f "/tmp/dsl-wdc-$sha.tar.gz"
-          tar xzf "/tmp/dsl-wdc-$sha.tar.gz" -C "$root"
-          chown -R daily-song-list:daily-song-list "$root/$sha"
-          rm -f "$root/current"
-          ln -sf "$sha" "$root/current"
-          readlink -f "$root/current"
-          systemctl restart daily-song-list-api
-          sleep 2
-          systemctl is-active daily-song-list-api
-          curl -s --max-time 20 "http://127.0.0.1:18777/api/meta" \
-            | python3 -c "import json,sys;d=json.load(sys.stdin)['meta'];assert d['active_revision_id']==sys.argv[1];assert d['content_sha256']==sys.argv[2];print('deployed content:',d['content_sha256'][:16])" \
-                "$expected_active" "$sha"
-          echo "WDC_DEPLOYED $sha"
-          rm -f "/tmp/dsl-wdc-$sha.tar.gz"
-          REMOTE
-        env:
-          ACTIVE: ${{ steps.check.outputs.active }}
+          run_isolated() {
+            local phase="$1"
+            shift
+            systemd-run --quiet --wait --pipe --collect \
+              --unit="dsl-wdc-${phase}-${run_id}-${run_attempt}" \
+              --property=MemoryMax=700M \
+              --property=Nice=15 \
+              --property=CPUWeight=10 \
+              --property=IOWeight=10 \
+              --property=RuntimeMaxSec=32400 \
+              --property="WorkingDirectory=$remote_root" \
+              "$@"
+          }
 
-      - name: Verify new domain
-        if: steps.check.outputs.skip != 'true' && success()
-        run: |
-          set -Eeuo pipefail
-          health_code=$(curl -sS -o /tmp/wdc-health.json -w "%{http_code}" --max-time 40 "https://next.ytb-song-rank.culua.com/healthz")
-          meta_code=$(curl -sS -o /tmp/wdc-meta.json -w "%{http_code}" --max-time 40 "https://next.ytb-song-rank.culua.com/api/meta")
-          echo "next healthz: $health_code meta: $meta_code"
-          test "$health_code" = "200"
-          test "$meta_code" = "200"
-          python3 - "$ACTIVE" "$BUNDLE_SHA" <<'PY'
-          import json
-          import sys
-
-          expected_active, expected_bundle = sys.argv[1:]
-          health = json.load(open("/tmp/wdc-health.json", encoding="utf-8"))
-          meta = json.load(open("/tmp/wdc-meta.json", encoding="utf-8"))["meta"]
-          assert health["status"] == "ok"
-          assert health["activeRevisionId"] == expected_active
-          assert health["currentRelease"] == expected_bundle
-          assert meta["active_revision_id"] == expected_active
-          assert meta["content_sha256"] == expected_bundle
-          print(f"WDC_DOMAIN_VERIFIED revision={expected_active} bundle={expected_bundle}")
+          curl --silent --show-error --fail --retry 5 --retry-all-errors \
+            --connect-timeout 10 --max-time 60 \
+            http://127.0.0.1:8765/api/meta > "$remote_root/meta-api.json"
+          python3 - "$expected_active" "$remote_root/meta-api.json" "$meta_file" <<'PY'
+          import json, sys
+          expected, source_path, output_path = sys.argv[1:]
+          meta = json.load(open(source_path, encoding="utf-8"))
+          fields = meta.get("meta") or {}
+          active = str(fields.get("active_revision_id") or "")
+          if active != expected:
+              raise SystemExit(f"ACTIVE_MISMATCH before materialize: local={active} expected={expected}")
+          marker = {
+              key: fields.get(key, "")
+              for key in (
+                  "active_revision_id",
+                  "content_sha256",
+                  "parent_revision_id",
+                  "source_commit_sha",
+                  "built_at",
+                  "latest_generated_at",
+              )
+          }
+          with open(output_path, "w", encoding="utf-8") as stream:
+              json.dump(marker, stream, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
           PY
-        env:
-          ACTIVE: ${{ steps.check.outputs.active }}
-          BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
 
-      - name: Record deployed active revision
-        if: steps.check.outputs.skip != 'true' && success()
-        run: |
-          set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10)
-          printf '%s\n' "$ACTIVE" | ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" "cat > /tmp/dsl-wdc-last-active"
-          echo "WDC_ACTIVE_RECORDED $ACTIVE"
-        env:
-          ACTIVE: ${{ steps.check.outputs.active }}
+          run_isolated snapshot /usr/bin/python3 "$remote_root/snapshot-runtime-db.py" \
+            --source "$runtime_db" \
+            --output "$runtime_snapshot" \
+            --expected-revision "$expected_active"
 
-      - name: Finalize WDC sync cleanup
-        if: always()
-        run: |
-          set -Eeuo pipefail
-          SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10)
-          ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$GITHUB_RUN_ID" "$BUNDLE_SHA" <<'REMOTE'
-          set -Eeuo pipefail
-          run_id="$1"; bundle_sha="${2:-}"
-          systemctl stop "dsl-wdc-snapshot-$run_id.service" 2>/dev/null || true
-          rm -rf -- "/tmp/dsl-wdc-sync-$run_id" /tmp/dsl-wdc-pages /tmp/dsl-wdc-bundles
-          rm -f -- /tmp/dsl-wdc-meta.json
-          if [[ "$bundle_sha" =~ ^[0-9a-f]{64}$ ]]; then
-            rm -f -- "/tmp/dsl-wdc-$bundle_sha.tar.gz"
-          fi
-          echo "WDC_OLD_VPS_CLEANUP_OK run=$run_id"
+          # Build every compact page from the same read-only runtime snapshot.
+          # This does not call the old ranking HTTP API once per page.
+          run_isolated pages /usr/bin/python3 "$remote_root/materialize-ranking-pages.py" \
+            --source-db "$runtime_snapshot" \
+            --output "$pages_root" \
+            --active-revision-id "$expected_active" \
+            --ranges "7d,all" \
+            --views "songs,vtubers,videos" \
+            --metrics "occurrences,songs,videos"
+
+          built_at="$(python3 -c "import json; print(json.load(open('$meta_file')).get('built_at') or '')")"
+          run_isolated serving /usr/bin/python3 "$remote_root/build-serving-store.py" \
+            --source-db "$runtime_snapshot" \
+            --ranking-root "$pages_root" \
+            --output "$serving_db" \
+            --active-revision-id "$expected_active" \
+            --required-ranges "7d,all" \
+            --built-at "$built_at"
+
+          # The canonical active pointer must not move while pages and SQLite are
+          # being assembled.  A mismatch aborts before any WDC upload.
+          after_active="$(curl --silent --show-error --fail --max-time 60 \
+            http://127.0.0.1:8765/api/meta | \
+            python3 -c 'import json,sys; print(json.load(sys.stdin).get("meta",{}).get("active_revision_id", ""))')"
+          [[ "$after_active" == "$expected_active" ]] || {
+            echo "ACTIVE_MISMATCH after build: $after_active != $expected_active" >&2
+            exit 67
+          }
+
+          run_isolated bundle /usr/bin/python3 "$remote_root/build-release-bundle.py" \
+            --input "$pages_root" \
+            --output "$bundles_root" \
+            --serving-sqlite "$serving_db" \
+            --server-artifact "$remote_root/release_serving_server.py" \
+            --active-revision-id "$expected_active" \
+            --expected-parent-revision-id "$(python3 -c "import json; print(json.load(open('$meta_file')).get('parent_revision_id') or '')")" \
+            --source-commit-sha "$(python3 -c "import json; print(json.load(open('$meta_file')).get('source_commit_sha') or '')")" \
+            --server-commit-sha "$server_commit" \
+            --build-logic-sha "$build_logic_sha" \
+            --generated-at "$built_at" \
+            --latest-event-time "$(python3 -c "import json; print(json.load(open('$meta_file')).get('latest_generated_at') or '')")"
+
+          bundle_dir="$(find "$bundles_root" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | head -1)"
+          [[ "$bundle_dir" =~ ^[0-9a-f]{64}$ ]] || { echo "INVALID_BUNDLE_SHA $bundle_dir" >&2; exit 68; }
+          tar -C "$bundles_root" -czf "$remote_root/dsl-wdc-$bundle_dir.tar.gz" "$bundle_dir"
+          printf '%s\n' "$bundle_dir" > "$remote_root/bundle-sha"
+          ls -lh "$remote_root/dsl-wdc-$bundle_dir.tar.gz"
           REMOTE
-          if [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
-            WDC_SSH=(-o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
-            ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" "rm -f -- '/tmp/dsl-wdc-$BUNDLE_SHA.tar.gz'"
-          fi
+
+          BUNDLE_SHA="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/bundle-sha'")"
+          [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]] || { echo "invalid bundle sha: $BUNDLE_SHA" >&2; exit 69; }
+          echo "bundle_sha=$BUNDLE_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Transfer and atomically deploy WDC release
+        if: steps.check.outputs.skip != 'true'
         env:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
+          REMOTE_ROOT: ${{ steps.materialize.outputs.remote_root }}
+        run: |
+          set -Eeuo pipefail
+          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
+          WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
+          [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]
+          mkdir -p /tmp/dsl-wdc-transfer
+          scp "${VPS2_SSH[@]}" \
+            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/dsl-wdc-$BUNDLE_SHA.tar.gz" \
+            /tmp/dsl-wdc-transfer/
+          scp "${WDC_SSH[@]}" \
+            "/tmp/dsl-wdc-transfer/dsl-wdc-$BUNDLE_SHA.tar.gz" \
+            deploy/install-wdc-release.sh \
+            "$WDC_USER@$WDC_HOST:/tmp/"
+
+          ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- \
+            "$BUNDLE_SHA" "$WDC_RELEASES_ROOT" "$WDC_SERVER_PATH" "$WDC_SERVICE" \
+            "$GITHUB_SHA" "$BUILD_LOGIC_SHA" "$WDC_API_PORT" <<'REMOTE'
+          set -Eeuo pipefail
+          sha="$1"; root="$2"; server_path="$3"; service="$4"; server_commit="$5"; build_logic="$6"; port="$7"
+          archive="/tmp/dsl-wdc-$sha.tar.gz"
+          installer="/tmp/install-wdc-release.sh"
+          [[ "$sha" =~ ^[0-9a-f]{64}$ ]]
+          test -f "$archive"
+          test -x "$installer"
+          mkdir -p "$root"
+          incoming="$(mktemp -d "$root/.incoming-$sha.XXXXXX")"
+          trap 'rm -rf "$incoming" "$archive" "$installer"' EXIT
+          python3 - "$archive" "$incoming" "$sha" <<'PY'
+          import tarfile, sys
+          from pathlib import Path
+          archive, incoming, expected = Path(sys.argv[1]), Path(sys.argv[2]).resolve(), sys.argv[3]
+          with tarfile.open(archive, "r:gz") as tar:
+              members = tar.getmembers()
+              for member in members:
+                  if member.issym() or member.islnk() or member.isdev():
+                      raise SystemExit(f"unsafe tar member type: {member.name}")
+                  target = (incoming / member.name).resolve()
+                  if incoming not in target.parents and target != incoming:
+                      raise SystemExit(f"tar path traversal: {member.name}")
+              tar.extractall(incoming)
+          extracted = incoming / expected
+          if not extracted.is_dir():
+              raise SystemExit("archive does not contain the expected release directory")
+          PY
+          if [[ -d "$root/$sha" ]]; then
+            cmp "$incoming/$sha/manifest.json" "$root/$sha/manifest.json"
+            rm -rf "$incoming/$sha"
+          else
+            mv "$incoming/$sha" "$root/$sha"
+          fi
+          chown -R daily-song-list:daily-song-list "$root/$sha"
+          "$installer" \
+            --sha "$sha" \
+            --releases-root "$root" \
+            --server-path "$server_path" \
+            --service "$service" \
+            --expected-server-commit "$server_commit" \
+            --expected-build-logic-sha "$build_logic" \
+            --port "$port"
+          REMOTE
+
+      - name: Verify public next domain
+        if: steps.check.outputs.skip != 'true'
+        env:
+          BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
+        run: |
+          set -Eeuo pipefail
+          curl --silent --show-error --fail --max-time 20 \
+            https://next.ytb-song-rank.culua.com/healthz > /tmp/next-health.json
+          python3 - "$BUNDLE_SHA" "$BUILD_LOGIC_SHA" <<'PY'
+          import json, sys
+          p=json.load(open('/tmp/next-health.json',encoding='utf-8'))
+          expected_sha, expected_logic=sys.argv[1],sys.argv[2]
+          assert p.get('status') == 'ok', p
+          assert p.get('releaseContentSha') == expected_sha, p
+          assert p.get('buildLogicSha') == expected_logic, p
+          assert p.get('oldOriginDependency') is False, p
+          assert p.get('sourceFallbackEnabled') is False, p
+          print('PUBLIC_HEALTH_OK', expected_sha[:16])
+          PY
+          curl --silent --show-error --fail --compressed --max-time 20 \
+            "https://next.ytb-song-rank.culua.com/api/rankings?v=$BUNDLE_SHA&range=all&view=songs&metric=occurrences&page=1&pageSize=30" \
+            | python3 -c 'import json,sys; p=json.load(sys.stdin); assert len(p.get("records") or []) <= 30; print("PUBLIC_RANKING_OK",len(p.get("records") or []))'
+
+      - name: Cleanup temporary build material
+        if: always()
+        env:
+          REMOTE_ROOT: ${{ steps.materialize.outputs.remote_root }}
+          BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
+        run: |
+          set +e
+          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
+          EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          REMOTE_ROOT="${REMOTE_ROOT:-$EXPECTED_REMOTE_ROOT}"
+          if [[ "$REMOTE_ROOT" == "$EXPECTED_REMOTE_ROOT" ]]; then
+            ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -rf -- '$REMOTE_ROOT'"
+          else
+            echo "refusing unexpected VPS2 cleanup path: $REMOTE_ROOT" >&2
+          fi
+          if [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
+            WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=8 -i /tmp/ssh/wdc-key)
+            ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" \
+              "rm -f -- '/tmp/dsl-wdc-$BUNDLE_SHA.tar.gz' '/tmp/install-wdc-release.sh'"
+          fi
+          rm -rf /tmp/dsl-wdc-transfer /tmp/next-health.json /tmp/ssh
