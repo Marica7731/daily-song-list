@@ -1,0 +1,105 @@
+name: Test next serving v3
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sync-wdc-release.yml"
+      - ".github/workflows/test-next-serving-v3.yml"
+      - "assets/app.js"
+      - "index.html"
+      - "deploy/**"
+      - "scripts/migration/**"
+      - "server/pg_adapter.py"
+      - "server/release_serving_server.py"
+      - "tests/test_next_serving_v3.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: next-serving-v3-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/sync-wdc-release.yml
+            .github/workflows/test-next-serving-v3.yml
+            assets/app.js
+            index.html
+            deploy/daily-song-list-api.service
+            deploy/install-wdc-release.sh
+            deploy/nginx-next-api.conf
+            scripts/migration/materialize-pg-release-snapshot.py
+            scripts/migration/materialize-ranking-pages.py
+            scripts/migration/build-serving-store.py
+            scripts/migration/build-release-bundle.py
+            scripts/migration/prepare-wdc-frontend.py
+            scripts/migration/patch-next-frontend.py
+            server/pg_adapter.py
+            server/release_serving_server.py
+            tests/test_next_serving_v3.py
+
+      - name: Validate Python Node shell and YAML
+        run: |
+          set -Eeuo pipefail
+          python3 -m pip install --disable-pip-version-check --quiet pyyaml
+          python3 -m py_compile \
+            server/release_serving_server.py \
+            server/pg_adapter.py \
+            scripts/migration/materialize-pg-release-snapshot.py \
+            scripts/migration/materialize-ranking-pages.py \
+            scripts/migration/build-serving-store.py \
+            scripts/migration/build-release-bundle.py \
+            scripts/migration/prepare-wdc-frontend.py \
+            scripts/migration/patch-next-frontend.py \
+            tests/test_next_serving_v3.py
+          node --check assets/app.js
+          bash -n deploy/install-wdc-release.sh
+          if command -v shellcheck >/dev/null 2>&1; then
+            shellcheck deploy/install-wdc-release.sh
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml
+          for path in sorted(Path(".github/workflows").glob("*.yml")):
+              value=yaml.safe_load(path.read_text(encoding="utf-8"))
+              if not isinstance(value,dict):raise SystemExit(f"invalid workflow: {path}")
+              print("YAML_OK",path)
+          PY
+          diff_base="HEAD^"
+          if git rev-parse --verify HEAD^2 >/dev/null 2>&1; then diff_base="HEAD^1"; fi
+          git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol \
+            diff --check "$diff_base" HEAD -- \
+            .github/workflows/sync-wdc-release.yml \
+            .github/workflows/test-next-serving-v3.yml \
+            assets/app.js index.html deploy scripts/migration \
+            server/pg_adapter.py server/release_serving_server.py tests/test_next_serving_v3.py
+
+      - name: Scan candidate files for committed secrets
+        run: |
+          set -Eeuo pipefail
+          pattern='-----BEGIN (RSA|OPENSSH|EC) PRIVATE KEY-----|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}'
+          if git grep -nE -e "$pattern" -- \
+              .github/workflows/sync-wdc-release.yml \
+              .github/workflows/test-next-serving-v3.yml \
+              assets/app.js deploy scripts/migration server tests/test_next_serving_v3.py; then
+            echo "secret-like material found in candidate" >&2
+            exit 1
+          fi
+          echo "SECRET_SCAN_OK"
+
+      - name: Run complete next-serving regression suite
+        run: |
+          set -Eeuo pipefail
+          PYTHONDONTWRITEBYTECODE=1 PYTHONWARNINGS=error::ResourceWarning \
+            python3 -B -m unittest discover -s tests -p 'test_next_serving_v3.py' -v

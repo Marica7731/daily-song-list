@@ -1,857 +1,592 @@
-"""Thin immutable release-serving API for the WDC shadow host.
+#!/usr/bin/env python3
+"""Fail-closed immutable release server for the WDC site.
 
-Serves the versioned ranking read model that the Mac/GitHub release chain
-materializes (see build-release-bundle.py).  It reads only local immutable
-release files under releases/<content_sha256>/; it never contacts a
-database and never recomputes a ranking.
-
-Ranking pagination is correct by construction: the release bundle freezes
-200-record chunks, and the server slices the requested user page
-(pageSize=20/30) out of those chunks.  Responses are cached in-process
-(bounded, keyed by content SHA) so a repeat request never re-decompresses
-and re-serializes the same immutable file.
-
-Endpoints:
-  /healthz                      local release readiness
-  /api/meta                     active release identity + counts + capabilities
-  /api/rankings                 versioned compact pages (range/view/metric/page/pageSize)
-  /api/sources/<key>            local serving.sqlite when present, else old-site proxy (transitional)
-  /api/thumbnails/...           YouTube origin relay (allowlisted, cached)
-
-The `current` release is selected by releases/current -> <sha> symlink or a
-meta/current.json pointer written atomically at activation time.
+No route contacts the old production site. Rankings come from local immutable
+chunks or local SQLite; source detail and search come only from serving.sqlite
+inside the same content-addressed release.
 """
-
 from __future__ import annotations
 
 import argparse
 import gzip
 import hashlib
+import http.client
 import json
+import math
+import os
 import re
+import socket
+import sqlite3
+import sys
 import threading
 import time
+import traceback
 import uuid
 from collections import OrderedDict
+from contextlib import closing
+from copy import deepcopy
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Callable
-from urllib.parse import parse_qs, urlencode, urlparse
+from typing import Any, Iterable, Mapping, Sequence
+from urllib.parse import parse_qs, unquote, urlparse
 
-import http.client
-import socket
-import sys
-
-REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{1,96}$")
-SUPPORTED_RANGES = {"all", "7d"}
-SUPPORTED_VIEWS = {"songs", "vtubers", "videos"}
-SUPPORTED_METRICS = {"occurrences", "songs", "videos"}
-METRIC_ALIASES = {"count": "occurrences"}
-MAX_PAGE_SIZE = 200
-CHUNK_SIZE = 200
-
-# In-process cache bounds (hard caps, never unbounded).
-CACHE_MAX_BYTES = 256 * 1024 * 1024   # 256 MiB total across both tiers
-CACHE_MAX_ENTRIES = 2000
-CHUNK_MAX_ENTRIES = 512
-
-# Thumbnail relay: fixed YouTube origin, allowlisted qualities only.
-THUMBNAIL_HOST = "i.ytimg.com"
-THUMBNAIL_VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
-THUMBNAIL_QUALITY_ALLOWLIST = frozenset(
-    {"default", "mqdefault", "hqdefault", "sddefault", "maxresdefault"}
-)
-THUMBNAIL_MAX_BYTES = 512 * 1024
-THUMBNAIL_CONNECT_TIMEOUT = 3.0
-THUMBNAIL_READ_TIMEOUT = 5.0
-THUMBNAIL_CACHE_CONTROL = "public, max-age=86400, immutable"
-
-# Old-origin fallback for /api/sources and search.  Disabled by default once
-# a local serving.sqlite exists; kept only for the transitional shadow phase.
-OLD_ORIGIN_HOST = "ytb-song-rank.culua.com"
-# Old-site source detail can take 30-90s on the all range (deep PG query);
-# the proxy must not time out before the upstream finishes, or the frontend
-# drawer fails on the first card.
-SOURCE_PROXY_TIMEOUT = 180.0
-SOURCE_FALLBACK_ENABLED = False  # flips to True only if serving.sqlite is absent
+SERVER_API_VERSION=3
+SERVING_SCHEMA_VERSION=3
+CHUNK_SIZE=200
+MAX_PAGE_SIZE=200
+SHA_RE=re.compile(r"^[0-9a-f]{64}$")
+REQUEST_ID_RE=re.compile(r"^[A-Za-z0-9._:-]{1,96}$")
+SOURCE_KEY_RE=re.compile(r"^[^/\\\x00]{1,512}$")
+THUMBNAIL_RE=re.compile(r"^/api/thumbnails/([A-Za-z0-9_-]{11})/(default|mqdefault|hqdefault|sddefault|maxresdefault)\.jpg$")
+METRIC_ALIASES={"count":"occurrences"}
+DB_METRIC_CANDIDATES={"occurrences":("count","occurrences"),"songs":("songs",),"videos":("videos",)}
+SEARCH_FIELDS={"title","artist","channel","video","source"}
 
 
-class _BoundedCache:
-    """Thread-safe LRU cache with a hard byte/entry cap."""
-
-    __slots__ = ("_entries", "_bytes", "_lock", "_max_bytes", "_max_entries")
-
-    def __init__(self, max_bytes: int, max_entries: int):
-        self._entries: OrderedDict[Any, Any] = OrderedDict()
-        self._bytes = 0
-        self._lock = threading.Lock()
-        self._max_bytes = max_bytes
-        self._max_entries = max_entries
-
-    def get(self, key: Any) -> Any | None:
-        with self._lock:
-            entry = self._entries.get(key)
-            if entry is None:
-                return None
-            self._entries.move_to_end(key)
-            return entry
-
-    def put(self, key: Any, value: Any, byte_size: int) -> None:
-        with self._lock:
-            previous = self._entries.pop(key, None)
-            if previous is not None:
-                self._bytes -= previous[1]
-            self._entries[key] = (value, byte_size)
-            self._bytes += byte_size
-            while (
-                len(self._entries) > self._max_entries
-                or self._bytes > self._max_bytes
-            ):
-                _, evicted = self._entries.popitem(last=False)
-                self._bytes -= evicted[1]
+class ApiError(Exception):
+    def __init__(self,status:int,code:str,message:str,**details:Any):
+        super().__init__(message);self.status=int(status);self.code=code;self.message=message;self.details=details
 
 
-_CHUNK_CACHE = _BoundedCache(CACHE_MAX_BYTES, CHUNK_MAX_ENTRIES)
-_RESPONSE_CACHE = _BoundedCache(CACHE_MAX_BYTES, CACHE_MAX_ENTRIES)
-_SERIES_TOTAL_CACHE = _BoundedCache(1_048_576, 256)  # totalCount per (sha,range,view,metric)
-_LOCK_REGISTRY: dict[tuple[Any, ...], threading.Lock] = {}
-_LOCK_REGISTRY_GUARD = threading.Lock()
+class BoundedCache:
+    def __init__(self,max_bytes:int,max_entries:int):
+        self.max_bytes=max(0,int(max_bytes));self.max_entries=max(1,int(max_entries))
+        self.bytes=0;self.items:OrderedDict[Any,tuple[Any,int]]=OrderedDict();self.lock=threading.Lock()
+    def get(self,key:Any)->Any|None:
+        with self.lock:
+            item=self.items.get(key)
+            if item is None:return None
+            self.items.move_to_end(key);return item[0]
+    def put(self,key:Any,value:Any,size:int)->None:
+        size=max(0,int(size))
+        with self.lock:
+            old=self.items.pop(key,None)
+            if old:self.bytes-=old[1]
+            self.items[key]=(value,size);self.bytes+=size
+            while self.items and (len(self.items)>self.max_entries or self.bytes>self.max_bytes):
+                _,evicted=self.items.popitem(last=False);self.bytes-=evicted[1]
 
 
-def _key_lock(key: tuple[Any, ...]) -> threading.Lock:
-    """Return a per-key lock so concurrent MISSes build once (single flight)."""
-    with _LOCK_REGISTRY_GUARD:
-        lock = _LOCK_REGISTRY.get(key)
-        if lock is None:
-            lock = threading.Lock()
-            _LOCK_REGISTRY[key] = lock
-        return lock
+CHUNK_CACHE=BoundedCache(96*1024*1024,512)
+RESPONSE_CACHE=BoundedCache(64*1024*1024,2000)
+STATUS_CACHE=BoundedCache(4*1024*1024,64)
+THUMBNAIL_CACHE=BoundedCache(32*1024*1024,256)
+KEY_LOCKS:dict[tuple[Any,...],threading.Lock]={}
+KEY_LOCKS_GUARD=threading.Lock()
 
 
-def _json_object(value: Any) -> dict[str, Any]:
-    if isinstance(value, dict):
-        return value
-    if isinstance(value, str) and value.strip():
-        try:
-            parsed = json.loads(value)
-        except json.JSONDecodeError:
-            return {}
-        return parsed if isinstance(parsed, dict) else {}
+def key_lock(key:tuple[Any,...])->threading.Lock:
+    with KEY_LOCKS_GUARD:
+        return KEY_LOCKS.setdefault(key,threading.Lock())
+
+
+def json_object(value:Any)->dict[str,Any]:
+    if isinstance(value,dict):return value
+    if isinstance(value,str) and value.strip():
+        try:parsed=json.loads(value)
+        except json.JSONDecodeError:return {}
+        return parsed if isinstance(parsed,dict) else {}
     return {}
 
 
+def canonical_json(value:Any)->bytes:
+    return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":"),default=str).encode("utf-8")
+
+
+def sha256_bytes(value:bytes)->str:return hashlib.sha256(value).hexdigest()
+
+def sha256_file(path:Path)->str:
+    digest=hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda:stream.read(1024*1024),b""):digest.update(chunk)
+    return digest.hexdigest()
+
+
+def release_content_sha(meta:Mapping[str,Any],manifest:Mapping[str,Any])->str:
+    meta_identity=dict(meta);manifest_identity=dict(manifest)
+    meta_identity.pop("contentSha256",None);manifest_identity.pop("contentSha256",None)
+    return sha256_bytes(canonical_json({"meta":meta_identity,"manifest":manifest_identity}))
+
+
+def qvalue(query:Mapping[str,list[str]],key:str,default:str="")->str:
+    values=query.get(key) or [];return str(values[-1]).strip() if values else default
+
+
+def qint(query:Mapping[str,list[str]],key:str,default:int,*,minimum:int=1,maximum:int=MAX_PAGE_SIZE)->int:
+    try:value=int(qvalue(query,key,str(default)))
+    except (TypeError,ValueError):value=default
+    return max(minimum,min(maximum,value))
+
+
+def qpagination(query:Mapping[str,list[str]],key:str,default:int,*,maximum:int)->int:
+    raw=qvalue(query,key)
+    if not raw:return default
+    try:value=int(raw)
+    except (TypeError,ValueError) as exc:raise ApiError(400,"invalid_pagination",f"{key} must be an integer",field=key,value=raw) from exc
+    if value<1 or value>maximum:
+        raise ApiError(400,"invalid_pagination",f"{key} is out of range",field=key,value=value,minimum=1,maximum=maximum)
+    return value
+
+
+def qbool(query:Mapping[str,list[str]],key:str)->bool:return qvalue(query,key).casefold() in {"1","true","yes","on"}
+
+def like_escape(value:str)->str:return value.replace("\\","\\\\").replace("%","\\%").replace("_","\\_")
+
+def fts_phrase(value:str)->str:return '"'+value.replace('"','""')+'"'
+
+
+def compact_record(record:Mapping[str,Any],view:str)->dict[str,Any]:
+    drop={"payload","payload_json","occurrence_payload_json","video_payload_json","searchText"}
+    result:dict[str,Any]={}
+    for key,value in record.items():
+        if key.startswith("_") or key in drop:continue
+        if isinstance(value,(str,int,float,bool)) or value is None:result[key]=deepcopy(value)
+        elif key=="artists" and isinstance(value,list):result[key]=deepcopy(value)
+        elif key=="songs" and isinstance(value,list) and view!="vtubers":result[key]=deepcopy(value[:3] if view in {"artists","videos"} else value)
+    previews=[];seen=set()
+    for item in record.get("occurrences") or []:
+        if not isinstance(item,Mapping):continue
+        nested=item.get("item") if isinstance(item.get("item"),Mapping) else {}
+        video_id=str(item.get("videoId") or nested.get("videoId") or "")
+        identity=f"video:{video_id}" if video_id else json.dumps(item,ensure_ascii=False,sort_keys=True)
+        if identity in seen:continue
+        seen.add(identity);preview=deepcopy(dict(item))
+        for key in drop:preview.pop(key,None)
+        previews.append(preview)
+        if len(previews)>=3:break
+    result["occurrences"]=previews;result["sourcePreviewCount"]=len(previews)
+    try:total=int(record.get("count") or record.get("timestampCount") or 0)
+    except (TypeError,ValueError):total=0
+    result["occurrencePreviewLimited"]=bool(record.get("occurrencePreviewLimited") or total>len(previews))
+    return result
+
+
+def normalize_occurrence(row:sqlite3.Row)->dict[str,Any]:
+    item=json_object(row["payload_json"])
+    if isinstance(item.get("payload"),Mapping):item=dict(item["payload"])
+    fields={"videoId":row["video_id"],"title":row["title"],"channelName":row["channel_name"],
+            "channelId":row["channel_id"],"channelHandle":row["channel_handle"],"channelUrl":row["channel_url"],
+            "publishedAt":row["published_timestamp"],"seconds":row["seconds"]}
+    for key,value in fields.items():
+        if key not in item:item[key]=value
+    return item
+
+
+def scope_key(niche_only:bool,hide_unknown:bool)->str:
+    if niche_only and hide_unknown:return "visibleNiche"
+    if niche_only:return "niche"
+    if hide_unknown:return "visible"
+    return "all"
+
+
+def declared_ranking_scopes(connection:sqlite3.Connection)->dict[str,int]:
+    row=connection.execute(
+        "SELECT value FROM serving_meta WHERE key='ranking_scope_counts_json'"
+    ).fetchone()
+    if not row or not str(row[0] or "").strip():return {}
+    try:value=json.loads(str(row[0]))
+    except json.JSONDecodeError as exc:raise ValueError("ranking scope marker is invalid") from exc
+    if not isinstance(value,dict):raise ValueError("ranking scope marker is not an object")
+    result={}
+    for key,count in value.items():
+        try:result[str(key)]=int(count)
+        except (TypeError,ValueError) as exc:raise ValueError("ranking scope count is invalid") from exc
+    return result
+
+
 class ReleaseStore:
-    """Resolve the current immutable release and serve its files."""
+    def __init__(self,releases_root:Path):
+        self.releases_root=releases_root.resolve();self.running_server_sha256=sha256_file(Path(__file__).resolve())
 
-    def __init__(self, releases_root: Path):
-        self.releases_root = releases_root
+    def release_dir(self,sha:str)->Path:
+        if not SHA_RE.fullmatch(sha):raise ApiError(400,"invalid_release","invalid release hash")
+        path=(self.releases_root/sha).resolve()
+        if path.parent!=self.releases_root or not path.is_dir():raise ApiError(404,"release_not_found","release does not exist")
+        return path
 
-    def current_sha(self) -> str | None:
-        current_link = self.releases_root / "current"
-        if current_link.is_symlink() or current_link.exists():
-            try:
-                resolved = current_link.resolve()
-                if resolved.parent == self.releases_root and resolved.is_dir():
-                    return resolved.name
-            except (OSError, RuntimeError):
-                pass
-        meta_file = self.releases_root / "meta" / "current.json"
-        if meta_file.exists():
-            pointer = _json_object(json.loads(meta_file.read_text(encoding="utf-8")))
-            sha = str(pointer.get("contentSha256") or "").strip()
-            if sha and (self.releases_root / sha).is_dir():
-                return sha
+    def current_sha(self)->str:
+        try:path=(self.releases_root/"current").resolve(strict=True)
+        except (OSError,RuntimeError) as exc:raise ApiError(503,"no_current_release","current release pointer unavailable") from exc
+        if path.parent!=self.releases_root or not path.is_dir() or not SHA_RE.fullmatch(path.name):
+            raise ApiError(503,"invalid_current_release","current release pointer invalid")
+        return path.name
+
+    def resolve_sha(self,requested:str="")->str:
+        if requested:self.release_dir(requested);return requested
+        return self.current_sha()
+
+    def read_json(self,sha:str,name:str)->dict[str,Any]:
+        path=self.release_dir(sha)/name
+        if not path.is_file():raise ApiError(503,"release_incomplete",f"missing {name}")
+        try:value=json.loads(path.read_text(encoding="utf-8"))
+        except (OSError,json.JSONDecodeError) as exc:raise ApiError(503,"release_invalid",f"invalid {name}") from exc
+        if not isinstance(value,dict):raise ApiError(503,"release_invalid",f"invalid {name}")
+        return value
+
+    def meta(self,sha:str)->dict[str,Any]:return self.read_json(sha,"meta.json")
+    def manifest(self,sha:str)->dict[str,Any]:return self.read_json(sha,"manifest.json")
+
+    def open_db(self,sha:str)->sqlite3.Connection:
+        path=self.release_dir(sha)/"serving.sqlite"
+        if not path.is_file():raise ApiError(503,"serving_store_missing","serving.sqlite is missing")
+        connection=sqlite3.connect(f"file:{path}?mode=ro",uri=True,timeout=10.0)
+        connection.row_factory=sqlite3.Row;connection.execute("PRAGMA query_only=ON");connection.execute("PRAGMA busy_timeout=10000")
+        return connection
+
+    def artifact(self,manifest:Mapping[str,Any],path:str)->Mapping[str,Any]|None:
+        for item in manifest.get("artifacts") or []:
+            if isinstance(item,Mapping) and item.get("path")==path:return item
         return None
 
-    def release_dir(self, sha: str) -> Path:
-        return self.releases_root / sha
-
-    def _chunk_records(
-        self,
-        sha: str,
-        range_id: str,
-        view: str,
-        metric: str,
-        chunk_page: int,
-    ) -> list[dict[str, Any]] | None:
-        """Parse one 200-record chunk (cached, single-flight)."""
-        cache_key = (sha, range_id, view, metric, chunk_page)
-        cached = _CHUNK_CACHE.get(cache_key)
-        if cached is not None:
-            return cached[0]
-        lock = _key_lock(("chunk",) + cache_key)
-        with lock:
-            cached = _CHUNK_CACHE.get(cache_key)
-            if cached is not None:
-                return cached[0]
-            page_path = (
-                self.release_dir(sha)
-                / "rankings" / range_id / view / metric / f"page-{chunk_page:04d}.json.gz"
-            )
-            if not page_path.exists():
-                return None
-            with gzip.open(page_path, "rt", encoding="utf-8") as stream:
-                payload = json.load(stream)
-            records = payload.get("records")
-            if not isinstance(records, list):
-                return None
-            chunk_size = len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-            _CHUNK_CACHE.put(cache_key, records, chunk_size)
-            return records
-
-    def _chunk_count(self, sha: str, range_id: str, view: str, metric: str) -> int:
-        base = self.release_dir(sha) / "rankings" / range_id / view / metric
-        if not base.is_dir():
-            return 0
-        n = 0
-        for _ in base.glob("page-*.json.gz"):
-            n += 1
-        return n
-
-    def _chunk_record_count(self, sha: str, range_id: str, view: str, metric: str, chunk_page: int) -> int:
-        """Number of records in one chunk (None if the chunk is absent)."""
-        cache_key = (sha, range_id, view, metric, chunk_page, "n")
-        cached = _SERIES_TOTAL_CACHE.get(cache_key)
-        if cached is not None:
-            return cached[0]
-        page_path = (
-            self.release_dir(sha)
-            / "rankings" / range_id / view / metric / f"page-{chunk_page:04d}.json.gz"
-        )
-        if not page_path.exists():
-            return -1
-        with gzip.open(page_path, "rt", encoding="utf-8") as stream:
-            payload = json.load(stream)
-        records = payload.get("records")
-        n = len(records) if isinstance(records, list) else 0
-        _SERIES_TOTAL_CACHE.put(cache_key, n, 64)
-        return n
-
-    def _series_total(self, sha: str, range_id: str, view: str, metric: str) -> int:
-        """True total record count for a (range/view/metric) series.
-
-        The old API's page-1 totalCount can overstate the real traversable
-        count (e.g. it advertises 34313 but only 34132 records exist across
-        172 chunks).  Trust the frozen chunks: find the last non-empty chunk
-        (binary search) and compute the real total from its prefix count.
-        """
-        cache_key = (sha, range_id, view, metric)
-        cached = _SERIES_TOTAL_CACHE.get(cache_key)
-        if cached is not None:
-            return cached[0]
-        lock = _key_lock(("total",) + cache_key)
-        with lock:
-            cached = _SERIES_TOTAL_CACHE.get(cache_key)
-            if cached is not None:
-                return cached[0]
-            n_chunks = self._chunk_count(sha, range_id, view, metric)
-            total = 0
-            if n_chunks > 0:
-                # Chunks are prefix-contiguous; binary search last non-empty.
-                lo, hi = 1, n_chunks
-                last_non_empty = 0
-                last_count = 0
-                while lo <= hi:
-                    mid = (lo + hi) // 2
-                    cnt = self._chunk_record_count(sha, range_id, view, metric, mid)
-                    if cnt > 0:
-                        last_non_empty = mid
-                        last_count = cnt
-                        lo = mid + 1
-                    else:
-                        hi = mid - 1
-                total = (last_non_empty - 1) * CHUNK_SIZE + last_count
-            _SERIES_TOTAL_CACHE.put(cache_key, total, 64)
-            return total
-
-    def rankings_page(
-        self,
-        range_id: str,
-        view: str,
-        metric: str,
-        user_page: int,
-        page_size: int,
-    ) -> dict[str, Any] | None:
-        """Slice a user page out of the 200-record chunks."""
-        sha = self.current_sha()
-        if not sha:
-            return None
-        start = (user_page - 1) * page_size
-        end = start + page_size
-        first_chunk = start // CHUNK_SIZE + 1
-        last_chunk = (end - 1) // CHUNK_SIZE + 1
-        records: list[dict[str, Any]] = []
-        chunk1 = self._chunk_records(sha, range_id, view, metric, first_chunk)
-        if chunk1 is None:
-            return None
-        records = list(chunk1)
-        if last_chunk != first_chunk:
-            chunk2 = self._chunk_records(sha, range_id, view, metric, last_chunk)
-            if chunk2 is None:
-                # Partial tail chunk already covers the request; tolerate.
-                pass
+    def validate_release(self,sha:str)->dict[str,Any]:
+        cache_key=(str(self.releases_root),sha,self.running_server_sha256);cached=STATUS_CACHE.get(cache_key)
+        if cached is not None:return deepcopy(cached)
+        with key_lock(("status",)+cache_key):
+            cached=STATUS_CACHE.get(cache_key)
+            if cached is not None:return deepcopy(cached)
+            meta=self.meta(sha);manifest=self.manifest(sha);errors=[]
+            if meta.get("contentSha256")!=sha or manifest.get("contentSha256")!=sha:errors.append("content hash marker mismatch")
+            try:
+                if release_content_sha(meta,manifest)!=sha:errors.append("computed content hash mismatch")
+            except (TypeError,ValueError) as exc:
+                errors.append(f"content hash computation failed: {type(exc).__name__}: {exc}")
+            if int(meta.get("schemaVersion") or 0)<2 or int(manifest.get("schemaVersion") or 0)<2:errors.append("release schema is older than 2")
+            complete_path=self.release_dir(sha)/".complete"
+            if not complete_path.is_file():errors.append("completion marker missing")
             else:
-                records.extend(chunk2)
-        total = self._series_total(sha, range_id, view, metric)
-        if total == 0:
-            # Fall back to chunk length only when the series payload lacks a
-            # totalCount (defensive; never let pageCount collapse to a chunk).
-            total = len(chunk1) if last_chunk == first_chunk else len(records)
-        sliced = records[start % CHUNK_SIZE: start % CHUNK_SIZE + page_size]
-        page_count = max(1, (total + page_size - 1) // page_size)
-        return {
-            "schemaVersion": 1,
-            "rangeId": range_id,
-            "view": view,
-            "metric": metric,
-            "page": user_page,
-            "pageSize": page_size,
-            "totalCount": total,
-            "pageCount": page_count,
-            "records": sliced,
-        }
-
-    def meta(self) -> dict[str, Any]:
-        sha = self.current_sha()
-        if not sha:
-            return {"error": "no_current_release", "message": "release pointer not ready"}
-        meta_file = self.release_dir(sha) / "meta.json"
-        manifest_file = self.release_dir(sha) / "manifest.json"
-        meta = _json_object(json.loads(meta_file.read_text(encoding="utf-8"))) if meta_file.exists() else {}
-        manifest = _json_object(json.loads(manifest_file.read_text(encoding="utf-8"))) if manifest_file.exists() else {}
-        pages = manifest.get("pages")
-        page_stats: dict[str, int] = {"pages": 0, "bytes": 0}
-        if isinstance(pages, list):
-            page_stats = {
-                "pages": len(pages),
-                "bytes": sum(int(p.get("bytes") or 0) for p in pages if isinstance(p, dict)),
-            }
-        serving_sqlite = (self.release_dir(sha) / "serving.sqlite").exists()
-        return {
-            "schemaVersion": 1,
-            "meta": {
-                "active_revision_id": meta.get("activeRevisionId", ""),
-                "expected_parent_revision_id": meta.get("expectedParentRevisionId", ""),
-                "source_commit_sha": meta.get("sourceCommitSha", ""),
-                "content_sha256": sha,
-                "generated_at": meta.get("generatedAt", ""),
-                "latest_event_time": meta.get("latestEventTime", ""),
-                "release_schema_version": meta.get("schemaVersion", 1),
-            },
-            "counts": {},
-            "release": {"pages": page_stats["pages"], "bytes": page_stats["bytes"]},
-            "capabilities": {
-                "ranges": ["7d", "all"],
-                "views": ["songs", "vtubers", "videos"],
-                "metrics": ["occurrences", "songs", "videos"],
-                "localSources": serving_sqlite,
-                "localSearch": serving_sqlite,
-            },
-        }
-
-    def health(self) -> dict[str, Any]:
-        sha = self.current_sha()
-        if not sha:
-            return {"status": "degraded", "schemaVersion": 1, "currentRelease": None}
-        meta_file = self.release_dir(sha) / "meta.json"
-        meta = _json_object(json.loads(meta_file.read_text(encoding="utf-8"))) if meta_file.exists() else {}
-        return {
-            "status": "ok",
-            "schemaVersion": 1,
-            "currentRelease": sha,
-            "activeRevisionId": meta.get("activeRevisionId", ""),
-            "generatedAt": meta.get("generatedAt", ""),
-        }
-
-
-def _query_value(query: dict[str, list[str]], key: str) -> str:
-    values = query.get(key) or []
-    return str(values[0]).strip() if values else ""
-
-
-def _int_query(query: dict[str, list[str]], key: str, default: int) -> int:
-    value = _query_value(query, key)
-    try:
-        return max(1, int(value))
-    except (TypeError, ValueError):
-        return default
-
-
-def make_handler(store: ReleaseStore) -> Callable:
-    def _proxy_get(path: str) -> dict[str, Any] | None:
-        """GET the old-site API with retries; returns None only after the
-        upstream consistently fails.  The old production API intermittently
-        drops connections on slow all-range source queries, so one retry with
-        a short backoff makes the drawer succeed instead of 504ing."""
-        last: Exception | None = None
-        for attempt in range(3):
-            connection = http.client.HTTPSConnection(OLD_ORIGIN_HOST, timeout=SOURCE_PROXY_TIMEOUT)
+                try:
+                    if complete_path.read_text(encoding="ascii").strip()!=sha:errors.append("completion marker mismatch")
+                except (OSError,UnicodeError) as exc:errors.append(f"completion marker unreadable: {type(exc).__name__}: {exc}")
+            db_entry=self.artifact(manifest,"serving.sqlite");server_entry=self.artifact(manifest,"artifacts/release_serving_server.py")
+            db_path=self.release_dir(sha)/"serving.sqlite"
+            if not db_entry or not db_path.is_file():errors.append("serving.sqlite missing from release")
+            elif sha256_file(db_path)!=str(db_entry.get("sha256") or ""):errors.append("serving.sqlite hash mismatch")
+            if not server_entry:errors.append("server artifact missing from release")
+            elif self.running_server_sha256!=str(server_entry.get("sha256") or ""):errors.append("running server differs from release artifact")
+            db_meta={};ranges=[];views=[];metrics=[];ranking_scopes=[];counts={}
             try:
-                connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
-                response = connection.getresponse()
-                body = response.read()
-                if not body.strip():
-                    raise RuntimeError("empty upstream body")
-                return json.loads(body)
-            except Exception as exc:  # noqa: BLE001
-                last = exc
-                time.sleep(2 * (attempt + 1))
-            finally:
-                connection.close()
-        print(f"  proxy_source upstream failed for {path}: {last}", flush=True)
-        return None
+                with closing(self.open_db(sha)) as connection:
+                    tables={str(r[0]) for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+                    missing={"serving_meta","source_details","source_occurrences","source_videos","ranking_rows","ranking_search_fts"}-tables
+                    if missing:errors.append("serving store missing tables: "+",".join(sorted(missing)))
+                    else:
+                        db_meta={str(r[0]):str(r[1]) for r in connection.execute("SELECT key,value FROM serving_meta")}
+                        if int(db_meta.get("schema_version") or 0)!=SERVING_SCHEMA_VERSION:errors.append("serving schema mismatch")
+                        if db_meta.get("active_revision_id")!=str(meta.get("activeRevisionId") or ""):errors.append("serving revision mismatch")
+                        ranges=[str(r[0]) for r in connection.execute("SELECT DISTINCT range_id FROM source_details ORDER BY range_id")]
+                        views=[str(r[0]) for r in connection.execute("SELECT DISTINCT view FROM ranking_rows ORDER BY view")]
+                        metrics=sorted({METRIC_ALIASES.get(str(r[0]),str(r[0])) for r in connection.execute("SELECT DISTINCT metric FROM ranking_rows")})
+                        declared_scopes=declared_ranking_scopes(connection)
+                        ranking_scopes=sorted({key.rsplit("/",1)[-1] for key in declared_scopes})
+                        counts={"ranking_rows":int(connection.execute("SELECT count(*) FROM ranking_rows").fetchone()[0]),
+                                "occurrences":int(connection.execute("SELECT count(*) FROM source_occurrences").fetchone()[0]),
+                                "videos":int(connection.execute("SELECT count(*) FROM source_videos").fetchone()[0]),
+                                "source_details":int(connection.execute("SELECT count(*) FROM source_details").fetchone()[0]),
+                                "ranking_search_rows":int(connection.execute("SELECT count(*) FROM ranking_search_fts").fetchone()[0])}
+                        if counts["ranking_search_rows"]!=counts["ranking_rows"]:errors.append("ranking search index row mismatch")
+                        quick=str(connection.execute("PRAGMA quick_check").fetchone()[0])
+                        if quick.casefold()!="ok":errors.append(f"SQLite quick_check failed: {quick}")
+            except (sqlite3.DatabaseError,OSError,ValueError) as exc:errors.append(f"serving validation failed: {type(exc).__name__}: {exc}")
+            status={"ok":not errors,"errors":errors,"releaseContentSha":sha,
+                    "activeRevision":str(meta.get("activeRevisionId") or ""),"sourceCommit":str(meta.get("sourceCommitSha") or ""),
+                    "serverCommit":str(meta.get("serverCommitSha") or ""),"buildLogicSha":str(meta.get("buildLogicSha") or ""),
+                    "runningServerSha256":self.running_server_sha256,"searchTokenizer":db_meta.get("search_tokenizer",""),"servingSchemaVersion":int(db_meta.get("schema_version") or 0),"localSourcesRanges":ranges,
+                    "localSearchReady":db_meta.get("local_search_ready")=="1" and bool(counts.get("ranking_rows")),
+                    "views":views,"metrics":metrics,"rankingScopes":ranking_scopes,"counts":counts,"generatedAt":str(meta.get("generatedAt") or "")}
+            STATUS_CACHE.put(cache_key,deepcopy(status),len(canonical_json(status)));return status
 
-    def proxy_source(key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-        """Local serving.sqlite only.  When the local store cannot resolve the
-        key, return a structured not-found error instead of silently proxying
-        the old site (which hid data gaps behind 30-180s waits)."""
-        sha = store.current_sha()
-        if sha:
-            sqlite_path = store.release_dir(sha) / "serving.sqlite"
-            if sqlite_path.exists():
-                local = _local_source_details_payload(sqlite_path, key, query)
-                if local is not None and local.get("found"):
-                    return local
-                local = _local_source_payload(sqlite_path, key, query)
-                if local is not None and local.get("found"):
-                    return local
-        return {
-            "error": "source_not_found_in_local_release",
-            "range": _query_value(query, "range") or "all",
-            "sourceKey": key,
-            "releaseSha": sha or "",
-        }
+    def require_ready(self,sha:str)->dict[str,Any]:
+        status=self.validate_release(sha)
+        if not status["ok"]:raise ApiError(503,"release_not_ready","local release failed integrity validation",release=sha,reasons=status["errors"])
+        return status
 
-    def proxy_search(query: dict[str, list[str]]) -> dict[str, Any] | None:
-        """Local FTS when serving.sqlite present; else structured error."""
-        sha = store.current_sha()
-        if sha:
-            sqlite_path = store.release_dir(sha) / "serving.sqlite"
-            if sqlite_path.exists():
-                return _local_search_payload(sqlite_path, query)
-        return {"error": "search_not_ready_in_local_release", "range": _query_value(query, "range") or "all"}
-        if not SOURCE_FALLBACK_ENABLED:
-            return {"error": "search_unavailable", "message": "local search index missing"}
-        params = {k: v[-1] for k, v in query.items() if v}
-        path = "/api/rankings?" + urlencode(params)
-        connection = http.client.HTTPSConnection(OLD_ORIGIN_HOST, timeout=SOURCE_PROXY_TIMEOUT)
+    def health(self)->dict[str,Any]:
+        try:status=self.validate_release(self.current_sha())
+        except ApiError as exc:return {"status":"degraded","apiVersion":SERVER_API_VERSION,"error":exc.code,"message":exc.message}
+        return {"status":"ok" if status["ok"] else "degraded","apiVersion":SERVER_API_VERSION,**status,
+                "oldOriginDependency":False,"sourceFallbackEnabled":False}
+
+    def api_meta(self)->dict[str,Any]:
+        sha=self.current_sha();status=self.require_ready(sha);meta=self.meta(sha);manifest=self.manifest(sha)
+        pages=[x for x in manifest.get("pages") or [] if isinstance(x,Mapping)]
+        return {"schemaVersion":SERVER_API_VERSION,
+                "meta":{"active_revision_id":status["activeRevision"],"source_commit_sha":status["sourceCommit"],
+                        "server_commit_sha":status["serverCommit"],"build_logic_sha":status["buildLogicSha"],"content_sha256":sha,"generated_at":status["generatedAt"],
+                        "latest_event_time":str(meta.get("latestEventTime") or ""),"release_schema_version":int(meta.get("schemaVersion") or 0),
+                        "serving_schema_version":status["servingSchemaVersion"],"search_tokenizer":status["searchTokenizer"]},
+                "counts":status["counts"],"release":{"pages":len(pages),"bytes":sum(int(x.get("bytes") or 0) for x in pages)},
+                "capabilities":{"ranges":status["localSourcesRanges"],"views":status["views"],"metrics":status["metrics"],
+                                "localSources":bool(status["localSourcesRanges"]),"localSourcesRanges":status["localSourcesRanges"],
+                                "localSearch":bool(status["localSearchReady"]),"rankingScopes":status["rankingScopes"],
+                                "sourceFallbackEnabled":False,"oldOriginDependency":False}}
+
+    def chunk_records(self,sha:str,range_id:str,view:str,metric:str,chunk_page:int)->list[dict[str,Any]]|None:
+        key=(sha,range_id,view,metric,chunk_page);cached=CHUNK_CACHE.get(key)
+        if cached is not None:return cached
+        with key_lock(("chunk",)+key):
+            cached=CHUNK_CACHE.get(key)
+            if cached is not None:return cached
+            path=self.release_dir(sha)/"rankings"/range_id/view/metric/f"page-{chunk_page:04d}.json.gz"
+            if not path.is_file():return None
+            try:
+                with gzip.open(path,"rt",encoding="utf-8") as stream:payload=json.load(stream)
+            except (OSError,json.JSONDecodeError) as exc:raise ApiError(503,"ranking_chunk_invalid",str(path)) from exc
+            records=payload.get("records") if isinstance(payload,dict) else None
+            if not isinstance(records,list):raise ApiError(503,"ranking_chunk_invalid",str(path))
+            records=[x for x in records if isinstance(x,dict)];CHUNK_CACHE.put(key,records,len(canonical_json(records)));return records
+
+    def series_total(self,sha:str,range_id:str,view:str,metric:str)->int:
+        key=("total",sha,range_id,view,metric);cached=RESPONSE_CACHE.get(key)
+        if cached is not None:return int(cached)
+        summary=self.series_summary(sha,range_id,view,metric)
+        if summary is not None:
+            total=int(summary.get("totalCount") or 0);RESPONSE_CACHE.put(key,total,64);return total
+        directory=self.release_dir(sha)/"rankings"/range_id/view/metric
+        pages=list(directory.glob("page-*.json.gz")) if directory.is_dir() else []
+        if not pages:return 0
+        last_number=max(int(p.name.split("page-")[1].split(".")[0]) for p in pages)
+        total=(last_number-1)*CHUNK_SIZE+len(self.chunk_records(sha,range_id,view,metric,last_number) or [])
+        RESPONSE_CACHE.put(key,total,64);return total
+
+    def series_summary(self,sha:str,range_id:str,view:str,metric:str)->dict[str,Any]|None:
+        key=("summary",sha,range_id,view,metric);cached=RESPONSE_CACHE.get(key)
+        if cached is not None:return cached
+        path=self.release_dir(sha)/"rankings"/range_id/view/metric/"page-0001.json.gz"
+        if not path.is_file():return None
         try:
-            connection.request("GET", path, headers={"User-Agent": "daily-song-list-wdc-shadow/1"})
-            response = connection.getresponse()
-            body = response.read()
-            return json.loads(body)
-        finally:
-            connection.close()
+            with gzip.open(path,"rt",encoding="utf-8") as stream:payload=json.load(stream)
+        except (OSError,json.JSONDecodeError) as exc:raise ApiError(503,"ranking_chunk_invalid",str(path)) from exc
+        if not isinstance(payload,dict):raise ApiError(503,"ranking_chunk_invalid",str(path))
+        summary={key:payload.get(key) for key in ("totalCount","totalOccurrenceCount","totalSongCount","totalVideoCount")}
+        RESPONSE_CACHE.put(key,summary,len(canonical_json(summary)));return summary
 
-    class ReleaseHandler(BaseHTTPRequestHandler):
-        server_version = "daily-song-list-release-serving/1"
+    def static_page(self,sha:str,range_id:str,view:str,metric:str,page:int,page_size:int)->dict[str,Any]|None:
+        start=(page-1)*page_size;end=start+page_size;first_chunk=start//CHUNK_SIZE+1;last_chunk=(end-1)//CHUNK_SIZE+1
+        first=self.chunk_records(sha,range_id,view,metric,first_chunk)
+        if first is None:return None
+        combined=list(first)
+        if last_chunk!=first_chunk:combined.extend(self.chunk_records(sha,range_id,view,metric,last_chunk) or [])
+        records=combined[start%CHUNK_SIZE:start%CHUNK_SIZE+page_size];total=self.series_total(sha,range_id,view,metric);summary=self.series_summary(sha,range_id,view,metric) or {}
+        return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":"all","page":page,"pageSize":page_size,
+                "totalCount":total,"filteredBaseCount":total,"totalOccurrenceCount":int(summary.get("totalOccurrenceCount") or 0),
+                "totalSongCount":int(summary.get("totalSongCount") or 0),"totalVideoCount":int(summary.get("totalVideoCount") or 0),
+                "pageCount":max(1,math.ceil(total/page_size)),"compact":True,"records":records}
 
-        def do_GET(self) -> None:  # noqa: N802
-            self._dispatch()
+    def resolve_db_metric(self,connection:sqlite3.Connection,range_id:str,view:str,metric:str)->str|None:
+        candidates=DB_METRIC_CANDIDATES.get(metric,(metric,));placeholders=",".join("?" for _ in candidates)
+        values={str(r[0]) for r in connection.execute(f"SELECT DISTINCT metric FROM ranking_rows WHERE range_id=? AND view=? AND metric IN ({placeholders})",(range_id,view,*candidates))}
+        return next((x for x in candidates if x in values),None)
 
-        def _send_json(
-            self,
-            status: HTTPStatus,
-            payload: dict[str, Any],
-            rid: str,
-            started: float,
-            cache: str = "MISS",
-            release_sha: str = "",
-            data_source: str = "local-release",
-            server_timing: str = "",
-        ) -> None:
-            body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), default=str).encode("utf-8")
-            self.send_response(int(status))
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("X-Request-Id", rid)
-            self.send_header("Cache-Control", "public, max-age=300, must-revalidate" if status == HTTPStatus.OK else "no-store")
-            self.send_header("X-Cache", cache)
-            self.send_header("X-Duration-Ms", f"{(time.monotonic() - started) * 1000:.2f}")
-            self.send_header("X-Data-Source", data_source)
-            if release_sha:
-                self.send_header("X-Release-Sha", release_sha)
-            if server_timing:
-                self.send_header("Server-Timing", server_timing)
-            self.end_headers()
-            self.wfile.write(body)
+    def dynamic_page(self,sha:str,query:Mapping[str,list[str]],range_id:str,view:str,metric:str,page:int,page_size:int)->dict[str,Any]:
+        q=qvalue(query,"q").casefold();min_count=qint(query,"minCount",1,minimum=0,maximum=2_147_483_647)
+        scope=scope_key(qbool(query,"nicheOnly"),qbool(query,"hideUnknownArtist"));search_scope=qvalue(query,"searchScope","all")
+        search_fields={x.strip() for x in qvalue(query,"searchFields").split(",") if x.strip()}
+        invalid_fields=sorted(search_fields-SEARCH_FIELDS)
+        if invalid_fields:raise ApiError(400,"invalid_search_fields","searchFields contains unsupported values",fields=invalid_fields)
+        if not search_fields and search_scope!="all":
+            mapped_scope="channel" if search_scope in {"channel","vtuber"} else search_scope
+            if mapped_scope not in SEARCH_FIELDS:raise ApiError(400,"invalid_search_scope","searchScope is unsupported",searchScope=search_scope)
+            search_fields={mapped_scope}
+        with closing(self.open_db(sha)) as connection:
+            db_metric=self.resolve_db_metric(connection,range_id,view,metric)
+            if db_metric is None:raise ApiError(404,"ranking_series_missing","ranking series missing",range=range_id,view=view,metric=metric)
+            if not connection.execute("SELECT 1 FROM ranking_rows WHERE range_id=? AND view=? AND metric=? AND scope_key=? LIMIT 1",(range_id,view,db_metric,scope)).fetchone():
+                try:declared=declared_ranking_scopes(connection)
+                except ValueError as exc:raise ApiError(503,"ranking_scope_marker_invalid",str(exc)) from exc
+                declared_count=declared.get(f"{range_id}/{view}/{db_metric}/{scope}")
+                if declared_count==0:
+                    base=connection.execute(
+                        "SELECT count(*) FROM ranking_rows WHERE range_id=? AND view=? AND metric=? AND scope_key='all'",
+                        (range_id,view,db_metric),
+                    ).fetchone()
+                    return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":scope,"searchScope":search_scope,
+                            "searchFields":sorted(search_fields),"page":1,"pageSize":page_size,"totalCount":0,
+                            "filteredBaseCount":int(base[0] or 0),"totalOccurrenceCount":0,"totalSongCount":0,
+                            "totalVideoCount":0,"pageCount":1,"compact":True,"records":[]}
+                if scope!="all":raise ApiError(404,"ranking_scope_missing","filtered scope missing",scope=scope)
+                scope="all"
+            conditions=["ranking_rows.range_id=?","ranking_rows.view=?","ranking_rows.metric=?","ranking_rows.scope_key=?"];params:list[Any]=[range_id,view,db_metric,scope]
+            metric_column={"occurrences":"row_count","songs":"song_count","videos":"video_count"}.get(metric,"row_count")
+            conditions.append(f"ranking_rows.{metric_column}>=?");params.append(min_count)
+            tokens=[x for x in q.split() if x];channel_only=search_fields=={"channel"}
+            tokenizer_row=connection.execute("SELECT value FROM serving_meta WHERE key='search_tokenizer'").fetchone()
+            tokenizer=str(tokenizer_row[0] if tokenizer_row else "")
+            use_fts=bool(tokens) and tokenizer=="trigram" and all(len(token)>=3 for token in tokens) and (not search_fields or channel_only)
+            from_clause="ranking_rows"
+            if use_fts:
+                from_clause="ranking_rows JOIN ranking_search_fts ON ranking_search_fts.rowid=ranking_rows.id"
+                phrases=[]
+                for token in tokens:
+                    phrase=fts_phrase(token);phrases.append(f"channel_search_text : {phrase}" if channel_only else phrase)
+                conditions.append("ranking_search_fts MATCH ?");params.append(" AND ".join(phrases))
+            else:
+                for token in tokens:
+                    pattern=f"%{like_escape(token)}%"
+                    if not search_fields:
+                        conditions.append("(lower(ranking_rows.search_text) LIKE lower(?) ESCAPE '\\' OR lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\')");params.extend([pattern,pattern])
+                        continue
+                    field_clauses=[]
+                    if "title" in search_fields:
+                        field_clauses.append("lower(ranking_rows.title) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if "artist" in search_fields:
+                        field_clauses.append("lower(ranking_rows.artist) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                        if view=="artists":field_clauses.append("lower(ranking_rows.name) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if "channel" in search_fields:
+                        field_clauses.append("lower(ranking_rows.channel_search_text) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    if search_fields & {"video","source"}:
+                        field_clauses.append("lower(ranking_rows.search_text) LIKE lower(?) ESCAPE '\\'");params.append(pattern)
+                    conditions.append("("+" OR ".join(field_clauses)+")")
+            where=" AND ".join(conditions)
+            summary=connection.execute(f"SELECT count(*),coalesce(sum(ranking_rows.row_count),0),coalesce(sum(ranking_rows.song_count),0),coalesce(sum(ranking_rows.video_count),0) FROM {from_clause} WHERE {where}",params).fetchone()
+            total=int(summary[0] or 0);page_count=max(1,math.ceil(total/page_size));page=min(page,page_count)
+            base_params=list(params);base_params[3]="all"
+            filtered_base=int(connection.execute(f"SELECT count(*) FROM {from_clause} WHERE {where}",base_params).fetchone()[0] or 0)
+            rows=connection.execute(f"SELECT ranking_rows.rank,ranking_rows.payload_json FROM {from_clause} WHERE {where} ORDER BY ranking_rows.rank LIMIT ? OFFSET ?",(*params,page_size,(page-1)*page_size)).fetchall()
+            records=[]
+            for row in rows:
+                payload=json_object(row["payload_json"]);payload["rank"]=int(row["rank"] or payload.get("rank") or 0);records.append(compact_record(payload,view))
+            return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":scope,"searchScope":search_scope,
+                    "searchFields":sorted(search_fields),"page":page,"pageSize":page_size,"totalCount":total,"filteredBaseCount":filtered_base,
+                    "totalOccurrenceCount":int(summary[1] or 0),"totalSongCount":int(summary[2] or 0),"totalVideoCount":int(summary[3] or 0),
+                    "pageCount":page_count,"compact":True,"records":records}
 
-        def _dispatch(self) -> None:
-            supplied = str(self.headers.get("X-Request-Id", "")).strip()
-            rid = supplied if REQUEST_ID_RE.fullmatch(supplied) else uuid.uuid4().hex
-            started = time.monotonic()
-            parsed = urlparse(self.path)
-            query = parse_qs(parsed.query, keep_blank_values=True)
+    def ranking_page(self,query:Mapping[str,list[str]])->tuple[str,dict[str,Any],str]:
+        sha=self.resolve_sha(qvalue(query,"v"));self.require_ready(sha);range_id=qvalue(query,"range","all");view=qvalue(query,"view","songs")
+        raw_metric=qvalue(query,"metric","occurrences");metric=METRIC_ALIASES.get(raw_metric,raw_metric)
+        page=qpagination(query,"page",1,maximum=10_000_000);page_size=qpagination(query,"pageSize",30,maximum=MAX_PAGE_SIZE)
+        dynamic=bool(qvalue(query,"q") or qint(query,"minCount",1,minimum=0,maximum=2_147_483_647)>1 or qbool(query,"nicheOnly") or qbool(query,"hideUnknownArtist"))
+        if not dynamic:
+            payload=self.static_page(sha,range_id,view,metric,page,page_size)
+            if payload is not None:return sha,payload,"local-release-chunk"
+        return sha,self.dynamic_page(sha,query,range_id,view,metric,page,page_size),"local-serving-sqlite"
+
+    def source_page(self,sha:str,source_key:str,query:Mapping[str,list[str]])->dict[str,Any]:
+        self.require_ready(sha);range_id=qvalue(query,"range","all");page=qpagination(query,"page",1,maximum=10_000_000);page_size=qpagination(query,"pageSize",20,maximum=MAX_PAGE_SIZE)
+        q=qvalue(query,"q").casefold();niche=qbool(query,"nicheOnly");hide_unknown=qbool(query,"hideUnknownArtist")
+        with closing(self.open_db(sha)) as connection:
+            detail=connection.execute("SELECT payload_json FROM source_details WHERE range_id=? AND source_key=?",(range_id,source_key)).fetchone()
+            if detail is None:raise ApiError(404,"source_not_found_in_local_release","source key missing from local release",range=range_id,sourceKey=source_key,releaseSha=sha)
+            conditions=["range_id=?","source_key=?"];params:list[Any]=[range_id,source_key]
+            if niche:conditions.append("is_niche=1")
+            if hide_unknown:conditions.append("is_unknown_artist=0")
+            if q:conditions.append("lower(search_text) LIKE lower(?) ESCAPE '\\'");params.append(f"%{like_escape(q)}%")
+            where=" AND ".join(conditions)
+            summary=connection.execute(f"SELECT count(*),count(DISTINCT video_id) FROM source_occurrences WHERE {where}",params).fetchone()
+            total_occ=int(summary[0] or 0);total_videos=int(summary[1] or 0);page_count=max(1,math.ceil(total_videos/page_size));page=min(page,page_count)
+            video_ids=[str(r[0] or "") for r in connection.execute(f"SELECT video_id FROM source_occurrences WHERE {where} GROUP BY video_id ORDER BY min(position),video_id LIMIT ? OFFSET ?",(*params,page_size,(page-1)*page_size))]
+            rows=[]
+            if video_ids:
+                placeholders=",".join("?" for _ in video_ids)
+                rows=connection.execute(f"SELECT video_id,title,channel_name,channel_id,channel_handle,channel_url,published_timestamp,seconds,payload_json FROM source_occurrences WHERE {where} AND video_id IN ({placeholders}) ORDER BY position,video_id",(*params,*video_ids)).fetchall()
+            occurrences=[normalize_occurrence(r) for r in rows];record=json_object(detail["payload_json"])
+            record.update({"sourceDetailKey":source_key,"rangeId":range_id,"occurrences":occurrences,"count":total_occ,
+                           "occurrenceCount":total_occ,"timestampCount":total_occ,"videoCount":total_videos,"sourceFilterQuery":q,
+                           "occurrencePreviewLimited":total_occ>len(occurrences)})
+            return {"schemaVersion":1,"found":True,"sourceKey":source_key,"sourceRevisionId":self.meta(sha).get("activeRevisionId",""),
+                    "record":record,"page":page,"pageSize":page_size,"pageCount":page_count,"totalCount":total_videos,
+                    "totalVideoCount":total_videos,"totalOccurrenceCount":total_occ}
+
+
+def make_handler(store:ReleaseStore)->type[BaseHTTPRequestHandler]:
+    class Handler(BaseHTTPRequestHandler):
+        server_version="daily-song-list-release-serving/3";protocol_version="HTTP/1.1"
+        def log_message(self,format:str,*args:Any)->None:sys.stderr.write("%s - - [%s] %s\n"%(self.address_string(),self.log_date_time_string(),format%args))
+        def do_GET(self)->None:
+            started=time.monotonic();request_id=self.headers.get("X-Request-Id","")
+            if not REQUEST_ID_RE.fullmatch(request_id):request_id=uuid.uuid4().hex
             try:
-                if parsed.path == "/healthz":
-                    payload = store.health()
-                    status = HTTPStatus.OK if payload.get("status") == "ok" else HTTPStatus.SERVICE_UNAVAILABLE
-                    self._send_json(status, payload, rid, started, data_source="local-release")
-                    return
-                if parsed.path == "/api/meta":
-                    self._send_json(HTTPStatus.OK, store.meta(), rid, started, data_source="local-release")
-                    return
-                if parsed.path == "/api/rankings":
-                    q = _query_value(query, "q")
-                    if q:
-                        payload = proxy_search(query)
-                        if payload is None:
-                            self._send_json(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "search_unavailable"}, rid, started)
-                            return
-                        self._send_json(HTTPStatus.OK, payload, rid, started, data_source="local-search" if store.current_sha() and (store.release_dir(store.current_sha()) / "serving.sqlite").exists() else "old-origin-proxy")
-                        return
-                    range_id = _query_value(query, "range") or "all"
-                    view = _query_value(query, "view") or "songs"
-                    metric = _query_value(query, "metric") or "occurrences"
-                    metric = METRIC_ALIASES.get(metric, metric)
-                    user_page = _int_query(query, "page", 1)
-                    requested_size = _int_query(query, "pageSize", 30)
-                    if requested_size > MAX_PAGE_SIZE:
-                        raise ValueError("pageSize exceeds bounded maximum")
-                    if range_id not in SUPPORTED_RANGES:
-                        raise ValueError("range must be 7d or all")
-                    if view not in SUPPORTED_VIEWS:
-                        raise ValueError("view must be songs, vtubers, or videos")
-                    if metric not in SUPPORTED_METRICS:
-                        raise ValueError("metric must be occurrences, songs, or videos")
-
-                    # Cached final response (SHA-bound, never crosses releases).
-                    sha = store.current_sha()
-                    resp_key = ("resp", sha, range_id, view, metric, user_page, requested_size)
-                    cached = _RESPONSE_CACHE.get(resp_key)
-                    if cached is not None:
-                        payload = cached[0]
-                        self._send_json(HTTPStatus.OK, payload, rid, started, cache="HIT", release_sha=sha, data_source="local-release")
-                        return
-                    lock = _key_lock(resp_key)
-                    with lock:
-                        cached = _RESPONSE_CACHE.get(resp_key)
-                        if cached is not None:
-                            payload = cached[0]
-                            self._send_json(HTTPStatus.OK, payload, rid, started, cache="HIT", release_sha=sha, data_source="local-release")
-                            return
-                        t0 = time.monotonic()
-                        payload = store.rankings_page(range_id, view, metric, user_page, requested_size)
-                        if payload is None:
-                            self._send_json(HTTPStatus.NOT_FOUND, {"error": "release_page_missing"}, rid, started)
-                            return
-                        body_size = len(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-                        # Store the raw payload (not a tuple): _BoundedCache.get
-                        # already returns (value, byte_size), so cached[0] IS the
-                        # payload.  Wrapping here double-nested it and the HIT
-                        # path serialized a top-level JSON array.
-                        _RESPONSE_CACHE.put(resp_key, payload, body_size)
-                        server_timing = f"lookup;dur={int((time.monotonic() - t0) * 1000)}"
-                        self._send_json(HTTPStatus.OK, payload, rid, started, cache="MISS", release_sha=sha, data_source="local-release", server_timing=server_timing)
-                    return
+                parsed=urlparse(self.path);query=parse_qs(parsed.query,keep_blank_values=True)
+                if parsed.path=="/healthz":
+                    payload=store.health();self.send_json(200 if payload.get("status")=="ok" else 503,payload,request_id,started,release_sha=str(payload.get("releaseContentSha") or ""),cache_control="no-store");return
+                if parsed.path=="/api/meta":
+                    meta_sha=store.current_sha();self.send_json(200,store.api_meta(),request_id,started,release_sha=meta_sha,cache_control="public, max-age=30, must-revalidate",data_source="local-release");return
+                if parsed.path=="/api/rankings":
+                    resolved_sha=store.resolve_sha(qvalue(query,"v"));cache_key=("ranking",resolved_sha,tuple(sorted((k,tuple(v)) for k,v in query.items() if k!="v")))
+                    cached=RESPONSE_CACHE.get(cache_key)
+                    if cached is None:
+                        with key_lock(cache_key):
+                            cached=RESPONSE_CACHE.get(cache_key)
+                            if cached is None:
+                                cached=store.ranking_page(query);RESPONSE_CACHE.put(cache_key,cached,len(canonical_json(cached[1])))
+                        cache="MISS"
+                    else:cache="HIT"
+                    sha,payload,data_source=cached
+                    immutable=bool(qvalue(query,"v"));self.send_json(200,payload,request_id,started,cache=cache,release_sha=sha,data_source=data_source,
+                        cache_control="public, max-age=31536000, immutable" if immutable else "public, max-age=60, must-revalidate");return
                 if parsed.path.startswith("/api/sources/"):
-                    key = parsed.path.removeprefix("/api/sources/")
-                    if not key:
-                        raise ValueError("source key is required")
-                    payload = proxy_source(key, query)
-                    if payload is None:
-                        self._send_json(HTTPStatus.SERVICE_UNAVAILABLE, {"error": "source_unavailable"}, rid, started)
-                        return
-                    sha = store.current_sha()
-                    local = bool(sha and (store.release_dir(sha) / "serving.sqlite").exists())
-                    self._send_json(HTTPStatus.OK, payload, rid, started, data_source="local-release" if local else "old-origin-proxy", release_sha=sha or "")
-                    return
+                    source_key=unquote(parsed.path.removeprefix("/api/sources/"))
+                    if not SOURCE_KEY_RE.fullmatch(source_key):raise ApiError(400,"invalid_source_key","source key invalid")
+                    sha=store.resolve_sha(qvalue(query,"v"));payload=store.source_page(sha,source_key,query);immutable=bool(qvalue(query,"v"))
+                    self.send_json(200,payload,request_id,started,release_sha=sha,data_source="local-serving-sqlite",
+                        cache_control="public, max-age=31536000, immutable" if immutable else "public, max-age=60, must-revalidate");return
                 if parsed.path.startswith("/api/thumbnails/"):
-                    self._send_thumbnail(parsed.path, rid, started)
-                    return
-                self._send_json(HTTPStatus.NOT_FOUND, {"error": "not_found"}, rid, started)
-            except ValueError as exc:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": "bad_request", "message": str(exc)}, rid, started)
-            except (socket.timeout, TimeoutError):
-                self._send_json(HTTPStatus.GATEWAY_TIMEOUT, {"error": "source_timeout", "message": "upstream timed out"}, rid, started)
-            except Exception:  # pragma: no cover - fixed public boundary
-                self._send_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "internal_error", "message": "request failed"}, rid, started)
+                    self.send_thumbnail(parsed.path,request_id,started);return
+                raise ApiError(404,"not_found","route not found")
+            except ApiError as exc:self.send_json(exc.status,{"error":exc.code,"message":exc.message,**exc.details},request_id,started,cache_control="no-store")
+            except (BrokenPipeError,ConnectionResetError):return
+            except Exception as exc:
+                traceback.print_exc(file=sys.stderr);self.send_json(500,{"error":"internal_error","message":"request failed","type":type(exc).__name__},request_id,started,cache_control="no-store")
 
-        def _send_thumbnail(self, path: str, rid: str, started: float) -> None:
-            m = re.fullmatch(
-                r"/api/thumbnails/([A-Za-z0-9_-]{11})/(default|mqdefault|hqdefault|sddefault|maxresdefault)\.jpg",
-                path,
-            )
-            if m is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": "bad_request", "message": "thumbnail path is not allowlisted"}, rid, started)
-                return
-            video_id, quality = m.group(1), m.group(2)
-            upstream_path = f"/vi/{video_id}/{quality}.jpg"
-            connection = http.client.HTTPSConnection(THUMBNAIL_HOST, timeout=THUMBNAIL_CONNECT_TIMEOUT)
-            try:
-                if connection.sock is not None:
-                    connection.sock.settimeout(THUMBNAIL_READ_TIMEOUT)
-                connection.request("GET", upstream_path, headers={"User-Agent": "daily-song-list-wdc-shadow/1", "Accept": "image/*"})
-                response = connection.getresponse()
-                body = response.read(THUMBNAIL_MAX_BYTES + 1)
-                if len(body) > THUMBNAIL_MAX_BYTES or response.status != HTTPStatus.OK:
-                    self._send_json(HTTPStatus.BAD_GATEWAY, {"error": "thumbnail_upstream", "message": "thumbnail upstream error"}, rid, started)
-                    return
-                content_type = (response.getheader("Content-Type") or "image/jpeg").split(";")[0].strip()
-                self.send_response(HTTPStatus.OK)
-                self.send_header("Content-Type", content_type)
-                self.send_header("Content-Length", str(len(body)))
-                self.send_header("Cache-Control", THUMBNAIL_CACHE_CONTROL)
-                self.send_header("X-Request-Id", rid)
-                self.end_headers()
-                self.wfile.write(body)
-            finally:
-                connection.close()
+        def send_json(self,status:int,payload:Any,request_id:str,started:float,*,cache:str="BYPASS",release_sha:str="",data_source:str="",cache_control:str="no-store")->None:
+            body=canonical_json(payload);etag='"'+sha256_bytes(body)+'"'
+            if self.headers.get("If-None-Match")==etag and status==200:
+                self.send_response(304);self.send_header("ETag",etag);self.send_header("Cache-Control",cache_control);self.send_header("Access-Control-Allow-Origin","*");self.send_header("X-Request-Id",request_id);self.send_header("Content-Length","0");self.end_headers();return
+            encoding=""
+            if len(body)>=1024 and "gzip" in self.headers.get("Accept-Encoding","").casefold():body=gzip.compress(body,compresslevel=5,mtime=0);encoding="gzip"
+            duration=(time.monotonic()-started)*1000;self.send_response(status);self.send_header("Content-Type","application/json; charset=utf-8");self.send_header("Content-Length",str(len(body)))
+            self.send_header("Cache-Control",cache_control);self.send_header("ETag",etag);self.send_header("Vary","Accept-Encoding");self.send_header("Access-Control-Allow-Origin","*");self.send_header("X-Request-Id",request_id)
+            self.send_header("X-Cache",cache);self.send_header("X-Duration-Ms",f"{duration:.1f}");self.send_header("Server-Timing",f"app;dur={duration:.1f}")
+            if status in {429,502,503,504}:self.send_header("Retry-After","3")
+            error_code=str(payload.get("error") or "") if isinstance(payload,Mapping) else ""
+            if error_code and re.fullmatch(r"[a-z0-9_:-]{1,80}",error_code):self.send_header("X-Error-Code",error_code)
+            if release_sha:
+                self.send_header("X-Release-Sha",release_sha);self.send_header("X-Content-Sha256",release_sha)
+                release_status=store.validate_release(release_sha)
+                self.send_header("X-Active-Revision",str(release_status.get("activeRevision") or ""))
+                self.send_header("X-Server-Commit",str(release_status.get("serverCommit") or ""))
+                self.send_header("X-Build-Logic-Sha",str(release_status.get("buildLogicSha") or ""))
+            if data_source:self.send_header("X-Data-Source",data_source)
+            if encoding:self.send_header("Content-Encoding",encoding)
+            self.end_headers();self.wfile.write(body)
 
-    return ReleaseHandler
-
-
-def _local_source_details_payload(sqlite_path: Path, key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-    """Read one source page from the canonical (v3) schema.
-
-    Canonical schema (see build-canonical-sqlite.py) keeps the DB's own
-    source_key and pages by distinct videoId (video-paged source response),
-    matching the old authoritative contract:
-      source_details(range_id, source_key, entity_type, entity_key, payload_json)
-      source_videos(range_id, source_key, video_order, video_id)
-      source_occurrences(range_id, source_key, position, video_id, payload_json)
-    """
-    try:
-        import sqlite3
-    except ImportError:  # pragma: no cover
-        return None
-    if not sqlite_path.exists():
-        return None
-    page = _int_query(query, "page", 1)
-    page_size = min(200, _int_query(query, "pageSize", 20))
-    range_id = _query_value(query, "range") or "all"
-    conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    try:
-        try:
-            detail = conn.execute(
-                "SELECT entity_type, entity_key, payload_json FROM source_details"
-                " WHERE range_id=? AND source_key=?",
-                (range_id, key),
-            ).fetchone()
-        except sqlite3.OperationalError:
-            # older schema (v1/v2) has no canonical tables; caller falls back.
-            return None
-        if detail is None:
-            return {"schemaVersion": 1, "found": False, "sourceKey": key}
-        # video-paged: distinct videoIds in page order
-        videos = conn.execute(
-            "SELECT video_id FROM source_videos WHERE range_id=? AND source_key=?"
-            " ORDER BY video_order LIMIT ? OFFSET ?",
-            (range_id, key, page_size, (page - 1) * page_size),
-        ).fetchall()
-        total_video_count = int(
-            conn.execute(
-                "SELECT count(*) FROM source_videos WHERE range_id=? AND source_key=?",
-                (range_id, key),
-            ).fetchone()[0]
-        )
-        video_ids = [r["video_id"] for r in videos]
-        occurrences: list[dict[str, Any]] = []
-        total_occurrence_count = 0
-        if video_ids:
-            placeholders = ",".join("?" * len(video_ids))
-            rows = conn.execute(
-                "SELECT position, video_id, payload_json FROM source_occurrences"
-                f" WHERE range_id=? AND source_key=? AND video_id IN ({placeholders})"
-                " ORDER BY position",
-                (range_id, key, *video_ids),
-            ).fetchall()
-            occurrences = [json.loads(r["payload_json"]) for r in rows]
-            total_occurrence_count = int(
-                conn.execute(
-                    "SELECT count(*) FROM source_occurrences WHERE range_id=? AND source_key=?",
-                    (range_id, key),
-                ).fetchone()[0]
-            )
-        # entity identity from the source detail payload (canonical record)
-        record_payload: dict[str, Any] = {}
-        try:
-            record_payload = json.loads(detail["payload_json"]) if detail["payload_json"] else {}
-        except (TypeError, ValueError):
-            record_payload = {}
-        if not isinstance(record_payload, dict):
-            record_payload = {}
-        page_count = max(1, (total_video_count + page_size - 1) // page_size)
-        return {
-            "schemaVersion": 1,
-            "found": True,
-            "sourceKey": key,
-            "record": {
-                "type": detail["entity_type"] or record_payload.get("type") or "song",
-                "key": detail["entity_key"] or record_payload.get("key") or key,
-                "title": record_payload.get("title") or record_payload.get("workTitle") or "",
-                "displayArtist": record_payload.get("displayArtist") or record_payload.get("artist") or "",
-                "count": total_occurrence_count,
-                "videoCount": total_video_count,
-                "timestampCount": total_occurrence_count,
-                "occurrences": occurrences,
-                "sourceDetailKey": key,
-            },
-            "page": page,
-            "pageSize": page_size,
-            "pageCount": page_count,
-            "totalCount": total_video_count,
-            "totalVideoCount": total_video_count,
-            "totalOccurrenceCount": total_occurrence_count,
-        }
-    finally:
-        conn.close()
+        def send_thumbnail(self,path:str,request_id:str,started:float)->None:
+            match=THUMBNAIL_RE.fullmatch(path)
+            if not match:raise ApiError(400,"invalid_thumbnail","thumbnail path not allowlisted")
+            video_id,quality=match.groups();cache_key=(video_id,quality);cached=THUMBNAIL_CACHE.get(cache_key)
+            if cached is None:
+                connection=http.client.HTTPSConnection("i.ytimg.com",timeout=5.0)
+                try:
+                    connection.request("GET",f"/vi/{video_id}/{quality}.jpg",headers={"User-Agent":"daily-song-list-wdc/3","Accept":"image/*"})
+                    response=connection.getresponse();body=response.read(512*1024+1)
+                    if response.status!=200 or len(body)>512*1024:raise ApiError(502,"thumbnail_upstream_error","thumbnail origin failed")
+                    cached=((response.getheader("Content-Type") or "image/jpeg").split(";",1)[0],body);THUMBNAIL_CACHE.put(cache_key,cached,len(body))
+                except (socket.timeout,OSError,http.client.HTTPException) as exc:raise ApiError(502,"thumbnail_upstream_error","thumbnail origin failed") from exc
+                finally:connection.close()
+            content_type,body=cached;duration=(time.monotonic()-started)*1000;self.send_response(200);self.send_header("Content-Type",content_type);self.send_header("Content-Length",str(len(body)))
+            self.send_header("Cache-Control","public, max-age=86400, immutable");self.send_header("Access-Control-Allow-Origin","*");self.send_header("X-Request-Id",request_id);self.send_header("X-Duration-Ms",f"{duration:.1f}");self.end_headers();self.wfile.write(body)
+    return Handler
 
 
-def _local_source_payload(sqlite_path: Path, key: str, query: dict[str, list[str]]) -> dict[str, Any] | None:
-    """Read one source page from the local serving.sqlite (indexed, LIMIT/OFFSET)."""
-    try:
-        import sqlite3
-    except ImportError:  # pragma: no cover
-        return None
-    if not sqlite_path.exists():
-        return None
-    page = _int_query(query, "page", 1)
-    page_size = min(200, _int_query(query, "pageSize", 20))
-    range_id = _query_value(query, "range") or "all"
-    conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    try:
-        try:
-            row = conn.execute(
-                "SELECT total_count, video_count FROM source_summary WHERE range_id=? AND source_key=?",
-                (range_id, key),
-            ).fetchone()
-        except sqlite3.OperationalError:
-            # v2 schema (source_details only) has no source_summary table.
-            return None
-        if row is None:
-            return {"schemaVersion": 1, "found": False, "sourceKey": key}
-        total = int(row["total_count"])
-        page_count = max(1, (total + page_size - 1) // page_size)
-        offset = (page - 1) * page_size
-        rows = conn.execute(
-            """
-            SELECT o.payload_json
-            FROM source_members s
-            JOIN occurrences o ON o.occurrence_id = s.occurrence_id
-            WHERE s.range_id=? AND s.source_key=?
-            ORDER BY s.source_sort_key, o.occurrence_id
-            LIMIT ? OFFSET ?
-            """,
-            (range_id, key, page_size, offset),
-        ).fetchall()
-        records = [json.loads(r["payload_json"]) for r in rows]
-        # Match the old production /api/sources contract so the frontend's
-        # normalizeSourceDetailOccurrences sees record.occurrences (each entry
-        # carries song/item/video).  The previous `records`-only shape made the
-        # frontend fall through to [] and rendered "no displayable sources".
-        return {
-            "schemaVersion": 1,
-            "found": True,
-            "sourceKey": key,
-            "record": {
-                "type": "",
-                "key": key,
-                "title": "",
-                "sourceDetailKey": key,
-                "count": total,
-                "videoCount": int(row["video_count"]),
-                "timestampCount": total,
-                "occurrences": records,
-            },
-            "page": page,
-            "pageSize": page_size,
-            "totalCount": total,
-            "totalOccurrenceCount": total,
-            "totalVideoCount": int(row["video_count"]),
-            "pageCount": page_count,
-        }
-    finally:
-        conn.close()
+def make_server(host:str,port:int,backlog:int,store:ReleaseStore)->ThreadingHTTPServer:
+    class ReleaseHTTPServer(ThreadingHTTPServer):
+        daemon_threads=True
+        request_queue_size=max(16,int(backlog))
+    return ReleaseHTTPServer((host,port),make_handler(store))
 
 
-def _local_search_payload(sqlite_path: Path, query: dict[str, list[str]]) -> dict[str, Any] | None:
-    """SQLite FTS5 search over local serving.sqlite (bounded candidates)."""
-    try:
-        import sqlite3
-    except ImportError:  # pragma: no cover
-        return None
-    q = _query_value(query, "q").strip()
-    if not q or len(q) < 1:
-        return None
-    page = _int_query(query, "page", 1)
-    page_size = min(200, _int_query(query, "pageSize", 30))
-    conn = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    try:
-        try:
-            total = conn.execute(
-                "SELECT count(*) AS c FROM search_fts WHERE search_fts MATCH ?",
-                (f'"{q}"*',),
-            ).fetchone()["c"]
-        except sqlite3.OperationalError:
-            return None
-        page_count = max(1, (total + page_size - 1) // page_size)
-        offset = (page - 1) * page_size
-        rows = conn.execute(
-            """
-            SELECT f.entity_key, f.title, f.artist, f.channel
-            FROM search_fts f
-            WHERE search_fts MATCH ?
-            ORDER BY rank
-            LIMIT ? OFFSET ?
-            """,
-            (f'"{q}"*', page_size, offset),
-        ).fetchall()
-        records = [dict(r) for r in rows]
-        return {
-            "schemaVersion": 1,
-            "rangeId": _query_value(query, "range") or "all",
-            "view": _query_value(query, "view") or "songs",
-            "metric": "occurrences",
-            "page": page,
-            "pageSize": page_size,
-            "totalCount": total,
-            "pageCount": page_count,
-            "records": records,
-        }
-    finally:
-        conn.close()
+def parse_args(argv:Sequence[str]|None=None)->argparse.Namespace:
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument("--releases-root",type=Path,default=Path(os.environ.get("DAILY_SONG_RELEASES_ROOT","/opt/culua/ytb-song-rank/releases")))
+    p.add_argument("--host",default=os.environ.get("DAILY_SONG_HOST","127.0.0.1"));p.add_argument("--port",type=int,default=int(os.environ.get("DAILY_SONG_PORT","18777")))
+    p.add_argument("--backlog",type=int,default=int(os.environ.get("DAILY_SONG_BACKLOG","128")));return p.parse_args(argv)
 
 
-def make_server(host: str, port: int, backlog: int, store: ReleaseStore) -> ThreadingHTTPServer:
-    class _ReleaseHTTPServer(ThreadingHTTPServer):
-        daemon_threads = True
-
-        def __init__(self) -> None:
-            self.request_queue_size = max(16, int(backlog))
-            super().__init__((host, port), make_handler(store))
-
-    return _ReleaseHTTPServer()
-
-
-def serve(releases_root: Path, host: str, port: int, backlog: int = 128) -> None:
-    store = ReleaseStore(releases_root)
-    server = make_server(host, port, backlog, store)
-    try:
-        server.serve_forever()
-    finally:
-        server.server_close()
-
-
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--releases-root", required=True, type=Path)
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=18777)
-    parser.add_argument("--backlog", type=int, default=128)
-    return parser.parse_args(argv)
-
-
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    serve(args.releases_root, args.host, args.port, args.backlog)
+def main(argv:Sequence[str]|None=None)->int:
+    args=parse_args(argv);store=ReleaseStore(args.releases_root);httpd=make_server(args.host,args.port,args.backlog,store)
+    print(f"RELEASE_SERVING_START host={args.host} port={args.port} root={args.releases_root} serverSha256={store.running_server_sha256}",flush=True)
+    try:httpd.serve_forever(poll_interval=.25)
+    except KeyboardInterrupt:pass
+    finally:httpd.server_close()
     return 0
 
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__=="__main__":raise SystemExit(main())
