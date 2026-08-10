@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T16:14:28.042Z",
+  "generatedAt": "2026-08-10T17:11:50.674Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T16:14:28.042Z",
+    "fetchedAt": "2026-08-10T17:11:50.674Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T16:14:28.042Z",
+    "generatedAt": "2026-08-10T17:11:50.674Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,18 +11657,18 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1095,
-      "parseableChannels": 1075,
+      "totalChannels": 1096,
+      "parseableChannels": 1076,
       "realAvatar": 648,
-      "thumbnailFallback": 447,
+      "thumbnailFallback": 448,
       "missingDisplayImage": 0,
-      "missingAvatar": 447,
+      "missingAvatar": 448,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 626
+      "skipped_collected_evidence": 626,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@MikuroKotonoha",
+        "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
+        "displayName": "言ノ葉みくろ / Mikuro Kotonoha🍨🍦",
+        "sourceUrl": "https://www.youtube.com/@MikuroKotonoha",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mashiro3yuki",
+        "channelId": "UC8LJJ1HOq_z8Uaycot6L_Xw",
+        "displayName": "真白ユキ*JPN Vtuber",
+        "sourceUrl": "https://www.youtube.com/@mashiro3yuki",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E3%83%8A%E3%82%AC%E3%83%AC",
         "channelId": "UCzwHbM92dBREagbKtiou58Q",
@@ -11716,6 +11730,13 @@
         "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
         "displayName": "Tencho Ch.  萌水 団",
         "sourceUrl": "https://www.youtube.com/@dantencho",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E6%97%A5%E5%90%91%E3%81%AA%E3%81%93",
+        "channelId": "UC2aJjm_delfy_nZsGEILxYw",
+        "displayName": "Nako Ch.日向なこ",
+        "sourceUrl": "https://www.youtube.com/@%E6%97%A5%E5%90%91%E3%81%AA%E3%81%93",
         "reason": "batch_limit_reached"
       },
       {
@@ -11828,27 +11849,6 @@
         "channelId": "UC0TXe_LYZ4scaW2XMyi5_kw",
         "displayName": "AZKi Channel",
         "sourceUrl": "https://www.youtube.com/@AZKi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MomoseNina",
-        "channelId": "UCGCNass-jSHshAHA4ufX3Ng",
-        "displayName": "桃瀬にな / Nina Momose",
-        "sourceUrl": "https://www.youtube.com/@MomoseNina",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@konekomiu",
-        "channelId": "UCaGQRHO_siHMRkCsfvTcSMg",
-        "displayName": "氷猫みう",
-        "sourceUrl": "https://www.youtube.com/@konekomiu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShidaChiyo",
-        "channelId": "UCxMovBd8wNiHHlvFX5YR3dQ",
-        "displayName": "獅田ちよ / Shida Chiyo",
-        "sourceUrl": "https://www.youtube.com/@ShidaChiyo",
         "reason": "batch_limit_reached"
       }
     ]
