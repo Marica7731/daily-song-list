@@ -508,7 +508,11 @@ jobs:
           }
           trap bootstrap_cleanup EXIT INT TERM
           # BEGIN PG_INCREMENT_ROUTING_BLOCK
-          RAW_BASE=""
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "PG_INCREMENT_BLOCKED invalid-code-sha=$GITHUB_SHA"; exit 78;
+          }
+          RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
+          echo "PG_INCREMENT_CODE_BINDING codeSha=$GITHUB_SHA rawBase=$RAW_BASE"
           fetch_input() {
             source_path="$1"
             destination="$2"
@@ -721,10 +725,10 @@ jobs:
               workflow_run_hard_fail source-commit-binding-failed; return 64
             fi
             WORKFLOW_RUN_ROUTE=authoritative-7d
-            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
+            SOURCE_RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             source_data_probe="$TASK_ROOT/workflow-run-source-7d.json"
             if ! curl --fail --silent --show-error --location --retry 2 --connect-timeout 5 --max-time 60 \
-              "$RAW_BASE/data/7d.json" -o "$source_data_probe"; then
+              "$SOURCE_RAW_BASE/data/7d.json" -o "$source_data_probe"; then
               workflow_run_hard_fail source-commit-7d-fetch-failed; return 64
             fi
             source_blob_probe="$(git hash-object "$source_data_probe")"
@@ -747,7 +751,6 @@ jobs:
               echo "PG_INCREMENT_INPUT_ERROR invalid-push-identity before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
             }
             PUSH_ROUTE=authoritative-7d
-            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             echo "PG_INCREMENT_ROUTE owner=push route=authoritative-7d sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE"
             return 0
           }
@@ -766,7 +769,6 @@ jobs:
               echo "PG_INCREMENT_INPUT_ERROR invalid-manual-identity before=$SOURCE_BASE_SHA sha=$SOURCE_SHA"; return 64;
             }
             MANUAL_7D_ROUTE=authoritative-7d
-            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${SOURCE_SHA}"
             echo "PG_INCREMENT_ROUTE owner=workflow_dispatch route=authoritative-7d sourceSha=$SOURCE_SHA sourceRole=$SOURCE_COMMIT_ROLE"
             return 0
           }
@@ -787,10 +789,6 @@ jobs:
           test -n "$VPS2_USER" || { echo "PG_INCREMENT_BLOCKED missing VPS2_USER"; exit 78; }
           test -n "$VPS2_PASSWORD" || { echo "PG_INCREMENT_BLOCKED missing VPS2_PASSWORD"; exit 78; }
           test -n "$VPS2_KNOWN_HOSTS" || { echo "PG_INCREMENT_BLOCKED missing VPS2_KNOWN_HOSTS"; exit 78; }
-          if [ -z "$WORKFLOW_RUN_ROUTE" ] && [ -z "$PUSH_ROUTE" ] && [ -z "$MANUAL_7D_ROUTE" ] && \
-             [ "$GITHUB_EVENT_NAME" != "workflow_run" ]; then
-            RAW_BASE="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}"
-          fi
           fetch_input "scripts/migration/accepted-source-identities.py" "$INPUT_ROOT/accepted-source-identities.py"
           if [ -n "$ARTIFACT_NAME" ]; then
             PATCH_INPUT="$ARTIFACT_ROOT/$PATCH_PATH"
