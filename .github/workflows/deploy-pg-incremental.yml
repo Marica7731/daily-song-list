@@ -370,6 +370,15 @@ jobs:
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" '
             set -Eeuo pipefail
             systemctl restart song-rank-pg-api
+            ready=0
+            for n in $(seq 1 30); do
+              if systemctl is-active --quiet song-rank-pg-api && ss -ltnH | grep -q :8765; then
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            test "$ready" = 1 || echo PG_ROLLBACK_OBSERVATION service-listener-timeout >&2
             if ! curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 \
               http://127.0.0.1:8765/healthz >/dev/null; then
               echo PG_ROLLBACK_OBSERVATION service-health-timeout >&2
@@ -922,6 +931,12 @@ jobs:
                 restore_file /etc/systemd/system/song-rank-pg-api.service service
                 systemctl daemon-reload
                 systemctl restart song-rank-pg-api
+                ready=0
+                for n in \$(seq 1 30); do
+                  if systemctl is-active --quiet song-rank-pg-api && ss -ltnH | grep -q :8765; then ready=1; break; fi
+                  sleep 1
+                done
+                test "\$ready" = 1
                 systemctl is-active --quiet song-rank-pg-api
                 curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz >/dev/null
                 echo PG_7D_ROLLBACK_SERVICE_VERIFIED
@@ -1060,6 +1075,12 @@ jobs:
               systemctl daemon-reload
               systemctl enable song-rank-pg-api
               systemctl restart song-rank-pg-api
+              ready=0
+              for n in \$(seq 1 30); do
+                if systemctl is-active --quiet song-rank-pg-api && ss -ltnH | grep -q :8765; then ready=1; break; fi
+                sleep 1
+              done
+              test "\$ready" = 1 || { echo PG_ADAPTER_LISTENER_BLOCKED unavailable >&2; exit 75; }
               curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 \
                 http://127.0.0.1:8765/healthz >/dev/null
               echo PG_7D_RANGE_ADAPTER_INSTALLED
