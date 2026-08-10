@@ -503,6 +503,47 @@ class Tests(unittest.TestCase):
                     object(),"parent",changes,"artists",{"range":"all"},
                 ))
 
+    def test_streamed_reconciliation_uses_database_keyset_for_mixed_case_ids(self):
+        changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
+                  "title":"Old","artist":"Mega Artist"}]
+        # A locale-aware PostgreSQL collation can place lowercase ``a`` before
+        # uppercase ``Z`` while Python orders them in the opposite direction.
+        # The production failure appeared only after a full page crossed that
+        # boundary.  PostgreSQL remains the ordering authority; Python only
+        # rejects an exactly repeated cursor.
+        batches=[
+            [{"video_id":"a-video","occurrence_id":"a-occurrence","song_key":"s1",
+              "title":"One","artist":"Mega Artist"}],
+            [{"video_id":"Z-video","occurrence_id":"Z-occurrence","song_key":"s2",
+              "title":"Two","artist":"Mega Artist"}],
+            [],
+        ]
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",1), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4), \
+             patch.object(pg_adapter,"_rows",side_effect=batches) as rows:
+            streamed=list(pg_adapter._bounded_affected_parent_occurrences(
+                object(),"parent",changes,"artists",{"range":"all"},
+            ))
+
+        self.assertEqual([row["video_id"] for row in streamed],["a-video","Z-video"])
+        self.assertEqual(rows.call_count,3)
+        for call in rows.call_args_list:
+            sql=call.args[1]
+            self.assertIn("(o.video_id, o.occurrence_id) > (%s, %s)",sql)
+            self.assertIn("ORDER BY o.video_id, o.occurrence_id",sql)
+        self.assertEqual(rows.call_args_list[1].args[2][-3:],
+                         ["a-video","a-occurrence",1])
+        self.assertEqual(rows.call_args_list[2].args[2][-3:],
+                         ["Z-video","Z-occurrence",1])
+
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",1), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4), \
+             patch.object(pg_adapter,"_rows",side_effect=[batches[0],batches[0]]):
+            with self.assertRaisesRegex(pg_adapter.PostgresAdapterError,"did not advance"):
+                tuple(pg_adapter._bounded_affected_parent_occurrences(
+                    object(),"parent",changes,"artists",{"range":"all"},
+                ))
+
     def test_streamed_reconciliation_preserves_reset_tombstone_replacement_order(self):
         parent_rows=[
             {"video_id":"v1","occurrence_id":"o1","song_key":"old1","title":"Old 1","artist":"Mega Artist"},

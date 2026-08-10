@@ -4112,7 +4112,13 @@ def _bounded_affected_parent_occurrences(
             raise PostgresAdapterError(
                 "affected runtime song-count reconciliation returned an empty identity"
             )
-        if (next_video_id, next_occurrence_id) <= (last_video_id, last_occurrence_id):
+        # The SQL predicate and ORDER BY use the same PostgreSQL collation, so
+        # every returned cursor is database-ordered after the prior cursor.
+        # Python's Unicode ordering can disagree for mixed-case YouTube IDs;
+        # comparing < or > here therefore creates a false non-advance failure.
+        # Exact equality is locale-independent and still fails closed if a
+        # broken page ever repeats its cursor without making progress.
+        if (next_video_id, next_occurrence_id) == (last_video_id, last_occurrence_id):
             raise PostgresAdapterError(
                 "affected runtime song-count reconciliation did not advance"
             )
