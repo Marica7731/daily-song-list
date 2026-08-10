@@ -3552,6 +3552,10 @@ function shouldUseRuntimeApiForRequest(request) {
   if (!runtimeCapabilityIncludes(capabilities.metrics, metric)) return false;
   const filters = requestFiltersForView(request.view, request.filters || {});
   if (cleanText(filters.q || "") && capabilities.localSearch !== true) return false;
+  const rankingScope = filters.nicheOnly
+    ? (filters.hideUnknownArtist ? "visibleNiche" : "niche")
+    : (filters.hideUnknownArtist ? "visible" : "all");
+  if (rankingScope !== "all" && !runtimeCapabilityIncludes(capabilities.rankingScopes, rankingScope)) return false;
   return true;
 }
 

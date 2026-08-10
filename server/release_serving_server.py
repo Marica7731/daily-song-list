@@ -169,6 +169,21 @@ def scope_key(niche_only:bool,hide_unknown:bool)->str:
     return "all"
 
 
+def declared_ranking_scopes(connection:sqlite3.Connection)->dict[str,int]:
+    row=connection.execute(
+        "SELECT value FROM serving_meta WHERE key='ranking_scope_counts_json'"
+    ).fetchone()
+    if not row or not str(row[0] or "").strip():return {}
+    try:value=json.loads(str(row[0]))
+    except json.JSONDecodeError as exc:raise ValueError("ranking scope marker is invalid") from exc
+    if not isinstance(value,dict):raise ValueError("ranking scope marker is not an object")
+    result={}
+    for key,count in value.items():
+        try:result[str(key)]=int(count)
+        except (TypeError,ValueError) as exc:raise ValueError("ranking scope count is invalid") from exc
+    return result
+
+
 class ReleaseStore:
     def __init__(self,releases_root:Path):
         self.releases_root=releases_root.resolve();self.running_server_sha256=sha256_file(Path(__file__).resolve())
@@ -238,7 +253,7 @@ class ReleaseStore:
             elif sha256_file(db_path)!=str(db_entry.get("sha256") or ""):errors.append("serving.sqlite hash mismatch")
             if not server_entry:errors.append("server artifact missing from release")
             elif self.running_server_sha256!=str(server_entry.get("sha256") or ""):errors.append("running server differs from release artifact")
-            db_meta={};ranges=[];views=[];metrics=[];counts={}
+            db_meta={};ranges=[];views=[];metrics=[];ranking_scopes=[];counts={}
             try:
                 with closing(self.open_db(sha)) as connection:
                     tables={str(r[0]) for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -251,6 +266,8 @@ class ReleaseStore:
                         ranges=[str(r[0]) for r in connection.execute("SELECT DISTINCT range_id FROM source_details ORDER BY range_id")]
                         views=[str(r[0]) for r in connection.execute("SELECT DISTINCT view FROM ranking_rows ORDER BY view")]
                         metrics=sorted({METRIC_ALIASES.get(str(r[0]),str(r[0])) for r in connection.execute("SELECT DISTINCT metric FROM ranking_rows")})
+                        declared_scopes=declared_ranking_scopes(connection)
+                        ranking_scopes=sorted({key.rsplit("/",1)[-1] for key in declared_scopes})
                         counts={"ranking_rows":int(connection.execute("SELECT count(*) FROM ranking_rows").fetchone()[0]),
                                 "occurrences":int(connection.execute("SELECT count(*) FROM source_occurrences").fetchone()[0]),
                                 "videos":int(connection.execute("SELECT count(*) FROM source_videos").fetchone()[0]),
@@ -265,7 +282,7 @@ class ReleaseStore:
                     "serverCommit":str(meta.get("serverCommitSha") or ""),"buildLogicSha":str(meta.get("buildLogicSha") or ""),
                     "runningServerSha256":self.running_server_sha256,"searchTokenizer":db_meta.get("search_tokenizer",""),"servingSchemaVersion":int(db_meta.get("schema_version") or 0),"localSourcesRanges":ranges,
                     "localSearchReady":db_meta.get("local_search_ready")=="1" and bool(counts.get("ranking_rows")),
-                    "views":views,"metrics":metrics,"counts":counts,"generatedAt":str(meta.get("generatedAt") or "")}
+                    "views":views,"metrics":metrics,"rankingScopes":ranking_scopes,"counts":counts,"generatedAt":str(meta.get("generatedAt") or "")}
             STATUS_CACHE.put(cache_key,deepcopy(status),len(canonical_json(status)));return status
 
     def require_ready(self,sha:str)->dict[str,Any]:
@@ -290,7 +307,8 @@ class ReleaseStore:
                 "counts":status["counts"],"release":{"pages":len(pages),"bytes":sum(int(x.get("bytes") or 0) for x in pages)},
                 "capabilities":{"ranges":status["localSourcesRanges"],"views":status["views"],"metrics":status["metrics"],
                                 "localSources":bool(status["localSourcesRanges"]),"localSourcesRanges":status["localSourcesRanges"],
-                                "localSearch":bool(status["localSearchReady"]),"sourceFallbackEnabled":False,"oldOriginDependency":False}}
+                                "localSearch":bool(status["localSearchReady"]),"rankingScopes":status["rankingScopes"],
+                                "sourceFallbackEnabled":False,"oldOriginDependency":False}}
 
     def chunk_records(self,sha:str,range_id:str,view:str,metric:str,chunk_page:int)->list[dict[str,Any]]|None:
         key=(sha,range_id,view,metric,chunk_page);cached=CHUNK_CACHE.get(key)
@@ -340,6 +358,18 @@ class ReleaseStore:
             db_metric=self.resolve_db_metric(connection,range_id,view,metric)
             if db_metric is None:raise ApiError(404,"ranking_series_missing","ranking series missing",range=range_id,view=view,metric=metric)
             if not connection.execute("SELECT 1 FROM ranking_rows WHERE range_id=? AND view=? AND metric=? AND scope_key=? LIMIT 1",(range_id,view,db_metric,scope)).fetchone():
+                try:declared=declared_ranking_scopes(connection)
+                except ValueError as exc:raise ApiError(503,"ranking_scope_marker_invalid",str(exc)) from exc
+                declared_count=declared.get(f"{range_id}/{view}/{db_metric}/{scope}")
+                if declared_count==0:
+                    base=connection.execute(
+                        "SELECT count(*) FROM ranking_rows WHERE range_id=? AND view=? AND metric=? AND scope_key='all'",
+                        (range_id,view,db_metric),
+                    ).fetchone()
+                    return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"searchScope":search_scope,
+                            "searchFields":sorted(search_fields),"page":1,"pageSize":page_size,"totalCount":0,
+                            "filteredBaseCount":int(base[0] or 0),"totalOccurrenceCount":0,"totalSongCount":0,
+                            "totalVideoCount":0,"pageCount":1,"compact":True,"records":[]}
                 if scope!="all":raise ApiError(404,"ranking_scope_missing","filtered scope missing",scope=scope)
                 scope="all"
             conditions=["ranking_rows.range_id=?","ranking_rows.view=?","ranking_rows.metric=?","ranking_rows.scope_key=?"];params:list[Any]=[range_id,view,db_metric,scope]

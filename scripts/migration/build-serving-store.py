@@ -117,6 +117,37 @@ def validate_revision(meta: Mapping[str, str], expected: str) -> str:
     return ""
 
 
+def ranking_scope_counts(meta: Mapping[str, str]) -> dict[str, int]:
+    raw = str(meta.get("ranking_scope_counts_json") or "").strip()
+    if not raw:
+        return {}
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("canonical runtime DB has invalid ranking_scope_counts_json") from exc
+    if not isinstance(parsed, dict):
+        raise RuntimeError("canonical runtime DB ranking scope marker is not an object")
+    result: dict[str, int] = {}
+    for key, value in parsed.items():
+        parts = str(key).split("/")
+        if len(parts) != 4 or not all(parts):
+            raise RuntimeError(f"canonical runtime DB has invalid ranking scope key: {key!r}")
+        try:
+            count = int(value)
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(f"canonical runtime DB has invalid ranking scope count: {key!r}") from exc
+        if count < 0:
+            raise RuntimeError(f"canonical runtime DB has negative ranking scope count: {key!r}")
+        result[str(key)] = count
+    declared = str(meta.get("ranking_scope_series") or "").strip()
+    if declared and int(declared) != len(result):
+        raise RuntimeError(
+            f"canonical runtime DB ranking scope series mismatch: "
+            f"declared={declared} actual={len(result)}"
+        )
+    return result
+
+
 def create_schema(connection: sqlite3.Connection) -> None:
     connection.executescript("""
     PRAGMA journal_mode=OFF;
@@ -405,7 +436,12 @@ def validate_card_coverage(connection: sqlite3.Connection, ranking_root: Path) -
     return {"checked":checked,"missing":0,"bySeries":by_series}
 
 
-def validate_database(connection: sqlite3.Connection, required_ranges: Sequence[str], ranking_root: Path) -> dict[str,Any]:
+def validate_database(
+    connection: sqlite3.Connection,
+    required_ranges: Sequence[str],
+    ranking_root: Path,
+    expected_scope_counts: Mapping[str, int] | None = None,
+) -> dict[str,Any]:
     orphan = int(connection.execute("""
       SELECT count(*) FROM source_occurrences o LEFT JOIN source_details d
       ON d.range_id=o.range_id AND d.source_key=o.source_key WHERE d.source_key IS NULL
@@ -433,11 +469,48 @@ def validate_database(connection: sqlite3.Connection, required_ranges: Sequence[
         stats = ranges.get(range_id)
         if not stats or stats["details"]<=0 or stats["occurrences"]<=0:
             raise RuntimeError(f"required range {range_id!r} is absent or empty")
+    scope_counts = {
+        f"{row[0]}/{row[1]}/{row[2]}/{row[3]}": int(row[4])
+        for row in connection.execute("""
+          SELECT range_id,view,metric,scope_key,count(*)
+          FROM ranking_rows
+          GROUP BY range_id,view,metric,scope_key
+          ORDER BY range_id,view,metric,scope_key
+        """)
+    }
+    if expected_scope_counts:
+        expected = {str(key): int(value) for key, value in expected_scope_counts.items()}
+        normalized_actual = {
+            key: int(scope_counts.get(key, 0))
+            for key in expected
+        }
+        unexpected = sorted(set(scope_counts) - set(expected))
+        if normalized_actual != expected or unexpected:
+            missing = sorted(
+                key for key in set(expected) - set(scope_counts)
+                if expected[key] != 0
+            )
+            mismatched = sorted(
+                key for key in expected
+                if normalized_actual[key] != expected[key]
+            )
+            raise RuntimeError(
+                "ranking scope coverage mismatch: "
+                f"missing={missing[:8]} unexpected={unexpected[:8]} "
+                f"mismatched={mismatched[:8]}"
+            )
+        scope_counts = normalized_actual
     coverage = validate_card_coverage(connection, ranking_root)
     quick = str(connection.execute("PRAGMA quick_check").fetchone()[0])
     if quick.casefold() != "ok":
         raise RuntimeError(f"SQLite quick_check failed: {quick}")
-    return {"counts":counts,"ranges":ranges,"coverage":coverage,"quickCheck":quick}
+    return {
+        "counts":counts,
+        "ranges":ranges,
+        "rankingScopes":scope_counts,
+        "coverage":coverage,
+        "quickCheck":quick,
+    }
 
 
 def build_serving_store(source_db: Path, ranking_root: Path, output: Path, *, active_revision_id: str,
@@ -456,7 +529,9 @@ def build_serving_store(source_db: Path, ranking_root: Path, output: Path, *, ac
     target.row_factory = sqlite3.Row
     try:
         require_source_schema(source)
-        source_revision = validate_revision(source_meta(source),active_revision_id)
+        source_metadata = source_meta(source)
+        source_revision = validate_revision(source_metadata,active_revision_id)
+        expected_scopes = ranking_scope_counts(source_metadata)
         create_schema(target)
         details = copy_details(source,target)
         occurrences = copy_occurrences(source,target)
@@ -464,7 +539,12 @@ def build_serving_store(source_db: Path, ranking_root: Path, output: Path, *, ac
         if not details or not occurrences or not rankings:
             raise RuntimeError(f"empty serving store details={details} occurrences={occurrences} rankings={rankings}")
         search_tokenizer = build_indexes(target)
-        validation = validate_database(target,required_ranges,ranking_root)
+        validation = validate_database(
+            target,
+            required_ranges,
+            ranking_root,
+            expected_scope_counts=expected_scopes,
+        )
         metadata = {
             "schema_version":str(SCHEMA_VERSION),
             "active_revision_id":active_revision_id,
@@ -477,6 +557,13 @@ def build_serving_store(source_db: Path, ranking_root: Path, output: Path, *, ac
             "ranking_search_max_chars":str(MAX_RANKING_SEARCH_CHARS),
             "channel_search_max_chars":str(MAX_CHANNEL_SEARCH_CHARS),
             "ranking_payload_contract":"compact-v3",
+            "ranking_scope_counts_json":json.dumps(
+                validation["rankingScopes"],
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",",":"),
+            ),
+            "ranking_scope_series":str(len(validation["rankingScopes"])),
             "ranges_json":json.dumps(validation["ranges"],ensure_ascii=False,sort_keys=True,separators=(",",":")),
             "coverage_json":json.dumps(validation["coverage"],ensure_ascii=False,sort_keys=True,separators=(",",":")),
             "counts_json":json.dumps(validation["counts"],ensure_ascii=False,sort_keys=True,separators=(",",":")),

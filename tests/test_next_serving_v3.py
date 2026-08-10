@@ -8,15 +8,18 @@ import os
 import shutil
 import sqlite3
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from urllib.parse import parse_qs
 
 ROOT=Path(__file__).resolve().parents[1]
 SERVER_PATH=ROOT/"server"/"release_serving_server.py"
-SNAPSHOT_PATH=ROOT/"scripts"/"migration"/"snapshot-runtime-db.py"
+PG_ADAPTER_PATH=ROOT/"server"/"pg_adapter.py"
+PG_MATERIALIZER_PATH=ROOT/"scripts"/"migration"/"materialize-pg-release-snapshot.py"
 MATERIALIZER_PATH=ROOT/"scripts"/"migration"/"materialize-ranking-pages.py"
 BUILDER_PATH=ROOT/"scripts"/"migration"/"build-serving-store.py"
 BUNDLE_PATH=ROOT/"scripts"/"migration"/"build-release-bundle.py"
@@ -25,9 +28,11 @@ INSTALLER_PATH=ROOT/"deploy"/"install-wdc-release.sh"
 
 
 def load(name:str,path:Path):
-    spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);assert spec and spec.loader;spec.loader.exec_module(module);return module
+    spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);assert spec and spec.loader;sys.modules[name]=module;spec.loader.exec_module(module);return module
 
-snapshotter=load("snapshotter",SNAPSHOT_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH)
+sys.path.insert(0,str(ROOT/"server"))
+pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
+pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH)
 ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
@@ -94,12 +99,66 @@ def create_pages(root:Path)->None:
             (directory/f"page-{page:04d}.json").write_text(json.dumps(payload,ensure_ascii=False),encoding="utf-8")
 
 
+class FakeCursor:
+    def __init__(self):self.statements=[]
+    def execute(self,statement,*_args):self.statements.append(statement)
+    def close(self):pass
+
+
+class FakePgConnection:
+    def __init__(self):self.autocommit=True;self.cursor_value=FakeCursor();self.rollbacks=0;self.closed=False
+    def cursor(self):return self.cursor_value
+    def rollback(self):self.rollbacks+=1
+    def close(self):self.closed=True
+
+
+class FakeSnapshotPageBuilder:
+    def __init__(self,_connection):pass
+    def build_combo(self,range_id,view,metric,scope_key="all"):
+        def render(page):
+            key=f"source-{range_id}-{view}" if view in {"songs","vtubers"} else ""
+            record={"rank":1,"type":view[:-1] if view.endswith("s") else view,
+                    "key":f"{range_id}-{view}","title":f"{range_id} {view}","displayArtist":"Fixture",
+                    "name":f"{range_id} {view}","count":3,"songCount":2,"videoCount":2,
+                    "timestampCount":3,"channelName":"Fixture","channelId":"UCfixture",
+                    "occurrences":[{"videoId":f"preview-{range_id}-{view}","seconds":1}]}
+            if key:record["sourceDetailKey"]=key
+            return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,
+                    "page":page,"pageSize":200,"totalCount":1,"filteredBaseCount":1,
+                    "totalOccurrenceCount":3,"totalSongCount":2,"totalVideoCount":2,
+                    "pageCount":1,"compact":False,"records":[record] if page==1 else []}
+        return render
+
+
+def fake_pg_meta(_connection):
+    return {"meta":{"active_revision_id":REV,"content_sha256":"c"*64,
+                    "parent_revision_id":"parent-revision","source_commit_sha":"a"*40,
+                    "built_at":"2026-08-10T00:00:00Z","latest_generated_at":"2026-08-09T23:59:59Z"}}
+
+
+def fake_pg_source(_connection,key,query):
+    range_id=str(query.get("range") or "all");page=int(query.get("page") or 1)
+    start=0 if page==1 else 200;stop=200 if page==1 else 201
+    occurrences=[]
+    for index in range(start,stop):
+        occurrences.append({"videoId":f"video-{range_id}-{index:03d}","title":f"Video {index}",
+                            "channelName":"Fixture","channelId":"UCfixture","channelHandle":"@fixture",
+                            "channelUrl":"https://youtube.com/@fixture","publishedAt":"2026-08-10T00:00:00Z",
+                            "seconds":index,"song":{"songKey":f"song-{index%2}","title":f"Song {index%2}",
+                                                        "artist":"Fixture","isNiche":index%2==0}})
+    record={"type":"song" if "songs" in key else "vtuber","key":key,
+            "sourceDetailKey":key,"rangeId":range_id,"count":201,"videoCount":201,
+            "timestampCount":201,"occurrences":occurrences}
+    return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
+            "page":page,"pageSize":200,"pageCount":2,"totalCount":201,
+            "totalVideoCount":201,"totalOccurrenceCount":201}
+
+
 class Tests(unittest.TestCase):
     def setUp(self):
         self.temp=Path(tempfile.mkdtemp(prefix="dsl-v3-"));self.source=self.temp/"source.sqlite";self.pages=self.temp/"pages";self.serving=self.temp/"serving.sqlite";self.releases=self.temp/"releases"
         create_source_db(self.source)
-        self.snapshot=self.temp/"snapshot.sqlite"
-        self.snapshot_result=snapshotter.snapshot(self.source,self.snapshot,expected_revision=REV)
+        self.snapshot=self.source
         self.materialized=materializer.materialize(self.snapshot,self.pages,active_revision_id=REV)
         self.build=builder.build_serving_store(self.snapshot,self.pages,self.serving,active_revision_id=REV,built_at="2026-08-10T00:00:00Z")
         meta={"activeRevisionId":REV,"expectedParentRevisionId":"parent","sourceCommitSha":"a"*40,"serverCommitSha":SERVER_COMMIT,"buildLogicSha":"b"*64,"generatedAt":"2026-08-10T00:00:00Z","latestEventTime":"2026-08-09T23:59:59Z"}
@@ -108,8 +167,6 @@ class Tests(unittest.TestCase):
     def tearDown(self):shutil.rmtree(self.temp,ignore_errors=True)
 
     def test_canonical_keys_and_coverage(self):
-        self.assertEqual(self.snapshot_result["activeRevisionId"],REV)
-        self.assertGreater(self.snapshot_result["bytes"],0)
         self.assertEqual(self.materialized["records"],2277)
         self.assertEqual(self.materialized["pages"],27)
         with closing(sqlite3.connect(self.serving)) as c:
@@ -209,7 +266,93 @@ class Tests(unittest.TestCase):
     def test_frontend_patcher(self):
         app=self.temp/"app.js"
         app.write_text('''function shouldUseRuntimeApiForRequest(request) {\n  if (!state.runtimeApi.available) return false;\n  return true;\n}\n  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";\nasync function loadRequestSearchRecords(query, signal) {\n  const range = state.range;\n  if (state.runtimeApi.available) {\n    const params = new URLSearchParams({\n      range,\n      view: "songs",\n      metric: "occurrences",\n      page: "1",\n      pageSize: "12",\n      q: cleanText(query),\n    });\n    const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {\n      cache: "no-cache",\n      signal,\n    });\nfunction sourceDetailPathForRecord(record, occurrences = []) {\n  const ownerRecord = record?._record || {};\n  const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);\n  if (explicitPath) return explicitPath;\n  const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);\n  const vtuberAlias = cleanText(record?.channelId || ownerRecord?.channelId || (record?.type === "vtuber" ? record?.key : "") || (ownerRecord?.type === "vtuber" ? ownerRecord?.key : ""));\n  if (detailKey || vtuberAlias) {\n    return `/api/sources/${encodeURIComponent(detailKey || vtuberAlias)}`;\n  }\n  const candidates = [\n    record?.sourceDetail?.path,\n    record?.sourceDetails?.path,\n    record?.detailPath,\n    record?.detail?.path,\n    ownerRecord?.sourceDetail?.path,\n    ownerRecord?.sourceDetails?.path,\n    ownerRecord?.detailPath,\n    ownerRecord?.detail?.path,\n    occurrences?.[0]?.sourceDetailPath,\n    occurrences?.[0]?.sourceDetail?.path,\n    occurrences?.[0]?.item?.sourceDetailPath,\n    occurrences?.[0]?.item?.sourceDetail?.path,\n    sourceDetailPathFromShard(record, occurrences),\n  ];\n  return cleanText(candidates.find(Boolean));\n}\nfunction a(path,requestPath,key){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => normalizeSourceDetailOccurrences(payload, key))\n}\nfunction b(path,requestPath){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => {\n}\n  params.set("range", cleanText(state.range) || "all");\n  const suffix = params.toString();\n''',encoding="utf-8")
-        self.assertTrue(patcher.patch_app(app));patched=app.read_text();self.assertIn("function runtimeApiCapabilities()",patched);self.assertIn("function runtimeSupportsLocalSources(",patched);self.assertIn('params.set("v", releaseVersion)',patched);self.assertFalse(patcher.patch_app(app))
+        self.assertTrue(patcher.patch_app(app));patched=app.read_text();self.assertIn("function runtimeApiCapabilities()",patched);self.assertIn("function runtimeSupportsLocalSources(",patched);self.assertIn("capabilities.rankingScopes",patched);self.assertIn('params.set("v", releaseVersion)',patched);self.assertFalse(patcher.patch_app(app))
+
+    def test_pg_snapshot_exports_all_scopes_and_complete_source_pages(self):
+        pages=self.temp/"pg-pages";meta=self.temp/"pg-meta.json";canonical=self.temp/"pg-canonical.sqlite"
+        connection=FakePgConnection()
+        with patch.object(pg_materializer.adapter,"connect_from_env",return_value=connection), \
+             patch.object(pg_materializer.adapter,"meta_payload",side_effect=fake_pg_meta), \
+             patch.object(pg_materializer.adapter,"source_payload",side_effect=fake_pg_source), \
+             patch.object(pg_materializer,"SnapshotPageBuilder",FakeSnapshotPageBuilder):
+            result=pg_materializer.materialize(pages,meta,canonical,REV)
+        self.assertTrue(connection.closed)
+        self.assertGreaterEqual(connection.rollbacks,1)
+        self.assertEqual(len(list(pages.rglob("page-*.json"))),18)
+        self.assertEqual(result["ranking_scope_series"],72)
+        self.assertEqual(result["ranking_rows"],72)
+        self.assertEqual(result["source_details"],4)
+        self.assertEqual(result["source_occurrences"],804)
+        with closing(sqlite3.connect(canonical)) as database:
+            scope_marker=json.loads(dict(database.execute("SELECT key,value FROM meta"))["ranking_scope_counts_json"])
+            scopes={row[0] for row in database.execute("SELECT DISTINCT scope_key FROM ranking_rows")}
+            source_counts=dict(database.execute("SELECT range_id,count(*) FROM source_occurrences GROUP BY range_id"))
+        self.assertEqual(len(scope_marker),72)
+        self.assertEqual(scopes,{"all","niche","visible","visibleNiche"})
+        self.assertEqual(source_counts,{"7d":402,"all":402})
+        serving=self.temp/"pg-serving.sqlite"
+        built=builder.build_serving_store(canonical,pages,serving,active_revision_id=REV)
+        self.assertEqual(len(built["validation"]["rankingScopes"]),72)
+
+    def test_zero_count_filtered_scope_is_declared_and_served(self):
+        canonical=self.temp/"zero-scope.sqlite";shutil.copyfile(self.snapshot,canonical)
+        expected={}
+        with closing(sqlite3.connect(canonical)) as database:
+            for range_id,view,metric,count in database.execute(
+                "SELECT range_id,view,metric,count(*) FROM ranking_rows "
+                "GROUP BY range_id,view,metric ORDER BY range_id,view,metric"
+            ):
+                expected[f"{range_id}/{view}/{metric}/all"]=int(count)
+                for scope in ("niche","visible","visibleNiche"):
+                    expected[f"{range_id}/{view}/{metric}/{scope}"]=0
+            database.execute("INSERT INTO meta(key,value) VALUES(?,?)",(
+                "ranking_scope_counts_json",json.dumps(expected,sort_keys=True,separators=(",",":")),
+            ))
+            database.execute("INSERT INTO meta(key,value) VALUES(?,?)",(
+                "ranking_scope_series",str(len(expected)),
+            ))
+            database.commit()
+        zero_serving=self.temp/"zero-serving.sqlite"
+        built=builder.build_serving_store(canonical,self.pages,zero_serving,active_revision_id=REV)
+        marker="all/songs/count/visibleNiche"
+        self.assertEqual(len(built["validation"]["rankingScopes"]),72)
+        self.assertEqual(built["validation"]["rankingScopes"][marker],0)
+
+        def open_zero(_sha):
+            connection=sqlite3.connect(f"file:{zero_serving}?mode=ro",uri=True)
+            connection.row_factory=sqlite3.Row
+            return connection
+
+        query=parse_qs("nicheOnly=1&hideUnknownArtist=1")
+        with patch.object(self.store,"require_ready",return_value={}), \
+             patch.object(self.store,"open_db",side_effect=open_zero):
+            payload=self.store.dynamic_page(self.sha,query,"all","songs","occurrences",1,30)
+        self.assertEqual(payload["totalCount"],0)
+        self.assertEqual(payload["filteredBaseCount"],250)
+        self.assertEqual(payload["records"],[])
+
+    def test_pg_adapter_selects_one_persisted_scope(self):
+        calls=[]
+        def fake_rows(_connection,sql,params=()):
+            calls.append((sql,list(params)))
+            self.assertIn("scope_key",sql)
+            self.assertIn("visibleNiche",params)
+            if "SELECT count(*) AS total_count" in sql:
+                return [{"total_count":1,"total_occurrence_count":3,
+                         "total_song_count":2,"total_video_count":1}]
+            return [{"rank":1,"detail_key":"video-key","title":"Video","name":"Video",
+                     "channel_search_text":"Fixture","payload_json":{"rank":1,"type":"video",
+                     "key":"video-key","videoId":"video-key","title":"Video","count":3,
+                     "songCount":2,"videoCount":1,"timestampCount":3,"occurrences":[]}}]
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows):
+            payload=pg_adapter._runtime_rankings_payload(object(),REV,{"range":"all","view":"videos",
+                "metric":"occurrences","page":"1","pageSize":"30","compact":"1",
+                "nicheOnly":"1","hideUnknownArtist":"1"})
+        self.assertEqual(payload["totalCount"],1)
+        self.assertEqual(len(calls),2)
+        adapter_text=PG_ADAPTER_PATH.read_text(encoding="utf-8")
+        self.assertIn("AND ranking.scope_key = %s",adapter_text)
+        self.assertIn("AND parent_row.scope_key = %s",adapter_text)
 
     def test_http_contract_exposes_version_and_local_data_source(self):
         httpd=server.ThreadingHTTPServer(("127.0.0.1",0),server.make_handler(self.store));httpd.daemon_threads=True
@@ -238,8 +381,9 @@ class Tests(unittest.TestCase):
     def test_workflow_deploys_complete_artifact_and_never_marks_proxy_fallback(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
         installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
-        self.assertIn("snapshot-runtime-db.py",workflow)
-        self.assertIn("materialize-ranking-pages.py",workflow)
+        self.assertIn("materialize-pg-release-snapshot.py",workflow)
+        self.assertIn("server/pg_adapter.py",workflow)
+        self.assertIn("--snapshot-output",workflow)
         self.assertIn("build-serving-store.py",workflow)
         self.assertIn("release_serving_server.py",workflow)
         self.assertIn("install-wdc-release.sh",workflow)
@@ -248,9 +392,12 @@ class Tests(unittest.TestCase):
         self.assertNotIn("PUBLIC_BASE",workflow)
         self.assertNotIn("https://ytb-song-rank.culua.com",workflow)
         self.assertNotIn("/api/rankings?range=",workflow)
-        self.assertIn('VPS2_RUNTIME_DB: ${{ vars.VPS2_RUNTIME_DB }}',workflow)
+        self.assertNotIn("VPS2_RUNTIME_DB",workflow)
+        self.assertNotIn("snapshot-runtime-db.py",workflow)
         self.assertNotIn("/var/lib/culua/ytb-song-rank/song-rank.sqlite",workflow)
-        self.assertIn('test -n "$VPS2_RUNTIME_DB"',workflow)
+        self.assertIn("PGHOST=/var/run/postgresql",workflow)
+        self.assertIn("--uid=www-data",workflow)
+        self.assertIn('chown root:www-data "$remote_root"',workflow)
         self.assertIn("systemd-run --quiet --wait --pipe --collect",workflow)
         self.assertIn('[[ "$DEPLOYED_STATUS" == "ok"',workflow)
         self.assertIn('"$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$',workflow)

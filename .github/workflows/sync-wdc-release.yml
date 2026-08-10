@@ -20,8 +20,6 @@ concurrency:
 env:
   VPS2_HOST: ${{ secrets.VPS2_HOST }}
   VPS2_USER: "root"
-  # This must be set only after a read-only VPS2 preflight verifies the canonical path.
-  VPS2_RUNTIME_DB: ${{ vars.VPS2_RUNTIME_DB }}
   WDC_HOST: ${{ secrets.WDC_HOST }}
   WDC_USER: ${{ secrets.WDC_USER }}
   WDC_RELEASES_ROOT: "/opt/culua/ytb-song-rank/releases"
@@ -44,7 +42,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             server/release_serving_server.py
-            scripts/migration/snapshot-runtime-db.py
+            server/pg_adapter.py
+            scripts/migration/materialize-pg-release-snapshot.py
             scripts/migration/materialize-ranking-pages.py
             scripts/migration/build-serving-store.py
             scripts/migration/build-release-bundle.py
@@ -58,7 +57,8 @@ jobs:
           set -Eeuo pipefail
           python3 -m py_compile \
             server/release_serving_server.py \
-            scripts/migration/snapshot-runtime-db.py \
+            server/pg_adapter.py \
+            scripts/migration/materialize-pg-release-snapshot.py \
             scripts/migration/materialize-ranking-pages.py \
             scripts/migration/build-serving-store.py \
             scripts/migration/build-release-bundle.py \
@@ -68,7 +68,8 @@ jobs:
             python3 -m unittest discover -s tests -p 'test_next_serving_v3.py' -v
           BUILD_LOGIC_SHA="$({
             sha256sum server/release_serving_server.py
-            sha256sum scripts/migration/snapshot-runtime-db.py
+            sha256sum server/pg_adapter.py
+            sha256sum scripts/migration/materialize-pg-release-snapshot.py
             sha256sum scripts/migration/materialize-ranking-pages.py
             sha256sum scripts/migration/build-serving-store.py
             sha256sum scripts/migration/build-release-bundle.py
@@ -88,14 +89,6 @@ jobs:
           test -n "$VPS2_PASSWORD"
           test -n "$WDC_SSH_PRIVATE_KEY"
           test -n "$WDC_KNOWN_HOSTS"
-          test -n "$VPS2_RUNTIME_DB" || {
-            echo "VPS2_RUNTIME_DB repository/environment variable is required" >&2
-            exit 64
-          }
-          [[ "$VPS2_RUNTIME_DB" =~ ^/[A-Za-z0-9._/-]+$ ]] || {
-            echo "VPS2_RUNTIME_DB must be a shell-safe absolute path" >&2
-            exit 64
-          }
           mkdir -p /tmp/ssh
           printf '%s\n' "$VPS2_PASSWORD" > /tmp/ssh/vps2-password
           printf '%s\n' "$WDC_SSH_PRIVATE_KEY" > /tmp/ssh/wdc-key
@@ -161,41 +154,44 @@ jobs:
           VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
           REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           echo "remote_root=$REMOTE_ROOT" >> "$GITHUB_OUTPUT"
-          ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "mkdir -p '$REMOTE_ROOT'"
+          ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+            "test ! -e '$REMOTE_ROOT' && install -d -m 0750 '$REMOTE_ROOT'"
           scp "${VPS2_SSH[@]}" \
             server/release_serving_server.py \
-            scripts/migration/snapshot-runtime-db.py \
-            scripts/migration/materialize-ranking-pages.py \
+            server/pg_adapter.py \
+            scripts/migration/materialize-pg-release-snapshot.py \
             scripts/migration/build-serving-store.py \
             scripts/migration/build-release-bundle.py \
             "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/"
 
           ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
-            "$REMOTE_ROOT" "$ACTIVE" "$VPS2_RUNTIME_DB" "$GITHUB_SHA" "$BUILD_LOGIC_SHA" \
+            "$REMOTE_ROOT" "$ACTIVE" "$GITHUB_SHA" "$BUILD_LOGIC_SHA" \
             "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'REMOTE'
           set -Eeuo pipefail
           remote_root="$1"
           expected_active="$2"
-          runtime_db="$3"
-          server_commit="$4"
-          build_logic_sha="$5"
-          run_id="$6"
-          run_attempt="$7"
-          test -r "$runtime_db" || { echo "RUNTIME_DB_MISSING $runtime_db" >&2; exit 66; }
+          server_commit="$3"
+          build_logic_sha="$4"
+          run_id="$5"
+          run_attempt="$6"
           cd "$remote_root"
-          pages_root="$remote_root/pages"
-          bundles_root="$remote_root/bundles"
-          serving_db="$remote_root/serving.sqlite"
-          runtime_snapshot="$remote_root/runtime-snapshot.sqlite"
-          meta_file="$remote_root/source-meta.json"
-          rm -rf "$pages_root" "$bundles_root" "$serving_db" "$runtime_snapshot"
-          mkdir -p "$pages_root" "$bundles_root"
+          build_root="$remote_root/build"
+          pages_root="$build_root/pages"
+          bundles_root="$build_root/bundles"
+          serving_db="$build_root/serving.sqlite"
+          canonical_snapshot="$build_root/canonical-runtime.sqlite"
+          meta_file="$build_root/source-meta.json"
+          chown root:www-data "$remote_root"
+          chmod 0750 "$remote_root"
+          install -d -o www-data -g www-data -m 0750 "$build_root"
 
           run_isolated() {
             local phase="$1"
             shift
             systemd-run --quiet --wait --pipe --collect \
               --unit="dsl-wdc-${phase}-${run_id}-${run_attempt}" \
+              --uid=www-data \
+              --gid=www-data \
               --property=MemoryMax=700M \
               --property=Nice=15 \
               --property=CPUWeight=10 \
@@ -205,50 +201,43 @@ jobs:
               "$@"
           }
 
-          curl --silent --show-error --fail --retry 5 --retry-all-errors \
-            --connect-timeout 10 --max-time 60 \
-            http://127.0.0.1:8765/api/meta > "$remote_root/meta-api.json"
-          python3 - "$expected_active" "$remote_root/meta-api.json" "$meta_file" <<'PY'
-          import json, sys
-          expected, source_path, output_path = sys.argv[1:]
-          meta = json.load(open(source_path, encoding="utf-8"))
-          fields = meta.get("meta") or {}
-          active = str(fields.get("active_revision_id") or "")
-          if active != expected:
-              raise SystemExit(f"ACTIVE_MISMATCH before materialize: local={active} expected={expected}")
-          marker = {
-              key: fields.get(key, "")
-              for key in (
-                  "active_revision_id",
-                  "content_sha256",
-                  "parent_revision_id",
-                  "source_commit_sha",
-                  "built_at",
-                  "latest_generated_at",
-              )
-          }
-          with open(output_path, "w", encoding="utf-8") as stream:
-              json.dump(marker, stream, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-          PY
-
-          run_isolated snapshot /usr/bin/python3 "$remote_root/snapshot-runtime-db.py" \
-            --source "$runtime_db" \
-            --output "$runtime_snapshot" \
+          # Resolve parent/overlay/authoritative-7d semantics through the same
+          # adapter as production, inside one repeatable-read, read-only PG
+          # transaction.  Pages, every filtered scope, and complete sources
+          # are emitted from that one immutable database view.
+          run_isolated snapshot /usr/bin/env \
+            PGHOST=/var/run/postgresql \
+            PGDATABASE=song_rank \
+            PGUSER=www-data \
+            PYTHONPATH="$remote_root" \
+            /usr/bin/python3 "$remote_root/materialize-pg-release-snapshot.py" \
+            --output "$pages_root" \
+            --meta-output "$meta_file" \
+            --snapshot-output "$canonical_snapshot" \
             --expected-revision "$expected_active"
 
-          # Build every compact page from the same read-only runtime snapshot.
-          # This does not call the old ranking HTTP API once per page.
-          run_isolated pages /usr/bin/python3 "$remote_root/materialize-ranking-pages.py" \
-            --source-db "$runtime_snapshot" \
-            --output "$pages_root" \
-            --active-revision-id "$expected_active" \
-            --ranges "7d,all" \
-            --views "songs,vtubers,videos" \
-            --metrics "occurrences,songs,videos"
+          test -s "$meta_file"
+          test -s "$canonical_snapshot"
+          python3 - "$meta_file" "$expected_active" <<'PY'
+          import json, sys
+          path, expected = sys.argv[1:]
+          marker = json.load(open(path, encoding="utf-8"))
+          assert marker["active_revision_id"] == expected, marker
+          assert int(marker["page_files"]) >= 18, marker
+          assert int(marker["ranking_scope_series"]) == 72, marker
+          assert int(marker["ranking_rows"]) > 0, marker
+          assert int(marker["source_details"]) > 0, marker
+          assert int(marker["source_occurrences"]) > 0, marker
+          for range_id in ("7d", "all"):
+              stats = marker["source_ranges"][range_id]
+              assert int(stats["details"]) > 0, marker
+              assert int(stats["occurrences"]) > 0, marker
+          print("PG_CANONICAL_SNAPSHOT_OK", marker["ranking_rows"], marker["source_occurrences"])
+          PY
 
           built_at="$(python3 -c "import json; print(json.load(open('$meta_file')).get('built_at') or '')")"
           run_isolated serving /usr/bin/python3 "$remote_root/build-serving-store.py" \
-            --source-db "$runtime_snapshot" \
+            --source-db "$canonical_snapshot" \
             --ranking-root "$pages_root" \
             --output "$serving_db" \
             --active-revision-id "$expected_active" \
@@ -361,22 +350,125 @@ jobs:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
         run: |
           set -Eeuo pipefail
-          curl --silent --show-error --fail --max-time 20 \
-            https://next.ytb-song-rank.culua.com/healthz > /tmp/next-health.json
           python3 - "$BUNDLE_SHA" "$BUILD_LOGIC_SHA" <<'PY'
-          import json, sys
-          p=json.load(open('/tmp/next-health.json',encoding='utf-8'))
-          expected_sha, expected_logic=sys.argv[1],sys.argv[2]
-          assert p.get('status') == 'ok', p
-          assert p.get('releaseContentSha') == expected_sha, p
-          assert p.get('buildLogicSha') == expected_logic, p
-          assert p.get('oldOriginDependency') is False, p
-          assert p.get('sourceFallbackEnabled') is False, p
-          print('PUBLIC_HEALTH_OK', expected_sha[:16])
+          import json
+          import sys
+          from urllib.parse import quote, urlencode
+          from urllib.request import Request, urlopen
+
+          base = "https://next.ytb-song-rank.culua.com"
+          expected_sha, expected_logic = sys.argv[1], sys.argv[2]
+          expected_scopes = {"all", "niche", "visible", "visibleNiche"}
+
+          def fetch(path, *, data_source=None):
+              request = Request(
+                  base + path,
+                  headers={"Accept": "application/json", "User-Agent": "daily-song-list-release-gate/3"},
+              )
+              with urlopen(request, timeout=20) as response:
+                  assert response.status == 200, (path, response.status)
+                  assert response.headers.get("X-Release-Sha") == expected_sha, (
+                      path,
+                      response.headers.get("X-Release-Sha"),
+                  )
+                  if data_source is not None:
+                      assert response.headers.get("X-Data-Source") == data_source, (
+                          path,
+                          response.headers.get("X-Data-Source"),
+                      )
+                  return json.loads(response.read())
+
+          health = fetch("/healthz")
+          assert health.get("status") == "ok", health
+          assert health.get("releaseContentSha") == expected_sha, health
+          assert health.get("buildLogicSha") == expected_logic, health
+          assert health.get("oldOriginDependency") is False, health
+          assert health.get("sourceFallbackEnabled") is False, health
+          assert set(health.get("rankingScopes") or []) == expected_scopes, health
+
+          meta = fetch("/api/meta", data_source="local-release")
+          capabilities = meta.get("capabilities") or {}
+          assert capabilities.get("localSources") is True, meta
+          assert capabilities.get("localSearch") is True, meta
+          assert capabilities.get("oldOriginDependency") is False, meta
+          assert capabilities.get("sourceFallbackEnabled") is False, meta
+          assert set(capabilities.get("rankingScopes") or []) == expected_scopes, meta
+          assert {"7d", "all"}.issubset(set(capabilities.get("ranges") or [])), meta
+
+          ranking_records = []
+          for range_id in ("all", "7d"):
+              query = urlencode({
+                  "v": expected_sha,
+                  "range": range_id,
+                  "view": "songs",
+                  "metric": "occurrences",
+                  "page": 1,
+                  "pageSize": 30,
+              })
+              ranking = fetch("/api/rankings?" + query, data_source="local-release-chunk")
+              records = ranking.get("records") or []
+              assert 0 < len(records) <= 30, (range_id, ranking)
+              if range_id == "all":
+                  ranking_records = records
+
+          dynamic_query = urlencode({
+              "v": expected_sha,
+              "range": "all",
+              "view": "songs",
+              "metric": "occurrences",
+              "nicheOnly": 1,
+              "hideUnknownArtist": 1,
+              "page": 1,
+              "pageSize": 5,
+          })
+          dynamic = fetch("/api/rankings?" + dynamic_query, data_source="local-serving-sqlite")
+          assert len(dynamic.get("records") or []) <= 5, dynamic
+
+          source_record = next(
+              (record for record in ranking_records if str(record.get("sourceDetailKey") or "")),
+              None,
+          )
+          assert source_record is not None, ranking_records
+          source_key = str(source_record["sourceDetailKey"])
+          source_query = urlencode({
+              "v": expected_sha,
+              "range": "all",
+              "page": 1,
+              "pageSize": 2,
+          })
+          source = fetch(
+              "/api/sources/" + quote(source_key, safe="") + "?" + source_query,
+              data_source="local-serving-sqlite",
+          )
+          assert source.get("found") is True, source
+          assert source.get("sourceKey") == source_key, source
+          assert int(source.get("totalVideoCount") or 0) > 0, source
+          assert int(source.get("totalOccurrenceCount") or 0) > 0, source
+
+          search_text = next(
+              (
+                  str(source_record.get(key) or "").strip()
+                  for key in ("title", "workTitle", "artist", "displayArtist", "name")
+                  if str(source_record.get(key) or "").strip()
+              ),
+              source_key,
+          )
+          search_query = urlencode({
+              "v": expected_sha,
+              "range": "all",
+              "view": "songs",
+              "metric": "occurrences",
+              "q": search_text,
+              "page": 1,
+              "pageSize": 5,
+          })
+          search = fetch("/api/rankings?" + search_query, data_source="local-serving-sqlite")
+          assert search.get("records"), (search_text, search)
+
+          print("PUBLIC_HEALTH_META_OK", expected_sha[:16])
+          print("PUBLIC_RANKING_SCOPES_OK", ",".join(sorted(expected_scopes)))
+          print("PUBLIC_SOURCE_SEARCH_OK", source_key, search_text)
           PY
-          curl --silent --show-error --fail --compressed --max-time 20 \
-            "https://next.ytb-song-rank.culua.com/api/rankings?v=$BUNDLE_SHA&range=all&view=songs&metric=occurrences&page=1&pageSize=30" \
-            | python3 -c 'import json,sys; p=json.load(sys.stdin); assert len(p.get("records") or []) <= 30; print("PUBLIC_RANKING_OK",len(p.get("records") or []))'
 
       - name: Cleanup temporary build material
         if: always()

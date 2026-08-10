@@ -400,6 +400,20 @@ _GENERIC_RANKING_PREPARATION_FLIGHTS: dict[
 _GENERIC_RANKING_PREPARATION_LOCK = threading.RLock()
 
 
+def _ranking_scope_key(options: Mapping[str, Any]) -> str:
+    """Map public filters to the canonical persisted ranking scope."""
+
+    niche_only = bool(options.get("nicheOnly"))
+    hide_unknown = bool(options.get("hideUnknownArtist"))
+    if niche_only and hide_unknown:
+        return "visibleNiche"
+    if niche_only:
+        return "niche"
+    if hide_unknown:
+        return "visible"
+    return "all"
+
+
 def _phase_trace(phase: str, started_at: float, **counts: int) -> float:
     """Emit candidate-only timing markers without changing normal API output."""
 
@@ -3063,6 +3077,7 @@ def _resolve_exact_vtuber_channel_scope(
             AND ranking.range_id = %s
             AND ranking.view = 'vtubers'
             AND ranking.metric = %s
+            AND ranking.scope_key = %s
             AND ranking.detail_key <> ''
             AND coalesce(
                   ranking.payload_json::jsonb->>'channelId',
@@ -3119,6 +3134,7 @@ def _resolve_exact_vtuber_channel_scope(
             parent_revision_id,
             _text(options.get("range")) or "all",
             db_metric,
+            _ranking_scope_key(options),
             list(overlay_revision_ids),
             3,
         ],
@@ -6938,6 +6954,7 @@ def _prepare_generic_overlay_rankings(
             "previewExcludedOccurrenceIds": (),
         }
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    db_scope = _ranking_scope_key(options)
     overlay_ids = _overlay_revision_ids(connection, revision_id, parent[0])
     vtuber_residual_spec = _vtuber_residual_search_spec(options)
     exact_channel_scope = _resolve_exact_vtuber_channel_scope(
@@ -6996,7 +7013,9 @@ def _prepare_generic_overlay_rankings(
     )
     search_select = "search_text, channel_search_text" if options["q"] else "'' AS search_text, '' AS channel_search_text"
     search_clause = ""
-    base_params: list[Any] = [parent[0], options["range"], options["view"], db_metric]
+    base_params: list[Any] = [
+        parent[0], options["range"], options["view"], db_metric, db_scope,
+    ]
     if song_channel_scope is not None and song_title_query:
         search_clause = " AND title ILIKE %s ESCAPE E'\\\\'"
         base_params.append(
@@ -7105,13 +7124,14 @@ def _prepare_generic_overlay_rankings(
                    COALESCE(SUM(video_count), 0) AS total_video_count
             FROM runtime_ranking_rows
             WHERE revision_id = %s AND range_id = %s AND view = %s
-              AND metric = %s AND {metric_column} >= %s
+              AND metric = %s AND scope_key = %s AND {metric_column} >= %s
             """,
             [
                 parent[0],
                 options["range"],
                 options["view"],
                 db_metric,
+                db_scope,
                 int(options["minCount"]),
             ],
         ) or {}
@@ -7138,7 +7158,8 @@ def _prepare_generic_overlay_rankings(
         if source_search_sql_active
         else (
             "WHERE ranking.revision_id = %s AND ranking.range_id = %s "
-            "AND ranking.view = %s AND ranking.metric = %s"
+            "AND ranking.view = %s AND ranking.metric = %s "
+            "AND ranking.scope_key = %s"
             f"{search_clause}"
         )
     )
@@ -7635,7 +7656,7 @@ def _prepare_generic_overlay_rankings(
                        '' AS search_text, '' AS channel_search_text
                 FROM runtime_ranking_rows
                 WHERE revision_id = %s AND range_id = %s AND view = %s
-                  AND metric = %s AND detail_key = ANY(%s)
+                  AND metric = %s AND scope_key = %s AND detail_key = ANY(%s)
                 ORDER BY rank
                 LIMIT %s
                 """,
@@ -7644,6 +7665,7 @@ def _prepare_generic_overlay_rankings(
                     options["range"],
                     options["view"],
                     db_metric,
+                    db_scope,
                     sorted(bounded_affected_keys),
                     len(bounded_affected_keys) + 1,
                 ],
@@ -7691,6 +7713,7 @@ def _prepare_generic_overlay_rankings(
                       AND parent_row.range_id = %s
                       AND parent_row.view = %s
                       AND parent_row.metric = %s
+                      AND parent_row.scope_key = %s
                       AND parent_row.{metric_column} >= %s
                       AND NOT EXISTS (
                           SELECT 1
@@ -7706,6 +7729,7 @@ def _prepare_generic_overlay_rankings(
                         options["range"],
                         options["view"],
                         db_metric,
+                        db_scope,
                         int(options["minCount"]),
                         base_window_end,
                     ],
@@ -8703,7 +8727,7 @@ def _hydrated_generic_ranking_payload(
             /* exact returned generic ranking payload hydration */
             SELECT payload_json FROM runtime_ranking_rows
             WHERE revision_id = %s AND range_id = %s AND view = %s
-              AND metric = %s AND detail_key = %s
+              AND metric = %s AND scope_key = %s AND detail_key = %s
             LIMIT 1
             """,
             [
@@ -8711,6 +8735,7 @@ def _hydrated_generic_ranking_payload(
                 options["range"],
                 view,
                 db_metric,
+                _ranking_scope_key(options),
                 row.get("detail_key"),
             ],
         )
@@ -9789,6 +9814,7 @@ def _runtime_source_search_sql(
               AND ranking.range_id = %s
               AND ranking.view = %s
               AND ranking.metric = %s
+              AND ranking.scope_key = %s
               AND ranking.row_count >= %s
         ){source_candidate_cte}, matched_source_tokens AS MATERIALIZED (
             SELECT DISTINCT {source_match_key} AS source_key,
@@ -9835,6 +9861,7 @@ def _runtime_source_search_sql(
             _text(options["range"]),
             _text(options["view"]),
             db_metric,
+            _ranking_scope_key(options),
             int(options["minCount"]),
             _text(options["range"]),
             _RANKING_SOURCE_SEARCH_MATCH_CAP + 1,
@@ -10539,14 +10566,21 @@ def _hydrate_runtime_ranking_song_previews(
 def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     options = _query_options(query)
     db_metric = "count" if options["metric"] in {"count", "occurrences"} else options["metric"]
+    db_scope = _ranking_scope_key(options)
     # The normal UI request has no text filter.  Do not materialize every
     # payload just to return one page: the full runtime projection can contain
     # hundreds of thousands of rows, and the old SQLite API answered this path
     # from a precomputed index.  Keep the filtered/search path below for
     # compatibility, but make the common path bounded and proxy-safe.
     if not options["q"]:
-        where = "revision_id = %s AND range_id = %s AND view = %s AND metric = %s AND row_count >= %s"
-        params = [revision_id, options["range"], options["view"], db_metric, options["minCount"]]
+        where = (
+            "revision_id = %s AND range_id = %s AND view = %s "
+            "AND metric = %s AND scope_key = %s AND row_count >= %s"
+        )
+        params = [
+            revision_id, options["range"], options["view"], db_metric,
+            db_scope, options["minCount"],
+        ]
         summary = _rows(
             connection,
             f"""
@@ -10622,6 +10656,7 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         else (
             " AND ranking.revision_id = %s AND ranking.range_id = %s"
             " AND ranking.view = %s AND ranking.metric = %s"
+            " AND ranking.scope_key = %s"
         )
     )
     rows = _rows(
@@ -10639,7 +10674,7 @@ def _runtime_rankings_payload(connection, revision_id: str, query: Mapping[str, 
         (
             [*source_cte_params, *source_outer_params]
             if source_search_sql_active
-            else [revision_id, options["range"], options["view"], db_metric]
+            else [revision_id, options["range"], options["view"], db_metric, db_scope]
         ),
     )
     if options["searchTokens"] and not source_search_sql_active:
@@ -11800,6 +11835,7 @@ def _runtime_source_key_for_channel_alias(connection, revision_id: str, requeste
     rows = _rows(connection, """
         SELECT payload_json, row_count FROM runtime_ranking_rows
         WHERE revision_id = %s AND view = 'vtubers' AND metric = 'count'
+          AND scope_key = 'all'
           AND (detail_key = %s OR channel_search_text ILIKE %s)
         LIMIT 8
         """, [revision_id, alias, f"%{alias}%"])
@@ -12164,6 +12200,7 @@ def _apply_generic_overlay_ranking_row_delta(
          AND affected_group.view = row.view
          AND affected_group.detail_key = row.detail_key
         WHERE row.revision_id = %s
+          AND row.scope_key = 'all'
         GROUP BY row.range_id, row.view, row.detail_key
         ORDER BY row.range_id, row.view, row.detail_key
         LIMIT %s
@@ -12275,6 +12312,7 @@ def _authoritative_7d_runtime_aggregate(
         FROM runtime_ranking_rows
         WHERE revision_id = %s
           AND range_id = '7d'
+          AND scope_key = 'all'
           AND row_count >= 1
           AND (
             (view = 'songs' AND metric IN ('count', 'videos'))
@@ -12587,6 +12625,7 @@ def _generic_public_all_range_baseline(
           AND range_id = 'all'
           AND view = 'songs'
           AND metric = 'count'
+          AND scope_key = 'all'
           AND row_count >= 1
         """,
         [parent_revision_id],
@@ -12619,6 +12658,7 @@ def _generic_public_all_range_baseline(
               AND parent_row.range_id = 'all'
               AND parent_row.view = 'songs'
               AND parent_row.metric = 'count'
+              AND parent_row.scope_key = 'all'
               AND parent_row.row_count >= 1
         ), unaffected_guard AS MATERIALIZED (
             SELECT COUNT(*) AS unaffected_group_count
@@ -12627,6 +12667,7 @@ def _generic_public_all_range_baseline(
               AND parent_row.range_id = 'all'
               AND parent_row.view = 'songs'
               AND parent_row.metric = 'count'
+              AND parent_row.scope_key = 'all'
               AND parent_row.row_count >= 1
               AND NOT EXISTS (
                   SELECT 1

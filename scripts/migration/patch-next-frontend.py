@@ -16,7 +16,7 @@ def replace_once(source:str,old:str,new:str,label:str)->str:
 def patch_app(path:Path)->bool:
     original=path.read_text(encoding="utf-8")
     if "function runtimeReleaseVersion()" in original:
-        required=("function runtimeApiCapabilities()","function runtimeSupportsLocalSources(","capabilities?.localSearch === true",'params.set("v", releaseVersion)',
+        required=("function runtimeApiCapabilities()","function runtimeSupportsLocalSources(","capabilities?.localSearch === true","capabilities.rankingScopes",'params.set("v", releaseVersion)',
                   'const sourceCacheMode = isRuntimeSourceDetailPath(path) && runtimeReleaseVersion()')
         missing=[x for x in required if x not in original]
         if missing:raise RuntimeError("frontend patch partially applied; missing: "+", ".join(missing))
@@ -58,6 +58,10 @@ function shouldUseRuntimeApiForRequest(request) {
   if (!runtimeCapabilityIncludes(capabilities.metrics, metric)) return false;
   const filters = requestFiltersForView(request.view, request.filters || {});
   if (cleanText(filters.q || "") && capabilities.localSearch !== true) return false;
+  const rankingScope = filters.nicheOnly
+    ? (filters.hideUnknownArtist ? "visibleNiche" : "niche")
+    : (filters.hideUnknownArtist ? "visible" : "all");
+  if (rankingScope !== "all" && !runtimeCapabilityIncludes(capabilities.rankingScopes, rankingScope)) return false;
   return true;
 }
 ''',"capability gate")
