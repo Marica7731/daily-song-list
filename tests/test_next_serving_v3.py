@@ -588,6 +588,9 @@ class Tests(unittest.TestCase):
         self.assertIn("PREP_STATE_DIR",installer)
         self.assertIn("state preserved at",installer)
         self.assertIn('git grep -nE -e "$pattern"',ci)
+        self.assertIn("sparse-checkout-cone-mode: false",ci)
+        self.assertIn("fetch-depth: 2",ci)
+        self.assertIn('git diff --check "$diff_base" HEAD',ci)
         self.assertNotIn('ranking_scope_series\"] == 72',workflow)
         self.assertNotIn("https://ytb-song-rank.culua.com",installer)
 

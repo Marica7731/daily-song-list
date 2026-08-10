@@ -28,6 +28,26 @@ jobs:
     steps:
       - name: Checkout pull request
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/sync-wdc-release.yml
+            .github/workflows/test-next-serving-v3.yml
+            assets/app.js
+            index.html
+            deploy/daily-song-list-api.service
+            deploy/install-wdc-release.sh
+            deploy/nginx-next-api.conf
+            scripts/migration/materialize-pg-release-snapshot.py
+            scripts/migration/materialize-ranking-pages.py
+            scripts/migration/build-serving-store.py
+            scripts/migration/build-release-bundle.py
+            scripts/migration/prepare-wdc-frontend.py
+            scripts/migration/patch-next-frontend.py
+            server/pg_adapter.py
+            server/release_serving_server.py
+            tests/test_next_serving_v3.py
 
       - name: Validate Python Node shell and YAML
         run: |
@@ -56,7 +76,13 @@ jobs:
               if not isinstance(value,dict):raise SystemExit(f"invalid workflow: {path}")
               print("YAML_OK",path)
           PY
-          git diff --check
+          diff_base="HEAD^"
+          if git rev-parse --verify HEAD^2 >/dev/null 2>&1; then diff_base="HEAD^1"; fi
+          git diff --check "$diff_base" HEAD -- \
+            .github/workflows/sync-wdc-release.yml \
+            .github/workflows/test-next-serving-v3.yml \
+            assets/app.js index.html deploy scripts/migration \
+            server/pg_adapter.py server/release_serving_server.py tests/test_next_serving_v3.py
 
       - name: Scan candidate files for committed secrets
         run: |
