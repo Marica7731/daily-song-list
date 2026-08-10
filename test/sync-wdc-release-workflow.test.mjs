@@ -20,6 +20,7 @@ test("WDC workflow exports one database snapshot and records only verified deplo
   assert.match(source, /test "\$actual_pages" = "\$snapshot_pages"/);
   assert.match(source, /WDC_DOMAIN_VERIFIED/);
   assert.match(source, /health\["currentRelease"\] == expected_bundle/);
+  assert.match(source, /bundle_sha="\$\{2:-\}"/);
   assert.doesNotMatch(source, /urllib\.request/);
 
   const materialize = source.indexOf("Materialize + build bundle");

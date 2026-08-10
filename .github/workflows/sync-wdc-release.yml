@@ -240,7 +240,7 @@ jobs:
           SSH_OPTS=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10)
           ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- "$GITHUB_RUN_ID" "$BUNDLE_SHA" <<'REMOTE'
           set -Eeuo pipefail
-          run_id="$1"; bundle_sha="$2"
+          run_id="$1"; bundle_sha="${2:-}"
           systemctl stop "dsl-wdc-snapshot-$run_id.service" 2>/dev/null || true
           rm -rf -- "/tmp/dsl-wdc-sync-$run_id" /tmp/dsl-wdc-pages /tmp/dsl-wdc-bundles
           rm -f -- /tmp/dsl-wdc-meta.json
