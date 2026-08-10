@@ -45,9 +45,9 @@ def canonical_meta(payload: Mapping[str, Any]) -> dict[str, str]:
         "built_at": _meta_value(raw, "built_at", "builtAt", "generatedAt"),
         "latest_generated_at": _meta_value(
             raw,
-            "latest_generated_at",
             "latestGeneratedAt",
             "generatedAt",
+            "latest_generated_at",
         ),
     }
     missing = [name for name, value in marker.items() if not value]

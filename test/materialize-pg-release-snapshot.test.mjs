@@ -89,6 +89,12 @@ module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
+priority_payload = fake.meta_payload(None)
+priority_payload["meta"]["generatedAt"] = "2026-08-10T06:22:03.626Z"
+assert module.canonical_meta(priority_payload)["latest_generated_at"] == (
+    "2026-08-10T06:22:03.626Z"
+)
+
 with tempfile.TemporaryDirectory() as temporary:
     root = Path(temporary)
     marker = module.materialize(
