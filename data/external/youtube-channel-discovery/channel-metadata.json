@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T20:15:28.716Z",
+  "generatedAt": "2026-08-10T20:59:25.969Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T20:15:28.716Z",
+    "fetchedAt": "2026-08-10T20:59:25.969Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T20:15:28.716Z",
+    "generatedAt": "2026-08-10T20:59:25.969Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1098,
-      "parseableChannels": 1078,
+      "totalChannels": 1101,
+      "parseableChannels": 1081,
       "realAvatar": 648,
-      "thumbnailFallback": 450,
+      "thumbnailFallback": 453,
       "missingDisplayImage": 0,
-      "missingAvatar": 450,
+      "missingAvatar": 453,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 628
+      "skipped_collected_evidence": 631
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 608,
+      "batch_limit_reached": 611,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@melty_el",
+        "channelId": "UCuMDk_EWGz9c0R_HfvUjOsw",
+        "displayName": "メルティch",
+        "sourceUrl": "https://www.youtube.com/@melty_el",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MikuroKotonoha",
         "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
@@ -11723,6 +11730,13 @@
         "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
         "displayName": "瀬戸乃とと",
         "sourceUrl": "https://www.youtube.com/@Setono_Toto",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@erishingyoji0521",
+        "channelId": "UChjfk_ii6syvF-Q3wyzV0JQ",
+        "displayName": "真行寺恵里チャンネル",
+        "sourceUrl": "https://www.youtube.com/@erishingyoji0521",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UCx3FdASxZpgILDwDv7MQYRg",
         "displayName": "琥珀ひなた",
         "sourceUrl": "https://www.youtube.com/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hm_pkr",
-        "channelId": "UC5HTrmQDKhsEFCvYs7AQz9A",
-        "displayName": "日向ぽかり Pokari Hinata",
-        "sourceUrl": "https://www.youtube.com/@hm_pkr",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yura_ayami",
-        "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
-        "displayName": "綾見ユラ / YuraAyami",
-        "sourceUrl": "https://www.youtube.com/@yura_ayami",
         "reason": "batch_limit_reached"
       }
     ]
