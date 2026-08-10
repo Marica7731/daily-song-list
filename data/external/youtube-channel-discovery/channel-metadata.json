@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T15:13:31.642Z",
+  "generatedAt": "2026-08-10T16:14:28.042Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T15:13:31.642Z",
+    "fetchedAt": "2026-08-10T16:14:28.042Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T15:13:31.642Z",
+    "generatedAt": "2026-08-10T16:14:28.042Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1093,
-      "parseableChannels": 1073,
+      "totalChannels": 1095,
+      "parseableChannels": 1075,
       "realAvatar": 648,
-      "thumbnailFallback": 445,
+      "thumbnailFallback": 447,
       "missingDisplayImage": 0,
-      "missingAvatar": 445,
+      "missingAvatar": 447,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 624
+      "skipped_collected_evidence": 626
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 604,
+      "batch_limit_reached": 606,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E3%83%8A%E3%82%AC%E3%83%AC",
+        "channelId": "UCzwHbM92dBREagbKtiou58Q",
+        "displayName": "ナガレ",
+        "sourceUrl": "https://www.youtube.com/@%E3%83%8A%E3%82%AC%E3%83%AC",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@ykn0911v",
+        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
+        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
+        "sourceUrl": "https://www.youtube.com/@ykn0911v",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@MonicaMelodia",
+        "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
+        "displayName": "Monica Ch. モニカ・メロディア",
+        "sourceUrl": "https://www.youtube.com/@MonicaMelodia",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@rikka-hoshiumi0217",
         "channelId": "UCUhwsEiJ7PZmEu0qdJ9_Aeg",
@@ -11828,27 +11849,6 @@
         "channelId": "UCxMovBd8wNiHHlvFX5YR3dQ",
         "displayName": "獅田ちよ / Shida Chiyo",
         "sourceUrl": "https://www.youtube.com/@ShidaChiyo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mozuhiyoko",
-        "channelId": "UCHZMxlogafenHdQd9u1JWTg",
-        "displayName": "百舌鳥ひよこ ch / Mozu hiyoko.",
-        "sourceUrl": "https://www.youtube.com/@mozuhiyoko",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@otodayori",
-        "channelId": "UCkJ8WSMjoTMdprPe_dFZJ-A",
-        "displayName": "otodayori【ギター弾き語り】",
-        "sourceUrl": "https://www.youtube.com/@otodayori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hananokimaru",
-        "channelId": "UCmB1E78Kdgd9z6hN3ONRKow",
-        "displayName": "花ノ木まる ✿ Hananoki Maru",
-        "sourceUrl": "https://www.youtube.com/@hananokimaru",
         "reason": "batch_limit_reached"
       }
     ]
