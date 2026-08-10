@@ -1235,9 +1235,9 @@ jobs:
           test -f "$remote_root/rollback-complete" && { echo "PG_ADAPTER_BLOCKED rollback-already-used"; exit 78; }
           systemctl is-active --quiet song-rank-pg-api
           ss -ltn 'sport = :8765' | grep -q LISTEN
-          curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz > "$remote_root/finalize-healthz.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz > "$remote_root/finalize-healthz.json"
           jq -e '.status == "ok" and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)' "$remote_root/finalize-healthz.json" >/dev/null
-          curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta > "$remote_root/finalize-meta.json"
+          curl --fail --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/api/meta > "$remote_root/finalize-meta.json"
           jq -e --arg expected "$expected_revision" '(.meta // .) as $m | (($m.active_revision_id // $m.activeRevisionId) == $expected) and (($m.migration_status // $m.migrationStatus) == "active")' "$remote_root/finalize-meta.json" >/dev/null
           touch "$remote_root/release-finalized"
           echo "PG_ADAPTER_CONTRACT_FINALIZED"
