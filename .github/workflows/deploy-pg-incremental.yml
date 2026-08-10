@@ -370,12 +370,8 @@ jobs:
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" '
             set -Eeuo pipefail
             systemctl restart song-rank-pg-api
-            ready=0
-            for n in $(seq 1 30); do
-              if curl -fsS --connect-timeout 2 --max-time 5 http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
-              sleep 1
-            done
-            if [ "$ready" != 1 ]; then
+            if ! curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 \
+              http://127.0.0.1:8765/healthz >/dev/null; then
               echo PG_ROLLBACK_OBSERVATION service-health-timeout >&2
             fi
           '
@@ -929,7 +925,7 @@ jobs:
                 systemctl daemon-reload
                 systemctl restart song-rank-pg-api
                 systemctl is-active --quiet song-rank-pg-api
-                curl --fail-with-body --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz >/dev/null
+                curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz >/dev/null
                 echo PG_7D_ROLLBACK_SERVICE_VERIFIED
               " | tee "$TASK_ROOT/service-rollback.log" && grep -qx 'PG_7D_ROLLBACK_SERVICE_VERIFIED' "$TASK_ROOT/service-rollback.log"; then
                 service_restored=1
@@ -1066,12 +1062,8 @@ jobs:
               systemctl daemon-reload
               systemctl enable song-rank-pg-api
               systemctl restart song-rank-pg-api
-              ready=0
-              for n in \$(seq 1 30); do
-                if curl -fsS --max-time 10 http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
-                sleep 1
-              done
-              test \"\$ready\" = 1 || { echo PG_ADAPTER_HEALTH_BLOCKED unavailable >&2; exit 75; }
+              curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 \
+                http://127.0.0.1:8765/healthz >/dev/null
               echo PG_7D_RANGE_ADAPTER_INSTALLED
             " | tee "$TASK_ROOT/adapter-install.log"
             grep -qx 'PG_7D_RANGE_ADAPTER_INSTALLED' "$TASK_ROOT/adapter-install.log"
