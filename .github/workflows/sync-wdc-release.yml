@@ -49,6 +49,8 @@ jobs:
             scripts/migration/build-release-bundle.py
             scripts/migration/patch-next-frontend.py
             deploy/install-wdc-release.sh
+            deploy/nginx-next-api.conf
+            assets/app.js
             .github/workflows/sync-wdc-release.yml
             tests/test_next_serving_v3.py
 
@@ -64,6 +66,7 @@ jobs:
             scripts/migration/build-release-bundle.py \
             scripts/migration/patch-next-frontend.py
           bash -n deploy/install-wdc-release.sh
+          node --check assets/app.js
           PYTHONWARNINGS=error::ResourceWarning \
             python3 -m unittest discover -s tests -p 'test_next_serving_v3.py' -v
           BUILD_LOGIC_SHA="$({
@@ -73,6 +76,8 @@ jobs:
             sha256sum scripts/migration/materialize-ranking-pages.py
             sha256sum scripts/migration/build-serving-store.py
             sha256sum scripts/migration/build-release-bundle.py
+            sha256sum assets/app.js
+            sha256sum deploy/nginx-next-api.conf
             sha256sum deploy/install-wdc-release.sh
             sha256sum .github/workflows/sync-wdc-release.yml
           } | sha256sum | awk '{print $1}')"

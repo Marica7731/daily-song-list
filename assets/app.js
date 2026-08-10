@@ -23,6 +23,19 @@ const SNAPSHOT_LATEST_PATH = "data/latest.json";
 const UI_META_PATH = "data/ui/meta.json";
 const API_META_PATH = "/api/meta";
 const API_RANKINGS_PATH = "/api/rankings";
+const API_META_TIMEOUT_MS = 4_000;
+const API_REQUEST_TIMEOUT_MS = 8_000;
+const METADATA_REQUEST_TIMEOUT_MS = 8_000;
+const DEFAULT_REQUEST_TIMEOUT_MS = 20_000;
+const RUNTIME_API_FALLBACK_CAPABILITIES = Object.freeze({
+  ranges: ["7d", "all"],
+  views: ["songs", "vtubers", "videos"],
+  metrics: ["occurrences", "songs", "videos"],
+  rankingScopes: ["all", "niche", "visible", "visibleNiche"],
+  localSources: true,
+  localSourcesRanges: ["7d", "all"],
+  localSearch: true,
+});
 const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
@@ -332,6 +345,9 @@ const state = {
   runtimeApi: {
     available: false,
     meta: null,
+    metaError: null,
+    staticMeta: null,
+    usingFallbackMeta: false,
   },
   loadedResources: [],
   compactDrawerLru: [],
@@ -477,21 +493,53 @@ async function init() {
   renderInitialSkeleton();
   await yieldToBrowser();
   const initialRange = state.range;
-  const apiMetaPromise = measureAsync("fetch-api-meta", () => readJson(API_META_PATH, { cache: "no-cache" })).catch(() => null);
+  const apiMetaPromise = measureAsync("fetch-api-meta", () => readJson(API_META_PATH, {
+    cache: "default",
+    timeoutMs: API_META_TIMEOUT_MS,
+  })).catch((error) => ({ __error: error }));
+  // Start the local static fallback at the same time.  A stalled runtime API
+  // must not leave the user staring at a skeleton for tens of seconds.
+  const staticMetaPromise = measureAsync("fetch-meta", () => readJson(UI_META_PATH, {
+    cache: "default",
+    timeoutMs: METADATA_REQUEST_TIMEOUT_MS,
+  })).catch((error) => ({ __error: error }));
+  const usableStaticMetaPromise = staticMetaPromise.then((result) => {
+    if (!result || result.__error) return null;
+    return validateStaticRuntimeMeta(result, initialRange);
+  }).catch(() => null);
+  usableStaticMetaPromise.then((result) => {
+    if (result) state.runtimeApi.staticMeta = result;
+  });
   const statusPromise = readJson(STATUS_PATH, { cache: "no-cache" }).catch(() => null);
   const snapshotIndexPromise = readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] }));
-  const apiMeta = await apiMetaPromise;
+  const apiMetaResult = await apiMetaPromise;
+  const apiMeta = apiMetaResult && !apiMetaResult.__error ? apiMetaResult : null;
   if (isRuntimeApiMeta(apiMeta)) {
     state.runtimeApi.available = true;
     state.runtimeApi.meta = apiMeta;
     state.runtimeMeta = runtimeMetaFromApiMeta(apiMeta);
   } else {
-    const staticMetaResult = await measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })).catch((error) => ({ __error: error }));
-    const staticMeta = staticMetaResult && !staticMetaResult.__error ? staticMetaResult : null;
-    if (!staticMeta) {
-      throw staticMetaResult?.__error || new Error("runtime meta missing");
+    state.runtimeApi.metaError = apiMetaResult?.__error || new Error("runtime API metadata is invalid");
+    // A local static manifest should already be cached or return quickly. Do
+    // not replace one stalled metadata request with another long wait.
+    const staticMeta = await Promise.race([
+      usableStaticMetaPromise,
+      new Promise((resolve) => window.setTimeout(() => resolve(null), 500)),
+    ]);
+    if (staticMeta) {
+      state.runtimeApi.staticMeta = staticMeta;
+      state.runtimeMeta = staticMeta;
+      showToast(`实时数据接口不可用：${requestErrorFriendlyMessage(state.runtimeApi.metaError)} 已切换为静态只读数据。`);
+    } else {
+      // The next-serving host intentionally does not ship the legacy static
+      // shards.  The rankings endpoint has a stable query contract, so a meta
+      // timeout can degrade to a direct API request instead of a blank page.
+      state.runtimeApi.available = true;
+      state.runtimeApi.usingFallbackMeta = true;
+      state.runtimeApi.meta = runtimeApiFallbackMeta();
+      state.runtimeMeta = runtimeMetaFromApiMeta(state.runtimeApi.meta);
+      showToast(`实时元数据读取失败：${requestErrorFriendlyMessage(state.runtimeApi.metaError)} 正在直接读取榜单。`);
     }
-    state.runtimeMeta = staticMeta;
   }
   const meta = state.runtimeMeta;
   state.initializationMetaPending = false;
@@ -2350,6 +2398,38 @@ function isRuntimeApiMeta(payload) {
   return Boolean(payload && typeof payload === "object" && payload.schemaVersion && payload.meta && payload.counts);
 }
 
+async function validateStaticRuntimeMeta(meta, rangeId) {
+  const shards = window.FrontendUtils.runtimeRangeShards(canonicalRangeId(rangeId), meta, runtimeRangeOptions());
+  const manifestPath = shardManifestPath(shards?.page);
+  if (!manifestPath) return null;
+  try {
+    const manifest = await readJson(manifestPath, {
+      cache: cacheModeForPath(manifestPath),
+      timeoutMs: 2_000,
+    });
+    return Array.isArray(manifest?.pages) && manifest.pages.length ? meta : null;
+  } catch (error) {
+    console.warn(`[runtime] static fallback probe failed: ${error?.message || error}`);
+    return null;
+  }
+}
+
+function runtimeApiFallbackMeta() {
+  return {
+    schemaVersion: 1,
+    meta: {},
+    counts: {},
+    capabilities: {
+      ...RUNTIME_API_FALLBACK_CAPABILITIES,
+      ranges: [...RUNTIME_API_FALLBACK_CAPABILITIES.ranges],
+      views: [...RUNTIME_API_FALLBACK_CAPABILITIES.views],
+      metrics: [...RUNTIME_API_FALLBACK_CAPABILITIES.metrics],
+      rankingScopes: [...RUNTIME_API_FALLBACK_CAPABILITIES.rankingScopes],
+      localSourcesRanges: [...RUNTIME_API_FALLBACK_CAPABILITIES.localSourcesRanges],
+    },
+  };
+}
+
 function runtimeMetaFromApiMeta(apiMeta, fallbackMeta = null) {
   const meta = apiMeta?.meta || {};
   const builtAt = cleanText(meta.built_at || meta.generated_at || "");
@@ -3333,6 +3413,7 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     scheduleCurrentRankDiffLoad();
   } catch (error) {
     if (error?.name === "AbortError" || revision !== state.requestRuntime.revision) return;
+    const friendlyMessage = requestErrorFriendlyMessage(error);
     if (previousResult) {
       setSnapshotBusy(false);
       await waitForPageInputToSettle({ allowActive: options.preservePageInput === false });
@@ -3346,6 +3427,11 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
         if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
         const pageInputStateBeforeFallback = capturePageInputState() || preservedPageInputState;
         const rangeId = canonicalRangeId(state.range);
+        if (!state.runtimeApi.staticMeta) throw error;
+        state.runtimeApi.available = false;
+        state.runtimeApi.meta = null;
+        state.runtimeApi.usingFallbackMeta = false;
+        state.runtimeMeta = state.runtimeApi.staticMeta;
         state.requestRuntime.disabledRanges.add(rangeId);
         const fallbackPayload = await loadRuntimeRange(rangeId);
         await applyRuntimeRangePayload(fallbackPayload, {
@@ -3355,11 +3441,12 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
         });
         restorePageInputState(pageInputStateBeforeFallback);
       } catch (fallbackError) {
+        console.warn(`[runtime] request and static fallback failed: ${fallbackError?.message || fallbackError}`);
         setSnapshotBusy(false);
-        renderEmpty(`页面读取失败：${fallbackError.message || error.message}`, { reloadable: true, role: "alert" });
+        renderEmpty(`页面读取失败：${friendlyMessage}`, { reloadable: true, role: "alert" });
       }
     }
-    showToast(`页面读取失败：${error.message}`);
+    showToast(`页面读取失败：${friendlyMessage}`);
   } finally {
     if (state.requestRuntime.activeController === controller) state.requestRuntime.activeController = null;
   }
@@ -4423,7 +4510,13 @@ function renderRequestInlineWarning(error) {
 
 function requestErrorFriendlyMessage(error) {
   const status = Number(error?.status) || 0;
+  if (error?.name === "RequestTimeoutError") {
+    const seconds = Math.max(1, Math.round((Number(error.timeoutMs) || API_REQUEST_TIMEOUT_MS) / 1000));
+    return `请求超过 ${seconds} 秒仍未完成，请稍后重试。`;
+  }
+  if (error?.name === "RequestNetworkError") return "网络连接失败，请检查网络后重试。";
   if (status === 400) return "查询条件有误，请调整后重试。";
+  if (status === 429) return "请求过于频繁，请稍后再试。";
   if (status === 404) return "请求的数据不存在或尚未生成。";
   if (status === 502 || status === 503) return "数据服务暂时不可用，请稍后重试。";
   if (status === 504) return "查询处理超时，请稍后重试。";
@@ -4434,6 +4527,7 @@ function requestErrorDiagnostic(error) {
   const lines = [];
   if (Number(error?.status)) lines.push(`HTTP ${Number(error.status)}`);
   if (error?.requestPath) lines.push(`请求：${error.requestPath}`);
+  if (Number(error?.timeoutMs)) lines.push(`客户端截止时间：${Number(error.timeoutMs)}ms`);
   const detail = cleanText(error?.diagnosticDetail || error?.body || "");
   if (detail) lines.push(`详情：${detail.slice(0, 240)}`);
   return lines.length ? lines.join("\n") : "暂无更多诊断信息";
@@ -9205,10 +9299,63 @@ function indexBucketWeight(label) {
   return 99;
 }
 
+function requestTimeoutMs(path, options = {}) {
+  const configured = Number(options.timeoutMs);
+  if (Number.isFinite(configured) && configured > 0) return Math.floor(configured);
+  if (path === API_META_PATH) return API_META_TIMEOUT_MS;
+  if (String(path || "").startsWith("/api/")) return API_REQUEST_TIMEOUT_MS;
+  if (path === UI_META_PATH || path === STATUS_PATH || path === "data/snapshots/index.json") {
+    return METADATA_REQUEST_TIMEOUT_MS;
+  }
+  return DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
+function createRequestTimeoutError(path, timeoutMs) {
+  const error = new Error(`请求超时（${Math.max(1, Math.round(timeoutMs / 1000))} 秒）：${path}`);
+  error.name = "RequestTimeoutError";
+  error.requestPath = path;
+  error.timeoutMs = timeoutMs;
+  error.diagnosticDetail = "客户端已中止长时间无响应的请求";
+  return error;
+}
+
+function createRequestNetworkError(path, cause) {
+  const error = new Error(`网络连接失败：${path}`);
+  error.name = "RequestNetworkError";
+  error.requestPath = path;
+  error.diagnosticDetail = cleanText(cause?.message || cause || "network request failed");
+  error.cause = cause;
+  return error;
+}
+
 async function readJson(path, options = {}) {
   const startedAt = performanceAvailable() ? performance.now() : 0;
-  const response = await fetch(path, { cache: options.cache || cacheModeForPath(path), signal: options.signal });
-  const text = await response.text();
+  const timeoutMs = requestTimeoutMs(path, options);
+  const controller = new AbortController();
+  let timedOut = false;
+  const abortFromCaller = () => controller.abort();
+  if (options.signal?.aborted) controller.abort();
+  else options.signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  let response;
+  let text;
+  try {
+    response = await fetch(path, {
+      cache: options.cache || cacheModeForPath(path),
+      signal: controller.signal,
+    });
+    text = await response.text();
+  } catch (error) {
+    if (timedOut) throw createRequestTimeoutError(path, timeoutMs);
+    if (options.signal?.aborted || error?.name === "AbortError") throw error;
+    throw createRequestNetworkError(path, error);
+  } finally {
+    window.clearTimeout(timeoutId);
+    options.signal?.removeEventListener("abort", abortFromCaller);
+  }
   if (!response.ok) {
     let detail = "";
     try {

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import importlib.util
+import gzip
 import http.client
 import json
 import threading
@@ -25,6 +26,8 @@ BUILDER_PATH=ROOT/"scripts"/"migration"/"build-serving-store.py"
 BUNDLE_PATH=ROOT/"scripts"/"migration"/"build-release-bundle.py"
 PATCHER_PATH=ROOT/"scripts"/"migration"/"patch-next-frontend.py"
 INSTALLER_PATH=ROOT/"deploy"/"install-wdc-release.sh"
+APP_PATH=ROOT/"assets"/"app.js"
+NGINX_PATH=ROOT/"deploy"/"nginx-next-api.conf"
 
 
 def load(name:str,path:Path):
@@ -359,9 +362,10 @@ class Tests(unittest.TestCase):
         thread=threading.Thread(target=httpd.serve_forever,kwargs={"poll_interval":0.05},daemon=True);thread.start()
         connection=http.client.HTTPConnection("127.0.0.1",httpd.server_address[1],timeout=5)
         try:
-            connection.request("GET",f"/api/rankings?v={self.sha}&range=all&view=songs&metric=occurrences&page=1&pageSize=30")
-            response=connection.getresponse();payload=json.loads(response.read())
+            connection.request("GET",f"/api/rankings?v={self.sha}&range=all&view=songs&metric=occurrences&page=1&pageSize=30",headers={"Accept-Encoding":"gzip"})
+            response=connection.getresponse();compressed=response.read();payload=json.loads(gzip.decompress(compressed))
             self.assertEqual(response.status,200);self.assertEqual(len(payload["records"]),30)
+            self.assertEqual(response.getheader("Content-Encoding"),"gzip");self.assertLess(len(compressed),len(json.dumps(payload).encode()))
             self.assertEqual(response.getheader("X-Release-Sha"),self.sha)
             self.assertEqual(response.getheader("X-Server-Commit"),SERVER_COMMIT)
             self.assertEqual(response.getheader("X-Data-Source"),"local-release-chunk")
@@ -370,8 +374,39 @@ class Tests(unittest.TestCase):
             response=connection.getresponse();source_payload=json.loads(response.read())
             self.assertEqual(response.status,200);self.assertTrue(source_payload["found"])
             self.assertEqual(response.getheader("X-Data-Source"),"local-serving-sqlite")
+            with patch.object(self.store,"health",return_value={"status":"degraded","error":"release_not_ready"}):
+                connection.request("GET","/healthz")
+                response=connection.getresponse();degraded=json.loads(response.read())
+                self.assertEqual(response.status,503);self.assertEqual(degraded["status"],"degraded")
+                self.assertEqual(response.getheader("Retry-After"),"3")
+                self.assertEqual(response.getheader("X-Error-Code"),"release_not_ready")
         finally:
             connection.close();httpd.shutdown();httpd.server_close();thread.join(timeout=2)
+
+    def test_frontend_fail_fast_timeout_and_error_contract(self):
+        app=APP_PATH.read_text(encoding="utf-8")
+        self.assertIn("const API_META_TIMEOUT_MS = 4_000",app)
+        self.assertIn("const API_REQUEST_TIMEOUT_MS = 8_000",app)
+        self.assertIn('cache: "default",\n    timeoutMs: API_META_TIMEOUT_MS',app)
+        self.assertIn("async function validateStaticRuntimeMeta(meta, rangeId)",app)
+        self.assertIn("timeoutMs: 2_000",app)
+        self.assertIn("function runtimeApiFallbackMeta()",app)
+        self.assertIn("state.runtimeApi.usingFallbackMeta = true",app)
+        self.assertIn("if (!state.runtimeApi.staticMeta) throw error",app)
+        self.assertIn("requestErrorFriendlyMessage(error)",app)
+        self.assertIn("function requestTimeoutMs(path, options = {})",app)
+        self.assertIn('error.name = "RequestTimeoutError"',app)
+        self.assertIn('error.name = "RequestNetworkError"',app)
+        self.assertIn('options.signal?.addEventListener("abort", abortFromCaller, { once: true })',app)
+        self.assertIn("window.clearTimeout(timeoutId)",app)
+        self.assertIn("客户端截止时间",app)
+
+    def test_nginx_fails_fast_and_preserves_json_errors(self):
+        nginx=NGINX_PATH.read_text(encoding="utf-8")
+        self.assertEqual(nginx.count("proxy_read_timeout 10s;"),2)
+        self.assertEqual(nginx.count("proxy_next_upstream off;"),2)
+        self.assertEqual(nginx.count("proxy_intercept_errors off;"),2)
+        self.assertNotIn("proxy_read_timeout 15s;",nginx)
 
     def test_server_retains_configurable_production_backlog(self):
         httpd=server.make_server("127.0.0.1",0,256,self.store)

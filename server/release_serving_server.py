@@ -489,6 +489,9 @@ def make_handler(store:ReleaseStore)->type[BaseHTTPRequestHandler]:
             duration=(time.monotonic()-started)*1000;self.send_response(status);self.send_header("Content-Type","application/json; charset=utf-8");self.send_header("Content-Length",str(len(body)))
             self.send_header("Cache-Control",cache_control);self.send_header("ETag",etag);self.send_header("Vary","Accept-Encoding");self.send_header("Access-Control-Allow-Origin","*");self.send_header("X-Request-Id",request_id)
             self.send_header("X-Cache",cache);self.send_header("X-Duration-Ms",f"{duration:.1f}");self.send_header("Server-Timing",f"app;dur={duration:.1f}")
+            if status in {429,502,503,504}:self.send_header("Retry-After","3")
+            error_code=str(payload.get("error") or "") if isinstance(payload,Mapping) else ""
+            if error_code and re.fullmatch(r"[a-z0-9_:-]{1,80}",error_code):self.send_header("X-Error-Code",error_code)
             if release_sha:
                 self.send_header("X-Release-Sha",release_sha);self.send_header("X-Content-Sha256",release_sha)
                 release_status=store.validate_release(release_sha)
