@@ -1721,7 +1721,15 @@ def _overlay_candidate_rows(
     if not selected_video_ids:
         return []
     occurrence_range_clause = ""
-    occurrence_params: list[Any] = [list(revision_ids), selected_video_ids]
+    selected_video_priorities = [
+        priority.get(
+            _text(selected_video[video_id].get("revision_id")), len(priority),
+        )
+        for video_id in selected_video_ids
+    ]
+    occurrence_params: list[Any] = [
+        list(revision_ids), selected_video_ids, selected_video_priorities,
+    ]
     if scope is not None:
         occurrence_range_clause = """
           AND (
@@ -1742,15 +1750,45 @@ def _overlay_candidate_rows(
     occurrence_rows = _rows(
         connection,
         f"""
-        SELECT o.revision_id, o.video_id, o.occurrence_id, o.position, o.range_id,
-               o.song_key, o.seconds, o.title, o.artist, o.source_id,
-               o.raw_hash, o.source_system,
-               {occurrence_payload} AS occurrence_payload_json
-        FROM migration_occurrence_rows AS o
-        WHERE o.revision_id = ANY(%s)
-          AND o.video_id = ANY(%s)
-          {occurrence_range_clause}
-        ORDER BY o.revision_id, o.video_id, o.position, o.occurrence_key
+        WITH revision_priority(revision_id, overlay_priority) AS MATERIALIZED (
+          SELECT item.revision_id, item.ordinality - 1
+          FROM unnest(%s::text[]) WITH ORDINALITY
+            AS item(revision_id, ordinality)
+        ), selected_videos(video_id, selected_priority) AS MATERIALIZED (
+          SELECT selected.video_id, selected.selected_priority
+          FROM unnest(%s::text[], %s::bigint[])
+            AS selected(video_id, selected_priority)
+        ), ranked_occurrences AS MATERIALIZED (
+          SELECT o.revision_id, o.video_id, o.occurrence_id, o.position,
+                 o.range_id, o.song_key, o.seconds, o.title, o.artist,
+                 o.source_id, o.raw_hash, o.source_system,
+                 {occurrence_payload} AS occurrence_payload_json,
+                 priority.overlay_priority, o.occurrence_key,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY o.video_id,
+                     COALESCE(
+                       NULLIF(o.occurrence_id, ''),
+                       'position:' || COALESCE(o.position::text, '0') || ':' ||
+                         COALESCE(o.song_key, '')
+                     )
+                   ORDER BY priority.overlay_priority, o.position,
+                            o.occurrence_key
+                 ) AS identity_rank
+          FROM migration_occurrence_rows AS o
+          JOIN revision_priority AS priority
+            ON priority.revision_id = o.revision_id
+          JOIN selected_videos AS selected
+            ON selected.video_id = o.video_id
+           AND priority.overlay_priority <= selected.selected_priority
+          WHERE TRUE
+            {occurrence_range_clause}
+        )
+        SELECT revision_id, video_id, occurrence_id, position, range_id,
+               song_key, seconds, title, artist, source_id, raw_hash,
+               source_system, occurrence_payload_json
+        FROM ranked_occurrences
+        WHERE identity_rank = 1
+        ORDER BY overlay_priority, video_id, position, occurrence_key
         LIMIT %s
         """,
         occurrence_params,
