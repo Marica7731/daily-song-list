@@ -22,6 +22,7 @@ env:
   VPS2_USER: "root"
   WDC_HOST: ${{ secrets.WDC_HOST }}
   WDC_USER: ${{ secrets.WDC_USER }}
+  WDC_PROJECT_ROOT: "/opt/culua/ytb-song-rank"
   WDC_RELEASES_ROOT: "/opt/culua/ytb-song-rank/releases"
   WDC_SERVER_PATH: "/opt/culua/ytb-song-rank/server/release_serving_server.py"
   WDC_STATIC_ROOT: "/opt/culua/ytb-song-rank/static"
@@ -30,6 +31,10 @@ env:
   WDC_NGINX_ENABLED_PATH: "/etc/nginx/sites-enabled/next.ytb-song-rank.culua.com.conf"
   WDC_SERVICE: "daily-song-list-api"
   WDC_API_PORT: "18777"
+  # Decimal bytes. Reaching the 40 GB line is a hard failure, not a warning.
+  WDC_PROJECT_MAX_BYTES: "40000000000"
+  # Keep host-level headroom so this project cannot crowd out unrelated workloads.
+  WDC_FILESYSTEM_RESERVE_BYTES: "5000000000"
   FORCE: ${{ inputs.force || 'false' }}
 
 jobs:
@@ -317,29 +322,84 @@ jobs:
 
           bundle_dir="$(find "$bundles_root" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | head -1)"
           [[ "$bundle_dir" =~ ^[0-9a-f]{64}$ ]] || { echo "INVALID_BUNDLE_SHA $bundle_dir" >&2; exit 68; }
-          tar -C "$bundles_root" -czf "$remote_root/dsl-wdc-$bundle_dir.tar.gz" "$bundle_dir"
+          release_size_bytes="$(du -sb -- "$bundles_root/$bundle_dir" | awk '{print $1}')"
+          [[ "$release_size_bytes" =~ ^[0-9]+$ ]] && (( release_size_bytes > 0 ))
+          archive_path="$remote_root/dsl-wdc-$bundle_dir.tar.gz"
+          tar -C "$bundles_root" -czf "$archive_path" "$bundle_dir"
+          archive_size_bytes="$(stat -c '%s' -- "$archive_path")"
+          [[ "$archive_size_bytes" =~ ^[0-9]+$ ]] && (( archive_size_bytes > 0 ))
           printf '%s\n' "$bundle_dir" > "$remote_root/bundle-sha"
-          ls -lh "$remote_root/dsl-wdc-$bundle_dir.tar.gz"
+          printf '%s\n' "$release_size_bytes" > "$remote_root/release-size-bytes"
+          printf '%s\n' "$archive_size_bytes" > "$remote_root/archive-size-bytes"
+          ls -lh "$archive_path"
+          echo "WDC_BUNDLE_SIZE_OK release_bytes=$release_size_bytes archive_bytes=$archive_size_bytes"
           REMOTE
 
           BUNDLE_SHA="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/bundle-sha'")"
+          RELEASE_SIZE_BYTES="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/release-size-bytes'")"
+          ARCHIVE_SIZE_BYTES="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/archive-size-bytes'")"
           [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]] || { echo "invalid bundle sha: $BUNDLE_SHA" >&2; exit 69; }
+          [[ "$RELEASE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( RELEASE_SIZE_BYTES > 0 ))
+          [[ "$ARCHIVE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( ARCHIVE_SIZE_BYTES > 0 ))
           echo "bundle_sha=$BUNDLE_SHA" >> "$GITHUB_OUTPUT"
+          echo "release_size_bytes=$RELEASE_SIZE_BYTES" >> "$GITHUB_OUTPUT"
+          echo "archive_size_bytes=$ARCHIVE_SIZE_BYTES" >> "$GITHUB_OUTPUT"
 
       - name: Transfer and atomically deploy WDC release
         if: steps.check.outputs.skip != 'true'
         env:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
           REMOTE_ROOT: ${{ steps.materialize.outputs.remote_root }}
+          RELEASE_SIZE_BYTES: ${{ steps.materialize.outputs.release_size_bytes }}
+          ARCHIVE_SIZE_BYTES: ${{ steps.materialize.outputs.archive_size_bytes }}
         run: |
           set -Eeuo pipefail
           VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
           WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
           [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$RELEASE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( RELEASE_SIZE_BYTES > 0 ))
+          [[ "$ARCHIVE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( ARCHIVE_SIZE_BYTES > 0 ))
+
+          # This read-only gate runs before the archive is copied to WDC. It
+          # measures only this project's exact root and reserves a second
+          # release-sized copy for rollback. It never scans or cleans siblings.
+          ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- \
+            "$WDC_PROJECT_ROOT" "$WDC_RELEASES_ROOT" "$ARCHIVE_SIZE_BYTES" \
+            "$RELEASE_SIZE_BYTES" "$WDC_PROJECT_MAX_BYTES" \
+            "$WDC_FILESYSTEM_RESERVE_BYTES" <<'REMOTE'
+          set -Eeuo pipefail
+          project_root="$1"; releases_root="$2"; archive_bytes="$3"; release_bytes="$4"
+          max_bytes="$5"; reserve_bytes="$6"
+          [[ "$project_root" == "/opt/culua/ytb-song-rank" ]]
+          [[ "$releases_root" == "$project_root/releases" ]]
+          for value in "$archive_bytes" "$release_bytes" "$max_bytes" "$reserve_bytes"; do
+            [[ "$value" =~ ^[0-9]+$ ]]
+          done
+          (( archive_bytes > 0 && release_bytes > 0 ))
+          (( max_bytes == 40000000000 && reserve_bytes >= 5000000000 ))
+          test -d "$project_root"
+          current_bytes="$(du -sb -- "$project_root" | awk '{print $1}')"
+          available_bytes="$(df -B1 --output=avail -- "$project_root" | tail -1 | tr -d ' ')"
+          [[ "$current_bytes" =~ ^[0-9]+$ && "$available_bytes" =~ ^[0-9]+$ ]]
+          rollback_bytes="$release_bytes"
+          incoming_bytes=$((archive_bytes + release_bytes + rollback_bytes))
+          projected_bytes=$((current_bytes + incoming_bytes))
+          if (( projected_bytes >= max_bytes )); then
+            echo "WDC_STORAGE_LIMIT_EXCEEDED current=$current_bytes archive=$archive_bytes release=$release_bytes rollback=$rollback_bytes projected=$projected_bytes max=$max_bytes" >&2
+            exit 74
+          fi
+          if (( available_bytes - incoming_bytes < reserve_bytes )); then
+            echo "WDC_FILESYSTEM_RESERVE_VIOLATION available=$available_bytes incoming=$incoming_bytes reserve=$reserve_bytes" >&2
+            exit 75
+          fi
+          echo "WDC_STORAGE_PREFLIGHT_OK current=$current_bytes archive=$archive_bytes release=$release_bytes rollback=$rollback_bytes projected=$projected_bytes max=$max_bytes available=$available_bytes reserve=$reserve_bytes"
+          REMOTE
+
           mkdir -p /tmp/dsl-wdc-transfer
           scp "${VPS2_SSH[@]}" \
             "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/dsl-wdc-$BUNDLE_SHA.tar.gz" \
             /tmp/dsl-wdc-transfer/
+          [[ "$(stat -c '%s' -- "/tmp/dsl-wdc-transfer/dsl-wdc-$BUNDLE_SHA.tar.gz")" == "$ARCHIVE_SIZE_BYTES" ]]
           scp "${WDC_SSH[@]}" \
             "/tmp/dsl-wdc-transfer/dsl-wdc-$BUNDLE_SHA.tar.gz" \
             deploy/install-wdc-release.sh \
@@ -348,15 +408,39 @@ jobs:
           ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- \
             "$BUNDLE_SHA" "$WDC_RELEASES_ROOT" "$WDC_SERVER_PATH" "$WDC_SERVICE" \
             "$GITHUB_SHA" "$BUILD_LOGIC_SHA" "$WDC_API_PORT" "$WDC_STATIC_ROOT" \
-            "$WDC_SERVICE_UNIT_PATH" "$WDC_NGINX_AVAILABLE_PATH" "$WDC_NGINX_ENABLED_PATH" <<'REMOTE'
+            "$WDC_SERVICE_UNIT_PATH" "$WDC_NGINX_AVAILABLE_PATH" "$WDC_NGINX_ENABLED_PATH" \
+            "$WDC_PROJECT_ROOT" "$WDC_PROJECT_MAX_BYTES" "$WDC_FILESYSTEM_RESERVE_BYTES" \
+            "$RELEASE_SIZE_BYTES" "$ARCHIVE_SIZE_BYTES" <<'REMOTE'
           set -Eeuo pipefail
           sha="$1"; root="$2"; server_path="$3"; service="$4"; server_commit="$5"; build_logic="$6"; port="$7"
           static_root="$8"; unit_path="$9"; nginx_available="${10}"; nginx_enabled="${11}"
+          project_root="${12}"; max_bytes="${13}"; reserve_bytes="${14}"; release_bytes="${15}"; expected_archive_bytes="${16}"
           archive="/tmp/dsl-wdc-$sha.tar.gz"
           installer="/tmp/install-wdc-release.sh"
           [[ "$sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$project_root" == "/opt/culua/ytb-song-rank" && "$root" == "$project_root/releases" ]]
+          for value in "$max_bytes" "$reserve_bytes" "$release_bytes" "$expected_archive_bytes"; do
+            [[ "$value" =~ ^[0-9]+$ ]]
+          done
+          (( max_bytes == 40000000000 && reserve_bytes >= 5000000000 && release_bytes > 0 && expected_archive_bytes > 0 ))
           test -f "$archive"
           test -x "$installer"
+          actual_archive_bytes="$(stat -c '%s' -- "$archive")"
+          [[ "$actual_archive_bytes" == "$expected_archive_bytes" ]]
+          current_bytes="$(du -sb -- "$project_root" | awk '{print $1}')"
+          available_bytes="$(df -B1 --output=avail -- "$project_root" | tail -1 | tr -d ' ')"
+          [[ "$current_bytes" =~ ^[0-9]+$ && "$available_bytes" =~ ^[0-9]+$ ]]
+          rollback_bytes="$release_bytes"
+          projected_bytes=$((current_bytes + actual_archive_bytes + release_bytes + rollback_bytes))
+          (( projected_bytes < max_bytes )) || {
+            echo "WDC_STORAGE_LIMIT_EXCEEDED_POSTUPLOAD current=$current_bytes archive=$actual_archive_bytes release=$release_bytes rollback=$rollback_bytes projected=$projected_bytes max=$max_bytes" >&2
+            exit 74
+          }
+          (( available_bytes - release_bytes - rollback_bytes >= reserve_bytes )) || {
+            echo "WDC_FILESYSTEM_RESERVE_VIOLATION_POSTUPLOAD available=$available_bytes release=$release_bytes rollback=$rollback_bytes reserve=$reserve_bytes" >&2
+            exit 75
+          }
+          echo "WDC_STORAGE_POSTUPLOAD_OK current=$current_bytes archive=$actual_archive_bytes release=$release_bytes rollback=$rollback_bytes projected=$projected_bytes max=$max_bytes available=$available_bytes reserve=$reserve_bytes"
           mkdir -p "$root"
           incoming="$(mktemp -d "$root/.incoming-$sha.XXXXXX")"
           trap 'rm -rf "$incoming"; rm -f "$archive"' EXIT
@@ -674,9 +758,14 @@ jobs:
           WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=8 -i /tmp/ssh/wdc-key)
           ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" bash -s -- \
             "$BUNDLE_SHA" "$WDC_RELEASES_ROOT" "$WDC_SERVER_PATH" "$WDC_STATIC_ROOT" \
-            "$WDC_SERVICE_UNIT_PATH" "$WDC_NGINX_AVAILABLE_PATH" "$WDC_NGINX_ENABLED_PATH" "$WDC_SERVICE" <<'REMOTE'
+            "$WDC_SERVICE_UNIT_PATH" "$WDC_NGINX_AVAILABLE_PATH" "$WDC_NGINX_ENABLED_PATH" "$WDC_SERVICE" \
+            "$WDC_PROJECT_ROOT" "$WDC_PROJECT_MAX_BYTES" "$WDC_FILESYSTEM_RESERVE_BYTES" <<'REMOTE'
           set -Eeuo pipefail
           sha="$1";root="$2";server="$3";static="$4";unit="$5";available="$6";enabled="$7";service="$8"
+          project_root="$9";max_bytes="${10}";reserve_bytes="${11}"
+          [[ "$project_root" == "/opt/culua/ytb-song-rank" && "$root" == "$project_root/releases" ]]
+          [[ "$max_bytes" == "40000000000" && "$reserve_bytes" =~ ^[0-9]+$ ]]
+          (( reserve_bytes >= 5000000000 ))
           state="$root/.rollback-$sha"
           previous="$(cat "$state/previous-target")"
           systemctl is-active --quiet "$service"
@@ -695,6 +784,18 @@ jobs:
           /tmp/install-wdc-release.sh --action finalize --sha "$sha" --releases-root "$root" \
             --server-path "$server" --static-root "$static" --service-unit-path "$unit" \
             --nginx-available-path "$available" --nginx-enabled-path "$enabled" --service "$service"
+          project_bytes="$(du -sb -- "$project_root" | awk '{print $1}')"
+          filesystem_available_bytes="$(df -B1 --output=avail -- "$project_root" | tail -1 | tr -d ' ')"
+          [[ "$project_bytes" =~ ^[0-9]+$ && "$filesystem_available_bytes" =~ ^[0-9]+$ ]]
+          (( project_bytes < max_bytes )) || {
+            echo "WDC_STORAGE_LIMIT_EXCEEDED_FINAL project=$project_bytes max=$max_bytes" >&2
+            exit 74
+          }
+          (( filesystem_available_bytes >= reserve_bytes )) || {
+            echo "WDC_FILESYSTEM_RESERVE_VIOLATION_FINAL available=$filesystem_available_bytes reserve=$reserve_bytes" >&2
+            exit 75
+          }
+          echo "WDC_STORAGE_FINAL_OK project=$project_bytes max=$max_bytes available=$filesystem_available_bytes reserve=$reserve_bytes"
           rm -f -- /tmp/install-wdc-release.sh
           REMOTE
 

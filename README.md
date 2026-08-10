@@ -7,6 +7,19 @@ Small GitHub Pages site that collects YouTube videos with usable timestamp song 
 
 `72h` and `1m` remain compatibility aliases for old links and legacy data paths. The site keeps successful hourly snapshots permanently. If a scheduled scrape fails, existing `data/latest.json`, snapshot files, and browser runtime files remain untouched, so the page continues to show the last successful result.
 
+## WDC storage safety
+
+WDC production has a project-specific hard ceiling of **40 GB = 40,000,000,000 bytes** for Daily Song List. Reaching the line is a deployment failure, not a warning.
+
+- Before uploading or extracting a release, measure only `/opt/culua/ytb-song-rank` and calculate `current project bytes + compressed archive bytes + extracted release bytes + one release-sized rollback reserve`.
+- If that conservative peak is greater than or equal to `40,000,000,000`, or any input cannot be proved, the deployment **must stop before writing to WDC**.
+- The workflow also preserves at least `5,000,000,000` bytes of host filesystem headroom so this project cannot crowd out unrelated workloads.
+- WDC writes and cleanup are limited to `/opt/culua/ytb-song-rank`, `/tmp/dsl-wdc-<64-hex-release>.tar.gz`, and `/tmp/install-wdc-release.sh`. Never scan or delete sibling projects or unrelated temporary files to make room.
+- Rollback state is retained through all public correctness gates. Only after success may retention remove verified direct 64-hex children of `/opt/culua/ytb-song-rank/releases`, keeping the exact current and previous releases.
+- Final acceptance must record project bytes, filesystem availability, current/previous identities, and absence of incoming, rollback, and current-run temporary residue.
+
+The authoritative agent instructions are in [`AGENTS.md`](AGENTS.md). Capacity uncertainty always fails closed and leaves production unchanged.
+
 ## UI Screenshots
 
 These committed screenshots are the repository homepage proof set for the current UI. Refresh them whenever a UI-facing change is shipped or when the deployed page needs to show the latest layout:
