@@ -3522,8 +3522,36 @@ async function requestViewPage(request) {
   return result;
 }
 
+function runtimeReleaseVersion() {
+  return cleanText(state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "");
+}
+function runtimeApiCapabilities() {
+  const capabilities = state.runtimeApi?.meta?.capabilities;
+  return capabilities && typeof capabilities === "object" ? capabilities : null;
+}
+function runtimeCapabilityIncludes(values, expected) {
+  return Array.isArray(values) && values.map((value) => String(value)).includes(String(expected));
+}
+function runtimeSupportsLocalSources(rangeValue = state.range) {
+  if (!state.runtimeApi.available) return false;
+  const capabilities = runtimeApiCapabilities();
+  if (capabilities?.localSources !== true) return false;
+  const ranges = capabilities.localSourcesRanges || capabilities.ranges;
+  return runtimeCapabilityIncludes(ranges, canonicalRangeId(rangeValue));
+}
 function shouldUseRuntimeApiForRequest(request) {
   if (!state.runtimeApi.available) return false;
+  const capabilities = runtimeApiCapabilities();
+  if (!capabilities) return false;
+  const range = canonicalRangeId(request.range);
+  const view = apiViewForRequestView(request.view);
+  const rawMetric = apiMetricForRequest(request);
+  const metric = rawMetric === "count" ? "occurrences" : rawMetric;
+  if (!runtimeCapabilityIncludes(capabilities.ranges, range)) return false;
+  if (!runtimeCapabilityIncludes(capabilities.views, view)) return false;
+  if (!runtimeCapabilityIncludes(capabilities.metrics, metric)) return false;
+  const filters = requestFiltersForView(request.view, request.filters || {});
+  if (cleanText(filters.q || "") && capabilities.localSearch !== true) return false;
   return true;
 }
 
@@ -3554,7 +3582,7 @@ async function requestApiViewPage(request, range) {
   // Versioned immutable URL: bind the request to the current release SHA so
   // the browser/edge may cache it long-term.  The server /api/meta short
   // cache is what discovers a new SHA.
-  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";
+  const releaseVersion = runtimeReleaseVersion();
   if (releaseVersion) params.set("v", releaseVersion);
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: releaseVersion ? "force-cache" : "default",
@@ -3956,7 +3984,12 @@ function pushSuggestion(target, seen, item) {
 
 async function loadRequestSearchRecords(query, signal) {
   const range = state.range;
-  if (state.runtimeApi.available) {
+  const capabilities = runtimeApiCapabilities();
+  if (state.runtimeApi.available &&
+      capabilities?.localSearch === true &&
+      runtimeCapabilityIncludes(capabilities.ranges, canonicalRangeId(range)) &&
+      runtimeCapabilityIncludes(capabilities.views, "songs") &&
+      runtimeCapabilityIncludes(capabilities.metrics, "occurrences")) {
     const params = new URLSearchParams({
       range,
       view: "songs",
@@ -3965,8 +3998,10 @@ async function loadRequestSearchRecords(query, signal) {
       pageSize: "12",
       q: cleanText(query),
     });
+    const releaseVersion = runtimeReleaseVersion();
+    if (releaseVersion) params.set("v", releaseVersion);
     const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
-      cache: "no-cache",
+      cache: releaseVersion ? "force-cache" : "default",
       signal,
     });
     if (!Array.isArray(payload?.records)) return [];
@@ -7300,11 +7335,12 @@ function renderInlineSource(occurrence) {
 
 function sourceDetailPathForRecord(record, occurrences = []) {
   const ownerRecord = record?._record || {};
+  const supportsRuntimeSources = runtimeSupportsLocalSources();
   const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);
-  if (explicitPath) return explicitPath;
+  if (explicitPath && (!isRuntimeSourceDetailPath(explicitPath) || supportsRuntimeSources)) return explicitPath;
   const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);
   const vtuberAlias = cleanText(record?.channelId || ownerRecord?.channelId || (record?.type === "vtuber" ? record?.key : "") || (ownerRecord?.type === "vtuber" ? ownerRecord?.key : ""));
-  if (detailKey || vtuberAlias) {
+  if ((detailKey || vtuberAlias) && supportsRuntimeSources) {
     return `/api/sources/${encodeURIComponent(detailKey || vtuberAlias)}`;
   }
   const candidates = [
@@ -7322,7 +7358,7 @@ function sourceDetailPathForRecord(record, occurrences = []) {
     occurrences?.[0]?.item?.sourceDetail?.path,
     sourceDetailPathFromShard(record, occurrences),
   ];
-  return cleanText(candidates.find(Boolean));
+  return cleanText(candidates.find((path) => path && (!isRuntimeSourceDetailPath(path) || supportsRuntimeSources)));
 }
 
 function sourceDetailPathFromShard(record, occurrences = []) {
@@ -7422,7 +7458,8 @@ async function loadSourceDetailOccurrences(path, key = "") {
   const cacheKey = key ? `${requestPath}#${key}` : requestPath;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
   if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
-  const load = readJson(requestPath, { cache: cacheModeForPath(path) })
+  const sourceCacheMode = isRuntimeSourceDetailPath(path) && runtimeReleaseVersion() ? "force-cache" : cacheModeForPath(path);
+  const load = readJson(requestPath, { cache: sourceCacheMode })
     .then((payload) => normalizeSourceDetailOccurrences(payload, key))
     .then((occurrences) => {
       state.sourceDetailCache.set(cacheKey, occurrences);
@@ -7442,7 +7479,8 @@ async function loadSourceDetailPage(path, key = "", options = {}) {
   const cacheKey = key ? `page:${requestPath}#${key}` : `page:${requestPath}`;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
   if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
-  const load = readJson(requestPath, { cache: cacheModeForPath(path) })
+  const sourceCacheMode = isRuntimeSourceDetailPath(path) && runtimeReleaseVersion() ? "force-cache" : cacheModeForPath(path);
+  const load = readJson(requestPath, { cache: sourceCacheMode })
     .then((payload) => {
       const occurrences = normalizeSourceDetailOccurrences(payload, key);
       if (!isRuntimeSourceDetailPath(path)) {
@@ -7481,6 +7519,8 @@ function sourceDetailPathWithRange(path) {
   const [pathname, query = ""] = requestPath.split("?", 2);
   const params = new URLSearchParams(query);
   params.set("range", cleanText(state.range) || "all");
+  const releaseVersion = runtimeReleaseVersion();
+  if (releaseVersion) params.set("v", releaseVersion);
   const suffix = params.toString();
   return suffix ? `${pathname}?${suffix}` : pathname;
 }
