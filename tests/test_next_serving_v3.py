@@ -583,6 +583,7 @@ class Tests(unittest.TestCase):
         self.assertIn("Verify complete public correctness and asset contract",workflow)
         self.assertIn("Roll back WDC release after failed public gate",workflow)
         self.assertIn("Finalize successful WDC release",workflow)
+        self.assertIn(".github/workflows/test-next-serving-v3.yml",workflow)
         self.assertIn("page_size=min(200,max(1,total_videos-1))",workflow)
         self.assertIn("backups-complete",installer)
         self.assertIn("PREP_STATE_DIR",installer)
