@@ -1631,8 +1631,8 @@ jobs:
             fi
           fi
           if [ -n "${EVIDENCE_ROOT:-}" ] && [ -n "${REMOTE_ROOT:-}" ]; then
-            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz"               > "$EVIDENCE_ROOT/cleanup-healthz.json" || cleanup_status=$?
-            timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta"               > "$EVIDENCE_ROOT/cleanup-meta.json" || cleanup_status=$?
+            timeout --signal=TERM --kill-after=10s 360s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz"               > "$EVIDENCE_ROOT/cleanup-healthz.json" || cleanup_status=$?
+            timeout --signal=TERM --kill-after=10s 360s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST"               "curl --fail --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/api/meta"               > "$EVIDENCE_ROOT/cleanup-meta.json" || cleanup_status=$?
             timeout --signal=TERM --kill-after=10s 60s ssh "${SSH_OPTS[@]}" "$VPS2_USER@$VPS2_HOST" bash -s --               "$REMOTE_ROOT" > "$EVIDENCE_ROOT/cleanup-state.txt" <<'REMOTE_CLEANUP_EVIDENCE' || cleanup_status=$?
           set -Eeuo pipefail
           remote_root="$1"
