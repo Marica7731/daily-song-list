@@ -462,6 +462,82 @@ class Tests(unittest.TestCase):
         self.assertIn("AND ranking.scope_key = %s",adapter_text)
         self.assertIn("AND parent_row.scope_key = %s",adapter_text)
 
+    def test_large_affected_artist_reconciliation_streams_bounded_pages(self):
+        batches=[
+            [
+                {"video_id":"v1","occurrence_id":"o1","song_key":"s1","title":"One","artist":"Mega Artist"},
+                {"video_id":"v1","occurrence_id":"o2","song_key":"s1","title":"One","artist":"Mega Artist"},
+            ],
+            [
+                {"video_id":"v2","occurrence_id":"o1","song_key":"s2","title":"Two","artist":"Mega Artist"},
+                {"video_id":"v3","occurrence_id":"o1","song_key":"s3","title":"Three","artist":"Mega Artist"},
+            ],
+            [
+                {"video_id":"v3","occurrence_id":"o2","song_key":"s3","title":"Three","artist":"Mega Artist"},
+            ],
+        ]
+        groups={"mega artist":{"artist":"Mega Artist","name":"Mega Artist","row_count":99,
+                               "song_count":99,"video_count":99,"payload_json":{"name":"Mega Artist"}}}
+        changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
+                  "title":"Old","artist":"Mega Artist"}]
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",10), \
+             patch.object(pg_adapter,"_rows",side_effect=batches) as rows:
+            pg_adapter._reconcile_affected_song_counts(
+                object(),"parent",[],[],changes,groups,"artists",{"range":"all"},
+            )
+        self.assertEqual(rows.call_count,3)
+        self.assertEqual(rows.call_args_list[0].args[2][-3:],["","",2])
+        self.assertEqual(rows.call_args_list[1].args[2][-3:],["v1","o2",2])
+        self.assertEqual(rows.call_args_list[2].args[2][-3:],["v3","o1",2])
+        group=groups["mega artist"]
+        self.assertEqual((group["row_count"],group["song_count"],group["video_count"]),(5,3,3))
+        self.assertEqual((group["payload_json"]["count"],group["payload_json"]["songCount"],
+                          group["payload_json"]["videoCount"]),(5,3,3))
+
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4), \
+             patch.object(pg_adapter,"_rows",side_effect=batches):
+            with self.assertRaisesRegex(pg_adapter.PostgresAdapterError,"streamed occurrence cap"):
+                list(pg_adapter._bounded_affected_parent_occurrences(
+                    object(),"parent",changes,"artists",{"range":"all"},
+                ))
+
+    def test_streamed_reconciliation_preserves_reset_tombstone_replacement_order(self):
+        parent_rows=[
+            {"video_id":"v1","occurrence_id":"o1","song_key":"old1","title":"Old 1","artist":"Mega Artist"},
+            {"video_id":"v1","occurrence_id":"o2","song_key":"old2","title":"Old 2","artist":"Mega Artist"},
+            {"video_id":"v2","occurrence_id":"o1","song_key":"old3","title":"Old 3","artist":"Mega Artist"},
+        ]
+        candidate_rows=[
+            {"video_id":"v1","occurrence_id":"n1","song_key":"new1","title":"New 1","artist":"Mega Artist",
+             "video_payload_json":{"videoId":"v1"}},
+            {"video_id":"v1","occurrence_id":"n2","song_key":"new2","title":"New 2","artist":"Mega Artist",
+             "video_payload_json":{"videoId":"v1"}},
+        ]
+        replacement_rows=[
+            {"video_id":"v2","occurrence_id":"o1","song_key":"replacement","title":"Replacement",
+             "artist":"Mega Artist"},
+        ]
+        changes=[
+            {"entityType":"occurrences","videoId":"v1","occurrenceId":"o1","title":"Old 1",
+             "artist":"Mega Artist","acceptedVideoReset":True},
+            {"entityType":"occurrences","videoId":"v2","occurrenceId":"o1","title":"Old 3",
+             "artist":"Mega Artist","replacement":True,
+             "replacementPayload":{"title":"Replacement","artist":"Mega Artist"}},
+        ]
+        groups={"mega artist":{"artist":"Mega Artist","name":"Mega Artist","row_count":99,
+                               "song_count":99,"video_count":99,"payload_json":{"name":"Mega Artist"}}}
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",10), \
+             patch.object(pg_adapter,"_rows",return_value=parent_rows):
+            pg_adapter._reconcile_affected_song_counts(
+                object(),"parent",candidate_rows,replacement_rows,changes,groups,"artists",{"range":"all"},
+            )
+        group=groups["mega artist"]
+        self.assertEqual((group["row_count"],group["song_count"],group["video_count"]),(3,3,2))
+        self.assertEqual((group["payload_json"]["count"],group["payload_json"]["songCount"],
+                          group["payload_json"]["videoCount"]),(3,3,2))
+
     def test_http_contract_exposes_version_and_local_data_source(self):
         httpd=server.ThreadingHTTPServer(("127.0.0.1",0),server.make_handler(self.store));httpd.daemon_threads=True
         thread=threading.Thread(target=httpd.serve_forever,kwargs={"poll_interval":0.05},daemon=True);thread.start()

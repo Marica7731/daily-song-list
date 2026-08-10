@@ -3931,6 +3931,8 @@ def _apply_runtime_change_previews(
 
 _MAX_AFFECTED_RUNTIME_OCCURRENCES = 50000
 _MAX_UNSCOPED_OVERLAY_OCCURRENCES = 250000
+_AFFECTED_RECONCILIATION_BATCH_SIZE = 10000
+_MAX_AFFECTED_RECONCILIATION_OCCURRENCES = 5000000
 
 
 def _runtime_song_identity(row: Mapping[str, Any]) -> str:
@@ -3989,8 +3991,13 @@ def _bounded_affected_parent_occurrences(
     changes: Sequence[Mapping[str, Any]],
     view: str,
     options: Mapping[str, Any],
-) -> list[dict[str, Any]]:
-    """Read only the parent rows for changed artist/video/channel groups."""
+) -> Iterable[dict[str, Any]]:
+    """Stream parent rows for changed groups in bounded keyset pages.
+
+    A single affected artist can legitimately own more than the legacy
+    50,000-row in-memory cap.  Keep every fetch bounded while retaining a
+    separate fail-closed ceiling for the complete reconciliation.
+    """
 
     if view in {"songs", "songIndex", "vsingerSongs"}:
         pairs: set[tuple[str, str]] = set()
@@ -4007,7 +4014,7 @@ def _bounded_affected_parent_occurrences(
                     pairs.add((title.casefold(), artist.casefold()))
         ordered_pairs = sorted(pairs)
         if not ordered_pairs:
-            return []
+            return
         predicate = """
           EXISTS (
             SELECT 1
@@ -4032,7 +4039,7 @@ def _bounded_affected_parent_occurrences(
             if _text(value)
         })
         if not artists:
-            return []
+            return
         predicate = "lower(coalesce(o.artist, '')) = ANY(%s)"
         predicate_params: list[Any] = [[value.casefold() for value in artists]]
     elif view == "videos":
@@ -4042,7 +4049,7 @@ def _bounded_affected_parent_occurrences(
             if _text(change.get("videoId") or change.get("video_id"))
         })
         if not videos:
-            return []
+            return
         predicate = "o.video_id = ANY(%s)"
         predicate_params = [videos]
     else:
@@ -4052,40 +4059,66 @@ def _bounded_affected_parent_occurrences(
             if _text(change.get("channel_id") or change.get("channelId"))
         })
         if not channels:
-            return []
+            return
         predicate = "v.channel_id = ANY(%s)"
         predicate_params = [channels]
-    rows = _rows(
-        connection,
-        f"""
-        SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
-               v.channel_id, v.channel_handle, v.channel_name
-        FROM runtime_occurrences AS o
-        JOIN runtime_videos AS v
-          ON v.revision_id = o.revision_id AND v.video_id = o.video_id
-        WHERE o.revision_id = %s AND v.revision_id = %s
-          AND {predicate}
-          AND (
-            (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
-            OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
-          )
-        ORDER BY o.video_id, o.occurrence_id
-        LIMIT %s
-        """,
-        [
-            parent_revision_id,
-            parent_revision_id,
-            *predicate_params,
-            _text(options.get("range")) or "all",
-            _text(options.get("range")) or "all",
-            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
-        ],
-    )
-    if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
-        raise PostgresAdapterError(
-            "affected runtime song-count reconciliation exceeded bounded occurrence cap"
+    range_id = _text(options.get("range")) or "all"
+    last_video_id = ""
+    last_occurrence_id = ""
+    total = 0
+    while True:
+        rows = _rows(
+            connection,
+            f"""
+            SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
+                   v.channel_id, v.channel_handle, v.channel_name
+            FROM runtime_occurrences AS o
+            JOIN runtime_videos AS v
+              ON v.revision_id = o.revision_id AND v.video_id = o.video_id
+            WHERE o.revision_id = %s AND v.revision_id = %s
+              AND {predicate}
+              AND (
+                (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
+                OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
+              )
+              AND (o.video_id, o.occurrence_id) > (%s, %s)
+            ORDER BY o.video_id, o.occurrence_id
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                parent_revision_id,
+                *predicate_params,
+                range_id,
+                range_id,
+                last_video_id,
+                last_occurrence_id,
+                _AFFECTED_RECONCILIATION_BATCH_SIZE,
+            ],
         )
-    return rows
+        if not rows:
+            return
+        total += len(rows)
+        if total > _MAX_AFFECTED_RECONCILIATION_OCCURRENCES:
+            raise PostgresAdapterError(
+                "affected runtime song-count reconciliation exceeded streamed occurrence cap"
+            )
+        for row in rows:
+            yield row
+        last = rows[-1]
+        next_video_id = _text(last.get("video_id"))
+        next_occurrence_id = _text(last.get("occurrence_id"))
+        if not next_video_id or not next_occurrence_id:
+            raise PostgresAdapterError(
+                "affected runtime song-count reconciliation returned an empty identity"
+            )
+        if (next_video_id, next_occurrence_id) <= (last_video_id, last_occurrence_id):
+            raise PostgresAdapterError(
+                "affected runtime song-count reconciliation did not advance"
+            )
+        last_video_id, last_occurrence_id = next_video_id, next_occurrence_id
+        if len(rows) < _AFFECTED_RECONCILIATION_BATCH_SIZE:
+            return
 
 
 def _reconcile_affected_song_counts(
@@ -4164,17 +4197,6 @@ def _reconcile_affected_song_counts(
             for row in relevant_candidates
         ),
     ]
-    parent_rows = _bounded_affected_parent_occurrences(
-        connection, parent_revision_id, lookup_changes, view, options,
-    )
-    parent_by_identity = {
-        (
-            _text(row.get("video_id")),
-            _text(row.get("occurrence_id")),
-        ): dict(row)
-        for row in parent_rows
-        if _text(row.get("video_id")) and _text(row.get("occurrence_id"))
-    }
     candidate_video_ids = {
         _text(row.get("video_id"))
         for row in relevant_candidates
@@ -4190,15 +4212,13 @@ def _reconcile_affected_song_counts(
         if bool(change.get("acceptedVideoReset"))
         and _text(change.get("videoId") or change.get("video_id"))
     }
-    effective = {
-        identity: row for identity, row in parent_by_identity.items()
-        if identity[0] not in candidate_video_ids
-        and identity[0] not in reset_video_ids
-    }
+    overlay_effective: dict[tuple[str, str], dict[str, Any]] = {}
+    overridden_identities: set[tuple[str, str]] = set()
     for row in relevant_candidates:
         identity = (_text(row.get("video_id")), _text(row.get("occurrence_id")))
         if identity[0] and identity[1]:
-            effective[identity] = dict(row)
+            overridden_identities.add(identity)
+            overlay_effective[identity] = dict(row)
     for change in relevant_changes:
         # Accepted full-video reset removals describe parent rows only.  They
         # must not delete a selected accepted candidate with the same identity
@@ -4211,33 +4231,58 @@ def _reconcile_affected_song_counts(
             _text(change.get("videoId") or change.get("video_id")),
             _text(change.get("occurrenceId") or change.get("occurrence_id")),
         )
-        effective.pop(identity, None)
+        if identity[0] and identity[1]:
+            overridden_identities.add(identity)
+            overlay_effective.pop(identity, None)
     for row in relevant_replacements:
         identity = (_text(row.get("video_id")), _text(row.get("occurrence_id")))
         if identity[0] and identity[1]:
-            effective[identity] = dict(row)
-    rows_by_group: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+            overridden_identities.add(identity)
+            overlay_effective[identity] = dict(row)
+
+    row_counts: dict[str, int] = defaultdict(int)
     songs_by_group: dict[str, set[str]] = defaultdict(set)
-    for row in effective.values():
+    videos_by_group: dict[str, set[str]] = defaultdict(set)
+
+    def accumulate(row: Mapping[str, Any]) -> None:
         key = _runtime_view_group_key(row, view)
-        if key in affected_keys:
-            rows_by_group[key].append(row)
-            songs_by_group[key].add(_runtime_song_identity(row))
+        if key not in affected_keys:
+            return
+        row_counts[key] += 1
+        songs_by_group[key].add(_runtime_song_identity(row))
+        video_id = _text(row.get("video_id") or row.get("videoId"))
+        if video_id:
+            videos_by_group[key].add(video_id)
+
+    for row in _bounded_affected_parent_occurrences(
+        connection, parent_revision_id, lookup_changes, view, options,
+    ):
+        identity = (
+            _text(row.get("video_id")),
+            _text(row.get("occurrence_id")),
+        )
+        if not identity[0] or not identity[1]:
+            continue
+        if (
+            identity[0] in candidate_video_ids
+            or identity[0] in reset_video_ids
+            or identity in overridden_identities
+        ):
+            continue
+        accumulate(row)
+    for row in overlay_effective.values():
+        accumulate(row)
+
     for row in groups.values():
         key = _runtime_view_group_key(row, view)
         if key not in affected_keys:
             continue
-        exact_rows = rows_by_group.get(key, [])
         song_count = len(songs_by_group.get(key, set()))
-        row_count = len(exact_rows)
-        video_count = len({
-            _text(item.get("video_id") or item.get("videoId"))
-            for item in exact_rows
-            if _text(item.get("video_id") or item.get("videoId"))
-        })
+        row_count = row_counts.get(key, 0)
+        video_count = len(videos_by_group.get(key, set()))
         row["song_count"] = song_count
-        # ``effective`` is the bounded parent projection after selected
-        # accepted-video resets plus its final candidate/replacement rows.
+        # The streamed projection applies selected accepted-video resets plus
+        # final candidate/replacement rows before computing exact scalars.
         # Every public grouping (not only songs) must use it: incrementally
         # adding an accepted reset otherwise double-counts its old video in
         # artist/video/channel aggregates.
