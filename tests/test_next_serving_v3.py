@@ -480,11 +480,13 @@ class Tests(unittest.TestCase):
                                "song_count":99,"video_count":99,"payload_json":{"name":"Mega Artist"}}}
         changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
                   "title":"Old","artist":"Mega Artist"}]
+        reconciliation_counts={}
         with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
              patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",10), \
              patch.object(pg_adapter,"_rows",side_effect=batches) as rows:
             pg_adapter._reconcile_affected_song_counts(
                 object(),"parent",[],[],changes,groups,"artists",{"range":"all"},
+                reconciliation_counts=reconciliation_counts,
             )
         self.assertEqual(rows.call_count,3)
         self.assertEqual(rows.call_args_list[0].args[2][-3:],["","",2])
@@ -494,6 +496,22 @@ class Tests(unittest.TestCase):
         self.assertEqual((group["row_count"],group["song_count"],group["video_count"]),(5,3,3))
         self.assertEqual((group["payload_json"]["count"],group["payload_json"]["songCount"],
                           group["payload_json"]["videoCount"]),(5,3,3))
+        self.assertEqual(reconciliation_counts,
+                         {("parent","all","artists","mega artist"):(5,3,3)})
+
+        cached_groups={"mega artist":{"artist":"Mega Artist","name":"Mega Artist",
+                                      "row_count":0,"song_count":0,"video_count":0,
+                                      "payload_json":{"name":"Mega Artist"}}}
+        with patch.object(pg_adapter,"_rows") as cached_rows:
+            pg_adapter._reconcile_affected_song_counts(
+                object(),"parent",[],[],changes,cached_groups,"artists",
+                {"range":"all","metric":"songs","nicheOnly":True},
+                reconciliation_counts=reconciliation_counts,
+            )
+        cached_rows.assert_not_called()
+        cached_group=cached_groups["mega artist"]
+        self.assertEqual((cached_group["row_count"],cached_group["song_count"],
+                          cached_group["video_count"]),(5,3,3))
 
         with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
              patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4), \
