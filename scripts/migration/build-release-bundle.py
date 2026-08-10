@@ -7,6 +7,7 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -87,12 +88,16 @@ def verify_existing(final: Path, expected_sha: str) -> None:
 
 
 def build_bundle(input_root: Path,output_root: Path,*,serving_sqlite: Path,server_artifact: Path,
-                 release_meta: dict[str,Any]) -> tuple[str,Path]:
+                 release_meta: dict[str,Any],frontend_root: Path|None=None,
+                 nginx_artifact: Path|None=None,systemd_artifact: Path|None=None) -> tuple[str,Path]:
     pages=discover_pages(input_root)
     if not pages:
         raise ValueError("no ranking pages found")
     if not serving_sqlite.is_file(): raise FileNotFoundError(serving_sqlite)
     if not server_artifact.is_file(): raise FileNotFoundError(server_artifact)
+    deployment_inputs=(frontend_root,nginx_artifact,systemd_artifact)
+    if any(value is not None for value in deployment_inputs) and not all(value is not None for value in deployment_inputs):
+        raise ValueError("frontend_root, nginx_artifact and systemd_artifact must be supplied together")
     output_root.mkdir(parents=True,exist_ok=True)
     staging=Path(tempfile.mkdtemp(prefix=".release-staging-",dir=output_root))
     try:
@@ -116,6 +121,28 @@ def build_bundle(input_root: Path,output_root: Path,*,serving_sqlite: Path,serve
         os.chmod(server_target,0o755)
         artifacts=[artifact_entry(serving_target,"serving.sqlite","application/vnd.sqlite3"),
                    artifact_entry(server_target,server_relative,"text/x-python")]
+        if frontend_root is not None and nginx_artifact is not None and systemd_artifact is not None:
+            frontend_root=frontend_root.resolve()
+            frontend_manifest_path=frontend_root/"frontend-manifest.json"
+            frontend_index_path=frontend_root/"index.html"
+            if not frontend_manifest_path.is_file() or not frontend_index_path.is_file():
+                raise FileNotFoundError("prepared frontend manifest or index is missing")
+            frontend_manifest=json.loads(frontend_manifest_path.read_text(encoding="utf-8"))
+            app_relative=str(frontend_manifest.get("appPath") or "")
+            if not re.fullmatch(r"assets/app-h[0-9a-f]{12}\.js",app_relative):
+                raise ValueError(f"invalid prepared app path: {app_relative!r}")
+            frontend_files=(
+                (frontend_index_path,"artifacts/frontend/index.html","text/html"),
+                (frontend_root/app_relative,f"artifacts/frontend/{app_relative}","application/javascript"),
+                (frontend_manifest_path,"artifacts/frontend/frontend-manifest.json","application/json"),
+                (nginx_artifact,"artifacts/deploy/next.ytb-song-rank.culua.com.conf","text/plain"),
+                (systemd_artifact,"artifacts/deploy/daily-song-list-api.service","text/plain"),
+            )
+            for source,relative,content_type in frontend_files:
+                if not source.is_file():raise FileNotFoundError(source)
+                target=staging/relative;target.parent.mkdir(parents=True,exist_ok=True)
+                shutil.copyfile(source,target)
+                artifacts.append(artifact_entry(target,relative,content_type))
         meta={
             "schemaVersion":RELEASE_SCHEMA_VERSION,
             "activeRevisionId":str(release_meta.get("activeRevisionId") or ""),
@@ -156,6 +183,7 @@ def parse_args(argv: Sequence[str]|None=None) -> argparse.Namespace:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input",required=True,type=Path);p.add_argument("--output",required=True,type=Path)
     p.add_argument("--serving-sqlite",required=True,type=Path);p.add_argument("--server-artifact",required=True,type=Path)
+    p.add_argument("--frontend-root",type=Path);p.add_argument("--nginx-artifact",type=Path);p.add_argument("--systemd-artifact",type=Path)
     p.add_argument("--active-revision-id",required=True);p.add_argument("--expected-parent-revision-id",default="")
     p.add_argument("--source-commit-sha",default="");p.add_argument("--server-commit-sha",required=True)
     p.add_argument("--build-logic-sha",required=True)
@@ -170,7 +198,9 @@ def main(argv: Sequence[str]|None=None) -> int:
           "generatedAt":args.generated_at,"latestEventTime":args.latest_event_time}
     try:
         sha,path=build_bundle(args.input,args.output,serving_sqlite=args.serving_sqlite,
-                              server_artifact=args.server_artifact,release_meta=meta)
+                              server_artifact=args.server_artifact,release_meta=meta,
+                              frontend_root=args.frontend_root,nginx_artifact=args.nginx_artifact,
+                              systemd_artifact=args.systemd_artifact)
     except Exception as exc:
         print(f"RELEASE_BUNDLE_ERROR {type(exc).__name__}: {exc}",file=sys.stderr);return 1
     print(f"RELEASE_BUNDLE_OK contentSha256={sha} dir={path}");return 0

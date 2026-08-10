@@ -339,6 +339,9 @@ class ReleaseStore:
     def series_total(self,sha:str,range_id:str,view:str,metric:str)->int:
         key=("total",sha,range_id,view,metric);cached=RESPONSE_CACHE.get(key)
         if cached is not None:return int(cached)
+        summary=self.series_summary(sha,range_id,view,metric)
+        if summary is not None:
+            total=int(summary.get("totalCount") or 0);RESPONSE_CACHE.put(key,total,64);return total
         directory=self.release_dir(sha)/"rankings"/range_id/view/metric
         pages=list(directory.glob("page-*.json.gz")) if directory.is_dir() else []
         if not pages:return 0
@@ -346,15 +349,29 @@ class ReleaseStore:
         total=(last_number-1)*CHUNK_SIZE+len(self.chunk_records(sha,range_id,view,metric,last_number) or [])
         RESPONSE_CACHE.put(key,total,64);return total
 
+    def series_summary(self,sha:str,range_id:str,view:str,metric:str)->dict[str,Any]|None:
+        key=("summary",sha,range_id,view,metric);cached=RESPONSE_CACHE.get(key)
+        if cached is not None:return cached
+        path=self.release_dir(sha)/"rankings"/range_id/view/metric/"page-0001.json.gz"
+        if not path.is_file():return None
+        try:
+            with gzip.open(path,"rt",encoding="utf-8") as stream:payload=json.load(stream)
+        except (OSError,json.JSONDecodeError) as exc:raise ApiError(503,"ranking_chunk_invalid",str(path)) from exc
+        if not isinstance(payload,dict):raise ApiError(503,"ranking_chunk_invalid",str(path))
+        summary={key:payload.get(key) for key in ("totalCount","totalOccurrenceCount","totalSongCount","totalVideoCount")}
+        RESPONSE_CACHE.put(key,summary,len(canonical_json(summary)));return summary
+
     def static_page(self,sha:str,range_id:str,view:str,metric:str,page:int,page_size:int)->dict[str,Any]|None:
         start=(page-1)*page_size;end=start+page_size;first_chunk=start//CHUNK_SIZE+1;last_chunk=(end-1)//CHUNK_SIZE+1
         first=self.chunk_records(sha,range_id,view,metric,first_chunk)
         if first is None:return None
         combined=list(first)
         if last_chunk!=first_chunk:combined.extend(self.chunk_records(sha,range_id,view,metric,last_chunk) or [])
-        records=combined[start%CHUNK_SIZE:start%CHUNK_SIZE+page_size];total=self.series_total(sha,range_id,view,metric)
+        records=combined[start%CHUNK_SIZE:start%CHUNK_SIZE+page_size];total=self.series_total(sha,range_id,view,metric);summary=self.series_summary(sha,range_id,view,metric) or {}
         return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":"all","page":page,"pageSize":page_size,
-                "totalCount":total,"filteredBaseCount":total,"pageCount":max(1,math.ceil(total/page_size)),"compact":True,"records":records}
+                "totalCount":total,"filteredBaseCount":total,"totalOccurrenceCount":int(summary.get("totalOccurrenceCount") or 0),
+                "totalSongCount":int(summary.get("totalSongCount") or 0),"totalVideoCount":int(summary.get("totalVideoCount") or 0),
+                "pageCount":max(1,math.ceil(total/page_size)),"compact":True,"records":records}
 
     def resolve_db_metric(self,connection:sqlite3.Connection,range_id:str,view:str,metric:str)->str|None:
         candidates=DB_METRIC_CANDIDATES.get(metric,(metric,));placeholders=",".join("?" for _ in candidates)
@@ -423,12 +440,14 @@ class ReleaseStore:
             where=" AND ".join(conditions)
             summary=connection.execute(f"SELECT count(*),coalesce(sum(ranking_rows.row_count),0),coalesce(sum(ranking_rows.song_count),0),coalesce(sum(ranking_rows.video_count),0) FROM {from_clause} WHERE {where}",params).fetchone()
             total=int(summary[0] or 0);page_count=max(1,math.ceil(total/page_size));page=min(page,page_count)
+            base_params=list(params);base_params[3]="all"
+            filtered_base=int(connection.execute(f"SELECT count(*) FROM {from_clause} WHERE {where}",base_params).fetchone()[0] or 0)
             rows=connection.execute(f"SELECT ranking_rows.rank,ranking_rows.payload_json FROM {from_clause} WHERE {where} ORDER BY ranking_rows.rank LIMIT ? OFFSET ?",(*params,page_size,(page-1)*page_size)).fetchall()
             records=[]
             for row in rows:
                 payload=json_object(row["payload_json"]);payload["rank"]=int(row["rank"] or payload.get("rank") or 0);records.append(compact_record(payload,view))
             return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,"scopeKey":scope,"searchScope":search_scope,
-                    "searchFields":sorted(search_fields),"page":page,"pageSize":page_size,"totalCount":total,"filteredBaseCount":total,
+                    "searchFields":sorted(search_fields),"page":page,"pageSize":page_size,"totalCount":total,"filteredBaseCount":filtered_base,
                     "totalOccurrenceCount":int(summary[1] or 0),"totalSongCount":int(summary[2] or 0),"totalVideoCount":int(summary[3] or 0),
                     "pageCount":page_count,"compact":True,"records":records}
 

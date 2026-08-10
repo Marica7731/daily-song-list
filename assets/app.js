@@ -602,6 +602,7 @@ async function activateInitialStaticFallback(initialRange, cause) {
   state.runtimeApi.meta = null;
   state.runtimeApi.usingFallbackMeta = false;
   state.runtimeMeta = staticMeta;
+  showToast("实时数据接口失败，已切换为静态只读数据。");
   const rangePayload = await measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange));
   await applyRuntimeRangePayload(rangePayload, {
     resetPage: false,
@@ -6648,7 +6649,7 @@ function validSongArtistCandidate(value) {
 }
 
 function fallbackSongArtist(record) {
-  const displayArtist = validSongArtistCandidate(record?.displayArtist);
+  const displayArtist = validSongArtistCandidate(record?.displayArtist || record?.artist);
   if (displayArtist) return displayArtist;
   const occurrences = Array.isArray(record?.occurrences) ? record.occurrences : [];
   for (const occurrence of occurrences) {
@@ -7715,11 +7716,16 @@ async function loadAllRuntimeSourceDetailOccurrences(path, key = "") {
   const first = await loadSourceDetailPage(path, key, { page: 1, pageSize });
   const pageCount = Math.max(1, Number(first?.pageInfo?.pageCount) || 1);
   if (pageCount === 1) return first.occurrences || [];
-  const remaining = await Promise.all(
-    Array.from({ length: pageCount - 1 }, (_, index) =>
-      loadSourceDetailPage(path, key, { page: index + 2, pageSize }),
-    ),
-  );
+  const remaining = new Array(pageCount - 1);
+  let nextPage = 2;
+  const workerCount = Math.min(4, pageCount - 1);
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (nextPage <= pageCount) {
+      const page = nextPage;
+      nextPage += 1;
+      remaining[page - 2] = await loadSourceDetailPage(path, key, { page, pageSize });
+    }
+  }));
   return [first, ...remaining].flatMap((page) => page?.occurrences || []);
 }
 

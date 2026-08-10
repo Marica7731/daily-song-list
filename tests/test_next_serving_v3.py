@@ -25,9 +25,11 @@ MATERIALIZER_PATH=ROOT/"scripts"/"migration"/"materialize-ranking-pages.py"
 BUILDER_PATH=ROOT/"scripts"/"migration"/"build-serving-store.py"
 BUNDLE_PATH=ROOT/"scripts"/"migration"/"build-release-bundle.py"
 PATCHER_PATH=ROOT/"scripts"/"migration"/"patch-next-frontend.py"
+PREPARE_FRONTEND_PATH=ROOT/"scripts"/"migration"/"prepare-wdc-frontend.py"
 INSTALLER_PATH=ROOT/"deploy"/"install-wdc-release.sh"
 APP_PATH=ROOT/"assets"/"app.js"
 NGINX_PATH=ROOT/"deploy"/"nginx-next-api.conf"
+UNIT_PATH=ROOT/"deploy"/"daily-song-list-api.service"
 
 
 def load(name:str,path:Path):
@@ -35,7 +37,7 @@ def load(name:str,path:Path):
 
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
-pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH)
+pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH)
 ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
@@ -77,7 +79,7 @@ def create_source_db(path:Path)->None:
         for view in ("songs","artists","vtubers","videos"):
             for db_metric in ("count","songs","videos"):
                 for rank in range(1,count+1):
-                    key=ALL_KEY if range_id=="all" and rank==1 else SEVEN_KEY if range_id=="7d" and rank==1 else ""
+                    key=ALL_KEY if range_id=="all" and rank==1 else MANY_KEY if range_id=="all" and view=="songs" and rank==2 else SEVEN_KEY if range_id=="7d" and rank==1 else ""
                     value=card(rank,range_id,key)
                     search_text=f"{value['title']} {value['artist']}"
                     if rank==1:
@@ -186,8 +188,10 @@ class Tests(unittest.TestCase):
         self.snapshot=self.source
         self.materialized=materializer.materialize(self.snapshot,self.pages,active_revision_id=REV)
         self.build=builder.build_serving_store(self.snapshot,self.pages,self.serving,active_revision_id=REV,built_at="2026-08-10T00:00:00Z")
+        self.frontend_index=self.temp/"source-index.html";self.frontend_index.write_text('<link rel="stylesheet" href="assets/styles-h0123456789ab.css"><script src="assets/app-h0123456789ab.js" defer></script>',encoding="utf-8")
+        self.frontend_root=self.temp/"prepared-frontend";self.frontend_manifest=prepare_frontend.prepare(APP_PATH,self.frontend_index,self.frontend_root)
         meta={"activeRevisionId":REV,"expectedParentRevisionId":"parent","sourceCommitSha":"a"*40,"serverCommitSha":SERVER_COMMIT,"buildLogicSha":"b"*64,"generatedAt":"2026-08-10T00:00:00Z","latestEventTime":"2026-08-09T23:59:59Z"}
-        self.sha,self.release=bundle.build_bundle(self.pages,self.releases,serving_sqlite=self.serving,server_artifact=SERVER_PATH,release_meta=meta)
+        self.sha,self.release=bundle.build_bundle(self.pages,self.releases,serving_sqlite=self.serving,server_artifact=SERVER_PATH,release_meta=meta,frontend_root=self.frontend_root,nginx_artifact=NGINX_PATH,systemd_artifact=UNIT_PATH)
         os.symlink(self.sha,self.releases/"current");self.store=server.ReleaseStore(self.releases)
     def tearDown(self):shutil.rmtree(self.temp,ignore_errors=True)
 
@@ -214,7 +218,7 @@ class Tests(unittest.TestCase):
     def test_health_and_release_artifacts(self):
         health=self.store.health();self.assertEqual(health["status"],"ok",health);self.assertEqual(health["releaseContentSha"],self.sha);self.assertEqual(health["serverCommit"],SERVER_COMMIT);self.assertEqual(health["buildLogicSha"],"b"*64);self.assertEqual(health["searchTokenizer"],"trigram");self.assertEqual(health["localSourcesRanges"],["7d","all"]);self.assertFalse(health["oldOriginDependency"]);self.assertFalse(health["sourceFallbackEnabled"])
         self.assertEqual(set(health["views"]),{"songs","artists","vtubers","videos"});self.assertEqual(set(health["metrics"]),{"occurrences","songs","videos"})
-        manifest=json.loads((self.release/"manifest.json").read_text());artifacts={x["path"] for x in manifest["artifacts"]};self.assertEqual(artifacts,{"serving.sqlite","artifacts/release_serving_server.py"})
+        manifest=json.loads((self.release/"manifest.json").read_text());artifacts={x["path"] for x in manifest["artifacts"]};self.assertEqual(artifacts,{"serving.sqlite","artifacts/release_serving_server.py","artifacts/frontend/index.html","artifacts/frontend/frontend-manifest.json",f"artifacts/frontend/{self.frontend_manifest['appPath']}","artifacts/deploy/next.ytb-song-rank.culua.com.conf","artifacts/deploy/daily-song-list-api.service"})
 
     def test_missing_required_series_fails_closed(self):
         sparse=self.temp/"sparse.sqlite";shutil.copyfile(self.snapshot,sparse)
@@ -250,29 +254,72 @@ class Tests(unittest.TestCase):
         previous="previous-release";(self.releases/previous).mkdir()
         (self.releases/"current").unlink();os.symlink(previous,self.releases/"current")
         server_target=self.temp/"server-target.py";server_target.write_bytes(b"old-server\n")
+        static_root=self.temp/"static";(static_root/"assets").mkdir(parents=True);(static_root/"index.html").write_bytes(b"old-index\n")
+        unit_target=self.temp/"daily-song-list-api.service";unit_target.write_bytes(b"old-unit\n")
+        nginx_available=self.temp/"nginx-available.conf";nginx_available.write_bytes(b"old-nginx-available\n")
+        nginx_enabled=self.temp/"nginx-enabled.conf";nginx_enabled.write_bytes(b"old-nginx-enabled\n")
         fakebin=self.temp/"fakebin";fakebin.mkdir();marker=self.temp/"ln-failed-once"
         (fakebin/"systemctl").write_text(
-            '#!/usr/bin/env bash\nif [[ "$1" == "show" ]]; then printf "%s\\n" "/usr/bin/python3 $TEST_SERVER_PATH"; exit 0; fi\n[[ "$1" == "restart" ]]\n',encoding="utf-8")
+            '#!/usr/bin/env bash\nexit 0\n',encoding="utf-8")
+        (fakebin/"systemd-analyze").write_text('#!/usr/bin/env bash\nexit 0\n',encoding="utf-8")
+        (fakebin/"nginx").write_text('#!/usr/bin/env bash\nexit 0\n',encoding="utf-8")
         (fakebin/"ln").write_text(
             '#!/usr/bin/env bash\ndestination="${@: -1}"\nif [[ ! -e "$FAIL_LN_ONCE_MARKER" && "$destination" == */.current.* ]]; then : > "$FAIL_LN_ONCE_MARKER"; exit 73; fi\nexec /usr/bin/ln "$@"\n',encoding="utf-8")
-        os.chmod(fakebin/"systemctl",0o755);os.chmod(fakebin/"ln",0o755)
+        for executable in ("systemctl","systemd-analyze","nginx","ln"):os.chmod(fakebin/executable,0o755)
         env={**os.environ,"PATH":f"{fakebin}:{os.environ.get('PATH','')}","TEST_SERVER_PATH":str(server_target),"FAIL_LN_ONCE_MARKER":str(marker)}
         result=subprocess.run([
             "bash",str(INSTALLER_PATH),"--sha",self.sha,"--releases-root",str(self.releases),
-            "--server-path",str(server_target),"--service","fixture.service",
+            "--server-path",str(server_target),"--static-root",str(static_root),
+            "--service-unit-path",str(unit_target),"--nginx-available-path",str(nginx_available),
+            "--nginx-enabled-path",str(nginx_enabled),"--service","fixture.service",
             "--expected-server-commit",SERVER_COMMIT,"--expected-build-logic-sha","b"*64,
         ],env=env,capture_output=True,text=True,timeout=15,check=False)
         self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertEqual(server_target.read_bytes(),b"old-server\n")
+        self.assertEqual((static_root/"index.html").read_bytes(),b"old-index\n")
+        self.assertEqual(unit_target.read_bytes(),b"old-unit\n")
+        self.assertEqual(nginx_available.read_bytes(),b"old-nginx-available\n")
+        self.assertEqual(nginx_enabled.read_bytes(),b"old-nginx-enabled\n")
         self.assertEqual(os.readlink(self.releases/"current"),previous)
-        self.assertIn("DEPLOY_ROLLBACK complete",result.stderr)
-        self.assertNotIn("DEPLOY_OK",result.stdout+result.stderr)
+        self.assertFalse((self.releases/f".rollback-{self.sha}").exists())
+        self.assertIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
+        self.assertNotIn("DEPLOY_ACTIVATED_PENDING_PUBLIC",result.stdout+result.stderr)
+
+    def test_installer_never_publishes_partial_backup_state(self):
+        previous="previous-release";(self.releases/previous).mkdir()
+        (self.releases/"current").unlink();os.symlink(previous,self.releases/"current")
+        server_target=self.temp/"server-target.py";server_target.write_bytes(b"old-server\n")
+        static_root=self.temp/"static";(static_root/"assets").mkdir(parents=True);(static_root/"index.html").write_bytes(b"old-index\n")
+        unit_target=self.temp/"daily-song-list-api.service";unit_target.write_bytes(b"old-unit\n")
+        nginx_available=self.temp/"nginx-available.conf";nginx_available.write_bytes(b"old-nginx-available\n")
+        nginx_enabled=self.temp/"nginx-enabled.conf";nginx_enabled.write_bytes(b"old-nginx-enabled\n")
+        fakebin=self.temp/"fakebin-partial";fakebin.mkdir()
+        for executable in ("systemctl","systemd-analyze","nginx"):
+            (fakebin/executable).write_text('#!/usr/bin/env bash\nexit 0\n',encoding="utf-8")
+        (fakebin/"cp").write_text(
+            '#!/usr/bin/env bash\ndestination="${@: -1}"\nif [[ "$destination" == */index.backup ]]; then exit 74; fi\nexec /usr/bin/cp "$@"\n',encoding="utf-8")
+        for executable in ("systemctl","systemd-analyze","nginx","cp"):os.chmod(fakebin/executable,0o755)
+        env={**os.environ,"PATH":f"{fakebin}:{os.environ.get('PATH','')}"}
+        result=subprocess.run([
+            "bash",str(INSTALLER_PATH),"--sha",self.sha,"--releases-root",str(self.releases),
+            "--server-path",str(server_target),"--static-root",str(static_root),
+            "--service-unit-path",str(unit_target),"--nginx-available-path",str(nginx_available),
+            "--nginx-enabled-path",str(nginx_enabled),"--service","fixture.service",
+            "--expected-server-commit",SERVER_COMMIT,"--expected-build-logic-sha","b"*64,
+        ],env=env,capture_output=True,text=True,timeout=15,check=False)
+        self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(server_target.read_bytes(),b"old-server\n")
+        self.assertEqual((static_root/"index.html").read_bytes(),b"old-index\n")
+        self.assertEqual(os.readlink(self.releases/"current"),previous)
+        self.assertFalse((self.releases/f".rollback-{self.sha}").exists())
+        self.assertEqual(list(self.releases.glob(f".rollback-{self.sha}.preparing.*")),[])
+        self.assertNotIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
 
     def test_real_page_size_crosses_chunk(self):
         first=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&page=1&pageSize=30"))[1]
         seventh=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&page=7&pageSize=30"))[1]
         ninth=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&page=9&pageSize=30"))[1]
-        self.assertEqual([x["rank"] for x in first["records"]],list(range(1,31)));self.assertEqual([x["rank"] for x in seventh["records"]],list(range(181,211)));self.assertEqual([x["rank"] for x in ninth["records"]],list(range(241,251)));self.assertEqual(first["pageCount"],9)
+        self.assertEqual([x["rank"] for x in first["records"]],list(range(1,31)));self.assertEqual([x["rank"] for x in seventh["records"]],list(range(181,211)));self.assertEqual([x["rank"] for x in ninth["records"]],list(range(241,251)));self.assertEqual(first["pageCount"],9);self.assertGreater(first["totalOccurrenceCount"],0)
 
     def test_source_pages_distinct_video(self):
         p1=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&page=1&pageSize=2"));p2=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&page=2&pageSize=2"))
@@ -304,6 +351,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len({record["key"] for record in title_only["records"]}),len(title_only["records"]))
         _,scoped,_=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&nicheOnly=1&hideUnknownArtist=1"))
         self.assertEqual((scoped["scopeKey"],scoped["totalCount"]),("visibleNiche",1))
+        self.assertEqual(scoped["filteredBaseCount"],250)
         self.assertNotEqual(scoped["totalCount"],self.store.series_total(self.sha,"all","songs","occurrences"))
         niche=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&nicheOnly=1"));visible=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&hideUnknownArtist=1"));self.assertEqual((niche["totalOccurrenceCount"],niche["totalVideoCount"]),(1,1));self.assertEqual((visible["totalOccurrenceCount"],visible["totalVideoCount"]),(4,3))
 
@@ -473,6 +521,8 @@ class Tests(unittest.TestCase):
         self.assertIn("includeResponseMeta: true",app)
         self.assertIn('result.releaseSha = cleanText(response.responseMeta?.releaseSha || "")',app)
         self.assertIn('if (request.rankMetric === "songs") return "songs"',app)
+        self.assertIn("record?.displayArtist || record?.artist",app)
+        self.assertIn("const workerCount = Math.min(4, pageCount - 1)",app)
 
     def test_nginx_fails_fast_and_preserves_json_errors(self):
         nginx=NGINX_PATH.read_text(encoding="utf-8")
@@ -495,6 +545,7 @@ class Tests(unittest.TestCase):
 
     def test_workflow_deploys_complete_artifact_and_never_marks_proxy_fallback(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
+        ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
         installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
         self.assertIn("materialize-pg-release-snapshot.py",workflow)
         self.assertIn("server/pg_adapter.py",workflow)
@@ -522,7 +573,22 @@ class Tests(unittest.TestCase):
         self.assertIn("DEPLOY_ROLLBACK",installer)
         self.assertIn("sourceFallbackEnabled",installer)
         self.assertIn("computed release content hash mismatch",installer)
-        self.assertLess(installer.index("LIVE_MUTATION_STARTED=1"),installer.index('mv -f "$SERVER_TEMP" "$SERVER_PATH"'))
-        self.assertNotIn("ytb-song-rank.culua.com",installer)
+        self.assertLess(installer.index("LIVE_MUTATION_STARTED=1"),installer.index('atomic_install "$SERVER_ARTIFACT" "$SERVER_PATH"'))
+        self.assertIn("DEPLOY_ACTIVATED_PENDING_PUBLIC",installer)
+        self.assertIn('ACTION" == "rollback"',installer)
+        self.assertIn('ACTION" == "finalize"',installer)
+        self.assertIn("--frontend-root",workflow)
+        self.assertIn("--nginx-artifact",workflow)
+        self.assertIn("--systemd-artifact",workflow)
+        self.assertIn("Verify complete public correctness and asset contract",workflow)
+        self.assertIn("Roll back WDC release after failed public gate",workflow)
+        self.assertIn("Finalize successful WDC release",workflow)
+        self.assertIn("page_size=min(200,max(1,total_videos-1))",workflow)
+        self.assertIn("backups-complete",installer)
+        self.assertIn("PREP_STATE_DIR",installer)
+        self.assertIn("state preserved at",installer)
+        self.assertIn('git grep -nE -e "$pattern"',ci)
+        self.assertNotIn('ranking_scope_series\"] == 72',workflow)
+        self.assertNotIn("https://ytb-song-rank.culua.com",installer)
 
 if __name__=="__main__":unittest.main(verbosity=2)
