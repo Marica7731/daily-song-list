@@ -348,6 +348,7 @@ const state = {
     metaError: null,
     staticMeta: null,
     usingFallbackMeta: false,
+    versionRetryUsed: false,
   },
   loadedResources: [],
   compactDrawerLru: [],
@@ -434,7 +435,7 @@ window.printSongListPerformance = function printSongListPerformance() {
   return { measures, resources, runtime };
 };
 
-init().catch((error) => {
+initNextServingV3().catch((error) => {
   setSnapshotBusy(false);
   renderLoadError(error);
 });
@@ -477,6 +478,136 @@ function measureSync(name, callback) {
   } finally {
     perfMeasure(name, start);
   }
+}
+
+async function initNextServingV3() {
+  const initMark = perfMark("app-init:start");
+  setupSnapshotLoader();
+  setupControlsObserver();
+  applyInitialUrlState();
+  state.rangeIntent = canonicalRangeId(state.range);
+  state.initializationMetaPending = true;
+  bindEvents();
+  syncControlsFromState();
+  setupBackToTopButton();
+  setSnapshotBusy(true, "正在加载数据");
+  renderInitialSkeleton();
+  await yieldToBrowser();
+
+  const initialRange = canonicalRangeId(state.range);
+  const requestedSnapshotPath = state.currentSnapshotPath;
+  const apiMetaPromise = measureAsync("fetch-api-meta", () => readJson(API_META_PATH, {
+    cache: "default",
+    timeoutMs: API_META_TIMEOUT_MS,
+  })).catch((error) => ({ __error: error }));
+
+  // The first ranking request has a stable contract and does not need meta.
+  // Start it in the same task as meta so the slower response does not block
+  // first content. Meta later binds the result to an immutable release SHA.
+  state.runtimeApi.available = true;
+  state.runtimeApi.usingFallbackMeta = true;
+  state.runtimeApi.meta = runtimeApiFallbackMeta();
+  state.runtimeMeta = runtimeMetaFromApiMeta(state.runtimeApi.meta);
+  state.range = initialRange;
+  applyRequestRuntimeShell();
+  setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === initialRange) || els.rangeTabs[0]);
+  const firstRankingPromise = requestedSnapshotPath === SNAPSHOT_LATEST_PATH
+    ? measureAsync("fetch-initial-ranking", () => render({ syncUrl: false })).catch((error) => ({ __error: error }))
+    : Promise.resolve(null);
+
+  const apiMetaResult = await apiMetaPromise;
+  const apiMeta = apiMetaResult && !apiMetaResult.__error ? apiMetaResult : null;
+  if (isRuntimeApiMeta(apiMeta)) {
+    state.runtimeApi.available = true;
+    state.runtimeApi.usingFallbackMeta = false;
+    state.runtimeApi.meta = apiMeta;
+    state.runtimeMeta = runtimeMetaFromApiMeta(apiMeta);
+  } else {
+    state.runtimeApi.metaError = apiMetaResult?.__error || new Error("runtime API metadata is invalid");
+  }
+  state.initializationMetaPending = false;
+
+  const firstRankingResult = await firstRankingPromise;
+  let activeResult = firstRankingResult && !firstRankingResult.__error ? firstRankingResult : null;
+  if (activeResult && !isRuntimeApiMeta(apiMeta) && cleanText(activeResult.releaseSha || "")) {
+    const responseBoundMeta = runtimeApiFallbackMeta();
+    responseBoundMeta.meta.content_sha256 = cleanText(activeResult.releaseSha);
+    state.runtimeApi.meta = responseBoundMeta;
+    state.runtimeMeta = runtimeMetaFromApiMeta(responseBoundMeta);
+  }
+  if (activeResult && isRuntimeApiMeta(apiMeta)) {
+    activeResult = await reconcileInitialRankingRelease(activeResult, apiMeta);
+  }
+  if (!activeResult) {
+    const rankingError = firstRankingResult?.__error || state.runtimeApi.metaError || new Error("initial ranking request failed");
+    await activateInitialStaticFallback(initialRange, rankingError);
+  }
+
+  // Status, snapshot history and legacy static metadata are deliberately not
+  // on the first-content critical path.
+  const statusPromise = readJson(STATUS_PATH, { cache: "no-cache" }).catch(() => null);
+  const snapshotIndexPromise = readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] }));
+  const meta = state.runtimeMeta;
+  state.status = mergeRuntimeStatus(meta?.status || null, await statusPromise, meta || {});
+  startStatusTicker();
+  renderStatus(state.status);
+  const snapshotIndex = await snapshotIndexPromise;
+  state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
+  renderSnapshotOptions();
+  normalizeTrendStateForRuntime();
+  syncControlsFromState();
+
+  if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
+    await loadSnapshotPath(requestedSnapshotPath, SNAPSHOT_LATEST_PATH);
+  } else {
+    scheduleCurrentRankDiffLoad();
+    scheduleOtherRangePrefetch();
+    cleanSharedUrlAfterRender();
+  }
+  perfMeasure("app-init", initMark);
+}
+
+function apiMetaReleaseSha(apiMeta = state.runtimeApi.meta) {
+  return cleanText(apiMeta?.meta?.content_sha256 || apiMeta?.meta?.contentSha256 || "");
+}
+
+async function reconcileInitialRankingRelease(result, apiMeta) {
+  const expectedSha = apiMetaReleaseSha(apiMeta);
+  const actualSha = cleanText(result?.releaseSha || "");
+  if (!expectedSha || actualSha === expectedSha) return result;
+  if (state.runtimeApi.versionRetryUsed) {
+    throw new Error(`release mismatch after retry: expected ${expectedSha}, received ${actualSha || "missing"}`);
+  }
+  state.runtimeApi.versionRetryUsed = true;
+  state.requestRuntime.pageResultCache.clear();
+  const retryResult = await measureAsync("fetch-versioned-initial-ranking", () => render({ syncUrl: false }));
+  const retrySha = cleanText(retryResult?.releaseSha || "");
+  if (retrySha !== expectedSha) {
+    const error = new Error(`release mismatch after versioned retry: expected ${expectedSha}, received ${retrySha || "missing"}`);
+    error.name = "ReleaseMismatchError";
+    throw error;
+  }
+  return retryResult;
+}
+
+async function activateInitialStaticFallback(initialRange, cause) {
+  const staticMetaPayload = await measureAsync("fetch-static-meta-after-api-failure", () => readJson(UI_META_PATH, {
+    cache: "default",
+    timeoutMs: METADATA_REQUEST_TIMEOUT_MS,
+  })).catch(() => null);
+  const staticMeta = staticMetaPayload ? validateStaticRuntimeMeta(staticMetaPayload, initialRange) : null;
+  if (!staticMeta) throw cause;
+  state.runtimeApi.staticMeta = staticMeta;
+  state.runtimeApi.available = false;
+  state.runtimeApi.meta = null;
+  state.runtimeApi.usingFallbackMeta = false;
+  state.runtimeMeta = staticMeta;
+  const rangePayload = await measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange));
+  await applyRuntimeRangePayload(rangePayload, {
+    resetPage: false,
+    syncUrl: false,
+    expectedRange: initialRange,
+  });
 }
 
 async function init() {
@@ -3313,8 +3444,7 @@ function render(options = {}) {
   const preservedPageInputState = options.preservePageInput === false ? null : capturePageInputState();
   if (options.preservePageInput === false) cancelPageInputRestore();
   if (canUseRequestRuntime(state.range)) {
-    renderRequestedRuntime(options, preservedPageInputState);
-    return;
+    return renderRequestedRuntime(options, preservedPageInputState);
   }
   const renderMark = perfMark("render-dom:start");
   const group = currentGroup();
@@ -3411,6 +3541,7 @@ async function renderRequestedRuntime(options = {}, preservedPageInputState = nu
     if (result.view !== "vtuberRank")
     scheduleAdjacentRequestPagePrefetch(result);
     scheduleCurrentRankDiffLoad();
+    return result;
   } catch (error) {
     if (error?.name === "AbortError" || revision !== state.requestRuntime.revision) return;
     const friendlyMessage = requestErrorFriendlyMessage(error);
@@ -3675,10 +3806,12 @@ async function requestApiViewPage(request, range) {
   // cache is what discovers a new SHA.
   const releaseVersion = runtimeReleaseVersion();
   if (releaseVersion) params.set("v", releaseVersion);
-  const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
+  const response = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: releaseVersion ? "force-cache" : "default",
     signal: request.signal,
+    includeResponseMeta: true,
   });
+  const payload = response.payload;
   assertApiRankingPayload(payload);
   const records = hydrateRequestRecords(payload.records, request.view);
   const page = Number(payload.page) || request.page || 1;
@@ -3702,7 +3835,7 @@ async function requestApiViewPage(request, range) {
     totalCount: Number(payload.totalCount) || 0,
     pageCount: Number(payload.pageCount) || 1,
   };
-  return buildRequestResult({
+  const result = buildRequestResult({
     request,
     summary,
     manifest,
@@ -3716,6 +3849,10 @@ async function requestApiViewPage(request, range) {
     totalOccurrenceCount: Number(payload.totalOccurrenceCount) || 0,
     totalVideoCount: Number(payload.totalVideoCount) || 0,
   });
+  result.releaseSha = cleanText(response.responseMeta?.releaseSha || "");
+  result.dataSource = cleanText(response.responseMeta?.dataSource || "");
+  result.serverDurationMs = Number(response.responseMeta?.durationMs) || 0;
+  return result;
 }
 
 function apiViewForRequestView(view) {
@@ -3728,7 +3865,7 @@ function apiViewForRequestView(view) {
 
 function apiMetricForRequest(request) {
   if (request.view === "songRank" || request.view === "artistRank" || request.view === "vtuberRank") {
-    if (request.view === "vtuberRank" && request.rankMetric === "songs") return "songs";
+    if (request.rankMetric === "songs") return "songs";
     return request.rankMetric === "videos" ? "videos" : "occurrences";
   }
   return "count";
@@ -9398,7 +9535,17 @@ async function readJson(path, options = {}) {
   }
   const parseMark = perfMark("json-parse:start");
   try {
-    return JSON.parse(text);
+    const payload = JSON.parse(text);
+    if (!options.includeResponseMeta) return payload;
+    return {
+      payload,
+      responseMeta: {
+        releaseSha: cleanText(response.headers.get("X-Release-Sha") || ""),
+        dataSource: cleanText(response.headers.get("X-Data-Source") || ""),
+        durationMs: Number(response.headers.get("X-Duration-Ms")) || 0,
+        etag: cleanText(response.headers.get("ETag") || ""),
+      },
+    };
   } finally {
     perfMeasure("json-parse", parseMark);
     state.loadedResources.push({

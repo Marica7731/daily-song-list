@@ -458,12 +458,35 @@ class Tests(unittest.TestCase):
         self.assertIn("window.clearTimeout(timeoutId)",app)
         self.assertIn("客户端截止时间",app)
 
+    def test_frontend_parallelizes_first_ranking_and_binds_release_once(self):
+        app=APP_PATH.read_text(encoding="utf-8")
+        start=app.index("async function initNextServingV3()")
+        end=app.index("function apiMetaReleaseSha",start)
+        active_init=app[start:end]
+        self.assertLess(active_init.index("const apiMetaPromise"),active_init.index("const firstRankingPromise"))
+        self.assertLess(active_init.index("const firstRankingPromise"),active_init.index("await apiMetaPromise"))
+        self.assertLess(active_init.index("await firstRankingPromise"),active_init.index("const statusPromise"))
+        self.assertNotIn("staticMetaPromise",active_init)
+        self.assertIn("fetch-static-meta-after-api-failure",app)
+        self.assertIn("state.runtimeApi.versionRetryUsed",app)
+        self.assertIn("fetch-versioned-initial-ranking",app)
+        self.assertIn("includeResponseMeta: true",app)
+        self.assertIn('result.releaseSha = cleanText(response.responseMeta?.releaseSha || "")',app)
+        self.assertIn('if (request.rankMetric === "songs") return "songs"',app)
+
     def test_nginx_fails_fast_and_preserves_json_errors(self):
         nginx=NGINX_PATH.read_text(encoding="utf-8")
         self.assertEqual(nginx.count("proxy_read_timeout 10s;"),2)
         self.assertEqual(nginx.count("proxy_next_upstream off;"),2)
         self.assertEqual(nginx.count("proxy_intercept_errors off;"),2)
         self.assertNotIn("proxy_read_timeout 15s;",nginx)
+        self.assertIn("server_name next.ytb-song-rank.culua.com;",nginx)
+        self.assertIn("gzip on;",nginx)
+        self.assertIn("application/javascript",nginx)
+        self.assertIn("text/css",nginx)
+        self.assertIn("image/svg+xml",nginx)
+        self.assertIn('Cache-Control "public, max-age=31536000, immutable"',nginx)
+        self.assertIn('Cache-Control "public, max-age=60, must-revalidate"',nginx)
 
     def test_server_retains_configurable_production_backlog(self):
         httpd=server.make_server("127.0.0.1",0,256,self.store)
