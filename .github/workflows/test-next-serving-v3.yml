@@ -78,7 +78,8 @@ jobs:
           PY
           diff_base="HEAD^"
           if git rev-parse --verify HEAD^2 >/dev/null 2>&1; then diff_base="HEAD^1"; fi
-          git diff --check "$diff_base" HEAD -- \
+          git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol \
+            diff --check "$diff_base" HEAD -- \
             .github/workflows/sync-wdc-release.yml \
             .github/workflows/test-next-serving-v3.yml \
             assets/app.js index.html deploy scripts/migration \

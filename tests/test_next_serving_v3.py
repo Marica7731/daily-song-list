@@ -590,7 +590,8 @@ class Tests(unittest.TestCase):
         self.assertIn('git grep -nE -e "$pattern"',ci)
         self.assertIn("sparse-checkout-cone-mode: false",ci)
         self.assertIn("fetch-depth: 2",ci)
-        self.assertIn('git diff --check "$diff_base" HEAD',ci)
+        self.assertIn("core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",ci)
+        self.assertIn('diff --check "$diff_base" HEAD',ci)
         self.assertNotIn('ranking_scope_series\"] == 72',workflow)
         self.assertNotIn("https://ytb-song-rank.culua.com",installer)
 
