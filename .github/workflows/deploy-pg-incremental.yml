@@ -372,7 +372,7 @@ jobs:
             systemctl restart song-rank-pg-api
             ready=0
             for n in $(seq 1 30); do
-              if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
+              if curl -fsS --connect-timeout 2 --max-time 5 http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
               sleep 1
             done
             if [ "$ready" != 1 ]; then
@@ -382,10 +382,10 @@ jobs:
           if ! (
           set -Eeuo pipefail
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-            "curl --fail-with-body --silent --show-error --max-time 20 http://127.0.0.1:8765/healthz" \
+            "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz" \
             > "$TASK_ROOT/local-healthz.json"
           "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
-            "curl --fail-with-body --silent --show-error --max-time 20 http://127.0.0.1:8765/api/meta" \
+            "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/api/meta" \
             > "$TASK_ROOT/local-meta.json"
           jq -e --arg revision "$EXPECTED_TARGET_REVISION" --arg sha "$EXPECTED_TARGET_CONTENT_SHA256" '
             (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
@@ -398,10 +398,10 @@ jobs:
             echo "PG_ROLLBACK_BLOCKED local-meta-gate revision=$EXPECTED_TARGET_REVISION"; exit 78;
           }
           public_health_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
-            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-healthz.json" -w '%{http_code}' \
+            --connect-timeout 8 --max-time 300 -o "$TASK_ROOT/public-healthz.json" -w '%{http_code}' \
             https://ytb-song-rank.culua.com/healthz)"
           public_meta_http="$(curl --fail-with-body --silent --show-error --location --retry 2 --retry-all-errors \
-            --connect-timeout 8 --max-time 20 -o "$TASK_ROOT/public-meta.json" -w '%{http_code}' \
+            --connect-timeout 8 --max-time 300 -o "$TASK_ROOT/public-meta.json" -w '%{http_code}' \
             https://ytb-song-rank.culua.com/api/meta)"
           test "$public_health_http" = 200
           test "$public_meta_http" = 200
@@ -1071,7 +1071,7 @@ jobs:
                 if curl -fsS --max-time 10 http://127.0.0.1:8765/healthz >/dev/null; then ready=1; break; fi
                 sleep 1
               done
-              test \"\$ready\" = 1 || echo PG_ADAPTER_HEALTH_OBSERVATION unavailable >&2
+              test \"\$ready\" = 1 || { echo PG_ADAPTER_HEALTH_BLOCKED unavailable >&2; exit 75; }
               echo PG_7D_RANGE_ADAPTER_INSTALLED
             " | tee "$TASK_ROOT/adapter-install.log"
             grep -qx 'PG_7D_RANGE_ADAPTER_INSTALLED' "$TASK_ROOT/adapter-install.log"
@@ -1094,6 +1094,21 @@ jobs:
             test "$still_previous" = "$previous_active" || {
               echo "PG_INCREMENT_BLOCKED adapter-install-changed-active expected=$previous_active actual=$still_previous"; exit 75;
             }
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz" \
+              > "$TASK_ROOT/adapter-healthz.json"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/api/meta" \
+              > "$TASK_ROOT/adapter-meta.json"
+            jq -e '
+              (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
+            ' "$TASK_ROOT/adapter-healthz.json" >/dev/null
+            jq -e --arg revision "$previous_active" '
+              (.meta.active_revision_id == $revision) and (.meta.migration_status == "active")
+            ' "$TASK_ROOT/adapter-meta.json" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED adapter-old-active-meta revision=$previous_active"; exit 75;
+            }
+            echo "PG_ADAPTER_OLD_ACTIVE_HEALTH_META_OK revision=$previous_active"
             echo "PG_BUSINESS_VALIDATION_OBSERVATION_BEGIN phase=source"
             activation_source_args=""
             echo "PG_SOURCE_BLOB_VALIDATION_REMOVED"
@@ -1105,11 +1120,41 @@ jobs:
             fi
             printf '%s\n' "$activation_output" | tee "$TASK_ROOT/activation-result.txt"
             activated=1
-            echo "PG_ONLINE_BUSINESS_VALIDATION_REMOVED"
-            if ! curl --silent --show-error --location --connect-timeout 8 --max-time 20 \
-              https://ytb-song-rank.culua.com/healthz -o "$TASK_ROOT/public-healthz.json"; then
-              echo "PG_ONLINE_HEALTH_OBSERVATION unavailable"
-            fi
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/healthz" \
+              > "$TASK_ROOT/active-healthz.json"
+            "${SSH[@]}" "$VPS2_USER@$VPS2_HOST" \
+              "curl --fail-with-body --silent --show-error --connect-timeout 8 --max-time 300 http://127.0.0.1:8765/api/meta" \
+              > "$TASK_ROOT/active-meta.json"
+            jq -e '
+              (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
+            ' "$TASK_ROOT/active-healthz.json" >/dev/null
+            jq -e --arg revision "$REVISION" --arg sha "$candidate_sha" '
+              (.meta.active_revision_id == $revision) and
+              (.meta.migration_status == "active") and
+              (.meta.content_sha256 == $sha)
+            ' "$TASK_ROOT/active-meta.json" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED active-local-meta revision=$REVISION"; exit 75;
+            }
+            public_health_http="$(curl --fail-with-body --silent --show-error --location --retry 1 --retry-all-errors \
+              --connect-timeout 8 --max-time 300 -o "$TASK_ROOT/public-healthz.json" -w '%{http_code}' \
+              https://ytb-song-rank.culua.com/healthz)"
+            public_meta_http="$(curl --fail-with-body --silent --show-error --location --retry 1 --retry-all-errors \
+              --connect-timeout 8 --max-time 300 -o "$TASK_ROOT/public-meta.json" -w '%{http_code}' \
+              https://ytb-song-rank.culua.com/api/meta)"
+            test "$public_health_http" = 200
+            test "$public_meta_http" = 200
+            jq -e '
+              (.status == "ok") and ((.counts.videos // 0) > 0) and ((.counts.occurrences // 0) > 0)
+            ' "$TASK_ROOT/public-healthz.json" >/dev/null
+            jq -e --arg revision "$REVISION" --arg sha "$candidate_sha" '
+              (.meta.active_revision_id == $revision) and
+              (.meta.migration_status == "active") and
+              (.meta.content_sha256 == $sha)
+            ' "$TASK_ROOT/public-meta.json" >/dev/null || {
+              echo "PG_INCREMENT_BLOCKED active-public-meta revision=$REVISION"; exit 75;
+            }
+            echo "PG_ONLINE_HEALTH_META_OK revision=$REVISION contentSha256=$candidate_sha"
           fi
           echo PG_INCREMENT_STORAGE_BEGIN
           cat "$TASK_ROOT/storage.txt"
