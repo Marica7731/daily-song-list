@@ -8760,9 +8760,26 @@ def _hydrated_generic_ranking_payload(
     if candidate_previews and not hydration_degraded:
         parent_previews = payload.get("occurrences")
         if not isinstance(parent_previews, list):
-            raise PostgresAdapterError(
-                "generic ranking parent previews are invalid"
-            )
+            detail_key = _text(row.get("detail_key"))
+            payload_video_id = _text(payload.get("videoId"))
+            if (
+                view == "videos"
+                and re.fullmatch(r"[A-Za-z0-9_-]{11}", detail_key)
+                and payload_video_id in {"", detail_key}
+            ):
+                # Some legacy parent video cards persisted only scalar video
+                # metadata.  The immutable detail key still binds the exact
+                # YouTube video, so treat the absent parent preview list as
+                # empty and retain the reviewed accepted-overlay previews.
+                # This keeps one malformed legacy card from turning an
+                # otherwise valid deep rankings page into a page-wide 503.
+                parent_previews = []
+                payload["videoId"] = detail_key
+                payload["occurrences"] = parent_previews
+            else:
+                raise PostgresAdapterError(
+                    "generic ranking parent previews are invalid"
+                )
         payload["occurrences"] = _bounded_overlay_previews(
             (*parent_previews, *candidate_previews),
         )
