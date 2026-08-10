@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T06:22:38.461Z",
+  "generatedAt": "2026-08-10T08:53:28.560Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T06:22:38.461Z",
+    "fetchedAt": "2026-08-10T08:53:28.560Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T06:22:38.461Z",
+    "generatedAt": "2026-08-10T08:53:28.560Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1089,
-      "parseableChannels": 1069,
+      "totalChannels": 1090,
+      "parseableChannels": 1070,
       "realAvatar": 648,
-      "thumbnailFallback": 441,
+      "thumbnailFallback": 442,
       "missingDisplayImage": 0,
-      "missingAvatar": 441,
+      "missingAvatar": 442,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 620
+      "skipped_collected_evidence": 621
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 600,
+      "batch_limit_reached": 601,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@rikka-hoshiumi0217",
+        "channelId": "UCUhwsEiJ7PZmEu0qdJ9_Aeg",
+        "displayName": "星海りっか 【Hoshiumi Rikka】",
+        "sourceUrl": "https://www.youtube.com/@rikka-hoshiumi0217",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Setono_Toto",
         "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
@@ -11842,13 +11849,6 @@
         "channelId": "UCoHsW282iYqPmZZ5617cg2w",
         "displayName": "姫乃あいむ",
         "sourceUrl": "https://www.youtube.com/@himenoaimu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KugaTsubaki",
-        "channelId": "UCiMrvZ_l8lw42T8amrGCFNQ",
-        "displayName": "Tsubaki Ch. 九娥つばき",
-        "sourceUrl": "https://www.youtube.com/@KugaTsubaki",
         "reason": "batch_limit_reached"
       }
     ]
