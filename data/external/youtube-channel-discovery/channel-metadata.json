@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T19:13:20.934Z",
+  "generatedAt": "2026-08-10T20:15:28.716Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T19:13:20.934Z",
+    "fetchedAt": "2026-08-10T20:15:28.716Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T19:13:20.934Z",
+    "generatedAt": "2026-08-10T20:15:28.716Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1096,
-      "parseableChannels": 1076,
+      "totalChannels": 1098,
+      "parseableChannels": 1078,
       "realAvatar": 648,
-      "thumbnailFallback": 448,
+      "thumbnailFallback": 450,
       "missingDisplayImage": 0,
-      "missingAvatar": 448,
+      "missingAvatar": 450,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 626
+      "skipped_collected_evidence": 628
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 606,
+      "batch_limit_reached": 608,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
@@ -11723,6 +11723,13 @@
         "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
         "displayName": "瀬戸乃とと",
         "sourceUrl": "https://www.youtube.com/@Setono_Toto",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RurizukiRuchil",
+        "channelId": "UC-NiJPpTdmbXqqhmMARoHLg",
+        "displayName": "瑠璃月るちる",
+        "sourceUrl": "https://www.youtube.com/@RurizukiRuchil",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
         "displayName": "綾見ユラ / YuraAyami",
         "sourceUrl": "https://www.youtube.com/@yura_ayami",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@EngakuAsobi",
-        "channelId": "UCcgspKfdWRiCKtJ1E1pAWwA",
-        "displayName": "苑楽アソビ【びじぱと】",
-        "sourceUrl": "https://www.youtube.com/@EngakuAsobi",
         "reason": "batch_limit_reached"
       }
     ]
