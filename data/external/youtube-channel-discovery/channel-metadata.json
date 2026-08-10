@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T04:52:31.175Z",
+  "generatedAt": "2026-08-10T06:22:38.461Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T04:52:31.175Z",
+    "fetchedAt": "2026-08-10T06:22:38.461Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T04:52:31.175Z",
+    "generatedAt": "2026-08-10T06:22:38.461Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1088,
-      "parseableChannels": 1068,
+      "totalChannels": 1089,
+      "parseableChannels": 1069,
       "realAvatar": 648,
-      "thumbnailFallback": 440,
+      "thumbnailFallback": 441,
       "missingDisplayImage": 0,
-      "missingAvatar": 440,
+      "missingAvatar": 441,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 619
+      "skipped_collected_evidence": 620
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 599,
+      "batch_limit_reached": 600,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@Setono_Toto",
+        "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
+        "displayName": "瀬戸乃とと",
+        "sourceUrl": "https://www.youtube.com/@Setono_Toto",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@dantencho",
         "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
@@ -11744,6 +11751,13 @@
         "channelId": "UCtWH0tVAcUcSm4v96H5cAqQ",
         "displayName": "Pico Ch. 倉夢ぴこ 【Phase Connect】",
         "sourceUrl": "https://www.youtube.com/@grampico",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@VPI_NekonadeKozeni",
+        "channelId": "UCdWQytF_syOGwaQQuxwklxg",
+        "displayName": "猫撫こぜに / Nekonade Kozeni",
+        "sourceUrl": "https://www.youtube.com/@VPI_NekonadeKozeni",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UCiMrvZ_l8lw42T8amrGCFNQ",
         "displayName": "Tsubaki Ch. 九娥つばき",
         "sourceUrl": "https://www.youtube.com/@KugaTsubaki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Unifee_akechi",
-        "channelId": "UCrDRepCC81GaakxeWwJhMFA",
-        "displayName": "明智光月 / akechi mitsuki",
-        "sourceUrl": "https://www.youtube.com/@Unifee_akechi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@myth_hydrangea",
-        "channelId": "UCDpX_q4mlkbuPJbY6h62eHQ",
-        "displayName": "妃那子 / HINAKO",
-        "sourceUrl": "https://www.youtube.com/@myth_hydrangea",
         "reason": "batch_limit_reached"
       }
     ]
