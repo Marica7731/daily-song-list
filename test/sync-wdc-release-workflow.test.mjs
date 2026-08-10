@@ -13,6 +13,11 @@ test("WDC workflow exports one database snapshot and records only verified deplo
   assert.match(source, /materialize-pg-release-snapshot\.py/);
   assert.match(source, /--expected-revision "\$expected_active"/);
   assert.match(source, /--property=MemoryMax=700M/);
+  assert.match(source, /--property=Nice=15/);
+  assert.match(source, /--property=CPUWeight=10/);
+  assert.match(source, /--property=IOWeight=10/);
+  assert.match(source, /test -s \/tmp\/dsl-wdc-meta\.json/);
+  assert.match(source, /test "\$actual_pages" = "\$snapshot_pages"/);
   assert.match(source, /WDC_DOMAIN_VERIFIED/);
   assert.match(source, /health\["currentRelease"\] == expected_bundle/);
   assert.doesNotMatch(source, /urllib\.request/);

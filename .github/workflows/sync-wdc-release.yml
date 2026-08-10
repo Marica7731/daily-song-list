@@ -118,6 +118,9 @@ jobs:
             --unit="dsl-wdc-snapshot-$run_id" \
             --uid=www-data --gid=www-data \
             --property=MemoryMax=700M \
+            --property=Nice=15 \
+            --property=CPUWeight=10 \
+            --property=IOWeight=10 \
             --property=RuntimeMaxSec=32400 \
             --property=WorkingDirectory=/opt/culua/ytb-song-rank \
             --setenv=PGHOST=/var/run/postgresql \
@@ -128,13 +131,27 @@ jobs:
               --output /tmp/dsl-wdc-pages \
               --meta-output /tmp/dsl-wdc-meta.json \
               --expected-revision "$expected_active"
+          test -s /tmp/dsl-wdc-meta.json
+          snapshot_active="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['active_revision_id'])")"
+          snapshot_parent="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['parent_revision_id'])")"
+          snapshot_source="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['source_commit_sha'])")"
+          snapshot_built="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['built_at'])")"
+          snapshot_latest="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['latest_generated_at'])")"
+          snapshot_pages="$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['page_files'])")"
+          actual_pages="$(find /tmp/dsl-wdc-pages -type f -name 'page-*.json' | wc -l)"
+          test "$snapshot_active" = "$expected_active"
+          [[ "$snapshot_parent" =~ ^[A-Za-z0-9._:-]+$ ]]
+          [[ "$snapshot_source" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$snapshot_pages" =~ ^[0-9]+$ ]]
+          test "$snapshot_pages" -ge 18
+          test "$actual_pages" = "$snapshot_pages"
           python3 build-release-bundle.py \
             --input /tmp/dsl-wdc-pages --output /tmp/dsl-wdc-bundles \
-            --active-revision-id "$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['active_revision_id'])")" \
-            --expected-parent-revision-id "$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['parent_revision_id'])")" \
-            --source-commit-sha "$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['source_commit_sha'])")" \
-            --generated-at "$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['built_at'])")" \
-            --latest-event-time "$(python3 -c "import json;print(json.load(open('/tmp/dsl-wdc-meta.json'))['latest_generated_at'])")"
+            --active-revision-id "$snapshot_active" \
+            --expected-parent-revision-id "$snapshot_parent" \
+            --source-commit-sha "$snapshot_source" \
+            --generated-at "$snapshot_built" \
+            --latest-event-time "$snapshot_latest"
           BUNDLE_DIR=$(ls -dt /tmp/dsl-wdc-bundles/*/ | head -1)
           python3 build-serving-sqlite.py --bundle-dir "$BUNDLE_DIR"
           REMOTE
