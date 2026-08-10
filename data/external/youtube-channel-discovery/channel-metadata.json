@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T20:59:25.969Z",
+  "generatedAt": "2026-08-10T22:53:07.779Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T20:59:25.969Z",
+    "fetchedAt": "2026-08-10T22:53:07.779Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T20:59:25.969Z",
+    "generatedAt": "2026-08-10T22:53:07.779Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1101,
-      "parseableChannels": 1081,
+      "totalChannels": 1103,
+      "parseableChannels": 1083,
       "realAvatar": 648,
-      "thumbnailFallback": 453,
+      "thumbnailFallback": 455,
       "missingDisplayImage": 0,
-      "missingAvatar": 453,
+      "missingAvatar": 455,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 631
+      "skipped_collected_evidence": 633,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 611,
+      "batch_limit_reached": 613,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@aozora_byakumo",
+        "channelId": "UCbdLMRFTRAYjUeYE55Nc-wg",
+        "displayName": "青空びゃくも【うたごえピアノCh】",
+        "sourceUrl": "https://www.youtube.com/@aozora_byakumo",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@melty_el",
         "channelId": "UCuMDk_EWGz9c0R_HfvUjOsw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCE6w5FzazXE9i3wwrVJPbhg",
         "displayName": "詠音ガト",
         "sourceUrl": "https://www.youtube.com/@Gato_utane",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
-        "channelId": "UCx3FdASxZpgILDwDv7MQYRg",
-        "displayName": "琥珀ひなた",
-        "sourceUrl": "https://www.youtube.com/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
         "reason": "batch_limit_reached"
       }
     ]
