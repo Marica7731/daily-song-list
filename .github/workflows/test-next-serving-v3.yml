@@ -3,6 +3,8 @@ name: Test next serving v3
 on:
   pull_request:
     paths:
+      - "AGENTS.md"
+      - "README.md"
       - ".github/workflows/sync-wdc-release.yml"
       - ".github/workflows/test-next-serving-v3.yml"
       - "assets/app.js"
@@ -32,6 +34,8 @@ jobs:
           fetch-depth: 2
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            AGENTS.md
+            README.md
             .github/workflows/sync-wdc-release.yml
             .github/workflows/test-next-serving-v3.yml
             assets/app.js
@@ -65,6 +69,13 @@ jobs:
             tests/test_next_serving_v3.py
           node --check assets/app.js
           bash -n deploy/install-wdc-release.sh
+          grep -Fq '40,000,000,000 bytes' AGENTS.md
+          grep -Fq '40,000,000,000 bytes' README.md
+          grep -Fq '/opt/culua/ytb-song-rank' AGENTS.md
+          grep -Fq '/opt/culua/ytb-song-rank' README.md
+          grep -Fq 'must stop before writing to WDC' AGENTS.md
+          grep -Fq 'must stop before writing to WDC' README.md
+          echo "WDC_STORAGE_DOCS_OK"
           if command -v shellcheck >/dev/null 2>&1; then
             shellcheck deploy/install-wdc-release.sh
           fi
@@ -82,6 +93,7 @@ jobs:
             diff --check "$diff_base" HEAD -- \
             .github/workflows/sync-wdc-release.yml \
             .github/workflows/test-next-serving-v3.yml \
+            AGENTS.md README.md \
             assets/app.js index.html deploy scripts/migration \
             server/pg_adapter.py server/release_serving_server.py tests/test_next_serving_v3.py
 
@@ -92,6 +104,7 @@ jobs:
           if git grep -nE -e "$pattern" -- \
               .github/workflows/sync-wdc-release.yml \
               .github/workflows/test-next-serving-v3.yml \
+              AGENTS.md README.md \
               assets/app.js deploy scripts/migration server tests/test_next_serving_v3.py; then
             echo "secret-like material found in candidate" >&2
             exit 1
