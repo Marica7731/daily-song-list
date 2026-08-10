@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-10T13:31:27.795Z",
+  "generatedAt": "2026-08-10T15:13:31.642Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-10T13:31:27.795Z",
+    "fetchedAt": "2026-08-10T15:13:31.642Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-10T13:31:27.795Z",
+    "generatedAt": "2026-08-10T15:13:31.642Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1091,
-      "parseableChannels": 1071,
+      "totalChannels": 1093,
+      "parseableChannels": 1073,
       "realAvatar": 648,
-      "thumbnailFallback": 443,
+      "thumbnailFallback": 445,
       "missingDisplayImage": 0,
-      "missingAvatar": 443,
+      "missingAvatar": 445,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 666,
-      "skipped_collected_evidence": 622
+      "skipped_collected_evidence": 624
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 602,
+      "batch_limit_reached": 604,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
@@ -11709,6 +11709,13 @@
         "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
         "displayName": "Sakuna Ch. 結城さくな",
         "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@WakasaIto",
+        "channelId": "UCGGc-KmG4fxc8D03S-H0rbw",
+        "displayName": "若櫻依兔 WakasaIto Ch.",
+        "sourceUrl": "https://www.youtube.com/@WakasaIto",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCmB1E78Kdgd9z6hN3ONRKow",
         "displayName": "花ノ木まる ✿ Hananoki Maru",
         "sourceUrl": "https://www.youtube.com/@hananokimaru",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@himenoaimu",
-        "channelId": "UCoHsW282iYqPmZZ5617cg2w",
-        "displayName": "姫乃あいむ",
-        "sourceUrl": "https://www.youtube.com/@himenoaimu",
         "reason": "batch_limit_reached"
       }
     ]
