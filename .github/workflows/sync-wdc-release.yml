@@ -234,6 +234,9 @@ jobs:
           run_isolated() {
             local phase="$1"
             shift
+            local started_at status
+            started_at="$(date --iso-8601=seconds)"
+            set +e
             systemd-run --quiet --wait --pipe --collect \
               --unit="dsl-wdc-${phase}-${run_id}-${run_attempt}" \
               --uid=www-data \
@@ -245,6 +248,14 @@ jobs:
               --property=RuntimeMaxSec=32400 \
               --property="WorkingDirectory=$remote_root" \
               "$@"
+            status=$?
+            set -e
+            if (( status != 0 )); then
+              echo "RUN_ISOLATED_FAILED phase=$phase status=$status started_at=$started_at" >&2
+              journalctl -k --since "$started_at" --no-pager \
+                | grep -Ei 'oom|out of memory|killed process|memory cgroup' >&2 || true
+              return "$status"
+            fi
           }
 
           # Resolve parent/overlay/authoritative-7d semantics through the same

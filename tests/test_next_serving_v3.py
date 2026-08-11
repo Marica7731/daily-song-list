@@ -660,6 +660,60 @@ class Tests(unittest.TestCase):
         self.assertEqual(exported,len(keys))
         self.assertEqual(counts,(32,31))
 
+    def test_source_export_streams_validated_pages_without_whole_source_list(self):
+        source_key="streaming-source"
+        pages={
+            1:[
+                {"videoId":"video-one","occurrenceId":"one-a","title":"One"},
+                {"videoId":"video-one","occurrenceId":"one-b","title":"One"},
+                {"videoId":"video-two","occurrenceId":"two-a","title":"Two"},
+            ],
+            2:[{"videoId":"video-three","occurrenceId":"three-a","title":"Three"}],
+        }
+        class ProbeWriter:
+            def __init__(self):self.page_sizes=[];self.started=0;self.position=0
+            def begin_source(self,key,range_id,record):
+                self.started+=1;return {"source_key":key,"range_id":range_id,"position":0}
+            def add_source_occurrences(self,state,values):
+                rows=list(values);self.page_sizes.append(len(rows));state["position"]+=len(rows);return len(rows)
+            def finish_source(self,state):self.position=state["position"];return self.position
+        def load(key,query):
+            page=int(query["page"]);occurrences=pages[page]
+            return {"found":True,"sourceKey":key,"page":page,"pageSize":200,
+                    "pageCount":2,"totalVideoCount":3,"totalOccurrenceCount":4,
+                    "record":{"type":"song","sourceDetailKey":key,"rangeId":"all",
+                              "occurrences":occurrences}}
+        writer=ProbeWriter()
+        pg_materializer.export_source(
+            object(),writer,range_id="all",source_key=source_key,payload_loader=load,
+        )
+        self.assertEqual(writer.started,1)
+        self.assertEqual(writer.page_sizes,[3,1])
+        self.assertEqual(writer.position,4)
+
+    def test_snapshot_writer_bounds_large_source_write_batches(self):
+        target=self.temp/"streaming-source.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        source_key="large-streaming-source"
+        def occurrences():
+            for index in range(5000):
+                yield {"videoId":f"video-{index:06d}","occurrenceId":f"occ-{index:06d}",
+                       "title":f"Title {index}","channelName":"Fixture",
+                       "channelId":"UCfixture","seconds":index}
+        writer.add_source(
+            source_key,"all",{"type":"vtuber","sourceDetailKey":source_key},occurrences(),
+        )
+        self.assertLessEqual(
+            writer.max_source_write_batch,pg_materializer.SOURCE_WRITE_BATCH_SIZE,
+        )
+        writer.finish()
+        with closing(sqlite3.connect(target)) as database:
+            count,minimum,maximum=database.execute(
+                "SELECT count(*),min(position),max(position) FROM source_occurrences "
+                "WHERE source_key=? AND range_id='all'",(source_key,),
+            ).fetchone()
+        self.assertEqual((count,minimum,maximum),(5000,1,5000))
+
     def test_pg_snapshot_exports_all_scopes_and_complete_source_pages(self):
         pages=self.temp/"pg-pages";meta=self.temp/"pg-meta.json";canonical=self.temp/"pg-canonical.sqlite"
         connection=FakePgConnection()
@@ -1045,6 +1099,10 @@ class Tests(unittest.TestCase):
         self.assertIn("--uid=www-data",workflow)
         self.assertIn('chown root:www-data "$remote_root"',workflow)
         self.assertIn("systemd-run --quiet --wait --pipe --collect",workflow)
+        self.assertIn("--property=MemoryMax=700M",workflow)
+        self.assertNotIn("--property=MemoryMax=701M",workflow)
+        self.assertIn("RUN_ISOLATED_FAILED phase=$phase",workflow)
+        self.assertIn("killed process|memory cgroup",workflow)
         self.assertIn("SOURCE_ACTIVE_STABLE",workflow)
         self.assertIn("SOURCE_ACTIVE_DRIFT",workflow)
         self.assertIn("publishing the pinned immutable snapshot",workflow)
