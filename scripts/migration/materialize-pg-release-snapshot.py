@@ -39,6 +39,8 @@ MAX_SOURCE_SEARCH_CHARS = 65_536
 SOURCE_SCOPE_FETCH_SIZE = 10_000
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
+SOURCE_WRITE_BATCH_SIZE = 64
+SQLITE_CHECKPOINT_ROWS = 2_048
 
 
 def _text(value: Any) -> str:
@@ -615,22 +617,94 @@ def build_snapshot_source_scope(
     return scope
 
 
-def _bounded_text(parts: Iterable[Any], limit: int) -> str:
-    values: list[str] = []
-    seen: set[str] = set()
-    size = 0
-    for raw in parts:
+class _BoundedTextAccumulator:
+    """Preserve bounded-text order/dedup without retaining every source row."""
+
+    def __init__(self, limit: int):
+        self.limit = limit
+        self.values: list[str] = []
+        self.seen: set[str] = set()
+        self.size = 0
+        self.full = False
+
+    def add(self, raw: Any) -> None:
+        if self.full:
+            return
         value = _text(raw)
-        if not value or value in seen:
-            continue
-        seen.add(value)
-        remaining = limit - size - (1 if values else 0)
+        if not value or value in self.seen:
+            return
+        self.seen.add(value)
+        remaining = self.limit - self.size - (1 if self.values else 0)
         if remaining <= 0:
-            break
+            self.full = True
+            return
         value = value[:remaining]
-        values.append(value)
-        size += len(value) + (1 if len(values) > 1 else 0)
-    return " ".join(values)[:limit]
+        self.values.append(value)
+        self.size += len(value) + (1 if len(self.values) > 1 else 0)
+        if self.size >= self.limit:
+            self.full = True
+
+    @property
+    def text(self) -> str:
+        return " ".join(self.values)[:self.limit]
+
+
+def _bounded_text(parts: Iterable[Any], limit: int) -> str:
+    accumulator = _BoundedTextAccumulator(limit)
+    for raw in parts:
+        accumulator.add(raw)
+    return accumulator.text
+
+
+def _current_rss_kib() -> int:
+    try:
+        for line in Path("/proc/self/status").read_text(encoding="utf-8").splitlines():
+            if line.startswith("VmRSS:"):
+                return int(line.split()[1])
+    except (OSError, ValueError, IndexError):
+        pass
+    return -1
+
+
+def _release_materializer_memory(
+    writer: "CanonicalSnapshotWriter",
+    builder: Any,
+    *,
+    phase: str,
+    drop_authoritative: bool = False,
+) -> None:
+    """Release phase-local payload graphs while preserving the PG snapshot."""
+
+    if drop_authoritative and hasattr(builder, "authoritative_records"):
+        builder.authoritative_records = None
+    reconciliation_counts = getattr(builder, "reconciliation_counts", None)
+    if isinstance(reconciliation_counts, dict):
+        reconciliation_counts.clear()
+    for name in (
+        "_GENERIC_RANKING_PREPARATION_CACHE",
+        "_GENERIC_META_COUNTS_CACHE",
+        "_VTUBER_REPLACEMENT_CACHE",
+    ):
+        cache = getattr(adapter, name, None)
+        clear = getattr(cache, "clear", None)
+        if callable(clear):
+            clear()
+    writer.checkpoint(shrink=True)
+    gc.collect()
+    try:
+        import ctypes
+
+        trim = getattr(ctypes.CDLL(None), "malloc_trim", None)
+        if trim is not None:
+            trim(0)
+    except (ImportError, OSError, TypeError):
+        pass
+    rss_kib = _current_rss_kib()
+    print(
+        f"PG_SNAPSHOT_MEMORY_RELEASE phase={phase} "
+        f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'}",
+        flush=True,
+    )
 
 
 def _flatten_scalars(value: Any, *, channel_only: bool = False) -> Iterable[str]:
@@ -804,6 +878,9 @@ class CanonicalSnapshotWriter:
         PRAGMA journal_mode=OFF;
         PRAGMA synchronous=OFF;
         PRAGMA temp_store=FILE;
+        PRAGMA cache_size=-32768;
+        PRAGMA mmap_size=0;
+        PRAGMA temp.cache_size=-8192;
         CREATE TABLE meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID;
         CREATE TABLE source_details(
           source_key TEXT NOT NULL,range_id TEXT NOT NULL,entity_type TEXT NOT NULL,
@@ -830,6 +907,23 @@ class CanonicalSnapshotWriter:
         self.ranking_rows = 0
         self.source_details = 0
         self.source_occurrences = 0
+        self._pending_writes = 0
+        self.max_source_write_batch = 0
+
+    def _record_writes(self, count: int) -> None:
+        self._pending_writes += count
+        if self._pending_writes >= SQLITE_CHECKPOINT_ROWS:
+            # This database is a private temporary candidate until finish()
+            # atomically renames it.  Intermediate SQLite commits therefore
+            # release dirty pages without weakening release atomicity.
+            self.connection.commit()
+            self._pending_writes = 0
+
+    def checkpoint(self, *, shrink: bool = False) -> None:
+        self.connection.commit()
+        self._pending_writes = 0
+        if shrink:
+            self.connection.execute("PRAGMA shrink_memory")
 
     def add_ranking(self, row: Sequence[Any]) -> None:
         self.connection.execute(
@@ -837,14 +931,14 @@ class CanonicalSnapshotWriter:
             tuple(row),
         )
         self.ranking_rows += 1
+        self._record_writes(1)
 
-    def add_source(
+    def begin_source(
         self,
         source_key: str,
         range_id: str,
         record: Mapping[str, Any],
-        occurrences: Sequence[Mapping[str, Any]],
-    ) -> None:
+    ) -> dict[str, Any]:
         entity_type = _text(record.get("type") or record.get("entityType") or "source")
         entity_key = _text(
             record.get("key") or record.get("entityKey") or record.get("videoId") or source_key
@@ -858,27 +952,62 @@ class CanonicalSnapshotWriter:
             (source_key, range_id, entity_type, entity_key, _json_text(detail)),
         )
         self.source_details += 1
-        rows = [
-            _source_occurrence_row(source_key, range_id, position, raw)
-            for position, raw in enumerate(occurrences, start=1)
-        ]
-        self.connection.executemany(
-            "INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            rows,
-        )
-        self.source_occurrences += len(rows)
-        source_search = _bounded_text(
-            (row[13] for row in rows),
-            MAX_RANKING_SEARCH_CHARS,
-        )
-        channel_search = _bounded_text(
-            (
-                value
-                for row in rows
-                for value in (row[5], row[6], row[7], row[8])
-            ),
-            MAX_CHANNEL_SEARCH_CHARS,
-        )
+        self._record_writes(1)
+        return {
+            "source_key": source_key,
+            "range_id": range_id,
+            "position": 0,
+            "source_search": _BoundedTextAccumulator(MAX_RANKING_SEARCH_CHARS),
+            "channel_search": _BoundedTextAccumulator(MAX_CHANNEL_SEARCH_CHARS),
+        }
+
+    def add_source_occurrences(
+        self,
+        state: dict[str, Any],
+        occurrences: Iterable[Mapping[str, Any]],
+    ) -> int:
+        source_key = _text(state["source_key"])
+        range_id = _text(state["range_id"])
+        source_search = state["source_search"]
+        channel_search = state["channel_search"]
+        rows: list[tuple[Any, ...]] = []
+        written = 0
+
+        def flush() -> None:
+            nonlocal written
+            if not rows:
+                return
+            self.max_source_write_batch = max(self.max_source_write_batch, len(rows))
+            self.connection.executemany(
+                "INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                rows,
+            )
+            count = len(rows)
+            self.source_occurrences += count
+            written += count
+            self._record_writes(count)
+            rows.clear()
+
+        for raw in occurrences:
+            state["position"] = int(state["position"]) + 1
+            row = _source_occurrence_row(
+                source_key,
+                range_id,
+                int(state["position"]),
+                raw,
+            )
+            source_search.add(row[13])
+            for value in (row[5], row[6], row[7], row[8]):
+                channel_search.add(value)
+            rows.append(row)
+            if len(rows) >= SOURCE_WRITE_BATCH_SIZE:
+                flush()
+        flush()
+        return written
+
+    def finish_source(self, state: Mapping[str, Any]) -> int:
+        source_key = _text(state["source_key"])
+        range_id = _text(state["range_id"])
         self.connection.execute(
             """
             UPDATE ranking_rows
@@ -887,14 +1016,27 @@ class CanonicalSnapshotWriter:
             WHERE range_id=? AND detail_key=?
             """,
             (
-                source_search,
+                state["source_search"].text,
                 MAX_RANKING_SEARCH_CHARS,
-                channel_search,
+                state["channel_search"].text,
                 MAX_CHANNEL_SEARCH_CHARS,
                 range_id,
                 source_key,
             ),
         )
+        self._record_writes(1)
+        return int(state["position"])
+
+    def add_source(
+        self,
+        source_key: str,
+        range_id: str,
+        record: Mapping[str, Any],
+        occurrences: Iterable[Mapping[str, Any]],
+    ) -> None:
+        state = self.begin_source(source_key, range_id, record)
+        self.add_source_occurrences(state, occurrences)
+        self.finish_source(state)
 
     def add_meta(self, values: Mapping[str, Any]) -> None:
         self.connection.executemany(
@@ -903,6 +1045,7 @@ class CanonicalSnapshotWriter:
         )
 
     def finish(self) -> dict[str, Any]:
+        self.checkpoint(shrink=True)
         quick = str(self.connection.execute("PRAGMA quick_check").fetchone()[0])
         if quick.casefold() != "ok":
             raise RuntimeError(f"canonical snapshot quick_check failed: {quick}")
@@ -940,12 +1083,12 @@ def export_source(
     source_key: str,
     payload_loader: Callable[[str, Mapping[str, Any]], Mapping[str, Any]] | None = None,
 ) -> None:
-    occurrences: list[dict[str, Any]] = []
     seen_videos: set[str] = set()
     expected_page_count: int | None = None
     expected_video_count: int | None = None
     expected_occurrence_count: int | None = None
-    detail: dict[str, Any] = {}
+    stream_state: dict[str, Any] | None = None
+    written_occurrences = 0
     page = 1
     while expected_page_count is None or page <= expected_page_count:
         query = _source_query(range_id, page)
@@ -980,7 +1123,7 @@ def export_source(
             expected_page_count = page_count
             expected_video_count = video_count
             expected_occurrence_count = occurrence_count
-            detail = current_detail
+            stream_state = writer.begin_source(source_key, range_id, current_detail)
         elif (
             page_count != expected_page_count
             or video_count != expected_video_count
@@ -1000,19 +1143,27 @@ def export_source(
         if seen_videos.intersection(page_videos):
             raise RuntimeError(f"source video crossed page boundary: {range_id}/{source_key}")
         seen_videos.update(page_videos)
-        occurrences.extend(dict(item) for item in page_occurrences if isinstance(item, Mapping))
+        if stream_state is None:
+            raise RuntimeError(f"source stream was not initialized: {range_id}/{source_key}")
+        written_occurrences += writer.add_source_occurrences(
+            stream_state,
+            (item for item in page_occurrences if isinstance(item, Mapping)),
+        )
         page += 1
     if len(seen_videos) != expected_video_count:
         raise RuntimeError(
             f"source video total mismatch: {range_id}/{source_key} "
             f"expected={expected_video_count} actual={len(seen_videos)}"
         )
-    if len(occurrences) != expected_occurrence_count:
+    if written_occurrences != expected_occurrence_count:
         raise RuntimeError(
             f"source occurrence total mismatch: {range_id}/{source_key} "
-            f"expected={expected_occurrence_count} actual={len(occurrences)}"
+            f"expected={expected_occurrence_count} actual={written_occurrences}"
         )
-    writer.add_source(source_key, range_id, detail, occurrences)
+    if stream_state is None:
+        raise RuntimeError(f"source stream is absent: {range_id}/{source_key}")
+    if writer.finish_source(stream_state) != written_occurrences:
+        raise RuntimeError(f"source stream position mismatch: {range_id}/{source_key}")
 
 
 def export_sources_from_records(
@@ -1038,11 +1189,15 @@ def export_sources_from_records(
             if not source_key or source_key not in pending:
                 continue
             detail = dict(payload)
-            occurrences = [dict(value) for value in group.get("occurrences", ())]
-            detail["occurrences"] = occurrences
+            detail.pop("occurrences", None)
             detail["sourceDetailKey"] = source_key
             detail["rangeId"] = range_id
-            writer.add_source(source_key, range_id, detail, occurrences)
+            writer.add_source(
+                source_key,
+                range_id,
+                detail,
+                (value for value in group.get("occurrences", ()) if isinstance(value, Mapping)),
+            )
             pending.remove(source_key)
             completed += 1
             if completed % 25 == 0:
@@ -1057,6 +1212,12 @@ def export_sources_from_records(
         raise RuntimeError(
             f"authoritative source keys are missing for {range_id}: "
             + ", ".join(sorted(pending)[:10])
+        )
+    if completed % 25:
+        print(
+            f"PG_SNAPSHOT_SOURCES range={range_id} "
+            f"complete={completed} total={total}",
+            flush=True,
         )
     return completed
 
@@ -1313,6 +1474,7 @@ def materialize(
                         del render
                         gc.collect()
 
+        _release_materializer_memory(writer, builder, phase="rankings")
         bulk_exported_ranges: set[str] = set()
         if (
             getattr(builder, "authoritative_ids", ())
@@ -1326,6 +1488,12 @@ def materialize(
                 source_keys=source_keys["7d"],
             )
             bulk_exported_ranges.add("7d")
+        _release_materializer_memory(
+            writer,
+            builder,
+            phase="authoritative-sources",
+            drop_authoritative=True,
+        )
 
         prepare_source_scope = getattr(builder, "prepare_source_scope", None)
         source_scope = (
@@ -1336,6 +1504,7 @@ def materialize(
         source_scope_stats = source_scope.stats() if source_scope is not None else {
             "videos": 0, "pairs": 0, "sources": 0, "targets": 0,
         }
+        _release_materializer_memory(writer, builder, phase="source-scope")
         scoped_payload_loader = getattr(builder, "source_payload", None)
         for range_id in RANGES:
             missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
@@ -1367,12 +1536,25 @@ def materialize(
                         else adapter.source_payload(connection, key, query)
                     ),
                 )
+                del video_scope
                 if index % 25 == 0:
                     print(
                         f"PG_SNAPSHOT_SOURCES range={range_id} "
                         f"complete={index} total={len(source_keys[range_id])}",
                         flush=True,
                     )
+                    _release_materializer_memory(
+                        writer,
+                        builder,
+                        phase=f"sources-{range_id}-{index}",
+                    )
+            if len(source_keys[range_id]) % 25:
+                print(
+                    f"PG_SNAPSHOT_SOURCES range={range_id} "
+                    f"complete={len(source_keys[range_id])} "
+                    f"total={len(source_keys[range_id])}",
+                    flush=True,
+                )
 
         after = canonical_meta(adapter.meta_payload(connection))
         for name in ("active_revision_id", "content_sha256", "source_commit_sha"):
