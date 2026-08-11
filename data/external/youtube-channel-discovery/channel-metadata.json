@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T02:18:25.546Z",
+  "generatedAt": "2026-08-11T05:07:48.141Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T02:18:25.546Z",
+    "fetchedAt": "2026-08-11T05:07:48.141Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T02:18:25.546Z",
+    "generatedAt": "2026-08-11T05:07:48.141Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 633
+      "skipped_collected_evidence": 633,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@Miyavi_udon",
+        "channelId": "UC64Qf9294_6lHJR_HG6TOzw",
+        "displayName": "宮守ゆり",
+        "sourceUrl": "https://www.youtube.com/@Miyavi_udon",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@aozora_byakumo",
         "channelId": "UCbdLMRFTRAYjUeYE55Nc-wg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCdWQytF_syOGwaQQuxwklxg",
         "displayName": "猫撫こぜに / Nekonade Kozeni",
         "sourceUrl": "https://www.youtube.com/@VPI_NekonadeKozeni",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Gato_utane",
-        "channelId": "UCE6w5FzazXE9i3wwrVJPbhg",
-        "displayName": "詠音ガト",
-        "sourceUrl": "https://www.youtube.com/@Gato_utane",
         "reason": "batch_limit_reached"
       }
     ]
