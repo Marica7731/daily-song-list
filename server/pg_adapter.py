@@ -3945,7 +3945,15 @@ def _runtime_view_group_key(row: Mapping[str, Any], view: str) -> str:
     if view in {"songs", "songIndex", "vsingerSongs"}:
         return f"{_overlay_norm(row.get('title'))}::{_overlay_norm(row.get('artist'))}"
     if view == "artists":
-        return _overlay_norm(row.get("artist")) or "unknown"
+        # Historical full-runtime artist rankings store their public identity
+        # in ``name`` while occurrence/candidate rows use ``artist``.  Treat
+        # both shapes as the same group so one snapshot reconciliation can be
+        # cached and reused across every metric and persisted filter scope.
+        for field in ("artist", "name", "displayArtist", "detail_key"):
+            key = _overlay_norm(row.get(field))
+            if key:
+                return key
+        return "unknown"
     if view == "videos":
         return _text(row.get("video_id") or row.get("videoId"))
     video = _overlay_public_video(row)
@@ -4063,6 +4071,93 @@ def _bounded_affected_parent_occurrences(
         predicate = "v.channel_id = ANY(%s)"
         predicate_params = [channels]
     range_id = _text(options.get("range")) or "all"
+
+    # Immutable snapshot builds already own one explicit transaction.  Use a
+    # server-side cursor there so PostgreSQL sorts the affected parent set
+    # once and the client still consumes only one bounded batch at a time.
+    # Online autocommit requests retain the keyset fallback below: a named
+    # cursor is transaction-scoped and must never leak across API requests.
+    streaming_cursor = None
+    if getattr(connection, "autocommit", True) is False:
+        try:
+            streaming_cursor = connection.cursor(
+                name=(
+                    f"dsl_affected_{threading.get_ident()}_"
+                    f"{time.monotonic_ns()}"
+                )
+            )
+        except TypeError:
+            # Lightweight adapters/test doubles may expose only cursor().
+            streaming_cursor = None
+    if streaming_cursor is not None:
+        try:
+            if hasattr(streaming_cursor, "itersize"):
+                streaming_cursor.itersize = _AFFECTED_RECONCILIATION_BATCH_SIZE
+            streaming_cursor.execute(
+                f"""
+                SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
+                       v.channel_id, v.channel_handle, v.channel_name
+                FROM runtime_occurrences AS o
+                JOIN runtime_videos AS v
+                  ON v.revision_id = o.revision_id AND v.video_id = o.video_id
+                WHERE o.revision_id = %s AND v.revision_id = %s
+                  AND {predicate}
+                  AND (
+                    (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
+                    OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
+                  )
+                ORDER BY o.video_id, o.occurrence_id
+                LIMIT %s
+                """,
+                [
+                    parent_revision_id,
+                    parent_revision_id,
+                    *predicate_params,
+                    range_id,
+                    range_id,
+                    _MAX_AFFECTED_RECONCILIATION_OCCURRENCES + 1,
+                ],
+            )
+            description = streaming_cursor.description or ()
+            names = [
+                column.name if hasattr(column, "name") else column[0]
+                for column in description
+            ]
+            total = 0
+            last_identity = ("", "")
+            while True:
+                values = streaming_cursor.fetchmany(
+                    _AFFECTED_RECONCILIATION_BATCH_SIZE
+                )
+                if not values:
+                    return
+                total += len(values)
+                if total > _MAX_AFFECTED_RECONCILIATION_OCCURRENCES:
+                    raise PostgresAdapterError(
+                        "affected runtime song-count reconciliation exceeded streamed occurrence cap"
+                    )
+                for value in values:
+                    row = dict(zip(names, value))
+                    identity = (
+                        _text(row.get("video_id")),
+                        _text(row.get("occurrence_id")),
+                    )
+                    if not identity[0] or not identity[1]:
+                        raise PostgresAdapterError(
+                            "affected runtime song-count reconciliation returned an empty identity"
+                        )
+                    if identity == last_identity:
+                        raise PostgresAdapterError(
+                            "affected runtime song-count reconciliation did not advance"
+                        )
+                    last_identity = identity
+                    yield row
+        finally:
+            close = getattr(streaming_cursor, "close", None)
+            if close:
+                close()
+        return
+
     last_video_id = ""
     last_occurrence_id = ""
     total = 0

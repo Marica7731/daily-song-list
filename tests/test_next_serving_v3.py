@@ -476,7 +476,9 @@ class Tests(unittest.TestCase):
                 {"video_id":"v3","occurrence_id":"o2","song_key":"s3","title":"Three","artist":"Mega Artist"},
             ],
         ]
-        groups={"mega artist":{"artist":"Mega Artist","name":"Mega Artist","row_count":99,
+        # Production full-runtime artist rankings carry identity in ``name``
+        # and leave the occurrence-shaped ``artist`` scalar empty.
+        groups={"mega artist":{"artist":"","name":"Mega Artist","row_count":99,
                                "song_count":99,"video_count":99,"payload_json":{"name":"Mega Artist"}}}
         changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
                   "title":"Old","artist":"Mega Artist"}]
@@ -499,7 +501,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(reconciliation_counts,
                          {("parent","all","artists","mega artist"):(5,3,3)})
 
-        cached_groups={"mega artist":{"artist":"Mega Artist","name":"Mega Artist",
+        cached_groups={"mega artist":{"artist":"","name":"Mega Artist",
                                       "row_count":0,"song_count":0,"video_count":0,
                                       "payload_json":{"name":"Mega Artist"}}}
         with patch.object(pg_adapter,"_rows") as cached_rows:
@@ -520,6 +522,62 @@ class Tests(unittest.TestCase):
                 list(pg_adapter._bounded_affected_parent_occurrences(
                     object(),"parent",changes,"artists",{"range":"all"},
                 ))
+
+    def test_snapshot_reconciliation_sorts_once_and_fetches_bounded_batches(self):
+        columns=("occurrence_id","video_id","song_key","title","artist",
+                 "channel_id","channel_handle","channel_name")
+        rows=[
+            ("o1","v1","s1","One","Mega Artist","c1","h1","Channel"),
+            ("o2","v1","s1","One","Mega Artist","c1","h1","Channel"),
+            ("o1","v2","s2","Two","Mega Artist","c1","h1","Channel"),
+            ("o1","v3","s3","Three","Mega Artist","c1","h1","Channel"),
+            ("o2","v3","s3","Three","Mega Artist","c1","h1","Channel"),
+        ]
+
+        class StreamingCursor:
+            def __init__(self, values):
+                self.values=list(values);self.offset=0;self.description=[(name,) for name in columns]
+                self.executions=[];self.fetch_sizes=[];self.itersize=None;self.closed=False
+            def execute(self, sql, params):self.executions.append((sql,list(params)))
+            def fetchmany(self, size):
+                self.fetch_sizes.append(size)
+                batch=self.values[self.offset:self.offset+size];self.offset+=len(batch)
+                return batch
+            def close(self):self.closed=True
+
+        class StreamingConnection:
+            autocommit=False
+            def __init__(self, values):self.cursor_value=StreamingCursor(values);self.names=[]
+            def cursor(self, *, name):self.names.append(name);return self.cursor_value
+
+        changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
+                  "title":"Old","artist":"Mega Artist"}]
+        connection=StreamingConnection(rows)
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",10):
+            streamed=list(pg_adapter._bounded_affected_parent_occurrences(
+                connection,"parent",changes,"artists",{"range":"all"},
+            ))
+
+        cursor=connection.cursor_value
+        self.assertEqual(len(connection.names),1)
+        self.assertEqual(len(cursor.executions),1)
+        self.assertNotIn("(o.video_id, o.occurrence_id) >",cursor.executions[0][0])
+        self.assertIn("ORDER BY o.video_id, o.occurrence_id",cursor.executions[0][0])
+        self.assertEqual(cursor.executions[0][1][-1],11)
+        self.assertEqual(cursor.itersize,2)
+        self.assertEqual(cursor.fetch_sizes,[2,2,2,2])
+        self.assertEqual([row["occurrence_id"] for row in streamed],["o1","o2","o1","o1","o2"])
+        self.assertTrue(cursor.closed)
+
+        capped=StreamingConnection(rows)
+        with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
+             patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4):
+            with self.assertRaisesRegex(pg_adapter.PostgresAdapterError,"streamed occurrence cap"):
+                tuple(pg_adapter._bounded_affected_parent_occurrences(
+                    capped,"parent",changes,"artists",{"range":"all"},
+                ))
+        self.assertTrue(capped.cursor_value.closed)
 
     def test_streamed_reconciliation_uses_database_keyset_for_mixed_case_ids(self):
         changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
