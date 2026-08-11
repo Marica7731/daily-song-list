@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T14:04:08.295Z",
+  "generatedAt": "2026-08-11T15:14:07.105Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T14:04:08.295Z",
+    "fetchedAt": "2026-08-11T15:14:07.105Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T14:04:08.295Z",
+    "generatedAt": "2026-08-11T15:14:07.105Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1113,
-      "parseableChannels": 1093,
+      "totalChannels": 1115,
+      "parseableChannels": 1095,
       "realAvatar": 648,
-      "thumbnailFallback": 465,
+      "thumbnailFallback": 467,
       "missingDisplayImage": 0,
-      "missingAvatar": 465,
+      "missingAvatar": 467,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 639,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 641
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 619,
+      "batch_limit_reached": 621,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@H.Midori-Ch-",
+        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
+        "displayName": "H.Midori Ch🍃葉山翠",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@makanons_room",
+        "channelId": "UCQ4X4yfqgSVmOTBBpiIqWVQ",
+        "displayName": "柾花音のまかのんずるーむ【Makanon's Room】",
+        "sourceUrl": "https://www.youtube.com/@makanons_room",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KaguraTomyoji",
         "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
@@ -11835,20 +11849,6 @@
         "channelId": "UChjfk_ii6syvF-Q3wyzV0JQ",
         "displayName": "真行寺恵里チャンネル",
         "sourceUrl": "https://www.youtube.com/@erishingyoji0521",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RurizukiRuchil",
-        "channelId": "UC-NiJPpTdmbXqqhmMARoHLg",
-        "displayName": "瑠璃月るちる",
-        "sourceUrl": "https://www.youtube.com/@RurizukiRuchil",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@dantencho",
-        "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
-        "displayName": "Tencho Ch.  萌水 団",
-        "sourceUrl": "https://www.youtube.com/@dantencho",
         "reason": "batch_limit_reached"
       }
     ]
