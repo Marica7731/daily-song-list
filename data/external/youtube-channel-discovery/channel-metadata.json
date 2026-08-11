@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T08:01:24.844Z",
+  "generatedAt": "2026-08-11T09:49:44.285Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T08:01:24.844Z",
+    "fetchedAt": "2026-08-11T09:49:44.285Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T08:01:24.844Z",
+    "generatedAt": "2026-08-11T09:49:44.285Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,53 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1105,
-      "parseableChannels": 1085,
+      "totalChannels": 1109,
+      "parseableChannels": 1089,
       "realAvatar": 648,
-      "thumbnailFallback": 457,
+      "thumbnailFallback": 461,
       "missingDisplayImage": 0,
-      "missingAvatar": 457,
+      "missingAvatar": 461,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 635
+      "skipped_collected_evidence": 636,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 615,
+      "batch_limit_reached": 616,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@NemukumoTsukuri",
+        "channelId": "UCekc8SI533NI675r9aCBRcQ",
+        "displayName": "眠雲ツクリ / NemukumoTsukuri",
+        "sourceUrl": "https://www.youtube.com/@NemukumoTsukuri",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@OtonoseRaco",
+        "channelId": "UCH-SLA_jpPhM2lzdZjZDxjQ",
+        "displayName": "音ノ瀬らこ / Otonose Raco",
+        "sourceUrl": "https://www.youtube.com/@OtonoseRaco",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@v_sakurarina",
+        "channelId": "UCxAVi_6J0oxobmkQYgr5H0Q",
+        "displayName": "サクラリナ / SakuraRina 🥩🧈",
+        "sourceUrl": "https://www.youtube.com/@v_sakurarina",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@AmakamiKonomi",
+        "channelId": "UCbntVBSebvO5zT3cQYIxbWQ",
+        "displayName": "甘狼このみ / AmakamiKonomi🐺🍫",
+        "sourceUrl": "https://www.youtube.com/@AmakamiKonomi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Hoshinouta_kaz",
         "channelId": "UC_n3V9K0VoEhGSO9ikOE6pw",
@@ -11821,34 +11849,6 @@
         "channelId": "UCJX2-_5O1MdgnXpCGRJPgXw",
         "displayName": "猫宮ふわり",
         "sourceUrl": "https://www.youtube.com/@NekomyaCh.",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@0hinarysan",
-        "channelId": "UCV6V6YJLO0Zykeq1VD16txg",
-        "displayName": "INARI",
-        "sourceUrl": "https://www.youtube.com/@0hinarysan",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@UtaneSuzukami",
-        "channelId": "UCyJGAJVreS_FKL_uRydg9cw",
-        "displayName": "鈴神うたね / Suzukami Utane",
-        "sourceUrl": "https://www.youtube.com/@UtaneSuzukami",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
-        "channelId": "UC3TvY0biJcMRzQyu5hyOkXw",
-        "displayName": "大石昌良の弾き語りラボ",
-        "sourceUrl": "https://www.youtube.com/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YakonHibana",
-        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
-        "displayName": "夜紺 火花 / Yakon Hibana",
-        "sourceUrl": "https://www.youtube.com/@YakonHibana",
         "reason": "batch_limit_reached"
       }
     ]
