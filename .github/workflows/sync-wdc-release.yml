@@ -816,23 +816,50 @@ jobs:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
         run: |
           set +e
+          cleanup_status=0
           VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=8)
           EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           REMOTE_ROOT="${REMOTE_ROOT:-$EXPECTED_REMOTE_ROOT}"
           if [[ "$REMOTE_ROOT" == "$EXPECTED_REMOTE_ROOT" ]]; then
-            ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "rm -rf -- '$REMOTE_ROOT'"
+            if ! ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+              "$REMOTE_ROOT" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'REMOTE'
+          set -Eeuo pipefail
+          remote_root="$1"
+          run_id="$2"
+          run_attempt="$3"
+          [[ "$run_id" =~ ^[0-9]+$ && "$run_attempt" =~ ^[0-9]+$ ]]
+          [[ "$remote_root" == "/tmp/dsl-wdc-sync-${run_id}-${run_attempt}" ]]
+          for phase in snapshot serving bundle; do
+            unit="dsl-wdc-${phase}-${run_id}-${run_attempt}.service"
+            timeout 20s systemctl stop "$unit" >/dev/null 2>&1 || true
+            if systemctl is-active --quiet "$unit"; then
+              echo "VPS2_TRANSIENT_UNIT_STILL_ACTIVE $unit" >&2
+              exit 76
+            fi
+          done
+          rm -rf -- "$remote_root"
+          echo "VPS2_TRANSIENT_UNITS_CLEANED run=${run_id} attempt=${run_attempt}"
+          REMOTE
+            then
+              cleanup_status=1
+            fi
           else
             echo "refusing unexpected VPS2 cleanup path: $REMOTE_ROOT" >&2
+            cleanup_status=1
           fi
           if [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
             WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=8 -i /tmp/ssh/wdc-key)
-            ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" \
-              "rm -f -- '/tmp/dsl-wdc-$BUNDLE_SHA.tar.gz' '/tmp/install-wdc-release.sh'"
+            if ! ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" \
+              "rm -f -- '/tmp/dsl-wdc-$BUNDLE_SHA.tar.gz' '/tmp/install-wdc-release.sh'"; then
+              cleanup_status=1
+            fi
           fi
           EXPECTED_FRONTEND_ROOT="/tmp/dsl-wdc-frontend-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           if [[ "${FRONTEND_ROOT:-}" == "$EXPECTED_FRONTEND_ROOT" ]]; then
-            rm -rf -- "$EXPECTED_FRONTEND_ROOT"
+            rm -rf -- "$EXPECTED_FRONTEND_ROOT" || cleanup_status=1
           else
             echo "refusing unexpected frontend cleanup path: ${FRONTEND_ROOT:-unset}" >&2
+            cleanup_status=1
           fi
-          rm -rf /tmp/dsl-wdc-transfer /tmp/next-health.json /tmp/ssh
+          rm -rf /tmp/dsl-wdc-transfer /tmp/next-health.json /tmp/ssh || cleanup_status=1
+          exit "$cleanup_status"
