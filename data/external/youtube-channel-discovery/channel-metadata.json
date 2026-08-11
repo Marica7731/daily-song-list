@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T15:14:07.105Z",
+  "generatedAt": "2026-08-11T16:50:10.436Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T15:14:07.105Z",
+    "fetchedAt": "2026-08-11T16:50:10.436Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T15:14:07.105Z",
+    "generatedAt": "2026-08-11T16:50:10.436Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1115,
-      "parseableChannels": 1095,
+      "totalChannels": 1116,
+      "parseableChannels": 1096,
       "realAvatar": 648,
-      "thumbnailFallback": 467,
+      "thumbnailFallback": 468,
       "missingDisplayImage": 0,
-      "missingAvatar": 467,
+      "missingAvatar": 468,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 641
+      "skipped_collected_evidence": 642,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 621,
+      "batch_limit_reached": 622,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@kyopipi_channel",
+        "channelId": "UCj11bm46vGpEIbNO5LV5O8Q",
+        "displayName": "きょぴぴ / Kyopipi🎀🍼‪†",
+        "sourceUrl": "https://www.youtube.com/@kyopipi_channel",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@H.Midori-Ch-",
         "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
@@ -11842,13 +11849,6 @@
         "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
         "displayName": "瀬戸乃とと",
         "sourceUrl": "https://www.youtube.com/@Setono_Toto",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@erishingyoji0521",
-        "channelId": "UChjfk_ii6syvF-Q3wyzV0JQ",
-        "displayName": "真行寺恵里チャンネル",
-        "sourceUrl": "https://www.youtube.com/@erishingyoji0521",
         "reason": "batch_limit_reached"
       }
     ]
