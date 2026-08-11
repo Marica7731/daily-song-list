@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T12:32:30.217Z",
+  "generatedAt": "2026-08-11T14:04:08.295Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T12:32:30.217Z",
+    "fetchedAt": "2026-08-11T14:04:08.295Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T12:32:30.217Z",
+    "generatedAt": "2026-08-11T14:04:08.295Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1111,
-      "parseableChannels": 1091,
+      "totalChannels": 1113,
+      "parseableChannels": 1093,
       "realAvatar": 648,
-      "thumbnailFallback": 463,
+      "thumbnailFallback": 465,
       "missingDisplayImage": 0,
-      "missingAvatar": 463,
+      "missingAvatar": 465,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 637,
+      "skipped_collected_evidence": 639,
       "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 617,
+      "batch_limit_reached": 619,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@KaguraTomyoji",
+        "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
+        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
+        "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Are_Tete",
+        "channelId": "UCpOO_KwyHJHFHX1Awm2PPMA",
+        "displayName": "アール・テテ / Are Tete",
+        "sourceUrl": "https://www.youtube.com/@Are_Tete",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@01rosa18",
+        "channelId": "UCO0ihI_Cgv_Rmf9Q2nNcmtA",
+        "displayName": "ろざ",
+        "sourceUrl": "https://www.youtube.com/@01rosa18",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@keserasera68",
         "channelId": "UCpIIJGtpQFkkcjzqxNgyeyg",
@@ -11828,27 +11849,6 @@
         "channelId": "UCL7NohDGFGRZiTfSDMR7c7A",
         "displayName": "Tencho Ch.  萌水 団",
         "sourceUrl": "https://www.youtube.com/@dantencho",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E6%97%A5%E5%90%91%E3%81%AA%E3%81%93",
-        "channelId": "UC2aJjm_delfy_nZsGEILxYw",
-        "displayName": "Nako Ch.日向なこ",
-        "sourceUrl": "https://www.youtube.com/@%E6%97%A5%E5%90%91%E3%81%AA%E3%81%93",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Saetsuki_Rei",
-        "channelId": "UC637kgL_I6NKVkTZ46x3Cyg",
-        "displayName": "冴月零 -Saetsuki Re:i-",
-        "sourceUrl": "https://www.youtube.com/@Saetsuki_Rei",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
-        "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
-        "displayName": "Sakuna Ch. 結城さくな",
-        "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
         "reason": "batch_limit_reached"
       }
     ]
