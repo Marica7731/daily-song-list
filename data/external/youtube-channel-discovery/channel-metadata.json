@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T22:04:22.352Z",
+  "generatedAt": "2026-08-11T23:00:07.475Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T22:04:22.352Z",
+    "fetchedAt": "2026-08-11T23:00:07.475Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T22:04:22.352Z",
+    "generatedAt": "2026-08-11T23:00:07.475Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1121,
-      "parseableChannels": 1101,
+      "totalChannels": 1124,
+      "parseableChannels": 1104,
       "realAvatar": 649,
-      "thumbnailFallback": 472,
+      "thumbnailFallback": 475,
       "missingDisplayImage": 0,
-      "missingAvatar": 472,
+      "missingAvatar": 475,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 646
+      "skipped_collected_evidence": 649
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 626,
+      "batch_limit_reached": 629,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@Ruruka0w0",
+        "channelId": "UCwBxb9vxDp_mYoOddhw9dTA",
+        "displayName": "縷々原るるか\\RurukaRuruhara",
+        "sourceUrl": "https://www.youtube.com/@Ruruka0w0",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@TukuneDuck",
+        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
+        "displayName": "月音-TUKUNE-",
+        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MonicaMelodia",
         "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
@@ -11835,20 +11849,6 @@
         "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
         "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
         "sourceUrl": "https://www.youtube.com/@ykn0911v",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@rikka-hoshiumi0217",
-        "channelId": "UCUhwsEiJ7PZmEu0qdJ9_Aeg",
-        "displayName": "星海りっか 【Hoshiumi Rikka】",
-        "sourceUrl": "https://www.youtube.com/@rikka-hoshiumi0217",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Setono_Toto",
-        "channelId": "UC-M0Poxo4VXMxdIzinqWOig",
-        "displayName": "瀬戸乃とと",
-        "sourceUrl": "https://www.youtube.com/@Setono_Toto",
         "reason": "batch_limit_reached"
       }
     ]
