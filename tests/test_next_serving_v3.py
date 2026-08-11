@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -375,6 +376,202 @@ class Tests(unittest.TestCase):
         app.write_text('''function shouldUseRuntimeApiForRequest(request) {\n  if (!state.runtimeApi.available) return false;\n  return true;\n}\n  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";\nasync function loadRequestSearchRecords(query, signal) {\n  const range = state.range;\n  if (state.runtimeApi.available) {\n    const params = new URLSearchParams({\n      range,\n      view: "songs",\n      metric: "occurrences",\n      page: "1",\n      pageSize: "12",\n      q: cleanText(query),\n    });\n    const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {\n      cache: "no-cache",\n      signal,\n    });\nfunction sourceDetailPathForRecord(record, occurrences = []) {\n  const ownerRecord = record?._record || {};\n  const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);\n  if (explicitPath) return explicitPath;\n  const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);\n  const vtuberAlias = cleanText(record?.channelId || ownerRecord?.channelId || (record?.type === "vtuber" ? record?.key : "") || (ownerRecord?.type === "vtuber" ? ownerRecord?.key : ""));\n  if (detailKey || vtuberAlias) {\n    return `/api/sources/${encodeURIComponent(detailKey || vtuberAlias)}`;\n  }\n  const candidates = [\n    record?.sourceDetail?.path,\n    record?.sourceDetails?.path,\n    record?.detailPath,\n    record?.detail?.path,\n    ownerRecord?.sourceDetail?.path,\n    ownerRecord?.sourceDetails?.path,\n    ownerRecord?.detailPath,\n    ownerRecord?.detail?.path,\n    occurrences?.[0]?.sourceDetailPath,\n    occurrences?.[0]?.sourceDetail?.path,\n    occurrences?.[0]?.item?.sourceDetailPath,\n    occurrences?.[0]?.item?.sourceDetail?.path,\n    sourceDetailPathFromShard(record, occurrences),\n  ];\n  return cleanText(candidates.find(Boolean));\n}\nfunction a(path,requestPath,key){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => normalizeSourceDetailOccurrences(payload, key))\n}\nfunction b(path,requestPath){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => {\n}\n  params.set("range", cleanText(state.range) || "all");\n  const suffix = params.toString();\n''',encoding="utf-8")
         self.assertTrue(patcher.patch_app(app));patched=app.read_text();self.assertIn("function runtimeApiCapabilities()",patched);self.assertIn("function runtimeSupportsLocalSources(",patched);self.assertIn("capabilities.rankingScopes",patched);self.assertIn('params.set("v", releaseVersion)',patched);self.assertFalse(patcher.patch_app(app))
 
+    def test_snapshot_source_scope_is_disk_backed_and_excludes_7d_boundary(self):
+        song_key=pg_adapter._production_source_detail_key_for_group("songs","all","song::artist")
+        artist_key=pg_adapter._production_source_detail_key_for_group("artists","all","artist")
+        channel_key=pg_adapter._production_source_detail_key_for_group("vtubers","all","UCfixture")
+        replacement_key=pg_adapter._production_source_detail_key_for_group("songs","all","replacement::new artist")
+        video_key=pg_adapter._stable_key("source-video","all","video-all")
+        replacement_video_key=pg_adapter._stable_key("source-video","all","video-new")
+        requested={song_key,artist_key,channel_key,replacement_key,video_key,
+                   replacement_video_key,"parent-source","alias-song"}
+
+        def fake_stream(_connection,label,_statement,_params):
+            if label=="targets":
+                yield {"view":"songs","detail_key":"legacy-alias","title":"Song",
+                       "artist":"Artist","source_key":"alias-song"}
+            elif label=="videos":
+                yield {"video_id":"video7d","channel_id":"UC7d","payload_json":{"partialRangeReset":True,"rangeId":"7d"}}
+                yield {"video_id":"video-all","channel_id":"UCfixture","payload_json":{}}
+            elif label=="occurrences":
+                yield {"video_id":"video-all","range_id":"all","title":"Song","artist":"Artist"}
+            elif label=="runtime":
+                yield {"range_id":"all","payload_json":{"rangeId":"all","videoId":"video-new","title":"Replacement","artist":"New Artist"}}
+            elif label.startswith("parents_"):
+                yield {"source_key":"parent-source","video_id":"video-all"}
+
+        with closing(sqlite3.connect(":memory:")) as database, \
+             patch.object(pg_materializer,"_stream_pg_rows",side_effect=fake_stream):
+            scope=pg_materializer.build_snapshot_source_scope(
+                object(),database,overlay_revision_ids=("overlay",),
+                source_revision_ids=("overlay","parent"),requested_keys=requested,
+            )
+            self.assertNotIn("video7d",scope.affected_videos())
+            self.assertEqual(scope.videos_for_source(song_key),("video-all",))
+            self.assertEqual(scope.videos_for_source("alias-song"),("video-all",))
+            self.assertEqual(scope.videos_for_source(artist_key),("video-all",))
+            self.assertEqual(scope.videos_for_source(channel_key),("video-all",))
+            self.assertEqual(scope.videos_for_source(replacement_key),("video-new",))
+            self.assertEqual(scope.videos_for_source(video_key),("video-all",))
+            self.assertEqual(scope.videos_for_source(replacement_video_key),("video-new",))
+            self.assertEqual(scope.videos_for_source("parent-source"),("video-all",))
+
+    def test_snapshot_empty_source_scope_skips_every_overlay_scan(self):
+        persisted={"schemaVersion":1,"found":True,"sourceKey":"source",
+                   "sourceRevisionId":"parent","record":{"type":"song","sourceDetailKey":"source"}}
+        context=SimpleNamespace(runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+                                overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None)
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=persisted), \
+             patch.object(pg_adapter,"_generic_song_source_payload") as rebuild, \
+             patch.object(pg_adapter,"_overlay_candidate_rows") as candidates, \
+             patch.object(pg_adapter,"_accepted_video_resets") as resets, \
+             patch.object(pg_adapter,"_runtime_tombstones") as runtime:
+            result=pg_adapter.source_payload(
+                object(),"source",{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=(),
+            )
+        self.assertIs(result,persisted)
+        rebuild.assert_not_called();candidates.assert_not_called();resets.assert_not_called();runtime.assert_not_called()
+
+    def test_source_song_identity_accepts_one_complete_200_video_page(self):
+        record={"type":"song","occurrences":[
+            {"videoId":f"video-{index:03d}","item":{"videoId":f"video-{index:03d}"},
+             "song":{"songKey":"song-key","title":"Song","artist":"Artist",
+                     "payload":{"title":"Song","artist":"Artist"}}}
+            for index in range(200)
+        ]}
+        pairs,keys=pg_adapter._source_song_identity_evidence(record)
+        self.assertIn(("song","artist"),pairs)
+        self.assertEqual(keys,{"song-key"})
+
+    def test_snapshot_exact_video_scope_never_reads_unscoped_candidates(self):
+        video={"revision_id":"overlay","video_id":"video-one","video_title":"Video",
+               "channel_name":"Fixture","channel_id":"UCfixture","channel_handle":"@fixture",
+               "channel_url":"","published_at":0,"video_payload_json":{},"video_tombstone":False}
+        occurrence={"revision_id":"overlay","video_id":"video-one","occurrence_id":"occ-one",
+                    "position":0,"range_id":"all","song_key":"song","seconds":1,"title":"Song",
+                    "artist":"Artist","source_id":"source","raw_hash":"raw","source_system":"fixture",
+                    "occurrence_payload_json":{}}
+        with patch.object(pg_adapter,"_rows",side_effect=[[video],[occurrence]]) as rows:
+            selected=pg_adapter._overlay_candidate_rows(
+                object(),("overlay",),video_scope=("video-one",),range_id="all",
+            )
+        self.assertEqual(len(selected),1)
+        self.assertEqual(rows.call_count,2)
+        self.assertIn("video_id = ANY",rows.call_args_list[0].args[1])
+        self.assertEqual(rows.call_args_list[0].args[2][1],["video-one"])
+        self.assertIn("coalesce(o.range_id, '')",rows.call_args_list[1].args[1])
+
+    def test_snapshot_channel_source_reuses_prepared_exact_video_changes(self):
+        video={"video_id":"video-one","title":"Video","channel_name":"Fixture",
+               "channel_id":"UCfixture","channel_handle":"@fixture","channel_url":"",
+               "published_timestamp":0,"payload_json":{}}
+        occurrence={"video_id":"video-one","occurrence_id":"occ-one","range_id":"all",
+                    "song_key":"song","seconds":1,"source_system":"fixture","source_id":"source",
+                    "title":"Song","artist":"Artist","payload_json":{}}
+        prepared=((),{},())
+        with patch.object(pg_adapter,"_rows",side_effect=[[video],[occurrence]]), \
+             patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared) as prepare, \
+             patch.object(pg_adapter,"_runtime_tombstones") as global_changes, \
+             patch.object(pg_adapter,"_source_payload_from_channel_records",
+                          return_value={"schemaVersion":1,"found":True,"sourceKey":"source","record":{}}):
+            result=pg_adapter._runtime_channel_source_payload(
+                object(),"parent",{"channelId":"UCfixture"},"source",
+                {"range":"all","page":"1","pageSize":"200"},
+                overlay_revision_ids=("overlay",),snapshot_video_scope=("video-one",),
+            )
+        self.assertTrue(result["found"])
+        prepare.assert_called_once()
+        global_changes.assert_not_called()
+
+    def test_snapshot_overlay_only_video_source_uses_exact_prepared_video(self):
+        video_id="video-new"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        candidate={
+            "revision_id":"overlay","video_id":video_id,
+            "occurrence_id":"occ-new","position":0,"range_id":"all",
+            "song_key":"song-new","seconds":7,"title":"Song",
+            "artist":"Artist","source_id":"source","raw_hash":"raw",
+            "source_system":"fixture","occurrence_payload_json":{},
+            "video_title":"New Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+            "channel_url":"","published_at":0,"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        with patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
+             patch.object(pg_adapter,"_overlay_candidate_rows") as global_candidates, \
+             patch.object(pg_adapter,"_accepted_video_resets") as global_resets, \
+             patch.object(pg_adapter,"_runtime_tombstones") as global_changes:
+            result=pg_adapter._generic_video_source_payload(
+                object(),"parent",None,source_key,
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),(candidate,),{},(),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual((result["totalVideoCount"],result["totalOccurrenceCount"]),(1,1))
+        self.assertEqual(result["record"]["videoId"],video_id)
+        global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
+
+    def test_snapshot_persisted_video_source_never_rebuilds_whole_channel(self):
+        video_id="video-one"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        persisted={
+            "schemaVersion":1,"found":True,"sourceKey":source_key,
+            "sourceRevisionId":"parent",
+            "record":{"type":"video","key":video_id,"videoId":video_id,
+                      "channelId":"UCfixture","sourceDetailKey":source_key},
+        }
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        expected={"schemaVersion":1,"found":True,"sourceKey":source_key,
+                  "record":{"type":"video","videoId":video_id}}
+        prepared=((),{},())
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=persisted), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared), \
+             patch.object(pg_adapter,"_generic_video_source_payload",return_value=expected) as video_detail, \
+             patch.object(pg_adapter,"_runtime_channel_source_payload") as channel_detail:
+            result=pg_adapter.source_payload(
+                object(),source_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=(video_id,),
+            )
+        self.assertIs(result,expected)
+        video_detail.assert_called_once()
+        channel_detail.assert_not_called()
+
+    def test_authoritative_bulk_source_export_keeps_all_video_occurrences(self):
+        records=[]
+        for index in range(31):
+            songs=[{"occurrenceId":f"occ-{index}-0","position":0,"rangeId":"7d",
+                    "songKey":"song","title":"Song","artist":"Artist","seconds":index}]
+            if index==0:
+                songs.append({"occurrenceId":"occ-0-1","position":1,"rangeId":"7d",
+                              "songKey":"song","title":"Song","artist":"Artist","seconds":99})
+            records.append({"video":{"videoId":f"video-{index:03d}","title":f"Video {index}",
+                                     "channelName":"Fixture","channelId":"UCfixture"},
+                            "occurrences":tuple(songs)})
+        keys=set()
+        for view in pg_materializer.VIEWS:
+            payload=pg_adapter.rankings_payload_from_records(
+                records,{"range":"7d","view":view,"metric":"occurrences","page":"1","pageSize":"200"},
+            )
+            keys.update(record["sourceDetailKey"] for record in payload["records"] if record.get("sourceDetailKey"))
+        target=self.temp/"bulk-authoritative.sqlite";writer=pg_materializer.CanonicalSnapshotWriter(target)
+        exported=pg_materializer.export_sources_from_records(
+            writer,records=records,range_id="7d",source_keys=keys,
+        )
+        writer.finish()
+        song_source=pg_adapter._stable_key("source-song","7d","song")
+        with closing(sqlite3.connect(target)) as database:
+            counts=database.execute(
+                "SELECT count(*),count(DISTINCT video_id) FROM source_occurrences WHERE range_id='7d' AND source_key=?",
+                (song_source,),
+            ).fetchone()
+        self.assertEqual(exported,len(keys))
+        self.assertEqual(counts,(32,31))
+
     def test_pg_snapshot_exports_all_scopes_and_complete_source_pages(self):
         pages=self.temp/"pg-pages";meta=self.temp/"pg-meta.json";canonical=self.temp/"pg-canonical.sqlite"
         connection=FakePgConnection()
@@ -390,6 +587,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["ranking_rows"],96)
         self.assertEqual(result["source_details"],6)
         self.assertEqual(result["source_occurrences"],1206)
+        self.assertEqual(result["source_overlay_scope"],
+                         {"videos":0,"pairs":0,"sources":0,"targets":0})
         with closing(sqlite3.connect(canonical)) as database:
             scope_marker=json.loads(dict(database.execute("SELECT key,value FROM meta"))["ranking_scope_counts_json"])
             scopes={row[0] for row in database.execute("SELECT DISTINCT scope_key FROM ranking_rows")}

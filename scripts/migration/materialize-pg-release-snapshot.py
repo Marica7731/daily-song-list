@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 import sqlite3
 import tempfile
+import time
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
 import pg_adapter as adapter
@@ -35,6 +36,9 @@ SCOPES = (
 MAX_RANKING_SEARCH_CHARS = 65_536
 MAX_CHANNEL_SEARCH_CHARS = 32_768
 MAX_SOURCE_SEARCH_CHARS = 65_536
+SOURCE_SCOPE_FETCH_SIZE = 10_000
+SOURCE_SCOPE_VIDEO_BATCH = 2_500
+MAX_SOURCE_SCOPE_ROWS = 5_000_000
 
 
 def _text(value: Any) -> str:
@@ -159,6 +163,456 @@ def _integer(value: Any, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError, OverflowError):
         return default
+
+
+def _stream_pg_rows(
+    connection: Any,
+    label: str,
+    statement: str,
+    params: Sequence[Any],
+) -> Iterable[dict[str, Any]]:
+    """Stream one bounded snapshot query without retaining its result graph."""
+
+    cursor = None
+    if getattr(connection, "autocommit", True) is False:
+        try:
+            cursor = connection.cursor(
+                name=f"dsl_source_{label}_{os.getpid()}_{time.monotonic_ns()}"[:63]
+            )
+        except TypeError:
+            cursor = None
+    if cursor is None:
+        rows = adapter._rows(connection, statement, params)
+        if len(rows) > MAX_SOURCE_SCOPE_ROWS:
+            raise RuntimeError(f"snapshot source {label} exceeded streamed row cap")
+        yield from rows
+        return
+    try:
+        if hasattr(cursor, "itersize"):
+            cursor.itersize = SOURCE_SCOPE_FETCH_SIZE
+        cursor.execute(statement, list(params))
+        description = cursor.description or ()
+        names = [
+            column.name if hasattr(column, "name") else column[0]
+            for column in description
+        ]
+        total = 0
+        while True:
+            values = cursor.fetchmany(SOURCE_SCOPE_FETCH_SIZE)
+            if not values:
+                return
+            total += len(values)
+            if total > MAX_SOURCE_SCOPE_ROWS:
+                raise RuntimeError(f"snapshot source {label} exceeded streamed row cap")
+            for value in values:
+                yield dict(zip(names, value))
+    finally:
+        close = getattr(cursor, "close", None)
+        if close:
+            close()
+
+
+class SnapshotSourceScope:
+    """Disk-backed source-key to affected-video index for one immutable build."""
+
+    def __init__(self, connection: sqlite3.Connection):
+        self.connection = connection
+        self.connection.executescript("""
+        CREATE TEMP TABLE source_scope_videos(
+          video_id TEXT PRIMARY KEY
+        ) WITHOUT ROWID;
+        CREATE TEMP TABLE source_scope_pairs(
+          source_key TEXT NOT NULL,
+          video_id TEXT NOT NULL,
+          PRIMARY KEY(source_key,video_id)
+        ) WITHOUT ROWID;
+        CREATE TEMP TABLE source_scope_targets(
+          view TEXT NOT NULL,
+          group_key TEXT NOT NULL,
+          source_key TEXT NOT NULL,
+          PRIMARY KEY(view,group_key,source_key)
+        ) WITHOUT ROWID;
+        """)
+
+    def add_videos(self, values: Iterable[str]) -> None:
+        self.connection.executemany(
+            "INSERT OR IGNORE INTO source_scope_videos(video_id) VALUES(?)",
+            ((_text(value),) for value in values if _text(value)),
+        )
+
+    def add_pairs(self, values: Iterable[tuple[str, str]]) -> None:
+        self.connection.executemany(
+            "INSERT OR IGNORE INTO source_scope_pairs(source_key,video_id) VALUES(?,?)",
+            (
+                (_text(source_key), _text(video_id))
+                for source_key, video_id in values
+                if _text(source_key) and _text(video_id)
+            ),
+        )
+
+    def add_targets(self, values: Iterable[tuple[str, str, str]]) -> None:
+        self.connection.executemany(
+            "INSERT OR IGNORE INTO source_scope_targets(view,group_key,source_key) "
+            "VALUES(?,?,?)",
+            (
+                (_text(view), _text(group_key), _text(source_key))
+                for view, group_key, source_key in values
+                if _text(view) and _text(group_key) and _text(source_key)
+            ),
+        )
+
+    def source_keys_for_group(self, view: str, group_key: str) -> tuple[str, ...]:
+        return tuple(
+            str(row[0])
+            for row in self.connection.execute(
+                "SELECT source_key FROM source_scope_targets "
+                "WHERE view=? AND group_key=? ORDER BY source_key",
+                (view, group_key),
+            )
+        )
+
+    def affected_videos(self) -> tuple[str, ...]:
+        return tuple(
+            str(row[0])
+            for row in self.connection.execute(
+                "SELECT video_id FROM source_scope_videos ORDER BY video_id"
+            )
+        )
+
+    def videos_for_source(self, source_key: str) -> tuple[str, ...]:
+        return tuple(
+            str(row[0])
+            for row in self.connection.execute(
+                "SELECT video_id FROM source_scope_pairs "
+                "WHERE source_key=? ORDER BY video_id",
+                (source_key,),
+            )
+        )
+
+    def stats(self) -> dict[str, int]:
+        return {
+            "videos": int(self.connection.execute(
+                "SELECT count(*) FROM source_scope_videos"
+            ).fetchone()[0]),
+            "pairs": int(self.connection.execute(
+                "SELECT count(*) FROM source_scope_pairs"
+            ).fetchone()[0]),
+            "sources": int(self.connection.execute(
+                "SELECT count(DISTINCT source_key) FROM source_scope_pairs"
+            ).fetchone()[0]),
+            "targets": int(self.connection.execute(
+                "SELECT count(*) FROM source_scope_targets"
+            ).fetchone()[0]),
+        }
+
+
+def _production_source_key(view: str, range_id: str, group_key: str) -> str:
+    return _text(adapter._production_source_detail_key_for_group(
+        view, range_id, group_key,
+    ))
+
+
+def _derived_source_pairs(
+    *,
+    video_ids: Iterable[str],
+    song_pairs: Iterable[tuple[str, str]] = (),
+    channel_keys: Iterable[str] = (),
+    requested_keys: set[str],
+    source_scope: SnapshotSourceScope | None = None,
+) -> set[tuple[str, str]]:
+    videos = {_text(value) for value in video_ids if _text(value)}
+    pairs: set[tuple[str, str]] = set()
+    for video_id in videos:
+        source_key = adapter._stable_key("source-video", "all", video_id)
+        if source_key in requested_keys:
+            pairs.add((source_key, video_id))
+    for title, artist in song_pairs:
+        normalized_title = adapter._overlay_norm(title)
+        normalized_artist = adapter._overlay_norm(artist)
+        if not normalized_title:
+            continue
+        song_group_key = f"{normalized_title}::{normalized_artist}"
+        song_keys = {_production_source_key(
+            "songs", "all", song_group_key,
+        )}
+        artist_group_key = normalized_artist or "unknown"
+        artist_keys = {_production_source_key(
+            "artists", "all", normalized_artist or "unknown",
+        )}
+        if source_scope is not None:
+            canonical_song_group = "\x1f".join((
+                adapter._overlay_song_group_norm(title),
+                adapter._overlay_song_group_norm(artist),
+            ))
+            song_keys.update(source_scope.source_keys_for_group(
+                "songs", canonical_song_group,
+            ))
+            artist_keys.update(source_scope.source_keys_for_group(
+                "artists", artist_group_key,
+            ))
+        for source_key in (*song_keys, *artist_keys):
+            if source_key in requested_keys:
+                pairs.update((source_key, video_id) for video_id in videos)
+    for channel_key in {_text(value) for value in channel_keys if _text(value)}:
+        source_keys = {_production_source_key("vtubers", "all", channel_key)}
+        if source_scope is not None:
+            source_keys.update(source_scope.source_keys_for_group(
+                "vtubers", channel_key,
+            ))
+        for source_key in source_keys:
+            if source_key in requested_keys:
+                pairs.update((source_key, video_id) for video_id in videos)
+    return pairs
+
+
+def _runtime_scope_evidence(
+    value: Any,
+) -> tuple[set[str], set[tuple[str, str]], set[str], set[str]]:
+    """Extract conservative immutable scope evidence from one runtime event."""
+
+    videos: set[str] = set()
+    songs: set[tuple[str, str]] = set()
+    channels: set[str] = set()
+    ranges: set[str] = set()
+    queue: list[Any] = [value]
+    visited = 0
+    while queue:
+        current = queue.pop()
+        visited += 1
+        if visited > 512:
+            raise RuntimeError("snapshot runtime source scope exceeded bounded shape")
+        if isinstance(current, Mapping):
+            video_id = _text(
+                current.get("videoId")
+                or current.get("video_id")
+                or current.get("youtubeVideoId")
+                or current.get("externalVideoId")
+            )
+            if video_id:
+                videos.add(video_id)
+            title = _text(current.get("title") or current.get("workTitle"))
+            if title and "artist" in current and current.get("artist") is not None:
+                songs.add((title, _text(current.get("artist"))))
+            channel_id = _text(current.get("channelId") or current.get("channel_id"))
+            channel_handle = _text(
+                current.get("channelHandle") or current.get("channel_handle")
+            ).lstrip("@/")
+            channel_name = adapter._overlay_norm(
+                current.get("channelName") or current.get("channel_name")
+            )
+            channel_key = channel_id or channel_handle or channel_name
+            if channel_key:
+                channels.add(channel_key)
+            range_id = _text(current.get("rangeId") or current.get("range_id"))
+            if range_id:
+                ranges.add(range_id)
+            for nested in current.values():
+                if isinstance(nested, (Mapping, list, tuple)):
+                    queue.append(nested)
+        elif isinstance(current, (list, tuple)):
+            queue.extend(current)
+    return videos, songs, channels, ranges
+
+
+def build_snapshot_source_scope(
+    connection: Any,
+    sqlite_connection: sqlite3.Connection,
+    *,
+    overlay_revision_ids: Sequence[str],
+    source_revision_ids: Sequence[str],
+    requested_keys: Iterable[str],
+) -> SnapshotSourceScope:
+    """Build one scalar-only overlay index shared by every all-range source."""
+
+    requested = {_text(value) for value in requested_keys if _text(value)}
+    scope = SnapshotSourceScope(sqlite_connection)
+    revision_ids = [_text(value) for value in overlay_revision_ids if _text(value)]
+    if not revision_ids or not requested:
+        return scope
+    source_lineage = [_text(value) for value in source_revision_ids if _text(value)]
+    if not source_lineage:
+        raise RuntimeError("snapshot source scope has no source lineage")
+    parent_revision_id = source_lineage[-1]
+
+    target_buffer: list[tuple[str, str, str]] = []
+    for row in _stream_pg_rows(
+        connection,
+        "targets",
+        """
+        SELECT view,detail_key,title,artist,
+               coalesce(payload_json::jsonb->>'sourceDetailKey','') AS source_key
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = 'all'
+          AND view = ANY(%s) AND metric = 'count' AND scope_key = 'all'
+          AND coalesce(payload_json::jsonb->>'sourceDetailKey','') = ANY(%s)
+        ORDER BY view,detail_key
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            ["songs", "songIndex", "artists", "vtubers"],
+            sorted(requested),
+            MAX_SOURCE_SCOPE_ROWS + 1,
+        ],
+    ):
+        view = _text(row.get("view"))
+        source_key = _text(row.get("source_key"))
+        if view in {"songs", "songIndex"}:
+            view = "songs"
+            group_key = "\x1f".join((
+                adapter._overlay_song_group_norm(row.get("title")),
+                adapter._overlay_song_group_norm(row.get("artist")),
+            ))
+        elif view == "artists":
+            group_key = _text(row.get("detail_key")) or adapter._overlay_norm(
+                row.get("artist")
+            )
+        elif view == "vtubers":
+            group_key = _text(row.get("detail_key"))
+        else:
+            continue
+        if group_key and source_key:
+            target_buffer.append((view, group_key, source_key))
+        if len(target_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            scope.add_targets(target_buffer)
+            target_buffer = []
+    scope.add_targets(target_buffer)
+
+    pair_buffer: list[tuple[str, str]] = []
+    video_buffer: list[str] = []
+
+    def flush() -> None:
+        nonlocal pair_buffer, video_buffer
+        if video_buffer:
+            scope.add_videos(video_buffer)
+            video_buffer = []
+        if pair_buffer:
+            scope.add_pairs(pair_buffer)
+            pair_buffer = []
+
+    for row in _stream_pg_rows(
+        connection,
+        "videos",
+        """
+        SELECT video_id,channel_id,channel_handle,channel_name,payload_json
+        FROM migration_video_rows
+        WHERE revision_id = ANY(%s)
+        LIMIT %s
+        """,
+        [revision_ids, MAX_SOURCE_SCOPE_ROWS + 1],
+    ):
+        if adapter._is_partial_range_video_row(row):
+            continue
+        video_id = _text(row.get("video_id"))
+        if not video_id:
+            continue
+        video_buffer.append(video_id)
+        channel_key = (
+            _text(row.get("channel_id"))
+            or _text(row.get("channel_handle")).lstrip("@/")
+            or adapter._overlay_norm(row.get("channel_name"))
+        )
+        pair_buffer.extend(_derived_source_pairs(
+            video_ids=(video_id,),
+            channel_keys=(channel_key,),
+            requested_keys=requested,
+            source_scope=scope,
+        ))
+        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            flush()
+
+    for row in _stream_pg_rows(
+        connection,
+        "occurrences",
+        """
+        SELECT video_id,range_id,title,artist
+        FROM migration_occurrence_rows
+        WHERE revision_id = ANY(%s)
+          AND coalesce(range_id,'') IN ('all','')
+        LIMIT %s
+        """,
+        [revision_ids, MAX_SOURCE_SCOPE_ROWS + 1],
+    ):
+        video_id = _text(row.get("video_id"))
+        title = _text(row.get("title"))
+        artist = _text(row.get("artist"))
+        if not video_id:
+            continue
+        video_buffer.append(video_id)
+        pair_buffer.extend(_derived_source_pairs(
+            video_ids=(video_id,),
+            song_pairs=((title, artist),) if title else (),
+            requested_keys=requested,
+            source_scope=scope,
+        ))
+        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            flush()
+
+    for row in _stream_pg_rows(
+        connection,
+        "runtime",
+        """
+        SELECT range_id,payload_json
+        FROM migration_runtime_rows
+        WHERE revision_id = ANY(%s)
+          AND coalesce(range_id,'') IN ('all','')
+        LIMIT %s
+        """,
+        [revision_ids, MAX_SOURCE_SCOPE_ROWS + 1],
+    ):
+        payload = _json_object(row.get("payload_json"))
+        videos, songs, channels, payload_ranges = _runtime_scope_evidence(payload)
+        if payload_ranges and not payload_ranges.intersection({"all", ""}):
+            continue
+        video_buffer.extend(videos)
+        pair_buffer.extend(_derived_source_pairs(
+            video_ids=videos,
+            song_pairs=songs,
+            channel_keys=channels,
+            requested_keys=requested,
+            source_scope=scope,
+        ))
+        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            flush()
+    flush()
+
+    scalar_stats = scope.stats()
+    if scalar_stats["videos"] > MAX_SOURCE_SCOPE_ROWS:
+        raise RuntimeError("snapshot source scope exceeded affected-video cap")
+    affected_videos = scope.affected_videos()
+    for offset in range(0, len(affected_videos), SOURCE_SCOPE_VIDEO_BATCH):
+        batch = affected_videos[offset : offset + SOURCE_SCOPE_VIDEO_BATCH]
+        mapping_buffer: list[tuple[str, str]] = []
+        for row in _stream_pg_rows(
+            connection,
+            f"parents_{offset // SOURCE_SCOPE_VIDEO_BATCH}",
+            """
+            SELECT DISTINCT source_key,video_id
+            FROM runtime_source_occurrences
+            WHERE revision_id = ANY(%s)
+              AND range_id = 'all'
+              AND video_id = ANY(%s)
+              AND source_key = ANY(%s)
+            ORDER BY source_key,video_id
+            LIMIT %s
+            """,
+            [source_lineage, list(batch), sorted(requested), MAX_SOURCE_SCOPE_ROWS + 1],
+        ):
+            mapping_buffer.append((_text(row.get("source_key")), _text(row.get("video_id"))))
+            if len(mapping_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+                scope.add_pairs(mapping_buffer)
+                mapping_buffer = []
+        scope.add_pairs(mapping_buffer)
+
+    stats = scope.stats()
+    if stats["pairs"] > MAX_SOURCE_SCOPE_ROWS:
+        raise RuntimeError("snapshot source scope exceeded source-video pair cap")
+    print(
+        f"PG_SNAPSHOT_SOURCE_SCOPE videos={stats['videos']} "
+        f"sources={stats['sources']} pairs={stats['pairs']}",
+        flush=True,
+    )
+    return scope
 
 
 def _bounded_text(parts: Iterable[Any], limit: int) -> str:
@@ -484,6 +938,7 @@ def export_source(
     *,
     range_id: str,
     source_key: str,
+    payload_loader: Callable[[str, Mapping[str, Any]], Mapping[str, Any]] | None = None,
 ) -> None:
     occurrences: list[dict[str, Any]] = []
     seen_videos: set[str] = set()
@@ -493,11 +948,12 @@ def export_source(
     detail: dict[str, Any] = {}
     page = 1
     while expected_page_count is None or page <= expected_page_count:
-        payload = dict(adapter.source_payload(
-            connection,
-            source_key,
-            _source_query(range_id, page),
-        ))
+        query = _source_query(range_id, page)
+        payload = dict(
+            payload_loader(source_key, query)
+            if payload_loader is not None
+            else adapter.source_payload(connection, source_key, query)
+        )
         if payload.get("found") is not True:
             raise RuntimeError(f"canonical source is missing: {range_id}/{source_key}")
         if _text(payload.get("sourceKey")) != source_key:
@@ -559,9 +1015,56 @@ def export_source(
     writer.add_source(source_key, range_id, detail, occurrences)
 
 
+def export_sources_from_records(
+    writer: CanonicalSnapshotWriter,
+    *,
+    records: Sequence[Mapping[str, Any]],
+    range_id: str,
+    source_keys: Iterable[str],
+) -> int:
+    """Export a complete authoritative range with one grouping pass per view."""
+
+    pending = {_text(value) for value in source_keys if _text(value)}
+    total = len(pending)
+    completed = 0
+    options = adapter._query_options(_source_query(range_id, 1))
+    options["q"] = ""
+    for view in VIEWS:
+        options["view"] = view
+        groups = adapter._entity_groups(records, options)
+        for group in groups:
+            payload = adapter._group_payload(group, options)
+            source_key = _text(payload.get("sourceDetailKey"))
+            if not source_key or source_key not in pending:
+                continue
+            detail = dict(payload)
+            occurrences = [dict(value) for value in group.get("occurrences", ())]
+            detail["occurrences"] = occurrences
+            detail["sourceDetailKey"] = source_key
+            detail["rangeId"] = range_id
+            writer.add_source(source_key, range_id, detail, occurrences)
+            pending.remove(source_key)
+            completed += 1
+            if completed % 25 == 0:
+                print(
+                    f"PG_SNAPSHOT_SOURCES range={range_id} "
+                    f"complete={completed} total={total}",
+                    flush=True,
+                )
+        del groups
+        gc.collect()
+    if pending:
+        raise RuntimeError(
+            f"authoritative source keys are missing for {range_id}: "
+            + ", ".join(sorted(pending)[:10])
+        )
+    return completed
+
+
 class SnapshotPageBuilder:
     def __init__(self, connection: Any):
         self.connection = connection
+        self.runtime = None
         self.generic_runtime = None
         self.parent = None
         self.overlay_ids: tuple[str, ...] = ()
@@ -575,6 +1078,11 @@ class SnapshotPageBuilder:
             tuple[str, str, str, str], tuple[int, int, int]
         ] = {}
 
+        runtime_probe = getattr(adapter, "_runtime_projection_revision", None)
+        if callable(runtime_probe):
+            self.runtime = runtime_probe(connection)
+        if self.runtime:
+            return
         generic_probe = getattr(adapter, "_generic_runtime_projection_revision", None)
         if not callable(generic_probe):
             return
@@ -594,6 +1102,35 @@ class SnapshotPageBuilder:
         )
         self.authoritative_ids = tuple(
             adapter._authoritative_7d_overlay_ids(connection, self.overlay_ids)
+        )
+
+    def prepare_source_scope(
+        self,
+        sqlite_connection: sqlite3.Connection,
+        source_keys: Iterable[str],
+    ) -> SnapshotSourceScope | None:
+        if not self.generic_runtime or not self.parent or not self.overlay_ids:
+            return None
+        return build_snapshot_source_scope(
+            self.connection,
+            sqlite_connection,
+            overlay_revision_ids=self.overlay_ids,
+            source_revision_ids=(*self.overlay_ids, self.parent[0]),
+            requested_keys=source_keys,
+        )
+
+    def source_payload(
+        self,
+        source_key: str,
+        query: Mapping[str, Any],
+        video_scope: Sequence[str] | None,
+    ) -> Mapping[str, Any]:
+        return adapter.source_payload(
+            self.connection,
+            source_key,
+            query,
+            snapshot_context=self,
+            snapshot_video_scope=video_scope,
         )
 
     def build_combo(
@@ -776,6 +1313,30 @@ def materialize(
                         del render
                         gc.collect()
 
+        bulk_exported_ranges: set[str] = set()
+        if (
+            getattr(builder, "authoritative_ids", ())
+            and getattr(builder, "authoritative_records", None) is not None
+            and source_keys["7d"]
+        ):
+            export_sources_from_records(
+                writer,
+                records=getattr(builder, "authoritative_records"),
+                range_id="7d",
+                source_keys=source_keys["7d"],
+            )
+            bulk_exported_ranges.add("7d")
+
+        prepare_source_scope = getattr(builder, "prepare_source_scope", None)
+        source_scope = (
+            prepare_source_scope(writer.connection, source_keys["all"])
+            if callable(prepare_source_scope)
+            else None
+        )
+        source_scope_stats = source_scope.stats() if source_scope is not None else {
+            "videos": 0, "pairs": 0, "sources": 0, "targets": 0,
+        }
+        scoped_payload_loader = getattr(builder, "source_payload", None)
         for range_id in RANGES:
             missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
             if missing:
@@ -785,12 +1346,26 @@ def materialize(
                 )
             if not source_keys[range_id]:
                 raise RuntimeError(f"ranking snapshot has no canonical source keys for {range_id}")
+            if range_id in bulk_exported_ranges:
+                continue
             for index, source_key in enumerate(sorted(source_keys[range_id]), start=1):
+                video_scope = (
+                    source_scope.videos_for_source(source_key)
+                    if source_scope is not None and range_id == "all"
+                    else None
+                )
                 export_source(
                     connection,
                     writer,
                     range_id=range_id,
                     source_key=source_key,
+                    payload_loader=(
+                        lambda key, query, current_scope=video_scope: builder.source_payload(
+                            key, query, current_scope,
+                        )
+                        if callable(scoped_payload_loader)
+                        else adapter.source_payload(connection, key, query)
+                    ),
                 )
                 if index % 25 == 0:
                     print(
@@ -831,6 +1406,7 @@ def materialize(
             "ranking_scope_counts_json": _json_text(scope_counts),
             "ranking_scope_series": len(scope_counts),
             "source_ranges_json": _json_text(range_stats),
+            "source_overlay_scope_json": _json_text(source_scope_stats),
         })
         snapshot_stats = writer.finish()
         snapshot_finished = True
@@ -840,6 +1416,7 @@ def materialize(
             "ranking_scope_series": len(scope_counts),
             "ranking_scope_counts": scope_counts,
             "source_ranges": range_stats,
+            "source_overlay_scope": source_scope_stats,
             **snapshot_stats,
         }
         meta_output.write_text(
