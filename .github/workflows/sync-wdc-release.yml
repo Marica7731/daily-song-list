@@ -294,15 +294,28 @@ jobs:
             --required-ranges "7d,all" \
             --built-at "$built_at"
 
-          # The canonical active pointer must not move while pages and SQLite are
-          # being assembled.  A mismatch aborts before any WDC upload.
+          # The release is pinned to expected_active by one repeatable-read
+          # transaction.  A later canonical activation must not invalidate that
+          # internally consistent immutable snapshot; record the source drift so
+          # the next scheduled sync can catch up.  Missing or unsafe metadata
+          # still fails closed before any WDC upload.
           after_active="$(curl --silent --show-error --fail --max-time 60 \
             http://127.0.0.1:8765/api/meta | \
             python3 -c 'import json,sys; print(json.load(sys.stdin).get("meta",{}).get("active_revision_id", ""))')"
-          [[ "$after_active" == "$expected_active" ]] || {
-            echo "ACTIVE_MISMATCH after build: $after_active != $expected_active" >&2
+          [[ "$after_active" =~ ^[A-Za-z0-9._:-]{1,200}$ ]] || {
+            echo "SOURCE_ACTIVE_INVALID after build: ${after_active:-missing}" >&2
             exit 67
           }
+          if [[ "$after_active" == "$expected_active" ]]; then
+            echo "SOURCE_ACTIVE_STABLE revision=$expected_active"
+          else
+            echo "::warning title=Source active revision advanced::SOURCE_ACTIVE_DRIFT snapshot=$expected_active current=$after_active; publishing the pinned immutable snapshot"
+          fi
+          {
+            echo "### WDC source revision"
+            echo "- immutable snapshot: $expected_active"
+            echo "- canonical active after build: $after_active"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           run_isolated bundle /usr/bin/python3 "$remote_root/build-release-bundle.py" \
             --input "$pages_root" \
