@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T10:15:34.436Z",
+  "generatedAt": "2026-08-11T12:32:30.217Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T10:15:34.436Z",
+    "fetchedAt": "2026-08-11T12:32:30.217Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T10:15:34.436Z",
+    "generatedAt": "2026-08-11T12:32:30.217Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1110,
-      "parseableChannels": 1090,
+      "totalChannels": 1111,
+      "parseableChannels": 1091,
       "realAvatar": 648,
-      "thumbnailFallback": 462,
+      "thumbnailFallback": 463,
       "missingDisplayImage": 0,
-      "missingAvatar": 462,
+      "missingAvatar": 463,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 666,
-      "skipped_collected_evidence": 636
+      "skipped_collected_evidence": 637,
+      "already_cached": 666
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 616,
+      "batch_limit_reached": 617,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@keserasera68",
+        "channelId": "UCpIIJGtpQFkkcjzqxNgyeyg",
+        "displayName": "keita ch / けいたの実験室",
+        "sourceUrl": "https://www.youtube.com/@keserasera68",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KikiraraVivi",
         "channelId": "UCGzTVXqMQHa4AgJVJIVvtDQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCrV1Hf5r8P148idjoSfrGEQ",
         "displayName": "Sakuna Ch. 結城さくな",
         "sourceUrl": "https://www.youtube.com/@%E7%B5%90%E5%9F%8E%E3%81%95%E3%81%8F%E3%81%AA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@WakasaIto",
-        "channelId": "UCGGc-KmG4fxc8D03S-H0rbw",
-        "displayName": "若櫻依兔 WakasaIto Ch.",
-        "sourceUrl": "https://www.youtube.com/@WakasaIto",
         "reason": "batch_limit_reached"
       }
     ]
