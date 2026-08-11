@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T17:53:21.782Z",
+  "generatedAt": "2026-08-11T19:54:21.524Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T17:53:21.782Z",
+    "fetchedAt": "2026-08-11T19:54:21.524Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T17:53:21.782Z",
+    "generatedAt": "2026-08-11T19:54:21.524Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@MonicaMelodia",
+        "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
+        "displayName": "Monica Ch. モニカ・メロディア",
+        "sourceUrl": "https://www.youtube.com/@MonicaMelodia",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kyopipi_channel",
         "channelId": "UCj11bm46vGpEIbNO5LV5O8Q",
@@ -11828,13 +11835,6 @@
         "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
         "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
         "sourceUrl": "https://www.youtube.com/@ykn0911v",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MonicaMelodia",
-        "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
-        "displayName": "Monica Ch. モニカ・メロディア",
-        "sourceUrl": "https://www.youtube.com/@MonicaMelodia",
         "reason": "batch_limit_reached"
       },
       {
