@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-11T09:49:44.285Z",
+  "generatedAt": "2026-08-11T10:15:34.436Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-11T09:49:44.285Z",
+    "fetchedAt": "2026-08-11T10:15:34.436Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-11T09:49:44.285Z",
+    "generatedAt": "2026-08-11T10:15:34.436Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,18 +11657,18 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1109,
-      "parseableChannels": 1089,
+      "totalChannels": 1110,
+      "parseableChannels": 1090,
       "realAvatar": 648,
-      "thumbnailFallback": 461,
+      "thumbnailFallback": 462,
       "missingDisplayImage": 0,
-      "missingAvatar": 461,
+      "missingAvatar": 462,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 636,
-      "already_cached": 666
+      "already_cached": 666,
+      "skipped_collected_evidence": 636
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@KikiraraVivi",
+        "channelId": "UCGzTVXqMQHa4AgJVJIVvtDQ",
+        "displayName": "Vivi Ch. 綺々羅々ヴィヴィ - FLOW GLOW",
+        "sourceUrl": "https://www.youtube.com/@KikiraraVivi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@NemukumoTsukuri",
         "channelId": "UCekc8SI533NI675r9aCBRcQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCGGc-KmG4fxc8D03S-H0rbw",
         "displayName": "若櫻依兔 WakasaIto Ch.",
         "sourceUrl": "https://www.youtube.com/@WakasaIto",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@NekomyaCh.",
-        "channelId": "UCJX2-_5O1MdgnXpCGRJPgXw",
-        "displayName": "猫宮ふわり",
-        "sourceUrl": "https://www.youtube.com/@NekomyaCh.",
         "reason": "batch_limit_reached"
       }
     ]
