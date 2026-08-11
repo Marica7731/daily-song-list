@@ -368,6 +368,7 @@ MAX_PAGE_SIZE = 200
 MAX_SEARCH_PAGE_SIZE = 50
 MAX_SOURCE_PREVIEW_OCCURRENCES = 2048
 MAX_RANKING_PREVIEW_VIDEOS = 3
+MAX_SOURCE_SONG_IDENTITY_NODES = MAX_SOURCE_PREVIEW_OCCURRENCES * 16
 _VTUBER_REPLACEMENT_CACHE: dict[tuple[Any, ...], dict[str, dict[str, Any]]] = {}
 _VTUBER_REPLACEMENT_CACHE_LOCK = threading.RLock()
 # Generic increments are immutable.  Keep only their small derived meta count
@@ -1129,6 +1130,7 @@ def _runtime_channel_source_payload(
     key: str,
     query: Mapping[str, Any] | None = None,
     overlay_revision_ids: Sequence[str] | None = None,
+    snapshot_video_scope: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Read only the parent-runtime rows belonging to a verified channel.
 
@@ -1247,8 +1249,23 @@ def _runtime_channel_source_payload(
         # video before channel filtering candidate records; otherwise a
         # tombstone has no candidate record and stale parent payload leaks
         # back through this public source endpoint.
-        candidate_rows = tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
-        accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids)
+        if snapshot_video_scope is None:
+            candidate_rows = tuple(
+                _overlay_candidate_rows(connection, overlay_revision_ids)
+            )
+            accepted_video_resets = _accepted_video_resets(
+                connection, overlay_revision_ids,
+            )
+        else:
+            candidate_rows, accepted_video_resets, prepared_changes = (
+                _snapshot_source_overlay_inputs(
+                    connection,
+                    revision_id,
+                    overlay_revision_ids,
+                    options["range"],
+                    snapshot_video_scope,
+                )
+            )
         reset_video_ids = set(accepted_video_resets)
         if reset_video_ids:
             records = [
@@ -1266,16 +1283,19 @@ def _runtime_channel_source_payload(
             candidate_video_ids = {_text(record["video"].get("videoId")) for record in candidate_records}
             records = [record for record in records if _text(record["video"].get("videoId")) not in candidate_video_ids]
             records.extend(candidate_records)
-    runtime_changes = (
-        _runtime_tombstones(
-            connection,
-            overlay_revision_ids or (),
-            accepted_video_resets.values() if accepted_video_resets else None,
-            candidate_rows,
+    if overlay_revision_ids and snapshot_video_scope is not None:
+        runtime_changes = prepared_changes
+    else:
+        runtime_changes = (
+            _runtime_tombstones(
+                connection,
+                overlay_revision_ids or (),
+                accepted_video_resets.values() if accepted_video_resets else None,
+                candidate_rows,
+            )
+            if overlay_revision_ids
+            else _runtime_tombstones(connection, overlay_revision_ids or ())
         )
-        if overlay_revision_ids
-        else _runtime_tombstones(connection, overlay_revision_ids or ())
-    )
     records = _apply_record_overlay(records, runtime_changes)
     payload = _source_payload_from_channel_records(records, metadata, key, source_query)
     if payload.get("found"):
@@ -1644,6 +1664,7 @@ def _overlay_candidate_rows(
     channel_scope: Sequence[str] | None = None,
     scoped_parent_video_ids: Sequence[str] | None = None,
     range_id: str = "",
+    video_scope: Sequence[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Read only the candidate rows; never resolve the parent occurrence table.
 
@@ -1661,8 +1682,21 @@ def _overlay_candidate_rows(
         if channel_scope is not None
         else None
     )
+    exact_video_scope = (
+        sorted({_text(value) for value in video_scope if _text(value)})
+        if video_scope is not None
+        else None
+    )
+    if scope is not None and exact_video_scope is not None:
+        raise PostgresAdapterError(
+            "overlay candidate lookup cannot combine channel and exact-video scope"
+        )
     scoped_video_ids: list[str] | None = None
-    if scope is not None:
+    if exact_video_scope is not None:
+        if not exact_video_scope:
+            return []
+        scoped_video_ids = exact_video_scope
+    elif scope is not None:
         scoped_video_rows = _rows(
             connection,
             """
@@ -1694,7 +1728,8 @@ def _overlay_candidate_rows(
         })
         if not scoped_video_ids:
             return []
-    video_scope_clause = " AND video_id = ANY(%s)" if scope is not None else ""
+    targeted = scoped_video_ids is not None
+    video_scope_clause = " AND video_id = ANY(%s)" if targeted else ""
     video_params: list[Any] = [list(revision_ids)]
     if scoped_video_ids is not None:
         video_params.append(scoped_video_ids)
@@ -1744,7 +1779,7 @@ def _overlay_candidate_rows(
     occurrence_params: list[Any] = [
         list(revision_ids), selected_video_ids, selected_video_priorities,
     ]
-    if scope is not None:
+    if targeted:
         occurrence_range_clause = """
           AND (
             (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
@@ -1757,7 +1792,7 @@ def _overlay_candidate_rows(
         ))
     occurrence_limit = (
         _MAX_UNSCOPED_OVERLAY_OCCURRENCES
-        if scope is None
+        if not targeted
         else _MAX_AFFECTED_RUNTIME_OCCURRENCES
     )
     occurrence_params.append(occurrence_limit + 1)
@@ -1890,6 +1925,7 @@ def _accepted_video_resets(
     parent_revision_id: str = "",
     channel_scope: Sequence[str] | None = None,
     scoped_parent_video_ids: Sequence[str] | None = None,
+    video_scope: Sequence[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Return the newest accepted/full video projection per overlay video.
 
@@ -1907,9 +1943,23 @@ def _accepted_video_resets(
         if channel_scope is not None
         else None
     )
+    exact_video_scope = (
+        sorted({_text(value) for value in video_scope if _text(value)})
+        if video_scope is not None
+        else None
+    )
+    if scope is not None and exact_video_scope is not None:
+        raise PostgresAdapterError(
+            "accepted-video reset lookup cannot combine channel and exact-video scope"
+        )
+    if exact_video_scope is not None and not exact_video_scope:
+        return {}
     scope_clause = ""
     params: list[Any] = [list(revision_ids)]
-    if scope is not None:
+    if exact_video_scope is not None:
+        scope_clause = " AND video_id = ANY(%s)"
+        params.append(exact_video_scope)
+    elif scope is not None:
         if not parent_revision_id:
             raise PostgresAdapterError(
                 "scoped accepted-video reset lookup requires parent revision"
@@ -11299,7 +11349,7 @@ def _source_song_identity_evidence(
     while queue:
         current = queue.pop()
         visited += 1
-        if visited > 512:
+        if visited > MAX_SOURCE_SONG_IDENTITY_NODES:
             raise PostgresAdapterError("source song identity evidence exceeded bounded shape")
         if isinstance(current, Mapping):
             song_key = _text(current.get("songKey") or current.get("song_key"))
@@ -11431,6 +11481,47 @@ def _adjust_source_count_list(
         for name, count in sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))
         if count > 0
     ]
+
+
+def _snapshot_source_overlay_inputs(
+    connection,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    range_id: str,
+    video_scope: Sequence[str],
+) -> tuple[
+    tuple[Mapping[str, Any], ...],
+    dict[str, dict[str, Any]],
+    tuple[Mapping[str, Any], ...],
+]:
+    """Hydrate only one source's indexed overlay videos during a snapshot."""
+
+    scoped_videos = tuple(sorted({
+        _text(value) for value in video_scope if _text(value)
+    }))
+    if not scoped_videos:
+        return (), {}, ()
+    candidate_rows = tuple(_overlay_candidate_rows(
+        connection,
+        overlay_revision_ids,
+        video_scope=scoped_videos,
+        range_id=range_id,
+    ))
+    accepted_video_resets = _accepted_video_resets(
+        connection,
+        overlay_revision_ids,
+        video_scope=scoped_videos,
+    )
+    runtime_changes = tuple(_runtime_tombstones(
+        connection,
+        overlay_revision_ids,
+        accepted_video_resets.values() if accepted_video_resets else (),
+        candidate_rows,
+        parent_revision_id=parent_revision_id,
+        channel_scope=(),
+        scoped_parent_video_ids=scoped_videos,
+    ))
+    return candidate_rows, accepted_video_resets, runtime_changes
 
 
 def _generic_song_source_payload(
@@ -11770,6 +11861,9 @@ def _generic_overlay_song_source_for_key(
     requested_key: str,
     query: Mapping[str, Any] | None,
     overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None = None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     """Resolve an overlay-only song source key without a parent detail row.
 
@@ -11785,12 +11879,24 @@ def _generic_overlay_song_source_for_key(
     if not re.fullmatch(r"[0-9a-f]{16}(?:[0-9a-f]{8})?", requested_key):
         return None
     options = _query_options(query)
-    candidate_rows = tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
-    accepted_video_resets = _accepted_video_resets(connection, overlay_revision_ids, False)
-    changes = _runtime_tombstones(
-        connection, overlay_revision_ids,
-        accepted_video_resets.values() if accepted_video_resets else None,
-        candidate_rows,
+    candidate_rows = (
+        tuple(candidate_rows)
+        if candidate_rows is not None
+        else tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
+    )
+    accepted_video_resets = (
+        dict(accepted_video_resets)
+        if accepted_video_resets is not None
+        else _accepted_video_resets(connection, overlay_revision_ids, False)
+    )
+    changes = (
+        list(runtime_changes)
+        if runtime_changes is not None
+        else _runtime_tombstones(
+            connection, overlay_revision_ids,
+            accepted_video_resets.values() if accepted_video_resets else None,
+            candidate_rows,
+        )
     )
     replacement_rows = _runtime_replacement_candidate_rows(changes)
     targets: dict[str, tuple[str, str]] = {}
@@ -11819,6 +11925,160 @@ def _generic_overlay_song_source_for_key(
         connection, parent_revision_id, synthetic, requested_key, query,
         overlay_revision_ids, candidate_rows, accepted_video_resets, changes,
     )
+
+
+def _generic_video_source_payload(
+    connection,
+    parent_revision_id: str,
+    persisted_record: Mapping[str, Any] | None,
+    requested_key: str,
+    query: Mapping[str, Any] | None,
+    overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None = None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    """Rebuild exactly one affected video source from bounded snapshot rows.
+
+    Video ranking cards use a 24-character stable source key even though the
+    production scalar-key helper intentionally has no video mapping.  Reverse
+    that key only against the exact affected-video scope prepared by the
+    snapshot exporter.  This prevents an affected video detail from being
+    mistaken for its whole channel and also covers overlay-only new videos.
+    """
+
+    if not re.fullmatch(r"[0-9a-f]{24}", requested_key):
+        return None
+    options = _query_options(query)
+    range_id = options["range"]
+    persisted_record = (
+        dict(persisted_record)
+        if isinstance(persisted_record, Mapping)
+        else {}
+    )
+    candidate_rows = (
+        tuple(candidate_rows)
+        if candidate_rows is not None
+        else tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
+    )
+    candidate_range_rows = tuple(_overlay_rows_for_range(
+        candidate_rows, range_id,
+    ))
+    accepted_video_resets = (
+        dict(accepted_video_resets)
+        if accepted_video_resets is not None
+        else _accepted_video_resets(connection, overlay_revision_ids, False)
+    )
+    changes = (
+        list(runtime_changes)
+        if runtime_changes is not None
+        else _runtime_tombstones(
+            connection,
+            overlay_revision_ids,
+            accepted_video_resets.values() if accepted_video_resets else None,
+            candidate_range_rows,
+        )
+    )
+    changes = _overlay_rows_for_range(changes, range_id)
+    replacement_rows = _runtime_replacement_candidate_rows(changes)
+
+    def video_id_for(value: Mapping[str, Any]) -> str:
+        return _text(value.get("video_id") or value.get("videoId"))
+
+    target_video_ids = {
+        video_id
+        for value in (*candidate_range_rows, *changes, *replacement_rows)
+        for video_id in (video_id_for(value),)
+        if video_id
+        and _stable_key("source-video", range_id, video_id) == requested_key
+    }
+    persisted_video_id = _text(
+        persisted_record.get("videoId")
+        or persisted_record.get("video_id")
+        or (
+            persisted_record.get("key")
+            if _text(persisted_record.get("type")) == "video"
+            else ""
+        )
+    )
+    if (
+        persisted_video_id
+        and _text(persisted_record.get("type")) == "video"
+        and _stable_key("source-video", range_id, persisted_video_id)
+            == requested_key
+    ):
+        target_video_ids.add(persisted_video_id)
+    if not target_video_ids:
+        return None
+    if len(target_video_ids) != 1:
+        return {
+            "schemaVersion": 1,
+            "found": False,
+            "sourceKey": requested_key,
+        }
+    target_video_id = next(iter(target_video_ids))
+
+    effective: dict[tuple[str, str], dict[str, Any]] = {}
+    parent_occurrences = _runtime_source_occurrences(
+        connection, parent_revision_id, requested_key, range_id,
+    )
+    for record in _persisted_source_records(parent_occurrences, {}):
+        if _text(record.get("video", {}).get("videoId")) != target_video_id:
+            continue
+        for occurrence in record.get("occurrences", ()):
+            single = {
+                "video": dict(record.get("video") or {}),
+                "occurrences": (dict(occurrence),),
+            }
+            effective[_source_record_identity(single)] = single
+
+    full_video_changes = {
+        video_id_for(value)
+        for value in changes
+        if _text(value.get("entityType") or value.get("entity_type"))
+            in {"videos", "runtime_videos"}
+    }
+    if (
+        target_video_id in accepted_video_resets
+        or target_video_id in full_video_changes
+    ):
+        effective.clear()
+    for row in candidate_range_rows:
+        if video_id_for(row) != target_video_id or row.get("video_tombstone"):
+            continue
+        record = _overlay_source_record(row)
+        if record:
+            effective[_source_record_identity(record)] = record
+    for change in changes:
+        if video_id_for(change) != target_video_id:
+            continue
+        if _text(change.get("entityType") or change.get("entity_type")) not in {
+            "occurrences", "runtime_occurrences",
+        }:
+            continue
+        occurrence_id = _text(
+            change.get("occurrenceId") or change.get("occurrence_id")
+        )
+        if occurrence_id:
+            effective.pop((target_video_id, occurrence_id), None)
+    for row in replacement_rows:
+        if video_id_for(row) != target_video_id:
+            continue
+        record = _overlay_source_record(row)
+        if record:
+            effective[_source_record_identity(record)] = record
+
+    records = [record for _, record in sorted(effective.items())]
+    payload = source_payload_from_records(records, requested_key, query)
+    if not payload.get("found"):
+        return payload
+    if persisted_record:
+        payload = dict(payload)
+        payload["record"] = {
+            **persisted_record,
+            **dict(payload.get("record") or {}),
+        }
+    return payload
 
 
 def _authoritative_7d_overlay_ids(
@@ -12072,11 +12332,22 @@ def _source_detail_delta_lineage(
     return detail_revision_id, overlays[:detail_index]
 
 
-def source_payload(connection, key: str, query: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def source_payload(
+    connection,
+    key: str,
+    query: Mapping[str, Any] | None = None,
+    *,
+    snapshot_context: Any | None = None,
+    snapshot_video_scope: Sequence[str] | None = None,
+) -> dict[str, Any]:
     key = _text(key).strip()
     if not key:
         raise ValueError("source key is required")
-    runtime = _runtime_projection_revision(connection)
+    runtime = (
+        getattr(snapshot_context, "runtime", None)
+        if snapshot_context is not None
+        else _runtime_projection_revision(connection)
+    )
     if runtime:
         persisted = _runtime_source_payload(connection, runtime[0], key, query, allow_derived=False)
         if persisted.get("found"):
@@ -12091,17 +12362,42 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
         if channel_metadata:
             return _runtime_channel_source_payload(connection, runtime[0], channel_metadata, key, query)
         return persisted
-    generic_runtime = _generic_runtime_projection_revision(connection)
+    generic_runtime = (
+        getattr(snapshot_context, "generic_runtime", None)
+        if snapshot_context is not None
+        else _generic_runtime_projection_revision(connection)
+    )
     if generic_runtime:
-        parent = _generic_parent_runtime_revision(connection, generic_runtime[0], generic_runtime[1])
+        parent = (
+            getattr(snapshot_context, "parent", None)
+            if snapshot_context is not None
+            else _generic_parent_runtime_revision(
+                connection, generic_runtime[0], generic_runtime[1],
+            )
+        )
         if parent:
-            overlay_ids = _overlay_revision_ids(connection, generic_runtime[0], parent[0])
-            authoritative_7d_ids = _authoritative_7d_overlay_ids(
-                connection, overlay_ids,
+            overlay_ids = (
+                tuple(getattr(snapshot_context, "overlay_ids", ()))
+                if snapshot_context is not None
+                else _overlay_revision_ids(connection, generic_runtime[0], parent[0])
+            )
+            authoritative_7d_ids = (
+                tuple(getattr(snapshot_context, "authoritative_ids", ()))
+                if snapshot_context is not None
+                else _authoritative_7d_overlay_ids(connection, overlay_ids)
+            )
+            authoritative_records = (
+                getattr(snapshot_context, "authoritative_records", None)
+                if snapshot_context is not None
+                else None
             )
             authoritative_7d = (
                 source_payload_from_records(
-                    _authoritative_7d_records(connection, overlay_ids), key, query,
+                    authoritative_records
+                    if authoritative_records is not None
+                    else _authoritative_7d_records(connection, overlay_ids),
+                    key,
+                    query,
                 )
                 if (
                     authoritative_7d_ids
@@ -12123,11 +12419,29 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                     _text(persisted.get("sourceRevisionId")),
                     parent[0],
                 )
-                if not source_overlay_ids:
+                if not source_overlay_ids or (
+                    snapshot_video_scope is not None and not snapshot_video_scope
+                ):
                     return persisted
+                prepared_inputs = (
+                    _snapshot_source_overlay_inputs(
+                        connection,
+                        source_base_revision,
+                        source_overlay_ids,
+                        _query_options(query)["range"],
+                        snapshot_video_scope,
+                    )
+                    if (
+                        snapshot_video_scope is not None
+                        and _text(persisted_record.get("type"))
+                            in {"song", "video"}
+                    )
+                    else None
+                )
                 song_rebuilt = _generic_song_source_payload(
                     connection, source_base_revision, persisted_record, key, query,
                     source_overlay_ids,
+                    *(prepared_inputs or ()),
                 )
                 if song_rebuilt is not None:
                     return song_rebuilt
@@ -12136,6 +12450,17 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                     # Do not reinterpret it as a channel source merely because
                     # a different physical range has newer migration rows.
                     return persisted
+                video_rebuilt = _generic_video_source_payload(
+                    connection,
+                    source_base_revision,
+                    persisted_record,
+                    key,
+                    query,
+                    source_overlay_ids,
+                    *(prepared_inputs or ()),
+                )
+                if video_rebuilt is not None:
+                    return video_rebuilt
                 if persisted_record and (
                     source_overlay_ids
                     or _text(persisted_record.get("sourceDetailKey")) != _text(key)
@@ -12147,6 +12472,7 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                     repaired = _runtime_channel_source_payload(
                         connection, source_base_revision, persisted_record, key, query,
                         overlay_revision_ids=source_overlay_ids,
+                        snapshot_video_scope=snapshot_video_scope,
                     )
                     if repaired.get("found"):
                         repaired = dict(repaired)
@@ -12157,6 +12483,8 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                         # exact persisted channel identity.  Do not revive the
                         # parent source when its final record set is empty.
                         return repaired
+                return persisted
+            if snapshot_video_scope is not None and not snapshot_video_scope:
                 return persisted
             resolved_key = _runtime_source_key_for_channel_alias(connection, parent[0], key)
             if resolved_key:
@@ -12172,16 +12500,45 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                         _text(persisted.get("sourceRevisionId")),
                         parent[0],
                     )
-                    if not source_overlay_ids:
+                    if not source_overlay_ids or (
+                        snapshot_video_scope is not None and not snapshot_video_scope
+                    ):
                         return persisted
+                    prepared_inputs = (
+                        _snapshot_source_overlay_inputs(
+                            connection,
+                            source_base_revision,
+                            source_overlay_ids,
+                            _query_options(query)["range"],
+                            snapshot_video_scope,
+                        )
+                        if (
+                            snapshot_video_scope is not None
+                            and _text(persisted_record.get("type"))
+                                in {"song", "video"}
+                        )
+                        else None
+                    )
                     song_rebuilt = _generic_song_source_payload(
                         connection, source_base_revision, persisted_record, resolved_key,
                         query, source_overlay_ids,
+                        *(prepared_inputs or ()),
                     )
                     if song_rebuilt is not None:
                         return song_rebuilt
                     if _text(persisted_record.get("type")) == "song":
                         return persisted
+                    video_rebuilt = _generic_video_source_payload(
+                        connection,
+                        source_base_revision,
+                        persisted_record,
+                        resolved_key,
+                        query,
+                        source_overlay_ids,
+                        *(prepared_inputs or ()),
+                    )
+                    if video_rebuilt is not None:
+                        return video_rebuilt
                     if persisted_record:
                         repaired = _runtime_channel_source_payload(
                             connection,
@@ -12190,6 +12547,7 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                             resolved_key,
                             query,
                             overlay_revision_ids=source_overlay_ids,
+                            snapshot_video_scope=snapshot_video_scope,
                         )
                         if repaired.get("found"):
                             repaired = dict(repaired)
@@ -12201,15 +12559,50 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                         if source_overlay_ids and _has_trusted_source_channel_identity(persisted_record):
                             return repaired
                     return persisted
+            prepared_inputs = (
+                _snapshot_source_overlay_inputs(
+                    connection,
+                    parent[0],
+                    overlay_ids,
+                    _query_options(query)["range"],
+                    snapshot_video_scope,
+                )
+                if snapshot_video_scope is not None
+                else None
+            )
             overlay_song = _generic_overlay_song_source_for_key(
-                connection, parent[0], key, query, overlay_ids,
+                connection,
+                parent[0],
+                key,
+                query,
+                overlay_ids,
+                *(prepared_inputs or ()),
             ) if overlay_ids else None
             if overlay_song is not None:
                 return overlay_song
+            overlay_video = _generic_video_source_payload(
+                connection,
+                parent[0],
+                None,
+                key,
+                query,
+                overlay_ids,
+                *(prepared_inputs or ()),
+            ) if overlay_ids else None
+            if overlay_video is not None:
+                return overlay_video
             metadata = _channel_metadata_rows(connection, _revision_lineage(connection, generic_runtime[0]))
             channel_metadata = _metadata_for_source_key(metadata, key)
             if channel_metadata:
-                return _runtime_channel_source_payload(connection, parent[0], channel_metadata, key, query, overlay_revision_ids=overlay_ids)
+                return _runtime_channel_source_payload(
+                    connection,
+                    parent[0],
+                    channel_metadata,
+                    key,
+                    query,
+                    overlay_revision_ids=overlay_ids,
+                    snapshot_video_scope=snapshot_video_scope,
+                )
             if key.startswith("UC"):
                 return _runtime_channel_source_payload(
                     connection,
@@ -12218,6 +12611,7 @@ def source_payload(connection, key: str, query: Mapping[str, Any] | None = None)
                     key,
                     query,
                     overlay_revision_ids=overlay_ids,
+                    snapshot_video_scope=snapshot_video_scope,
                 )
             return persisted
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
