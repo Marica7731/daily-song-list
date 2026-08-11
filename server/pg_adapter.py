@@ -11414,7 +11414,7 @@ def _source_record_identity(record: Mapping[str, Any]) -> tuple[str, str]:
 def _source_records_as_occurrences(
     records: Iterable[Mapping[str, Any]],
     options: Mapping[str, Any],
-    canonical_song_key: str,
+    canonical_song_key: str | None,
 ) -> list[dict[str, Any]]:
     """Render exact effective records in the persisted source occurrence shape."""
 
@@ -11424,7 +11424,8 @@ def _source_records_as_occurrences(
         occurrences = []
         for occurrence in record.get("occurrences") or ():
             item = dict(occurrence)
-            item["songKey"] = canonical_song_key
+            if canonical_song_key is not None:
+                item["songKey"] = canonical_song_key
             occurrences.append(item)
         projected = {"video": video, "occurrences": tuple(occurrences)}
         for item in _occurrences_for_range(projected, options["range"]):
@@ -11524,7 +11525,7 @@ def _snapshot_source_overlay_inputs(
     return candidate_rows, accepted_video_resets, runtime_changes
 
 
-def _generic_song_source_payload(
+def _generic_group_source_payload(
     connection,
     parent_revision_id: str,
     persisted_record: Mapping[str, Any],
@@ -11534,31 +11535,49 @@ def _generic_song_source_payload(
     candidate_rows: Sequence[Mapping[str, Any]] | None = None,
     accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
     runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+    *,
+    source_type: str,
 ) -> dict[str, Any] | None:
-    """Rebuild one affected song from an indexed source seed and bounded deltas."""
+    """Rebuild one affected song or artist from bounded indexed deltas."""
 
-    if _text(persisted_record.get("type")) != "song":
+    if source_type not in {"song", "artist"}:
+        raise ValueError("generic source type must be song or artist")
+    if _text(persisted_record.get("type")) != source_type:
         return None
     options = _query_options(query)
     range_id = options["range"]
     target_key = _text(persisted_record.get("key"))
-    if not target_key:
-        return None
-    exact_pairs, exact_song_keys = _source_song_identity_evidence(persisted_record)
-    if not exact_pairs and not exact_song_keys:
-        return {
-            "schemaVersion": 1,
-            "found": False,
-            "sourceKey": requested_key,
-            "sourceDetailBlocked": True,
-            "sourceDetailState": "missing_exact_song_identity",
-        }
+    canonical_song_key: str | None = target_key if source_type == "song" else None
+    if source_type == "song":
+        if not target_key:
+            return None
+        exact_pairs, exact_song_keys = _source_song_identity_evidence(persisted_record)
+        if not exact_pairs and not exact_song_keys:
+            return {
+                "schemaVersion": 1,
+                "found": False,
+                "sourceKey": requested_key,
+                "sourceDetailBlocked": True,
+                "sourceDetailState": "missing_exact_song_identity",
+            }
 
-    def same_target(row: Mapping[str, Any]) -> bool:
-        pairs, keys = _source_song_identity_evidence(row)
-        if exact_song_keys & keys:
-            return True
-        return bool(set(exact_pairs) & set(pairs))
+        def same_target(row: Mapping[str, Any]) -> bool:
+            pairs, keys = _source_song_identity_evidence(row)
+            if exact_song_keys & keys:
+                return True
+            return bool(set(exact_pairs) & set(pairs))
+    else:
+        target_artist = _overlay_norm(
+            target_key
+            or persisted_record.get("name")
+            or persisted_record.get("artist")
+        )
+        if not target_artist:
+            return None
+
+        def same_target(row: Mapping[str, Any]) -> bool:
+            artist = _overlay_norm(row.get("artist")) or "unknown"
+            return artist == target_artist
 
     candidate_rows = tuple(candidate_rows) if candidate_rows is not None else tuple(
         _overlay_candidate_rows(connection, overlay_revision_ids)
@@ -11668,7 +11687,9 @@ def _generic_song_source_payload(
             effective[_source_record_identity(record)] = record
 
     effective_records = [record for _, record in sorted(effective.items())]
-    after_public = _source_records_as_occurrences(effective_records, options, target_key)
+    after_public = _source_records_as_occurrences(
+        effective_records, options, canonical_song_key,
+    )
     raw_query = query or {}
     search_predicate = ""
     search_params: list[Any] = []
@@ -11799,7 +11820,7 @@ def _generic_song_source_payload(
             {},
         ),
         options,
-        target_key,
+        canonical_song_key,
     )
     for item in selected_parent_public:
         page_occurrences_by_video[_text(item.get("videoId"))].append(item)
@@ -11825,15 +11846,26 @@ def _generic_song_source_payload(
     record["sourceFilterQuery"] = options["q"]
     record["occurrencePreviewLimited"] = total_occurrence_count > len(page_occurrences)
     unfiltered_after = _source_records_as_occurrences(
-        effective_records, {**dict(options), "q": "", "searchTokens": []}, target_key,
+        effective_records,
+        {**dict(options), "q": "", "searchTokens": []},
+        canonical_song_key,
     )
-    record["artists"] = _adjust_source_count_list(
-        record.get("artists"), before_public, unfiltered_after, "artist",
-    )
+    if source_type == "artist":
+        record["songs"] = _adjust_source_count_list(
+            record.get("songs"), before_public, unfiltered_after, "title",
+        )
+        record["songCount"] = len(record["songs"])
+    else:
+        record["artists"] = _adjust_source_count_list(
+            record.get("artists"), before_public, unfiltered_after, "artist",
+        )
     record["channels"] = _adjust_source_count_list(
         record.get("channels"), before_public, unfiltered_after, "channelName",
     )
-    total_song_count = int(record.get("songCount") or len(record.get("artists") or ()))
+    total_song_count = int(
+        record.get("songCount")
+        or len(record.get("artists") or ())
+    )
     if not total_occurrence_count and not options["q"]:
         return {"schemaVersion": 1, "found": False, "sourceKey": requested_key}
     response: dict[str, Any] = {
@@ -11853,6 +11885,56 @@ def _generic_song_source_payload(
             "totalSongCount": total_song_count,
         })
     return response
+
+
+def _generic_song_source_payload(
+    connection,
+    parent_revision_id: str,
+    persisted_record: Mapping[str, Any],
+    requested_key: str,
+    query: Mapping[str, Any] | None,
+    overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None = None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    return _generic_group_source_payload(
+        connection,
+        parent_revision_id,
+        persisted_record,
+        requested_key,
+        query,
+        overlay_revision_ids,
+        candidate_rows,
+        accepted_video_resets,
+        runtime_changes,
+        source_type="song",
+    )
+
+
+def _generic_artist_source_payload(
+    connection,
+    parent_revision_id: str,
+    persisted_record: Mapping[str, Any],
+    requested_key: str,
+    query: Mapping[str, Any] | None,
+    overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None = None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    return _generic_group_source_payload(
+        connection,
+        parent_revision_id,
+        persisted_record,
+        requested_key,
+        query,
+        overlay_revision_ids,
+        candidate_rows,
+        accepted_video_resets,
+        runtime_changes,
+        source_type="artist",
+    )
 
 
 def _generic_overlay_song_source_for_key(
@@ -11924,6 +12006,82 @@ def _generic_overlay_song_source_for_key(
     return _generic_song_source_payload(
         connection, parent_revision_id, synthetic, requested_key, query,
         overlay_revision_ids, candidate_rows, accepted_video_resets, changes,
+    )
+
+
+def _generic_overlay_artist_source_for_key(
+    connection,
+    parent_revision_id: str,
+    requested_key: str,
+    query: Mapping[str, Any] | None,
+    overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None = None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    """Resolve one overlay-only artist key from bounded exact video rows."""
+
+    if not re.fullmatch(r"[0-9a-f]{16}(?:[0-9a-f]{8})?", requested_key):
+        return None
+    options = _query_options(query)
+    candidate_rows = (
+        tuple(candidate_rows)
+        if candidate_rows is not None
+        else tuple(_overlay_candidate_rows(connection, overlay_revision_ids))
+    )
+    accepted_video_resets = (
+        dict(accepted_video_resets)
+        if accepted_video_resets is not None
+        else _accepted_video_resets(connection, overlay_revision_ids, False)
+    )
+    changes = (
+        list(runtime_changes)
+        if runtime_changes is not None
+        else _runtime_tombstones(
+            connection,
+            overlay_revision_ids,
+            accepted_video_resets.values() if accepted_video_resets else None,
+            candidate_rows,
+        )
+    )
+    replacement_rows = _runtime_replacement_candidate_rows(changes)
+    targets: dict[str, str] = {}
+    for row in (*candidate_rows, *changes, *replacement_rows):
+        artist = _text(row.get("artist"))
+        group_key = _overlay_norm(artist) or "unknown"
+        if (
+            _production_source_detail_key_for_group(
+                "artists", options["range"], group_key,
+            )
+            != requested_key
+        ):
+            continue
+        targets[group_key] = artist or "unknown"
+    if not targets:
+        return None
+    if len(targets) != 1:
+        return {"schemaVersion": 1, "found": False, "sourceKey": requested_key}
+    group_key, display_artist = next(iter(targets.items()))
+    synthetic = {
+        "type": "artist",
+        "key": group_key,
+        "name": display_artist,
+        "artist": display_artist,
+        "songs": [],
+        "channels": [],
+        "rangeId": options["range"],
+        "sourceDetailKey": requested_key,
+    }
+    return _generic_artist_source_payload(
+        connection,
+        parent_revision_id,
+        synthetic,
+        requested_key,
+        query,
+        overlay_revision_ids,
+        candidate_rows,
+        accepted_video_resets,
+        changes,
     )
 
 
@@ -12450,6 +12608,19 @@ def source_payload(
                     # Do not reinterpret it as a channel source merely because
                     # a different physical range has newer migration rows.
                     return persisted
+                artist_rebuilt = _generic_artist_source_payload(
+                    connection,
+                    source_base_revision,
+                    persisted_record,
+                    key,
+                    query,
+                    source_overlay_ids,
+                    *(prepared_inputs or ()),
+                )
+                if artist_rebuilt is not None:
+                    return artist_rebuilt
+                if _text(persisted_record.get("type")) == "artist":
+                    return persisted
                 video_rebuilt = _generic_video_source_payload(
                     connection,
                     source_base_revision,
@@ -12528,6 +12699,19 @@ def source_payload(
                         return song_rebuilt
                     if _text(persisted_record.get("type")) == "song":
                         return persisted
+                    artist_rebuilt = _generic_artist_source_payload(
+                        connection,
+                        source_base_revision,
+                        persisted_record,
+                        resolved_key,
+                        query,
+                        source_overlay_ids,
+                        *(prepared_inputs or ()),
+                    )
+                    if artist_rebuilt is not None:
+                        return artist_rebuilt
+                    if _text(persisted_record.get("type")) == "artist":
+                        return persisted
                     video_rebuilt = _generic_video_source_payload(
                         connection,
                         source_base_revision,
@@ -12580,6 +12764,16 @@ def source_payload(
             ) if overlay_ids else None
             if overlay_song is not None:
                 return overlay_song
+            overlay_artist = _generic_overlay_artist_source_for_key(
+                connection,
+                parent[0],
+                key,
+                query,
+                overlay_ids,
+                *(prepared_inputs or ()),
+            ) if overlay_ids else None
+            if overlay_artist is not None:
+                return overlay_artist
             overlay_video = _generic_video_source_payload(
                 connection,
                 parent[0],

@@ -513,6 +513,94 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["record"]["videoId"],video_id)
         global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
 
+    def test_snapshot_overlay_only_artist_source_rebuilds_exact_prepared_video(self):
+        artist="\u500d\u8cde\u5343\u6075\u5b50\u3055\u3093"
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "artists","all",pg_adapter._overlay_norm(artist),
+        )
+        self.assertEqual(source_key,"000e41d350a7ef83")
+        candidate={
+            "revision_id":"accepted_30890421984_1","video_id":"PZPwqBtYM2I",
+            "occurrence_id":"occ-artist","position":0,"range_id":"all",
+            "song_key":"song-artist","seconds":7,"title":"World Promise",
+            "artist":artist,"source_id":"source","raw_hash":"raw",
+            "source_system":"fixture","occurrence_payload_json":{},
+            "video_title":"Artist Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+            "channel_url":"","published_at":0,"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        summary={"total_occurrence_count":0,"total_video_count":0,"max_position":0}
+        page=[{"video_id":"PZPwqBtYM2I","first_position":1}]
+        with patch.object(pg_adapter,"_rows",side_effect=[[],[summary],page]), \
+             patch.object(pg_adapter,"_overlay_candidate_rows") as global_candidates, \
+             patch.object(pg_adapter,"_accepted_video_resets") as global_resets, \
+             patch.object(pg_adapter,"_runtime_tombstones") as global_changes:
+            result=pg_adapter._generic_overlay_artist_source_for_key(
+                object(),"parent",source_key,
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),(candidate,),{},(),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual(
+            (result["totalVideoCount"],result["totalOccurrenceCount"],result["totalSongCount"]),
+            (1,1,1),
+        )
+        self.assertEqual(result["record"]["type"],"artist")
+        self.assertEqual(result["record"]["name"],artist)
+        self.assertEqual(result["record"]["sourceDetailKey"],source_key)
+        self.assertEqual(result["record"]["occurrences"][0]["videoId"],"PZPwqBtYM2I")
+        global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
+
+    def test_snapshot_overlay_artist_route_precedes_video_and_channel_fallbacks(self):
+        source_key="000e41d350a7ef83"
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        expected={"schemaVersion":1,"found":True,"sourceKey":source_key,
+                  "record":{"type":"artist","sourceDetailKey":source_key}}
+        prepared=((),{},())
+        missing={"schemaVersion":1,"found":False,"sourceKey":source_key}
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=missing), \
+             patch.object(pg_adapter,"_runtime_source_key_for_channel_alias",return_value=""), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared), \
+             patch.object(pg_adapter,"_generic_overlay_song_source_for_key",return_value=None), \
+             patch.object(pg_adapter,"_generic_overlay_artist_source_for_key",return_value=expected) as artist_detail, \
+             patch.object(pg_adapter,"_generic_video_source_payload") as video_detail, \
+             patch.object(pg_adapter,"_runtime_channel_source_payload") as channel_detail:
+            result=pg_adapter.source_payload(
+                object(),source_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=("PZPwqBtYM2I",),
+            )
+        self.assertIs(result,expected)
+        artist_detail.assert_called_once()
+        video_detail.assert_not_called();channel_detail.assert_not_called()
+
+    def test_snapshot_persisted_artist_without_delta_is_not_reinterpreted_as_channel(self):
+        source_key="artist-source"
+        persisted={"schemaVersion":1,"found":True,"sourceKey":source_key,
+                   "sourceRevisionId":"parent",
+                   "record":{"type":"artist","key":"artist","name":"Artist",
+                             "sourceDetailKey":source_key}}
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=persisted), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=((),{},())), \
+             patch.object(pg_adapter,"_generic_song_source_payload",return_value=None), \
+             patch.object(pg_adapter,"_generic_artist_source_payload",return_value=None) as artist_detail, \
+             patch.object(pg_adapter,"_generic_video_source_payload") as video_detail, \
+             patch.object(pg_adapter,"_runtime_channel_source_payload") as channel_detail:
+            result=pg_adapter.source_payload(
+                object(),source_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=("video-one",),
+            )
+        self.assertIs(result,persisted)
+        artist_detail.assert_called_once()
+        video_detail.assert_not_called();channel_detail.assert_not_called()
+
     def test_snapshot_persisted_video_source_never_rebuilds_whole_channel(self):
         video_id="video-one"
         source_key=pg_adapter._stable_key("source-video","all",video_id)
