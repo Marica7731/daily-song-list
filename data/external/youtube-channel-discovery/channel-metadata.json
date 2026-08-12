@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T02:36:21.272Z",
+  "generatedAt": "2026-08-12T06:28:38.673Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T02:36:21.272Z",
+    "fetchedAt": "2026-08-12T06:28:38.673Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T02:36:21.272Z",
+    "generatedAt": "2026-08-12T06:28:38.673Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1125,
-      "parseableChannels": 1105,
+      "totalChannels": 1126,
+      "parseableChannels": 1106,
       "realAvatar": 649,
-      "thumbnailFallback": 476,
+      "thumbnailFallback": 477,
       "missingDisplayImage": 0,
-      "missingAvatar": 476,
+      "missingAvatar": 477,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
