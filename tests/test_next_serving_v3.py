@@ -1267,6 +1267,91 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["record"]["occurrences"][0]["videoId"],"PZPwqBtYM2I")
         global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
 
+    def test_snapshot_overlay_only_vtuber_source_rebuilds_compatible_full_reset(self):
+        video_id="pIaojB8RGwE";channel_id="UCDV5jA1Cgg53EdmsB8zYQpA"
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "vtubers","all",channel_id,
+        )
+        self.assertEqual(source_key,"00485aba2b39b893")
+        candidate={
+            "revision_id":"accepted_30347149376_1","video_id":video_id,
+            "occurrence_id":"position:0","position":1,"range_id":"all",
+            "song_key":"song-new","seconds":938,"title":"Nyan",
+            "artist":"Unknown","source_id":"source","raw_hash":"raw",
+            "source_system":"fixture",
+            "occurrence_payload_json":{
+                "videoId":video_id,"occurrenceId":"position:0",
+                "position":1,"rangeId":"all","songKey":"song-new",
+                "seconds":938,"title":"Nyan","artist":"Unknown",
+            },
+            "video_title":"Relay","channel_name":"Fixture VTuber",
+            "channel_id":channel_id,"channel_handle":"/@fixture",
+            "channel_url":f"https://www.youtube.com/channel/{channel_id}",
+            "published_at":0,
+            "video_payload_json":{
+                "videoId":video_id,"title":"Relay","channelId":channel_id,
+                "channelName":"Fixture VTuber","channelHandle":"/@fixture",
+                "channelUrl":f"https://www.youtube.com/channel/{channel_id}",
+            },
+            "video_tombstone":False,
+        }
+        resets={video_id:{"video_id":video_id}}
+        with patch.object(pg_adapter,"_rows",side_effect=[[],[],[],[]]), \
+             patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs") as global_prepare, \
+             patch.object(pg_adapter,"_runtime_tombstones") as global_changes:
+            result=pg_adapter._generic_overlay_vtuber_source_for_key(
+                object(),"parent",source_key,
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),(candidate,),resets,(),(video_id,),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual(result["sourceKey"],source_key)
+        self.assertEqual(
+            (result["totalOccurrenceCount"],result["totalSongCount"],result["totalVideoCount"]),
+            (1,1,1),
+        )
+        self.assertEqual(result["record"]["type"],"vtuber")
+        self.assertEqual(result["record"]["channelId"],channel_id)
+        self.assertEqual(
+            result["record"]["channelUrl"],
+            "https://www.youtube.com/@fixture",
+        )
+        self.assertEqual(result["record"]["sourceDetailKey"],source_key)
+        self.assertEqual(result["record"]["occurrences"][0]["videoId"],video_id)
+        global_prepare.assert_not_called();global_changes.assert_not_called()
+
+    def test_snapshot_overlay_vtuber_route_precedes_video_and_channel_fallbacks(self):
+        source_key="00485aba2b39b893"
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        prepared=(({"video_id":"pIaojB8RGwE"},),{},())
+        expected={"schemaVersion":1,"found":True,"sourceKey":source_key,
+                  "record":{"type":"vtuber","sourceDetailKey":source_key}}
+        missing={"schemaVersion":1,"found":False,"sourceKey":source_key}
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=missing), \
+             patch.object(pg_adapter,"_runtime_source_key_for_channel_alias",return_value=""), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared) as prepare, \
+             patch.object(pg_adapter,"_generic_overlay_song_source_for_key",return_value=None), \
+             patch.object(pg_adapter,"_generic_overlay_artist_source_for_key",return_value=None), \
+             patch.object(pg_adapter,"_generic_overlay_vtuber_source_for_key",return_value=expected) as vtuber_detail, \
+             patch.object(pg_adapter,"_generic_video_source_payload") as video_detail, \
+             patch.object(pg_adapter,"_runtime_channel_source_payload") as channel_detail:
+            result=pg_adapter.source_payload(
+                object(),source_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=("pIaojB8RGwE",),
+            )
+        self.assertIs(result,expected)
+        prepare.assert_called_once()
+        vtuber_detail.assert_called_once_with(
+            unittest.mock.ANY,"parent",source_key,
+            {"range":"all","page":"1","pageSize":"200"},
+            ("overlay",),*prepared,("pIaojB8RGwE",),
+        )
+        video_detail.assert_not_called();channel_detail.assert_not_called()
+
     def test_snapshot_overlay_artist_route_precedes_video_and_channel_fallbacks(self):
         source_key="000e41d350a7ef83"
         context=SimpleNamespace(

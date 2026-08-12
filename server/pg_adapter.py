@@ -1297,6 +1297,12 @@ def _runtime_channel_source_payload(
     query: Mapping[str, Any] | None = None,
     overlay_revision_ids: Sequence[str] | None = None,
     snapshot_video_scope: Sequence[str] | None = None,
+    *,
+    prepared_overlay_inputs: tuple[
+        Sequence[Mapping[str, Any]],
+        Mapping[str, Mapping[str, Any]],
+        Sequence[Mapping[str, Any]],
+    ] | None = None,
 ) -> dict[str, Any]:
     """Read only the parent-runtime rows belonging to a verified channel.
 
@@ -1393,6 +1399,7 @@ def _runtime_channel_source_payload(
         records.append({"video": video, "occurrences": tuple(songs)})
     candidate_rows: tuple[Mapping[str, Any], ...] = ()
     accepted_video_resets: dict[str, dict[str, Any]] = {}
+    prepared_changes: tuple[Mapping[str, Any], ...] = ()
     if overlay_revision_ids:
         options = _query_options(source_query)
         parent_source_key = _text(
@@ -1455,16 +1462,25 @@ def _runtime_channel_source_payload(
                 selected.setdefault(_overlay_candidate_identity(row), dict(row))
             candidate_rows = tuple(selected.values())
         else:
-            candidate_rows, accepted_video_resets, prepared_changes = (
-                _snapshot_source_overlay_inputs(
-                    connection,
-                    revision_id,
-                    overlay_revision_ids,
-                    options["range"],
-                    snapshot_video_scope,
-                    include_compatible_full_reset_7d=True,
+            if prepared_overlay_inputs is None:
+                candidate_rows, accepted_video_resets, prepared_changes = (
+                    _snapshot_source_overlay_inputs(
+                        connection,
+                        revision_id,
+                        overlay_revision_ids,
+                        options["range"],
+                        snapshot_video_scope,
+                        include_compatible_full_reset_7d=True,
+                    )
                 )
-            )
+            else:
+                candidate_rows = tuple(prepared_overlay_inputs[0])
+                accepted_video_resets = {
+                    _text(video_id): dict(row)
+                    for video_id, row in prepared_overlay_inputs[1].items()
+                    if _text(video_id)
+                }
+                prepared_changes = tuple(prepared_overlay_inputs[2])
         reset_video_ids = set(accepted_video_resets)
         if reset_video_ids:
             records = [
@@ -13280,6 +13296,137 @@ def _generic_overlay_artist_source_for_key(
     )
 
 
+def _generic_overlay_vtuber_source_for_key(
+    connection,
+    parent_revision_id: str,
+    requested_key: str,
+    query: Mapping[str, Any] | None,
+    overlay_revision_ids: Sequence[str],
+    candidate_rows: Sequence[Mapping[str, Any]] | None,
+    accepted_video_resets: Mapping[str, Mapping[str, Any]] | None,
+    runtime_changes: Sequence[Mapping[str, Any]] | None,
+    snapshot_video_scope: Sequence[str] | None,
+) -> dict[str, Any] | None:
+    """Resolve one overlay-only VTuber key from an exact snapshot scope.
+
+    Production VTuber keys are opaque 16-character digests.  Reverse them
+    only against the caller-prepared candidate/final-runtime rows for the
+    already bounded source-video scope.  Never scan the whole overlay merely
+    because an arbitrary digest was requested.
+    """
+
+    if not re.fullmatch(r"[0-9a-f]{16}", requested_key):
+        return None
+    scoped_videos = tuple(sorted({
+        _text(video_id)
+        for video_id in (snapshot_video_scope or ())
+        if _text(video_id)
+    }))
+    if not scoped_videos or candidate_rows is None:
+        return None
+    options = _query_options(query)
+    prepared_candidates = tuple(candidate_rows)
+    prepared_resets = dict(accepted_video_resets or {})
+    prepared_changes = tuple(runtime_changes or ())
+    replacement_rows = tuple(_runtime_replacement_candidate_rows(
+        prepared_changes,
+    ))
+    target_rows = (
+        *prepared_candidates,
+        *_overlay_rows_for_range(prepared_changes, options["range"]),
+        *_overlay_rows_for_range(replacement_rows, options["range"]),
+    )
+    targets: dict[str, dict[str, Any]] = {}
+    for row in target_rows:
+        video_id = _text(row.get("video_id") or row.get("videoId"))
+        if not video_id or video_id not in scoped_videos:
+            continue
+        video = _overlay_public_video(row)
+        channel_id = _text(
+            row.get("channel_id") or row.get("channelId")
+            or video.get("channelId")
+        )
+        channel_handle = _text(
+            row.get("channel_handle") or row.get("channelHandle")
+            or video.get("channelHandle")
+        )
+        channel_name = _text(
+            row.get("channel_name") or row.get("channelName")
+            or video.get("channelName")
+        )
+        video_channel_id = _text(video.get("channelId"))
+        if (
+            channel_id and video_channel_id
+            and channel_id != video_channel_id
+        ):
+            raise PostgresAdapterError(
+                "overlay-only VTuber source has conflicting channel identity"
+            )
+        channel_key = (
+            channel_id
+            or channel_handle.lstrip("@/")
+            or _overlay_norm(channel_name)
+        )
+        if not channel_key or (
+            _production_source_detail_key_for_group(
+                "vtubers", options["range"], channel_key,
+            )
+            != requested_key
+        ):
+            continue
+        metadata = targets.setdefault(channel_key, {
+            "channelKey": channel_key,
+            "channelId": channel_id,
+            "channelHandle": channel_handle,
+            "channelName": channel_name,
+            "channelUrl": _canonical_channel_url(
+                channel_id, channel_handle,
+            ) if channel_id else "",
+            "sourceDetailKey": requested_key,
+        })
+        for field, value in (
+            ("channelId", channel_id),
+            ("channelHandle", channel_handle),
+            ("channelName", channel_name),
+        ):
+            current = _text(metadata.get(field))
+            if (
+                field == "channelId"
+                and
+                current and value
+                and _overlay_norm(current.lstrip("@/"))
+                    != _overlay_norm(value.lstrip("@/"))
+            ):
+                raise PostgresAdapterError(
+                    "overlay-only VTuber source has conflicting channel identity"
+                )
+            if not current and value:
+                metadata[field] = value
+    if not targets:
+        return None
+    if len(targets) != 1:
+        return {
+            "schemaVersion": 1,
+            "found": False,
+            "sourceKey": requested_key,
+        }
+    metadata = next(iter(targets.values()))
+    return _runtime_channel_source_payload(
+        connection,
+        parent_revision_id,
+        metadata,
+        requested_key,
+        query,
+        overlay_revision_ids=overlay_revision_ids,
+        snapshot_video_scope=scoped_videos,
+        prepared_overlay_inputs=(
+            prepared_candidates,
+            prepared_resets,
+            prepared_changes,
+        ),
+    )
+
+
 def _generic_video_source_payload(
     connection,
     parent_revision_id: str,
@@ -13969,6 +14116,33 @@ def source_payload(
             ) if overlay_ids else None
             if overlay_artist is not None:
                 return overlay_artist
+            vtuber_inputs = prepared_inputs
+            if (
+                re.fullmatch(r"[0-9a-f]{16}", key)
+                and
+                prepared_inputs is not None
+                and _query_options(query)["range"] == "all"
+                and prepared_inputs[1]
+            ):
+                vtuber_inputs = _snapshot_source_overlay_inputs(
+                    connection,
+                    parent[0],
+                    overlay_ids,
+                    "all",
+                    snapshot_video_scope or (),
+                    include_compatible_full_reset_7d=True,
+                )
+            overlay_vtuber = _generic_overlay_vtuber_source_for_key(
+                connection,
+                parent[0],
+                key,
+                query,
+                overlay_ids,
+                *(vtuber_inputs or (None, None, None)),
+                snapshot_video_scope,
+            ) if overlay_ids else None
+            if overlay_vtuber is not None:
+                return overlay_vtuber
             overlay_video = _generic_video_source_payload(
                 connection,
                 parent[0],
