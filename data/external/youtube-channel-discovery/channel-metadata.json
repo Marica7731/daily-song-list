@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T21:02:08.062Z",
+  "generatedAt": "2026-08-12T22:02:01.451Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T21:02:08.062Z",
+    "fetchedAt": "2026-08-12T22:02:01.451Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T21:02:08.062Z",
+    "generatedAt": "2026-08-12T22:02:01.451Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11681,6 +11681,13 @@
         "channelId": "UCYzW2KfGcoG5CeTCnM3dgVA",
         "displayName": "鳴",
         "sourceUrl": "https://www.youtube.com/@mei0bake",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@kaonya5",
+        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
+        "displayName": "訛音屋 / Kaonya",
+        "sourceUrl": "https://www.youtube.com/@kaonya5",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCGzTVXqMQHa4AgJVJIVvtDQ",
         "displayName": "Vivi Ch. 綺々羅々ヴィヴィ - FLOW GLOW",
         "sourceUrl": "https://www.youtube.com/@KikiraraVivi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@NemukumoTsukuri",
-        "channelId": "UCekc8SI533NI675r9aCBRcQ",
-        "displayName": "眠雲ツクリ / NemukumoTsukuri",
-        "sourceUrl": "https://www.youtube.com/@NemukumoTsukuri",
         "reason": "batch_limit_reached"
       }
     ]
