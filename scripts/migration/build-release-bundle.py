@@ -89,7 +89,8 @@ def verify_existing(final: Path, expected_sha: str) -> None:
 
 def build_bundle(input_root: Path,output_root: Path,*,serving_sqlite: Path,server_artifact: Path,
                  release_meta: dict[str,Any],frontend_root: Path|None=None,
-                 nginx_artifact: Path|None=None,systemd_artifact: Path|None=None) -> tuple[str,Path]:
+                 nginx_artifact: Path|None=None,systemd_artifact: Path|None=None,
+                 link_serving_sqlite: bool=False) -> tuple[str,Path]:
     pages=discover_pages(input_root)
     if not pages:
         raise ValueError("no ranking pages found")
@@ -113,7 +114,16 @@ def build_bundle(input_root: Path,output_root: Path,*,serving_sqlite: Path,serve
             page_entries.append({"path":relative,"bytes":len(compressed),"sha256":sha256_bytes(compressed),
                                  "jsonSha256":sha256_bytes(plain),"contentType":"application/gzip"})
         serving_target=staging/"serving.sqlite"
-        shutil.copyfile(serving_sqlite,serving_target)
+        if link_serving_sqlite:
+            source_stat=serving_sqlite.stat();staging_stat=staging.stat()
+            if source_stat.st_dev!=staging_stat.st_dev:
+                raise OSError("serving SQLite and release staging are on different filesystems")
+            os.link(serving_sqlite,serving_target)
+            target_stat=serving_target.stat()
+            if (target_stat.st_dev,target_stat.st_ino)!=(source_stat.st_dev,source_stat.st_ino):
+                raise OSError("serving SQLite hard-link verification failed")
+        else:
+            shutil.copyfile(serving_sqlite,serving_target)
         server_relative="artifacts/release_serving_server.py"
         server_target=staging/server_relative
         server_target.parent.mkdir(parents=True,exist_ok=True)
@@ -187,6 +197,7 @@ def parse_args(argv: Sequence[str]|None=None) -> argparse.Namespace:
     p.add_argument("--active-revision-id",required=True);p.add_argument("--expected-parent-revision-id",default="")
     p.add_argument("--source-commit-sha",default="");p.add_argument("--server-commit-sha",required=True)
     p.add_argument("--build-logic-sha",required=True)
+    p.add_argument("--link-serving-sqlite",action="store_true")
     p.add_argument("--generated-at",required=True);p.add_argument("--latest-event-time",default="")
     return p.parse_args(argv)
 
@@ -200,7 +211,8 @@ def main(argv: Sequence[str]|None=None) -> int:
         sha,path=build_bundle(args.input,args.output,serving_sqlite=args.serving_sqlite,
                               server_artifact=args.server_artifact,release_meta=meta,
                               frontend_root=args.frontend_root,nginx_artifact=args.nginx_artifact,
-                              systemd_artifact=args.systemd_artifact)
+                              systemd_artifact=args.systemd_artifact,
+                              link_serving_sqlite=args.link_serving_sqlite)
     except Exception as exc:
         print(f"RELEASE_BUNDLE_ERROR {type(exc).__name__}: {exc}",file=sys.stderr);return 1
     print(f"RELEASE_BUNDLE_OK contentSha256={sha} dir={path}");return 0

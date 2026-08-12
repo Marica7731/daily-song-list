@@ -150,7 +150,11 @@ class FakeSnapshotPageBuilder:
                     "key":f"{range_id}-{view}","title":f"{range_id} {view}","displayArtist":"Fixture",
                     "name":f"{range_id} {view}","count":3,"songCount":2,"videoCount":2,
                     "timestampCount":3,"channelName":"Fixture","channelId":"UCfixture",
-                    "occurrences":[{"videoId":f"preview-{range_id}-{view}","seconds":1}]}
+                    "occurrences":[
+                        {"videoId":f"preview-{range_id}-{view}-{index}","seconds":index,
+                         "debugSearchEvidence":"deep-only-marker" if index==4 else ""}
+                        for index in range(5)
+                    ]}
             if key:record["sourceDetailKey"]=key
             return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,
                     "page":page,"pageSize":200,"totalCount":1,"filteredBaseCount":1,
@@ -218,10 +222,80 @@ class Tests(unittest.TestCase):
         self.assertLessEqual(search_length,65536)
         self.assertEqual(fts_count,row_count)
 
+    def test_serving_store_can_consume_disposable_canonical_snapshot_in_place(self):
+        canonical=self.temp/"consume-canonical.sqlite"
+        output=self.temp/"consume-serving.sqlite"
+        shutil.copyfile(self.snapshot,canonical)
+        source_inode=canonical.stat().st_ino
+        result=builder.build_serving_store(
+            canonical,self.pages,output,active_revision_id=REV,
+            built_at="2026-08-10T00:00:00Z",consume_source_db=True,
+        )
+        self.assertFalse(canonical.exists())
+        self.assertTrue(output.is_file())
+        self.assertEqual(output.stat().st_ino,source_inode)
+        self.assertEqual(result["buildMode"],"consume-canonical-in-place")
+        with closing(sqlite3.connect(output)) as connection:
+            tables={row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )}
+            quick=connection.execute("PRAGMA quick_check").fetchone()[0]
+            meta=dict(connection.execute("SELECT key,value FROM serving_meta"))
+            ranking_count=connection.execute("SELECT count(*) FROM ranking_rows").fetchone()[0]
+            fts_count=connection.execute("SELECT count(*) FROM ranking_search_fts").fetchone()[0]
+        self.assertNotIn("meta",tables)
+        self.assertIn("source_videos",tables)
+        self.assertEqual(quick,"ok")
+        self.assertEqual(meta["active_revision_id"],REV)
+        self.assertEqual(ranking_count,fts_count)
+
+    def test_consume_source_mode_refuses_to_overwrite_output(self):
+        canonical=self.temp/"consume-refuse.sqlite"
+        output=self.temp/"already-present.sqlite"
+        shutil.copyfile(self.snapshot,canonical)
+        output.write_bytes(b"owned")
+        with self.assertRaises(FileExistsError):
+            builder.build_serving_store(
+                canonical,self.pages,output,active_revision_id=REV,
+                consume_source_db=True,
+            )
+        self.assertTrue(canonical.is_file())
+        self.assertEqual(output.read_bytes(),b"owned")
+
     def test_health_and_release_artifacts(self):
         health=self.store.health();self.assertEqual(health["status"],"ok",health);self.assertEqual(health["releaseContentSha"],self.sha);self.assertEqual(health["serverCommit"],SERVER_COMMIT);self.assertEqual(health["buildLogicSha"],"b"*64);self.assertEqual(health["searchTokenizer"],"trigram");self.assertEqual(health["localSourcesRanges"],["7d","all"]);self.assertFalse(health["oldOriginDependency"]);self.assertFalse(health["sourceFallbackEnabled"])
         self.assertEqual(set(health["views"]),{"songs","artists","vtubers","videos"});self.assertEqual(set(health["metrics"]),{"occurrences","songs","videos"})
         manifest=json.loads((self.release/"manifest.json").read_text());artifacts={x["path"] for x in manifest["artifacts"]};self.assertEqual(artifacts,{"serving.sqlite","artifacts/release_serving_server.py","artifacts/frontend/index.html","artifacts/frontend/frontend-manifest.json",f"artifacts/frontend/{self.frontend_manifest['appPath']}","artifacts/deploy/next.ytb-song-rank.culua.com.conf","artifacts/deploy/daily-song-list-api.service"})
+
+    def test_release_bundle_can_require_same_filesystem_serving_hardlink(self):
+        meta={"activeRevisionId":REV,"expectedParentRevisionId":"parent","sourceCommitSha":"a"*40,
+              "serverCommitSha":SERVER_COMMIT,"buildLogicSha":"b"*64,
+              "generatedAt":"2026-08-10T00:00:00Z","latestEventTime":"2026-08-09T23:59:59Z"}
+        sha,release=bundle.build_bundle(
+            self.pages,self.temp/"linked-releases",serving_sqlite=self.serving,
+            server_artifact=SERVER_PATH,release_meta=meta,frontend_root=self.frontend_root,
+            nginx_artifact=NGINX_PATH,systemd_artifact=UNIT_PATH,
+            link_serving_sqlite=True,
+        )
+        source_stat=self.serving.stat();target_stat=(release/"serving.sqlite").stat()
+        self.assertEqual(sha,self.sha)
+        self.assertEqual((target_stat.st_dev,target_stat.st_ino),(source_stat.st_dev,source_stat.st_ino))
+        self.serving.unlink()
+        with closing(sqlite3.connect(release/"serving.sqlite")) as connection:
+            self.assertEqual(connection.execute("PRAGMA quick_check").fetchone()[0],"ok")
+
+    def test_release_bundle_hardlink_mode_never_falls_back_to_copy(self):
+        meta={"activeRevisionId":REV,"expectedParentRevisionId":"parent","sourceCommitSha":"a"*40,
+              "serverCommitSha":SERVER_COMMIT,"buildLogicSha":"b"*64,
+              "generatedAt":"2026-08-10T00:00:00Z","latestEventTime":"2026-08-09T23:59:59Z"}
+        with patch.object(bundle.os,"link",side_effect=OSError("hard links disabled")):
+            with self.assertRaisesRegex(OSError,"hard links disabled"):
+                bundle.build_bundle(
+                    self.pages,self.temp/"failed-linked-releases",serving_sqlite=self.serving,
+                    server_artifact=SERVER_PATH,release_meta=meta,frontend_root=self.frontend_root,
+                    nginx_artifact=NGINX_PATH,systemd_artifact=UNIT_PATH,
+                    link_serving_sqlite=True,
+                )
 
     def test_missing_required_series_fails_closed(self):
         sparse=self.temp/"sparse.sqlite";shutil.copyfile(self.snapshot,sparse)
@@ -741,9 +815,16 @@ class Tests(unittest.TestCase):
             scope_marker=json.loads(dict(database.execute("SELECT key,value FROM meta"))["ranking_scope_counts_json"])
             scopes={row[0] for row in database.execute("SELECT DISTINCT scope_key FROM ranking_rows")}
             source_counts=dict(database.execute("SELECT range_id,count(*) FROM source_occurrences GROUP BY range_id"))
+            ranking_payload,ranking_search=database.execute(
+                "SELECT payload_json,search_text FROM ranking_rows "
+                "WHERE range_id='all' AND view='songs' AND metric='count' "
+                "AND scope_key='all' AND rank=1"
+            ).fetchone()
         self.assertEqual(len(scope_marker),96)
         self.assertEqual(scopes,{"all","niche","visible","visibleNiche"})
         self.assertEqual(source_counts,{"7d":603,"all":603})
+        self.assertEqual(len(json.loads(ranking_payload)["occurrences"]),3)
+        self.assertIn("deep-only-marker",ranking_search)
         serving=self.temp/"pg-serving.sqlite"
         built=builder.build_serving_store(canonical,pages,serving,active_revision_id=REV)
         self.assertEqual(len(built["validation"]["rankingScopes"]),96)
@@ -1107,6 +1188,7 @@ class Tests(unittest.TestCase):
         self.assertIn("systemd-run --quiet --wait --pipe --collect",workflow)
         self.assertIn("--property=MemoryMax=700M",workflow)
         self.assertNotIn("--property=MemoryMax=701M",workflow)
+        self.assertIn("--property=LimitFSIZE=6G",workflow)
         self.assertIn("RUN_ISOLATED_FAILED phase=$phase",workflow)
         self.assertIn("killed process|memory cgroup",workflow)
         self.assertIn("SOURCE_ACTIVE_STABLE",workflow)
@@ -1128,6 +1210,19 @@ class Tests(unittest.TestCase):
         self.assertIn('WDC_PROJECT_ROOT: "/opt/culua/ytb-song-rank"',workflow)
         self.assertIn('WDC_PROJECT_MAX_BYTES: "40000000000"',workflow)
         self.assertIn('WDC_FILESYSTEM_RESERVE_BYTES: "5000000000"',workflow)
+        self.assertIn('VPS2_FILESYSTEM_RESERVE_BYTES: "2500000000"',workflow)
+        self.assertIn('VPS2_FILESYSTEM_GUARD_BYTES: "536870912"',workflow)
+        self.assertIn("VPS2_STORAGE_PREFLIGHT_OK",workflow)
+        self.assertIn("VPS2_FILESYSTEM_RUNTIME_GUARD",workflow)
+        self.assertIn("--consume-source-db",workflow)
+        self.assertIn("projected_growth_bytes",workflow)
+        self.assertNotIn("projected_serving_bytes",workflow)
+        self.assertIn("VPS2_CANONICAL_RELEASED",workflow)
+        self.assertIn("VPS2_SERVING_HARDLINK_MISMATCH",workflow)
+        self.assertIn("--link-serving-sqlite",workflow)
+        self.assertIn("RUNNER_ARCHIVE_READY",workflow)
+        self.assertIn('> "$archive_path" <<\'REMOTE\'',workflow)
+        self.assertNotIn("$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/dsl-wdc-",workflow)
         self.assertIn('projected_bytes=$((current_bytes + incoming_bytes))',workflow)
         self.assertIn('if (( projected_bytes >= max_bytes )); then',workflow)
         self.assertIn("WDC_STORAGE_PREFLIGHT_OK",workflow)

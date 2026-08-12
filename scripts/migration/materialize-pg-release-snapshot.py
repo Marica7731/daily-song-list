@@ -734,6 +734,7 @@ def _flatten_scalars(value: Any, *, channel_only: bool = False) -> Iterable[str]
 def _ranking_row(
     record: Mapping[str, Any],
     *,
+    payload_record: Mapping[str, Any],
     range_id: str,
     view: str,
     metric: str,
@@ -770,7 +771,7 @@ def _ranking_row(
         _integer(record.get("songCount")),
         _integer(record.get("videoCount")),
         _integer(record.get("timestampCount") or record.get("count")),
-        _json_text(dict(record)),
+        _json_text(dict(payload_record)),
         _bounded_text(
             _flatten_scalars(record),
             MAX_RANKING_SEARCH_CHARS,
@@ -1448,11 +1449,29 @@ def materialize(
                             for index, raw in enumerate(records, start=1):
                                 if not isinstance(raw, Mapping):
                                     raise RuntimeError(
-                                        f"ranking record is not an object: {series_key}/{page}/{index}"
+                                        f"ranking record is not an object: "
+                                        f"{series_key}/{page}/{index}"
+                                    )
+                            compact_records = adapter.compact_ranking_payloads(
+                                [dict(record) for record in records],
+                                view,
+                            )
+                            if len(compact_records) != len(records):
+                                raise RuntimeError(
+                                    f"ranking compact projection is invalid: {series_key}/{page}"
+                                )
+                            for index, (raw, compact_raw) in enumerate(
+                                zip(records, compact_records),
+                                start=1,
+                            ):
+                                if not isinstance(compact_raw, Mapping):
+                                    raise RuntimeError(
+                                        f"compact ranking record is not an object: {series_key}/{page}/{index}"
                                     )
                                 expected_rank = (page - 1) * PAGE_SIZE + index
                                 writer.add_ranking(_ranking_row(
                                     raw,
+                                    payload_record=compact_raw,
                                     range_id=range_id,
                                     view=view,
                                     metric=metric,
@@ -1466,10 +1485,7 @@ def materialize(
                                         source_keys[range_id].add(detail_key)
                             if scope_key == "all":
                                 compact_payload = dict(payload)
-                                compact_payload["records"] = adapter.compact_ranking_payloads(
-                                    [dict(record) for record in records],
-                                    view,
-                                )
+                                compact_payload["records"] = compact_records
                                 compact_payload["compact"] = True
                                 target = target_dir / f"page-{page:04d}.json"
                                 target.write_text(
@@ -1479,6 +1495,7 @@ def materialize(
                                 written += 1
                                 if written % 25 == 0:
                                     print(f"PG_SNAPSHOT_WRITTEN files={written}", flush=True)
+                            del compact_records
                         print(
                             f"PG_SNAPSHOT_COMBO {range_id}/{view}/{metric}/{scope_key} "
                             f"total={total} pages={page_count}",
