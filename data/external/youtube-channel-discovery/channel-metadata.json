@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T17:14:47.574Z",
+  "generatedAt": "2026-08-12T18:11:01.262Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T17:14:47.574Z",
+    "fetchedAt": "2026-08-12T18:11:01.262Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T17:14:47.574Z",
+    "generatedAt": "2026-08-12T18:11:01.262Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1135,
-      "parseableChannels": 1115,
+      "totalChannels": 1136,
+      "parseableChannels": 1116,
       "realAvatar": 649,
-      "thumbnailFallback": 486,
+      "thumbnailFallback": 487,
       "missingDisplayImage": 0,
-      "missingAvatar": 486,
+      "missingAvatar": 487,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 659
+      "skipped_collected_evidence": 660
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 639,
+      "batch_limit_reached": 640,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
@@ -11681,6 +11681,13 @@
         "channelId": "UCrtj7mTumU4Pg9sdzfGZm6Q",
         "displayName": "アエギス / Aegis Channel【音大首席オペラVsinger】",
         "sourceUrl": "https://www.youtube.com/@ShichitembattoinAegis",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@miomiim316",
+        "channelId": "UCXozdmTMKyfAwdlGZne4Kuw",
+        "displayName": "水魚みぃむ / Mio Miim",
+        "sourceUrl": "https://www.youtube.com/@miomiim316",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCbntVBSebvO5zT3cQYIxbWQ",
         "displayName": "甘狼このみ / AmakamiKonomi🐺🍫",
         "sourceUrl": "https://www.youtube.com/@AmakamiKonomi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Hoshinouta_kaz",
-        "channelId": "UC_n3V9K0VoEhGSO9ikOE6pw",
-        "displayName": "星乃歌カズ/Kaz Hoshinouta",
-        "sourceUrl": "https://www.youtube.com/@Hoshinouta_kaz",
         "reason": "batch_limit_reached"
       }
     ]
