@@ -391,6 +391,7 @@ _GENERIC_RANKING_PREPARATION_MAX_BYTES = 16 * 1024 * 1024
 _GENERIC_RANKING_PREPARATION_MAX_OCCURRENCES = 4096
 _VTUBER_REPLACEMENT_CACHE_MAX_BYTES = 8 * 1024 * 1024
 _VTUBER_REPLACEMENT_CACHE_MAX_OCCURRENCES = 2048
+_VTUBER_SOURCE_TOTALS_CACHE_CAP = 4096
 _CLICKED_SONG_SCOPE_GROUP_CAP = 512
 _GENERIC_RANKING_PREPARATION_CACHE: OrderedDict[
     tuple[Any, ...], Mapping[str, Any],
@@ -959,12 +960,177 @@ def _source_payload_from_channel_records(
     return source_payload_from_records(enriched, key, query)
 
 
+def _canonicalize_vtuber_source_payload(
+    payload: Mapping[str, Any],
+    records: Iterable[Mapping[str, Any]],
+    query: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Make a rebuilt VTuber detail use the runtime builder's song identity.
+
+    ``source_payload_from_records`` is intentionally generic and therefore
+    groups VTuber songs by the physical ``songKey``.  The production runtime
+    exporter instead strips safe version/list markers and groups by the
+    canonical work-title key.  Recompute the small count map from the exact
+    final occurrence set so card and detail share one contract.
+    """
+
+    result = copy.deepcopy(dict(payload))
+    if not result.get("found"):
+        return result
+    options = _query_options(query)
+    occurrences = _source_records_as_occurrences(records, options, None)
+    counts: dict[str, dict[str, Any]] = {}
+    for occurrence in occurrences:
+        song = occurrence.get("song") if isinstance(occurrence.get("song"), Mapping) else {}
+        title, key = _vtuber_canonical_song_identity(song.get("title"))
+        if not title or not key:
+            raise PostgresAdapterError(
+                "VTuber source occurrence is missing canonical song identity"
+            )
+        entry = counts.setdefault(key, {"key": key, "name": title, "count": 0})
+        entry["count"] += 1
+    songs = sorted(
+        counts.values(),
+        key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
+    )
+    total_occurrences = int(result.get("totalOccurrenceCount") or len(occurrences))
+    if len(occurrences) != total_occurrences or sum(
+        int(item["count"]) for item in songs
+    ) != total_occurrences:
+        raise PostgresAdapterError(
+            "VTuber source canonical song counts do not cover final occurrences"
+        )
+    record = dict(result.get("record") or {})
+    record["songs"] = songs
+    record["songCount"] = len(songs)
+    result["record"] = record
+    result["totalSongCount"] = len(songs)
+    return result
+
+
+def _apply_persisted_vtuber_song_delta(
+    payload: Mapping[str, Any],
+    parent_record: Mapping[str, Any],
+    before_records: Iterable[Mapping[str, Any]],
+    after_records: Iterable[Mapping[str, Any]],
+    query: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Preserve the canonical parent song multiset and apply exact tuple delta."""
+
+    result = copy.deepcopy(dict(payload))
+    if not result.get("found"):
+        return result
+    options = _query_options(query)
+    before = _source_records_as_occurrences(before_records, options, None)
+    after = _source_records_as_occurrences(after_records, options, None)
+    before_by_id = {
+        _source_record_identity({
+            "video": item.get("item") or item.get("video") or {},
+            "occurrences": (item.get("song") or item,),
+        }): item
+        for item in before
+    }
+    after_by_id = {
+        _source_record_identity({
+            "video": item.get("item") or item.get("video") or {},
+            "occurrences": (item.get("song") or item,),
+        }): item
+        for item in after
+    }
+    counts: dict[str, dict[str, Any]] = {}
+    for item in parent_record.get("songs") or ():
+        if not isinstance(item, Mapping):
+            raise PostgresAdapterError("VTuber parent song counts are invalid")
+        key = _text(item.get("key"))
+        name = _text(item.get("name"))
+        count = int(item.get("count") or 0)
+        if not key or not name or count <= 0 or key in counts:
+            raise PostgresAdapterError("VTuber parent song counts are invalid")
+        counts[key] = {"key": key, "name": name, "count": count}
+    parent_occurrence_count = int(
+        parent_record.get("count")
+        or parent_record.get("occurrenceCount")
+        or parent_record.get("timestampCount")
+        or len(before)
+    )
+    keyed_parent_count = sum(int(item["count"]) for item in counts.values())
+    unkeyed_count = parent_occurrence_count - keyed_parent_count
+    if unkeyed_count < 0:
+        raise PostgresAdapterError("VTuber parent song counts do not cover authority")
+
+    def adjust(item: Mapping[str, Any], delta: int) -> None:
+        nonlocal unkeyed_count
+        song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+        title, key = _vtuber_canonical_song_identity(song.get("title"))
+        if not _text(song.get("title")):
+            raise PostgresAdapterError("VTuber source delta lacks canonical song identity")
+        if not key:
+            unkeyed_count += delta
+            if unkeyed_count < 0:
+                raise PostgresAdapterError(
+                    "VTuber source unkeyed song delta became negative"
+                )
+            return
+        entry = counts.get(key)
+        if entry is None:
+            if delta < 0:
+                raise PostgresAdapterError("VTuber source delta cannot find parent song")
+            entry = {"key": key, "name": title, "count": 0}
+            counts[key] = entry
+        entry["count"] = int(entry["count"]) + delta
+        if int(entry["count"]) < 0:
+            raise PostgresAdapterError("VTuber source song delta became negative")
+
+    for identity, item in before_by_id.items():
+        if (
+            identity not in after_by_id
+            or _vtuber_canonical_song_identity(
+                (item.get("song") or item).get("title")
+            )[1]
+            != _vtuber_canonical_song_identity(
+                (after_by_id.get(identity, {}).get("song") or after_by_id.get(identity, {})).get("title")
+            )[1]
+        ):
+            adjust(item, -1)
+    for identity, item in after_by_id.items():
+        if (
+            identity not in before_by_id
+            or _vtuber_canonical_song_identity(
+                (item.get("song") or item).get("title")
+            )[1]
+            != _vtuber_canonical_song_identity(
+                (before_by_id.get(identity, {}).get("song") or before_by_id.get(identity, {})).get("title")
+            )[1]
+        ):
+            adjust(item, 1)
+    songs = sorted(
+        (item for item in counts.values() if int(item["count"]) > 0),
+        key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
+    )
+    total = int(result.get("totalOccurrenceCount") or len(after))
+    if (
+        len(after) != total
+        or sum(int(item["count"]) for item in songs) + unkeyed_count != total
+    ):
+        raise PostgresAdapterError(
+            "VTuber final canonical song counts do not cover final occurrences"
+        )
+    record = dict(result.get("record") or {})
+    record["songs"] = songs
+    record["songCount"] = len(songs)
+    result["record"] = record
+    result["totalSongCount"] = len(songs)
+    return result
+
+
 def _source_occurrence_identity(item: Mapping[str, Any]) -> tuple[Any, ...]:
     occurrence_id = _text(item.get("occurrenceId") or item.get("occurrence_id"))
+    range_id = _text(item.get("rangeId") or item.get("range_id"))
     if occurrence_id:
-        return ("id", occurrence_id)
+        return ("id", range_id, occurrence_id)
     return (
         "tuple",
+        range_id,
         _text(item.get("position")),
         _text(item.get("songKey") or item.get("song_key")),
         item.get("seconds"),
@@ -1240,22 +1406,54 @@ def _runtime_channel_source_payload(
             parent_source_key,
             options["range"],
         )
+        direct_target_video_ids = {
+            _text(record.get("video", {}).get("videoId"))
+            for record in records
+            if any(
+                _text(value.get("rangeId") or value.get("range_id"))
+                    in {options["range"], ""}
+                for value in record.get("occurrences", ())
+                if isinstance(value, Mapping)
+            )
+        }
+        persisted_records = [
+            record
+            for record in _persisted_source_records(
+                persisted_occurrences, metadata,
+            )
+            if _text(record.get("video", {}).get("videoId"))
+                not in direct_target_video_ids
+        ]
         records = _merge_source_records(
             records,
-            _persisted_source_records(persisted_occurrences, metadata),
+            persisted_records,
         )
+        authoritative_parent_records = copy.deepcopy(records)
         # A selected migration video row is a full-video reset even if it is
         # a tombstone or belongs to a different channel.  Remove that parent
         # video before channel filtering candidate records; otherwise a
         # tombstone has no candidate record and stale parent payload leaks
         # back through this public source endpoint.
         if snapshot_video_scope is None:
-            candidate_rows = tuple(
-                _overlay_candidate_rows(connection, overlay_revision_ids)
-            )
             accepted_video_resets = _accepted_video_resets(
                 connection, overlay_revision_ids,
             )
+            same_range_rows = tuple(_overlay_rows_for_range(
+                _overlay_candidate_rows(connection, overlay_revision_ids),
+                options["range"],
+            ))
+            selected = {
+                _overlay_candidate_identity(row): dict(row)
+                for row in same_range_rows
+            }
+            for row in _selected_full_reset_candidate_rows(
+                connection,
+                overlay_revision_ids,
+                accepted_video_resets,
+                options["range"],
+            ):
+                selected.setdefault(_overlay_candidate_identity(row), dict(row))
+            candidate_rows = tuple(selected.values())
         else:
             candidate_rows, accepted_video_resets, prepared_changes = (
                 _snapshot_source_overlay_inputs(
@@ -1264,6 +1462,7 @@ def _runtime_channel_source_payload(
                     overlay_revision_ids,
                     options["range"],
                     snapshot_video_scope,
+                    include_compatible_full_reset_7d=True,
                 )
             )
         reset_video_ids = set(accepted_video_resets)
@@ -1297,7 +1496,23 @@ def _runtime_channel_source_payload(
             else _runtime_tombstones(connection, overlay_revision_ids or ())
         )
     records = _apply_record_overlay(records, runtime_changes)
-    payload = _source_payload_from_channel_records(records, metadata, key, source_query)
+    raw_payload = _source_payload_from_channel_records(
+        records, metadata, key, source_query,
+    )
+    if overlay_revision_ids and (
+        isinstance(metadata.get("songs"), list) or persisted_occurrences
+    ):
+        payload = _apply_persisted_vtuber_song_delta(
+            raw_payload,
+            metadata,
+            authoritative_parent_records,
+            records,
+            source_query,
+        )
+    else:
+        payload = _canonicalize_vtuber_source_payload(
+            raw_payload, records, source_query,
+        )
     if payload.get("found"):
         return payload
 
@@ -1310,8 +1525,23 @@ def _runtime_channel_source_payload(
     canonical_key = _stable_key("source-vtuber", options["range"], channel_key)
     if not channel_key or canonical_key == key:
         return payload
-    canonical = _source_payload_from_channel_records(
+    canonical_raw = _source_payload_from_channel_records(
         records, metadata, canonical_key, source_query,
+    )
+    canonical = (
+        _apply_persisted_vtuber_song_delta(
+            canonical_raw,
+            metadata,
+            authoritative_parent_records,
+            records,
+            source_query,
+        )
+        if overlay_revision_ids and (
+            isinstance(metadata.get("songs"), list) or persisted_occurrences
+        )
+        else _canonicalize_vtuber_source_payload(
+            canonical_raw, records, source_query,
+        )
     )
     if not canonical.get("found"):
         return payload
@@ -1622,6 +1852,184 @@ def _overlay_song_group_norm(value: Any) -> str:
     return "".join(character for character in _overlay_norm(value) if character.isalnum())
 
 
+def _strip_vtuber_title_list_marker(value: Any) -> str:
+    """Port the runtime builder's bounded leading set-list marker cleanup."""
+
+    result = _text(value)
+    for _ in range(4):
+        next_value = re.sub(
+            r"^\s*[\u2500-\u257f\u25a0-\u25ff\u2600-\u27bf"
+            r"\U0001f300-\U0001faff\ufe0f\u266a-\u266f>|・･]+",
+            "", result,
+        )
+        next_value = re.sub(
+            r"^\s*[NＮ][oｏ]\s*[0-9０-９]{1,3}[.．]\s+",
+            "", next_value, flags=re.IGNORECASE,
+        )
+        next_value = re.sub(
+            r"^\s*[＊*]?\s*(?:[#＃]?\d{1,3}|[０-９]{1,3})\s*"
+            r"(?:曲目|曲|番目)?\s*[.)．。、,，:：)）\]\-|｜/／]+\s*",
+            "", next_value,
+        )
+        next_value = re.sub(
+            r"^\s*(?:[#＃]?\d{1,3}|[０-９]{1,3})\s*"
+            r"(?:曲目|曲|番目)\s+",
+            "", next_value,
+        )
+        next_value = re.sub(
+            r"^\s*(?:[#＃]?\d{1,3}|[０-９]{1,3})(?=[「『【［\[(（])",
+            "", next_value,
+        )
+        # Keep parity with RankingUtils.stripLeadingTitleListMarker.  In
+        # particular, historical source rows contain composite markers such
+        # as ``034,2:44:26 Title``; four bounded passes intentionally peel
+        # one numeric segment at a time.  The decimal-dot guard keeps a real
+        # numeric title from being truncated at ``12.3``.
+        next_value = re.sub(
+            r"^\s*[\d\uFF10-\uFF19]{1,3}\s*[;\uFF1B]\s*"
+            r"[\d\uFF10-\uFF19]{1,2}[:\uFF1A]"
+            r"[0-5\uFF10-\uFF15][\d\uFF10-\uFF19]"
+            r"[:\uFF1A][0-5\uFF10-\uFF15]"
+            r"[\d\uFF10-\uFF19]\s+",
+            "", next_value,
+        )
+        next_value = re.sub(
+            r"^\s*[\u2460-\u2473\u24F5-\u24FE\u2776-\u2793"
+            r"\u3251-\u325F\u32B1-\u32BF]\s*",
+            "", next_value,
+        )
+        number = r"(?:[#\uFF03]?\d{1,3}|[\uFF10-\uFF19]{1,3})"
+        next_value = re.sub(
+            rf"^\s*(?:{number}(?=[\u300C\u300E\u3010\uFF3B\[(\uFF08])|"
+            rf"{number}[\s\u3002\u3001,\uFF0C:\uFF1A)\uFF09\]\-|"
+            rf"\uFF5C/\uFF0F]+|"
+            rf"{number}[.\uFF0E](?![0-9\uFF10-\uFF19])\s*)",
+            "", next_value,
+        )
+        if next_value == result:
+            break
+        result = next_value.strip()
+    return result.strip()
+
+
+def _vtuber_title_has_japanese(value: Any) -> bool:
+    return bool(re.search(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]", _text(value)))
+
+
+def _strip_vtuber_trailing_latin_gloss(value: Any) -> str:
+    text = unicodedata.normalize("NFKC", _text(value))
+    separated = re.match(
+        r"^(.+?)\s+(?:[-–—])\s+([A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80})$",
+        text,
+    )
+    if separated and _vtuber_title_has_japanese(separated.group(1)):
+        return separated.group(1).strip()
+    bracketed = re.match(
+        r"^(.+?)\s*[(（［\[]\s*([A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80})\s*[)）］\]]$",
+        text,
+    )
+    if bracketed and _vtuber_title_has_japanese(bracketed.group(1)):
+        return bracketed.group(1).strip()
+    return text
+
+
+def _is_safe_vtuber_song_variant(work_title: Any, value: Any, *, allow_repeated_title: bool) -> bool:
+    text = re.sub(r"^[\s:：\-ー–—|｜/／]+|[\s:：\-ー–—|｜/／]+$", "", _text(value)).strip()
+    title = _text(work_title)
+    if allow_repeated_title and text and _overlay_song_group_norm(text) == _overlay_song_group_norm(title):
+        return True
+    return bool(re.match(
+        r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|"
+        r"acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|"
+        r"a\s*cappella\s*(?:ver\.?|version|版)?|acappella\s*(?:ver\.?|version|版)?|"
+        r"アカペラ\s*(?:ver\.?|version|版)?|清唱(?:版)?|short\s*(?:ver\.?|version)?|"
+        r"full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version|版)?|"
+        r"eng\s*(?:ver\.?|version|版)?|英語\s*(?:ver\.?|version|版)?|英文\s*(?:ver\.?|version|版)?|"
+        r"key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|"
+        r"[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$",
+        text, re.IGNORECASE,
+    ))
+
+
+def _normalize_vtuber_song_work_title(value: Any) -> str:
+    text = _strip_vtuber_title_list_marker(value)
+    for _ in range(3):
+        next_text = re.sub(r"^[「『【［\[(（]\s*(.+?)\s*[」』】］\])）]$", r"\1", text).strip()
+        if next_text == text:
+            break
+        text = next_text
+    bracket = re.match(r"^(.+?)\s*[(（［\[【「『]\s*([^()（）\[\]［］【】「」『』]{1,80})\s*[)）］\]】」』]\s*$", text)
+    if bracket and _is_safe_vtuber_song_variant(bracket.group(1), bracket.group(2), allow_repeated_title=True):
+        return bracket.group(1).strip()
+    separated = re.match(r"^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$", text)
+    if separated and _is_safe_vtuber_song_variant(separated.group(1), separated.group(2), allow_repeated_title=True):
+        return separated.group(1).strip()
+    spaced = re.match(r"^(.+?)\s+(.{1,80})\s*$", text)
+    if spaced and _is_safe_vtuber_song_variant(spaced.group(1), spaced.group(2), allow_repeated_title=False):
+        return spaced.group(1).strip()
+    trailing = re.match(r"^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$", text)
+    return trailing.group(1).strip() if trailing else text
+
+
+def _normalize_japanese_month_words(value: Any) -> str:
+    """Port RankingUtils.normalizeJapaneseMonthWords for song keys only."""
+
+    month_digits = {
+        "\u4e00": "1",
+        "\u4e8c": "2",
+        "\u4e09": "3",
+        "\u56db": "4",
+        "\u4e94": "5",
+        "\u516d": "6",
+        "\u4e03": "7",
+        "\u516b": "8",
+        "\u4e5d": "9",
+        "\u5341": "10",
+        "\u5341\u4e00": "11",
+        "\u5341\u4e8c": "12",
+    }
+    return re.sub(
+        r"(\u5341\u4e00|\u5341\u4e8c|\u5341|"
+        r"[\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d])"
+        r"\u6708",
+        lambda match: f"{month_digits[match.group(1)]}\u6708",
+        _text(value),
+    )
+
+
+def _vtuber_canonical_song_identity(value: Any) -> tuple[str, str]:
+    """Return the exact runtime builder display title and work-title key."""
+
+    title = _text(value)
+    if not title:
+        return "", ""
+    for _ in range(4):
+        next_title = unicodedata.normalize("NFKC", title)
+        next_title = re.sub(
+            r"^\s*[#＃]?\d{1,4}\s*[\u2600-\u27bf\U0001f300-\U0001faff\ufe0f\u266a-\u266f"
+            r"▶▷►▸▹>|・･●○◆◇■□]+", "", next_title,
+        )
+        next_title = re.sub(
+            r"^\s*[＊*]?\s*(?:[#＃]?\d{1,4}|[０-９]{1,4})\s*(?:曲目|曲|番目)?\s*"
+            r"[.)．。、,，:：)）\]\-|｜/／]+\s*", "", next_title,
+        ).strip()
+        if next_title == title:
+            break
+        title = next_title
+    title = _strip_vtuber_trailing_latin_gloss(title)
+    title = _normalize_vtuber_song_work_title(title)
+    title = _strip_vtuber_trailing_latin_gloss(title)
+    key_title = _normalize_japanese_month_words(
+        _normalize_vtuber_song_work_title(title)
+    )
+    key = "".join(
+        character
+        for character in unicodedata.normalize("NFKC", key_title).casefold()
+        if unicodedata.category(character)[0] in {"L", "N"}
+    )
+    return title, key
+
+
 def _overlay_public_occurrence(value: Any) -> dict[str, Any]:
     """Expose only the established occurrence fields, never curation evidence."""
 
@@ -1665,6 +2073,7 @@ def _overlay_candidate_rows(
     scoped_parent_video_ids: Sequence[str] | None = None,
     range_id: str = "",
     video_scope: Sequence[str] | None = None,
+    full_reset_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Read only the candidate rows; never resolve the parent occurrence table.
 
@@ -1740,7 +2149,9 @@ def _overlay_candidate_rows(
         SELECT revision_id, video_id, title AS video_title, channel_name,
                channel_id, channel_handle, channel_url, published_at,
                {video_payload} AS video_payload_json,
-               tombstone AS video_tombstone
+               tombstone AS video_tombstone,
+               (payload_json->>'partialRangeReset' = 'true') AS partial_range_reset,
+               payload_json->>'rangeId' AS partial_range_id
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
           {video_scope_clause}
@@ -1757,6 +2168,8 @@ def _overlay_candidate_rows(
     ))
     selected_video: dict[str, dict[str, Any]] = {}
     for row in video_rows:
+        if full_reset_only and _is_partial_range_video_row(row):
+            continue
         video_id = _text(row.get("video_id"))
         if video_id and video_id not in selected_video:
             selected_video[video_id] = row
@@ -1898,6 +2311,83 @@ def _overlay_candidate_rows(
             })
         resolved.append(merged)
     return resolved
+
+
+def _overlay_candidate_identity(row: Mapping[str, Any]) -> tuple[str, str]:
+    video_id = _text(row.get("video_id") or row.get("videoId"))
+    occurrence_id = _text(row.get("occurrence_id") or row.get("occurrenceId"))
+    if not occurrence_id:
+        occurrence_id = "position:" + ":".join((
+            _text(row.get("position")),
+            _text(row.get("song_key") or row.get("songKey")),
+        ))
+    return video_id, occurrence_id
+
+
+def _project_compatible_candidate_rows(
+    rows: Iterable[Mapping[str, Any]], target_range: str,
+) -> tuple[dict[str, Any], ...]:
+    projected: list[dict[str, Any]] = []
+    for value in rows:
+        row = dict(value)
+        if target_range == "all" and _text(row.get("range_id")) == "7d":
+            row["range_id"] = "all"
+            payload = _json_object(row.get("occurrence_payload_json"))
+            if payload:
+                if isinstance(payload.get("payload"), Mapping):
+                    nested = dict(payload["payload"])
+                    nested["rangeId"] = "all"
+                    payload["payload"] = nested
+                else:
+                    payload["rangeId"] = "all"
+                row["occurrence_payload_json"] = payload
+        projected.append(row)
+    return tuple(projected)
+
+
+def _selected_full_reset_candidate_rows(
+    connection,
+    revision_ids: Sequence[str],
+    resets: Mapping[str, Mapping[str, Any]],
+    target_range: str,
+    *,
+    include_payload: bool = True,
+) -> tuple[dict[str, Any], ...]:
+    """Read compatible physical rows only for selected non-partial resets.
+
+    Ordinary 7d rows stay isolated from all.  Only video ids already selected
+    by ``_accepted_video_resets`` may contribute their physical 7d projection
+    to the compatible all endpoint.  Target-range rows win when both physical
+    projections contain the same logical occurrence.
+    """
+
+    video_ids = tuple(sorted({_text(value) for value in resets if _text(value)}))
+    if not video_ids:
+        return ()
+    physical_ranges = (target_range, "7d") if target_range == "all" else (target_range,)
+    selected: dict[tuple[str, str], dict[str, Any]] = {}
+    for physical_range in physical_ranges:
+        physical_rows = list(_overlay_candidate_rows(
+            connection,
+            revision_ids,
+            include_payload,
+            range_id=physical_range,
+            video_scope=video_ids,
+            full_reset_only=True,
+        ))
+        # The runtime builder excludes source songs whose normalized title is
+        # empty.  Scalar title is sufficient for the exact aggregate; do not
+        # deserialize payload for every historical full-reset tuple merely to
+        # reconfirm it.  Detailed source reconstruction already requests full
+        # payloads and follows the same scalar filter here.
+        physical_rows = [
+            row for row in physical_rows if _text(row.get("title"))
+        ]
+        for row in physical_rows:
+            identity = _overlay_candidate_identity(row)
+            if identity[0] in resets and identity not in selected:
+                selected[identity] = dict(row)
+    return _project_compatible_candidate_rows(selected.values(), target_range)
 
 
 def _is_partial_range_video_row(row: Mapping[str, Any]) -> bool:
@@ -5893,6 +6383,447 @@ def _store_vtuber_replacement_cache(
         _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
 
 
+def _authoritative_vtuber_summary_rows(
+    connection,
+    parent_revision_id: str,
+    affected_channel_ids: set[str],
+    full_video_ids: set[str],
+    affected_occurrence_ids: set[tuple[str, str]],
+    parent_sources: Mapping[str, str],
+    candidate_values: Sequence[Mapping[str, Any]],
+    range_id: str,
+    source_totals_cache: MutableMapping[
+        tuple[str, str, str], tuple[int, int]
+    ] | None = None,
+) -> list[dict[str, Any]]:
+    """Apply bounded overlay deltas to persisted VTuber source authority."""
+
+    source_values = [
+        {"channel_id": channel_id, "source_key": source_key}
+        for channel_id, source_key in sorted(parent_sources.items())
+        if channel_id and source_key
+    ]
+    detail_rows = _rows(
+        connection,
+        """
+        /* bounded authoritative VTuber parent details */
+        WITH requested AS MATERIALIZED (
+          SELECT channel_id, source_key
+          FROM jsonb_to_recordset(%s::jsonb)
+            AS item(channel_id text, source_key text)
+        )
+        SELECT requested.channel_id, requested.source_key,
+               detail.entity_key, detail.payload_json
+        FROM requested
+        JOIN runtime_source_details AS detail
+          ON detail.revision_id = %s
+         AND detail.source_key = requested.source_key
+         AND detail.range_id = %s
+         AND detail.entity_type = 'vtuber'
+        ORDER BY requested.channel_id
+        LIMIT %s
+        """,
+        [
+            json.dumps(source_values, ensure_ascii=False),
+            parent_revision_id,
+            range_id,
+            len(source_values) + 1,
+        ],
+    ) if source_values else []
+    if len(detail_rows) != len(source_values):
+        raise PostgresAdapterError(
+            "VTuber parent source detail coverage is incomplete"
+        )
+
+    channel_by_source = {
+        source_key: channel_id for channel_id, source_key in parent_sources.items()
+    }
+    base_counts: dict[str, int] = {}
+    base_videos: dict[str, int] = {}
+    base_songs: dict[str, dict[str, dict[str, Any]]] = {}
+    for row in detail_rows:
+        channel_id = _text(row.get("channel_id"))
+        source_key = _text(row.get("source_key"))
+        if (
+            channel_by_source.get(source_key) != channel_id
+            or _text(row.get("entity_key")) != channel_id
+        ):
+            raise PostgresAdapterError(
+                "VTuber parent source detail identity is invalid"
+            )
+        payload = _json_object(row.get("payload_json"))
+        occurrence_count = int(
+            payload.get("count")
+            or payload.get("occurrenceCount")
+            or payload.get("timestampCount")
+            or 0
+        )
+        video_count = int(payload.get("videoCount") or 0)
+        songs: dict[str, dict[str, Any]] = {}
+        for value in payload.get("songs") or ():
+            if not isinstance(value, Mapping):
+                raise PostgresAdapterError(
+                    "VTuber parent source song counts are invalid"
+                )
+            key = _text(value.get("key"))
+            name = _text(value.get("name"))
+            count = int(value.get("count") or 0)
+            if not key or not name or count <= 0 or key in songs:
+                raise PostgresAdapterError(
+                    "VTuber parent source song counts are invalid"
+                )
+            songs[key] = {"key": key, "name": name, "count": count}
+        if (
+            occurrence_count <= 0
+            or video_count <= 0
+            or len(songs) != int(payload.get("songCount") or len(songs))
+            or sum(int(item["count"]) for item in songs.values())
+                > occurrence_count
+        ):
+            raise PostgresAdapterError(
+                "VTuber parent source aggregate is not internally consistent"
+            )
+        base_counts[channel_id] = occurrence_count
+        base_videos[channel_id] = video_count
+        base_songs[channel_id] = songs
+
+    source_keys = sorted(channel_by_source)
+    missing_source_keys: list[str] = []
+    cached_totals: dict[str, tuple[int, int]] = {}
+    for source_key in source_keys:
+        cache_key = (parent_revision_id, range_id, source_key)
+        cached = (
+            source_totals_cache.get(cache_key)
+            if source_totals_cache is not None
+            else None
+        )
+        if cached is None:
+            missing_source_keys.append(source_key)
+            continue
+        if (
+            not isinstance(cached, (tuple, list))
+            or len(cached) != 2
+            or not all(isinstance(value, int) for value in cached)
+        ):
+            raise PostgresAdapterError(
+                "VTuber parent source totals cache is invalid"
+            )
+        cached_totals[source_key] = (int(cached[0]), int(cached[1]))
+    physical_rows = _rows(
+        connection,
+        """
+        /* indexed authoritative VTuber physical totals */
+        SELECT source_key, count(*) AS occurrence_count,
+               count(DISTINCT video_id) AS video_count
+        FROM runtime_source_occurrences
+        WHERE revision_id = %s AND source_key = ANY(%s)
+          AND range_id = %s
+        GROUP BY source_key
+        ORDER BY source_key
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            missing_source_keys,
+            range_id,
+            len(missing_source_keys) + 1,
+        ],
+    ) if missing_source_keys else []
+    physical_by_source = {
+        _text(row.get("source_key")): row for row in physical_rows
+    }
+    cache_updates: dict[tuple[str, str, str], tuple[int, int]] = {}
+    for source_key, channel_id in channel_by_source.items():
+        if source_key in cached_totals:
+            occurrence_count, video_count = cached_totals[source_key]
+        else:
+            physical = physical_by_source.get(source_key)
+            if not physical:
+                raise PostgresAdapterError(
+                    "VTuber parent source physical totals disagree with detail"
+                )
+            occurrence_count = int(physical.get("occurrence_count") or 0)
+            video_count = int(physical.get("video_count") or 0)
+        if (
+            occurrence_count != base_counts[channel_id]
+            or video_count != base_videos[channel_id]
+        ):
+            raise PostgresAdapterError(
+                "VTuber parent source physical totals disagree with detail"
+            )
+        if source_key not in cached_totals:
+            cache_updates[(parent_revision_id, range_id, source_key)] = (
+                occurrence_count,
+                video_count,
+            )
+    if source_totals_cache is not None and cache_updates:
+        available = max(
+            0, _VTUBER_SOURCE_TOTALS_CACHE_CAP - len(source_totals_cache)
+        )
+        for cache_key in sorted(cache_updates)[:available]:
+            source_totals_cache[cache_key] = cache_updates[cache_key]
+
+    touched_video_ids = sorted({
+        *(_text(value) for value in full_video_ids if _text(value)),
+        *(_text(video_id) for video_id, _ in affected_occurrence_ids if _text(video_id)),
+    })
+    touched_rows = _rows(
+        connection,
+        """
+        /* bounded authoritative VTuber touched source rows */
+        SELECT source_key, position, video_id, seconds, payload_json
+        FROM runtime_source_occurrences
+        WHERE revision_id = %s AND source_key = ANY(%s)
+          AND range_id = %s AND video_id = ANY(%s)
+        ORDER BY source_key, video_id, position
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            source_keys,
+            range_id,
+            touched_video_ids,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    ) if source_keys and touched_video_ids else []
+    if len(touched_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "VTuber touched source occurrence lookup exceeded bounded cap"
+        )
+
+    normalized_touched: list[dict[str, Any]] = []
+    for row in touched_rows:
+        source_key = _text(row.get("source_key"))
+        channel_id = channel_by_source.get(source_key, "")
+        item = _runtime_source_occurrence(row)
+        song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+        title = _text(song.get("title"))
+        artist = _text(song.get("artist"))
+        canonical_title, canonical_key = _vtuber_canonical_song_identity(title)
+        if not channel_id or not title:
+            raise PostgresAdapterError(
+                "VTuber touched source occurrence identity is invalid"
+            )
+        normalized_touched.append({
+            "channel_id": channel_id,
+            "source_key": source_key,
+            "position": int(row.get("position") or 0),
+            "video_id": _text(row.get("video_id")),
+            "seconds": row.get("seconds") if row.get("seconds") is not None else song.get("seconds"),
+            "title": title,
+            "artist": artist,
+            "canonical_title": canonical_title,
+            "canonical_key": canonical_key,
+        })
+
+    aligned_occurrences = sorted({
+        identity
+        for identity in affected_occurrence_ids
+        if identity[0] not in full_video_ids
+    })
+    preimage_rows = _rows(
+        connection,
+        """
+        /* bounded VTuber occurrence preimages */
+        WITH requested(video_id, occurrence_id) AS MATERIALIZED (
+          SELECT video_id, occurrence_id
+          FROM unnest(%s::text[], %s::text[])
+            AS item(video_id, occurrence_id)
+        )
+        SELECT occurrence.video_id, occurrence.occurrence_id,
+               occurrence.seconds, occurrence.title, occurrence.artist
+        FROM requested
+        JOIN runtime_occurrences AS occurrence
+          ON occurrence.revision_id = %s
+         AND occurrence.video_id = requested.video_id
+         AND occurrence.occurrence_id = requested.occurrence_id
+         AND occurrence.range_id = %s
+        ORDER BY occurrence.video_id, occurrence.occurrence_id
+        LIMIT %s
+        """,
+        [
+            [video_id for video_id, _ in aligned_occurrences],
+            [occurrence_id for _, occurrence_id in aligned_occurrences],
+            parent_revision_id,
+            range_id,
+            len(aligned_occurrences) + 1,
+        ],
+    ) if aligned_occurrences else []
+    preimage_by_identity: dict[tuple[str, str], Mapping[str, Any]] = {}
+    for row in preimage_rows:
+        identity = (
+            _text(row.get("video_id")),
+            _text(row.get("occurrence_id")),
+        )
+        if not all(identity) or identity in preimage_by_identity:
+            raise PostgresAdapterError(
+                "VTuber occurrence preimage coverage is invalid"
+            )
+        preimage_by_identity[identity] = row
+    if set(preimage_by_identity) != set(aligned_occurrences):
+        raise PostgresAdapterError(
+            "VTuber occurrence preimage coverage is incomplete"
+        )
+
+    removed_identities: set[tuple[str, int]] = set()
+    removals: list[dict[str, Any]] = []
+
+    def remove(item: Mapping[str, Any]) -> None:
+        identity = (_text(item.get("source_key")), int(item.get("position") or 0))
+        if identity in removed_identities:
+            return
+        removed_identities.add(identity)
+        removals.append(dict(item))
+
+    for item in normalized_touched:
+        if item["video_id"] in full_video_ids:
+            remove(item)
+    for identity, preimage in preimage_by_identity.items():
+        if identity[0] in full_video_ids:
+            continue
+        matches = [
+            item for item in normalized_touched
+            if item["video_id"] == identity[0]
+            and item["seconds"] == preimage.get("seconds")
+            and item["title"] == _text(preimage.get("title"))
+            and item["artist"] == _text(preimage.get("artist"))
+        ]
+        if len(matches) != 1:
+            raise PostgresAdapterError(
+                "VTuber occurrence preimage does not uniquely match source authority"
+            )
+        remove(matches[0])
+
+    additions: list[dict[str, Any]] = []
+    for value in candidate_values:
+        channel_id = _text(value.get("channel_id"))
+        video_id = _text(value.get("video_id"))
+        title = _text(value.get("canonical_title") or value.get("title"))
+        key = _text(value.get("canonical_song_key"))
+        canonical_title, canonical_key = _vtuber_canonical_song_identity(
+            value.get("title") or title
+        )
+        if not channel_id or not video_id or not title:
+            raise PostgresAdapterError(
+                "VTuber overlay addition is missing canonical identity"
+            )
+        if key and (canonical_title != title or canonical_key != key):
+            raise PostgresAdapterError(
+                "VTuber overlay addition canonical identity disagrees with title"
+            )
+        if not key and canonical_key:
+            raise PostgresAdapterError(
+                "VTuber overlay addition omitted available canonical identity"
+            )
+        additions.append({
+            "channel_id": channel_id,
+            "video_id": video_id,
+            "canonical_title": title,
+            "canonical_key": key,
+        })
+
+    parent_video_occurrences: dict[tuple[str, str], int] = defaultdict(int)
+    removed_video_occurrences: dict[tuple[str, str], int] = defaultdict(int)
+    added_video_occurrences: dict[tuple[str, str], int] = defaultdict(int)
+    for item in normalized_touched:
+        parent_video_occurrences[(item["channel_id"], item["video_id"])] += 1
+    for item in removals:
+        removed_video_occurrences[(item["channel_id"], item["video_id"])] += 1
+    for item in additions:
+        added_video_occurrences[(item["channel_id"], item["video_id"])] += 1
+
+    summaries: list[dict[str, Any]] = []
+    for channel_id in sorted(affected_channel_ids):
+        counts = copy.deepcopy(base_songs.get(channel_id, {}))
+        row_count = int(base_counts.get(channel_id, 0))
+        video_count = int(base_videos.get(channel_id, 0))
+        unkeyed_count = row_count - sum(
+            int(item["count"]) for item in counts.values()
+        )
+        if unkeyed_count < 0:
+            raise PostgresAdapterError(
+                "VTuber parent canonical counts exceed source authority"
+            )
+        channel_removals = [item for item in removals if item["channel_id"] == channel_id]
+        channel_additions = [item for item in additions if item["channel_id"] == channel_id]
+        row_count += len(channel_additions) - len(channel_removals)
+        touched = {
+            video_id
+            for owner, video_id in {
+                *parent_video_occurrences,
+                *removed_video_occurrences,
+                *added_video_occurrences,
+            }
+            if owner == channel_id
+        }
+        for video_id in touched:
+            before = parent_video_occurrences[(channel_id, video_id)]
+            after = (
+                before
+                - removed_video_occurrences[(channel_id, video_id)]
+                + added_video_occurrences[(channel_id, video_id)]
+            )
+            if after < 0:
+                raise PostgresAdapterError(
+                    "VTuber overlay removed more source rows than parent authority"
+                )
+            video_count += int(after > 0) - int(before > 0)
+        for item, delta in (
+            *((item, -1) for item in channel_removals),
+            *((item, 1) for item in channel_additions),
+        ):
+            key = item["canonical_key"]
+            if not key:
+                unkeyed_count += delta
+                if unkeyed_count < 0:
+                    raise PostgresAdapterError(
+                        "VTuber unkeyed occurrence delta became negative"
+                    )
+                continue
+            entry = counts.get(key)
+            if entry is None:
+                if delta < 0:
+                    raise PostgresAdapterError(
+                        "VTuber source removal lacks a canonical parent song"
+                    )
+                entry = {
+                    "key": key,
+                    "name": item["canonical_title"],
+                    "count": 0,
+                }
+                counts[key] = entry
+            entry["count"] = int(entry["count"]) + delta
+            if int(entry["count"]) < 0:
+                raise PostgresAdapterError(
+                    "VTuber canonical song delta became negative"
+                )
+        effective_songs = {
+            key: item for key, item in counts.items()
+            if int(item["count"]) > 0
+        }
+        if (
+            row_count < 0
+            or video_count < 0
+            or sum(int(item["count"]) for item in effective_songs.values())
+                + unkeyed_count != row_count
+        ):
+            raise PostgresAdapterError(
+                "VTuber authoritative overlay summary is not internally consistent"
+            )
+        summaries.append({
+            "channel_id": channel_id,
+            "row_count": row_count,
+            "video_count": video_count,
+            "song_count": len(effective_songs),
+            "songs": sorted(
+                effective_songs.values(),
+                key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
+            ),
+            "residual_match": True,
+        })
+    return summaries
+
+
 def _unfiltered_vtuber_summary_rows(
     connection,
     parent_revision_id: str,
@@ -6259,6 +7190,9 @@ def _overlay_vtuber_replacement_rows(
     exact_required: bool = False,
     exact_channel_scope: Sequence[str] | None = None,
     direct_overlay_revision_ids: Sequence[str] = (),
+    source_totals_cache: MutableMapping[
+        tuple[str, str, str], tuple[int, int]
+    ] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Rebuild affected VTuber groups with per-video replacement semantics."""
 
@@ -6372,8 +7306,13 @@ def _overlay_vtuber_replacement_rows(
         elif (
             entity_type in {"occurrences", "runtime_occurrences"}
             and not bool(changed.get("acceptedVideoReset"))
-            and video_id and occurrence_id
+            and video_id and occurrence_id and channel_id
         ):
+            # A global runtime chain can contain historical curation for a
+            # tuple that never belonged to the persisted VTuber authority.
+            # Without an immutable old-side channel there is no parent
+            # VTuber source to subtract from.  Candidate/replacement rows
+            # still add their independently validated new-side channel.
             affected_occurrence_ids.add((video_id, occurrence_id))
 
     # Runtime occurrence chains replace the matching accepted projection, not
@@ -6499,13 +7438,26 @@ def _overlay_vtuber_replacement_rows(
                 if options.get("hideUnknownArtist") and not _text(occurrence["song"].get("artist")):
                     continue
                 song = occurrence["song"]
-                song_key = _text(song.get("songKey")) or (
-                    f"{_overlay_norm(song.get('title'))}::{_overlay_norm(song.get('artist'))}"
+                if not _text(song.get("title")):
+                    # Runtime construction drops empty normalized titles
+                    # before VTuber aggregation.  Historical accepted rows
+                    # may retain a reviewed curation candidate with no title;
+                    # it is not a public song occurrence.
+                    continue
+                canonical_title, canonical_song_key = (
+                    _vtuber_canonical_song_identity(song.get("title"))
                 )
+                # Symbol-only non-empty titles are valid VTuber occurrences
+                # in the runtime builder, but intentionally have no canonical
+                # song identity and therefore do not increase songCount.
+                canonical_title = canonical_title or _text(song.get("title"))
                 candidate_values.append({
                     "channel_id": channel_id,
                     "video_id": _text(occurrence.get("videoId")),
-                    "song_key": song_key,
+                    "song_key": canonical_song_key,
+                    "title": _text(song.get("title")),
+                    "canonical_title": canonical_title,
+                    "canonical_song_key": canonical_song_key,
                     "residual_match": _vtuber_candidate_matches_residual(
                         row={
                             **dict(song),
@@ -6536,8 +7488,29 @@ def _overlay_vtuber_replacement_rows(
         residual_sql_tokens = [
             _sql_like_literal(token) for token in residual_tokens
         ]
+        parent_sources = {
+            channel_id: _exact_vtuber_source_detail_key(
+                _json_object((base_groups.get(channel_id) or {}).get("payload_json")),
+                _text(options.get("range")) or "all",
+                channel_id,
+            )
+            for channel_id in affected_channel_ids
+            if base_groups.get(channel_id)
+        }
         summaries = (
-            _unfiltered_vtuber_summary_rows(
+            _authoritative_vtuber_summary_rows(
+                connection,
+                parent_revision_id,
+                affected_channel_ids,
+                full_video_ids,
+                affected_occurrence_ids,
+                parent_sources,
+                candidate_values,
+                _text(options.get("range")) or "all",
+                source_totals_cache=source_totals_cache,
+            )
+            if channel_scope is None and direct_overlay_revision_ids
+            else _unfiltered_vtuber_summary_rows(
                 connection,
                 parent_revision_id,
                 affected_channel_ids,
@@ -6828,9 +7801,12 @@ def _overlay_vtuber_replacement_rows(
                 "videoCount": int(summary.get("video_count") or 0),
                 "timestampCount": int(summary.get("row_count") or 0),
                 "occurrences": previews,
-                "sourceDetailKey": payload.get("sourceDetailKey")
-                    or _stable_key("source-vtuber", _text(options.get("range")) or "all", channel_id),
+                "sourceDetailKey": _exact_vtuber_source_detail_key(
+                    payload, _text(options.get("range")) or "all", channel_id,
+                ),
             })
+            if isinstance(summary.get("songs"), list):
+                payload["songs"] = copy.deepcopy(summary["songs"])
             exact[channel_id] = {
                 "detail_key": channel_id,
                 "title": "",
@@ -6967,6 +7943,12 @@ def _overlay_vtuber_replacement_rows(
     for group in _entity_groups(records, {**dict(options), "view": "vtubers"}):
         payload = _group_payload(group, {**dict(options), "view": "vtubers"})
         key = _text(group.get("key"))
+        base_payload = _json_object(
+            (base_groups.get(key) or {}).get("payload_json")
+        )
+        payload["sourceDetailKey"] = _exact_vtuber_source_detail_key(
+            base_payload, _text(options.get("range")) or "all", key,
+        )
         if key in canonical_candidate_urls:
             payload["_canonicalChannelUrl"] = canonical_candidate_urls[key]
         exact[key] = {
@@ -7004,8 +7986,9 @@ def _overlay_vtuber_replacement_rows(
             "videoCount": 0,
             "timestampCount": 0,
             "occurrences": [],
-            "sourceDetailKey": payload.get("sourceDetailKey")
-                or _stable_key("source-vtuber", _text(options.get("range")) or "all", channel_id),
+            "sourceDetailKey": _exact_vtuber_source_detail_key(
+                payload, _text(options.get("range")) or "all", channel_id,
+            ),
         })
         exact[channel_id] = {
             "detail_key": channel_id,
@@ -7032,6 +8015,16 @@ def _overlay_vtuber_replacement_rows(
         )
     _store_vtuber_replacement_cache(cache_key, exact)
     return copy.deepcopy(exact)
+
+
+def _exact_vtuber_source_detail_key(
+    payload: Mapping[str, Any], range_id: str, channel_id: str,
+) -> str:
+    """Preserve a parent key or use the runtime exporter's VTuber contract."""
+
+    return _text(payload.get("sourceDetailKey")) or (
+        _production_source_detail_key_for_group("vtubers", range_id, channel_id)
+    )
 
 
 def _overlay_rank_value(row: Mapping[str, Any], metric: str) -> int:
@@ -7148,6 +8141,27 @@ def _validated_overlay_change_identity(
         ) or len(set(replacement_channels)) > 1:
             pass
     return video_id, channel_id
+
+
+def _vtuber_owned_overlay_changes(
+    changes: Iterable[Mapping[str, Any]],
+) -> tuple[Mapping[str, Any], ...]:
+    """Keep only changes with immutable old-side VTuber ownership.
+
+    Historical global curation can resolve to a tombstone whose tuple is
+    absent from both the parent runtime and persisted source authority.  Such
+    a row is a no-op for VTuber aggregation, not evidence that a source
+    preimage may be skipped.  Conflicting identity evidence still raises via
+    ``_validated_overlay_change_identity``.
+    """
+
+    return tuple(
+        change
+        for change in changes
+        if _validated_overlay_change_identity(
+            change, validate_urls=False,
+        )[1]
+    )
 
 
 def _canonical_channel_url(channel_id: str, handle: Any) -> str:
@@ -7275,6 +8289,9 @@ def _prepare_generic_overlay_rankings(
     ] | None = None,
     snapshot_original_group_counts: MutableMapping[
         tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+    ] | None = None,
+    snapshot_vtuber_source_totals: MutableMapping[
+        tuple[str, str, str], tuple[int, int]
     ] | None = None,
 ) -> Mapping[str, Any]:
     """Build the page-independent generic overlay aggregate once per spec."""
@@ -7575,6 +8592,15 @@ def _prepare_generic_overlay_rankings(
         exact_channel_scope if options["view"] == "vtubers" else None,
         exact_parent_video_ids if exact_channel_scope is not None else None,
     )
+    compatible_reset_rows: tuple[Mapping[str, Any], ...] = ()
+    if options["view"] == "vtubers" and accepted_video_resets:
+        compatible_reset_rows = _selected_full_reset_candidate_rows(
+            connection,
+            overlay_ids,
+            accepted_video_resets,
+            options["range"],
+            include_payload=not bool(direct_overlay_revision_ids),
+        )
     candidate_range_rows = tuple(
         _overlay_rows_for_range(candidate_rows, options["range"])
     )
@@ -7596,6 +8622,14 @@ def _prepare_generic_overlay_rankings(
             ) == options["range"]
         }
     candidate_rows = list(candidate_range_rows)
+    if compatible_reset_rows:
+        compatible_by_identity = {
+            _overlay_candidate_identity(row): dict(row)
+            for row in candidate_rows
+        }
+        for row in compatible_reset_rows:
+            compatible_by_identity[_overlay_candidate_identity(row)] = dict(row)
+        candidate_rows = list(compatible_by_identity.values())
     if options["view"] == "vtubers" and accepted_video_resets:
         # A selected accepted reset is immutable evidence.  Its historical
         # public URL is derived metadata and is never allowed to veto or
@@ -7653,6 +8687,14 @@ def _prepare_generic_overlay_rankings(
     )
     phase_started = _phase_trace("reset", phase_started)
     candidate_rows = list(candidate_range_rows)
+    if compatible_reset_rows:
+        compatible_by_identity = {
+            _overlay_candidate_identity(row): dict(row)
+            for row in candidate_rows
+        }
+        for row in compatible_reset_rows:
+            compatible_by_identity[_overlay_candidate_identity(row)] = dict(row)
+        candidate_rows = list(compatible_by_identity.values())
     runtime_changes = _overlay_rows_for_range(runtime_changes_all, options["range"])
     # The exact VTuber query is physical-range scoped.  Do not pass the
     # lineage-wide candidate list: a legacy/all row must not leak into 7d,
@@ -7769,12 +8811,17 @@ def _prepare_generic_overlay_rankings(
                 if (
                     identity not in requested_set
                     or identity in direct_seen
-                    or identity in accepted_identity_by_occurrence
                 ):
                     raise PostgresAdapterError(
                         "direct accepted identity repair returned a duplicate occurrence"
                     )
                 direct_seen.add(identity)
+                if identity in accepted_identity_by_occurrence:
+                    # Compatible full-reset hydration already supplied this
+                    # accepted occurrence with complete public metadata.
+                    # Keep that stronger row and do not treat the same logical
+                    # identity as a second repair candidate.
+                    continue
                 selected_video = accepted_video_resets.get(identity[0])
                 selected_revision_id = _text(
                     selected_video.get("revision_id")
@@ -8203,6 +9250,13 @@ def _prepare_generic_overlay_rankings(
     exact_reset_changes = tuple(reset_changes)
     exact_runtime_changes = tuple(runtime_changes)
     exact_replacement_rows = tuple(replacement_rows)
+    if options["view"] == "vtubers":
+        exact_reset_changes = _vtuber_owned_overlay_changes(
+            exact_reset_changes,
+        )
+        exact_runtime_changes = _vtuber_owned_overlay_changes(
+            exact_runtime_changes,
+        )
     if exact_channel_scope is not None:
         exact_scope_set = {
             _text(value) for value in exact_channel_scope if _text(value)
@@ -8312,6 +9366,7 @@ def _prepare_generic_overlay_rankings(
             exact_required,
             exact_channel_scope,
             direct_overlay_revision_ids,
+            source_totals_cache=snapshot_vtuber_source_totals,
         )
         if options["view"] == "vtubers"
         else {}
@@ -11610,6 +12665,8 @@ def _snapshot_source_overlay_inputs(
     overlay_revision_ids: Sequence[str],
     range_id: str,
     video_scope: Sequence[str],
+    *,
+    include_compatible_full_reset_7d: bool = False,
 ) -> tuple[
     tuple[Mapping[str, Any], ...],
     dict[str, dict[str, Any]],
@@ -11622,17 +12679,35 @@ def _snapshot_source_overlay_inputs(
     }))
     if not scoped_videos:
         return (), {}, ()
-    candidate_rows = tuple(_overlay_candidate_rows(
-        connection,
-        overlay_revision_ids,
-        video_scope=scoped_videos,
-        range_id=range_id,
-    ))
     accepted_video_resets = _accepted_video_resets(
         connection,
         overlay_revision_ids,
         video_scope=scoped_videos,
     )
+    candidate_rows = tuple(_overlay_candidate_rows(
+        connection,
+        overlay_revision_ids,
+        range_id=range_id,
+        video_scope=scoped_videos,
+    ))
+    if include_compatible_full_reset_7d:
+        # Keep the generic same-range source contract intact.  Only channel
+        # detail reconstruction may additionally project physical 7d rows
+        # from already-selected non-partial full resets into compatible all.
+        # Target-range rows win when the same logical occurrence is present
+        # in both physical projections.
+        selected = {
+            _overlay_candidate_identity(row): dict(row)
+            for row in candidate_rows
+        }
+        for row in _selected_full_reset_candidate_rows(
+            connection,
+            overlay_revision_ids,
+            accepted_video_resets,
+            range_id,
+        ):
+            selected.setdefault(_overlay_candidate_identity(row), dict(row))
+        candidate_rows = tuple(selected.values())
     runtime_changes = tuple(_runtime_tombstones(
         connection,
         overlay_revision_ids,
