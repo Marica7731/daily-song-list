@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T16:12:56.906Z",
+  "generatedAt": "2026-08-12T17:14:47.574Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T16:12:56.906Z",
+    "fetchedAt": "2026-08-12T17:14:47.574Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T16:12:56.906Z",
+    "generatedAt": "2026-08-12T17:14:47.574Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1134,
-      "parseableChannels": 1114,
+      "totalChannels": 1135,
+      "parseableChannels": 1115,
       "realAvatar": 649,
-      "thumbnailFallback": 485,
+      "thumbnailFallback": 486,
       "missingDisplayImage": 0,
-      "missingAvatar": 485,
+      "missingAvatar": 486,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 658
+      "skipped_collected_evidence": 659
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 638,
+      "batch_limit_reached": 639,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@ShichitembattoinAegis",
+        "channelId": "UCrtj7mTumU4Pg9sdzfGZm6Q",
+        "displayName": "アエギス / Aegis Channel【音大首席オペラVsinger】",
+        "sourceUrl": "https://www.youtube.com/@ShichitembattoinAegis",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kanno_noa",
         "channelId": "UC1RUs08ZfM4Cpfl01e_Tvhg",
@@ -11842,13 +11849,6 @@
         "channelId": "UC_n3V9K0VoEhGSO9ikOE6pw",
         "displayName": "星乃歌カズ/Kaz Hoshinouta",
         "sourceUrl": "https://www.youtube.com/@Hoshinouta_kaz",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@komawarikoma",
-        "channelId": "UC_upTZ0otpptV5KARBsnIPg",
-        "displayName": "小廻こま / Komawari Koma",
-        "sourceUrl": "https://www.youtube.com/@komawarikoma",
         "reason": "batch_limit_reached"
       }
     ]
