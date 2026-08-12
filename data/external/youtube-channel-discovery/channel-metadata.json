@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T13:32:32.845Z",
+  "generatedAt": "2026-08-12T15:11:53.685Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T13:32:32.845Z",
+    "fetchedAt": "2026-08-12T15:11:53.685Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T13:32:32.845Z",
+    "generatedAt": "2026-08-12T15:11:53.685Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,60 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1129,
-      "parseableChannels": 1109,
+      "totalChannels": 1133,
+      "parseableChannels": 1113,
       "realAvatar": 649,
-      "thumbnailFallback": 480,
+      "thumbnailFallback": 484,
       "missingDisplayImage": 0,
-      "missingAvatar": 480,
+      "missingAvatar": 484,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 653,
+      "skipped_collected_evidence": 657,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 633,
+      "batch_limit_reached": 637,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@KanadeIzuru",
+        "channelId": "UCZgOv3YDEs-ZnZWDYVwJdmA",
+        "displayName": "Izuru Ch. 奏手イヅル",
+        "sourceUrl": "https://www.youtube.com/@KanadeIzuru",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@nyanyaochu",
+        "channelId": "UC2lVHvoycjQZork33yImt0A",
+        "displayName": "ニャンヤオチュー",
+        "sourceUrl": "https://www.youtube.com/@nyanyaochu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@neru.sirius",
+        "channelId": "UCSbRTqDYHFrGGPCQj6O3sEw",
+        "displayName": "星刻ねる",
+        "sourceUrl": "https://www.youtube.com/@neru.sirius",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@YakonHibana",
+        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
+        "displayName": "夜紺 火花 / Yakon Hibana",
+        "sourceUrl": "https://www.youtube.com/@YakonHibana",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KoshiraiSofuto",
+        "channelId": "UCaZqsFn0wJRpluZiK-GU70w",
+        "displayName": "小白井そふと -Koshirai Sofuto-",
+        "sourceUrl": "https://www.youtube.com/@KoshiraiSofuto",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
         "channelId": "UC4woRHLSPSz3sAr10XIJK2Q",
@@ -11814,41 +11849,6 @@
         "channelId": "UCHciolv_eI59j40JEp_e9-w",
         "displayName": "妃てぃな / Kisaki Tina",
         "sourceUrl": "https://www.youtube.com/@kisaki_tina",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Miyavi_udon",
-        "channelId": "UC64Qf9294_6lHJR_HG6TOzw",
-        "displayName": "宮守ゆり",
-        "sourceUrl": "https://www.youtube.com/@Miyavi_udon",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aozora_byakumo",
-        "channelId": "UCbdLMRFTRAYjUeYE55Nc-wg",
-        "displayName": "青空びゃくも【うたごえピアノCh】",
-        "sourceUrl": "https://www.youtube.com/@aozora_byakumo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@melty_el",
-        "channelId": "UCuMDk_EWGz9c0R_HfvUjOsw",
-        "displayName": "メルティch",
-        "sourceUrl": "https://www.youtube.com/@melty_el",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MikuroKotonoha",
-        "channelId": "UCl97L7y5bzKR4EeRmKL0lqQ",
-        "displayName": "言ノ葉みくろ / Mikuro Kotonoha🍨🍦",
-        "sourceUrl": "https://www.youtube.com/@MikuroKotonoha",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mashiro3yuki",
-        "channelId": "UC8LJJ1HOq_z8Uaycot6L_Xw",
-        "displayName": "真白ユキ*JPN Vtuber",
-        "sourceUrl": "https://www.youtube.com/@mashiro3yuki",
         "reason": "batch_limit_reached"
       }
     ]
