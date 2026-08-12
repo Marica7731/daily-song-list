@@ -1,4 +1,5 @@
 from __future__ import annotations
+import copy
 import importlib.util
 import gzip
 import http.client
@@ -524,6 +525,92 @@ class Tests(unittest.TestCase):
         self.assertEqual(cursor.itersize,2)
         self.assertEqual(cursor.sizes,[2,2,2])
         self.assertTrue(cursor.closed)
+
+    def test_snapshot_render_limits_previews_before_json_hydration(self):
+        records=[{"type":"video","key":"video-card","occurrences":[
+            {"videoId":f"video-{index}","occurrenceId":f"occ-{index}",
+             "position":index,"item":{"videoId":f"video-{index}"}}
+            for index in range(20)
+        ]}]
+        prepared={"filtered":[{"detail_key":"video-card","row_count":20,
+                              "song_count":20,"video_count":20,
+                              "timestamp_count":20}],
+                  "metadata":[],"candidateRows":[],"parentRevisionId":"parent",
+                  "overlayRevisionIds":(),"aggregateTotals":{"totalCount":1,
+                  "totalOccurrenceCount":20,"totalSongCount":20,"totalVideoCount":20}}
+        hydrated=[]
+        with patch.object(pg_adapter,"_hydrated_generic_ranking_payload",
+                          return_value=records[0]), \
+             patch.object(pg_adapter,"_hydrate_overlay_page_previews",
+                          side_effect=lambda _connection,_candidates,payloads:
+                          hydrated.extend(copy.deepcopy(payloads))), \
+             patch.object(pg_adapter,"_hydrate_runtime_ranking_song_previews"):
+            response=pg_adapter._render_generic_overlay_rankings(
+                object(),"active",prepared,
+                {"range":"all","view":"videos","metric":"occurrences",
+                 "page":"1","pageSize":"30"},preview_hydration_limit=3,
+            )
+        self.assertEqual(len(hydrated),1)
+        self.assertEqual(
+            [item["videoId"] for item in hydrated[0]["occurrences"]],
+            ["video-0","video-1","video-2"],
+        )
+        self.assertEqual(response["totalCount"],1)
+
+    def test_snapshot_builder_enables_pre_hydration_preview_limit(self):
+        builder=pg_materializer.SnapshotPageBuilder.__new__(
+            pg_materializer.SnapshotPageBuilder
+        )
+        builder.connection=object()
+        builder.runtime=None
+        builder.generic_runtime=("active",{})
+        builder.parent=("parent",{})
+        builder.overlay_ids=("overlay",)
+        builder.authoritative_ids=()
+        builder.authoritative_records=None
+        builder.reconciliation_counts={}
+        builder.snapshot_reset_changes={}
+        builder.snapshot_original_group_counts={}
+        rendered={"records":[]}
+        with patch.object(pg_adapter,"_prepare_generic_overlay_rankings",
+                          return_value={}), \
+             patch.object(pg_adapter,"_render_generic_overlay_rankings",
+                          return_value=rendered) as render, \
+             patch.object(pg_adapter,"_project_generic_overlay_video_records",
+                          side_effect=lambda _connection,_overlays,response,**_kwargs:
+                          response):
+            response=builder.build_combo("all","videos","occurrences")(1)
+        self.assertIs(response,rendered)
+        self.assertEqual(
+            render.call_args.kwargs["preview_hydration_limit"],
+            pg_adapter.MAX_RANKING_PREVIEW_VIDEOS,
+        )
+
+    def test_snapshot_writer_periodically_evicts_only_its_temp_file(self):
+        target=self.temp/"cache-drop.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        with patch.object(pg_materializer,"SQLITE_CACHE_DROP_ROWS",2), \
+             patch.object(pg_materializer,"_drop_clean_file_cache",return_value=True) as drop:
+            writer._record_writes(1)
+            writer._record_writes(1)
+        drop.assert_called_once_with(writer.temp)
+        self.assertEqual((writer.cache_drop_attempts,writer.cache_drop_count),(1,1))
+        writer.abort()
+
+    def test_snapshot_file_cache_drop_flushes_before_exact_fadvise(self):
+        target=self.temp/"cache-file.bin"
+        target.write_bytes(b"fixture")
+        with patch.object(pg_materializer.os,"open",return_value=71), \
+             patch.object(pg_materializer.os,"fdatasync") as sync, \
+             patch.object(pg_materializer.os,"posix_fadvise") as fadvise, \
+             patch.object(pg_materializer.os,"close") as close:
+            dropped=pg_materializer._drop_clean_file_cache(target)
+        self.assertTrue(dropped)
+        sync.assert_called_once_with(71)
+        fadvise.assert_called_once_with(
+            71,0,0,pg_materializer.os.POSIX_FADV_DONTNEED,
+        )
+        close.assert_called_once_with(71)
 
     def test_snapshot_empty_source_scope_skips_every_overlay_scan(self):
         persisted={"schemaVersion":1,"found":True,"sourceKey":"source",
