@@ -4887,7 +4887,8 @@ def _hydrate_overlay_page_previews(
 
     The scalar overlay pass deliberately leaves ``payload_json`` unread.  A
     card can nevertheless require the original item image/identity shape, so
-    fetch exactly the at-most-20 previews for each returned card afterwards.
+    fetch exactly the caller-bounded previews afterwards.  Immutable snapshot
+    builds trim to their three-preview contract before this JSON read.
     """
 
     def scalar_key(row: Mapping[str, Any], label: str, strict: bool = True) -> tuple[str, str, str, int] | None:
@@ -9188,6 +9189,8 @@ def _render_generic_overlay_rankings(
     ranking_revision_id: str,
     prepared: Mapping[str, Any],
     query: Mapping[str, Any] | None,
+    *,
+    preview_hydration_limit: int | None = None,
 ) -> dict[str, Any]:
     """Render a fresh page from a cached aggregate without sharing payloads."""
 
@@ -9346,6 +9349,18 @@ def _render_generic_overlay_rankings(
         })
         payload["rank"] = index
         records.append(payload)
+    if preview_hydration_limit is not None:
+        if not 1 <= preview_hydration_limit <= MAX_RANKING_PREVIEW_VIDEOS:
+            raise PostgresAdapterError(
+                "ranking preview hydration limit is invalid"
+            )
+        for record in records:
+            occurrences = record.get("occurrences")
+            if isinstance(occurrences, list):
+                record["occurrences"] = distinct_source_previews(
+                    occurrences,
+                    limit=preview_hydration_limit,
+                )
     _hydrate_overlay_page_previews(connection, candidate_rows, records)
     _hydrate_runtime_ranking_song_previews(
         connection,

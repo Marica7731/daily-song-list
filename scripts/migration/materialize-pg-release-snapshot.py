@@ -43,6 +43,7 @@ SOURCE_SCOPE_VIDEO_BATCH = 2_500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
+SQLITE_CACHE_DROP_ROWS = 2_048
 
 
 def _text(value: Any) -> str:
@@ -160,6 +161,23 @@ def _json_object(value: Any) -> dict[str, Any]:
         if isinstance(parsed, Mapping):
             return dict(parsed)
     return {}
+
+
+def _drop_clean_file_cache(path: Path) -> bool:
+    """Flush and evict clean cache pages for one private build file only."""
+
+    fadvise = getattr(os, "posix_fadvise", None)
+    advice = getattr(os, "POSIX_FADV_DONTNEED", None)
+    if not callable(fadvise) or advice is None:
+        return False
+    descriptor = os.open(path, os.O_RDWR)
+    try:
+        sync = getattr(os, "fdatasync", os.fsync)
+        sync(descriptor)
+        fadvise(descriptor, 0, 0, advice)
+    finally:
+        os.close(descriptor)
+    return True
 
 
 def _integer(value: Any, default: int = 0) -> int:
@@ -1015,22 +1033,42 @@ class CanonicalSnapshotWriter:
         self.source_details = 0
         self.source_occurrences = 0
         self._pending_writes = 0
+        self._cache_drop_pending_writes = 0
+        self.cache_drop_attempts = 0
+        self.cache_drop_count = 0
         self.max_source_write_batch = 0
+
+    def _drop_file_cache(self, reason: str) -> None:
+        self.cache_drop_attempts += 1
+        dropped = _drop_clean_file_cache(self.temp)
+        self.cache_drop_count += int(dropped)
+        self._cache_drop_pending_writes = 0
+        print(
+            f"PG_SNAPSHOT_FILE_CACHE_DROP reason={reason} "
+            f"bytes={self.temp.stat().st_size} dropped={int(dropped)}",
+            flush=True,
+        )
 
     def _record_writes(self, count: int) -> None:
         self._pending_writes += count
+        self._cache_drop_pending_writes += count
         if self._pending_writes >= SQLITE_CHECKPOINT_ROWS:
             # This database is a private temporary candidate until finish()
             # atomically renames it.  Intermediate SQLite commits therefore
             # release dirty pages without weakening release atomicity.
             self.connection.commit()
             self._pending_writes = 0
+        if self._cache_drop_pending_writes >= SQLITE_CACHE_DROP_ROWS:
+            self.connection.commit()
+            self._pending_writes = 0
+            self._drop_file_cache("periodic")
 
     def checkpoint(self, *, shrink: bool = False) -> None:
         self.connection.commit()
         self._pending_writes = 0
         if shrink:
             self.connection.execute("PRAGMA shrink_memory")
+        self._drop_file_cache("checkpoint")
 
     def add_ranking(self, row: Sequence[Any]) -> None:
         self.connection.execute(
@@ -1158,6 +1196,7 @@ class CanonicalSnapshotWriter:
             raise RuntimeError(f"canonical snapshot quick_check failed: {quick}")
         self.connection.commit()
         self.connection.close()
+        self._drop_file_cache("quick-check")
         os.replace(self.temp, self.output)
         return {
             "ranking_rows": self.ranking_rows,
@@ -1165,6 +1204,8 @@ class CanonicalSnapshotWriter:
             "source_occurrences": self.source_occurrences,
             "snapshot_bytes": self.output.stat().st_size,
             "quick_check": quick,
+            "cache_drop_attempts": self.cache_drop_attempts,
+            "cache_drop_count": self.cache_drop_count,
         }
 
     def abort(self) -> None:
@@ -1462,6 +1503,7 @@ class SnapshotPageBuilder:
                 revision_id,
                 prepared,
                 ranking_query(range_id, view, metric, page, scope_key),
+                preview_hydration_limit=adapter.MAX_RANKING_PREVIEW_VIDEOS,
             )
             return adapter._project_generic_overlay_video_records(
                 self.connection,
