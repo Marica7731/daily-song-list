@@ -304,6 +304,7 @@ jobs:
             PGHOST=/var/run/postgresql \
             PGDATABASE=song_rank \
             PGUSER=www-data \
+            PGAPPNAME="dsl-wdc-snapshot-${run_id}-${run_attempt}" \
             PYTHONPATH="$remote_root" \
             /usr/bin/python3 "$remote_root/materialize-pg-release-snapshot.py" \
             --output "$pages_root" \
@@ -367,10 +368,10 @@ jobs:
           echo "VPS2_CANONICAL_RELEASED mode=consumed-in-place serving=$serving_bytes available=$available_after_serving"
 
           # The release is pinned to expected_active by one repeatable-read
-          # transaction.  A later canonical activation must not invalidate that
-          # internally consistent immutable snapshot; record the source drift so
-          # the next scheduled sync can catch up.  Missing or unsafe metadata
-          # still fails closed before any WDC upload.
+          # transaction.  It is internally consistent, but publishing it after
+          # canonical activation would knowingly make the public release stale.
+          # Fail closed before bundle creation or WDC upload; the next sync must
+          # rebuild from the new active revision.
           after_active="$(curl --silent --show-error --fail --max-time 60 \
             http://127.0.0.1:8765/api/meta | \
             python3 -c 'import json,sys; print(json.load(sys.stdin).get("meta",{}).get("active_revision_id", ""))')"
@@ -381,7 +382,8 @@ jobs:
           if [[ "$after_active" == "$expected_active" ]]; then
             echo "SOURCE_ACTIVE_STABLE revision=$expected_active"
           else
-            echo "::warning title=Source active revision advanced::SOURCE_ACTIVE_DRIFT snapshot=$expected_active current=$after_active; publishing the pinned immutable snapshot"
+            echo "SOURCE_ACTIVE_DRIFT snapshot=$expected_active current=$after_active" >&2
+            exit 75
           fi
           {
             echo "### WDC source revision"

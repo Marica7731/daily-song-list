@@ -951,6 +951,58 @@ class Tests(unittest.TestCase):
                     object(),"parent",changes,"artists",{"range":"all"},
                 ))
 
+    def test_snapshot_accepted_reset_parent_projection_is_reused_by_range_and_mode(self):
+        cache={}
+        resets={"video-one":{"video_id":"video-one"}}
+        occurrence_changes=[{"videoId":"video-one","occurrenceId":"occ-one"}]
+        identity_changes=[{"videoId":"video-one","acceptedVideoReset":True}]
+        with patch.object(pg_adapter,"_accepted_video_reset_changes",
+                          return_value=occurrence_changes) as occurrences, \
+             patch.object(pg_adapter,"_accepted_video_reset_identity_changes",
+                          return_value=identity_changes) as identities:
+            first=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all","metric":"occurrences"},
+                cache=cache,
+            )
+            second=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all","metric":"videos",
+                                          "nicheOnly":True},cache=cache,
+            )
+            seven=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"7d","metric":"occurrences"},
+                cache=cache,
+            )
+            identity=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all"},identity_only=True,
+                cache=cache,
+            )
+        self.assertIs(first,second)
+        self.assertIs(first,occurrence_changes)
+        self.assertIs(seven,occurrence_changes)
+        self.assertIs(identity,identity_changes)
+        self.assertEqual(occurrences.call_count,2)
+        identities.assert_called_once()
+        self.assertEqual(len(cache),3)
+
+    def test_snapshot_phase_release_clears_reset_and_scalar_caches(self):
+        key=("parent","all","occurrences",("video-one",))
+        fake_builder=SimpleNamespace(
+            authoritative_records=(1,),
+            reconciliation_counts={("parent","all","artists","artist"):(1,1,1)},
+            snapshot_reset_changes={key:[{"videoId":"video-one"}]},
+        )
+        checkpoints=[]
+        fake_writer=SimpleNamespace(
+            checkpoint=lambda *,shrink:checkpoints.append(shrink),
+        )
+        pg_materializer._release_materializer_memory(
+            fake_writer,fake_builder,phase="rankings",drop_authoritative=True,
+        )
+        self.assertIsNone(fake_builder.authoritative_records)
+        self.assertEqual(fake_builder.reconciliation_counts,{})
+        self.assertEqual(fake_builder.snapshot_reset_changes,{})
+        self.assertEqual(checkpoints,[True])
+
     def test_snapshot_reconciliation_sorts_once_and_fetches_bounded_batches(self):
         columns=("occurrence_id","video_id","song_key","title","artist",
                  "channel_id","channel_handle","channel_name")
@@ -1193,7 +1245,9 @@ class Tests(unittest.TestCase):
         self.assertIn("killed process|memory cgroup",workflow)
         self.assertIn("SOURCE_ACTIVE_STABLE",workflow)
         self.assertIn("SOURCE_ACTIVE_DRIFT",workflow)
-        self.assertIn("publishing the pinned immutable snapshot",workflow)
+        self.assertNotIn("publishing the pinned immutable snapshot",workflow)
+        self.assertIn('echo "SOURCE_ACTIVE_DRIFT snapshot=$expected_active current=$after_active" >&2',workflow)
+        self.assertIn("PGAPPNAME=\"dsl-wdc-snapshot-${run_id}-${run_attempt}\"",workflow)
         self.assertIn("SOURCE_ACTIVE_INVALID",workflow)
         self.assertNotIn("ACTIVE_MISMATCH after build",workflow)
         self.assertIn('[[ "$DEPLOYED_STATUS" == "ok"',workflow)
