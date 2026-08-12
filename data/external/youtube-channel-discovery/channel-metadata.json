@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T19:18:38.744Z",
+  "generatedAt": "2026-08-12T21:02:08.062Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T19:18:38.744Z",
+    "fetchedAt": "2026-08-12T21:02:08.062Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T19:18:38.744Z",
+    "generatedAt": "2026-08-12T21:02:08.062Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1136,
-      "parseableChannels": 1116,
+      "totalChannels": 1137,
+      "parseableChannels": 1117,
       "realAvatar": 649,
-      "thumbnailFallback": 487,
+      "thumbnailFallback": 488,
       "missingDisplayImage": 0,
-      "missingAvatar": 487,
+      "missingAvatar": 488,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 660
+      "skipped_collected_evidence": 661,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 640,
+      "batch_limit_reached": 641,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@mei0bake",
+        "channelId": "UCYzW2KfGcoG5CeTCnM3dgVA",
+        "displayName": "鳴",
+        "sourceUrl": "https://www.youtube.com/@mei0bake",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@CharWitch",
+        "channelId": "UCiYmrUY_048YmG1yQzTBwtQ",
+        "displayName": "シャル・ウィッチ / Char Witch",
+        "sourceUrl": "https://www.youtube.com/@CharWitch",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@TukuneDuck",
+        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
+        "displayName": "月音-TUKUNE-",
+        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@ShichitembattoinAegis",
         "channelId": "UCrtj7mTumU4Pg9sdzfGZm6Q",
@@ -11761,13 +11782,6 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@TukuneDuck",
-        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
-        "displayName": "月音-TUKUNE-",
-        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
-        "reason": "batch_limit_reached"
-      },
-      {
         "handle": "/@MonicaMelodia",
         "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
         "displayName": "Monica Ch. モニカ・メロディア",
@@ -11835,20 +11849,6 @@
         "channelId": "UCekc8SI533NI675r9aCBRcQ",
         "displayName": "眠雲ツクリ / NemukumoTsukuri",
         "sourceUrl": "https://www.youtube.com/@NemukumoTsukuri",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@OtonoseRaco",
-        "channelId": "UCH-SLA_jpPhM2lzdZjZDxjQ",
-        "displayName": "音ノ瀬らこ / Otonose Raco",
-        "sourceUrl": "https://www.youtube.com/@OtonoseRaco",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@v_sakurarina",
-        "channelId": "UCxAVi_6J0oxobmkQYgr5H0Q",
-        "displayName": "サクラリナ / SakuraRina 🥩🧈",
-        "sourceUrl": "https://www.youtube.com/@v_sakurarina",
         "reason": "batch_limit_reached"
       }
     ]
