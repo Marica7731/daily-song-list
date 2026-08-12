@@ -809,6 +809,11 @@ def _release_materializer_memory(
     )
     if isinstance(snapshot_original_group_counts, dict):
         snapshot_original_group_counts.clear()
+    snapshot_vtuber_source_totals = getattr(
+        builder, "snapshot_vtuber_source_totals", None,
+    )
+    if isinstance(snapshot_vtuber_source_totals, dict):
+        snapshot_vtuber_source_totals.clear()
     for name in (
         "_GENERIC_RANKING_PREPARATION_CACHE",
         "_GENERIC_META_COUNTS_CACHE",
@@ -1404,6 +1409,12 @@ class SnapshotPageBuilder:
         self.snapshot_original_group_counts: dict[
             tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
         ] = {}
+        # Physical source/detail consistency is immutable within this one
+        # repeatable-read snapshot.  Cache only the two verified integers per
+        # parent source; online requests do not receive this cache.
+        self.snapshot_vtuber_source_totals: dict[
+            tuple[str, str, str], tuple[int, int]
+        ] = {}
 
         runtime_probe = getattr(adapter, "_runtime_projection_revision", None)
         if callable(runtime_probe):
@@ -1495,6 +1506,7 @@ class SnapshotPageBuilder:
             reconciliation_counts=self.reconciliation_counts,
             snapshot_reset_changes=self.snapshot_reset_changes,
             snapshot_original_group_counts=self.snapshot_original_group_counts,
+            snapshot_vtuber_source_totals=self.snapshot_vtuber_source_totals,
         )
 
         def render(page: int) -> Mapping[str, Any]:
