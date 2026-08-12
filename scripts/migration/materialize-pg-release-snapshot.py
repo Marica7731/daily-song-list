@@ -180,6 +180,35 @@ def _drop_clean_file_cache(path: Path) -> bool:
     return True
 
 
+def _write_json_file_and_drop_cache(path: Path, value: Any) -> bool:
+    """Stream one private JSON artifact and evict only its clean file pages.
+
+    Ranking snapshots can contain hundreds of multi-megabyte page files.  A
+    plain ``Path.write_text(_json_text(...))`` both allocates the complete
+    serialized string and leaves every written page charged to the isolated
+    materializer cgroup.  Keep the bytes identical to ``_json_text`` while
+    writing incrementally, then flush and advise away only this exact file.
+    """
+
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        json.dump(
+            value,
+            stream,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            default=_json_default,
+        )
+        stream.flush()
+        fadvise = getattr(os, "posix_fadvise", None)
+        advice = getattr(os, "POSIX_FADV_DONTNEED", None)
+        if not callable(fadvise) or advice is None:
+            return False
+        sync = getattr(os, "fdatasync", os.fsync)
+        sync(stream.fileno())
+        fadvise(stream.fileno(), 0, 0, advice)
+        return True
+
+
 def _integer(value: Any, default: int = 0) -> int:
     try:
         return int(value)
@@ -1571,6 +1600,8 @@ def materialize(
         builder = SnapshotPageBuilder(connection)
         writer = CanonicalSnapshotWriter(snapshot_output)
         written = 0
+        static_page_cache_drop_attempts = 0
+        static_page_cache_drop_count = 0
         scope_counts: dict[str, int] = {}
         source_keys: dict[str, set[str]] = {range_id: set() for range_id in RANGES}
         scoped_source_keys: dict[str, set[str]] = {range_id: set() for range_id in RANGES}
@@ -1655,13 +1686,22 @@ def materialize(
                                 compact_payload["records"] = compact_records
                                 compact_payload["compact"] = True
                                 target = target_dir / f"page-{page:04d}.json"
-                                target.write_text(
-                                    _json_text(compact_payload),
-                                    encoding="utf-8",
+                                static_page_cache_drop_attempts += 1
+                                static_page_cache_drop_count += int(
+                                    _write_json_file_and_drop_cache(
+                                        target,
+                                        compact_payload,
+                                    )
                                 )
                                 written += 1
                                 if written % 25 == 0:
-                                    print(f"PG_SNAPSHOT_WRITTEN files={written}", flush=True)
+                                    print(
+                                        f"PG_SNAPSHOT_WRITTEN files={written} "
+                                        f"page_cache_drops={static_page_cache_drop_count}/"
+                                        f"{static_page_cache_drop_attempts}",
+                                        flush=True,
+                                    )
+                                compact_payload = None
                             del compact_records
                         print(
                             f"PG_SNAPSHOT_COMBO {range_id}/{view}/{metric}/{scope_key} "
