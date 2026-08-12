@@ -681,6 +681,9 @@ def _release_materializer_memory(
     reconciliation_counts = getattr(builder, "reconciliation_counts", None)
     if isinstance(reconciliation_counts, dict):
         reconciliation_counts.clear()
+    snapshot_reset_changes = getattr(builder, "snapshot_reset_changes", None)
+    if isinstance(snapshot_reset_changes, dict):
+        snapshot_reset_changes.clear()
     for name in (
         "_GENERIC_RANKING_PREPARATION_CACHE",
         "_GENERIC_META_COUNTS_CACHE",
@@ -1252,6 +1255,9 @@ class SnapshotPageBuilder:
         self.reconciliation_counts: dict[
             tuple[str, str, str, str], tuple[int, int, int]
         ] = {}
+        self.snapshot_reset_changes: dict[
+            tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
+        ] = {}
 
         runtime_probe = getattr(adapter, "_runtime_projection_revision", None)
         if callable(runtime_probe):
@@ -1341,6 +1347,7 @@ class SnapshotPageBuilder:
             self.parent,
             options,
             reconciliation_counts=self.reconciliation_counts,
+            snapshot_reset_changes=self.snapshot_reset_changes,
         )
 
         def render(page: int) -> Mapping[str, Any]:

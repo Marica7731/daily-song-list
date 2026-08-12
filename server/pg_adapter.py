@@ -2140,6 +2140,64 @@ def _accepted_video_reset_identity_changes(
     return changes
 
 
+def _snapshot_accepted_video_reset_changes(
+    connection,
+    parent_revision_id: str,
+    resets: Mapping[str, Mapping[str, Any]],
+    options: Mapping[str, Any],
+    *,
+    identity_only: bool = False,
+    cache: MutableMapping[
+        tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
+    ] | None = None,
+) -> list[dict[str, Any]]:
+    """Reuse one accepted-reset parent projection inside one immutable snapshot.
+
+    A release materializer asks for the same all-range reset set once per
+    metric and persisted filter scope.  Re-reading every affected parent
+    occurrence for each of those combinations dominated the offline build.
+    The caller owns ``cache`` for exactly one repeatable-read transaction and
+    clears it before source export; ordinary API requests pass no cache and
+    retain the existing independent-query behaviour.
+
+    The preparation path enriches reset dictionaries with immutable channel
+    evidence and exact per-video/group counts.  Those updates are idempotent,
+    so returning the same list within the same database snapshot is both
+    bounded and semantically identical to rebuilding it.
+    """
+
+    video_ids = tuple(sorted({
+        _text(video_id) for video_id in resets if _text(video_id)
+    }))
+    mode = "identity" if identity_only else "occurrences"
+    range_id = _text(options.get("range")) or "all"
+    key = (parent_revision_id, range_id, mode, video_ids)
+    if cache is not None and key in cache:
+        print(
+            f"PG_SNAPSHOT_RESET_CACHE hit range={range_id} "
+            f"mode={mode} videos={len(video_ids)}",
+            flush=True,
+        )
+        return cache[key]
+    changes = (
+        _accepted_video_reset_identity_changes(
+            connection, parent_revision_id, resets,
+        )
+        if identity_only
+        else _accepted_video_reset_changes(
+            connection, parent_revision_id, resets, options,
+        )
+    )
+    if cache is not None:
+        cache[key] = changes
+        print(
+            f"PG_SNAPSHOT_RESET_CACHE miss range={range_id} "
+            f"mode={mode} videos={len(video_ids)} changes={len(changes)}",
+            flush=True,
+        )
+    return changes
+
+
 def _source_query_for_channel(key: str, metadata: Mapping[str, Any], query: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Infer a vtuber source key's range without changing the endpoint URL."""
 
@@ -7171,6 +7229,9 @@ def _prepare_generic_overlay_rankings(
     reconciliation_counts: MutableMapping[
         tuple[str, str, str, str], tuple[int, int, int]
     ] | None = None,
+    snapshot_reset_changes: MutableMapping[
+        tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
+    ] | None = None,
 ) -> Mapping[str, Any]:
     """Build the page-independent generic overlay aggregate once per spec."""
 
@@ -7528,14 +7589,13 @@ def _prepare_generic_overlay_rankings(
             canonical_rows.append(canonical)
         candidate_rows = canonical_rows
         all_candidate_rows = tuple(candidate_rows)
-    reset_changes = (
-        _accepted_video_reset_identity_changes(
-            connection, parent[0], accepted_video_resets,
-        )
-        if direct_overlay_revision_ids
-        else _accepted_video_reset_changes(
-            connection, parent[0], accepted_video_resets, options,
-        )
+    reset_changes = _snapshot_accepted_video_reset_changes(
+        connection,
+        parent[0],
+        accepted_video_resets,
+        options,
+        identity_only=bool(direct_overlay_revision_ids),
+        cache=snapshot_reset_changes,
     )
     runtime_changes_all = _runtime_tombstones(
         connection,
