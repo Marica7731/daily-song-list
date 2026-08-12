@@ -1062,6 +1062,8 @@ class CanonicalSnapshotWriter:
           search_text TEXT NOT NULL,channel_search_text TEXT NOT NULL,
           PRIMARY KEY(range_id,view,metric,scope_key,rank)
         ) WITHOUT ROWID;
+        CREATE INDEX ranking_rows_source_lookup
+          ON ranking_rows(range_id,detail_key);
         """)
         self.ranking_rows = 0
         self.source_details = 0
