@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T15:11:53.685Z",
+  "generatedAt": "2026-08-12T16:12:56.906Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T15:11:53.685Z",
+    "fetchedAt": "2026-08-12T16:12:56.906Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T15:11:53.685Z",
+    "generatedAt": "2026-08-12T16:12:56.906Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1133,
-      "parseableChannels": 1113,
+      "totalChannels": 1134,
+      "parseableChannels": 1114,
       "realAvatar": 649,
-      "thumbnailFallback": 484,
+      "thumbnailFallback": 485,
       "missingDisplayImage": 0,
-      "missingAvatar": 484,
+      "missingAvatar": 485,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 657,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 658
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 637,
+      "batch_limit_reached": 638,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@kanno_noa",
+        "channelId": "UC1RUs08ZfM4Cpfl01e_Tvhg",
+        "displayName": "菅野ノア / Kanno Noa",
+        "sourceUrl": "https://www.youtube.com/@kanno_noa",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KanadeIzuru",
         "channelId": "UCZgOv3YDEs-ZnZWDYVwJdmA",
@@ -11842,13 +11849,6 @@
         "channelId": "UC_upTZ0otpptV5KARBsnIPg",
         "displayName": "小廻こま / Komawari Koma",
         "sourceUrl": "https://www.youtube.com/@komawarikoma",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kisaki_tina",
-        "channelId": "UCHciolv_eI59j40JEp_e9-w",
-        "displayName": "妃てぃな / Kisaki Tina",
-        "sourceUrl": "https://www.youtube.com/@kisaki_tina",
         "reason": "batch_limit_reached"
       }
     ]
