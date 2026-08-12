@@ -27,6 +27,7 @@ RANGES = ("7d", "all")
 VIEWS = ("songs", "artists", "vtubers", "videos")
 METRICS = ("occurrences", "songs", "videos")
 PAGE_SIZE = 200
+SOURCE_EXPORT_VIDEO_PAGE_SIZE = 30
 SCOPES = (
     ("all", False, False),
     ("niche", True, False),
@@ -1067,11 +1068,15 @@ class CanonicalSnapshotWriter:
             self.temp.unlink(missing_ok=True)
 
 
-def _source_query(range_id: str, page: int) -> dict[str, str]:
+def _source_query(
+    range_id: str,
+    page: int,
+    page_size: int = PAGE_SIZE,
+) -> dict[str, str]:
     return {
         "range": range_id,
         "page": str(page),
-        "pageSize": str(PAGE_SIZE),
+        "pageSize": str(page_size),
     }
 
 
@@ -1091,7 +1096,11 @@ def export_source(
     written_occurrences = 0
     page = 1
     while expected_page_count is None or page <= expected_page_count:
-        query = _source_query(range_id, page)
+        query = _source_query(
+            range_id,
+            page,
+            SOURCE_EXPORT_VIDEO_PAGE_SIZE,
+        )
         payload = dict(
             payload_loader(source_key, query)
             if payload_loader is not None
@@ -1117,7 +1126,7 @@ def export_source(
         occurrence_count = _integer(payload.get("totalOccurrenceCount"))
         if page_count < 1 or _integer(payload.get("page")) != page:
             raise RuntimeError(f"source pagination is invalid: {range_id}/{source_key}/{page}")
-        if _integer(payload.get("pageSize")) != PAGE_SIZE:
+        if _integer(payload.get("pageSize")) != SOURCE_EXPORT_VIDEO_PAGE_SIZE:
             raise RuntimeError(f"source page size changed: {range_id}/{source_key}/{page}")
         if expected_page_count is None:
             expected_page_count = page_count
@@ -1149,6 +1158,10 @@ def export_source(
             stream_state,
             (item for item in page_occurrences if isinstance(item, Mapping)),
         )
+        # Do not retain one fully hydrated JSON page while the adapter builds
+        # the next page.  Ranking pages use 200 rows, but source pages expand
+        # every occurrence for each selected video and can be hundreds of MiB.
+        del page_occurrences, page_videos, current_detail, payload
         page += 1
     if len(seen_videos) != expected_video_count:
         raise RuntimeError(
