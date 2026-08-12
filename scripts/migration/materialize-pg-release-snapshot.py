@@ -684,6 +684,11 @@ def _release_materializer_memory(
     snapshot_reset_changes = getattr(builder, "snapshot_reset_changes", None)
     if isinstance(snapshot_reset_changes, dict):
         snapshot_reset_changes.clear()
+    snapshot_original_group_counts = getattr(
+        builder, "snapshot_original_group_counts", None,
+    )
+    if isinstance(snapshot_original_group_counts, dict):
+        snapshot_original_group_counts.clear()
     for name in (
         "_GENERIC_RANKING_PREPARATION_CACHE",
         "_GENERIC_META_COUNTS_CACHE",
@@ -1258,6 +1263,9 @@ class SnapshotPageBuilder:
         self.snapshot_reset_changes: dict[
             tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
         ] = {}
+        self.snapshot_original_group_counts: dict[
+            tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+        ] = {}
 
         runtime_probe = getattr(adapter, "_runtime_projection_revision", None)
         if callable(runtime_probe):
@@ -1348,6 +1356,7 @@ class SnapshotPageBuilder:
             options,
             reconciliation_counts=self.reconciliation_counts,
             snapshot_reset_changes=self.snapshot_reset_changes,
+            snapshot_original_group_counts=self.snapshot_original_group_counts,
         )
 
         def render(page: int) -> Mapping[str, Any]:

@@ -3559,6 +3559,11 @@ def _enrich_runtime_original_group_counts(
     parent_revision_id: str,
     candidate_rows: Sequence[Mapping[str, Any]],
     changes: Sequence[dict[str, Any]],
+    *,
+    range_id: str,
+    parent_count_cache: MutableMapping[
+        tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+    ] | None = None,
 ) -> None:
     """Bind videoCount subtraction to the exact pre-curation video/song group."""
 
@@ -3582,22 +3587,57 @@ def _enrich_runtime_original_group_counts(
             _overlay_song_group_norm(row.get("artist")),
         )
         candidate_counts[key] += 1
-    parent_counts: dict[tuple[str, str, str], int] = defaultdict(int)
-    for row in _rows(
-            connection,
-            """
-            SELECT video_id, title, artist, COUNT(*) AS occurrence_count
-            FROM runtime_occurrences
-            WHERE revision_id = %s AND video_id = ANY(%s)
-            GROUP BY video_id, title, artist
-            """,
-            [parent_revision_id, sorted(target_video_ids)],
-        ):
-        parent_counts[(
-            _text(row.get("video_id")),
-            _overlay_song_group_norm(row.get("title")),
-            _overlay_song_group_norm(row.get("artist")),
-        )] += int(row.get("occurrence_count") or 0)
+    selected_range = _text(range_id)
+    if selected_range not in SUPPORTED_RANGES:
+        raise PostgresAdapterError("original group count range is invalid")
+    ordered_target_video_ids = tuple(sorted(target_video_ids))
+    cache_key = (parent_revision_id, selected_range, ordered_target_video_ids)
+    cached_parent_counts = (
+        parent_count_cache.get(cache_key)
+        if parent_count_cache is not None
+        else None
+    )
+    if cached_parent_counts is None:
+        parent_counts: dict[tuple[str, str, str], int] = defaultdict(int)
+        for row in _rows(
+                connection,
+                """
+                SELECT video_id, title, artist, COUNT(*) AS occurrence_count
+                FROM runtime_occurrences
+                WHERE revision_id = %s
+                  AND (range_id = ANY(%s) OR range_id IS NULL)
+                  AND video_id = ANY(%s)
+                GROUP BY video_id, title, artist
+                """,
+                [
+                    parent_revision_id,
+                    [selected_range, ""],
+                    list(ordered_target_video_ids),
+                ],
+            ):
+            parent_counts[(
+                _text(row.get("video_id")),
+                _overlay_song_group_norm(row.get("title")),
+                _overlay_song_group_norm(row.get("artist")),
+            )] += int(row.get("occurrence_count") or 0)
+        cached_parent_counts = dict(parent_counts)
+        if parent_count_cache is not None:
+            parent_count_cache[cache_key] = cached_parent_counts
+            print(
+                f"PG_SNAPSHOT_PARENT_COUNT_CACHE miss "
+                f"range={selected_range} "
+                f"videos={len(ordered_target_video_ids)} "
+                f"groups={len(cached_parent_counts)}",
+                flush=True,
+            )
+    elif parent_count_cache is not None:
+        print(
+            f"PG_SNAPSHOT_PARENT_COUNT_CACHE hit "
+            f"range={selected_range} "
+            f"videos={len(ordered_target_video_ids)} "
+            f"groups={len(cached_parent_counts)}",
+            flush=True,
+        )
     for change in changes:
         video_id = _text(change.get("videoId") or change.get("video_id"))
         key = (
@@ -3608,7 +3648,7 @@ def _enrich_runtime_original_group_counts(
         change["originalGroupVideoOccurrenceCount"] = (
             candidate_counts.get(key, 0)
             if video_id in selected_video_ids
-            else parent_counts.get(key, 0)
+            else cached_parent_counts.get(key, 0)
         )
 
 
@@ -7232,6 +7272,9 @@ def _prepare_generic_overlay_rankings(
     snapshot_reset_changes: MutableMapping[
         tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
     ] | None = None,
+    snapshot_original_group_counts: MutableMapping[
+        tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+    ] | None = None,
 ) -> Mapping[str, Any]:
     """Build the page-independent generic overlay aggregate once per spec."""
 
@@ -8110,11 +8153,13 @@ def _prepare_generic_overlay_rankings(
             connection,
             parent[0],
             generic_candidate_rows,
-            # Accepted reset removals are immediately assigned exact
-            # per-video/group counts from ``generic_reset_changes`` below.
-            # Re-reading every selected reset video from the full parent here
-            # made an ordinary page scan hundreds of videos for no new value.
+            # Accepted resets get exact counts from ``generic_reset_changes``
+            # below.  Only the remaining runtime curation needs this parent
+            # lookup; snapshot callers reuse its range-scoped result across
+            # metric/filter combinations for the same exact video set.
             generic_runtime_changes,
+            range_id=options["range"],
+            parent_count_cache=snapshot_original_group_counts,
         )
     phase_started = _phase_trace(
         "enrich",
