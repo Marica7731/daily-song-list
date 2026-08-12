@@ -1022,6 +1022,19 @@ class Tests(unittest.TestCase):
         self.assertEqual((writer.cache_drop_attempts,writer.cache_drop_count),(1,1))
         writer.abort()
 
+    def test_snapshot_source_search_update_uses_exact_lookup_index(self):
+        target=self.temp/"source-lookup.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        plan=writer.connection.execute(
+            "EXPLAIN QUERY PLAN UPDATE ranking_rows SET search_text=? "
+            "WHERE range_id=? AND detail_key=?",
+            ("fixture","all","source"),
+        ).fetchall()
+        detail=" ".join(str(column) for row in plan for column in row)
+        self.assertIn("ranking_rows_source_lookup",detail)
+        self.assertNotIn("SCAN ranking_rows",detail)
+        writer.abort()
+
     def test_snapshot_file_cache_drop_flushes_before_exact_fadvise(self):
         target=self.temp/"cache-file.bin"
         target.write_bytes(b"fixture")
