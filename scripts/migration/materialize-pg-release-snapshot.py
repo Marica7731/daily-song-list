@@ -657,14 +657,60 @@ def _bounded_text(parts: Iterable[Any], limit: int) -> str:
     return accumulator.text
 
 
-def _current_rss_kib() -> int:
+def _current_process_status_kib(field: str) -> int:
     try:
         for line in Path("/proc/self/status").read_text(encoding="utf-8").splitlines():
-            if line.startswith("VmRSS:"):
+            if line.startswith(f"{field}:"):
                 return int(line.split()[1])
     except (OSError, ValueError, IndexError):
         pass
     return -1
+
+
+def _current_rss_kib() -> int:
+    return _current_process_status_kib("VmRSS")
+
+
+def _current_swap_kib() -> int:
+    return _current_process_status_kib("VmSwap")
+
+
+def _trim_process_heap() -> bool:
+    """Collect unreachable graphs and return idle glibc pages to the host."""
+
+    gc.collect()
+    try:
+        import ctypes
+
+        trim = getattr(ctypes.CDLL(None), "malloc_trim", None)
+        if trim is None:
+            return False
+        trim.argtypes = [ctypes.c_size_t]
+        trim.restype = ctypes.c_int
+        return bool(trim(0))
+    except (AttributeError, ImportError, OSError, TypeError):
+        return False
+
+
+def _release_ranking_combo_memory(
+    *,
+    range_id: str,
+    view: str,
+    metric: str,
+    scope_key: str,
+) -> None:
+    """Release one prepared ranking aggregate before building the next one."""
+
+    trimmed = _trim_process_heap()
+    rss_kib = _current_rss_kib()
+    swap_kib = _current_swap_kib()
+    print(
+        f"PG_SNAPSHOT_COMBO_RELEASE {range_id}/{view}/{metric}/{scope_key} "
+        f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
+        f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
+        f"trimmed={int(trimmed)}",
+        flush=True,
+    )
 
 
 def _release_materializer_memory(
@@ -699,19 +745,14 @@ def _release_materializer_memory(
         if callable(clear):
             clear()
     writer.checkpoint(shrink=True)
-    gc.collect()
-    try:
-        import ctypes
-
-        trim = getattr(ctypes.CDLL(None), "malloc_trim", None)
-        if trim is not None:
-            trim(0)
-    except (ImportError, OSError, TypeError):
-        pass
+    trimmed = _trim_process_heap()
     rss_kib = _current_rss_kib()
+    swap_kib = _current_swap_kib()
     print(
         f"PG_SNAPSHOT_MEMORY_RELEASE phase={phase} "
-        f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'}",
+        f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
+        f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
+        f"trimmed={int(trimmed)}",
         flush=True,
     )
 
@@ -1517,8 +1558,24 @@ def materialize(
                             f"total={total} pages={page_count}",
                             flush=True,
                         )
-                        del render
-                        gc.collect()
+                        # The render closure owns the page-independent aggregate,
+                        # which can contain tens of thousands of Python objects.
+                        # Drop every page-local reference before trimming the
+                        # allocator so the next one of 96 combinations cannot
+                        # accumulate idle heap or push a shared VPS into swap.
+                        render = None
+                        first = None
+                        payload = None
+                        records = None
+                        compact_payload = None
+                        raw = None
+                        compact_raw = None
+                        _release_ranking_combo_memory(
+                            range_id=range_id,
+                            view=view,
+                            metric=metric,
+                            scope_key=scope_key,
+                        )
 
         _release_materializer_memory(writer, builder, phase="rankings")
         bulk_exported_ranges: set[str] = set()
