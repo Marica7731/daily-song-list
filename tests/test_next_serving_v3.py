@@ -3,6 +3,7 @@ import importlib.util
 import gzip
 import http.client
 import json
+import math
 import threading
 from contextlib import closing
 import os
@@ -166,7 +167,8 @@ def fake_pg_meta(_connection):
 
 def fake_pg_source(_connection,key,query):
     range_id=str(query.get("range") or "all");page=int(query.get("page") or 1)
-    start=0 if page==1 else 200;stop=200 if page==1 else 201
+    page_size=int(query.get("pageSize") or 30);total=201
+    start=(page-1)*page_size;stop=min(start+page_size,total)
     occurrences=[]
     for index in range(start,stop):
         occurrences.append({"videoId":f"video-{range_id}-{index:03d}","title":f"Video {index}",
@@ -178,7 +180,7 @@ def fake_pg_source(_connection,key,query):
             "sourceDetailKey":key,"rangeId":range_id,"count":201,"videoCount":201,
             "timestampCount":201,"occurrences":occurrences}
     return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
-            "page":page,"pageSize":200,"pageCount":2,"totalCount":201,
+            "page":page,"pageSize":page_size,"pageCount":math.ceil(total/page_size),"totalCount":total,
             "totalVideoCount":201,"totalOccurrenceCount":201}
 
 
@@ -677,9 +679,12 @@ class Tests(unittest.TestCase):
             def add_source_occurrences(self,state,values):
                 rows=list(values);self.page_sizes.append(len(rows));state["position"]+=len(rows);return len(rows)
             def finish_source(self,state):self.position=state["position"];return self.position
+        requested_page_sizes=[]
         def load(key,query):
+            requested_page_sizes.append(int(query["pageSize"]))
             page=int(query["page"]);occurrences=pages[page]
-            return {"found":True,"sourceKey":key,"page":page,"pageSize":200,
+            return {"found":True,"sourceKey":key,"page":page,
+                    "pageSize":pg_materializer.SOURCE_EXPORT_VIDEO_PAGE_SIZE,
                     "pageCount":2,"totalVideoCount":3,"totalOccurrenceCount":4,
                     "record":{"type":"song","sourceDetailKey":key,"rangeId":"all",
                               "occurrences":occurrences}}
@@ -690,6 +695,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(writer.started,1)
         self.assertEqual(writer.page_sizes,[3,1])
         self.assertEqual(writer.position,4)
+        self.assertEqual(requested_page_sizes,[30,30])
 
     def test_snapshot_writer_bounds_large_source_write_batches(self):
         target=self.temp/"streaming-source.sqlite"
