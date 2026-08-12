@@ -984,12 +984,63 @@ class Tests(unittest.TestCase):
         identities.assert_called_once()
         self.assertEqual(len(cache),3)
 
+    def test_snapshot_parent_group_counts_reuse_exact_video_set(self):
+        cache={}
+        first_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
+        second_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
+        seven_day_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
+        other_change={"videoId":"video-two","title":"Other Song","artist":"Artist"}
+        def parent_rows(_connection,_sql,params):
+            count=1 if params[1][0]=="7d" else 3
+            return [{"video_id":params[2][0],"title":"Old Song","artist":"Artist",
+                     "occurrence_count":count}]
+        with patch.object(pg_adapter,"_rows",side_effect=parent_rows) as rows:
+            pg_adapter._enrich_runtime_original_group_counts(
+                object(),"parent",[],[first_change],range_id="all",
+                parent_count_cache=cache,
+            )
+            pg_adapter._enrich_runtime_original_group_counts(
+                object(),"parent",[],[second_change],range_id="all",
+                parent_count_cache=cache,
+            )
+            pg_adapter._enrich_runtime_original_group_counts(
+                object(),"parent",[],[seven_day_change],range_id="7d",
+                parent_count_cache=cache,
+            )
+            pg_adapter._enrich_runtime_original_group_counts(
+                object(),"parent",[],[other_change],range_id="all",
+                parent_count_cache=cache,
+            )
+        self.assertEqual(rows.call_count,3)
+        self.assertEqual(
+            rows.call_args_list[0].args[2],
+            ["parent",["all",""],["video-one"]],
+        )
+        self.assertEqual(
+            rows.call_args_list[1].args[2],
+            ["parent",["7d",""],["video-one"]],
+        )
+        self.assertEqual(
+            rows.call_args_list[2].args[2],
+            ["parent",["all",""],["video-two"]],
+        )
+        self.assertEqual(first_change["originalGroupVideoOccurrenceCount"],3)
+        self.assertEqual(second_change["originalGroupVideoOccurrenceCount"],3)
+        self.assertEqual(seven_day_change["originalGroupVideoOccurrenceCount"],1)
+        self.assertEqual(other_change["originalGroupVideoOccurrenceCount"],0)
+        self.assertEqual(len(cache),3)
+
     def test_snapshot_phase_release_clears_reset_and_scalar_caches(self):
         key=("parent","all","occurrences",("video-one",))
         fake_builder=SimpleNamespace(
             authoritative_records=(1,),
             reconciliation_counts={("parent","all","artists","artist"):(1,1,1)},
             snapshot_reset_changes={key:[{"videoId":"video-one"}]},
+            snapshot_original_group_counts={
+                ("parent","all",("video-one",)):{
+                    ("video-one","song","artist"):1,
+                },
+            },
         )
         checkpoints=[]
         fake_writer=SimpleNamespace(
@@ -1001,6 +1052,7 @@ class Tests(unittest.TestCase):
         self.assertIsNone(fake_builder.authoritative_records)
         self.assertEqual(fake_builder.reconciliation_counts,{})
         self.assertEqual(fake_builder.snapshot_reset_changes,{})
+        self.assertEqual(fake_builder.snapshot_original_group_counts,{})
         self.assertEqual(checkpoints,[True])
 
     def test_snapshot_reconciliation_sorts_once_and_fetches_bounded_batches(self):
