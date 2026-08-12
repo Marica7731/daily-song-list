@@ -261,6 +261,7 @@ jobs:
               --uid=www-data \
               --gid=www-data \
               --property=MemoryMax=700M \
+              --property=MemorySwapMax=256M \
               --property=LimitFSIZE=6G \
               --property=Nice=15 \
               --property=CPUWeight=10 \
@@ -301,6 +302,8 @@ jobs:
           # transaction.  Pages, every filtered scope, and complete sources
           # are emitted from that one immutable database view.
           run_isolated snapshot /usr/bin/env \
+            MALLOC_ARENA_MAX=2 \
+            MALLOC_TRIM_THRESHOLD_=131072 \
             PGHOST=/var/run/postgresql \
             PGDATABASE=song_rank \
             PGUSER=www-data \

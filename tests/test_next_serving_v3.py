@@ -1055,6 +1055,23 @@ class Tests(unittest.TestCase):
         self.assertEqual(fake_builder.snapshot_original_group_counts,{})
         self.assertEqual(checkpoints,[True])
 
+    def test_ranking_combo_release_trims_heap_and_reports_rss_and_swap(self):
+        with (
+            patch.object(pg_materializer,"_trim_process_heap",return_value=True) as trim,
+            patch.object(pg_materializer,"_current_rss_kib",return_value=123456),
+            patch.object(pg_materializer,"_current_swap_kib",return_value=789),
+            patch("builtins.print") as printer,
+        ):
+            pg_materializer._release_ranking_combo_memory(
+                range_id="all",view="videos",metric="songs",scope_key="visible",
+            )
+        trim.assert_called_once_with()
+        printer.assert_called_once_with(
+            "PG_SNAPSHOT_COMBO_RELEASE all/videos/songs/visible "
+            "rss_kib=123456 swap_kib=789 trimmed=1",
+            flush=True,
+        )
+
     def test_snapshot_reconciliation_sorts_once_and_fetches_bounded_batches(self):
         columns=("occurrence_id","video_id","song_key","title","artist",
                  "channel_id","channel_handle","channel_name")
@@ -1292,6 +1309,10 @@ class Tests(unittest.TestCase):
         self.assertIn("systemd-run --quiet --wait --pipe --collect",workflow)
         self.assertIn("--property=MemoryMax=700M",workflow)
         self.assertNotIn("--property=MemoryMax=701M",workflow)
+        self.assertIn("--property=MemorySwapMax=256M",workflow)
+        self.assertNotIn("--property=MemorySwapMax=257M",workflow)
+        self.assertIn("MALLOC_ARENA_MAX=2",workflow)
+        self.assertIn("MALLOC_TRIM_THRESHOLD_=131072",workflow)
         self.assertIn("--property=LimitFSIZE=6G",workflow)
         self.assertIn("RUN_ISOLATED_FAILED phase=$phase",workflow)
         self.assertIn("killed process|memory cgroup",workflow)
