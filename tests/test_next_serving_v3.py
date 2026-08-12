@@ -329,7 +329,9 @@ class Tests(unittest.TestCase):
         self.assertIn("computed content hash mismatch",degraded["errors"])
 
     def test_installer_rolls_back_when_first_symlink_switch_fails(self):
-        previous="previous-release";(self.releases/previous).mkdir()
+        previous="1"*64;(self.releases/previous).mkdir()
+        for name in ("manifest.json","meta.json","serving.sqlite"):
+            (self.releases/previous/name).write_bytes(b"previous\n")
         (self.releases/"current").unlink();os.symlink(previous,self.releases/"current")
         server_target=self.temp/"server-target.py";server_target.write_bytes(b"old-server\n")
         static_root=self.temp/"static";(static_root/"assets").mkdir(parents=True);(static_root/"index.html").write_bytes(b"old-index\n")
@@ -351,6 +353,7 @@ class Tests(unittest.TestCase):
             "--service-unit-path",str(unit_target),"--nginx-available-path",str(nginx_available),
             "--nginx-enabled-path",str(nginx_enabled),"--service","fixture.service",
             "--expected-server-commit",SERVER_COMMIT,"--expected-build-logic-sha","b"*64,
+            "--previous-release-sha",previous,
         ],env=env,capture_output=True,text=True,timeout=15,check=False)
         self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertEqual(server_target.read_bytes(),b"old-server\n")
@@ -364,7 +367,9 @@ class Tests(unittest.TestCase):
         self.assertNotIn("DEPLOY_ACTIVATED_PENDING_PUBLIC",result.stdout+result.stderr)
 
     def test_installer_never_publishes_partial_backup_state(self):
-        previous="previous-release";(self.releases/previous).mkdir()
+        previous="1"*64;(self.releases/previous).mkdir()
+        for name in ("manifest.json","meta.json","serving.sqlite"):
+            (self.releases/previous/name).write_bytes(b"previous\n")
         (self.releases/"current").unlink();os.symlink(previous,self.releases/"current")
         server_target=self.temp/"server-target.py";server_target.write_bytes(b"old-server\n")
         static_root=self.temp/"static";(static_root/"assets").mkdir(parents=True);(static_root/"index.html").write_bytes(b"old-index\n")
@@ -384,6 +389,7 @@ class Tests(unittest.TestCase):
             "--service-unit-path",str(unit_target),"--nginx-available-path",str(nginx_available),
             "--nginx-enabled-path",str(nginx_enabled),"--service","fixture.service",
             "--expected-server-commit",SERVER_COMMIT,"--expected-build-logic-sha","b"*64,
+            "--previous-release-sha",previous,
         ],env=env,capture_output=True,text=True,timeout=15,check=False)
         self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertEqual(server_target.read_bytes(),b"old-server\n")
@@ -392,6 +398,48 @@ class Tests(unittest.TestCase):
         self.assertFalse((self.releases/f".rollback-{self.sha}").exists())
         self.assertEqual(list(self.releases.glob(f".rollback-{self.sha}.preparing.*")),[])
         self.assertNotIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
+
+    def test_installer_legacy_layout_rolls_back_without_creating_current_link(self):
+        previous="1"*64;previous_dir=self.releases/previous;previous_dir.mkdir()
+        for name in ("manifest.json","meta.json","serving.sqlite"):
+            (previous_dir/name).write_bytes(b"previous\n")
+        (self.releases/"current").unlink()
+        server_target=self.temp/"legacy-server.py";server_target.write_bytes(b"old-server\n")
+        static_root=self.temp/"legacy-static";(static_root/"assets").mkdir(parents=True)
+        (static_root/"index.html").write_bytes(b"old-index\n")
+        unit_target=self.temp/"legacy.service";unit_target.write_bytes(b"old-unit\n")
+        nginx_available=self.temp/"legacy-available.conf";nginx_available.write_bytes(b"old-nginx\n")
+        nginx_enabled=self.temp/"legacy-enabled.conf";nginx_enabled.write_bytes(b"old-nginx\n")
+        fakebin=self.temp/"fakebin-legacy";fakebin.mkdir();marker=self.temp/"legacy-ln-failed"
+        for executable in ("systemctl","systemd-analyze","nginx"):
+            (fakebin/executable).write_text('#!/usr/bin/env bash\nexit 0\n',encoding="utf-8")
+        (fakebin/"curl").write_text(
+            '#!/usr/bin/env bash\nprintf \'{"status":"ok","currentRelease":"%s"}\\n\' "$PREVIOUS_RELEASE"\n',
+            encoding="utf-8",
+        )
+        (fakebin/"ln").write_text(
+            '#!/usr/bin/env bash\ndestination="${@: -1}"\nif [[ ! -e "$FAIL_LN_ONCE_MARKER" && "$destination" == */.current.* ]]; then : > "$FAIL_LN_ONCE_MARKER"; exit 73; fi\nexec /usr/bin/ln "$@"\n',
+            encoding="utf-8",
+        )
+        for executable in ("systemctl","systemd-analyze","nginx","curl","ln"):
+            os.chmod(fakebin/executable,0o755)
+        env={**os.environ,"PATH":f"{fakebin}:{os.environ.get('PATH','')}",
+             "FAIL_LN_ONCE_MARKER":str(marker),"PREVIOUS_RELEASE":previous}
+        result=subprocess.run([
+            "bash",str(INSTALLER_PATH),"--sha",self.sha,"--releases-root",str(self.releases),
+            "--server-path",str(server_target),"--static-root",str(static_root),
+            "--service-unit-path",str(unit_target),"--nginx-available-path",str(nginx_available),
+            "--nginx-enabled-path",str(nginx_enabled),"--service","fixture.service",
+            "--expected-server-commit",SERVER_COMMIT,"--expected-build-logic-sha","b"*64,
+            "--previous-release-sha",previous,
+        ],env=env,capture_output=True,text=True,timeout=15,check=False)
+        self.assertNotEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertFalse((self.releases/"current").exists())
+        self.assertEqual(server_target.read_bytes(),b"old-server\n")
+        self.assertEqual((static_root/"index.html").read_bytes(),b"old-index\n")
+        self.assertIn("PREVIOUS_RELEASE_HEALTH_OK",result.stdout+result.stderr)
+        self.assertIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
+        self.assertFalse((self.releases/f".rollback-{self.sha}").exists())
 
     def test_real_page_size_crosses_chunk(self):
         first=self.store.ranking_page(parse_qs("range=all&view=songs&metric=count&page=1&pageSize=30"))[1]
@@ -1944,6 +1992,9 @@ class Tests(unittest.TestCase):
         self.assertNotIn("ACTIVE_MISMATCH after build",workflow)
         self.assertIn('[[ "$DEPLOYED_STATUS" == "ok"',workflow)
         self.assertIn('"$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$',workflow)
+        self.assertIn('data.get("releaseContentSha") or data.get("currentRelease")',workflow)
+        self.assertIn("WDC_PREVIOUS_RELEASE_INVALID",workflow)
+        self.assertIn("previous-release-sha",workflow)
         self.assertIn('EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',workflow)
         self.assertIn("if: always()",workflow)
         self.assertNotIn("if: always() &&",workflow)
@@ -1979,6 +2030,8 @@ class Tests(unittest.TestCase):
         self.assertNotIn('du -s /opt/culua',workflow)
         self.assertNotIn('rm -rf /opt/culua',workflow)
         self.assertIn("DEPLOY_ROLLBACK",installer)
+        self.assertIn("PREVIOUS_RELEASE_HEALTH_OK",installer)
+        self.assertIn("--previous-release-sha",installer)
         self.assertIn("sourceFallbackEnabled",installer)
         self.assertIn("computed release content hash mismatch",installer)
         self.assertLess(installer.index("LIVE_MUTATION_STARTED=1"),installer.index('atomic_install "$SERVER_ARTIFACT" "$SERVER_PATH"'))

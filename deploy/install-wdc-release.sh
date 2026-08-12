@@ -9,7 +9,8 @@ usage: install-wdc-release.sh --action <activate|rollback|finalize> \
   --static-root <dir> --service-unit-path <file> \
   --nginx-available-path <file> --nginx-enabled-path <file> \
   --service <systemd-unit> [--expected-server-commit <git-sha>] \
-  [--expected-build-logic-sha <64hex>] [--port 18777]
+  [--expected-build-logic-sha <64hex>] \
+  [--previous-release-sha <64hex>] [--port 18777]
 EOF
   exit 2
 }
@@ -25,6 +26,7 @@ NGINX_ENABLED_PATH=""
 SERVICE=""
 EXPECTED_SERVER_COMMIT=""
 EXPECTED_BUILD_LOGIC_SHA=""
+PREVIOUS_RELEASE_SHA=""
 PORT="18777"
 
 while (($#)); do
@@ -40,6 +42,7 @@ while (($#)); do
     --service) SERVICE="${2:-}"; shift 2 ;;
     --expected-server-commit) EXPECTED_SERVER_COMMIT="${2:-}"; shift 2 ;;
     --expected-build-logic-sha) EXPECTED_BUILD_LOGIC_SHA="${2:-}"; shift 2 ;;
+    --previous-release-sha) PREVIOUS_RELEASE_SHA="${2:-}"; shift 2 ;;
     --port) PORT="${2:-}"; shift 2 ;;
     *) usage ;;
   esac
@@ -54,6 +57,7 @@ done
 if [[ "$ACTION" == "activate" ]]; then
   [[ "$EXPECTED_SERVER_COMMIT" =~ ^[0-9a-f]{40}$ ]] || usage
   [[ "$EXPECTED_BUILD_LOGIC_SHA" =~ ^[0-9a-f]{64}$ ]] || usage
+  [[ "$PREVIOUS_RELEASE_SHA" =~ ^[0-9a-f]{64}$ ]] || usage
 fi
 
 RELEASES_ROOT="$(readlink -m "$RELEASES_ROOT")"
@@ -154,6 +158,45 @@ for required in "$SERVER_ARTIFACT" "$RELEASE_DIR/serving.sqlite" "$RELEASE_DIR/.
 done
 [[ ! -e "$STATE_DIR" ]] || { echo "DEPLOY_ERROR rollback state already exists: $STATE_DIR" >&2; exit 1; }
 
+PREVIOUS_RELEASE_DIR="$RELEASES_ROOT/$PREVIOUS_RELEASE_SHA"
+[[ -d "$PREVIOUS_RELEASE_DIR" && ! -L "$PREVIOUS_RELEASE_DIR" ]] || {
+  echo "DEPLOY_ERROR previous release directory missing: $PREVIOUS_RELEASE_DIR" >&2
+  exit 1
+}
+for required in "$PREVIOUS_RELEASE_DIR/manifest.json" "$PREVIOUS_RELEASE_DIR/meta.json" \
+  "$PREVIOUS_RELEASE_DIR/serving.sqlite"; do
+  [[ -f "$required" ]] || {
+    echo "DEPLOY_ERROR previous release artifact missing: $required" >&2
+    exit 1
+  }
+done
+if [[ -L "$CURRENT_LINK" ]]; then
+  current_target="$(readlink "$CURRENT_LINK")"
+  [[ "${current_target##*/}" == "$PREVIOUS_RELEASE_SHA" ]] || {
+    echo "DEPLOY_ERROR current link disagrees with previous release" >&2
+    exit 1
+  }
+elif [[ -e "$CURRENT_LINK" ]]; then
+  echo "DEPLOY_ERROR current path is not a symlink: $CURRENT_LINK" >&2
+  exit 1
+else
+  PREVIOUS_HEALTH_FILE="$(mktemp)"
+  trap 'rm -f -- "${PREVIOUS_HEALTH_FILE:-}"' EXIT
+  curl --silent --show-error --fail --max-time 5 \
+    "http://127.0.0.1:$PORT/healthz" >"$PREVIOUS_HEALTH_FILE"
+  python3 - "$PREVIOUS_HEALTH_FILE" "$PREVIOUS_RELEASE_SHA" <<'PY'
+import json,sys
+data=json.load(open(sys.argv[1],encoding="utf-8"));expected=sys.argv[2]
+actual=str(data.get("releaseContentSha") or data.get("currentRelease") or "")
+if data.get("status")!="ok" or actual!=expected:
+    raise SystemExit(f"previous release health mismatch: status={data.get('status')} release={actual}")
+print("PREVIOUS_RELEASE_HEALTH_OK",actual)
+PY
+  rm -f -- "$PREVIOUS_HEALTH_FILE"
+  PREVIOUS_HEALTH_FILE=""
+  trap - EXIT
+fi
+
 read -r APP_RELATIVE APP_SHA < <(python3 - "$RELEASE_DIR" "$SHA" "$EXPECTED_SERVER_COMMIT" "$EXPECTED_BUILD_LOGIC_SHA" <<'PY'
 from __future__ import annotations
 import hashlib, json, re, sys
@@ -238,6 +281,7 @@ trap cleanup_preparing_state EXIT
 chmod 0700 "$PREP_STATE_DIR"
 BACKUP_DIR="$PREP_STATE_DIR"
 if [[ -L "$CURRENT_LINK" ]]; then readlink "$CURRENT_LINK" >"$PREP_STATE_DIR/previous-target"; else : >"$PREP_STATE_DIR/previous-target"; fi
+printf '%s\n' "$PREVIOUS_RELEASE_SHA" >"$PREP_STATE_DIR/previous-release-sha"
 printf '%s\n' "$APP_TARGET" >"$PREP_STATE_DIR/app-target"
 backup_file server "$SERVER_PATH"
 backup_file index "$STATIC_ROOT/index.html"
@@ -327,4 +371,4 @@ PY
 done
 
 trap - ERR INT TERM
-echo "DEPLOY_ACTIVATED_PENDING_PUBLIC sha=$SHA app=$APP_RELATIVE previous=$(cat "$STATE_DIR/previous-target")"
+echo "DEPLOY_ACTIVATED_PENDING_PUBLIC sha=$SHA app=$APP_RELATIVE previous=$PREVIOUS_RELEASE_SHA"
