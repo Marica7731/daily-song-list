@@ -1037,6 +1037,21 @@ class Tests(unittest.TestCase):
         )
         close.assert_called_once_with(71)
 
+    def test_snapshot_json_page_streams_and_evicts_exact_file_cache(self):
+        target=self.temp/"page-0001.json"
+        payload={"records":[{"title":"Fixture","count":3}],"compact":True}
+        with patch.object(pg_materializer.os,"fdatasync") as sync, \
+             patch.object(pg_materializer.os,"posix_fadvise") as fadvise:
+            dropped=pg_materializer._write_json_file_and_drop_cache(
+                target,payload,
+            )
+        self.assertTrue(dropped)
+        self.assertEqual(json.loads(target.read_text(encoding="utf-8")),payload)
+        descriptor=sync.call_args.args[0]
+        fadvise.assert_called_once_with(
+            descriptor,0,0,pg_materializer.os.POSIX_FADV_DONTNEED,
+        )
+
     def test_snapshot_empty_source_scope_skips_every_overlay_scan(self):
         persisted={"schemaVersion":1,"found":True,"sourceKey":"source",
                    "sourceRevisionId":"parent","record":{"type":"song","sourceDetailKey":"source"}}
