@@ -462,13 +462,20 @@ class Tests(unittest.TestCase):
         requested={song_key,artist_key,channel_key,replacement_key,video_key,
                    replacement_video_key,"parent-source","alias-song"}
 
-        def fake_stream(_connection,label,_statement,_params):
+        fetch_sizes={}
+        statements={}
+
+        def fake_stream(_connection,label,statement,_params,*,fetch_size=pg_materializer.SOURCE_SCOPE_FETCH_SIZE):
+            fetch_sizes[label]=fetch_size
+            statements[label]=statement
             if label=="targets":
                 yield {"view":"songs","detail_key":"legacy-alias","title":"Song",
                        "artist":"Artist","source_key":"alias-song"}
             elif label=="videos":
-                yield {"video_id":"video7d","channel_id":"UC7d","payload_json":{"partialRangeReset":True,"rangeId":"7d"}}
-                yield {"video_id":"video-all","channel_id":"UCfixture","payload_json":{}}
+                yield {"video_id":"video7d","channel_id":"UC7d",
+                       "partial_range_reset":True,"partial_range_id":"7d"}
+                yield {"video_id":"video-all","channel_id":"UCfixture",
+                       "partial_range_reset":False,"partial_range_id":""}
             elif label=="occurrences":
                 yield {"video_id":"video-all","range_id":"all","title":"Song","artist":"Artist"}
             elif label=="runtime":
@@ -491,6 +498,32 @@ class Tests(unittest.TestCase):
             self.assertEqual(scope.videos_for_source(video_key),("video-all",))
             self.assertEqual(scope.videos_for_source(replacement_video_key),("video-new",))
             self.assertEqual(scope.videos_for_source("parent-source"),("video-all",))
+            self.assertNotIn("SELECT video_id,channel_id,channel_handle,channel_name,payload_json",
+                             statements["videos"])
+            self.assertIn("AS partial_range_reset",statements["videos"])
+            self.assertEqual(fetch_sizes["runtime"],
+                             pg_materializer.SOURCE_SCOPE_PAYLOAD_FETCH_SIZE)
+            self.assertEqual(fetch_sizes["videos"],
+                             pg_materializer.SOURCE_SCOPE_FETCH_SIZE)
+
+    def test_snapshot_stream_cursor_honors_small_payload_batch(self):
+        class Cursor:
+            def __init__(self):
+                self.itersize=None;self.description=[("payload_json",)];self.sizes=[]
+                self.rows=[("x"*1024,), ("y"*1024,), ("z"*1024,)];self.closed=False
+            def execute(self,_statement,_params):pass
+            def fetchmany(self,size):
+                self.sizes.append(size);batch=self.rows[:size];self.rows=self.rows[size:];return batch
+            def close(self):self.closed=True
+        cursor=Cursor()
+        connection=SimpleNamespace(autocommit=False,cursor=lambda **_kwargs:cursor)
+        rows=list(pg_materializer._stream_pg_rows(
+            connection,"payloads","SELECT payload_json",[],fetch_size=2,
+        ))
+        self.assertEqual([row["payload_json"] for row in rows],["x"*1024,"y"*1024,"z"*1024])
+        self.assertEqual(cursor.itersize,2)
+        self.assertEqual(cursor.sizes,[2,2,2])
+        self.assertTrue(cursor.closed)
 
     def test_snapshot_empty_source_scope_skips_every_overlay_scan(self):
         persisted={"schemaVersion":1,"found":True,"sourceKey":"source",
@@ -663,8 +696,9 @@ class Tests(unittest.TestCase):
             runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
             overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
         )
+        prepared=(({"video_id":"video-one"},),{"video-one":{"video_id":"video-one"}},())
         with patch.object(pg_adapter,"_runtime_source_payload",return_value=persisted), \
-             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=((),{},())), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared) as prepare, \
              patch.object(pg_adapter,"_generic_song_source_payload",return_value=None), \
              patch.object(pg_adapter,"_generic_artist_source_payload",return_value=None) as artist_detail, \
              patch.object(pg_adapter,"_generic_video_source_payload") as video_detail, \
@@ -674,7 +708,51 @@ class Tests(unittest.TestCase):
                 snapshot_context=context,snapshot_video_scope=("video-one",),
             )
         self.assertIs(result,persisted)
-        artist_detail.assert_called_once()
+        prepare.assert_called_once_with(
+            unittest.mock.ANY,"parent",["overlay"],"all",("video-one",),
+        )
+        artist_detail.assert_called_once_with(
+            unittest.mock.ANY,"parent",persisted["record"],source_key,
+            {"range":"all","page":"1","pageSize":"200"},["overlay"],*prepared,
+        )
+        video_detail.assert_not_called();channel_detail.assert_not_called()
+
+    def test_snapshot_resolved_artist_alias_reuses_exact_prepared_video(self):
+        requested_key="artist-alias"
+        resolved_key="artist-source"
+        missing={"schemaVersion":1,"found":False,"sourceKey":requested_key}
+        persisted={"schemaVersion":1,"found":True,"sourceKey":resolved_key,
+                   "sourceRevisionId":"parent",
+                   "record":{"type":"artist","key":"artist","name":"Artist",
+                             "sourceDetailKey":resolved_key}}
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        prepared=(({"video_id":"video-one"},),{},())
+        with patch.object(
+                pg_adapter,"_runtime_source_payload",side_effect=[missing,persisted]), \
+             patch.object(
+                pg_adapter,"_runtime_source_key_for_channel_alias",return_value=resolved_key), \
+             patch.object(
+                pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared) as prepare, \
+             patch.object(pg_adapter,"_generic_song_source_payload",return_value=None), \
+             patch.object(
+                pg_adapter,"_generic_artist_source_payload",return_value=None) as artist_detail, \
+             patch.object(pg_adapter,"_generic_video_source_payload") as video_detail, \
+             patch.object(pg_adapter,"_runtime_channel_source_payload") as channel_detail:
+            result=pg_adapter.source_payload(
+                object(),requested_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=("video-one",),
+            )
+        self.assertIs(result,persisted)
+        prepare.assert_called_once_with(
+            unittest.mock.ANY,"parent",["overlay"],"all",("video-one",),
+        )
+        artist_detail.assert_called_once_with(
+            unittest.mock.ANY,"parent",persisted["record"],resolved_key,
+            {"range":"all","page":"1","pageSize":"200"},["overlay"],*prepared,
+        )
         video_detail.assert_not_called();channel_detail.assert_not_called()
 
     def test_snapshot_persisted_video_source_never_rebuilds_whole_channel(self):

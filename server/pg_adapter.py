@@ -12697,7 +12697,7 @@ def source_payload(
                     if (
                         snapshot_video_scope is not None
                         and _text(persisted_record.get("type"))
-                            in {"song", "video"}
+                            in {"song", "artist", "video"}
                     )
                     else None
                 )
@@ -12791,7 +12791,7 @@ def source_payload(
                         if (
                             snapshot_video_scope is not None
                             and _text(persisted_record.get("type"))
-                                in {"song", "video"}
+                                in {"song", "artist", "video"}
                         )
                         else None
                     )

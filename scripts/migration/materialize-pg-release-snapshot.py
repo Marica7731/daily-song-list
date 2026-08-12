@@ -38,6 +38,7 @@ MAX_RANKING_SEARCH_CHARS = 65_536
 MAX_CHANNEL_SEARCH_CHARS = 32_768
 MAX_SOURCE_SEARCH_CHARS = 65_536
 SOURCE_SCOPE_FETCH_SIZE = 10_000
+SOURCE_SCOPE_PAYLOAD_FETCH_SIZE = 64
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
@@ -173,9 +174,13 @@ def _stream_pg_rows(
     label: str,
     statement: str,
     params: Sequence[Any],
+    *,
+    fetch_size: int = SOURCE_SCOPE_FETCH_SIZE,
 ) -> Iterable[dict[str, Any]]:
     """Stream one bounded snapshot query without retaining its result graph."""
 
+    if fetch_size < 1 or fetch_size > SOURCE_SCOPE_FETCH_SIZE:
+        raise ValueError(f"invalid snapshot source fetch size: {fetch_size}")
     cursor = None
     if getattr(connection, "autocommit", True) is False:
         try:
@@ -192,7 +197,7 @@ def _stream_pg_rows(
         return
     try:
         if hasattr(cursor, "itersize"):
-            cursor.itersize = SOURCE_SCOPE_FETCH_SIZE
+            cursor.itersize = fetch_size
         cursor.execute(statement, list(params))
         description = cursor.description or ()
         names = [
@@ -201,7 +206,7 @@ def _stream_pg_rows(
         ]
         total = 0
         while True:
-            values = cursor.fetchmany(SOURCE_SCOPE_FETCH_SIZE)
+            values = cursor.fetchmany(fetch_size)
             if not values:
                 return
             total += len(values)
@@ -209,6 +214,11 @@ def _stream_pg_rows(
                 raise RuntimeError(f"snapshot source {label} exceeded streamed row cap")
             for value in values:
                 yield dict(zip(names, value))
+            # A server-side cursor still materializes one client batch.  Drop
+            # payload-bearing tuples before fetching the next batch instead
+            # of retaining the prior 10,000-row graph in the generator frame.
+            value = None
+            values = None
     finally:
         close = getattr(cursor, "close", None)
         if close:
@@ -480,6 +490,9 @@ def build_snapshot_source_scope(
             scope.add_targets(target_buffer)
             target_buffer = []
     scope.add_targets(target_buffer)
+    target_buffer = []
+    row = None
+    _release_source_scope_stage("targets")
 
     pair_buffer: list[tuple[str, str]] = []
     video_buffer: list[str] = []
@@ -497,7 +510,19 @@ def build_snapshot_source_scope(
         connection,
         "videos",
         """
-        SELECT video_id,channel_id,channel_handle,channel_name,payload_json
+        SELECT video_id,channel_id,channel_handle,channel_name,
+               coalesce(
+                 payload_json::jsonb->>'partialRangeReset',
+                 payload_json::jsonb->'payload'->>'partialRangeReset',
+                 ''
+               ) = 'true' AS partial_range_reset,
+               coalesce(
+                 payload_json::jsonb->>'rangeId',
+                 payload_json::jsonb->>'range',
+                 payload_json::jsonb->'payload'->>'rangeId',
+                 payload_json::jsonb->'payload'->>'range',
+                 ''
+               ) AS partial_range_id
         FROM migration_video_rows
         WHERE revision_id = ANY(%s)
         LIMIT %s
@@ -523,6 +548,9 @@ def build_snapshot_source_scope(
         ))
         if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
             flush()
+    flush()
+    row = None
+    _release_source_scope_stage("videos")
 
     for row in _stream_pg_rows(
         connection,
@@ -550,6 +578,9 @@ def build_snapshot_source_scope(
         ))
         if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
             flush()
+    flush()
+    row = None
+    _release_source_scope_stage("occurrences")
 
     for row in _stream_pg_rows(
         connection,
@@ -562,6 +593,7 @@ def build_snapshot_source_scope(
         LIMIT %s
         """,
         [revision_ids, MAX_SOURCE_SCOPE_ROWS + 1],
+        fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
     ):
         payload = _json_object(row.get("payload_json"))
         videos, songs, channels, payload_ranges = _runtime_scope_evidence(payload)
@@ -578,6 +610,10 @@ def build_snapshot_source_scope(
         if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
             flush()
     flush()
+    row = None
+    payload = None
+    videos = songs = channels = payload_ranges = None
+    _release_source_scope_stage("runtime")
 
     scalar_stats = scope.stats()
     if scalar_stats["videos"] > MAX_SOURCE_SCOPE_ROWS:
@@ -606,6 +642,11 @@ def build_snapshot_source_scope(
                 scope.add_pairs(mapping_buffer)
                 mapping_buffer = []
         scope.add_pairs(mapping_buffer)
+    affected_videos = ()
+    batch = ()
+    mapping_buffer = []
+    row = None
+    _release_source_scope_stage("parents")
 
     stats = scope.stats()
     if stats["pairs"] > MAX_SOURCE_SCOPE_ROWS:
@@ -706,6 +747,21 @@ def _release_ranking_combo_memory(
     swap_kib = _current_swap_kib()
     print(
         f"PG_SNAPSHOT_COMBO_RELEASE {range_id}/{view}/{metric}/{scope_key} "
+        f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
+        f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
+        f"trimmed={int(trimmed)}",
+        flush=True,
+    )
+
+
+def _release_source_scope_stage(stage: str) -> None:
+    """Return payload-batch memory between disk-backed scope stages."""
+
+    trimmed = _trim_process_heap()
+    rss_kib = _current_rss_kib()
+    swap_kib = _current_swap_kib()
+    print(
+        f"PG_SNAPSHOT_SOURCE_SCOPE_STAGE stage={stage} "
         f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
         f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
         f"trimmed={int(trimmed)}",
@@ -1577,6 +1633,16 @@ def materialize(
                             scope_key=scope_key,
                         )
 
+        for range_id in RANGES:
+            missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
+            if missing:
+                raise RuntimeError(
+                    f"filtered ranking introduced unknown source keys for {range_id}: "
+                    + ", ".join(missing[:10])
+                )
+            if not source_keys[range_id]:
+                raise RuntimeError(f"ranking snapshot has no canonical source keys for {range_id}")
+        scoped_source_keys.clear()
         _release_materializer_memory(writer, builder, phase="rankings")
         bulk_exported_ranges: set[str] = set()
         if (
@@ -1610,14 +1676,6 @@ def materialize(
         _release_materializer_memory(writer, builder, phase="source-scope")
         scoped_payload_loader = getattr(builder, "source_payload", None)
         for range_id in RANGES:
-            missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
-            if missing:
-                raise RuntimeError(
-                    f"filtered ranking introduced unknown source keys for {range_id}: "
-                    + ", ".join(missing[:10])
-                )
-            if not source_keys[range_id]:
-                raise RuntimeError(f"ranking snapshot has no canonical source keys for {range_id}")
             if range_id in bulk_exported_ranges:
                 continue
             for index, source_key in enumerate(sorted(source_keys[range_id]), start=1):
