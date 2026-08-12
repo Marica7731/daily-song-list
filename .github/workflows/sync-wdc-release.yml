@@ -35,6 +35,12 @@ env:
   WDC_PROJECT_MAX_BYTES: "40000000000"
   # Keep host-level headroom so this project cannot crowd out unrelated workloads.
   WDC_FILESYSTEM_RESERVE_BYTES: "5000000000"
+  # VPS2 is shared. The disposable canonical snapshot is converted in place;
+  # retain a conservative growth allowance plus an emergency stop buffer.
+  VPS2_FILESYSTEM_RESERVE_BYTES: "2500000000"
+  VPS2_INPLACE_GROWTH_NUMERATOR: "1"
+  VPS2_INPLACE_GROWTH_DENOMINATOR: "2"
+  VPS2_FILESYSTEM_GUARD_BYTES: "536870912"
   FORCE: ${{ inputs.force || 'false' }}
 
 jobs:
@@ -211,7 +217,9 @@ jobs:
 
           ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
             "$REMOTE_ROOT" "$ACTIVE" "$GITHUB_SHA" "$BUILD_LOGIC_SHA" \
-            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'REMOTE'
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" \
+            "$VPS2_FILESYSTEM_RESERVE_BYTES" "$VPS2_INPLACE_GROWTH_NUMERATOR" \
+            "$VPS2_INPLACE_GROWTH_DENOMINATOR" "$VPS2_FILESYSTEM_GUARD_BYTES" <<'REMOTE'
           set -Eeuo pipefail
           remote_root="$1"
           expected_active="$2"
@@ -219,6 +227,15 @@ jobs:
           build_logic_sha="$4"
           run_id="$5"
           run_attempt="$6"
+          reserve_bytes="$7"
+          numerator="$8"
+          denominator="$9"
+          guard_bytes="${10}"
+          for value in "$reserve_bytes" "$numerator" "$denominator" "$guard_bytes"; do
+            [[ "$value" =~ ^[0-9]+$ ]]
+          done
+          (( reserve_bytes >= 2500000000 && numerator >= 0 && denominator > 0 ))
+          (( guard_bytes >= 536870912 ))
           cd "$remote_root"
           build_root="$remote_root/build"
           pages_root="$build_root/pages"
@@ -234,22 +251,43 @@ jobs:
           run_isolated() {
             local phase="$1"
             shift
-            local started_at status
+            local started_at status unit runner_pid available_now disk_violation
             started_at="$(date --iso-8601=seconds)"
+            unit="dsl-wdc-${phase}-${run_id}-${run_attempt}"
+            disk_violation=0
             set +e
             systemd-run --quiet --wait --pipe --collect \
-              --unit="dsl-wdc-${phase}-${run_id}-${run_attempt}" \
+              --unit="$unit" \
               --uid=www-data \
               --gid=www-data \
               --property=MemoryMax=700M \
+              --property=LimitFSIZE=6G \
               --property=Nice=15 \
               --property=CPUWeight=10 \
               --property=IOWeight=10 \
               --property=RuntimeMaxSec=32400 \
               --property="WorkingDirectory=$remote_root" \
-              "$@"
+              "$@" &
+            runner_pid=$!
+            set -e
+            while kill -0 "$runner_pid" 2>/dev/null; do
+              available_now="$(df -B1 --output=avail -- "$build_root" 2>/dev/null | tail -1 | tr -d ' ' || true)"
+              if [[ ! "$available_now" =~ ^[0-9]+$ ]] || \
+                 (( available_now < reserve_bytes + guard_bytes )); then
+                echo "VPS2_FILESYSTEM_RUNTIME_GUARD phase=$phase available=${available_now:-invalid} reserve=$reserve_bytes guard=$guard_bytes" >&2
+                disk_violation=1
+                systemctl stop "${unit}.service" || true
+                break
+              fi
+              sleep 2
+            done
+            set +e
+            wait "$runner_pid"
             status=$?
             set -e
+            if (( disk_violation != 0 )); then
+              return 75
+            fi
             if (( status != 0 )); then
               echo "RUN_ISOLATED_FAILED phase=$phase status=$status started_at=$started_at" >&2
               journalctl -k --since "$started_at" --no-pager \
@@ -296,6 +334,18 @@ jobs:
           print("PG_CANONICAL_SNAPSHOT_OK", marker["ranking_rows"], marker["source_occurrences"])
           PY
 
+          canonical_bytes="$(stat -c '%s' -- "$canonical_snapshot")"
+          available_bytes="$(df -B1 --output=avail -- "$build_root" | tail -1 | tr -d ' ')"
+          for value in "$canonical_bytes" "$available_bytes"; do
+            [[ "$value" =~ ^[0-9]+$ ]]
+          done
+          projected_growth_bytes=$(((canonical_bytes * numerator + denominator - 1) / denominator))
+          if (( available_bytes - projected_growth_bytes < reserve_bytes + guard_bytes )); then
+            echo "VPS2_FILESYSTEM_RESERVE_VIOLATION available=$available_bytes canonical=$canonical_bytes projected_growth=$projected_growth_bytes reserve=$reserve_bytes guard=$guard_bytes" >&2
+            exit 75
+          fi
+          echo "VPS2_STORAGE_PREFLIGHT_OK available=$available_bytes canonical=$canonical_bytes projected_growth=$projected_growth_bytes reserve=$reserve_bytes guard=$guard_bytes"
+
           built_at="$(python3 -c "import json; print(json.load(open('$meta_file')).get('built_at') or '')")"
           run_isolated serving /usr/bin/python3 "$remote_root/build-serving-store.py" \
             --source-db "$canonical_snapshot" \
@@ -303,7 +353,18 @@ jobs:
             --output "$serving_db" \
             --active-revision-id "$expected_active" \
             --required-ranges "7d,all" \
-            --built-at "$built_at"
+            --built-at "$built_at" \
+            --consume-source-db
+          test -s "$serving_db"
+          test ! -e "$canonical_snapshot"
+          serving_bytes="$(stat -c '%s' -- "$serving_db")"
+          available_after_serving="$(df -B1 --output=avail -- "$build_root" | tail -1 | tr -d ' ')"
+          [[ "$serving_bytes" =~ ^[0-9]+$ && "$available_after_serving" =~ ^[0-9]+$ ]]
+          (( available_after_serving >= reserve_bytes + guard_bytes )) || {
+            echo "VPS2_FILESYSTEM_RESERVE_VIOLATION_AFTER_SERVING available=$available_after_serving serving=$serving_bytes reserve=$reserve_bytes guard=$guard_bytes" >&2
+            exit 75
+          }
+          echo "VPS2_CANONICAL_RELEASED mode=consumed-in-place serving=$serving_bytes available=$available_after_serving"
 
           # The release is pinned to expected_active by one repeatable-read
           # transaction.  A later canonical activation must not invalidate that
@@ -336,6 +397,7 @@ jobs:
             --frontend-root "$frontend_root" \
             --nginx-artifact "$remote_root/nginx-next-api.conf" \
             --systemd-artifact "$remote_root/daily-song-list-api.service" \
+            --link-serving-sqlite \
             --active-revision-id "$expected_active" \
             --expected-parent-revision-id "$(python3 -c "import json; print(json.load(open('$meta_file')).get('parent_revision_id') or '')")" \
             --source-commit-sha "$(python3 -c "import json; print(json.load(open('$meta_file')).get('source_commit_sha') or '')")" \
@@ -346,28 +408,27 @@ jobs:
 
           bundle_dir="$(find "$bundles_root" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | head -1)"
           [[ "$bundle_dir" =~ ^[0-9a-f]{64}$ ]] || { echo "INVALID_BUNDLE_SHA $bundle_dir" >&2; exit 68; }
+          bundle_serving="$bundles_root/$bundle_dir/serving.sqlite"
+          test -f "$bundle_serving"
+          [[ "$(stat -c '%d:%i' -- "$bundle_serving")" == "$(stat -c '%d:%i' -- "$serving_db")" ]] || {
+            echo "VPS2_SERVING_HARDLINK_MISMATCH" >&2
+            exit 76
+          }
           release_size_bytes="$(du -sb -- "$bundles_root/$bundle_dir" | awk '{print $1}')"
           [[ "$release_size_bytes" =~ ^[0-9]+$ ]] && (( release_size_bytes > 0 ))
-          archive_path="$remote_root/dsl-wdc-$bundle_dir.tar.gz"
-          tar -C "$bundles_root" -czf "$archive_path" "$bundle_dir"
-          archive_size_bytes="$(stat -c '%s' -- "$archive_path")"
-          [[ "$archive_size_bytes" =~ ^[0-9]+$ ]] && (( archive_size_bytes > 0 ))
+          rm -f -- "$serving_db"
+          test ! -e "$serving_db"
           printf '%s\n' "$bundle_dir" > "$remote_root/bundle-sha"
           printf '%s\n' "$release_size_bytes" > "$remote_root/release-size-bytes"
-          printf '%s\n' "$archive_size_bytes" > "$remote_root/archive-size-bytes"
-          ls -lh "$archive_path"
-          echo "WDC_BUNDLE_SIZE_OK release_bytes=$release_size_bytes archive_bytes=$archive_size_bytes"
+          echo "WDC_BUNDLE_SIZE_OK release_bytes=$release_size_bytes serving_hardlink=1"
           REMOTE
 
           BUNDLE_SHA="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/bundle-sha'")"
           RELEASE_SIZE_BYTES="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/release-size-bytes'")"
-          ARCHIVE_SIZE_BYTES="$(ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "cat '$REMOTE_ROOT/archive-size-bytes'")"
           [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]] || { echo "invalid bundle sha: $BUNDLE_SHA" >&2; exit 69; }
           [[ "$RELEASE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( RELEASE_SIZE_BYTES > 0 ))
-          [[ "$ARCHIVE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( ARCHIVE_SIZE_BYTES > 0 ))
           echo "bundle_sha=$BUNDLE_SHA" >> "$GITHUB_OUTPUT"
           echo "release_size_bytes=$RELEASE_SIZE_BYTES" >> "$GITHUB_OUTPUT"
-          echo "archive_size_bytes=$ARCHIVE_SIZE_BYTES" >> "$GITHUB_OUTPUT"
 
       - name: Transfer and atomically deploy WDC release
         if: steps.check.outputs.skip != 'true'
@@ -375,14 +436,44 @@ jobs:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
           REMOTE_ROOT: ${{ steps.materialize.outputs.remote_root }}
           RELEASE_SIZE_BYTES: ${{ steps.materialize.outputs.release_size_bytes }}
-          ARCHIVE_SIZE_BYTES: ${{ steps.materialize.outputs.archive_size_bytes }}
         run: |
           set -Eeuo pipefail
           VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
           WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
           [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]
           [[ "$RELEASE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( RELEASE_SIZE_BYTES > 0 ))
+          EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          [[ "$REMOTE_ROOT" == "$EXPECTED_REMOTE_ROOT" ]]
+
+          transfer_root="/tmp/dsl-wdc-transfer"
+          archive_path="$transfer_root/dsl-wdc-$BUNDLE_SHA.tar.gz"
+          runner_reserve_bytes=1000000000
+          archive_upper_bound=$((RELEASE_SIZE_BYTES + RELEASE_SIZE_BYTES / 1000 + 1048576))
+          runner_available_bytes="$(df -B1 --output=avail -- /tmp | tail -1 | tr -d ' ')"
+          [[ "$runner_available_bytes" =~ ^[0-9]+$ ]]
+          (( runner_available_bytes - archive_upper_bound >= runner_reserve_bytes )) || {
+            echo "RUNNER_FILESYSTEM_RESERVE_VIOLATION available=$runner_available_bytes archive_upper=$archive_upper_bound reserve=$runner_reserve_bytes" >&2
+            exit 75
+          }
+          mkdir -p "$transfer_root"
+          test ! -e "$archive_path"
+          ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" bash -s -- \
+            "$REMOTE_ROOT" "$BUNDLE_SHA" > "$archive_path" <<'REMOTE'
+          set -Eeuo pipefail
+          remote_root="$1";sha="$2"
+          [[ "$remote_root" =~ ^/tmp/dsl-wdc-sync-[0-9]+-[0-9]+$ ]]
+          [[ "$sha" =~ ^[0-9a-f]{64}$ ]]
+          bundle_root="$remote_root/build/bundles"
+          test -d "$bundle_root/$sha"
+          exec nice -n 15 ionice -c3 tar -C "$bundle_root" -czf - "$sha"
+          REMOTE
+          ARCHIVE_SIZE_BYTES="$(stat -c '%s' -- "$archive_path")"
           [[ "$ARCHIVE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( ARCHIVE_SIZE_BYTES > 0 ))
+          (( ARCHIVE_SIZE_BYTES <= archive_upper_bound )) || {
+            echo "RUNNER_ARCHIVE_BOUND_EXCEEDED actual=$ARCHIVE_SIZE_BYTES upper=$archive_upper_bound release=$RELEASE_SIZE_BYTES" >&2
+            exit 76
+          }
+          echo "RUNNER_ARCHIVE_READY bytes=$ARCHIVE_SIZE_BYTES upper=$archive_upper_bound reserve=$runner_reserve_bytes"
 
           # This read-only gate runs before the archive is copied to WDC. It
           # measures only this project's exact root and reserves a second
@@ -419,13 +510,8 @@ jobs:
           echo "WDC_STORAGE_PREFLIGHT_OK current=$current_bytes archive=$archive_bytes release=$release_bytes rollback=$rollback_bytes projected=$projected_bytes max=$max_bytes available=$available_bytes reserve=$reserve_bytes"
           REMOTE
 
-          mkdir -p /tmp/dsl-wdc-transfer
-          scp "${VPS2_SSH[@]}" \
-            "$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/dsl-wdc-$BUNDLE_SHA.tar.gz" \
-            /tmp/dsl-wdc-transfer/
-          [[ "$(stat -c '%s' -- "/tmp/dsl-wdc-transfer/dsl-wdc-$BUNDLE_SHA.tar.gz")" == "$ARCHIVE_SIZE_BYTES" ]]
           scp "${WDC_SSH[@]}" \
-            "/tmp/dsl-wdc-transfer/dsl-wdc-$BUNDLE_SHA.tar.gz" \
+            "$archive_path" \
             deploy/install-wdc-release.sh \
             "$WDC_USER@$WDC_HOST:/tmp/"
 

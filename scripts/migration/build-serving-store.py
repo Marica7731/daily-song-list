@@ -304,14 +304,26 @@ def compact_ranking_payload(value: Any, view: str) -> str:
     return json.dumps(compact,ensure_ascii=False,separators=(",",":"))
 
 
-def copy_rankings(source: sqlite3.Connection, target: sqlite3.Connection) -> int:
-    query = "SELECT " + ",".join(RANKING_COLUMNS) + " FROM ranking_rows ORDER BY range_id,view,metric,scope_key,rank"
+def copy_rankings(
+    source: sqlite3.Connection,
+    target: sqlite3.Connection,
+    *,
+    source_table: str = "ranking_rows",
+    target_table: str = "ranking_rows",
+) -> int:
+    allowed_tables = {"ranking_rows", "ranking_rows_v3"}
+    if source_table not in allowed_tables or target_table not in allowed_tables:
+        raise ValueError("unsupported ranking table")
+    query = (
+        "SELECT " + ",".join(RANKING_COLUMNS) + f" FROM {source_table} "
+        "ORDER BY range_id,view,metric,scope_key,rank"
+    )
     insert = """
-      INSERT INTO ranking_rows(
+      INSERT INTO {target_table}(
         row_id,range_id,view,metric,scope_key,rank,detail_key,title,artist,name,row_count,
         song_count,video_count,timestamp_count,payload_json,search_text,channel_search_text
       ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    """
+    """.format(target_table=target_table)
     total = 0
     for batch in chunks(source.execute(query)):
         normalized = []
@@ -328,6 +340,72 @@ def copy_rankings(source: sqlite3.Connection, target: sqlite3.Connection) -> int
         target.executemany(insert,normalized)
         total += len(normalized)
     return total
+
+
+def create_in_place_schema(connection: sqlite3.Connection) -> None:
+    """Add serving-only structures without copying the multi-gigabyte source tables.
+
+    The input is an unpublished, disposable canonical snapshot.  A failed
+    conversion is therefore discarded with the run root; it is never a live
+    database and is not reused as a canonical artifact.
+    """
+    existing = table_names(connection)
+    unexpected = sorted(
+        existing.intersection({"serving_meta", "source_videos", "ranking_rows_v3"})
+    )
+    if unexpected:
+        raise RuntimeError(
+            "canonical runtime DB already has serving artifacts: " + ", ".join(unexpected)
+        )
+    detail_columns = table_columns(connection, "source_details")
+    serving_columns = {"total_occurrence_count", "total_video_count"}
+    if detail_columns.intersection(serving_columns):
+        raise RuntimeError("canonical source_details already has serving count columns")
+    connection.executescript("""
+    PRAGMA journal_mode=OFF;
+    PRAGMA synchronous=OFF;
+    PRAGMA temp_store=FILE;
+    PRAGMA cache_size=-32768;
+    PRAGMA foreign_keys=OFF;
+
+    ALTER TABLE source_details
+      ADD COLUMN total_occurrence_count INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE source_details
+      ADD COLUMN total_video_count INTEGER NOT NULL DEFAULT 0;
+
+    CREATE TABLE serving_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL) WITHOUT ROWID;
+
+    CREATE TABLE source_videos(
+      range_id TEXT NOT NULL,
+      source_key TEXT NOT NULL,
+      video_order INTEGER NOT NULL,
+      video_id TEXT NOT NULL,
+      first_position INTEGER NOT NULL,
+      PRIMARY KEY(range_id,source_key,video_id),
+      UNIQUE(range_id,source_key,video_order)
+    ) WITHOUT ROWID;
+
+    CREATE TABLE ranking_rows_v3(
+      id INTEGER PRIMARY KEY,
+      row_id TEXT NOT NULL,
+      range_id TEXT NOT NULL,
+      view TEXT NOT NULL,
+      metric TEXT NOT NULL,
+      scope_key TEXT NOT NULL,
+      rank INTEGER NOT NULL,
+      detail_key TEXT NOT NULL,
+      title TEXT NOT NULL,
+      artist TEXT NOT NULL,
+      name TEXT NOT NULL,
+      row_count INTEGER NOT NULL,
+      song_count INTEGER NOT NULL,
+      video_count INTEGER NOT NULL,
+      timestamp_count INTEGER NOT NULL,
+      payload_json TEXT NOT NULL,
+      search_text TEXT NOT NULL,
+      channel_search_text TEXT NOT NULL
+    );
+    """)
 
 
 def build_search_index(connection: sqlite3.Connection) -> str:
@@ -513,12 +591,139 @@ def validate_database(
     }
 
 
+def consume_canonical_snapshot(
+    source_db: Path,
+    ranking_root: Path,
+    output: Path,
+    *,
+    active_revision_id: str,
+    required_ranges: Sequence[str],
+    built_at: str | None,
+) -> dict[str, Any]:
+    """Convert a disposable canonical snapshot into the serving store in place.
+
+    The large source tables keep their existing SQLite pages.  Only the much
+    smaller ranking table is rebuilt to gain an integer FTS rowid, then serving
+    indexes and derived video/count tables are added.  The completed database
+    is renamed to ``output`` on the same filesystem; no full-database copy or
+    VACUUM is performed.
+    """
+    if source_db.resolve() == output.resolve():
+        raise ValueError("consume-source output must differ from source DB")
+    if output.exists():
+        raise FileExistsError(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if source_db.stat().st_dev != output.parent.stat().st_dev:
+        raise RuntimeError("consume-source conversion requires one filesystem")
+
+    connection = sqlite3.connect(source_db)
+    connection.row_factory = sqlite3.Row
+    try:
+        require_source_schema(connection)
+        source_metadata = source_meta(connection)
+        source_revision = validate_revision(source_metadata, active_revision_id)
+        expected_scopes = ranking_scope_counts(source_metadata)
+        details = int(connection.execute("SELECT count(*) FROM source_details").fetchone()[0])
+        occurrences = int(
+            connection.execute("SELECT count(*) FROM source_occurrences").fetchone()[0]
+        )
+        create_in_place_schema(connection)
+        rankings = copy_rankings(
+            connection,
+            connection,
+            source_table="ranking_rows",
+            target_table="ranking_rows_v3",
+        )
+        if not details or not occurrences or not rankings:
+            raise RuntimeError(
+                f"empty serving store details={details} occurrences={occurrences} "
+                f"rankings={rankings}"
+            )
+        connection.executescript("""
+        DROP TABLE ranking_rows;
+        ALTER TABLE ranking_rows_v3 RENAME TO ranking_rows;
+        """)
+        search_tokenizer = build_indexes(connection)
+        validation = validate_database(
+            connection,
+            required_ranges,
+            ranking_root,
+            expected_scope_counts=expected_scopes,
+        )
+        metadata = {
+            "schema_version": str(SCHEMA_VERSION),
+            "active_revision_id": active_revision_id,
+            "source_revision_marker": source_revision,
+            "built_at": built_at or utc_now(),
+            "canonical_source_key": "copied-from-source_details",
+            "local_sources_ready": "1",
+            "local_search_ready": "1",
+            "search_tokenizer": search_tokenizer,
+            "ranking_search_max_chars": str(MAX_RANKING_SEARCH_CHARS),
+            "channel_search_max_chars": str(MAX_CHANNEL_SEARCH_CHARS),
+            "ranking_payload_contract": "compact-v3",
+            "ranking_scope_counts_json": json.dumps(
+                validation["rankingScopes"],
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            "ranking_scope_series": str(len(validation["rankingScopes"])),
+            "ranges_json": json.dumps(
+                validation["ranges"], ensure_ascii=False, sort_keys=True,
+                separators=(",", ":"),
+            ),
+            "coverage_json": json.dumps(
+                validation["coverage"], ensure_ascii=False, sort_keys=True,
+                separators=(",", ":"),
+            ),
+            "counts_json": json.dumps(
+                validation["counts"], ensure_ascii=False, sort_keys=True,
+                separators=(",", ":"),
+            ),
+        }
+        connection.executemany(
+            "INSERT INTO serving_meta(key,value) VALUES(?,?)",
+            sorted(metadata.items()),
+        )
+        connection.execute("DROP TABLE meta")
+        connection.execute("ANALYZE")
+        connection.execute("PRAGMA optimize")
+        connection.commit()
+    finally:
+        connection.close()
+
+    source_inode = source_db.stat().st_ino
+    os.replace(source_db, output)
+    if output.stat().st_ino != source_inode:
+        raise RuntimeError("consume-source rename changed database inode")
+    return {
+        "schemaVersion": SCHEMA_VERSION,
+        "activeRevisionId": active_revision_id,
+        "path": str(output),
+        "bytes": output.stat().st_size,
+        "sha256": sha256_file(output),
+        "buildMode": "consume-canonical-in-place",
+        "validation": validation,
+    }
+
+
 def build_serving_store(source_db: Path, ranking_root: Path, output: Path, *, active_revision_id: str,
-                        required_ranges: Sequence[str] = ("7d","all"), built_at: str|None=None) -> dict[str,Any]:
+                        required_ranges: Sequence[str] = ("7d","all"), built_at: str|None=None,
+                        consume_source_db: bool = False) -> dict[str,Any]:
     if not source_db.is_file():
         raise FileNotFoundError(source_db)
     if not (ranking_root / "rankings").is_dir():
         raise FileNotFoundError(ranking_root / "rankings")
+    if consume_source_db:
+        return consume_canonical_snapshot(
+            source_db,
+            ranking_root,
+            output,
+            active_revision_id=active_revision_id,
+            required_ranges=required_ranges,
+            built_at=built_at,
+        )
     output.parent.mkdir(parents=True,exist_ok=True)
     fd,tmp_name = tempfile.mkstemp(prefix=f".{output.name}.",suffix=".tmp",dir=output.parent)
     os.close(fd)
@@ -591,6 +796,11 @@ def parse_args(argv: Sequence[str]|None=None) -> argparse.Namespace:
     parser.add_argument("--active-revision-id",required=True)
     parser.add_argument("--required-ranges",default="7d,all")
     parser.add_argument("--built-at",default="")
+    parser.add_argument(
+        "--consume-source-db",
+        action="store_true",
+        help="convert the disposable canonical snapshot in place and atomically rename it",
+    )
     return parser.parse_args(argv)
 
 
@@ -600,7 +810,8 @@ def main(argv: Sequence[str]|None=None) -> int:
         result = build_serving_store(args.source_db,args.ranking_root,args.output,
             active_revision_id=args.active_revision_id,
             required_ranges=tuple(x.strip() for x in args.required_ranges.split(",") if x.strip()),
-            built_at=args.built_at or None)
+            built_at=args.built_at or None,
+            consume_source_db=args.consume_source_db)
     except Exception as exc:
         print(f"SERVING_STORE_ERROR {type(exc).__name__}: {exc}",file=sys.stderr)
         return 1
