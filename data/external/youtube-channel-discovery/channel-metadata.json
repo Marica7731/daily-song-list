@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-12T10:21:24.674Z",
+  "generatedAt": "2026-08-12T13:32:32.845Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-12T10:21:24.674Z",
+    "fetchedAt": "2026-08-12T13:32:32.845Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-12T10:21:24.674Z",
+    "generatedAt": "2026-08-12T13:32:32.845Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1128,
-      "parseableChannels": 1108,
+      "totalChannels": 1129,
+      "parseableChannels": 1109,
       "realAvatar": 649,
-      "thumbnailFallback": 479,
+      "thumbnailFallback": 480,
       "missingDisplayImage": 0,
-      "missingAvatar": 479,
+      "missingAvatar": 480,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 652
+      "skipped_collected_evidence": 653,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 632,
+      "batch_limit_reached": 633,
       "missing_channel_url_or_handle": 20
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
+        "channelId": "UC4woRHLSPSz3sAr10XIJK2Q",
+        "displayName": "かわよき なめ🐾💫",
+        "sourceUrl": "https://www.youtube.com/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@TsunomakiWatame",
+        "channelId": "UCqm3BQLlJfvkTsX_hvm0UmA",
+        "displayName": "Watame Ch. 角巻わため",
+        "sourceUrl": "https://www.youtube.com/@TsunomakiWatame",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Ruruka0w0",
         "channelId": "UCwBxb9vxDp_mYoOddhw9dTA",
@@ -11835,20 +11849,6 @@
         "channelId": "UC8LJJ1HOq_z8Uaycot6L_Xw",
         "displayName": "真白ユキ*JPN Vtuber",
         "sourceUrl": "https://www.youtube.com/@mashiro3yuki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E3%83%8A%E3%82%AC%E3%83%AC",
-        "channelId": "UCzwHbM92dBREagbKtiou58Q",
-        "displayName": "ナガレ",
-        "sourceUrl": "https://www.youtube.com/@%E3%83%8A%E3%82%AC%E3%83%AC",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ykn0911v",
-        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
-        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
-        "sourceUrl": "https://www.youtube.com/@ykn0911v",
         "reason": "batch_limit_reached"
       }
     ]
