@@ -174,10 +174,15 @@ jobs:
           DEPLOYED_STATUS="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("status", ""))' 2>/dev/null || true)"
           DEPLOYED_ACTIVE="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("activeRevision", ""))' 2>/dev/null || true)"
           DEPLOYED_LOGIC="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("buildLogicSha", ""))' 2>/dev/null || true)"
-          DEPLOYED_RELEASE="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("releaseContentSha", ""))' 2>/dev/null || true)"
+          DEPLOYED_RELEASE="$(printf '%s' "$DEPLOYED_HEALTH" | python3 -c 'import json,sys; data=json.load(sys.stdin); print(data.get("releaseContentSha") or data.get("currentRelease") or "")' 2>/dev/null || true)"
 
           echo "old active=$CURRENT_ACTIVE content=${CURRENT_CONTENT:0:16}"
           echo "wdc status=${DEPLOYED_STATUS:-none} active=${DEPLOYED_ACTIVE:-none} release=${DEPLOYED_RELEASE:0:16} logic=${DEPLOYED_LOGIC:-none}"
+          if [[ "$DEPLOYED_STATUS" != "ok" || ! "$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "WDC_PREVIOUS_RELEASE_INVALID status=${DEPLOYED_STATUS:-none} release=${DEPLOYED_RELEASE:-none}" >&2
+            exit 66
+          fi
+          echo "deployed_release=$DEPLOYED_RELEASE" >> "$GITHUB_OUTPUT"
           if [[ "$DEPLOYED_STATUS" == "ok" \
              && "$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$ \
              && "$CURRENT_ACTIVE" == "$DEPLOYED_ACTIVE" \
@@ -441,11 +446,13 @@ jobs:
           BUNDLE_SHA: ${{ steps.materialize.outputs.bundle_sha }}
           REMOTE_ROOT: ${{ steps.materialize.outputs.remote_root }}
           RELEASE_SIZE_BYTES: ${{ steps.materialize.outputs.release_size_bytes }}
+          PREVIOUS_RELEASE_SHA: ${{ steps.check.outputs.deployed_release }}
         run: |
           set -Eeuo pipefail
           VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
           WDC_SSH=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/tmp/ssh/wdc-knownhosts -o ConnectTimeout=10 -i /tmp/ssh/wdc-key)
           [[ "$BUNDLE_SHA" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$PREVIOUS_RELEASE_SHA" =~ ^[0-9a-f]{64}$ ]]
           [[ "$RELEASE_SIZE_BYTES" =~ ^[0-9]+$ ]] && (( RELEASE_SIZE_BYTES > 0 ))
           EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           [[ "$REMOTE_ROOT" == "$EXPECTED_REMOTE_ROOT" ]]
@@ -525,14 +532,16 @@ jobs:
             "$GITHUB_SHA" "$BUILD_LOGIC_SHA" "$WDC_API_PORT" "$WDC_STATIC_ROOT" \
             "$WDC_SERVICE_UNIT_PATH" "$WDC_NGINX_AVAILABLE_PATH" "$WDC_NGINX_ENABLED_PATH" \
             "$WDC_PROJECT_ROOT" "$WDC_PROJECT_MAX_BYTES" "$WDC_FILESYSTEM_RESERVE_BYTES" \
-            "$RELEASE_SIZE_BYTES" "$ARCHIVE_SIZE_BYTES" <<'REMOTE'
+            "$RELEASE_SIZE_BYTES" "$ARCHIVE_SIZE_BYTES" "$PREVIOUS_RELEASE_SHA" <<'REMOTE'
           set -Eeuo pipefail
           sha="$1"; root="$2"; server_path="$3"; service="$4"; server_commit="$5"; build_logic="$6"; port="$7"
           static_root="$8"; unit_path="$9"; nginx_available="${10}"; nginx_enabled="${11}"
           project_root="${12}"; max_bytes="${13}"; reserve_bytes="${14}"; release_bytes="${15}"; expected_archive_bytes="${16}"
+          previous_release_sha="${17}"
           archive="/tmp/dsl-wdc-$sha.tar.gz"
           installer="/tmp/install-wdc-release.sh"
           [[ "$sha" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$previous_release_sha" =~ ^[0-9a-f]{64}$ ]]
           [[ "$project_root" == "/opt/culua/ytb-song-rank" && "$root" == "$project_root/releases" ]]
           for value in "$max_bytes" "$reserve_bytes" "$release_bytes" "$expected_archive_bytes"; do
             [[ "$value" =~ ^[0-9]+$ ]]
@@ -540,6 +549,10 @@ jobs:
           (( max_bytes == 40000000000 && reserve_bytes >= 5000000000 && release_bytes > 0 && expected_archive_bytes > 0 ))
           test -f "$archive"
           test -x "$installer"
+          test -d "$root/$previous_release_sha"
+          test -f "$root/$previous_release_sha/manifest.json"
+          test -f "$root/$previous_release_sha/meta.json"
+          test -f "$root/$previous_release_sha/serving.sqlite"
           actual_archive_bytes="$(stat -c '%s' -- "$archive")"
           [[ "$actual_archive_bytes" == "$expected_archive_bytes" ]]
           current_bytes="$(du -sb -- "$project_root" | awk '{print $1}')"
@@ -595,6 +608,7 @@ jobs:
             --service "$service" \
             --expected-server-commit "$server_commit" \
             --expected-build-logic-sha "$build_logic" \
+            --previous-release-sha "$previous_release_sha" \
             --port "$port"
           REMOTE
 
@@ -882,7 +896,8 @@ jobs:
           [[ "$max_bytes" == "40000000000" && "$reserve_bytes" =~ ^[0-9]+$ ]]
           (( reserve_bytes >= 5000000000 ))
           state="$root/.rollback-$sha"
-          previous="$(cat "$state/previous-target")"
+          previous="$(cat "$state/previous-release-sha")"
+          [[ "$previous" =~ ^[0-9a-f]{64}$ ]]
           systemctl is-active --quiet "$service"
           python3 - "$root" "$sha" "$previous" <<'PY'
           import re,shutil,sys
