@@ -12547,7 +12547,7 @@ def _source_song_identity_evidence(
             if song_key:
                 song_keys.add(song_key)
             title = _text(current.get("title") or current.get("workTitle"))
-            if title and "artist" in current and current.get("artist") is not None:
+            if title and "artist" in current:
                 artist = _text(current.get("artist"))
                 pairs.setdefault(
                     (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
@@ -12565,7 +12565,7 @@ def _source_song_identity_evidence(
             queue.extend(current)
 
     title = _text(value.get("title") or value.get("workTitle"))
-    if title and "artist" in value and value.get("artist") is not None:
+    if title and "artist" in value:
         artist = _text(value.get("artist"))
         pairs.setdefault(
             (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
@@ -13073,9 +13073,9 @@ def _generic_group_source_payload(
     record["channels"] = _adjust_source_count_list(
         record.get("channels"), before_public, unfiltered_after, "channelName",
     )
-    total_song_count = int(
-        record.get("songCount")
-        or len(record.get("artists") or ())
+    total_song_count = (
+        1 if source_type == "song" and total_occurrence_count > 0
+        else int(record.get("songCount") or 0)
     )
     if not total_occurrence_count and not options["q"]:
         return {"schemaVersion": 1, "found": False, "sourceKey": requested_key}
@@ -13437,6 +13437,7 @@ def _generic_video_source_payload(
     candidate_rows: Sequence[Mapping[str, Any]] | None = None,
     accepted_video_resets: Mapping[str, Mapping[str, Any]] | None = None,
     runtime_changes: Sequence[Mapping[str, Any]] | None = None,
+    snapshot_video_scope: Sequence[str] | None = None,
 ) -> dict[str, Any] | None:
     """Rebuild exactly one affected video source from bounded snapshot rows.
 
@@ -13492,6 +13493,14 @@ def _generic_video_source_payload(
         if video_id
         and _stable_key("source-video", range_id, video_id) == requested_key
     }
+    target_video_ids.update(
+        video_id
+        for video_id in (
+            _text(value) for value in (snapshot_video_scope or ())
+        )
+        if video_id
+        and _stable_key("source-video", range_id, video_id) == requested_key
+    )
     persisted_video_id = _text(
         persisted_record.get("videoId")
         or persisted_record.get("video_id")
@@ -13519,9 +13528,111 @@ def _generic_video_source_payload(
     target_video_id = next(iter(target_video_ids))
 
     effective: dict[tuple[str, str], dict[str, Any]] = {}
-    parent_occurrences = _runtime_source_occurrences(
-        connection, parent_revision_id, requested_key, range_id,
+    parent_occurrences = (
+        _runtime_source_occurrences(
+            connection, parent_revision_id, requested_key, range_id,
+        )
+        if persisted_record
+        else []
     )
+    parent_video_rows = [] if parent_occurrences else _rows(
+        connection,
+        """
+        SELECT video_id, title, channel_name, channel_id, channel_handle,
+               channel_url, published_timestamp, payload_json
+        FROM runtime_videos
+        WHERE revision_id = %s AND video_id = %s
+        LIMIT 2
+        """,
+        [parent_revision_id, target_video_id],
+    )
+    if len(parent_video_rows) > 1:
+        raise PostgresAdapterError(
+            "video source parent lookup returned duplicate video identity"
+        )
+    parent_occurrence_rows = _rows(
+        connection,
+        """
+        SELECT occurrence_id, range_id, video_id, song_key, seconds,
+               source_system, source_id, title, artist, payload_json
+        FROM runtime_occurrences
+        WHERE revision_id = %s AND video_id = %s
+          AND range_id = ANY(%s)
+        ORDER BY range_id, occurrence_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            target_video_id,
+            [range_id, ""],
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    ) if parent_video_rows else []
+    if len(parent_occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "video source parent occurrence lookup exceeded bounded cap"
+        )
+    if parent_video_rows:
+        parent_video_row = parent_video_rows[0]
+        parent_video = _json_object(parent_video_row.get("payload_json"))
+        parent_video.update({
+            "videoId": parent_video.get("videoId") or target_video_id,
+            "title": (
+                parent_video.get("title")
+                if parent_video.get("title") is not None
+                else parent_video_row.get("title")
+            ),
+            "channelName": (
+                parent_video.get("channelName")
+                if parent_video.get("channelName") is not None
+                else parent_video_row.get("channel_name")
+            ),
+            "channelId": (
+                parent_video.get("channelId")
+                if parent_video.get("channelId") is not None
+                else parent_video_row.get("channel_id")
+            ),
+            "channelHandle": (
+                parent_video.get("channelHandle")
+                if parent_video.get("channelHandle") is not None
+                else parent_video_row.get("channel_handle")
+            ),
+            "channelUrl": (
+                parent_video.get("channelUrl")
+                if parent_video.get("channelUrl") is not None
+                else parent_video_row.get("channel_url")
+            ),
+            "publishedAt": (
+                parent_video.get("publishedAt")
+                if parent_video.get("publishedAt") is not None
+                else parent_video_row.get("published_timestamp")
+            ),
+        })
+        for position, row in enumerate(parent_occurrence_rows):
+            occurrence = _json_object(row.get("payload_json"))
+            occurrence.update({
+                "videoId": occurrence.get("videoId") or target_video_id,
+                "occurrenceId": (
+                    occurrence.get("occurrenceId")
+                    or row.get("occurrence_id")
+                ),
+                "position": occurrence.get("position", position),
+                "rangeId": occurrence.get("rangeId") or row.get("range_id"),
+                "songKey": occurrence.get("songKey") or row.get("song_key"),
+                "seconds": occurrence.get("seconds", row.get("seconds")),
+                "title": occurrence.get("title") or row.get("title"),
+                "artist": occurrence.get("artist") or row.get("artist"),
+                "sourceId": occurrence.get("sourceId") or row.get("source_id"),
+                "sourceSystem": (
+                    occurrence.get("sourceSystem")
+                    or row.get("source_system")
+                ),
+            })
+            single = {
+                "video": dict(parent_video),
+                "occurrences": (occurrence,),
+            }
+            effective[_source_record_identity(single)] = single
     for record in _persisted_source_records(parent_occurrences, {}):
         if _text(record.get("video", {}).get("videoId")) != target_video_id:
             continue
@@ -13930,6 +14041,9 @@ def source_payload(
                         source_overlay_ids,
                         _query_options(query)["range"],
                         snapshot_video_scope,
+                        include_compatible_full_reset_7d=(
+                            _query_options(query)["range"] == "all"
+                        ),
                     )
                     if (
                         snapshot_video_scope is not None
@@ -13971,6 +14085,7 @@ def source_payload(
                     query,
                     source_overlay_ids,
                     *(prepared_inputs or ()),
+                    snapshot_video_scope=snapshot_video_scope,
                 )
                 if video_rebuilt is not None:
                     return video_rebuilt
@@ -14024,6 +14139,9 @@ def source_payload(
                             source_overlay_ids,
                             _query_options(query)["range"],
                             snapshot_video_scope,
+                            include_compatible_full_reset_7d=(
+                                _query_options(query)["range"] == "all"
+                            ),
                         )
                         if (
                             snapshot_video_scope is not None
@@ -14062,6 +14180,7 @@ def source_payload(
                         query,
                         source_overlay_ids,
                         *(prepared_inputs or ()),
+                        snapshot_video_scope=snapshot_video_scope,
                     )
                     if video_rebuilt is not None:
                         return video_rebuilt
@@ -14092,6 +14211,9 @@ def source_payload(
                     overlay_ids,
                     _query_options(query)["range"],
                     snapshot_video_scope,
+                    include_compatible_full_reset_7d=(
+                        _query_options(query)["range"] == "all"
+                    ),
                 )
                 if snapshot_video_scope is not None
                 else None
@@ -14116,29 +14238,13 @@ def source_payload(
             ) if overlay_ids else None
             if overlay_artist is not None:
                 return overlay_artist
-            vtuber_inputs = prepared_inputs
-            if (
-                re.fullmatch(r"[0-9a-f]{16}", key)
-                and
-                prepared_inputs is not None
-                and _query_options(query)["range"] == "all"
-                and prepared_inputs[1]
-            ):
-                vtuber_inputs = _snapshot_source_overlay_inputs(
-                    connection,
-                    parent[0],
-                    overlay_ids,
-                    "all",
-                    snapshot_video_scope or (),
-                    include_compatible_full_reset_7d=True,
-                )
             overlay_vtuber = _generic_overlay_vtuber_source_for_key(
                 connection,
                 parent[0],
                 key,
                 query,
                 overlay_ids,
-                *(vtuber_inputs or (None, None, None)),
+                *(prepared_inputs or (None, None, None)),
                 snapshot_video_scope,
             ) if overlay_ids else None
             if overlay_vtuber is not None:
@@ -14151,6 +14257,7 @@ def source_payload(
                 query,
                 overlay_ids,
                 *(prepared_inputs or ()),
+                snapshot_video_scope=snapshot_video_scope,
             ) if overlay_ids else None
             if overlay_video is not None:
                 return overlay_video

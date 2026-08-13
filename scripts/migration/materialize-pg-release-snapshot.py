@@ -40,6 +40,7 @@ MAX_SOURCE_SEARCH_CHARS = 65_536
 SOURCE_SCOPE_FETCH_SIZE = 10_000
 SOURCE_SCOPE_PAYLOAD_FETCH_SIZE = 64
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
+PARENT_VIDEO_EXPORT_BATCH = 500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
@@ -349,6 +350,25 @@ class SnapshotSourceScope:
             )
         )
 
+    def unaffected_parent_video_sources(self) -> tuple[tuple[str, str], ...]:
+        """Return parent video-card keys whose videos have no overlay delta."""
+
+        return tuple(
+            (str(row[0]), str(row[1]))
+            for row in self.connection.execute(
+                "SELECT pair.source_key,pair.video_id "
+                "FROM source_scope_pairs AS pair "
+                "JOIN source_scope_targets AS target "
+                "  ON target.view='videos' "
+                " AND target.source_key=pair.source_key "
+                " AND target.group_key=pair.video_id "
+                "LEFT JOIN source_scope_videos AS affected "
+                "  ON affected.video_id=pair.video_id "
+                "WHERE affected.video_id IS NULL "
+                "ORDER BY pair.source_key,pair.video_id"
+            )
+        )
+
     def stats(self) -> dict[str, int]:
         return {
             "videos": int(self.connection.execute(
@@ -451,7 +471,7 @@ def _runtime_scope_evidence(
             if video_id:
                 videos.add(video_id)
             title = _text(current.get("title") or current.get("workTitle"))
-            if title and "artist" in current and current.get("artist") is not None:
+            if title and "artist" in current:
                 songs.add((title, _text(current.get("artist"))))
             channel_id = _text(current.get("channelId") or current.get("channel_id"))
             channel_handle = _text(
@@ -495,6 +515,7 @@ def build_snapshot_source_scope(
     parent_revision_id = source_lineage[-1]
 
     target_buffer: list[tuple[str, str, str]] = []
+    parent_video_pair_buffer: list[tuple[str, str]] = []
     for row in _stream_pg_rows(
         connection,
         "targets",
@@ -504,13 +525,16 @@ def build_snapshot_source_scope(
         FROM runtime_ranking_rows
         WHERE revision_id = %s AND range_id = 'all'
           AND view = ANY(%s) AND metric = 'count' AND scope_key = 'all'
-          AND coalesce(payload_json::jsonb->>'sourceDetailKey','') = ANY(%s)
+          AND (
+            view = 'videos'
+            OR coalesce(payload_json::jsonb->>'sourceDetailKey','') = ANY(%s)
+          )
         ORDER BY view,detail_key
         LIMIT %s
         """,
         [
             parent_revision_id,
-            ["songs", "songIndex", "artists", "vtubers"],
+            ["songs", "songIndex", "artists", "vtubers", "videos"],
             sorted(requested),
             MAX_SOURCE_SCOPE_ROWS + 1,
         ],
@@ -529,15 +553,35 @@ def build_snapshot_source_scope(
             )
         elif view == "vtubers":
             group_key = _text(row.get("detail_key"))
+        elif view == "videos":
+            group_key = _text(row.get("detail_key"))
+            expected_key = adapter._stable_key(
+                "source-video", "all", group_key,
+            ) if group_key else ""
+            if expected_key not in requested:
+                continue
+            if source_key and source_key != expected_key:
+                raise RuntimeError(
+                    "parent video ranking has an invalid source key: "
+                    f"video={group_key} expected={expected_key} "
+                    f"actual={source_key}"
+                )
+            source_key = expected_key
         else:
             continue
         if group_key and source_key:
             target_buffer.append((view, group_key, source_key))
+            if view == "videos":
+                parent_video_pair_buffer.append((source_key, group_key))
         if len(target_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
             scope.add_targets(target_buffer)
+            scope.add_pairs(parent_video_pair_buffer)
             target_buffer = []
+            parent_video_pair_buffer = []
     scope.add_targets(target_buffer)
+    scope.add_pairs(parent_video_pair_buffer)
     target_buffer = []
+    parent_video_pair_buffer = []
     row = None
     _release_source_scope_stage("targets")
 
@@ -628,6 +672,53 @@ def build_snapshot_source_scope(
     flush()
     row = None
     _release_source_scope_stage("occurrences")
+
+    # The all-range ranking contract projects physical 7d occurrences only
+    # for already-selected non-partial full-video resets.  Add those exact
+    # song/artist/channel identities to the disk-backed source scope as well;
+    # ordinary 7d rows and partialRangeReset metadata remain excluded.
+    accepted_resets = adapter._accepted_video_resets(
+        connection,
+        revision_ids,
+        include_payload=False,
+    )
+    compatible_reset_rows = adapter._selected_full_reset_candidate_rows(
+        connection,
+        revision_ids,
+        accepted_resets,
+        "all",
+        include_payload=False,
+    )
+    for row in compatible_reset_rows:
+        video_id = _text(row.get("video_id") or row.get("videoId"))
+        title = _text(row.get("title"))
+        artist = _text(row.get("artist"))
+        if not video_id:
+            continue
+        video_buffer.append(video_id)
+        channel_key = (
+            _text(row.get("channel_id") or row.get("channelId"))
+            or _text(
+                row.get("channel_handle") or row.get("channelHandle")
+            ).lstrip("@/")
+            or adapter._overlay_norm(
+                row.get("channel_name") or row.get("channelName")
+            )
+        )
+        pair_buffer.extend(_derived_source_pairs(
+            video_ids=(video_id,),
+            song_pairs=((title, artist),) if title else (),
+            channel_keys=(channel_key,),
+            requested_keys=requested,
+            source_scope=scope,
+        ))
+        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            flush()
+    flush()
+    row = None
+    compatible_reset_rows = None
+    accepted_resets = None
+    _release_source_scope_stage("compatible_resets")
 
     for row in _stream_pg_rows(
         connection,
@@ -1418,6 +1509,202 @@ def export_sources_from_records(
     return completed
 
 
+def export_unaffected_parent_video_sources(
+    connection: Any,
+    writer: CanonicalSnapshotWriter,
+    *,
+    parent_revision_id: str,
+    sources: Sequence[tuple[str, str]],
+) -> set[str]:
+    """Bulk-export immutable parent video details without per-source SQL.
+
+    Full runtime releases intentionally do not persist video source-detail
+    rows.  The ranking row is the authoritative opaque-key-to-video mapping,
+    while the exact parent video and occurrences provide the detail payload.
+    Overlay-affected videos are excluded by ``SnapshotSourceScope`` and keep
+    using the delta-aware adapter path.
+    """
+
+    ordered = tuple(sorted({
+        (_text(source_key), _text(video_id))
+        for source_key, video_id in sources
+        if _text(source_key) and _text(video_id)
+    }))
+    source_keys = [source_key for source_key, _ in ordered]
+    video_ids = [video_id for _, video_id in ordered]
+    if len(set(source_keys)) != len(ordered) or len(set(video_ids)) != len(ordered):
+        raise RuntimeError("parent video source mapping is not one-to-one")
+    for source_key, video_id in ordered:
+        expected_key = adapter._stable_key("source-video", "all", video_id)
+        if source_key != expected_key:
+            raise RuntimeError(
+                "parent video source mapping changed: "
+                f"video={video_id} expected={expected_key} actual={source_key}"
+            )
+
+    completed: set[str] = set()
+    for offset in range(0, len(ordered), PARENT_VIDEO_EXPORT_BATCH):
+        batch = ordered[offset : offset + PARENT_VIDEO_EXPORT_BATCH]
+        batch_by_video = {
+            video_id: source_key for source_key, video_id in batch
+        }
+        batch_video_ids = sorted(batch_by_video)
+        video_rows = adapter._rows(
+            connection,
+            """
+            SELECT video_id,title,channel_name,channel_id,channel_handle,
+                   channel_url,published_timestamp,payload_json
+            FROM runtime_videos
+            WHERE revision_id = %s AND video_id = ANY(%s)
+            ORDER BY video_id
+            LIMIT %s
+            """,
+            [parent_revision_id, batch_video_ids, len(batch_video_ids) + 1],
+        )
+        video_by_id = {
+            _text(row.get("video_id")): dict(row)
+            for row in video_rows
+            if _text(row.get("video_id"))
+        }
+        if set(video_by_id) != set(batch_video_ids):
+            missing = sorted(set(batch_video_ids) - set(video_by_id))
+            extra = sorted(set(video_by_id) - set(batch_video_ids))
+            raise RuntimeError(
+                "parent video source lookup changed: "
+                f"missing={missing[:3]} extra={extra[:3]}"
+            )
+
+        current_video_id = ""
+        current_occurrences: list[dict[str, Any]] = []
+
+        def flush_video() -> None:
+            nonlocal current_video_id, current_occurrences
+            if not current_video_id:
+                return
+            video_row = video_by_id[current_video_id]
+            video = _json_object(video_row.get("payload_json"))
+            for public_name, column_name in (
+                ("videoId", "video_id"),
+                ("title", "title"),
+                ("channelName", "channel_name"),
+                ("channelId", "channel_id"),
+                ("channelHandle", "channel_handle"),
+                ("channelUrl", "channel_url"),
+                ("publishedAt", "published_timestamp"),
+            ):
+                if video.get(public_name) is None:
+                    video[public_name] = video_row.get(column_name)
+            video["videoId"] = video.get("videoId") or current_video_id
+            record = {
+                "video": video,
+                "occurrences": tuple(current_occurrences),
+            }
+            options = adapter._query_options({
+                "range": "all",
+                "view": "videos",
+                "metric": "occurrences",
+                "page": "1",
+                "pageSize": "200",
+            })
+            groups = adapter._entity_groups((record,), options)
+            if len(groups) != 1:
+                raise RuntimeError(
+                    f"parent video source is empty: {current_video_id}"
+                )
+            detail = adapter._group_payload(groups[0], options)
+            source_key = batch_by_video[current_video_id]
+            if _text(detail.get("sourceDetailKey")) != source_key:
+                raise RuntimeError(
+                    f"parent video source key changed: {current_video_id}"
+                )
+            occurrences = detail.pop("occurrences", None)
+            if not isinstance(occurrences, list) or not occurrences:
+                raise RuntimeError(
+                    f"parent video source has no occurrences: {current_video_id}"
+                )
+            detail["rangeId"] = "all"
+            writer.add_source(source_key, "all", detail, occurrences)
+            completed.add(source_key)
+            current_video_id = ""
+            current_occurrences = []
+
+        for row in _stream_pg_rows(
+            connection,
+            f"parent_video_occurrences_{offset // PARENT_VIDEO_EXPORT_BATCH}",
+            """
+            SELECT occurrence_id,range_id,video_id,song_key,seconds,
+                   source_system,source_id,title,artist,payload_json
+            FROM runtime_occurrences
+            WHERE revision_id = %s AND video_id = ANY(%s)
+              AND range_id = ANY(%s)
+            ORDER BY video_id,range_id,occurrence_id
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                batch_video_ids,
+                ["all", ""],
+                MAX_SOURCE_SCOPE_ROWS + 1,
+            ],
+        ):
+            video_id = _text(row.get("video_id"))
+            if video_id not in batch_by_video:
+                raise RuntimeError(
+                    f"parent video occurrence escaped scope: {video_id}"
+                )
+            if current_video_id and video_id != current_video_id:
+                flush_video()
+            if not current_video_id:
+                current_video_id = video_id
+            occurrence = _json_object(row.get("payload_json"))
+            for public_name, column_name in (
+                ("occurrenceId", "occurrence_id"),
+                ("rangeId", "range_id"),
+                ("songKey", "song_key"),
+                ("seconds", "seconds"),
+                ("title", "title"),
+                ("artist", "artist"),
+                ("sourceId", "source_id"),
+                ("sourceSystem", "source_system"),
+            ):
+                if occurrence.get(public_name) is None:
+                    occurrence[public_name] = row.get(column_name)
+            occurrence["videoId"] = occurrence.get("videoId") or video_id
+            occurrence["position"] = occurrence.get(
+                "position", len(current_occurrences),
+            )
+            current_occurrences.append(occurrence)
+        flush_video()
+        batch_completed = {
+            source_key for source_key, _ in batch if source_key in completed
+        }
+        if len(batch_completed) != len(batch):
+            missing = sorted(set(source_key for source_key, _ in batch) - completed)
+            raise RuntimeError(
+                "parent video sources have no all-range occurrences: "
+                + ", ".join(missing[:3])
+            )
+        if len(completed) % 1_000 < len(batch):
+            print(
+                "PG_SNAPSHOT_PARENT_VIDEO_SOURCES "
+                f"complete={len(completed)} total={len(ordered)}",
+                flush=True,
+            )
+        video_rows = None
+        video_by_id = None
+        current_occurrences = []
+        gc.collect()
+    if len(completed) != len(ordered):
+        raise RuntimeError("parent video source bulk export is incomplete")
+    if len(completed) % 1_000:
+        print(
+            "PG_SNAPSHOT_PARENT_VIDEO_SOURCES "
+            f"complete={len(completed)} total={len(ordered)}",
+            flush=True,
+        )
+    return completed
+
+
 class SnapshotPageBuilder:
     def __init__(self, connection: Any):
         self.connection = connection
@@ -1769,12 +2056,35 @@ def materialize(
         source_scope_stats = source_scope.stats() if source_scope is not None else {
             "videos": 0, "pairs": 0, "sources": 0, "targets": 0,
         }
+        bulk_exported_source_keys: dict[str, set[str]] = {
+            range_id: set() for range_id in RANGES
+        }
+        if source_scope is not None and getattr(builder, "parent", None):
+            parent_video_sources = source_scope.unaffected_parent_video_sources()
+            if parent_video_sources:
+                exported_parent_videos = export_unaffected_parent_video_sources(
+                    connection,
+                    writer,
+                    parent_revision_id=builder.parent[0],
+                    sources=parent_video_sources,
+                )
+                if not exported_parent_videos.issubset(source_keys["all"]):
+                    raise RuntimeError(
+                        "parent video bulk export introduced an unknown source key"
+                    )
+                bulk_exported_source_keys["all"].update(
+                    exported_parent_videos,
+                )
+            parent_video_sources = ()
         _release_materializer_memory(writer, builder, phase="source-scope")
         scoped_payload_loader = getattr(builder, "source_payload", None)
         for range_id in RANGES:
             if range_id in bulk_exported_ranges:
                 continue
-            for index, source_key in enumerate(sorted(source_keys[range_id]), start=1):
+            pending_source_keys = sorted(
+                source_keys[range_id] - bulk_exported_source_keys[range_id]
+            )
+            for index, source_key in enumerate(pending_source_keys, start=1):
                 video_scope = (
                     source_scope.videos_for_source(source_key)
                     if source_scope is not None and range_id == "all"
@@ -1797,7 +2107,7 @@ def materialize(
                 if index % 25 == 0:
                     print(
                         f"PG_SNAPSHOT_SOURCES range={range_id} "
-                        f"complete={index} total={len(source_keys[range_id])}",
+                        f"complete={index} total={len(pending_source_keys)}",
                         flush=True,
                     )
                     _release_materializer_memory(
@@ -1805,13 +2115,14 @@ def materialize(
                         builder,
                         phase=f"sources-{range_id}-{index}",
                     )
-            if len(source_keys[range_id]) % 25:
+            if len(pending_source_keys) % 25:
                 print(
                     f"PG_SNAPSHOT_SOURCES range={range_id} "
-                    f"complete={len(source_keys[range_id])} "
-                    f"total={len(source_keys[range_id])}",
+                    f"complete={len(pending_source_keys)} "
+                    f"total={len(pending_source_keys)}",
                     flush=True,
                 )
+            pending_source_keys = []
 
         after = canonical_meta(adapter.meta_payload(connection))
         for name in ("active_revision_id", "content_sha256", "source_commit_sha"):
