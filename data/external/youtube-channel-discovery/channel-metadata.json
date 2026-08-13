@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T13:34:13.716Z",
+  "generatedAt": "2026-08-13T15:13:06.363Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T13:34:13.716Z",
+    "fetchedAt": "2026-08-13T15:13:06.363Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T13:34:13.716Z",
+    "generatedAt": "2026-08-13T15:13:06.363Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 668,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 668
     },
     "failures": [],
     "skippedSummary": {
@@ -11789,6 +11789,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@aoi_sonata",
+        "channelId": "UCRQJCI74rG0mhSKA1ovmw0A",
+        "displayName": "Sonata ch. 蒼依 そなた",
+        "sourceUrl": "https://www.youtube.com/@aoi_sonata",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@KanadeIzuru",
         "channelId": "UCZgOv3YDEs-ZnZWDYVwJdmA",
         "displayName": "Izuru Ch. 奏手イヅル",
@@ -11842,13 +11849,6 @@
         "channelId": "UCwBxb9vxDp_mYoOddhw9dTA",
         "displayName": "縷々原るるか\\RurukaRuruhara",
         "sourceUrl": "https://www.youtube.com/@Ruruka0w0",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@FujiotoKanade",
-        "channelId": "UC0S-Kc5tpRbG7XGv3IbCQUw",
-        "displayName": "藤音カナデ-Fujioto Kanade-",
-        "sourceUrl": "https://www.youtube.com/@FujiotoKanade",
         "reason": "batch_limit_reached"
       }
     ]
