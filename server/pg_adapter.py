@@ -2540,15 +2540,19 @@ def _project_compatible_candidate_rows(
         row = dict(value)
         if target_range == "all" and _text(row.get("range_id")) == "7d":
             row["range_id"] = "all"
-            payload = _json_object(row.get("occurrence_payload_json"))
-            if payload:
+            for payload_field in (
+                "occurrence_payload_json", "video_payload_json",
+            ):
+                payload = _json_object(row.get(payload_field))
+                if not payload:
+                    continue
                 if isinstance(payload.get("payload"), Mapping):
                     nested = dict(payload["payload"])
                     nested["rangeId"] = "all"
                     payload["payload"] = nested
                 else:
                     payload["rangeId"] = "all"
-                row["occurrence_payload_json"] = payload
+                row[payload_field] = payload
         projected.append(row)
     return tuple(projected)
 
@@ -14812,8 +14816,16 @@ def _generic_video_source_payload(
     payload = source_payload_from_records(records, requested_key, query)
     if not payload.get("found"):
         return payload
+    # The source key and every effective occurrence were resolved against the
+    # requested range above.  A selected physical 7d full reset projected into
+    # compatible all can still carry 7d as video metadata; never let that
+    # implementation detail change the public detail contract.
+    payload = dict(payload)
+    payload["record"] = {
+        **dict(payload.get("record") or {}),
+        "rangeId": range_id,
+    }
     if persisted_record:
-        payload = dict(payload)
         payload["record"] = {
             **persisted_record,
             **dict(payload.get("record") or {}),
