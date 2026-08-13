@@ -629,6 +629,24 @@ class Tests(unittest.TestCase):
                 self.assertEqual(record["songCount"],5)
                 self.assertEqual(len(record["songs"]),3)
 
+    def test_compact_artist_card_limits_song_preview_without_changing_count(self):
+        record={
+            "type":"artist","key":"artist","name":"Artist",
+            "count":9,"songCount":5,"videoCount":4,
+            "songs":[
+                {"key":f"song-{index}","name":f"Song {index}","count":1}
+                for index in range(5)
+            ],
+            "occurrences":[],
+        }
+        compact=pg_adapter.compact_ranking_card(record,"artists")
+        self.assertEqual(compact["songCount"],5)
+        self.assertEqual(compact["songPreviewCount"],3)
+        self.assertEqual(
+            [item["key"] for item in compact["songs"]],
+            ["song-0","song-1","song-2"],
+        )
+
     def test_missing_source_fails_fast_no_proxy(self):
         start=time.monotonic()
         with self.assertRaises(server.ApiError) as raised:self.store.source_page(self.sha,"missing",parse_qs("range=all"))
@@ -649,10 +667,14 @@ class Tests(unittest.TestCase):
             "songs","all","reset song::reset artist",
         )
         reset_artist_key=pg_adapter._production_source_detail_key_for_group(
-            "artists","all","reset artist",
+            "artists","all","resetartist",
         )
         ordinary_7d_key=pg_adapter._production_source_detail_key_for_group(
             "songs","all","ordinary seven::reset artist",
+        )
+        punctuated_artist="岡村和義（岡村靖幸,斉藤和義）"
+        canonical_artist_key=pg_adapter._production_source_detail_key_for_group(
+            "artists","all","岡村和義岡村靖幸斉藤和義",
         )
         video_key=pg_adapter._stable_key("source-video","all","video-all")
         parent_video_key=pg_adapter._stable_key(
@@ -661,7 +683,8 @@ class Tests(unittest.TestCase):
         replacement_video_key=pg_adapter._stable_key("source-video","all","video-new")
         requested={song_key,artist_key,channel_key,replacement_key,video_key,
                    replacement_video_key,reset_song_key,reset_artist_key,
-                   parent_video_key,ordinary_7d_key,"parent-source","alias-song"}
+                   parent_video_key,ordinary_7d_key,canonical_artist_key,
+                   "parent-source","alias-song"}
 
         fetch_sizes={}
         statements={}
@@ -681,6 +704,8 @@ class Tests(unittest.TestCase):
                        "partial_range_reset":False,"partial_range_id":""}
             elif label=="occurrences":
                 yield {"video_id":"video-all","range_id":"all","title":"Song","artist":"Artist"}
+                yield {"video_id":"video-punctuated","range_id":"all",
+                       "title":"Punctuated","artist":punctuated_artist}
             elif label=="runtime":
                 yield {"range_id":"all","payload_json":{"rangeId":"all","videoId":"video-new","title":"Replacement","artist":"New Artist"}}
             elif label.startswith("parents_"):
@@ -705,6 +730,10 @@ class Tests(unittest.TestCase):
             self.assertEqual(scope.videos_for_source(song_key),("video-all",))
             self.assertEqual(scope.videos_for_source("alias-song"),("video-all",))
             self.assertEqual(scope.videos_for_source(artist_key),("video-all",))
+            self.assertEqual(
+                scope.videos_for_source(canonical_artist_key),
+                ("video-punctuated",),
+            )
             self.assertEqual(scope.videos_for_source(channel_key),("video-all",))
             self.assertEqual(scope.videos_for_source(replacement_key),("video-new",))
             self.assertEqual(scope.videos_for_source(reset_song_key),("video-full-7d",))
@@ -727,6 +756,7 @@ class Tests(unittest.TestCase):
                              pg_materializer.SOURCE_SCOPE_FETCH_SIZE)
             self.assertIn("view = ANY",statements["targets"])
             self.assertIn("view = 'videos'",statements["targets"])
+            self.assertIn("view = 'artists'",statements["artist_owners"])
             resets.assert_called_once_with(
                 unittest.mock.ANY,["overlay"],include_payload=False,
             )
@@ -735,6 +765,41 @@ class Tests(unittest.TestCase):
                 {"video-full-7d":{"video_id":"video-full-7d"}},"all",
                 include_payload=False,
             )
+
+    def test_snapshot_artist_scope_uses_exact_owner_before_alias_fallback(self):
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_artist_identities((
+                ("broad",0,"source-broad"),
+                ("exactalias",1,"source-broad"),
+                ("ownedalias",1,"source-broad"),
+                ("exactalias",0,"source-exact"),
+            ))
+            scope.finalize_artist_targets({"source-broad"})
+            self.assertEqual(
+                scope.source_keys_for_group("artists","broad"),
+                ("source-broad",),
+            )
+            self.assertEqual(
+                scope.source_keys_for_group("artists","ownedalias"),
+                ("source-broad",),
+            )
+            self.assertEqual(
+                scope.source_keys_for_group("artists","exactalias"),
+                (),
+            )
+
+    def test_snapshot_artist_scope_rejects_ambiguous_alias_only_owner(self):
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_artist_identities((
+                ("sharedalias",1,"source-one"),
+                ("sharedalias",1,"source-two"),
+            ))
+            with self.assertRaisesRegex(
+                RuntimeError,"multiple canonical owners",
+            ):
+                scope.finalize_artist_targets({"source-one"})
 
     def test_snapshot_stream_cursor_honors_small_payload_batch(self):
         class Cursor:
@@ -795,6 +860,58 @@ class Tests(unittest.TestCase):
             ["video-0","video-1","video-2"],
         )
         self.assertEqual(response["totalCount"],1)
+
+    def test_complete_parent_window_recomputes_final_canonical_totals(self):
+        filtered=[
+            {"detail_key":"artist-one","row_count":3,"song_count":2,
+             "video_count":2,"timestamp_count":3,"payload_json":{}},
+            {"detail_key":"artist-two","row_count":1,"song_count":1,
+             "video_count":1,"timestamp_count":1,"payload_json":{}},
+        ]
+        self.assertEqual(
+            pg_adapter._final_generic_aggregate_totals(filtered),
+            {"totalCount":2,"totalOccurrenceCount":4,
+             "totalSongCount":3,"totalVideoCount":3},
+        )
+        prepared={
+            "filtered":filtered,"metadata":[],"candidateRows":[],
+            "parentRevisionId":"parent","overlayRevisionIds":(),
+        }
+        hydrated={
+            "type":"artist","key":"artist","name":"Artist",
+            "sourceDetailKey":"source","occurrences":[],
+        }
+        prepared["aggregateTotals"]={
+            "totalCount":2,"totalOccurrenceCount":4,
+            "totalSongCount":3,"totalVideoCount":3,
+        }
+        with patch.object(
+            pg_adapter,"_hydrated_generic_ranking_payload",
+            return_value=hydrated,
+        ), patch.object(pg_adapter,"_hydrate_overlay_page_previews"), \
+             patch.object(pg_adapter,"_hydrate_runtime_ranking_song_previews"):
+            response=pg_adapter._render_generic_overlay_rankings(
+                object(),"active",prepared,
+                {"range":"all","view":"artists","metric":"occurrences",
+                 "page":"1","pageSize":"30"},
+            )
+        self.assertEqual(
+            (response["totalCount"],response["totalOccurrenceCount"],
+             response["totalSongCount"],response["totalVideoCount"]),
+            (2,4,3,3),
+        )
+
+    def test_snapshot_rejects_incomplete_ranking_page_series(self):
+        pg_materializer.validate_complete_ranking_series(
+            "all/artists/count/all",11152,11152,
+        )
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "all/artists/count/all expected=11154 actual=11152",
+        ):
+            pg_materializer.validate_complete_ranking_series(
+                "all/artists/count/all",11154,11152,
+            )
 
     def test_snapshot_builder_enables_pre_hydration_preview_limit(self):
         builder=pg_materializer.SnapshotPageBuilder.__new__(
@@ -1739,6 +1856,28 @@ class Tests(unittest.TestCase):
         self.assertEqual(rows.call_args_list[0].args[2][1],["video-one"])
         self.assertIn("coalesce(o.range_id, '')",rows.call_args_list[1].args[1])
 
+    def test_overlay_candidates_exclude_empty_title_for_every_public_view(self):
+        video={"revision_id":"overlay","video_id":"video-one",
+               "video_title":"Video","channel_name":"Fixture",
+               "channel_id":"UCfixture","channel_handle":"@fixture",
+               "channel_url":"","published_at":0,
+               "video_payload_json":{},"video_tombstone":False}
+        valid={"revision_id":"overlay","video_id":"video-one",
+               "occurrence_id":"valid","position":0,"range_id":"all",
+               "song_key":"song","seconds":1,"title":"Song",
+               "artist":"Artist","source_id":"source","raw_hash":"raw",
+               "source_system":"fixture","occurrence_payload_json":{}}
+        empty={**valid,"occurrence_id":"empty","position":1,
+               "song_key":"empty","title":"","artist":""}
+        with patch.object(pg_adapter,"_rows",side_effect=[[video],[valid,empty]]):
+            selected=pg_adapter._overlay_candidate_rows(
+                object(),("overlay",),range_id="all",
+            )
+        self.assertEqual(
+            [row["occurrence_id"] for row in selected],
+            ["valid"],
+        )
+
     def test_snapshot_channel_source_reuses_prepared_exact_video_changes(self):
         video={"video_id":"video-one","title":"Video","channel_name":"Fixture",
                "channel_id":"UCfixture","channel_handle":"@fixture","channel_url":"",
@@ -2000,7 +2139,7 @@ class Tests(unittest.TestCase):
     def test_snapshot_overlay_only_artist_source_rebuilds_exact_prepared_video(self):
         artist="\u500d\u8cde\u5343\u6075\u5b50\u3055\u3093"
         source_key=pg_adapter._production_source_detail_key_for_group(
-            "artists","all",pg_adapter._overlay_norm(artist),
+            "artists","all",pg_adapter._overlay_artist_group_norm(artist),
         )
         self.assertEqual(source_key,"000e41d350a7ef83")
         candidate={
@@ -2035,6 +2174,588 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["record"]["sourceDetailKey"],source_key)
         self.assertEqual(result["record"]["occurrences"][0]["videoId"],"PZPwqBtYM2I")
         global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
+
+    def test_snapshot_parent_artist_source_matches_canonical_punctuation_free_key(self):
+        display_artist="岡村和義（岡村靖幸,斉藤和義）"
+        canonical_artist="岡村和義岡村靖幸斉藤和義"
+        video_id="jsQX01izzbY"
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "artists","all",canonical_artist,
+        )
+        self.assertEqual(source_key,"0126c6ea5a6f30f6")
+        candidate={
+            "revision_id":"accepted_30347149376_1","video_id":video_id,
+            "occurrence_id":"position:14","position":14,"range_id":"all",
+            "song_key":"song-artist","seconds":4500,"title":"カモンベイビー",
+            "artist":display_artist,"source_id":"source","raw_hash":"raw",
+            "source_system":"fixture",
+            "occurrence_payload_json":{
+                "videoId":video_id,"occurrenceId":"position:14",
+                "position":14,"rangeId":"all","songKey":"song-artist",
+                "seconds":4500,"title":"カモンベイビー",
+                "artist":display_artist,
+            },
+            "video_title":"Artist Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+            "channel_url":"","published_at":0,"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        parent_occurrence={
+            "position":14,"video_id":video_id,"title":"Artist Video",
+            "channel_name":"Fixture","channel_id":"UCfixture",
+            "channel_handle":"@fixture","channel_url":"",
+            "published_timestamp":0,"seconds":4500,"search_text":"",
+            "payload_json":{
+                "videoId":video_id,"occurrenceId":"position:14",
+                "position":14,"rangeId":"all","songKey":"song-artist",
+                "seconds":4500,"title":"カモンベイビー",
+                "artist":display_artist,
+            },
+        }
+        persisted={
+            "type":"artist","key":canonical_artist,"name":display_artist,
+            "artist":display_artist,"count":1,"occurrenceCount":1,
+            "timestampCount":1,"videoCount":1,"songCount":1,
+            "songs":[{"name":"カモンベイビー","count":1}],
+            "channels":[{"name":"Fixture","count":1}],
+            "rangeId":"all","sourceDetailKey":source_key,
+        }
+        summary={"total_occurrence_count":1,"total_video_count":1,
+                 "max_position":14}
+        page=[{"video_id":video_id,"first_position":14}]
+        rows=[ [parent_occurrence], [summary], page, [parent_occurrence] ]
+        with patch.object(pg_adapter,"_rows",side_effect=rows), \
+             patch.object(pg_adapter,"_overlay_candidate_rows") as global_candidates, \
+             patch.object(pg_adapter,"_accepted_video_resets") as global_resets, \
+             patch.object(pg_adapter,"_runtime_tombstones") as global_changes:
+            result=pg_adapter._generic_artist_source_payload(
+                object(),"parent",persisted,source_key,
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),(candidate,),{video_id:{"video_id":video_id}},(),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual(result["sourceKey"],source_key)
+        self.assertEqual(
+            (result["totalVideoCount"],result["totalOccurrenceCount"],
+             result["totalSongCount"]),(1,1,1),
+        )
+        self.assertEqual(result["record"]["key"],canonical_artist)
+        self.assertEqual(result["record"]["name"],display_artist)
+        self.assertEqual(result["record"]["occurrences"][0]["videoId"],video_id)
+        self.assertEqual(
+            result["record"]["occurrences"][0]["song"]["artist"],
+            display_artist,
+        )
+        self.assertEqual(len(result["record"]["occurrences"]),1)
+        global_candidates.assert_not_called();global_resets.assert_not_called();global_changes.assert_not_called()
+
+    def test_artist_group_identity_matches_runtime_normalize_artist_key(self):
+        display_artist="岡村和義（岡村靖幸,斉藤和義）"
+        canonical_artist="岡村和義岡村靖幸斉藤和義"
+        candidate={
+            "video_id":"jsQX01izzbY","occurrence_id":"position:14",
+            "position":14,"range_id":"all","song_key":"song-artist",
+            "seconds":4500,"title":"カモンベイビー",
+            "artist":display_artist,"occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        self.assertEqual(
+            pg_adapter._overlay_artist_group_norm(display_artist),
+            canonical_artist,
+        )
+        self.assertEqual(
+            pg_adapter._runtime_view_group_key(candidate,"artists"),
+            canonical_artist,
+        )
+        self.assertEqual(
+            set(pg_adapter._overlay_candidate_groups((candidate,),"artists")),
+            {canonical_artist},
+        )
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "artists","all",canonical_artist,
+        )
+        with patch.object(
+            pg_adapter,"_generic_artist_source_payload",return_value={"found":True},
+        ) as detail:
+            result=pg_adapter._generic_overlay_artist_source_for_key(
+                object(),"parent",source_key,{"range":"all"},("overlay",),
+                (candidate,),{},(),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual(detail.call_args.args[2]["key"],canonical_artist)
+        self.assertEqual(detail.call_args.args[2]["name"],display_artist)
+
+    def test_artist_source_song_counts_use_runtime_entity_key_identity(self):
+        current=[{"key":"planetes","name":"Planetes","count":2}]
+        before=[{"song":{"title":"PLANETES"}}]
+        after=[{"song":{"title":"\uff30\uff4c\uff41\uff4e\uff45\uff54\uff45\uff53"}}]
+        actual=pg_adapter._adjust_source_count_list(
+            current,before,after,"title",
+        )
+        self.assertEqual(
+            actual,
+            [{"key":"planetes","name":"Planetes","count":2}],
+        )
+
+    def test_artist_source_song_counts_never_use_video_title(self):
+        current=[{"key":"song","name":"Song","count":2}]
+        before=[{
+            "title":"Old video title",
+            "item":{"title":"Old video title"},
+            "song":{"title":"Song","artist":"Artist"},
+        }]
+        after=[{
+            "title":"New video title",
+            "video":{"title":"New video title"},
+            "song":{"title":"Song","artist":"Artist"},
+        }]
+        actual=pg_adapter._adjust_source_count_list(
+            current,before,after,"title",
+        )
+        self.assertEqual(
+            actual,
+            [{"key":"song","name":"Song","count":2}],
+        )
+
+    def test_artist_source_alias_keys_match_reviewed_parent_owner(self):
+        record={
+            "type":"artist","key":"artist","name":"Artist (2023)",
+            "aliases":[
+                {"key":"artist2023","name":"Artist (2023)","count":{}},
+            ],
+        }
+        self.assertEqual(
+            pg_adapter._artist_source_alias_keys(record),
+            {"artist","artist2023"},
+        )
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "Artist source alias payload is invalid",
+        ):
+            pg_adapter._artist_source_alias_keys({
+                **record,"aliases":[{"key":"","name":"Artist","count":{}}],
+            })
+
+    def test_artist_source_uses_current_global_owner_not_stale_alias(self):
+        persisted={
+            "type":"artist","key":"current","name":"Current",
+            "aliases":[
+                {"key":"alias","name":"Alias","count":{}},
+            ],
+            "songs":[],"channels":[],"sourceDetailKey":"source-current",
+        }
+        candidate={
+            "video_id":"video-alias","occurrence_id":"occ-alias",
+            "range_id":"all","title":"Song","artist":"Alias",
+            "video_tombstone":False,
+        }
+        resolved=(
+            {"current":"source-current","alias":"source-alias"},
+            {"current":"current","alias":"alias"},
+            {"current":"Current","alias":"Alias"},
+        )
+        with patch.object(
+            pg_adapter,"_resolved_artist_parent_sources",return_value=resolved,
+        ) as owners, patch.object(pg_adapter,"_rows") as rows:
+            actual=pg_adapter._generic_artist_source_payload(
+                object(),"parent",persisted,"source-current",
+                {"range":"all"},("overlay",),(candidate,),{},(),
+                artist_owner_revision_id="parent",
+                artist_alias_cache={},
+            )
+        self.assertIsNone(actual)
+        owners.assert_called_once()
+        rows.assert_not_called()
+
+    def test_artist_parent_source_resolution_uses_explicit_alias_owner(self):
+        cache={}
+        rows=[{
+            "detail_key":"artist","name":"Artist (2023)",
+            "source_key":"source-artist",
+            "aliases":[{"key":"artist2023","name":"Artist (2023)","count":{}}],
+        }]
+        with patch.object(pg_adapter,"_rows",return_value=rows) as query:
+            sources,aliases,names=pg_adapter._resolved_artist_parent_sources(
+                object(),"parent",{"artist2023","overlayonly"},"all",
+                alias_cache=cache,
+            )
+        self.assertEqual(sources,{"artist":"source-artist"})
+        self.assertEqual(aliases,{"artist2023":"artist"})
+        self.assertEqual(names,{"artist":"Artist (2023)"})
+        self.assertIn("runtime_ranking_rows",query.call_args.args[1])
+        self.assertEqual(cache[("parent","all","overlayonly")],("","",""))
+        with patch.object(pg_adapter,"_rows") as cached_query:
+            cached=pg_adapter._resolved_artist_parent_sources(
+                object(),"parent",{"artist2023","overlayonly"},"all",
+                alias_cache=cache,
+            )
+        self.assertEqual(cached,(sources,aliases,names))
+        cached_query.assert_not_called()
+
+    def test_artist_parent_canonical_key_wins_over_broader_alias(self):
+        rows=[
+            {
+                "detail_key":"artist","name":"Artist",
+                "source_key":"source-broad",
+                "aliases":[
+                    {"key":"artistspecific","name":"Artist Specific",
+                     "count":1},
+                ],
+            },
+            {
+                "detail_key":"artistspecific","name":"Artist Specific",
+                "source_key":"source-specific","aliases":[],
+            },
+        ]
+        with patch.object(pg_adapter,"_rows",return_value=rows):
+            sources,aliases,names=pg_adapter._resolved_artist_parent_sources(
+                object(),"parent",{"artistspecific"},"all",
+            )
+        self.assertEqual(
+            (sources,aliases,names),
+            ({"artistspecific":"source-specific"},
+             {"artistspecific":"artistspecific"},
+             {"artistspecific":"Artist Specific"}),
+        )
+
+    def test_authoritative_artist_summary_applies_reset_and_replacement_once(self):
+        artist_key="artist";source_key="source-artist"
+        detail={
+            "type":"artist","key":artist_key,"name":"Artist",
+            "count":3,"occurrenceCount":3,"timestampCount":3,
+            "songCount":3,"videoCount":2,
+            "songs":[
+                {"key":"a","name":"A","count":1},
+                {"key":"b","name":"B","count":1},
+                {"key":"c","name":"C","count":1},
+            ],
+            "sourceDetailKey":source_key,
+        }
+        touched=[]
+        for position,(title,seconds) in enumerate((("B",20),("C",30)),1):
+            touched.append({
+                "source_key":source_key,"position":position,
+                "video_id":"video-two","seconds":seconds,
+                "is_niche":False,"is_unknown_artist":False,
+                "payload_json":{
+                    "videoId":"video-two","seconds":seconds,
+                    "song":{"title":title,"artist":"Artist"},
+                },
+            })
+        candidate=[]
+        for occurrence_id,title,seconds in (("occ-b","B",20),("occ-c","C",30)):
+            candidate.append({
+                "video_id":"video-two","occurrence_id":occurrence_id,
+                "position":seconds,"range_id":"all","song_key":title.lower(),
+                "seconds":seconds,"title":title,"artist":"Artist",
+                "is_niche_value":False,"is_unknown_artist_value":False,
+                "occurrence_payload_json":{
+                    "occurrenceId":occurrence_id,"rangeId":"all",
+                    "seconds":seconds,"title":title,"artist":"Artist",
+                },
+                "video_payload_json":{"videoId":"video-two"},
+                "video_tombstone":False,
+            })
+        replacement={**candidate[0],"title":"D","song_key":"d",
+                     "occurrence_payload_json":{
+                         "occurrenceId":"occ-b","rangeId":"all",
+                         "seconds":20,"title":"D","artist":"Artist",
+                     }}
+        reset_changes=[
+            {"entityType":"occurrences","videoId":"video-two",
+             "acceptedVideoReset":True,"parentArtistGroupKey":artist_key,
+             "title":title,"artist":"Artist"}
+            for title in ("B","C")
+        ]
+        runtime_changes=[{
+            "entityType":"runtime_occurrences","videoId":"video-two",
+            "occurrenceId":"occ-b","title":"B","artist":"Artist",
+            "seconds":20,"replacement":True,
+        }]
+        rows=[
+            [{"artist_key":artist_key,"source_key":source_key,
+              "entity_key":artist_key,"payload_json":detail,
+              "songs_is_array":True,"song_array_count":3,
+              "distinct_song_key_count":3,"song_occurrence_count":3,
+              "invalid_song_count":0}],
+            [{"source_key":source_key,"occurrence_count":3,"video_count":2}],
+            touched,
+        ]
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            actual=pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{artist_key},{artist_key:source_key},
+                {artist_key:"Artist"},{"artist":artist_key},candidate,
+                reset_changes,runtime_changes,(replacement,),
+                pg_adapter._query_options({
+                    "range":"all","view":"artists","metric":"count",
+                    "page":"1","pageSize":"30",
+                }),
+            )
+        row=actual[artist_key];payload=row["payload_json"]
+        self.assertEqual(
+            (row["row_count"],row["song_count"],row["video_count"]),
+            (3,3,2),
+        )
+        self.assertEqual(
+            {item["key"]:item["count"] for item in payload["songs"]},
+            {"a":1,"c":1,"d":1},
+        )
+        self.assertEqual(payload["sourceDetailKey"],source_key)
+
+    def test_snapshot_authoritative_artist_keeps_three_song_preview_and_search(self):
+        artist_key="artist";source_key="source-artist"
+        detail={
+            "type":"artist","key":artist_key,"name":"Artist",
+            "count":4,"occurrenceCount":4,"timestampCount":4,
+            "songCount":4,"videoCount":1,
+            "songs":[
+                {"key":key.lower(),"name":key,"count":1}
+                for key in ("Alpha","Beta","Gamma","Delta")
+            ],
+            "sourceDetailKey":source_key,
+        }
+        rows=[
+            [{"artist_key":artist_key,"source_key":source_key,
+              "entity_key":artist_key,"payload_json":detail,
+              "songs_is_array":True,"song_array_count":4,
+              "distinct_song_key_count":4,"song_occurrence_count":4,
+              "invalid_song_count":0}],
+            [{"source_key":source_key,"occurrence_count":4,"video_count":1}],
+        ]
+        options=pg_adapter._query_options({
+            "range":"all","view":"artists","metric":"count",
+            "page":"1","pageSize":"30",
+        })
+        options["_snapshotCompactCards"]=True
+        options["_snapshotSongSearchMaxChars"]=64
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            actual=pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{artist_key},{artist_key:source_key},
+                {artist_key:"Artist"},{"artist":artist_key},(),(),(),(),
+                options,
+            )
+        row=actual[artist_key];payload=row["payload_json"]
+        self.assertEqual((row["row_count"],row["song_count"]),(4,4))
+        self.assertEqual(len(payload["songs"]),3)
+        self.assertEqual(
+            payload["_snapshotSongSearchText"],
+            "Alpha Beta Delta Gamma",
+        )
+        compact=pg_adapter.compact_ranking_card(payload,"artists")
+        self.assertNotIn("_snapshotSongSearchText",compact)
+
+    def test_authoritative_artist_summary_uses_unique_source_only_preimage(self):
+        artist_key="artist";source_key="source-artist"
+        detail={
+            "type":"artist","key":artist_key,"name":"Artist",
+            "count":2,"occurrenceCount":2,"timestampCount":2,
+            "songCount":2,"videoCount":1,
+            "songs":[
+                {"key":"a","name":"A","count":1},
+                {"key":"b","name":"B","count":1},
+            ],
+            "sourceDetailKey":source_key,
+        }
+        touched=[
+            {
+                "source_key":source_key,"position":position,
+                "video_id":"video-one","seconds":seconds,
+                "is_niche":False,"is_unknown_artist":False,
+                "payload_json":{
+                    "videoId":"video-one","seconds":seconds,
+                    "song":{"title":title,"artist":"Artist"},
+                },
+            }
+            for position,(title,seconds) in enumerate((("A",10),("B",20)),1)
+        ]
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"source-only-id","title":"A",
+            "artist":"Artist","seconds":10,
+        }
+        rows=[
+            [{"artist_key":artist_key,"source_key":source_key,
+              "entity_key":artist_key,"payload_json":detail,
+              "songs_is_array":True,"song_array_count":2,
+              "distinct_song_key_count":2,"song_occurrence_count":2,
+              "invalid_song_count":0}],
+            [{"source_key":source_key,"occurrence_count":2,"video_count":1}],
+            touched,
+            [],
+        ]
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            actual=pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{artist_key},{artist_key:source_key},
+                {artist_key:"Artist"},{"artist":artist_key},(),(),
+                (change,),(),
+                pg_adapter._query_options({
+                    "range":"all","view":"artists","metric":"count",
+                    "page":"1","pageSize":"30",
+                }),
+            )
+        row=actual[artist_key]
+        self.assertEqual(
+            (row["row_count"],row["song_count"],row["video_count"]),
+            (1,1,1),
+        )
+        self.assertEqual(row["payload_json"]["songs"],[
+            {"key":"b","name":"B","count":1},
+        ])
+
+    def test_authoritative_artist_summary_rejects_ambiguous_source_only_preimage(self):
+        artist_key="artist";source_key="source-artist"
+        detail={
+            "type":"artist","key":artist_key,"name":"Artist",
+            "count":2,"occurrenceCount":2,"timestampCount":2,
+            "songCount":1,"videoCount":1,
+            "songs":[{"key":"a","name":"A","count":2}],
+            "sourceDetailKey":source_key,
+        }
+        touched=[
+            {
+                "source_key":source_key,"position":position,
+                "video_id":"video-one","seconds":10,
+                "is_niche":False,"is_unknown_artist":False,
+                "payload_json":{
+                    "videoId":"video-one","seconds":10,
+                    "song":{"title":"A","artist":"Artist"},
+                },
+            }
+            for position in (1,2)
+        ]
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"ambiguous-id","title":"A",
+            "artist":"Artist","seconds":10,
+        }
+        rows=[
+            [{"artist_key":artist_key,"source_key":source_key,
+              "entity_key":artist_key,"payload_json":detail,
+              "songs_is_array":True,"song_array_count":1,
+              "distinct_song_key_count":1,"song_occurrence_count":2,
+              "invalid_song_count":0}],
+            [{"source_key":source_key,"occurrence_count":2,"video_count":1}],
+            touched,
+            [],
+        ]
+        with patch.object(pg_adapter,"_rows",side_effect=rows), \
+             self.assertRaisesRegex(
+                 pg_adapter.PostgresAdapterError,
+                 "does not uniquely match source authority",
+             ):
+            pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{artist_key},{artist_key:source_key},
+                {artist_key:"Artist"},{"artist":artist_key},(),(),
+                (change,),(),
+                pg_adapter._query_options({
+                    "range":"all","view":"artists","metric":"count",
+                    "page":"1","pageSize":"30",
+                }),
+            )
+
+    def test_authoritative_artist_summary_routes_empty_artist_to_unknown(self):
+        candidate={
+            "video_id":"video-unknown","occurrence_id":"occ-unknown",
+            "position":1,"range_id":"all","song_key":"song",
+            "seconds":10,"title":"Song","artist":"",
+            "is_niche_value":False,"is_unknown_artist_value":True,
+            "occurrence_payload_json":{
+                "occurrenceId":"occ-unknown","rangeId":"all",
+                "seconds":10,"title":"Song","artist":"",
+                "isUnknownArtist":True,
+            },
+            "video_payload_json":{"videoId":"video-unknown"},
+            "video_tombstone":False,
+        }
+        with patch.object(pg_adapter,"_rows",side_effect=[]):
+            actual=pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{"unknown"},{},{},
+                {},(candidate,),(),(),(),
+                pg_adapter._query_options({
+                    "range":"all","view":"artists","metric":"count",
+                    "page":"1","pageSize":"30",
+                }),
+            )
+        row=actual["unknown"]
+        self.assertEqual(
+            (row["row_count"],row["song_count"],row["video_count"]),
+            (1,1,1),
+        )
+        self.assertEqual(row["payload_json"]["name"],"unknown")
+
+    def test_prepare_artist_installs_exact_authority_without_generic_replay(self):
+        options=pg_adapter._query_options({
+            "range":"all","view":"artists","metric":"count",
+            "page":"1","pageSize":"30",
+        })
+        candidate={
+            "video_id":"video-one","occurrence_id":"occ-one",
+            "range_id":"all","title":"Song","artist":"Artist",
+            "video_tombstone":False,
+        }
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-one","rangeId":"all",
+            "title":"Song","artist":"Artist",
+        }
+        exact={
+            "artist":{
+                "detail_key":"artist","title":"","artist":"Artist",
+                "name":"Artist","row_count":3,"song_count":2,
+                "video_count":2,"timestamp_count":3,
+                "payload_json":{
+                    "type":"artist","key":"artist","name":"Artist",
+                    "count":3,"songCount":2,"videoCount":2,
+                    "timestampCount":3,"occurrences":[],
+                    "sourceDetailKey":"source-artist",
+                },
+                "search_text":"artist","channel_search_text":"",
+            },
+        }
+        aggregate={
+            "total_count":1,"total_occurrence_count":3,
+            "total_song_count":0,"total_video_count":2,
+        }
+        parent_row={
+            "rank":1,"detail_key":"artist","title":"",
+            "artist":"Artist","name":"Artist","row_count":3,
+            "song_count":0,"video_count":2,"timestamp_count":3,
+            "payload_json":None,"search_text":"artist",
+            "channel_search_text":"",
+        }
+        with patch.object(pg_adapter,"_overlay_revision_ids",return_value=("overlay",)), \
+             patch.object(pg_adapter,"_resolve_exact_vtuber_channel_scope",return_value=None), \
+             patch.object(pg_adapter,"_one",return_value=aggregate), \
+             patch.object(pg_adapter,"_rows",side_effect=[
+                 [parent_row],[parent_row],[parent_row],[],
+             ]), \
+             patch.object(pg_adapter,"_overlay_candidate_rows",return_value=[candidate]), \
+             patch.object(pg_adapter,"_accepted_video_resets",return_value={}), \
+             patch.object(pg_adapter,"_snapshot_accepted_video_reset_changes",return_value=[]), \
+             patch.object(pg_adapter,"_runtime_tombstones",return_value=[change]), \
+             patch.object(pg_adapter,"_runtime_replacement_candidate_rows",return_value=[]), \
+             patch.object(pg_adapter,"_resolved_artist_parent_sources",
+                          return_value=({"artist":"source-artist"},
+                                        {"artist":"artist"},
+                                        {"artist":"Artist"})), \
+             patch.object(pg_adapter,"_authoritative_artist_summary_rows",
+                          return_value=exact) as authority, \
+             patch.object(pg_adapter,"_enrich_runtime_original_group_counts") as enrich, \
+             patch.object(pg_adapter,"_apply_runtime_tombstone_groups") as tombstones, \
+             patch.object(pg_adapter,"_reconcile_affected_song_counts") as reconcile:
+            prepared=pg_adapter._prepare_generic_overlay_rankings(
+                object(),"active",("parent",{}),options,
+            )
+        self.assertEqual(
+            (prepared["filtered"][0]["row_count"],
+             prepared["filtered"][0]["song_count"],
+             prepared["filtered"][0]["video_count"]),
+            (3,2,2),
+        )
+        self.assertEqual(prepared["exactAffectedArtistKeys"],("artist",))
+        authority.assert_called_once()
+        enrich.assert_not_called();tombstones.assert_not_called()
+        reconcile.assert_not_called()
 
     def test_snapshot_overlay_only_vtuber_source_rebuilds_compatible_full_reset(self):
         video_id="pIaojB8RGwE";channel_id="UCDV5jA1Cgg53EdmsB8zYQpA"
@@ -2179,6 +2900,7 @@ class Tests(unittest.TestCase):
         artist_detail.assert_called_once_with(
             unittest.mock.ANY,"parent",persisted["record"],source_key,
             {"range":"all","page":"1","pageSize":"200"},["overlay"],*prepared,
+            artist_owner_revision_id="parent",artist_alias_cache=None,
         )
         video_detail.assert_not_called();channel_detail.assert_not_called()
 
@@ -2218,6 +2940,7 @@ class Tests(unittest.TestCase):
         artist_detail.assert_called_once_with(
             unittest.mock.ANY,"parent",persisted["record"],resolved_key,
             {"range":"all","page":"1","pageSize":"200"},["overlay"],*prepared,
+            artist_owner_revision_id="parent",artist_alias_cache=None,
         )
         video_detail.assert_not_called();channel_detail.assert_not_called()
 
@@ -2457,7 +3180,7 @@ class Tests(unittest.TestCase):
         ]
         # Production full-runtime artist rankings carry identity in ``name``
         # and leave the occurrence-shaped ``artist`` scalar empty.
-        groups={"mega artist":{"artist":"","name":"Mega Artist","row_count":99,
+        groups={"megaartist":{"artist":"","name":"Mega Artist","row_count":99,
                                "song_count":99,"video_count":99,"payload_json":{"name":"Mega Artist"}}}
         changes=[{"entityType":"occurrences","videoId":"removed","occurrenceId":"removed",
                   "title":"Old","artist":"Mega Artist"}]
@@ -2473,14 +3196,14 @@ class Tests(unittest.TestCase):
         self.assertEqual(rows.call_args_list[0].args[2][-3:],["","",2])
         self.assertEqual(rows.call_args_list[1].args[2][-3:],["v1","o2",2])
         self.assertEqual(rows.call_args_list[2].args[2][-3:],["v3","o1",2])
-        group=groups["mega artist"]
+        group=groups["megaartist"]
         self.assertEqual((group["row_count"],group["song_count"],group["video_count"]),(5,3,3))
         self.assertEqual((group["payload_json"]["count"],group["payload_json"]["songCount"],
                           group["payload_json"]["videoCount"]),(5,3,3))
         self.assertEqual(reconciliation_counts,
-                         {("parent","all","artists","all","mega artist"):(5,3,3)})
+                         {("parent","all","artists","all","megaartist"):(5,3,3)})
 
-        cached_groups={"mega artist":{"artist":"","name":"Mega Artist",
+        cached_groups={"megaartist":{"artist":"","name":"Mega Artist",
                                       "row_count":0,"song_count":0,"video_count":0,
                                       "payload_json":{"name":"Mega Artist"}}}
         niche_batches=[[{**batches[0][0],"is_niche":True}]]
@@ -2491,12 +3214,12 @@ class Tests(unittest.TestCase):
                 reconciliation_counts=reconciliation_counts,
             )
         self.assertEqual(cached_rows.call_count,1)
-        cached_group=cached_groups["mega artist"]
+        cached_group=cached_groups["megaartist"]
         self.assertEqual((cached_group["row_count"],cached_group["song_count"],
                           cached_group["video_count"]),(1,1,1))
         self.assertEqual(
             reconciliation_counts[
-                ("parent","all","artists","niche","mega artist")
+                ("parent","all","artists","niche","megaartist")
             ],
             (1,1,1),
         )

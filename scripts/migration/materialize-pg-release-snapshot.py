@@ -137,6 +137,16 @@ def validate_page(
     return total, page_count
 
 
+def validate_complete_ranking_series(
+    series_key: str, expected: int, actual: int,
+) -> None:
+    if actual != expected:
+        raise RuntimeError(
+            "ranking pages are incomplete: "
+            f"{series_key} expected={expected} actual={actual}"
+        )
+
+
 def _json_default(value: Any) -> Any:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
@@ -293,6 +303,12 @@ class SnapshotSourceScope:
           source_key TEXT NOT NULL,
           PRIMARY KEY(view,group_key,source_key)
         ) WITHOUT ROWID;
+        CREATE TEMP TABLE source_scope_artist_identities(
+          group_key TEXT NOT NULL,
+          priority INTEGER NOT NULL,
+          source_key TEXT NOT NULL,
+          PRIMARY KEY(group_key,priority,source_key)
+        ) WITHOUT ROWID;
         """)
 
     def add_videos(self, values: Iterable[str]) -> None:
@@ -321,6 +337,73 @@ class SnapshotSourceScope:
                 if _text(view) and _text(group_key) and _text(source_key)
             ),
         )
+
+    def add_artist_identities(
+        self, values: Iterable[tuple[str, int, str]],
+    ) -> None:
+        self.connection.executemany(
+            "INSERT OR IGNORE INTO source_scope_artist_identities"
+            "(group_key,priority,source_key) VALUES(?,?,?)",
+            (
+                (_text(group_key), int(priority), _text(source_key))
+                for group_key, priority, source_key in values
+                if _text(group_key) and _text(source_key)
+            ),
+        )
+
+    def finalize_artist_targets(self, requested_keys: Iterable[str]) -> None:
+        """Resolve Artist aliases with exact canonical identity precedence."""
+
+        requested = sorted({
+            _text(value) for value in requested_keys if _text(value)
+        })
+        if not requested:
+            self.connection.execute(
+                "DROP TABLE source_scope_artist_identities"
+            )
+            return
+        self.connection.execute(
+            "CREATE TEMP TABLE source_scope_requested_artists("
+            "source_key TEXT PRIMARY KEY) WITHOUT ROWID"
+        )
+        self.connection.executemany(
+            "INSERT INTO source_scope_requested_artists(source_key) VALUES(?)",
+            ((value,) for value in requested),
+        )
+        rows = self.connection.execute("""
+        WITH winning_priority AS (
+          SELECT group_key,min(priority) AS priority
+          FROM source_scope_artist_identities
+          GROUP BY group_key
+        ), winning_owners AS (
+          SELECT identity.group_key,
+                 min(identity.source_key) AS source_key,
+                 count(DISTINCT identity.source_key) AS owner_count,
+                 max(CASE WHEN requested.source_key IS NULL THEN 0 ELSE 1 END)
+                   AS has_requested_owner
+          FROM source_scope_artist_identities AS identity
+          JOIN winning_priority AS winner
+            ON winner.group_key=identity.group_key
+           AND winner.priority=identity.priority
+          LEFT JOIN source_scope_requested_artists AS requested
+            ON requested.source_key=identity.source_key
+          GROUP BY identity.group_key
+        )
+        SELECT group_key,source_key,owner_count
+        FROM winning_owners
+        WHERE has_requested_owner=1
+        ORDER BY group_key
+        """).fetchall()
+        targets: list[tuple[str, str, str]] = []
+        for group_key, source_key, owner_count in rows:
+            if int(owner_count) != 1:
+                raise RuntimeError(
+                    "snapshot Artist alias has multiple canonical owners"
+                )
+            targets.append(("artists", str(group_key), str(source_key)))
+        self.add_targets(targets)
+        self.connection.execute("DROP TABLE source_scope_requested_artists")
+        self.connection.execute("DROP TABLE source_scope_artist_identities")
 
     def source_keys_for_group(self, view: str, group_key: str) -> tuple[str, ...]:
         return tuple(
@@ -415,9 +498,9 @@ def _derived_source_pairs(
         song_keys = {_production_source_key(
             "songs", "all", song_group_key,
         )}
-        artist_group_key = normalized_artist or "unknown"
+        artist_group_key = adapter._overlay_artist_group_norm(artist) or "unknown"
         artist_keys = {_production_source_key(
-            "artists", "all", normalized_artist or "unknown",
+            "artists", "all", artist_group_key,
         )}
         if source_scope is not None:
             canonical_song_group = "\x1f".join((
@@ -584,6 +667,65 @@ def build_snapshot_source_scope(
     parent_video_pair_buffer = []
     row = None
     _release_source_scope_stage("targets")
+
+    # Artist cards retain reviewed aliases that are not derivable from the raw
+    # overlay spelling.  Stage every parent Artist identity on disk, then use
+    # exact canonical keys before alias fallbacks.  Filtering to requested
+    # source keys happens only after global ownership is known, so an alias
+    # that is also another card's canonical key can never leak to the broader
+    # requested source.
+    artist_identity_buffer: list[tuple[str, int, str]] = []
+    for row in _stream_pg_rows(
+        connection,
+        "artist_owners",
+        """
+        SELECT detail_key,
+               coalesce(payload_json::jsonb->>'sourceDetailKey','') AS source_key,
+               coalesce(payload_json::jsonb->'aliases','[]'::jsonb) AS aliases
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = 'all'
+          AND view = 'artists' AND metric = 'count' AND scope_key = 'all'
+        ORDER BY detail_key
+        LIMIT %s
+        """,
+        [parent_revision_id, MAX_SOURCE_SCOPE_ROWS + 1],
+    ):
+        canonical_key = _text(row.get("detail_key"))
+        source_key = _text(row.get("source_key")) or (
+            _production_source_key("artists", "all", canonical_key)
+            if canonical_key else ""
+        )
+        aliases = row.get("aliases")
+        if isinstance(aliases, str):
+            try:
+                aliases = json.loads(aliases)
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(
+                    "snapshot Artist alias payload is invalid"
+                ) from exc
+        if not canonical_key or not source_key or not isinstance(aliases, list):
+            raise RuntimeError("snapshot Artist alias payload is invalid")
+        artist_identity_buffer.append((canonical_key, 0, source_key))
+        for alias in aliases:
+            if not isinstance(alias, Mapping) or not _text(alias.get("key")):
+                raise RuntimeError("snapshot Artist alias payload is invalid")
+            artist_identity_buffer.append((
+                _text(alias.get("key")), 1, source_key,
+            ))
+        if len(artist_identity_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+            scope.add_artist_identities(artist_identity_buffer)
+            artist_identity_buffer = []
+    scope.add_artist_identities(artist_identity_buffer)
+    identity_count = int(scope.connection.execute(
+        "SELECT count(*) FROM source_scope_artist_identities"
+    ).fetchone()[0])
+    if identity_count > MAX_SOURCE_SCOPE_ROWS:
+        raise RuntimeError("snapshot Artist alias scope exceeded identity cap")
+    scope.finalize_artist_targets(requested)
+    artist_identity_buffer = []
+    aliases = None
+    row = None
+    _release_source_scope_stage("artist_owners")
 
     pair_buffer: list[tuple[str, str]] = []
     video_buffer: list[str] = []
@@ -954,6 +1096,14 @@ def _release_completed_ranking_view_memory(
         cache = getattr(builder, name, None)
         if isinstance(cache, dict):
             cache.clear()
+    if view == "artists":
+        for name in (
+            "snapshot_artist_aliases",
+            "snapshot_artist_source_totals",
+        ):
+            cache = getattr(builder, name, None)
+            if isinstance(cache, dict):
+                cache.clear()
     if view == "vtubers":
         cache = getattr(builder, "snapshot_vtuber_source_totals", None)
         if isinstance(cache, dict):
@@ -1026,6 +1176,13 @@ def _release_materializer_memory(
     )
     if isinstance(snapshot_vtuber_source_totals, dict):
         snapshot_vtuber_source_totals.clear()
+    for name in (
+        "snapshot_artist_aliases",
+        "snapshot_artist_source_totals",
+    ):
+        cache = getattr(builder, name, None)
+        if isinstance(cache, dict):
+            cache.clear()
     for name in (
         "_GENERIC_RANKING_PREPARATION_CACHE",
         "_GENERIC_META_COUNTS_CACHE",
@@ -1852,6 +2009,15 @@ class SnapshotPageBuilder:
         self.snapshot_vtuber_source_totals: dict[
             tuple[str, str, str], tuple[int, int]
         ] = {}
+        # Artist cards and source details must share the same immutable parent
+        # alias owner and physical source totals.  Reuse only these bounded
+        # scalar identities inside this repeatable-read snapshot.
+        self.snapshot_artist_aliases: dict[
+            tuple[str, str, str], tuple[str, str, str]
+        ] = {}
+        self.snapshot_artist_source_totals: dict[
+            tuple[str, str, str, str], tuple[int, int]
+        ] = {}
 
         runtime_probe = getattr(adapter, "_runtime_projection_revision", None)
         if callable(runtime_probe):
@@ -1952,6 +2118,12 @@ class SnapshotPageBuilder:
             snapshot_reset_changes=self.snapshot_reset_changes,
             snapshot_original_group_counts=self.snapshot_original_group_counts,
             snapshot_vtuber_source_totals=self.snapshot_vtuber_source_totals,
+            snapshot_artist_aliases=getattr(
+                self, "snapshot_artist_aliases", None,
+            ),
+            snapshot_artist_source_totals=getattr(
+                self, "snapshot_artist_source_totals", None,
+            ),
         )
 
         def render(page: int) -> Mapping[str, Any]:
@@ -2045,6 +2217,7 @@ def materialize(
                         target_dir = output_root / "rankings" / range_id / view / metric
                         if scope_key == "all":
                             target_dir.mkdir(parents=True, exist_ok=True)
+                        rendered_record_count = 0
                         for page in range(1, page_count + 1):
                             payload = first if page == 1 else dict(render(page))
                             validate_page(
@@ -2060,6 +2233,7 @@ def materialize(
                                 raise RuntimeError(
                                     f"ranking records are invalid: {series_key}/{page}"
                                 )
+                            rendered_record_count += len(records)
                             for index, raw in enumerate(records, start=1):
                                 if not isinstance(raw, Mapping):
                                     raise RuntimeError(
@@ -2119,6 +2293,9 @@ def materialize(
                                     )
                                 compact_payload = None
                             del compact_records
+                        validate_complete_ranking_series(
+                            series_key, total, rendered_record_count,
+                        )
                         print(
                             f"PG_SNAPSHOT_COMBO {range_id}/{view}/{metric}/{scope_key} "
                             f"total={total} pages={page_count}",
