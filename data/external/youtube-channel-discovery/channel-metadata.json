@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T10:22:37.714Z",
+  "generatedAt": "2026-08-13T13:34:13.716Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T10:22:37.714Z",
+    "fetchedAt": "2026-08-13T13:34:13.716Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T10:22:37.714Z",
+    "generatedAt": "2026-08-13T13:34:13.716Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,53 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1144,
-      "parseableChannels": 1125,
+      "totalChannels": 1148,
+      "parseableChannels": 1129,
       "realAvatar": 649,
-      "thumbnailFallback": 495,
+      "thumbnailFallback": 499,
       "missingDisplayImage": 0,
-      "missingAvatar": 495,
+      "missingAvatar": 499,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 665,
+      "skipped_collected_evidence": 668,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 646,
+      "batch_limit_reached": 649,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@MINO_Channel1",
+        "channelId": "UCw3R07ErTjLb4xR5xRhdhEw",
+        "displayName": "MINO Channel",
+        "sourceUrl": "https://www.youtube.com/@MINO_Channel1",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@ko_to_to_i",
+        "channelId": "UCpgM2Ycx8WC8eRNxGAL2i3Q",
+        "displayName": "kototo!",
+        "sourceUrl": "https://www.youtube.com/@ko_to_to_i",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Mia_Konan",
+        "channelId": "UC4PrHgUcAtOoj_LKmUL-uLQ",
+        "displayName": "湖南みあ / Mia Channel【ななしいんく】",
+        "sourceUrl": "https://www.youtube.com/@Mia_Konan",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@keserasera68",
+        "channelId": "UCpIIJGtpQFkkcjzqxNgyeyg",
+        "displayName": "keita ch / けいたの実験室",
+        "sourceUrl": "https://www.youtube.com/@keserasera68",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
         "channelId": "UCgGy3QyrsbmXcLDZJGDOKBQ",
@@ -11821,34 +11849,6 @@
         "channelId": "UC0S-Kc5tpRbG7XGv3IbCQUw",
         "displayName": "藤音カナデ-Fujioto Kanade-",
         "sourceUrl": "https://www.youtube.com/@FujiotoKanade",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MonicaMelodia",
-        "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
-        "displayName": "Monica Ch. モニカ・メロディア",
-        "sourceUrl": "https://www.youtube.com/@MonicaMelodia",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kyopipi_channel",
-        "channelId": "UCj11bm46vGpEIbNO5LV5O8Q",
-        "displayName": "きょぴぴ / Kyopipi🎀🍼‪†",
-        "sourceUrl": "https://www.youtube.com/@kyopipi_channel",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@makanons_room",
-        "channelId": "UCQ4X4yfqgSVmOTBBpiIqWVQ",
-        "displayName": "柾花音のまかのんずるーむ【Makanon's Room】",
-        "sourceUrl": "https://www.youtube.com/@makanons_room",
         "reason": "batch_limit_reached"
       }
     ]
