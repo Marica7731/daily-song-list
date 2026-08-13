@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T02:39:07.144Z",
+  "generatedAt": "2026-08-13T05:05:23.722Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T02:39:07.144Z",
+    "fetchedAt": "2026-08-13T05:05:23.722Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T02:39:07.144Z",
+    "generatedAt": "2026-08-13T05:05:23.722Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11658,7 +11658,7 @@
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
       "totalChannels": 1138,
-      "parseableChannels": 1118,
+      "parseableChannels": 1119,
       "realAvatar": 649,
       "thumbnailFallback": 489,
       "missingDisplayImage": 0,
@@ -11667,15 +11667,22 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 661,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 660
     },
     "failures": [],
     "skippedSummary": {
       "batch_limit_reached": 641,
-      "missing_channel_url_or_handle": 20
+      "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@tenmeimau",
+        "channelId": "UCkJtGhNTE3uVWbXMiUaw1oA",
+        "displayName": "天命まう / Tenmei  Mau",
+        "sourceUrl": "https://www.youtube.com/@tenmeimau",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@mei0bake",
         "channelId": "UCYzW2KfGcoG5CeTCnM3dgVA",
@@ -11842,13 +11849,6 @@
         "channelId": "UCO0ihI_Cgv_Rmf9Q2nNcmtA",
         "displayName": "ろざ",
         "sourceUrl": "https://www.youtube.com/@01rosa18",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@keserasera68",
-        "channelId": "UCpIIJGtpQFkkcjzqxNgyeyg",
-        "displayName": "keita ch / けいたの実験室",
-        "sourceUrl": "https://www.youtube.com/@keserasera68",
         "reason": "batch_limit_reached"
       }
     ]
