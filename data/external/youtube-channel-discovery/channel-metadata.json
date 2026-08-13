@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T16:12:25.433Z",
+  "generatedAt": "2026-08-13T17:13:40.485Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T16:12:25.433Z",
+    "fetchedAt": "2026-08-13T17:13:40.485Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T16:12:25.433Z",
+    "generatedAt": "2026-08-13T17:13:40.485Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1148,
-      "parseableChannels": 1129,
+      "totalChannels": 1149,
+      "parseableChannels": 1130,
       "realAvatar": 649,
-      "thumbnailFallback": 499,
+      "thumbnailFallback": 500,
       "missingDisplayImage": 0,
-      "missingAvatar": 499,
+      "missingAvatar": 500,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 668
+      "skipped_collected_evidence": 669
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 649,
+      "batch_limit_reached": 650,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@chaco_haguma",
+        "channelId": "UCw5b3jUXwajzoFzQ97SXPlA",
+        "displayName": "羽熊ちゃこ / ChacoHaguma",
+        "sourceUrl": "https://www.youtube.com/@chaco_haguma",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MINO_Channel1",
         "channelId": "UCw3R07ErTjLb4xR5xRhdhEw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCqm3BQLlJfvkTsX_hvm0UmA",
         "displayName": "Watame Ch. 角巻わため",
         "sourceUrl": "https://www.youtube.com/@TsunomakiWatame",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Ruruka0w0",
-        "channelId": "UCwBxb9vxDp_mYoOddhw9dTA",
-        "displayName": "縷々原るるか\\RurukaRuruhara",
-        "sourceUrl": "https://www.youtube.com/@Ruruka0w0",
         "reason": "batch_limit_reached"
       }
     ]
