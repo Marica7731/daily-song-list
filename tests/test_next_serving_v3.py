@@ -947,6 +947,63 @@ class Tests(unittest.TestCase):
             [("same","all","All"),("new","all","New")],
         )
 
+    def test_selected_full_reset_video_source_projects_nested_range_to_all(self):
+        video_id="tZ-UM1BYNas"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        self.assertEqual(source_key,"003f298aac93675b4654253d")
+        physical={
+            "revision_id":"overlay","video_id":video_id,
+            "occurrence_id":"occ-7d","position":0,"range_id":"7d",
+            "song_key":"song-7d","seconds":7,"title":"Song",
+            "artist":"Artist","source_id":"source","raw_hash":"raw",
+            "source_system":"fixture",
+            "occurrence_payload_json":{"payload":{
+                "videoId":video_id,"occurrenceId":"occ-7d",
+                "position":0,"rangeId":"7d","songKey":"song-7d",
+                "seconds":7,"title":"Song","artist":"Artist",
+            }},
+            "video_title":"Physical 7d Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+            "channel_url":"","published_at":0,
+            "video_payload_json":{"payload":{
+                "videoId":video_id,"title":"Physical 7d Video",
+                "channelId":"UCfixture","channelName":"Fixture",
+                "rangeId":"7d",
+            }},
+            "video_tombstone":False,
+        }
+        with patch.object(
+            pg_adapter,"_overlay_candidate_rows",side_effect=[(),(physical,)],
+        ):
+            projected=pg_adapter._selected_full_reset_candidate_rows(
+                object(),("overlay",),{video_id:{"video_id":video_id}},"all",
+            )
+        self.assertEqual(len(projected),1)
+        self.assertEqual(projected[0]["range_id"],"all")
+        self.assertEqual(
+            projected[0]["occurrence_payload_json"]["payload"]["rangeId"],
+            "all",
+        )
+        self.assertEqual(
+            projected[0]["video_payload_json"]["payload"]["rangeId"],
+            "all",
+        )
+        with patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
+             patch.object(pg_adapter,"_rows",return_value=[]):
+            result=pg_adapter._generic_video_source_payload(
+                object(),"parent",None,source_key,
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),projected,{video_id:{"video_id":video_id}},(),
+                snapshot_video_scope=(video_id,),
+            )
+        self.assertTrue(result["found"])
+        self.assertEqual(result["sourceKey"],source_key)
+        self.assertEqual(result["record"]["sourceDetailKey"],source_key)
+        self.assertEqual(result["record"]["rangeId"],"all")
+        self.assertEqual(
+            result["record"]["occurrences"][0]["rangeId"],"all",
+        )
+
     def test_selected_full_reset_excludes_empty_runtime_song_without_hydration(self):
         resets={"video-good":{},"video-missing":{}}
         good={"video_id":"video-good","occurrence_id":"good","range_id":"all",
