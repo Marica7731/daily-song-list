@@ -1071,6 +1071,8 @@ def _source_occurrence_row(
     range_id: str,
     position: int,
     raw: Mapping[str, Any],
+    *,
+    entity_type: str,
 ) -> tuple[Any, ...]:
     item = dict(raw)
     payload = _nested_mapping(item, "payload")
@@ -1082,11 +1084,30 @@ def _source_occurrence_row(
     if not video_id:
         raise RuntimeError(f"source occurrence has no video identity: {range_id}/{source_key}")
     song = _nested_mapping(item, "song")
+    song_title = _text(song.get("title") or item.get("songTitle"))
     artist = _text(song.get("artist") or item.get("artist") or item.get("songArtist"))
+    if entity_type == "vtuber":
+        canonical_song_name, canonical_song_key = (
+            adapter._vtuber_canonical_song_identity(song_title)
+        )
+    else:
+        canonical_song_name = song_title
+        song_identity = {**dict(song), "title": song_title, "artist": artist}
+        if not _text(song_identity.get("songKey")) and item.get("songKey") is not None:
+            song_identity["songKey"] = item.get("songKey")
+        canonical_song_key = (
+            adapter._song_key(song_identity)
+            if song_title
+            else ""
+        )
     explicit_unknown = item.get("isUnknownArtist")
     if explicit_unknown is None:
         explicit_unknown = song.get("isUnknownArtist")
-    is_unknown = bool(explicit_unknown) if explicit_unknown is not None else not bool(artist)
+    is_unknown = (
+        bool(explicit_unknown)
+        if explicit_unknown is not None
+        else adapter._unknown_artist_name(artist)
+    )
     is_niche = bool(item.get("isNiche") is True or song.get("isNiche") is True)
     published = _occurrence_value(
         item, "publishedTimestamp", "publishedAt", "published_at", "streamedAt"
@@ -1107,6 +1128,8 @@ def _source_occurrence_row(
         seconds,
         1 if is_niche else 0,
         1 if is_unknown else 0,
+        canonical_song_key,
+        canonical_song_name,
         _bounded_text(_flatten_scalars(item), MAX_SOURCE_SEARCH_CHARS),
         _json_text(item),
     )
@@ -1142,7 +1165,9 @@ class CanonicalSnapshotWriter:
           video_id TEXT NOT NULL,title TEXT NOT NULL,channel_name TEXT NOT NULL,
           channel_id TEXT NOT NULL,channel_handle TEXT NOT NULL,channel_url TEXT NOT NULL,
           published_timestamp INTEGER,seconds INTEGER,is_niche INTEGER NOT NULL,
-          is_unknown_artist INTEGER NOT NULL,search_text TEXT NOT NULL,payload_json TEXT NOT NULL,
+          is_unknown_artist INTEGER NOT NULL,canonical_song_key TEXT NOT NULL,
+          canonical_song_name TEXT NOT NULL,search_text TEXT NOT NULL,
+          payload_json TEXT NOT NULL,
           PRIMARY KEY(source_key,range_id,position)
         ) WITHOUT ROWID;
         CREATE TABLE ranking_rows(
@@ -1228,6 +1253,7 @@ class CanonicalSnapshotWriter:
         return {
             "source_key": source_key,
             "range_id": range_id,
+            "entity_type": entity_type,
             "position": 0,
             "source_search": _BoundedTextAccumulator(MAX_RANKING_SEARCH_CHARS),
             "channel_search": _BoundedTextAccumulator(MAX_CHANNEL_SEARCH_CHARS),
@@ -1251,7 +1277,7 @@ class CanonicalSnapshotWriter:
                 return
             self.max_source_write_batch = max(self.max_source_write_batch, len(rows))
             self.connection.executemany(
-                "INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 rows,
             )
             count = len(rows)
@@ -1267,8 +1293,9 @@ class CanonicalSnapshotWriter:
                 range_id,
                 int(state["position"]),
                 raw,
+                entity_type=_text(state["entity_type"]),
             )
-            source_search.add(row[13])
+            source_search.add(row[15])
             for value in (row[5], row[6], row[7], row[8]):
                 channel_search.add(value)
             rows.append(row)
@@ -1719,13 +1746,13 @@ class SnapshotPageBuilder:
         # combinations without leaking state into online requests or later
         # releases.
         self.reconciliation_counts: dict[
-            tuple[str, str, str, str], tuple[int, int, int]
+            tuple[str, str, str, str, str], tuple[int, int, int]
         ] = {}
         self.snapshot_reset_changes: dict[
             tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
         ] = {}
         self.snapshot_original_group_counts: dict[
-            tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+            tuple[str, str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
         ] = {}
         # Physical source/detail consistency is immutable within this one
         # repeatable-read snapshot.  Cache only the two verified integers per

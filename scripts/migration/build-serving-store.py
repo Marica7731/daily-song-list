@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 BATCH_SIZE = 2000
 MAX_RANKING_SEARCH_CHARS = 65_536
 MAX_CHANNEL_SEARCH_CHARS = 32_768
@@ -30,7 +30,8 @@ DETAIL_COLUMNS = ("source_key", "range_id", "entity_type", "entity_key", "payloa
 OCCURRENCE_COLUMNS = (
     "source_key", "range_id", "position", "video_id", "title", "channel_name",
     "channel_id", "channel_handle", "channel_url", "published_timestamp", "seconds",
-    "is_niche", "is_unknown_artist", "search_text", "payload_json",
+    "is_niche", "is_unknown_artist", "canonical_song_key",
+    "canonical_song_name", "search_text", "payload_json",
 )
 RANKING_COLUMNS = (
     "row_id", "range_id", "view", "metric", "scope_key", "rank", "detail_key",
@@ -183,6 +184,8 @@ def create_schema(connection: sqlite3.Connection) -> None:
       seconds INTEGER,
       is_niche INTEGER NOT NULL,
       is_unknown_artist INTEGER NOT NULL,
+      canonical_song_key TEXT NOT NULL,
+      canonical_song_name TEXT NOT NULL,
       search_text TEXT NOT NULL,
       payload_json TEXT NOT NULL,
       PRIMARY KEY(range_id,source_key,position)
@@ -236,16 +239,17 @@ def copy_occurrences(source: sqlite3.Connection, target: sqlite3.Connection) -> 
     insert = """
       INSERT INTO source_occurrences(
         source_key,range_id,position,video_id,title,channel_name,channel_id,channel_handle,
-        channel_url,published_timestamp,seconds,is_niche,is_unknown_artist,search_text,payload_json
-      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        channel_url,published_timestamp,seconds,is_niche,is_unknown_artist,
+        canonical_song_key,canonical_song_name,search_text,payload_json
+      ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     """
     total = 0
     for batch in chunks(source.execute(query)):
         normalized = []
         for row in batch:
             values = list(row)
-            for index in (3,4,5,6,7,8,13,14):
-                values[index] = str(values[index] or ("{}" if index == 14 else ""))
+            for index in (3,4,5,6,7,8,13,14,15,16):
+                values[index] = str(values[index] or ("{}" if index == 16 else ""))
             values[11] = 1 if values[11] else 0
             values[12] = 1 if values[12] else 0
             normalized.append(tuple(values))
@@ -440,6 +444,9 @@ def build_indexes(connection: sqlite3.Connection) -> str:
     CREATE INDEX idx_occurrence_page ON source_occurrences(range_id,source_key,position,video_id);
     CREATE INDEX idx_occurrence_video ON source_occurrences(range_id,source_key,video_id,position);
     CREATE INDEX idx_occurrence_flags ON source_occurrences(range_id,source_key,is_niche,is_unknown_artist,position);
+    CREATE INDEX idx_occurrence_scope_song ON source_occurrences(
+      range_id,source_key,is_niche,is_unknown_artist,canonical_song_key
+    );
     CREATE INDEX idx_ranking_page ON ranking_rows(range_id,view,metric,scope_key,rank);
     CREATE INDEX idx_ranking_detail ON ranking_rows(range_id,detail_key);
 
@@ -526,6 +533,41 @@ def validate_database(
     """).fetchone()[0])
     if orphan:
         raise RuntimeError(f"serving store has {orphan} orphan occurrences")
+    invalid_vtuber_identity = int(connection.execute("""
+      SELECT count(*)
+      FROM source_occurrences AS occurrence
+      JOIN source_details AS detail
+        ON detail.range_id=occurrence.range_id
+       AND detail.source_key=occurrence.source_key
+      WHERE detail.entity_type='vtuber'
+        AND occurrence.canonical_song_key<>''
+        AND occurrence.canonical_song_name=''
+    """).fetchone()[0])
+    if invalid_vtuber_identity:
+        raise RuntimeError(
+            "serving store has invalid VTuber canonical song identities: "
+            f"{invalid_vtuber_identity}"
+        )
+    ambiguous_vtuber_identity = int(connection.execute("""
+      SELECT count(*) FROM (
+        SELECT occurrence.range_id,occurrence.source_key,
+               occurrence.canonical_song_key
+        FROM source_occurrences AS occurrence
+        JOIN source_details AS detail
+          ON detail.range_id=occurrence.range_id
+         AND detail.source_key=occurrence.source_key
+        WHERE detail.entity_type='vtuber'
+          AND occurrence.canonical_song_key<>''
+        GROUP BY occurrence.range_id,occurrence.source_key,
+                 occurrence.canonical_song_key
+        HAVING count(DISTINCT occurrence.canonical_song_name)<>1
+      ) AS invalid
+    """).fetchone()[0])
+    if ambiguous_vtuber_identity:
+        raise RuntimeError(
+            "serving store has ambiguous VTuber canonical song identities: "
+            f"{ambiguous_vtuber_identity}"
+        )
     counts = {
         "sourceDetails": int(connection.execute("SELECT count(*) FROM source_details").fetchone()[0]),
         "sourceOccurrences": int(connection.execute("SELECT count(*) FROM source_occurrences").fetchone()[0]),
