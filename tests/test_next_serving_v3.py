@@ -41,7 +41,7 @@ def load(name:str,path:Path):
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
 pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH)
-ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
+ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";VTUBER_KEY="dc6aa541a6dff484";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
 def card(rank:int,range_id:str,key:str="")->dict:
@@ -57,9 +57,14 @@ def create_source_db(path:Path)->None:
     c.executescript("""
     CREATE TABLE meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);
     CREATE TABLE source_details(source_key TEXT,range_id TEXT,entity_type TEXT,entity_key TEXT,payload_json TEXT,PRIMARY KEY(source_key,range_id));
-    CREATE TABLE source_occurrences(source_key TEXT,range_id TEXT,position INTEGER,video_id TEXT,title TEXT,channel_name TEXT,channel_id TEXT,channel_handle TEXT,channel_url TEXT,published_timestamp INTEGER,seconds INTEGER,is_niche INTEGER,is_unknown_artist INTEGER,search_text TEXT,payload_json TEXT,PRIMARY KEY(source_key,range_id,position));
+    CREATE TABLE source_occurrences(source_key TEXT,range_id TEXT,position INTEGER,video_id TEXT,title TEXT,channel_name TEXT,channel_id TEXT,channel_handle TEXT,channel_url TEXT,published_timestamp INTEGER,seconds INTEGER,is_niche INTEGER,is_unknown_artist INTEGER,canonical_song_key TEXT,canonical_song_name TEXT,search_text TEXT,payload_json TEXT,PRIMARY KEY(source_key,range_id,position));
     CREATE TABLE ranking_rows(row_id TEXT,range_id TEXT,view TEXT,metric TEXT,scope_key TEXT,rank INTEGER,detail_key TEXT,title TEXT,artist TEXT,name TEXT,count INTEGER,song_count INTEGER,video_count INTEGER,timestamp_count INTEGER,payload_json TEXT,search_text TEXT,channel_search_text TEXT,PRIMARY KEY(range_id,view,metric,scope_key,rank));
     """)
+    def insert_occurrence(values,canonical_key="fixture-song",canonical_name="Fixture Song"):
+        c.execute(
+            "INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (*values[:13],canonical_key,canonical_name,*values[13:]),
+        )
     c.execute("INSERT INTO meta VALUES(?,?)",("active_revision_id",REV))
     for range_id,key in (("all",ALL_KEY),("7d",SEVEN_KEY)):
         c.execute("INSERT INTO source_details VALUES(?,?,?,?,?)",(key,range_id,"song","song-hare",json.dumps({"title":"ただ君に晴れ","artist":"ヨルシカ","sourceDetailKey":key},ensure_ascii=False)))
@@ -68,15 +73,15 @@ def create_source_db(path:Path)->None:
     rows=[(1,"videoAAAAAA",0,0),(2,"videoAAAAAA",1,0),(3,"videoBBBBBB",0,0),(4,"videoCCCCCC",0,0),(5,"videoCCCCCC",0,1)]
     for pos,video,niche,unknown in rows:
         payload={"videoId":video,"title":video,"channelName":"Fixture","channelId":"UCfixture","seconds":100+pos}
-        c.execute("INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        insert_occurrence(
                   (ALL_KEY,"all",pos,video,video,"Fixture","UCfixture","@fixture","https://youtube.com/@fixture",1700000000+pos,100+pos,niche,unknown,f"ただ君に晴れ ヨルシカ {video}",json.dumps(payload,ensure_ascii=False)))
     payload={"videoId":"video7DDDDD","title":"7d","channelName":"Fixture","channelId":"UCfixture","seconds":1}
-    c.execute("INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    insert_occurrence(
               (SEVEN_KEY,"7d",1,"video7DDDDD","7d","Fixture","UCfixture","@fixture","https://youtube.com/@fixture",1700000001,1,0,0,"ただ君に晴れ ヨルシカ",json.dumps(payload,ensure_ascii=False)))
     for pos in range(32):
         video_index=max(0,pos-1);video=f"many{video_index:07d}"
         payload={"videoId":video,"title":f"Many {video_index}","channelName":"Fixture","channelId":"UCfixture","seconds":pos}
-        c.execute("INSERT INTO source_occurrences VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        insert_occurrence(
                   (MANY_KEY,"all",pos,video,payload["title"],"Fixture","UCfixture","@fixture","https://youtube.com/@fixture",1700001000+pos,pos,0,0,f"Many videos Fixture {video}",json.dumps(payload)))
     for range_id,count in (("all",250),("7d",3)):
         for view in ("songs","artists","vtubers","videos"):
@@ -209,6 +214,44 @@ class Tests(unittest.TestCase):
         with closing(sqlite3.connect(self.serving)) as c:
             keys=set(c.execute("SELECT range_id,source_key FROM source_details"));meta=dict(c.execute("SELECT key,value FROM serving_meta"))
         self.assertIn(("all",ALL_KEY),keys);self.assertIn(("7d",SEVEN_KEY),keys);self.assertEqual(meta["canonical_source_key"],"copied-from-source_details");self.assertEqual(self.build["validation"]["coverage"]["missing"],0)
+
+    def test_non_vtuber_snapshot_song_identity_uses_explicit_title_and_artist(self):
+        row=pg_materializer._source_occurrence_row(
+            "source-fixture","all",1,
+            {"videoId":"video-fixture","songTitle":"Fixture Song",
+             "songArtist":"Fixture Artist"},
+            entity_type="artist",
+        )
+        self.assertEqual(row[14],"Fixture Song")
+        self.assertEqual(
+            row[13],
+            pg_adapter._song_key(
+                {"title":"Fixture Song","artist":"Fixture Artist"},
+            ),
+        )
+        explicit=pg_materializer._source_occurrence_row(
+            "source-fixture","all",2,
+            {"videoId":"video-explicit","songTitle":"Fixture Song",
+             "songArtist":"Fixture Artist","songKey":"canonical-explicit"},
+            entity_type="video",
+        )
+        self.assertEqual(explicit[13],"canonical-explicit")
+
+    def test_serving_build_rejects_ambiguous_vtuber_canonical_identity(self):
+        with closing(sqlite3.connect(self.serving)) as connection:
+            connection.execute(
+                "UPDATE source_details SET entity_type='vtuber' "
+                "WHERE range_id='all' AND source_key=?",(MANY_KEY,),
+            )
+            connection.execute(
+                "UPDATE source_occurrences SET canonical_song_name='Conflict' "
+                "WHERE range_id='all' AND source_key=? AND position=1",(MANY_KEY,),
+            )
+            connection.commit()
+            with self.assertRaisesRegex(
+                RuntimeError,"ambiguous VTuber canonical song identities",
+            ):
+                builder.validate_database(connection,("7d","all"),self.pages)
 
     def test_serving_ranking_payload_and_search_text_are_bounded(self):
         with closing(sqlite3.connect(self.serving)) as c:
@@ -480,6 +523,102 @@ class Tests(unittest.TestCase):
         self.assertEqual(scoped["filteredBaseCount"],250)
         self.assertNotEqual(scoped["totalCount"],self.store.series_total(self.sha,"all","songs","occurrences"))
         niche=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&nicheOnly=1"));visible=self.store.source_page(self.sha,ALL_KEY,parse_qs("range=all&hideUnknownArtist=1"));self.assertEqual((niche["totalOccurrenceCount"],niche["totalVideoCount"]),(1,1));self.assertEqual((visible["totalOccurrenceCount"],visible["totalVideoCount"]),(4,3))
+        for detail in (niche,visible):
+            self.assertEqual(detail["record"]["songCount"],detail["totalSongCount"])
+            self.assertEqual(len(detail["record"]["songs"]),detail["totalSongCount"])
+            self.assertEqual(
+                sum(item["count"] for item in detail["record"]["songs"]),
+                detail["totalOccurrenceCount"],
+            )
+
+    def test_vtuber_source_four_scopes_match_ranking_card_triples(self):
+        with closing(sqlite3.connect(self.serving)) as connection:
+            connection.row_factory=sqlite3.Row
+            detail={"type":"vtuber","key":"UCfixture","name":"VTuber Fixture",
+                    "channelId":"UCfixture","sourceDetailKey":VTUBER_KEY,
+                    "count":4,"songCount":3,"videoCount":3,
+                    "songs":[{"key":"songa","name":"Song A","count":2},
+                             {"key":"songb","name":"Song B","count":1},
+                             {"key":"songc","name":"Song C","count":1}]}
+            connection.execute(
+                "INSERT INTO source_details(range_id,source_key,entity_type,entity_key,payload_json,total_occurrence_count,total_video_count) VALUES(?,?,?,?,?,?,?)",
+                ("all",VTUBER_KEY,"vtuber","UCfixture",json.dumps(detail),4,3),
+            )
+            rows=[
+                (1,"vtuberVid01",0,0,"songa","Song A","Song A -Piano Ver"),
+                (2,"vtuberVid01",1,0,"songa","Song A","Song A"),
+                (3,"vtuberVid02",1,1,"songb","Song B","Song B"),
+                (4,"vtuberVid03",0,0,"songc","Song C","Song C"),
+            ]
+            for pos,video,niche,unknown,song_key,song_name,title in rows:
+                payload={"videoId":video,"title":video,"channelName":"VTuber Fixture",
+                         "channelId":"UCfixture","seconds":pos,
+                         "song":{"songKey":song_key,"title":title,
+                                 "artist":"Unknown" if unknown else "Artist",
+                                 "isNiche":bool(niche),
+                                 "isUnknownArtist":bool(unknown)}}
+                connection.execute(
+                    "INSERT INTO source_occurrences(range_id,source_key,position,video_id,title,channel_name,channel_id,channel_handle,channel_url,published_timestamp,seconds,is_niche,is_unknown_artist,canonical_song_key,canonical_song_name,search_text,payload_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    ("all",VTUBER_KEY,pos,video,video,"VTuber Fixture","UCfixture",
+                     "@fixture","https://youtube.com/@fixture",1700002000+pos,pos,
+                     niche,unknown,song_key,song_name,f"{title} {video}",json.dumps(payload)),
+                )
+            expected={
+                "all":(4,3,3,""),
+                "niche":(2,2,2,"nicheOnly=1"),
+                "visible":(3,2,2,"hideUnknownArtist=1"),
+                "visibleNiche":(1,1,1,"nicheOnly=1&hideUnknownArtist=1"),
+            }
+            for scope,(count,songs,videos,_query) in expected.items():
+                card_payload={**detail,"count":count,"songCount":songs,
+                              "videoCount":videos,"timestampCount":count}
+                for metric in ("count","songs","videos"):
+                    connection.execute(
+                        "INSERT INTO ranking_rows(row_id,range_id,view,metric,scope_key,rank,detail_key,title,artist,name,row_count,song_count,video_count,timestamp_count,payload_json,search_text,channel_search_text) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (f"fixture-vtuber-{metric}-{scope}","all","vtubers",metric,
+                         scope,1,"UCfixture","","","VTuber Fixture",count,songs,
+                         videos,count,json.dumps(card_payload),"VTuber Fixture",
+                         "VTuber Fixture UCfixture @fixture"),
+                    )
+            connection.commit()
+        def open_fixture(_sha):
+            connection=sqlite3.connect(self.serving)
+            connection.row_factory=sqlite3.Row
+            return connection
+        with patch.object(self.store,"require_ready",return_value={}), \
+             patch.object(self.store,"open_db",side_effect=open_fixture), \
+             patch.object(self.store,"meta",return_value={"activeRevisionId":REV}):
+            for scope,(count,songs,videos,query) in expected.items():
+                suffix=f"&{query}" if query else ""
+                ranking=self.store.dynamic_page(
+                    self.sha,
+                    parse_qs(
+                        f"range=all&view=vtubers&metric=occurrences&page=1&pageSize=200{suffix}"
+                    ),
+                    "all","vtubers","occurrences",1,200,
+                )
+                cards=[item for item in ranking["records"] if item.get("channelId")=="UCfixture"]
+                self.assertEqual(len(cards),1,scope)
+                detail=self.store.source_page(
+                    self.sha,VTUBER_KEY,parse_qs(f"range=all&page=1&pageSize=30{suffix}"),
+                )
+                self.assertEqual(
+                    (cards[0]["count"],cards[0]["songCount"],cards[0]["videoCount"]),
+                    (count,songs,videos),scope,
+                )
+                self.assertEqual(
+                    (detail["totalOccurrenceCount"],detail["totalSongCount"],
+                     detail["totalVideoCount"]),(count,songs,videos),scope,
+                )
+                self.assertEqual(
+                    (detail["record"]["count"],detail["record"]["songCount"],
+                     detail["record"]["videoCount"]),(count,songs,videos),scope,
+                )
+                self.assertEqual(
+                    sum(int(item["count"]) for item in detail["record"]["songs"]),
+                    count,scope,
+                )
+                self.assertEqual(len(detail["record"]["songs"]),songs,scope)
 
     def test_artist_cards_keep_scalar_count_and_three_previews_for_all_metrics(self):
         for range_id in ("7d","all"):
@@ -713,6 +852,45 @@ class Tests(unittest.TestCase):
             "parent-source",
         )
 
+    def test_scoped_vtuber_parent_sources_resolve_unfiltered_authority(self):
+        entering="UCentering";existing="UCexisting"
+        rows=[
+            {"detail_key":entering,"payload_json":{
+                "channelId":entering,"sourceDetailKey":"source-entering",
+            }},
+            {"detail_key":existing,"payload_json":{
+                "channelId":existing,"sourceDetailKey":"source-existing",
+            }},
+        ]
+        with patch.object(pg_adapter,"_rows",return_value=rows) as queried:
+            resolved=pg_adapter._resolved_vtuber_parent_sources(
+                object(),"parent",{entering,existing},"all",
+                {existing:{"detail_key":existing,"payload_json":{
+                    "sourceDetailKey":"source-existing",
+                }}},
+            )
+        self.assertEqual(resolved,{
+            entering:"source-entering",existing:"source-existing",
+        })
+        statement=" ".join(queried.call_args.args[1].split())
+        params=queried.call_args.args[2]
+        self.assertIn("scope_key = 'all'",statement)
+        self.assertIn("detail_key = ANY",statement)
+        self.assertEqual(params[:2],["parent","all"])
+        self.assertEqual(set(params[2]),{entering,existing})
+
+    def test_scoped_vtuber_parent_sources_fail_closed_on_missing_base_authority(self):
+        channel="UCfixture"
+        with patch.object(pg_adapter,"_rows",return_value=[]), \
+             self.assertRaisesRegex(
+                 pg_adapter.PostgresAdapterError,
+                 "scoped parent source coverage is incomplete",
+             ):
+            pg_adapter._resolved_vtuber_parent_sources(
+                object(),"parent",{channel},"all",
+                {channel:{"detail_key":channel,"payload_json":{}}},
+            )
+
     def test_vtuber_canonical_song_identity_matches_runtime_builder_variants(self):
         base=pg_adapter._vtuber_canonical_song_identity("前前前世")
         self.assertEqual(
@@ -796,6 +974,52 @@ class Tests(unittest.TestCase):
                 object(),("overlay",),{"video-empty":{}},"all",include_payload=False,
             )
         self.assertEqual(rows,())
+
+    def test_overlay_scope_membership_matches_persisted_four_scope_contract(self):
+        known={"artist":"Artist","is_niche_value":"false",
+               "is_unknown_artist_value":"false"}
+        niche={"artist":"Artist","is_niche_value":"true",
+               "is_unknown_artist_value":"false"}
+        unknown={"artist":"Unknown","is_niche_value":"false",
+                 "is_unknown_artist_value":"true"}
+        legacy_unknown={"artist":"\u672a\u8a18\u8f09","is_niche_value":None,
+                        "is_unknown_artist_value":None}
+        def options(niche_only=False,hide=False):
+            return {"nicheOnly":niche_only,"hideUnknownArtist":hide}
+        self.assertTrue(pg_adapter._occurrence_matches_ranking_scope(
+            known,options(),
+        ))
+        self.assertFalse(pg_adapter._occurrence_matches_ranking_scope(
+            known,options(True),
+        ))
+        self.assertTrue(pg_adapter._occurrence_matches_ranking_scope(
+            niche,options(True),
+        ))
+        self.assertFalse(pg_adapter._occurrence_matches_ranking_scope(
+            unknown,options(False,True),
+        ))
+        self.assertFalse(pg_adapter._occurrence_matches_ranking_scope(
+            legacy_unknown,options(False,True),
+        ))
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,"isNiche flag is invalid",
+        ):
+            pg_adapter._occurrence_matches_ranking_scope(
+                {"artist":"Artist","is_niche_value":"maybe"},options(),
+            )
+
+    def test_direct_vtuber_preview_query_binds_scope_filters(self):
+        with patch.object(pg_adapter,"_rows",return_value=[]) as rows:
+            result=pg_adapter._bounded_direct_overlay_vtuber_previews(
+                object(),("overlay",),("UCfixture",),"all",
+                niche_only=True,hide_unknown_artist=True,
+            )
+        self.assertEqual(result,{})
+        statement=rows.call_args.args[1]
+        params=rows.call_args.args[2]
+        self.assertIn("payload_json->>'isNiche'",statement)
+        self.assertIn("lower(btrim(coalesce(occurrence.artist, '')))",statement)
+        self.assertEqual(params[-4:-1],[True,True,sorted(pg_adapter._UNKNOWN_ARTIST_NAMES)])
 
     def test_persisted_vtuber_song_delta_preserves_canonical_parent_multiset(self):
         parent={"count":3,"songCount":2,"songs":[
@@ -938,6 +1162,55 @@ class Tests(unittest.TestCase):
                 {("parent","all",source):(2,1)},
             )
 
+    def test_authoritative_vtuber_scoped_summary_uses_physical_flags_and_canonical_titles(self):
+        channel="UCfixture";source="source-fixture"
+        detail={
+            "channel_id":channel,"source_key":source,"entity_key":channel,
+            "payload_json":{"count":3,"videoCount":2,"songCount":2,"songs":[
+                {"key":"songa","name":"Song A","count":2},
+                {"key":"songb","name":"Song B","count":1},
+            ]},
+        }
+        physical={"source_key":source,"occurrence_count":3,"video_count":2}
+        scoped_total={"source_key":source,"occurrence_count":1,"video_count":1}
+        title={"source_key":source,"song_title":"Song A -Piano Ver",
+               "occurrence_count":1}
+        touched=[
+            {"source_key":source,"position":1,"video_id":"v-change","seconds":1,
+             "is_niche":False,"is_unknown_artist":False,
+             "payload_json":{"title":"Song B","artist":"Artist"}},
+        ]
+        preimage={"video_id":"v-change","occurrence_id":"old","seconds":1,
+                  "title":"Song B","artist":"Artist"}
+        def fake_rows(_connection,sql,_params):
+            compact=" ".join(sql.split())
+            if "parent details" in compact:return [detail]
+            if "scoped authoritative VTuber physical totals" in compact:return [scoped_total]
+            if "scoped authoritative VTuber canonical title counts" in compact:return [title]
+            if "indexed authoritative VTuber physical totals" in compact:return [physical]
+            if "touched source rows" in compact:return touched
+            if "occurrence preimages" in compact:return [preimage]
+            self.fail(compact[:180])
+        addition={"channel_id":channel,"video_id":"v-new","title":"Song C",
+                  "canonical_title":"Song C","canonical_song_key":"songc"}
+        options=pg_adapter._query_options({
+            "range":"all","view":"vtubers","metric":"occurrences",
+            "nicheOnly":"1",
+        })
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows):
+            rows=pg_adapter._authoritative_vtuber_summary_rows(
+                object(),"parent",{channel},set(),{("v-change","old")},
+                {channel:source},(addition,),"all",options=options,
+            )
+        self.assertEqual(
+            (rows[0]["row_count"],rows[0]["video_count"],rows[0]["song_count"]),
+            (2,2,2),
+        )
+        self.assertEqual(
+            {item["key"]:item["count"] for item in rows[0]["songs"]},
+            {"songa":1,"songc":1},
+        )
+
     def test_authoritative_vtuber_summary_rejects_missing_preimage(self):
         channel="UCfixture";source="source-fixture"
         responses=[
@@ -955,6 +1228,58 @@ class Tests(unittest.TestCase):
                 object(),"parent",{channel},set(),{("v-change","missing")},
                 {channel:source},(),"all",
             )
+
+    def test_pg_vtuber_source_page_filters_physical_scope_and_canonicalizes_titles(self):
+        calls=[]
+        summary={"total_occurrence_count":2,"total_video_count":2,
+                 "source_occurrence_count":4}
+        page_rows=[{"video_id":"v1","first_position":1},
+                   {"video_id":"v2","first_position":2}]
+        occurrences=[
+            {"position":1,"video_id":"v1","title":"Video 1",
+             "channel_name":"Fixture","channel_id":"UCfixture",
+             "channel_handle":"@fixture","channel_url":"","seconds":1,
+             "is_niche":True,"is_unknown_artist":False,
+             "payload_json":{"videoId":"v1","song":{"title":"Song A -Piano Ver","artist":"Artist"}}},
+            {"position":2,"video_id":"v2","title":"Video 2",
+             "channel_name":"Fixture","channel_id":"UCfixture",
+             "channel_handle":"@fixture","channel_url":"","seconds":2,
+             "is_niche":True,"is_unknown_artist":False,
+             "payload_json":{"videoId":"v2","song":{"title":"Song A","artist":"Artist"}}},
+        ]
+        titles=[{"song_title":"Song A -Piano Ver","occurrence_count":1},
+                {"song_title":"Song A","occurrence_count":1}]
+        def fake_rows(_connection,sql,params):
+            compact=" ".join(sql.split());calls.append((compact,list(params)))
+            if "source_occurrence_count" in compact:return [summary]
+            if "GROUP BY video_id" in compact:return page_rows
+            if "WITH titled AS" in compact:return titles
+            if "video_id = ANY" in compact:return occurrences
+            self.fail(compact[:180])
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows):
+            result=pg_adapter._runtime_source_table_page(
+                object(),"parent","source-fixture",
+                {"range":"all","page":"1","pageSize":"30",
+                 "nicheOnly":"1","hideUnknownArtist":"1"},
+                entity_type="vtuber",
+            )
+        for statement,_params in calls:
+            if "runtime_source_occurrences" in statement:
+                self.assertIn("is_niche IS TRUE",statement)
+                self.assertIn("is_unknown_artist IS NOT TRUE",statement)
+        self.assertEqual(
+            (result["totalOccurrenceCount"],result["totalSongCount"],
+             result["totalVideoCount"]),(2,1,2),
+        )
+        self.assertEqual(result["record"]["songCount"],1)
+        self.assertEqual(result["record"]["songs"],[
+            {"key":"songa","name":"Song A","count":2},
+        ])
+        self.assertTrue(all(
+            item.get("isNiche") is True
+            and item.get("isUnknownArtist") is False
+            for item in result["record"]["occurrences"]
+        ))
 
     def test_vtuber_owned_changes_drop_only_unowned_noop(self):
         owned={
@@ -1000,9 +1325,11 @@ class Tests(unittest.TestCase):
         def authority(
             _connection,_parent,_channels,_videos,occurrences,
             _sources,_candidates,_range_id,*,source_totals_cache=None,
+            options=None,
         ):
             captured["occurrences"]=set(occurrences)
             captured["source_totals_cache"]=source_totals_cache
+            captured["options"]=options
             return [summary]
         pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
         with patch.object(
@@ -1021,6 +1348,7 @@ class Tests(unittest.TestCase):
             )
         self.assertEqual(captured["occurrences"],set())
         self.assertIsNone(captured["source_totals_cache"])
+        self.assertIs(captured["options"],options)
         self.assertEqual(rows[channel_id]["row_count"],1)
 
     def test_exact_vtuber_sql_reconciliation_uses_production_source_key(self):
@@ -1047,7 +1375,7 @@ class Tests(unittest.TestCase):
         }
         pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
         with patch.object(
-            pg_adapter,"_unfiltered_vtuber_summary_rows",return_value=[summary],
+            pg_adapter,"_authoritative_vtuber_summary_rows",return_value=[summary],
         ):
             rows=pg_adapter._overlay_vtuber_replacement_rows(
                 SimpleNamespace(cursor=lambda:None),"active","parent",
@@ -1061,6 +1389,86 @@ class Tests(unittest.TestCase):
         self.assertNotEqual(
             payload["sourceDetailKey"],
             pg_adapter._stable_key("source-vtuber","all",channel_id),
+        )
+
+    def test_exact_vtuber_scoped_channel_enters_from_unfiltered_parent_source(self):
+        channel_id="UCscope-entering";source_key="source-scope-entering"
+        candidate={
+            "revision_id":"overlay","video_id":"video-scope",
+            "occurrence_id":"occ-scope","position":0,"range_id":"all",
+            "song_key":"song","seconds":1,"title":"Scoped Song",
+            "artist":"Artist","source_id":"source","raw_hash":"raw",
+            "source_system":"fixture","occurrence_payload_json":{},
+            "is_niche_value":True,"is_unknown_artist_value":False,
+            "video_title":"Video","channel_name":"Channel",
+            "channel_id":channel_id,"channel_handle":"@channel",
+            "channel_url":"","published_at":0,"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        options=pg_adapter._query_options({
+            "range":"all","view":"vtubers","metric":"occurrences",
+            "nicheOnly":"1","page":"1","pageSize":"30",
+        })
+        summary={
+            "channel_id":channel_id,"row_count":1,"song_count":1,
+            "video_count":1,"residual_match":True,
+        }
+        captured={}
+        def resolve(_connection,_parent,channels,_range_id,base_groups):
+            captured["resolved_channels"]=set(channels)
+            captured["base_groups"]=dict(base_groups)
+            return {channel_id:source_key}
+        def authority(
+            _connection,_parent,_channels,_videos,_occurrences,
+            parent_sources,_candidates,_range_id,**_kwargs,
+        ):
+            captured["parent_sources"]=dict(parent_sources)
+            return [summary]
+        pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
+        with patch.object(
+            pg_adapter,"_resolved_vtuber_parent_sources",side_effect=resolve,
+        ), patch.object(
+            pg_adapter,"_authoritative_vtuber_summary_rows",side_effect=authority,
+        ):
+            rows=pg_adapter._overlay_vtuber_replacement_rows(
+                SimpleNamespace(cursor=lambda:None),"active","parent",
+                (candidate,),options,{},exact_required=True,
+            )
+        self.assertEqual(captured["resolved_channels"],{channel_id})
+        self.assertEqual(captured["base_groups"],{})
+        self.assertEqual(captured["parent_sources"],{channel_id:source_key})
+        self.assertEqual(
+            (rows[channel_id]["row_count"],rows[channel_id]["song_count"],
+             rows[channel_id]["video_count"]),(1,1,1),
+        )
+
+    def test_reconciliation_adds_replacement_that_enters_filtered_scope(self):
+        replacement={
+            "video_id":"video-new","occurrence_id":"occ-new",
+            "song_key":"song-new","title":"New Song","artist":"New Artist",
+            "is_niche_value":True,
+        }
+        groups={
+            "new artist":{
+                "artist":"","name":"New Artist","row_count":0,
+                "song_count":0,"video_count":0,
+                "payload_json":{"name":"New Artist"},
+            },
+        }
+        # The immutable old tuple was outside niche scope, so the caller
+        # intentionally supplies no removal.  The final replacement must
+        # still create the exact scoped aggregate.
+        with patch.object(pg_adapter,"_rows",return_value=[]) as rows:
+            pg_adapter._reconcile_affected_song_counts(
+                object(),"parent",[],[replacement],[],groups,"artists",
+                {"range":"all","nicheOnly":True},
+            )
+        self.assertEqual(rows.call_count,1)
+        self.assertEqual(
+            (groups["new artist"]["row_count"],
+             groups["new artist"]["song_count"],
+             groups["new artist"]["video_count"]),
+            (1,1,1),
         )
 
     def test_snapshot_writer_periodically_evicts_only_its_temp_file(self):
@@ -1902,21 +2310,28 @@ class Tests(unittest.TestCase):
         self.assertEqual((group["payload_json"]["count"],group["payload_json"]["songCount"],
                           group["payload_json"]["videoCount"]),(5,3,3))
         self.assertEqual(reconciliation_counts,
-                         {("parent","all","artists","mega artist"):(5,3,3)})
+                         {("parent","all","artists","all","mega artist"):(5,3,3)})
 
         cached_groups={"mega artist":{"artist":"","name":"Mega Artist",
                                       "row_count":0,"song_count":0,"video_count":0,
                                       "payload_json":{"name":"Mega Artist"}}}
-        with patch.object(pg_adapter,"_rows") as cached_rows:
+        niche_batches=[[{**batches[0][0],"is_niche":True}]]
+        with patch.object(pg_adapter,"_rows",side_effect=niche_batches) as cached_rows:
             pg_adapter._reconcile_affected_song_counts(
                 object(),"parent",[],[],changes,cached_groups,"artists",
                 {"range":"all","metric":"songs","nicheOnly":True},
                 reconciliation_counts=reconciliation_counts,
             )
-        cached_rows.assert_not_called()
+        self.assertEqual(cached_rows.call_count,1)
         cached_group=cached_groups["mega artist"]
         self.assertEqual((cached_group["row_count"],cached_group["song_count"],
-                          cached_group["video_count"]),(5,3,3))
+                          cached_group["video_count"]),(1,1,1))
+        self.assertEqual(
+            reconciliation_counts[
+                ("parent","all","artists","niche","mega artist")
+            ],
+            (1,1,1),
+        )
 
         with patch.object(pg_adapter,"_AFFECTED_RECONCILIATION_BATCH_SIZE",2), \
              patch.object(pg_adapter,"_MAX_AFFECTED_RECONCILIATION_OCCURRENCES",4), \
@@ -1959,14 +2374,370 @@ class Tests(unittest.TestCase):
         identities.assert_called_once()
         self.assertEqual(len(cache),3)
 
+    def test_accepted_reset_preserves_raw_artist_and_public_unknown_flag(self):
+        parent_row={
+            "occurrence_id":"occ-old","video_id":"video-reset",
+            "song_key":"song-old","title":"Torinoko City (Live)",
+            "artist":"Unknown placeholder","is_unknown_artist":True,
+            "range_id":"all","channel_id":"UCfixture",
+            "channel_handle":"@fixture","channel_name":"Fixture",
+            "channel_url":"https://www.youtube.com/channel/UCfixture",
+        }
+        with patch.object(pg_adapter,"_rows",return_value=[parent_row]) as rows:
+            changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{"video-reset":{"video_id":"video-reset"}},
+                {"range":"all"},
+            )
+        self.assertEqual(len(changes),1)
+        self.assertEqual(changes[0]["artist"],"Unknown placeholder")
+        self.assertTrue(changes[0]["isUnknownArtist"])
+        self.assertTrue(changes[0]["acceptedVideoReset"])
+        self.assertIn("o.is_unknown_artist",rows.call_args.args[1])
+
+    def test_snapshot_reset_prefers_persisted_source_only_parent_authority(self):
+        video_id="video-source-only"
+        channel_id="UCsourceonly"
+        scalar={
+            "occurrence_id":"scalar-a","video_id":video_id,
+            "song_key":"scalar-song-a","seconds":10,"title":"Song A",
+            "artist":"Unknown display","is_unknown_artist":True,
+            "range_id":"all","channel_id":channel_id,
+            "channel_handle":"@fixture","channel_name":"Fixture",
+            "channel_url":"https://www.youtube.com/channel/UCsourceonly",
+        }
+        def payload(title,artist,seconds):
+            return {
+                "item":{
+                    "videoId":video_id,"title":"Source-only video",
+                    "channelId":channel_id,"channelHandle":"@fixture",
+                    "channelName":"Fixture",
+                    "channelUrl":"https://www.youtube.com/@fixture",
+                },
+                "song":{"title":title,"artist":artist,"seconds":seconds},
+            }
+        vtuber_rows=[
+            {"video_id":video_id,"source_key":"vtuber-source",
+             "entity_type":"vtuber","entity_key":channel_id,
+             "position":100,"seconds":10,"is_unknown_artist":True,
+             "payload_json":payload("Song A","Unknown display",10)},
+            {"video_id":video_id,"source_key":"vtuber-source",
+             "entity_type":"vtuber","entity_key":channel_id,
+             "position":101,"seconds":20,"is_unknown_artist":False,
+             "payload_json":payload("Song B","Artist B",20)},
+        ]
+        song_rows=[
+            {**vtuber_rows[0],"source_key":"song-source-a",
+             "entity_type":"song","entity_key":"songa::unknown",
+             "position":0},
+            {**vtuber_rows[1],"source_key":"song-source-b",
+             "entity_type":"song","entity_key":"songb::artistb",
+             "position":0},
+        ]
+        queries=[]
+        def fake_rows(_connection,sql,params):
+            compact=" ".join(sql.split());queries.append((compact,params))
+            if "FROM runtime_occurrences AS o" in compact:return [scalar]
+            if "persisted source authority" in compact:
+                self.assertEqual(params[0],["song"])
+                return song_rows
+            self.fail(compact[:160])
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows):
+            changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{"video_id":video_id}},
+                {"range":"all"},include_persisted_source_authority=True,
+            )
+        self.assertEqual(len(changes),2)
+        self.assertEqual(
+            [(row["title"],row["parentSongGroupKey"],row["parentArtistGroupKey"])
+             for row in changes],
+            [("Song A","songa::unknown","unknown"),
+             ("Song B","songb::artistb","artistb")],
+        )
+        self.assertTrue(changes[0]["isUnknownArtist"])
+        self.assertFalse(changes[1]["isUnknownArtist"])
+        self.assertTrue(all(row["persistedSourceAuthority"] for row in changes))
+        authority_sql,authority_params=queries[1]
+        self.assertIn("runtime_source_occurrences_video_search_trgm", (
+            "runtime_source_occurrences_video_search_trgm"
+            if "daily_song_source_video_search_text" in authority_sql else ""
+        ))
+        self.assertEqual(authority_params[:3],[["song"],"parent","all"])
+        self.assertEqual(authority_params[4],video_id)
+
+    def test_snapshot_reset_source_authority_is_selected_by_view(self):
+        video_id="video-by-view"
+        common={
+            "video_id":video_id,"position":0,"seconds":10,
+            "is_unknown_artist":False,
+            "payload_json":{
+                "item":{"videoId":video_id,"channelId":"UCfixture"},
+                "song":{"title":"Song A","artist":"Artist","seconds":10},
+            },
+        }
+        song_row={**common,"source_key":"song","entity_type":"song",
+                  "entity_key":"songa::artist"}
+        artist_row={**common,"source_key":"artist","entity_type":"artist",
+                    "entity_key":"artist"}
+        requested=[]
+        def fake_rows(_connection,sql,params):
+            compact=" ".join(sql.split())
+            if "FROM runtime_occurrences AS o" in compact:return []
+            if "persisted source authority" in compact:
+                requested.append(tuple(params[0]))
+                return [song_row] if params[0]==["song"] else [artist_row]
+            self.fail(compact[:160])
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows):
+            song_changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{}},{"range":"all","view":"songs"},
+                include_persisted_source_authority=True,
+            )
+            artist_changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{}},{"range":"all","view":"artists"},
+                include_persisted_source_authority=True,
+            )
+            video_changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{}},{"range":"all","view":"videos"},
+                include_persisted_source_authority=True,
+            )
+        self.assertEqual(requested,[("song",),("artist",)])
+        self.assertEqual(song_changes[0]["parentSongGroupKey"],"songa::artist")
+        self.assertEqual(song_changes[0]["parentArtistGroupKey"],"artist")
+        self.assertEqual(artist_changes[0]["parentArtistGroupKey"],"artist")
+        self.assertEqual(video_changes,[])
+
+    def test_snapshot_reset_source_authority_uses_canonical_title_only_as_fallback(self):
+        video_id="video-title-rewrite"
+        scalar={
+            "occurrence_id":"scalar","video_id":video_id,
+            "song_key":"runtime-song","seconds":15860,
+            "title":"TIMES feat. chelly (EGOIST)",
+            "artist":"MY FIRST STORY","is_unknown_artist":False,
+            "range_id":"all","channel_id":"UCfixture",
+        }
+        source={
+            "video_id":video_id,"source_key":"song-source",
+            "entity_type":"song",
+            "entity_key":"timesfeatchellyegoist::myfirststory",
+            "position":9,"seconds":15860,"is_unknown_artist":False,
+            "payload_json":{
+                "item":{"videoId":video_id,"channelId":"UCfixture"},
+                "song":{
+                    "title":"1,000,000 TIMES feat. chelly (EGOIST)",
+                    "artist":"MY FIRST STORY","seconds":15860,
+                },
+            },
+        }
+        with patch.object(pg_adapter,"_rows",side_effect=[[scalar],[source]]):
+            changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{}},
+                {"range":"all","view":"songs"},
+                include_persisted_source_authority=True,
+            )
+        self.assertEqual(len(changes),1)
+        self.assertEqual(
+            (changes[0]["title"],changes[0]["parentSongGroupKey"]),
+            ("1,000,000 TIMES feat. chelly (EGOIST)",
+             "timesfeatchellyegoist::myfirststory"),
+        )
+        self.assertTrue(changes[0]["persistedSourceAuthority"])
+
+    def test_snapshot_reset_source_authority_matches_raw_before_canonical_collision(self):
+        video_id="video-raw-collision"
+        def scalar(title,occurrence_id):
+            return {
+                "occurrence_id":occurrence_id,"video_id":video_id,
+                "song_key":occurrence_id,"seconds":7159,"title":title,
+                "artist":"*Luna","is_unknown_artist":False,
+                "range_id":"all","channel_id":"UCfixture",
+            }
+        def source(title,key,position):
+            return {
+                "video_id":video_id,"source_key":f"source-{position}",
+                "entity_type":"song","entity_key":key,
+                "position":position,"seconds":7159,
+                "is_unknown_artist":False,
+                "payload_json":{
+                    "item":{"videoId":video_id,"channelId":"UCfixture"},
+                    "song":{"title":title,"artist":"*Luna","seconds":7159},
+                },
+            }
+        scalar_rows=[scalar("32","occ-32"),scalar("8.32","occ-832")]
+        # Reverse the source order so a canonical-first matcher would bind
+        # ``32`` to the wrong persisted identity when both canonicalize alike.
+        source_rows=[source("8.32","832::luna",2),source("32","32::luna",0)]
+        with patch.object(pg_adapter,"_rows",side_effect=[scalar_rows,source_rows]), \
+             patch.object(
+                 pg_adapter,"_vtuber_canonical_song_identity",
+                 side_effect=AssertionError("raw matches must precede canonical fallback"),
+             ):
+            changes=pg_adapter._accepted_video_reset_changes(
+                object(),"parent",{video_id:{}},
+                {"range":"all","view":"songs"},
+                include_persisted_source_authority=True,
+            )
+        self.assertEqual(
+            {(row["title"],row["parentSongGroupKey"]) for row in changes},
+            {("32","32::luna"),("8.32","832::luna")},
+        )
+        self.assertEqual(len(changes),2)
+
+    def test_snapshot_reset_source_authority_cache_is_isolated_by_view(self):
+        cache={}
+        resets={"video-one":{"video_id":"video-one"}}
+        def fake_changes(_connection,_parent,_resets,options,**_kwargs):
+            return [{"view":options["view"]}]
+        with patch.object(pg_adapter,"_accepted_video_reset_changes",
+                          side_effect=fake_changes) as changes:
+            songs=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all","view":"songs"},
+                include_persisted_source_authority=True,cache=cache,
+            )
+            artists=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all","view":"artists"},
+                include_persisted_source_authority=True,cache=cache,
+            )
+            songs_again=pg_adapter._snapshot_accepted_video_reset_changes(
+                object(),"parent",resets,{"range":"all","view":"songs"},
+                include_persisted_source_authority=True,cache=cache,
+            )
+        self.assertEqual(songs,[{"view":"songs"}])
+        self.assertEqual(artists,[{"view":"artists"}])
+        self.assertIs(songs_again,songs)
+        self.assertEqual(changes.call_count,2)
+        self.assertEqual(len(cache),2)
+
+    def test_all_song_view_includes_selected_physical_7d_reset_once(self):
+        options=pg_adapter._query_options({
+            "range":"all","view":"songs","metric":"occurrences",
+            "page":"1","pageSize":"30",
+        })
+        reset={"video-reset":{"video_id":"video-reset"}}
+        compatible={
+            "video_id":"video-reset","occurrence_id":"accepted-7d",
+            "range_id":"all","title":"Replacement","artist":"Artist",
+        }
+        calls={}
+        def stop_after_resets(*_args,**_kwargs):
+            raise RuntimeError("stop-after-resets")
+        with patch.object(pg_adapter,"_overlay_revision_ids",return_value=("overlay",)), \
+             patch.object(pg_adapter,"_resolve_exact_vtuber_channel_scope",return_value=None), \
+             patch.object(pg_adapter,"_rows",return_value=[]), \
+             patch.object(pg_adapter,"_one",return_value={
+                 "total_count":0,"total_occurrence_count":0,
+                 "total_song_count":0,"total_video_count":0,
+             }), \
+             patch.object(pg_adapter,"_overlay_candidate_rows",return_value=[]), \
+             patch.object(pg_adapter,"_accepted_video_resets",return_value=reset), \
+             patch.object(pg_adapter,"_selected_full_reset_candidate_rows",
+                          return_value=(compatible,)) as selected, \
+             patch.object(pg_adapter,"_snapshot_accepted_video_reset_changes",
+                          side_effect=lambda _c,_p,resets,_o,**kwargs:
+                          calls.update({"resets":resets,"kwargs":kwargs}) or []), \
+             patch.object(pg_adapter,"_runtime_tombstones",side_effect=stop_after_resets), \
+             self.assertRaisesRegex(RuntimeError,"stop-after-resets"):
+            pg_adapter._prepare_generic_overlay_rankings(
+                object(),"active",("parent",{}),options,
+                snapshot_reset_changes={},
+            )
+        selected.assert_called_once()
+        self.assertEqual(selected.call_args.args[3],"all")
+        self.assertTrue(calls["kwargs"]["include_persisted_source_authority"])
+        self.assertEqual(set(calls["resets"]),{"video-reset"})
+
+    def test_accepted_reset_moves_unknown_song_into_existing_canonical_artist(self):
+        title="Torinoko City (Live)"
+        title_key=pg_adapter._overlay_song_group_norm(title)
+        old_key=f"{title_key}::unknown"
+        new_key=f"{title_key}::40mp"
+        raw_new_key=(
+            f"{pg_adapter._overlay_norm(title)}::"
+            f"{pg_adapter._overlay_norm('40mP')}"
+        )
+        change={
+            "entityType":"occurrences","videoId":"video-reset",
+            "occurrenceId":"occ-old","title":title,
+            "artist":"Unknown placeholder","isUnknownArtist":True,
+            "acceptedVideoReset":True,
+            "originalGroupVideoOccurrenceCount":1,
+        }
+        groups={
+            old_key:{
+                "detail_key":old_key,"title":title,"artist":"",
+                "row_count":1,"song_count":1,"video_count":1,
+                "timestamp_count":1,"payload_json":None,
+            },
+            new_key:{
+                "detail_key":new_key,"title":title,"artist":"40mP",
+                "row_count":4,"song_count":1,"video_count":4,
+                "timestamp_count":4,"payload_json":None,
+            },
+        }
+        self.assertEqual(
+            pg_adapter._runtime_change_group_key(change,"songs"),old_key,
+        )
+        self.assertEqual(
+            pg_adapter._runtime_change_group_key(change,"artists"),"unknown",
+        )
+        pg_adapter._apply_runtime_tombstone_groups(
+            groups,[change],"songs",allow_accepted_reset_detail_fallback=True,
+        )
+        self.assertNotIn(old_key,groups)
+
+        delta={raw_new_key:{
+            "title":title,"artist":"40mP","name":title,
+            "occurrenceCount":1,"occurrences":[{
+                "videoId":"video-reset","occurrenceId":"occ-new",
+            }],"videoIds":{"video-reset"},"songKeys":{"song-new"},
+            "search":"torinoko city 40mp",
+        }}
+        persisted={new_key:dict(groups[new_key])}
+        pg_adapter._apply_overlay_delta_groups(
+            groups,persisted,delta,"songs","all",
+        )
+        self.assertEqual(set(groups),{new_key})
+        self.assertEqual(groups[new_key]["row_count"],5)
+        self.assertEqual(groups[new_key]["video_count"],5)
+        self.assertNotIn(raw_new_key,groups)
+
+    def test_unknown_artist_reconciliation_uses_physical_runtime_flag(self):
+        change={
+            "entityType":"occurrences","videoId":"video-reset",
+            "occurrenceId":"occ-old","title":"Old Song",
+            "artist":"Unknown placeholder","isUnknownArtist":True,
+            "acceptedVideoReset":True,
+        }
+        parent_row={
+            "occurrence_id":"occ-keep","video_id":"video-keep",
+            "song_key":"song-keep","title":"Kept Song",
+            "artist":"Different placeholder","is_unknown_artist":True,
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+            "channel_name":"Fixture",
+        }
+        connection=SimpleNamespace(autocommit=True)
+        with patch.object(pg_adapter,"_rows",return_value=[parent_row]) as rows:
+            selected=list(pg_adapter._bounded_affected_parent_occurrences(
+                connection,"parent",[change],"artists",{"range":"all"},
+            ))
+        self.assertEqual(selected,[parent_row])
+        statement=rows.call_args.args[1]
+        params=rows.call_args.args[2]
+        self.assertIn("o.is_unknown_artist IS TRUE",statement)
+        self.assertIn("o.is_unknown_artist",statement)
+        self.assertIn(True,params)
+        self.assertEqual(
+            pg_adapter._runtime_view_group_key(parent_row,"artists"),
+            "unknown",
+        )
+
     def test_snapshot_parent_group_counts_reuse_exact_video_set(self):
         cache={}
         first_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
         second_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
         seven_day_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
+        niche_change={"videoId":"video-one","title":"Old Song","artist":"Artist"}
         other_change={"videoId":"video-two","title":"Other Song","artist":"Artist"}
         def parent_rows(_connection,_sql,params):
-            count=1 if params[1][0]=="7d" else 3
+            count=1 if params[1][0]=="7d" else 2 if params[3] else 3
             return [{"video_id":params[2][0],"title":"Old Song","artist":"Artist",
                      "occurrence_count":count}]
         with patch.object(pg_adapter,"_rows",side_effect=parent_rows) as rows:
@@ -1983,36 +2754,45 @@ class Tests(unittest.TestCase):
                 parent_count_cache=cache,
             )
             pg_adapter._enrich_runtime_original_group_counts(
+                object(),"parent",[],[niche_change],range_id="all",
+                options={"nicheOnly":True},parent_count_cache=cache,
+            )
+            pg_adapter._enrich_runtime_original_group_counts(
                 object(),"parent",[],[other_change],range_id="all",
                 parent_count_cache=cache,
             )
-        self.assertEqual(rows.call_count,3)
+        self.assertEqual(rows.call_count,4)
         self.assertEqual(
             rows.call_args_list[0].args[2],
-            ["parent",["all",""],["video-one"]],
+            ["parent",["all",""],["video-one"],False,False],
         )
         self.assertEqual(
             rows.call_args_list[1].args[2],
-            ["parent",["7d",""],["video-one"]],
+            ["parent",["7d",""],["video-one"],False,False],
         )
         self.assertEqual(
             rows.call_args_list[2].args[2],
-            ["parent",["all",""],["video-two"]],
+            ["parent",["all",""],["video-one"],True,False],
+        )
+        self.assertEqual(
+            rows.call_args_list[3].args[2],
+            ["parent",["all",""],["video-two"],False,False],
         )
         self.assertEqual(first_change["originalGroupVideoOccurrenceCount"],3)
         self.assertEqual(second_change["originalGroupVideoOccurrenceCount"],3)
         self.assertEqual(seven_day_change["originalGroupVideoOccurrenceCount"],1)
+        self.assertEqual(niche_change["originalGroupVideoOccurrenceCount"],2)
         self.assertEqual(other_change["originalGroupVideoOccurrenceCount"],0)
-        self.assertEqual(len(cache),3)
+        self.assertEqual(len(cache),4)
 
     def test_snapshot_phase_release_clears_reset_and_scalar_caches(self):
         key=("parent","all","occurrences",("video-one",))
         fake_builder=SimpleNamespace(
             authoritative_records=(1,),
-            reconciliation_counts={("parent","all","artists","artist"):(1,1,1)},
+            reconciliation_counts={("parent","all","artists","all","artist"):(1,1,1)},
             snapshot_reset_changes={key:[{"videoId":"video-one"}]},
             snapshot_original_group_counts={
-                ("parent","all",("video-one",)):{
+                ("parent","all","all",("video-one",)):{
                     ("video-one","song","artist"):1,
                 },
             },

@@ -56,7 +56,9 @@ _DEFERRED_ID_KEYS = frozenset({
     "channel_handle", "channelName", "channel_name", "entityType",
     "entity_type", "acceptedVideoReset", "runtime_replacement", "title",
     "artist", "name", "channelUrl", "channel_url", "count", "songCount",
-    "videoCount", "timestampCount",
+    "videoCount", "timestampCount", "seconds", "sourcePosition",
+    "parentSongGroupKey", "parentArtistGroupKey",
+    "persistedSourceAuthority",
 })
 
 
@@ -1215,7 +1217,8 @@ def _persisted_source_records(
         occurrence.update(_overlay_public_occurrence(source_song))
         for name in (
             "occurrenceId", "position", "rangeId", "songKey", "seconds",
-            "title", "artist", "sourceId", "sourceSystem",
+            "title", "artist", "sourceId", "sourceSystem", "isNiche",
+            "isUnknownArtist",
         ):
             if name not in occurrence and item.get(name) is not None:
                 occurrence[name] = item[name]
@@ -1316,6 +1319,9 @@ def _runtime_channel_source_payload(
     channel_handle = _text(metadata.get("channelHandle") or metadata.get("handle"))
     channel_name = _text(metadata.get("channelName") or metadata.get("display_name"))
     source_query = _source_query_for_channel(key, metadata, query)
+    options = _query_options(source_query)
+    persisted_occurrences: list[dict[str, Any]] = []
+    authoritative_parent_records: list[dict[str, Any]] = []
     predicates: list[str] = []
     params: list[Any] = [revision_id]
     if channel_id:
@@ -1395,13 +1401,18 @@ def _runtime_channel_source_payload(
                 "sourceId": song.get("sourceId") if song.get("sourceId") is not None else occurrence.get("source_id"),
                 "sourceSystem": song.get("sourceSystem") if song.get("sourceSystem") is not None else occurrence.get("source_system"),
             })
+            if "isNiche" not in song:
+                song["isNiche"] = occurrence.get("is_niche") is True
+            if "isUnknownArtist" not in song:
+                song["isUnknownArtist"] = (
+                    occurrence.get("is_unknown_artist") is True
+                )
             songs.append(song)
         records.append({"video": video, "occurrences": tuple(songs)})
     candidate_rows: tuple[Mapping[str, Any], ...] = ()
     accepted_video_resets: dict[str, dict[str, Any]] = {}
     prepared_changes: tuple[Mapping[str, Any], ...] = ()
     if overlay_revision_ids:
-        options = _query_options(source_query)
         parent_source_key = _text(
             metadata.get("sourceDetailKey")
             or metadata.get("source_detail_key")
@@ -1515,7 +1526,10 @@ def _runtime_channel_source_payload(
     raw_payload = _source_payload_from_channel_records(
         records, metadata, key, source_query,
     )
-    if overlay_revision_ids and (
+    scoped_source = bool(
+        options.get("nicheOnly") or options.get("hideUnknownArtist")
+    )
+    if overlay_revision_ids and not scoped_source and (
         isinstance(metadata.get("songs"), list) or persisted_occurrences
     ):
         payload = _apply_persisted_vtuber_song_delta(
@@ -1552,7 +1566,7 @@ def _runtime_channel_source_payload(
             records,
             source_query,
         )
-        if overlay_revision_ids and (
+        if overlay_revision_ids and not scoped_source and (
             isinstance(metadata.get("songs"), list) or persisted_occurrences
         )
         else _canonicalize_vtuber_source_payload(
@@ -1860,6 +1874,109 @@ def _generic_parent_runtime_revision(connection, revision_id: str, revision: Map
 
 def _overlay_norm(value: Any) -> str:
     return " ".join(unicodedata.normalize("NFKC", _text(value)).casefold().split())
+
+
+_UNKNOWN_ARTIST_NAMES = frozenset({
+    "unknown", "n/a", "na", "none", "null", "-",
+    "\u672a\u8a18\u8f09", "\u672a\u8bb0\u8f7d", "\u4e0d\u660e",
+    "\u65e0", "\u306a\u3057", "\u5f85\u8865\u6b4c\u624b",
+    "\u5f85\u88dc\u6b4c\u624b", "\u5f85\u8865", "\u5f85\u88dc",
+})
+
+
+def _unknown_artist_name(value: Any) -> bool:
+    """Port RankingUtils.isUnknownArtistName for overlay-only rows."""
+
+    normalized = _overlay_norm(value)
+    return not normalized or normalized in _UNKNOWN_ARTIST_NAMES
+
+
+def _scope_value_sources(row: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
+    """Expose scalar and nested occurrence shapes without losing false values."""
+
+    sources: list[Mapping[str, Any]] = [row]
+    for field in ("occurrence_payload_json", "payload_json"):
+        raw = row.get(field)
+        if raw is None:
+            continue
+        payload = _json_object(raw)
+        if payload:
+            sources.append(payload)
+            nested = payload.get("payload")
+            if isinstance(nested, Mapping):
+                sources.append(nested)
+    for source in tuple(sources):
+        song = source.get("song")
+        if isinstance(song, Mapping):
+            sources.append(song)
+    return tuple(sources)
+
+
+def _scope_boolean_flag(
+    row: Mapping[str, Any], camel_name: str, snake_name: str,
+) -> bool | None:
+    """Read one immutable scope flag, rejecting malformed explicit values."""
+
+    scalar_alias = f"{snake_name}_value"
+    for source in _scope_value_sources(row):
+        for name in (camel_name, snake_name, scalar_alias):
+            if name not in source or source.get(name) is None:
+                continue
+            value = source.get(name)
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, int) and value in {0, 1}:
+                return bool(value)
+            if isinstance(value, str):
+                normalized = value.strip().casefold()
+                if normalized in {"true", "1"}:
+                    return True
+                if normalized in {"false", "0"}:
+                    return False
+            raise PostgresAdapterError(
+                f"overlay occurrence {camel_name} flag is invalid"
+            )
+    return None
+
+
+def _scope_artist(row: Mapping[str, Any]) -> str:
+    for source in _scope_value_sources(row):
+        if "artist" in source:
+            return _text(source.get("artist"))
+    return ""
+
+
+def _occurrence_matches_ranking_scope(
+    row: Mapping[str, Any], options: Mapping[str, Any],
+) -> bool:
+    """Apply the same occurrence membership as persisted ranking scopes.
+
+    Parent runtime rows expose physical boolean columns.  Accepted increments
+    predate those columns, so their bounded scalar query extracts the JSON
+    flags even when full payload hydration is disabled.  Historical accepted
+    rows never stored ``isUnknownArtist``; only for that missing case do we
+    fall back to the runtime builder's exact unknown-name set.
+    """
+
+    is_niche = _scope_boolean_flag(row, "isNiche", "is_niche")
+    is_unknown_artist = _scope_boolean_flag(
+        row, "isUnknownArtist", "is_unknown_artist",
+    )
+    if is_unknown_artist is None:
+        is_unknown_artist = _unknown_artist_name(_scope_artist(row))
+    if bool(options.get("nicheOnly")) and is_niche is not True:
+        return False
+    if bool(options.get("hideUnknownArtist")) and is_unknown_artist:
+        return False
+    return True
+
+
+def _ranking_scope_rows(
+    rows: Iterable[Mapping[str, Any]], options: Mapping[str, Any],
+) -> list[Mapping[str, Any]]:
+    return [
+        row for row in rows if _occurrence_matches_ranking_scope(row, options)
+    ]
 
 
 def _overlay_song_group_norm(value: Any) -> str:
@@ -2240,6 +2357,14 @@ def _overlay_candidate_rows(
           SELECT o.revision_id, o.video_id, o.occurrence_id, o.position,
                  o.range_id, o.song_key, o.seconds, o.title, o.artist,
                  o.source_id, o.raw_hash, o.source_system,
+                 coalesce(
+                   o.payload_json->>'isNiche',
+                   o.payload_json->'payload'->>'isNiche'
+                 ) AS is_niche_value,
+                 coalesce(
+                   o.payload_json->>'isUnknownArtist',
+                   o.payload_json->'payload'->>'isUnknownArtist'
+                 ) AS is_unknown_artist_value,
                  {occurrence_payload} AS occurrence_payload_json,
                  priority.overlay_priority, o.occurrence_key,
                  ROW_NUMBER() OVER (
@@ -2263,7 +2388,8 @@ def _overlay_candidate_rows(
         )
         SELECT revision_id, video_id, occurrence_id, position, range_id,
                song_key, seconds, title, artist, source_id, raw_hash,
-               source_system, occurrence_payload_json
+               source_system, is_niche_value, is_unknown_artist_value,
+               occurrence_payload_json
         FROM ranked_occurrences
         WHERE identity_rank = 1
         ORDER BY overlay_priority, video_id, position, occurrence_key
@@ -2515,6 +2641,8 @@ def _accepted_video_reset_changes(
     parent_revision_id: str,
     resets: Mapping[str, Mapping[str, Any]],
     options: Mapping[str, Any],
+    *,
+    include_persisted_source_authority: bool = False,
 ) -> list[dict[str, Any]]:
     """Project accepted full-video replacements as bounded parent removals.
 
@@ -2532,8 +2660,9 @@ def _accepted_video_reset_changes(
     rows = _rows(
         connection,
         """
-        SELECT o.occurrence_id, o.video_id, o.song_key, o.title,
-               o.artist, o.range_id, v.channel_id, v.channel_handle,
+        SELECT o.occurrence_id, o.video_id, o.song_key, o.seconds, o.title,
+               o.artist, o.is_niche, o.is_unknown_artist, o.range_id,
+               v.channel_id, v.channel_handle,
                v.channel_name, v.channel_url
         FROM runtime_occurrences AS o
         JOIN runtime_videos AS v
@@ -2568,7 +2697,10 @@ def _accepted_video_reset_changes(
             "occurrenceId": _text(row.get("occurrence_id")),
             "title": _text(row.get("title")),
             "artist": _text(row.get("artist")),
+            "isNiche": row.get("is_niche") is True,
+            "isUnknownArtist": row.get("is_unknown_artist") is True,
             "songKey": _text(row.get("song_key")),
+            "seconds": row.get("seconds"),
             "rangeId": _text(row.get("range_id")),
             "channel_id": row.get("channel_id"),
             "channel_handle": row.get("channel_handle"),
@@ -2577,6 +2709,271 @@ def _accepted_video_reset_changes(
             "originalGroupVideoOccurrenceCount": 1,
             "acceptedVideoReset": True,
         })
+    if include_persisted_source_authority:
+        # ``runtime_videos``/``runtime_occurrences`` are an intentionally
+        # compact scalar projection.  Historical full-runtime releases can
+        # retain a video's complete immutable occurrence set only inside the
+        # persisted source projection for the requested view.  A selected
+        # full-video reset must remove that source authority too, otherwise an
+        # old ranking card can survive while its source detail correctly
+        # disappears and snapshot export fails.
+        #
+        # The trigram expression below has a production GIN index.  Keep the
+        # exact equality predicate as a fail-closed recheck and run this only
+        # for snapshot materialization, whose caller caches the result across
+        # every metric/filter combination in one repeatable-read transaction.
+        source_rows: list[dict[str, Any]] = []
+        range_id = _text(options.get("range")) or "all"
+        view = _text(options.get("view")) or "songs"
+        source_entity_types = (
+            ["song"]
+            if view in {"songs", "songIndex", "vsingerSongs"}
+            else ["artist"]
+            if view == "artists"
+            else ["vtuber"]
+            if view == "vtubers"
+            else []
+        )
+        # Video sources are synthesized from the parent video ranking during
+        # snapshot export; there is no single physical ``video`` source
+        # entity whose occurrence multiset can replace runtime_occurrences.
+        # Keep the compact scalar parent projection authoritative here.
+        if not source_entity_types:
+            return changes
+        for video_id in video_ids:
+            remaining = _MAX_AFFECTED_RUNTIME_OCCURRENCES - len(source_rows)
+            if remaining <= 0:
+                raise PostgresAdapterError(
+                    "accepted-video persisted source reconciliation exceeded bounded cap"
+                )
+            scoped_rows = _rows(
+                connection,
+                """
+                /* indexed accepted-reset persisted source authority */
+                SELECT occurrence.video_id, occurrence.source_key,
+                       detail.entity_type, detail.entity_key,
+                       occurrence.position, occurrence.seconds,
+                       occurrence.is_niche, occurrence.is_unknown_artist,
+                       occurrence.payload_json
+                FROM runtime_source_occurrences AS occurrence
+                JOIN runtime_source_details AS detail
+                  ON detail.revision_id = occurrence.revision_id
+                 AND detail.source_key = occurrence.source_key
+                 AND detail.range_id = occurrence.range_id
+                 AND detail.entity_type = ANY(%s)
+                WHERE occurrence.revision_id = %s
+                  AND occurrence.range_id = %s
+                  AND daily_song_source_video_search_text(
+                        occurrence.title,
+                        occurrence.video_id,
+                        occurrence.payload_json
+                      ) ILIKE %s ESCAPE E'\\\\'
+                  AND occurrence.video_id = %s
+                ORDER BY occurrence.source_key, occurrence.position
+                LIMIT %s
+                """,
+                [
+                    source_entity_types,
+                    parent_revision_id,
+                    range_id,
+                    f"%{_sql_like_literal(video_id)}%",
+                    video_id,
+                    remaining + 1,
+                ],
+            )
+            if len(scoped_rows) > remaining:
+                raise PostgresAdapterError(
+                    "accepted-video persisted source reconciliation exceeded bounded cap"
+                )
+            source_rows.extend(dict(row) for row in scoped_rows)
+        rows_by_video: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in source_rows:
+            video_id = _text(row.get("video_id"))
+            source_key = _text(row.get("source_key"))
+            entity_type = _text(row.get("entity_type"))
+            entity_key = _text(row.get("entity_key"))
+            if (
+                video_id not in video_ids
+                or not source_key
+                or entity_type not in set(source_entity_types)
+                or not entity_key
+            ):
+                raise PostgresAdapterError(
+                    "accepted-video persisted source authority identity is invalid"
+                )
+            rows_by_video[video_id].append(dict(row))
+
+        def persisted_identity(
+            row: Mapping[str, Any], *, canonical_title: bool = False,
+        ) -> tuple[Any, ...]:
+            item = _runtime_source_occurrence(row)
+            song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+            title = _text(song.get("title"))
+            if not title:
+                raise PostgresAdapterError(
+                    "accepted-video persisted source authority lacks song identity"
+                )
+            artist = _text(song.get("artist"))
+            title_key = (
+                _vtuber_canonical_song_identity(title)[1]
+                if canonical_title
+                else _overlay_song_group_norm(title)
+            )
+            seconds = (
+                song.get("seconds")
+                if song.get("seconds") is not None
+                else row.get("seconds")
+            )
+            return (
+                _text(row.get("video_id")),
+                seconds,
+                title_key or _overlay_song_group_norm(title),
+                _overlay_song_group_norm(artist),
+            )
+
+        scalar_by_video: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for change in changes:
+            scalar_by_video[_text(change.get("videoId"))].append(change)
+        reconciled: list[dict[str, Any]] = []
+        for video_id in video_ids:
+            authority_rows = rows_by_video.get(video_id, [])
+            song_rows = [
+                row
+                for row in authority_rows
+                if _text(row.get("entity_type")) == "song"
+            ]
+            artist_rows = [
+                row
+                for row in authority_rows
+                if _text(row.get("entity_type")) == "artist"
+            ]
+            vtuber_rows_by_source: dict[str, list[dict[str, Any]]] = defaultdict(list)
+            for row in authority_rows:
+                if _text(row.get("entity_type")) == "vtuber":
+                    vtuber_rows_by_source[_text(row.get("source_key"))].append(row)
+            if len(vtuber_rows_by_source) > 1:
+                raise PostgresAdapterError(
+                    "accepted-video persisted VTuber authority is ambiguous "
+                    f"(video={video_id})"
+                )
+            vtuber_rows = (
+                next(iter(vtuber_rows_by_source.values()))
+                if vtuber_rows_by_source
+                else []
+            )
+            if view in {"songs", "songIndex", "vsingerSongs"}:
+                persisted_rows = song_rows
+            elif view == "artists":
+                persisted_rows = artist_rows
+            elif view == "vtubers":
+                persisted_rows = vtuber_rows
+            else:
+                raise PostgresAdapterError(
+                    f"accepted-video persisted source view is unsupported: {view}"
+                )
+
+            source_changes: list[dict[str, Any]] = []
+            for row in persisted_rows:
+                identity = persisted_identity(row)
+                item = _runtime_source_occurrence(row)
+                song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+                video = _overlay_video_projection(item)
+                title = _text(song.get("title"))
+                artist = _text(song.get("artist"))
+                is_unknown_artist = row.get("is_unknown_artist") is True
+                is_niche = row.get("is_niche") is True
+                parent_artist_key = (
+                    _text(row.get("entity_key"))
+                    if _text(row.get("entity_type")) == "artist"
+                    else "unknown"
+                    if is_unknown_artist
+                    else _overlay_song_group_norm(artist) or "unknown"
+                )
+                parent_song_group_key = (
+                    _text(row.get("entity_key"))
+                    if _text(row.get("entity_type")) == "song"
+                    else "::".join((
+                        _vtuber_canonical_song_identity(title)[1]
+                        or _overlay_song_group_norm(title),
+                        parent_artist_key,
+                    ))
+                )
+                source_changes.append({
+                    "entityType": "occurrences",
+                    "videoId": video_id,
+                    # Persisted source rows predate occurrenceId.  Position is
+                    # source-local and not a public immutable id; keep it out
+                    # of occurrence matching while retaining one explicit
+                    # identity for diagnostics and preview de-duplication.
+                    "occurrenceId": "",
+                    "sourcePosition": int(row.get("position") or 0),
+                    "title": title,
+                    "artist": artist,
+                    "isNiche": is_niche,
+                    "isUnknownArtist": is_unknown_artist,
+                    "parentSongGroupKey": parent_song_group_key,
+                    "parentArtistGroupKey": parent_artist_key,
+                    "songKey": _text(song.get("songKey") or song.get("key")),
+                    "seconds": (
+                        song.get("seconds")
+                        if song.get("seconds") is not None
+                        else row.get("seconds")
+                    ),
+                    "rangeId": _text(options.get("range")) or "all",
+                    "channel_id": _text(video.get("channelId")),
+                    "channel_handle": video.get("channelHandle"),
+                    "channel_name": video.get("channelName"),
+                    "channel_url": video.get("channelUrl"),
+                    "videoTitle": video.get("title"),
+                    "videoPayload": video,
+                    "acceptedVideoReset": True,
+                    "persistedSourceAuthority": True,
+                })
+            # Persisted rows are the immutable authority.  Scalar runtime rows
+            # remain a bounded fallback for identities that have no source
+            # projection at all.  Match raw title first, then the runtime
+            # canonical work-title key for historical display rewrites such as
+            # ``1,000,000 TIMES`` -> ``TIMES``.
+            used_source: set[int] = set()
+
+            def change_identity(
+                change: Mapping[str, Any], *, canonical_title: bool = False,
+            ) -> tuple[Any, ...]:
+                title = _text(change.get("title"))
+                title_key = (
+                    _vtuber_canonical_song_identity(title)[1]
+                    if canonical_title
+                    else _overlay_song_group_norm(title)
+                )
+                return (
+                    video_id,
+                    change.get("seconds"),
+                    title_key or _overlay_song_group_norm(title),
+                    _overlay_song_group_norm(change.get("artist")),
+                )
+
+            for scalar_change in scalar_by_video.get(video_id, ()):
+                match_index = next((
+                    index
+                    for index, source_change in enumerate(source_changes)
+                    if index not in used_source
+                    and change_identity(source_change)
+                        == change_identity(scalar_change)
+                ), None)
+                if match_index is None:
+                    match_index = next((
+                        index
+                        for index, source_change in enumerate(source_changes)
+                        if index not in used_source
+                        and change_identity(source_change, canonical_title=True)
+                            == change_identity(scalar_change, canonical_title=True)
+                    ), None)
+                if match_index is None:
+                    reconciled.append(scalar_change)
+                else:
+                    used_source.add(match_index)
+            reconciled.extend(source_changes)
+        changes = reconciled
     return changes
 
 
@@ -2653,6 +3050,7 @@ def _snapshot_accepted_video_reset_changes(
     options: Mapping[str, Any],
     *,
     identity_only: bool = False,
+    include_persisted_source_authority: bool = False,
     cache: MutableMapping[
         tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
     ] | None = None,
@@ -2675,7 +3073,14 @@ def _snapshot_accepted_video_reset_changes(
     video_ids = tuple(sorted({
         _text(video_id) for video_id in resets if _text(video_id)
     }))
-    mode = "identity" if identity_only else "occurrences"
+    view = _text(options.get("view")) or "songs"
+    mode = (
+        "identity"
+        if identity_only
+        else f"source-authority:{view}"
+        if include_persisted_source_authority
+        else "occurrences"
+    )
     range_id = _text(options.get("range")) or "all"
     key = (parent_revision_id, range_id, mode, video_ids)
     if cache is not None and key in cache:
@@ -2691,7 +3096,13 @@ def _snapshot_accepted_video_reset_changes(
         )
         if identity_only
         else _accepted_video_reset_changes(
-            connection, parent_revision_id, resets, options,
+            connection,
+            parent_revision_id,
+            resets,
+            options,
+            include_persisted_source_authority=(
+                include_persisted_source_authority
+            ),
         )
     )
     if cache is not None:
@@ -2835,6 +3246,15 @@ def _overlay_channel_records(connection, rows: Iterable[Mapping[str, Any]], meta
             "rawHash": song.get("rawHash") if song.get("rawHash") is not None else row.get("raw_hash"),
             "sourceSystem": song.get("sourceSystem") if song.get("sourceSystem") is not None else row.get("source_system"),
         })
+        for public_name, camel_name, snake_name in (
+            ("isNiche", "isNiche", "is_niche"),
+            ("isUnknownArtist", "isUnknownArtist", "is_unknown_artist"),
+        ):
+            if public_name in song and song.get(public_name) is not None:
+                continue
+            value = _scope_boolean_flag(row, camel_name, snake_name)
+            if value is not None:
+                song[public_name] = value
         record["occurrences"].append(song)
     return [
         {"video": record["video"], "occurrences": tuple(record["occurrences"])}
@@ -4042,6 +4462,12 @@ def _runtime_replacement_candidate_rows(
             "seconds": replacement.get("seconds"),
             "title": title,
             "artist": artist,
+            "is_niche_value": _scope_boolean_flag(
+                replacement, "isNiche", "is_niche",
+            ),
+            "is_unknown_artist_value": _scope_boolean_flag(
+                replacement, "isUnknownArtist", "is_unknown_artist",
+            ),
             "source_id": replacement.get("sourceId"),
             "raw_hash": replacement.get("rawHash"),
             "source_system": replacement.get("sourceSystem"),
@@ -4067,8 +4493,9 @@ def _enrich_runtime_original_group_counts(
     changes: Sequence[dict[str, Any]],
     *,
     range_id: str,
+    options: Mapping[str, Any] | None = None,
     parent_count_cache: MutableMapping[
-        tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+        tuple[str, str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
     ] | None = None,
 ) -> None:
     """Bind videoCount subtraction to the exact pre-curation video/song group."""
@@ -4097,7 +4524,12 @@ def _enrich_runtime_original_group_counts(
     if selected_range not in SUPPORTED_RANGES:
         raise PostgresAdapterError("original group count range is invalid")
     ordered_target_video_ids = tuple(sorted(target_video_ids))
-    cache_key = (parent_revision_id, selected_range, ordered_target_video_ids)
+    selected_options = dict(options or {})
+    selected_options.setdefault("range", selected_range)
+    scope_key = _ranking_scope_key(selected_options)
+    cache_key = (
+        parent_revision_id, selected_range, scope_key, ordered_target_video_ids,
+    )
     cached_parent_counts = (
         parent_count_cache.get(cache_key)
         if parent_count_cache is not None
@@ -4113,12 +4545,16 @@ def _enrich_runtime_original_group_counts(
                 WHERE revision_id = %s
                   AND (range_id = ANY(%s) OR range_id IS NULL)
                   AND video_id = ANY(%s)
+                  AND (NOT %s OR is_niche IS TRUE)
+                  AND (NOT %s OR is_unknown_artist IS NOT TRUE)
                 GROUP BY video_id, title, artist
                 """,
                 [
                     parent_revision_id,
                     [selected_range, ""],
                     list(ordered_target_video_ids),
+                    bool(selected_options.get("nicheOnly")),
+                    bool(selected_options.get("hideUnknownArtist")),
                 ],
             ):
             parent_counts[(
@@ -4132,6 +4568,7 @@ def _enrich_runtime_original_group_counts(
             print(
                 f"PG_SNAPSHOT_PARENT_COUNT_CACHE miss "
                 f"range={selected_range} "
+                f"scope={scope_key} "
                 f"videos={len(ordered_target_video_ids)} "
                 f"groups={len(cached_parent_counts)}",
                 flush=True,
@@ -4140,6 +4577,7 @@ def _enrich_runtime_original_group_counts(
         print(
             f"PG_SNAPSHOT_PARENT_COUNT_CACHE hit "
             f"range={selected_range} "
+            f"scope={scope_key} "
             f"videos={len(ordered_target_video_ids)} "
             f"groups={len(cached_parent_counts)}",
             flush=True,
@@ -4253,13 +4691,56 @@ def _apply_record_overlay(records: Iterable[Mapping[str, Any]], changes: Sequenc
     return result
 
 
+def _runtime_change_has_unknown_artist(change: Mapping[str, Any]) -> bool:
+    """Trust only the immutable runtime flag for a parent unknown artist."""
+
+    return (
+        change.get("isUnknownArtist") is True
+        or change.get("is_unknown_artist") is True
+    )
+
+
+def _runtime_change_group_artist(change: Mapping[str, Any]) -> str:
+    """Return the public parent-ranking artist identity for one change.
+
+    Runtime occurrences retain their source display placeholder (for example,
+    ``未記載``), while the full-runtime ranking groups every reviewed unknown
+    artist under ``unknown``.  Keep the raw artist on the change for exact
+    occurrence/source matching and use this helper only for aggregate keys.
+    """
+
+    if _runtime_change_has_unknown_artist(change):
+        return "unknown"
+    return _text(change.get("artist"))
+
+
+def _runtime_change_song_group_identity(
+    change: Mapping[str, Any],
+) -> tuple[str, str]:
+    """Return the canonical title/artist identity of a parent song group."""
+
+    return (
+        _overlay_song_group_norm(change.get("title")),
+        _overlay_song_group_norm(_runtime_change_group_artist(change)),
+    )
+
+
 def _runtime_change_group_key(change: Mapping[str, Any], view: str) -> str:
     title = _text(change.get("title"))
-    artist = _text(change.get("artist"))
+    artist = _runtime_change_group_artist(change)
     video_id = _text(change.get("videoId") or change.get("video_id"))
     if view in {"songs", "songIndex", "vsingerSongs"}:
+        parent_group_key = _text(change.get("parentSongGroupKey"))
+        if parent_group_key:
+            return parent_group_key
+        if bool(change.get("acceptedVideoReset")):
+            title_key, artist_key = _runtime_change_song_group_identity(change)
+            return f"{title_key}::{artist_key}"
         return f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
     if view == "artists":
+        parent_artist_key = _text(change.get("parentArtistGroupKey"))
+        if parent_artist_key:
+            return parent_artist_key
         return _overlay_norm(artist) or "unknown"
     if view == "videos":
         return video_id
@@ -4277,9 +4758,12 @@ def _apply_runtime_tombstone_groups(
     decremented_videos: set[tuple[str, str]] = set()
     removal_counts: dict[tuple[str, str, str], int] = defaultdict(int)
     for change in changes:
+        change_title_key, change_artist_key = (
+            _runtime_change_song_group_identity(change)
+        )
         removal_counts[(
-            _overlay_song_group_norm(change.get("title")),
-            _overlay_song_group_norm(change.get("artist")),
+            change_title_key,
+            change_artist_key,
             _text(change.get("videoId") or change.get("video_id")),
         )] += 1
     group_keys_by_identity: dict[str, list[str]] = defaultdict(list)
@@ -4319,8 +4803,10 @@ def _apply_runtime_tombstone_groups(
                 continue
         target_video = _text(change.get("videoId") or change.get("video_id"))
         if view in {"songs", "songIndex", "vsingerSongs"}:
-            target_song_title_norm = _overlay_song_group_norm(change.get("title"))
-            target_song_artist_norm = _overlay_song_group_norm(change.get("artist"))
+            (
+                target_song_title_norm,
+                target_song_artist_norm,
+            ) = _runtime_change_song_group_identity(change)
             target_song_identity = (
                 f"{target_song_title_norm}::{target_song_artist_norm}"
             )
@@ -4339,11 +4825,19 @@ def _apply_runtime_tombstone_groups(
                     _runtime_change_group_key(change, view), ()
                 )
                 candidate_group_keys = detail_group_keys
+            if (
+                allow_accepted_reset_detail_fallback
+                and not candidate_group_keys
+                and _text(change.get("parentSongGroupKey")) in groups
+            ):
+                candidate_group_keys = (
+                    _text(change.get("parentSongGroupKey")),
+                )
             if len(candidate_group_keys) > 1:
                 exact_identity = (
                     _overlay_norm(change.get("title"))
                     + "::"
-                    + _overlay_norm(change.get("artist"))
+                    + _overlay_norm(_runtime_change_group_artist(change))
                 )
                 exact_matches = tuple(
                     key
@@ -4409,7 +4903,7 @@ def _apply_runtime_tombstone_groups(
                     )
                 candidate_group_keys = replacement_group_keys
         elif view == "artists":
-            target_artist = _overlay_norm(change.get("artist"))
+            target_artist = _overlay_norm(_runtime_change_group_artist(change))
             candidate_group_keys = group_keys_by_identity.get(target_artist, ())
         elif view == "videos":
             candidate_group_keys = group_keys_by_identity.get(target_video, ())
@@ -4442,9 +4936,12 @@ def _apply_runtime_tombstone_groups(
                     (target_song_title_norm, target_song_artist_norm, target_video)
                 ]
             else:
+                change_title_key, change_artist_key = (
+                    _runtime_change_song_group_identity(change)
+                )
                 removed_video_group_count = removal_counts[(
-                    _overlay_song_group_norm(change.get("title")),
-                    _overlay_song_group_norm(change.get("artist")),
+                    change_title_key,
+                    change_artist_key,
                     target_video,
                 )]
             if (
@@ -4597,8 +5094,16 @@ def _runtime_song_identity(row: Mapping[str, Any]) -> str:
 
 def _runtime_view_group_key(row: Mapping[str, Any], view: str) -> str:
     if view in {"songs", "songIndex", "vsingerSongs"}:
+        detail_key = _text(row.get("detail_key"))
+        if detail_key:
+            return detail_key
         return f"{_overlay_norm(row.get('title'))}::{_overlay_norm(row.get('artist'))}"
     if view == "artists":
+        if (
+            row.get("isUnknownArtist") is True
+            or row.get("is_unknown_artist") is True
+        ):
+            return "unknown"
         # Historical full-runtime artist rankings store their public identity
         # in ``name`` while occurrence/candidate rows use ``artist``.  Treat
         # both shapes as the same group so one snapshot reconciliation can be
@@ -4690,6 +5195,10 @@ def _bounded_affected_parent_occurrences(
             [artist for _title, artist in ordered_pairs],
         ]
     elif view == "artists":
+        unknown_artist_affected = any(
+            _runtime_change_has_unknown_artist(change)
+            for change in changes
+        )
         artists = sorted({
             _text(value)
             for change in changes
@@ -4700,10 +5209,14 @@ def _bounded_affected_parent_occurrences(
             )
             if _text(value)
         })
-        if not artists:
+        if not artists and not unknown_artist_affected:
             return
-        predicate = "lower(coalesce(o.artist, '')) = ANY(%s)"
+        predicate = (
+            "(lower(coalesce(o.artist, '')) = ANY(%s) "
+            "OR (%s AND o.is_unknown_artist IS TRUE))"
+        )
         predicate_params: list[Any] = [[value.casefold() for value in artists]]
+        predicate_params.append(unknown_artist_affected)
     elif view == "videos":
         videos = sorted({
             _text(change.get("videoId") or change.get("video_id"))
@@ -4725,6 +5238,14 @@ def _bounded_affected_parent_occurrences(
         predicate = "v.channel_id = ANY(%s)"
         predicate_params = [channels]
     range_id = _text(options.get("range")) or "all"
+    scope_clause = """
+      AND (NOT %s OR o.is_niche IS TRUE)
+      AND (NOT %s OR o.is_unknown_artist IS NOT TRUE)
+    """
+    scope_params = [
+        bool(options.get("nicheOnly")),
+        bool(options.get("hideUnknownArtist")),
+    ]
 
     # Immutable snapshot builds already own one explicit transaction.  Use a
     # server-side cursor there so PostgreSQL sorts the affected parent set
@@ -4749,7 +5270,8 @@ def _bounded_affected_parent_occurrences(
                 streaming_cursor.itersize = _AFFECTED_RECONCILIATION_BATCH_SIZE
             streaming_cursor.execute(
                 f"""
-                SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
+                SELECT o.occurrence_id, o.video_id, o.song_key, o.title,
+                       o.artist, o.is_unknown_artist,
                        v.channel_id, v.channel_handle, v.channel_name
                 FROM runtime_occurrences AS o
                 JOIN runtime_videos AS v
@@ -4760,6 +5282,7 @@ def _bounded_affected_parent_occurrences(
                     (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
                     OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
                   )
+                  {scope_clause}
                 ORDER BY o.video_id, o.occurrence_id
                 LIMIT %s
                 """,
@@ -4769,6 +5292,7 @@ def _bounded_affected_parent_occurrences(
                     *predicate_params,
                     range_id,
                     range_id,
+                    *scope_params,
                     _MAX_AFFECTED_RECONCILIATION_OCCURRENCES + 1,
                 ],
             )
@@ -4819,7 +5343,8 @@ def _bounded_affected_parent_occurrences(
         rows = _rows(
             connection,
             f"""
-            SELECT o.occurrence_id, o.video_id, o.song_key, o.title, o.artist,
+            SELECT o.occurrence_id, o.video_id, o.song_key, o.title,
+                   o.artist, o.is_unknown_artist,
                    v.channel_id, v.channel_handle, v.channel_name
             FROM runtime_occurrences AS o
             JOIN runtime_videos AS v
@@ -4830,6 +5355,7 @@ def _bounded_affected_parent_occurrences(
                 (%s = 'all' AND coalesce(o.range_id, '') IN ('all', ''))
                 OR (%s = '7d' AND coalesce(o.range_id, '') IN ('7d', ''))
               )
+              {scope_clause}
               AND (o.video_id, o.occurrence_id) > (%s, %s)
             ORDER BY o.video_id, o.occurrence_id
             LIMIT %s
@@ -4840,6 +5366,7 @@ def _bounded_affected_parent_occurrences(
                 *predicate_params,
                 range_id,
                 range_id,
+                *scope_params,
                 last_video_id,
                 last_occurrence_id,
                 _AFFECTED_RECONCILIATION_BATCH_SIZE,
@@ -4887,7 +5414,7 @@ def _reconcile_affected_song_counts(
     options: Mapping[str, Any],
     *,
     reconciliation_counts: MutableMapping[
-        tuple[str, str, str, str], tuple[int, int, int]
+        tuple[str, str, str, str, str], tuple[int, int, int]
     ] | None = None,
 ) -> None:
     """Recompute distinct songs from bounded parent and overlay occurrence sets."""
@@ -4903,10 +5430,14 @@ def _reconcile_affected_song_counts(
         change for change in changes
         if _text(change.get("entityType")) in {"occurrences", "runtime_occurrences"}
     ]
-    if not affected_changes:
+    if not affected_changes and not candidate_rows and not replacement_rows:
         return
     affected_keys = _runtime_change_view_keys(affected_changes, view)
     for row in candidate_rows:
+        key = _runtime_view_group_key(row, view)
+        if key:
+            affected_keys.add(key)
+    for row in replacement_rows:
         key = _runtime_view_group_key(row, view)
         if key:
             affected_keys.add(key)
@@ -4923,11 +5454,12 @@ def _reconcile_affected_song_counts(
     if not affected_keys:
         return
     range_id = _text(options.get("range")) or "all"
+    scope_key = _ranking_scope_key(options)
     cached_counts: dict[str, tuple[int, int, int]] = {}
     if reconciliation_counts is not None:
         for key in affected_keys:
             cached = reconciliation_counts.get(
-                (parent_revision_id, range_id, view, key)
+                (parent_revision_id, range_id, view, scope_key, key)
             )
             if cached is not None:
                 cached_counts[key] = cached
@@ -4987,6 +5519,19 @@ def _reconcile_affected_song_counts(
                 "video_payload_json": row.get("video_payload_json"),
             }
             for row in relevant_candidates
+        ),
+        *(
+            {
+                "entityType": "occurrences",
+                "videoId": row.get("video_id"),
+                "title": row.get("title"),
+                "artist": row.get("artist"),
+                "channel_id": row.get("channel_id"),
+                "channel_handle": row.get("channel_handle"),
+                "channel_name": row.get("channel_name"),
+                "video_payload_json": row.get("video_payload_json"),
+            }
+            for row in relevant_replacements
         ),
     ]
     candidate_video_ids = {
@@ -5076,7 +5621,7 @@ def _reconcile_affected_song_counts(
     if reconciliation_counts is not None:
         for key, values in computed_counts.items():
             reconciliation_counts[
-                (parent_revision_id, range_id, view, key)
+                (parent_revision_id, range_id, view, scope_key, key)
             ] = values
     # The streamed projection applies selected accepted-video resets plus
     # final candidate/replacement rows before computing exact scalars. Every
@@ -5594,6 +6139,8 @@ def _bounded_direct_overlay_vtuber_previews(
     range_id: str,
     excluded_video_ids: Iterable[str] = (),
     excluded_occurrence_ids: Iterable[tuple[str, str]] = (),
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Return at most one accepted-overlay preview for each requested page card."""
 
@@ -5681,6 +6228,19 @@ def _bounded_direct_overlay_vtuber_previews(
            AND changed.occurrence_id = occurrence.occurrence_id
           WHERE selected.tombstone IS NOT TRUE
             AND changed.occurrence_id IS NULL
+            AND (
+              NOT %s
+              OR coalesce(
+                occurrence.payload_json->>'isNiche',
+                occurrence.payload_json->'payload'->>'isNiche',
+                'false'
+              ) = 'true'
+            )
+            AND (
+              NOT %s
+              OR lower(btrim(coalesce(occurrence.artist, '')))
+                   <> ALL(%s::text[])
+            )
           ORDER BY occurrence.video_id,
                    coalesce(
                      nullif(occurrence.occurrence_id, ''),
@@ -5714,6 +6274,9 @@ def _bounded_direct_overlay_vtuber_previews(
             [video_id for video_id, _ in excluded_occurrences],
             [occurrence_id for _, occurrence_id in excluded_occurrences],
             range_values,
+            bool(niche_only),
+            bool(hide_unknown_artist),
+            sorted(_UNKNOWN_ARTIST_NAMES),
             len(requested_channels) + 1,
         ],
     )
@@ -5903,7 +6466,7 @@ def _bounded_final_vtuber_previews(
             WHERE o.revision_id = %s
               AND o.video_id = v.video_id
               AND changed.occurrence_id IS NULL
-              AND (NOT %s OR nullif(o.artist, '') IS NOT NULL)
+              AND (NOT %s OR o.is_unknown_artist IS NOT TRUE)
               AND (NOT %s OR o.is_niche IS TRUE)
             ORDER BY o.song_key, o.occurrence_id
             LIMIT 1
@@ -6399,6 +6962,93 @@ def _store_vtuber_replacement_cache(
         _VTUBER_REPLACEMENT_CACHE[cache_key] = exact
 
 
+def _resolved_vtuber_parent_sources(
+    connection,
+    parent_revision_id: str,
+    affected_channel_ids: Iterable[str],
+    range_id: str,
+    base_groups: Mapping[str, Mapping[str, Any]],
+) -> dict[str, str]:
+    """Resolve scoped VTuber groups against the unfiltered parent authority.
+
+    A channel can be absent from a persisted filter scope and enter it through
+    the overlay.  Its immutable source still lives on the parent's ``all``
+    scope row, so deriving parent authority only from ``base_groups`` silently
+    turns that channel into an overlay-only zero.  This bounded lookup follows
+    the indexed parent ranking prefix and hydrates only affected identities.
+    """
+
+    channel_ids = sorted({
+        _text(value) for value in affected_channel_ids if _text(value)
+    })
+    if not channel_ids:
+        return {}
+    rows = _rows(
+        connection,
+        """
+        /* bounded unfiltered VTuber parent source identities */
+        SELECT detail_key, payload_json
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = %s
+          AND view = 'vtubers' AND metric = 'count'
+          AND scope_key = 'all' AND detail_key = ANY(%s)
+        ORDER BY rank
+        LIMIT %s
+        """,
+        [parent_revision_id, range_id, channel_ids, len(channel_ids) + 1],
+    )
+    if len(rows) > len(channel_ids):
+        raise PostgresAdapterError(
+            "VTuber unfiltered parent source lookup exceeded affected scope"
+        )
+
+    requested = set(channel_ids)
+    resolved: dict[str, str] = {}
+    source_owners: dict[str, str] = {}
+    for row in rows:
+        channel_id = _text(row.get("detail_key"))
+        payload = _json_object(row.get("payload_json"))
+        payload_channel_id = _text(payload.get("channelId"))
+        if (
+            channel_id not in requested
+            or (payload_channel_id and payload_channel_id != channel_id)
+            or channel_id in resolved
+        ):
+            raise PostgresAdapterError(
+                "VTuber unfiltered parent source identity is invalid"
+            )
+        source_key = _exact_vtuber_source_detail_key(
+            payload, range_id, channel_id,
+        )
+        owner = source_owners.get(source_key)
+        if not source_key or (owner and owner != channel_id):
+            raise PostgresAdapterError(
+                "VTuber unfiltered parent source identity is ambiguous"
+            )
+        source_owners[source_key] = channel_id
+        resolved[channel_id] = source_key
+
+    for channel_id in channel_ids:
+        base_row = base_groups.get(channel_id)
+        if not base_row:
+            continue
+        if _text(base_row.get("detail_key")) not in {"", channel_id}:
+            raise PostgresAdapterError(
+                "VTuber scoped parent source identity is invalid"
+            )
+        if channel_id not in resolved:
+            raise PostgresAdapterError(
+                "VTuber scoped parent source coverage is incomplete"
+            )
+        base_payload = _json_object(base_row.get("payload_json"))
+        explicit_source_key = _text(base_payload.get("sourceDetailKey"))
+        if explicit_source_key and explicit_source_key != resolved[channel_id]:
+            raise PostgresAdapterError(
+                "VTuber scoped parent source identity disagrees with authority"
+            )
+    return resolved
+
+
 def _authoritative_vtuber_summary_rows(
     connection,
     parent_revision_id: str,
@@ -6411,6 +7061,7 @@ def _authoritative_vtuber_summary_rows(
     source_totals_cache: MutableMapping[
         tuple[str, str, str], tuple[int, int]
     ] | None = None,
+    options: Mapping[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Apply bounded overlay deltas to persisted VTuber source authority."""
 
@@ -6457,6 +7108,8 @@ def _authoritative_vtuber_summary_rows(
     base_counts: dict[str, int] = {}
     base_videos: dict[str, int] = {}
     base_songs: dict[str, dict[str, dict[str, Any]]] = {}
+    authority_counts: dict[str, int] = {}
+    authority_videos: dict[str, int] = {}
     for row in detail_rows:
         channel_id = _text(row.get("channel_id"))
         source_key = _text(row.get("source_key"))
@@ -6502,8 +7155,124 @@ def _authoritative_vtuber_summary_rows(
         base_counts[channel_id] = occurrence_count
         base_videos[channel_id] = video_count
         base_songs[channel_id] = songs
+        authority_counts[channel_id] = occurrence_count
+        authority_videos[channel_id] = video_count
 
     source_keys = sorted(channel_by_source)
+    scoped = bool(
+        options
+        and (
+            bool(options.get("nicheOnly"))
+            or bool(options.get("hideUnknownArtist"))
+        )
+    )
+    if scoped:
+        # A parent detail stores only its unfiltered canonical multiset.  For a
+        # persisted filter scope, aggregate the exact physical source rows by
+        # raw song title and canonicalise only that bounded grouped result in
+        # Python.  This preserves source-only videos while avoiding the 8.46 GB
+        # table scan and multi-million-row payload hydration that caused the
+        # original build failures.
+        scope_totals = _rows(
+            connection,
+            """
+            /* indexed scoped authoritative VTuber physical totals */
+            SELECT source_key, count(*) AS occurrence_count,
+                   count(DISTINCT video_id) AS video_count
+            FROM runtime_source_occurrences
+            WHERE revision_id = %s AND source_key = ANY(%s)
+              AND range_id = %s
+              AND (NOT %s OR is_niche IS TRUE)
+              AND (NOT %s OR is_unknown_artist IS NOT TRUE)
+            GROUP BY source_key
+            ORDER BY source_key
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                source_keys,
+                range_id,
+                bool(options.get("nicheOnly")),
+                bool(options.get("hideUnknownArtist")),
+                len(source_keys) + 1,
+            ],
+        ) if source_keys else []
+        if len(scope_totals) > len(source_keys):
+            raise PostgresAdapterError(
+                "VTuber scoped parent source totals exceeded bounded source set"
+            )
+        totals_by_source = {
+            _text(row.get("source_key")): row for row in scope_totals
+        }
+        title_rows = _rows(
+            connection,
+            """
+            /* indexed scoped authoritative VTuber canonical title counts */
+            SELECT source_key,
+                   coalesce(
+                     payload_json::jsonb->'song'->>'title',
+                     payload_json::jsonb->'payload'->'song'->>'title',
+                     payload_json::jsonb->>'songTitle'
+                   ) AS song_title,
+                   count(*) AS occurrence_count
+            FROM runtime_source_occurrences
+            WHERE revision_id = %s AND source_key = ANY(%s)
+              AND range_id = %s
+              AND (NOT %s OR is_niche IS TRUE)
+              AND (NOT %s OR is_unknown_artist IS NOT TRUE)
+            GROUP BY source_key, song_title
+            ORDER BY source_key, song_title
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                source_keys,
+                range_id,
+                bool(options.get("nicheOnly")),
+                bool(options.get("hideUnknownArtist")),
+                _MAX_UNSCOPED_OVERLAY_OCCURRENCES + 1,
+            ],
+        ) if source_keys else []
+        if len(title_rows) > _MAX_UNSCOPED_OVERLAY_OCCURRENCES:
+            raise PostgresAdapterError(
+                "VTuber scoped canonical title aggregation exceeded bounded cap"
+            )
+        scoped_songs: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+        scoped_title_counts: dict[str, int] = defaultdict(int)
+        for row in title_rows:
+            source_key = _text(row.get("source_key"))
+            channel_id = channel_by_source.get(source_key, "")
+            raw_title = _text(row.get("song_title"))
+            count = int(row.get("occurrence_count") or 0)
+            if not channel_id or not raw_title or count <= 0:
+                raise PostgresAdapterError(
+                    "VTuber scoped source title count is invalid"
+                )
+            canonical_title, canonical_key = _vtuber_canonical_song_identity(
+                raw_title
+            )
+            canonical_title = canonical_title or raw_title
+            if canonical_key:
+                entry = scoped_songs[channel_id].setdefault(
+                    canonical_key,
+                    {"key": canonical_key, "name": canonical_title, "count": 0},
+                )
+                entry["count"] = int(entry["count"]) + count
+            scoped_title_counts[channel_id] += count
+        for source_key, channel_id in channel_by_source.items():
+            total = totals_by_source.get(source_key)
+            base_counts[channel_id] = int(
+                total.get("occurrence_count") or 0
+            ) if total else 0
+            base_videos[channel_id] = int(
+                total.get("video_count") or 0
+            ) if total else 0
+            base_songs[channel_id] = scoped_songs.get(channel_id, {})
+            if scoped_title_counts.get(channel_id, 0) != base_counts[channel_id]:
+                raise PostgresAdapterError(
+                    "VTuber scoped canonical title counts disagree with source authority"
+                )
+
     missing_source_keys: list[str] = []
     cached_totals: dict[str, tuple[int, int]] = {}
     for source_key in source_keys:
@@ -6561,8 +7330,8 @@ def _authoritative_vtuber_summary_rows(
             occurrence_count = int(physical.get("occurrence_count") or 0)
             video_count = int(physical.get("video_count") or 0)
         if (
-            occurrence_count != base_counts[channel_id]
-            or video_count != base_videos[channel_id]
+            occurrence_count != authority_counts[channel_id]
+            or video_count != authority_videos[channel_id]
         ):
             raise PostgresAdapterError(
                 "VTuber parent source physical totals disagree with detail"
@@ -6587,7 +7356,8 @@ def _authoritative_vtuber_summary_rows(
         connection,
         """
         /* bounded authoritative VTuber touched source rows */
-        SELECT source_key, position, video_id, seconds, payload_json
+        SELECT source_key, position, video_id, seconds, is_niche,
+               is_unknown_artist, payload_json
         FROM runtime_source_occurrences
         WHERE revision_id = %s AND source_key = ANY(%s)
           AND range_id = %s AND video_id = ANY(%s)
@@ -6612,6 +7382,10 @@ def _authoritative_vtuber_summary_rows(
         source_key = _text(row.get("source_key"))
         channel_id = channel_by_source.get(source_key, "")
         item = _runtime_source_occurrence(row)
+        in_scope = (
+            not scoped
+            or _occurrence_matches_ranking_scope(row, options or {})
+        )
         song = item.get("song") if isinstance(item.get("song"), Mapping) else item
         title = _text(song.get("title"))
         artist = _text(song.get("artist"))
@@ -6630,12 +7404,19 @@ def _authoritative_vtuber_summary_rows(
             "artist": artist,
             "canonical_title": canonical_title,
             "canonical_key": canonical_key,
+            "in_scope": in_scope,
         })
 
+    touched_source_video_ids = {
+        _text(item.get("video_id"))
+        for item in normalized_touched
+        if _text(item.get("video_id"))
+    }
     aligned_occurrences = sorted({
         identity
         for identity in affected_occurrence_ids
         if identity[0] not in full_video_ids
+        and identity[0] in touched_source_video_ids
     })
     preimage_rows = _rows(
         connection,
@@ -6692,7 +7473,7 @@ def _authoritative_vtuber_summary_rows(
         removals.append(dict(item))
 
     for item in normalized_touched:
-        if item["video_id"] in full_video_ids:
+        if item["video_id"] in full_video_ids and item["in_scope"]:
             remove(item)
     for identity, preimage in preimage_by_identity.items():
         if identity[0] in full_video_ids:
@@ -6708,7 +7489,8 @@ def _authoritative_vtuber_summary_rows(
             raise PostgresAdapterError(
                 "VTuber occurrence preimage does not uniquely match source authority"
             )
-        remove(matches[0])
+        if matches[0]["in_scope"]:
+            remove(matches[0])
 
     additions: list[dict[str, Any]] = []
     for value in candidate_values:
@@ -6742,6 +7524,8 @@ def _authoritative_vtuber_summary_rows(
     removed_video_occurrences: dict[tuple[str, str], int] = defaultdict(int)
     added_video_occurrences: dict[tuple[str, str], int] = defaultdict(int)
     for item in normalized_touched:
+        if not item["in_scope"]:
+            continue
         parent_video_occurrences[(item["channel_id"], item["video_id"])] += 1
     for item in removals:
         removed_video_occurrences[(item["channel_id"], item["video_id"])] += 1
@@ -7161,15 +7945,8 @@ def _unfiltered_vtuber_summary_rows(
             ON changed.video_id = occurrence.video_id
            AND changed.occurrence_id = occurrence.occurrence_id
           WHERE changed.occurrence_id IS NULL
-            AND (NOT %s OR nullif(occurrence.artist, '') IS NOT NULL)
-            AND (
-              NOT %s
-              OR coalesce(
-                occurrence.payload_json::jsonb->>'isNiche',
-                occurrence.payload_json::jsonb->'payload'->>'isNiche',
-                'false'
-              ) = 'true'
-            )
+            AND (NOT %s OR occurrence.is_unknown_artist IS NOT TRUE)
+            AND (NOT %s OR occurrence.is_niche IS TRUE)
         ),
         combined AS (
           SELECT channel_id, video_id, song_key FROM parent_occurrences
@@ -7221,8 +7998,6 @@ def _overlay_vtuber_replacement_rows(
         _text(options.get("q")),
         _text(options.get("searchScope")),
         tuple(options.get("searchFields") or ()),
-        _text(options.get("metric")),
-        int(options.get("minCount") or 0),
         bool(options.get("nicheOnly")),
         bool(options.get("hideUnknownArtist")),
     )
@@ -7377,6 +8152,15 @@ def _overlay_vtuber_replacement_rows(
             "rawHash": song.get("rawHash") or row.get("raw_hash"),
             "sourceSystem": song.get("sourceSystem") or row.get("source_system"),
         })
+        for public_name, camel_name, snake_name in (
+            ("isNiche", "isNiche", "is_niche"),
+            ("isUnknownArtist", "isUnknownArtist", "is_unknown_artist"),
+        ):
+            if public_name in song and song.get(public_name) is not None:
+                continue
+            value = _scope_boolean_flag(row, camel_name, snake_name)
+            if value is not None:
+                song[public_name] = value
         identity = (
             _text(song.get("occurrenceId")),
             _text(song.get("songKey")),
@@ -7449,9 +8233,9 @@ def _overlay_vtuber_replacement_rows(
                 continue
             candidate_videos.setdefault(channel_id, video)
             for occurrence in _occurrences_for_range(record, _text(options.get("range")) or "all"):
-                if options.get("nicheOnly") and occurrence["song"].get("isNiche") is not True:
-                    continue
-                if options.get("hideUnknownArtist") and not _text(occurrence["song"].get("artist")):
+                if not _occurrence_matches_ranking_scope(
+                    occurrence["song"], options,
+                ):
                     continue
                 song = occurrence["song"]
                 if not _text(song.get("title")):
@@ -7504,15 +8288,30 @@ def _overlay_vtuber_replacement_rows(
         residual_sql_tokens = [
             _sql_like_literal(token) for token in residual_tokens
         ]
-        parent_sources = {
-            channel_id: _exact_vtuber_source_detail_key(
-                _json_object((base_groups.get(channel_id) or {}).get("payload_json")),
+        scoped_authority = bool(
+            options.get("nicheOnly") or options.get("hideUnknownArtist")
+        )
+        parent_sources = (
+            _resolved_vtuber_parent_sources(
+                connection,
+                parent_revision_id,
+                affected_channel_ids,
                 _text(options.get("range")) or "all",
-                channel_id,
+                base_groups,
             )
-            for channel_id in affected_channel_ids
-            if base_groups.get(channel_id)
-        }
+            if scoped_authority
+            else {
+                channel_id: _exact_vtuber_source_detail_key(
+                    _json_object(
+                        (base_groups.get(channel_id) or {}).get("payload_json")
+                    ),
+                    _text(options.get("range")) or "all",
+                    channel_id,
+                )
+                for channel_id in affected_channel_ids
+                if base_groups.get(channel_id)
+            }
+        )
         summaries = (
             _authoritative_vtuber_summary_rows(
                 connection,
@@ -7524,8 +8323,9 @@ def _overlay_vtuber_replacement_rows(
                 candidate_values,
                 _text(options.get("range")) or "all",
                 source_totals_cache=source_totals_cache,
+                options=options,
             )
-            if channel_scope is None and direct_overlay_revision_ids
+            if channel_scope is None and not options.get("q")
             else _unfiltered_vtuber_summary_rows(
                 connection,
                 parent_revision_id,
@@ -7589,7 +8389,8 @@ def _overlay_vtuber_replacement_rows(
               SELECT parent.channel_id, parent.channel_name,
                      parent.channel_handle, parent.title AS video_title,
                      o.video_id, o.occurrence_id, o.song_key, o.title,
-                     o.artist, o.source_id, o.source_system, o.payload_json
+                     o.artist, o.source_id, o.source_system, o.payload_json,
+                     o.is_niche, o.is_unknown_artist
               FROM affected_parent_videos AS parent
               JOIN runtime_occurrences AS o
                 ON o.revision_id = %s
@@ -7637,15 +8438,8 @@ def _overlay_vtuber_replacement_rows(
                 ON changed.video_id = parent.video_id
                AND changed.occurrence_id = parent.occurrence_id
               WHERE changed.occurrence_id IS NULL
-                AND (NOT %s OR nullif(parent.artist, '') IS NOT NULL)
-                AND (
-                  NOT %s
-                  OR coalesce(
-                    parent.payload_json::jsonb->>'isNiche',
-                    parent.payload_json::jsonb->'payload'->>'isNiche',
-                    'false'
-                  ) = 'true'
-                )
+                AND (NOT %s OR parent.is_unknown_artist IS NOT TRUE)
+                AND (NOT %s OR parent.is_niche IS TRUE)
             ),
             combined AS (
               SELECT channel_id, video_id, song_key, residual_match
@@ -8298,13 +9092,13 @@ def _prepare_generic_overlay_rankings(
     options: Mapping[str, Any],
     *,
     reconciliation_counts: MutableMapping[
-        tuple[str, str, str, str], tuple[int, int, int]
+        tuple[str, str, str, str, str], tuple[int, int, int]
     ] | None = None,
     snapshot_reset_changes: MutableMapping[
         tuple[str, str, str, tuple[str, ...]], list[dict[str, Any]]
     ] | None = None,
     snapshot_original_group_counts: MutableMapping[
-        tuple[str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
+        tuple[str, str, str, tuple[str, ...]], Mapping[tuple[str, str, str], int]
     ] | None = None,
     snapshot_vtuber_source_totals: MutableMapping[
         tuple[str, str, str], tuple[int, int]
@@ -8609,7 +9403,7 @@ def _prepare_generic_overlay_rankings(
         exact_parent_video_ids if exact_channel_scope is not None else None,
     )
     compatible_reset_rows: tuple[Mapping[str, Any], ...] = ()
-    if options["view"] == "vtubers" and accepted_video_resets:
+    if accepted_video_resets:
         compatible_reset_rows = _selected_full_reset_candidate_rows(
             connection,
             overlay_ids,
@@ -8622,7 +9416,7 @@ def _prepare_generic_overlay_rankings(
     )
     candidate_range_video_ids = {
         _text(row.get("video_id") or row.get("videoId"))
-        for row in candidate_range_rows
+        for row in (*candidate_range_rows, *compatible_reset_rows)
         if _text(row.get("video_id") or row.get("videoId"))
     }
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
@@ -8689,6 +9483,10 @@ def _prepare_generic_overlay_rankings(
         accepted_video_resets,
         options,
         identity_only=bool(direct_overlay_revision_ids),
+        include_persisted_source_authority=(
+            snapshot_reset_changes is not None
+            and not bool(direct_overlay_revision_ids)
+        ),
         cache=snapshot_reset_changes,
     )
     runtime_changes_all = _runtime_tombstones(
@@ -9023,6 +9821,21 @@ def _prepare_generic_overlay_rankings(
             for row in (*candidate_rows, *replacement_rows)
             if (key := _runtime_view_group_key(row, options["view"]))
         )
+        if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
+            # Overlay-only song cards retain their established raw-normalized
+            # key.  Also probe the parent runtime's punctuation-insensitive
+            # canonical key inside this already bounded affected set: when
+            # that parent card exists, ``_canonical_overlay_delta_group_key``
+            # can merge the accepted tuple instead of creating a duplicate
+            # low-count card with only display punctuation changed.
+            bounded_affected_keys.update(
+                f"{title_key}::{artist_key}"
+                for row in (*candidate_rows, *replacement_rows)
+                for title_key, artist_key in (
+                    _runtime_change_song_group_identity(row),
+                )
+                if title_key
+            )
         bounded_affected_keys.update(
             key
             for key in _runtime_change_view_keys(
@@ -9183,6 +9996,24 @@ def _prepare_generic_overlay_rankings(
     generic_replacement_rows = list(replacement_rows)
     generic_reset_changes = list(reset_changes)
     generic_runtime_changes = list(runtime_changes)
+    if options["view"] != "vtubers":
+        # Parent ranking rows already use the exact persisted scope_key.  Keep
+        # every overlay mutation in that same occurrence scope: removals use
+        # the immutable old row, while additions use the accepted/replacement
+        # final row.  This lets one curation move across scope boundaries
+        # without deleting or adding the wrong side.
+        generic_candidate_rows = list(_ranking_scope_rows(
+            generic_candidate_rows, options,
+        ))
+        generic_replacement_rows = list(_ranking_scope_rows(
+            generic_replacement_rows, options,
+        ))
+        generic_reset_changes = list(_ranking_scope_rows(
+            generic_reset_changes, options,
+        ))
+        generic_runtime_changes = list(_ranking_scope_rows(
+            generic_runtime_changes, options,
+        ))
     if options["searchTokens"] and options["view"] != "vtubers":
         generic_candidate_rows = [
             row for row in generic_candidate_rows
@@ -9223,6 +10054,7 @@ def _prepare_generic_overlay_rankings(
             # metric/filter combinations for the same exact video set.
             generic_runtime_changes,
             range_id=options["range"],
+            options=options,
             parent_count_cache=snapshot_original_group_counts,
         )
     phase_started = _phase_trace(
@@ -9238,16 +10070,22 @@ def _prepare_generic_overlay_rankings(
     # remains in ``runtime_changes`` and is deliberately applied afterwards.
     reset_group_counts: dict[tuple[str, str, str], int] = defaultdict(int)
     for change in generic_reset_changes:
+        reset_title_key, reset_artist_key = (
+            _runtime_change_song_group_identity(change)
+        )
         reset_group_counts[(
             _text(change.get("videoId")),
-            _overlay_song_group_norm(change.get("title")),
-            _overlay_song_group_norm(change.get("artist")),
+            reset_title_key,
+            reset_artist_key,
         )] += 1
     for change in generic_reset_changes:
+        reset_title_key, reset_artist_key = (
+            _runtime_change_song_group_identity(change)
+        )
         change["originalGroupVideoOccurrenceCount"] = reset_group_counts[(
             _text(change.get("videoId")),
-            _overlay_song_group_norm(change.get("title")),
-            _overlay_song_group_norm(change.get("artist")),
+            reset_title_key,
+            reset_artist_key,
         )]
     # The VTuber exact aggregate below owns both sides of every reset/move.
     # Applying the bounded generic mutation here would make the caller replay
@@ -9314,7 +10152,9 @@ def _prepare_generic_overlay_rankings(
                 ) in replacement_identities
             )
         )
-    clicked_song_candidate_rows = tuple(candidate_rows)
+    clicked_song_candidate_rows = tuple(generic_candidate_rows)
+    candidate_rows = list(generic_candidate_rows)
+    replacement_rows = list(generic_replacement_rows)
     if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
         candidate_rows = [*candidate_rows, *replacement_rows]
     elif options["view"] == "artists":
@@ -9425,8 +10265,8 @@ def _prepare_generic_overlay_rankings(
         _reconcile_affected_song_counts(
             connection,
             parent[0],
-            all_candidate_rows,
-            replacement_rows,
+            generic_candidate_rows,
+            generic_replacement_rows,
             [*generic_reset_changes, *generic_runtime_changes],
             groups,
             options["view"],
@@ -10469,6 +11309,8 @@ def _render_generic_overlay_rankings(
                 options["range"],
                 excluded_video_ids=overlay_preview_excluded_video_ids,
                 excluded_occurrence_ids=preview_excluded_occurrence_ids,
+                niche_only=bool(options.get("nicheOnly")),
+                hide_unknown_artist=bool(options.get("hideUnknownArtist")),
             )
             for channel_id, preview in overlay_previews.items():
                 records_by_channel[channel_id]["occurrences"] = [preview]
@@ -11546,11 +12388,16 @@ def _entity_groups(records: Iterable[Mapping[str, Any]], query: Mapping[str, Any
     view = query["view"]
     grouped: dict[str, dict[str, Any]] = {}
     for record in records:
-        occurrences = [occurrence for occurrence in _occurrences_for_range(record, range_id) if _matches(occurrence, query, ("title", "artist", "channel", "video", "source"))]
-        if query.get("nicheOnly"):
-            occurrences = [occurrence for occurrence in occurrences if occurrence["song"].get("isNiche") is True]
-        if query.get("hideUnknownArtist"):
-            occurrences = [occurrence for occurrence in occurrences if _text(occurrence["song"].get("artist"))]
+        occurrences = [
+            occurrence
+            for occurrence in _occurrences_for_range(record, range_id)
+            if _matches(
+                occurrence,
+                query,
+                ("title", "artist", "channel", "video", "source"),
+            )
+            and _occurrence_matches_ranking_scope(occurrence["song"], query)
+        ]
         if view == "videos":
             key = _text(record["video"].get("videoId"))
             if not key or not occurrences:
@@ -12155,6 +13002,10 @@ def _runtime_source_occurrence(row: Mapping[str, Any]) -> dict[str, Any]:
     for name, value in fields.items():
         if name not in item and (value is not None or name == "seconds"):
             item[name] = value
+    if "isNiche" not in item and "is_niche" in row:
+        item["isNiche"] = row.get("is_niche") is True
+    if "isUnknownArtist" not in item and "is_unknown_artist" in row:
+        item["isUnknownArtist"] = row.get("is_unknown_artist") is True
     for name in ("thumbnailUrl", "videoThumbnailUrl", "avatarUrl"):
         if name not in item and nested_video.get(name) is not None:
             item[name] = nested_video[name]
@@ -12174,7 +13025,8 @@ def _runtime_source_occurrences(connection, revision_id: str, key: str, range_id
         connection,
         """
         SELECT position, video_id, title, channel_name, channel_id, channel_handle,
-               channel_url, published_timestamp, seconds, payload_json
+               channel_url, published_timestamp, seconds, is_niche,
+               is_unknown_artist, payload_json
         FROM runtime_source_occurrences
         WHERE revision_id = %s AND source_key = %s AND range_id = %s
         ORDER BY position
@@ -12240,6 +13092,8 @@ def _runtime_source_table_page(
     revision_id: str,
     key: str,
     query: Mapping[str, Any] | None = None,
+    *,
+    entity_type: str = "",
 ) -> dict[str, Any]:
     """Read one bounded page from one authoritative physical source revision."""
 
@@ -12250,9 +13104,14 @@ def _runtime_source_table_page(
     if options["q"]:
         search_predicate = " AND search_text ILIKE %s ESCAPE E'\\\\'"
         search_params.append(f"%{_escape_source_search_pattern(options['q'])}%")
+    scope_predicate = ""
+    if options["nicheOnly"]:
+        scope_predicate += " AND is_niche IS TRUE"
+    if options["hideUnknownArtist"]:
+        scope_predicate += " AND is_unknown_artist IS NOT TRUE"
     where = (
         "revision_id = %s AND source_key = %s AND range_id = %s"
-        + search_predicate
+        + search_predicate + scope_predicate
     )
     where_params: list[Any] = [revision_id, key, options["range"], *search_params]
     summary_rows = _rows(
@@ -12306,7 +13165,7 @@ def _runtime_source_table_page(
             f"""
             SELECT position, video_id, title, channel_name, channel_id,
                    channel_handle, channel_url, published_timestamp, seconds,
-                   search_text, payload_json
+                   is_niche, is_unknown_artist, search_text, payload_json
             FROM runtime_source_occurrences
             WHERE {where} AND video_id = ANY(%s::text[])
             ORDER BY position, video_id
@@ -12321,6 +13180,61 @@ def _runtime_source_table_page(
     if len(occurrence_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
         raise PostgresAdapterError("source page occurrence lookup exceeded bounded cap")
     occurrences = [_runtime_source_occurrence(row) for row in occurrence_rows]
+    canonical_songs: list[dict[str, Any]] | None = None
+    if entity_type == "vtuber":
+        title_rows = _rows(
+            connection,
+            f"""
+            WITH titled AS (
+              SELECT coalesce(
+                       payload_json::jsonb->'song'->>'title',
+                       payload_json::jsonb->'payload'->'song'->>'title',
+                       payload_json::jsonb->>'songTitle',
+                       payload_json::jsonb->'payload'->>'songTitle'
+                     ) AS song_title
+              FROM runtime_source_occurrences
+              WHERE {where}
+            )
+            SELECT song_title, count(*) AS occurrence_count
+            FROM titled
+            GROUP BY song_title
+            ORDER BY song_title
+            LIMIT %s
+            """,
+            [*where_params, _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1],
+        )
+        if len(title_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+            raise PostgresAdapterError(
+                "source canonical title aggregation exceeded bounded cap"
+            )
+        canonical_by_key: dict[str, dict[str, Any]] = {}
+        title_total = 0
+        for row in title_rows:
+            raw_title = _text(row.get("song_title"))
+            count = int(row.get("occurrence_count") or 0)
+            if not raw_title or count <= 0:
+                raise PostgresAdapterError(
+                    "source canonical title aggregation is invalid"
+                )
+            title_total += count
+            canonical_name, canonical_key = _vtuber_canonical_song_identity(
+                raw_title
+            )
+            if not canonical_key:
+                continue
+            entry = canonical_by_key.setdefault(
+                canonical_key,
+                {"key": canonical_key, "name": canonical_name, "count": 0},
+            )
+            entry["count"] = int(entry["count"]) + count
+        if title_total != total_occurrence_count:
+            raise PostgresAdapterError(
+                "source canonical titles disagree with filtered occurrences"
+            )
+        canonical_songs = sorted(
+            canonical_by_key.values(),
+            key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
+        )
     record = {
         "sourceDetailKey": key,
         "rangeId": options["range"],
@@ -12332,6 +13246,9 @@ def _runtime_source_table_page(
         "sourceFilterQuery": options["q"],
         "occurrencePreviewLimited": total_occurrence_count > len(occurrences),
     }
+    if canonical_songs is not None:
+        record["songs"] = canonical_songs
+        record["songCount"] = len(canonical_songs)
     response: dict[str, Any] = {
         "schemaVersion": 1,
         "found": True,
@@ -12347,6 +13264,8 @@ def _runtime_source_table_page(
             "totalVideoCount": total_video_count,
             "totalOccurrenceCount": total_occurrence_count,
         })
+        if canonical_songs is not None:
+            response["totalSongCount"] = len(canonical_songs)
     return response
 
 
@@ -12367,7 +13286,7 @@ def _runtime_source_payload(
     rows = _rows(
         connection,
         """
-        SELECT revision_id, range_id, payload_json
+        SELECT revision_id, range_id, entity_type, payload_json
         FROM runtime_source_details
         WHERE revision_id::text = ANY(%s::text[])
           AND source_key = %s AND range_id = %s
@@ -12396,6 +13315,7 @@ def _runtime_source_payload(
     record = _json_object(rows[0].get("payload_json"))
     paged = _runtime_source_table_page(
         connection, detail_revision_id, key, raw_query,
+        entity_type=_text(rows[0].get("entity_type") or record.get("type")),
     )
     if paged.get("found"):
         result = dict(paged)
@@ -12448,6 +13368,11 @@ def _runtime_source_payload(
             item for item in embedded
             if options["q"] in json.dumps(item, ensure_ascii=False).casefold()
         ]
+    embedded = [
+        item
+        for item in embedded
+        if _occurrence_matches_ranking_scope(item, options)
+    ]
     video_keys: list[str] = []
     seen_video_keys: set[str] = set()
     for item in embedded:
@@ -12525,6 +13450,15 @@ def _overlay_source_record(row: Mapping[str, Any]) -> dict[str, Any] | None:
         "sourceId": occurrence.get("sourceId") or row.get("source_id"),
         "sourceSystem": occurrence.get("sourceSystem") or row.get("source_system"),
     })
+    for public_name, camel_name, snake_name in (
+        ("isNiche", "isNiche", "is_niche"),
+        ("isUnknownArtist", "isUnknownArtist", "is_unknown_artist"),
+    ):
+        if public_name in occurrence and occurrence.get(public_name) is not None:
+            continue
+        value = _scope_boolean_flag(row, camel_name, snake_name)
+        if value is not None:
+            occurrence[public_name] = value
     return {"video": video, "occurrences": (occurrence,)}
 
 
@@ -12620,7 +13554,14 @@ def _source_records_as_occurrences(
             occurrences.append(item)
         projected = {"video": video, "occurrences": tuple(occurrences)}
         for item in _occurrences_for_range(projected, options["range"]):
-            if _matches(item, options, ("title", "artist", "channel", "video", "source")):
+            if (
+                _matches(
+                    item,
+                    options,
+                    ("title", "artist", "channel", "video", "source"),
+                )
+                and _occurrence_matches_ranking_scope(item["song"], options)
+            ):
                 values.append(item)
     return values
 

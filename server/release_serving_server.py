@@ -32,7 +32,7 @@ from typing import Any, Iterable, Mapping, Sequence
 from urllib.parse import parse_qs, unquote, urlparse
 
 SERVER_API_VERSION=3
-SERVING_SCHEMA_VERSION=3
+SERVING_SCHEMA_VERSION=4
 CHUNK_SIZE=200
 MAX_PAGE_SIZE=200
 SHA_RE=re.compile(r"^[0-9a-f]{64}$")
@@ -465,32 +465,37 @@ class ReleaseStore:
         self.require_ready(sha);range_id=qvalue(query,"range","all");page=qpagination(query,"page",1,maximum=10_000_000);page_size=qpagination(query,"pageSize",20,maximum=MAX_PAGE_SIZE)
         q=qvalue(query,"q").casefold();niche=qbool(query,"nicheOnly");hide_unknown=qbool(query,"hideUnknownArtist")
         with closing(self.open_db(sha)) as connection:
-            detail=connection.execute("SELECT payload_json FROM source_details WHERE range_id=? AND source_key=?",(range_id,source_key)).fetchone()
+            detail=connection.execute("SELECT entity_type,payload_json FROM source_details WHERE range_id=? AND source_key=?",(range_id,source_key)).fetchone()
             if detail is None:raise ApiError(404,"source_not_found_in_local_release","source key missing from local release",range=range_id,sourceKey=source_key,releaseSha=sha)
             conditions=["range_id=?","source_key=?"];params:list[Any]=[range_id,source_key]
             if niche:conditions.append("is_niche=1")
             if hide_unknown:conditions.append("is_unknown_artist=0")
             if q:conditions.append("lower(search_text) LIKE lower(?) ESCAPE '\\'");params.append(f"%{like_escape(q)}%")
             where=" AND ".join(conditions)
-            summary=connection.execute(f"SELECT count(*),count(DISTINCT video_id) FROM source_occurrences WHERE {where}",params).fetchone()
-            total_occ=int(summary[0] or 0);total_videos=int(summary[1] or 0);page_count=max(1,math.ceil(total_videos/page_size));page=min(page,page_count)
+            summary=connection.execute(f"SELECT count(*),count(DISTINCT video_id),count(DISTINCT nullif(canonical_song_key,'')) FROM source_occurrences WHERE {where}",params).fetchone()
+            total_occ=int(summary[0] or 0);total_videos=int(summary[1] or 0);total_songs=int(summary[2] or 0);page_count=max(1,math.ceil(total_videos/page_size));page=min(page,page_count)
             video_ids=[str(r[0] or "") for r in connection.execute(f"SELECT video_id FROM source_occurrences WHERE {where} GROUP BY video_id ORDER BY min(position),video_id LIMIT ? OFFSET ?",(*params,page_size,(page-1)*page_size))]
             rows=[]
             if video_ids:
                 placeholders=",".join("?" for _ in video_ids)
                 rows=connection.execute(f"SELECT video_id,title,channel_name,channel_id,channel_handle,channel_url,published_timestamp,seconds,payload_json FROM source_occurrences WHERE {where} AND video_id IN ({placeholders}) ORDER BY position,video_id",(*params,*video_ids)).fetchall()
-            occurrences=[normalize_occurrence(r) for r in rows];record=json_object(detail["payload_json"])
+            occurrences=[normalize_occurrence(r) for r in rows];record=json_object(detail["payload_json"]);entity_type=str(detail["entity_type"] or "")
+            if entity_type in {"vtuber","song","artist","video"}:
+                song_rows=connection.execute(f"SELECT canonical_song_key,min(canonical_song_name) AS canonical_song_name,count(*) AS occurrence_count,count(DISTINCT canonical_song_name) AS name_count FROM source_occurrences WHERE {where} AND canonical_song_key<>'' GROUP BY canonical_song_key ORDER BY occurrence_count DESC,canonical_song_name,canonical_song_key",params).fetchall()
+                if any(not str(row[0] or "") or not str(row[1] or "") or int(row[2] or 0)<=0 or (entity_type=="vtuber" and int(row[3] or 0)!=1) for row in song_rows):raise ApiError(503,"source_song_identity_invalid","source canonical song identity is inconsistent",sourceKey=source_key,range=range_id)
+                if len(song_rows)!=total_songs:raise ApiError(503,"source_song_count_mismatch","source canonical song count is inconsistent",sourceKey=source_key,range=range_id)
+                record["songs"]=[{"key":str(row[0]),"name":str(row[1]),"count":int(row[2])} for row in song_rows]
             record.update({"sourceDetailKey":source_key,"rangeId":range_id,"occurrences":occurrences,"count":total_occ,
-                           "occurrenceCount":total_occ,"timestampCount":total_occ,"videoCount":total_videos,"sourceFilterQuery":q,
+                           "occurrenceCount":total_occ,"timestampCount":total_occ,"videoCount":total_videos,"songCount":total_songs,"sourceFilterQuery":q,
                            "occurrencePreviewLimited":total_occ>len(occurrences)})
             return {"schemaVersion":1,"found":True,"sourceKey":source_key,"sourceRevisionId":self.meta(sha).get("activeRevisionId",""),
                     "record":record,"page":page,"pageSize":page_size,"pageCount":page_count,"totalCount":total_videos,
-                    "totalVideoCount":total_videos,"totalOccurrenceCount":total_occ}
+                    "totalVideoCount":total_videos,"totalOccurrenceCount":total_occ,"totalSongCount":total_songs}
 
 
 def make_handler(store:ReleaseStore)->type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
-        server_version="daily-song-list-release-serving/3";protocol_version="HTTP/1.1"
+        server_version="daily-song-list-release-serving/4";protocol_version="HTTP/1.1"
         def log_message(self,format:str,*args:Any)->None:sys.stderr.write("%s - - [%s] %s\n"%(self.address_string(),self.log_date_time_string(),format%args))
         def do_GET(self)->None:
             started=time.monotonic();request_id=self.headers.get("X-Request-Id","")
