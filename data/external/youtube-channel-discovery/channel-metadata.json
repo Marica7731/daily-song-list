@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T08:34:27.321Z",
+  "generatedAt": "2026-08-13T10:22:37.714Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T08:34:27.321Z",
+    "fetchedAt": "2026-08-13T10:22:37.714Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T08:34:27.321Z",
+    "generatedAt": "2026-08-13T10:22:37.714Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1142,
-      "parseableChannels": 1123,
+      "totalChannels": 1144,
+      "parseableChannels": 1125,
       "realAvatar": 649,
-      "thumbnailFallback": 493,
+      "thumbnailFallback": 495,
       "missingDisplayImage": 0,
-      "missingAvatar": 493,
+      "missingAvatar": 495,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 663,
+      "skipped_collected_evidence": 665,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 644,
+      "batch_limit_reached": 646,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
+        "channelId": "UCgGy3QyrsbmXcLDZJGDOKBQ",
+        "displayName": "白汰まゆのへや𓂃𓈒𓏸",
+        "sourceUrl": "https://www.youtube.com/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@TukuneDuck",
         "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCQ4X4yfqgSVmOTBBpiIqWVQ",
         "displayName": "柾花音のまかのんずるーむ【Makanon's Room】",
         "sourceUrl": "https://www.youtube.com/@makanons_room",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KaguraTomyoji",
-        "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
-        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
-        "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
         "reason": "batch_limit_reached"
       }
     ]
