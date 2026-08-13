@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T20:59:49.642Z",
+  "generatedAt": "2026-08-13T22:02:23.777Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T20:59:49.642Z",
+    "fetchedAt": "2026-08-13T22:02:23.777Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T20:59:49.642Z",
+    "generatedAt": "2026-08-13T22:02:23.777Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1149,
-      "parseableChannels": 1130,
+      "totalChannels": 1151,
+      "parseableChannels": 1132,
       "realAvatar": 649,
-      "thumbnailFallback": 500,
+      "thumbnailFallback": 502,
       "missingDisplayImage": 0,
-      "missingAvatar": 500,
+      "missingAvatar": 502,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 669
+      "skipped_collected_evidence": 671
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 650,
+      "batch_limit_reached": 652,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Shoncho_Tofu",
+        "channelId": "UCkfAkgtsDLCt66zWjjppeXQ",
+        "displayName": "白噛ましゅー(村長)",
+        "sourceUrl": "https://www.youtube.com/@Shoncho_Tofu",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@teikobonbonch3548",
         "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
@@ -11842,13 +11849,6 @@
         "channelId": "UCaZqsFn0wJRpluZiK-GU70w",
         "displayName": "小白井そふと -Koshirai Sofuto-",
         "sourceUrl": "https://www.youtube.com/@KoshiraiSofuto",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
-        "channelId": "UC4woRHLSPSz3sAr10XIJK2Q",
-        "displayName": "かわよき なめ🐾💫",
-        "sourceUrl": "https://www.youtube.com/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
         "reason": "batch_limit_reached"
       }
     ]
