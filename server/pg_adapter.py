@@ -534,6 +534,62 @@ def _rows(connection, sql: str, params: Sequence[Any] = ()) -> list[dict[str, An
             close()
 
 
+def _iter_bounded_query_rows(
+    connection,
+    sql: str,
+    params: Sequence[Any] = (),
+    *,
+    batch_size: int = 5_000,
+) -> Iterable[dict[str, Any]]:
+    """Stream one bounded query inside snapshot transactions.
+
+    PostgreSQL result grouping can legitimately return hundreds of thousands
+    of small scalar rows.  ``fetchall()`` then retains the driver's tuples and
+    a second Python dict copy at the same time.  Snapshot materialization owns
+    an explicit transaction, so use a named cursor there and keep only one
+    bounded batch resident.  Online autocommit calls and lightweight test
+    doubles retain the ordinary finite ``_rows`` path.
+    """
+
+    if batch_size <= 0:
+        raise ValueError("stream batch size must be positive")
+    streaming_cursor = None
+    if getattr(connection, "autocommit", True) is False:
+        try:
+            streaming_cursor = connection.cursor(
+                name=(
+                    f"dsl_bounded_{threading.get_ident()}_"
+                    f"{time.monotonic_ns()}"
+                )
+            )
+        except TypeError:
+            # Lightweight adapters/test doubles may expose only cursor().
+            streaming_cursor = None
+    if streaming_cursor is None:
+        yield from _rows(connection, sql, params)
+        return
+
+    try:
+        if hasattr(streaming_cursor, "itersize"):
+            streaming_cursor.itersize = batch_size
+        streaming_cursor.execute(sql, params)
+        description = streaming_cursor.description or ()
+        names = [
+            column.name if hasattr(column, "name") else column[0]
+            for column in description
+        ]
+        while True:
+            values = streaming_cursor.fetchmany(batch_size)
+            if not values:
+                return
+            for value in values:
+                yield dict(zip(names, value))
+    finally:
+        close = getattr(streaming_cursor, "close", None)
+        if close:
+            close()
+
+
 def _one(connection, sql: str, params: Sequence[Any] = ()) -> dict[str, Any] | None:
     rows = _rows(connection, sql, params)
     return rows[0] if rows else None
@@ -2185,18 +2241,28 @@ def _overlay_video_projection(value: Any) -> dict[str, Any]:
     """Keep the accepted video identity when a runtime occurrence is replaced."""
 
     source = _json_object(value)
+    scalar_source = source
     for name in ("videoPayload", "video_payload", "video", "item"):
         candidate = source.get(name)
         if isinstance(candidate, Mapping):
-            return dict(candidate)
+            source = candidate
+            break
     fields = (
         "videoId", "title", "channelId", "channelName", "channelHandle",
-        "channelUrl", "thumbnailUrl", "publishedAt", "publishedTimestamp",
+        "channelUrl", "thumbnailUrl", "videoThumbnailUrl", "avatarUrl",
+        "sourceUrl", "sourceSystem", "publishedAt", "publishedTimestamp",
     )
     return {
-        name: source[name]
+        name: (
+            source[name]
+            if name in source and source[name] is not None
+            else scalar_source[name]
+        )
         for name in fields
-        if name in source and source[name] is not None
+        if (
+            (name in source and source[name] is not None)
+            or (name in scalar_source and scalar_source[name] is not None)
+        )
     }
 
 
@@ -7065,14 +7131,45 @@ def _authoritative_vtuber_summary_rows(
 ) -> list[dict[str, Any]]:
     """Apply bounded overlay deltas to persisted VTuber source authority."""
 
+    snapshot_compact_cards = bool(
+        options and options.get("_snapshotCompactCards")
+    )
+    snapshot_song_search_max_chars = int(
+        options.get("_snapshotSongSearchMaxChars") or 0
+        if options
+        else 0
+    )
+    if snapshot_compact_cards and not (
+        1 <= snapshot_song_search_max_chars <= 1_048_576
+    ):
+        raise PostgresAdapterError(
+            "snapshot VTuber song search bound is invalid"
+        )
+    scoped = bool(
+        options
+        and (
+            bool(options.get("nicheOnly"))
+            or bool(options.get("hideUnknownArtist"))
+        )
+    )
     source_values = [
         {"channel_id": channel_id, "source_key": source_key}
         for channel_id, source_key in sorted(parent_sources.items())
         if channel_id and source_key
     ]
+    # Filtered scopes rebuild their canonical multiset from physical source
+    # rows below.  Do not deserialize the much larger unfiltered ``songs``
+    # arrays merely to throw them away; PostgreSQL returns their scalar guards
+    # and a payload with only that array removed.  The unfiltered path keeps
+    # the full canonical multiset because it is the delta base.
+    detail_payload_select = (
+        "detail.payload_json::jsonb - 'songs'"
+        if scoped
+        else "detail.payload_json"
+    )
     detail_rows = _rows(
         connection,
-        """
+        f"""
         /* bounded authoritative VTuber parent details */
         WITH requested AS MATERIALIZED (
           SELECT channel_id, source_key
@@ -7080,13 +7177,45 @@ def _authoritative_vtuber_summary_rows(
             AS item(channel_id text, source_key text)
         )
         SELECT requested.channel_id, requested.source_key,
-               detail.entity_key, detail.payload_json
+               detail.entity_key,
+               {detail_payload_select} AS payload_json,
+               (jsonb_typeof(coalesce(
+                  detail.payload_json::jsonb->'songs', '[]'::jsonb
+                )) = 'array') AS songs_is_array,
+               song_stats.song_array_count,
+               song_stats.distinct_song_key_count,
+               song_stats.song_occurrence_count,
+               song_stats.invalid_song_count
         FROM requested
         JOIN runtime_source_details AS detail
           ON detail.revision_id = %s
          AND detail.source_key = requested.source_key
          AND detail.range_id = %s
          AND detail.entity_type = 'vtuber'
+        CROSS JOIN LATERAL (
+          SELECT count(*) AS song_array_count,
+                 count(DISTINCT nullif(btrim(song->>'key'), ''))
+                   AS distinct_song_key_count,
+                 coalesce(sum(
+                   CASE
+                     WHEN coalesce(song->>'count', '') ~ '^[1-9][0-9]*$'
+                     THEN (song->>'count')::bigint
+                     ELSE 0
+                   END
+                 ), 0) AS song_occurrence_count,
+                 count(*) FILTER (
+                   WHERE nullif(btrim(song->>'key'), '') IS NULL
+                      OR nullif(btrim(song->>'name'), '') IS NULL
+                      OR coalesce(song->>'count', '') !~ '^[1-9][0-9]*$'
+                 ) AS invalid_song_count
+          FROM jsonb_array_elements(
+            CASE
+              WHEN jsonb_typeof(detail.payload_json::jsonb->'songs') = 'array'
+              THEN detail.payload_json::jsonb->'songs'
+              ELSE '[]'::jsonb
+            END
+          ) AS item(song)
+        ) AS song_stats
         ORDER BY requested.channel_id
         LIMIT %s
         """,
@@ -7107,7 +7236,7 @@ def _authoritative_vtuber_summary_rows(
     }
     base_counts: dict[str, int] = {}
     base_videos: dict[str, int] = {}
-    base_songs: dict[str, dict[str, dict[str, Any]]] = {}
+    base_songs: dict[str, dict[str, tuple[str, int]]] = {}
     authority_counts: dict[str, int] = {}
     authority_videos: dict[str, int] = {}
     for row in detail_rows:
@@ -7128,7 +7257,7 @@ def _authoritative_vtuber_summary_rows(
             or 0
         )
         video_count = int(payload.get("videoCount") or 0)
-        songs: dict[str, dict[str, Any]] = {}
+        songs: dict[str, tuple[str, int]] = {}
         for value in payload.get("songs") or ():
             if not isinstance(value, Mapping):
                 raise PostgresAdapterError(
@@ -7141,13 +7270,42 @@ def _authoritative_vtuber_summary_rows(
                 raise PostgresAdapterError(
                     "VTuber parent source song counts are invalid"
                 )
-            songs[key] = {"key": key, "name": name, "count": count}
+            songs[key] = (name, count)
+        song_array_count = int(
+            row.get("song_array_count")
+            if row.get("song_array_count") is not None
+            else len(songs)
+        )
+        distinct_song_key_count = int(
+            row.get("distinct_song_key_count")
+            if row.get("distinct_song_key_count") is not None
+            else len(songs)
+        )
+        song_occurrence_count = int(
+            row.get("song_occurrence_count")
+            if row.get("song_occurrence_count") is not None
+            else sum(int(item[1]) for item in songs.values())
+        )
+        invalid_song_count = int(row.get("invalid_song_count") or 0)
+        songs_is_array = (
+            bool(row.get("songs_is_array"))
+            if row.get("songs_is_array") is not None
+            else isinstance(payload.get("songs", []), list)
+        )
+        declared_song_count = int(
+            payload.get("songCount")
+            if payload.get("songCount") is not None
+            else song_array_count
+        )
         if (
             occurrence_count <= 0
             or video_count <= 0
-            or len(songs) != int(payload.get("songCount") or len(songs))
-            or sum(int(item["count"]) for item in songs.values())
-                > occurrence_count
+            or not songs_is_array
+            or song_array_count != declared_song_count
+            or distinct_song_key_count != song_array_count
+            or invalid_song_count != 0
+            or song_occurrence_count > occurrence_count
+            or (not scoped and len(songs) != song_array_count)
         ):
             raise PostgresAdapterError(
                 "VTuber parent source aggregate is not internally consistent"
@@ -7159,13 +7317,6 @@ def _authoritative_vtuber_summary_rows(
         authority_videos[channel_id] = video_count
 
     source_keys = sorted(channel_by_source)
-    scoped = bool(
-        options
-        and (
-            bool(options.get("nicheOnly"))
-            or bool(options.get("hideUnknownArtist"))
-        )
-    )
     if scoped:
         # A parent detail stores only its unfiltered canonical multiset.  For a
         # persisted filter scope, aggregate the exact physical source rows by
@@ -7204,7 +7355,7 @@ def _authoritative_vtuber_summary_rows(
         totals_by_source = {
             _text(row.get("source_key")): row for row in scope_totals
         }
-        title_rows = _rows(
+        title_rows = _iter_bounded_query_rows(
             connection,
             """
             /* indexed scoped authoritative VTuber canonical title counts */
@@ -7232,14 +7383,17 @@ def _authoritative_vtuber_summary_rows(
                 bool(options.get("hideUnknownArtist")),
                 _MAX_UNSCOPED_OVERLAY_OCCURRENCES + 1,
             ],
-        ) if source_keys else []
-        if len(title_rows) > _MAX_UNSCOPED_OVERLAY_OCCURRENCES:
-            raise PostgresAdapterError(
-                "VTuber scoped canonical title aggregation exceeded bounded cap"
-            )
-        scoped_songs: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
+            batch_size=_AFFECTED_RECONCILIATION_BATCH_SIZE,
+        ) if source_keys else ()
+        scoped_songs: dict[str, dict[str, tuple[str, int]]] = defaultdict(dict)
         scoped_title_counts: dict[str, int] = defaultdict(int)
+        title_row_count = 0
         for row in title_rows:
+            title_row_count += 1
+            if title_row_count > _MAX_UNSCOPED_OVERLAY_OCCURRENCES:
+                raise PostgresAdapterError(
+                    "VTuber scoped canonical title aggregation exceeded bounded cap"
+                )
             source_key = _text(row.get("source_key"))
             channel_id = channel_by_source.get(source_key, "")
             raw_title = _text(row.get("song_title"))
@@ -7253,11 +7407,14 @@ def _authoritative_vtuber_summary_rows(
             )
             canonical_title = canonical_title or raw_title
             if canonical_key:
-                entry = scoped_songs[channel_id].setdefault(
+                previous_name, previous_count = scoped_songs[channel_id].get(
                     canonical_key,
-                    {"key": canonical_key, "name": canonical_title, "count": 0},
+                    (canonical_title, 0),
                 )
-                entry["count"] = int(entry["count"]) + count
+                scoped_songs[channel_id][canonical_key] = (
+                    previous_name,
+                    previous_count + count,
+                )
             scoped_title_counts[channel_id] += count
         for source_key, channel_id in channel_by_source.items():
             total = totals_by_source.get(source_key)
@@ -7534,11 +7691,15 @@ def _authoritative_vtuber_summary_rows(
 
     summaries: list[dict[str, Any]] = []
     for channel_id in sorted(affected_channel_ids):
-        counts = copy.deepcopy(base_songs.get(channel_id, {}))
+        # Values are immutable ``(name, count)`` tuples.  One shallow dict
+        # copy is sufficient for channel-local deltas and avoids duplicating
+        # hundreds of thousands of tiny three-field dictionaries in filtered
+        # snapshot scopes.
+        counts = dict(base_songs.get(channel_id, {}))
         row_count = int(base_counts.get(channel_id, 0))
         video_count = int(base_videos.get(channel_id, 0))
         unkeyed_count = row_count - sum(
-            int(item["count"]) for item in counts.values()
+            int(item[1]) for item in counts.values()
         )
         if unkeyed_count < 0:
             raise PostgresAdapterError(
@@ -7586,41 +7747,57 @@ def _authoritative_vtuber_summary_rows(
                     raise PostgresAdapterError(
                         "VTuber source removal lacks a canonical parent song"
                     )
-                entry = {
-                    "key": key,
-                    "name": item["canonical_title"],
-                    "count": 0,
-                }
-                counts[key] = entry
-            entry["count"] = int(entry["count"]) + delta
-            if int(entry["count"]) < 0:
+                entry = (item["canonical_title"], 0)
+            name, previous_count = entry
+            next_count = int(previous_count) + delta
+            if next_count < 0:
                 raise PostgresAdapterError(
                     "VTuber canonical song delta became negative"
                 )
+            counts[key] = (name, next_count)
         effective_songs = {
             key: item for key, item in counts.items()
-            if int(item["count"]) > 0
+            if int(item[1]) > 0
         }
         if (
             row_count < 0
             or video_count < 0
-            or sum(int(item["count"]) for item in effective_songs.values())
+            or sum(int(item[1]) for item in effective_songs.values())
                 + unkeyed_count != row_count
         ):
             raise PostgresAdapterError(
                 "VTuber authoritative overlay summary is not internally consistent"
             )
-        summaries.append({
+        sorted_songs = sorted(
+            effective_songs.items(),
+            key=lambda item: (
+                -int(item[1][1]), _overlay_norm(item[1][0])
+            ),
+        )
+        summary = {
             "channel_id": channel_id,
             "row_count": row_count,
             "video_count": video_count,
             "song_count": len(effective_songs),
-            "songs": sorted(
-                effective_songs.values(),
-                key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
-            ),
             "residual_match": True,
-        })
+        }
+        if snapshot_compact_cards:
+            fragments: list[str] = []
+            remaining = snapshot_song_search_max_chars
+            for _, (name, _) in sorted_songs:
+                fragment = _text(name)
+                if not fragment or remaining <= 0:
+                    break
+                fragment = fragment[:remaining]
+                fragments.append(fragment)
+                remaining -= len(fragment) + 1
+            summary["_snapshotSongSearchText"] = " ".join(fragments)
+        else:
+            summary["songs"] = [
+                {"key": key, "name": name, "count": count}
+                for key, (name, count) in sorted_songs
+            ]
+        summaries.append(summary)
     return summaries
 
 
@@ -8617,6 +8794,17 @@ def _overlay_vtuber_replacement_rows(
             })
             if isinstance(summary.get("songs"), list):
                 payload["songs"] = copy.deepcopy(summary["songs"])
+            else:
+                payload.pop("songs", None)
+            snapshot_song_search_text = _text(
+                summary.get("_snapshotSongSearchText")
+            )
+            if snapshot_song_search_text:
+                payload["_snapshotSongSearchText"] = (
+                    snapshot_song_search_text
+                )
+            else:
+                payload.pop("_snapshotSongSearchText", None)
             exact[channel_id] = {
                 "detail_key": channel_id,
                 "title": "",

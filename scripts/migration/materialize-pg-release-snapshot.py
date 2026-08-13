@@ -877,9 +877,47 @@ def _release_ranking_combo_memory(
     view: str,
     metric: str,
     scope_key: str,
+    builder: Any | None = None,
 ) -> None:
     """Release one prepared ranking aggregate before building the next one."""
 
+    # Snapshot combinations are strictly serial and immutable.  Online cache
+    # reuse is useful for concurrent page requests, but retaining a prior
+    # VTuber scope's nested canonical-song payload while constructing the next
+    # scope can exceed the isolated 700 MiB builder limit.  Drop only the two
+    # recomputable payload caches here; the builder's small scalar/source
+    # authority caches remain available for the rest of the snapshot.
+    if view == "vtubers":
+        # This list contains one mutable dictionary per persisted reset
+        # occurrence.  Preparation enriches those dictionaries with
+        # scope-specific group counts and channel evidence.  Retaining the
+        # enriched list across the next scope both raises the baseline by
+        # hundreds of MiB and lets per-scope fields accumulate.  Rebuild the
+        # bounded list for the next scope; keep the tiny verified physical
+        # source-total cache on the builder.
+        reset_cache = getattr(builder, "snapshot_reset_changes", None)
+        if isinstance(reset_cache, dict):
+            reset_cache.clear()
+        reconciliation_cache = getattr(builder, "reconciliation_counts", None)
+        if isinstance(reconciliation_cache, dict):
+            reconciliation_cache.clear()
+        for cache_name, lock_name in (
+            ("_VTUBER_REPLACEMENT_CACHE", "_VTUBER_REPLACEMENT_CACHE_LOCK"),
+            (
+                "_GENERIC_RANKING_PREPARATION_CACHE",
+                "_GENERIC_RANKING_PREPARATION_LOCK",
+            ),
+        ):
+            cache = getattr(adapter, cache_name, None)
+            lock = getattr(adapter, lock_name, None)
+            clear = getattr(cache, "clear", None)
+            if not callable(clear):
+                continue
+            if lock is None:
+                clear()
+            else:
+                with lock:
+                    clear()
     trimmed = _trim_process_heap()
     rss_kib = _current_rss_kib()
     swap_kib = _current_swap_kib()
@@ -887,6 +925,60 @@ def _release_ranking_combo_memory(
         f"PG_SNAPSHOT_COMBO_RELEASE {range_id}/{view}/{metric}/{scope_key} "
         f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
         f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
+        f"trimmed={int(trimmed)}",
+        flush=True,
+    )
+
+
+def _release_completed_ranking_view_memory(
+    builder: Any,
+    *,
+    range_id: str,
+    view: str,
+) -> None:
+    """Drop caches whose keys cannot be read by a later ranking view.
+
+    The materializer's loop is ordered by range and view.  Reset parent rows,
+    group counts and reconciliation scalars are all keyed by view or derived
+    specifically for it; once its twelve metric/scope combinations finish,
+    retaining those nested dictionaries only increases the baseline for the
+    next view.  VTuber physical source totals are range-specific but reused
+    across every VTuber metric, so keep them until that view is complete too.
+    """
+
+    for name in (
+        "reconciliation_counts",
+        "snapshot_reset_changes",
+        "snapshot_original_group_counts",
+    ):
+        cache = getattr(builder, name, None)
+        if isinstance(cache, dict):
+            cache.clear()
+    if view == "vtubers":
+        cache = getattr(builder, "snapshot_vtuber_source_totals", None)
+        if isinstance(cache, dict):
+            cache.clear()
+    for cache_name, lock_name in (
+        ("_VTUBER_REPLACEMENT_CACHE", "_VTUBER_REPLACEMENT_CACHE_LOCK"),
+        (
+            "_GENERIC_RANKING_PREPARATION_CACHE",
+            "_GENERIC_RANKING_PREPARATION_LOCK",
+        ),
+    ):
+        cache = getattr(adapter, cache_name, None)
+        lock = getattr(adapter, lock_name, None)
+        clear = getattr(cache, "clear", None)
+        if not callable(clear):
+            continue
+        if lock is None:
+            clear()
+        else:
+            with lock:
+                clear()
+    trimmed = _trim_process_heap()
+    print(
+        f"PG_SNAPSHOT_VIEW_RELEASE range={range_id} view={view} "
+        f"rss_kib={_current_rss_kib()} swap_kib={_current_swap_kib()} "
         f"trimmed={int(trimmed)}",
         flush=True,
     )
@@ -1843,6 +1935,14 @@ class SnapshotPageBuilder:
 
         first_query = ranking_query(range_id, view, metric, 1, scope_key)
         options = adapter._query_options(first_query)
+        # A serving snapshot stores compact list cards and exports the full
+        # canonical song multiset through source details.  Tell the adapter it
+        # may retain only bounded private song-search text while preparing
+        # VTuber cards, instead of holding duplicate per-channel song arrays
+        # until every page has been written.  Online PG requests do not set
+        # these internal flags and keep their established full response shape.
+        options["_snapshotCompactCards"] = True
+        options["_snapshotSongSearchMaxChars"] = MAX_RANKING_SEARCH_CHARS
         prepared = adapter._prepare_generic_overlay_rankings(
             self.connection,
             revision_id,
@@ -2041,7 +2141,13 @@ def materialize(
                             view=view,
                             metric=metric,
                             scope_key=scope_key,
+                            builder=builder,
                         )
+                _release_completed_ranking_view_memory(
+                    builder,
+                    range_id=range_id,
+                    view=view,
+                )
 
         for range_id in RANGES:
             missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
