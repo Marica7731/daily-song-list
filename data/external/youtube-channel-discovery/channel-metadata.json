@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T06:29:49.878Z",
+  "generatedAt": "2026-08-13T08:34:27.321Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T06:29:49.878Z",
+    "fetchedAt": "2026-08-13T08:34:27.321Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T06:29:49.878Z",
+    "generatedAt": "2026-08-13T08:34:27.321Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1139,
-      "parseableChannels": 1120,
+      "totalChannels": 1142,
+      "parseableChannels": 1123,
       "realAvatar": 649,
-      "thumbnailFallback": 490,
+      "thumbnailFallback": 493,
       "missingDisplayImage": 0,
-      "missingAvatar": 490,
+      "missingAvatar": 493,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 661
+      "skipped_collected_evidence": 663,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 642,
+      "batch_limit_reached": 644,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@TukuneDuck",
+        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
+        "displayName": "月音-TUKUNE-",
+        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@MihoshiYume",
+        "channelId": "UCK0OzXxJVvMjBnr9NeV1t1A",
+        "displayName": "Mihoshi Yume",
+        "sourceUrl": "https://www.youtube.com/@MihoshiYume",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@LiccaLinCH",
+        "channelId": "UCRsss1xyvtErN5NKppVXmjg",
+        "displayName": "LiccaLin",
+        "sourceUrl": "https://www.youtube.com/@LiccaLinCH",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@tenmeimau",
         "channelId": "UCkJtGhNTE3uVWbXMiUaw1oA",
@@ -11709,13 +11730,6 @@
         "channelId": "UCXyAitTabBsoRclTn_Gq-eA",
         "displayName": "xxhacucoxx ch. 白白虹",
         "sourceUrl": "https://www.youtube.com/@xxhacucoxx_Celestial",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@TukuneDuck",
-        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
-        "displayName": "月音-TUKUNE-",
-        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
         "displayName": "燈明寺かぐら - Tomyoji Kagura -",
         "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Are_Tete",
-        "channelId": "UCpOO_KwyHJHFHX1Awm2PPMA",
-        "displayName": "アール・テテ / Are Tete",
-        "sourceUrl": "https://www.youtube.com/@Are_Tete",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@01rosa18",
-        "channelId": "UCO0ihI_Cgv_Rmf9Q2nNcmtA",
-        "displayName": "ろざ",
-        "sourceUrl": "https://www.youtube.com/@01rosa18",
         "reason": "batch_limit_reached"
       }
     ]
