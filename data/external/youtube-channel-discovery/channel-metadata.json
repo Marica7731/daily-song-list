@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-13T17:13:40.485Z",
+  "generatedAt": "2026-08-13T18:09:39.572Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-13T17:13:40.485Z",
+    "fetchedAt": "2026-08-13T18:09:39.572Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-13T17:13:40.485Z",
+    "generatedAt": "2026-08-13T18:09:39.572Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 669
+      "skipped_collected_evidence": 669,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@teikobonbonch3548",
+        "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
+        "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
+        "sourceUrl": "https://www.youtube.com/@teikobonbonch3548",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@chaco_haguma",
         "channelId": "UCw5b3jUXwajzoFzQ97SXPlA",
@@ -11842,13 +11849,6 @@
         "channelId": "UC4woRHLSPSz3sAr10XIJK2Q",
         "displayName": "かわよき なめ🐾💫",
         "sourceUrl": "https://www.youtube.com/@%E3%81%8B%E3%82%8F%E3%82%88%E3%81%8D%E3%81%AA%E3%82%81kawayoki_name",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@TsunomakiWatame",
-        "channelId": "UCqm3BQLlJfvkTsX_hvm0UmA",
-        "displayName": "Watame Ch. 角巻わため",
-        "sourceUrl": "https://www.youtube.com/@TsunomakiWatame",
         "reason": "batch_limit_reached"
       }
     ]
