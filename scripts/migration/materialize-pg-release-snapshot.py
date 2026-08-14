@@ -1688,7 +1688,13 @@ def export_source(
             or video_count != expected_video_count
             or occurrence_count != expected_occurrence_count
         ):
-            raise RuntimeError(f"source totals changed inside snapshot: {range_id}/{source_key}")
+            raise RuntimeError(
+                "source totals changed inside snapshot: "
+                f"{range_id}/{source_key} page={page} "
+                "expected="
+                f"{expected_page_count}/{expected_video_count}/{expected_occurrence_count} "
+                f"actual={page_count}/{video_count}/{occurrence_count}"
+            )
         page_occurrences = current_detail.get("occurrences")
         if not isinstance(page_occurrences, list):
             raise RuntimeError(f"source occurrences are invalid: {range_id}/{source_key}/{page}")
