@@ -1228,6 +1228,86 @@ def _flatten_scalars(value: Any, *, channel_only: bool = False) -> Iterable[str]
             yield str(item)
 
 
+def _legacy_ranking_song_count(
+    record: Mapping[str, Any], view: str,
+) -> int:
+    """Recover one missing legacy scalar from the canonical card payload."""
+
+    if view == "songs":
+        if not _text(record.get("key") or record.get("title")):
+            raise RuntimeError("legacy song ranking has no canonical identity")
+        return 1
+    songs = record.get("songs")
+    if not isinstance(songs, list) or not songs:
+        raise RuntimeError(
+            f"legacy {view} ranking has no canonical songs payload"
+        )
+    if view == "artists":
+        identities: set[str] = set()
+        for raw in songs:
+            if not isinstance(raw, Mapping):
+                raise RuntimeError("legacy Artist song entry is invalid")
+            identity = _text(
+                raw.get("key") or raw.get("name") or raw.get("title")
+            )
+            if not identity or identity in identities:
+                raise RuntimeError(
+                    "legacy Artist canonical song identities are invalid"
+                )
+            if raw.get("count") is not None and _integer(raw.get("count")) <= 0:
+                raise RuntimeError("legacy Artist song count is invalid")
+            identities.add(identity)
+        return len(identities)
+    if view == "videos":
+        identities: set[str] = set()
+        for raw in songs:
+            if not isinstance(raw, Mapping):
+                raise RuntimeError("legacy video song entry is invalid")
+            nested = raw.get("song")
+            song = dict(nested) if isinstance(nested, Mapping) else dict(raw)
+            explicit_key = _text(song.get("songKey") or song.get("key"))
+            if explicit_key:
+                song["songKey"] = explicit_key
+            title = _text(song.get("title") or raw.get("songTitle"))
+            artist = _text(song.get("artist") or raw.get("songArtist"))
+            if title:
+                song["title"] = title
+                song["artist"] = artist
+            if not explicit_key and not title:
+                raise RuntimeError("legacy video song identity is invalid")
+            identity = adapter._song_key(song)
+            if not identity:
+                raise RuntimeError("legacy video canonical song key is empty")
+            identities.add(identity)
+        return len(identities)
+    raise RuntimeError(f"legacy {view} songCount cannot be reconstructed")
+
+
+def _complete_ranking_metric_scalars(
+    record: Mapping[str, Any], view: str,
+) -> dict[str, Any]:
+    """Normalize one canonical card before it becomes the shared metric row."""
+
+    result = dict(record)
+    count = _integer(result.get("count") or result.get("timestampCount"))
+    song_count = _integer(result.get("songCount"))
+    if song_count <= 0:
+        song_count = _legacy_ranking_song_count(result, view)
+    video_count = _integer(result.get("videoCount"))
+    timestamp_count = _integer(result.get("timestampCount") or count)
+    if min(count, song_count, video_count, timestamp_count) <= 0:
+        raise RuntimeError(
+            f"canonical ranking scalars are not positive: {view}"
+        )
+    result.update({
+        "count": count,
+        "songCount": song_count,
+        "videoCount": video_count,
+        "timestampCount": timestamp_count,
+    })
+    return result
+
+
 def _ranking_row(
     record: Mapping[str, Any],
     *,
@@ -1478,6 +1558,765 @@ class CanonicalSnapshotWriter:
         )
         self.ranking_rows += 1
         self._record_writes(1)
+
+    def ranking_series_totals(
+        self,
+        *,
+        range_id: str,
+        view: str,
+        metric: str,
+        scope_key: str,
+    ) -> dict[str, int]:
+        row = self.connection.execute(
+            """
+            SELECT count(*),coalesce(sum(count),0),
+                   coalesce(sum(song_count),0),coalesce(sum(video_count),0)
+            FROM ranking_rows
+            WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+            """,
+            (range_id, view, metric, scope_key),
+        ).fetchone()
+        return {
+            "totalCount": int(row[0] or 0),
+            "totalOccurrenceCount": int(row[1] or 0),
+            "totalSongCount": int(row[2] or 0),
+            "totalVideoCount": int(row[3] or 0),
+        }
+
+    def ranking_metric_pages(
+        self,
+        *,
+        range_id: str,
+        view: str,
+        metric: str,
+        scope_key: str,
+        page_size: int,
+    ) -> Iterable[tuple[int, tuple[dict[str, Any], ...]]]:
+        """Stream one stored metric in rank order without retaining pages."""
+
+        if page_size <= 0:
+            raise ValueError("ranking page size must be positive")
+        total, minimum_rank, maximum_rank, distinct_ranks = (
+            self.connection.execute(
+                """
+                SELECT count(*),min(rank),max(rank),count(DISTINCT rank)
+                FROM ranking_rows
+                WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+                """,
+                (range_id, view, metric, scope_key),
+            ).fetchone()
+        )
+        total = int(total or 0)
+        if total == 0:
+            yield 1, ()
+            return
+        if (
+            int(minimum_rank or 0) != 1
+            or int(maximum_rank or 0) != total
+            or int(distinct_ranks or 0) != total
+        ):
+            raise RuntimeError("stored ranking ranks are not contiguous")
+        for start in range(1, total + 1, page_size):
+            rows = self.connection.execute(
+                """
+                SELECT rank,payload_json
+                FROM ranking_rows
+                WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+                  AND rank BETWEEN ? AND ?
+                ORDER BY rank
+                """,
+                (
+                    range_id,
+                    view,
+                    metric,
+                    scope_key,
+                    start,
+                    min(total, start + page_size - 1),
+                ),
+            ).fetchall()
+            expected = list(
+                range(start, min(total, start + page_size - 1) + 1)
+            )
+            if [int(row[0]) for row in rows] != expected:
+                raise RuntimeError("stored ranking page is incomplete")
+            records: list[dict[str, Any]] = []
+            for rank, payload_json in rows:
+                try:
+                    payload = json.loads(payload_json)
+                except (TypeError, json.JSONDecodeError) as exc:
+                    raise RuntimeError("stored ranking payload is invalid") from exc
+                if (
+                    not isinstance(payload, dict)
+                    or _integer(payload.get("rank")) != int(rank)
+                ):
+                    raise RuntimeError("stored ranking payload rank is invalid")
+                records.append(payload)
+            yield (start - 1) // page_size + 1, tuple(records)
+
+    def derive_ranking_metric_pages(
+        self,
+        *,
+        range_id: str,
+        view: str,
+        scope_key: str,
+        source_metric: str,
+        target_metric: str,
+        page_size: int,
+    ) -> Iterable[tuple[int, tuple[dict[str, Any], ...]]]:
+        """Re-rank one immutable entity set without rehydrating PostgreSQL.
+
+        Snapshot ranking queries always use ``minCount=1``.  A positive
+        canonical row therefore belongs to all three metric series; only its
+        ordering changes.  Reuse the already-validated compact payload and
+        deep search text from the first series, update its public rank, and
+        insert the target series in bounded page batches.  Any zero scalar or
+        identity mismatch fails closed instead of silently deriving a series
+        with different membership.
+        """
+
+        if source_metric == target_metric:
+            raise ValueError("derived ranking metrics must differ")
+        if source_metric not in {"count", "songs", "videos"}:
+            raise ValueError("unsupported source ranking metric")
+        if target_metric not in {"count", "songs", "videos"}:
+            raise ValueError("unsupported target ranking metric")
+        if page_size <= 0:
+            raise ValueError("derived ranking page size must be positive")
+
+        total, minimum_count, minimum_songs, minimum_videos = (
+            self.connection.execute(
+                """
+                SELECT count(*),min(count),min(song_count),min(video_count)
+                FROM ranking_rows
+                WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+                """,
+                (range_id, view, source_metric, scope_key),
+            ).fetchone()
+        )
+        total = int(total or 0)
+        if total == 0:
+            # Empty filtered scopes are part of the declared 96-series
+            # contract even though they have no physical ranking rows.
+            yield 1, ()
+            return
+        if min(
+            int(minimum_count or 0),
+            int(minimum_songs or 0),
+            int(minimum_videos or 0),
+        ) <= 0:
+            raise RuntimeError(
+                "ranking metric membership is not invariant at minCount=1"
+            )
+        existing = int(
+            self.connection.execute(
+                """
+                SELECT count(*) FROM ranking_rows
+                WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+                """,
+                (range_id, view, target_metric, scope_key),
+            ).fetchone()[0]
+        )
+        if existing:
+            raise RuntimeError("derived ranking metric already exists")
+
+        order_index = {
+            "count": 5,
+            "songs": 6,
+            "videos": 7,
+        }[target_metric]
+        source_order_rows = self.connection.execute(
+            """
+            SELECT rank,row_id,title,name,detail_key,
+                   count,song_count,video_count
+            FROM ranking_rows
+            WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+            """,
+            (range_id, view, source_metric, scope_key),
+        ).fetchall()
+        entity_keys: dict[int, str] = {}
+        for row in source_order_rows:
+            source_rank = int(row[0])
+            expected_prefix = ":".join((
+                range_id,
+                view,
+                source_metric,
+                scope_key,
+                str(source_rank),
+                "",
+            ))
+            row_id = _text(row[1])
+            if not row_id.startswith(expected_prefix):
+                raise RuntimeError("derived ranking row identity is invalid")
+            entity_key = row_id[len(expected_prefix) :]
+            if not entity_key:
+                raise RuntimeError("derived ranking entity identity is empty")
+            if source_rank in entity_keys:
+                raise RuntimeError("derived ranking source rank is duplicated")
+            entity_keys[source_rank] = entity_key
+        source_order_rows.sort(key=lambda row: (
+            -int(row[order_index] or 0),
+            _text(row[2] or row[3] or entity_keys[int(row[0])] or row[4]),
+            entity_keys[int(row[0])],
+        ))
+        source_ranks = [int(row[0]) for row in source_order_rows]
+        if len(source_ranks) != total or len(set(source_ranks)) != total:
+            raise RuntimeError("derived ranking source order is invalid")
+
+        columns = (
+            "row_id,range_id,view,metric,scope_key,rank,detail_key,title,"
+            "artist,name,count,song_count,video_count,timestamp_count,"
+            "payload_json,search_text,channel_search_text"
+        )
+        for start in range(0, total, page_size):
+            selected_ranks = source_ranks[start : start + page_size]
+            placeholders = ",".join("?" for _ in selected_ranks)
+            source_rows = self.connection.execute(
+                f"""
+                SELECT {columns}
+                FROM ranking_rows
+                WHERE range_id=? AND view=? AND metric=? AND scope_key=?
+                  AND rank IN ({placeholders})
+                """,
+                (
+                    range_id,
+                    view,
+                    source_metric,
+                    scope_key,
+                    *selected_ranks,
+                ),
+            ).fetchall()
+            by_rank = {int(row[5]): row for row in source_rows}
+            if set(by_rank) != set(selected_ranks):
+                raise RuntimeError("derived ranking source page is incomplete")
+
+            records: list[dict[str, Any]] = []
+            for offset, source_rank in enumerate(selected_ranks, start=start + 1):
+                row = by_rank[source_rank]
+                expected_prefix = ":".join(
+                    (
+                        range_id,
+                        view,
+                        source_metric,
+                        scope_key,
+                        str(source_rank),
+                        "",
+                    )
+                )
+                row_id = _text(row[0])
+                if not row_id.startswith(expected_prefix):
+                    raise RuntimeError("derived ranking row identity is invalid")
+                entity_key = entity_keys[source_rank]
+                if row_id != expected_prefix + entity_key:
+                    raise RuntimeError("derived ranking entity identity changed")
+                try:
+                    payload = json.loads(row[14])
+                except (TypeError, json.JSONDecodeError) as exc:
+                    raise RuntimeError(
+                        "derived ranking payload is invalid"
+                    ) from exc
+                if not isinstance(payload, dict):
+                    raise RuntimeError("derived ranking payload is not an object")
+                if _integer(payload.get("rank")) != source_rank:
+                    raise RuntimeError("derived ranking payload rank is invalid")
+                payload["rank"] = offset
+                target_row_id = ":".join(
+                    (
+                        range_id,
+                        view,
+                        target_metric,
+                        scope_key,
+                        str(offset),
+                        entity_key,
+                    )
+                )
+                self.add_ranking((
+                    target_row_id,
+                    range_id,
+                    view,
+                    target_metric,
+                    scope_key,
+                    offset,
+                    *row[6:14],
+                    _json_text(payload),
+                    row[15],
+                    row[16],
+                ))
+                records.append(payload)
+            yield start // page_size + 1, tuple(records)
+
+    def derive_filtered_ranking_scopes(
+        self,
+        *,
+        range_id: str,
+        page_size: int,
+    ) -> dict[str, int]:
+        """Derive all filtered rankings from exported canonical sources.
+
+        Legacy PostgreSQL releases do not contain a complete persisted row set
+        for every filtered scope.  The source-detail occurrence stream is the
+        canonical membership authority, so scan it once for the requested
+        range, compute all three filters together, stage compact count cards in
+        temporary SQLite tables, and then reuse the metric re-ranker above.
+        The all-scope card scalars are checked against the same occurrence set
+        before any filtered rows are made visible.
+        """
+
+        if range_id not in RANGES:
+            raise ValueError("unsupported filtered ranking range")
+        if page_size <= 0:
+            raise ValueError("filtered ranking page size must be positive")
+        filtered_scopes = tuple(
+            scope_key for scope_key, _niche, _hidden in SCOPES
+            if scope_key != "all"
+        )
+        if filtered_scopes != ("niche", "visible", "visibleNiche"):
+            raise RuntimeError("filtered ranking scope contract changed")
+
+        base_table = "temp.filtered_ranking_base"
+        candidate_table = "temp.filtered_ranking_candidates"
+        self.connection.execute(f"DROP TABLE IF EXISTS {candidate_table}")
+        self.connection.execute(f"DROP TABLE IF EXISTS {base_table}")
+        self.connection.executescript(f"""
+        CREATE TEMP TABLE filtered_ranking_base(
+          source_key TEXT PRIMARY KEY,view TEXT NOT NULL,entity_key TEXT NOT NULL,
+          title TEXT NOT NULL,artist TEXT NOT NULL,name TEXT NOT NULL,
+          count INTEGER NOT NULL,song_count INTEGER NOT NULL,
+          video_count INTEGER NOT NULL,timestamp_count INTEGER NOT NULL,
+          payload_json TEXT NOT NULL
+        ) WITHOUT ROWID;
+        CREATE TEMP TABLE filtered_ranking_candidates(
+          view TEXT NOT NULL,scope_key TEXT NOT NULL,entity_key TEXT NOT NULL,
+          source_key TEXT NOT NULL,title TEXT NOT NULL,artist TEXT NOT NULL,
+          name TEXT NOT NULL,count INTEGER NOT NULL,song_count INTEGER NOT NULL,
+          video_count INTEGER NOT NULL,timestamp_count INTEGER NOT NULL,
+          payload_json TEXT NOT NULL,search_text TEXT NOT NULL,
+          channel_search_text TEXT NOT NULL,
+          PRIMARY KEY(view,scope_key,source_key)
+        ) WITHOUT ROWID;
+        """)
+
+        def parse_payload(raw: Any, context: str) -> dict[str, Any]:
+            try:
+                payload = json.loads(raw)
+            except (TypeError, json.JSONDecodeError) as exc:
+                raise RuntimeError(f"{context} payload is invalid") from exc
+            if not isinstance(payload, dict):
+                raise RuntimeError(f"{context} payload is not an object")
+            return payload
+
+        def count_items(values: Mapping[str, list[Any]]) -> list[dict[str, Any]]:
+            return [
+                {"key": key, "name": _text(value[0]) or key, "count": int(value[1])}
+                for key, value in sorted(
+                    values.items(),
+                    key=lambda item: (-int(item[1][1]), _text(item[1][0]), item[0]),
+                )
+            ]
+
+        def artist_items(values: Mapping[str, int]) -> list[dict[str, Any]]:
+            return [
+                {"name": name, "count": int(count)}
+                for name, count in sorted(
+                    values.items(), key=lambda item: (-int(item[1]), item[0])
+                )
+            ]
+
+        def new_scope_state(
+            base: Mapping[str, Any],
+        ) -> dict[str, Any]:
+            search = _BoundedTextAccumulator(MAX_RANKING_SEARCH_CHARS)
+            channel_search = _BoundedTextAccumulator(MAX_CHANNEL_SEARCH_CHARS)
+            payload = base["payload"]
+            for value in (
+                base["entity_key"], base["source_key"], base["title"],
+                base["artist"], base["name"], payload.get("key"),
+                payload.get("videoId"), payload.get("title"),
+                payload.get("workTitle"), payload.get("displayArtist"),
+                payload.get("artist"), payload.get("name"),
+                payload.get("channelName"), payload.get("channelId"),
+                payload.get("channelHandle"), payload.get("channelUrl"),
+            ):
+                search.add(value)
+            for value in (
+                payload.get("channelName"), payload.get("channelId"),
+                payload.get("channelHandle"), payload.get("channelUrl"),
+            ):
+                channel_search.add(value)
+            return {
+                "count": 0,
+                "videos": set(),
+                "songs": {},
+                "artists": {},
+                "previews": [],
+                "preview_videos": set(),
+                "video_songs": [],
+                "video_song_keys": set(),
+                "search": search,
+                "channel_search": channel_search,
+            }
+
+        base_counts = {view: 0 for view in VIEWS}
+        base_rows = self.connection.execute(
+            """
+            SELECT view,rank,row_id,detail_key,title,artist,name,count,
+                   song_count,video_count,timestamp_count,payload_json
+            FROM ranking_rows
+            WHERE range_id=? AND metric='count' AND scope_key='all'
+            ORDER BY view,rank
+            """,
+            (range_id,),
+        )
+        pending_base: list[tuple[Any, ...]] = []
+        for row in base_rows:
+            view = _text(row[0])
+            rank = int(row[1] or 0)
+            source_key = _text(row[3])
+            if view not in VIEWS or rank <= 0 or not source_key:
+                raise RuntimeError("all-scope ranking source identity is invalid")
+            prefix = ":".join((range_id, view, "count", "all", str(rank), ""))
+            row_id = _text(row[2])
+            if not row_id.startswith(prefix):
+                raise RuntimeError("all-scope ranking row identity is invalid")
+            entity_key = row_id[len(prefix) :]
+            if not entity_key:
+                raise RuntimeError("all-scope ranking entity identity is empty")
+            payload = parse_payload(row[11], "all-scope ranking")
+            if _text(payload.get("sourceDetailKey")) != source_key:
+                raise RuntimeError("all-scope ranking source key changed")
+            pending_base.append((
+                source_key, view, entity_key, _text(row[4]), _text(row[5]),
+                _text(row[6]), int(row[7] or 0), int(row[8] or 0),
+                int(row[9] or 0), int(row[10] or 0), _json_text(payload),
+            ))
+            base_counts[view] += 1
+            if len(pending_base) >= 512:
+                self.connection.executemany(
+                    "INSERT INTO filtered_ranking_base VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                    pending_base,
+                )
+                pending_base.clear()
+        if pending_base:
+            self.connection.executemany(
+                "INSERT INTO filtered_ranking_base VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                pending_base,
+            )
+            pending_base.clear()
+        if any(base_counts[view] <= 0 for view in VIEWS):
+            raise RuntimeError(f"all-scope ranking view is empty: {range_id}")
+        missing_details = int(self.connection.execute(
+            """
+            SELECT count(*) FROM filtered_ranking_base AS base
+            LEFT JOIN source_details AS detail
+              ON detail.source_key=base.source_key AND detail.range_id=?
+            WHERE detail.source_key IS NULL
+            """,
+            (range_id,),
+        ).fetchone()[0])
+        if missing_details:
+            raise RuntimeError(
+                f"all-scope ranking sources are missing details: {range_id}/{missing_details}"
+            )
+
+        pending_candidates: list[tuple[Any, ...]] = []
+        seen_sources: set[str] = set()
+        current_source = ""
+        current_base: dict[str, Any] | None = None
+        all_count = 0
+        all_videos: set[str] = set()
+        all_songs: set[str] = set()
+        states: dict[str, dict[str, Any]] = {}
+        expected_position = 0
+
+        def flush_candidates() -> None:
+            if not pending_candidates:
+                return
+            self.connection.executemany(
+                "INSERT INTO filtered_ranking_candidates VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                pending_candidates,
+            )
+            pending_candidates.clear()
+
+        def finish_source() -> None:
+            nonlocal all_count
+            nonlocal all_videos
+            nonlocal all_songs
+            nonlocal states
+            nonlocal current_base
+            if current_base is None:
+                return
+            expected = (
+                int(current_base["count"]), int(current_base["song_count"]),
+                int(current_base["video_count"]),
+                int(current_base["timestamp_count"]),
+            )
+            actual = (all_count, len(all_songs), len(all_videos), all_count)
+            if actual != expected:
+                raise RuntimeError(
+                    "all-scope ranking/source totals differ: "
+                    f"{range_id}/{current_base['view']}/{current_base['source_key']} "
+                    f"ranking={expected} source={actual}"
+                )
+            for scope_key in filtered_scopes:
+                state = states[scope_key]
+                count = int(state["count"])
+                if count <= 0:
+                    continue
+                payload = dict(current_base["payload"])
+                for name in (
+                    "occurrences", "songs", "artists", "channels", "singers",
+                    "sourcePreviewCount", "songPreviewCount",
+                    "occurrencePreviewLimited",
+                ):
+                    payload.pop(name, None)
+                payload.update({
+                    "rank": 0,
+                    "count": count,
+                    "songCount": len(state["songs"]),
+                    "videoCount": len(state["videos"]),
+                    "timestampCount": count,
+                    "occurrences": list(state["previews"]),
+                })
+                view = _text(current_base["view"])
+                if view == "artists":
+                    payload["songs"] = count_items(state["songs"])
+                elif view == "songs":
+                    artists = artist_items(state["artists"])
+                    if artists:
+                        payload["artists"] = artists
+                elif view == "videos":
+                    payload["songs"] = list(state["video_songs"])
+                compact = adapter.compact_ranking_payloads([payload], view)
+                if len(compact) != 1 or not isinstance(compact[0], Mapping):
+                    raise RuntimeError("filtered compact ranking projection is invalid")
+                compact_payload = dict(compact[0])
+                if _text(compact_payload.get("sourceDetailKey")) != current_base["source_key"]:
+                    raise RuntimeError("filtered ranking source key changed")
+                pending_candidates.append((
+                    view, scope_key, current_base["entity_key"],
+                    current_base["source_key"], current_base["title"],
+                    current_base["artist"], current_base["name"], count,
+                    len(state["songs"]), len(state["videos"]), count,
+                    _json_text(compact_payload), state["search"].text,
+                    state["channel_search"].text,
+                ))
+            if len(pending_candidates) >= 512:
+                flush_candidates()
+            all_count = 0
+            all_videos = set()
+            all_songs = set()
+            states = {}
+            current_base = None
+
+        occurrence_rows = self.connection.execute(
+            """
+            SELECT base.source_key,base.view,base.entity_key,base.title,
+                   base.artist,base.name,base.count,base.song_count,
+                   base.video_count,base.timestamp_count,base.payload_json,
+                   occurrence.position,occurrence.video_id,occurrence.title,
+                   occurrence.channel_name,occurrence.channel_id,
+                   occurrence.channel_handle,occurrence.channel_url,
+                   occurrence.published_timestamp,occurrence.seconds,
+                   occurrence.is_niche,occurrence.is_unknown_artist,
+                   occurrence.canonical_song_key,
+                   occurrence.canonical_song_name,occurrence.search_text,
+                   occurrence.payload_json
+            FROM filtered_ranking_base AS base
+            JOIN source_occurrences AS occurrence
+              ON occurrence.source_key=base.source_key
+             AND occurrence.range_id=?
+            ORDER BY base.source_key,occurrence.position
+            """,
+            (range_id,),
+        )
+        for row in occurrence_rows:
+            source_key = _text(row[0])
+            if source_key != current_source:
+                finish_source()
+                if source_key in seen_sources:
+                    raise RuntimeError("filtered source occurrence order is unstable")
+                seen_sources.add(source_key)
+                current_source = source_key
+                current_base = {
+                    "source_key": source_key,
+                    "view": _text(row[1]),
+                    "entity_key": _text(row[2]),
+                    "title": _text(row[3]),
+                    "artist": _text(row[4]),
+                    "name": _text(row[5]),
+                    "count": int(row[6] or 0),
+                    "song_count": int(row[7] or 0),
+                    "video_count": int(row[8] or 0),
+                    "timestamp_count": int(row[9] or 0),
+                    "payload": parse_payload(row[10], "all-scope ranking"),
+                }
+                states = {
+                    scope_key: new_scope_state(current_base)
+                    for scope_key in filtered_scopes
+                }
+                all_count = 0
+                all_videos = set()
+                all_songs = set()
+                expected_position = 0
+            expected_position += 1
+            if int(row[11] or 0) != expected_position:
+                raise RuntimeError(
+                    f"source occurrence positions are not contiguous: {range_id}/{source_key}"
+                )
+            video_id = _text(row[12])
+            song_key = _text(row[22])
+            song_name = _text(row[23])
+            if not video_id or not song_key or not song_name:
+                raise RuntimeError(
+                    f"source occurrence identity is incomplete: {range_id}/{source_key}"
+                )
+            all_count += 1
+            all_videos.add(video_id)
+            all_songs.add(song_key)
+            is_niche = bool(row[20])
+            is_unknown = bool(row[21])
+            matched_scopes = []
+            if is_niche:
+                matched_scopes.append("niche")
+            if not is_unknown:
+                matched_scopes.append("visible")
+                if is_niche:
+                    matched_scopes.append("visibleNiche")
+            if not matched_scopes:
+                continue
+            raw_payload = parse_payload(row[25], "source occurrence")
+            preview = adapter._normalize_ranking_preview_occurrence(raw_payload)
+            if not _text(adapter._ranking_preview_video_id(preview)):
+                preview["videoId"] = video_id
+            raw_song = raw_payload.get("song")
+            raw_song = dict(raw_song) if isinstance(raw_song, Mapping) else {}
+            raw_song.setdefault("songKey", song_key)
+            raw_song.setdefault("key", song_key)
+            raw_song.setdefault("title", song_name)
+            artist_name = _text(
+                raw_song.get("artist")
+                or raw_payload.get("artist")
+                or raw_payload.get("songArtist")
+            )
+            for scope_key in matched_scopes:
+                state = states[scope_key]
+                state["count"] += 1
+                state["videos"].add(video_id)
+                song_state = state["songs"].setdefault(song_key, [song_name, 0])
+                if _text(song_state[0]) != song_name:
+                    raise RuntimeError("canonical song name changed inside one source")
+                song_state[1] = int(song_state[1]) + 1
+                if artist_name:
+                    state["artists"][artist_name] = (
+                        int(state["artists"].get(artist_name, 0)) + 1
+                    )
+                if (
+                    video_id not in state["preview_videos"]
+                    and len(state["previews"]) < 3
+                ):
+                    state["preview_videos"].add(video_id)
+                    state["previews"].append(dict(preview))
+                if (
+                    song_key not in state["video_song_keys"]
+                    and len(state["video_songs"]) < 3
+                ):
+                    state["video_song_keys"].add(song_key)
+                    state["video_songs"].append(dict(raw_song))
+                state["search"].add(row[24])
+                for value in (row[14], row[15], row[16], row[17]):
+                    state["channel_search"].add(value)
+        finish_source()
+        flush_candidates()
+        expected_sources = sum(base_counts.values())
+        if len(seen_sources) != expected_sources:
+            raise RuntimeError(
+                f"all-scope ranking sources have no occurrences: "
+                f"{range_id} expected={expected_sources} actual={len(seen_sources)}"
+            )
+
+        result: dict[str, int] = {}
+        candidate_columns = (
+            "entity_key,source_key,title,artist,name,count,song_count,"
+            "video_count,timestamp_count,payload_json,search_text,"
+            "channel_search_text"
+        )
+        try:
+            for view in VIEWS:
+                for scope_key in filtered_scopes:
+                    cursor = self.connection.execute(
+                        f"""
+                        SELECT {candidate_columns}
+                        FROM filtered_ranking_candidates
+                        WHERE view=? AND scope_key=?
+                        ORDER BY count DESC,
+                          CASE WHEN title<>'' THEN title
+                               WHEN name<>'' THEN name ELSE entity_key END,
+                          entity_key
+                        """,
+                        (view, scope_key),
+                    )
+                    rank = 0
+                    while True:
+                        rows = cursor.fetchmany(256)
+                        if not rows:
+                            break
+                        for row in rows:
+                            rank += 1
+                            payload = parse_payload(row[9], "filtered ranking")
+                            payload["rank"] = rank
+                            self.add_ranking((
+                                ":".join((
+                                    range_id, view, "count", scope_key,
+                                    str(rank), _text(row[0]),
+                                )),
+                                range_id, view, "count", scope_key, rank,
+                                _text(row[1]), _text(row[2]), _text(row[3]),
+                                _text(row[4]), int(row[5]), int(row[6]),
+                                int(row[7]), int(row[8]), _json_text(payload),
+                                _text(row[10]), _text(row[11]),
+                            ))
+                    count_key = f"{range_id}/{view}/count/{scope_key}"
+                    result[count_key] = rank
+                    page_count = max(1, math.ceil(rank / page_size))
+                    print(
+                        f"PG_SNAPSHOT_COMBO {range_id}/{view}/occurrences/"
+                        f"{scope_key} total={rank} pages={page_count}",
+                        flush=True,
+                    )
+                    for target_metric in ("songs", "videos"):
+                        derived_pages = 0
+                        derived_records = 0
+                        for page, records in self.derive_ranking_metric_pages(
+                            range_id=range_id,
+                            view=view,
+                            scope_key=scope_key,
+                            source_metric="count",
+                            target_metric=target_metric,
+                            page_size=page_size,
+                        ):
+                            derived_pages += 1
+                            if page != derived_pages:
+                                raise RuntimeError(
+                                    "derived filtered ranking page order is invalid"
+                                )
+                            derived_records += len(records)
+                        if derived_pages != page_count or derived_records != rank:
+                            raise RuntimeError(
+                                "derived filtered ranking series is incomplete"
+                            )
+                        metric_key = (
+                            f"{range_id}/{view}/{target_metric}/{scope_key}"
+                        )
+                        result[metric_key] = rank
+                        print(
+                            f"PG_SNAPSHOT_COMBO {range_id}/{view}/"
+                            f"{target_metric}/{scope_key} total={rank} "
+                            f"pages={page_count}",
+                            flush=True,
+                        )
+        finally:
+            self.connection.execute(f"DROP TABLE IF EXISTS {candidate_table}")
+            self.connection.execute(f"DROP TABLE IF EXISTS {base_table}")
+        return result
 
     def begin_source(
         self,
@@ -2196,36 +3035,182 @@ def materialize(
         written = 0
         static_page_cache_drop_attempts = 0
         static_page_cache_drop_count = 0
+
+        def write_static_page(target: Path, payload: Mapping[str, Any]) -> None:
+            nonlocal written
+            nonlocal static_page_cache_drop_attempts
+            nonlocal static_page_cache_drop_count
+            static_page_cache_drop_attempts += 1
+            static_page_cache_drop_count += int(
+                _write_json_file_and_drop_cache(target, payload)
+            )
+            written += 1
+            if written % 25 == 0:
+                print(
+                    f"PG_SNAPSHOT_WRITTEN files={written} "
+                    f"page_cache_drops={static_page_cache_drop_count}/"
+                    f"{static_page_cache_drop_attempts}",
+                    flush=True,
+                )
+
         scope_counts: dict[str, int] = {}
         source_keys: dict[str, set[str]] = {range_id: set() for range_id in RANGES}
-        scoped_source_keys: dict[str, set[str]] = {range_id: set() for range_id in RANGES}
         for range_id in RANGES:
             for view in VIEWS:
-                for metric in METRICS:
-                    for scope_key, _niche, _hidden in SCOPES:
-                        render = builder.build_combo(range_id, view, metric, scope_key)
-                        first = dict(render(1))
-                        total, page_count = validate_page(
-                            first,
+                for scope_key, _niche, _hidden in SCOPES[:1]:
+                    # Hydrate each canonical entity set from PostgreSQL once.
+                    # minCount is fixed at one, so songs/videos contain the
+                    # same positive entities and differ only in deterministic
+                    # ordering.  The two alternate series are derived below
+                    # from the canonical SQLite rows instead of repeating the
+                    # expensive overlay reconciliation and payload hydration.
+                    metric = "occurrences"
+                    render = builder.build_combo(range_id, view, metric, scope_key)
+                    first = dict(render(1))
+                    total, page_count = validate_page(
+                        first,
+                        range_id=range_id,
+                        view=view,
+                        metric=metric,
+                        page=1,
+                    )
+                    if scope_key == "all" and total <= 0:
+                        raise RuntimeError(
+                            f"required ranking series missing or empty: "
+                            f"{range_id}/{view}/{metric}"
+                        )
+                    series_key = f"{range_id}/{view}/count/{scope_key}"
+                    scope_counts[series_key] = total
+                    target_dir = output_root / "rankings" / range_id / view / metric
+                    if scope_key == "all":
+                        target_dir.mkdir(parents=True, exist_ok=True)
+                    rendered_record_count = 0
+                    derived_payload_template: dict[str, Any] | None = None
+                    for page in range(1, page_count + 1):
+                        payload = first if page == 1 else dict(render(page))
+                        validate_page(
+                            payload,
                             range_id=range_id,
                             view=view,
                             metric=metric,
-                            page=1,
+                            page=page,
+                            expected_total=total,
                         )
-                        if scope_key == "all" and total <= 0:
+                        records = payload.get("records")
+                        if not isinstance(records, list):
                             raise RuntimeError(
-                                f"required ranking series missing or empty: "
-                                f"{range_id}/{view}/{metric}"
+                                f"ranking records are invalid: {series_key}/{page}"
                             )
-                        db_metric = "count" if metric == "occurrences" else metric
-                        series_key = f"{range_id}/{view}/{db_metric}/{scope_key}"
-                        scope_counts[series_key] = total
-                        target_dir = output_root / "rankings" / range_id / view / metric
-                        if scope_key == "all":
-                            target_dir.mkdir(parents=True, exist_ok=True)
-                        rendered_record_count = 0
-                        for page in range(1, page_count + 1):
-                            payload = first if page == 1 else dict(render(page))
+                        rendered_record_count += len(records)
+                        for index, raw in enumerate(records, start=1):
+                            if not isinstance(raw, Mapping):
+                                raise RuntimeError(
+                                    f"ranking record is not an object: "
+                                    f"{series_key}/{page}/{index}"
+                                )
+                        records = [
+                            _complete_ranking_metric_scalars(raw, view)
+                            for raw in records
+                        ]
+                        compact_records = adapter.compact_ranking_payloads(
+                            [dict(record) for record in records],
+                            view,
+                        )
+                        if len(compact_records) != len(records):
+                            raise RuntimeError(
+                                f"ranking compact projection is invalid: {series_key}/{page}"
+                            )
+                        for index, (raw, compact_raw) in enumerate(
+                            zip(records, compact_records),
+                            start=1,
+                        ):
+                            if not isinstance(compact_raw, Mapping):
+                                raise RuntimeError(
+                                    f"compact ranking record is not an object: {series_key}/{page}/{index}"
+                                )
+                            expected_rank = (page - 1) * PAGE_SIZE + index
+                            writer.add_ranking(_ranking_row(
+                                raw,
+                                payload_record=compact_raw,
+                                range_id=range_id,
+                                view=view,
+                                metric=metric,
+                                scope_key=scope_key,
+                                expected_rank=expected_rank,
+                            ))
+                            detail_key = _text(raw.get("sourceDetailKey"))
+                            if detail_key:
+                                source_keys[range_id].add(detail_key)
+                        if page == 1:
+                            derived_payload_template = {
+                                key: value
+                                for key, value in payload.items()
+                                if key != "records"
+                            }
+                            derived_payload_template["compact"] = True
+                        del compact_records
+                    validate_complete_ranking_series(
+                        series_key, total, rendered_record_count,
+                    )
+                    if derived_payload_template is None:
+                        raise RuntimeError(
+                            f"ranking payload template is missing: {series_key}"
+                        )
+                    canonical_totals = writer.ranking_series_totals(
+                        range_id=range_id,
+                        view=view,
+                        metric="count",
+                        scope_key=scope_key,
+                    )
+                    if canonical_totals["totalCount"] != total:
+                        raise RuntimeError(
+                            f"canonical ranking total is invalid: {series_key}"
+                        )
+                    derived_payload_template.update(canonical_totals)
+                    print(
+                        f"PG_SNAPSHOT_COMBO {range_id}/{view}/{metric}/{scope_key} "
+                        f"total={total} pages={page_count}",
+                        flush=True,
+                    )
+                    # The render closure owns the page-independent aggregate,
+                    # which can contain tens of thousands of Python objects.
+                    # Release it before the two bounded SQLite re-ranks.
+                    render = None
+                    first = None
+                    payload = None
+                    records = None
+                    compact_payload = None
+                    raw = None
+                    compact_raw = None
+                    _release_ranking_combo_memory(
+                        range_id=range_id,
+                        view=view,
+                        metric=metric,
+                        scope_key=scope_key,
+                        builder=builder,
+                    )
+
+                    if scope_key == "all":
+                        target_dir = (
+                            output_root / "rankings" / range_id / view / metric
+                        )
+                        target_dir.mkdir(parents=True, exist_ok=True)
+                        stored_page_count = 0
+                        stored_record_count = 0
+                        for page, stored_records in writer.ranking_metric_pages(
+                            range_id=range_id,
+                            view=view,
+                            metric="count",
+                            scope_key=scope_key,
+                            page_size=PAGE_SIZE,
+                        ):
+                            stored_page_count += 1
+                            records = [dict(record) for record in stored_records]
+                            payload = dict(derived_payload_template)
+                            payload["metric"] = metric
+                            payload["page"] = page
+                            payload["records"] = records
+                            payload["compact"] = True
                             validate_page(
                                 payload,
                                 range_id=range_id,
@@ -2234,71 +3219,77 @@ def materialize(
                                 page=page,
                                 expected_total=total,
                             )
-                            records = payload.get("records")
-                            if not isinstance(records, list):
-                                raise RuntimeError(
-                                    f"ranking records are invalid: {series_key}/{page}"
-                                )
-                            rendered_record_count += len(records)
-                            for index, raw in enumerate(records, start=1):
-                                if not isinstance(raw, Mapping):
-                                    raise RuntimeError(
-                                        f"ranking record is not an object: "
-                                        f"{series_key}/{page}/{index}"
-                                    )
-                            compact_records = adapter.compact_ranking_payloads(
-                                [dict(record) for record in records],
-                                view,
+                            stored_record_count += len(records)
+                            write_static_page(
+                                target_dir / f"page-{page:04d}.json",
+                                payload,
                             )
-                            if len(compact_records) != len(records):
+                        if stored_page_count != page_count:
+                            raise RuntimeError(
+                                f"stored ranking page count is invalid: "
+                                f"{series_key} expected={page_count} "
+                                f"actual={stored_page_count}"
+                            )
+                        validate_complete_ranking_series(
+                            series_key, total, stored_record_count,
+                        )
+                        payload = None
+                        records = None
+                        stored_records = None
+
+                    for metric in METRICS[1:]:
+                        db_metric = metric
+                        series_key = (
+                            f"{range_id}/{view}/{db_metric}/{scope_key}"
+                        )
+                        scope_counts[series_key] = total
+                        target_dir = (
+                            output_root / "rankings" / range_id / view / metric
+                        )
+                        if scope_key == "all":
+                            target_dir.mkdir(parents=True, exist_ok=True)
+                        rendered_record_count = 0
+                        rendered_page_count = 0
+                        for page, derived_records in (
+                            writer.derive_ranking_metric_pages(
+                                range_id=range_id,
+                                view=view,
+                                scope_key=scope_key,
+                                source_metric="count",
+                                target_metric=db_metric,
+                                page_size=PAGE_SIZE,
+                            )
+                        ):
+                            rendered_page_count += 1
+                            if page != rendered_page_count:
                                 raise RuntimeError(
-                                    f"ranking compact projection is invalid: {series_key}/{page}"
+                                    f"derived ranking page order is invalid: "
+                                    f"{series_key}/{page}"
                                 )
-                            for index, (raw, compact_raw) in enumerate(
-                                zip(records, compact_records),
-                                start=1,
-                            ):
-                                if not isinstance(compact_raw, Mapping):
-                                    raise RuntimeError(
-                                        f"compact ranking record is not an object: {series_key}/{page}/{index}"
-                                    )
-                                expected_rank = (page - 1) * PAGE_SIZE + index
-                                writer.add_ranking(_ranking_row(
-                                    raw,
-                                    payload_record=compact_raw,
-                                    range_id=range_id,
-                                    view=view,
-                                    metric=metric,
-                                    scope_key=scope_key,
-                                    expected_rank=expected_rank,
-                                ))
-                                detail_key = _text(raw.get("sourceDetailKey"))
-                                if detail_key:
-                                    scoped_source_keys[range_id].add(detail_key)
-                                    if scope_key == "all":
-                                        source_keys[range_id].add(detail_key)
+                            records = [dict(record) for record in derived_records]
+                            payload = dict(derived_payload_template)
+                            payload["metric"] = metric
+                            payload["page"] = page
+                            payload["records"] = records
+                            payload["compact"] = True
+                            validate_page(
+                                payload,
+                                range_id=range_id,
+                                view=view,
+                                metric=metric,
+                                page=page,
+                                expected_total=total,
+                            )
+                            rendered_record_count += len(records)
                             if scope_key == "all":
-                                compact_payload = dict(payload)
-                                compact_payload["records"] = compact_records
-                                compact_payload["compact"] = True
                                 target = target_dir / f"page-{page:04d}.json"
-                                static_page_cache_drop_attempts += 1
-                                static_page_cache_drop_count += int(
-                                    _write_json_file_and_drop_cache(
-                                        target,
-                                        compact_payload,
-                                    )
-                                )
-                                written += 1
-                                if written % 25 == 0:
-                                    print(
-                                        f"PG_SNAPSHOT_WRITTEN files={written} "
-                                        f"page_cache_drops={static_page_cache_drop_count}/"
-                                        f"{static_page_cache_drop_attempts}",
-                                        flush=True,
-                                    )
-                                compact_payload = None
-                            del compact_records
+                                write_static_page(target, payload)
+                        if rendered_page_count != page_count:
+                            raise RuntimeError(
+                                f"derived ranking page count is invalid: "
+                                f"{series_key} expected={page_count} "
+                                f"actual={rendered_page_count}"
+                            )
                         validate_complete_ranking_series(
                             series_key, total, rendered_record_count,
                         )
@@ -2307,18 +3298,9 @@ def materialize(
                             f"total={total} pages={page_count}",
                             flush=True,
                         )
-                        # The render closure owns the page-independent aggregate,
-                        # which can contain tens of thousands of Python objects.
-                        # Drop every page-local reference before trimming the
-                        # allocator so the next one of 96 combinations cannot
-                        # accumulate idle heap or push a shared VPS into swap.
-                        render = None
-                        first = None
                         payload = None
                         records = None
-                        compact_payload = None
-                        raw = None
-                        compact_raw = None
+                        derived_records = None
                         _release_ranking_combo_memory(
                             range_id=range_id,
                             view=view,
@@ -2326,6 +3308,7 @@ def materialize(
                             scope_key=scope_key,
                             builder=builder,
                         )
+                    derived_payload_template = None
                 _release_completed_ranking_view_memory(
                     builder,
                     range_id=range_id,
@@ -2333,15 +3316,8 @@ def materialize(
                 )
 
         for range_id in RANGES:
-            missing = sorted(scoped_source_keys[range_id] - source_keys[range_id])
-            if missing:
-                raise RuntimeError(
-                    f"filtered ranking introduced unknown source keys for {range_id}: "
-                    + ", ".join(missing[:10])
-                )
             if not source_keys[range_id]:
                 raise RuntimeError(f"ranking snapshot has no canonical source keys for {range_id}")
-        scoped_source_keys.clear()
         _release_materializer_memory(writer, builder, phase="rankings")
         bulk_exported_ranges: set[str] = set()
         if (
@@ -2439,6 +3415,32 @@ def materialize(
                     flush=True,
                 )
             pending_source_keys = []
+
+        for range_id in RANGES:
+            derived_scope_counts = writer.derive_filtered_ranking_scopes(
+                range_id=range_id,
+                page_size=PAGE_SIZE,
+            )
+            overlap = sorted(set(scope_counts) & set(derived_scope_counts))
+            if overlap:
+                raise RuntimeError(
+                    "derived filtered ranking series already exists: "
+                    + ", ".join(overlap[:10])
+                )
+            scope_counts.update(derived_scope_counts)
+            _release_materializer_memory(
+                writer,
+                builder,
+                phase=f"filtered-rankings-{range_id}",
+            )
+        expected_scope_series = (
+            len(RANGES) * len(VIEWS) * len(METRICS) * len(SCOPES)
+        )
+        if len(scope_counts) != expected_scope_series:
+            raise RuntimeError(
+                "ranking scope series is incomplete: "
+                f"expected={expected_scope_series} actual={len(scope_counts)}"
+            )
 
         after = canonical_meta(adapter.meta_payload(connection))
         for name in ("active_revision_id", "content_sha256", "source_commit_sha"):

@@ -11841,7 +11841,13 @@ def _prepare_generic_overlay_rankings(
         if _overlay_rank_value(row, options["metric"]) < options["minCount"]:
             continue
         filtered.append(row)
-    filtered.sort(key=lambda row: (-_overlay_rank_value(row, options["metric"]), _text(row.get("title") or row.get("name") or row.get("detail_key"))))
+    filtered.sort(
+        key=lambda row: (
+            -_overlay_rank_value(row, options["metric"]),
+            _text(row.get("title") or row.get("name") or row.get("detail_key")),
+            _text(row.get("detail_key")),
+        )
+    )
     clicked_song_scopes = (
         _bounded_clicked_song_scopes(
             connection,
@@ -13992,6 +13998,20 @@ def _metric_value(group: Mapping[str, Any], metric: str) -> int:
     return len(occurrences)
 
 
+def _entity_group_sort_text(
+    group: Mapping[str, Any], view: str,
+) -> str:
+    """Match the public card title/name used by persisted ranking rows."""
+
+    video = group.get("video")
+    video = video if isinstance(video, Mapping) else {}
+    if view == "videos":
+        return _text(video.get("title") or group.get("key"))
+    if view == "vtubers":
+        return _text(video.get("channelName") or group.get("key"))
+    return _text(group.get("title") or group.get("key"))
+
+
 def _group_payload(group: Mapping[str, Any], query: Mapping[str, Any]) -> dict[str, Any]:
     range_id = query["range"]
     view = query["view"]
@@ -14047,6 +14067,7 @@ def _group_payload(group: Mapping[str, Any], query: Mapping[str, Any]) -> dict[s
         }
     payload["rank"] = 0
     payload["count"] = count
+    payload["songCount"] = payload.get("songCount", len(songs))
     payload["videoCount"] = payload.get("videoCount", len(videos))
     payload["timestampCount"] = count
     return payload
@@ -14061,7 +14082,11 @@ def rankings_payload_from_records(records: Iterable[Mapping[str, Any]], query: M
     base_groups = _entity_groups(records, base_query)
     groups = _entity_groups(records, options)
     groups = [group for group in groups if _metric_value(group, options["metric"]) >= options["minCount"]]
-    groups.sort(key=lambda group: (-_metric_value(group, options["metric"]), _text(group.get("title") or group.get("key"))))
+    groups.sort(key=lambda group: (
+        -_metric_value(group, options["metric"]),
+        _entity_group_sort_text(group, options["view"]),
+        _text(group.get("key")),
+    ))
     total_occurrences = sum(len(group["occurrences"]) for group in groups)
     total_videos = len({_text(row.get("videoId")) for group in groups for row in group["occurrences"]})
     page_count = max(1, math.ceil(len(groups) / options["pageSize"]))
