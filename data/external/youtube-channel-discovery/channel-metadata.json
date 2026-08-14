@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T08:30:15.079Z",
+  "generatedAt": "2026-08-14T10:19:05.234Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T08:30:15.079Z",
+    "fetchedAt": "2026-08-14T10:19:05.234Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T08:30:15.079Z",
+    "generatedAt": "2026-08-14T10:19:05.234Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1153,
-      "parseableChannels": 1134,
+      "totalChannels": 1155,
+      "parseableChannels": 1136,
       "realAvatar": 649,
-      "thumbnailFallback": 504,
+      "thumbnailFallback": 506,
       "missingDisplayImage": 0,
-      "missingAvatar": 504,
+      "missingAvatar": 506,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 672,
+      "skipped_collected_evidence": 674,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 653,
+      "batch_limit_reached": 655,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@hinamiphoenica",
+        "channelId": "UCygtb6wTyiSxXYHPAHs3UKA",
+        "displayName": "日向海フェニカ-Hinami Phoenica-【ユニプロ】",
+        "sourceUrl": "https://www.youtube.com/@hinamiphoenica",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hirari_otori",
+        "channelId": "UCWQa3tpD_swhocjOqhtJW6w",
+        "displayName": "鳳蝶",
+        "sourceUrl": "https://www.youtube.com/@hirari_otori",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@komawarikoma",
         "channelId": "UC_upTZ0otpptV5KARBsnIPg",
@@ -11835,20 +11849,6 @@
         "channelId": "UCRQJCI74rG0mhSKA1ovmw0A",
         "displayName": "Sonata ch. 蒼依 そなた",
         "sourceUrl": "https://www.youtube.com/@aoi_sonata",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KanadeIzuru",
-        "channelId": "UCZgOv3YDEs-ZnZWDYVwJdmA",
-        "displayName": "Izuru Ch. 奏手イヅル",
-        "sourceUrl": "https://www.youtube.com/@KanadeIzuru",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@nyanyaochu",
-        "channelId": "UC2lVHvoycjQZork33yImt0A",
-        "displayName": "ニャンヤオチュー",
-        "sourceUrl": "https://www.youtube.com/@nyanyaochu",
         "reason": "batch_limit_reached"
       }
     ]
