@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T19:11:36.193Z",
+  "generatedAt": "2026-08-14T20:09:44.184Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T19:11:36.193Z",
+    "fetchedAt": "2026-08-14T20:09:44.184Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T19:11:36.193Z",
+    "generatedAt": "2026-08-14T20:09:44.184Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1159,
-      "parseableChannels": 1140,
+      "totalChannels": 1160,
+      "parseableChannels": 1141,
       "realAvatar": 649,
-      "thumbnailFallback": 510,
+      "thumbnailFallback": 511,
       "missingDisplayImage": 0,
-      "missingAvatar": 510,
+      "missingAvatar": 511,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 678
+      "skipped_collected_evidence": 679
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 659,
+      "batch_limit_reached": 660,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@ghostdoll_y",
+        "channelId": "UCGcCqY2rzbxmbP5mMhlUwMA",
+        "displayName": "勿忘草 幽冥 - Yume Wasurenagusa -",
+        "sourceUrl": "https://www.youtube.com/@ghostdoll_y",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@sorashipurumu",
         "channelId": "UC82JqwZtW_AaoHE9vubF4Og",
@@ -11842,13 +11849,6 @@
         "channelId": "UCRsss1xyvtErN5NKppVXmjg",
         "displayName": "LiccaLin",
         "sourceUrl": "https://www.youtube.com/@LiccaLinCH",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tenmeimau",
-        "channelId": "UCkJtGhNTE3uVWbXMiUaw1oA",
-        "displayName": "天命まう / Tenmei  Mau",
-        "sourceUrl": "https://www.youtube.com/@tenmeimau",
         "reason": "batch_limit_reached"
       }
     ]
