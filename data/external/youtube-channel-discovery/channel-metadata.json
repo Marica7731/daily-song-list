@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T16:05:27.872Z",
+  "generatedAt": "2026-08-14T17:08:56.728Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T16:05:27.872Z",
+    "fetchedAt": "2026-08-14T17:08:56.728Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T16:05:27.872Z",
+    "generatedAt": "2026-08-14T17:08:56.728Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 678,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 678
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@sorashipurumu",
+        "channelId": "UC82JqwZtW_AaoHE9vubF4Og",
+        "displayName": "空詩ぷるむ / Sorashi Purumu",
+        "sourceUrl": "https://www.youtube.com/@sorashipurumu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@honacaroe",
+        "channelId": "UCZhTt1n3C-WvluNBLn_uLvg",
+        "displayName": "ほないこ!カロエちゃんねる!!【ギター弾き語り・ゲーム実況】",
+        "sourceUrl": "https://www.youtube.com/@honacaroe",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@YakonHibana",
         "channelId": "UCgKjo_iSJpFmXQypArDztYA",
@@ -11835,20 +11849,6 @@
         "channelId": "UCYzW2KfGcoG5CeTCnM3dgVA",
         "displayName": "鳴",
         "sourceUrl": "https://www.youtube.com/@mei0bake",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kaonya5",
-        "channelId": "UCv72evf2OghRQ_VZz8rSYzA",
-        "displayName": "訛音屋 / Kaonya",
-        "sourceUrl": "https://www.youtube.com/@kaonya5",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@CharWitch",
-        "channelId": "UCiYmrUY_048YmG1yQzTBwtQ",
-        "displayName": "シャル・ウィッチ / Char Witch",
-        "sourceUrl": "https://www.youtube.com/@CharWitch",
         "reason": "batch_limit_reached"
       }
     ]
