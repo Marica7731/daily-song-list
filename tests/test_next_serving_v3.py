@@ -1838,6 +1838,50 @@ class Tests(unittest.TestCase):
         self.assertIn(("song","artist"),pairs)
         self.assertEqual(keys,{"song-key"})
 
+    def test_source_song_identity_excludes_incomplete_page_variants(self):
+        record={
+            "type":"song","title":"Flavor Of Life","artist":"Hikaru Utada",
+            "count":88,"occurrenceCount":88,"occurrencePreviewLimited":True,
+            "occurrences":[{
+                "videoId":"page-one-video",
+                "song":{"title":"Flavor Of Life -Ballad Version-",
+                        "artist":"Hikaru Utada"},
+            }],
+        }
+        pairs,keys=pg_adapter._source_song_identity_evidence(record)
+        self.assertIn(("flavoroflife","hikaruutada"),pairs)
+        self.assertNotIn(("flavoroflifeballadversion","hikaruutada"),pairs)
+        self.assertEqual(keys,set())
+
+    def test_incomplete_song_page_cannot_expand_overlay_owner_identity(self):
+        persisted={
+            "type":"song","key":"flavoroflife::hikaruutada",
+            "title":"Flavor Of Life","artist":"Hikaru Utada",
+            "count":88,"occurrenceCount":88,"occurrencePreviewLimited":True,
+            "occurrences":[{
+                "videoId":"page-one-video",
+                "song":{"title":"Flavor Of Life -Ballad Version-",
+                        "artist":"Hikaru Utada"},
+            }],
+        }
+        candidate={
+            "revision_id":"overlay","video_id":"overlay-video",
+            "occurrence_id":"overlay-occurrence","position":0,
+            "range_id":"all","song_key":"ballad","seconds":1,
+            "title":"Flavor Of Life -Ballad Version-",
+            "artist":"Hikaru Utada","source_id":"fixture",
+            "source_system":"fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        with patch.object(pg_adapter,"_rows") as rows:
+            rebuilt=pg_adapter._generic_song_source_payload(
+                object(),"parent",persisted,"source",
+                {"range":"all","page":"1","pageSize":"30"},
+                ("overlay",),(candidate,),{},(),
+            )
+        self.assertIsNone(rebuilt)
+        rows.assert_not_called()
+
     def test_snapshot_exact_video_scope_never_reads_unscoped_candidates(self):
         video={"revision_id":"overlay","video_id":"video-one","video_title":"Video",
                "channel_name":"Fixture","channel_id":"UCfixture","channel_handle":"@fixture",

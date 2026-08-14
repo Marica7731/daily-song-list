@@ -14856,7 +14856,31 @@ def _source_song_identity_evidence(
 
     pairs: dict[tuple[str, str], tuple[str, str]] = {}
     song_keys: set[str] = set()
-    queue: list[Any] = [value]
+    identity_root = dict(value)
+    occurrences = identity_root.get("occurrences")
+    if isinstance(occurrences, (list, tuple)):
+        declared_raw = (
+            identity_root.get("occurrenceCount")
+            or identity_root.get("count")
+            or len(occurrences)
+        )
+        try:
+            declared_occurrences = int(declared_raw)
+        except (TypeError, ValueError):
+            declared_occurrences = len(occurrences)
+        if (
+            identity_root.get("occurrencePreviewLimited") is True
+            or declared_occurrences > len(occurrences)
+        ):
+            # Runtime source pagination merges the current video page into
+            # the immutable detail payload.  Those occurrences are display
+            # data, not source-owner evidence: using them here made the exact
+            # song identity (and therefore overlay totals) depend on page 1,
+            # page 2, and so on.  Complete legacy embedded sources remain a
+            # valid fallback, while incomplete pages must rely on invariant
+            # detail fields or fail closed.
+            identity_root.pop("occurrences", None)
+    queue: list[Any] = [identity_root]
     visited = 0
     while queue:
         current = queue.pop()
