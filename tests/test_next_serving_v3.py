@@ -148,23 +148,26 @@ class FakePgConnection:
 
 
 class FakeSnapshotPageBuilder:
-    def __init__(self,_connection):pass
+    build_calls=[]
+    def __init__(self,_connection):type(self).build_calls=[]
     def build_combo(self,range_id,view,metric,scope_key="all"):
+        type(self).build_calls.append((range_id,view,metric,scope_key))
         def render(page):
-            key=f"source-{range_id}-{view}" if view in {"songs","artists","vtubers"} else ""
+            key=f"source-{range_id}-{view}"
+            song_count=1 if view=="songs" else 2
             record={"rank":1,"type":view[:-1] if view.endswith("s") else view,
                     "key":f"{range_id}-{view}","title":f"{range_id} {view}","displayArtist":"Fixture",
-                    "name":f"{range_id} {view}","count":3,"songCount":2,"videoCount":2,
-                    "timestampCount":3,"channelName":"Fixture","channelId":"UCfixture",
+                    "name":f"{range_id} {view}","count":201,"songCount":song_count,"videoCount":201,
+                    "timestampCount":201,"channelName":"Fixture","channelId":"UCfixture",
                     "occurrences":[
                         {"videoId":f"preview-{range_id}-{view}-{index}","seconds":index,
                          "debugSearchEvidence":"deep-only-marker" if index==4 else ""}
                         for index in range(5)
                     ]}
-            if key:record["sourceDetailKey"]=key
+            record["sourceDetailKey"]=key
             return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,
                     "page":page,"pageSize":200,"totalCount":1,"filteredBaseCount":1,
-                    "totalOccurrenceCount":3,"totalSongCount":2,"totalVideoCount":2,
+                    "totalOccurrenceCount":201,"totalSongCount":song_count,"totalVideoCount":201,
                     "pageCount":1,"compact":False,"records":[record] if page==1 else []}
         return render
 
@@ -180,13 +183,15 @@ def fake_pg_source(_connection,key,query):
     page_size=int(query.get("pageSize") or 30);total=201
     start=(page-1)*page_size;stop=min(start+page_size,total)
     occurrences=[]
+    view=next(view for view in pg_materializer.VIEWS if key.endswith(f"-{view}"))
     for index in range(start,stop):
+        song_index=0 if view=="songs" else index%2
         occurrences.append({"videoId":f"video-{range_id}-{index:03d}","title":f"Video {index}",
                             "channelName":"Fixture","channelId":"UCfixture","channelHandle":"@fixture",
                             "channelUrl":"https://youtube.com/@fixture","publishedAt":"2026-08-10T00:00:00Z",
-                            "seconds":index,"song":{"songKey":f"song-{index%2}","title":f"Song {index%2}",
+                            "seconds":index,"song":{"songKey":f"song-{song_index}","title":f"Song {song_index}",
                                                         "artist":"Fixture","isNiche":index%2==0}})
-    record={"type":"song" if "songs" in key else "artist" if "artists" in key else "vtuber","key":key,
+    record={"type":"song" if view=="songs" else "artist" if view=="artists" else "video" if view=="videos" else "vtuber","key":key,
             "sourceDetailKey":key,"rangeId":range_id,"count":201,"videoCount":201,
             "timestampCount":201,"occurrences":occurrences}
     return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
@@ -1780,6 +1785,315 @@ class Tests(unittest.TestCase):
         self.assertNotIn("SCAN ranking_rows",detail)
         writer.abort()
 
+    def test_snapshot_writer_derives_metric_orders_from_canonical_rows(self):
+        target=self.temp/"derived-rankings.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        records=[
+            {"rank":1,"key":"entity-zulu","sourceDetailKey":"source-zulu",
+             "title":"Zulu","count":40,"songCount":1,"videoCount":4,
+             "timestampCount":40,"deepSearchEvidence":"marker-zulu"},
+            {"rank":2,"key":"entity-b","sourceDetailKey":"source-a",
+             "title":"同名","count":30,"songCount":3,"videoCount":2,
+             "timestampCount":30,"deepSearchEvidence":"marker-b"},
+            {"rank":3,"key":"entity-a","sourceDetailKey":"source-z",
+             "title":"同名","count":20,"songCount":3,"videoCount":1,
+             "timestampCount":20,"deepSearchEvidence":"marker-a"},
+            {"rank":4,"key":"entity-hana","sourceDetailKey":"source-hana",
+             "title":"花","count":10,"songCount":2,"videoCount":5,
+             "timestampCount":10,"deepSearchEvidence":"marker-hana"},
+        ]
+        try:
+            for record in records:
+                writer.add_ranking(pg_materializer._ranking_row(
+                    record,
+                    payload_record={**record,"occurrences":[{
+                        "videoId":record["key"],"marker":record["deepSearchEvidence"],
+                    }]},
+                    range_id="all",view="songs",metric="occurrences",
+                    scope_key="all",expected_rank=record["rank"],
+                ))
+            songs=list(writer.derive_ranking_metric_pages(
+                range_id="all",view="songs",scope_key="all",
+                source_metric="count",target_metric="songs",page_size=2,
+            ))
+            videos=list(writer.derive_ranking_metric_pages(
+                range_id="all",view="songs",scope_key="all",
+                source_metric="count",target_metric="videos",page_size=2,
+            ))
+            self.assertEqual([page for page,_records in songs],[1,2])
+            self.assertEqual([page for page,_records in videos],[1,2])
+            self.assertEqual(
+                [record["sourceDetailKey"] for _page,page_records in songs
+                 for record in page_records],
+                ["source-z","source-a","source-hana","source-zulu"],
+            )
+            self.assertEqual(
+                [record["sourceDetailKey"] for _page,page_records in videos
+                 for record in page_records],
+                ["source-hana","source-zulu","source-a","source-z"],
+            )
+            rows=writer.connection.execute(
+                "SELECT metric,rank,detail_key,row_id,count,song_count,video_count,"
+                "timestamp_count,payload_json,search_text,channel_search_text "
+                "FROM ranking_rows ORDER BY metric,rank"
+            ).fetchall()
+            by_metric_detail={(row[0],row[2]):row for row in rows}
+            for target_metric in ("songs","videos"):
+                for source_record in records:
+                    detail_key=source_record["sourceDetailKey"]
+                    source=by_metric_detail[("count",detail_key)]
+                    derived=by_metric_detail[(target_metric,detail_key)]
+                    self.assertEqual(derived[4:8],source[4:8])
+                    self.assertEqual(derived[9:11],source[9:11])
+                    self.assertIn(source_record["deepSearchEvidence"],derived[9])
+                    source_payload=json.loads(source[8])
+                    derived_payload=json.loads(derived[8])
+                    self.assertEqual(derived_payload["rank"],derived[1])
+                    source_payload.pop("rank")
+                    derived_payload.pop("rank")
+                    self.assertEqual(derived_payload,source_payload)
+                    self.assertEqual(
+                        derived[3],
+                        f"all:songs:{target_metric}:all:{derived[1]}:"
+                        f"{source_record['key']}",
+                    )
+        finally:
+            writer.abort()
+
+    def test_snapshot_writer_metric_derivation_fails_closed_on_zero_scalar(self):
+        target=self.temp/"derived-zero.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        record={"rank":1,"key":"entity-zero","sourceDetailKey":"source-zero",
+                "title":"Zero","count":1,"songCount":0,"videoCount":1,
+                "timestampCount":1}
+        try:
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=record,range_id="all",view="songs",
+                metric="occurrences",scope_key="visible",expected_rank=1,
+            ))
+            with self.assertRaisesRegex(
+                RuntimeError,"membership is not invariant",
+            ):
+                list(writer.derive_ranking_metric_pages(
+                    range_id="all",view="songs",scope_key="visible",
+                    source_metric="count",target_metric="songs",page_size=200,
+                ))
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*) FROM ranking_rows WHERE metric='songs'"
+                ).fetchone()[0],0,
+            )
+            self.assertEqual(
+                list(writer.derive_ranking_metric_pages(
+                    range_id="7d",view="artists",scope_key="niche",
+                    source_metric="count",target_metric="songs",page_size=200,
+                )),
+                [(1,())],
+            )
+        finally:
+            writer.abort()
+
+    def test_snapshot_writer_derives_filtered_scopes_from_canonical_sources(self):
+        target=self.temp/"derived-filtered-scopes.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+
+        def add_fixture(view,source_key,entity_key,name,occurrences):
+            canonical=[]
+            video_ids=set()
+            song_keys=set()
+            for position,item in enumerate(occurrences,1):
+                row=pg_materializer._source_occurrence_row(
+                    source_key,"all",position,item,
+                    entity_type="vtuber" if view=="vtubers" else view[:-1],
+                )
+                canonical.append(row)
+                video_ids.add(row[3]);song_keys.add(row[13])
+            record={"rank":1,"key":entity_key,"sourceDetailKey":source_key,
+                    "title":name if view in {"songs","videos"} else "",
+                    "name":name,"displayArtist":"Fixture",
+                    "count":len(canonical),"songCount":len(song_keys),
+                    "videoCount":len(video_ids),"timestampCount":len(canonical),
+                    "occurrences":occurrences}
+            existing=writer.connection.execute(
+                "SELECT count(*) FROM ranking_rows WHERE range_id='all' "
+                "AND view=? AND metric='count' AND scope_key='all'",(view,),
+            ).fetchone()[0]
+            record["rank"]=int(existing)+1
+            compact=pg_adapter.compact_ranking_payloads([record],view)[0]
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=compact,range_id="all",view=view,
+                metric="occurrences",scope_key="all",expected_rank=record["rank"],
+            ))
+            writer.add_source(
+                source_key,"all",
+                {"type":"vtuber" if view=="vtubers" else view[:-1],
+                 "key":entity_key,"sourceDetailKey":source_key},
+                occurrences,
+            )
+
+        artist_a=[
+            {"videoId":"video-a","marker":"visible-niche-marker",
+             "song":{"songKey":"song-a","title":"Song A","artist":"Artist A",
+                     "isNiche":True,"isUnknownArtist":False}},
+            {"videoId":"video-b","marker":"unknown-normal-excluded",
+             "song":{"songKey":"song-b","title":"Song B","artist":"unknown",
+                     "isNiche":False,"isUnknownArtist":True}},
+            {"videoId":"video-c","marker":"unknown-niche-marker",
+             "song":{"songKey":"song-c","title":"Song C","artist":"unknown",
+                     "isNiche":True,"isUnknownArtist":True}},
+        ]
+        artist_b=[
+            {"videoId":"video-d","marker":"visible-normal-marker",
+             "song":{"songKey":"song-d","title":"Song D","artist":"Artist B",
+                     "isNiche":False,"isUnknownArtist":False}},
+        ]
+        add_fixture("artists","source-artist-a","artist-a","Alpha",artist_a)
+        add_fixture("artists","source-artist-b","artist-b","Beta",artist_b)
+        for view in ("songs","vtubers","videos"):
+            add_fixture(
+                view,f"source-{view}",f"entity-{view}",view,
+                [{"videoId":f"video-{view}","marker":f"visible-{view}",
+                  "song":{"songKey":f"song-{view}","title":f"Song {view}",
+                          "artist":"Fixture","isNiche":False,
+                          "isUnknownArtist":False}}],
+            )
+        try:
+            result=writer.derive_filtered_ranking_scopes(
+                range_id="all",page_size=2,
+            )
+            self.assertEqual(len(result),36)
+            self.assertEqual(result["all/artists/count/niche"],1)
+            self.assertEqual(result["all/artists/count/visible"],2)
+            self.assertEqual(result["all/artists/count/visibleNiche"],1)
+            self.assertEqual(result["all/songs/count/niche"],0)
+            self.assertEqual(result["all/songs/count/visible"],1)
+            for metric in ("count","songs","videos"):
+                self.assertEqual(result[f"all/artists/{metric}/niche"],1)
+                self.assertEqual(result[f"all/artists/{metric}/visible"],2)
+            visible=writer.connection.execute(
+                "SELECT rank,detail_key,count,song_count,video_count,payload_json,"
+                "search_text FROM ranking_rows WHERE range_id='all' "
+                "AND view='artists' AND metric='count' AND scope_key='visible' "
+                "ORDER BY rank"
+            ).fetchall()
+            self.assertEqual(
+                [(row[0],row[1],row[2],row[3],row[4]) for row in visible],
+                [(1,"source-artist-a",1,1,1),(2,"source-artist-b",1,1,1)],
+            )
+            payload=json.loads(visible[0][5])
+            self.assertEqual(payload["songs"],[
+                {"key":"song-a","name":"Song A","count":1},
+            ])
+            self.assertEqual(len(payload["occurrences"]),1)
+            self.assertIn("visible-niche-marker",visible[0][6])
+            self.assertNotIn("unknown-normal-excluded",visible[0][6])
+            self.assertNotIn("unknown-niche-marker",visible[0][6])
+            niche_payload,niche_search=writer.connection.execute(
+                "SELECT payload_json,search_text FROM ranking_rows "
+                "WHERE range_id='all' AND view='artists' AND metric='count' "
+                "AND scope_key='niche' AND rank=1"
+            ).fetchone()
+            self.assertEqual(
+                (json.loads(niche_payload)["count"],
+                 json.loads(niche_payload)["songCount"],
+                 json.loads(niche_payload)["videoCount"]),
+                (2,2,2),
+            )
+            self.assertIn("unknown-niche-marker",niche_search)
+            self.assertNotIn("unknown-normal-excluded",niche_search)
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*) FROM temp.sqlite_temp_master "
+                    "WHERE name LIKE 'filtered_ranking_%'"
+                ).fetchone()[0],0,
+            )
+        finally:
+            writer.abort()
+
+    def test_legacy_count_cards_recover_canonical_song_counts_once(self):
+        song=pg_materializer._complete_ranking_metric_scalars(
+            {"key":"song-key","count":5,"songCount":0,"videoCount":4,
+             "timestampCount":5},
+            "songs",
+        )
+        artist=pg_materializer._complete_ranking_metric_scalars(
+            {"key":"artist-key","count":5,"songCount":0,"videoCount":4,
+             "timestampCount":5,"songs":[
+                 {"key":"song-a","name":"Song A","count":3},
+                 {"key":"song-b","name":"Song B","count":2},
+             ]},
+            "artists",
+        )
+        video=pg_materializer._complete_ranking_metric_scalars(
+            {"key":"video-key","count":3,"songCount":0,"videoCount":1,
+             "timestampCount":3,"songs":[
+                 {"title":"Same","artist":"Artist","seconds":1},
+                 {"title":"Same","artist":"Artist","seconds":2},
+                 {"title":"Other","artist":"Artist","seconds":3},
+             ]},
+            "videos",
+        )
+        self.assertEqual(song["songCount"],1)
+        self.assertEqual(artist["songCount"],2)
+        self.assertEqual(video["songCount"],2)
+        with self.assertRaisesRegex(
+            RuntimeError,"Artist canonical song identities are invalid",
+        ):
+            pg_materializer._complete_ranking_metric_scalars(
+                {"key":"artist-key","count":2,"songCount":0,
+                 "videoCount":1,"timestampCount":2,"songs":[
+                     {"key":"duplicate","count":1},
+                     {"key":"duplicate","count":1},
+                 ]},
+                "artists",
+            )
+
+    def test_authoritative_record_metrics_share_payloads_and_public_tie_order(self):
+        records=[]
+        for suffix in ("b","a"):
+            records.append({
+                "video":{
+                    "videoId":f"video-{suffix}","title":"Same Video",
+                    "channelId":f"channel-{suffix}","channelName":"Same Channel",
+                },
+                "occurrences":({
+                    "occurrenceId":f"occ-{suffix}","rangeId":"7d",
+                    "songKey":f"song-{suffix}","title":"Same Song",
+                    "artist":f"Artist {suffix.upper()}","seconds":1,
+                },),
+            })
+        expected_orders={
+            "songs":["song-a","song-b"],
+            "artists":["Artist A","Artist B"],
+            "vtubers":["channel-a","channel-b"],
+            "videos":["video-a","video-b"],
+        }
+        for view,expected_order in expected_orders.items():
+            canonical=None
+            for metric in pg_materializer.METRICS:
+                payload=pg_adapter.rankings_payload_from_records(
+                    records,{"range":"7d","view":view,"metric":metric,
+                             "page":"1","pageSize":"200"},
+                )
+                public_records=payload["records"]
+                self.assertEqual(
+                    [record["key"] for record in public_records],expected_order,
+                )
+                self.assertTrue(all(
+                    int(record.get(name) or 0)>0
+                    for record in public_records
+                    for name in ("count","songCount","videoCount")
+                ))
+                normalized={
+                    record["key"]:{key:value for key,value in record.items()
+                                   if key!="rank"}
+                    for record in public_records
+                }
+                if canonical is None:
+                    canonical=normalized
+                else:
+                    self.assertEqual(normalized,canonical)
+
     def test_snapshot_file_cache_drop_flushes_before_exact_fadvise(self):
         target=self.temp/"cache-file.bin"
         target.write_bytes(b"fixture")
@@ -3127,8 +3441,19 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(list(pages.rglob("page-*.json"))),24)
         self.assertEqual(result["ranking_scope_series"],96)
         self.assertEqual(result["ranking_rows"],96)
-        self.assertEqual(result["source_details"],6)
-        self.assertEqual(result["source_occurrences"],1206)
+        self.assertEqual(len(FakeSnapshotPageBuilder.build_calls),8)
+        self.assertEqual(
+            {metric for _range_id,_view,metric,_scope
+             in FakeSnapshotPageBuilder.build_calls},
+            {"occurrences"},
+        )
+        self.assertEqual(
+            {scope for _range_id,_view,_metric,scope
+             in FakeSnapshotPageBuilder.build_calls},
+            {"all"},
+        )
+        self.assertEqual(result["source_details"],8)
+        self.assertEqual(result["source_occurrences"],1608)
         self.assertEqual(result["source_overlay_scope"],
                          {"videos":0,"pairs":0,"sources":0,"targets":0})
         with closing(sqlite3.connect(canonical)) as database:
@@ -3142,9 +3467,15 @@ class Tests(unittest.TestCase):
             ).fetchone()
         self.assertEqual(len(scope_marker),96)
         self.assertEqual(scopes,{"all","niche","visible","visibleNiche"})
-        self.assertEqual(source_counts,{"7d":603,"all":603})
+        self.assertEqual(source_counts,{"7d":804,"all":804})
         self.assertEqual(len(json.loads(ranking_payload)["occurrences"]),3)
         self.assertIn("deep-only-marker",ranking_search)
+        for metric in pg_materializer.METRICS:
+            static_payload=json.loads((
+                pages/"rankings"/"all"/"songs"/metric/"page-0001.json"
+            ).read_text(encoding="utf-8"))
+            self.assertEqual(static_payload["totalSongCount"],1)
+            self.assertEqual(static_payload["records"][0]["songCount"],1)
         serving=self.temp/"pg-serving.sqlite"
         built=builder.build_serving_store(canonical,pages,serving,active_revision_id=REV)
         self.assertEqual(len(built["validation"]["rankingScopes"]),96)
