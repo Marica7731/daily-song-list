@@ -2200,6 +2200,167 @@ class Tests(unittest.TestCase):
         self.assertNotIn(("flavoroflifeballadversion","hikaruutada"),pairs)
         self.assertEqual(keys,set())
 
+    def test_legacy_unknown_song_group_ignores_unrelated_scoped_change(self):
+        persisted={
+            "type":"song","key":"責任集合体::unknown","title":"責任集合体",
+            "count":39,"occurrenceCount":39,"occurrencePreviewLimited":True,
+            "occurrences":[{
+                "videoId":"shared-video",
+                "song":{"title":"責任集合体","artist":"未記載"},
+            }],
+        }
+        unrelated={
+            "entityType":"occurrences","videoId":"shared-video",
+            "occurrenceId":"other-occurrence","rangeId":"all",
+            "title":"フィナーレ。","artist":"eill",
+        }
+        with patch.object(pg_adapter,"_rows") as rows:
+            rebuilt=pg_adapter._generic_song_source_payload(
+                object(),"parent",persisted,"source",
+                {"range":"all","page":"1","pageSize":"30"},
+                ("overlay",),(),{},(unrelated,),
+            )
+        self.assertIsNone(rebuilt)
+        rows.assert_not_called()
+
+    def test_legacy_unknown_song_group_matches_reviewed_unknown_candidate(self):
+        title="責任集合体"
+        persisted={
+            "type":"song","key":f"{title}::unknown","title":title,
+            "count":39,"occurrenceCount":39,"occurrencePreviewLimited":True,
+            "occurrences":[{
+                "videoId":"parent-page-video",
+                "song":{"title":title,"artist":"未記載"},
+            }],
+        }
+        candidate={
+            "revision_id":"overlay","video_id":"video-new",
+            "occurrence_id":"occ-new","position":0,"range_id":"all",
+            "song_key":"song-new","seconds":1,"title":title,
+            "artist":"未記載","source_id":"source","raw_hash":"raw",
+            "source_system":"fixture","video_tombstone":False,
+            "occurrence_payload_json":{
+                "videoId":"video-new","occurrenceId":"occ-new",
+                "rangeId":"all","title":title,"artist":"未記載",
+                "isUnknownArtist":True,
+            },
+            "video_payload_json":{
+                "videoId":"video-new","title":"New Video",
+                "channelId":"UCfixture","channelName":"Fixture",
+            },
+        }
+        summary={"total_occurrence_count":39,"total_video_count":39,
+                 "max_position":39}
+        page=[{"video_id":"video-new","first_position":40}]
+        with patch.object(
+            pg_adapter,"_rows",side_effect=[[],[summary],page],
+        ) as rows:
+            rebuilt=pg_adapter._generic_song_source_payload(
+                object(),"parent",persisted,"source",
+                {"range":"all","page":"1","pageSize":"200"},
+                ("overlay",),(candidate,),{},(),
+            )
+        self.assertTrue(rebuilt["found"])
+        self.assertEqual(rebuilt["totalOccurrenceCount"],40)
+        self.assertEqual(rebuilt["totalVideoCount"],40)
+        self.assertEqual(rebuilt["record"]["count"],40)
+        self.assertEqual(
+            rebuilt["record"]["occurrences"][0]["song"]["artist"],
+            "未記載",
+        )
+        self.assertEqual(rows.call_count,3)
+
+    def test_snapshot_exports_legacy_unknown_song_after_unrelated_change(self):
+        source_key="0dc720fff2e97b01"
+        title="責任集合体"
+        self.assertEqual(
+            pg_adapter._production_source_detail_key_for_group(
+                "songs","all",f"{title}::unknown",
+            ),
+            source_key,
+        )
+        occurrences=[{
+            "videoId":("shared-video" if index==0 else f"video-{index:02d}"),
+            "song":{"title":title,"artist":"未記載",
+                    "isUnknownArtist":True},
+        } for index in range(39)]
+        unrelated={
+            "entityType":"occurrences","videoId":"shared-video",
+            "occurrenceId":"other-occurrence","rangeId":"all",
+            "title":"フィナーレ。","artist":"eill",
+        }
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),
+            authoritative_records=None,snapshot_artist_aliases=None,
+        )
+        rendered=[]
+
+        def persisted(_connection,_revision,key,query,**_kwargs):
+            page=int(query["page"])
+            page_values=occurrences[(page-1)*30:page*30]
+            return {
+                "schemaVersion":1,"found":True,"sourceKey":key,
+                "sourceRevisionId":"parent","page":page,"pageSize":30,
+                "pageCount":2,"totalCount":39,
+                "totalVideoCount":39,"totalOccurrenceCount":39,
+                "record":{
+                    "type":"song","key":f"{title}::unknown",
+                    "title":title,"count":39,"occurrenceCount":39,
+                    "videoCount":39,"occurrencePreviewLimited":True,
+                    "sourceDetailKey":key,"rangeId":"all",
+                    "occurrences":page_values,
+                },
+            }
+
+        def load(key,query):
+            payload=pg_adapter.source_payload(
+                object(),key,query,snapshot_context=context,
+                snapshot_video_scope=("shared-video",),
+            )
+            rendered.append(payload)
+            return payload
+
+        class Writer:
+            def __init__(self):
+                self.values=[]
+            def begin_source(self,key,range_id,record):
+                self.key=key;self.range_id=range_id;self.record=dict(record)
+                return {"position":0}
+            def add_source_occurrences(self,state,values):
+                values=list(values);self.values.extend(values)
+                state["position"]+=len(values)
+                return len(values)
+            def finish_source(self,state):
+                return state["position"]
+
+        writer=Writer()
+        with patch.object(
+            pg_adapter,"_runtime_source_payload",side_effect=persisted,
+        ), patch.object(
+            pg_adapter,"_snapshot_source_overlay_inputs",
+            return_value=((),{},(unrelated,)),
+        ), patch.object(pg_adapter,"_rows") as rows:
+            pg_materializer.export_source(
+                object(),writer,range_id="all",source_key=source_key,
+                payload_loader=load,
+            )
+        rows.assert_not_called()
+        self.assertEqual(len(rendered),2)
+        self.assertTrue(all(payload["found"] for payload in rendered))
+        self.assertTrue(all(
+            payload["sourceKey"]==source_key
+            and payload["totalOccurrenceCount"]==39
+            and payload["totalVideoCount"]==39
+            and payload["pageCount"]==2
+            and "sourceDetailBlocked" not in payload
+            for payload in rendered
+        ))
+        self.assertEqual(writer.key,source_key)
+        self.assertEqual(writer.range_id,"all")
+        self.assertEqual(len(writer.values),39)
+        self.assertEqual(len({item["videoId"] for item in writer.values}),39)
+
     def test_incomplete_song_page_cannot_expand_overlay_owner_identity(self):
         persisted={
             "type":"song","key":"flavoroflife::hikaruutada",
