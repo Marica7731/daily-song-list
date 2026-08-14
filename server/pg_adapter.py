@@ -4587,6 +4587,171 @@ def _runtime_replacement_candidate_rows(
     return rows
 
 
+def _enrich_runtime_parent_group_keys(
+    connection,
+    parent_revision_id: str,
+    changes: Sequence[dict[str, Any]],
+    *,
+    range_id: str,
+    parent_group_cache: MutableMapping[Any, Any] | None = None,
+) -> None:
+    """Bind runtime curation to the exact persisted parent ranking groups.
+
+    Historical curation rows keep the raw parent artist placeholder inside
+    ``originalIdentity`` but can omit ``isUnknownArtist``.  The immutable full
+    runtime still has that physical flag.  Resolve only exact
+    ``(video_id, occurrence_id)`` pairs and carry their canonical parent group
+    keys forward before the bounded affected-ranking window is selected.
+    """
+
+    requested = tuple(sorted({
+        (
+            _text(change.get("videoId") or change.get("video_id")),
+            _text(change.get("occurrenceId") or change.get("occurrence_id")),
+        )
+        for change in changes
+        if _text(change.get("entityType"))
+            in {"occurrences", "runtime_occurrences"}
+        and _text(change.get("videoId") or change.get("video_id"))
+        and _text(change.get("occurrenceId") or change.get("occurrence_id"))
+    }))
+    if not requested:
+        return
+    if len(requested) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "runtime parent group identity exceeded bounded occurrence cap"
+        )
+    selected_range = _text(range_id)
+    if selected_range not in SUPPORTED_RANGES:
+        raise PostgresAdapterError("runtime parent group identity range is invalid")
+    encoded_identities = tuple(
+        f"{video_id}\0{occurrence_id}"
+        for video_id, occurrence_id in requested
+    )
+    cache_key = (
+        parent_revision_id,
+        selected_range,
+        "__runtime_parent_group_keys__",
+        encoded_identities,
+    )
+    evidence = (
+        parent_group_cache.get(cache_key)
+        if parent_group_cache is not None
+        else None
+    )
+    if evidence is None:
+        requested_json = json.dumps(
+            [
+                {"video_id": video_id, "occurrence_id": occurrence_id}
+                for video_id, occurrence_id in requested
+            ],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        rows = _rows(
+            connection,
+            """
+            WITH requested(video_id, occurrence_id) AS MATERIALIZED (
+              SELECT item.video_id, item.occurrence_id
+              FROM jsonb_to_recordset(%s::jsonb)
+                AS item(video_id text, occurrence_id text)
+            )
+            SELECT o.video_id, o.occurrence_id, o.title, o.artist,
+                   o.is_unknown_artist
+            FROM runtime_occurrences AS o
+            JOIN requested AS wanted
+              ON wanted.video_id = o.video_id
+             AND wanted.occurrence_id = o.occurrence_id
+            WHERE o.revision_id = %s
+              AND (o.range_id = ANY(%s) OR o.range_id IS NULL)
+            ORDER BY o.video_id, o.occurrence_id
+            LIMIT %s
+            """,
+            [
+                requested_json,
+                parent_revision_id,
+                [selected_range, ""],
+                len(requested) + 1,
+            ],
+        )
+        if len(rows) > len(requested):
+            raise PostgresAdapterError(
+                "runtime parent group identity returned duplicate occurrences"
+            )
+        requested_set = set(requested)
+        resolved: dict[tuple[str, str], tuple[str, str, bool]] = {}
+        for row in rows:
+            identity = (
+                _text(row.get("video_id")),
+                _text(row.get("occurrence_id")),
+            )
+            if identity not in requested_set or identity in resolved:
+                raise PostgresAdapterError(
+                    "runtime parent group identity returned an invalid occurrence"
+                )
+            title_key = _overlay_song_group_norm(row.get("title"))
+            if not title_key:
+                raise PostgresAdapterError(
+                    "runtime parent group identity has an empty song title"
+                )
+            is_unknown_artist = row.get("is_unknown_artist") is True
+            artist_key = (
+                "unknown"
+                if is_unknown_artist
+                else _overlay_song_group_norm(row.get("artist")) or "unknown"
+            )
+            resolved[identity] = (
+                f"{title_key}::{artist_key}",
+                artist_key,
+                is_unknown_artist,
+            )
+        evidence = resolved
+        if parent_group_cache is not None:
+            parent_group_cache[cache_key] = dict(resolved)
+    if not isinstance(evidence, Mapping):
+        raise PostgresAdapterError("runtime parent group cache is invalid")
+    for change in changes:
+        identity = (
+            _text(change.get("videoId") or change.get("video_id")),
+            _text(change.get("occurrenceId") or change.get("occurrence_id")),
+        )
+        resolved = evidence.get(identity)
+        if resolved is None:
+            # A runtime chain can be rooted in a newer accepted overlay and
+            # therefore have no full-parent tuple.  Existing overlay identity
+            # handling remains authoritative for that case.
+            continue
+        if (
+            not isinstance(resolved, (tuple, list))
+            or len(resolved) != 3
+            or not _text(resolved[0])
+            or not _text(resolved[1])
+            or not isinstance(resolved[2], bool)
+        ):
+            raise PostgresAdapterError("runtime parent group cache entry is invalid")
+        parent_song_key = _text(resolved[0])
+        parent_artist_key = _text(resolved[1])
+        is_unknown_artist = resolved[2]
+        explicit_unknown = _scope_boolean_flag(
+            change, "isUnknownArtist", "is_unknown_artist",
+        )
+        if explicit_unknown is not None and explicit_unknown != is_unknown_artist:
+            raise PostgresAdapterError(
+                "runtime parent unknown-artist identity conflicts with full runtime"
+            )
+        for field, expected in (
+            ("parentSongGroupKey", parent_song_key),
+            ("parentArtistGroupKey", parent_artist_key),
+        ):
+            existing = _text(change.get(field))
+            if existing and existing != expected:
+                raise PostgresAdapterError(
+                    f"runtime parent group identity conflicts with {field}"
+                )
+            change[field] = expected
+        change["isUnknownArtist"] = is_unknown_artist
+
+
 def _enrich_runtime_original_group_counts(
     connection,
     parent_revision_id: str,
@@ -4927,8 +5092,7 @@ def _apply_runtime_tombstone_groups(
                 )
                 candidate_group_keys = detail_group_keys
             if (
-                allow_accepted_reset_detail_fallback
-                and not candidate_group_keys
+                not candidate_group_keys
                 and _text(change.get("parentSongGroupKey")) in groups
             ):
                 candidate_group_keys = (
@@ -10795,6 +10959,13 @@ def _prepare_generic_overlay_rankings(
             compatible_by_identity[_overlay_candidate_identity(row)] = dict(row)
         candidate_rows = list(compatible_by_identity.values())
     runtime_changes = _overlay_rows_for_range(runtime_changes_all, options["range"])
+    _enrich_runtime_parent_group_keys(
+        connection,
+        parent[0],
+        runtime_changes,
+        range_id=options["range"],
+        parent_group_cache=snapshot_original_group_counts,
+    )
     # The exact VTuber query is physical-range scoped.  Do not pass the
     # lineage-wide candidate list: a legacy/all row must not leak into 7d,
     # and a 7d row must not perturb the all aggregate.

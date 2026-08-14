@@ -2784,6 +2784,7 @@ class Tests(unittest.TestCase):
                                         {"artist":"Artist"})), \
              patch.object(pg_adapter,"_authoritative_artist_summary_rows",
                           return_value=exact) as authority, \
+             patch.object(pg_adapter,"_enrich_runtime_parent_group_keys") as parent_groups, \
              patch.object(pg_adapter,"_enrich_runtime_original_group_counts") as enrich, \
              patch.object(pg_adapter,"_apply_runtime_tombstone_groups") as tombstones, \
              patch.object(pg_adapter,"_reconcile_affected_song_counts") as reconcile:
@@ -2798,6 +2799,7 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(prepared["exactAffectedArtistKeys"],("artist",))
         authority.assert_called_once()
+        parent_groups.assert_called_once()
         enrich.assert_not_called();tombstones.assert_not_called()
         reconcile.assert_not_called()
 
@@ -3688,6 +3690,76 @@ class Tests(unittest.TestCase):
             pg_adapter._runtime_view_group_key(parent_row,"artists"),
             "unknown",
         )
+
+    def test_runtime_parent_group_keys_use_exact_physical_unknown_flag(self):
+        cache={}
+        original_artist="\u672a\u8a18\u8f09"
+        first={
+            "entityType":"occurrences","videoId":"ZQtuEfpiawc",
+            "occurrenceId":"a858aab31ec7cd9ffb7d30e7",
+            "title":"Snow halation \u5408\u5531","artist":original_artist,
+            "replacement":True,
+        }
+        second=dict(first)
+        parent_row={
+            "video_id":"ZQtuEfpiawc",
+            "occurrence_id":"a858aab31ec7cd9ffb7d30e7",
+            "title":"Snow halation \u5408\u5531","artist":original_artist,
+            "is_unknown_artist":True,
+        }
+        with patch.object(pg_adapter,"_rows",return_value=[parent_row]) as rows:
+            pg_adapter._enrich_runtime_parent_group_keys(
+                object(),"parent",[first],range_id="all",
+                parent_group_cache=cache,
+            )
+            pg_adapter._enrich_runtime_parent_group_keys(
+                object(),"parent",[second],range_id="all",
+                parent_group_cache=cache,
+            )
+        self.assertEqual(rows.call_count,1)
+        statement=rows.call_args.args[1]
+        params=rows.call_args.args[2]
+        self.assertIn("jsonb_to_recordset",statement)
+        self.assertIn("o.is_unknown_artist",statement)
+        self.assertEqual(params[1:3],["parent",["all",""]])
+        requested=json.loads(params[0])
+        self.assertEqual(requested,[{
+            "video_id":"ZQtuEfpiawc",
+            "occurrence_id":"a858aab31ec7cd9ffb7d30e7",
+        }])
+        for change in (first,second):
+            self.assertIs(change["isUnknownArtist"],True)
+            self.assertEqual(change["parentArtistGroupKey"],"unknown")
+            self.assertEqual(
+                change["parentSongGroupKey"],
+                "snowhalation\u5408\u5531::unknown",
+            )
+
+    def test_runtime_replacement_removes_explicit_parent_song_group(self):
+        old_key="snowhalation\u5408\u5531::unknown"
+        groups={old_key:{
+            "detail_key":old_key,"title":"Snow halation \u5408\u5531",
+            "artist":"","row_count":1,"timestamp_count":1,
+            "song_count":1,"video_count":1,"payload_json":None,
+        }}
+        change={
+            "entityType":"occurrences","videoId":"ZQtuEfpiawc",
+            "occurrenceId":"a858aab31ec7cd9ffb7d30e7",
+            "title":"Snow halation \u5408\u5531","artist":"\u672a\u8a18\u8f09",
+            "isUnknownArtist":True,"parentSongGroupKey":old_key,
+            "parentArtistGroupKey":"unknown",
+            "originalGroupVideoOccurrenceCount":1,"replacement":True,
+            "replacementPayload":{
+                "videoId":"ZQtuEfpiawc",
+                "occurrenceId":"a858aab31ec7cd9ffb7d30e7",
+                "title":"Snow halation \u5408\u5531",
+                "artist":"\u03bc's (Love Live!)",
+            },
+        }
+        pg_adapter._apply_runtime_tombstone_groups(
+            groups,[change],"songs",
+        )
+        self.assertEqual(groups,{})
 
     def test_snapshot_parent_group_counts_reuse_exact_video_set(self):
         cache={}
