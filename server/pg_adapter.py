@@ -15213,6 +15213,57 @@ def _source_song_identity_evidence(
     return pairs, song_keys
 
 
+def _source_song_group_identity(value: Mapping[str, Any]) -> str:
+    """Return one validated persisted canonical song-group identity.
+
+    Some legacy unknown-artist source details intentionally omit a top-level
+    ``artist`` while retaining the immutable ``<title>::unknown`` aggregate
+    key.  Their paged physical occurrences use a display placeholder such as
+    ``未記載`` and cannot be treated as owner evidence.  Accept only a key
+    whose title component agrees with the persisted aggregate title; this
+    preserves the page-variant isolation enforced above.
+    """
+
+    key = _text(value.get("key"))
+    parts = key.split("::")
+    title_key = _overlay_song_group_norm(
+        value.get("title") or value.get("workTitle")
+    )
+    if len(parts) != 2 or not title_key or parts[0] != title_key:
+        return ""
+    return key
+
+
+def _source_row_song_group_identity(value: Mapping[str, Any]) -> str:
+    """Project one bounded overlay row into the parent song-group space."""
+
+    parent_key = _text(
+        value.get("parentSongGroupKey")
+        or value.get("parent_song_group_key")
+    )
+    if parent_key:
+        return parent_key
+    title = ""
+    for source in _scope_value_sources(value):
+        title = _text(source.get("title") or source.get("workTitle"))
+        if title:
+            break
+    title_key = _overlay_song_group_norm(title)
+    if not title_key:
+        return ""
+    artist = _scope_artist(value)
+    is_unknown = _scope_boolean_flag(
+        value, "isUnknownArtist", "is_unknown_artist",
+    )
+    artist_key = (
+        "unknown"
+        if is_unknown is True
+        or (is_unknown is None and _unknown_artist_name(artist))
+        else _overlay_song_group_norm(artist)
+    )
+    return f"{title_key}::{artist_key}"
+
+
 def _source_record_identity(record: Mapping[str, Any]) -> tuple[str, str]:
     video = record.get("video") if isinstance(record.get("video"), Mapping) else {}
     occurrences = record.get("occurrences") or ()
@@ -15467,7 +15518,8 @@ def _generic_group_source_payload(
         if not target_key:
             return None
         exact_pairs, exact_song_keys = _source_song_identity_evidence(persisted_record)
-        if not exact_pairs and not exact_song_keys:
+        exact_group_key = _source_song_group_identity(persisted_record)
+        if not exact_pairs and not exact_song_keys and not exact_group_key:
             return {
                 "schemaVersion": 1,
                 "found": False,
@@ -15480,7 +15532,12 @@ def _generic_group_source_payload(
             pairs, keys = _source_song_identity_evidence(row)
             if exact_song_keys & keys:
                 return True
-            return bool(set(exact_pairs) & set(pairs))
+            if set(exact_pairs) & set(pairs):
+                return True
+            return bool(
+                exact_group_key
+                and _source_row_song_group_identity(row) == exact_group_key
+            )
     else:
         target_artist_keys = _artist_source_alias_keys(persisted_record)
         canonical_target = _overlay_artist_group_norm(
