@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T06:28:13.372Z",
+  "generatedAt": "2026-08-14T08:30:15.079Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T06:28:13.372Z",
+    "fetchedAt": "2026-08-14T08:30:15.079Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T06:28:13.372Z",
+    "generatedAt": "2026-08-14T08:30:15.079Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,8 +11667,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 672
+      "skipped_collected_evidence": 672,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@komawarikoma",
+        "channelId": "UC_upTZ0otpptV5KARBsnIPg",
+        "displayName": "小廻こま / Komawari Koma",
+        "sourceUrl": "https://www.youtube.com/@komawarikoma",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Sophia_Valentine",
+        "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
+        "displayName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@Sophia_Valentine",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@riaaoba1749",
         "channelId": "UC3UuaALZkf0boBO5hBd4d_A",
@@ -11835,20 +11849,6 @@
         "channelId": "UC2lVHvoycjQZork33yImt0A",
         "displayName": "ニャンヤオチュー",
         "sourceUrl": "https://www.youtube.com/@nyanyaochu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@neru.sirius",
-        "channelId": "UCSbRTqDYHFrGGPCQj6O3sEw",
-        "displayName": "星刻ねる",
-        "sourceUrl": "https://www.youtube.com/@neru.sirius",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YakonHibana",
-        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
-        "displayName": "夜紺 火花 / Yakon Hibana",
-        "sourceUrl": "https://www.youtube.com/@YakonHibana",
         "reason": "batch_limit_reached"
       }
     ]
