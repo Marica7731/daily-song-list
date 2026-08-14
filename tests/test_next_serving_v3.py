@@ -806,6 +806,17 @@ class Tests(unittest.TestCase):
             ):
                 scope.finalize_artist_targets({"source-one"})
 
+    def test_snapshot_source_scope_marks_only_intersecting_sources_affected(self):
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_videos(("video-affected",))
+            scope.add_pairs((
+                ("source-affected","video-affected"),
+                ("source-affected","video-clean"),
+                ("source-clean","video-clean"),
+            ))
+            self.assertEqual(scope.affected_source_keys(),("source-affected",))
+
     def test_snapshot_stream_cursor_honors_small_payload_batch(self):
         class Cursor:
             def __init__(self):
@@ -1258,6 +1269,28 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(result["record"]["songCount"],1)
         self.assertEqual(sum(item["count"] for item in result["record"]["songs"]),1)
+
+    def test_persisted_vtuber_song_delta_preserves_duplicate_occurrence_id_counts(self):
+        parent={"count":2,"songCount":1,"songs":[
+            {"key":"songa","name":"Song A","count":2},
+        ]}
+        before=[{"video":{"videoId":"v1"},"occurrences":(
+            {"occurrenceId":"duplicate","rangeId":"all","title":"Song A"},
+            {"occurrenceId":"duplicate","rangeId":"all","title":"Song A"},
+        )}]
+        after=[{"video":{"videoId":"v1"},"occurrences":(
+            {"occurrenceId":"duplicate","rangeId":"all","title":"Song A"},
+            {"occurrenceId":"new","rangeId":"all","title":"Song B"},
+        )}]
+        result=pg_adapter._apply_persisted_vtuber_song_delta(
+            {"found":True,"totalOccurrenceCount":2,"record":{}},
+            parent,before,after,{"range":"all","page":"1","pageSize":"30"},
+        )
+        self.assertEqual(
+            [(item["key"],item["count"]) for item in result["record"]["songs"]],
+            [("songa",1),("songb",1)],
+        )
+        self.assertEqual(result["totalSongCount"],2)
 
     def test_authoritative_vtuber_summary_applies_source_delta_once(self):
         channel="UCfixture";source="source-fixture"
@@ -2284,6 +2317,85 @@ class Tests(unittest.TestCase):
             )
         self.assertEqual((result["totalOccurrenceCount"],result["totalVideoCount"]),(1,1))
 
+    def test_channel_source_prefers_complete_persisted_same_video_authority(self):
+        video={"video_id":"video-one","title":"Video","channel_name":"Fixture",
+               "channel_id":"UCfixture","channel_handle":"@fixture","channel_url":"",
+               "published_timestamp":0,"payload_json":{}}
+        occurrence={"video_id":"video-one","occurrence_id":"occ-one","range_id":"all",
+                    "song_key":"song-one","seconds":1,"source_system":"fixture",
+                    "source_id":"source","title":"Song one","artist":"Artist",
+                    "payload_json":{}}
+        persisted=[
+            {"videoId":"video-one","rangeId":"all","position":0,
+             "songKey":"song-one","seconds":1,"title":"Song one",
+             "artist":"Artist","channelId":"UCfixture"},
+            {"videoId":"video-one","rangeId":"all","position":1,
+             "songKey":"song-two","seconds":2,"title":"Song two",
+             "artist":"Artist","channelId":"UCfixture"},
+        ]
+        metadata={"channelId":"UCfixture","sourceDetailKey":"source",
+                  "count":2,"songCount":2,"videoCount":1,
+                  "songs":[
+                      {"key":"songone","name":"Song one","count":1},
+                      {"key":"songtwo","name":"Song two","count":1},
+                  ]}
+        with patch.object(pg_adapter,"_rows",side_effect=[[video],[occurrence]]), \
+             patch.object(pg_adapter,"_runtime_source_occurrences",return_value=persisted), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=((),{},())), \
+             patch.object(pg_adapter,"_runtime_tombstones",return_value=()):
+            result=pg_adapter._runtime_channel_source_payload(
+                object(),"parent",metadata,"source",
+                {"range":"all","page":"1","pageSize":"30"},
+                overlay_revision_ids=("overlay",),snapshot_video_scope=("video-one",),
+            )
+        self.assertEqual(
+            (result["totalOccurrenceCount"],result["totalSongCount"],
+             result["totalVideoCount"]),(2,2,1),
+        )
+        self.assertEqual(len(result["record"]["occurrences"]),2)
+
+    def test_name_only_vtuber_source_keeps_underlying_channel_ids_together(self):
+        videos=[
+            {"video_id":"video-one","title":"One","channel_name":"Fixture",
+             "channel_id":"UCone","channel_handle":"","channel_url":"",
+             "published_timestamp":0,"payload_json":{}},
+            {"video_id":"video-two","title":"Two","channel_name":"Fixture",
+             "channel_id":"UCtwo","channel_handle":"","channel_url":"",
+             "published_timestamp":0,"payload_json":{}},
+        ]
+        persisted=[
+            {"videoId":"video-one","rangeId":"all","position":0,
+             "songKey":"song-one","seconds":1,"title":"Song one",
+             "artist":"Artist","channelId":"UCone"},
+            {"videoId":"video-two","rangeId":"all","position":1,
+             "songKey":"song-two","seconds":2,"title":"Song two",
+             "artist":"Artist","channelId":"UCtwo"},
+        ]
+        metadata={"channelName":"Fixture","sourceDetailKey":"source",
+                  "count":2,"songCount":2,"videoCount":2,
+                  "songs":[
+                      {"key":"songone","name":"Song one","count":1},
+                      {"key":"songtwo","name":"Song two","count":1},
+                  ]}
+        with patch.object(pg_adapter,"_rows",side_effect=[videos,[]]), \
+             patch.object(pg_adapter,"_runtime_source_occurrences",return_value=persisted), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=((),{},())), \
+             patch.object(pg_adapter,"_runtime_tombstones",return_value=()):
+            result=pg_adapter._runtime_channel_source_payload(
+                object(),"parent",metadata,"source",
+                {"range":"all","page":"1","pageSize":"30"},
+                overlay_revision_ids=("overlay",),
+                snapshot_video_scope=("video-one","video-two"),
+            )
+        self.assertEqual(
+            (result["totalOccurrenceCount"],result["totalSongCount"],
+             result["totalVideoCount"]),(2,2,2),
+        )
+        self.assertEqual(
+            {item["videoId"] for item in result["record"]["occurrences"]},
+            {"video-one","video-two"},
+        )
+
     def test_channel_source_keeps_persisted_only_video_complement(self):
         video={"video_id":"video-one","title":"Video","channel_name":"Fixture",
                "channel_id":"UCfixture","channel_handle":"@fixture","channel_url":"",
@@ -2292,9 +2404,14 @@ class Tests(unittest.TestCase):
                     "song_key":"song-one","seconds":1,"source_system":"fixture",
                     "source_id":"source","title":"Song one","artist":"Artist",
                     "payload_json":{}}
-        persisted=[{"videoId":"video-two","rangeId":"all","position":0,
-                    "songKey":"song-two","seconds":2,"title":"Song two",
-                    "artist":"Artist","channelId":"UCfixture"}]
+        persisted=[
+            {"videoId":"video-one","rangeId":"all","position":0,
+             "songKey":"song-one","seconds":1,"title":"Song one",
+             "artist":"Artist","channelId":"UCfixture"},
+            {"videoId":"video-two","rangeId":"all","position":1,
+             "songKey":"song-two","seconds":2,"title":"Song two",
+             "artist":"Artist","channelId":"UCfixture"},
+        ]
         metadata={"channelId":"UCfixture","sourceDetailKey":"source",
                   "count":2,"songCount":2,"videoCount":2,
                   "songs":[
@@ -2436,6 +2553,80 @@ class Tests(unittest.TestCase):
         self.assertEqual(record["sourceDetailKey"],source_key)
         self.assertEqual(occurrences[0]["song"]["title"],"Bulk Song")
         rows.assert_called_once()
+
+    def test_snapshot_bulk_streams_unaffected_persisted_parent_sources(self):
+        keep_key="source-keep"
+        affected_key="source-affected"
+        overlay_key="source-overlay"
+        detail={
+            "source_key":keep_key,"entity_type":"song","entity_key":"song-a",
+            "payload_json":{
+                "type":"song","key":"song-a","name":"Song A",
+                "sourceDetailKey":keep_key,"rangeId":"all",
+                "count":2,"occurrenceCount":2,"videoCount":2,
+            },
+        }
+        occurrences=[
+            {
+                "source_key":keep_key,"position":1,"video_id":"video-a",
+                "title":"Video A","channel_name":"Fixture","channel_id":"UCfixture",
+                "channel_handle":"@fixture","channel_url":"","published_timestamp":1,
+                "seconds":10,"is_niche":False,"is_unknown_artist":False,
+                "payload_json":{"videoId":"video-a","song":{"title":"Song A"}},
+            },
+            {
+                "source_key":keep_key,"position":2,"video_id":"video-b",
+                "title":"Video B","channel_name":"Fixture","channel_id":"UCfixture",
+                "channel_handle":"@fixture","channel_url":"","published_timestamp":2,
+                "seconds":20,"is_niche":False,"is_unknown_artist":False,
+                "payload_json":{"videoId":"video-b","song":{"title":"Song A"}},
+            },
+        ]
+
+        class Writer:
+            def __init__(self):self.values={}
+            def begin_source(self,key,range_id,record):
+                self.values[key]={"range":range_id,"record":dict(record),"occurrences":[]}
+                return {"source_key":key,"range_id":range_id,"position":0}
+            def add_source_occurrences(self,state,values):
+                values=list(values);state["position"]+=len(values)
+                self.values[state["source_key"]]["occurrences"].extend(values)
+                return len(values)
+            def finish_source(self,state):return state["position"]
+
+        writer=Writer()
+        def rows(_connection,statement,params):
+            self.assertIn("runtime_source_details",statement)
+            self.assertEqual(params[0],"parent")
+            self.assertEqual(set(params[1]),{keep_key,overlay_key})
+            self.assertNotIn(affected_key,params[1])
+            return [detail]
+        def stream(_connection,label,statement,params,**kwargs):
+            self.assertTrue(label.startswith("parent_sources_"))
+            self.assertIn("runtime_source_occurrences",statement)
+            self.assertEqual(params[0],"parent")
+            self.assertEqual(params[1],[keep_key])
+            self.assertEqual(
+                kwargs.get("fetch_size"),
+                pg_materializer.SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+            )
+            yield from occurrences
+
+        with patch.object(pg_adapter,"_rows",side_effect=rows), \
+             patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream):
+            completed=pg_materializer.export_unaffected_parent_sources(
+                object(),writer,parent_revision_id="parent",
+                source_keys={keep_key,affected_key,overlay_key},
+                affected_source_keys={affected_key},
+            )
+        self.assertEqual(completed,{keep_key})
+        self.assertEqual(set(writer.values),{keep_key})
+        self.assertEqual(writer.values[keep_key]["range"],"all")
+        self.assertEqual(writer.values[keep_key]["record"]["sourceDetailKey"],keep_key)
+        self.assertEqual(
+            [item["videoId"] for item in writer.values[keep_key]["occurrences"]],
+            ["video-a","video-b"],
+        )
 
     def test_song_identity_treats_explicit_null_artist_as_exact_empty_artist(self):
         title="Video is completed ten minutes before publication"
