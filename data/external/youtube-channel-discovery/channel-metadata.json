@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T02:36:50.612Z",
+  "generatedAt": "2026-08-14T05:02:26.059Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T02:36:50.612Z",
+    "fetchedAt": "2026-08-14T05:02:26.059Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T02:36:50.612Z",
+    "generatedAt": "2026-08-14T05:02:26.059Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1152,
-      "parseableChannels": 1133,
+      "totalChannels": 1153,
+      "parseableChannels": 1134,
       "realAvatar": 649,
-      "thumbnailFallback": 503,
+      "thumbnailFallback": 504,
       "missingDisplayImage": 0,
-      "missingAvatar": 503,
+      "missingAvatar": 504,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@riaaoba1749",
+        "channelId": "UC3UuaALZkf0boBO5hBd4d_A",
+        "displayName": "碧葉リア /  Ria Aoba",
+        "sourceUrl": "https://www.youtube.com/@riaaoba1749",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Shoncho_Tofu",
         "channelId": "UCkfAkgtsDLCt66zWjjppeXQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCgKjo_iSJpFmXQypArDztYA",
         "displayName": "夜紺 火花 / Yakon Hibana",
         "sourceUrl": "https://www.youtube.com/@YakonHibana",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KoshiraiSofuto",
-        "channelId": "UCaZqsFn0wJRpluZiK-GU70w",
-        "displayName": "小白井そふと -Koshirai Sofuto-",
-        "sourceUrl": "https://www.youtube.com/@KoshiraiSofuto",
         "reason": "batch_limit_reached"
       }
     ]
