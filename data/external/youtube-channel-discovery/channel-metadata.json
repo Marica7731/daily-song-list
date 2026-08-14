@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-14T13:28:26.105Z",
+  "generatedAt": "2026-08-14T16:05:27.872Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-14T13:28:26.105Z",
+    "fetchedAt": "2026-08-14T16:05:27.872Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-14T13:28:26.105Z",
+    "generatedAt": "2026-08-14T16:05:27.872Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1157,
-      "parseableChannels": 1138,
+      "totalChannels": 1159,
+      "parseableChannels": 1140,
       "realAvatar": 649,
-      "thumbnailFallback": 508,
+      "thumbnailFallback": 510,
       "missingDisplayImage": 0,
-      "missingAvatar": 508,
+      "missingAvatar": 510,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 676,
+      "skipped_collected_evidence": 678,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 657,
+      "batch_limit_reached": 659,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@YakonHibana",
+        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
+        "displayName": "夜紺 火花 / Yakon Hibana",
+        "sourceUrl": "https://www.youtube.com/@YakonHibana",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@pnmcmnj",
+        "channelId": "UCa-SeD_42RAk_-v7n9YSpJw",
+        "displayName": "まんじゅう - pnmcmnj",
+        "sourceUrl": "https://www.youtube.com/@pnmcmnj",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@AnonRemu",
+        "channelId": "UCPqswBEjZm3FdvOzPyDw9wg",
+        "displayName": "Remu Ch. 綺音れむ",
+        "sourceUrl": "https://www.youtube.com/@AnonRemu",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MariaMarionette",
         "channelId": "UCwaS8_S7kMiKA3izlTWHbQg",
@@ -11828,27 +11849,6 @@
         "channelId": "UCiYmrUY_048YmG1yQzTBwtQ",
         "displayName": "シャル・ウィッチ / Char Witch",
         "sourceUrl": "https://www.youtube.com/@CharWitch",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@xxhacucoxx_Celestial",
-        "channelId": "UCXyAitTabBsoRclTn_Gq-eA",
-        "displayName": "xxhacucoxx ch. 白白虹",
-        "sourceUrl": "https://www.youtube.com/@xxhacucoxx_Celestial",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShichitembattoinAegis",
-        "channelId": "UCrtj7mTumU4Pg9sdzfGZm6Q",
-        "displayName": "アエギス / Aegis Channel【音大首席オペラVsinger】",
-        "sourceUrl": "https://www.youtube.com/@ShichitembattoinAegis",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@miomiim316",
-        "channelId": "UCXozdmTMKyfAwdlGZne4Kuw",
-        "displayName": "水魚みぃむ / Mio Miim",
-        "sourceUrl": "https://www.youtube.com/@miomiim316",
         "reason": "batch_limit_reached"
       }
     ]
