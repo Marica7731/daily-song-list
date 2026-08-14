@@ -1018,7 +1018,92 @@ def _source_payload_from_channel_records(
     """Build source detail from a bounded, channel-filtered parent record set."""
 
     enriched = [_apply_source_channel_metadata(record, metadata) for record in records]
-    return source_payload_from_records(enriched, key, query)
+    options = _query_options(query)
+    occurrences = _source_records_as_occurrences(enriched, options, None)
+    if not occurrences:
+        return {"schemaVersion": 1, "found": False, "sourceKey": key}
+
+    video_keys: list[str] = []
+    for position, occurrence in enumerate(occurrences):
+        video_id = _text(occurrence.get("videoId")) or f"position:{position}"
+        if video_id not in video_keys:
+            video_keys.append(video_id)
+    use_paging = any(field in (query or {}) for field in ("page", "pageSize"))
+    page_count = max(1, math.ceil(len(video_keys) / options["pageSize"]))
+    page = min(options["page"], page_count)
+    if use_paging:
+        selected = set(video_keys[
+            (page - 1) * options["pageSize"] : page * options["pageSize"]
+        ])
+        page_occurrences = [
+            occurrence
+            for position, occurrence in enumerate(occurrences)
+            if (_text(occurrence.get("videoId")) or f"position:{position}")
+                in selected
+        ]
+    else:
+        page_occurrences = occurrences
+
+    channel_id = _text(
+        metadata.get("channelId")
+        or metadata.get("channel_id")
+        or metadata.get("channelKey")
+        or metadata.get("channel_key")
+    )
+    channel_handle = _text(
+        metadata.get("channelHandle")
+        or metadata.get("channel_handle")
+        or metadata.get("handle")
+    )
+    channel_name = _text(
+        metadata.get("channelName")
+        or metadata.get("display_name")
+        or metadata.get("name")
+    )
+    group_key = channel_id or channel_handle.lstrip("/@") or channel_name or key
+    songs = _count_list(
+        _text(occurrence.get("song", {}).get("title"))
+        for occurrence in occurrences
+    )
+    record = copy.deepcopy(dict(metadata))
+    record.update({
+        "type": "vtuber",
+        "key": _text(record.get("key")) or group_key,
+        "name": channel_name or group_key,
+        "channelName": channel_name or group_key,
+        "count": len(occurrences),
+        "occurrenceCount": len(occurrences),
+        "timestampCount": len(occurrences),
+        "songCount": len(songs),
+        "videoCount": len(video_keys),
+        "songs": songs,
+        "occurrences": page_occurrences,
+        "sourceDetailKey": key,
+        "sourceDetailPath": f"/api/sources/{key}",
+        "rangeId": options["range"],
+    })
+    if channel_id:
+        record["channelId"] = channel_id
+    if channel_handle:
+        record["channelHandle"] = channel_handle
+
+    result: dict[str, Any] = {
+        "schemaVersion": 1,
+        "found": True,
+        "sourceKey": key,
+        "record": record,
+    }
+    if use_paging:
+        result.update({
+            "page": page,
+            "pageSize": options["pageSize"],
+            "pageCount": page_count,
+            "totalCount": len(video_keys),
+            "totalVideoCount": len(video_keys),
+            "totalOccurrenceCount": len(occurrences),
+            "totalSongCount": len(songs),
+        })
+    return result
 
 
 def _canonicalize_vtuber_source_payload(
@@ -1084,20 +1169,27 @@ def _apply_persisted_vtuber_song_delta(
     options = _query_options(query)
     before = _source_records_as_occurrences(before_records, options, None)
     after = _source_records_as_occurrences(after_records, options, None)
-    before_by_id = {
-        _source_record_identity({
-            "video": item.get("item") or item.get("video") or {},
-            "occurrences": (item.get("song") or item,),
-        }): item
-        for item in before
-    }
-    after_by_id = {
-        _source_record_identity({
-            "video": item.get("item") or item.get("video") or {},
-            "occurrences": (item.get("song") or item,),
-        }): item
-        for item in after
-    }
+    def identity_counts(
+        values: Iterable[Mapping[str, Any]],
+    ) -> dict[tuple[Any, ...], tuple[Mapping[str, Any], int]]:
+        """Preserve multiplicity when historical occurrence ids are reused."""
+
+        result: dict[tuple[Any, ...], tuple[Mapping[str, Any], int]] = {}
+        for item in values:
+            song = item.get("song") if isinstance(item.get("song"), Mapping) else item
+            identity = (
+                *_source_record_identity({
+                    "video": item.get("item") or item.get("video") or {},
+                    "occurrences": (song,),
+                }),
+                _vtuber_canonical_song_identity(song.get("title"))[1],
+            )
+            previous = result.get(identity)
+            result[identity] = (item, int(previous[1]) + 1 if previous else 1)
+        return result
+
+    before_by_id = identity_counts(before)
+    after_by_id = identity_counts(after)
     counts: dict[str, dict[str, Any]] = {}
     for item in parent_record.get("songs") or ():
         if not isinstance(item, Mapping):
@@ -1142,39 +1234,34 @@ def _apply_persisted_vtuber_song_delta(
         if int(entry["count"]) < 0:
             raise PostgresAdapterError("VTuber source song delta became negative")
 
-    for identity, item in before_by_id.items():
-        if (
-            identity not in after_by_id
-            or _vtuber_canonical_song_identity(
-                (item.get("song") or item).get("title")
-            )[1]
-            != _vtuber_canonical_song_identity(
-                (after_by_id.get(identity, {}).get("song") or after_by_id.get(identity, {})).get("title")
-            )[1]
-        ):
-            adjust(item, -1)
-    for identity, item in after_by_id.items():
-        if (
-            identity not in before_by_id
-            or _vtuber_canonical_song_identity(
-                (item.get("song") or item).get("title")
-            )[1]
-            != _vtuber_canonical_song_identity(
-                (before_by_id.get(identity, {}).get("song") or before_by_id.get(identity, {})).get("title")
-            )[1]
-        ):
-            adjust(item, 1)
+    for identity in before_by_id.keys() | after_by_id.keys():
+        before_item, before_count = before_by_id.get(identity, ({}, 0))
+        after_item, after_count = after_by_id.get(identity, ({}, 0))
+        delta = int(after_count) - int(before_count)
+        if delta < 0:
+            adjust(before_item, delta)
+        elif delta > 0:
+            adjust(after_item, delta)
     songs = sorted(
         (item for item in counts.values() if int(item["count"]) > 0),
         key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
     )
     total = int(result.get("totalOccurrenceCount") or len(after))
-    if (
-        len(after) != total
-        or sum(int(item["count"]) for item in songs) + unkeyed_count != total
-    ):
+    canonical_total = sum(int(item["count"]) for item in songs)
+    effective_total = canonical_total + unkeyed_count
+    if len(after) != total or effective_total != total:
+        source_key = _text(
+            parent_record.get("sourceDetailKey")
+            or (result.get("record") or {}).get("sourceDetailKey")
+            or result.get("sourceKey")
+        )
         raise PostgresAdapterError(
-            "VTuber final canonical song counts do not cover final occurrences"
+            "VTuber final canonical song counts do not cover final occurrences: "
+            f"source={source_key or 'unknown'} parent={parent_occurrence_count} "
+            f"keyed_parent={keyed_parent_count} before={len(before)} "
+            f"after={len(after)} response_total={total} "
+            f"canonical_total={canonical_total} unkeyed={unkeyed_count} "
+            f"effective_total={effective_total}"
         )
     record = dict(result.get("record") or {})
     record["songs"] = songs
@@ -1483,28 +1570,27 @@ def _runtime_channel_source_payload(
             parent_source_key,
             options["range"],
         )
-        direct_target_video_ids = {
-            _text(record.get("video", {}).get("videoId"))
-            for record in records
-            if any(
-                _text(value.get("rangeId") or value.get("range_id"))
-                    in {options["range"], ""}
-                for value in record.get("occurrences", ())
-                if isinstance(value, Mapping)
-            )
-        }
-        persisted_records = [
-            record
-            for record in _persisted_source_records(
-                persisted_occurrences, metadata,
-            )
-            if _text(record.get("video", {}).get("videoId"))
-                not in direct_target_video_ids
-        ]
-        records = _merge_source_records(
-            records,
-            persisted_records,
+        persisted_records = _persisted_source_records(
+            persisted_occurrences, metadata,
         )
+        if persisted_occurrences:
+            # The persisted source projection is the immutable parent
+            # membership authority.  A runtime video's scalar channel can be
+            # stale or incomplete, and replacing an entire same-video source
+            # record merely because one direct occurrence exists silently
+            # drops the remaining persisted occurrences.  Keep every physical
+            # source row as the parent base; direct channel rows remain the
+            # compatibility fallback only when the parent release has no
+            # physical source projection.
+            parent_options = _query_options({"range": options["range"]})
+            projected_parent = _source_records_as_occurrences(
+                persisted_records, parent_options, None,
+            )
+            if len(projected_parent) != len(persisted_occurrences):
+                raise PostgresAdapterError(
+                    "VTuber persisted source records do not cover physical authority"
+                )
+            records = persisted_records
         authoritative_parent_records = copy.deepcopy(records)
         # A selected migration video row is a full-video reset even if it is
         # a tombstone or belongs to a different channel.  Remove that parent

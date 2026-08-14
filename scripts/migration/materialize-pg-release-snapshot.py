@@ -40,6 +40,7 @@ MAX_SOURCE_SEARCH_CHARS = 65_536
 SOURCE_SCOPE_FETCH_SIZE = 10_000
 SOURCE_SCOPE_PAYLOAD_FETCH_SIZE = 64
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
+PARENT_SOURCE_EXPORT_BATCH = 500
 PARENT_VIDEO_EXPORT_BATCH = 500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
@@ -430,6 +431,20 @@ class SnapshotSourceScope:
                 "SELECT video_id FROM source_scope_pairs "
                 "WHERE source_key=? ORDER BY video_id",
                 (source_key,),
+            )
+        )
+
+    def affected_source_keys(self) -> tuple[str, ...]:
+        """Return sources whose exact parent membership intersects a delta video."""
+
+        return tuple(
+            str(row[0])
+            for row in self.connection.execute(
+                "SELECT DISTINCT pair.source_key "
+                "FROM source_scope_pairs AS pair "
+                "JOIN source_scope_videos AS affected "
+                "  ON affected.video_id=pair.video_id "
+                "ORDER BY pair.source_key"
             )
         )
 
@@ -2826,6 +2841,197 @@ def export_unaffected_parent_video_sources(
     return completed
 
 
+def export_unaffected_parent_sources(
+    connection: Any,
+    writer: CanonicalSnapshotWriter,
+    *,
+    parent_revision_id: str,
+    source_keys: Iterable[str],
+    affected_source_keys: Iterable[str],
+) -> set[str]:
+    """Stream immutable persisted parent sources without per-source round trips.
+
+    Only source keys with no overlay-affected member video are eligible.  The
+    parent detail and its physical occurrence projection are copied verbatim
+    through the canonical SQLite writer; overlay-only keys and historical video
+    sources without a persisted detail remain pending for the existing
+    delta-aware paths.
+    """
+
+    requested = {
+        _text(value) for value in source_keys if _text(value)
+    }
+    affected = {
+        _text(value) for value in affected_source_keys if _text(value)
+    }
+    ordered = tuple(sorted(requested - affected))
+    completed: set[str] = set()
+    for offset in range(0, len(ordered), PARENT_SOURCE_EXPORT_BATCH):
+        batch = ordered[offset : offset + PARENT_SOURCE_EXPORT_BATCH]
+        detail_rows = adapter._rows(
+            connection,
+            """
+            SELECT source_key,entity_type,entity_key,payload_json
+            FROM runtime_source_details
+            WHERE revision_id = %s AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key
+            LIMIT %s
+            """,
+            [parent_revision_id, list(batch), len(batch) + 1],
+        )
+        if len(detail_rows) > len(batch):
+            raise RuntimeError("parent source detail lookup exceeded requested batch")
+        details: dict[str, dict[str, Any]] = {}
+        declared_counts: dict[str, int | None] = {}
+        declared_video_counts: dict[str, int | None] = {}
+        for row in detail_rows:
+            source_key = _text(row.get("source_key"))
+            if source_key not in batch or source_key in details:
+                raise RuntimeError("parent source detail lookup changed identity")
+            record = _json_object(row.get("payload_json"))
+            explicit_source_key = _text(record.get("sourceDetailKey"))
+            if explicit_source_key and explicit_source_key != source_key:
+                raise RuntimeError("parent source detail key disagrees with authority")
+            explicit_range = _text(record.get("rangeId"))
+            if explicit_range and explicit_range != "all":
+                raise RuntimeError("parent source detail range disagrees with authority")
+            entity_type = _text(row.get("entity_type")) or "source"
+            entity_key = _text(row.get("entity_key")) or source_key
+            if _text(record.get("type")) and _text(record.get("type")) != entity_type:
+                raise RuntimeError("parent source detail type disagrees with authority")
+            if _text(record.get("key")) and _text(record.get("key")) != entity_key:
+                raise RuntimeError("parent source detail entity key disagrees with authority")
+            record.setdefault("type", entity_type)
+            record.setdefault("key", entity_key)
+            record["sourceDetailKey"] = source_key
+            record["rangeId"] = "all"
+            details[source_key] = record
+
+            declared_value = next(
+                (
+                    record.get(name)
+                    for name in ("occurrenceCount", "count", "timestampCount")
+                    if record.get(name) is not None
+                ),
+                None,
+            )
+            declared_count = int(declared_value) if declared_value is not None else None
+            if declared_count is not None and declared_count < 0:
+                raise RuntimeError("parent source occurrence count is invalid")
+            declared_counts[source_key] = declared_count
+            declared_video_value = record.get("videoCount")
+            declared_video_count = (
+                int(declared_video_value)
+                if declared_video_value is not None
+                else None
+            )
+            if declared_video_count is not None and declared_video_count < 0:
+                raise RuntimeError("parent source video count is invalid")
+            declared_video_counts[source_key] = declared_video_count
+
+        current_key = ""
+        state: dict[str, Any] | None = None
+        occurrence_buffer: list[dict[str, Any]] = []
+        physical_rows = 0
+        physical_videos: set[str] = set()
+        streamed_rows = 0
+
+        def flush_occurrences() -> None:
+            nonlocal occurrence_buffer
+            if state is not None and occurrence_buffer:
+                writer.add_source_occurrences(state, occurrence_buffer)
+                occurrence_buffer = []
+
+        def finish_current() -> None:
+            nonlocal current_key, state, physical_rows, physical_videos
+            if not current_key or state is None:
+                return
+            flush_occurrences()
+            written = writer.finish_source(state)
+            if written != physical_rows:
+                raise RuntimeError("parent source occurrence stream lost rows")
+            declared_count = declared_counts[current_key]
+            if declared_count is not None and declared_count != written:
+                raise RuntimeError(
+                    "parent source occurrence total disagrees with detail: "
+                    + current_key
+                )
+            declared_video_count = declared_video_counts[current_key]
+            if (
+                declared_video_count is not None
+                and declared_video_count != len(physical_videos)
+            ):
+                raise RuntimeError(
+                    "parent source video total disagrees with detail: "
+                    + current_key
+                )
+            completed.add(current_key)
+            current_key = ""
+            state = None
+            physical_rows = 0
+            physical_videos = set()
+
+        for row in _stream_pg_rows(
+            connection,
+            f"parent_sources_{offset // PARENT_SOURCE_EXPORT_BATCH}",
+            """
+            SELECT source_key,position,video_id,title,channel_name,channel_id,
+                   channel_handle,channel_url,published_timestamp,seconds,
+                   is_niche,is_unknown_artist,payload_json
+            FROM runtime_source_occurrences
+            WHERE revision_id = %s AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key,position
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                sorted(details),
+                MAX_SOURCE_SCOPE_ROWS + 1,
+            ],
+            fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+        ) if details else ():
+            streamed_rows += 1
+            if streamed_rows > MAX_SOURCE_SCOPE_ROWS:
+                raise RuntimeError("parent source occurrence batch exceeded bounded cap")
+            source_key = _text(row.get("source_key"))
+            if source_key not in details:
+                raise RuntimeError("parent source occurrence escaped requested detail set")
+            if current_key and source_key != current_key:
+                finish_current()
+            if not current_key:
+                current_key = source_key
+                state = writer.begin_source(source_key, "all", details[source_key])
+            physical_rows += 1
+            video_id = _text(row.get("video_id"))
+            if video_id:
+                physical_videos.add(video_id)
+            occurrence_buffer.append(adapter._runtime_source_occurrence(row))
+            if len(occurrence_buffer) >= SOURCE_WRITE_BATCH_SIZE:
+                flush_occurrences()
+        finish_current()
+
+        if not completed.issubset(requested):
+            raise RuntimeError("parent source bulk export introduced an unknown key")
+        if len(completed) % 1_000 < len(batch):
+            print(
+                "PG_SNAPSHOT_PARENT_SOURCES "
+                f"complete={len(completed)} eligible={len(ordered)}",
+                flush=True,
+            )
+        detail_rows = None
+        details = {}
+        gc.collect()
+    if len(completed) % 1_000:
+        print(
+            "PG_SNAPSHOT_PARENT_SOURCES "
+            f"complete={len(completed)} eligible={len(ordered)}",
+            flush=True,
+        )
+    return completed
+
+
 class SnapshotPageBuilder:
     def __init__(self, connection: Any):
         self.connection = connection
@@ -3352,7 +3558,24 @@ def materialize(
             range_id: set() for range_id in RANGES
         }
         if source_scope is not None and getattr(builder, "parent", None):
-            parent_video_sources = source_scope.unaffected_parent_video_sources()
+            affected_parent_sources = source_scope.affected_source_keys()
+            exported_parent_sources = export_unaffected_parent_sources(
+                connection,
+                writer,
+                parent_revision_id=builder.parent[0],
+                source_keys=source_keys["all"],
+                affected_source_keys=affected_parent_sources,
+            )
+            if not exported_parent_sources.issubset(source_keys["all"]):
+                raise RuntimeError(
+                    "parent source bulk export introduced an unknown source key"
+                )
+            bulk_exported_source_keys["all"].update(exported_parent_sources)
+            parent_video_sources = tuple(
+                item
+                for item in source_scope.unaffected_parent_video_sources()
+                if item[0] not in bulk_exported_source_keys["all"]
+            )
             if parent_video_sources:
                 exported_parent_videos = export_unaffected_parent_video_sources(
                     connection,
@@ -3367,6 +3590,8 @@ def materialize(
                 bulk_exported_source_keys["all"].update(
                     exported_parent_videos,
                 )
+            affected_parent_sources = ()
+            exported_parent_sources = set()
             parent_video_sources = ()
         _release_materializer_memory(writer, builder, phase="source-scope")
         scoped_payload_loader = getattr(builder, "source_payload", None)
