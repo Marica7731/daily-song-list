@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T11:19:29.885Z",
+  "generatedAt": "2026-08-15T12:17:03.176Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T11:19:29.885Z",
+    "fetchedAt": "2026-08-15T12:17:03.176Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T11:19:29.885Z",
+    "generatedAt": "2026-08-15T12:17:03.176Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1168,
-      "parseableChannels": 1149,
+      "totalChannels": 1171,
+      "parseableChannels": 1152,
       "realAvatar": 649,
-      "thumbnailFallback": 519,
+      "thumbnailFallback": 522,
       "missingDisplayImage": 0,
-      "missingAvatar": 519,
+      "missingAvatar": 522,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 687
+      "skipped_collected_evidence": 690
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 668,
+      "batch_limit_reached": 671,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Kaname_Uto",
+        "channelId": "UC9dTH36kl56JWKz7OPpHnYg",
+        "displayName": "かなめうと / Kaname Uto",
+        "sourceUrl": "https://www.youtube.com/@Kaname_Uto",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@lara_songs",
         "channelId": "UCWF-3hyAv7TFw8mpS_wHLmw",
@@ -11775,6 +11782,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@nekuro0412",
+        "channelId": "UCs-lYkwb-NYKE9_ssTRDK3Q",
+        "displayName": "ねくろちゃん -Yamaguro Nekuro- /あおぎり高校",
+        "sourceUrl": "https://www.youtube.com/@nekuro0412",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@riona_02",
         "channelId": "UCqBais6iJg_7bcaFFpRv36A",
         "displayName": "Riona ch. リオナ・ネロ",
@@ -11835,20 +11849,6 @@
         "channelId": "UChvkwy7w0ouKv2rJhD_kPvw",
         "displayName": "NORISTRY Official",
         "sourceUrl": "https://www.youtube.com/@NORISTRY_music",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@teikobonbonch3548",
-        "channelId": "UCdTlw9He5XZhG2t5ozOkPAA",
-        "displayName": "TBB:帝子ボンボンちゃんねる　(TBB:Teikobonbon ch)",
-        "sourceUrl": "https://www.youtube.com/@teikobonbonch3548",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@chaco_haguma",
-        "channelId": "UCw5b3jUXwajzoFzQ97SXPlA",
-        "displayName": "羽熊ちゃこ / ChacoHaguma",
-        "sourceUrl": "https://www.youtube.com/@chaco_haguma",
         "reason": "batch_limit_reached"
       }
     ]
