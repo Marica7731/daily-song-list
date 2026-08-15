@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T08:24:21.611Z",
+  "generatedAt": "2026-08-15T09:22:05.185Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T08:24:21.611Z",
+    "fetchedAt": "2026-08-15T09:22:05.185Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T08:24:21.611Z",
+    "generatedAt": "2026-08-15T09:22:05.185Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1165,
-      "parseableChannels": 1146,
+      "totalChannels": 1166,
+      "parseableChannels": 1147,
       "realAvatar": 649,
-      "thumbnailFallback": 516,
+      "thumbnailFallback": 517,
       "missingDisplayImage": 0,
-      "missingAvatar": 516,
+      "missingAvatar": 517,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 684
+      "skipped_collected_evidence": 685,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 665,
+      "batch_limit_reached": 666,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@atatakakunaru",
+        "channelId": "UCgcel56b36LSI1uViDRxj5w",
+        "displayName": "あたたかくなる",
+        "sourceUrl": "https://www.youtube.com/@atatakakunaru",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Nagi_Kamiitsuki",
         "channelId": "UChBFDLeY7cNh0pllsEAx2Vw",
@@ -11688,13 +11695,6 @@
         "channelId": "UCWKC5_gzWd5YvlGal1sVkCw",
         "displayName": "魅音モモキュ / 毛毛球 Ch.",
         "sourceUrl": "https://www.youtube.com/@momokyu_u",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@atatakakunaru",
-        "channelId": "UCgcel56b36LSI1uViDRxj5w",
-        "displayName": "あたたかくなる",
-        "sourceUrl": "https://www.youtube.com/@atatakakunaru",
         "reason": "batch_limit_reached"
       },
       {
