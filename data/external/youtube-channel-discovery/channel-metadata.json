@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T07:32:40.671Z",
+  "generatedAt": "2026-08-15T08:24:21.611Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T07:32:40.671Z",
+    "fetchedAt": "2026-08-15T08:24:21.611Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T07:32:40.671Z",
+    "generatedAt": "2026-08-15T08:24:21.611Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1164,
-      "parseableChannels": 1145,
+      "totalChannels": 1165,
+      "parseableChannels": 1146,
       "realAvatar": 649,
-      "thumbnailFallback": 515,
+      "thumbnailFallback": 516,
       "missingDisplayImage": 0,
-      "missingAvatar": 515,
+      "missingAvatar": 516,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 683,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 684
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 664,
+      "batch_limit_reached": 665,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Nagi_Kamiitsuki",
+        "channelId": "UChBFDLeY7cNh0pllsEAx2Vw",
+        "displayName": "神光斎 凪Kamiitsuki Nagi",
+        "sourceUrl": "https://www.youtube.com/@Nagi_Kamiitsuki",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@momokyu_u",
         "channelId": "UCWKC5_gzWd5YvlGal1sVkCw",
@@ -11688,6 +11695,13 @@
         "channelId": "UCgcel56b36LSI1uViDRxj5w",
         "displayName": "あたたかくなる",
         "sourceUrl": "https://www.youtube.com/@atatakakunaru",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E7%99%BD%E6%B3%A2%E3%81%AA%E3%81%AA%E3%81%BF",
+        "channelId": "UCPl9Zm6FLmmzFNts4odtDFA",
+        "displayName": "白波ななみ",
+        "sourceUrl": "https://www.youtube.com/@%E7%99%BD%E6%B3%A2%E3%81%AA%E3%81%AA%E3%81%BF",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UC4PrHgUcAtOoj_LKmUL-uLQ",
         "displayName": "湖南みあ / Mia Channel【ななしいんく】",
         "sourceUrl": "https://www.youtube.com/@Mia_Konan",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@keserasera68",
-        "channelId": "UCpIIJGtpQFkkcjzqxNgyeyg",
-        "displayName": "keita ch / けいたの実験室",
-        "sourceUrl": "https://www.youtube.com/@keserasera68",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
-        "channelId": "UCgGy3QyrsbmXcLDZJGDOKBQ",
-        "displayName": "白汰まゆのへや𓂃𓈒𓏸",
-        "sourceUrl": "https://www.youtube.com/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
         "reason": "batch_limit_reached"
       }
     ]
