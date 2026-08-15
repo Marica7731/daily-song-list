@@ -226,7 +226,7 @@ jobs:
             --timeout 30 \
             --retries 2 \
             -r scripts/migration/requirements-wdc-mac.txt
-          PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE" "$MAC_PYTHON" -B - <<'PY'
+          PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" "$MAC_PYTHON" -B - <<'PY'
           import psycopg
           if psycopg.__version__ != "3.3.4":
               raise SystemExit(f"unexpected psycopg version: {psycopg.__version__}")
@@ -235,7 +235,7 @@ jobs:
           print("MAC_RUN_LOCAL_PSYCOPG_OK", psycopg.__version__, psycopg.pq.__impl__)
           PY
           echo "PYTHON_DEPS_ROOT=$PYTHON_DEPS_ROOT" >> "$GITHUB_ENV"
-          echo "PYTHONPATH=$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          echo "PYTHONPATH=$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
 
       - name: Run release regression tests
         run: |
@@ -257,6 +257,7 @@ jobs:
               ast.parse(Path(name).read_text(encoding="utf-8"), filename=name)
           print("PYTHON_AST_OK")
           PY
+          "$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py --help >/dev/null
           bash -n deploy/install-wdc-release.sh
           "$MAC_NODE" --check assets/app.js
           PYTHONWARNINGS=error::ResourceWarning \
@@ -483,7 +484,7 @@ jobs:
             PGDATABASE=song_rank \
             PGUSER=www-data \
             PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE" \
+            PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" \
             "$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py \
               --output "$PAGES_ROOT" \
               --meta-output "$META_FILE" \
