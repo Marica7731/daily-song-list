@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T16:10:50.299Z",
+  "generatedAt": "2026-08-15T17:15:53.640Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T16:10:50.299Z",
+    "fetchedAt": "2026-08-15T17:15:53.640Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T16:10:50.299Z",
+    "generatedAt": "2026-08-15T17:15:53.640Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1171,
-      "parseableChannels": 1152,
+      "totalChannels": 1172,
+      "parseableChannels": 1153,
       "realAvatar": 649,
-      "thumbnailFallback": 522,
+      "thumbnailFallback": 523,
       "missingDisplayImage": 0,
-      "missingAvatar": 522,
+      "missingAvatar": 523,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 690
+      "skipped_collected_evidence": 691
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 671,
+      "batch_limit_reached": 672,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@RukaCh.",
+        "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
+        "displayName": "Ruka Ch. 雨海ルカ",
+        "sourceUrl": "https://www.youtube.com/@RukaCh.",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RIM_virtual",
+        "channelId": "UCfBkUgaJ6eqYA9_TX2cmq9A",
+        "displayName": "理芽 -RIM-",
+        "sourceUrl": "https://www.youtube.com/@RIM_virtual",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E5%A4%A7%E7%9F%B3%E6%98%8C%E8%89%AF%E3%81%AE%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A%E3%83%A9%E3%83%9C",
         "channelId": "UC3TvY0biJcMRzQyu5hyOkXw",
@@ -11835,20 +11849,6 @@
         "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
         "displayName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
         "sourceUrl": "https://www.youtube.com/@Sophia_Valentine",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@riaaoba1749",
-        "channelId": "UC3UuaALZkf0boBO5hBd4d_A",
-        "displayName": "碧葉リア /  Ria Aoba",
-        "sourceUrl": "https://www.youtube.com/@riaaoba1749",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shoncho_Tofu",
-        "channelId": "UCkfAkgtsDLCt66zWjjppeXQ",
-        "displayName": "白噛ましゅー(村長)",
-        "sourceUrl": "https://www.youtube.com/@Shoncho_Tofu",
         "reason": "batch_limit_reached"
       }
     ]
