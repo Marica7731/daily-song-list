@@ -41,6 +41,7 @@ SOURCE_SCOPE_FETCH_SIZE = 10_000
 SOURCE_SCOPE_PAYLOAD_FETCH_SIZE = 64
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
 PARENT_SOURCE_EXPORT_BATCH = 500
+PARENT_SOURCE_OCCURRENCE_BATCH_ROWS = 100_000
 PARENT_VIDEO_EXPORT_BATCH = 500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
@@ -434,6 +435,74 @@ class SnapshotSourceScope:
             )
         )
 
+    def source_batches(
+        self,
+        source_keys: Iterable[str],
+        *,
+        batch_size: int = PARENT_SOURCE_EXPORT_BATCH,
+    ) -> Iterable[
+        tuple[
+            tuple[str, ...],
+            dict[str, dict[str, tuple[Any, ...]]],
+            tuple[str, ...],
+        ]
+    ]:
+        """Yield exact source scopes without one SQLite lookup per key."""
+
+        if batch_size < 1 or batch_size > PARENT_SOURCE_EXPORT_BATCH:
+            raise ValueError("invalid snapshot source key batch size")
+        ordered = tuple(sorted({
+            _text(value) for value in source_keys if _text(value)
+        }))
+        for offset in range(0, len(ordered), batch_size):
+            batch = ordered[offset : offset + batch_size]
+            placeholders = ",".join("?" for _ in batch)
+            scoped: dict[str, dict[str, list[Any]]] = {
+                source_key: {"videos": [], "targets": []}
+                for source_key in batch
+            }
+            for source_key, video_id in self.connection.execute(
+                "SELECT source_key,video_id FROM source_scope_pairs "
+                f"WHERE source_key IN ({placeholders}) "
+                "ORDER BY source_key,video_id",
+                batch,
+            ):
+                scoped[str(source_key)]["videos"].append(str(video_id))
+            for source_key, view, group_key in self.connection.execute(
+                "SELECT source_key,view,group_key FROM source_scope_targets "
+                f"WHERE source_key IN ({placeholders}) "
+                "ORDER BY source_key,view,group_key",
+                batch,
+            ):
+                scoped[str(source_key)]["targets"].append(
+                    (str(view), str(group_key))
+                )
+            missing = [
+                source_key
+                for source_key in batch
+                if not scoped[source_key]["videos"]
+            ]
+            if missing:
+                raise RuntimeError(
+                    "snapshot source batch has empty exact video scope: "
+                    + ", ".join(missing[:10])
+                )
+            frozen = {
+                source_key: {
+                    "videos": tuple(values["videos"]),
+                    "targets": tuple(values["targets"]),
+                }
+                for source_key, values in scoped.items()
+            }
+            union_videos = tuple(sorted({
+                video_id
+                for values in frozen.values()
+                for video_id in values["videos"]
+            }))
+            if not union_videos:
+                raise RuntimeError("snapshot source batch union scope is empty")
+            yield batch, frozen, union_videos
+
     def affected_source_keys(self) -> tuple[str, ...]:
         """Return sources whose exact parent membership intersects a delta video."""
 
@@ -497,13 +566,15 @@ def _derived_source_pairs(
     channel_keys: Iterable[str] = (),
     requested_keys: set[str],
     source_scope: SnapshotSourceScope | None = None,
-) -> set[tuple[str, str]]:
+) -> tuple[set[tuple[str, str]], set[tuple[str, str, str]]]:
     videos = {_text(value) for value in video_ids if _text(value)}
     pairs: set[tuple[str, str]] = set()
+    targets: set[tuple[str, str, str]] = set()
     for video_id in videos:
         source_key = adapter._stable_key("source-video", "all", video_id)
         if source_key in requested_keys:
             pairs.add((source_key, video_id))
+            targets.add(("videos", video_id, source_key))
     for title, artist in song_pairs:
         normalized_title = adapter._overlay_norm(title)
         normalized_artist = adapter._overlay_norm(artist)
@@ -517,11 +588,11 @@ def _derived_source_pairs(
         artist_keys = {_production_source_key(
             "artists", "all", artist_group_key,
         )}
+        canonical_song_group = "\x1f".join((
+            adapter._overlay_song_group_norm(title),
+            adapter._overlay_song_group_norm(artist),
+        ))
         if source_scope is not None:
-            canonical_song_group = "\x1f".join((
-                adapter._overlay_song_group_norm(title),
-                adapter._overlay_song_group_norm(artist),
-            ))
             song_keys.update(source_scope.source_keys_for_group(
                 "songs", canonical_song_group,
             ))
@@ -531,6 +602,12 @@ def _derived_source_pairs(
         for source_key in (*song_keys, *artist_keys):
             if source_key in requested_keys:
                 pairs.update((source_key, video_id) for video_id in videos)
+                targets.add((
+                    "songs" if source_key in song_keys else "artists",
+                    canonical_song_group
+                    if source_key in song_keys else artist_group_key,
+                    source_key,
+                ))
     for channel_key in {_text(value) for value in channel_keys if _text(value)}:
         source_keys = {_production_source_key("vtubers", "all", channel_key)}
         if source_scope is not None:
@@ -540,7 +617,8 @@ def _derived_source_pairs(
         for source_key in source_keys:
             if source_key in requested_keys:
                 pairs.update((source_key, video_id) for video_id in videos)
-    return pairs
+                targets.add(("vtubers", channel_key, source_key))
+    return pairs, targets
 
 
 def _runtime_scope_evidence(
@@ -743,16 +821,20 @@ def build_snapshot_source_scope(
     _release_source_scope_stage("artist_owners")
 
     pair_buffer: list[tuple[str, str]] = []
+    derived_target_buffer: list[tuple[str, str, str]] = []
     video_buffer: list[str] = []
 
     def flush() -> None:
-        nonlocal pair_buffer, video_buffer
+        nonlocal pair_buffer, derived_target_buffer, video_buffer
         if video_buffer:
             scope.add_videos(video_buffer)
             video_buffer = []
         if pair_buffer:
             scope.add_pairs(pair_buffer)
             pair_buffer = []
+        if derived_target_buffer:
+            scope.add_targets(derived_target_buffer)
+            derived_target_buffer = []
 
     for row in _stream_pg_rows(
         connection,
@@ -788,13 +870,18 @@ def build_snapshot_source_scope(
             or _text(row.get("channel_handle")).lstrip("@/")
             or adapter._overlay_norm(row.get("channel_name"))
         )
-        pair_buffer.extend(_derived_source_pairs(
+        derived_pairs, derived_targets = _derived_source_pairs(
             video_ids=(video_id,),
             channel_keys=(channel_key,),
             requested_keys=requested,
             source_scope=scope,
-        ))
-        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+        )
+        pair_buffer.extend(derived_pairs)
+        derived_target_buffer.extend(derived_targets)
+        if (
+            len(video_buffer) + len(pair_buffer) + len(derived_target_buffer)
+            >= SOURCE_SCOPE_FETCH_SIZE
+        ):
             flush()
     flush()
     row = None
@@ -818,13 +905,18 @@ def build_snapshot_source_scope(
         if not video_id:
             continue
         video_buffer.append(video_id)
-        pair_buffer.extend(_derived_source_pairs(
+        derived_pairs, derived_targets = _derived_source_pairs(
             video_ids=(video_id,),
             song_pairs=((title, artist),) if title else (),
             requested_keys=requested,
             source_scope=scope,
-        ))
-        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+        )
+        pair_buffer.extend(derived_pairs)
+        derived_target_buffer.extend(derived_targets)
+        if (
+            len(video_buffer) + len(pair_buffer) + len(derived_target_buffer)
+            >= SOURCE_SCOPE_FETCH_SIZE
+        ):
             flush()
     flush()
     row = None
@@ -862,14 +954,19 @@ def build_snapshot_source_scope(
                 row.get("channel_name") or row.get("channelName")
             )
         )
-        pair_buffer.extend(_derived_source_pairs(
+        derived_pairs, derived_targets = _derived_source_pairs(
             video_ids=(video_id,),
             song_pairs=((title, artist),) if title else (),
             channel_keys=(channel_key,),
             requested_keys=requested,
             source_scope=scope,
-        ))
-        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+        )
+        pair_buffer.extend(derived_pairs)
+        derived_target_buffer.extend(derived_targets)
+        if (
+            len(video_buffer) + len(pair_buffer) + len(derived_target_buffer)
+            >= SOURCE_SCOPE_FETCH_SIZE
+        ):
             flush()
     flush()
     row = None
@@ -895,14 +992,19 @@ def build_snapshot_source_scope(
         if payload_ranges and not payload_ranges.intersection({"all", ""}):
             continue
         video_buffer.extend(videos)
-        pair_buffer.extend(_derived_source_pairs(
+        derived_pairs, derived_targets = _derived_source_pairs(
             video_ids=videos,
             song_pairs=songs,
             channel_keys=channels,
             requested_keys=requested,
             source_scope=scope,
-        ))
-        if len(video_buffer) + len(pair_buffer) >= SOURCE_SCOPE_FETCH_SIZE:
+        )
+        pair_buffer.extend(derived_pairs)
+        derived_target_buffer.extend(derived_targets)
+        if (
+            len(video_buffer) + len(pair_buffer) + len(derived_target_buffer)
+            >= SOURCE_SCOPE_FETCH_SIZE
+        ):
             flush()
     flush()
     row = None
@@ -3032,6 +3134,601 @@ def export_unaffected_parent_sources(
     return completed
 
 
+def export_affected_parent_sources(
+    connection: Any,
+    writer: CanonicalSnapshotWriter,
+    *,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    source_scope: SnapshotSourceScope,
+    source_keys: Iterable[str],
+) -> set[str]:
+    """Materialize affected generic-all sources with bounded batch SQL.
+
+    A 500-key metadata window reads parent details once and is then split by
+    each detail's declared occurrence count.  Within each adaptive batch the
+    union overlay delta is shared, while physical parent rows are retained for
+    only the current ``source_key`` and are written and released at the next
+    key boundary.  No key in this path may fall back to the paged endpoint
+    loader.
+    """
+
+    requested = {
+        _text(value) for value in source_keys if _text(value)
+    }
+    source_lineage = tuple(dict.fromkeys((
+        *(_text(value) for value in overlay_revision_ids if _text(value)),
+        _text(parent_revision_id),
+    )))
+    if not source_lineage or not _text(parent_revision_id):
+        raise RuntimeError("affected parent source lineage is empty")
+    completed: set[str] = set()
+    for metadata_index, (batch, scoped, _union_videos) in enumerate(
+        source_scope.source_batches(requested)
+    ):
+        detail_rows = adapter._rows(
+            connection,
+            """
+            SELECT DISTINCT ON (source_key)
+                   revision_id,source_key,entity_type,entity_key,payload_json
+            FROM runtime_source_details
+            WHERE revision_id::text = ANY(%s::text[]) AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key,
+                     array_position(%s::text[],revision_id::text)
+            LIMIT %s
+            """,
+            [
+                list(source_lineage),
+                list(batch),
+                list(source_lineage),
+                len(batch) + 1,
+            ],
+        )
+        if len(detail_rows) > len(batch):
+            raise RuntimeError(
+                "affected parent source detail lookup exceeded requested batch"
+            )
+        details: dict[str, dict[str, Any]] = {}
+        detail_revisions: dict[str, str] = {}
+        declared_counts: dict[str, int] = {}
+        for row in detail_rows:
+            source_key = _text(row.get("source_key"))
+            if source_key not in batch or source_key in details:
+                raise RuntimeError(
+                    "affected parent source detail lookup changed identity"
+                )
+            detail_revision_id = _text(row.get("revision_id"))
+            if detail_revision_id not in source_lineage:
+                raise RuntimeError(
+                    "affected parent source detail escaped active lineage"
+                )
+            record = _json_object(row.get("payload_json"))
+            entity_type = _text(row.get("entity_type")) or _text(
+                record.get("type")
+            ) or "source"
+            entity_key = _text(row.get("entity_key")) or _text(
+                record.get("key")
+            ) or source_key
+            if _text(record.get("sourceDetailKey")) not in {"", source_key}:
+                raise RuntimeError(
+                    "affected parent source detail key disagrees with authority"
+                )
+            if _text(record.get("rangeId")) not in {"", "all"}:
+                raise RuntimeError(
+                    "affected parent source detail range disagrees with authority"
+                )
+            if _text(record.get("type")) not in {"", entity_type}:
+                raise RuntimeError(
+                    "affected parent source detail type disagrees with authority"
+                )
+            if _text(record.get("key")) not in {"", entity_key}:
+                raise RuntimeError(
+                    "affected parent source entity key disagrees with authority"
+                )
+            record.setdefault("type", entity_type)
+            record.setdefault("key", entity_key)
+            record["sourceDetailKey"] = source_key
+            record["rangeId"] = "all"
+            details[source_key] = record
+            detail_revisions[source_key] = detail_revision_id
+            declared_values: list[int] = []
+            for name in ("occurrenceCount", "count", "timestampCount"):
+                value = record.get(name)
+                if value is None:
+                    continue
+                try:
+                    declared_value = int(value)
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError(
+                        "affected parent source occurrence count is invalid: "
+                        + source_key
+                    ) from exc
+                if declared_value < 0:
+                    raise RuntimeError(
+                        "affected parent source occurrence count is invalid: "
+                        + source_key
+                    )
+                declared_values.append(declared_value)
+            if not declared_values:
+                raise RuntimeError(
+                    "affected parent source occurrence count is missing: "
+                    + source_key
+                )
+            if len(set(declared_values)) != 1:
+                raise RuntimeError(
+                    "affected parent source occurrence counts disagree: "
+                    + source_key
+                )
+            declared_count = declared_values[0]
+            if declared_count > PARENT_SOURCE_OCCURRENCE_BATCH_ROWS:
+                raise RuntimeError(
+                    "affected parent source occurrence count exceeded "
+                    "single-source batch cap: "
+                    + source_key
+                )
+            declared_counts[source_key] = declared_count
+
+        direct_sources: dict[str, str] = {}
+        for source_key in batch:
+            if source_key in details:
+                continue
+            video_targets = {
+                group_key
+                for view, group_key in scoped[source_key]["targets"]
+                if view == "videos" and group_key
+            }
+            if video_targets:
+                if len(video_targets) != 1:
+                    raise RuntimeError(
+                        "affected direct video source has ambiguous target"
+                    )
+                direct_sources[source_key] = next(iter(video_targets))
+        direct_video_ids = sorted(set(direct_sources.values()))
+        if len(direct_video_ids) != len(direct_sources):
+            raise RuntimeError(
+                "affected direct video source has ambiguous parent identity"
+            )
+        direct_count_rows = adapter._rows(
+            connection,
+            """
+            SELECT video_id,count(*) AS occurrence_count
+            FROM runtime_occurrences
+            WHERE revision_id = %s AND video_id = ANY(%s)
+              AND range_id = ANY(%s)
+            GROUP BY video_id
+            ORDER BY video_id
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                direct_video_ids,
+                ["all", ""],
+                len(direct_video_ids) + 1,
+            ],
+        ) if direct_video_ids else []
+        if len(direct_count_rows) > len(direct_video_ids):
+            raise RuntimeError(
+                "affected direct video occurrence count exceeded requested batch"
+            )
+        direct_counts = {video_id: 0 for video_id in direct_video_ids}
+        for row in direct_count_rows:
+            video_id = _text(row.get("video_id"))
+            if video_id not in direct_counts:
+                raise RuntimeError(
+                    "affected direct video occurrence count escaped scope"
+                )
+            try:
+                occurrence_count = int(row.get("occurrence_count"))
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError(
+                    "affected direct video occurrence count is invalid"
+                ) from exc
+            if (
+                occurrence_count < 0
+                or occurrence_count > PARENT_SOURCE_OCCURRENCE_BATCH_ROWS
+            ):
+                raise RuntimeError(
+                    "affected direct video occurrence count exceeded "
+                    "single-source batch cap"
+                )
+            direct_counts[video_id] = occurrence_count
+
+        source_plans: dict[str, tuple[str, tuple[str, ...]]] = {}
+        for source_key in batch:
+            if source_key in detail_revisions:
+                source_base_revision, source_overlay_ids = (
+                    adapter._source_detail_delta_lineage(
+                        overlay_revision_ids,
+                        detail_revisions[source_key],
+                        parent_revision_id,
+                    )
+                )
+            else:
+                source_base_revision = parent_revision_id
+                source_overlay_ids = [
+                    _text(value)
+                    for value in overlay_revision_ids
+                    if _text(value)
+                ]
+            source_plans[source_key] = (
+                _text(source_base_revision),
+                tuple(_text(value) for value in source_overlay_ids if _text(value)),
+            )
+
+        adaptive_batches: list[tuple[str, ...]] = []
+        adaptive_batch: list[str] = []
+        adaptive_rows = 0
+        for source_key in batch:
+            occurrence_count = (
+                declared_counts[source_key]
+                if source_key in details
+                else direct_counts.get(direct_sources.get(source_key, ""), 0)
+            )
+            if (
+                adaptive_batch
+                and adaptive_rows + occurrence_count
+                    > PARENT_SOURCE_OCCURRENCE_BATCH_ROWS
+            ):
+                adaptive_batches.append(tuple(adaptive_batch))
+                adaptive_batch = []
+                adaptive_rows = 0
+            adaptive_batch.append(source_key)
+            adaptive_rows += occurrence_count
+        if adaptive_batch:
+            adaptive_batches.append(tuple(adaptive_batch))
+
+        for stream_index, stream_batch in enumerate(adaptive_batches):
+            stream_scoped = {
+                source_key: scoped[source_key] for source_key in stream_batch
+            }
+            stream_union_videos = tuple(sorted({
+                video_id
+                for values in stream_scoped.values()
+                for video_id in values["videos"]
+            }))
+            stream_direct_sources = {
+                source_key: direct_sources[source_key]
+                for source_key in stream_batch
+                if source_key in direct_sources
+            }
+            stream_direct_video_ids = sorted(set(stream_direct_sources.values()))
+            direct_video_rows = adapter._rows(
+                connection,
+                """
+                SELECT video_id,title,channel_name,channel_id,channel_handle,
+                       channel_url,published_timestamp,payload_json
+                FROM runtime_videos
+                WHERE revision_id = %s AND video_id = ANY(%s)
+                ORDER BY video_id
+                LIMIT %s
+                """,
+                [
+                    parent_revision_id,
+                    stream_direct_video_ids,
+                    len(stream_direct_video_ids) + 1,
+                ],
+            ) if stream_direct_video_ids else []
+            if len(direct_video_rows) > len(stream_direct_video_ids):
+                raise RuntimeError(
+                    "affected direct video detail exceeded requested batch"
+                )
+            direct_video_by_id: dict[str, dict[str, Any]] = {}
+            for row in direct_video_rows:
+                video_id = _text(row.get("video_id"))
+                if (
+                    video_id not in stream_direct_video_ids
+                    or video_id in direct_video_by_id
+                ):
+                    raise RuntimeError(
+                        "affected direct video detail changed identity"
+                    )
+                direct_video_by_id[video_id] = row
+            for video_id in stream_direct_video_ids:
+                if direct_counts[video_id] and video_id not in direct_video_by_id:
+                    raise RuntimeError(
+                        "affected direct video occurrence has no parent detail"
+                    )
+
+            plan_members: dict[
+                tuple[str, tuple[str, ...]], list[str]
+            ] = {}
+            for source_key in stream_batch:
+                plan_members.setdefault(source_plans[source_key], []).append(
+                    source_key
+                )
+            overlay_inputs_by_plan: dict[
+                tuple[str, tuple[str, ...]],
+                tuple[
+                    tuple[Mapping[str, Any], ...],
+                    dict[str, dict[str, Any]],
+                    tuple[Mapping[str, Any], ...],
+                ],
+            ] = {}
+            for plan, plan_source_keys in plan_members.items():
+                source_base_revision, source_overlay_ids = plan
+                plan_union_videos = tuple(sorted({
+                    video_id
+                    for source_key in plan_source_keys
+                    for video_id in stream_scoped[source_key]["videos"]
+                }))
+                overlay_inputs_by_plan[plan] = (
+                    adapter._snapshot_source_overlay_inputs(
+                        connection,
+                        source_base_revision,
+                        source_overlay_ids,
+                        "all",
+                        plan_union_videos,
+                        include_compatible_full_reset_7d=True,
+                    )
+                    if source_overlay_ids
+                    else ((), {}, ())
+                )
+
+            def write_source(
+                source_key: str,
+                *,
+                parent_rows: list[dict[str, Any]] | None = None,
+                direct_rows: list[dict[str, Any]] | None = None,
+            ) -> None:
+                parent_rows = parent_rows if parent_rows is not None else []
+                direct_rows = direct_rows if direct_rows is not None else []
+                direct_video_id = stream_direct_sources.get(source_key, "")
+                try:
+                    candidate_rows, accepted_resets, runtime_changes = (
+                        overlay_inputs_by_plan[source_plans[source_key]]
+                    )
+                    payload = adapter._snapshot_materialized_source_payload(
+                        source_key,
+                        range_id="all",
+                        persisted_record=details.get(source_key),
+                        targets=stream_scoped[source_key]["targets"],
+                        video_scope=stream_scoped[source_key]["videos"],
+                        parent_occurrences=parent_rows,
+                        direct_video_rows=(
+                            (direct_video_by_id[direct_video_id],)
+                            if direct_video_id in direct_video_by_id else ()
+                        ),
+                        direct_occurrence_rows=direct_rows,
+                        candidate_rows=candidate_rows,
+                        accepted_video_resets=accepted_resets,
+                        runtime_changes=runtime_changes,
+                    )
+                    if payload.get("found") is not True:
+                        raise RuntimeError(
+                            "affected canonical source is missing: "
+                            f"all/{source_key}"
+                        )
+                    record = payload.get("record")
+                    if not isinstance(record, Mapping):
+                        raise RuntimeError(
+                            "affected canonical source is invalid: "
+                            f"all/{source_key}"
+                        )
+                    occurrences = record.get("occurrences")
+                    if not isinstance(occurrences, list) or not occurrences:
+                        raise RuntimeError(
+                            "affected canonical source is empty: "
+                            f"all/{source_key}"
+                        )
+                    detail = dict(record)
+                    detail.pop("occurrences", None)
+                    writer.add_source(source_key, "all", detail, occurrences)
+                    completed.add(source_key)
+                finally:
+                    # The overlay is shared metadata for this stream batch, but
+                    # parent payload graphs are strictly one-source-at-a-time.
+                    parent_rows.clear()
+                    direct_rows.clear()
+
+            persisted_keys = tuple(sorted(
+                source_key
+                for source_key in stream_batch
+                if source_key in details
+            ))
+            expected_parent_rows = sum(
+                declared_counts[source_key] for source_key in persisted_keys
+            )
+            current_source_key = ""
+            current_parent_rows: list[dict[str, Any]] = []
+            written_persisted: set[str] = set()
+            streamed_parent_rows = 0
+
+            def finish_parent_source() -> None:
+                nonlocal current_source_key, current_parent_rows
+                if not current_source_key:
+                    return
+                if len(current_parent_rows) != declared_counts[current_source_key]:
+                    raise RuntimeError(
+                        "affected parent source occurrence total disagrees "
+                        "with detail: " + current_source_key
+                    )
+                write_source(
+                    current_source_key,
+                    parent_rows=current_parent_rows,
+                )
+                written_persisted.add(current_source_key)
+                current_source_key = ""
+                current_parent_rows = []
+
+            for row in _stream_pg_rows(
+                connection,
+                f"affected_parent_sources_{metadata_index}_{stream_index}",
+                """
+                WITH requested(source_key,revision_id) AS (
+                  SELECT * FROM unnest(%s::text[],%s::text[])
+                )
+                SELECT occurrence.revision_id,occurrence.source_key,
+                       occurrence.position,occurrence.video_id,occurrence.title,
+                       occurrence.channel_name,occurrence.channel_id,
+                       occurrence.channel_handle,occurrence.channel_url,
+                       occurrence.published_timestamp,occurrence.seconds,
+                       occurrence.is_niche,occurrence.is_unknown_artist,
+                       occurrence.payload_json
+                FROM runtime_source_occurrences AS occurrence
+                JOIN requested
+                  ON requested.source_key=occurrence.source_key
+                 AND requested.revision_id=occurrence.revision_id::text
+                WHERE occurrence.range_id = 'all'
+                ORDER BY occurrence.source_key,occurrence.position
+                LIMIT %s
+                """,
+                [
+                    list(persisted_keys),
+                    [detail_revisions[source_key] for source_key in persisted_keys],
+                    expected_parent_rows + 1,
+                ],
+                fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+            ) if expected_parent_rows else ():
+                streamed_parent_rows += 1
+                if streamed_parent_rows > expected_parent_rows:
+                    raise RuntimeError(
+                        "affected parent source occurrence stream exceeded "
+                        "declared total"
+                    )
+                source_key = _text(row.get("source_key"))
+                if source_key not in persisted_keys:
+                    raise RuntimeError(
+                        "affected parent occurrence escaped requested detail set"
+                    )
+                if _text(row.get("revision_id")) != detail_revisions[source_key]:
+                    raise RuntimeError(
+                        "affected parent occurrence escaped source base revision"
+                    )
+                if source_key != current_source_key:
+                    finish_parent_source()
+                    if source_key in written_persisted:
+                        raise RuntimeError(
+                            "affected parent occurrence stream is not ordered"
+                        )
+                    current_source_key = source_key
+                current_parent_rows.append(
+                    adapter._runtime_source_occurrence(row)
+                )
+            finish_parent_source()
+            for source_key in persisted_keys:
+                if source_key in written_persisted:
+                    continue
+                if declared_counts[source_key] != 0:
+                    raise RuntimeError(
+                        "affected parent source occurrence stream is incomplete: "
+                        + source_key
+                    )
+                write_source(source_key)
+                written_persisted.add(source_key)
+
+            direct_source_by_video = {
+                video_id: source_key
+                for source_key, video_id in stream_direct_sources.items()
+            }
+            expected_direct_rows = sum(
+                direct_counts[video_id]
+                for video_id in direct_source_by_video
+            )
+            current_direct_key = ""
+            current_direct_rows: list[dict[str, Any]] = []
+            written_direct: set[str] = set()
+            streamed_direct_rows = 0
+
+            def finish_direct_source() -> None:
+                nonlocal current_direct_key, current_direct_rows
+                if not current_direct_key:
+                    return
+                video_id = stream_direct_sources[current_direct_key]
+                if len(current_direct_rows) != direct_counts[video_id]:
+                    raise RuntimeError(
+                        "affected direct video occurrence total disagrees "
+                        "with parent: " + current_direct_key
+                    )
+                write_source(current_direct_key, direct_rows=current_direct_rows)
+                written_direct.add(current_direct_key)
+                current_direct_key = ""
+                current_direct_rows = []
+
+            for row in _stream_pg_rows(
+                connection,
+                f"affected_direct_sources_{metadata_index}_{stream_index}",
+                """
+                SELECT occurrence_id,range_id,video_id,song_key,seconds,
+                       source_system,source_id,title,artist,is_niche,
+                       is_unknown_artist,payload_json
+                FROM runtime_occurrences
+                WHERE revision_id = %s AND video_id = ANY(%s)
+                  AND range_id = ANY(%s)
+                ORDER BY video_id,range_id,occurrence_id
+                LIMIT %s
+                """,
+                [
+                    parent_revision_id,
+                    sorted(direct_source_by_video),
+                    ["all", ""],
+                    expected_direct_rows + 1,
+                ],
+                fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+            ) if expected_direct_rows else ():
+                streamed_direct_rows += 1
+                if streamed_direct_rows > expected_direct_rows:
+                    raise RuntimeError(
+                        "affected direct video occurrence stream exceeded "
+                        "declared total"
+                    )
+                video_id = _text(row.get("video_id"))
+                source_key = direct_source_by_video.get(video_id, "")
+                if not source_key:
+                    raise RuntimeError(
+                        "affected direct video occurrence escaped scope"
+                    )
+                if source_key != current_direct_key:
+                    finish_direct_source()
+                    if source_key in written_direct:
+                        raise RuntimeError(
+                            "affected direct video occurrence stream is not ordered"
+                        )
+                    current_direct_key = source_key
+                current_direct_rows.append(row)
+            finish_direct_source()
+            for source_key in stream_direct_sources:
+                if source_key in written_direct:
+                    continue
+                video_id = stream_direct_sources[source_key]
+                if direct_counts[video_id] != 0:
+                    raise RuntimeError(
+                        "affected direct video occurrence stream is incomplete: "
+                        + source_key
+                    )
+                write_source(source_key)
+                written_direct.add(source_key)
+
+            for source_key in stream_batch:
+                if source_key not in details and source_key not in direct_sources:
+                    write_source(source_key)
+
+            print(
+                "PG_SNAPSHOT_AFFECTED_PARENT_SOURCES "
+                f"complete={len(completed)} total={len(requested)}",
+                flush=True,
+            )
+            direct_video_rows = None
+            direct_video_by_id = {}
+            overlay_inputs_by_plan = {}
+            gc.collect()
+        detail_rows = None
+        details = {}
+        detail_revisions = {}
+        declared_counts = {}
+        direct_count_rows = None
+        direct_counts = {}
+        source_plans = {}
+        gc.collect()
+    if completed != requested:
+        missing = sorted(requested - completed)
+        raise RuntimeError(
+            "affected parent source bulk export is incomplete: "
+            + ", ".join(missing[:10])
+        )
+    return completed
+
+
 class SnapshotPageBuilder:
     def __init__(self, connection: Any):
         self.connection = connection
@@ -3601,6 +4298,32 @@ def materialize(
             pending_source_keys = sorted(
                 source_keys[range_id] - bulk_exported_source_keys[range_id]
             )
+            if range_id == "all" and getattr(builder, "generic_runtime", None):
+                if pending_source_keys and (
+                    source_scope is None
+                    or not getattr(builder, "parent", None)
+                    or not getattr(builder, "overlay_ids", ())
+                ):
+                    raise RuntimeError(
+                        "generic all source batch has no exact overlay scope"
+                    )
+                exported_affected = export_affected_parent_sources(
+                    connection,
+                    writer,
+                    parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=pending_source_keys,
+                ) if pending_source_keys else set()
+                pending_source_keys = sorted(
+                    set(pending_source_keys) - exported_affected
+                )
+                if pending_source_keys:
+                    raise RuntimeError(
+                        "generic all source batch left pending keys: "
+                        + ", ".join(pending_source_keys[:10])
+                    )
+                continue
             for index, source_key in enumerate(pending_source_keys, start=1):
                 video_scope = (
                     source_scope.videos_for_source(source_key)

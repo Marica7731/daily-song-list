@@ -16533,6 +16533,422 @@ def _generic_video_source_payload(
     return payload
 
 
+def _snapshot_materialized_source_payload(
+    requested_key: str,
+    *,
+    range_id: str,
+    persisted_record: Mapping[str, Any] | None,
+    targets: Sequence[tuple[str, str]],
+    video_scope: Sequence[str],
+    parent_occurrences: Sequence[Mapping[str, Any]],
+    direct_video_rows: Sequence[Mapping[str, Any]],
+    direct_occurrence_rows: Sequence[Mapping[str, Any]],
+    candidate_rows: Sequence[Mapping[str, Any]],
+    accepted_video_resets: Mapping[str, Mapping[str, Any]],
+    runtime_changes: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Resolve one source from batch-prefetched immutable snapshot inputs.
+
+    This helper deliberately performs no SQL.  The materializer supplies the
+    persisted source authority, an exact video scope, and one union overlay
+    delta shared by the surrounding key batch.
+    """
+
+    requested_key = _text(requested_key)
+    scoped_videos = {
+        _text(value) for value in video_scope if _text(value)
+    }
+    if not requested_key or not scoped_videos:
+        raise PostgresAdapterError(
+            "snapshot materialized source has empty exact scope"
+        )
+    target_groups: dict[str, set[str]] = defaultdict(set)
+    for view, group_key in targets:
+        normalized_view = _text(view)
+        normalized_group_key = _text(group_key)
+        if (
+            normalized_view in {"songs", "songIndex"}
+            and "\x1f" in normalized_group_key
+        ):
+            parts = normalized_group_key.split("\x1f")
+            if len(parts) != 2 or not parts[0]:
+                raise PostgresAdapterError(
+                    "snapshot materialized song target identity is invalid"
+                )
+            normalized_group_key = f"{parts[0]}::{parts[1]}"
+        if normalized_view and normalized_group_key:
+            target_groups[normalized_view].add(normalized_group_key)
+    type_for_view = {
+        "songs": "song",
+        "songIndex": "song",
+        "artists": "artist",
+        "vtubers": "vtuber",
+        "videos": "video",
+    }
+    target_types = {
+        type_for_view[view]
+        for view in target_groups
+        if view in type_for_view
+    }
+    persisted = dict(persisted_record or {})
+    source_type = _text(persisted.get("type") or persisted.get("entityType"))
+    if source_type in {"channel", "source"} and "vtuber" in target_types:
+        source_type = "vtuber"
+    if not source_type:
+        if len(target_types) != 1:
+            raise PostgresAdapterError(
+                "snapshot materialized source target type is ambiguous"
+            )
+        source_type = next(iter(target_types))
+    if target_types and source_type not in target_types:
+        raise PostgresAdapterError(
+            "snapshot materialized source target disagrees with detail type"
+        )
+
+    def row_video_id(value: Mapping[str, Any]) -> str:
+        return _text(value.get("video_id") or value.get("videoId"))
+
+    def channel_identities(value: Mapping[str, Any]) -> set[str]:
+        payload = _json_object(value.get("video_payload_json"))
+        if isinstance(payload.get("payload"), Mapping):
+            payload = dict(payload["payload"])
+        values = {
+            _text(value.get("channel_id") or value.get("channelId")),
+            _text(
+                value.get("channel_handle")
+                or value.get("channelHandle")
+                or payload.get("channelHandle")
+            ).lstrip("/@"),
+            _text(
+                value.get("channel_name")
+                or value.get("channelName")
+                or payload.get("channelName")
+            ),
+            _text(payload.get("channelId")),
+        }
+        return {
+            item
+            for value in values
+            for item in (value, _overlay_norm(value))
+            if item
+        }
+
+    def matches_target(value: Mapping[str, Any]) -> bool:
+        if row_video_id(value) not in scoped_videos:
+            return False
+        if source_type == "video":
+            return row_video_id(value) in target_groups.get("videos", set())
+        if source_type == "song":
+            groups = target_groups.get("songs", set())
+            return bool(
+                _source_row_song_group_identity(value) in groups
+                or _runtime_change_group_key(value, "songs") in groups
+            )
+        if source_type == "artist":
+            groups = target_groups.get("artists", set())
+            return bool(
+                _runtime_change_group_key(value, "artists") in groups
+                or (_overlay_artist_group_norm(value.get("artist")) or "unknown")
+                    in groups
+            )
+        if source_type == "vtuber":
+            groups = target_groups.get("vtubers", set())
+            expected = {
+                item
+                for value in groups
+                for item in (value, value.lstrip("/@"), _overlay_norm(value))
+                if item
+            }
+            if persisted:
+                expected.update(channel_identities(persisted))
+            return bool(expected & channel_identities(value))
+        return False
+
+    effective: list[dict[str, Any]] = []
+    if persisted:
+        for occurrence in parent_occurrences:
+            records = _persisted_source_records((occurrence,), persisted)
+            if len(records) != 1 or len(records[0].get("occurrences", ())) != 1:
+                raise PostgresAdapterError(
+                    "persisted source occurrence disagrees with detail authority"
+                )
+            effective.append(records[0])
+    elif source_type == "video" and direct_video_rows:
+        if len(direct_video_rows) != 1:
+            raise PostgresAdapterError(
+                "direct video source parent identity is ambiguous"
+            )
+        video_row = direct_video_rows[0]
+        video_id = _text(video_row.get("video_id"))
+        video = _json_object(video_row.get("payload_json"))
+        video.update({
+            "videoId": video.get("videoId") or video_id,
+            "title": video.get("title")
+                if video.get("title") is not None else video_row.get("title"),
+            "channelName": video.get("channelName")
+                if video.get("channelName") is not None
+                else video_row.get("channel_name"),
+            "channelId": video.get("channelId")
+                if video.get("channelId") is not None
+                else video_row.get("channel_id"),
+            "channelHandle": video.get("channelHandle")
+                if video.get("channelHandle") is not None
+                else video_row.get("channel_handle"),
+            "channelUrl": video.get("channelUrl")
+                if video.get("channelUrl") is not None
+                else video_row.get("channel_url"),
+            "publishedAt": video.get("publishedAt")
+                if video.get("publishedAt") is not None
+                else video_row.get("published_timestamp"),
+        })
+        for row in direct_occurrence_rows:
+            occurrence = _json_object(row.get("payload_json"))
+            occurrence.update({
+                "occurrenceId": occurrence.get("occurrenceId")
+                    or row.get("occurrence_id"),
+                "rangeId": occurrence.get("rangeId")
+                    or row.get("range_id") or range_id,
+                "songKey": occurrence.get("songKey") or row.get("song_key"),
+                "seconds": occurrence.get("seconds", row.get("seconds")),
+                "title": occurrence.get("title") or row.get("title"),
+                "artist": occurrence.get("artist") or row.get("artist"),
+                "sourceId": occurrence.get("sourceId") or row.get("source_id"),
+                "sourceSystem": occurrence.get("sourceSystem")
+                    or row.get("source_system"),
+            })
+            if "isNiche" not in occurrence:
+                occurrence["isNiche"] = row.get("is_niche") is True
+            if "isUnknownArtist" not in occurrence:
+                occurrence["isUnknownArtist"] = (
+                    row.get("is_unknown_artist") is True
+                )
+            effective.append({
+                "video": dict(video),
+                "occurrences": (occurrence,),
+            })
+
+    def identity(record: Mapping[str, Any]) -> tuple[str, str]:
+        return _source_record_identity(record)
+
+    def insert_record(record: Mapping[str, Any]) -> None:
+        record_identity = identity(record)
+        if not all(record_identity):
+            raise PostgresAdapterError(
+                "snapshot source candidate is missing immutable identity"
+            )
+        matches = [
+            index for index, current in enumerate(effective)
+            if identity(current) == record_identity
+        ]
+        if len(matches) > 1:
+            raise PostgresAdapterError(
+                "snapshot source immutable identity is ambiguous"
+            )
+        if matches:
+            effective[matches[0]] = dict(record)
+        else:
+            effective.append(dict(record))
+
+    reset_videos = scoped_videos & {
+        _text(video_id) for video_id in accepted_video_resets if _text(video_id)
+    }
+    if reset_videos:
+        effective = [
+            record for record in effective
+            if identity(record)[0] not in reset_videos
+        ]
+    for row in candidate_rows:
+        if row.get("video_tombstone") or not matches_target(row):
+            continue
+        record = _overlay_source_record(row)
+        if record:
+            insert_record(record)
+
+    for change in runtime_changes:
+        entity_type = _text(
+            change.get("entityType") or change.get("entity_type")
+        )
+        video_id = row_video_id(change)
+        if not video_id or video_id not in scoped_videos:
+            continue
+        if entity_type in {"videos", "runtime_videos"}:
+            effective = [
+                record for record in effective
+                if identity(record)[0] != video_id
+            ]
+            continue
+        if entity_type not in {"occurrences", "runtime_occurrences"}:
+            continue
+        occurrence_id = _text(
+            change.get("occurrenceId") or change.get("occurrence_id")
+        )
+        matches = [
+            index for index, record in enumerate(effective)
+            if identity(record) == (video_id, occurrence_id)
+        ] if occurrence_id else []
+        if not matches:
+            if source_type in {"song", "artist"} and not matches_target(change):
+                continue
+            matches = [
+                index for index, record in enumerate(effective)
+                if _source_record_matches_change(record, change)
+            ]
+        if len(matches) > 1:
+            raise PostgresAdapterError(
+                "source occurrence preimage does not uniquely match authority"
+            )
+        if len(matches) == 1:
+            effective.pop(matches[0])
+
+    for row in _runtime_replacement_candidate_rows(runtime_changes):
+        if not matches_target(row):
+            continue
+        record = _overlay_source_record(row)
+        if record:
+            insert_record(record)
+
+    records_by_video: dict[str, dict[str, Any]] = {}
+    for record in effective:
+        video = dict(record.get("video") or {})
+        video_id, _occurrence_id = identity(record)
+        if not video_id:
+            continue
+        current = records_by_video.setdefault(
+            video_id, {"video": video, "occurrences": []}
+        )
+        occurrences = record.get("occurrences") or ()
+        if len(occurrences) != 1 or not isinstance(occurrences[0], Mapping):
+            raise PostgresAdapterError(
+                "snapshot source effective record is not one occurrence"
+            )
+        current["occurrences"].append(dict(occurrences[0]))
+    records = [
+        {
+            "video": value["video"],
+            "occurrences": tuple(sorted(
+                value["occurrences"],
+                key=lambda item: (
+                    int(item.get("position") or 0),
+                    _text(item.get("occurrenceId")),
+                ),
+            )),
+        }
+        for _video_id, value in sorted(records_by_video.items())
+    ]
+    if not records or not any(record["occurrences"] for record in records):
+        return {
+            "schemaVersion": 1,
+            "found": False,
+            "sourceKey": requested_key,
+        }
+
+    query = {"range": range_id}
+    payload = source_payload_from_records(records, requested_key, query)
+    if not payload.get("found"):
+        view_for_type = {
+            "song": "songs",
+            "artist": "artists",
+            "vtuber": "vtubers",
+            "video": "videos",
+        }
+        view = view_for_type[source_type]
+        options = _query_options({
+            "range": range_id,
+            "view": view,
+            "metric": "occurrences",
+        })
+        groups = _entity_groups(records, options)
+        if not groups:
+            raise PostgresAdapterError(
+                "snapshot source records do not resolve a target group"
+            )
+        expected_groups = target_groups.get(view, set())
+        persisted_key = _text(persisted.get("key"))
+        if source_type == "video":
+            group_keys = {_text(group.get("key")) for group in groups}
+            if len(group_keys) != 1 or not group_keys.issubset(expected_groups):
+                raise PostgresAdapterError(
+                    "snapshot video source records have ambiguous identity"
+                )
+            group_key = next(iter(group_keys))
+        elif persisted_key:
+            group_key = persisted_key
+        elif len(expected_groups) == 1:
+            group_key = next(iter(expected_groups))
+        else:
+            raise PostgresAdapterError(
+                "snapshot source records have ambiguous target identity"
+            )
+        merged_occurrences = [
+            occurrence
+            for group in groups
+            for occurrence in group.get("occurrences", ())
+        ]
+        if not merged_occurrences:
+            raise PostgresAdapterError(
+                "snapshot source records resolve an empty target group"
+            )
+        first_group = groups[0]
+        merged_group = {
+            "key": group_key,
+            "video": dict(first_group.get("video") or {}),
+            "occurrences": merged_occurrences,
+            "title": (
+                persisted.get("title")
+                or persisted.get("workTitle")
+                or first_group.get("title")
+            ),
+            "artist": (
+                persisted.get("artist")
+                or persisted.get("displayArtist")
+                or first_group.get("artist")
+            ),
+        }
+        record = _group_payload(merged_group, options)
+        record["sourceDetailKey"] = requested_key
+        record["occurrences"] = merged_occurrences
+        payload = {
+            "schemaVersion": 1,
+            "found": True,
+            "sourceKey": requested_key,
+            "record": record,
+        }
+    result = dict(payload)
+    record = {
+        **persisted,
+        **dict(payload.get("record") or {}),
+    }
+    record["sourceDetailKey"] = requested_key
+    record["rangeId"] = range_id
+    occurrences = record.get("occurrences")
+    if not isinstance(occurrences, list):
+        occurrences = _source_records_as_occurrences(
+            records,
+            _query_options(query),
+            None,
+        )
+        record["occurrences"] = occurrences
+    count = len(occurrences)
+    video_count = len({
+        _text(item.get("videoId"))
+        for item in occurrences
+        if _text(item.get("videoId"))
+    })
+    record["count"] = count
+    record["occurrenceCount"] = count
+    record["timestampCount"] = count
+    record["videoCount"] = video_count
+    result["record"] = record
+    if source_type == "vtuber":
+        result = _canonicalize_vtuber_source_payload(result, records, query)
+        result_record = dict(result.get("record") or {})
+        result_record["sourceDetailKey"] = requested_key
+        result_record["rangeId"] = range_id
+        result["record"] = result_record
+    result["sourceKey"] = requested_key
+    return result
+
+
 def _authoritative_7d_overlay_ids(
     connection, overlay_revision_ids: Sequence[str],
 ) -> tuple[str, ...]:
