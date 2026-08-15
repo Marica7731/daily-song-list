@@ -741,6 +741,14 @@ class Tests(unittest.TestCase):
             )
             self.assertEqual(scope.videos_for_source(channel_key),("video-all",))
             self.assertEqual(scope.videos_for_source(replacement_key),("video-new",))
+            _batch,replacement_scope,_videos=next(scope.source_batches((replacement_key,)))
+            self.assertEqual(
+                replacement_scope[replacement_key]["targets"],
+                (("songs","\x1f".join((
+                    pg_adapter._overlay_song_group_norm("Replacement"),
+                    pg_adapter._overlay_song_group_norm("New Artist"),
+                ))),),
+            )
             self.assertEqual(scope.videos_for_source(reset_song_key),("video-full-7d",))
             self.assertEqual(scope.videos_for_source(reset_artist_key),("video-full-7d",))
             self.assertEqual(scope.videos_for_source(ordinary_7d_key),())
@@ -2789,6 +2797,450 @@ class Tests(unittest.TestCase):
             ["video-a","video-b"],
         )
 
+    def test_snapshot_affected_source_sql_scales_with_key_batches_without_fallback(self):
+        keys=[f"source-{index:04d}" for index in range(501)]
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs((key,f"video-{index:04d}") for index,key in enumerate(keys))
+            scope.add_targets((
+                "songs",f"song-{index:04d}::artist",key
+            ) for index,key in enumerate(keys))
+
+            detail_calls=[];stream_calls=[];overlay_calls=[]
+            def rows(_connection,statement,params):
+                if "runtime_source_details" not in statement:self.fail(statement)
+                self.assertEqual(params[0],["overlay","parent"])
+                self.assertEqual(params[2],["overlay","parent"])
+                detail_calls.append(tuple(params[1]))
+                return [{
+                    "revision_id":"parent","source_key":key,"entity_type":"song",
+                    "entity_key":f"song-{key[-4:]}::artist",
+                    "payload_json":{
+                        "type":"song","key":f"song-{key[-4:]}::artist",
+                        "sourceDetailKey":key,"rangeId":"all",
+                        "count":1,"occurrenceCount":1,"timestampCount":1,
+                        "videoCount":1,
+                    },
+                } for key in params[1]]
+            def stream(_connection,label,statement,params,**_kwargs):
+                stream_calls.append((label,tuple(params[0]),tuple(params[1])))
+                self.assertIn(
+                    "ORDER BY occurrence.source_key,occurrence.position",statement,
+                )
+                for key,revision_id in zip(params[0],params[1]):
+                    yield {
+                        "revision_id":revision_id,"source_key":key,"position":1,
+                        "video_id":f"video-{key[-4:]}",
+                        "payload_json":{"videoId":f"video-{key[-4:]}",
+                                        "occurrenceId":f"occ-{key[-4:]}",
+                                        "rangeId":"all","title":f"Song {key[-4:]}",
+                                        "artist":"Artist"},
+                    }
+            def overlay(_connection,_parent,_ids,_range,videos,**_kwargs):
+                overlay_calls.append(tuple(videos));return (),{},()
+            def materialized(key,**_kwargs):
+                suffix=key[-4:]
+                return {"schemaVersion":1,"found":True,"sourceKey":key,
+                        "record":{"type":"song","key":f"song-{suffix}::artist",
+                                  "sourceDetailKey":key,"rangeId":"all",
+                                  "count":1,"occurrenceCount":1,
+                                  "timestampCount":1,"videoCount":1,
+                                  "occurrences":[{"videoId":f"video-{suffix}",
+                                                  "occurrenceId":f"occ-{suffix}",
+                                                  "title":f"Song {suffix}",
+                                                  "artist":"Artist"}]}}
+            class Writer:
+                def __init__(self):self.keys=[]
+                def add_source(self,key,_range,_record,occurrences):
+                    self.keys.append(key);self.assertions=list(occurrences)
+            writer=Writer()
+            with patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream), \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs",
+                              side_effect=overlay), \
+                 patch.object(pg_adapter,"_snapshot_materialized_source_payload",
+                              side_effect=materialized), \
+                 patch.object(pg_materializer,"export_source",
+                              side_effect=AssertionError("paged exporter forbidden")), \
+                 patch.object(pg_adapter,"source_payload",
+                              side_effect=AssertionError("paged fallback forbidden")):
+                completed=pg_materializer.export_affected_parent_sources(
+                    object(),writer,parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=keys,
+                )
+        self.assertEqual(completed,set(keys));self.assertEqual(set(writer.keys),set(keys))
+        self.assertEqual([len(batch) for batch in detail_calls],[500,1])
+        self.assertEqual([len(batch) for _label,batch,_revisions in stream_calls],[500,1])
+        self.assertTrue(all(
+            set(revisions)=={"parent"}
+            for _label,_batch,revisions in stream_calls
+        ))
+        self.assertEqual(len(overlay_calls),2)
+
+    def test_snapshot_affected_source_adapts_batches_and_releases_each_preimage(self):
+        counts={"source-large":4,"source-small-a":1,"source-small-b":2}
+        keys=tuple(counts)
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs((key,f"video-{key}") for key in keys)
+            scope.add_targets(("songs",f"song-{key}::artist",key) for key in keys)
+            stream_calls=[];captured_buffers=[];overlay_calls=[]
+            class Writer:
+                def __init__(self):self.keys=[]
+                def add_source(self,key,_range,_record,_occurrences):
+                    self.keys.append(key)
+            writer=Writer()
+            def rows(_connection,statement,params):
+                self.assertIn("runtime_source_details",statement)
+                return [{
+                    "revision_id":"parent","source_key":key,
+                    "entity_type":"song","entity_key":f"song-{key}::artist",
+                    "payload_json":{
+                        "type":"song","key":f"song-{key}::artist",
+                        "sourceDetailKey":key,"rangeId":"all",
+                        "count":counts[key],"occurrenceCount":counts[key],
+                        "timestampCount":counts[key],"videoCount":1,
+                    },
+                } for key in params[1]]
+            def stream(_connection,_label,_statement,params,**_kwargs):
+                batch=tuple(params[0]);stream_calls.append((batch,params[2]))
+                for key,revision_id in zip(params[0],params[1]):
+                    for position in range(1,counts[key]+1):
+                        yield {
+                            "revision_id":revision_id,"source_key":key,
+                            "position":position,"video_id":f"video-{key}",
+                            "payload_json":{
+                                "videoId":f"video-{key}",
+                                "occurrenceId":f"{key}-{position}",
+                                "title":f"Song {key}","artist":"Artist",
+                            },
+                        }
+                        if key=="source-small-a" and position==1:
+                            self.assertEqual(writer.keys,["source-large"])
+            def overlay(_connection,_base,_ids,_range,videos,**_kwargs):
+                overlay_calls.append(tuple(videos));return (),{},()
+            def materialized(key,**kwargs):
+                parent_rows=kwargs["parent_occurrences"]
+                captured_buffers.append(parent_rows)
+                self.assertEqual(len(parent_rows),counts[key])
+                return {
+                    "schemaVersion":1,"found":True,"sourceKey":key,
+                    "record":{
+                        "type":"song","key":f"song-{key}::artist",
+                        "sourceDetailKey":key,"rangeId":"all",
+                        "count":1,"occurrenceCount":1,"timestampCount":1,
+                        "videoCount":1,
+                        "occurrences":[{
+                            "videoId":f"video-{key}",
+                            "occurrenceId":f"output-{key}",
+                            "title":f"Song {key}","artist":"Artist",
+                        }],
+                    },
+                }
+            with patch.object(pg_materializer,"PARENT_SOURCE_OCCURRENCE_BATCH_ROWS",5), \
+                 patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream), \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs",
+                              side_effect=overlay), \
+                 patch.object(pg_adapter,"_snapshot_materialized_source_payload",
+                              side_effect=materialized):
+                completed=pg_materializer.export_affected_parent_sources(
+                    object(),writer,parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=keys,
+                )
+        self.assertEqual(completed,set(keys))
+        self.assertEqual(stream_calls,[
+            (("source-large","source-small-a"),6),
+            (("source-small-b",),3),
+        ])
+        self.assertEqual(len(overlay_calls),2)
+        self.assertTrue(captured_buffers)
+        self.assertTrue(all(buffer==[] for buffer in captured_buffers))
+
+    def test_snapshot_affected_source_rejects_single_source_over_batch_cap(self):
+        source_key="source-too-large"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs(((source_key,"video-too-large"),))
+            scope.add_targets((("songs","too large::artist",source_key),))
+            def rows(_connection,statement,_params):
+                self.assertIn("runtime_source_details",statement)
+                count=pg_materializer.PARENT_SOURCE_OCCURRENCE_BATCH_ROWS+1
+                return [{
+                    "revision_id":"parent","source_key":source_key,
+                    "entity_type":"song","entity_key":"too large::artist",
+                    "payload_json":{
+                        "type":"song","key":"too large::artist",
+                        "sourceDetailKey":source_key,"rangeId":"all",
+                        "count":count,"occurrenceCount":count,
+                        "timestampCount":count,"videoCount":1,
+                    },
+                }]
+            with patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows") as stream, \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs") as overlay, \
+                 self.assertRaisesRegex(RuntimeError,"single-source batch cap"):
+                pg_materializer.export_affected_parent_sources(
+                    object(),object(),parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(source_key,),
+                )
+            stream.assert_not_called();overlay.assert_not_called()
+
+    def test_snapshot_affected_direct_source_rejects_parent_count_over_batch_cap(self):
+        source_key="source-direct-too-large";video_id="video-too-large"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs(((source_key,video_id),))
+            scope.add_targets((("videos",video_id,source_key),))
+            def rows(_connection,statement,_params):
+                if "runtime_source_details" in statement:return []
+                self.assertIn("count(*) AS occurrence_count",statement)
+                return [{
+                    "video_id":video_id,
+                    "occurrence_count":
+                        pg_materializer.PARENT_SOURCE_OCCURRENCE_BATCH_ROWS+1,
+                }]
+            with patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows") as stream, \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs") as overlay, \
+                 self.assertRaisesRegex(RuntimeError,"single-source batch cap"):
+                pg_materializer.export_affected_parent_sources(
+                    object(),object(),parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(source_key,),
+                )
+            stream.assert_not_called();overlay.assert_not_called()
+
+    def test_snapshot_affected_source_uses_overlay_detail_base_and_newer_suffix(self):
+        persisted_key="source-persisted";overlay_only_key="source-overlay-only"
+        keys=(persisted_key,overlay_only_key)
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs((
+                (persisted_key,"video-base"),
+                (persisted_key,"video-middle"),
+                (persisted_key,"video-new"),
+                (overlay_only_key,"video-overlay-middle"),
+                (overlay_only_key,"video-overlay-new"),
+            ))
+            scope.add_targets((
+                ("songs","persisted::artist",persisted_key),
+                ("songs","overlay only::artist",overlay_only_key),
+            ))
+            overlay_calls=[]
+            def rows(_connection,statement,params):
+                self.assertIn("runtime_source_details",statement)
+                self.assertEqual(params[0],["overlay-new","overlay-middle","parent"])
+                return [{
+                    "revision_id":"overlay-middle","source_key":persisted_key,
+                    "entity_type":"song","entity_key":"persisted::artist",
+                    "payload_json":{
+                        "type":"song","key":"persisted::artist",
+                        "sourceDetailKey":persisted_key,"rangeId":"all",
+                        "count":2,"occurrenceCount":2,"timestampCount":2,
+                        "videoCount":2,
+                    },
+                }]
+            def stream(_connection,_label,statement,params,**_kwargs):
+                self.assertIn("unnest(%s::text[],%s::text[])",statement)
+                self.assertEqual(params[0],[persisted_key])
+                self.assertEqual(params[1],["overlay-middle"])
+                for position,occurrence_id in enumerate(("base-a","middle-b"),1):
+                    yield {
+                        "revision_id":"overlay-middle","source_key":persisted_key,
+                        "position":position,"video_id":f"video-{occurrence_id}",
+                        "payload_json":{
+                            "videoId":f"video-{occurrence_id}",
+                            "occurrenceId":occurrence_id,"title":"Persisted",
+                            "artist":"Artist",
+                        },
+                    }
+            def candidate(occurrence_id,video_id):
+                return {"occurrence_id":occurrence_id,"video_id":video_id}
+            def overlay(_connection,base,ids,_range,videos,**_kwargs):
+                call=(base,tuple(ids),tuple(videos));overlay_calls.append(call)
+                if base=="overlay-middle":
+                    self.assertEqual(tuple(ids),("overlay-new",))
+                    return (candidate("new-c","video-new"),),{},()
+                self.assertEqual(base,"parent")
+                self.assertEqual(tuple(ids),("overlay-new","overlay-middle"))
+                return (
+                    candidate("overlay-middle-a","video-overlay-middle"),
+                    candidate("overlay-new-b","video-overlay-new"),
+                ),{},()
+            rebuilt={}
+            def materialized(key,**kwargs):
+                occurrence_ids=[
+                    item["occurrenceId"]
+                    for item in kwargs["parent_occurrences"]
+                ]+[
+                    item["occurrence_id"] for item in kwargs["candidate_rows"]
+                ]
+                rebuilt[key]=tuple(occurrence_ids)
+                return {
+                    "schemaVersion":1,"found":True,"sourceKey":key,
+                    "record":{
+                        "type":"song","sourceDetailKey":key,"rangeId":"all",
+                        "count":len(occurrence_ids),
+                        "occurrenceCount":len(occurrence_ids),
+                        "timestampCount":len(occurrence_ids),"videoCount":len(occurrence_ids),
+                        "occurrences":[{
+                            "videoId":f"video-{value}","occurrenceId":value,
+                            "title":"Fixture","artist":"Artist",
+                        } for value in occurrence_ids],
+                    },
+                }
+            class Writer:
+                def __init__(self):self.values={}
+                def add_source(self,key,_range,_record,occurrences):
+                    self.values[key]=tuple(item["occurrenceId"] for item in occurrences)
+            writer=Writer()
+            with patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream), \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs",
+                              side_effect=overlay), \
+                 patch.object(pg_adapter,"_snapshot_materialized_source_payload",
+                              side_effect=materialized), \
+                 patch.object(pg_materializer,"export_source",
+                              side_effect=AssertionError("generic-all export fallback")), \
+                 patch.object(pg_adapter,"source_payload",
+                              side_effect=AssertionError("generic-all payload fallback")):
+                completed=pg_materializer.export_affected_parent_sources(
+                    object(),writer,parent_revision_id="parent",
+                    overlay_revision_ids=("overlay-new","overlay-middle"),
+                    source_scope=scope,source_keys=keys,
+                )
+        self.assertEqual(completed,set(keys))
+        self.assertEqual(rebuilt[persisted_key],("base-a","middle-b","new-c"))
+        self.assertEqual(
+            rebuilt[overlay_only_key],
+            ("overlay-middle-a","overlay-new-b"),
+        )
+        self.assertEqual(writer.values,rebuilt)
+        self.assertEqual({(base,ids) for base,ids,_videos in overlay_calls},{
+            ("overlay-middle",("overlay-new",)),
+            ("parent",("overlay-new","overlay-middle")),
+        })
+
+    def test_snapshot_materialized_source_matches_disk_scope_and_keeps_triples(self):
+        title="Disk Scope Song";artist="Fixture Artist"
+        group_key="\x1f".join((
+            pg_adapter._overlay_song_group_norm(title),
+            pg_adapter._overlay_song_group_norm(artist),
+        ))
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",f"{pg_adapter._overlay_norm(title)}::"
+            f"{pg_adapter._overlay_norm(artist)}",
+        )
+        parent={
+            "videoId":"video-parent","occurrenceId":"occ-parent",
+            "rangeId":"all","position":1,"seconds":10,
+            "title":title,"artist":artist,
+        }
+        candidate={
+            "revision_id":"overlay","video_id":"video-new",
+            "occurrence_id":"occ-new","position":2,"range_id":"all",
+            "song_key":"song-new","seconds":20,"title":title,
+            "artist":artist,"source_id":"source","source_system":"fixture",
+            "occurrence_payload_json":{
+                "videoId":"video-new","occurrenceId":"occ-new",
+                "position":2,"rangeId":"all","songKey":"song-new",
+                "seconds":20,"title":title,"artist":artist,
+            },
+            "video_title":"New Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"song","key":f"{pg_adapter._overlay_norm(title)}::"
+                f"{pg_adapter._overlay_norm(artist)}",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("songs",group_key),),
+            video_scope=("video-parent","video-new"),
+            parent_occurrences=(parent,),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],
+             record["timestampCount"],record["videoCount"]),
+            (2,2,2,2),
+        )
+
+    def test_snapshot_materialized_source_rejects_ambiguous_preimage_delete(self):
+        source_key="source-ambiguous";title="Same Song";artist="Same Artist"
+        parent=tuple({
+            "videoId":"video-one","occurrenceId":f"occ-{index}",
+            "rangeId":"all","position":index,"seconds":30,
+            "title":title,"artist":artist,
+        } for index in (1,2))
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,"does not uniquely match",
+        ):
+            pg_adapter._snapshot_materialized_source_payload(
+                source_key,range_id="all",
+                persisted_record={
+                    "type":"song","key":"same song::same artist",
+                    "sourceDetailKey":source_key,"rangeId":"all",
+                },
+                targets=(("songs","same song::same artist"),),
+                video_scope=("video-one",),parent_occurrences=parent,
+                direct_video_rows=(),direct_occurrence_rows=(),candidate_rows=(),
+                accepted_video_resets={},runtime_changes=({
+                    "entityType":"occurrences","videoId":"video-one",
+                    "rangeId":"all","seconds":30,"title":title,"artist":artist,
+                },),
+            )
+
+    def test_snapshot_materialized_source_deletes_by_id_without_title_fallback(self):
+        source_key="source-exact-delete";title="Exact Song";artist="Artist"
+        parent=tuple({
+            "videoId":"video-one","occurrenceId":f"occ-{index}",
+            "rangeId":"all","position":index,"seconds":index,
+            "title":title,"artist":artist,
+        } for index in (1,2))
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"song","key":"exact song::artist",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("songs","exact song::artist"),),
+            video_scope=("video-one",),parent_occurrences=parent,
+            direct_video_rows=(),direct_occurrence_rows=(),candidate_rows=(),
+            accepted_video_resets={},runtime_changes=({
+                "entityType":"occurrences","videoId":"video-one",
+                "occurrenceId":"occ-1","rangeId":"all",
+            },),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            [item["song"]["occurrenceId"]
+             for item in payload["record"]["occurrences"]],
+            ["occ-2"],
+        )
+
+    def test_snapshot_affected_source_batch_rejects_empty_scope_before_sql(self):
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_targets((("songs","song::artist","source-empty"),))
+            with patch.object(pg_adapter,"_rows") as rows, \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs") as overlay, \
+                 self.assertRaisesRegex(RuntimeError,"empty exact video scope"):
+                pg_materializer.export_affected_parent_sources(
+                    object(),object(),parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=("source-empty",),
+                )
+            rows.assert_not_called();overlay.assert_not_called()
+
     def test_song_identity_treats_explicit_null_artist_as_exact_empty_artist(self):
         title="Video is completed ten minutes before publication"
         expected=(pg_adapter._overlay_song_group_norm(title),"")
@@ -3832,6 +4284,71 @@ class Tests(unittest.TestCase):
         built=builder.build_serving_store(canonical,pages,serving,active_revision_id=REV)
         self.assertEqual(len(built["validation"]["rankingScopes"]),96)
 
+    def test_pg_snapshot_generic_all_never_uses_per_source_fallback(self):
+        pages=self.temp/"pg-generic-pages";meta=self.temp/"pg-generic-meta.json"
+        canonical=self.temp/"pg-generic-canonical.sqlite"
+        connection=FakePgConnection();payload_ranges=[];export_ranges=[];bulk_calls=[]
+        class GenericBuilder(FakeSnapshotPageBuilder):
+            def __init__(self,connection):
+                super().__init__(connection)
+                self.generic_runtime=("active",{})
+                self.parent=("parent",{})
+                self.overlay_ids=("overlay",)
+                self.authoritative_ids=()
+                self.authoritative_records=None
+            def prepare_source_scope(self,sqlite_connection,source_keys):
+                scope=pg_materializer.SnapshotSourceScope(sqlite_connection)
+                scoped=[];targets=[]
+                for key in sorted(source_keys):
+                    view=next(view for view in pg_materializer.VIEWS
+                              if key.endswith(f"-{view}"))
+                    video_id=f"scope-{key}"
+                    scoped.append((key,video_id));targets.append((view,key,key))
+                scope.add_videos(video_id for _key,video_id in scoped)
+                scope.add_pairs(scoped);scope.add_targets(targets)
+                return scope
+        original_export_source=pg_materializer.export_source
+        def source_payload_spy(connection,key,query):
+            payload_ranges.append(str(query.get("range") or "all"))
+            return fake_pg_source(connection,key,query)
+        def export_source_spy(*args,**kwargs):
+            range_id=str(kwargs.get("range_id") or "")
+            export_ranges.append(range_id)
+            if range_id=="all":
+                raise AssertionError("generic-all reached per-source export_source")
+            return original_export_source(*args,**kwargs)
+        def bulk_export(_connection,writer,**kwargs):
+            keys=tuple(sorted(kwargs["source_keys"]));bulk_calls.append(keys)
+            for key in keys:
+                first=fake_pg_source(
+                    None,key,{"range":"all","page":1,"pageSize":30},
+                )
+                detail=dict(first["record"]);occurrences=[]
+                for page in range(1,int(first["pageCount"])+1):
+                    payload=(first if page==1 else fake_pg_source(
+                        None,key,{"range":"all","page":page,"pageSize":30},
+                    ))
+                    occurrences.extend(payload["record"]["occurrences"])
+                detail.pop("occurrences",None)
+                writer.add_source(key,"all",detail,occurrences)
+            return set(keys)
+        with patch.object(pg_materializer.adapter,"connect_from_env",return_value=connection), \
+             patch.object(pg_materializer.adapter,"meta_payload",side_effect=fake_pg_meta), \
+             patch.object(pg_materializer.adapter,"source_payload",
+                          side_effect=source_payload_spy), \
+             patch.object(pg_materializer,"export_source",side_effect=export_source_spy), \
+             patch.object(pg_materializer,"export_affected_parent_sources",
+                          side_effect=bulk_export), \
+             patch.object(pg_materializer,"SnapshotPageBuilder",GenericBuilder):
+            result=pg_materializer.materialize(pages,meta,canonical,REV)
+        self.assertEqual(export_ranges,["7d"]*4)
+        self.assertTrue(payload_ranges)
+        self.assertEqual(set(payload_ranges),{"7d"})
+        self.assertEqual(len(bulk_calls),1)
+        self.assertEqual(len(bulk_calls[0]),4)
+        self.assertEqual(result["source_details"],8)
+        self.assertEqual(result["source_occurrences"],1608)
+
     def test_zero_count_filtered_scope_is_declared_and_served(self):
         canonical=self.temp/"zero-scope.sqlite";shutil.copyfile(self.snapshot,canonical)
         expected={}
@@ -4824,77 +5341,93 @@ class Tests(unittest.TestCase):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
         ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
         installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
-        self.assertIn("materialize-pg-release-snapshot.py",workflow)
-        self.assertIn("server/pg_adapter.py",workflow)
-        self.assertIn("--snapshot-output",workflow)
-        self.assertIn("build-serving-store.py",workflow)
-        self.assertIn("release_serving_server.py",workflow)
-        self.assertIn("install-wdc-release.sh",workflow)
-        self.assertIn("--build-logic-sha",workflow)
-        self.assertNotIn("build-serving-sqlite.py",workflow)
-        self.assertNotIn("PUBLIC_BASE",workflow)
-        self.assertNotIn("https://ytb-song-rank.culua.com",workflow)
-        self.assertNotIn("/api/rankings?range=",workflow)
-        self.assertNotIn("VPS2_RUNTIME_DB",workflow)
-        self.assertNotIn("snapshot-runtime-db.py",workflow)
-        self.assertNotIn("/var/lib/culua/ytb-song-rank/song-rank.sqlite",workflow)
-        self.assertIn("PGHOST=/var/run/postgresql",workflow)
-        self.assertIn("--uid=www-data",workflow)
-        self.assertIn('chown root:www-data "$remote_root"',workflow)
-        self.assertIn("systemd-run --quiet --wait --pipe --collect",workflow)
-        self.assertIn("--property=MemoryMax=700M",workflow)
-        self.assertNotIn("--property=MemoryMax=701M",workflow)
-        self.assertIn("--property=MemorySwapMax=256M",workflow)
-        self.assertNotIn("--property=MemorySwapMax=257M",workflow)
-        self.assertIn("MALLOC_ARENA_MAX=2",workflow)
-        self.assertIn("MALLOC_TRIM_THRESHOLD_=131072",workflow)
-        self.assertIn("--property=LimitFSIZE=6G",workflow)
-        self.assertIn("RUN_ISOLATED_FAILED phase=$phase",workflow)
-        self.assertIn("killed process|memory cgroup",workflow)
-        self.assertIn("SOURCE_ACTIVE_STABLE",workflow)
-        self.assertIn("SOURCE_ACTIVE_DRIFT",workflow)
-        self.assertNotIn("publishing the pinned immutable snapshot",workflow)
-        self.assertIn('echo "SOURCE_ACTIVE_DRIFT snapshot=$expected_active current=$after_active" >&2',workflow)
-        self.assertIn("PGAPPNAME=\"dsl-wdc-snapshot-${run_id}-${run_attempt}\"",workflow)
-        self.assertIn("SOURCE_ACTIVE_INVALID",workflow)
-        self.assertNotIn("ACTIVE_MISMATCH after build",workflow)
-        self.assertIn('[[ "$DEPLOYED_STATUS" == "ok"',workflow)
-        self.assertIn('"$DEPLOYED_RELEASE" =~ ^[0-9a-f]{64}$',workflow)
-        self.assertIn('data.get("releaseContentSha") or data.get("currentRelease")',workflow)
-        self.assertIn("WDC_PREVIOUS_RELEASE_INVALID",workflow)
-        self.assertIn("previous-release-sha",workflow)
-        self.assertIn('EXPECTED_REMOTE_ROOT="/tmp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',workflow)
-        self.assertIn("if: always()",workflow)
-        self.assertNotIn("if: always() &&",workflow)
-        self.assertIn("VPS2_TRANSIENT_UNITS_CLEANED",workflow)
-        self.assertIn("for phase in snapshot serving bundle; do",workflow)
-        self.assertIn('unit="dsl-wdc-${phase}-${run_id}-${run_attempt}.service"',workflow)
-        self.assertIn('[[ "$remote_root" == "/tmp/dsl-wdc-sync-${run_id}-${run_attempt}" ]]',workflow)
-        self.assertIn('exit "$cleanup_status"',workflow)
-        self.assertLess(workflow.index('systemctl stop "$unit"'),workflow.index('rm -rf -- "$remote_root"'))
-        self.assertIn('WDC_PROJECT_ROOT: "/opt/culua/ytb-song-rank"',workflow)
-        self.assertIn('WDC_PROJECT_MAX_BYTES: "40000000000"',workflow)
-        self.assertIn('WDC_FILESYSTEM_RESERVE_BYTES: "5000000000"',workflow)
-        self.assertIn('VPS2_FILESYSTEM_RESERVE_BYTES: "2500000000"',workflow)
-        self.assertIn('VPS2_FILESYSTEM_GUARD_BYTES: "536870912"',workflow)
-        self.assertIn("VPS2_STORAGE_PREFLIGHT_OK",workflow)
-        self.assertIn("VPS2_FILESYSTEM_RUNTIME_GUARD",workflow)
-        self.assertIn("--consume-source-db",workflow)
-        self.assertIn("projected_growth_bytes",workflow)
-        self.assertNotIn("projected_serving_bytes",workflow)
-        self.assertIn("VPS2_CANONICAL_RELEASED",workflow)
-        self.assertIn("VPS2_SERVING_HARDLINK_MISMATCH",workflow)
-        self.assertIn("--link-serving-sqlite",workflow)
-        self.assertIn("RUNNER_ARCHIVE_READY",workflow)
-        self.assertIn('> "$archive_path" <<\'REMOTE\'',workflow)
-        self.assertNotIn("$VPS2_USER@$VPS2_HOST:$REMOTE_ROOT/dsl-wdc-",workflow)
-        self.assertIn('projected_bytes=$((current_bytes + incoming_bytes))',workflow)
-        self.assertIn('if (( projected_bytes >= max_bytes )); then',workflow)
-        self.assertIn("WDC_STORAGE_PREFLIGHT_OK",workflow)
-        self.assertIn("WDC_STORAGE_POSTUPLOAD_OK",workflow)
-        self.assertIn("WDC_STORAGE_FINAL_OK",workflow)
+        for required in (
+            "ubuntu_gate:",
+            "runs-on: ubuntu-latest",
+            "runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]",
+            "materialize-pg-release-snapshot.py",
+            "scripts/migration/pg-peer-relay.py",
+            "server/pg_adapter.py",
+            "--snapshot-output",
+            "build-serving-store.py",
+            "release_serving_server.py",
+            "install-wdc-release.sh",
+            "--build-logic-sha",
+            "/Users/be/codex-temp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}",
+            ".codex-owned-run",
+            "--socket /var/run/postgresql/.s.PGSQL.5432",
+            "--require-user www-data",
+            '-L "127.0.0.1:${LOCAL_PORT}:127.0.0.1:${RELAY_PORT}"',
+            "PGHOST=127.0.0.1",
+            'PGPORT="$LOCAL_PORT"',
+            'PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
+            "SOURCE_TRIPLET_STABLE_AFTER_BUILD",
+            "SOURCE_TRIPLET_STABLE_BEFORE_WDC_WRITE",
+            "SOURCE_TRIPLET_STABLE_BEFORE_ACTIVATE",
+            "SOURCE_TRIPLET_STABLE_AFTER_ACTIVATE",
+            "release.tar.gz.part",
+            'tar -C "$BUNDLE_ROOT" -czf - "$BUNDLE_SHA"',
+            'WDC_PROJECT_ROOT: "/opt/culua/ytb-song-rank"',
+            'WDC_PROJECT_MAX_BYTES: "40000000000"',
+            'WDC_FILESYSTEM_RESERVE_BYTES: "5000000000"',
+            "WDC_STORAGE_PREFLIGHT_OK",
+            "WDC_STORAGE_FINAL_OK",
+            "--consume-source-db",
+            "--link-serving-sqlite",
+            "if: always()",
+            'EXPECTED_APP_NAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
+            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity",
+            "SELECT count(*) FROM pg_stat_activity WHERE application_name = '$app_name'",
+            '[[ "$remaining" == "0" ]]',
+            "VPS2_RELAY_BACKEND_CLEAN",
+            "WDC_EXACT_INCOMING_CLEAN",
+            'exit "$cleanup_status"',
+        ):
+            self.assertIn(required,workflow)
+        for forbidden in (
+            "build-serving-sqlite.py",
+            "PUBLIC_BASE",
+            "https://ytb-song-rank.culua.com",
+            "/api/rankings?range=",
+            "VPS2_RUNTIME_DB",
+            "snapshot-runtime-db.py",
+            "/var/lib/culua/ytb-song-rank/song-rank.sqlite",
+            "PGHOST=/var/run/postgresql",
+            "Legacy VPS2",
+            "REMOTE_ROOT",
+            "/tmp/ssh",
+            "StrictHostKeyChecking=no",
+            "actions/upload-artifact",
+            "actions/download-artifact",
+            "Materialize + build bundle on old production",
+            "/tmp/dsl-wdc-pages",
+            "/tmp/dsl-wdc-bundles",
+            "--property=LimitFSIZE=6G",
+            "VPS2_STORAGE_PREFLIGHT_OK",
+            "VPS2_FILESYSTEM_RUNTIME_GUARD",
+            "VPS2_CANONICAL_RELEASED",
+            "VPS2_SERVING_HARDLINK_MISMATCH",
+            "RUNNER_ARCHIVE_READY",
+            "if: always() &&",
+            "-mindepth",
+            "ionice",
+        ):
+            self.assertNotIn(forbidden,workflow)
         self.assertIn('[[ "$project_root" == "/opt/culua/ytb-song-rank" ]]',workflow)
         self.assertIn('[[ "$releases_root" == "$project_root/releases" ]]',workflow)
+        self.assertIn('projected_bytes=$((current_bytes + incoming_bytes))',workflow)
+        self.assertLess(
+            workflow.index("SOURCE_TRIPLET_STABLE_BEFORE_WDC_WRITE"),
+            workflow.index('install -d -m 0750 "$project_root/incoming"'),
+        )
+        self.assertLess(
+            workflow.index('[[ "$remaining" == "0" ]]'),
+            workflow.index('rm -rf -- "$relay_root"'),
+        )
+        self.assertLess(
+            workflow.index('.codex-owned-run" 2>/dev/null)'),
+            workflow.index('rm -rf -- "$EXPECTED_MAC_ROOT"'),
+        )
         self.assertNotIn('du -s /opt/culua',workflow)
         self.assertNotIn('rm -rf /opt/culua',workflow)
         self.assertIn("DEPLOY_ROLLBACK",installer)

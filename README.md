@@ -7,14 +7,26 @@ Small GitHub Pages site that collects YouTube videos with usable timestamp song 
 
 `72h` and `1m` remain compatibility aliases for old links and legacy data paths. The site keeps successful hourly snapshots permanently. If a scheduled scrape fails, existing `data/latest.json`, snapshot files, and browser runtime files remain untouched, so the page continues to show the last successful result.
 
+## Mac-first WDC release workflow
+
+`.github/workflows/sync-wdc-release.yml` keeps an Ubuntu syntax/regression gate, then assigns the heavy snapshot, build, stream, activation, and verification job to `[self-hosted, macOS, ARM64, daily-song-list-mac]`. Each attempt exclusively owns `/Users/be/codex-temp/dsl-wdc-sync-<run>-<attempt>`; an existing directory is a hard failure rather than a resumable shared workspace.
+
+The Mac runner uses `/Users/be/.local/bin/python3`; it does not assume `/usr/bin/python3` has a PostgreSQL driver. The workflow installs the three binary/hash-locked entries in `scripts/migration/requirements-wdc-mac.txt` into the exact run's `python-deps` directory with `--only-binary=:all: --require-hashes --no-deps --no-cache-dir --timeout 30 --retries 2`. `PYTHONPATH` is the run-local dependency directory plus the checkout, and global/user site-packages are never modified. Node, OpenSSH, and `tar` must already exist. `materialize-pg-release-snapshot.py` reads all pages, scopes, source details, and source occurrences inside one `REPEATABLE READ READ ONLY` transaction. VPS2 only runs a bounded `www-data` relay from loopback TCP to the PostgreSQL Unix socket. The Mac uses strict known hosts for the SSH tunnel; there is no public PostgreSQL port and no database password.
+
+Mac storage is fail-closed and BSD-compatible. `MAC_RUN_MAX_BYTES=32,000,000,000` covers a roughly 13 GB release plus bounded build intermediates, while `MAC_FILESYSTEM_RESERVE_BYTES=15,000,000,000` protects space outside the run. A Python `lstat`/`shutil.disk_usage` preflight reserves the entire remaining run budget before build; a second exact recursive regular-file `st_size` count runs after the bundle is ready. Symlinks and every other non-regular entry are rejected. The workflow never uses GNU `find`/`du` approximations on Mac and never scans or cleans another run directory.
+
+The workflow checks the active revision, source content hash, and source commit at start, after the Mac build, immediately before activation, and after activation. It requires exactly one 64-hex bundle directory and computes release bytes by recursively summing regular-file `st_size`. The bundle never travels through GitHub artifacts and no large archive is written on VPS2: a bounded tar stream goes directly to the exact WDC current-run `release.tar.gz.part`. Failure cleanup derives all paths from run ID and attempt, stops the exact tunnel/relay/backend, and removes only current-run paths. A release moved before installer state exists is removed only when it is not `current`, has no `.rollback-<sha>`, and resolves to the exact `releases/<sha>` direct child; active or rollback-bearing candidates are preserved and make cleanup fail visibly.
+
 ## WDC storage safety
 
 WDC production has a project-specific hard ceiling of **40 GB = 40,000,000,000 bytes** for Daily Song List. Reaching the line is a deployment failure, not a warning.
 
-- Before uploading or extracting a release, measure only `/opt/culua/ytb-song-rank` and calculate `current project bytes + compressed archive bytes + extracted release bytes + one release-sized rollback reserve`.
+- Before the first current-run write, measure only `/opt/culua/ytb-song-rank` and calculate `current project bytes + bounded compressed archive bytes + one extracted release + 134,217,728-byte control-backup allowance`. Once the archive is present and already included in current project bytes, the second gate is `current project bytes + one extracted release + the same control allowance`.
+- The six installer control targets—server, index, hashed app, systemd unit, nginx available, and nginx enabled—are measured exactly with `lstat`; only regular files or symlinks are accepted and their total must remain below **128 MiB = 134,217,728 bytes**. The rollback state copies those small controls, never `serving.sqlite`.
+- The archive extracts into a sibling `releases/.incoming-<sha>.*` directory and a same-filesystem `mv` activates `releases/<sha>`. This rename does not copy the database, so the capacity gate deliberately counts one extracted release rather than two.
 - If that conservative peak is greater than or equal to `40,000,000,000`, or any input cannot be proved, the deployment **must stop before writing to WDC**.
 - The workflow also preserves at least `5,000,000,000` bytes of host filesystem headroom so this project cannot crowd out unrelated workloads.
-- WDC writes and cleanup are limited to `/opt/culua/ytb-song-rank`, `/tmp/dsl-wdc-<64-hex-release>.tar.gz`, and `/tmp/install-wdc-release.sh`. Never scan or delete sibling projects or unrelated temporary files to make room.
+- WDC writes and cleanup are limited to `/opt/culua/ytb-song-rank` and `/opt/culua/ytb-song-rank/incoming/dsl-wdc-<run>-<attempt>-<64-hex-release>`. Never scan or delete sibling projects or unrelated temporary files to make room.
 - Rollback state is retained through all public correctness gates. Only after success may retention remove verified direct 64-hex children of `/opt/culua/ytb-song-rank/releases`, keeping the exact current and previous releases.
 - Final acceptance must record project bytes, filesystem availability, current/previous identities, and absence of incoming, rollback, and current-run temporary residue.
 
