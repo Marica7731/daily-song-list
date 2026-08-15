@@ -14,6 +14,7 @@ on:
       - "server/pg_adapter.py"
       - "server/release_serving_server.py"
       - "tests/test_next_serving_v3.py"
+      - "tests/test_pg_peer_relay.py"
   workflow_dispatch:
 
 permissions:
@@ -49,9 +50,12 @@ jobs:
             scripts/migration/build-release-bundle.py
             scripts/migration/prepare-wdc-frontend.py
             scripts/migration/patch-next-frontend.py
+            scripts/migration/pg-peer-relay.py
+            scripts/migration/requirements-wdc-mac.txt
             server/pg_adapter.py
             server/release_serving_server.py
             tests/test_next_serving_v3.py
+            tests/test_pg_peer_relay.py
 
       - name: Validate Python Node shell and YAML
         run: |
@@ -66,7 +70,24 @@ jobs:
             scripts/migration/build-release-bundle.py \
             scripts/migration/prepare-wdc-frontend.py \
             scripts/migration/patch-next-frontend.py \
-            tests/test_next_serving_v3.py
+            scripts/migration/pg-peer-relay.py \
+            tests/test_next_serving_v3.py \
+            tests/test_pg_peer_relay.py
+          python3 - <<'PY'
+          from pathlib import Path
+          requirements=Path("scripts/migration/requirements-wdc-mac.txt").read_text(encoding="utf-8")
+          expected={
+              "psycopg==3.3.4":"b6bbc25ccf05c8fad3b061d9db2ef0909a555171b84b07f29458a447253d679a",
+              "psycopg-binary==3.3.4":"6402a9d8146cf4b3974ded3fd28a971e83dc6a0333eb7822524a3aa20b546578",
+              "typing-extensions==4.16.0":"481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+          }
+          if requirements.count("==")!=3 or requirements.count("--hash=sha256:")!=3:
+              raise SystemExit("Mac dependency set must contain exactly three pinned hashes")
+          for package,digest in expected.items():
+              if package not in requirements or f"--hash=sha256:{digest}" not in requirements:
+                  raise SystemExit(f"Mac dependency lock mismatch: {package}")
+          print("MAC_REQUIREMENTS_HASHES_OK")
+          PY
           node --check assets/app.js
           bash -n deploy/install-wdc-release.sh
           grep -Fq '40,000,000,000 bytes' AGENTS.md
@@ -75,6 +96,16 @@ jobs:
           grep -Fq '/opt/culua/ytb-song-rank' README.md
           grep -Fq 'must stop before writing to WDC' AGENTS.md
           grep -Fq 'must stop before writing to WDC' README.md
+          grep -Fq 'daily-song-list-mac' AGENTS.md
+          grep -Fq 'daily-song-list-mac' README.md
+          grep -Fq 'REPEATABLE READ READ ONLY' AGENTS.md
+          grep -Fq 'REPEATABLE READ READ ONLY' README.md
+          grep -Fq '32,000,000,000 bytes' AGENTS.md
+          grep -Fq '32,000,000,000' README.md
+          grep -Fq '/Users/be/.local/bin/python3' AGENTS.md
+          grep -Fq '/Users/be/.local/bin/python3' README.md
+          grep -Fq 'same-filesystem' AGENTS.md
+          grep -Fq 'same-filesystem' README.md
           echo "WDC_STORAGE_DOCS_OK"
           if command -v shellcheck >/dev/null 2>&1; then
             shellcheck deploy/install-wdc-release.sh
@@ -95,7 +126,8 @@ jobs:
             .github/workflows/test-next-serving-v3.yml \
             AGENTS.md README.md \
             assets/app.js index.html deploy scripts/migration \
-            server/pg_adapter.py server/release_serving_server.py tests/test_next_serving_v3.py
+            server/pg_adapter.py server/release_serving_server.py \
+            tests/test_next_serving_v3.py tests/test_pg_peer_relay.py
 
       - name: Scan candidate files for committed secrets
         run: |
@@ -105,7 +137,8 @@ jobs:
               .github/workflows/sync-wdc-release.yml \
               .github/workflows/test-next-serving-v3.yml \
               AGENTS.md README.md \
-              assets/app.js deploy scripts/migration server tests/test_next_serving_v3.py; then
+              assets/app.js deploy scripts/migration server \
+              tests/test_next_serving_v3.py tests/test_pg_peer_relay.py; then
             echo "secret-like material found in candidate" >&2
             exit 1
           fi
@@ -116,3 +149,5 @@ jobs:
           set -Eeuo pipefail
           PYTHONDONTWRITEBYTECODE=1 PYTHONWARNINGS=error::ResourceWarning \
             python3 -B -m unittest discover -s tests -p 'test_next_serving_v3.py' -v
+          PYTHONDONTWRITEBYTECODE=1 \
+            python3 -B -m unittest discover -s tests -p 'test_pg_peer_relay.py' -v
