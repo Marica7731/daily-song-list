@@ -98,6 +98,10 @@ class WorkflowContractTests(unittest.TestCase):
             "MAC_FILESYSTEM_RESERVE_BYTES: \"15000000000\"",
             "WDC_CONTROL_BACKUP_MAX_BYTES: \"134217728\"",
             "MAC_PYTHON: \"/Users/be/.local/bin/python3\"",
+            "MAC_NODE: \"/Users/be/.local/codex-toolchains/node/bin/node\"",
+            'test -x "$MAC_NODE"',
+            '"$MAC_NODE" --check assets/app.js',
+            '"$MAC_NODE" --check "$FRONTEND_ROOT/$APP_PATH"',
             'PYTHON_DEPS_ROOT="$MAC_RUN_ROOT/python-deps"',
             '--target "$PYTHON_DEPS_ROOT"',
             "--only-binary=:all:",
@@ -126,6 +130,8 @@ class WorkflowContractTests(unittest.TestCase):
             "scripts/migration/requirements-wdc-mac.txt",
         ):
             self.assertIn(required, workflow)
+        self.assertEqual(workflow.count('node --check assets/app.js'), 1)
+        self.assertEqual(workflow.count('"$MAC_NODE" --check'), 2)
         self.assertEqual(workflow.count('if len(targets)!=6'), 2)
         orphan_guards = (
             'elif [[ "$current_sha" == "$sha" ]]',

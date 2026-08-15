@@ -40,6 +40,7 @@ env:
   # Reserve host space outside the exact run root for the runner and unrelated work.
   MAC_FILESYSTEM_RESERVE_BYTES: "15000000000"
   MAC_PYTHON: "/Users/be/.local/bin/python3"
+  MAC_NODE: "/Users/be/.local/codex-toolchains/node/bin/node"
   PYTHONDONTWRITEBYTECODE: "1"
   # The installer copies only six small control files/symlinks, never serving.sqlite.
   WDC_CONTROL_BACKUP_MAX_BYTES: "134217728"
@@ -203,6 +204,7 @@ jobs:
           PY
           chmod 0500 "$MAC_RUN_ROOT/check-run-storage.py"
           test -x "$MAC_PYTHON"
+          test -x "$MAC_NODE"
           "$MAC_PYTHON" -B "$MAC_RUN_ROOT/check-run-storage.py" \
             "$MAC_RUN_ROOT" "$MAC_RUN_MAX_BYTES" "$MAC_FILESYSTEM_RESERVE_BYTES" \
             PREFLIGHT true
@@ -256,7 +258,7 @@ jobs:
           print("PYTHON_AST_OK")
           PY
           bash -n deploy/install-wdc-release.sh
-          node --check assets/app.js
+          "$MAC_NODE" --check assets/app.js
           PYTHONWARNINGS=error::ResourceWarning \
             PYTHONDONTWRITEBYTECODE=1 "$MAC_PYTHON" -B -m unittest discover -s tests -p 'test_next_serving_v3.py' -v
           PYTHONDONTWRITEBYTECODE=1 \
@@ -296,7 +298,7 @@ jobs:
           PY
           )"
           [[ "$APP_PATH" =~ ^assets/app-h[0-9a-f]{12}\.js$ ]]
-          node --check "$FRONTEND_ROOT/$APP_PATH"
+          "$MAC_NODE" --check "$FRONTEND_ROOT/$APP_PATH"
           grep -Fq "$APP_PATH" "$FRONTEND_ROOT/index.html"
           echo "FRONTEND_ROOT=$FRONTEND_ROOT" >> "$GITHUB_ENV"
 
