@@ -5378,6 +5378,8 @@ class Tests(unittest.TestCase):
             "PGHOST=127.0.0.1",
             'PGPORT="$LOCAL_PORT"',
             'PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
+            'PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE"',
+            '"$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py --help >/dev/null',
             "SOURCE_TRIPLET_STABLE_AFTER_BUILD",
             "SOURCE_TRIPLET_STABLE_BEFORE_WDC_WRITE",
             "SOURCE_TRIPLET_STABLE_BEFORE_ACTIVATE",
