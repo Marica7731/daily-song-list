@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T06:16:02.622Z",
+  "generatedAt": "2026-08-15T07:32:40.671Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T06:16:02.622Z",
+    "fetchedAt": "2026-08-15T07:32:40.671Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T06:16:02.622Z",
+    "generatedAt": "2026-08-15T07:32:40.671Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1163,
-      "parseableChannels": 1144,
+      "totalChannels": 1164,
+      "parseableChannels": 1145,
       "realAvatar": 649,
-      "thumbnailFallback": 514,
+      "thumbnailFallback": 515,
       "missingDisplayImage": 0,
-      "missingAvatar": 514,
+      "missingAvatar": 515,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 682,
+      "skipped_collected_evidence": 683,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 663,
+      "batch_limit_reached": 664,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@momokyu_u",
+        "channelId": "UCWKC5_gzWd5YvlGal1sVkCw",
+        "displayName": "魅音モモキュ / 毛毛球 Ch.",
+        "sourceUrl": "https://www.youtube.com/@momokyu_u",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@atatakakunaru",
         "channelId": "UCgcel56b36LSI1uViDRxj5w",
@@ -11842,13 +11849,6 @@
         "channelId": "UCgGy3QyrsbmXcLDZJGDOKBQ",
         "displayName": "白汰まゆのへや𓂃𓈒𓏸",
         "sourceUrl": "https://www.youtube.com/@%E7%99%BD%E6%B1%B0%E3%81%BE%E3%82%86",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@TukuneDuck",
-        "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
-        "displayName": "月音-TUKUNE-",
-        "sourceUrl": "https://www.youtube.com/@TukuneDuck",
         "reason": "batch_limit_reached"
       }
     ]
