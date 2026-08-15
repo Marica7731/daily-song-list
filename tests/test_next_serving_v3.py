@@ -376,6 +376,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(degraded["status"],"degraded",degraded)
         self.assertIn("computed content hash mismatch",degraded["errors"])
 
+    @unittest.skipUnless(
+        sys.platform.startswith("linux"),
+        "WDC installer runtime requires GNU/Linux",
+    )
     def test_installer_rolls_back_when_first_symlink_switch_fails(self):
         previous="1"*64;(self.releases/previous).mkdir()
         for name in ("manifest.json","meta.json","serving.sqlite"):
@@ -414,6 +418,10 @@ class Tests(unittest.TestCase):
         self.assertIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
         self.assertNotIn("DEPLOY_ACTIVATED_PENDING_PUBLIC",result.stdout+result.stderr)
 
+    @unittest.skipUnless(
+        sys.platform.startswith("linux"),
+        "WDC installer runtime requires GNU/Linux",
+    )
     def test_installer_never_publishes_partial_backup_state(self):
         previous="1"*64;(self.releases/previous).mkdir()
         for name in ("manifest.json","meta.json","serving.sqlite"):
@@ -447,6 +455,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(list(self.releases.glob(f".rollback-{self.sha}.preparing.*")),[])
         self.assertNotIn("DEPLOY_ROLLBACK complete",result.stdout+result.stderr)
 
+    @unittest.skipUnless(
+        sys.platform.startswith("linux"),
+        "WDC installer runtime requires GNU/Linux",
+    )
     def test_installer_legacy_layout_rolls_back_without_creating_current_link(self):
         previous="1"*64;previous_dir=self.releases/previous;previous_dir.mkdir()
         for name in ("manifest.json","meta.json","serving.sqlite"):
@@ -1817,7 +1829,8 @@ class Tests(unittest.TestCase):
         target=self.temp/"source-lookup.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
         plan=writer.connection.execute(
-            "EXPLAIN QUERY PLAN UPDATE ranking_rows SET search_text=? "
+            "EXPLAIN QUERY PLAN UPDATE ranking_rows "
+            "INDEXED BY ranking_rows_source_lookup SET search_text=? "
             "WHERE range_id=? AND detail_key=?",
             ("fixture","all","source"),
         ).fetchall()
@@ -2138,23 +2151,27 @@ class Tests(unittest.TestCase):
     def test_snapshot_file_cache_drop_flushes_before_exact_fadvise(self):
         target=self.temp/"cache-file.bin"
         target.write_bytes(b"fixture")
+        advice=4
         with patch.object(pg_materializer.os,"open",return_value=71), \
-             patch.object(pg_materializer.os,"fdatasync") as sync, \
-             patch.object(pg_materializer.os,"posix_fadvise") as fadvise, \
+             patch.object(pg_materializer.os,"fdatasync",create=True) as sync, \
+             patch.object(pg_materializer.os,"posix_fadvise",create=True) as fadvise, \
+             patch.object(pg_materializer.os,"POSIX_FADV_DONTNEED",advice,create=True), \
              patch.object(pg_materializer.os,"close") as close:
             dropped=pg_materializer._drop_clean_file_cache(target)
         self.assertTrue(dropped)
         sync.assert_called_once_with(71)
         fadvise.assert_called_once_with(
-            71,0,0,pg_materializer.os.POSIX_FADV_DONTNEED,
+            71,0,0,advice,
         )
         close.assert_called_once_with(71)
 
     def test_snapshot_json_page_streams_and_evicts_exact_file_cache(self):
         target=self.temp/"page-0001.json"
         payload={"records":[{"title":"Fixture","count":3}],"compact":True}
-        with patch.object(pg_materializer.os,"fdatasync") as sync, \
-             patch.object(pg_materializer.os,"posix_fadvise") as fadvise:
+        advice=4
+        with patch.object(pg_materializer.os,"fdatasync",create=True) as sync, \
+             patch.object(pg_materializer.os,"posix_fadvise",create=True) as fadvise, \
+             patch.object(pg_materializer.os,"POSIX_FADV_DONTNEED",advice,create=True):
             dropped=pg_materializer._write_json_file_and_drop_cache(
                 target,payload,
             )
@@ -2162,7 +2179,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(json.loads(target.read_text(encoding="utf-8")),payload)
         descriptor=sync.call_args.args[0]
         fadvise.assert_called_once_with(
-            descriptor,0,0,pg_materializer.os.POSIX_FADV_DONTNEED,
+            descriptor,0,0,advice,
         )
 
     def test_snapshot_empty_source_scope_skips_every_overlay_scan(self):

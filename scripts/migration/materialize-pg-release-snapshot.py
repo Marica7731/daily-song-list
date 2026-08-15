@@ -2514,7 +2514,7 @@ class CanonicalSnapshotWriter:
         range_id = _text(state["range_id"])
         self.connection.execute(
             """
-            UPDATE ranking_rows
+            UPDATE ranking_rows INDEXED BY ranking_rows_source_lookup
             SET search_text=substr(trim(search_text || ' ' || ?),1,?),
                 channel_search_text=substr(trim(channel_search_text || ' ' || ?),1,?)
             WHERE range_id=? AND detail_key=?
