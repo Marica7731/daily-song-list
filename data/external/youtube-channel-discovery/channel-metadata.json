@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T09:22:05.185Z",
+  "generatedAt": "2026-08-15T10:28:43.149Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T09:22:05.185Z",
+    "fetchedAt": "2026-08-15T10:28:43.149Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T09:22:05.185Z",
+    "generatedAt": "2026-08-15T10:28:43.149Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,30 +11657,44 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1166,
-      "parseableChannels": 1147,
+      "totalChannels": 1168,
+      "parseableChannels": 1149,
       "realAvatar": 649,
-      "thumbnailFallback": 517,
+      "thumbnailFallback": 519,
       "missingDisplayImage": 0,
-      "missingAvatar": 517,
+      "missingAvatar": 519,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 685,
+      "skipped_collected_evidence": 687,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 666,
+      "batch_limit_reached": 668,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@lara_songs",
+        "channelId": "UCWF-3hyAv7TFw8mpS_wHLmw",
+        "displayName": "音羽ララ (Otohane Lara) / シアーミュージックV",
+        "sourceUrl": "https://www.youtube.com/@lara_songs",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@atatakakunaru",
         "channelId": "UCgcel56b36LSI1uViDRxj5w",
         "displayName": "あたたかくなる",
         "sourceUrl": "https://www.youtube.com/@atatakakunaru",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RirisyaMusic",
+        "channelId": "UC1ucgoC_sGww_Euu5iMqpQw",
+        "displayName": "凛々咲 / Ririsya",
+        "sourceUrl": "https://www.youtube.com/@RirisyaMusic",
         "reason": "batch_limit_reached"
       },
       {
@@ -11768,6 +11782,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Yamori8cm",
+        "channelId": "UCWJvCc7Y8ekzfU7w0vNFwUQ",
+        "displayName": "やもり Yamori / 8cm",
+        "sourceUrl": "https://www.youtube.com/@Yamori8cm",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@hinamiphoenica",
         "channelId": "UCygtb6wTyiSxXYHPAHs3UKA",
         "displayName": "日向海フェニカ-Hinami Phoenica-【ユニプロ】",
@@ -11828,27 +11849,6 @@
         "channelId": "UCw5b3jUXwajzoFzQ97SXPlA",
         "displayName": "羽熊ちゃこ / ChacoHaguma",
         "sourceUrl": "https://www.youtube.com/@chaco_haguma",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MINO_Channel1",
-        "channelId": "UCw3R07ErTjLb4xR5xRhdhEw",
-        "displayName": "MINO Channel",
-        "sourceUrl": "https://www.youtube.com/@MINO_Channel1",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ko_to_to_i",
-        "channelId": "UCpgM2Ycx8WC8eRNxGAL2i3Q",
-        "displayName": "kototo!",
-        "sourceUrl": "https://www.youtube.com/@ko_to_to_i",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Mia_Konan",
-        "channelId": "UC4PrHgUcAtOoj_LKmUL-uLQ",
-        "displayName": "湖南みあ / Mia Channel【ななしいんく】",
-        "sourceUrl": "https://www.youtube.com/@Mia_Konan",
         "reason": "batch_limit_reached"
       }
     ]
