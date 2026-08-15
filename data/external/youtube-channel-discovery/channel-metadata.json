@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T18:48:42.284Z",
+  "generatedAt": "2026-08-15T19:34:51.086Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T18:48:42.284Z",
+    "fetchedAt": "2026-08-15T19:34:51.086Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T18:48:42.284Z",
+    "generatedAt": "2026-08-15T19:34:51.086Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1173,
-      "parseableChannels": 1154,
+      "totalChannels": 1175,
+      "parseableChannels": 1156,
       "realAvatar": 649,
-      "thumbnailFallback": 524,
+      "thumbnailFallback": 526,
       "missingDisplayImage": 0,
-      "missingAvatar": 524,
+      "missingAvatar": 526,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 692
+      "skipped_collected_evidence": 694,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 673,
+      "batch_limit_reached": 675,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E8%B5%AB%E3%83%8E%E7%99%BD%E4%BA%9E_AkanoByakua",
+        "channelId": "UC-bPlI8YYuijqdmYd9o1L8A",
+        "displayName": "赫ノ白亞 AkanoByakua",
+        "sourceUrl": "https://www.youtube.com/@%E8%B5%AB%E3%83%8E%E7%99%BD%E4%BA%9E_AkanoByakua",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Fuyubi06",
+        "channelId": "UC-271ul2c7SHq0A5p9kAJrA",
+        "displayName": "冬陽リッカ_Fuyubi Rikka",
+        "sourceUrl": "https://www.youtube.com/@Fuyubi06",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@RukaCh.",
         "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
@@ -11761,6 +11775,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@norn_kurano",
+        "channelId": "UCflVd-RkLPSA0E2ePYEmv7w",
+        "displayName": "蔵乃のるん-Norn Kurano-",
+        "sourceUrl": "https://www.youtube.com/@norn_kurano",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@sorashipurumu",
         "channelId": "UC82JqwZtW_AaoHE9vubF4Og",
         "displayName": "空詩ぷるむ / Sorashi Purumu",
@@ -11828,27 +11849,6 @@
         "channelId": "UCygtb6wTyiSxXYHPAHs3UKA",
         "displayName": "日向海フェニカ-Hinami Phoenica-【ユニプロ】",
         "sourceUrl": "https://www.youtube.com/@hinamiphoenica",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hirari_otori",
-        "channelId": "UCWQa3tpD_swhocjOqhtJW6w",
-        "displayName": "鳳蝶",
-        "sourceUrl": "https://www.youtube.com/@hirari_otori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@komawarikoma",
-        "channelId": "UC_upTZ0otpptV5KARBsnIPg",
-        "displayName": "小廻こま / Komawari Koma",
-        "sourceUrl": "https://www.youtube.com/@komawarikoma",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Sophia_Valentine",
-        "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-        "displayName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@Sophia_Valentine",
         "reason": "batch_limit_reached"
       }
     ]
