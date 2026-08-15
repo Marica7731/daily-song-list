@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-15T05:24:39.015Z",
+  "generatedAt": "2026-08-15T06:16:02.622Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-15T05:24:39.015Z",
+    "fetchedAt": "2026-08-15T06:16:02.622Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-15T05:24:39.015Z",
+    "generatedAt": "2026-08-15T06:16:02.622Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1161,
-      "parseableChannels": 1142,
+      "totalChannels": 1163,
+      "parseableChannels": 1144,
       "realAvatar": 649,
-      "thumbnailFallback": 512,
+      "thumbnailFallback": 514,
       "missingDisplayImage": 0,
-      "missingAvatar": 512,
+      "missingAvatar": 514,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 680
+      "skipped_collected_evidence": 682,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 661,
+      "batch_limit_reached": 663,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@atatakakunaru",
+        "channelId": "UCgcel56b36LSI1uViDRxj5w",
+        "displayName": "あたたかくなる",
+        "sourceUrl": "https://www.youtube.com/@atatakakunaru",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@NeneAmanoCh",
+        "channelId": "UCu1INzefw3R7M9-3QEHYmMQ",
+        "displayName": "Nene Amano Ch. 天野寧々",
+        "sourceUrl": "https://www.youtube.com/@NeneAmanoCh",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@ghostdoll_y",
         "channelId": "UCGcCqY2rzbxmbP5mMhlUwMA",
@@ -11835,20 +11849,6 @@
         "channelId": "UC0bVMTZaN40OaLzgzyWsqAw",
         "displayName": "月音-TUKUNE-",
         "sourceUrl": "https://www.youtube.com/@TukuneDuck",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MihoshiYume",
-        "channelId": "UCK0OzXxJVvMjBnr9NeV1t1A",
-        "displayName": "Mihoshi Yume",
-        "sourceUrl": "https://www.youtube.com/@MihoshiYume",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@LiccaLinCH",
-        "channelId": "UCRsss1xyvtErN5NKppVXmjg",
-        "displayName": "LiccaLin",
-        "sourceUrl": "https://www.youtube.com/@LiccaLinCH",
         "reason": "batch_limit_reached"
       }
     ]
