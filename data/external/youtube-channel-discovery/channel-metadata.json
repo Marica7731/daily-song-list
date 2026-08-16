@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T20:57:01.884Z",
+  "generatedAt": "2026-08-16T23:16:35.518Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T20:57:01.884Z",
+    "fetchedAt": "2026-08-16T23:16:35.518Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T20:57:01.884Z",
+    "generatedAt": "2026-08-16T23:16:35.518Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1181,
-      "parseableChannels": 1162,
+      "totalChannels": 1182,
+      "parseableChannels": 1163,
       "realAvatar": 649,
-      "thumbnailFallback": 532,
+      "thumbnailFallback": 533,
       "missingDisplayImage": 0,
-      "missingAvatar": 532,
+      "missingAvatar": 533,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 699
+      "skipped_collected_evidence": 700
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 680,
+      "batch_limit_reached": 681,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@hanahira__frill",
+        "channelId": "UCHv-JirenvPMNJeFhrhEfxw",
+        "displayName": "花開ふりる / hanahira frill",
+        "sourceUrl": "https://www.youtube.com/@hanahira__frill",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@chiyomi0812",
         "channelId": "UCyY6YeINiwQoA-FnmdQCkug",
@@ -11842,13 +11849,6 @@
         "channelId": "UCRNj_X_jTv-ATVOJky-YR1A",
         "displayName": "音夢ないねchannel【NemuNaine.ch】",
         "sourceUrl": "https://www.youtube.com/@nemunaine",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YakonHibana",
-        "channelId": "UCgKjo_iSJpFmXQypArDztYA",
-        "displayName": "夜紺 火花 / Yakon Hibana",
-        "sourceUrl": "https://www.youtube.com/@YakonHibana",
         "reason": "batch_limit_reached"
       }
     ]
