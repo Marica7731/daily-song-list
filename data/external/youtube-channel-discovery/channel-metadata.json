@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T16:45:28.024Z",
+  "generatedAt": "2026-08-16T17:36:26.659Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T16:45:28.024Z",
+    "fetchedAt": "2026-08-16T17:36:26.659Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T16:45:28.024Z",
+    "generatedAt": "2026-08-16T17:36:26.659Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1179,
-      "parseableChannels": 1160,
+      "totalChannels": 1180,
+      "parseableChannels": 1161,
       "realAvatar": 649,
-      "thumbnailFallback": 530,
+      "thumbnailFallback": 531,
       "missingDisplayImage": 0,
-      "missingAvatar": 530,
+      "missingAvatar": 531,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 697
+      "skipped_collected_evidence": 698
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 678,
+      "batch_limit_reached": 679,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@chiyomi0812",
+        "channelId": "UCyY6YeINiwQoA-FnmdQCkug",
+        "displayName": "ちよみch. 千代浦蝶美 /あおぎり高校",
+        "sourceUrl": "https://www.youtube.com/@chiyomi0812",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@TakanashiKobato",
         "channelId": "UCbA0mV8uL5-aTb2SeZ-X_cg",
@@ -11716,6 +11723,13 @@
         "channelId": "UC-271ul2c7SHq0A5p9kAJrA",
         "displayName": "冬陽リッカ_Fuyubi Rikka",
         "sourceUrl": "https://www.youtube.com/@Fuyubi06",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@inukai1101",
+        "channelId": "UCQb4rUTrgEUlEf4vN7e87Dw",
+        "displayName": "犬養 - INUKAI Ch. -",
+        "sourceUrl": "https://www.youtube.com/@inukai1101",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UCgKjo_iSJpFmXQypArDztYA",
         "displayName": "夜紺 火花 / Yakon Hibana",
         "sourceUrl": "https://www.youtube.com/@YakonHibana",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@pnmcmnj",
-        "channelId": "UCa-SeD_42RAk_-v7n9YSpJw",
-        "displayName": "まんじゅう - pnmcmnj",
-        "sourceUrl": "https://www.youtube.com/@pnmcmnj",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@AnonRemu",
-        "channelId": "UCPqswBEjZm3FdvOzPyDw9wg",
-        "displayName": "Remu Ch. 綺音れむ",
-        "sourceUrl": "https://www.youtube.com/@AnonRemu",
         "reason": "batch_limit_reached"
       }
     ]
