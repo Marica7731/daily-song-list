@@ -905,13 +905,15 @@ class Tests(unittest.TestCase):
              "video_count":1,"timestamp_count":1,"payload_json":None},
             {"detail_key":"video-overlay","row_count":1,"song_count":1,
              "video_count":1,"timestamp_count":1,"payload_json":None},
+            {"detail_key":"video-new","row_count":1,"song_count":1,
+             "video_count":1,"timestamp_count":1,"payload_json":None},
         ]
         prepared={
             "filtered":filtered,"metadata":[],"candidateRows":[],
             "parentRevisionId":"parent","overlayRevisionIds":(),
             "snapshotBulkHydrateCards":True,
-            "aggregateTotals":{"totalCount":3,"totalOccurrenceCount":4,
-                               "totalSongCount":4,"totalVideoCount":3},
+            "aggregateTotals":{"totalCount":4,"totalOccurrenceCount":5,
+                               "totalSongCount":5,"totalVideoCount":4},
         }
         payloads={
             "video-one":{"type":"video","key":"video-one",
@@ -923,28 +925,39 @@ class Tests(unittest.TestCase):
             "video-overlay":{"type":"video","key":"video-overlay",
                              "videoId":"video-overlay","title":"Overlay",
                              "occurrences":[]},
+            "video-new":{"type":"video","key":"video-new",
+                         "videoId":"video-new","title":"New",
+                         "occurrences":[]},
         }
 
         def fake_rows(_connection,statement,params):
+            if "bulk generic ranking page payload hydration" in statement:
+                self.assertEqual(
+                    params,
+                    ["parent",["row-one","row-two"],
+                     "all","videos","count","all"],
+                )
+                return [
+                    {"row_id":row_id,"detail_key":detail_key,
+                     "payload_json":payloads[detail_key]}
+                    for row_id,detail_key in reversed([
+                        ("row-one","video-one"),("row-two","video-two")
+                    ])
+                ]
             self.assertIn(
-                "bulk generic ranking page payload hydration",statement,
+                "bulk generic ranking page detail payload hydration",statement,
             )
             self.assertEqual(
                 params,
-                ["parent",["row-one","row-two"],
-                 "all","videos","count","all"],
+                ["parent","all","videos","count","all",
+                 ["video-overlay","video-new"]],
             )
-            return [
-                {"row_id":row_id,"detail_key":detail_key,
-                 "payload_json":payloads[detail_key]}
-                for row_id,detail_key in reversed([
-                    ("row-one","video-one"),("row-two","video-two")
-                ])
-            ]
+            return [{"detail_key":"video-overlay",
+                     "payload_json":payloads["video-overlay"]}]
 
         with patch.object(pg_adapter,"_rows",side_effect=fake_rows) as rows, \
              patch.object(pg_adapter,"_one",return_value={
-                 "payload_json":payloads["video-overlay"]
+                 "payload_json":payloads["video-new"]
              }) as exact, \
              patch.object(pg_adapter,"_hydrate_overlay_page_previews"), \
              patch.object(pg_adapter,"_hydrate_runtime_ranking_song_previews"):
@@ -954,17 +967,17 @@ class Tests(unittest.TestCase):
                  "page":"1","pageSize":"30"},
                 preview_hydration_limit=3,
             )
-        rows.assert_called_once()
+        self.assertEqual(rows.call_count,2)
         exact.assert_called_once()
         self.assertEqual(
-            exact.call_args.args[2][-1],"video-overlay",
+            exact.call_args.args[2][-1],"video-new",
         )
         self.assertEqual(
             [record["videoId"] for record in response["records"]],
-            ["video-one","video-two","video-overlay"],
+            ["video-one","video-two","video-overlay","video-new"],
         )
         self.assertEqual(
-            [record["rank"] for record in response["records"]],[1,2,3],
+            [record["rank"] for record in response["records"]],[1,2,3,4],
         )
 
     def test_complete_parent_window_recomputes_final_canonical_totals(self):
