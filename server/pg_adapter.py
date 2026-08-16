@@ -16568,7 +16568,13 @@ def _bulk_hydrate_generic_ranking_page(
             continue
         row_id = _text(row.get("row_id"))
         detail_key = _text(row.get("detail_key"))
-        if not row_id or not detail_key:
+        if not row_id:
+            # Overlay-created or regrouped cards do not necessarily have an
+            # immutable row in the parent ranking.  Keep their pre-existing
+            # exact detail-key hydration path; only persisted parent cards
+            # participate in this row-id batch.
+            continue
+        if not detail_key:
             raise PostgresAdapterError(
                 "snapshot ranking row is missing its immutable identity"
             )

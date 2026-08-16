@@ -903,13 +903,15 @@ class Tests(unittest.TestCase):
              "video_count":1,"timestamp_count":2,"payload_json":None},
             {"row_id":"row-two","detail_key":"video-two","row_count":1,"song_count":1,
              "video_count":1,"timestamp_count":1,"payload_json":None},
+            {"detail_key":"video-overlay","row_count":1,"song_count":1,
+             "video_count":1,"timestamp_count":1,"payload_json":None},
         ]
         prepared={
             "filtered":filtered,"metadata":[],"candidateRows":[],
             "parentRevisionId":"parent","overlayRevisionIds":(),
             "snapshotBulkHydrateCards":True,
-            "aggregateTotals":{"totalCount":2,"totalOccurrenceCount":3,
-                               "totalSongCount":3,"totalVideoCount":2},
+            "aggregateTotals":{"totalCount":3,"totalOccurrenceCount":4,
+                               "totalSongCount":4,"totalVideoCount":3},
         }
         payloads={
             "video-one":{"type":"video","key":"video-one",
@@ -918,6 +920,9 @@ class Tests(unittest.TestCase):
             "video-two":{"type":"video","key":"video-two",
                          "videoId":"video-two","title":"Two",
                          "occurrences":[]},
+            "video-overlay":{"type":"video","key":"video-overlay",
+                             "videoId":"video-overlay","title":"Overlay",
+                             "occurrences":[]},
         }
 
         def fake_rows(_connection,statement,params):
@@ -938,6 +943,9 @@ class Tests(unittest.TestCase):
             ]
 
         with patch.object(pg_adapter,"_rows",side_effect=fake_rows) as rows, \
+             patch.object(pg_adapter,"_one",return_value={
+                 "payload_json":payloads["video-overlay"]
+             }) as exact, \
              patch.object(pg_adapter,"_hydrate_overlay_page_previews"), \
              patch.object(pg_adapter,"_hydrate_runtime_ranking_song_previews"):
             response=pg_adapter._render_generic_overlay_rankings(
@@ -947,12 +955,16 @@ class Tests(unittest.TestCase):
                 preview_hydration_limit=3,
             )
         rows.assert_called_once()
+        exact.assert_called_once()
         self.assertEqual(
-            [record["videoId"] for record in response["records"]],
-            ["video-one","video-two"],
+            exact.call_args.args[2][-1],"video-overlay",
         )
         self.assertEqual(
-            [record["rank"] for record in response["records"]],[1,2],
+            [record["videoId"] for record in response["records"]],
+            ["video-one","video-two","video-overlay"],
+        )
+        self.assertEqual(
+            [record["rank"] for record in response["records"]],[1,2,3],
         )
 
     def test_complete_parent_window_recomputes_final_canonical_totals(self):
