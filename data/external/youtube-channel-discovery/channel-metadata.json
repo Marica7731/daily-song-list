@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T16:07:05.539Z",
+  "generatedAt": "2026-08-16T16:45:28.024Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T16:07:05.539Z",
+    "fetchedAt": "2026-08-16T16:45:28.024Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T16:07:05.539Z",
+    "generatedAt": "2026-08-16T16:45:28.024Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1178,
-      "parseableChannels": 1159,
+      "totalChannels": 1179,
+      "parseableChannels": 1160,
       "realAvatar": 649,
-      "thumbnailFallback": 529,
+      "thumbnailFallback": 530,
       "missingDisplayImage": 0,
-      "missingAvatar": 529,
+      "missingAvatar": 530,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@TakanashiKobato",
+        "channelId": "UCbA0mV8uL5-aTb2SeZ-X_cg",
+        "displayName": "小鳥遊こばと / Takanashi Kobato",
+        "sourceUrl": "https://www.youtube.com/@TakanashiKobato",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@sanapri",
         "channelId": "UC0D-9mI0XntQUhMdUzqiqJw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCPqswBEjZm3FdvOzPyDw9wg",
         "displayName": "Remu Ch. 綺音れむ",
         "sourceUrl": "https://www.youtube.com/@AnonRemu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MariaMarionette",
-        "channelId": "UCwaS8_S7kMiKA3izlTWHbQg",
-        "displayName": "Maria Marionette 【NIJISANJI EN】",
-        "sourceUrl": "https://www.youtube.com/@MariaMarionette",
         "reason": "batch_limit_reached"
       }
     ]
