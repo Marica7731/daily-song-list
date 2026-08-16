@@ -897,6 +897,64 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(response["totalCount"],1)
 
+    def test_snapshot_render_bulk_hydrates_one_page_in_one_query(self):
+        filtered=[
+            {"row_id":"row-one","detail_key":"video-one","row_count":2,"song_count":2,
+             "video_count":1,"timestamp_count":2,"payload_json":None},
+            {"row_id":"row-two","detail_key":"video-two","row_count":1,"song_count":1,
+             "video_count":1,"timestamp_count":1,"payload_json":None},
+        ]
+        prepared={
+            "filtered":filtered,"metadata":[],"candidateRows":[],
+            "parentRevisionId":"parent","overlayRevisionIds":(),
+            "snapshotBulkHydrateCards":True,
+            "aggregateTotals":{"totalCount":2,"totalOccurrenceCount":3,
+                               "totalSongCount":3,"totalVideoCount":2},
+        }
+        payloads={
+            "video-one":{"type":"video","key":"video-one",
+                         "videoId":"video-one","title":"One",
+                         "occurrences":[]},
+            "video-two":{"type":"video","key":"video-two",
+                         "videoId":"video-two","title":"Two",
+                         "occurrences":[]},
+        }
+
+        def fake_rows(_connection,statement,params):
+            self.assertIn(
+                "bulk generic ranking page payload hydration",statement,
+            )
+            self.assertEqual(
+                params,
+                ["parent",["row-one","row-two"],
+                 "all","videos","count","all"],
+            )
+            return [
+                {"row_id":row_id,"detail_key":detail_key,
+                 "payload_json":payloads[detail_key]}
+                for row_id,detail_key in reversed([
+                    ("row-one","video-one"),("row-two","video-two")
+                ])
+            ]
+
+        with patch.object(pg_adapter,"_rows",side_effect=fake_rows) as rows, \
+             patch.object(pg_adapter,"_hydrate_overlay_page_previews"), \
+             patch.object(pg_adapter,"_hydrate_runtime_ranking_song_previews"):
+            response=pg_adapter._render_generic_overlay_rankings(
+                object(),"active",prepared,
+                {"range":"all","view":"videos","metric":"occurrences",
+                 "page":"1","pageSize":"30"},
+                preview_hydration_limit=3,
+            )
+        rows.assert_called_once()
+        self.assertEqual(
+            [record["videoId"] for record in response["records"]],
+            ["video-one","video-two"],
+        )
+        self.assertEqual(
+            [record["rank"] for record in response["records"]],[1,2],
+        )
+
     def test_complete_parent_window_recomputes_final_canonical_totals(self):
         filtered=[
             {"detail_key":"artist-one","row_count":3,"song_count":2,

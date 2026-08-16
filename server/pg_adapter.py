@@ -10868,7 +10868,7 @@ def _prepare_generic_overlay_rankings(
         connection,
         f"""
         {source_search_cte}
-        SELECT rank, detail_key, title, artist, name, row_count, song_count,
+        SELECT row_id, rank, detail_key, title, artist, name, row_count, song_count,
                video_count, timestamp_count, {base_payload_select}, {search_select}
         FROM {base_from}
         {base_where}
@@ -12053,6 +12053,12 @@ def _prepare_generic_overlay_rankings(
         "aggregateTotals": aggregate_totals,
         "songChannelIds": tuple(song_channel_scope or ()),
         "clickedSongScopes": clicked_song_scopes,
+        # Offline snapshot rendering walks every canonical ranking page. It
+        # may preload one bounded page of immutable parent payloads instead
+        # of issuing one PostgreSQL round trip per card.
+        "snapshotBulkHydrateCards": bool(
+            options.get("_snapshotBulkHydrateCards")
+        ),
     }
 
 
@@ -12616,7 +12622,9 @@ def _hydrated_generic_ranking_payload(
     requires_canonical_hydration = bool(
         reset_deferred or candidate_previews or runtime_deferred
     )
-    parent_stored_found = False
+    parent_stored_found = bool(
+        row.get("_snapshot_parent_payload_preloaded")
+    )
     if not payload or (
         requires_canonical_hydration
         and not _generic_ranking_payload_is_complete(payload, row, view)
@@ -12882,16 +12890,26 @@ def _render_generic_overlay_rankings(
             connection, render_rows, options,
         )
     records = []
+    page_rows = (
+        tuple(render_rows)
+        if options["view"] == "vtubers"
+        else tuple(render_rows[offset:offset + options["pageSize"]])
+    )
+    if prepared.get("snapshotBulkHydrateCards"):
+        page_rows = _bulk_hydrate_generic_ranking_page(
+            connection,
+            parent_revision_id,
+            page_rows,
+            options,
+            db_metric,
+        )
     if options["view"] == "vtubers":
         ranked_rows = (
             (int(row.get("_prepared_rank") or 0) + 1, row)
-            for row in render_rows
+            for row in page_rows
         )
     else:
-        ranked_rows = enumerate(
-            render_rows[offset:offset + options["pageSize"]],
-            start=offset + 1,
-        )
+        ranked_rows = enumerate(page_rows, start=offset + 1)
     for index, row in ranked_rows:
         payload = _hydrated_generic_ranking_payload(
             connection,
@@ -16531,6 +16549,93 @@ def _generic_video_source_payload(
             **dict(payload.get("record") or {}),
         }
     return payload
+
+
+def _bulk_hydrate_generic_ranking_page(
+    connection,
+    parent_revision_id: str,
+    rows: Sequence[Mapping[str, Any]],
+    options: Mapping[str, Any],
+    db_metric: str,
+) -> tuple[dict[str, Any], ...]:
+    """Load missing immutable parent card payloads in one bounded query."""
+
+    hydrated_rows = [dict(row) for row in rows]
+    requested_row_ids: list[str] = []
+    requested_by_row_id: dict[str, str] = {}
+    for row in hydrated_rows:
+        if _json_object(row.get("payload_json")):
+            continue
+        row_id = _text(row.get("row_id"))
+        detail_key = _text(row.get("detail_key"))
+        if not row_id or not detail_key:
+            raise PostgresAdapterError(
+                "snapshot ranking row is missing its immutable identity"
+            )
+        if row_id in requested_by_row_id:
+            raise PostgresAdapterError(
+                "snapshot ranking page contains a duplicate row id"
+            )
+        requested_by_row_id[row_id] = detail_key
+        requested_row_ids.append(row_id)
+    if not requested_row_ids:
+        return tuple(hydrated_rows)
+    if len(requested_row_ids) > MAX_PAGE_SIZE:
+        raise PostgresAdapterError(
+            "snapshot ranking payload hydration exceeded bounded page cap"
+        )
+
+    stored_rows = _rows(
+        connection,
+        """
+        /* bulk generic ranking page payload hydration */
+        SELECT row_id, detail_key, payload_json
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND row_id = ANY(%s)
+          AND range_id = %s AND view = %s
+          AND metric = %s AND scope_key = %s
+        """,
+        [
+            parent_revision_id,
+            requested_row_ids,
+            options["range"],
+            options["view"],
+            db_metric,
+            _ranking_scope_key(options),
+        ],
+    )
+    stored_by_row_id: dict[str, dict[str, Any]] = {}
+    for stored in stored_rows:
+        row_id = _text(stored.get("row_id"))
+        detail_key = _text(stored.get("detail_key"))
+        payload = _json_object(stored.get("payload_json"))
+        if (
+            row_id not in requested_by_row_id
+            or requested_by_row_id[row_id] != detail_key
+        ):
+            raise PostgresAdapterError(
+                "snapshot ranking payload hydration returned an unexpected identity"
+            )
+        if row_id in stored_by_row_id:
+            raise PostgresAdapterError(
+                "snapshot ranking payload hydration returned a duplicate row id"
+            )
+        if not payload:
+            raise PostgresAdapterError(
+                "snapshot ranking payload hydration returned an empty payload"
+            )
+        stored_by_row_id[row_id] = payload
+    if set(requested_by_row_id) != set(stored_by_row_id):
+        raise PostgresAdapterError(
+            "snapshot ranking payload hydration is incomplete"
+        )
+    for row in hydrated_rows:
+        row_id = _text(row.get("row_id"))
+        if row_id not in stored_by_row_id:
+            continue
+        row["payload_json"] = copy.deepcopy(stored_by_row_id[row_id])
+        row["_snapshot_parent_payload_preloaded"] = True
+    return tuple(hydrated_rows)
 
 
 def _snapshot_materialized_source_payload(

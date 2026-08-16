@@ -3857,6 +3857,7 @@ class SnapshotPageBuilder:
         # these internal flags and keep their established full response shape.
         options["_snapshotCompactCards"] = True
         options["_snapshotSongSearchMaxChars"] = MAX_RANKING_SEARCH_CHARS
+        options["_snapshotBulkHydrateCards"] = True
         prepared = adapter._prepare_generic_overlay_rankings(
             self.connection,
             revision_id,
