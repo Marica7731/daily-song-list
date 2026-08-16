@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T14:31:39.998Z",
+  "generatedAt": "2026-08-16T16:07:05.539Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T14:31:39.998Z",
+    "fetchedAt": "2026-08-16T16:07:05.539Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T14:31:39.998Z",
+    "generatedAt": "2026-08-16T16:07:05.539Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1177,
-      "parseableChannels": 1158,
+      "totalChannels": 1178,
+      "parseableChannels": 1159,
       "realAvatar": 649,
-      "thumbnailFallback": 528,
+      "thumbnailFallback": 529,
       "missingDisplayImage": 0,
-      "missingAvatar": 528,
+      "missingAvatar": 529,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 696,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 697
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 677,
+      "batch_limit_reached": 678,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11817,6 +11817,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@nemunaine",
+        "channelId": "UCRNj_X_jTv-ATVOJky-YR1A",
+        "displayName": "音夢ないねchannel【NemuNaine.ch】",
+        "sourceUrl": "https://www.youtube.com/@nemunaine",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@YakonHibana",
         "channelId": "UCgKjo_iSJpFmXQypArDztYA",
         "displayName": "夜紺 火花 / Yakon Hibana",
@@ -11842,13 +11849,6 @@
         "channelId": "UCwaS8_S7kMiKA3izlTWHbQg",
         "displayName": "Maria Marionette 【NIJISANJI EN】",
         "sourceUrl": "https://www.youtube.com/@MariaMarionette",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@nekuro0412",
-        "channelId": "UCs-lYkwb-NYKE9_ssTRDK3Q",
-        "displayName": "ねくろちゃん -Yamaguro Nekuro- /あおぎり高校",
-        "sourceUrl": "https://www.youtube.com/@nekuro0412",
         "reason": "batch_limit_reached"
       }
     ]
