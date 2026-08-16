@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T03:34:23.795Z",
+  "generatedAt": "2026-08-16T14:31:39.998Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T03:34:23.795Z",
+    "fetchedAt": "2026-08-16T14:31:39.998Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T03:34:23.795Z",
+    "generatedAt": "2026-08-16T14:31:39.998Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1175,
-      "parseableChannels": 1156,
+      "totalChannels": 1177,
+      "parseableChannels": 1158,
       "realAvatar": 649,
-      "thumbnailFallback": 526,
+      "thumbnailFallback": 528,
       "missingDisplayImage": 0,
-      "missingAvatar": 526,
+      "missingAvatar": 528,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 694
+      "skipped_collected_evidence": 696,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 675,
+      "batch_limit_reached": 677,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@sanapri",
+        "channelId": "UC0D-9mI0XntQUhMdUzqiqJw",
+        "displayName": "鎖那",
+        "sourceUrl": "https://www.youtube.com/@sanapri",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@noboru_SKMC",
+        "channelId": "UCkUfp0u4CK07r4bSWauIGFA",
+        "displayName": "坂道 のぼる / Noboru Sakamichi",
+        "sourceUrl": "https://www.youtube.com/@noboru_SKMC",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E7%90%A5%E7%8F%80%E3%81%B2%E3%81%AA%E3%81%9F",
         "channelId": "UCx3FdASxZpgILDwDv7MQYRg",
@@ -11835,20 +11849,6 @@
         "channelId": "UCs-lYkwb-NYKE9_ssTRDK3Q",
         "displayName": "ねくろちゃん -Yamaguro Nekuro- /あおぎり高校",
         "sourceUrl": "https://www.youtube.com/@nekuro0412",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@riona_02",
-        "channelId": "UCqBais6iJg_7bcaFFpRv36A",
-        "displayName": "Riona ch. リオナ・ネロ",
-        "sourceUrl": "https://www.youtube.com/@riona_02",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Yamori8cm",
-        "channelId": "UCWJvCc7Y8ekzfU7w0vNFwUQ",
-        "displayName": "やもり Yamori / 8cm",
-        "sourceUrl": "https://www.youtube.com/@Yamori8cm",
         "reason": "batch_limit_reached"
       }
     ]
