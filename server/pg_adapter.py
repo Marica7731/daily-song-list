@@ -16563,83 +16563,132 @@ def _bulk_hydrate_generic_ranking_page(
     hydrated_rows = [dict(row) for row in rows]
     requested_row_ids: list[str] = []
     requested_by_row_id: dict[str, str] = {}
+    requested_detail_keys: list[str] = []
+    requested_detail_key_set: set[str] = set()
     for row in hydrated_rows:
         if _json_object(row.get("payload_json")):
             continue
         row_id = _text(row.get("row_id"))
         detail_key = _text(row.get("detail_key"))
-        if not row_id:
-            # Overlay-created or regrouped cards do not necessarily have an
-            # immutable row in the parent ranking.  Keep their pre-existing
-            # exact detail-key hydration path; only persisted parent cards
-            # participate in this row-id batch.
-            continue
         if not detail_key:
             raise PostgresAdapterError(
                 "snapshot ranking row is missing its immutable identity"
             )
+        if not row_id:
+            # Overlay-created or regrouped cards do not necessarily retain an
+            # immutable parent row id. Resolve all matching parent cards with
+            # one page-bounded detail-key query; only true overlay-only cards
+            # fall through to the legacy exact lookup below.
+            if detail_key in requested_detail_key_set:
+                raise PostgresAdapterError(
+                    "snapshot ranking page contains a duplicate detail key"
+                )
+            requested_detail_key_set.add(detail_key)
+            requested_detail_keys.append(detail_key)
+            continue
         if row_id in requested_by_row_id:
             raise PostgresAdapterError(
                 "snapshot ranking page contains a duplicate row id"
             )
         requested_by_row_id[row_id] = detail_key
         requested_row_ids.append(row_id)
-    if not requested_row_ids:
-        return tuple(hydrated_rows)
-    if len(requested_row_ids) > MAX_PAGE_SIZE:
+    if len(requested_row_ids) + len(requested_detail_keys) > MAX_PAGE_SIZE:
         raise PostgresAdapterError(
             "snapshot ranking payload hydration exceeded bounded page cap"
         )
 
-    stored_rows = _rows(
-        connection,
-        """
-        /* bulk generic ranking page payload hydration */
-        SELECT row_id, detail_key, payload_json
-        FROM runtime_ranking_rows
-        WHERE revision_id = %s AND row_id = ANY(%s)
-          AND range_id = %s AND view = %s
-          AND metric = %s AND scope_key = %s
-        """,
-        [
-            parent_revision_id,
-            requested_row_ids,
-            options["range"],
-            options["view"],
-            db_metric,
-            _ranking_scope_key(options),
-        ],
-    )
     stored_by_row_id: dict[str, dict[str, Any]] = {}
-    for stored in stored_rows:
-        row_id = _text(stored.get("row_id"))
-        detail_key = _text(stored.get("detail_key"))
-        payload = _json_object(stored.get("payload_json"))
-        if (
-            row_id not in requested_by_row_id
-            or requested_by_row_id[row_id] != detail_key
-        ):
-            raise PostgresAdapterError(
-                "snapshot ranking payload hydration returned an unexpected identity"
-            )
-        if row_id in stored_by_row_id:
-            raise PostgresAdapterError(
-                "snapshot ranking payload hydration returned a duplicate row id"
-            )
-        if not payload:
-            raise PostgresAdapterError(
-                "snapshot ranking payload hydration returned an empty payload"
-            )
-        stored_by_row_id[row_id] = payload
-    if set(requested_by_row_id) != set(stored_by_row_id):
-        raise PostgresAdapterError(
-            "snapshot ranking payload hydration is incomplete"
+    if requested_row_ids:
+        stored_rows = _rows(
+            connection,
+            """
+            /* bulk generic ranking page payload hydration */
+            SELECT row_id, detail_key, payload_json
+            FROM runtime_ranking_rows
+            WHERE revision_id = %s AND row_id = ANY(%s)
+              AND range_id = %s AND view = %s
+              AND metric = %s AND scope_key = %s
+            """,
+            [
+                parent_revision_id,
+                requested_row_ids,
+                options["range"],
+                options["view"],
+                db_metric,
+                _ranking_scope_key(options),
+            ],
         )
+        for stored in stored_rows:
+            row_id = _text(stored.get("row_id"))
+            detail_key = _text(stored.get("detail_key"))
+            payload = _json_object(stored.get("payload_json"))
+            if (
+                row_id not in requested_by_row_id
+                or requested_by_row_id[row_id] != detail_key
+            ):
+                raise PostgresAdapterError(
+                    "snapshot ranking payload hydration returned an unexpected identity"
+                )
+            if row_id in stored_by_row_id:
+                raise PostgresAdapterError(
+                    "snapshot ranking payload hydration returned a duplicate row id"
+                )
+            if not payload:
+                raise PostgresAdapterError(
+                    "snapshot ranking payload hydration returned an empty payload"
+                )
+            stored_by_row_id[row_id] = payload
+        if set(requested_by_row_id) != set(stored_by_row_id):
+            raise PostgresAdapterError(
+                "snapshot ranking payload hydration is incomplete"
+            )
+
+    stored_by_detail_key: dict[str, dict[str, Any]] = {}
+    if requested_detail_keys:
+        stored_rows = _rows(
+            connection,
+            """
+            /* bulk generic ranking page detail payload hydration */
+            SELECT detail_key, payload_json
+            FROM runtime_ranking_rows
+            WHERE revision_id = %s AND range_id = %s AND view = %s
+              AND metric = %s AND scope_key = %s
+              AND detail_key = ANY(%s)
+            """,
+            [
+                parent_revision_id,
+                options["range"],
+                options["view"],
+                db_metric,
+                _ranking_scope_key(options),
+                requested_detail_keys,
+            ],
+        )
+        for stored in stored_rows:
+            detail_key = _text(stored.get("detail_key"))
+            payload = _json_object(stored.get("payload_json"))
+            if detail_key not in requested_detail_key_set:
+                raise PostgresAdapterError(
+                    "snapshot detail hydration returned an unexpected identity"
+                )
+            if detail_key in stored_by_detail_key:
+                raise PostgresAdapterError(
+                    "snapshot detail hydration returned a duplicate identity"
+                )
+            if not payload:
+                raise PostgresAdapterError(
+                    "snapshot detail hydration returned an empty payload"
+                )
+            stored_by_detail_key[detail_key] = payload
     for row in hydrated_rows:
         row_id = _text(row.get("row_id"))
-        if row_id not in stored_by_row_id:
+        detail_key = _text(row.get("detail_key"))
+        payload = stored_by_row_id.get(row_id) or stored_by_detail_key.get(
+            detail_key
+        )
+        if not payload:
             continue
-        row["payload_json"] = copy.deepcopy(stored_by_row_id[row_id])
+        row["payload_json"] = copy.deepcopy(payload)
         row["_snapshot_parent_payload_preloaded"] = True
     return tuple(hydrated_rows)
 
