@@ -3431,6 +3431,10 @@ def _overlay_channel_records(connection, rows: Iterable[Mapping[str, Any]], meta
             "rawHash": song.get("rawHash") if song.get("rawHash") is not None else row.get("raw_hash"),
             "sourceSystem": song.get("sourceSystem") if song.get("sourceSystem") is not None else row.get("source_system"),
         })
+        if not _text(song.get("title")):
+            # Match the VTuber ranking contract: accepted discovery rows with
+            # no normalized title are curation evidence, not public songs.
+            continue
         for public_name, camel_name, snake_name in (
             ("isNiche", "isNiche", "is_niche"),
             ("isUnknownArtist", "isUnknownArtist", "is_unknown_artist"),
@@ -15137,6 +15141,13 @@ def _overlay_source_record(row: Mapping[str, Any]) -> dict[str, Any] | None:
         "sourceId": occurrence.get("sourceId") or row.get("source_id"),
         "sourceSystem": occurrence.get("sourceSystem") or row.get("source_system"),
     })
+    if not _text(occurrence.get("title")):
+        # The ranking builder already excludes accepted discovery candidates
+        # whose normalized title is empty. Keep source materialization on the
+        # same public-occurrence contract: these reviewed, title-less rows are
+        # curation evidence, not songs. Persisted parent authority is still
+        # validated separately and must fail closed if it is malformed.
+        return None
     for public_name, camel_name, snake_name in (
         ("isNiche", "isNiche", "is_niche"),
         ("isUnknownArtist", "isUnknownArtist", "is_unknown_artist"),

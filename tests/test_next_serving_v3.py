@@ -1162,6 +1162,58 @@ class Tests(unittest.TestCase):
             ("TIMES","times"),
         )
 
+    def test_overlay_source_record_drops_titleless_curation_candidate(self):
+        row={
+            "video_id":"video-empty","occurrence_id":"occ-empty",
+            "range_id":"all","song_key":"candidate-key",
+            "title":None,"artist":None,"source_system":"youtube_channel_discovery",
+            "occurrence_payload_json":{
+                "videoId":"video-empty","occurrenceId":"occ-empty",
+                "rangeId":"all","songKey":"candidate-key",
+                "title":None,"artist":None,
+                "curationCandidate":{
+                    "flags":["missing_artist_candidate"],"identity":None,
+                },
+            },
+        }
+        self.assertIsNone(pg_adapter._overlay_source_record(row))
+
+    def test_overlay_source_record_keeps_title_with_explicit_null_artist(self):
+        row={
+            "video_id":"video-song","occurrence_id":"occ-song",
+            "range_id":"all","song_key":"song-key",
+            "title":"Song Title","artist":None,
+            "occurrence_payload_json":{
+                "videoId":"video-song","occurrenceId":"occ-song",
+                "rangeId":"all","songKey":"song-key",
+                "title":"Song Title","artist":None,
+            },
+        }
+        record=pg_adapter._overlay_source_record(row)
+        self.assertIsNotNone(record)
+        self.assertEqual(record["occurrences"][0]["title"],"Song Title")
+        self.assertIsNone(record["occurrences"][0]["artist"])
+
+    def test_vtuber_parent_source_still_fails_closed_on_titleless_authority(self):
+        records=({
+            "video":{"videoId":"video-parent"},
+            "occurrences":({
+                "videoId":"video-parent","occurrenceId":"occ-parent",
+                "rangeId":"all","title":"","artist":"",
+            },),
+        },)
+        payload={
+            "schemaVersion":1,"found":True,"sourceKey":"source-parent",
+            "totalOccurrenceCount":1,"record":{"type":"vtuber"},
+        }
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "missing canonical song identity",
+        ):
+            pg_adapter._canonicalize_vtuber_source_payload(
+                payload,records,{"range":"all"},
+            )
+
     def test_selected_full_reset_projects_physical_7d_to_all_once(self):
         reset={"video-one":{"video_id":"video-one"}}
         all_row={"video_id":"video-one","occurrence_id":"same","range_id":"all",
@@ -4049,6 +4101,21 @@ class Tests(unittest.TestCase):
             },
             "video_tombstone":False,
         }
+        titleless={
+            **candidate,
+            "occurrence_id":"position:1","position":2,
+            "song_key":"candidate-null","seconds":999,
+            "title":None,"artist":None,
+            "source_system":"youtube_channel_discovery",
+            "occurrence_payload_json":{
+                "videoId":video_id,"occurrenceId":"position:1",
+                "position":2,"rangeId":"all","songKey":"candidate-null",
+                "seconds":999,"title":None,"artist":None,
+                "curationCandidate":{
+                    "flags":["missing_artist_candidate"],"identity":None,
+                },
+            },
+        }
         resets={video_id:{"video_id":video_id}}
         with patch.object(pg_adapter,"_rows",side_effect=[[],[],[],[]]), \
              patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
@@ -4057,7 +4124,7 @@ class Tests(unittest.TestCase):
             result=pg_adapter._generic_overlay_vtuber_source_for_key(
                 object(),"parent",source_key,
                 {"range":"all","page":"1","pageSize":"200"},
-                ("overlay",),(candidate,),resets,(),(video_id,),
+                ("overlay",),(candidate,titleless),resets,(),(video_id,),
             )
         self.assertTrue(result["found"])
         self.assertEqual(result["sourceKey"],source_key)
