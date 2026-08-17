@@ -1126,13 +1126,20 @@ def _canonicalize_vtuber_source_payload(
     options = _query_options(query)
     occurrences = _source_records_as_occurrences(records, options, None)
     counts: dict[str, dict[str, Any]] = {}
+    unkeyed_occurrences = 0
     for occurrence in occurrences:
         song = occurrence.get("song") if isinstance(occurrence.get("song"), Mapping) else {}
         title, key = _vtuber_canonical_song_identity(song.get("title"))
-        if not title or not key:
+        if not title:
             raise PostgresAdapterError(
                 "VTuber source occurrence is missing canonical song identity"
             )
+        if not key:
+            # Match the runtime ranking builder: a non-empty, symbol-only
+            # title (for example `+male-sign`) remains a valid occurrence but
+            # has no work-title key and therefore does not increase songCount.
+            unkeyed_occurrences += 1
+            continue
         entry = counts.setdefault(key, {"key": key, "name": title, "count": 0})
         entry["count"] += 1
     songs = sorted(
@@ -1140,9 +1147,10 @@ def _canonicalize_vtuber_source_payload(
         key=lambda item: (-int(item["count"]), _overlay_norm(item["name"])),
     )
     total_occurrences = int(result.get("totalOccurrenceCount") or len(occurrences))
-    if len(occurrences) != total_occurrences or sum(
-        int(item["count"]) for item in songs
-    ) != total_occurrences:
+    if len(occurrences) != total_occurrences or (
+        sum(int(item["count"]) for item in songs) + unkeyed_occurrences
+        != total_occurrences
+    ):
         raise PostgresAdapterError(
             "VTuber source canonical song counts do not cover final occurrences"
         )
