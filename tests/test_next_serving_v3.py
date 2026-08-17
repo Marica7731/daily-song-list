@@ -1214,6 +1214,27 @@ class Tests(unittest.TestCase):
                 payload,records,{"range":"all"},
             )
 
+    def test_vtuber_symbol_only_title_counts_occurrence_without_song_key(self):
+        records=({
+            "video":{"videoId":"video-symbol"},
+            "occurrences":({
+                "videoId":"video-symbol","occurrenceId":"occ-symbol",
+                "rangeId":"all","title":"\uff0b\u2642",
+                "artist":"GigaP feat. Kagamine Len",
+            },),
+        },)
+        payload={
+            "schemaVersion":1,"found":True,"sourceKey":"source-symbol",
+            "totalOccurrenceCount":1,
+            "record":{"type":"vtuber","count":1,"songCount":1},
+        }
+        result=pg_adapter._canonicalize_vtuber_source_payload(
+            payload,records,{"range":"all"},
+        )
+        self.assertEqual(result["totalSongCount"],0)
+        self.assertEqual(result["record"]["songCount"],0)
+        self.assertEqual(result["record"]["songs"],[])
+
     def test_selected_full_reset_projects_physical_7d_to_all_once(self):
         reset={"video-one":{"video_id":"video-one"}}
         all_row={"video_id":"video-one","occurrence_id":"same","range_id":"all",
@@ -4116,6 +4137,18 @@ class Tests(unittest.TestCase):
                 },
             },
         }
+        symbol_only={
+            **candidate,
+            "occurrence_id":"position:2","position":3,
+            "song_key":"symbol-song","seconds":1060,
+            "title":"\uff0b\u2642","artist":"GigaP feat. Kagamine Len",
+            "occurrence_payload_json":{
+                "videoId":video_id,"occurrenceId":"position:2",
+                "position":3,"rangeId":"all","songKey":"symbol-song",
+                "seconds":1060,"title":"\uff0b\u2642",
+                "artist":"GigaP feat. Kagamine Len",
+            },
+        }
         resets={video_id:{"video_id":video_id}}
         with patch.object(pg_adapter,"_rows",side_effect=[[],[],[],[]]), \
              patch.object(pg_adapter,"_runtime_source_occurrences",return_value=[]), \
@@ -4124,13 +4157,13 @@ class Tests(unittest.TestCase):
             result=pg_adapter._generic_overlay_vtuber_source_for_key(
                 object(),"parent",source_key,
                 {"range":"all","page":"1","pageSize":"200"},
-                ("overlay",),(candidate,titleless),resets,(),(video_id,),
+                ("overlay",),(candidate,titleless,symbol_only),resets,(),(video_id,),
             )
         self.assertTrue(result["found"])
         self.assertEqual(result["sourceKey"],source_key)
         self.assertEqual(
             (result["totalOccurrenceCount"],result["totalSongCount"],result["totalVideoCount"]),
-            (1,1,1),
+            (2,1,1),
         )
         self.assertEqual(result["record"]["type"],"vtuber")
         self.assertEqual(result["record"]["channelId"],channel_id)
@@ -4140,6 +4173,7 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(result["record"]["sourceDetailKey"],source_key)
         self.assertEqual(result["record"]["occurrences"][0]["videoId"],video_id)
+        self.assertEqual(len(result["record"]["occurrences"]),2)
         global_prepare.assert_not_called();global_changes.assert_not_called()
 
     def test_snapshot_overlay_vtuber_route_precedes_video_and_channel_fallbacks(self):
