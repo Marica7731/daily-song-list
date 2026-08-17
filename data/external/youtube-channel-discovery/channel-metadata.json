@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-17T04:13:51.078Z",
+  "generatedAt": "2026-08-17T07:02:22.056Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-17T04:13:51.078Z",
+    "fetchedAt": "2026-08-17T07:02:22.056Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-17T04:13:51.078Z",
+    "generatedAt": "2026-08-17T07:02:22.056Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1184,
-      "parseableChannels": 1165,
+      "totalChannels": 1186,
+      "parseableChannels": 1167,
       "realAvatar": 649,
-      "thumbnailFallback": 535,
+      "thumbnailFallback": 537,
       "missingDisplayImage": 0,
-      "missingAvatar": 535,
+      "missingAvatar": 537,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 702,
+      "skipped_collected_evidence": 704,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 683,
+      "batch_limit_reached": 685,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11817,6 +11817,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Shumulumeifei",
+        "channelId": "UC5QZFeVsxNcNlKKqPqUaw6g",
+        "displayName": "Meifei ch. 舒穆祿梅緋",
+        "sourceUrl": "https://www.youtube.com/@Shumulumeifei",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@%E7%99%BD%E6%B3%A2%E3%81%AA%E3%81%AA%E3%81%BF",
         "channelId": "UCPl9Zm6FLmmzFNts4odtDFA",
         "displayName": "白波ななみ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCflVd-RkLPSA0E2ePYEmv7w",
         "displayName": "蔵乃のるん-Norn Kurano-",
         "sourceUrl": "https://www.youtube.com/@norn_kurano",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@sorashipurumu",
-        "channelId": "UC82JqwZtW_AaoHE9vubF4Og",
-        "displayName": "空詩ぷるむ / Sorashi Purumu",
-        "sourceUrl": "https://www.youtube.com/@sorashipurumu",
         "reason": "batch_limit_reached"
       }
     ]
