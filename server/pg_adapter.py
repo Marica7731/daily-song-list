@@ -1137,8 +1137,18 @@ def _canonicalize_vtuber_source_payload(
             _source_occurrence_field(occurrence, "title")
         )
         if not title:
+            source_key = _text(
+                result.get("sourceKey")
+                or result.get("record", {}).get("sourceDetailKey")
+            )
             raise PostgresAdapterError(
-                "VTuber source occurrence is missing canonical song identity"
+                "VTuber source occurrence is missing canonical song identity: "
+                f"sourceKey={source_key or '-'} "
+                f"videoId={_source_occurrence_field(occurrence, 'videoId') or '-'} "
+                f"occurrenceId={_source_occurrence_field(occurrence, 'occurrenceId') or '-'} "
+                f"sourceSystem={_source_occurrence_field(occurrence, 'sourceSystem') or '-'} "
+                f"sourceId={_source_occurrence_field(occurrence, 'sourceId') or '-'} "
+                f"songKey={_source_occurrence_field(occurrence, 'songKey') or '-'}"
             )
         if not key:
             # Match the runtime ranking builder: a non-empty, symbol-only
