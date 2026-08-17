@@ -1128,8 +1128,14 @@ def _canonicalize_vtuber_source_payload(
     counts: dict[str, dict[str, Any]] = {}
     unkeyed_occurrences = 0
     for occurrence in occurrences:
-        song = occurrence.get("song") if isinstance(occurrence.get("song"), Mapping) else {}
-        title, key = _vtuber_canonical_song_identity(song.get("title"))
+        # Persisted source projections are not all at the same wrapper depth:
+        # newer rows expose ``song.title`` directly, while an older valid row
+        # can carry an occurrence wrapper whose own nested ``song`` owns the
+        # title.  Read through the established source-field traversal instead
+        # of mistaking that legacy wrapper for a title-less authority row.
+        title, key = _vtuber_canonical_song_identity(
+            _source_occurrence_field(occurrence, "title")
+        )
         if not title:
             raise PostgresAdapterError(
                 "VTuber source occurrence is missing canonical song identity"
