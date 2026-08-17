@@ -1296,6 +1296,28 @@ class Tests(unittest.TestCase):
                 payload,records,{"range":"all"},
             )
 
+    def test_vtuber_parent_source_reads_legacy_nested_song_identity(self):
+        records=({
+            "video":{"videoId":"video-parent"},
+            "occurrences":({
+                "videoId":"video-parent","occurrenceId":"occ-parent",
+                "rangeId":"all",
+                "song":{"title":"Nested Song","artist":"Nested Artist"},
+            },),
+        },)
+        payload={
+            "schemaVersion":1,"found":True,"sourceKey":"source-parent",
+            "totalOccurrenceCount":1,"record":{"type":"vtuber"},
+        }
+        result=pg_adapter._canonicalize_vtuber_source_payload(
+            payload,records,{"range":"all"},
+        )
+        self.assertEqual(result["totalSongCount"],1)
+        self.assertEqual(result["record"]["songCount"],1)
+        self.assertEqual(result["record"]["songs"],[{
+            "key":"nestedsong","name":"Nested Song","count":1,
+        }])
+
     def test_vtuber_symbol_only_title_counts_occurrence_without_song_key(self):
         records=({
             "video":{"videoId":"video-symbol"},
