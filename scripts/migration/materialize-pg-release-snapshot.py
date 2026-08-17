@@ -588,9 +588,14 @@ def _derived_source_pairs(
         artist_keys = {_production_source_key(
             "artists", "all", artist_group_key,
         )}
+        canonical_artist_group = (
+            "unknown"
+            if adapter._unknown_artist_name(artist)
+            else adapter._overlay_song_group_norm(artist)
+        )
         canonical_song_group = "\x1f".join((
             adapter._overlay_song_group_norm(title),
-            adapter._overlay_song_group_norm(artist),
+            canonical_artist_group,
         ))
         if source_scope is not None:
             song_keys.update(source_scope.source_keys_for_group(
