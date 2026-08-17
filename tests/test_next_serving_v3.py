@@ -814,6 +814,49 @@ class Tests(unittest.TestCase):
                 (),
             )
 
+    def test_snapshot_derived_song_source_uses_unknown_artist_owner_identity(self):
+        title="From now on(short ver)/Fixture Original Song"
+        artist="\u672a\u8a18\u8f09"
+        public_group=f"{pg_adapter._overlay_norm(title)}::{pg_adapter._overlay_norm(artist)}"
+        source_key=pg_materializer._production_source_key(
+            "songs","all",public_group,
+        )
+        pairs,targets=pg_materializer._derived_source_pairs(
+            video_ids=("video-unknown",),
+            song_pairs=((title,artist),),
+            requested_keys={source_key},
+        )
+        self.assertEqual(pairs,{(source_key,"video-unknown")})
+        self.assertEqual(targets,{(
+            "songs",
+            "\x1f".join((
+                pg_adapter._overlay_song_group_norm(title),"unknown",
+            )),
+            source_key,
+        )})
+        candidate={
+            "revision_id":"overlay","video_id":"video-unknown",
+            "occurrence_id":"occ-unknown","position":1,"range_id":"all",
+            "song_key":"song-unknown","seconds":10,
+            "title":title,"artist":artist,"is_unknown_artist":True,
+            "source_system":"fixture","video_title":"Unknown Artist Video",
+            "channel_id":"UCfixture","channel_name":"Fixture",
+            "occurrence_payload_json":{},"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record=None,
+            targets=tuple((view,group) for view,group,key in targets if key==source_key),
+            video_scope=("video-unknown",),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=(candidate,),
+            accepted_video_resets={"video-unknown":{"video_id":"video-unknown"}},
+            runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(payload["sourceKey"],source_key)
+        self.assertEqual(payload["record"]["count"],1)
+
     def test_snapshot_artist_scope_rejects_ambiguous_alias_only_owner(self):
         with closing(sqlite3.connect(":memory:")) as database:
             scope=pg_materializer.SnapshotSourceScope(database)
