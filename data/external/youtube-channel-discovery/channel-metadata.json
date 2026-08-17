@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-16T23:16:35.518Z",
+  "generatedAt": "2026-08-17T01:27:45.863Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-16T23:16:35.518Z",
+    "fetchedAt": "2026-08-17T01:27:45.863Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-16T23:16:35.518Z",
+    "generatedAt": "2026-08-17T01:27:45.863Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
+        "displayName": "一二美アユ ch / Hifumi Aryu",
+        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@hanahira__frill",
         "channelId": "UCHv-JirenvPMNJeFhrhEfxw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCZhTt1n3C-WvluNBLn_uLvg",
         "displayName": "ほないこ!カロエちゃんねる!!【ギター弾き語り・ゲーム実況】",
         "sourceUrl": "https://www.youtube.com/@honacaroe",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@nemunaine",
-        "channelId": "UCRNj_X_jTv-ATVOJky-YR1A",
-        "displayName": "音夢ないねchannel【NemuNaine.ch】",
-        "sourceUrl": "https://www.youtube.com/@nemunaine",
         "reason": "batch_limit_reached"
       }
     ]
