@@ -1290,7 +1290,8 @@ class Tests(unittest.TestCase):
         }
         with self.assertRaisesRegex(
             pg_adapter.PostgresAdapterError,
-            "missing canonical song identity",
+            "missing canonical song identity: sourceKey=source-parent "
+            "videoId=video-parent occurrenceId=occ-parent",
         ):
             pg_adapter._canonicalize_vtuber_source_payload(
                 payload,records,{"range":"all"},
