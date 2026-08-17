@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-17T01:27:45.863Z",
+  "generatedAt": "2026-08-17T03:57:12.941Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-17T01:27:45.863Z",
+    "fetchedAt": "2026-08-17T03:57:12.941Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-17T01:27:45.863Z",
+    "generatedAt": "2026-08-17T03:57:12.941Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1182,
-      "parseableChannels": 1163,
+      "totalChannels": 1184,
+      "parseableChannels": 1165,
       "realAvatar": 649,
-      "thumbnailFallback": 533,
+      "thumbnailFallback": 535,
       "missingDisplayImage": 0,
-      "missingAvatar": 533,
+      "missingAvatar": 535,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 700
+      "skipped_collected_evidence": 702,
+      "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 681,
+      "batch_limit_reached": 683,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@YozoraNeko_Ch",
+        "channelId": "UCZLwnUygGO2AZAapuaCj1cA",
+        "displayName": "夜空ねこ / Yozora Neko",
+        "sourceUrl": "https://www.youtube.com/@YozoraNeko_Ch",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
         "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
@@ -11842,13 +11849,6 @@
         "channelId": "UC82JqwZtW_AaoHE9vubF4Og",
         "displayName": "空詩ぷるむ / Sorashi Purumu",
         "sourceUrl": "https://www.youtube.com/@sorashipurumu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@honacaroe",
-        "channelId": "UCZhTt1n3C-WvluNBLn_uLvg",
-        "displayName": "ほないこ!カロエちゃんねる!!【ギター弾き語り・ゲーム実況】",
-        "sourceUrl": "https://www.youtube.com/@honacaroe",
         "reason": "batch_limit_reached"
       }
     ]
