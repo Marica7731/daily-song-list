@@ -591,10 +591,10 @@ def _derived_source_pairs(
         canonical_artist_group = (
             "unknown"
             if adapter._unknown_artist_name(artist)
-            else adapter._overlay_song_group_norm(artist)
+            else adapter._source_song_owner_norm(artist)
         )
         canonical_song_group = "\x1f".join((
-            adapter._overlay_song_group_norm(title),
+            adapter._source_song_owner_norm(title),
             canonical_artist_group,
         ))
         if source_scope is not None:
@@ -725,8 +725,10 @@ def build_snapshot_source_scope(
         if view in {"songs", "songIndex"}:
             view = "songs"
             group_key = "\x1f".join((
-                adapter._overlay_song_group_norm(row.get("title")),
-                adapter._overlay_song_group_norm(row.get("artist")),
+                adapter._source_song_owner_norm(row.get("title")),
+                "unknown"
+                if adapter._unknown_artist_name(row.get("artist"))
+                else adapter._source_song_owner_norm(row.get("artist")),
             ))
         elif view == "artists":
             group_key = _text(row.get("detail_key")) or adapter._overlay_norm(

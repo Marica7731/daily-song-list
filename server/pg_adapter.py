@@ -2147,6 +2147,21 @@ def _overlay_song_group_norm(value: Any) -> str:
     )
 
 
+def _source_song_owner_norm(value: Any) -> str:
+    """Return a non-empty source owner for every non-empty public label.
+
+    Song rankings intentionally retain symbol-only titles such as ``〜``.
+    Their punctuation-insensitive group key is empty, so source ownership must
+    fall back to the normalized public label instead of losing the identity.
+    Empty labels remain empty and continue to fail closed.
+    """
+
+    text = _text(value)
+    if not text:
+        return ""
+    return _overlay_song_group_norm(text) or _overlay_norm(text)
+
+
 def _overlay_artist_group_norm(value: Any) -> str:
     """Port ``RankingUtils.normalizeArtistKey`` for public artist groups.
 
@@ -5084,8 +5099,8 @@ def _runtime_change_song_group_identity(
     """Return the canonical title/artist identity of a parent song group."""
 
     return (
-        _overlay_song_group_norm(change.get("title")),
-        _overlay_song_group_norm(_runtime_change_group_artist(change)),
+        _source_song_owner_norm(change.get("title")),
+        _source_song_owner_norm(_runtime_change_group_artist(change)),
     )
 
 
@@ -6175,8 +6190,8 @@ def _canonical_overlay_delta_group_key(
     if view not in {"songs", "songIndex", "vsingerSongs"}:
         return replacement_key
     replacement_identity = (
-        _overlay_song_group_norm(item.get("title")),
-        _overlay_song_group_norm(item.get("artist")),
+        _source_song_owner_norm(item.get("title")),
+        _source_song_owner_norm(item.get("artist")),
     )
     if not replacement_identity[0] or not replacement_identity[1]:
         return replacement_key
@@ -15214,7 +15229,7 @@ def _source_song_identity_evidence(
             if title and "artist" in current:
                 artist = _text(current.get("artist"))
                 pairs.setdefault(
-                    (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+                    (_source_song_owner_norm(title), _source_song_owner_norm(artist)),
                     (title, artist),
                 )
             for name in (
@@ -15232,7 +15247,7 @@ def _source_song_identity_evidence(
     if title and "artist" in value:
         artist = _text(value.get("artist"))
         pairs.setdefault(
-            (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+            (_source_song_owner_norm(title), _source_song_owner_norm(artist)),
             (title, artist),
         )
     artists = value.get("artists")
@@ -15244,7 +15259,7 @@ def _source_song_identity_evidence(
                 artist = _text(artist_value)
             if artist:
                 pairs.setdefault(
-                    (_overlay_song_group_norm(title), _overlay_song_group_norm(artist)),
+                    (_source_song_owner_norm(title), _source_song_owner_norm(artist)),
                     (title, artist),
                 )
     return pairs, song_keys
@@ -15263,7 +15278,7 @@ def _source_song_group_identity(value: Mapping[str, Any]) -> str:
 
     key = _text(value.get("key"))
     parts = key.split("::")
-    title_key = _overlay_song_group_norm(
+    title_key = _source_song_owner_norm(
         value.get("title") or value.get("workTitle")
     )
     if len(parts) != 2 or not title_key or parts[0] != title_key:
@@ -15285,7 +15300,7 @@ def _source_row_song_group_identity(value: Mapping[str, Any]) -> str:
         title = _text(source.get("title") or source.get("workTitle"))
         if title:
             break
-    title_key = _overlay_song_group_norm(title)
+    title_key = _source_song_owner_norm(title)
     if not title_key:
         return ""
     artist = _scope_artist(value)
@@ -15296,7 +15311,7 @@ def _source_row_song_group_identity(value: Mapping[str, Any]) -> str:
         "unknown"
         if is_unknown is True
         or (is_unknown is None and _unknown_artist_name(artist))
-        else _overlay_song_group_norm(artist)
+        else _source_song_owner_norm(artist)
     )
     return f"{title_key}::{artist_key}"
 
