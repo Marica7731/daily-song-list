@@ -857,6 +857,45 @@ class Tests(unittest.TestCase):
         self.assertEqual(payload["sourceKey"],source_key)
         self.assertEqual(payload["record"]["count"],1)
 
+    def test_snapshot_symbol_only_song_source_keeps_nonempty_owner_identity(self):
+        title="\u301c";artist=""
+        public_group=f"{pg_adapter._overlay_norm(title)}::"
+        source_key=pg_materializer._production_source_key(
+            "songs","all",public_group,
+        )
+        pairs,targets=pg_materializer._derived_source_pairs(
+            video_ids=("video-symbol-song",),
+            song_pairs=((title,artist),),
+            requested_keys={source_key},
+        )
+        self.assertEqual(pairs,{(source_key,"video-symbol-song")})
+        self.assertEqual(targets,{(
+            "songs",f"{pg_adapter._overlay_norm(title)}\x1funknown",source_key,
+        )})
+        candidate={
+            "revision_id":"overlay","video_id":"video-symbol-song",
+            "occurrence_id":"occ-symbol-song","position":1,
+            "range_id":"all","song_key":"symbol-song","seconds":10,
+            "title":title,"artist":artist,"source_system":"fixture",
+            "video_title":"Symbol Song Video","channel_id":"UCfixture",
+            "channel_name":"Fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record=None,
+            targets=tuple((view,group) for view,group,key in targets if key==source_key),
+            video_scope=("video-symbol-song",),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=(candidate,),
+            accepted_video_resets={
+                "video-symbol-song":{"video_id":"video-symbol-song"},
+            },
+            runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(payload["sourceKey"],source_key)
+        self.assertEqual(payload["record"]["count"],1)
+
     def test_snapshot_artist_scope_rejects_ambiguous_alias_only_owner(self):
         with closing(sqlite3.connect(":memory:")) as database:
             scope=pg_materializer.SnapshotSourceScope(database)
