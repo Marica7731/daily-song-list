@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-17T07:23:23.054Z",
+  "generatedAt": "2026-08-17T11:02:24.608Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-17T07:23:23.054Z",
+    "fetchedAt": "2026-08-17T11:02:24.608Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-17T07:23:23.054Z",
+    "generatedAt": "2026-08-17T11:02:24.608Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1186,
-      "parseableChannels": 1167,
+      "totalChannels": 1187,
+      "parseableChannels": 1168,
       "realAvatar": 649,
-      "thumbnailFallback": 537,
+      "thumbnailFallback": 538,
       "missingDisplayImage": 0,
-      "missingAvatar": 537,
+      "missingAvatar": 538,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 704,
+      "skipped_collected_evidence": 705,
       "already_cached": 667
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 685,
+      "batch_limit_reached": 686,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11782,6 +11782,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Qalu_Mixstgirls",
+        "channelId": "UCjN-1QSJtD6RdRGXTf9L1Sw",
+        "displayName": "雪白キャル / Qalu Channel【ミクスト】",
+        "sourceUrl": "https://www.youtube.com/@Qalu_Mixstgirls",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@lara_songs",
         "channelId": "UCWF-3hyAv7TFw8mpS_wHLmw",
         "displayName": "音羽ララ (Otohane Lara) / シアーミュージックV",
@@ -11842,13 +11849,6 @@
         "channelId": "UCGcCqY2rzbxmbP5mMhlUwMA",
         "displayName": "勿忘草 幽冥 - Yume Wasurenagusa -",
         "sourceUrl": "https://www.youtube.com/@ghostdoll_y",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@norn_kurano",
-        "channelId": "UCflVd-RkLPSA0E2ePYEmv7w",
-        "displayName": "蔵乃のるん-Norn Kurano-",
-        "sourceUrl": "https://www.youtube.com/@norn_kurano",
         "reason": "batch_limit_reached"
       }
     ]
