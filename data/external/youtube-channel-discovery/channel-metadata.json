@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-17T16:46:28.465Z",
+  "generatedAt": "2026-08-17T20:05:44.314Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-17T16:46:28.465Z",
+    "fetchedAt": "2026-08-17T20:05:44.314Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-17T16:46:28.465Z",
+    "generatedAt": "2026-08-17T20:05:44.314Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1189,
-      "parseableChannels": 1170,
+      "totalChannels": 1192,
+      "parseableChannels": 1173,
       "realAvatar": 649,
-      "thumbnailFallback": 540,
+      "thumbnailFallback": 543,
       "missingDisplayImage": 0,
-      "missingAvatar": 540,
+      "missingAvatar": 543,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 707,
-      "already_cached": 667
+      "already_cached": 667,
+      "skipped_collected_evidence": 709
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 688,
+      "batch_limit_reached": 690,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@mele_dream",
+        "channelId": "UCHDteTHrF5wmI9nQYuAgcpw",
+        "displayName": "愛蕾 / Mele",
+        "sourceUrl": "https://www.youtube.com/@mele_dream",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@VanitaScarlet",
         "channelId": "UC2oiISB4UN2rqHBgkvcWKAg",
@@ -11842,13 +11849,6 @@
         "channelId": "UChBFDLeY7cNh0pllsEAx2Vw",
         "displayName": "神光斎 凪Kamiitsuki Nagi",
         "sourceUrl": "https://www.youtube.com/@Nagi_Kamiitsuki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@momokyu_u",
-        "channelId": "UCWKC5_gzWd5YvlGal1sVkCw",
-        "displayName": "魅音モモキュ / 毛毛球 Ch.",
-        "sourceUrl": "https://www.youtube.com/@momokyu_u",
         "reason": "batch_limit_reached"
       }
     ]
