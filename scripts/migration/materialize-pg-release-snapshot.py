@@ -47,6 +47,12 @@ MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
+# A read-only progress probe can briefly hold a shared SQLite lock while the
+# private candidate is being written.  The default sqlite3 timeout is only
+# five seconds, which is shorter than a full-table count on this snapshot.
+# Wait long enough for bounded observers to finish, while still failing
+# closed if a lock is genuinely stuck.
+SQLITE_BUSY_TIMEOUT_MS = 120_000
 
 
 def _text(value: Any) -> str:
@@ -1599,7 +1605,11 @@ class CanonicalSnapshotWriter:
         os.close(descriptor)
         self.output = output
         self.temp = Path(temp_name)
-        self.connection = sqlite3.connect(self.temp)
+        self.connection = sqlite3.connect(
+            self.temp,
+            timeout=SQLITE_BUSY_TIMEOUT_MS / 1000,
+        )
+        self.connection.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}")
         self.connection.executescript("""
         PRAGMA journal_mode=OFF;
         PRAGMA synchronous=OFF;
