@@ -2107,6 +2107,48 @@ class Tests(unittest.TestCase):
         self.assertEqual((writer.cache_drop_attempts,writer.cache_drop_count),(1,1))
         writer.abort()
 
+    def test_snapshot_writer_waits_for_short_read_only_probe_lock(self):
+        target=self.temp/"busy-timeout.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        reader=None
+        thread=None
+        try:
+            record={
+                "rank":1,"key":"entity","sourceDetailKey":"source",
+                "title":"Song","artist":"Artist","name":"Song",
+                "count":1,"songCount":1,"videoCount":1,"timestampCount":1,
+            }
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=record,range_id="all",view="songs",
+                metric="occurrences",scope_key="all",expected_rank=1,
+            ))
+            self.assertEqual(
+                writer.connection.execute("PRAGMA busy_timeout").fetchone()[0],
+                pg_materializer.SQLITE_BUSY_TIMEOUT_MS,
+            )
+            reader=sqlite3.connect(writer.temp,timeout=1,check_same_thread=False)
+            reader.execute("BEGIN")
+            reader.execute("SELECT count(*) FROM ranking_rows").fetchone()
+            def release_reader():
+                time.sleep(0.05)
+                reader.commit()
+                reader.close()
+            thread=threading.Thread(target=release_reader)
+            thread.start()
+            with patch.object(pg_materializer,"SQLITE_CHECKPOINT_ROWS",1):
+                writer._record_writes(1)
+            thread.join(timeout=2)
+            self.assertFalse(thread.is_alive())
+        finally:
+            if thread is not None and thread.is_alive():
+                thread.join(timeout=2)
+            if reader is not None:
+                try:
+                    reader.close()
+                except sqlite3.Error:
+                    pass
+            writer.abort()
+
     def test_snapshot_source_search_update_uses_exact_lookup_index(self):
         target=self.temp/"source-lookup.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
@@ -2346,79 +2388,236 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
-    def test_filtered_scope_uses_name_only_all_card_as_song_authority(self):
-        target=self.temp/"derived-filtered-canonical-song-name.sqlite"
-        writer=pg_materializer.CanonicalSnapshotWriter(target)
-        occurrences=[
-            {"videoId":"variant-video-a","song":{
-                "songKey":"shared-song-key","title":"Canonical Song",
-                "artist":"Fixture Artist","isNiche":False,
-                "isUnknownArtist":False,
-            }},
-            {"videoId":"variant-video-b","song":{
-                "songKey":"shared-song-key",
-                "title":"Canonical Song (Piano Ver.)",
-                "artist":"Fixture Artist","isNiche":False,
-                "isUnknownArtist":False,
-            }},
+    def test_snapshot_writer_uses_all_scope_song_name_for_filtered_variant(self):
+        target = self.temp / "derived-filtered-canonical-song-name.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        occurrences = [
+            {
+                "videoId": "variant-video-a",
+                "song": {
+                    "songKey": "shared-song-key",
+                    "title": "Canonical Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+            {
+                "videoId": "variant-video-b",
+                "song": {
+                    "songKey": "shared-song-key",
+                    "title": "Canonical Song (Piano Ver.)",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
         ]
-        artist_record={
-            "rank":1,"key":"artist-variant",
-            "sourceDetailKey":"source-artist-variant",
-            "name":"Variant Artist","count":2,"songCount":1,
-            "videoCount":2,"timestampCount":2,
-            "songs":[{"name":"Canonical Song","count":2}],
+        source_key = "source-artist-variant"
+        record = {
+            "rank": 1,
+            "key": "artist-variant",
+            "sourceDetailKey": source_key,
+            "name": "Variant Artist",
+            "count": 2,
+            "songCount": 1,
+            "videoCount": 2,
+            "timestampCount": 2,
+            "songs": [{"name": "Canonical Song", "count": 2}],
+            "occurrences": occurrences,
         }
-        writer.add_ranking(pg_materializer._ranking_row(
-            artist_record,
-            payload_record=pg_adapter.compact_ranking_payloads(
-                [artist_record],"artists",
-            )[0],
-            range_id="all",view="artists",metric="occurrences",
-            scope_key="all",expected_rank=1,
-        ))
-        writer.add_source(
-            "source-artist-variant","all",
-            {"type":"artist","key":"artist-variant",
-             "songs":artist_record["songs"]},occurrences,
-        )
-        for view in ("songs","videos","vtubers"):
-            source_key=f"source-{view}-variant"
-            entity_key=f"{view}-variant"
-            title=f"Other {view} Song"
-            other_occurrence={"videoId":f"{view}-variant-video","song":{
-                "songKey":f"{view}-variant-song","title":title,
-                "artist":"Fixture Artist","isNiche":False,
-                "isUnknownArtist":False,
-            }}
-            record={"rank":1,"key":entity_key,"sourceDetailKey":source_key,
-                    "title":title,"name":f"Other {view}","count":1,
-                    "songCount":1,"videoCount":1,"timestampCount":1,
-                    "songs":[{"key":f"{view}-variant-song",
-                              "name":title,"count":1}]}
-            writer.add_ranking(pg_materializer._ranking_row(
+        compact = pg_adapter.compact_ranking_payloads([record], "artists")[0]
+        writer.add_ranking(
+            pg_materializer._ranking_row(
                 record,
-                payload_record=pg_adapter.compact_ranking_payloads(
-                    [record],view,
-                )[0],
-                range_id="all",view=view,metric="occurrences",
-                scope_key="all",expected_rank=1,
-            ))
+                payload_record=compact,
+                range_id="all",
+                view="artists",
+                metric="occurrences",
+                scope_key="all",
+                expected_rank=1,
+            )
+        )
+        writer.add_source(
+            source_key,
+            "all",
+            {"type": "artist", "key": "artist-variant", "songs": record["songs"]},
+            occurrences,
+        )
+        for view in ("songs", "videos", "vtubers"):
+            other_source = f"source-{view}-variant"
+            other_occurrences = [{
+                "videoId": f"{view}-variant-video",
+                "song": {
+                    "songKey": f"{view}-variant-song",
+                    "title": f"Other {view} Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }]
+            other_record = {
+                "rank": 1,
+                "key": f"{view}-variant",
+                "sourceDetailKey": other_source,
+                "title": f"Other {view} Song",
+                "name": f"Other {view}",
+                "count": 1,
+                "songCount": 1,
+                "videoCount": 1,
+                "timestampCount": 1,
+                "songs": [{
+                    "key": f"{view}-variant-song",
+                    "name": f"Other {view} Song",
+                    "count": 1,
+                }],
+            }
+            other_compact = pg_adapter.compact_ranking_payloads(
+                [other_record], view,
+            )[0]
+            writer.add_ranking(
+                pg_materializer._ranking_row(
+                    other_record,
+                    payload_record=other_compact,
+                    range_id="all",
+                    view=view,
+                    metric="occurrences",
+                    scope_key="all",
+                    expected_rank=1,
+                )
+            )
             writer.add_source(
-                source_key,"all",
-                {"type":"vtuber" if view=="vtubers" else view[:-1],
-                 "key":entity_key,"songs":record["songs"]},
-                [other_occurrence],
+                other_source,
+                "all",
+                {
+                    "type": "vtuber" if view == "vtubers" else view[:-1],
+                    "key": f"{view}-variant",
+                    "songs": other_record["songs"],
+                },
+                other_occurrences,
             )
         try:
-            writer.derive_filtered_ranking_scopes(range_id="all",page_size=30)
-            payload=json.loads(writer.connection.execute(
-                "SELECT payload_json FROM ranking_rows WHERE range_id='all' "
-                "AND view='artists' AND metric='count' AND scope_key='visible'"
-            ).fetchone()[0])
-            self.assertEqual(payload["songs"],[
-                {"key":"shared-song-key","name":"Canonical Song","count":2},
-            ])
+            result = writer.derive_filtered_ranking_scopes(range_id="all", page_size=30)
+            self.assertEqual(result["all/artists/count/visible"], 1)
+            payload_json = writer.connection.execute(
+                "SELECT payload_json FROM ranking_rows "
+                "WHERE range_id='all' AND view='artists' AND metric='count' "
+                "AND scope_key='visible'"
+            ).fetchone()[0]
+            payload = json.loads(payload_json)
+            self.assertEqual(
+                payload["songs"],
+                [{"key": "shared-song-key", "name": "Canonical Song", "count": 2}],
+            )
+        finally:
+            writer.abort()
+
+    def test_snapshot_writer_accepts_nfkc_song_name_variants_within_source(self):
+        target = self.temp / "derived-filtered-nfkc-song-name.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+
+        def add_base(view, source_key, entity_key, name, occurrences, songs):
+            song_keys = {item["song"]["songKey"] for item in occurrences}
+            video_ids = {item["videoId"] for item in occurrences}
+            record = {
+                "rank": 1,
+                "key": entity_key,
+                "sourceDetailKey": source_key,
+                "title": name if view in {"songs", "videos"} else "",
+                "name": name,
+                "artist": "Fixture Artist",
+                "count": len(occurrences),
+                "songCount": len(song_keys),
+                "videoCount": len(video_ids),
+                "timestampCount": len(occurrences),
+                "songs": songs,
+            }
+            compact = pg_adapter.compact_ranking_payloads([record], view)[0]
+            writer.add_ranking(
+                pg_materializer._ranking_row(
+                    record,
+                    payload_record=compact,
+                    range_id="all",
+                    view=view,
+                    metric="occurrences",
+                    scope_key="all",
+                    expected_rank=1,
+                )
+            )
+            writer.add_source(
+                source_key,
+                "all",
+                {
+                    "type": "vtuber" if view == "vtubers" else view[:-1],
+                    "key": entity_key,
+                    "songs": songs,
+                },
+                occurrences,
+            )
+
+        artist_occurrences = [
+            {
+                "videoId": "grip-video-a",
+                "song": {
+                    "songKey": "grip-song",
+                    "title": "Grip！",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+            {
+                "videoId": "grip-video-b",
+                "song": {
+                    "songKey": "grip-song",
+                    "title": "Grip!",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+        ]
+        add_base(
+            "artists",
+            "source-artist-grip",
+            "artist-grip",
+            "Grip Artist",
+            artist_occurrences,
+            [{"name": "Grip!", "count": 2}],
+        )
+        for view in ("songs", "vtubers", "videos"):
+            occurrence = {
+                "videoId": f"{view}-grip-video",
+                "song": {
+                    "songKey": f"{view}-grip-song",
+                    "title": f"Other {view} Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }
+            add_base(
+                view,
+                f"source-{view}-grip",
+                f"{view}-grip",
+                f"Other {view}",
+                [occurrence],
+                [{"name": f"Other {view} Song", "count": 1}],
+            )
+
+        try:
+            result = writer.derive_filtered_ranking_scopes(range_id="all", page_size=30)
+            self.assertEqual(result["all/artists/count/visible"], 1)
+            payload_row = writer.connection.execute(
+                "SELECT count,payload_json FROM ranking_rows "
+                "WHERE range_id='all' AND view='artists' AND metric='count' "
+                "AND scope_key='visible' AND detail_key='source-artist-grip'"
+            ).fetchone()
+            self.assertEqual(payload_row[0], 2)
+            self.assertEqual(
+                json.loads(payload_row[1])["songs"],
+                [{"key": "grip-song", "name": "Grip！", "count": 2}],
+            )
         finally:
             writer.abort()
 
@@ -2790,6 +2989,56 @@ class Tests(unittest.TestCase):
         self.assertIn("video_id = ANY",rows.call_args_list[0].args[1])
         self.assertEqual(rows.call_args_list[0].args[2][1],["video-one"])
         self.assertIn("coalesce(o.range_id, '')",rows.call_args_list[1].args[1])
+
+    def test_unscoped_overlay_video_lookup_uses_separate_bounded_cap(self):
+        video={"revision_id":"overlay","video_id":"video-one","video_title":"Video",
+               "channel_name":"Fixture","channel_id":"UCfixture","channel_handle":"@fixture",
+               "channel_url":"","published_at":0,"video_payload_json":{},
+               "video_tombstone":False,"partial_range_reset":False,"partial_range_id":""}
+        occurrence={"revision_id":"overlay","video_id":"video-one","occurrence_id":"occ-one",
+                    "position":0,"range_id":"all","song_key":"song","seconds":1,"title":"Song",
+                    "artist":"Artist","source_id":"source","raw_hash":"raw",
+                    "source_system":"fixture","occurrence_payload_json":{}}
+        with patch.object(pg_adapter,"_rows",side_effect=[[video],[occurrence]]) as rows:
+            selected=pg_adapter._overlay_candidate_rows(object(),("overlay",),range_id="all")
+        self.assertEqual(len(selected),1)
+        self.assertEqual(
+            rows.call_args_list[0].args[2][-1],
+            pg_adapter._MAX_UNSCOPED_OVERLAY_VIDEOS + 1,
+        )
+        with patch.object(pg_adapter,"_MAX_UNSCOPED_OVERLAY_VIDEOS",2), \
+             patch.object(pg_adapter,"_rows",return_value=[video,dict(video),dict(video)]):
+            with self.assertRaisesRegex(
+                pg_adapter.PostgresAdapterError,
+                "overlay candidate video lookup exceeded bounded cap",
+            ):
+                pg_adapter._overlay_candidate_rows(object(),("overlay",),range_id="all")
+
+    def test_unscoped_accepted_video_reset_lookup_uses_separate_bounded_cap(self):
+        video={"revision_id":"overlay","video_id":"video-one",
+               "video_title":"Video","channel_name":"Fixture",
+               "channel_id":"UCfixture","channel_handle":"@fixture",
+               "channel_url":"","published_at":0,"video_payload_json":{},
+               "tombstone":False,"partial_range_reset":False,
+               "partial_range_id":""}
+        with patch.object(pg_adapter,"_rows",return_value=[video]) as rows:
+            selected=pg_adapter._accepted_video_resets(
+                object(),("overlay",),include_payload=False,
+            )
+        self.assertEqual(list(selected),["video-one"])
+        self.assertEqual(
+            rows.call_args.args[2][-1],
+            pg_adapter._MAX_UNSCOPED_OVERLAY_VIDEOS + 1,
+        )
+        with patch.object(pg_adapter,"_MAX_UNSCOPED_OVERLAY_VIDEOS",2), \
+             patch.object(pg_adapter,"_rows",return_value=[video,dict(video),dict(video)]):
+            with self.assertRaisesRegex(
+                pg_adapter.PostgresAdapterError,
+                "accepted-video reset lookup exceeded bounded video cap",
+            ):
+                pg_adapter._accepted_video_resets(
+                    object(),("overlay",),include_payload=False,
+                )
 
     def test_overlay_candidates_exclude_empty_title_for_every_public_view(self):
         video={"revision_id":"overlay","video_id":"video-one",

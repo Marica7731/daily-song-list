@@ -18,6 +18,7 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import time
+import unicodedata
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
 import pg_adapter as adapter
@@ -47,10 +48,22 @@ MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
+# A read-only progress probe can briefly hold a shared SQLite lock while the
+# private candidate is being written.  The default sqlite3 timeout is only
+# five seconds, which is shorter than a full-table count on this snapshot.
+# Wait long enough for bounded observers to finish, while still failing
+# closed if a lock is genuinely stuck.
+SQLITE_BUSY_TIMEOUT_MS = 120_000
 
 
 def _text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
+
+
+def _canonical_song_name_key(value: Any) -> str:
+    """Compare display names without treating Unicode compatibility variants as new songs."""
+
+    return unicodedata.normalize("NFKC", _text(value))
 
 
 def _meta_value(meta: Mapping[str, Any], *names: str) -> str:
@@ -1599,7 +1612,11 @@ class CanonicalSnapshotWriter:
         os.close(descriptor)
         self.output = output
         self.temp = Path(temp_name)
-        self.connection = sqlite3.connect(self.temp)
+        self.connection = sqlite3.connect(
+            self.temp,
+            timeout=SQLITE_BUSY_TIMEOUT_MS / 1000,
+        )
+        self.connection.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}")
         self.connection.executescript("""
         PRAGMA journal_mode=OFF;
         PRAGMA synchronous=OFF;
@@ -2052,12 +2069,17 @@ class CanonicalSnapshotWriter:
             entity_key: str,
             title: str,
         ) -> tuple[dict[str, str], set[str]]:
-            """Read canonical names from the all-scope card.
+            """Return keyed and unkeyed all-scope canonical display names.
 
-            Song and video cards normally retain a key/name pair.  Artist and
-            VTuber cards intentionally expose a compact name/count list, so
-            retain that name set as a bounded authority for resolving source
-            occurrence title variants that share one canonical key.
+            Source occurrences can contain reviewed title variants which share
+            one canonical key (for example a VTuber version marker or a legacy
+            artist occurrence retaining an older spelling).  The all-scope
+            card is built from the same effective occurrence set.  Song and
+            video cards normally retain a key, while artist/VTuber cards use
+            the public count-list shape (name/count only).  Keep both forms:
+            filtered cards must use the keyed pair when present, or resolve a
+            variant against the authoritative name set instead of treating it
+            as a new identity.
             """
 
             names: dict[str, str] = {}
@@ -2095,7 +2117,11 @@ class CanonicalSnapshotWriter:
                     if not song_key:
                         continue
                     previous = names.get(song_key)
-                    if previous is not None and previous != song_name:
+                    if (
+                        previous is not None
+                        and _canonical_song_name_key(previous)
+                        != _canonical_song_name_key(song_name)
+                    ):
                         raise RuntimeError(
                             "all-scope ranking canonical song name changed: "
                             f"{song_key}"
@@ -2372,18 +2398,25 @@ class CanonicalSnapshotWriter:
                     if existing is not None:
                         existing_state = _text(existing[0])
                         break
-                if existing_state and existing_state != occurrence_song_name:
-                    candidates = {
-                        value for value in (existing_state, occurrence_song_name)
-                        if value in current_base["song_name_values"]
-                    }
-                    if len(candidates) != 1:
-                        raise RuntimeError(
-                            "canonical song name changed inside one source: "
-                            f"{range_id}/{current_source} songKey={song_key} "
-                            f"first={existing_state!r} next={occurrence_song_name!r}"
-                        )
-                    song_name = next(iter(candidates))
+                if existing_state:
+                    if (
+                        _canonical_song_name_key(existing_state)
+                        == _canonical_song_name_key(occurrence_song_name)
+                    ):
+                        song_name = existing_state
+                    else:
+                        authoritative_values = current_base["song_name_values"]
+                        candidates = {
+                            value for value in (existing_state, occurrence_song_name)
+                            if value in authoritative_values
+                        }
+                        if len(candidates) != 1:
+                            raise RuntimeError(
+                                "canonical song name changed inside one source: "
+                                f"{range_id}/{current_source} songKey={song_key} "
+                                f"first={existing_state!r} next={occurrence_song_name!r}"
+                            )
+                        song_name = next(iter(candidates))
             all_count += 1
             all_videos.add(video_id)
             all_songs.add(song_key)
@@ -2417,7 +2450,10 @@ class CanonicalSnapshotWriter:
                 state["count"] += 1
                 state["videos"].add(video_id)
                 song_state = state["songs"].setdefault(song_key, [song_name, 0])
-                if _text(song_state[0]) != song_name:
+                if (
+                    _canonical_song_name_key(song_state[0])
+                    != _canonical_song_name_key(song_name)
+                ):
                     raise RuntimeError(
                         "canonical song name changed inside one source: "
                         f"{range_id}/{current_source} songKey={song_key} "
