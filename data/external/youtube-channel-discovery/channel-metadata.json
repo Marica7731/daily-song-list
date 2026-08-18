@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-17T21:02:41.888Z",
+  "generatedAt": "2026-08-18T00:30:16.998Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-17T21:02:41.888Z",
+    "fetchedAt": "2026-08-18T00:30:16.998Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-17T21:02:41.888Z",
+    "generatedAt": "2026-08-18T00:30:16.998Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1192,
-      "parseableChannels": 1173,
+      "totalChannels": 1193,
+      "parseableChannels": 1174,
       "realAvatar": 649,
-      "thumbnailFallback": 543,
+      "thumbnailFallback": 544,
       "missingDisplayImage": 0,
-      "missingAvatar": 543,
+      "missingAvatar": 544,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 667,
-      "skipped_collected_evidence": 709
+      "skipped_collected_evidence": 710
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 690,
+      "batch_limit_reached": 691,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@akimu_botan",
+        "channelId": "UCnYPN9wz4Gke21MNlJHvvyw",
+        "displayName": "秋舞 ぼたん / Akimu Botan",
+        "sourceUrl": "https://www.youtube.com/@akimu_botan",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@mele_dream",
         "channelId": "UCHDteTHrF5wmI9nQYuAgcpw",
@@ -11842,13 +11849,6 @@
         "channelId": "UC1ucgoC_sGww_Euu5iMqpQw",
         "displayName": "凛々咲 / Ririsya",
         "sourceUrl": "https://www.youtube.com/@RirisyaMusic",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Nagi_Kamiitsuki",
-        "channelId": "UChBFDLeY7cNh0pllsEAx2Vw",
-        "displayName": "神光斎 凪Kamiitsuki Nagi",
-        "sourceUrl": "https://www.youtube.com/@Nagi_Kamiitsuki",
         "reason": "batch_limit_reached"
       }
     ]
