@@ -1133,10 +1133,9 @@ def _canonicalize_vtuber_source_payload(
         # can carry an occurrence wrapper whose own nested ``song`` owns the
         # title.  Read through the established source-field traversal instead
         # of mistaking that legacy wrapper for a title-less authority row.
-        title, key = _vtuber_canonical_song_identity(
-            _source_occurrence_field(occurrence, "title")
-        )
-        if not title:
+        raw_title = _source_occurrence_field(occurrence, "title")
+        title, key = _vtuber_canonical_song_identity(raw_title)
+        if not raw_title:
             source_key = _text(
                 result.get("sourceKey")
                 or result.get("record", {}).get("sourceDetailKey")
@@ -1152,8 +1151,10 @@ def _canonicalize_vtuber_source_payload(
             )
         if not key:
             # Match the runtime ranking builder: a non-empty, symbol-only
-            # title (for example `+male-sign`) remains a valid occurrence but
-            # has no work-title key and therefore does not increase songCount.
+            # title (for example `+male-sign` or an emoji-only title whose
+            # normalized display title is empty) remains a valid occurrence
+            # but has no work-title key and therefore does not increase
+            # songCount.
             unkeyed_occurrences += 1
             continue
         entry = counts.setdefault(key, {"key": key, "name": title, "count": 0})
