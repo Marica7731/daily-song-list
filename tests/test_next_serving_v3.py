@@ -1340,6 +1340,27 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["record"]["songCount"],0)
         self.assertEqual(result["record"]["songs"],[])
 
+    def test_vtuber_emoji_only_title_counts_occurrence_without_song_key(self):
+        records=({
+            "video":{"videoId":"1IFO9Ol3q04"},
+            "occurrences":({
+                "videoId":"1IFO9Ol3q04","rangeId":"all",
+                "song":{"title":"💙🌷","artist":"未記載"},
+            },),
+        },)
+        payload={
+            "schemaVersion":1,"found":True,"sourceKey":"4aeb337b6762836f",
+            "totalOccurrenceCount":1,
+            "record":{"type":"vtuber","count":1,"songCount":1},
+        }
+        result=pg_adapter._canonicalize_vtuber_source_payload(
+            payload,records,{"range":"all"},
+        )
+        self.assertEqual(result["totalOccurrenceCount"],1)
+        self.assertEqual(result["totalSongCount"],0)
+        self.assertEqual(result["record"]["songCount"],0)
+        self.assertEqual(result["record"]["songs"],[])
+
     def test_selected_full_reset_projects_physical_7d_to_all_once(self):
         reset={"video-one":{"video_id":"video-one"}}
         all_row={"video_id":"video-one","occurrence_id":"same","range_id":"all",
