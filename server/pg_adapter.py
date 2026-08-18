@@ -2491,7 +2491,18 @@ def _overlay_candidate_rows(
     video_params: list[Any] = [list(revision_ids)]
     if scoped_video_ids is not None:
         video_params.append(scoped_video_ids)
-    video_params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
+    # The unscoped ranking path reads the complete overlay video identity set
+    # before reducing it to one row per video.  Its row bound is deliberately
+    # separate from the 50k affected-scope guard: the current production
+    # lineage has 50,178 video rows but only 2,192 distinct videos.  Keep a
+    # finite fail-closed ceiling while allowing that complete bounded set to
+    # be hydrated; exact/channel scopes retain the tighter affected bound.
+    video_limit = (
+        _MAX_AFFECTED_RUNTIME_OCCURRENCES
+        if targeted
+        else _MAX_UNSCOPED_OVERLAY_VIDEOS
+    )
+    video_params.append(video_limit + 1)
     video_rows = _rows(
         connection,
         f"""
@@ -2509,7 +2520,7 @@ def _overlay_candidate_rows(
         """,
         video_params,
     )
-    if len(video_rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+    if len(video_rows) > video_limit:
         raise PostgresAdapterError("overlay candidate video lookup exceeded bounded cap")
     video_rows.sort(key=lambda row: (
         priority.get(_text(row.get("revision_id")), len(priority)),
@@ -5487,6 +5498,10 @@ def _apply_runtime_change_previews(
 
 
 _MAX_AFFECTED_RUNTIME_OCCURRENCES = 50000
+# The unscoped overlay lineage can contain more video-row history than the
+# affected-scope bound.  Keep this finite and fail closed if a future lineage
+# exceeds the bounded hydration budget.
+_MAX_UNSCOPED_OVERLAY_VIDEOS = 100000
 _MAX_UNSCOPED_OVERLAY_OCCURRENCES = 250000
 _AFFECTED_RECONCILIATION_BATCH_SIZE = 10000
 _MAX_AFFECTED_RECONCILIATION_OCCURRENCES = 5000000
