@@ -2839,7 +2839,17 @@ def _accepted_video_resets(
           )
         """
         params.extend((scope, list(scoped_parent_video_ids or ())))
-    params.append(_MAX_AFFECTED_RUNTIME_OCCURRENCES + 1)
+    # The unscoped snapshot path must inspect the complete accepted overlay
+    # lineage.  Production currently has 50,178 migration_video_rows across
+    # 200 revisions, so the targeted 50,000 cap is intentionally retained for
+    # channel/exact-video requests while the unscoped path uses the separate
+    # bounded headroom used by _overlay_candidate_rows.
+    video_limit = (
+        _MAX_UNSCOPED_OVERLAY_VIDEOS
+        if scope is None and exact_video_scope is None
+        else _MAX_AFFECTED_RUNTIME_OCCURRENCES
+    )
+    params.append(video_limit + 1)
     rows = _rows(
         connection,
         f"""
@@ -2856,7 +2866,7 @@ def _accepted_video_resets(
         """,
         params,
     )
-    if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+    if len(rows) > video_limit:
         raise PostgresAdapterError(
             "accepted-video reset lookup exceeded bounded video cap"
         )

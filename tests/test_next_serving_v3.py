@@ -2781,6 +2781,32 @@ class Tests(unittest.TestCase):
             ):
                 pg_adapter._overlay_candidate_rows(object(),("overlay",),range_id="all")
 
+    def test_unscoped_accepted_video_reset_lookup_uses_separate_bounded_cap(self):
+        video={"revision_id":"overlay","video_id":"video-one",
+               "video_title":"Video","channel_name":"Fixture",
+               "channel_id":"UCfixture","channel_handle":"@fixture",
+               "channel_url":"","published_at":0,"video_payload_json":{},
+               "tombstone":False,"partial_range_reset":False,
+               "partial_range_id":""}
+        with patch.object(pg_adapter,"_rows",return_value=[video]) as rows:
+            selected=pg_adapter._accepted_video_resets(
+                object(),("overlay",),include_payload=False,
+            )
+        self.assertEqual(list(selected),["video-one"])
+        self.assertEqual(
+            rows.call_args.args[2][-1],
+            pg_adapter._MAX_UNSCOPED_OVERLAY_VIDEOS + 1,
+        )
+        with patch.object(pg_adapter,"_MAX_UNSCOPED_OVERLAY_VIDEOS",2), \
+             patch.object(pg_adapter,"_rows",return_value=[video,dict(video),dict(video)]):
+            with self.assertRaisesRegex(
+                pg_adapter.PostgresAdapterError,
+                "accepted-video reset lookup exceeded bounded video cap",
+            ):
+                pg_adapter._accepted_video_resets(
+                    object(),("overlay",),include_payload=False,
+                )
+
     def test_overlay_candidates_exclude_empty_title_for_every_public_view(self):
         video={"revision_id":"overlay","video_id":"video-one",
                "video_title":"Video","channel_name":"Fixture",
