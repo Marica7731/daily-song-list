@@ -47,12 +47,6 @@ MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
-# A read-only progress probe can briefly hold a shared SQLite lock while the
-# private candidate is being written.  The default sqlite3 timeout is only
-# five seconds, which is shorter than a full-table count on this snapshot.
-# Wait long enough for bounded observers to finish, while still failing
-# closed if a lock is genuinely stuck.
-SQLITE_BUSY_TIMEOUT_MS = 120_000
 
 
 def _text(value: Any) -> str:
@@ -1605,11 +1599,7 @@ class CanonicalSnapshotWriter:
         os.close(descriptor)
         self.output = output
         self.temp = Path(temp_name)
-        self.connection = sqlite3.connect(
-            self.temp,
-            timeout=SQLITE_BUSY_TIMEOUT_MS / 1000,
-        )
-        self.connection.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}")
+        self.connection = sqlite3.connect(self.temp)
         self.connection.executescript("""
         PRAGMA journal_mode=OFF;
         PRAGMA synchronous=OFF;
@@ -2055,6 +2045,67 @@ class CanonicalSnapshotWriter:
                 )
             ]
 
+        def authoritative_song_names(
+            payload: Mapping[str, Any],
+            *,
+            view: str,
+            entity_key: str,
+            title: str,
+        ) -> tuple[dict[str, str], set[str]]:
+            """Read canonical names from the all-scope card.
+
+            Song and video cards normally retain a key/name pair.  Artist and
+            VTuber cards intentionally expose a compact name/count list, so
+            retain that name set as a bounded authority for resolving source
+            occurrence title variants that share one canonical key.
+            """
+
+            names: dict[str, str] = {}
+            values: set[str] = set()
+            raw_songs = payload.get("songs")
+            if isinstance(raw_songs, list):
+                for raw_song in raw_songs:
+                    if not isinstance(raw_song, Mapping):
+                        raise RuntimeError(
+                            "all-scope ranking canonical song entry is invalid"
+                        )
+                    nested_song = raw_song.get("song")
+                    nested_song = (
+                        nested_song if isinstance(nested_song, Mapping) else {}
+                    )
+                    song_key = _text(
+                        raw_song.get("key")
+                        or raw_song.get("songKey")
+                        or nested_song.get("key")
+                        or nested_song.get("songKey")
+                    )
+                    song_name = _text(
+                        raw_song.get("name")
+                        or raw_song.get("title")
+                        or raw_song.get("workTitle")
+                        or nested_song.get("name")
+                        or nested_song.get("title")
+                        or nested_song.get("workTitle")
+                    )
+                    if not song_name:
+                        raise RuntimeError(
+                            "all-scope ranking canonical song identity is incomplete"
+                        )
+                    values.add(song_name)
+                    if not song_key:
+                        continue
+                    previous = names.get(song_key)
+                    if previous is not None and previous != song_name:
+                        raise RuntimeError(
+                            "all-scope ranking canonical song name changed: "
+                            f"{song_key}"
+                        )
+                    names[song_key] = song_name
+            if view == "songs" and entity_key and title:
+                names.setdefault(entity_key, title)
+                values.add(title)
+            return names, values
+
         def new_scope_state(
             base: Mapping[str, Any],
         ) -> dict[str, Any]:
@@ -2283,6 +2334,15 @@ class CanonicalSnapshotWriter:
                     "timestamp_count": int(row[9] or 0),
                     "payload": parse_payload(row[10], "all-scope ranking"),
                 }
+                (
+                    current_base["song_names"],
+                    current_base["song_name_values"],
+                ) = authoritative_song_names(
+                    current_base["payload"],
+                    view=current_base["view"],
+                    entity_key=current_base["entity_key"],
+                    title=current_base["title"],
+                )
                 states = {
                     scope_key: new_scope_state(current_base)
                     for scope_key in filtered_scopes
@@ -2298,11 +2358,32 @@ class CanonicalSnapshotWriter:
                 )
             video_id = _text(row[12])
             song_key = _text(row[22])
-            song_name = _text(row[23])
-            if not video_id or not song_key or not song_name:
+            occurrence_song_name = _text(row[23])
+            if not video_id or not song_key or not occurrence_song_name:
                 raise RuntimeError(
                     f"source occurrence identity is incomplete: {range_id}/{source_key}"
                 )
+            song_name = _text(current_base["song_names"].get(song_key))
+            if not song_name:
+                song_name = occurrence_song_name
+                existing_state = None
+                for scope_key in filtered_scopes:
+                    existing = states.get(scope_key, {}).get("songs", {}).get(song_key)
+                    if existing is not None:
+                        existing_state = _text(existing[0])
+                        break
+                if existing_state and existing_state != occurrence_song_name:
+                    candidates = {
+                        value for value in (existing_state, occurrence_song_name)
+                        if value in current_base["song_name_values"]
+                    }
+                    if len(candidates) != 1:
+                        raise RuntimeError(
+                            "canonical song name changed inside one source: "
+                            f"{range_id}/{current_source} songKey={song_key} "
+                            f"first={existing_state!r} next={occurrence_song_name!r}"
+                        )
+                    song_name = next(iter(candidates))
             all_count += 1
             all_videos.add(video_id)
             all_songs.add(song_key)
@@ -2337,7 +2418,11 @@ class CanonicalSnapshotWriter:
                 state["videos"].add(video_id)
                 song_state = state["songs"].setdefault(song_key, [song_name, 0])
                 if _text(song_state[0]) != song_name:
-                    raise RuntimeError("canonical song name changed inside one source")
+                    raise RuntimeError(
+                        "canonical song name changed inside one source: "
+                        f"{range_id}/{current_source} songKey={song_key} "
+                        f"first={_text(song_state[0])!r} next={song_name!r}"
+                    )
                 song_state[1] = int(song_state[1]) + 1
                 if artist_name:
                     state["artists"][artist_name] = (
