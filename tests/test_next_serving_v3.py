@@ -2107,6 +2107,48 @@ class Tests(unittest.TestCase):
         self.assertEqual((writer.cache_drop_attempts,writer.cache_drop_count),(1,1))
         writer.abort()
 
+    def test_snapshot_writer_waits_for_short_read_only_probe_lock(self):
+        target=self.temp/"busy-timeout.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        reader=None
+        thread=None
+        try:
+            record={
+                "rank":1,"key":"entity","sourceDetailKey":"source",
+                "title":"Song","artist":"Artist","name":"Song",
+                "count":1,"songCount":1,"videoCount":1,"timestampCount":1,
+            }
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=record,range_id="all",view="songs",
+                metric="occurrences",scope_key="all",expected_rank=1,
+            ))
+            self.assertEqual(
+                writer.connection.execute("PRAGMA busy_timeout").fetchone()[0],
+                pg_materializer.SQLITE_BUSY_TIMEOUT_MS,
+            )
+            reader=sqlite3.connect(writer.temp,timeout=1,check_same_thread=False)
+            reader.execute("BEGIN")
+            reader.execute("SELECT count(*) FROM ranking_rows").fetchone()
+            def release_reader():
+                time.sleep(0.05)
+                reader.commit()
+                reader.close()
+            thread=threading.Thread(target=release_reader)
+            thread.start()
+            with patch.object(pg_materializer,"SQLITE_CHECKPOINT_ROWS",1):
+                writer._record_writes(1)
+            thread.join(timeout=2)
+            self.assertFalse(thread.is_alive())
+        finally:
+            if thread is not None and thread.is_alive():
+                thread.join(timeout=2)
+            if reader is not None:
+                try:
+                    reader.close()
+                except sqlite3.Error:
+                    pass
+            writer.abort()
+
     def test_snapshot_source_search_update_uses_exact_lookup_index(self):
         target=self.temp/"source-lookup.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
