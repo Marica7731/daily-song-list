@@ -2621,6 +2621,132 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
+    def test_snapshot_writer_reconciles_vtuber_song_count_to_source_identity(self):
+        target = self.temp / "derived-vtuber-song-count.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        static_root = self.temp / "static-rankings"
+        writer.static_ranking_root = static_root
+
+        def add_base(view, source_key, entity_key, name, occurrences, song_count):
+            record = {
+                "rank": 1,
+                "key": entity_key,
+                "sourceDetailKey": source_key,
+                "title": name if view in {"songs", "videos"} else "",
+                "name": name,
+                "artist": "Fixture Artist",
+                "count": len(occurrences),
+                "songCount": song_count,
+                "videoCount": len({item["videoId"] for item in occurrences}),
+                "timestampCount": len(occurrences),
+                "occurrences": occurrences,
+            }
+            compact = pg_adapter.compact_ranking_payloads([record], view)[0]
+            for metric in ("occurrences", "songs", "videos"):
+                writer.add_ranking(
+                    pg_materializer._ranking_row(
+                        record,
+                        payload_record=compact,
+                        range_id="all",
+                        view=view,
+                        metric=metric,
+                        scope_key="all",
+                        expected_rank=1,
+                    )
+                )
+            writer.add_source(
+                source_key,
+                "all",
+                {"type": "vtuber" if view == "vtubers" else view[:-1],
+                 "key": entity_key, "name": name},
+                occurrences,
+            )
+
+        duplicate_occurrences = [
+            {
+                "videoId": "vtuber-duplicate-video",
+                "song": {
+                    "title": "Shared Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+            {
+                "videoId": "vtuber-duplicate-video",
+                "song": {
+                    "title": "Shared Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+        ]
+        add_base(
+            "vtubers", "source-vtuber-stale", "channel-stale", "Fixture VTuber",
+            duplicate_occurrences, 2,
+        )
+        for view in ("songs", "artists", "videos"):
+            occurrence = [{
+                "videoId": f"{view}-identity-video",
+                "song": {
+                    "songKey": f"{view}-identity-song",
+                    "title": f"{view} Identity Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }]
+            add_base(
+                view,
+                f"source-{view}-identity",
+                f"{view}-identity",
+                f"{view} Identity",
+                occurrence,
+                1,
+            )
+
+        for metric_name in ("occurrences", "songs", "videos"):
+            page = static_root / "all" / "vtubers" / metric_name / "page-0001.json"
+            page.parent.mkdir(parents=True, exist_ok=True)
+            page.write_text(
+                json.dumps({
+                    "rangeId": "all",
+                    "view": "vtubers",
+                    "metric": metric_name,
+                    "page": 1,
+                    "totalSongCount": 2,
+                    "records": [{
+                        "rank": 1,
+                        "key": "channel-stale",
+                        "sourceDetailKey": "source-vtuber-stale",
+                        "songCount": 2,
+                    }],
+                }, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        try:
+            result = writer.derive_filtered_ranking_scopes(
+                range_id="all", page_size=30,
+            )
+            self.assertEqual(result["all/vtubers/count/visible"], 1)
+            rows = writer.connection.execute(
+                "SELECT metric,song_count,payload_json FROM ranking_rows "
+                "WHERE range_id='all' AND view='vtubers' AND scope_key='all' "
+                "AND detail_key='source-vtuber-stale' ORDER BY metric"
+            ).fetchall()
+            self.assertEqual([(row[0], row[1]) for row in rows], [
+                ("count", 1), ("songs", 1), ("videos", 1),
+            ])
+            self.assertTrue(all(json.loads(row[2])["songCount"] == 1 for row in rows))
+            for metric_name in ("occurrences", "songs", "videos"):
+                page = static_root / "all" / "vtubers" / metric_name / "page-0001.json"
+                payload = json.loads(page.read_text(encoding="utf-8"))
+                self.assertEqual(payload["totalSongCount"], 1)
+                self.assertEqual(payload["records"][0]["songCount"], 1)
+        finally:
+            writer.abort()
+
     def test_legacy_count_cards_recover_canonical_song_counts_once(self):
         song=pg_materializer._complete_ranking_metric_scalars(
             {"key":"song-key","count":5,"songCount":0,"videoCount":4,
