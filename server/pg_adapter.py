@@ -1134,22 +1134,23 @@ def _canonicalize_vtuber_source_payload(
         # title.  Read through the established source-field traversal instead
         # of mistaking that legacy wrapper for a title-less authority row.
         raw_title = _source_occurrence_field(occurrence, "title")
+        video_id = _source_occurrence_field(occurrence, "videoId")
         title, key = _vtuber_canonical_song_identity(raw_title)
-        if not raw_title:
+        if not video_id:
             source_key = _text(
                 result.get("sourceKey")
                 or result.get("record", {}).get("sourceDetailKey")
             )
             raise PostgresAdapterError(
-                "VTuber source occurrence is missing canonical song identity: "
+                "VTuber source occurrence is missing video identity: "
                 f"sourceKey={source_key or '-'} "
-                f"videoId={_source_occurrence_field(occurrence, 'videoId') or '-'} "
+                f"videoId={video_id or '-'} "
                 f"occurrenceId={_source_occurrence_field(occurrence, 'occurrenceId') or '-'} "
                 f"sourceSystem={_source_occurrence_field(occurrence, 'sourceSystem') or '-'} "
                 f"sourceId={_source_occurrence_field(occurrence, 'sourceId') or '-'} "
                 f"songKey={_source_occurrence_field(occurrence, 'songKey') or '-'}"
             )
-        if not key:
+        if not raw_title or not key:
             # Match the runtime ranking builder: a non-empty, symbol-only
             # title (for example `+male-sign` or an emoji-only title whose
             # normalized display title is empty) remains a valid occurrence
@@ -1240,8 +1241,15 @@ def _apply_persisted_vtuber_song_delta(
         nonlocal unkeyed_count
         song = item.get("song") if isinstance(item.get("song"), Mapping) else item
         title, key = _vtuber_canonical_song_identity(song.get("title"))
+        if not _source_occurrence_field(item, "videoId"):
+            raise PostgresAdapterError("VTuber source delta lacks video identity")
         if not _text(song.get("title")):
-            raise PostgresAdapterError("VTuber source delta lacks canonical song identity")
+            unkeyed_count += delta
+            if unkeyed_count < 0:
+                raise PostgresAdapterError(
+                    "VTuber source unkeyed song delta became negative"
+                )
+            return
         if not key:
             unkeyed_count += delta
             if unkeyed_count < 0:
