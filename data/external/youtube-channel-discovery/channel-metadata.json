@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-19T16:43:03.124Z",
+  "generatedAt": "2026-08-19T22:14:50.620Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-19T16:43:03.124Z",
+    "fetchedAt": "2026-08-19T22:14:50.620Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-19T16:43:03.124Z",
+    "generatedAt": "2026-08-19T22:14:50.620Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11667,15 +11667,57 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1135,
-      "already_cached": 250
+      "skipped_collected_evidence": 1359,
+      "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1116,
+      "batch_limit_reached": 1340,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@muzuchannel",
+        "channelId": "UCBY1b_TPZx3rA0F1KJnXkNQ",
+        "displayName": "MUZU‐むずちゃんねる‐【Vtuber】",
+        "sourceUrl": "https://www.youtube.com/channel/UCBY1b_TPZx3rA0F1KJnXkNQ",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hajime_alc9",
+        "channelId": "UCeKkP16XdaalU0Xn6il_mhw",
+        "displayName": "飲酒じめさん【hajime】",
+        "sourceUrl": "https://www.youtube.com/@hajime_alc9",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E3%83%95%E3%82%A1%E3%83%8B%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96",
+        "channelId": "UCuKWoiJuEwpFtvt8CeRlIwg",
+        "displayName": "ファニのアーカイブ",
+        "sourceUrl": "https://www.youtube.com/@%E3%83%95%E3%82%A1%E3%83%8B%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@aroma_ongaku",
+        "channelId": "UCO4blswUnk1SHD1VmFXzB0A",
+        "displayName": "Aromaの音楽",
+        "sourceUrl": "https://www.youtube.com/@aroma_ongaku",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@yoiyume_fuwamu",
+        "channelId": "UCHRBDXLCWxNQ9AhZlk9VZLg",
+        "displayName": "宵夢 ふわむ【Fuwamu Ch.】",
+        "sourceUrl": "https://www.youtube.com/@yoiyume_fuwamu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Berrych0623",
+        "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
+        "displayName": "汐音ベリーちゃん Berry Ch",
+        "sourceUrl": "https://www.youtube.com/@Berrych0623",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Cetro.Timaeus",
         "channelId": "UCOBsuL1u08iXAHTKJmsoMzw",
@@ -11733,6 +11775,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@neru_utano",
+        "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
+        "displayName": "歌野ねる / Utano neru",
+        "sourceUrl": "https://www.youtube.com/@neru_utano",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@SHIRASESHIRAKAWA",
         "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
         "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
@@ -11782,13 +11831,6 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@Berrych0623",
-        "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
-        "displayName": "汐音ベリーちゃん Berry Ch",
-        "sourceUrl": "https://www.youtube.com/@Berrych0623",
-        "reason": "batch_limit_reached"
-      },
-      {
         "handle": "/@hanasakusumire",
         "channelId": "UCSBEnELOnKNtkjENIko0Q8A",
         "displayName": "花咲すみれch ‐hanasaku sumire ch‐",
@@ -11807,48 +11849,6 @@
         "channelId": "UC3xQCiEPSkco54WhuiDcngw",
         "displayName": "YOSHIKA⁂Ch.",
         "sourceUrl": "https://www.youtube.com/@YOSHIKA-Ch",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shairu.ch_0801",
-        "channelId": "UCe_8qM8Wk4cU5oD3WO07gZg",
-        "displayName": "Shairu.chしゃいる",
-        "sourceUrl": "https://www.youtube.com/@Shairu.ch_0801",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Kazagiri_Ayato",
-        "channelId": "UC8RF_xNedCKX4EFaQQcDU7Q",
-        "displayName": "風切アヤト / Ayato Ch.",
-        "sourceUrl": "https://www.youtube.com/@Kazagiri_Ayato",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MunMosh",
-        "channelId": "UC7cZJOAJZD1W4aOfqnRgWiA",
-        "displayName": "むんもっしゅ",
-        "sourceUrl": "https://www.youtube.com/@MunMosh",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@onigayaten0512",
-        "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
-        "displayName": "鬼ヶ谷 テン / Onigaya Ten",
-        "sourceUrl": "https://www.youtube.com/@onigayaten0512",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Hizuki_Yui_",
-        "channelId": "UCuk7vapXKckSw6yCGGDspDg",
-        "displayName": "緋月ゆい / Hizuki Yui",
-        "sourceUrl": "https://www.youtube.com/@Hizuki_Yui_",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@suiu_shino",
-        "channelId": "UCrPzeqsIo-_W95TXuExqckw",
-        "displayName": "翠雨 しの",
-        "sourceUrl": "https://www.youtube.com/@suiu_shino",
         "reason": "batch_limit_reached"
       }
     ]
