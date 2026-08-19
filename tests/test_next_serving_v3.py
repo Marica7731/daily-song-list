@@ -2621,6 +2621,115 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
+    def test_snapshot_writer_accepts_case_song_name_variants_within_source(self):
+        target = self.temp / "derived-filtered-case-song-name.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+
+        def add_base(view, source_key, entity_key, name, occurrences, songs):
+            record = {
+                "rank": 1,
+                "key": entity_key,
+                "sourceDetailKey": source_key,
+                "title": name if view in {"songs", "videos"} else "",
+                "name": name,
+                "artist": "Fixture Artist",
+                "count": len(occurrences),
+                "songCount": 1,
+                "videoCount": len({item["videoId"] for item in occurrences}),
+                "timestampCount": len(occurrences),
+                "songs": songs,
+            }
+            compact = pg_adapter.compact_ranking_payloads([record], view)[0]
+            writer.add_ranking(
+                pg_materializer._ranking_row(
+                    record,
+                    payload_record=compact,
+                    range_id="all",
+                    view=view,
+                    metric="occurrences",
+                    scope_key="all",
+                    expected_rank=1,
+                )
+            )
+            writer.add_source(
+                source_key,
+                "all",
+                {
+                    "type": "vtuber" if view == "vtubers" else view[:-1],
+                    "key": entity_key,
+                    "songs": songs,
+                },
+                occurrences,
+            )
+
+        occurrences = [
+            {
+                "videoId": "case-song-video-a",
+                "song": {
+                    "songKey": "case-song-key",
+                    "title": "ready steady go",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+            {
+                "videoId": "case-song-video-b",
+                "song": {
+                    "songKey": "case-song-key",
+                    "title": "READY STEADY GO",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            },
+        ]
+        add_base(
+            "artists",
+            "source-artist-case",
+            "artist-case",
+            "Case Artist",
+            occurrences,
+            [{"name": "ready steady go", "count": 2}],
+        )
+        for view in ("songs", "vtubers", "videos"):
+            occurrence = {
+                "videoId": f"{view}-case-video",
+                "song": {
+                    "songKey": f"{view}-case-key",
+                    "title": f"Other {view} Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }
+            add_base(
+                view,
+                f"source-{view}-case",
+                f"{view}-case",
+                f"Other {view}",
+                [occurrence],
+                [{"name": f"Other {view} Song", "count": 1}],
+            )
+
+        try:
+            result = writer.derive_filtered_ranking_scopes(
+                range_id="all", page_size=30,
+            )
+            self.assertEqual(result["all/artists/count/visible"], 1)
+            row = writer.connection.execute(
+                "SELECT count,payload_json FROM ranking_rows "
+                "WHERE range_id='all' AND view='artists' AND metric='count' "
+                "AND scope_key='visible' AND detail_key='source-artist-case'"
+            ).fetchone()
+            self.assertEqual(row[0], 2)
+            self.assertEqual(
+                json.loads(row[1])["songs"],
+                [{"key": "case-song-key", "name": "ready steady go", "count": 2}],
+            )
+        finally:
+            writer.abort()
+
     def test_snapshot_writer_reconciles_vtuber_song_count_to_source_identity(self):
         target = self.temp / "derived-vtuber-song-count.sqlite"
         writer = pg_materializer.CanonicalSnapshotWriter(target)
