@@ -61,9 +61,9 @@ def _text(value: Any) -> str:
 
 
 def _canonical_song_name_key(value: Any) -> str:
-    """Compare display names without treating Unicode compatibility variants as new songs."""
+    """Compare display names without treating Unicode/case variants as new songs."""
 
-    return unicodedata.normalize("NFKC", _text(value))
+    return unicodedata.normalize("NFKC", _text(value)).casefold()
 
 
 def _meta_value(meta: Mapping[str, Any], *names: str) -> str:
