@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-19T04:54:16.312Z",
+  "generatedAt": "2026-08-19T10:02:10.213Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-19T04:54:16.312Z",
+    "fetchedAt": "2026-08-19T10:02:10.213Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-19T04:54:16.312Z",
+    "generatedAt": "2026-08-19T10:02:10.213Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1197,
-      "parseableChannels": 1178,
+      "totalChannels": 1199,
+      "parseableChannels": 1180,
       "realAvatar": 649,
-      "thumbnailFallback": 548,
+      "thumbnailFallback": 550,
       "missingDisplayImage": 0,
-      "missingAvatar": 548,
+      "missingAvatar": 550,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 542,
-      "skipped_collected_evidence": 839
+      "skipped_collected_evidence": 959,
+      "already_cached": 424
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 820,
+      "batch_limit_reached": 940,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@PurinLalaMode",
+        "channelId": "UCIxiVz8JLYTMXexmLh92S6A",
+        "displayName": "ぷりん・らら・もーど / Purin･Lala･Mode【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@PurinLalaMode",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@SHIRASESHIRAKAWA",
+        "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
+        "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
+        "sourceUrl": "https://www.youtube.com/@SHIRASESHIRAKAWA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@aoisizukuv",
+        "channelId": "UCWNV-ixuEAxaso9rLk5PRFQ",
+        "displayName": "aoi sizuku ch. 葵井詩雫",
+        "sourceUrl": "https://www.youtube.com/@aoisizukuv",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@yomogich.6303",
         "channelId": "UC53iUi6icSME4tFA-bR6Rig",
@@ -11695,6 +11716,13 @@
         "channelId": "UCocnY-kJ7VYVA7SQLP8AHIA",
         "displayName": "時羽あいの",
         "sourceUrl": "https://www.youtube.com/channel/UCocnY-kJ7VYVA7SQLP8AHIA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@YokyuAkeru",
+        "channelId": "UCOuaCgLWUPRwQtnX78Cat5w",
+        "displayName": "宵吸あけル / Yokyu Akeru",
+        "sourceUrl": "https://www.youtube.com/@YokyuAkeru",
         "reason": "batch_limit_reached"
       },
       {
@@ -11782,6 +11810,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@SamayoiSuzu",
+        "channelId": "UCqDN60QQx3GGmfagx1eyIEg",
+        "displayName": "彷徨 鈴【Samayoi Suzu】",
+        "sourceUrl": "https://www.youtube.com/@SamayoiSuzu",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@VanitaScarlet",
         "channelId": "UC2oiISB4UN2rqHBgkvcWKAg",
         "displayName": "ばに団長 -Vanita Scarlet-",
@@ -11789,66 +11824,31 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@YozoraNeko_Ch",
-        "channelId": "UCZLwnUygGO2AZAapuaCj1cA",
-        "displayName": "夜空ねこ / Yozora Neko",
-        "sourceUrl": "https://www.youtube.com/@YozoraNeko_Ch",
+        "handle": "/@RurufuHizuki",
+        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
+        "displayName": "陽月るるふ / Hizuki Rurufu",
+        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
-        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
-        "displayName": "一二美アユ ch / Hifumi Aryu",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "handle": "/@SHUNA_MGS",
+        "channelId": "UCnYrx-hDfnlBVuO8D8L2ByQ",
+        "displayName": "朱名 / SHUNA",
+        "sourceUrl": "https://www.youtube.com/@SHUNA_MGS",
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@CYBILL_ch",
-        "channelId": "UC_eiXiNIBK-GzmM1jiY7OHA",
-        "displayName": "CYBILL",
-        "sourceUrl": "https://www.youtube.com/channel/UC_eiXiNIBK-GzmM1jiY7OHA",
+        "handle": "/@akatsukiluci",
+        "channelId": "UCv0hpsgpGWYdBsotEA3_5fQ",
+        "displayName": "あかつき るき / Akatsuki Luci",
+        "sourceUrl": "https://www.youtube.com/channel/UCv0hpsgpGWYdBsotEA3_5fQ",
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@OHGARUKIch",
-        "channelId": "UCV5fHI5euR7ZC4ZqhYqlwYw",
-        "displayName": "RUKI Ch. 凰牙るき",
-        "sourceUrl": "https://www.youtube.com/@OHGARUKIch",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hanahira__frill",
-        "channelId": "UCHv-JirenvPMNJeFhrhEfxw",
-        "displayName": "花開ふりる / hanahira frill",
-        "sourceUrl": "https://www.youtube.com/@hanahira__frill",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@chiyomi0812",
-        "channelId": "UCyY6YeINiwQoA-FnmdQCkug",
-        "displayName": "ちよみch. 千代浦蝶美 /あおぎり高校",
-        "sourceUrl": "https://www.youtube.com/@chiyomi0812",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@TakanashiKobato",
-        "channelId": "UCbA0mV8uL5-aTb2SeZ-X_cg",
-        "displayName": "小鳥遊こばと / Takanashi Kobato",
-        "sourceUrl": "https://www.youtube.com/@TakanashiKobato",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@shiyumarurun",
-        "channelId": "UC9b76pk9Re-focJF7X5GtKQ",
-        "displayName": "Shiyu Ch. しゆ。",
-        "sourceUrl": "https://www.youtube.com/@shiyumarurun",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@sanapri",
-        "channelId": "UC0D-9mI0XntQUhMdUzqiqJw",
-        "displayName": "鎖那",
-        "sourceUrl": "https://www.youtube.com/@sanapri",
+        "handle": "/@Ratio_Yuires",
+        "channelId": "UCWQGiZK_rAMpnl4awiUrqqg",
+        "displayName": "ラティオ・ユィリスOfficial",
+        "sourceUrl": "https://www.youtube.com/@Ratio_Yuires",
         "reason": "batch_limit_reached"
       }
     ]
