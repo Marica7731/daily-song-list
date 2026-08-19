@@ -2512,6 +2512,154 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
+    def test_snapshot_writer_keeps_symbol_only_vtuber_occurrence_without_song_count(self):
+        target = self.temp / "derived-vtuber-symbol-only.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        static_root = self.temp / "static-symbol-only-rankings"
+        writer.static_ranking_root = static_root
+
+        def add_base(view, source_key, entity_key, name, occurrences, song_count):
+            record = {
+                "rank": 1,
+                "key": entity_key,
+                "sourceDetailKey": source_key,
+                "title": name if view in {"songs", "videos"} else "",
+                "name": name,
+                "artist": "Fixture Artist",
+                "count": len(occurrences),
+                "songCount": song_count,
+                "videoCount": len({item["videoId"] for item in occurrences}),
+                "timestampCount": len(occurrences),
+                "occurrences": occurrences,
+            }
+            compact = pg_adapter.compact_ranking_payloads([record], view)[0]
+            for metric in ("occurrences", "songs", "videos"):
+                writer.add_ranking(
+                    pg_materializer._ranking_row(
+                        record,
+                        payload_record=compact,
+                        range_id="all",
+                        view=view,
+                        metric=metric,
+                        scope_key="all",
+                        expected_rank=1,
+                    )
+                )
+            writer.add_source(
+                source_key,
+                "all",
+                {"type": "vtuber" if view == "vtubers" else view[:-1],
+                 "key": entity_key, "name": name},
+                occurrences,
+            )
+
+        symbol_occurrence = [{
+            "videoId": "symbol-only-video",
+            "song": {
+                "title": "💙🌷",
+                "artist": "Fixture Artist",
+                "isNiche": False,
+                "isUnknownArtist": False,
+            },
+        }]
+        add_base(
+            "vtubers", "source-vtuber-symbol", "channel-symbol",
+            "Fixture VTuber", symbol_occurrence, 1,
+        )
+        for view in ("songs", "artists", "videos"):
+            occurrence = [{
+                "videoId": f"{view}-identity-video",
+                "song": {
+                    "songKey": f"{view}-identity-song",
+                    "title": f"{view} Identity Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }]
+            add_base(
+                view, f"source-{view}-identity", f"{view}-identity",
+                f"{view} Identity", occurrence, 1,
+            )
+        for metric_name in ("occurrences", "songs", "videos"):
+            page = static_root / "all" / "vtubers" / metric_name / "page-0001.json"
+            page.parent.mkdir(parents=True, exist_ok=True)
+            page.write_text(
+                json.dumps({
+                    "rangeId": "all", "view": "vtubers", "metric": metric_name,
+                    "page": 1, "totalSongCount": 1,
+                    "records": [{"rank": 1, "key": "channel-symbol",
+                                 "sourceDetailKey": "source-vtuber-symbol",
+                                 "songCount": 1}],
+                }, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        try:
+            result = writer.derive_filtered_ranking_scopes(
+                range_id="all", page_size=30,
+            )
+            self.assertEqual(result["all/vtubers/count/visible"], 1)
+            rows = writer.connection.execute(
+                "SELECT metric,song_count,payload_json FROM ranking_rows "
+                "WHERE range_id='all' AND view='vtubers' AND scope_key='all' "
+                "AND detail_key='source-vtuber-symbol' ORDER BY metric"
+            ).fetchall()
+            self.assertEqual([(row[0], row[1]) for row in rows], [
+                ("count", 0), ("songs", 0), ("videos", 0),
+            ])
+            self.assertTrue(all(json.loads(row[2])["songCount"] == 0 for row in rows))
+            occurrence = writer.connection.execute(
+                "SELECT canonical_song_key,canonical_song_name,payload_json "
+                "FROM source_occurrences WHERE source_key='source-vtuber-symbol'"
+            ).fetchone()
+            self.assertEqual(occurrence[0:2], ("", ""))
+            self.assertEqual(json.loads(occurrence[2])["song"]["title"], "💙🌷")
+            for metric_name in ("occurrences", "songs", "videos"):
+                page = static_root / "all" / "vtubers" / metric_name / "page-0001.json"
+                payload = json.loads(page.read_text(encoding="utf-8"))
+                self.assertEqual(payload["totalSongCount"], 0)
+                self.assertEqual(payload["records"][0]["songCount"], 0)
+        finally:
+            writer.abort()
+
+        titleless_target = self.temp / "derived-vtuber-titleless.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(titleless_target)
+        titleless_occurrence = [{
+            "videoId": "titleless-video",
+            "song": {
+                "title": "",
+                "artist": "Fixture Artist",
+                "isNiche": False,
+                "isUnknownArtist": False,
+            },
+        }]
+        add_base(
+            "vtubers", "source-vtuber-titleless", "channel-titleless",
+            "Titleless VTuber", titleless_occurrence, 0,
+        )
+        for view in ("songs", "artists", "videos"):
+            occurrence = [{
+                "videoId": f"{view}-titleless-identity-video",
+                "song": {
+                    "songKey": f"{view}-titleless-identity-song",
+                    "title": f"{view} Titleless Identity Song",
+                    "artist": "Fixture Artist",
+                    "isNiche": False,
+                    "isUnknownArtist": False,
+                },
+            }]
+            add_base(
+                view, f"source-{view}-titleless", f"{view}-titleless",
+                f"{view} Titleless Identity", occurrence, 1,
+            )
+        try:
+            with self.assertRaisesRegex(
+                RuntimeError, "source occurrence identity is incomplete",
+            ):
+                writer.derive_filtered_ranking_scopes(range_id="all", page_size=30)
+        finally:
+            writer.abort()
+
     def test_snapshot_writer_accepts_nfkc_song_name_variants_within_source(self):
         target = self.temp / "derived-filtered-nfkc-song-name.sqlite"
         writer = pg_materializer.CanonicalSnapshotWriter(target)

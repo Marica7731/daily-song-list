@@ -1849,9 +1849,10 @@ class CanonicalSnapshotWriter:
             return
         if min(
             int(minimum_count or 0),
-            int(minimum_songs or 0),
             int(minimum_videos or 0),
-        ) <= 0:
+        ) <= 0 or (
+            view != "vtubers" and int(minimum_songs or 0) <= 0
+        ):
             raise RuntimeError(
                 "ranking metric membership is not invariant at minCount=1"
             )
@@ -2275,7 +2276,7 @@ class CanonicalSnapshotWriter:
                     and actual[0] == expected[0]
                     and actual[2] == expected[2]
                     and actual[3] == expected[3]
-                    and 0 < actual[1] < expected[1]
+                    and 0 <= actual[1] < expected[1]
                 ):
                     self._reconcile_vtuber_song_count(
                         range_id=range_id,
@@ -2412,10 +2413,28 @@ class CanonicalSnapshotWriter:
             video_id = _text(row[12])
             song_key = _text(row[22])
             occurrence_song_name = _text(row[23])
-            if not video_id or not song_key or not occurrence_song_name:
+            raw_payload = parse_payload(row[25], "source occurrence")
+            raw_song = raw_payload.get("song")
+            raw_song = dict(raw_song) if isinstance(raw_song, Mapping) else {}
+            raw_song_title = _text(
+                raw_song.get("title")
+                or raw_payload.get("songTitle")
+            )
+            unkeyed_vtuber_song = False
+            if _text(current_base.get("view")) == "vtubers" and raw_song_title:
+                _canonical_title, canonical_key = adapter._vtuber_canonical_song_identity(
+                    raw_song_title
+                )
+                unkeyed_vtuber_song = not canonical_key
+            if not video_id or (
+                (not song_key or not occurrence_song_name)
+                and not unkeyed_vtuber_song
+            ):
                 raise RuntimeError(
                     f"source occurrence identity is incomplete: {range_id}/{source_key}"
                 )
+            if unkeyed_vtuber_song:
+                occurrence_song_name = occurrence_song_name or raw_song_title
             song_name = _text(current_base["song_names"].get(song_key))
             if not song_name:
                 song_name = occurrence_song_name
@@ -2446,7 +2465,8 @@ class CanonicalSnapshotWriter:
                         song_name = next(iter(candidates))
             all_count += 1
             all_videos.add(video_id)
-            all_songs.add(song_key)
+            if song_key:
+                all_songs.add(song_key)
             is_niche = bool(row[20])
             is_unknown = bool(row[21])
             matched_scopes = []
@@ -2458,7 +2478,6 @@ class CanonicalSnapshotWriter:
                     matched_scopes.append("visibleNiche")
             if not matched_scopes:
                 continue
-            raw_payload = parse_payload(row[25], "source occurrence")
             preview = adapter._normalize_ranking_preview_occurrence(raw_payload)
             if not _text(adapter._ranking_preview_video_id(preview)):
                 preview["videoId"] = video_id
@@ -2476,17 +2495,18 @@ class CanonicalSnapshotWriter:
                 state = states[scope_key]
                 state["count"] += 1
                 state["videos"].add(video_id)
-                song_state = state["songs"].setdefault(song_key, [song_name, 0])
-                if (
-                    _canonical_song_name_key(song_state[0])
-                    != _canonical_song_name_key(song_name)
-                ):
-                    raise RuntimeError(
-                        "canonical song name changed inside one source: "
-                        f"{range_id}/{current_source} songKey={song_key} "
-                        f"first={_text(song_state[0])!r} next={song_name!r}"
-                    )
-                song_state[1] = int(song_state[1]) + 1
+                if song_key:
+                    song_state = state["songs"].setdefault(song_key, [song_name, 0])
+                    if (
+                        _canonical_song_name_key(song_state[0])
+                        != _canonical_song_name_key(song_name)
+                    ):
+                        raise RuntimeError(
+                            "canonical song name changed inside one source: "
+                            f"{range_id}/{current_source} songKey={song_key} "
+                            f"first={_text(song_state[0])!r} next={_text(song_name)!r}"
+                        )
+                    song_state[1] = int(song_state[1]) + 1
                 if artist_name:
                     state["artists"][artist_name] = (
                         int(state["artists"].get(artist_name, 0)) + 1
@@ -2497,11 +2517,12 @@ class CanonicalSnapshotWriter:
                 ):
                     state["preview_videos"].add(video_id)
                     state["previews"].append(dict(preview))
+                preview_song_key = song_key or f"unkeyed:{video_id}:{row[11]}"
                 if (
-                    song_key not in state["video_song_keys"]
+                    preview_song_key not in state["video_song_keys"]
                     and len(state["video_songs"]) < 3
                 ):
-                    state["video_song_keys"].add(song_key)
+                    state["video_song_keys"].add(preview_song_key)
                     state["video_songs"].append(dict(raw_song))
                 state["search"].add(row[24])
                 for value in (row[14], row[15], row[16], row[17]):
