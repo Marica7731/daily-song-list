@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-19T10:02:10.213Z",
+  "generatedAt": "2026-08-19T16:43:03.124Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-19T10:02:10.213Z",
+    "fetchedAt": "2026-08-19T16:43:03.124Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-19T10:02:10.213Z",
+    "generatedAt": "2026-08-19T16:43:03.124Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,74 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1199,
-      "parseableChannels": 1180,
+      "totalChannels": 1201,
+      "parseableChannels": 1182,
       "realAvatar": 649,
-      "thumbnailFallback": 550,
+      "thumbnailFallback": 552,
       "missingDisplayImage": 0,
-      "missingAvatar": 550,
+      "missingAvatar": 552,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 959,
-      "already_cached": 424
+      "skipped_collected_evidence": 1135,
+      "already_cached": 250
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 940,
+      "batch_limit_reached": 1116,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Cetro.Timaeus",
+        "channelId": "UCOBsuL1u08iXAHTKJmsoMzw",
+        "displayName": "Cetro Ch. 賽特珞",
+        "sourceUrl": "https://www.youtube.com/@Cetro.Timaeus",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@inuzukiren",
+        "channelId": "UCg4x4QmjPx0I1HNQp9h1xvg",
+        "displayName": "Ren.ch戌月れん",
+        "sourceUrl": "https://www.youtube.com/@inuzukiren",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@doremikan1234",
+        "channelId": "UCkgVME8Flwsgxm7u3tK2H_w",
+        "displayName": "どれみかん_ch",
+        "sourceUrl": "https://www.youtube.com/@doremikan1234",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Ratio_Yuires",
+        "channelId": "UCWQGiZK_rAMpnl4awiUrqqg",
+        "displayName": "ラティオ・ユィリスOfficial",
+        "sourceUrl": "https://www.youtube.com/@Ratio_Yuires",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KannagiAnna",
+        "channelId": "UCvuAdWg_I8U9kwVGZ4XLvog",
+        "displayName": "神凪アンナ - Kannagi Anna -",
+        "sourceUrl": "https://www.youtube.com/@KannagiAnna",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@arale_yumemita",
+        "channelId": "UCWfF0DB6m_t2CE3KcOOOX7g",
+        "displayName": "仲町あられ -Nakamachi Arale- / 夢限大みゅーたいぷ",
+        "sourceUrl": "https://www.youtube.com/@arale_yumemita",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RurufuHizuki",
+        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
+        "displayName": "陽月るるふ / Hizuki Rurufu",
+        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@PurinLalaMode",
         "channelId": "UCIxiVz8JLYTMXexmLh92S6A",
@@ -11740,10 +11789,24 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@hanasakusumire",
+        "channelId": "UCSBEnELOnKNtkjENIko0Q8A",
+        "displayName": "花咲すみれch ‐hanasaku sumire ch‐",
+        "sourceUrl": "https://www.youtube.com/@hanasakusumire",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@Hao_RKMusic",
         "channelId": "UCjoGLVLapRciX38bwgDtttw",
         "displayName": "羽緒",
         "sourceUrl": "https://www.youtube.com/channel/UCjoGLVLapRciX38bwgDtttw",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@YOSHIKA-Ch",
+        "channelId": "UC3xQCiEPSkco54WhuiDcngw",
+        "displayName": "YOSHIKA⁂Ch.",
+        "sourceUrl": "https://www.youtube.com/@YOSHIKA-Ch",
         "reason": "batch_limit_reached"
       },
       {
@@ -11754,6 +11817,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@Kazagiri_Ayato",
+        "channelId": "UC8RF_xNedCKX4EFaQQcDU7Q",
+        "displayName": "風切アヤト / Ayato Ch.",
+        "sourceUrl": "https://www.youtube.com/@Kazagiri_Ayato",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@MunMosh",
         "channelId": "UC7cZJOAJZD1W4aOfqnRgWiA",
         "displayName": "むんもっしゅ",
@@ -11761,94 +11831,24 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@onigayaten0512",
+        "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
+        "displayName": "鬼ヶ谷 テン / Onigaya Ten",
+        "sourceUrl": "https://www.youtube.com/@onigayaten0512",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Hizuki_Yui_",
+        "channelId": "UCuk7vapXKckSw6yCGGDspDg",
+        "displayName": "緋月ゆい / Hizuki Yui",
+        "sourceUrl": "https://www.youtube.com/@Hizuki_Yui_",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@suiu_shino",
         "channelId": "UCrPzeqsIo-_W95TXuExqckw",
         "displayName": "翠雨 しの",
         "sourceUrl": "https://www.youtube.com/@suiu_shino",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@MioAlice___",
-        "channelId": "UCuwcoKexLtiyrB4CAqUsGIg",
-        "displayName": "Mio Ch.有栖川澪",
-        "sourceUrl": "https://www.youtube.com/@MioAlice___",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@LECIELMIYAJIMA",
-        "channelId": "UC8nI5_ywGQRJp0ExVt04ypQ",
-        "displayName": "宮島ルシェル / LECIEL MIYAJIMA",
-        "sourceUrl": "https://www.youtube.com/@LECIELMIYAJIMA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E4%B8%89%E3%83%84%E6%98%9F%E3%83%AB%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93",
-        "channelId": "UCwS7xvdBtL3P2V4-Su_fwhA",
-        "displayName": "歌う 三ツ星ルナちゃん",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%89%E3%83%84%E6%98%9F%E3%83%AB%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@akimu_botan",
-        "channelId": "UCnYPN9wz4Gke21MNlJHvvyw",
-        "displayName": "秋舞 ぼたん / Akimu Botan",
-        "sourceUrl": "https://www.youtube.com/@akimu_botan",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
-        "channelId": "UCeG3tgJze9QqUgD2GI33OjQ",
-        "displayName": "一色イズ ⟡ Isshiki_IS",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mele_dream",
-        "channelId": "UCHDteTHrF5wmI9nQYuAgcpw",
-        "displayName": "愛蕾 / Mele",
-        "sourceUrl": "https://www.youtube.com/@mele_dream",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@SamayoiSuzu",
-        "channelId": "UCqDN60QQx3GGmfagx1eyIEg",
-        "displayName": "彷徨 鈴【Samayoi Suzu】",
-        "sourceUrl": "https://www.youtube.com/@SamayoiSuzu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@VanitaScarlet",
-        "channelId": "UC2oiISB4UN2rqHBgkvcWKAg",
-        "displayName": "ばに団長 -Vanita Scarlet-",
-        "sourceUrl": "https://www.youtube.com/@VanitaScarlet",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RurufuHizuki",
-        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
-        "displayName": "陽月るるふ / Hizuki Rurufu",
-        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@SHUNA_MGS",
-        "channelId": "UCnYrx-hDfnlBVuO8D8L2ByQ",
-        "displayName": "朱名 / SHUNA",
-        "sourceUrl": "https://www.youtube.com/@SHUNA_MGS",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@akatsukiluci",
-        "channelId": "UCv0hpsgpGWYdBsotEA3_5fQ",
-        "displayName": "あかつき るき / Akatsuki Luci",
-        "sourceUrl": "https://www.youtube.com/channel/UCv0hpsgpGWYdBsotEA3_5fQ",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Ratio_Yuires",
-        "channelId": "UCWQGiZK_rAMpnl4awiUrqqg",
-        "displayName": "ラティオ・ユィリスOfficial",
-        "sourceUrl": "https://www.youtube.com/@Ratio_Yuires",
         "reason": "batch_limit_reached"
       }
     ]
