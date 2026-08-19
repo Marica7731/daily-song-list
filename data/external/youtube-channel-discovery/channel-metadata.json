@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-18T19:37:09.091Z",
+  "generatedAt": "2026-08-18T23:59:04.314Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-18T19:37:09.091Z",
+    "fetchedAt": "2026-08-18T23:59:04.314Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-18T19:37:09.091Z",
+    "generatedAt": "2026-08-18T23:59:04.314Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1195,
-      "parseableChannels": 1176,
+      "totalChannels": 1196,
+      "parseableChannels": 1177,
       "realAvatar": 649,
-      "thumbnailFallback": 546,
+      "thumbnailFallback": 547,
       "missingDisplayImage": 0,
-      "missingAvatar": 546,
+      "missingAvatar": 547,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 667,
-      "skipped_collected_evidence": 712
+      "skipped_collected_evidence": 718,
+      "already_cached": 662
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 693,
+      "batch_limit_reached": 699,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@yomogich.6303",
+        "channelId": "UC53iUi6icSME4tFA-bR6Rig",
+        "displayName": "Yomogi Ch.歌喰猫よもぎ",
+        "sourceUrl": "https://www.youtube.com/@yomogich.6303",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MioAlice___",
         "channelId": "UCuwcoKexLtiyrB4CAqUsGIg",
@@ -11842,13 +11849,6 @@
         "channelId": "UCjN-1QSJtD6RdRGXTf9L1Sw",
         "displayName": "雪白キャル / Qalu Channel【ミクスト】",
         "sourceUrl": "https://www.youtube.com/@Qalu_Mixstgirls",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@lara_songs",
-        "channelId": "UCWF-3hyAv7TFw8mpS_wHLmw",
-        "displayName": "音羽ララ (Otohane Lara) / シアーミュージックV",
-        "sourceUrl": "https://www.youtube.com/@lara_songs",
         "reason": "batch_limit_reached"
       }
     ]
