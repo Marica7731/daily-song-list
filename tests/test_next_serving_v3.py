@@ -1276,7 +1276,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(record["occurrences"][0]["title"],"Song Title")
         self.assertIsNone(record["occurrences"][0]["artist"])
 
-    def test_vtuber_parent_source_still_fails_closed_on_titleless_authority(self):
+    def test_vtuber_parent_source_keeps_titleless_video_without_song_key(self):
         records=({
             "video":{"videoId":"video-parent"},
             "occurrences":({
@@ -1288,10 +1288,29 @@ class Tests(unittest.TestCase):
             "schemaVersion":1,"found":True,"sourceKey":"source-parent",
             "totalOccurrenceCount":1,"record":{"type":"vtuber"},
         }
+        result=pg_adapter._canonicalize_vtuber_source_payload(
+            payload,records,{"range":"all"},
+        )
+        self.assertEqual(result["totalOccurrenceCount"],1)
+        self.assertEqual(result["totalSongCount"],0)
+        self.assertEqual(result["record"]["songCount"],0)
+        self.assertEqual(result["record"]["songs"],[])
+
+    def test_vtuber_parent_source_fails_closed_without_video_identity(self):
+        records=({
+            "video":{"videoId":""},
+            "occurrences":({
+                "videoId":"","occurrenceId":"occ-parent",
+                "rangeId":"all","title":"","artist":"",
+            },),
+        },)
+        payload={
+            "schemaVersion":1,"found":True,"sourceKey":"source-parent",
+            "totalOccurrenceCount":1,"record":{"type":"vtuber"},
+        }
         with self.assertRaisesRegex(
             pg_adapter.PostgresAdapterError,
-            "missing canonical song identity: sourceKey=source-parent "
-            "videoId=video-parent occurrenceId=occ-parent",
+            "missing video identity: sourceKey=source-parent videoId=-",
         ):
             pg_adapter._canonicalize_vtuber_source_payload(
                 payload,records,{"range":"all"},
@@ -2653,10 +2672,24 @@ class Tests(unittest.TestCase):
                 f"{view} Titleless Identity", occurrence, 1,
             )
         try:
-            with self.assertRaisesRegex(
-                RuntimeError, "source occurrence identity is incomplete",
-            ):
-                writer.derive_filtered_ranking_scopes(range_id="all", page_size=30)
+            result = writer.derive_filtered_ranking_scopes(
+                range_id="all", page_size=30,
+            )
+            self.assertEqual(result["all/vtubers/count/visible"], 1)
+            row = writer.connection.execute(
+                "SELECT song_count FROM ranking_rows "
+                "WHERE range_id='all' AND view='vtubers' "
+                "AND metric='count' AND scope_key='all' "
+                "AND detail_key='source-vtuber-titleless'"
+            ).fetchone()
+            self.assertEqual(row[0], 0)
+            occurrence = writer.connection.execute(
+                "SELECT canonical_song_key,canonical_song_name,payload_json "
+                "FROM source_occurrences "
+                "WHERE source_key='source-vtuber-titleless'"
+            ).fetchone()
+            self.assertEqual(occurrence[0:2], ("", ""))
+            self.assertEqual(json.loads(occurrence[2])["song"]["title"], "")
         finally:
             writer.abort()
 

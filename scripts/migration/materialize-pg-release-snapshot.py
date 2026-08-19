@@ -2421,19 +2421,29 @@ class CanonicalSnapshotWriter:
                 or raw_payload.get("songTitle")
             )
             unkeyed_vtuber_song = False
-            if _text(current_base.get("view")) == "vtubers" and raw_song_title:
-                _canonical_title, canonical_key = adapter._vtuber_canonical_song_identity(
-                    raw_song_title
+            titleless_vtuber_video = False
+            if _text(current_base.get("view")) == "vtubers":
+                if raw_song_title:
+                    _canonical_title, canonical_key = adapter._vtuber_canonical_song_identity(
+                        raw_song_title
+                    )
+                    unkeyed_vtuber_song = not canonical_key
+                else:
+                    titleless_vtuber_video = bool(
+                        video_id and not song_key and not occurrence_song_name
+                    )
+            if not occurrence_song_name and song_key:
+                occurrence_song_name = _text(
+                    current_base["song_names"].get(song_key)
                 )
-                unkeyed_vtuber_song = not canonical_key
             if not video_id or (
                 (not song_key or not occurrence_song_name)
-                and not unkeyed_vtuber_song
+                and not (unkeyed_vtuber_song or titleless_vtuber_video)
             ):
                 raise RuntimeError(
                     f"source occurrence identity is incomplete: {range_id}/{source_key}"
                 )
-            if unkeyed_vtuber_song:
+            if unkeyed_vtuber_song or titleless_vtuber_video:
                 occurrence_song_name = occurrence_song_name or raw_song_title
             song_name = _text(current_base["song_names"].get(song_key))
             if not song_name:
