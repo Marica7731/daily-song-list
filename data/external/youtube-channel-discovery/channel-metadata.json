@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-18T23:59:04.314Z",
+  "generatedAt": "2026-08-19T00:13:50.380Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-18T23:59:04.314Z",
+    "fetchedAt": "2026-08-19T00:13:50.380Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-18T23:59:04.314Z",
+    "generatedAt": "2026-08-19T00:13:50.380Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1196,
-      "parseableChannels": 1177,
+      "totalChannels": 1197,
+      "parseableChannels": 1178,
       "realAvatar": 649,
-      "thumbnailFallback": 547,
+      "thumbnailFallback": 548,
       "missingDisplayImage": 0,
-      "missingAvatar": 547,
+      "missingAvatar": 548,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 718,
+      "skipped_collected_evidence": 719,
       "already_cached": 662
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 699,
+      "batch_limit_reached": 700,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11681,6 +11681,13 @@
         "channelId": "UC53iUi6icSME4tFA-bR6Rig",
         "displayName": "Yomogi Ch.歌喰猫よもぎ",
         "sourceUrl": "https://www.youtube.com/@yomogich.6303",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E8%9D%B6%E7%BE%BD%E3%83%98%E3%83%AC%E3%83%8A",
+        "channelId": "UChxErvpRO-qLsCrAid3Qnfw",
+        "displayName": "蝶羽 ヘレナ / ageha helena",
+        "sourceUrl": "https://www.youtube.com/@%E8%9D%B6%E7%BE%BD%E3%83%98%E3%83%AC%E3%83%8A",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UC9dTH36kl56JWKz7OPpHnYg",
         "displayName": "かなめうと / Kaname Uto",
         "sourceUrl": "https://www.youtube.com/@Kaname_Uto",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Qalu_Mixstgirls",
-        "channelId": "UCjN-1QSJtD6RdRGXTf9L1Sw",
-        "displayName": "雪白キャル / Qalu Channel【ミクスト】",
-        "sourceUrl": "https://www.youtube.com/@Qalu_Mixstgirls",
         "reason": "batch_limit_reached"
       }
     ]
