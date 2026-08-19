@@ -1659,6 +1659,13 @@ class CanonicalSnapshotWriter:
         self.cache_drop_attempts = 0
         self.cache_drop_count = 0
         self.max_source_write_batch = 0
+        # A VTuber ranking card can carry a stale songCount scalar even when
+        # its persisted source occurrence stream has the authoritative
+        # canonical-key cardinality.  Corrections are staged here while the
+        # source stream is scanned and applied to the already-written static
+        # ranking pages after the pass completes.
+        self.static_ranking_root: Path | None = None
+        self.song_count_corrections: dict[tuple[str, str], int] = {}
 
     def _drop_file_cache(self, reason: str) -> None:
         self.cache_drop_attempts += 1
@@ -2262,11 +2269,31 @@ class CanonicalSnapshotWriter:
             )
             actual = (all_count, len(all_songs), len(all_videos), all_count)
             if actual != expected:
-                raise RuntimeError(
-                    "all-scope ranking/source totals differ: "
-                    f"{range_id}/{current_base['view']}/{current_base['source_key']} "
-                    f"ranking={expected} source={actual}"
-                )
+                view = _text(current_base["view"])
+                if (
+                    view == "vtubers"
+                    and actual[0] == expected[0]
+                    and actual[2] == expected[2]
+                    and actual[3] == expected[3]
+                    and 0 < actual[1] < expected[1]
+                ):
+                    self._reconcile_vtuber_song_count(
+                        range_id=range_id,
+                        source_key=_text(current_base["source_key"]),
+                        ranking_song_count=expected[1],
+                        source_song_count=actual[1],
+                    )
+                    current_base["song_count"] = actual[1]
+                    current_payload = dict(current_base["payload"])
+                    current_payload["songCount"] = actual[1]
+                    current_base["payload"] = current_payload
+                    expected = (expected[0], actual[1], expected[2], expected[3])
+                else:
+                    raise RuntimeError(
+                        "all-scope ranking/source totals differ: "
+                        f"{range_id}/{current_base['view']}/{current_base['source_key']} "
+                        f"ranking={expected} source={actual}"
+                    )
             for scope_key in filtered_scopes:
                 state = states[scope_key]
                 count = int(state["count"])
@@ -2487,6 +2514,7 @@ class CanonicalSnapshotWriter:
                 f"all-scope ranking sources have no occurrences: "
                 f"{range_id} expected={expected_sources} actual={len(seen_sources)}"
             )
+        self.rewrite_static_vtuber_song_counts(range_id)
 
         result: dict[str, int] = {}
         candidate_columns = (
@@ -2646,6 +2674,139 @@ class CanonicalSnapshotWriter:
                 flush()
         flush()
         return written
+
+    def _reconcile_vtuber_song_count(
+        self,
+        *,
+        range_id: str,
+        source_key: str,
+        ranking_song_count: int,
+        source_song_count: int,
+    ) -> None:
+        """Align stale VTuber card scalars with persisted source identity.
+
+        The source occurrence stream is authoritative for canonical song
+        membership.  A legacy VTuber card may still report one row per
+        occurrence, so a duplicate canonical key can make its ``songCount``
+        larger than the source's distinct-key count.  Only the bounded,
+        source-backed VTuber case is repaired; any other mismatch remains
+        fail-closed.
+        """
+
+        rows = self.connection.execute(
+            """
+            SELECT metric,rank,payload_json
+            FROM ranking_rows
+            WHERE range_id=? AND view='vtubers' AND scope_key='all'
+              AND detail_key=?
+            ORDER BY metric,rank
+            """,
+            (range_id, source_key),
+        ).fetchall()
+        expected_metrics = {"count", "songs", "videos"}
+        actual_metrics = {_text(row[0]) for row in rows}
+        if len(rows) != len(expected_metrics) or actual_metrics != expected_metrics:
+            raise RuntimeError(
+                "VTuber source song-count reconciliation has incomplete ranking rows: "
+                f"{range_id}/{source_key} metrics={sorted(actual_metrics)}"
+            )
+        for metric, rank, raw_payload in rows:
+            try:
+                payload = json.loads(raw_payload)
+            except (TypeError, json.JSONDecodeError) as exc:
+                raise RuntimeError(
+                    "VTuber source song-count reconciliation payload is invalid: "
+                    f"{range_id}/{source_key}/{metric}/{rank}"
+                ) from exc
+            if not isinstance(payload, dict):
+                raise RuntimeError(
+                    "VTuber source song-count reconciliation payload is not an object: "
+                    f"{range_id}/{source_key}/{metric}/{rank}"
+                )
+            if _integer(payload.get("songCount")) != ranking_song_count:
+                raise RuntimeError(
+                    "VTuber ranking songCount changed across metrics: "
+                    f"{range_id}/{source_key}/{metric}/{rank}"
+                )
+            payload["songCount"] = source_song_count
+            self.connection.execute(
+                """
+                UPDATE ranking_rows
+                SET song_count=?,payload_json=?
+                WHERE range_id=? AND view='vtubers' AND metric=?
+                  AND scope_key='all' AND rank=? AND detail_key=?
+                """,
+                (
+                    source_song_count,
+                    _json_text(payload),
+                    range_id,
+                    metric,
+                    int(rank),
+                    source_key,
+                ),
+            )
+        self._record_writes(len(rows))
+        self.song_count_corrections[(range_id, source_key)] = source_song_count
+        print(
+            "PG_SNAPSHOT_VTUBER_SONG_COUNT_RECONCILE "
+            f"range={range_id} source={source_key} "
+            f"ranking={ranking_song_count} source={source_song_count}",
+            flush=True,
+        )
+
+    def rewrite_static_vtuber_song_counts(self, range_id: str) -> None:
+        """Persist VTuber scalar corrections into already-written page files."""
+
+        root = self.static_ranking_root
+        corrections = {
+            source_key: int(song_count)
+            for (corrected_range, source_key), song_count
+            in self.song_count_corrections.items()
+            if corrected_range == range_id
+        }
+        if root is None or not corrections:
+            return
+        for metric_name, db_metric in (
+            ("occurrences", "count"),
+            ("songs", "songs"),
+            ("videos", "videos"),
+        ):
+            metric_root = root / range_id / "vtubers" / metric_name
+            for path in sorted(metric_root.glob("page-*.json")):
+                try:
+                    payload = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise RuntimeError(
+                        "VTuber static ranking page is invalid during song-count "
+                        f"reconciliation: {path}"
+                    ) from exc
+                records = payload.get("records") if isinstance(payload, dict) else None
+                if not isinstance(records, list):
+                    raise RuntimeError(
+                        "VTuber static ranking page records are invalid during "
+                        f"song-count reconciliation: {path}"
+                    )
+                changed = False
+                for record in records:
+                    if not isinstance(record, dict):
+                        continue
+                    source_key = _text(record.get("sourceDetailKey"))
+                    if source_key not in corrections:
+                        continue
+                    song_count = corrections[source_key]
+                    if _integer(record.get("songCount")) != song_count:
+                        record["songCount"] = song_count
+                        changed = True
+                if not changed:
+                    continue
+                totals = self.ranking_series_totals(
+                    range_id=range_id,
+                    view="vtubers",
+                    metric=db_metric,
+                    scope_key="all",
+                )
+                payload["totalSongCount"] = totals["totalSongCount"]
+                _write_json_file_and_drop_cache(path, payload)
 
     def finish_source(self, state: Mapping[str, Any]) -> int:
         source_key = _text(state["source_key"])
@@ -4074,6 +4235,7 @@ def materialize(
 
         builder = SnapshotPageBuilder(connection)
         writer = CanonicalSnapshotWriter(snapshot_output)
+        writer.static_ranking_root = output_root / "rankings"
         written = 0
         static_page_cache_drop_attempts = 0
         static_page_cache_drop_count = 0
