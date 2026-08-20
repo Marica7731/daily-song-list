@@ -478,7 +478,9 @@ jobs:
           print("MAC_PG_DRIVER_OK", psycopg.__version__, psycopg.pq.__impl__)
           PY
           unset PGPASSWORD DAILY_SONG_POSTGRES_DSN
+          MATERIALIZE_LOG="$MAC_RUN_ROOT/materialize.log"
           env \
+            PYTHONUNBUFFERED=1 \
             PGHOST=127.0.0.1 \
             PGPORT="$LOCAL_PORT" \
             PGDATABASE=song_rank \
@@ -489,7 +491,8 @@ jobs:
               --output "$PAGES_ROOT" \
               --meta-output "$META_FILE" \
               --snapshot-output "$CANONICAL_SNAPSHOT" \
-              --expected-revision "$ACTIVE"
+              --expected-revision "$ACTIVE" \
+              2>&1 | tee "$MATERIALIZE_LOG"
           # PostgreSQL is no longer needed after the one read-only transaction closes.
           # Remove the control socket before the exact run-root regular-file audit.
           ssh -S "$TUNNEL_CONTROL" -O exit "$VPS2_USER@$VPS2_HOST"

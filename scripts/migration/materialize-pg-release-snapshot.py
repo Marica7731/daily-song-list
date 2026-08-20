@@ -3179,22 +3179,9 @@ def _parent_video_ranking_fallback(
     return video_row, tuple(occurrences)
 
 
-def export_unaffected_parent_video_sources(
-    connection: Any,
-    writer: CanonicalSnapshotWriter,
-    *,
-    parent_revision_id: str,
+def _ordered_parent_video_sources(
     sources: Sequence[tuple[str, str]],
-) -> set[str]:
-    """Bulk-export immutable parent video details without per-source SQL.
-
-    Full runtime releases intentionally do not persist video source-detail
-    rows.  The ranking row is the authoritative opaque-key-to-video mapping,
-    while the exact parent video and occurrences provide the detail payload.
-    Overlay-affected videos are excluded by ``SnapshotSourceScope`` and keep
-    using the delta-aware adapter path.
-    """
-
+) -> tuple[tuple[str, str], ...]:
     ordered = tuple(sorted({
         (_text(source_key), _text(video_id))
         for source_key, video_id in sources
@@ -3211,6 +3198,240 @@ def export_unaffected_parent_video_sources(
                 "parent video source mapping changed: "
                 f"video={video_id} expected={expected_key} actual={source_key}"
             )
+    return ordered
+
+
+def _load_parent_video_source_batch(
+    connection: Any,
+    *,
+    parent_revision_id: str,
+    video_ids: Sequence[str],
+) -> tuple[
+    dict[str, dict[str, Any]],
+    dict[str, tuple[dict[str, Any], ...]],
+]:
+    batch_video_ids = sorted({_text(value) for value in video_ids if _text(value)})
+    video_rows = adapter._rows(
+        connection,
+        """
+        SELECT video_id,title,channel_name,channel_id,channel_handle,
+               channel_url,published_timestamp,payload_json
+        FROM runtime_videos
+        WHERE revision_id = %s AND video_id = ANY(%s)
+        ORDER BY video_id
+        LIMIT %s
+        """,
+        [parent_revision_id, batch_video_ids, len(batch_video_ids) + 1],
+    )
+    video_by_id = {
+        _text(row.get("video_id")): dict(row)
+        for row in video_rows
+        if _text(row.get("video_id"))
+    }
+    if len(video_by_id) != len(video_rows):
+        raise RuntimeError("parent video source lookup returned duplicate rows")
+    extra = sorted(set(video_by_id) - set(batch_video_ids))
+    if extra:
+        raise RuntimeError(
+            "parent video source lookup changed: "
+            f"missing=[] extra={extra[:3]}"
+        )
+
+    ranking_fallback_occurrences: dict[
+        str, tuple[dict[str, Any], ...]
+    ] = {}
+    missing_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
+    if missing_video_ids:
+        fallback_rows = adapter._rows(
+            connection,
+            """
+            SELECT detail_key,title,row_count,video_count,timestamp_count,
+                   payload_json
+            FROM runtime_ranking_rows
+            WHERE revision_id = %s AND range_id = 'all'
+              AND view = 'videos' AND metric = 'count'
+              AND scope_key = 'all' AND detail_key = ANY(%s)
+            ORDER BY detail_key
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                missing_video_ids,
+                len(missing_video_ids) + 1,
+            ],
+        )
+        if len(fallback_rows) > len(missing_video_ids):
+            raise RuntimeError(
+                "parent video ranking fallback exceeded requested scope"
+            )
+        fallback_by_video: dict[str, dict[str, Any]] = {}
+        for row in fallback_rows:
+            video_id = _text(row.get("detail_key"))
+            if video_id not in missing_video_ids or video_id in fallback_by_video:
+                raise RuntimeError(
+                    "parent video ranking fallback changed lookup identity"
+                )
+            fallback_by_video[video_id] = dict(row)
+        unresolved = sorted(set(missing_video_ids) - set(fallback_by_video))
+        if unresolved:
+            raise RuntimeError(
+                "parent video source lookup changed: "
+                f"missing={unresolved[:3]} extra=[]"
+            )
+        for video_id in missing_video_ids:
+            video_row, fallback_occurrences = _parent_video_ranking_fallback(
+                fallback_by_video[video_id],
+                expected_video_id=video_id,
+            )
+            video_by_id[video_id] = video_row
+            ranking_fallback_occurrences[video_id] = fallback_occurrences
+    if set(video_by_id) != set(batch_video_ids):
+        missing = sorted(set(batch_video_ids) - set(video_by_id))
+        extra = sorted(set(video_by_id) - set(batch_video_ids))
+        raise RuntimeError(
+            "parent video source lookup changed: "
+            f"missing={missing[:3]} extra={extra[:3]}"
+        )
+
+    runtime_video_ids = sorted(
+        set(batch_video_ids) - set(ranking_fallback_occurrences)
+    )
+    occurrence_rows = adapter._rows(
+        connection,
+        """
+        SELECT DISTINCT video_id
+        FROM runtime_occurrences
+        WHERE revision_id = %s AND video_id = ANY(%s)
+          AND range_id = ANY(%s)
+        ORDER BY video_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            runtime_video_ids,
+            ["all", ""],
+            len(runtime_video_ids) + 1,
+        ],
+    ) if runtime_video_ids else []
+    occurrence_video_ids = {
+        _text(row.get("video_id"))
+        for row in occurrence_rows
+        if _text(row.get("video_id"))
+    }
+    if len(occurrence_video_ids) != len(occurrence_rows):
+        raise RuntimeError(
+            "parent video occurrence preflight returned duplicate rows"
+        )
+    missing_occurrences = sorted(
+        set(runtime_video_ids) - occurrence_video_ids
+    )
+    extra_occurrences = sorted(
+        occurrence_video_ids - set(runtime_video_ids)
+    )
+    if missing_occurrences or extra_occurrences:
+        raise RuntimeError(
+            "parent video occurrence preflight changed: "
+            f"missing={missing_occurrences[:3]} extra={extra_occurrences[:3]}"
+        )
+    return video_by_id, ranking_fallback_occurrences
+
+
+def preflight_unaffected_parent_video_sources(
+    connection: Any,
+    *,
+    parent_revision_id: str,
+    sources: Sequence[tuple[str, str]],
+) -> set[str]:
+    """Validate direct parent-video fallbacks before the expensive source copy.
+
+    Persisted parent details are handled by the bulk source stream.  Every
+    remaining video source must already have an exact runtime video plus an
+    all-range occurrence, or a complete legacy ranking-only card.  Performing
+    this bounded lookup first turns a multi-hour late failure into a gate just
+    after the ranking/source-scope phase.
+    """
+
+    ordered = _ordered_parent_video_sources(sources)
+    direct_source_keys: set[str] = set()
+    for offset in range(0, len(ordered), PARENT_VIDEO_EXPORT_BATCH):
+        batch = ordered[offset : offset + PARENT_VIDEO_EXPORT_BATCH]
+        batch_source_keys = [source_key for source_key, _ in batch]
+        detail_rows = adapter._rows(
+            connection,
+            """
+            SELECT detail.source_key
+            FROM runtime_source_details AS detail
+            WHERE detail.revision_id = %s AND detail.range_id = 'all'
+              AND detail.source_key = ANY(%s)
+              AND EXISTS (
+                SELECT 1 FROM runtime_source_occurrences AS occurrence
+                WHERE occurrence.revision_id = detail.revision_id
+                  AND occurrence.source_key = detail.source_key
+                  AND occurrence.range_id = detail.range_id
+              )
+            ORDER BY detail.source_key
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                batch_source_keys,
+                len(batch_source_keys) + 1,
+            ],
+        )
+        persisted_keys = {
+            _text(row.get("source_key"))
+            for row in detail_rows
+            if _text(row.get("source_key"))
+        }
+        if len(persisted_keys) != len(detail_rows):
+            raise RuntimeError(
+                "parent video preflight detail lookup changed identity"
+            )
+        escaped = sorted(persisted_keys - set(batch_source_keys))
+        if escaped:
+            raise RuntimeError(
+                "parent video preflight detail escaped scope: "
+                + ", ".join(escaped[:3])
+            )
+        direct_batch = tuple(
+            (source_key, video_id)
+            for source_key, video_id in batch
+            if source_key not in persisted_keys
+        )
+        if direct_batch:
+            _load_parent_video_source_batch(
+                connection,
+                parent_revision_id=parent_revision_id,
+                video_ids=[video_id for _, video_id in direct_batch],
+            )
+            direct_source_keys.update(
+                source_key for source_key, _ in direct_batch
+            )
+    print(
+        "PG_SNAPSHOT_PARENT_VIDEO_PREFLIGHT "
+        f"total={len(ordered)} direct={len(direct_source_keys)}",
+        flush=True,
+    )
+    return direct_source_keys
+
+
+def export_unaffected_parent_video_sources(
+    connection: Any,
+    writer: CanonicalSnapshotWriter,
+    *,
+    parent_revision_id: str,
+    sources: Sequence[tuple[str, str]],
+) -> set[str]:
+    """Bulk-export immutable parent video details without per-source SQL.
+
+    Full runtime releases intentionally do not persist video source-detail
+    rows.  The ranking row is the authoritative opaque-key-to-video mapping,
+    while the exact parent video and occurrences provide the detail payload.
+    Overlay-affected videos are excluded by ``SnapshotSourceScope`` and keep
+    using the delta-aware adapter path.
+    """
+
+    ordered = _ordered_parent_video_sources(sources)
 
     completed: set[str] = set()
     for offset in range(0, len(ordered), PARENT_VIDEO_EXPORT_BATCH):
@@ -3219,84 +3440,13 @@ def export_unaffected_parent_video_sources(
             video_id: source_key for source_key, video_id in batch
         }
         batch_video_ids = sorted(batch_by_video)
-        video_rows = adapter._rows(
-            connection,
-            """
-            SELECT video_id,title,channel_name,channel_id,channel_handle,
-                   channel_url,published_timestamp,payload_json
-            FROM runtime_videos
-            WHERE revision_id = %s AND video_id = ANY(%s)
-            ORDER BY video_id
-            LIMIT %s
-            """,
-            [parent_revision_id, batch_video_ids, len(batch_video_ids) + 1],
-        )
-        video_by_id = {
-            _text(row.get("video_id")): dict(row)
-            for row in video_rows
-            if _text(row.get("video_id"))
-        }
-        if len(video_by_id) != len(video_rows):
-            raise RuntimeError("parent video source lookup returned duplicate rows")
-        extra = sorted(set(video_by_id) - set(batch_video_ids))
-        if extra:
-            raise RuntimeError(
-                "parent video source lookup changed: "
-                f"missing=[] extra={extra[:3]}"
-            )
-        ranking_fallback_occurrences: dict[str, tuple[dict[str, Any], ...]] = {}
-        missing_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
-        if missing_video_ids:
-            fallback_rows = adapter._rows(
+        video_by_id, ranking_fallback_occurrences = (
+            _load_parent_video_source_batch(
                 connection,
-                """
-                SELECT detail_key,title,row_count,video_count,timestamp_count,
-                       payload_json
-                FROM runtime_ranking_rows
-                WHERE revision_id = %s AND range_id = 'all'
-                  AND view = 'videos' AND metric = 'count'
-                  AND scope_key = 'all' AND detail_key = ANY(%s)
-                ORDER BY detail_key
-                LIMIT %s
-                """,
-                [
-                    parent_revision_id,
-                    missing_video_ids,
-                    len(missing_video_ids) + 1,
-                ],
+                parent_revision_id=parent_revision_id,
+                video_ids=batch_video_ids,
             )
-            if len(fallback_rows) > len(missing_video_ids):
-                raise RuntimeError(
-                    "parent video ranking fallback exceeded requested scope"
-                )
-            fallback_by_video: dict[str, dict[str, Any]] = {}
-            for row in fallback_rows:
-                video_id = _text(row.get("detail_key"))
-                if video_id not in missing_video_ids or video_id in fallback_by_video:
-                    raise RuntimeError(
-                        "parent video ranking fallback changed lookup identity"
-                    )
-                fallback_by_video[video_id] = dict(row)
-            unresolved = sorted(set(missing_video_ids) - set(fallback_by_video))
-            if unresolved:
-                raise RuntimeError(
-                    "parent video source lookup changed: "
-                    f"missing={unresolved[:3]} extra=[]"
-                )
-            for video_id in missing_video_ids:
-                video_row, fallback_occurrences = _parent_video_ranking_fallback(
-                    fallback_by_video[video_id],
-                    expected_video_id=video_id,
-                )
-                video_by_id[video_id] = video_row
-                ranking_fallback_occurrences[video_id] = fallback_occurrences
-        if set(video_by_id) != set(batch_video_ids):
-            missing = sorted(set(batch_video_ids) - set(video_by_id))
-            extra = sorted(set(video_by_id) - set(batch_video_ids))
-            raise RuntimeError(
-                "parent video source lookup changed: "
-                f"missing={missing[:3]} extra={extra[:3]}"
-            )
+        )
 
         current_video_id = ""
         current_occurrences: list[dict[str, Any]] = []
@@ -3421,7 +3571,6 @@ def export_unaffected_parent_video_sources(
                 f"complete={len(completed)} total={len(ordered)}",
                 flush=True,
             )
-        video_rows = None
         video_by_id = None
         current_occurrences = []
         gc.collect()
@@ -4751,6 +4900,17 @@ def materialize(
         }
         if source_scope is not None and getattr(builder, "parent", None):
             affected_parent_sources = source_scope.affected_source_keys()
+            unaffected_parent_video_sources = tuple(
+                source_scope.unaffected_parent_video_sources()
+            )
+            preflight_parent_video_keys = (
+                preflight_unaffected_parent_video_sources(
+                    connection,
+                    parent_revision_id=builder.parent[0],
+                    sources=unaffected_parent_video_sources,
+                )
+                if unaffected_parent_video_sources else set()
+            )
             exported_parent_sources = export_unaffected_parent_sources(
                 connection,
                 writer,
@@ -4765,9 +4925,18 @@ def materialize(
             bulk_exported_source_keys["all"].update(exported_parent_sources)
             parent_video_sources = tuple(
                 item
-                for item in source_scope.unaffected_parent_video_sources()
+                for item in unaffected_parent_video_sources
                 if item[0] not in bulk_exported_source_keys["all"]
             )
+            actual_parent_video_keys = {
+                source_key for source_key, _video_id in parent_video_sources
+            }
+            if actual_parent_video_keys != preflight_parent_video_keys:
+                raise RuntimeError(
+                    "parent video source preflight changed inside snapshot: "
+                    f"expected={len(preflight_parent_video_keys)} "
+                    f"actual={len(actual_parent_video_keys)}"
+                )
             if parent_video_sources:
                 exported_parent_videos = export_unaffected_parent_video_sources(
                     connection,
@@ -4784,6 +4953,8 @@ def materialize(
                 )
             affected_parent_sources = ()
             exported_parent_sources = set()
+            unaffected_parent_video_sources = ()
+            preflight_parent_video_keys = set()
             parent_video_sources = ()
         _release_materializer_memory(writer, builder, phase="source-scope")
         scoped_payload_loader = getattr(builder, "source_payload", None)
