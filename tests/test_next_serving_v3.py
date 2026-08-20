@@ -4140,6 +4140,38 @@ class Tests(unittest.TestCase):
         self.assertEqual(fallback[video_id][0]["videoId"],video_id)
         self.assertEqual(fallback[video_id][0]["song"]["title"],"Song A")
 
+    def test_snapshot_affected_preflight_accepts_overlay_only_video_without_parent_rows(self):
+        video_id="7F4cyWU3k9A"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_videos((video_id,))
+            scope.add_pairs(((source_key,video_id),))
+            scope.add_targets((("videos",video_id,source_key),))
+
+            def rows(_connection,statement,params):
+                if "runtime_source_details" in statement:
+                    self.assertEqual(params[1],[source_key])
+                    return []
+                if "FROM runtime_videos" in statement:
+                    self.assertEqual(params[1],[video_id])
+                    return []
+                if "SELECT DISTINCT video_id" in statement:
+                    self.assertEqual(params[1],[video_id])
+                    return []
+                if "FROM runtime_ranking_rows" in statement:
+                    self.assertEqual(params[1],[video_id])
+                    return []
+                self.fail(statement)
+
+            with patch.object(pg_adapter,"_rows",side_effect=rows):
+                direct=pg_materializer.preflight_affected_parent_sources(
+                    object(),parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(source_key,),
+                )
+        self.assertEqual(direct,{source_key})
+
     def test_snapshot_bulk_streams_unaffected_persisted_parent_sources(self):
         keep_key="source-keep"
         affected_key="source-affected"

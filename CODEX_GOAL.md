@@ -237,3 +237,11 @@
 - `pending`：detail run `30269601971` 使用 candidate run `30264934836` / artifact `urameshi-7d-30264934836-1` 启动，但 `runnerName=null`、5 分钟无 step/checkpoint，已取消；runner 随后 `online/busy=false`。没有 detail artifact、status-audit、accepted increment、curation 或 PG activate。
 - `done`：线上只读复核未受影响：`https://ytb-song-rank.culua.com/healthz` HTTP 200，`/api/meta` HTTP 200，Noa source detail page 1/2 HTTP 200；当前 active revision 仍为 `accepted_30261533343_1`，counts health 为 videos=45605、songs=45560、occurrences=598032。Noa 仍是已确认回归样本，不扩大为全局封面损坏。
 - `pending/external`：需要 Mac self-hosted runner 的 job assignment/runner service 恢复后，才可继续单一 detail；候选复用 patch 已准备好，禁止用 cancelled run 或 candidate-only manifest 冒充 7D 完成。
+
+### 2026-08-21 06:40 Asia/Taipei — WDC 发布失败账本与当前状态
+
+- active goal 仍为 next-serving-v3 正确性、性能优化、WDC 发布与公网验收；未发布前不得标记完成。
+- WDC run `32419778429`（head `84ccfa913ddc097743257e4a7621eaa39b9241d8`）在 affected-source 全量前置门禁失败：`_load_parent_video_source_batch` 对 overlay-only video `7F4cyWU3k9A` 已允许父数据完全缺失，却仍索引不存在的 `fallback_by_video` 行而抛 `KeyError`。cleanup 已成功，Mac exact root/relay 均不存在，WDC 仍是旧 release。
+- 最小修复：只跳过已被 `allow_absent` 明确认定为 overlay-only 的 video；父视频或父 occurrence 仅单边缺失时继续 fail closed，不放宽其他来源身份契约。
+- 回归测试 `test_snapshot_affected_preflight_accepts_overlay_only_video_without_parent_rows` 使用生产失败 videoId，要求前置门禁输出 `overlayOnlyVideos=1` 且不制造父 fallback。当前 targeted `1/1`、next-serving `190/190`、relay `5/5` 均通过。
+- 旧 head 的重复 WDC run `32422157316` 已精确取消；cleanup success，Mac exact root absent、VPS2 relay inactive、WDC 未写入。下一步为 commit/push/PR/CI/squash merge；等待合法 core/accepted writer 完成后，仅调度唯一 latest-head WDC，并继续完整公网验收。
