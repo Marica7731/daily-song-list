@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T06:25:56.628Z",
+  "generatedAt": "2026-08-20T07:05:10.094Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T06:25:56.628Z",
+    "fetchedAt": "2026-08-20T07:05:10.094Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T06:25:56.628Z",
+    "generatedAt": "2026-08-20T07:05:10.094Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@tokusari_kukuri",
+        "channelId": "UC0gbkS-xhcWWXfWugQUSRuw",
+        "displayName": "kukuri ch * 戸鎖 くくり *",
+        "sourceUrl": "https://www.youtube.com/@tokusari_kukuri",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@anyakumori",
         "channelId": "UCHnbtVLZYGuKkGh6iFxxTpw",
@@ -11842,13 +11849,6 @@
         "channelId": "UChxErvpRO-qLsCrAid3Qnfw",
         "displayName": "蝶羽 ヘレナ / ageha helena",
         "sourceUrl": "https://www.youtube.com/@%E8%9D%B6%E7%BE%BD%E3%83%98%E3%83%AC%E3%83%8A",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hanasakusumire",
-        "channelId": "UCSBEnELOnKNtkjENIko0Q8A",
-        "displayName": "花咲すみれch ‐hanasaku sumire ch‐",
-        "sourceUrl": "https://www.youtube.com/@hanasakusumire",
         "reason": "batch_limit_reached"
       }
     ]
