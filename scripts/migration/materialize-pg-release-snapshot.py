@@ -3242,65 +3242,8 @@ def _load_parent_video_source_batch(
             f"missing=[] extra={extra[:3]}"
         )
 
-    ranking_fallback_occurrences: dict[
-        str, tuple[dict[str, Any], ...]
-    ] = {}
-    missing_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
-    if missing_video_ids:
-        fallback_rows = adapter._rows(
-            connection,
-            """
-            SELECT detail_key,title,row_count,video_count,timestamp_count,
-                   payload_json
-            FROM runtime_ranking_rows
-            WHERE revision_id = %s AND range_id = 'all'
-              AND view = 'videos' AND metric = 'count'
-              AND scope_key = 'all' AND detail_key = ANY(%s)
-            ORDER BY detail_key
-            LIMIT %s
-            """,
-            [
-                parent_revision_id,
-                missing_video_ids,
-                len(missing_video_ids) + 1,
-            ],
-        )
-        if len(fallback_rows) > len(missing_video_ids):
-            raise RuntimeError(
-                "parent video ranking fallback exceeded requested scope"
-            )
-        fallback_by_video: dict[str, dict[str, Any]] = {}
-        for row in fallback_rows:
-            video_id = _text(row.get("detail_key"))
-            if video_id not in missing_video_ids or video_id in fallback_by_video:
-                raise RuntimeError(
-                    "parent video ranking fallback changed lookup identity"
-                )
-            fallback_by_video[video_id] = dict(row)
-        unresolved = sorted(set(missing_video_ids) - set(fallback_by_video))
-        if unresolved:
-            raise RuntimeError(
-                "parent video source lookup changed: "
-                f"missing={unresolved[:3]} extra=[]"
-            )
-        for video_id in missing_video_ids:
-            video_row, fallback_occurrences = _parent_video_ranking_fallback(
-                fallback_by_video[video_id],
-                expected_video_id=video_id,
-            )
-            video_by_id[video_id] = video_row
-            ranking_fallback_occurrences[video_id] = fallback_occurrences
-    if set(video_by_id) != set(batch_video_ids):
-        missing = sorted(set(batch_video_ids) - set(video_by_id))
-        extra = sorted(set(video_by_id) - set(batch_video_ids))
-        raise RuntimeError(
-            "parent video source lookup changed: "
-            f"missing={missing[:3]} extra={extra[:3]}"
-        )
-
-    runtime_video_ids = sorted(
-        set(batch_video_ids) - set(ranking_fallback_occurrences)
-    )
+    missing_runtime_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
+    runtime_video_ids = sorted(set(batch_video_ids) & set(video_by_id))
     occurrence_rows = adapter._rows(
         connection,
         """
@@ -3327,12 +3270,90 @@ def _load_parent_video_source_batch(
         raise RuntimeError(
             "parent video occurrence preflight returned duplicate rows"
         )
-    missing_occurrences = sorted(
+    extra_occurrences = sorted(occurrence_video_ids - set(runtime_video_ids))
+    if extra_occurrences:
+        raise RuntimeError(
+            "parent video occurrence preflight changed: "
+            f"missing=[] extra={extra_occurrences[:3]}"
+        )
+    missing_runtime_occurrence_ids = sorted(
         set(runtime_video_ids) - occurrence_video_ids
     )
-    extra_occurrences = sorted(
-        occurrence_video_ids - set(runtime_video_ids)
+
+    # Some legacy full-runtime rows retain the scalar video but omit its
+    # all-range runtime occurrence.  Treat that shape exactly like a missing
+    # runtime video: the complete all/videos card is authoritative only when
+    # its public identity, counts, and songs array pass the strict fallback
+    # contract below.
+    ranking_fallback_occurrences: dict[
+        str, tuple[dict[str, Any], ...]
+    ] = {}
+    fallback_video_ids = sorted(
+        set(missing_runtime_video_ids) | set(missing_runtime_occurrence_ids)
     )
+    if fallback_video_ids:
+        fallback_rows = adapter._rows(
+            connection,
+            """
+            SELECT detail_key,title,row_count,video_count,timestamp_count,
+                   payload_json
+            FROM runtime_ranking_rows
+            WHERE revision_id = %s AND range_id = 'all'
+              AND view = 'videos' AND metric = 'count'
+              AND scope_key = 'all' AND detail_key = ANY(%s)
+            ORDER BY detail_key
+            LIMIT %s
+            """,
+            [
+                parent_revision_id,
+                fallback_video_ids,
+                len(fallback_video_ids) + 1,
+            ],
+        )
+        if len(fallback_rows) > len(fallback_video_ids):
+            raise RuntimeError(
+                "parent video ranking fallback exceeded requested scope"
+            )
+        fallback_by_video: dict[str, dict[str, Any]] = {}
+        for row in fallback_rows:
+            video_id = _text(row.get("detail_key"))
+            if video_id not in fallback_video_ids or video_id in fallback_by_video:
+                raise RuntimeError(
+                    "parent video ranking fallback changed lookup identity"
+                )
+            fallback_by_video[video_id] = dict(row)
+        unresolved = sorted(set(fallback_video_ids) - set(fallback_by_video))
+        unresolved_videos = sorted(set(unresolved) & set(missing_runtime_video_ids))
+        if unresolved_videos:
+            raise RuntimeError(
+                "parent video source lookup changed: "
+                f"missing={unresolved_videos[:3]} extra=[]"
+            )
+        unresolved_occurrences = sorted(
+            set(unresolved) & set(missing_runtime_occurrence_ids)
+        )
+        if unresolved_occurrences:
+            raise RuntimeError(
+                "parent video occurrence preflight changed: "
+                f"missing={unresolved_occurrences[:3]} extra=[]"
+            )
+        for video_id in fallback_video_ids:
+            video_row, fallback_occurrences = _parent_video_ranking_fallback(
+                fallback_by_video[video_id],
+                expected_video_id=video_id,
+            )
+            video_by_id[video_id] = video_row
+            ranking_fallback_occurrences[video_id] = fallback_occurrences
+    if set(video_by_id) != set(batch_video_ids):
+        missing = sorted(set(batch_video_ids) - set(video_by_id))
+        extra = sorted(set(video_by_id) - set(batch_video_ids))
+        raise RuntimeError(
+            "parent video source lookup changed: "
+            f"missing={missing[:3]} extra={extra[:3]}"
+        )
+    covered_video_ids = occurrence_video_ids | set(ranking_fallback_occurrences)
+    missing_occurrences = sorted(set(batch_video_ids) - covered_video_ids)
+    extra_occurrences = sorted(covered_video_ids - set(batch_video_ids))
     if missing_occurrences or extra_occurrences:
         raise RuntimeError(
             "parent video occurrence preflight changed: "
