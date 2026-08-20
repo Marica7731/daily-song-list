@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T11:30:32.637Z",
+  "generatedAt": "2026-08-20T11:59:00.493Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T11:30:32.637Z",
+    "fetchedAt": "2026-08-20T11:59:00.493Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T11:30:32.637Z",
+    "generatedAt": "2026-08-20T11:59:00.493Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1201,
-      "parseableChannels": 1182,
+      "totalChannels": 1202,
+      "parseableChannels": 1183,
       "realAvatar": 649,
-      "thumbnailFallback": 552,
+      "thumbnailFallback": 553,
       "missingDisplayImage": 0,
-      "missingAvatar": 552,
+      "missingAvatar": 553,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1359,
+      "skipped_collected_evidence": 1360,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1340,
+      "batch_limit_reached": 1341,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Mcca25",
+        "channelId": "UCs8hDV9LLPSd-1SgdlMNm5Q",
+        "displayName": "MelanchoDori",
+        "sourceUrl": "https://www.youtube.com/@Mcca25",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@cuffy-games",
         "channelId": "UCQQdOoK-lTBhXzZIukAX1sw",
@@ -11842,13 +11849,6 @@
         "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
         "displayName": "歌野ねる / Utano neru",
         "sourceUrl": "https://www.youtube.com/@neru_utano",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@SHIRASESHIRAKAWA",
-        "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
-        "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
-        "sourceUrl": "https://www.youtube.com/@SHIRASESHIRAKAWA",
         "reason": "batch_limit_reached"
       }
     ]
