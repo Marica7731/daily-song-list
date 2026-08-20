@@ -813,6 +813,23 @@ def _project_generic_overlay_video_records(
             continue
         payload = dict(record)
         video_id = _text(payload.get("videoId") or payload.get("key"))
+        if re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id) and range_id:
+            expected_source_key = _stable_key(
+                "source-video", range_id, video_id,
+            )
+            explicit_source_key = _text(payload.get("sourceDetailKey"))
+            if (
+                explicit_source_key
+                and explicit_source_key != expected_source_key
+            ):
+                raise PostgresAdapterError(
+                    "video card sourceDetailKey conflicts with its canonical "
+                    f"range/video identity: {range_id}/{video_id}"
+                )
+            payload["sourceDetailKey"] = expected_source_key
+            payload["sourceDetailPath"] = (
+                f"/api/sources/{expected_source_key}"
+            )
         metadata = metadata_by_video.get(video_id)
         if metadata:
             for name in public_fields:
@@ -821,10 +838,6 @@ def _project_generic_overlay_video_records(
             payload["videoId"] = video_id
             if _text(metadata.get("title")) and "name" in payload:
                 payload["name"] = metadata["title"]
-            if range_id:
-                payload["sourceDetailKey"] = _stable_key(
-                    "source-video", range_id, video_id,
-                )
             if not isinstance(payload.get("songs"), list) or not payload["songs"]:
                 payload["songs"] = copy.deepcopy(songs_by_video.get(video_id, []))
         projected.append(payload)
