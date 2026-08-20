@@ -3772,7 +3772,7 @@ class Tests(unittest.TestCase):
         video_id="parent-ranking-only"
         source_key=pg_adapter._stable_key("source-video","all",video_id)
         ranking_payload={
-            "type":"video","key":video_id,"detailKey":video_id,
+            "type":"video","key":video_id,"detailKey":f"all:{video_id}",
             "videoId":video_id,"title":"Ranking-only Video",
             "channelName":"Fixture","channelId":"UCfixture",
             "channelHandle":"/@fixture",
@@ -3795,6 +3795,8 @@ class Tests(unittest.TestCase):
                 self.values.append((key,range_id,dict(record),list(occurrences)))
         writer=Writer()
         def rows(_connection,statement,params):
+            if "FROM runtime_source_details AS detail" in statement:
+                return []
             if "FROM runtime_videos" in statement:
                 return []
             if "FROM runtime_ranking_rows" in statement:
@@ -3805,10 +3807,15 @@ class Tests(unittest.TestCase):
             self.fail(statement)
         with patch.object(pg_adapter,"_rows",side_effect=rows), \
              patch.object(pg_materializer,"_stream_pg_rows",return_value=iter(())):
+            preflight=pg_materializer.preflight_unaffected_parent_video_sources(
+                object(),parent_revision_id="parent",
+                sources=((source_key,video_id),),
+            )
             completed=pg_materializer.export_unaffected_parent_video_sources(
                 object(),writer,parent_revision_id="parent",
                 sources=((source_key,video_id),),
             )
+        self.assertEqual(preflight,{source_key})
         self.assertEqual(completed,{source_key})
         self.assertEqual(len(writer.values),1)
         key,range_id,record,occurrences=writer.values[0]
@@ -3821,6 +3828,26 @@ class Tests(unittest.TestCase):
             ],
             [("Song A",11),("Song B",22)],
         )
+
+    def test_snapshot_ranking_only_parent_video_rejects_wrong_range_identity(self):
+        video_id="parent-ranking-wrong-range"
+        ranking_row={
+            "detail_key":video_id,"title":"Wrong Range",
+            "row_count":1,"video_count":1,"timestamp_count":1,
+            "payload_json":{
+                "type":"video","key":video_id,
+                "detailKey":f"7d:{video_id}","videoId":video_id,
+                "title":"Wrong Range","count":1,
+                "timestampCount":1,"videoCount":1,
+                "songs":[{"title":"Song","artist":"Artist"}],
+            },
+        }
+        with self.assertRaisesRegex(
+            RuntimeError,"parent video ranking fallback changed identity",
+        ):
+            pg_materializer._parent_video_ranking_fallback(
+                ranking_row,expected_video_id=video_id,
+            )
 
     def test_snapshot_ranking_only_parent_video_count_mismatch_fails_closed(self):
         video_id="parent-ranking-mismatch"

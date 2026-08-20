@@ -3102,13 +3102,18 @@ def _parent_video_ranking_fallback(
             "parent video ranking fallback changed identity: "
             f"expected={expected_video_id} actual={video_id or '<empty>'}"
         )
-    for name in ("detailKey", "key"):
-        value = _text(payload.get(name))
-        if value and value != video_id:
-            raise RuntimeError(
-                "parent video ranking fallback changed identity: "
-                f"video={video_id} field={name} actual={value}"
-            )
+    detail_key = _text(payload.get("detailKey"))
+    if detail_key and detail_key not in {video_id, f"all:{video_id}"}:
+        raise RuntimeError(
+            "parent video ranking fallback changed identity: "
+            f"video={video_id} field=detailKey actual={detail_key}"
+        )
+    public_key = _text(payload.get("key"))
+    if public_key and public_key != video_id:
+        raise RuntimeError(
+            "parent video ranking fallback changed identity: "
+            f"video={video_id} field=key actual={public_key}"
+        )
     if _text(payload.get("type")) not in {"", "video"}:
         raise RuntimeError(
             f"parent video ranking fallback changed type: {video_id}"
