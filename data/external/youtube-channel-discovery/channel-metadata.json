@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T08:45:15.876Z",
+  "generatedAt": "2026-08-20T09:02:58.716Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T08:45:15.876Z",
+    "fetchedAt": "2026-08-20T09:02:58.716Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T08:45:15.876Z",
+    "generatedAt": "2026-08-20T09:02:58.716Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@hide_ch",
+        "channelId": "UCqIigA_sooj8-efCTyqpWxA",
+        "displayName": "ひでチャンネル",
+        "sourceUrl": "https://www.youtube.com/@hide_ch",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@nemupipi",
         "channelId": "UC19jIOPqzpV05aqiGpceXYg",
@@ -11842,13 +11849,6 @@
         "channelId": "UC53iUi6icSME4tFA-bR6Rig",
         "displayName": "Yomogi Ch.歌喰猫よもぎ",
         "sourceUrl": "https://www.youtube.com/@yomogich.6303",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Mikage_RKMusic",
-        "channelId": "UC2daHxnuJJBM5NWci1RRkeA",
-        "displayName": "深影",
-        "sourceUrl": "https://www.youtube.com/channel/UC2daHxnuJJBM5NWci1RRkeA",
         "reason": "batch_limit_reached"
       }
     ]
