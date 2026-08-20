@@ -3799,6 +3799,8 @@ class Tests(unittest.TestCase):
                 return []
             if "FROM runtime_videos" in statement:
                 return []
+            if "SELECT DISTINCT video_id" in statement:
+                return []
             if "FROM runtime_ranking_rows" in statement:
                 self.assertEqual(params[1],[video_id])
                 self.assertIn("metric = 'count'",statement)
@@ -3849,6 +3851,87 @@ class Tests(unittest.TestCase):
                 ranking_row,expected_video_id=video_id,
             )
 
+    def test_snapshot_affected_ranking_only_video_applies_drop_to_parent_card(self):
+        video_id="LLe0YJODmFM"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        ranking_row={
+            "detail_key":video_id,"title":"Ranking-only affected video",
+            "row_count":2,"video_count":1,"timestamp_count":2,
+            "payload_json":{
+                "type":"video","key":video_id,
+                "detailKey":f"all:{video_id}","videoId":video_id,
+                "title":"Ranking-only affected video",
+                "channelName":"Fixture","channelId":"UCfixture",
+                "count":2,"timestampCount":2,"videoCount":1,
+                "songs":[
+                    {"title":"Keep Song","artist":"Artist","seconds":11},
+                    {"title":"Drop Song","artist":"Artist","seconds":22},
+                ],
+            },
+        }
+        runtime_drop={
+            "entityType":"runtime_occurrences","videoId":video_id,
+            "occurrenceId":"legacy-drop-id","rangeId":"all",
+            "title":"Drop Song","artist":"Artist","seconds":22,
+        }
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_videos((video_id,))
+            scope.add_pairs(((source_key,video_id),))
+            scope.add_targets((("videos",video_id,source_key),))
+
+            def rows(_connection,statement,params):
+                if "runtime_source_details" in statement:return []
+                if "count(*) AS occurrence_count" in statement:return []
+                if "FROM runtime_videos" in statement:
+                    self.assertEqual(params[1],[video_id]);return []
+                if "SELECT DISTINCT video_id" in statement:
+                    self.assertEqual(params[1],[video_id]);return []
+                if "FROM runtime_ranking_rows" in statement:
+                    self.assertEqual(params[1],[video_id]);return [ranking_row]
+                self.fail(statement)
+
+            def stream(_connection,label,_statement,_params,**_kwargs):
+                self.assertTrue(label.startswith("affected_direct_sources_"))
+                return iter(())
+
+            class Writer:
+                def __init__(self):self.values=[]
+                def add_source(self,key,range_id,record,occurrences):
+                    self.values.append(
+                        (key,range_id,dict(record),list(occurrences))
+                    )
+
+            writer=Writer()
+            with patch.object(pg_adapter,"_rows",side_effect=rows), \
+                 patch.object(pg_materializer,"_stream_pg_rows",
+                              side_effect=stream), \
+                 patch.object(pg_adapter,"_snapshot_source_overlay_inputs",
+                              return_value=((),{},(runtime_drop,))):
+                preflight=pg_materializer.preflight_affected_parent_sources(
+                    object(),parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(source_key,),
+                )
+                completed=pg_materializer.export_affected_parent_sources(
+                    object(),writer,parent_revision_id="parent",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(source_key,),
+                )
+
+        self.assertEqual(preflight,{source_key})
+        self.assertEqual(completed,{source_key})
+        self.assertEqual(len(writer.values),1)
+        key,range_id,record,occurrences=writer.values[0]
+        self.assertEqual((key,range_id),(source_key,"all"))
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],record["videoCount"]),
+            (1,1,1),
+        )
+        self.assertEqual(
+            [item["song"]["title"] for item in occurrences],["Keep Song"],
+        )
+
     def test_snapshot_ranking_only_parent_video_count_mismatch_fails_closed(self):
         video_id="parent-ranking-mismatch"
         source_key=pg_adapter._stable_key("source-video","all",video_id)
@@ -3867,6 +3950,7 @@ class Tests(unittest.TestCase):
         }
         def rows(_connection,statement,_params):
             if "FROM runtime_videos" in statement:return []
+            if "SELECT DISTINCT video_id" in statement:return []
             if "FROM runtime_ranking_rows" in statement:return [ranking_row]
             self.fail(statement)
         with patch.object(pg_adapter,"_rows",side_effect=rows):
@@ -5571,6 +5655,7 @@ class Tests(unittest.TestCase):
         pages=self.temp/"pg-generic-pages";meta=self.temp/"pg-generic-meta.json"
         canonical=self.temp/"pg-generic-canonical.sqlite"
         connection=FakePgConnection();payload_ranges=[];export_ranges=[];bulk_calls=[]
+        phase_order=[]
         class GenericBuilder(FakeSnapshotPageBuilder):
             def __init__(self,connection):
                 super().__init__(connection)
@@ -5601,6 +5686,7 @@ class Tests(unittest.TestCase):
                 raise AssertionError("generic-all reached per-source export_source")
             return original_export_source(*args,**kwargs)
         def bulk_export(_connection,writer,**kwargs):
+            phase_order.append("affected")
             keys=tuple(sorted(kwargs["source_keys"]));bulk_calls.append(keys)
             for key in keys:
                 first=fake_pg_source(
@@ -5615,6 +5701,12 @@ class Tests(unittest.TestCase):
                 detail.pop("occurrences",None)
                 writer.add_source(key,"all",detail,occurrences)
             return set(keys)
+        def affected_preflight(*_args,**kwargs):
+            phase_order.append("preflight")
+            return set(kwargs["source_keys"])
+        def unaffected_export(*_args,**_kwargs):
+            phase_order.append("unaffected")
+            return set()
         with patch.object(pg_materializer.adapter,"connect_from_env",return_value=connection), \
              patch.object(pg_materializer.adapter,"meta_payload",side_effect=fake_pg_meta), \
              patch.object(pg_materializer.adapter,"source_payload",
@@ -5622,6 +5714,10 @@ class Tests(unittest.TestCase):
              patch.object(pg_materializer,"export_source",side_effect=export_source_spy), \
              patch.object(pg_materializer,"export_affected_parent_sources",
                           side_effect=bulk_export), \
+             patch.object(pg_materializer,"preflight_affected_parent_sources",
+                          side_effect=affected_preflight), \
+             patch.object(pg_materializer,"export_unaffected_parent_sources",
+                          side_effect=unaffected_export), \
              patch.object(pg_materializer,"SnapshotPageBuilder",GenericBuilder):
             result=pg_materializer.materialize(pages,meta,canonical,REV)
         self.assertEqual(export_ranges,["7d"]*4)
@@ -5629,6 +5725,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(set(payload_ranges),{"7d"})
         self.assertEqual(len(bulk_calls),1)
         self.assertEqual(len(bulk_calls[0]),4)
+        self.assertEqual(phase_order,["preflight","affected","unaffected"])
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)
 
