@@ -6876,6 +6876,7 @@ class Tests(unittest.TestCase):
             "ionice",
         ):
             self.assertNotIn(forbidden,workflow)
+        self.assertEqual(workflow.count(".github/workflows/update-core.yml"),2)
         self.assertIn('[[ "$project_root" == "/opt/culua/ytb-song-rank" ]]',workflow)
         self.assertIn('[[ "$releases_root" == "$project_root/releases" ]]',workflow)
         self.assertIn('projected_bytes=$((current_bytes + incoming_bytes))',workflow)
