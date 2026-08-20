@@ -17,12 +17,15 @@
 | `32392989048` | `5a57f2c540baf8a6713e02b6f945155f4ad78c09` | Mac `actions/checkout@v4`，尚未创建 exact run root/relay | self-hosted workspace 复用的 partial-clone `.git` 已达 37GB（pack 30GB）；fetch 子进程在 `git rev-list --exclude-promisor-objects --alternate-refs` 单核 100% 持续约 27 分钟 | 精确取消且确认 Mac root absent、relay inactive、WDC 未写入；WDC workflow 改用独立 `wdc-release-source` sparse checkout，运行前按 owner/realpath 清理，checkout 后设 1GB fail-closed 门禁并新增 workflow contract 回归 |
 | `32393374772` | `5a57f2c540baf8a6713e02b6f945155f4ad78c09` | 合法 core 的 `Checkout controlled core inputs` | 与 WDC 相同的共享 37GB partial-clone；`git rev-list` 持续单核约 100%，阻塞 Mac runner 与后继 WDC | 当前合法 run 不取消；后续 core 改用 owner-marked 独立 `core-update-source`，checkout 后设 5GB fail-closed 门禁并新增 workflow contract 回归 |
 | `32399801694` | `5a8971a3f25b75bf4afab7c04ca9d4ce02eaa2d6` | WDC `ubuntu_gate`，尚未进入 Mac/WDC | `test_core_workflow_uses_bounded_isolated_mac_checkout` 找不到 `.github/workflows/update-core.yml`；WDC 两个 sparse checkout 清单未声明新测试依赖 | 在 Ubuntu gate 与 Mac source 两份稀疏清单同时加入 `update-core.yml`，并断言精确出现两次，避免门禁/实际 checkout 漂移 |
+| `32404690724` | `e8c2f31f7b8ef02900051e1882c857f95df8218a` | WDC 取得 Mac 时 main 已由合法 core 推进到 `61d4d52e` | 旧 event head 只完成 7d 小组合、exact root 约 131MB；继续会发布陈旧 source commit | 已精确取消；cleanup success、Mac root absent、relay inactive、WDC 未写入；仅允许最新 main 唯一发布 |
+| `32406152304` | `61d4d52ecf260894679cf0d0dac6f15efb15b669` | 合法 backfill 的 `Checkout` | 仍复用共享 37GB partial clone；Git 单核约 91%、RSS 约 10GB，重复阻塞 Mac 与最新-head WDC | 当前合法 run 不取消；后续 backfill 改用 owner-marked `backfill-update-source` 精确 sparse checkout，`.git` 设 1GB fail-closed 门禁并新增 workflow contract 回归 |
 
 ### 当前状态与下一步
 
 - `done`：affected-source 全量前置门禁已由 PR #72 合并；WDC 独立 checkout 已由 PR #73 合并到 `9fcbb3cb`，CI `32396801128` success，本地 serving `185/185` 与 relay `5/5` 通过。
 - `done`：PR #74 已把同一隔离和 fail-closed 容量门禁补到 core workflow；core `32393374772` success 并推进 main 到 `54e0a841`。
-- `in_progress`：分支 `codex/fix-wdc-gate-core-contract` 修复 WDC gate 两份 sparse checkout 未携带 core workflow 的快速失败。
+- `done`：PR #75 修复 WDC gate 两份 sparse checkout 未携带 core workflow 的快速失败；core `32405289528` 已验证隔离 `.git` 约 133MB，整条 run 约 16 分钟完成。
+- `in_progress`：分支 `codex/isolate-backfill-checkout` 把同一隔离、owner 与容量门禁补到 backfill workflow；合法旧 run `32406152304` 保持运行、不取消。
 - `pending`：确认合法 core/accepted、Mac writer、VPS2 relay 均空闲后，只调度唯一最新-head `sync-wdc-release.yml force=true`。
 - `pending`：成功后立即验证 health/meta/release、一致的四类视图、artists、31 distinct-video 跨页与多 occurrence、搜索/两个筛选、真实浏览器详情、同协议延迟、10 分钟稳定性和精确残留清理。
 

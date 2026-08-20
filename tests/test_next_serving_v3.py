@@ -6786,6 +6786,35 @@ class Tests(unittest.TestCase):
             workflow.index("Configure Mac toolchain"),
         )
 
+    def test_backfill_workflow_uses_bounded_isolated_mac_checkout(self):
+        workflow=(ROOT/".github"/"workflows"/"update-backfill.yml").read_text(encoding="utf-8")
+        for required in (
+            "Reset bounded isolated backfill checkout",
+            "BACKFILL_SOURCE_ROOT: ${{ github.workspace }}/backfill-update-source",
+            "working-directory: backfill-update-source",
+            "path: backfill-update-source",
+            ".backfill-update-source-owned",
+            "BACKFILL_SOURCE_CHECKOUT_RESET",
+            "Checkout controlled backfill inputs",
+            "Validate bounded isolated backfill checkout",
+            "BACKFILL_SOURCE_CHECKOUT_BYTES",
+            "BACKFILL_SOURCE_CHECKOUT_LIMIT_EXCEEDED",
+            "source_git_bytes < 1000000000",
+        ):
+            self.assertIn(required,workflow)
+        self.assertLess(
+            workflow.index("Reset bounded isolated backfill checkout"),
+            workflow.index("Checkout controlled backfill inputs"),
+        )
+        self.assertLess(
+            workflow.index("Checkout controlled backfill inputs"),
+            workflow.index("Validate bounded isolated backfill checkout"),
+        )
+        self.assertLess(
+            workflow.index("BACKFILL_SOURCE_CHECKOUT_BYTES"),
+            workflow.index("Configure Mac toolchain"),
+        )
+
     def test_workflow_deploys_complete_artifact_and_never_marks_proxy_fallback(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
         ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
@@ -6876,6 +6905,7 @@ class Tests(unittest.TestCase):
             "ionice",
         ):
             self.assertNotIn(forbidden,workflow)
+        self.assertEqual(workflow.count(".github/workflows/update-backfill.yml"),2)
         self.assertEqual(workflow.count(".github/workflows/update-core.yml"),2)
         self.assertIn('[[ "$project_root" == "/opt/culua/ytb-song-rank" ]]',workflow)
         self.assertIn('[[ "$releases_root" == "$project_root/releases" ]]',workflow)
