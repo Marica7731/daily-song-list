@@ -6758,6 +6758,34 @@ class Tests(unittest.TestCase):
         try:self.assertEqual(httpd.request_queue_size,256)
         finally:httpd.server_close()
 
+    def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
+        workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
+        for required in (
+            "Reset bounded isolated core checkout",
+            "CORE_SOURCE_ROOT: ${{ github.workspace }}/core-update-source",
+            "working-directory: core-update-source",
+            "path: core-update-source",
+            ".core-update-source-owned",
+            "CORE_SOURCE_CHECKOUT_RESET",
+            "Validate bounded isolated core checkout",
+            "CORE_SOURCE_CHECKOUT_BYTES",
+            "CORE_SOURCE_CHECKOUT_LIMIT_EXCEEDED",
+            "source_git_bytes < 5000000000",
+        ):
+            self.assertIn(required,workflow)
+        self.assertLess(
+            workflow.index("Reset bounded isolated core checkout"),
+            workflow.index("Checkout controlled core inputs"),
+        )
+        self.assertLess(
+            workflow.index("Checkout controlled core inputs"),
+            workflow.index("Validate bounded isolated core checkout"),
+        )
+        self.assertLess(
+            workflow.index("CORE_SOURCE_CHECKOUT_BYTES"),
+            workflow.index("Configure Mac toolchain"),
+        )
+
     def test_workflow_deploys_complete_artifact_and_never_marks_proxy_fallback(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
         ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
