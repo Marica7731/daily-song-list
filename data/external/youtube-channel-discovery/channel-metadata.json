@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T07:05:10.094Z",
+  "generatedAt": "2026-08-20T08:45:15.876Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T07:05:10.094Z",
+    "fetchedAt": "2026-08-20T08:45:15.876Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T07:05:10.094Z",
+    "generatedAt": "2026-08-20T08:45:15.876Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@nemupipi",
+        "channelId": "UC19jIOPqzpV05aqiGpceXYg",
+        "displayName": "ねむぴぴ*-Nemupipi-",
+        "sourceUrl": "https://www.youtube.com/@nemupipi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mizuchimakomori",
+        "channelId": "UCMBzCzLVj4J40PUtQUSY0eQ",
+        "displayName": "鮫升コモリ",
+        "sourceUrl": "https://www.youtube.com/@mizuchimakomori",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@tokusari_kukuri",
         "channelId": "UC0gbkS-xhcWWXfWugQUSRuw",
@@ -11796,6 +11810,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@maguro_utatane",
+        "channelId": "UCw9ItMEys4-5nD_jH0XUVXg",
+        "displayName": "一二三まぐろ😸🐟",
+        "sourceUrl": "https://www.youtube.com/@maguro_utatane",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@neru_utano",
         "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
         "displayName": "歌野ねる / Utano neru",
@@ -11828,27 +11849,6 @@
         "channelId": "UC2daHxnuJJBM5NWci1RRkeA",
         "displayName": "深影",
         "sourceUrl": "https://www.youtube.com/channel/UC2daHxnuJJBM5NWci1RRkeA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tokiwaaino",
-        "channelId": "UCocnY-kJ7VYVA7SQLP8AHIA",
-        "displayName": "時羽あいの",
-        "sourceUrl": "https://www.youtube.com/channel/UCocnY-kJ7VYVA7SQLP8AHIA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@YokyuAkeru",
-        "channelId": "UCOuaCgLWUPRwQtnX78Cat5w",
-        "displayName": "宵吸あけル / Yokyu Akeru",
-        "sourceUrl": "https://www.youtube.com/@YokyuAkeru",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E8%9D%B6%E7%BE%BD%E3%83%98%E3%83%AC%E3%83%8A",
-        "channelId": "UChxErvpRO-qLsCrAid3Qnfw",
-        "displayName": "蝶羽 ヘレナ / ageha helena",
-        "sourceUrl": "https://www.youtube.com/@%E8%9D%B6%E7%BE%BD%E3%83%98%E3%83%AC%E3%83%8A",
         "reason": "batch_limit_reached"
       }
     ]
