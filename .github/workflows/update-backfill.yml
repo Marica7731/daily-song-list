@@ -17,15 +17,59 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 75
     env:
+      BACKFILL_SOURCE_ROOT: ${{ github.workspace }}/backfill-update-source
       DAILY_SONG_UPDATE_MODE: "backfill"
       DAILY_SONG_MONTH_BACKFILL_TARGET: "3000"
       DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS: "7"
+    defaults:
+      run:
+        working-directory: backfill-update-source
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Reset bounded isolated backfill checkout
+        working-directory: .
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.backfill-update-source-owned"
+          [[ "$BACKFILL_SOURCE_ROOT" == "$GITHUB_WORKSPACE/backfill-update-source" ]]
+          [[ "${BACKFILL_SOURCE_ROOT%/*}" == "$GITHUB_WORKSPACE" ]]
+          [[ "${BACKFILL_SOURCE_ROOT##*/}" == "backfill-update-source" ]]
+          if [[ -e "$BACKFILL_SOURCE_ROOT" || -L "$BACKFILL_SOURCE_ROOT" ]]; then
+            [[ -d "$BACKFILL_SOURCE_ROOT" && ! -L "$BACKFILL_SOURCE_ROOT" ]]
+            [[ -f "$OWNER_PATH" ]]
+            [[ "$(cat "$OWNER_PATH")" == "daily-song-list-backfill-source-v1" ]]
+            source_real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$BACKFILL_SOURCE_ROOT")"
+            [[ "$source_real" == "$BACKFILL_SOURCE_ROOT" ]]
+            rm -rf -- "$BACKFILL_SOURCE_ROOT"
+          fi
+          printf '%s\n' "daily-song-list-backfill-source-v1" > "$OWNER_PATH"
+          install -d -m 0700 "$BACKFILL_SOURCE_ROOT"
+          echo "BACKFILL_SOURCE_CHECKOUT_RESET root=$BACKFILL_SOURCE_ROOT"
+
+      - name: Checkout controlled backfill inputs
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          fetch-depth: 0
+          path: backfill-update-source
+          fetch-depth: 50
           filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/update-backfill.yml
+            /.gitignore
+            /scripts/run-backfill-update.js
+            /data/latest.json
+            /data/backfill-inbox/**
+
+      - name: Validate bounded isolated backfill checkout
+        run: |
+          set -Eeuo pipefail
+          source_git_kib="$(du -sk "$BACKFILL_SOURCE_ROOT/.git" | awk '{print $1}')"
+          [[ "$source_git_kib" =~ ^[0-9]+$ ]]
+          source_git_bytes=$((source_git_kib * 1024))
+          (( source_git_bytes < 1000000000 )) || {
+            echo "BACKFILL_SOURCE_CHECKOUT_LIMIT_EXCEEDED bytes=$source_git_bytes" >&2
+            exit 74
+          }
+          echo "BACKFILL_SOURCE_CHECKOUT_BYTES bytes=$source_git_bytes limit=1000000000"
 
       - name: Configure Mac toolchain
         run: |
@@ -48,7 +92,9 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Sync latest main
-        run: git pull --ff-only origin main
+        run: |
+          git fetch --no-tags --filter=blob:none --prune origin main
+          git merge --ff-only FETCH_HEAD
 
       - name: Prepare immutable backfill bundle
         id: backfill
