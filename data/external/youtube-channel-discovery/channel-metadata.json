@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T19:21:24.699Z",
+  "generatedAt": "2026-08-20T20:31:20.189Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T19:21:24.699Z",
+    "fetchedAt": "2026-08-20T20:31:20.189Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T19:21:24.699Z",
+    "generatedAt": "2026-08-20T20:31:20.189Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,60 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1205,
-      "parseableChannels": 1186,
+      "totalChannels": 1207,
+      "parseableChannels": 1188,
       "realAvatar": 649,
-      "thumbnailFallback": 556,
+      "thumbnailFallback": 558,
       "missingDisplayImage": 0,
-      "missingAvatar": 556,
+      "missingAvatar": 558,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1363,
-      "already_cached": 26
+      "already_cached": 26,
+      "skipped_collected_evidence": 1365
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1344,
+      "batch_limit_reached": 1346,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Mikage_RKMusic",
+        "channelId": "UC2daHxnuJJBM5NWci1RRkeA",
+        "displayName": "深影",
+        "sourceUrl": "https://www.youtube.com/channel/UC2daHxnuJJBM5NWci1RRkeA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@shiramochidango",
+        "channelId": "UCSB9S5M1ktSjDEdmTTOZqkA",
+        "displayName": "白餅だんご🍡✤",
+        "sourceUrl": "https://www.youtube.com/channel/UCSB9S5M1ktSjDEdmTTOZqkA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
+        "channelId": "UCeG3tgJze9QqUgD2GI33OjQ",
+        "displayName": "一色イズ ⟡ Isshiki_IS",
+        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Berrych0623",
+        "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
+        "displayName": "汐音ベリーちゃん Berry Ch",
+        "sourceUrl": "https://www.youtube.com/@Berrych0623",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@DengekiNico",
+        "channelId": "UCOalOOX6-5TCEVRApZjj5-Q",
+        "displayName": "電撃ニコ / Dengeki Nico",
+        "sourceUrl": "https://www.youtube.com/@DengekiNico",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Shairu.ch_0801",
         "channelId": "UCe_8qM8Wk4cU5oD3WO07gZg",
@@ -11814,41 +11849,6 @@
         "channelId": "UC19jIOPqzpV05aqiGpceXYg",
         "displayName": "ねむぴぴ*-Nemupipi-",
         "sourceUrl": "https://www.youtube.com/@nemupipi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mizuchimakomori",
-        "channelId": "UCMBzCzLVj4J40PUtQUSY0eQ",
-        "displayName": "鮫升コモリ",
-        "sourceUrl": "https://www.youtube.com/@mizuchimakomori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@tokusari_kukuri",
-        "channelId": "UC0gbkS-xhcWWXfWugQUSRuw",
-        "displayName": "kukuri ch * 戸鎖 くくり *",
-        "sourceUrl": "https://www.youtube.com/@tokusari_kukuri",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@anyakumori",
-        "channelId": "UCHnbtVLZYGuKkGh6iFxxTpw",
-        "displayName": "杏夜 くもり - Anya Kumori -",
-        "sourceUrl": "https://www.youtube.com/@anyakumori",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@kanade_awayuki",
-        "channelId": "UCPUi4e7wnbhFdjsm3KqD3KA",
-        "displayName": "淡雪 花奏(かなで)",
-        "sourceUrl": "https://www.youtube.com/@kanade_awayuki",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@muzuchannel",
-        "channelId": "UCBY1b_TPZx3rA0F1KJnXkNQ",
-        "displayName": "MUZU‐むずちゃんねる‐【Vtuber】",
-        "sourceUrl": "https://www.youtube.com/channel/UCBY1b_TPZx3rA0F1KJnXkNQ",
         "reason": "batch_limit_reached"
       }
     ]
