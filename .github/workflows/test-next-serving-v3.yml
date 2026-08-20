@@ -45,6 +45,7 @@ jobs:
             deploy/daily-song-list-api.service
             deploy/install-wdc-release.sh
             deploy/nginx-next-api.conf
+            scripts/migration/7d-json-to-patch.py
             scripts/migration/materialize-pg-release-snapshot.py
             scripts/migration/materialize-ranking-pages.py
             scripts/migration/build-serving-store.py
@@ -65,6 +66,7 @@ jobs:
           python3 -m py_compile \
             server/release_serving_server.py \
             server/pg_adapter.py \
+            scripts/migration/7d-json-to-patch.py \
             scripts/migration/materialize-pg-release-snapshot.py \
             scripts/migration/materialize-ranking-pages.py \
             scripts/migration/build-serving-store.py \
