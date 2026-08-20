@@ -6,6 +6,7 @@ on:
       - "AGENTS.md"
       - "README.md"
       - ".github/workflows/sync-wdc-release.yml"
+      - ".github/workflows/check-code.yml"
       - ".github/workflows/update-backfill.yml"
       - ".github/workflows/test-next-serving-v3.yml"
       - "assets/app.js"
@@ -38,6 +39,7 @@ jobs:
           sparse-checkout: |
             AGENTS.md
             README.md
+            .github/workflows/check-code.yml
             .github/workflows/sync-wdc-release.yml
             .github/workflows/update-backfill.yml
             .github/workflows/update-core.yml
@@ -128,6 +130,7 @@ jobs:
           git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol \
             diff --check "$diff_base" HEAD -- \
             .github/workflows/sync-wdc-release.yml \
+            .github/workflows/check-code.yml \
             .github/workflows/update-backfill.yml \
             .github/workflows/test-next-serving-v3.yml \
             AGENTS.md README.md \
@@ -141,6 +144,7 @@ jobs:
           pattern='-----BEGIN (RSA|OPENSSH|EC) PRIVATE KEY-----|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}'
           if git grep -nE -e "$pattern" -- \
               .github/workflows/sync-wdc-release.yml \
+              .github/workflows/check-code.yml \
               .github/workflows/update-backfill.yml \
               .github/workflows/test-next-serving-v3.yml \
               AGENTS.md README.md \
