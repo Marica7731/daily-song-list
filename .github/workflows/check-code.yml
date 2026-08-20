@@ -288,6 +288,54 @@ jobs:
               run_budget=0
             fi
           fi
+          run_node_tests=1
+          if [ -n "${base}" ]; then
+            candidate_node_changes="$(git diff --name-only "${base}" HEAD -- \
+              .github/workflows \
+              assets \
+              config \
+              deploy \
+              docs \
+              index.html \
+              package.json \
+              README.md \
+              scripts \
+              server \
+              test)"
+            node_changes=()
+            while IFS= read -r changed_path; do
+              [ -n "${changed_path}" ] || continue
+              case "${changed_path}" in
+                .github/workflows/check-code.yml|\
+                .github/workflows/sync-wdc-release.yml|\
+                .github/workflows/test-next-serving-v3.yml|\
+                .github/workflows/update-backfill.yml|\
+                .github/workflows/update-core.yml|\
+                deploy/daily-song-list-api.service|\
+                deploy/install-wdc-release.sh|\
+                deploy/nginx-next-api.conf|\
+                scripts/migration/7d-json-to-patch.py|\
+                scripts/migration/build-release-bundle.py|\
+                scripts/migration/build-serving-store.py|\
+                scripts/migration/materialize-pg-release-snapshot.py|\
+                scripts/migration/materialize-ranking-pages.py|\
+                scripts/migration/patch-next-frontend.py|\
+                scripts/migration/pg-peer-relay.py|\
+                scripts/migration/prepare-wdc-frontend.py|\
+                scripts/migration/requirements-wdc-mac.txt|\
+                server/pg_adapter.py|\
+                server/release_serving_server.py)
+                  continue
+                  ;;
+              esac
+              node_changes+=("${changed_path}")
+            done <<< "${candidate_node_changes}"
+            if [ "${#node_changes[@]}" -eq 0 ]; then
+              run_node_tests=0
+            else
+              echo "CODEX_NODE_TESTS_SELECTED count=${#node_changes[@]} first=${node_changes[0]}"
+            fi
+          fi
           node scripts/check-js-syntax.js
           ui_proof_ok=0
           if [ "${run_ui_proof}" = "1" ]; then
@@ -302,7 +350,9 @@ jobs:
             echo "CODEX_UI_PROOF_SKIPPED reason=no-ui-proof-input-changes"
           fi
           npm run blocklist:validate
-          if [ "${run_ui_proof}" = "1" ] && [ "${ui_proof_ok}" = "1" ]; then
+          if [ "${run_node_tests}" = "0" ]; then
+            echo "CODEX_NODE_TESTS_SKIPPED reason=no-node-input-changes"
+          elif [ "${run_ui_proof}" = "1" ] && [ "${ui_proof_ok}" = "1" ]; then
             npm test
           else
             test_files=()

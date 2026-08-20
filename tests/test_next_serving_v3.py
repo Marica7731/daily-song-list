@@ -6868,6 +6868,43 @@ class Tests(unittest.TestCase):
         try:self.assertEqual(httpd.request_queue_size,256)
         finally:httpd.server_close()
 
+    def test_check_code_scopes_node_suite_away_from_next_serving_python_changes(self):
+        workflow=(ROOT/".github"/"workflows"/"check-code.yml").read_text(
+            encoding="utf-8",
+        )
+        for excluded in (
+            ".github/workflows/check-code.yml",
+            ".github/workflows/sync-wdc-release.yml",
+            ".github/workflows/test-next-serving-v3.yml",
+            ".github/workflows/update-backfill.yml",
+            ".github/workflows/update-core.yml",
+            "deploy/daily-song-list-api.service",
+            "deploy/install-wdc-release.sh",
+            "deploy/nginx-next-api.conf",
+            "scripts/migration/7d-json-to-patch.py",
+            "scripts/migration/build-release-bundle.py",
+            "scripts/migration/build-serving-store.py",
+            "scripts/migration/materialize-pg-release-snapshot.py",
+            "scripts/migration/materialize-ranking-pages.py",
+            "scripts/migration/patch-next-frontend.py",
+            "scripts/migration/pg-peer-relay.py",
+            "scripts/migration/prepare-wdc-frontend.py",
+            "scripts/migration/requirements-wdc-mac.txt",
+            "server/pg_adapter.py",
+            "server/release_serving_server.py",
+        ):
+            self.assertIn(excluded,workflow)
+        self.assertNotIn("scripts/migration/*.py",workflow)
+        self.assertIn("candidate_node_changes=",workflow)
+        self.assertIn('run_node_tests=0',workflow)
+        self.assertIn(
+            'CODEX_NODE_TESTS_SKIPPED reason=no-node-input-changes',workflow,
+        )
+        self.assertLess(
+            workflow.index('if [ "${run_node_tests}" = "0" ]; then'),
+            workflow.index('node --test "${test_files[@]}"'),
+        )
+
     def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
         for required in (
