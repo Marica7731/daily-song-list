@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T09:49:18.935Z",
+  "generatedAt": "2026-08-20T11:30:32.637Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T09:49:18.935Z",
+    "fetchedAt": "2026-08-20T11:30:32.637Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T09:49:18.935Z",
+    "generatedAt": "2026-08-20T11:30:32.637Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,20 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@cuffy-games",
+        "channelId": "UCQQdOoK-lTBhXzZIukAX1sw",
+        "displayName": "Cuffy ch. カフィー",
+        "sourceUrl": "https://www.youtube.com/@cuffy-games",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@maruchi",
+        "channelId": "UCAuCBqze_GL7-nPAzI62LNw",
+        "displayName": "まるちぃ",
+        "sourceUrl": "https://www.youtube.com/@maruchi",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@hide_ch",
         "channelId": "UCqIigA_sooj8-efCTyqpWxA",
@@ -11835,20 +11849,6 @@
         "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
         "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
         "sourceUrl": "https://www.youtube.com/@SHIRASESHIRAKAWA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aoisizukuv",
-        "channelId": "UCWNV-ixuEAxaso9rLk5PRFQ",
-        "displayName": "aoi sizuku ch. 葵井詩雫",
-        "sourceUrl": "https://www.youtube.com/@aoisizukuv",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yomogich.6303",
-        "channelId": "UC53iUi6icSME4tFA-bR6Rig",
-        "displayName": "Yomogi Ch.歌喰猫よもぎ",
-        "sourceUrl": "https://www.youtube.com/@yomogich.6303",
         "reason": "batch_limit_reached"
       }
     ]
