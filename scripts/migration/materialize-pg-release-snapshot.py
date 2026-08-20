@@ -2191,7 +2191,11 @@ class CanonicalSnapshotWriter:
             rank = int(row[1] or 0)
             source_key = _text(row[3])
             if view not in VIEWS or rank <= 0 or not source_key:
-                raise RuntimeError("all-scope ranking source identity is invalid")
+                raise RuntimeError(
+                    "all-scope ranking source identity is invalid: "
+                    f"range={range_id!r} view={view!r} rank={rank} "
+                    f"rowId={_text(row[2])!r} sourceKey={source_key!r}"
+                )
             prefix = ":".join((range_id, view, "count", "all", str(rank), ""))
             row_id = _text(row[2])
             if not row_id.startswith(prefix):

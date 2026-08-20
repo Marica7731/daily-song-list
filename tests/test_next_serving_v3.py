@@ -5604,6 +5604,47 @@ class Tests(unittest.TestCase):
             "publishedAt":"2026-08-13T00:00:00Z",
         })
 
+    def test_generic_video_projection_assigns_source_key_without_overlay_metadata(self):
+        video_id="parent00001"
+        expected=pg_adapter._stable_key("source-video","all",video_id)
+        response={
+            "rangeId":"all","view":"videos","records":[{
+                "type":"video","key":video_id,"videoId":video_id,
+                "title":"Persisted parent video","count":3,
+                "songCount":2,"videoCount":1,"timestampCount":3,
+            }],
+        }
+        with patch.object(pg_adapter,"_rows",return_value=[]):
+            projected=pg_adapter._project_generic_overlay_video_records(
+                object(),("overlay",),response,view="videos",
+            )
+        record=projected["records"][0]
+        self.assertEqual(record["sourceDetailKey"],expected)
+        self.assertEqual(record["sourceDetailPath"],f"/api/sources/{expected}")
+        row=pg_materializer._ranking_row(
+            {**record,"rank":1},payload_record={**record,"rank":1},
+            range_id="all",view="videos",metric="occurrences",
+            scope_key="all",expected_rank=1,
+        )
+        self.assertEqual(row[6],expected)
+
+    def test_generic_video_projection_rejects_conflicting_source_key(self):
+        video_id="parent00001"
+        response={
+            "rangeId":"all","view":"videos","records":[{
+                "key":video_id,"videoId":video_id,
+                "sourceDetailKey":"wrong-source-key",
+            }],
+        }
+        with patch.object(pg_adapter,"_rows",return_value=[]), \
+             self.assertRaisesRegex(
+                 pg_adapter.PostgresAdapterError,
+                 "sourceDetailKey conflicts",
+             ):
+            pg_adapter._project_generic_overlay_video_records(
+                object(),("overlay",),response,view="videos",
+            )
+
     def test_accepted_reset_preserves_raw_artist_and_public_unknown_flag(self):
         parent_row={
             "occurrence_id":"occ-old","video_id":"video-reset",
