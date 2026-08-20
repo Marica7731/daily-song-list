@@ -3081,6 +3081,104 @@ def export_sources_from_records(
     return completed
 
 
+def _parent_video_ranking_fallback(
+    row: Mapping[str, Any],
+    *,
+    expected_video_id: str,
+) -> tuple[dict[str, Any], tuple[dict[str, Any], ...]]:
+    """Recover one legacy ranking-only video without weakening identity gates.
+
+    Early full-runtime releases can retain a complete all-range video card while
+    omitting that video's scalar ``runtime_videos`` and ``runtime_occurrences``
+    rows.  The card's ``songs`` array is the only authoritative occurrence
+    payload for that legacy shape.  Accept it only when every stored scalar and
+    public identity agrees with the requested video.
+    """
+
+    video_id = _text(row.get("detail_key"))
+    payload = _json_object(row.get("payload_json"))
+    if video_id != expected_video_id or _text(payload.get("videoId")) != video_id:
+        raise RuntimeError(
+            "parent video ranking fallback changed identity: "
+            f"expected={expected_video_id} actual={video_id or '<empty>'}"
+        )
+    for name in ("detailKey", "key"):
+        value = _text(payload.get(name))
+        if value and value != video_id:
+            raise RuntimeError(
+                "parent video ranking fallback changed identity: "
+                f"video={video_id} field={name} actual={value}"
+            )
+    if _text(payload.get("type")) not in {"", "video"}:
+        raise RuntimeError(
+            f"parent video ranking fallback changed type: {video_id}"
+        )
+
+    raw_songs = payload.get("songs")
+    if not isinstance(raw_songs, list) or not raw_songs:
+        raise RuntimeError(
+            f"parent video ranking fallback has no songs: {video_id}"
+        )
+    occurrence_count = len(raw_songs)
+    count_values = {
+        "row_count": _integer(row.get("row_count"), -1),
+        "timestamp_count": _integer(row.get("timestamp_count"), -1),
+        "count": _integer(payload.get("count"), -1),
+        "timestampCount": _integer(payload.get("timestampCount"), -1),
+    }
+    if any(value != occurrence_count for value in count_values.values()):
+        raise RuntimeError(
+            "parent video ranking fallback count changed: "
+            f"video={video_id} songs={occurrence_count} values={count_values}"
+        )
+    if (
+        _integer(row.get("video_count"), -1) != 1
+        or _integer(payload.get("videoCount"), -1) != 1
+    ):
+        raise RuntimeError(
+            f"parent video ranking fallback video count changed: {video_id}"
+        )
+
+    video_title = _text(payload.get("title") or row.get("title"))
+    occurrences: list[dict[str, Any]] = []
+    for position, raw_song in enumerate(raw_songs):
+        if not isinstance(raw_song, Mapping):
+            raise RuntimeError(
+                "parent video ranking fallback song is invalid: "
+                f"video={video_id} position={position}"
+            )
+        song = dict(raw_song)
+        occurrence = dict(song)
+        occurrence.update({
+            "videoId": video_id,
+            "videoTitle": video_title,
+            "rangeId": "all",
+            "position": position,
+            "song": song,
+        })
+        for name in (
+            "channelName", "channelId", "channelHandle", "channelUrl",
+            "publishedTimestamp", "publishedAt",
+        ):
+            if payload.get(name) is not None:
+                occurrence.setdefault(name, payload.get(name))
+        occurrences.append(occurrence)
+
+    video_row = {
+        "video_id": video_id,
+        "title": video_title,
+        "channel_name": payload.get("channelName"),
+        "channel_id": payload.get("channelId"),
+        "channel_handle": payload.get("channelHandle"),
+        "channel_url": payload.get("channelUrl"),
+        "published_timestamp": (
+            payload.get("publishedTimestamp") or payload.get("publishedAt")
+        ),
+        "payload_json": payload,
+    }
+    return video_row, tuple(occurrences)
+
+
 def export_unaffected_parent_video_sources(
     connection: Any,
     writer: CanonicalSnapshotWriter,
@@ -3138,6 +3236,60 @@ def export_unaffected_parent_video_sources(
             for row in video_rows
             if _text(row.get("video_id"))
         }
+        if len(video_by_id) != len(video_rows):
+            raise RuntimeError("parent video source lookup returned duplicate rows")
+        extra = sorted(set(video_by_id) - set(batch_video_ids))
+        if extra:
+            raise RuntimeError(
+                "parent video source lookup changed: "
+                f"missing=[] extra={extra[:3]}"
+            )
+        ranking_fallback_occurrences: dict[str, tuple[dict[str, Any], ...]] = {}
+        missing_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
+        if missing_video_ids:
+            fallback_rows = adapter._rows(
+                connection,
+                """
+                SELECT detail_key,title,row_count,video_count,timestamp_count,
+                       payload_json
+                FROM runtime_ranking_rows
+                WHERE revision_id = %s AND range_id = 'all'
+                  AND view = 'videos' AND metric = 'count'
+                  AND scope_key = 'all' AND detail_key = ANY(%s)
+                ORDER BY detail_key
+                LIMIT %s
+                """,
+                [
+                    parent_revision_id,
+                    missing_video_ids,
+                    len(missing_video_ids) + 1,
+                ],
+            )
+            if len(fallback_rows) > len(missing_video_ids):
+                raise RuntimeError(
+                    "parent video ranking fallback exceeded requested scope"
+                )
+            fallback_by_video: dict[str, dict[str, Any]] = {}
+            for row in fallback_rows:
+                video_id = _text(row.get("detail_key"))
+                if video_id not in missing_video_ids or video_id in fallback_by_video:
+                    raise RuntimeError(
+                        "parent video ranking fallback changed lookup identity"
+                    )
+                fallback_by_video[video_id] = dict(row)
+            unresolved = sorted(set(missing_video_ids) - set(fallback_by_video))
+            if unresolved:
+                raise RuntimeError(
+                    "parent video source lookup changed: "
+                    f"missing={unresolved[:3]} extra=[]"
+                )
+            for video_id in missing_video_ids:
+                video_row, fallback_occurrences = _parent_video_ranking_fallback(
+                    fallback_by_video[video_id],
+                    expected_video_id=video_id,
+                )
+                video_by_id[video_id] = video_row
+                ranking_fallback_occurrences[video_id] = fallback_occurrences
         if set(video_by_id) != set(batch_video_ids):
             missing = sorted(set(batch_video_ids) - set(video_by_id))
             extra = sorted(set(video_by_id) - set(batch_video_ids))
@@ -3247,6 +3399,13 @@ def export_unaffected_parent_video_sources(
             )
             current_occurrences.append(occurrence)
         flush_video()
+        for video_id in sorted(ranking_fallback_occurrences):
+            source_key = batch_by_video[video_id]
+            if source_key in completed:
+                continue
+            current_video_id = video_id
+            current_occurrences = list(ranking_fallback_occurrences[video_id])
+            flush_video()
         batch_completed = {
             source_key for source_key, _ in batch if source_key in completed
         }

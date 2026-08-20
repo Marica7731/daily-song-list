@@ -3763,6 +3763,89 @@ class Tests(unittest.TestCase):
         self.assertEqual(occurrences[0]["song"]["title"],"Bulk Song")
         rows.assert_called_once()
 
+    def test_snapshot_bulk_exports_ranking_only_parent_video_sources(self):
+        video_id="parent-ranking-only"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        ranking_payload={
+            "type":"video","key":video_id,"detailKey":video_id,
+            "videoId":video_id,"title":"Ranking-only Video",
+            "channelName":"Fixture","channelId":"UCfixture",
+            "channelHandle":"/@fixture",
+            "channelUrl":"https://youtube.com/@fixture",
+            "publishedTimestamp":1700000000,
+            "count":2,"timestampCount":2,"videoCount":1,
+            "songs":[
+                {"title":"Song A","artist":"Artist","seconds":11},
+                {"title":"Song B","artist":"Artist","seconds":22},
+            ],
+        }
+        ranking_row={
+            "detail_key":video_id,"title":"Ranking-only Video",
+            "row_count":2,"video_count":1,"timestamp_count":2,
+            "payload_json":ranking_payload,
+        }
+        class Writer:
+            def __init__(self):self.values=[]
+            def add_source(self,key,range_id,record,occurrences):
+                self.values.append((key,range_id,dict(record),list(occurrences)))
+        writer=Writer()
+        def rows(_connection,statement,params):
+            if "FROM runtime_videos" in statement:
+                return []
+            if "FROM runtime_ranking_rows" in statement:
+                self.assertEqual(params[1],[video_id])
+                self.assertIn("metric = 'count'",statement)
+                self.assertIn("scope_key = 'all'",statement)
+                return [ranking_row]
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows), \
+             patch.object(pg_materializer,"_stream_pg_rows",return_value=iter(())):
+            completed=pg_materializer.export_unaffected_parent_video_sources(
+                object(),writer,parent_revision_id="parent",
+                sources=((source_key,video_id),),
+            )
+        self.assertEqual(completed,{source_key})
+        self.assertEqual(len(writer.values),1)
+        key,range_id,record,occurrences=writer.values[0]
+        self.assertEqual((key,range_id,record["videoId"]),(source_key,"all",video_id))
+        self.assertEqual(record["sourceDetailKey"],source_key)
+        self.assertEqual(
+            [
+                (item["song"]["title"],item["song"]["seconds"])
+                for item in occurrences
+            ],
+            [("Song A",11),("Song B",22)],
+        )
+
+    def test_snapshot_ranking_only_parent_video_count_mismatch_fails_closed(self):
+        video_id="parent-ranking-mismatch"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        ranking_row={
+            "detail_key":video_id,"title":"Mismatch",
+            "row_count":3,"video_count":1,"timestamp_count":2,
+            "payload_json":{
+                "type":"video","key":video_id,"detailKey":video_id,
+                "videoId":video_id,"title":"Mismatch",
+                "count":2,"timestampCount":2,"videoCount":1,
+                "songs":[
+                    {"title":"Song A","artist":"Artist","seconds":11},
+                    {"title":"Song B","artist":"Artist","seconds":22},
+                ],
+            },
+        }
+        def rows(_connection,statement,_params):
+            if "FROM runtime_videos" in statement:return []
+            if "FROM runtime_ranking_rows" in statement:return [ranking_row]
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            with self.assertRaisesRegex(
+                RuntimeError,"parent video ranking fallback count changed",
+            ):
+                pg_materializer.export_unaffected_parent_video_sources(
+                    object(),object(),parent_revision_id="parent",
+                    sources=((source_key,video_id),),
+                )
+
     def test_snapshot_bulk_streams_unaffected_persisted_parent_sources(self):
         keep_key="source-keep"
         affected_key="source-affected"
