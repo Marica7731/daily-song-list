@@ -3211,6 +3211,7 @@ def _load_parent_video_source_batch(
     *,
     parent_revision_id: str,
     video_ids: Sequence[str],
+    allow_absent: bool = False,
 ) -> tuple[
     dict[str, dict[str, Any]],
     dict[str, tuple[dict[str, Any], ...]],
@@ -3243,7 +3244,6 @@ def _load_parent_video_source_batch(
         )
 
     missing_runtime_video_ids = sorted(set(batch_video_ids) - set(video_by_id))
-    runtime_video_ids = sorted(set(batch_video_ids) & set(video_by_id))
     occurrence_rows = adapter._rows(
         connection,
         """
@@ -3256,11 +3256,11 @@ def _load_parent_video_source_batch(
         """,
         [
             parent_revision_id,
-            runtime_video_ids,
+            batch_video_ids,
             ["all", ""],
-            len(runtime_video_ids) + 1,
+            len(batch_video_ids) + 1,
         ],
-    ) if runtime_video_ids else []
+    ) if batch_video_ids else []
     occurrence_video_ids = {
         _text(row.get("video_id"))
         for row in occurrence_rows
@@ -3270,14 +3270,14 @@ def _load_parent_video_source_batch(
         raise RuntimeError(
             "parent video occurrence preflight returned duplicate rows"
         )
-    extra_occurrences = sorted(occurrence_video_ids - set(runtime_video_ids))
+    extra_occurrences = sorted(occurrence_video_ids - set(batch_video_ids))
     if extra_occurrences:
         raise RuntimeError(
             "parent video occurrence preflight changed: "
             f"missing=[] extra={extra_occurrences[:3]}"
         )
     missing_runtime_occurrence_ids = sorted(
-        set(runtime_video_ids) - occurrence_video_ids
+        set(batch_video_ids) - occurrence_video_ids
     )
 
     # Some legacy full-runtime rows retain the scalar video but omit its
@@ -3323,6 +3323,14 @@ def _load_parent_video_source_batch(
                 )
             fallback_by_video[video_id] = dict(row)
         unresolved = sorted(set(fallback_video_ids) - set(fallback_by_video))
+        absent_video_ids = set()
+        if allow_absent:
+            absent_video_ids = (
+                set(unresolved)
+                & set(missing_runtime_video_ids)
+                & set(missing_runtime_occurrence_ids)
+            )
+        unresolved = sorted(set(unresolved) - absent_video_ids)
         unresolved_videos = sorted(set(unresolved) & set(missing_runtime_video_ids))
         if unresolved_videos:
             raise RuntimeError(
@@ -3344,15 +3352,23 @@ def _load_parent_video_source_batch(
             )
             video_by_id[video_id] = video_row
             ranking_fallback_occurrences[video_id] = fallback_occurrences
-    if set(video_by_id) != set(batch_video_ids):
-        missing = sorted(set(batch_video_ids) - set(video_by_id))
+    allowed_absent = (
+        set(batch_video_ids) - set(video_by_id)
+        if allow_absent else set()
+    )
+    if set(video_by_id) != set(batch_video_ids) - allowed_absent:
+        missing = sorted(
+            set(batch_video_ids) - set(video_by_id) - allowed_absent
+        )
         extra = sorted(set(video_by_id) - set(batch_video_ids))
         raise RuntimeError(
             "parent video source lookup changed: "
             f"missing={missing[:3]} extra={extra[:3]}"
         )
     covered_video_ids = occurrence_video_ids | set(ranking_fallback_occurrences)
-    missing_occurrences = sorted(set(batch_video_ids) - covered_video_ids)
+    missing_occurrences = sorted(
+        set(batch_video_ids) - covered_video_ids - allowed_absent
+    )
     extra_occurrences = sorted(covered_video_ids - set(batch_video_ids))
     if missing_occurrences or extra_occurrences:
         raise RuntimeError(
@@ -3436,6 +3452,131 @@ def preflight_unaffected_parent_video_sources(
     print(
         "PG_SNAPSHOT_PARENT_VIDEO_PREFLIGHT "
         f"total={len(ordered)} direct={len(direct_source_keys)}",
+        flush=True,
+    )
+    return direct_source_keys
+
+
+def preflight_affected_parent_sources(
+    connection: Any,
+    *,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    source_scope: SnapshotSourceScope,
+    source_keys: Iterable[str],
+) -> set[str]:
+    """Validate every affected source class before immutable bulk copies.
+
+    Affected sources used to run only after all persisted and direct parent
+    sources had expanded the canonical SQLite file.  A malformed legacy video
+    authority could therefore fail after hours and tens of GiB.  This bounded
+    metadata pass validates all no-detail target identities and every parent
+    video fallback first; the complete affected export then runs immediately
+    after this gate, before either immutable copy phase.
+    """
+
+    requested = {_text(value) for value in source_keys if _text(value)}
+    source_lineage = tuple(dict.fromkeys((
+        *(_text(value) for value in overlay_revision_ids if _text(value)),
+        _text(parent_revision_id),
+    )))
+    if requested and not source_lineage:
+        raise RuntimeError("affected source preflight lineage is empty")
+    direct_source_keys: set[str] = set()
+    parent_fallback_keys: set[str] = set()
+    overlay_only_video_keys: set[str] = set()
+    no_detail_non_video_keys: set[str] = set()
+    for batch, scoped, _union_videos in source_scope.source_batches(requested):
+        rows = adapter._rows(
+            connection,
+            """
+            SELECT DISTINCT ON (source_key) source_key
+            FROM runtime_source_details
+            WHERE revision_id::text = ANY(%s::text[]) AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key,
+                     array_position(%s::text[],revision_id::text)
+            LIMIT %s
+            """,
+            [
+                list(source_lineage),
+                list(batch),
+                list(source_lineage),
+                len(batch) + 1,
+            ],
+        )
+        if len(rows) > len(batch):
+            raise RuntimeError(
+                "affected source preflight detail lookup exceeded batch"
+            )
+        persisted_keys = {
+            _text(row.get("source_key"))
+            for row in rows
+            if _text(row.get("source_key"))
+        }
+        if len(persisted_keys) != len(rows) or not persisted_keys.issubset(batch):
+            raise RuntimeError(
+                "affected source preflight detail lookup changed identity"
+            )
+
+        direct_sources: dict[str, str] = {}
+        for source_key in batch:
+            if source_key in persisted_keys:
+                continue
+            targets = tuple(scoped[source_key]["targets"])
+            target_views = {
+                _text(view) for view, group_key in targets
+                if _text(view) and _text(group_key)
+            }
+            if len(target_views) != 1:
+                raise RuntimeError(
+                    "affected source preflight target type is ambiguous: "
+                    + source_key
+                )
+            if target_views == {"videos"}:
+                video_targets = {
+                    _text(group_key) for view, group_key in targets
+                    if _text(view) == "videos" and _text(group_key)
+                }
+                if len(video_targets) != 1:
+                    raise RuntimeError(
+                        "affected source preflight video target is ambiguous: "
+                        + source_key
+                    )
+                direct_sources[source_key] = next(iter(video_targets))
+            else:
+                no_detail_non_video_keys.add(source_key)
+        direct_video_ids = sorted(set(direct_sources.values()))
+        if len(direct_video_ids) != len(direct_sources):
+            raise RuntimeError(
+                "affected source preflight video identity is ambiguous"
+            )
+        if direct_video_ids:
+            video_by_id, fallback_occurrences = (
+                _load_parent_video_source_batch(
+                    connection,
+                    parent_revision_id=parent_revision_id,
+                    video_ids=direct_video_ids,
+                    allow_absent=True,
+                )
+            )
+            direct_source_keys.update(direct_sources)
+            parent_fallback_keys.update(
+                source_key
+                for source_key, video_id in direct_sources.items()
+                if video_id in fallback_occurrences
+            )
+            overlay_only_video_keys.update(
+                source_key
+                for source_key, video_id in direct_sources.items()
+                if video_id not in video_by_id
+            )
+    print(
+        "PG_SNAPSHOT_AFFECTED_SOURCE_PREFLIGHT "
+        f"total={len(requested)} direct={len(direct_source_keys)} "
+        f"parentFallback={len(parent_fallback_keys)} "
+        f"overlayOnlyVideos={len(overlay_only_video_keys)} "
+        f"overlayOnlyEntities={len(no_detail_non_video_keys)}",
         flush=True,
     )
     return direct_source_keys
@@ -4002,6 +4143,39 @@ def export_affected_parent_sources(
                 )
             direct_counts[video_id] = occurrence_count
 
+        direct_video_by_id: dict[str, dict[str, Any]] = {}
+        direct_ranking_fallback_occurrences: dict[
+            str, tuple[dict[str, Any], ...]
+        ] = {}
+        if direct_video_ids:
+            (
+                direct_video_by_id,
+                direct_ranking_fallback_occurrences,
+            ) = _load_parent_video_source_batch(
+                connection,
+                parent_revision_id=parent_revision_id,
+                video_ids=direct_video_ids,
+                allow_absent=True,
+            )
+        for video_id, fallback_occurrences in (
+            direct_ranking_fallback_occurrences.items()
+        ):
+            if direct_counts.get(video_id, 0) != 0:
+                raise RuntimeError(
+                    "affected direct video parent authority is ambiguous: "
+                    + video_id
+                )
+            fallback_count = len(fallback_occurrences)
+            if (
+                fallback_count < 1
+                or fallback_count > PARENT_SOURCE_OCCURRENCE_BATCH_ROWS
+            ):
+                raise RuntimeError(
+                    "affected direct video ranking fallback exceeded "
+                    "single-source batch cap: " + video_id
+                )
+            direct_counts[video_id] = fallback_count
+
         source_plans: dict[str, tuple[str, tuple[str, ...]]] = {}
         for source_key in batch:
             if source_key in detail_revisions:
@@ -4061,42 +4235,11 @@ def export_affected_parent_sources(
                 if source_key in direct_sources
             }
             stream_direct_video_ids = sorted(set(stream_direct_sources.values()))
-            direct_video_rows = adapter._rows(
-                connection,
-                """
-                SELECT video_id,title,channel_name,channel_id,channel_handle,
-                       channel_url,published_timestamp,payload_json
-                FROM runtime_videos
-                WHERE revision_id = %s AND video_id = ANY(%s)
-                ORDER BY video_id
-                LIMIT %s
-                """,
-                [
-                    parent_revision_id,
-                    stream_direct_video_ids,
-                    len(stream_direct_video_ids) + 1,
-                ],
-            ) if stream_direct_video_ids else []
-            if len(direct_video_rows) > len(stream_direct_video_ids):
-                raise RuntimeError(
-                    "affected direct video detail exceeded requested batch"
-                )
-            direct_video_by_id: dict[str, dict[str, Any]] = {}
-            for row in direct_video_rows:
-                video_id = _text(row.get("video_id"))
-                if (
-                    video_id not in stream_direct_video_ids
-                    or video_id in direct_video_by_id
-                ):
-                    raise RuntimeError(
-                        "affected direct video detail changed identity"
-                    )
-                direct_video_by_id[video_id] = row
-            for video_id in stream_direct_video_ids:
-                if direct_counts[video_id] and video_id not in direct_video_by_id:
-                    raise RuntimeError(
-                        "affected direct video occurrence has no parent detail"
-                    )
+            stream_direct_video_by_id = {
+                video_id: direct_video_by_id[video_id]
+                for video_id in stream_direct_video_ids
+                if video_id in direct_video_by_id
+            }
 
             plan_members: dict[
                 tuple[str, tuple[str, ...]], list[str]
@@ -4154,8 +4297,8 @@ def export_affected_parent_sources(
                         video_scope=stream_scoped[source_key]["videos"],
                         parent_occurrences=parent_rows,
                         direct_video_rows=(
-                            (direct_video_by_id[direct_video_id],)
-                            if direct_video_id in direct_video_by_id else ()
+                            (stream_direct_video_by_id[direct_video_id],)
+                            if direct_video_id in stream_direct_video_by_id else ()
                         ),
                         direct_occurrence_rows=direct_rows,
                         candidate_rows=candidate_rows,
@@ -4359,6 +4502,16 @@ def export_affected_parent_sources(
                 if source_key in written_direct:
                     continue
                 video_id = stream_direct_sources[source_key]
+                fallback_occurrences = (
+                    direct_ranking_fallback_occurrences.get(video_id)
+                )
+                if fallback_occurrences is not None:
+                    write_source(
+                        source_key,
+                        direct_rows=list(fallback_occurrences),
+                    )
+                    written_direct.add(source_key)
+                    continue
                 if direct_counts[video_id] != 0:
                     raise RuntimeError(
                         "affected direct video occurrence stream is incomplete: "
@@ -4376,8 +4529,7 @@ def export_affected_parent_sources(
                 f"complete={len(completed)} total={len(requested)}",
                 flush=True,
             )
-            direct_video_rows = None
-            direct_video_by_id = {}
+            stream_direct_video_by_id = {}
             overlay_inputs_by_plan = {}
             gc.collect()
         detail_rows = None
@@ -4386,6 +4538,8 @@ def export_affected_parent_sources(
         declared_counts = {}
         direct_count_rows = None
         direct_counts = {}
+        direct_video_by_id = {}
+        direct_ranking_fallback_occurrences = {}
         source_plans = {}
         gc.collect()
     if completed != requested:
@@ -4926,6 +5080,27 @@ def materialize(
         }
         if source_scope is not None and getattr(builder, "parent", None):
             affected_parent_sources = source_scope.affected_source_keys()
+            if affected_parent_sources:
+                preflight_affected_parent_sources(
+                    connection,
+                    parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=affected_parent_sources,
+                )
+                exported_affected = export_affected_parent_sources(
+                    connection,
+                    writer,
+                    parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=affected_parent_sources,
+                )
+                if exported_affected != set(affected_parent_sources):
+                    raise RuntimeError(
+                        "affected source early export changed requested keys"
+                    )
+                bulk_exported_source_keys["all"].update(exported_affected)
             unaffected_parent_video_sources = tuple(
                 source_scope.unaffected_parent_video_sources()
             )
@@ -4978,6 +5153,7 @@ def materialize(
                     exported_parent_videos,
                 )
             affected_parent_sources = ()
+            exported_affected = set()
             exported_parent_sources = set()
             unaffected_parent_video_sources = ()
             preflight_parent_video_keys = set()
