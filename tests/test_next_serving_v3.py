@@ -6878,6 +6878,8 @@ class Tests(unittest.TestCase):
             "BACKFILL_SOURCE_CHECKOUT_BYTES",
             "BACKFILL_SOURCE_CHECKOUT_LIMIT_EXCEEDED",
             "source_git_bytes < 1000000000",
+            "/data/backfill-inbox/**",
+            "git add data/backfill-inbox",
         ):
             self.assertIn(required,workflow)
         self.assertLess(
