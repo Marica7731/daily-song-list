@@ -3346,6 +3346,8 @@ def _load_parent_video_source_batch(
                 f"missing={unresolved_occurrences[:3]} extra=[]"
             )
         for video_id in fallback_video_ids:
+            if video_id in absent_video_ids:
+                continue
             video_row, fallback_occurrences = _parent_video_ranking_fallback(
                 fallback_by_video[video_id],
                 expected_video_id=video_id,
