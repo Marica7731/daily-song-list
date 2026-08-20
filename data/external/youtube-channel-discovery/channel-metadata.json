@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T15:24:19.449Z",
+  "generatedAt": "2026-08-20T16:02:08.767Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T15:24:19.449Z",
+    "fetchedAt": "2026-08-20T16:02:08.767Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T15:24:19.449Z",
+    "generatedAt": "2026-08-20T16:02:08.767Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,74 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1202,
-      "parseableChannels": 1183,
+      "totalChannels": 1204,
+      "parseableChannels": 1185,
       "realAvatar": 649,
-      "thumbnailFallback": 553,
+      "thumbnailFallback": 555,
       "missingDisplayImage": 0,
-      "missingAvatar": 553,
+      "missingAvatar": 555,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1360,
+      "skipped_collected_evidence": 1362,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1341,
+      "batch_limit_reached": 1343,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@MIONASUMERAGI",
+        "channelId": "UCoAL7HKxjpPGuA1G4bdfHTQ",
+        "displayName": "皇 美緒奈 / MIONA SUMERAGI",
+        "sourceUrl": "https://www.youtube.com/channel/UCoAL7HKxjpPGuA1G4bdfHTQ",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mela_akaru",
+        "channelId": "UC1GQB6OqVMoFlHhQ9AagtqA",
+        "displayName": "メラ・アカル MelaakaruVtuber",
+        "sourceUrl": "https://www.youtube.com/@mela_akaru",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@shiyumarurun",
+        "channelId": "UC9b76pk9Re-focJF7X5GtKQ",
+        "displayName": "Shiyu Ch. しゆ。",
+        "sourceUrl": "https://www.youtube.com/@shiyumarurun",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RurufuHizuki",
+        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
+        "displayName": "陽月るるふ / Hizuki Rurufu",
+        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@onigayaten0512",
+        "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
+        "displayName": "鬼ヶ谷 テン / Onigaya Ten",
+        "sourceUrl": "https://www.youtube.com/@onigayaten0512",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@PIROPARU",
+        "channelId": "UCSCmu_VjL4RR7rBjrvSAwSg",
+        "displayName": "字ぴろぱる / AZANA PIROPARU",
+        "sourceUrl": "https://www.youtube.com/@PIROPARU",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@SidenLime",
+        "channelId": "UC2f11iZvrPBtA_S1LE2soeA",
+        "displayName": "Lime Ch. 紫電ライム",
+        "sourceUrl": "https://www.youtube.com/@SidenLime",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@otodama_hibiku",
         "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
@@ -11800,55 +11849,6 @@
         "channelId": "UCHRBDXLCWxNQ9AhZlk9VZLg",
         "displayName": "宵夢 ふわむ【Fuwamu Ch.】",
         "sourceUrl": "https://www.youtube.com/@yoiyume_fuwamu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Berrych0623",
-        "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
-        "displayName": "汐音ベリーちゃん Berry Ch",
-        "sourceUrl": "https://www.youtube.com/@Berrych0623",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Cetro.Timaeus",
-        "channelId": "UCOBsuL1u08iXAHTKJmsoMzw",
-        "displayName": "Cetro Ch. 賽特珞",
-        "sourceUrl": "https://www.youtube.com/@Cetro.Timaeus",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@inuzukiren",
-        "channelId": "UCg4x4QmjPx0I1HNQp9h1xvg",
-        "displayName": "Ren.ch戌月れん",
-        "sourceUrl": "https://www.youtube.com/@inuzukiren",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@doremikan1234",
-        "channelId": "UCkgVME8Flwsgxm7u3tK2H_w",
-        "displayName": "どれみかん_ch",
-        "sourceUrl": "https://www.youtube.com/@doremikan1234",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Ratio_Yuires",
-        "channelId": "UCWQGiZK_rAMpnl4awiUrqqg",
-        "displayName": "ラティオ・ユィリスOfficial",
-        "sourceUrl": "https://www.youtube.com/@Ratio_Yuires",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KannagiAnna",
-        "channelId": "UCvuAdWg_I8U9kwVGZ4XLvog",
-        "displayName": "神凪アンナ - Kannagi Anna -",
-        "sourceUrl": "https://www.youtube.com/@KannagiAnna",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@arale_yumemita",
-        "channelId": "UCWfF0DB6m_t2CE3KcOOOX7g",
-        "displayName": "仲町あられ -Nakamachi Arale- / 夢限大みゅーたいぷ",
-        "sourceUrl": "https://www.youtube.com/@arale_yumemita",
         "reason": "batch_limit_reached"
       }
     ]
