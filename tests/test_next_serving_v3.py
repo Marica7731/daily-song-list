@@ -6766,6 +6766,15 @@ class Tests(unittest.TestCase):
             "ubuntu_gate:",
             "runs-on: ubuntu-latest",
             "runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]",
+            "Reset bounded isolated Mac source checkout",
+            "WDC_SOURCE_ROOT: ${{ github.workspace }}/wdc-release-source",
+            "working-directory: wdc-release-source",
+            "path: wdc-release-source",
+            ".wdc-release-source-owned",
+            "WDC_SOURCE_CHECKOUT_RESET",
+            "WDC_SOURCE_CHECKOUT_BYTES",
+            "WDC_SOURCE_CHECKOUT_LIMIT_EXCEEDED",
+            "source_git_bytes < 1000000000",
             "materialize-pg-release-snapshot.py",
             "scripts/migration/pg-peer-relay.py",
             "server/pg_adapter.py",
@@ -6782,7 +6791,7 @@ class Tests(unittest.TestCase):
             "PGHOST=127.0.0.1",
             'PGPORT="$LOCAL_PORT"',
             'PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
-            'PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE"',
+            'PYTHONPATH="$PYTHON_DEPS_ROOT:$WDC_SOURCE_ROOT/server:$WDC_SOURCE_ROOT"',
             '"$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py --help >/dev/null',
             'MATERIALIZE_LOG="$MAC_RUN_ROOT/materialize.log"',
             "PYTHONUNBUFFERED=1",
@@ -6842,6 +6851,14 @@ class Tests(unittest.TestCase):
         self.assertIn('[[ "$project_root" == "/opt/culua/ytb-song-rank" ]]',workflow)
         self.assertIn('[[ "$releases_root" == "$project_root/releases" ]]',workflow)
         self.assertIn('projected_bytes=$((current_bytes + incoming_bytes))',workflow)
+        self.assertLess(
+            workflow.index("Reset bounded isolated Mac source checkout"),
+            workflow.index("Checkout complete serving implementation"),
+        )
+        self.assertLess(
+            workflow.index("WDC_SOURCE_CHECKOUT_BYTES"),
+            workflow.index("Install hash-locked Mac Python dependencies"),
+        )
         self.assertLess(
             workflow.index("SOURCE_TRIPLET_STABLE_BEFORE_WDC_WRITE"),
             workflow.index('install -d -m 0750 "$project_root/incoming"'),

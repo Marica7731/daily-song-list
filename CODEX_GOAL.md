@@ -14,11 +14,13 @@
 | `32368642818` | `d6a2a1e4e265fdf9714dbc36eae679f0305b2eb1` | `affected parent sources`，已完成 `32037/32037` 通用父来源与 `42936/42936` 父视频来源后 | `affected canonical source is missing: all/02bfc2bc89767132736c2e7a`；反算为 legacy ranking-only video `LLe0YJODmFM`，父卡 8 occurrences，本 overlay 删除其中 1 条 | 受影响视频复用严格 ranking fallback，预期 8→7；新增 exact regression；新增全量 affected metadata preflight，并把 affected export 前移到两个大规模 immutable copy 之前 |
 | `32376509908` | 同上 | 重复 scheduled run | 旧 head、同一未修复类别，不允许继续 | 已 force-cancel，Mac exact root/relay cleanup 后才允许最新修复 head 唯一重跑 |
 | `32381417614` | 同上 | 旧 schedule 在前一任务取消后获得 Mac 并重新物化 | 仍不含本轮修复，必然重复同类失败 | 已于 step 9 精确 force-cancel；exact root 不存在、relay inactive、WDC 未写入 |
+| `32392989048` | `5a57f2c540baf8a6713e02b6f945155f4ad78c09` | Mac `actions/checkout@v4`，尚未创建 exact run root/relay | self-hosted workspace 复用的 partial-clone `.git` 已达 37GB（pack 30GB）；fetch 子进程在 `git rev-list --exclude-promisor-objects --alternate-refs` 单核 100% 持续约 27 分钟 | 精确取消且确认 Mac root absent、relay inactive、WDC 未写入；WDC workflow 改用独立 `wdc-release-source` sparse checkout，运行前按 owner/realpath 清理，checkout 后设 1GB fail-closed 门禁并新增 workflow contract 回归 |
 
 ### 当前状态与下一步
 
-- `in_progress`：分支 `codex/fix-affected-source-preflight` 已定位并实现候选；focused tests 必须先绿，再跑完整 serving tests、diff 检查、commit/push、PR/CI/squash merge。
-- `pending`：确认 Mac writer、合法 core/accepted、VPS2 relay 均空闲后，只调度唯一最新-head `sync-wdc-release.yml force=true`。
+- `done`：affected-source 全量前置门禁已由 PR #72 合并，CI `32389612647` success；修复 commit `aa4d7ddf` 已确认在最新 core main 祖先链。
+- `in_progress`：分支 `codex/fix-mac-checkout-isolation` 修复 self-hosted checkout 的 37GB partial-clone 扫描；必须通过 workflow contract、完整 serving tests、diff/YAML/shell 检查、PR/CI 后才允许唯一最新-head WDC 重跑。
+- `pending`：确认合法 core/accepted、Mac writer、VPS2 relay 均空闲后，只调度唯一最新-head `sync-wdc-release.yml force=true`。
 - `pending`：成功后立即验证 health/meta/release、一致的四类视图、artists、31 distinct-video 跨页与多 occurrence、搜索/两个筛选、真实浏览器详情、同协议延迟、10 分钟稳定性和精确残留清理。
 
 ## Pre-release gate: VTuber source-detail paging and cover mapping

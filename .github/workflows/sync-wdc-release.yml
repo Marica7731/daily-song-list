@@ -110,11 +110,37 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 600
     environment: wdc-shadow
+    env:
+      WDC_SOURCE_ROOT: ${{ github.workspace }}/wdc-release-source
+    defaults:
+      run:
+        working-directory: wdc-release-source
 
     steps:
+      - name: Reset bounded isolated Mac source checkout
+        working-directory: .
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.wdc-release-source-owned"
+          [[ "$WDC_SOURCE_ROOT" == "$GITHUB_WORKSPACE/wdc-release-source" ]]
+          [[ "${WDC_SOURCE_ROOT%/*}" == "$GITHUB_WORKSPACE" ]]
+          [[ "${WDC_SOURCE_ROOT##*/}" == "wdc-release-source" ]]
+          if [[ -e "$WDC_SOURCE_ROOT" || -L "$WDC_SOURCE_ROOT" ]]; then
+            [[ -d "$WDC_SOURCE_ROOT" && ! -L "$WDC_SOURCE_ROOT" ]]
+            [[ -f "$OWNER_PATH" ]]
+            [[ "$(cat "$OWNER_PATH")" == "daily-song-list-wdc-source-v1" ]]
+            source_real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$WDC_SOURCE_ROOT")"
+            [[ "$source_real" == "$WDC_SOURCE_ROOT" ]]
+            rm -rf -- "$WDC_SOURCE_ROOT"
+          fi
+          printf '%s\n' "daily-song-list-wdc-source-v1" > "$OWNER_PATH"
+          install -d -m 0700 "$WDC_SOURCE_ROOT"
+          echo "WDC_SOURCE_CHECKOUT_RESET root=$WDC_SOURCE_ROOT"
+
       - name: Checkout complete serving implementation
         uses: actions/checkout@v4
         with:
+          path: wdc-release-source
           fetch-depth: 1
           sparse-checkout-cone-mode: false
           sparse-checkout: |
@@ -141,6 +167,14 @@ jobs:
       - name: Reserve exact Mac run root
         run: |
           set -Eeuo pipefail
+          source_git_kib="$(du -sk "$WDC_SOURCE_ROOT/.git" | awk '{print $1}')"
+          [[ "$source_git_kib" =~ ^[0-9]+$ ]]
+          source_git_bytes=$((source_git_kib * 1024))
+          (( source_git_bytes < 1000000000 )) || {
+            echo "WDC_SOURCE_CHECKOUT_LIMIT_EXCEEDED bytes=$source_git_bytes" >&2
+            exit 74
+          }
+          echo "WDC_SOURCE_CHECKOUT_BYTES bytes=$source_git_bytes limit=1000000000"
           MAC_RUN_ROOT="/Users/be/codex-temp/dsl-wdc-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           test ! -e "$MAC_RUN_ROOT"
           install -d -m 0700 "$MAC_RUN_ROOT"
@@ -226,7 +260,7 @@ jobs:
             --timeout 30 \
             --retries 2 \
             -r scripts/migration/requirements-wdc-mac.txt
-          PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" "$MAC_PYTHON" -B - <<'PY'
+          PYTHONPATH="$PYTHON_DEPS_ROOT:$WDC_SOURCE_ROOT/server:$WDC_SOURCE_ROOT" "$MAC_PYTHON" -B - <<'PY'
           import psycopg
           if psycopg.__version__ != "3.3.4":
               raise SystemExit(f"unexpected psycopg version: {psycopg.__version__}")
@@ -235,7 +269,7 @@ jobs:
           print("MAC_RUN_LOCAL_PSYCOPG_OK", psycopg.__version__, psycopg.pq.__impl__)
           PY
           echo "PYTHON_DEPS_ROOT=$PYTHON_DEPS_ROOT" >> "$GITHUB_ENV"
-          echo "PYTHONPATH=$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          echo "PYTHONPATH=$PYTHON_DEPS_ROOT:$WDC_SOURCE_ROOT/server:$WDC_SOURCE_ROOT" >> "$GITHUB_ENV"
 
       - name: Run release regression tests
         run: |
@@ -486,7 +520,7 @@ jobs:
             PGDATABASE=song_rank \
             PGUSER=www-data \
             PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE" \
+            PYTHONPATH="$PYTHON_DEPS_ROOT:$WDC_SOURCE_ROOT/server:$WDC_SOURCE_ROOT" \
             "$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py \
               --output "$PAGES_ROOT" \
               --meta-output "$META_FILE" \
