@@ -3749,7 +3749,12 @@ class Tests(unittest.TestCase):
             self.assertNotIn("coalesce(range_id",statement)
             self.assertEqual(params[2],["all",""])
             yield occurrence_row
-        with patch.object(pg_adapter,"_rows",return_value=[video_row]) as rows, \
+        def rows(_connection,statement,_params):
+            if "FROM runtime_videos" in statement:return [video_row]
+            if "SELECT DISTINCT video_id" in statement:
+                return [{"video_id":video_id}]
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows) as lookup_rows, \
              patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream):
             completed=pg_materializer.export_unaffected_parent_video_sources(
                 object(),writer,parent_revision_id="parent",
@@ -3761,13 +3766,13 @@ class Tests(unittest.TestCase):
         self.assertEqual((key,range_id,record["videoId"]),(source_key,"all",video_id))
         self.assertEqual(record["sourceDetailKey"],source_key)
         self.assertEqual(occurrences[0]["song"]["title"],"Bulk Song")
-        rows.assert_called_once()
+        self.assertEqual(lookup_rows.call_count,2)
 
     def test_snapshot_bulk_exports_ranking_only_parent_video_sources(self):
         video_id="parent-ranking-only"
         source_key=pg_adapter._stable_key("source-video","all",video_id)
         ranking_payload={
-            "type":"video","key":video_id,"detailKey":video_id,
+            "type":"video","key":video_id,"detailKey":f"all:{video_id}",
             "videoId":video_id,"title":"Ranking-only Video",
             "channelName":"Fixture","channelId":"UCfixture",
             "channelHandle":"/@fixture",
@@ -3790,6 +3795,8 @@ class Tests(unittest.TestCase):
                 self.values.append((key,range_id,dict(record),list(occurrences)))
         writer=Writer()
         def rows(_connection,statement,params):
+            if "FROM runtime_source_details AS detail" in statement:
+                return []
             if "FROM runtime_videos" in statement:
                 return []
             if "FROM runtime_ranking_rows" in statement:
@@ -3800,10 +3807,15 @@ class Tests(unittest.TestCase):
             self.fail(statement)
         with patch.object(pg_adapter,"_rows",side_effect=rows), \
              patch.object(pg_materializer,"_stream_pg_rows",return_value=iter(())):
+            preflight=pg_materializer.preflight_unaffected_parent_video_sources(
+                object(),parent_revision_id="parent",
+                sources=((source_key,video_id),),
+            )
             completed=pg_materializer.export_unaffected_parent_video_sources(
                 object(),writer,parent_revision_id="parent",
                 sources=((source_key,video_id),),
             )
+        self.assertEqual(preflight,{source_key})
         self.assertEqual(completed,{source_key})
         self.assertEqual(len(writer.values),1)
         key,range_id,record,occurrences=writer.values[0]
@@ -3816,6 +3828,26 @@ class Tests(unittest.TestCase):
             ],
             [("Song A",11),("Song B",22)],
         )
+
+    def test_snapshot_ranking_only_parent_video_rejects_wrong_range_identity(self):
+        video_id="parent-ranking-wrong-range"
+        ranking_row={
+            "detail_key":video_id,"title":"Wrong Range",
+            "row_count":1,"video_count":1,"timestamp_count":1,
+            "payload_json":{
+                "type":"video","key":video_id,
+                "detailKey":f"7d:{video_id}","videoId":video_id,
+                "title":"Wrong Range","count":1,
+                "timestampCount":1,"videoCount":1,
+                "songs":[{"title":"Song","artist":"Artist"}],
+            },
+        }
+        with self.assertRaisesRegex(
+            RuntimeError,"parent video ranking fallback changed identity",
+        ):
+            pg_materializer._parent_video_ranking_fallback(
+                ranking_row,expected_video_id=video_id,
+            )
 
     def test_snapshot_ranking_only_parent_video_count_mismatch_fails_closed(self):
         video_id="parent-ranking-mismatch"
@@ -3843,6 +3875,67 @@ class Tests(unittest.TestCase):
             ):
                 pg_materializer.export_unaffected_parent_video_sources(
                     object(),object(),parent_revision_id="parent",
+                    sources=((source_key,video_id),),
+                )
+
+    def test_snapshot_parent_video_preflight_skips_persisted_and_checks_direct(self):
+        persisted_video="parent-persisted"
+        direct_video="parent-direct"
+        persisted_key=pg_adapter._stable_key("source-video","all",persisted_video)
+        direct_key=pg_adapter._stable_key("source-video","all",direct_video)
+        direct_row={
+            "video_id":direct_video,"title":"Direct Video",
+            "channel_name":"Fixture","channel_id":"UCfixture",
+            "channel_handle":"@fixture","channel_url":"https://youtube.com/@fixture",
+            "published_timestamp":1700000000,"payload_json":{},
+        }
+        statements=[]
+        def rows(_connection,statement,params):
+            statements.append(" ".join(statement.split()))
+            if "FROM runtime_source_details AS detail" in statement:
+                self.assertEqual(set(params[1]),{persisted_key,direct_key})
+                return [{"source_key":persisted_key}]
+            if "FROM runtime_videos" in statement:
+                self.assertEqual(params[1],[direct_video])
+                return [direct_row]
+            if "SELECT DISTINCT video_id" in statement:
+                self.assertEqual(params[1],[direct_video])
+                return [{"video_id":direct_video}]
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            actual=pg_materializer.preflight_unaffected_parent_video_sources(
+                object(),parent_revision_id="parent",
+                sources=(
+                    (persisted_key,persisted_video),
+                    (direct_key,direct_video),
+                ),
+            )
+        self.assertEqual(actual,{direct_key})
+        self.assertEqual(len(statements),3)
+        self.assertIn("runtime_source_details",statements[0])
+        self.assertIn("runtime_videos",statements[1])
+        self.assertIn("runtime_occurrences",statements[2])
+
+    def test_snapshot_parent_video_preflight_rejects_missing_occurrences(self):
+        video_id="parent-no-occurrences"
+        source_key=pg_adapter._stable_key("source-video","all",video_id)
+        video_row={
+            "video_id":video_id,"title":"No Occurrences",
+            "channel_name":"Fixture","channel_id":"UCfixture",
+            "channel_handle":"@fixture","channel_url":"https://youtube.com/@fixture",
+            "published_timestamp":1700000000,"payload_json":{},
+        }
+        def rows(_connection,statement,_params):
+            if "FROM runtime_source_details AS detail" in statement:return []
+            if "FROM runtime_videos" in statement:return [video_row]
+            if "SELECT DISTINCT video_id" in statement:return []
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            with self.assertRaisesRegex(
+                RuntimeError,"parent video occurrence preflight changed",
+            ):
+                pg_materializer.preflight_unaffected_parent_video_sources(
+                    object(),parent_revision_id="parent",
                     sources=((source_key,video_id),),
                 )
 
@@ -6555,6 +6648,9 @@ class Tests(unittest.TestCase):
             'PGAPPNAME="dsl-wdc-snapshot-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
             'PYTHONPATH="$PYTHON_DEPS_ROOT:$GITHUB_WORKSPACE/server:$GITHUB_WORKSPACE"',
             '"$MAC_PYTHON" scripts/migration/materialize-pg-release-snapshot.py --help >/dev/null',
+            'MATERIALIZE_LOG="$MAC_RUN_ROOT/materialize.log"',
+            "PYTHONUNBUFFERED=1",
+            '2>&1 | tee "$MATERIALIZE_LOG"',
             "SOURCE_TRIPLET_STABLE_AFTER_BUILD",
             "SOURCE_TRIPLET_STABLE_BEFORE_WDC_WRITE",
             "SOURCE_TRIPLET_STABLE_BEFORE_ACTIVATE",
