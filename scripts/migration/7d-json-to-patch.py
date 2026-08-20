@@ -95,9 +95,17 @@ def occurrence_id(song: dict[str, Any], position: int) -> str:
     return value or f"position:{position}"
 
 
-def canonical_song(song: dict[str, Any], video_id: str, position: int) -> dict[str, Any]:
+def canonical_song(
+    song: dict[str, Any], video_id: str, position: int
+) -> dict[str, Any] | None:
     title = text(song.get("title"))
-    if not title or len(title) > 500:
+    # Core snapshots can contain timestamped commentary such as
+    # "encore encore encore" with no actual song title.  It is not a song
+    # occurrence, so do not manufacture one from the video's title.  The
+    # containing video and every titled occurrence remain authoritative.
+    if not title:
+        return None
+    if len(title) > 500:
         fail(f"video {video_id} occurrence {position} has invalid title")
     artist = song.get("artist")
     if artist is not None and not isinstance(artist, str):
@@ -144,7 +152,10 @@ def load_snapshot(path: Path, label: str, args: argparse.Namespace) -> dict[str,
     if len(items) > args.max_videos:
         fail(f"{label} video cap exceeded")
     seen_videos: set[str] = set()
+    input_occurrence_count = 0
     occurrence_count = 0
+    skipped_titleless_count = 0
+    skipped_empty_video_count = 0
     records: list[dict[str, Any]] = []
     identities: dict[tuple[str, str], dict[str, Any]] = {}
     for video_index, raw_video in enumerate(items):
@@ -163,18 +174,25 @@ def load_snapshot(path: Path, label: str, args: argparse.Namespace) -> dict[str,
         converted: list[dict[str, Any]] = []
         per_video: set[str] = set()
         for position, raw_song in enumerate(songs):
+            input_occurrence_count += 1
+            if input_occurrence_count > args.max_occurrences:
+                fail(f"{label} occurrence cap exceeded")
             if not isinstance(raw_song, dict):
                 fail(f"{label} video {video_id} occurrence {position} is not an object")
             song = canonical_song(raw_song, video_id, position)
+            if song is None:
+                skipped_titleless_count += 1
+                continue
             identity = text(song["occurrenceId"])
             if identity in per_video:
                 fail(f"{label} duplicate occurrence identity: {video_id}/{identity}")
             per_video.add(identity)
             identities[(video_id, identity)] = song
             converted.append(song)
+        if not converted:
+            skipped_empty_video_count += 1
+            continue
         occurrence_count += len(converted)
-        if occurrence_count > args.max_occurrences:
-            fail(f"{label} occurrence cap exceeded")
         record = dict(raw_video)
         record.update(
             {
@@ -198,8 +216,12 @@ def load_snapshot(path: Path, label: str, args: argparse.Namespace) -> dict[str,
         "generated": generated,
         "records": records,
         "identities": identities,
+        "inputVideoCount": len(items),
         "videoCount": len(records),
+        "inputOccurrenceCount": input_occurrence_count,
         "occurrenceCount": occurrence_count,
+        "skippedEmptyVideoCount": skipped_empty_video_count,
+        "skippedTitlelessOccurrenceCount": skipped_titleless_count,
     }
 
 
@@ -289,8 +311,13 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         "sourceBlobSha": args.source_blob,
         "sourceArtifactSha256": source_sha,
         "generatedAt": current["generatedAt"],
+        "inputVideoCount": current["inputVideoCount"],
         "acceptedVideoCount": current["videoCount"],
+        "inputOccurrenceCount": current["inputOccurrenceCount"],
         "acceptedOccurrenceCount": current["occurrenceCount"],
+        "skippedTitlelessOccurrenceCount": current[
+            "skippedTitlelessOccurrenceCount"
+        ],
         "sourceOccurrenceSemanticsSha256": semantics_sha,
     }
     source_manifest_sha = sha256_bytes(canonical_bytes(source_manifest))
@@ -316,8 +343,16 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         "mutation_count": 1 + current["videoCount"] + current["occurrenceCount"],
         "acceptedVideoCount": current["videoCount"],
         "acceptedOccurrenceCount": current["occurrenceCount"],
+        "skippedEmptyVideoCount": current["skippedEmptyVideoCount"],
+        "skippedTitlelessOccurrenceCount": current[
+            "skippedTitlelessOccurrenceCount"
+        ],
         "baseVideoCount": previous["videoCount"],
         "baseOccurrenceCount": previous["occurrenceCount"],
+        "baseSkippedEmptyVideoCount": previous["skippedEmptyVideoCount"],
+        "baseSkippedTitlelessOccurrenceCount": previous[
+            "skippedTitlelessOccurrenceCount"
+        ],
         "sourceCommitSha": args.source_commit,
         "source_commit_sha": args.source_commit,
         "sourceBaseSha": args.source_base,
@@ -361,6 +396,13 @@ def main() -> int:
     if not SHA1.fullmatch(args.source_blob) or not SHA1.fullmatch(args.base_blob):
         fail("source/base blob must be immutable 40-hex Git blob SHAs")
     manifest = convert(args)
+    print(
+        "7D_TITLELESS_OCCURRENCES_SKIPPED "
+        f"current={manifest['skippedTitlelessOccurrenceCount']} "
+        f"base={manifest['baseSkippedTitlelessOccurrenceCount']} "
+        f"emptyVideosCurrent={manifest['skippedEmptyVideoCount']} "
+        f"emptyVideosBase={manifest['baseSkippedEmptyVideoCount']}"
+    )
     print(json.dumps({"status": "ok", **manifest}, ensure_ascii=False, sort_keys=True))
     print("7D_AUTHORITATIVE_PATCH_COMPLETE")
     return 0

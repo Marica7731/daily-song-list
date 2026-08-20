@@ -29,6 +29,7 @@ BUILDER_PATH=ROOT/"scripts"/"migration"/"build-serving-store.py"
 BUNDLE_PATH=ROOT/"scripts"/"migration"/"build-release-bundle.py"
 PATCHER_PATH=ROOT/"scripts"/"migration"/"patch-next-frontend.py"
 PREPARE_FRONTEND_PATH=ROOT/"scripts"/"migration"/"prepare-wdc-frontend.py"
+SEVEN_DAY_PATCH_PATH=ROOT/"scripts"/"migration"/"7d-json-to-patch.py"
 INSTALLER_PATH=ROOT/"deploy"/"install-wdc-release.sh"
 APP_PATH=ROOT/"assets"/"app.js"
 NGINX_PATH=ROOT/"deploy"/"nginx-next-api.conf"
@@ -40,7 +41,7 @@ def load(name:str,path:Path):
 
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
-pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH)
+pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH);seven_day_patch=load("seven_day_patch",SEVEN_DAY_PATCH_PATH)
 ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";VTUBER_KEY="dc6aa541a6dff484";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
@@ -197,6 +198,83 @@ def fake_pg_source(_connection,key,query):
     return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
             "page":page,"pageSize":page_size,"pageCount":math.ceil(total/page_size),"totalCount":total,
             "totalVideoCount":201,"totalOccurrenceCount":201}
+
+
+class SevenDayPatchTests(unittest.TestCase):
+    def snapshot(self,generated_at:str)->dict:
+        return {
+            "id":"7d","generatedAt":generated_at,
+            "items":[{
+                "videoId":"zyngx4g-sy4","channelId":"UC"+"a"*22,
+                "title":"【DAM KARAOKE 歌枠】August Karaoke 2: Kaelix DLC",
+                "songs":[
+                    {"occurrenceId":"valid-song","title":"Valid Song",
+                     "artist":"Singer","seconds":60},
+                    {"occurrenceId":"zyngx4g-sy4:2448:4026","title":" ",
+                     "artist":"未記載","seconds":4026,"position":2448,
+                     "index":45,"time":"1:07:06",
+                     "raw":"1:07:06 - encore encore encore",
+                     "sourceId":"UgwS4gRmOU57rxeDg2R4AaABAg","isNiche":True},
+                ],
+            }],
+        }
+
+    def test_titleless_commentary_is_skipped_without_rewriting_video_title(self):
+        with tempfile.TemporaryDirectory(prefix="dsl-7d-titleless-") as raw_root:
+            root=Path(raw_root);base=root/"base.json";current=root/"current.json"
+            base_bytes=json.dumps(
+                self.snapshot("2026-08-19T00:00:00Z"),ensure_ascii=False,
+            ).encode("utf-8")
+            current_bytes=json.dumps(
+                self.snapshot("2026-08-20T00:00:00Z"),ensure_ascii=False,
+            ).encode("utf-8")
+            base.write_bytes(base_bytes);current.write_bytes(current_bytes)
+            args=SimpleNamespace(
+                base_input=base,input=current,output=root/"patch.ndjson",
+                manifest_output=root/"manifest.json",source_commit="a"*40,
+                source_base="b"*40,
+                source_blob=seven_day_patch.git_blob_sha(current_bytes),
+                base_blob=seven_day_patch.git_blob_sha(base_bytes),
+                max_bytes=seven_day_patch.MAX_BYTES,
+                max_videos=seven_day_patch.MAX_VIDEOS,
+                max_occurrences=seven_day_patch.MAX_OCCURRENCES,
+            )
+            manifest=seven_day_patch.convert(args)
+            record=json.loads(args.output.read_text(encoding="utf-8"))
+        self.assertEqual(record["title"],self.snapshot("")["items"][0]["title"])
+        self.assertEqual([song["occurrenceId"] for song in record["songs"]],["valid-song"])
+        self.assertEqual(manifest["acceptedVideoCount"],1)
+        self.assertEqual(manifest["acceptedOccurrenceCount"],1)
+        self.assertEqual(manifest["skippedTitlelessOccurrenceCount"],1)
+        self.assertEqual(manifest["baseSkippedTitlelessOccurrenceCount"],1)
+        self.assertEqual(manifest["skippedEmptyVideoCount"],0)
+        self.assertEqual(manifest["sourceManifest"]["inputOccurrenceCount"],2)
+        self.assertEqual(
+            manifest["sourceManifest"]["skippedTitlelessOccurrenceCount"],1,
+        )
+
+    def test_nonempty_corrupt_title_fails_and_all_titleless_video_is_skipped(self):
+        with self.assertRaisesRegex(ValueError,"invalid title"):
+            seven_day_patch.canonical_song(
+                {"title":"x"*501,"artist":"Singer"},"video-fixture",0,
+            )
+        snapshot=self.snapshot("2026-08-20T00:00:00Z")
+        snapshot["items"][0]["songs"]=snapshot["items"][0]["songs"][1:]
+        with tempfile.TemporaryDirectory(prefix="dsl-7d-all-titleless-") as raw_root:
+            path=Path(raw_root)/"snapshot.json"
+            path.write_text(json.dumps(snapshot,ensure_ascii=False),encoding="utf-8")
+            args=SimpleNamespace(
+                max_bytes=seven_day_patch.MAX_BYTES,
+                max_videos=seven_day_patch.MAX_VIDEOS,
+                max_occurrences=seven_day_patch.MAX_OCCURRENCES,
+            )
+            loaded=seven_day_patch.load_snapshot(path,"current",args)
+        self.assertEqual(loaded["inputVideoCount"],1)
+        self.assertEqual(loaded["videoCount"],0)
+        self.assertEqual(loaded["inputOccurrenceCount"],1)
+        self.assertEqual(loaded["occurrenceCount"],0)
+        self.assertEqual(loaded["skippedTitlelessOccurrenceCount"],1)
+        self.assertEqual(loaded["skippedEmptyVideoCount"],1)
 
 
 class Tests(unittest.TestCase):
