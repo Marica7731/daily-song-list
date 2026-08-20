@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T11:59:00.493Z",
+  "generatedAt": "2026-08-20T15:24:19.449Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T11:59:00.493Z",
+    "fetchedAt": "2026-08-20T15:24:19.449Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T11:59:00.493Z",
+    "generatedAt": "2026-08-20T15:24:19.449Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,34 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@otodama_hibiku",
+        "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
+        "displayName": "音魂ヒビクHibiku Otodama",
+        "sourceUrl": "https://www.youtube.com/@otodama_hibiku",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@yura_ayami",
+        "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
+        "displayName": "綾見ユラ / YuraAyami",
+        "sourceUrl": "https://www.youtube.com/@yura_ayami",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@H.Midori-Ch-",
+        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
+        "displayName": "H.Midori Ch🍃葉山翠",
+        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@HibachiMana",
+        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
+        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
+        "sourceUrl": "https://www.youtube.com/@HibachiMana",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Mcca25",
         "channelId": "UCs8hDV9LLPSd-1SgdlMNm5Q",
@@ -11821,34 +11849,6 @@
         "channelId": "UCWfF0DB6m_t2CE3KcOOOX7g",
         "displayName": "仲町あられ -Nakamachi Arale- / 夢限大みゅーたいぷ",
         "sourceUrl": "https://www.youtube.com/@arale_yumemita",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RurufuHizuki",
-        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
-        "displayName": "陽月るるふ / Hizuki Rurufu",
-        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@PurinLalaMode",
-        "channelId": "UCIxiVz8JLYTMXexmLh92S6A",
-        "displayName": "ぷりん・らら・もーど / Purin･Lala･Mode【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@PurinLalaMode",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@maguro_utatane",
-        "channelId": "UCw9ItMEys4-5nD_jH0XUVXg",
-        "displayName": "一二三まぐろ😸🐟",
-        "sourceUrl": "https://www.youtube.com/@maguro_utatane",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@neru_utano",
-        "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
-        "displayName": "歌野ねる / Utano neru",
-        "sourceUrl": "https://www.youtube.com/@neru_utano",
         "reason": "batch_limit_reached"
       }
     ]
