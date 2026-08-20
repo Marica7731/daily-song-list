@@ -3929,6 +3929,7 @@ class Tests(unittest.TestCase):
             if "FROM runtime_source_details AS detail" in statement:return []
             if "FROM runtime_videos" in statement:return [video_row]
             if "SELECT DISTINCT video_id" in statement:return []
+            if "FROM runtime_ranking_rows" in statement:return []
             self.fail(statement)
         with patch.object(pg_adapter,"_rows",side_effect=rows):
             with self.assertRaisesRegex(
@@ -3938,6 +3939,44 @@ class Tests(unittest.TestCase):
                     object(),parent_revision_id="parent",
                     sources=((source_key,video_id),),
                 )
+
+    def test_snapshot_parent_video_without_runtime_occurrence_uses_ranking_fallback(self):
+        video_id="parent-runtime-video-ranking-occurrence"
+        video_row={
+            "video_id":video_id,"title":"Stale Runtime Video",
+            "channel_name":"Fixture","channel_id":"UCfixture",
+            "channel_handle":"@fixture","channel_url":"https://youtube.com/@fixture",
+            "published_timestamp":1700000000,"payload_json":{},
+        }
+        ranking_row={
+            "detail_key":video_id,"title":"Authoritative Ranking Video",
+            "row_count":1,"video_count":1,"timestamp_count":1,
+            "payload_json":{
+                "type":"video","key":video_id,"detailKey":f"all:{video_id}",
+                "videoId":video_id,"title":"Authoritative Ranking Video",
+                "count":1,"timestampCount":1,"videoCount":1,
+                "songs":[{"title":"Song A","artist":"Artist","seconds":11}],
+            },
+        }
+        def rows(_connection,statement,params):
+            if "FROM runtime_videos" in statement:
+                self.assertEqual(params[1],[video_id])
+                return [video_row]
+            if "SELECT DISTINCT video_id" in statement:
+                self.assertEqual(params[1],[video_id])
+                return []
+            if "FROM runtime_ranking_rows" in statement:
+                self.assertEqual(params[1],[video_id])
+                return [ranking_row]
+            self.fail(statement)
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            videos,fallback=pg_materializer._load_parent_video_source_batch(
+                object(),parent_revision_id="parent",video_ids=[video_id],
+            )
+        self.assertEqual(videos[video_id]["title"],"Authoritative Ranking Video")
+        self.assertEqual(len(fallback[video_id]),1)
+        self.assertEqual(fallback[video_id][0]["videoId"],video_id)
+        self.assertEqual(fallback[video_id][0]["song"]["title"],"Song A")
 
     def test_snapshot_bulk_streams_unaffected_persisted_parent_sources(self):
         keep_key="source-keep"
