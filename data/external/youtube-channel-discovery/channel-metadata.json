@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T20:48:55.800Z",
+  "generatedAt": "2026-08-20T22:20:16.191Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T20:48:55.800Z",
+    "fetchedAt": "2026-08-20T22:20:16.191Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T20:48:55.800Z",
+    "generatedAt": "2026-08-20T22:20:16.191Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1207,
-      "parseableChannels": 1188,
+      "totalChannels": 1208,
+      "parseableChannels": 1189,
       "realAvatar": 649,
-      "thumbnailFallback": 558,
+      "thumbnailFallback": 559,
       "missingDisplayImage": 0,
-      "missingAvatar": 558,
+      "missingAvatar": 559,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 26,
-      "skipped_collected_evidence": 1365
+      "skipped_collected_evidence": 1366
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1346,
+      "batch_limit_reached": 1347,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11688,6 +11688,13 @@
         "channelId": "UCSB9S5M1ktSjDEdmTTOZqkA",
         "displayName": "白餅だんご🍡✤",
         "sourceUrl": "https://www.youtube.com/channel/UCSB9S5M1ktSjDEdmTTOZqkA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
+        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
+        "displayName": "一二美アユ ch / Hifumi Aryu",
+        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
         "reason": "batch_limit_reached"
       },
       {
@@ -11842,13 +11849,6 @@
         "channelId": "UCqIigA_sooj8-efCTyqpWxA",
         "displayName": "ひでチャンネル",
         "sourceUrl": "https://www.youtube.com/@hide_ch",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@nemupipi",
-        "channelId": "UC19jIOPqzpV05aqiGpceXYg",
-        "displayName": "ねむぴぴ*-Nemupipi-",
-        "sourceUrl": "https://www.youtube.com/@nemupipi",
         "reason": "batch_limit_reached"
       }
     ]
