@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-20T16:02:08.767Z",
+  "generatedAt": "2026-08-20T17:54:31.815Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-20T16:02:08.767Z",
+    "fetchedAt": "2026-08-20T17:54:31.815Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-20T16:02:08.767Z",
+    "generatedAt": "2026-08-20T17:54:31.815Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1204,
-      "parseableChannels": 1185,
+      "totalChannels": 1205,
+      "parseableChannels": 1186,
       "realAvatar": 649,
-      "thumbnailFallback": 555,
+      "thumbnailFallback": 556,
       "missingDisplayImage": 0,
-      "missingAvatar": 555,
+      "missingAvatar": 556,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1362,
+      "skipped_collected_evidence": 1363,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1343,
+      "batch_limit_reached": 1344,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Shairu.ch_0801",
+        "channelId": "UCe_8qM8Wk4cU5oD3WO07gZg",
+        "displayName": "Shairu.chしゃいる",
+        "sourceUrl": "https://www.youtube.com/@Shairu.ch_0801",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@aoisui_",
+        "channelId": "UCcZPZ680duJJXnm9J0AAuBg",
+        "displayName": "蒼星すい",
+        "sourceUrl": "https://www.youtube.com/@aoisui_",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Mia_Konan",
+        "channelId": "UC4PrHgUcAtOoj_LKmUL-uLQ",
+        "displayName": "湖南みあ / Mia Channel【ななしいんく】",
+        "sourceUrl": "https://www.youtube.com/@Mia_Konan",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MIONASUMERAGI",
         "channelId": "UCoAL7HKxjpPGuA1G4bdfHTQ",
@@ -11828,27 +11849,6 @@
         "channelId": "UCeKkP16XdaalU0Xn6il_mhw",
         "displayName": "飲酒じめさん【hajime】",
         "sourceUrl": "https://www.youtube.com/@hajime_alc9",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E3%83%95%E3%82%A1%E3%83%8B%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96",
-        "channelId": "UCuKWoiJuEwpFtvt8CeRlIwg",
-        "displayName": "ファニのアーカイブ",
-        "sourceUrl": "https://www.youtube.com/@%E3%83%95%E3%82%A1%E3%83%8B%E3%81%AE%E3%82%A2%E3%83%BC%E3%82%AB%E3%82%A4%E3%83%96",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aroma_ongaku",
-        "channelId": "UCO4blswUnk1SHD1VmFXzB0A",
-        "displayName": "Aromaの音楽",
-        "sourceUrl": "https://www.youtube.com/@aroma_ongaku",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yoiyume_fuwamu",
-        "channelId": "UCHRBDXLCWxNQ9AhZlk9VZLg",
-        "displayName": "宵夢 ふわむ【Fuwamu Ch.】",
-        "sourceUrl": "https://www.youtube.com/@yoiyume_fuwamu",
         "reason": "batch_limit_reached"
       }
     ]
