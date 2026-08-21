@@ -496,10 +496,53 @@ jobs:
           PY
           )"
           TUNNEL_CONTROL="$MAC_RUN_ROOT/ssh/vps2-tunnel-control"
-          ssh "${VPS2_SSH[@]}" -M -S "$TUNNEL_CONTROL" -fN \
-            -o ExitOnForwardFailure=yes \
-            -L "127.0.0.1:${LOCAL_PORT}:127.0.0.1:${RELAY_PORT}" \
-            "$VPS2_USER@$VPS2_HOST"
+          TUNNEL_MONITOR_STOP="$MAC_RUN_ROOT/ssh/vps2-tunnel-monitor.stop"
+          start_pg_tunnel() {
+            ssh "${VPS2_SSH[@]}" -M -S "$TUNNEL_CONTROL" -fN \
+              -o ExitOnForwardFailure=yes \
+              -L "127.0.0.1:${LOCAL_PORT}:127.0.0.1:${RELAY_PORT}" \
+              "$VPS2_USER@$VPS2_HOST"
+          }
+          stop_pg_tunnel() {
+            touch "$TUNNEL_MONITOR_STOP"
+            if [[ "${TUNNEL_MONITOR_PID:-}" =~ ^[0-9]+$ ]]; then
+              for _ in {1..20}; do
+                kill -0 "$TUNNEL_MONITOR_PID" 2>/dev/null || break
+                sleep 0.25
+              done
+              if kill -0 "$TUNNEL_MONITOR_PID" 2>/dev/null; then
+                kill "$TUNNEL_MONITOR_PID" 2>/dev/null || true
+              fi
+              wait "$TUNNEL_MONITOR_PID" 2>/dev/null || true
+            fi
+            if [[ -S "$TUNNEL_CONTROL" ]]; then
+              ssh -S "$TUNNEL_CONTROL" -O exit \
+                "$VPS2_USER@$VPS2_HOST" >/dev/null 2>&1 || true
+            fi
+            rm -f -- "$TUNNEL_MONITOR_STOP" "$TUNNEL_CONTROL"
+          }
+          start_pg_tunnel
+          (
+            while [[ ! -e "$TUNNEL_MONITOR_STOP" ]]; do
+              if ! ssh -S "$TUNNEL_CONTROL" -O check \
+                "$VPS2_USER@$VPS2_HOST" >/dev/null 2>&1; then
+                ssh -S "$TUNNEL_CONTROL" -O exit \
+                  "$VPS2_USER@$VPS2_HOST" >/dev/null 2>&1 || true
+                rm -f -- "$TUNNEL_CONTROL"
+                for reconnect_attempt in {1..12}; do
+                  [[ -e "$TUNNEL_MONITOR_STOP" ]] && exit 0
+                  if start_pg_tunnel; then
+                    echo "WDC_PG_TUNNEL_RESTART attempt=$reconnect_attempt"
+                    break
+                  fi
+                  sleep 5
+                done
+              fi
+              sleep 5
+            done
+          ) &
+          TUNNEL_MONITOR_PID=$!
+          trap stop_pg_tunnel EXIT
           {
             echo "RELAY_ROOT=$RELAY_ROOT"
             echo "RELAY_UNIT=$RELAY_UNIT"
@@ -539,11 +582,8 @@ jobs:
               2>&1 | tee "$MATERIALIZE_LOG"
           # PostgreSQL is no longer needed after the one read-only transaction closes.
           # Remove the control socket before the exact run-root regular-file audit.
-          ssh -S "$TUNNEL_CONTROL" -O exit "$VPS2_USER@$VPS2_HOST"
-          for _ in {1..50}; do
-            [[ ! -e "$TUNNEL_CONTROL" ]] && break
-            sleep 0.1
-          done
+          stop_pg_tunnel
+          trap - EXIT
           test ! -e "$TUNNEL_CONTROL"
           test -s "$META_FILE"
           test -s "$CANONICAL_SNAPSHOT"

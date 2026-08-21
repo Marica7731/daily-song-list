@@ -2205,6 +2205,101 @@ class Tests(unittest.TestCase):
         self.assertEqual((writer.cache_drop_attempts,writer.cache_drop_count),(1,1))
         writer.abort()
 
+    def test_snapshot_source_checkpoint_discards_partial_and_keeps_complete_rows(self):
+        target=self.temp/"source-checkpoint.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        stage="affected-parent-sources"
+        def detail(source_key):
+            return {"type":"song","key":source_key,"title":source_key,
+                    "sourceDetailKey":source_key}
+        def occurrence(video_id,song_key):
+            return {"videoId":video_id,"song":{
+                "songKey":song_key,"title":song_key,"artist":"Fixture",
+            }}
+        writer.add_checkpointed_source(
+            stage,"source-complete","all",detail("source-complete"),
+            [occurrence("video-complete","song-complete")],
+        )
+        partial=writer.begin_checkpointed_source(
+            stage,"source-partial","all",detail("source-partial"),
+        )
+        writer.add_source_occurrences(
+            partial,[occurrence("video-partial","song-partial")],
+        )
+        # Match the production writer's periodic SQLite commit before the PG
+        # cursor later loses its transport.
+        writer.connection.commit()
+        completed=writer.prepare_checkpointed_sources(
+            stage,"all",{"source-complete","source-partial"},
+        )
+        self.assertEqual(completed,{"source-complete"})
+        self.assertEqual(
+            writer.connection.execute(
+                "SELECT source_key FROM source_details ORDER BY source_key"
+            ).fetchall(),
+            [("source-complete",)],
+        )
+        writer.add_checkpointed_source(
+            stage,"source-partial","all",detail("source-partial"),
+            [occurrence("video-partial","song-partial")],
+        )
+        stats=writer.finish()
+        self.assertEqual(
+            (stats["source_details"],stats["source_occurrences"]),(2,2),
+        )
+        with sqlite3.connect(target) as connection:
+            tables={row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            )}
+        self.assertNotIn("source_export_checkpoints",tables)
+
+    def test_snapshot_transport_retry_resumes_only_driver_connection_loss(self):
+        transport_error=type(
+            "OperationalError",(Exception,),{"__module__":"psycopg"},
+        )
+        first=object();second=object();calls=[];checkpoints=[];reconnects=[]
+        def operation(connection):
+            calls.append(connection)
+            if connection is first:
+                raise transport_error(
+                    "consuming input failed: server closed the connection unexpectedly"
+                )
+            return "complete"
+        current,result=pg_materializer._run_resumable_snapshot_operation(
+            first,
+            phase="affected-parent-sources",
+            operation=operation,
+            checkpoint=lambda:checkpoints.append("durable"),
+            reconnect=lambda connection,attempt:(
+                reconnects.append((connection,attempt)) or second
+            ),
+        )
+        self.assertIs(current,second)
+        self.assertEqual(result,"complete")
+        self.assertEqual(calls,[first,second])
+        self.assertEqual(checkpoints,["durable"])
+        self.assertEqual(reconnects,[(first,1)])
+        with self.assertRaisesRegex(RuntimeError,"data identity changed"):
+            pg_materializer._run_resumable_snapshot_operation(
+                first,
+                phase="affected-parent-sources",
+                operation=lambda _connection:(_ for _ in ()).throw(
+                    RuntimeError("data identity changed")
+                ),
+                checkpoint=lambda:checkpoints.append("unexpected"),
+                reconnect=lambda _connection,_attempt:second,
+            )
+        self.assertEqual(checkpoints,["durable"])
+
+    def test_snapshot_bulk_source_stream_uses_latency_bounded_fetches(self):
+        self.assertGreaterEqual(
+            pg_materializer.SOURCE_EXPORT_STREAM_FETCH_SIZE,1_024,
+        )
+        self.assertLessEqual(
+            pg_materializer.SOURCE_EXPORT_STREAM_FETCH_SIZE,
+            pg_materializer.SOURCE_SCOPE_FETCH_SIZE,
+        )
+
     def test_snapshot_writer_waits_for_short_read_only_probe_lock(self):
         target=self.temp/"busy-timeout.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
@@ -4416,7 +4511,7 @@ class Tests(unittest.TestCase):
             self.assertEqual(params[1],[keep_key])
             self.assertEqual(
                 kwargs.get("fetch_size"),
-                pg_materializer.SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+                pg_materializer.SOURCE_EXPORT_STREAM_FETCH_SIZE,
             )
             yield from occurrences
 
@@ -7213,6 +7308,23 @@ class Tests(unittest.TestCase):
             workflow.index("Checkout complete serving implementation"),
             workflow.rindex("            .github/workflows/check-code.yml\n"),
         )
+
+    def test_wdc_release_supervises_tunnel_for_snapshot_transport_resume(self):
+        workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
+            encoding="utf-8",
+        )
+        for required in (
+            'TUNNEL_MONITOR_STOP="$MAC_RUN_ROOT/ssh/vps2-tunnel-monitor.stop"',
+            "start_pg_tunnel()",
+            "stop_pg_tunnel()",
+            'ssh -S "$TUNNEL_CONTROL" -O check',
+            'echo "WDC_PG_TUNNEL_RESTART attempt=$reconnect_attempt"',
+            "trap stop_pg_tunnel EXIT",
+            "trap - EXIT",
+        ):
+            self.assertIn(required,workflow)
+        self.assertEqual(workflow.count("RuntimeMaxSec=32400"),1)
+        self.assertNotIn("RuntimeMaxSec=64800",workflow)
 
     def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
