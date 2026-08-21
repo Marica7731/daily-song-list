@@ -2517,42 +2517,39 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
-    def test_snapshot_writer_uses_all_scope_song_name_for_filtered_variant(self):
-        target = self.temp / "derived-filtered-canonical-song-name.sqlite"
+    def test_snapshot_writer_pins_legacy_artist_occurrences_to_detail_song_owner(self):
+        target = self.temp / "derived-filtered-artist-song-owner.sqlite"
         writer = pg_materializer.CanonicalSnapshotWriter(target)
         occurrences = [
             {
-                "videoId": "variant-video-a",
+                "videoId": f"artist-owner-{index:02d}",
                 "song": {
-                    "songKey": "shared-song-key",
-                    "title": "Canonical Song",
-                    "artist": "Fixture Artist",
+                    "title": "Honeycomb Summer",
+                    "artist": "Crazy:B",
                     "isNiche": False,
                     "isUnknownArtist": False,
                 },
-            },
-            {
-                "videoId": "variant-video-b",
-                "song": {
-                    "songKey": "shared-song-key",
-                    "title": "Canonical Song (Piano Ver.)",
-                    "artist": "Fixture Artist",
-                    "isNiche": False,
-                    "isUnknownArtist": False,
-                },
-            },
+            }
+            for index in range(7)
         ]
-        source_key = "source-artist-variant"
+        # Production parent rows have no songKey, while one accepted overlay
+        # row retained this legacy title/unit-separator/artist identity.
+        occurrences[-1]["song"]["songKey"] = "Honeycomb Summer\x1fCrazy:B"
+        source_key = "000c1914748382f4"
         record = {
             "rank": 1,
-            "key": "artist-variant",
+            "key": "crazyb",
             "sourceDetailKey": source_key,
-            "name": "Variant Artist",
-            "count": 2,
+            "name": "Crazy:B",
+            "count": 7,
             "songCount": 1,
-            "videoCount": 2,
-            "timestampCount": 2,
-            "songs": [{"name": "Canonical Song", "count": 2}],
+            "videoCount": 7,
+            "timestampCount": 7,
+            "songs": [{
+                "key": "honeycomb summer",
+                "name": "Honeycomb Summer",
+                "count": 7,
+            }],
             "occurrences": occurrences,
         }
         compact = pg_adapter.compact_ranking_payloads([record], "artists")[0]
@@ -2570,7 +2567,7 @@ class Tests(unittest.TestCase):
         writer.add_source(
             source_key,
             "all",
-            {"type": "artist", "key": "artist-variant", "songs": record["songs"]},
+            {"type": "artist", "key": "crazyb", "songs": record["songs"]},
             occurrences,
         )
         for view in ("songs", "videos", "vtubers"):
@@ -2637,7 +2634,32 @@ class Tests(unittest.TestCase):
             payload = json.loads(payload_json)
             self.assertEqual(
                 payload["songs"],
-                [{"key": "shared-song-key", "name": "Canonical Song", "count": 2}],
+                [{
+                    "key": "honeycomb summer",
+                    "name": "Honeycomb Summer",
+                    "count": 7,
+                }],
+            )
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*),count(DISTINCT video_id),"
+                    "count(DISTINCT canonical_song_key),"
+                    "count(DISTINCT canonical_song_name),"
+                    "min(canonical_song_key),min(canonical_song_name) "
+                    "FROM source_occurrences WHERE range_id='all' "
+                    "AND source_key=?",
+                    (source_key,),
+                ).fetchone(),
+                (7, 7, 1, 1, "honeycomb summer", "Honeycomb Summer"),
+            )
+            raw_payload = json.loads(writer.connection.execute(
+                "SELECT payload_json FROM source_occurrences "
+                "WHERE range_id='all' AND source_key=? ORDER BY position DESC LIMIT 1",
+                (source_key,),
+            ).fetchone()[0])
+            self.assertEqual(
+                raw_payload["song"]["songKey"],
+                "Honeycomb Summer\x1fCrazy:B",
             )
         finally:
             writer.abort()
@@ -4206,6 +4228,76 @@ class Tests(unittest.TestCase):
                     source_keys=(source_key,),
                 )
         self.assertEqual(direct,{source_key})
+
+    def test_snapshot_artist_source_owner_preflight_covers_full_revision(self):
+        persisted_key="000c1914748382f4"
+        overlay_key="source-overlay-artist"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_videos(("video-overlay",))
+            scope.add_pairs((
+                (persisted_key,"video-parent"),
+                (overlay_key,"video-overlay"),
+            ))
+            scope.add_targets((
+                ("artists","crazyb",persisted_key),
+                ("artists","overlay artist",overlay_key),
+            ))
+
+            def rows(_connection,statement,params):
+                self.assertIn("runtime_source_details",statement)
+                self.assertEqual(
+                    params[0],["overlay","full_runtime_30257210187_1"],
+                )
+                self.assertEqual(set(params[1]),{persisted_key,overlay_key})
+                return [{
+                    "revision_id":"full_runtime_30257210187_1",
+                    "source_key":persisted_key,
+                    "entity_type":"artist","entity_key":"crazyb",
+                    "payload_json":{
+                        "type":"artist","key":"crazyb",
+                        "sourceDetailKey":persisted_key,"rangeId":"all",
+                        "songs":[{
+                            "key":"honeycomb summer",
+                            "name":"Honeycomb Summer","count":7,
+                        }],
+                    },
+                }]
+
+            with patch.object(pg_adapter,"_rows",side_effect=rows):
+                persisted=pg_materializer.preflight_artist_source_owners(
+                    object(),
+                    parent_revision_id="full_runtime_30257210187_1",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(persisted_key,overlay_key),
+                )
+        self.assertEqual(persisted,{persisted_key})
+
+    def test_snapshot_artist_source_owner_preflight_rejects_unkeyed_owner(self):
+        source_key="source-unkeyed-artist"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs(((source_key,"video-parent"),))
+            scope.add_targets((("artists","artist",source_key),))
+            detail={
+                "source_key":source_key,"entity_type":"artist",
+                "entity_key":"artist","payload_json":{
+                    "type":"artist","key":"artist",
+                    "sourceDetailKey":source_key,"rangeId":"all",
+                    "songs":[{"name":"Song","count":1}],
+                },
+            }
+            with patch.object(pg_adapter,"_rows",return_value=[detail]):
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "artist source all/source-unkeyed-artist canonical song owners "
+                    "are incomplete",
+                ):
+                    pg_materializer.preflight_artist_source_owners(
+                        object(),parent_revision_id="parent",
+                        overlay_revision_ids=("overlay",),source_scope=scope,
+                        source_keys=(source_key,),
+                    )
 
     def test_snapshot_song_source_owner_preflight_covers_full_revision(self):
         persisted_key="0007036316d9dffa"
@@ -5915,6 +6007,9 @@ class Tests(unittest.TestCase):
         def song_owner_preflight(*_args,**_kwargs):
             phase_order.append("song-owner-preflight")
             return set()
+        def artist_owner_preflight(*_args,**_kwargs):
+            phase_order.append("artist-owner-preflight")
+            return set()
         def unaffected_export(*_args,**_kwargs):
             phase_order.append("unaffected")
             return set()
@@ -5929,6 +6024,8 @@ class Tests(unittest.TestCase):
                           side_effect=affected_preflight), \
              patch.object(pg_materializer,"preflight_song_source_owners",
                           side_effect=song_owner_preflight), \
+             patch.object(pg_materializer,"preflight_artist_source_owners",
+                          side_effect=artist_owner_preflight), \
              patch.object(pg_materializer,"export_unaffected_parent_sources",
                           side_effect=unaffected_export), \
              patch.object(pg_materializer,"SnapshotPageBuilder",GenericBuilder):
@@ -5940,7 +6037,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(bulk_calls[0]),4)
         self.assertEqual(
             phase_order,
-            ["song-owner-preflight","preflight","affected","unaffected"],
+            ["artist-owner-preflight","song-owner-preflight",
+             "preflight","affected","unaffected"],
         )
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)

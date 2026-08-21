@@ -66,6 +66,78 @@ def _canonical_song_name_key(value: Any) -> str:
     return unicodedata.normalize("NFKC", _text(value)).casefold()
 
 
+def _artist_song_owners(
+    record: Mapping[str, Any],
+    *,
+    context: str,
+    require_complete: bool = False,
+) -> tuple[dict[str, str], dict[str, tuple[str, str] | None], bool]:
+    """Parse one Artist detail's authoritative song-key/name identities.
+
+    Parent runtime occurrences can predate the public Artist card identity and
+    therefore carry either no ``songKey`` or a legacy title/artist composite.
+    The persisted Artist detail is the canonical owner of the public song list.
+    Keep both keyed and normalized-name indexes so those legacy rows converge
+    without rewriting their raw provenance payload.  A normalized name that
+    belongs to more than one key remains explicitly ambiguous and must be
+    resolved by an occurrence's exact authoritative key.
+    """
+
+    raw_songs = record.get("songs")
+    if raw_songs is None and not require_complete:
+        return {}, {}, False
+    if not isinstance(raw_songs, list) or (require_complete and not raw_songs):
+        raise RuntimeError(f"{context} canonical song owners are incomplete")
+    owners_by_key: dict[str, str] = {}
+    owners_by_name: dict[str, tuple[str, str] | None] = {}
+    all_keyed = bool(raw_songs)
+    for raw_song in raw_songs:
+        if not isinstance(raw_song, Mapping):
+            raise RuntimeError(f"{context} canonical song owner is invalid")
+        nested_song = raw_song.get("song")
+        nested_song = nested_song if isinstance(nested_song, Mapping) else {}
+        song_key = _text(
+            raw_song.get("key")
+            or raw_song.get("songKey")
+            or nested_song.get("key")
+            or nested_song.get("songKey")
+        )
+        song_name = _text(
+            raw_song.get("name")
+            or raw_song.get("title")
+            or raw_song.get("workTitle")
+            or nested_song.get("name")
+            or nested_song.get("title")
+            or nested_song.get("workTitle")
+        )
+        canonical_name = _canonical_song_name_key(song_name)
+        if not song_name or not canonical_name:
+            raise RuntimeError(f"{context} canonical song owner is incomplete")
+        if raw_song.get("count") is not None:
+            try:
+                count = int(raw_song.get("count"))
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise RuntimeError(
+                    f"{context} canonical song owner count is invalid"
+                ) from exc
+            if count <= 0:
+                raise RuntimeError(f"{context} canonical song owner count is invalid")
+        all_keyed = all_keyed and bool(song_key)
+        if song_key:
+            if song_key in owners_by_key:
+                raise RuntimeError(f"{context} canonical song owner key is duplicated")
+            owners_by_key[song_key] = song_name
+        owner = (song_key, song_name)
+        previous = owners_by_name.get(canonical_name)
+        if canonical_name not in owners_by_name:
+            owners_by_name[canonical_name] = owner
+        elif previous != owner:
+            owners_by_name[canonical_name] = None
+    if require_complete and (not all_keyed or len(owners_by_key) != len(raw_songs)):
+        raise RuntimeError(f"{context} canonical song owners are incomplete")
+    return owners_by_key, owners_by_name, all_keyed
+
+
 def _meta_value(meta: Mapping[str, Any], *names: str) -> str:
     for name in names:
         value = _text(meta.get(name))
@@ -1541,6 +1613,11 @@ def _source_occurrence_row(
     entity_type: str,
     source_song_key: str = "",
     source_song_name: str = "",
+    source_artist_song_owners_by_key: Mapping[str, str] | None = None,
+    source_artist_song_owners_by_name: Mapping[
+        str, tuple[str, str] | None
+    ] | None = None,
+    source_artist_songs_are_keyed: bool = False,
 ) -> tuple[Any, ...]:
     item = dict(raw)
     payload = _nested_mapping(item, "payload")
@@ -1580,6 +1657,38 @@ def _source_occurrence_row(
             if song_title
             else ""
         )
+        if entity_type == "artist" and (
+            source_artist_song_owners_by_key
+            or source_artist_song_owners_by_name
+        ):
+            owners_by_key = source_artist_song_owners_by_key or {}
+            owners_by_name = source_artist_song_owners_by_name or {}
+            owner_name = _text(owners_by_key.get(canonical_song_key))
+            if owner_name:
+                canonical_song_name = owner_name
+            else:
+                normalized_name = _canonical_song_name_key(song_title)
+                owner = owners_by_name.get(normalized_name)
+                if normalized_name in owners_by_name and owner is None:
+                    raise RuntimeError(
+                        "artist source song owner is ambiguous: "
+                        f"{range_id}/{source_key} title={song_title!r}"
+                    )
+                if owner is not None:
+                    owner_key, owner_name = owner
+                    # A legacy unkeyed count list is display evidence only;
+                    # preserve the occurrence spelling/key and let filtered
+                    # derivation apply its existing NFKC/case reconciliation.
+                    # Only a keyed detail is an identity owner.
+                    if owner_key:
+                        canonical_song_key = owner_key
+                        canonical_song_name = owner_name
+                elif source_artist_songs_are_keyed:
+                    raise RuntimeError(
+                        "artist source occurrence has no canonical song owner: "
+                        f"{range_id}/{source_key} title={song_title!r} "
+                        f"songKey={canonical_song_key!r}"
+                    )
     explicit_unknown = item.get("isUnknownArtist")
     if explicit_unknown is None:
         explicit_unknown = song.get("isUnknownArtist")
@@ -2662,6 +2771,11 @@ class CanonicalSnapshotWriter:
         )
         source_song_key = ""
         source_song_name = ""
+        source_artist_song_owners_by_key: dict[str, str] = {}
+        source_artist_song_owners_by_name: dict[
+            str, tuple[str, str] | None
+        ] = {}
+        source_artist_songs_are_keyed = False
         if entity_type == "song":
             source_song_key = entity_key
             source_song_name = _text(
@@ -2671,6 +2785,15 @@ class CanonicalSnapshotWriter:
                 raise RuntimeError(
                     f"song source canonical owner is incomplete: {range_id}/{source_key}"
                 )
+        elif entity_type == "artist":
+            (
+                source_artist_song_owners_by_key,
+                source_artist_song_owners_by_name,
+                source_artist_songs_are_keyed,
+            ) = _artist_song_owners(
+                record,
+                context=f"artist source {range_id}/{source_key}",
+            )
         detail = dict(record)
         detail.pop("occurrences", None)
         detail["sourceDetailKey"] = source_key
@@ -2687,6 +2810,9 @@ class CanonicalSnapshotWriter:
             "entity_type": entity_type,
             "source_song_key": source_song_key,
             "source_song_name": source_song_name,
+            "source_artist_song_owners_by_key": source_artist_song_owners_by_key,
+            "source_artist_song_owners_by_name": source_artist_song_owners_by_name,
+            "source_artist_songs_are_keyed": source_artist_songs_are_keyed,
             "position": 0,
             "source_search": _BoundedTextAccumulator(MAX_RANKING_SEARCH_CHARS),
             "channel_search": _BoundedTextAccumulator(MAX_CHANNEL_SEARCH_CHARS),
@@ -2729,6 +2855,15 @@ class CanonicalSnapshotWriter:
                 entity_type=_text(state["entity_type"]),
                 source_song_key=_text(state.get("source_song_key")),
                 source_song_name=_text(state.get("source_song_name")),
+                source_artist_song_owners_by_key=state.get(
+                    "source_artist_song_owners_by_key"
+                ),
+                source_artist_song_owners_by_name=state.get(
+                    "source_artist_song_owners_by_name"
+                ),
+                source_artist_songs_are_keyed=bool(
+                    state.get("source_artist_songs_are_keyed")
+                ),
             )
             source_search.add(row[15])
             for value in (row[5], row[6], row[7], row[8]):
@@ -3486,6 +3621,123 @@ def preflight_unaffected_parent_video_sources(
         flush=True,
     )
     return direct_source_keys
+
+
+def preflight_artist_source_owners(
+    connection: Any,
+    *,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    source_scope: SnapshotSourceScope,
+    source_keys: Iterable[str],
+) -> set[str]:
+    """Validate all persisted Artist song owners before source expansion.
+
+    Artist source occurrences retain legacy raw ``songKey`` values, while the
+    persisted detail owns the public key/name list.  Validate every requested
+    all-range Artist detail in one bounded metadata pass so malformed or
+    unkeyed owners fail before the multi-hour occurrence copy.  Overlay-only
+    Artist sources are rebuilt and validated by ``begin_source`` during the
+    already-early affected export.
+    """
+
+    requested = {_text(value) for value in source_keys if _text(value)}
+    artist_keys = {
+        _text(row[0])
+        for row in source_scope.connection.execute(
+            "SELECT DISTINCT source_key FROM source_scope_targets "
+            "WHERE view='artists' ORDER BY source_key"
+        )
+        if _text(row[0])
+    }
+    if not artist_keys.issubset(requested):
+        raise RuntimeError("artist source owner preflight escaped requested keys")
+    affected = set(source_scope.affected_source_keys())
+    source_lineage = tuple(dict.fromkeys((
+        *(_text(value) for value in overlay_revision_ids if _text(value)),
+        _text(parent_revision_id),
+    )))
+    if artist_keys and not source_lineage:
+        raise RuntimeError("artist source owner preflight lineage is empty")
+
+    persisted: set[str] = set()
+    owner_count = 0
+    ordered = tuple(sorted(artist_keys))
+    for offset in range(0, len(ordered), SOURCE_SCOPE_FETCH_SIZE):
+        batch = ordered[offset : offset + SOURCE_SCOPE_FETCH_SIZE]
+        rows = adapter._rows(
+            connection,
+            """
+            SELECT DISTINCT ON (source_key)
+                   revision_id,source_key,entity_type,entity_key,payload_json
+            FROM runtime_source_details
+            WHERE revision_id::text = ANY(%s::text[]) AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key,
+                     array_position(%s::text[],revision_id::text)
+            LIMIT %s
+            """,
+            [
+                list(source_lineage), list(batch), list(source_lineage),
+                len(batch) + 1,
+            ],
+        )
+        if len(rows) > len(batch):
+            raise RuntimeError("artist source owner preflight exceeded batch")
+        for row in rows:
+            source_key = _text(row.get("source_key"))
+            if source_key not in batch or source_key in persisted:
+                raise RuntimeError("artist source owner preflight changed identity")
+            record = _json_object(row.get("payload_json"))
+            entity_type = _text(row.get("entity_type") or record.get("type"))
+            entity_key = _text(row.get("entity_key") or record.get("key"))
+            if entity_type != "artist" or not entity_key:
+                raise RuntimeError(
+                    "artist source canonical owner is incomplete: all/" + source_key
+                )
+            if _text(record.get("type")) not in {"", "artist"}:
+                raise RuntimeError(
+                    "artist source canonical owner changed type: all/" + source_key
+                )
+            if _text(record.get("key")) not in {"", entity_key}:
+                raise RuntimeError(
+                    "artist source canonical owner changed entity key: all/" + source_key
+                )
+            if _text(record.get("sourceDetailKey")) not in {"", source_key}:
+                raise RuntimeError(
+                    "artist source canonical owner changed source key: all/" + source_key
+                )
+            if _text(record.get("rangeId")) not in {"", "all"}:
+                raise RuntimeError(
+                    "artist source canonical owner changed range: all/" + source_key
+                )
+            owners_by_key, _owners_by_name, all_keyed = _artist_song_owners(
+                record,
+                context=f"artist source all/{source_key}",
+                require_complete=True,
+            )
+            if not all_keyed:
+                raise RuntimeError(
+                    "artist source canonical song owners are incomplete: all/"
+                    + source_key
+                )
+            owner_count += len(owners_by_key)
+            persisted.add(source_key)
+
+    overlay_only = artist_keys - persisted
+    unexpected_missing = sorted(overlay_only - affected)
+    if unexpected_missing:
+        raise RuntimeError(
+            "artist source canonical owner detail is missing: all/"
+            + ", ".join(unexpected_missing[:3])
+        )
+    print(
+        "PG_SNAPSHOT_ARTIST_SOURCE_OWNER_PREFLIGHT "
+        f"total={len(artist_keys)} persisted={len(persisted)} "
+        f"overlayOnly={len(overlay_only)} songOwners={owner_count}",
+        flush=True,
+    )
+    return persisted
 
 
 def preflight_song_source_owners(
@@ -5221,6 +5473,13 @@ def materialize(
         }
         if source_scope is not None and getattr(builder, "parent", None):
             affected_parent_sources = source_scope.affected_source_keys()
+            preflight_artist_source_owners(
+                connection,
+                parent_revision_id=builder.parent[0],
+                overlay_revision_ids=builder.overlay_ids,
+                source_scope=source_scope,
+                source_keys=source_keys["all"],
+            )
             preflight_song_source_owners(
                 connection,
                 parent_revision_id=builder.parent[0],
