@@ -6905,6 +6905,23 @@ class Tests(unittest.TestCase):
             workflow.index('node --test "${test_files[@]}"'),
         )
 
+    def test_wdc_release_checkouts_include_check_code_contract_for_both_gates(self):
+        workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
+            encoding="utf-8",
+        )
+        self.assertEqual(
+            workflow.count("            .github/workflows/check-code.yml\n"),
+            2,
+        )
+        self.assertLess(
+            workflow.index("Checkout release gate inputs"),
+            workflow.index("            .github/workflows/check-code.yml\n"),
+        )
+        self.assertLess(
+            workflow.index("Checkout complete serving implementation"),
+            workflow.rindex("            .github/workflows/check-code.yml\n"),
+        )
+
     def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
         for required in (

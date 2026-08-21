@@ -251,3 +251,9 @@
 - main Check code run `32425535970`（head `cc7c0e8106d834ffcede2012d73695564b335a50`）失败：该提交只改 `scripts/migration/materialize-pg-release-snapshot.py`、对应 Python 回归和本账本，完整 next-serving PR 门禁已为 `190/190`；旧 Check code 仍无差别执行根仓库 Node 套件，触发 77 个对 next-serving Python/发布 workflow 的陈旧重复静态断言。
 - 最小修复：Check code 先按 push base 精确识别根 Node 输入；仅逐文件列出的 next-serving-owned Python、WDC deploy 与发布 workflow 改动由完整 `test-next-serving-v3.yml` 阻断，真正改到根 Node/前端/其他迁移脚本输入时仍执行完整 Node 套件。禁止用 `scripts/migration/*.py` 一类宽泛排除。`check-code.yml` 本身加入 next-serving PR path、sparse checkout、diff 与秘密扫描，避免路由规则无门禁修改。
 - 回归 `test_check_code_scopes_node_suite_away_from_next_serving_python_changes` 锁定排除清单和 skip marker；当前 targeted `1/1`、next-serving `191/191`、relay `5/5`、workflow YAML、Check code shell syntax 与 `git diff --check` 均通过。下一步为提交、PR/CI/squash merge；不得把这次 CI 归属错误误报为 WDC 数据修复或通过证据。
+
+### 2026-08-21 08:08 Asia/Taipei — WDC 门禁 sparse checkout 修复
+
+- force WDC run `32431309635`（head `3c562c8ae2d550a59dbe9ba544bdec3e2f8cc459`）在 Ubuntu gate 失败：完整 next-serving 测试的 190 项通过，新增 Check code 路由测试因 `.github/workflows/check-code.yml` 未包含在 WDC sparse checkout 而唯一报 `FileNotFoundError`；sync job skipped，Mac materialize/relay/WDC 写入均未开始。
+- 最小修复：将 `.github/workflows/check-code.yml` 同时加入 WDC Ubuntu gate 与 Mac source 两份 sparse checkout，避免 Ubuntu 修好后又在 Mac regression 阶段重复失败；不改变发布逻辑、超时、数据或生产状态。
+- 新回归 `test_wdc_release_checkouts_include_check_code_contract_for_both_gates` 精确要求该路径出现两次并位于两个 checkout 之后；通过完整测试和 CI 后才允许唯一 latest-head WDC 重跑。
