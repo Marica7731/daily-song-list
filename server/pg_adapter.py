@@ -14141,6 +14141,43 @@ def _count_list(values: Iterable[str]) -> list[dict[str, Any]]:
     return [{"name": name, "count": count} for name, count in sorted(counts.items(), key=lambda pair: (-pair[1], pair[0]))]
 
 
+def _song_owner_count_list(
+    occurrences: Iterable[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Aggregate Artist songs by canonical key, not raw title spelling.
+
+    Authoritative 7d rows may retain NFKC-equivalent display spellings for the
+    same accepted ``songKey`` (for example ASCII ``B`` and full-width ``Ｂ``).
+    ``songCount`` already uses that key, so the public Artist song list must
+    use the same owner or source materialization can split one song later.
+    Keep the most frequent raw spelling as the display name (then lexical
+    order for a deterministic tie); every occurrence remains unchanged.
+    """
+
+    counts: dict[str, int] = defaultdict(int)
+    names: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for occurrence in occurrences:
+        song = occurrence.get("song")
+        song = song if isinstance(song, Mapping) else {}
+        song_key = _song_key(song)
+        song_name = _text(song.get("title"))
+        if not song_key or not song_name:
+            continue
+        counts[song_key] += 1
+        names[song_key][song_name] += 1
+    values = []
+    for song_key, count in counts.items():
+        song_name = min(
+            names[song_key],
+            key=lambda value: (-names[song_key][value], value),
+        )
+        values.append({"key": song_key, "name": song_name, "count": count})
+    return sorted(
+        values,
+        key=lambda value: (-int(value["count"]), value["name"], value["key"]),
+    )
+
+
 def _entity_groups(records: Iterable[Mapping[str, Any]], query: Mapping[str, Any]) -> list[dict[str, Any]]:
     range_id = query["range"]
     view = query["view"]
@@ -14232,7 +14269,7 @@ def _group_payload(group: Mapping[str, Any], query: Mapping[str, Any]) -> dict[s
         payload = {
             "type": "artist", "key": group["key"], "name": _text(group.get("key")),
             "count": count, "videoCount": len(videos), "timestampCount": count,
-            "songs": _count_list(_text(row["song"].get("title")) for row in occurrences),
+            "songs": _song_owner_count_list(occurrences),
             "channels": _count_list(row["item"].get("channelName") for row in occurrences),
             "occurrences": occurrences[:20], "sourceDetailKey": source_key,
         }

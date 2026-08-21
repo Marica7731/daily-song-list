@@ -3189,6 +3189,82 @@ def export_source(
         raise RuntimeError(f"source stream position mismatch: {range_id}/{source_key}")
 
 
+def preflight_authoritative_artist_source_owners(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    range_id: str,
+) -> tuple[int, int, int]:
+    """Resolve every authoritative Artist occurrence before ranking output.
+
+    A complete 7d reset is already resident before the first ranking combo.
+    Validate its Artist detail song owners at that point, rather than after all
+    rankings when bulk source export starts.  This catches an unkeyed or
+    ambiguous owner before any expensive snapshot phase and uses exactly the
+    same grouping and occurrence canonicalization as the eventual writer.
+    """
+
+    options = adapter._query_options(_source_query(range_id, 1))
+    options["q"] = ""
+    options["view"] = "artists"
+    groups = adapter._entity_groups(records, options)
+    source_count = 0
+    occurrence_count = 0
+    owner_count = 0
+    for group in groups:
+        payload = adapter._group_payload(group, options)
+        source_key = _text(payload.get("sourceDetailKey"))
+        if not source_key:
+            raise RuntimeError(
+                f"authoritative Artist source key is missing: {range_id}"
+            )
+        owners_by_key, owners_by_name, all_keyed = _artist_song_owners(
+            payload,
+            context=f"authoritative Artist source {range_id}/{source_key}",
+            require_complete=True,
+        )
+        if not all_keyed:
+            raise RuntimeError(
+                "authoritative Artist source owners are incomplete: "
+                f"{range_id}/{source_key}"
+            )
+        occurrences = tuple(
+            value
+            for value in group.get("occurrences", ())
+            if isinstance(value, Mapping)
+        )
+        if not occurrences:
+            raise RuntimeError(
+                f"authoritative Artist source is empty: {range_id}/{source_key}"
+            )
+        for position, occurrence in enumerate(occurrences, start=1):
+            row = _source_occurrence_row(
+                source_key,
+                range_id,
+                position,
+                occurrence,
+                entity_type="artist",
+                source_artist_song_owners_by_key=owners_by_key,
+                source_artist_song_owners_by_name=owners_by_name,
+                source_artist_songs_are_keyed=all_keyed,
+            )
+            if _text(row[13]) not in owners_by_key:
+                raise RuntimeError(
+                    "authoritative Artist occurrence escaped canonical owner: "
+                    f"{range_id}/{source_key} songKey={_text(row[13])!r}"
+                )
+        source_count += 1
+        occurrence_count += len(occurrences)
+        owner_count += len(owners_by_key)
+    del groups
+    print(
+        "PG_SNAPSHOT_AUTHORITATIVE_ARTIST_SOURCE_OWNER_PREFLIGHT "
+        f"range={range_id} sources={source_count} "
+        f"occurrences={occurrence_count} songOwners={owner_count}",
+        flush=True,
+    )
+    return source_count, occurrence_count, owner_count
+
+
 def export_sources_from_records(
     writer: CanonicalSnapshotWriter,
     *,
@@ -4953,6 +5029,7 @@ class SnapshotPageBuilder:
         self.overlay_ids: tuple[str, ...] = ()
         self.authoritative_ids: tuple[str, ...] = ()
         self.authoritative_records = None
+        self.authoritative_artist_source_preflight_done = False
         # One builder owns one repeatable-read snapshot and one active
         # revision.  Reuse exact affected-group scalars across metric/scope
         # combinations without leaking state into online requests or later
@@ -5057,6 +5134,12 @@ class SnapshotPageBuilder:
                     adapter._authoritative_7d_records(self.connection, self.overlay_ids)
                 )
             records = self.authoritative_records
+            if not self.authoritative_artist_source_preflight_done:
+                preflight_authoritative_artist_source_owners(
+                    records,
+                    range_id=range_id,
+                )
+                self.authoritative_artist_source_preflight_done = True
             return lambda page: adapter.rankings_payload_from_records(
                 records,
                 ranking_query(range_id, view, metric, page, scope_key),
