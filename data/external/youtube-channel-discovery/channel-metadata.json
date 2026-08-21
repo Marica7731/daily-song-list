@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-21T09:42:08.466Z",
+  "generatedAt": "2026-08-21T10:07:03.513Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-21T09:42:08.466Z",
+    "fetchedAt": "2026-08-21T10:07:03.513Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-21T09:42:08.466Z",
+    "generatedAt": "2026-08-21T10:07:03.513Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,32 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1211,
-      "parseableChannels": 1192,
+      "totalChannels": 1212,
+      "parseableChannels": 1193,
       "realAvatar": 650,
-      "thumbnailFallback": 561,
+      "thumbnailFallback": 562,
       "missingDisplayImage": 0,
-      "missingAvatar": 561,
+      "missingAvatar": 562,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1368,
+      "skipped_collected_evidence": 1369,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1349,
+      "batch_limit_reached": 1350,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Ryushen",
+        "channelId": "UCt5-0i4AVHXaWJrL8Wql3mw",
+        "displayName": "緑仙 / Ryushen",
+        "sourceUrl": "https://www.youtube.com/channel/UCt5-0i4AVHXaWJrL8Wql3mw",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@neru_utano",
         "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
@@ -11688,6 +11695,13 @@
         "channelId": "UC7GlwpI06mf8wQflsW7frTw",
         "displayName": "風魔小宵 / Fuuma Koyoi",
         "sourceUrl": "https://www.youtube.com/@Unifee_koyoi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hituzino_mery",
+        "channelId": "UC8-eGfSMfbQ-ILxIvKn55qw",
+        "displayName": "羊野メリー",
+        "sourceUrl": "https://www.youtube.com/@hituzino_mery",
         "reason": "batch_limit_reached"
       },
       {
@@ -11835,20 +11849,6 @@
         "channelId": "UC1GQB6OqVMoFlHhQ9AagtqA",
         "displayName": "メラ・アカル MelaakaruVtuber",
         "sourceUrl": "https://www.youtube.com/@mela_akaru",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@shiyumarurun",
-        "channelId": "UC9b76pk9Re-focJF7X5GtKQ",
-        "displayName": "Shiyu Ch. しゆ。",
-        "sourceUrl": "https://www.youtube.com/@shiyumarurun",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RurufuHizuki",
-        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
-        "displayName": "陽月るるふ / Hizuki Rurufu",
-        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
         "reason": "batch_limit_reached"
       }
     ]
