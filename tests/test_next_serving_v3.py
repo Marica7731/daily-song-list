@@ -193,6 +193,7 @@ def fake_pg_source(_connection,key,query):
                             "seconds":index,"song":{"songKey":f"song-{song_index}","title":f"Song {song_index}",
                                                         "artist":"Fixture","isNiche":index%2==0}})
     record={"type":"song" if view=="songs" else "artist" if view=="artists" else "video" if view=="videos" else "vtuber","key":key,
+            "title":"Song 0" if view=="songs" else "",
             "sourceDetailKey":key,"rangeId":range_id,"count":201,"videoCount":201,
             "timestampCount":201,"occurrences":occurrences}
     return {"schemaVersion":1,"found":True,"sourceKey":key,"record":record,
@@ -2372,7 +2373,9 @@ class Tests(unittest.TestCase):
         target=self.temp/"derived-filtered-scopes.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
 
-        def add_fixture(view,source_key,entity_key,name,occurrences):
+        def add_fixture(
+            view,source_key,entity_key,name,occurrences,*,song_count=None,
+        ):
             canonical=[]
             video_ids=set()
             song_keys=set()
@@ -2386,7 +2389,8 @@ class Tests(unittest.TestCase):
             record={"rank":1,"key":entity_key,"sourceDetailKey":source_key,
                     "title":name if view in {"songs","videos"} else "",
                     "name":name,"displayArtist":"Fixture",
-                    "count":len(canonical),"songCount":len(song_keys),
+                    "count":len(canonical),
+                    "songCount":len(song_keys) if song_count is None else song_count,
                     "videoCount":len(video_ids),"timestampCount":len(canonical),
                     "occurrences":occurrences}
             existing=writer.connection.execute(
@@ -2402,7 +2406,8 @@ class Tests(unittest.TestCase):
             writer.add_source(
                 source_key,"all",
                 {"type":"vtuber" if view=="vtubers" else view[:-1],
-                 "key":entity_key,"sourceDetailKey":source_key},
+                 "key":entity_key,"title":name,
+                 "sourceDetailKey":source_key},
                 occurrences,
             )
 
@@ -2424,7 +2429,23 @@ class Tests(unittest.TestCase):
         ]
         add_fixture("artists","source-artist-a","artist-a","Alpha",artist_a)
         add_fixture("artists","source-artist-b","artist-b","Beta",artist_b)
-        for view in ("songs","vtubers","videos"):
+        add_fixture(
+            "songs","source-songs",
+            "忘れじの言の葉::未来古代楽団feat安次嶺希和子",
+            "忘れじの言の葉",
+            [
+                {"videoId":"video-songs-a","marker":"visible-songs-a",
+                 "song":{"title":"忘れじの言の葉",
+                         "artist":"未来古代楽団feat.安次嶺希和子",
+                         "isNiche":False,"isUnknownArtist":False}},
+                {"videoId":"video-songs-b","marker":"visible-songs-b",
+                 "song":{"title":"《忘れじの言の葉》",
+                         "artist":"未来古代楽団 feat. 安次嶺希和子",
+                         "isNiche":False,"isUnknownArtist":False}},
+            ],
+            song_count=1,
+        )
+        for view in ("vtubers","videos"):
             add_fixture(
                 view,f"source-{view}",f"entity-{view}",view,
                 [{"videoId":f"video-{view}","marker":f"visible-{view}",
@@ -2442,6 +2463,17 @@ class Tests(unittest.TestCase):
             self.assertEqual(result["all/artists/count/visibleNiche"],1)
             self.assertEqual(result["all/songs/count/niche"],0)
             self.assertEqual(result["all/songs/count/visible"],1)
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(DISTINCT canonical_song_key),"
+                    "count(DISTINCT canonical_song_name),"
+                    "min(canonical_song_key),min(canonical_song_name) "
+                    "FROM source_occurrences WHERE range_id='all' "
+                    "AND source_key='source-songs'"
+                ).fetchone(),
+                (1,1,"忘れじの言の葉::未来古代楽団feat安次嶺希和子",
+                 "忘れじの言の葉"),
+            )
             for metric in ("count","songs","videos"):
                 self.assertEqual(result[f"all/artists/{metric}/niche"],1)
                 self.assertEqual(result[f"all/artists/{metric}/visible"],2)
@@ -2589,6 +2621,7 @@ class Tests(unittest.TestCase):
                 {
                     "type": "vtuber" if view == "vtubers" else view[:-1],
                     "key": f"{view}-variant",
+                    "title": other_record["title"],
                     "songs": other_record["songs"],
                 },
                 other_occurrences,
@@ -2809,6 +2842,7 @@ class Tests(unittest.TestCase):
                 {
                     "type": "vtuber" if view == "vtubers" else view[:-1],
                     "key": entity_key,
+                    "title": name if view == "songs" else "",
                     "songs": songs,
                 },
                 occurrences,
@@ -2916,6 +2950,7 @@ class Tests(unittest.TestCase):
                 {
                     "type": "vtuber" if view == "vtubers" else view[:-1],
                     "key": entity_key,
+                    "title": name if view == "songs" else "",
                     "songs": songs,
                 },
                 occurrences,
@@ -4171,6 +4206,69 @@ class Tests(unittest.TestCase):
                     source_keys=(source_key,),
                 )
         self.assertEqual(direct,{source_key})
+
+    def test_snapshot_song_source_owner_preflight_covers_full_revision(self):
+        persisted_key="0007036316d9dffa"
+        overlay_key="source-overlay-song"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_videos(("video-overlay",))
+            scope.add_pairs((
+                (persisted_key,"video-parent"),
+                (overlay_key,"video-overlay"),
+            ))
+            scope.add_targets((
+                ("songs","忘れじの言の葉\x1f未来古代楽団feat安次嶺希和子",
+                 persisted_key),
+                ("songs","overlay song\x1fartist",overlay_key),
+            ))
+
+            def rows(_connection,statement,params):
+                self.assertIn("runtime_source_details",statement)
+                self.assertEqual(
+                    params[0],["overlay","full_runtime_30257210187_1"],
+                )
+                self.assertEqual(set(params[1]),{persisted_key,overlay_key})
+                return [{
+                    "revision_id":"full_runtime_30257210187_1",
+                    "source_key":persisted_key,"entity_type":"song",
+                    "entity_key":
+                        "忘れじの言の葉::未来古代楽団feat安次嶺希和子",
+                    "payload_type":"song",
+                    "payload_key":
+                        "忘れじの言の葉::未来古代楽団feat安次嶺希和子",
+                    "payload_source_key":persisted_key,
+                    "payload_range":"all","payload_title":"忘れじの言の葉",
+                    "payload_work_title":"",
+                }]
+
+            with patch.object(pg_adapter,"_rows",side_effect=rows):
+                persisted=pg_materializer.preflight_song_source_owners(
+                    object(),
+                    parent_revision_id="full_runtime_30257210187_1",
+                    overlay_revision_ids=("overlay",),source_scope=scope,
+                    source_keys=(persisted_key,overlay_key),
+                )
+        self.assertEqual(persisted,{persisted_key})
+
+    def test_snapshot_song_source_owner_preflight_rejects_missing_parent(self):
+        missing_key="source-missing-parent-song"
+        with closing(sqlite3.connect(":memory:")) as database:
+            scope=pg_materializer.SnapshotSourceScope(database)
+            scope.add_pairs(((missing_key,"video-parent"),))
+            scope.add_targets((("songs","song\x1fartist",missing_key),))
+            with patch.object(pg_adapter,"_rows",return_value=[]):
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "song source canonical owner detail is missing",
+                ):
+                    pg_materializer.preflight_song_source_owners(
+                        object(),
+                        parent_revision_id="parent",
+                        overlay_revision_ids=("overlay",),
+                        source_scope=scope,
+                        source_keys=(missing_key,),
+                    )
 
     def test_snapshot_bulk_streams_unaffected_persisted_parent_sources(self):
         keep_key="source-keep"
@@ -5814,6 +5912,9 @@ class Tests(unittest.TestCase):
         def affected_preflight(*_args,**kwargs):
             phase_order.append("preflight")
             return set(kwargs["source_keys"])
+        def song_owner_preflight(*_args,**_kwargs):
+            phase_order.append("song-owner-preflight")
+            return set()
         def unaffected_export(*_args,**_kwargs):
             phase_order.append("unaffected")
             return set()
@@ -5826,6 +5927,8 @@ class Tests(unittest.TestCase):
                           side_effect=bulk_export), \
              patch.object(pg_materializer,"preflight_affected_parent_sources",
                           side_effect=affected_preflight), \
+             patch.object(pg_materializer,"preflight_song_source_owners",
+                          side_effect=song_owner_preflight), \
              patch.object(pg_materializer,"export_unaffected_parent_sources",
                           side_effect=unaffected_export), \
              patch.object(pg_materializer,"SnapshotPageBuilder",GenericBuilder):
@@ -5835,7 +5938,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(set(payload_ranges),{"7d"})
         self.assertEqual(len(bulk_calls),1)
         self.assertEqual(len(bulk_calls[0]),4)
-        self.assertEqual(phase_order,["preflight","affected","unaffected"])
+        self.assertEqual(
+            phase_order,
+            ["song-owner-preflight","preflight","affected","unaffected"],
+        )
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)
 

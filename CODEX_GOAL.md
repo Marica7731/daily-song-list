@@ -21,6 +21,7 @@
 | `32408693290` | `12ef2063206ebed009ef5de07bac02624f2af8b0` | accepted queued | 同一生产 artifact、未修复转换器，确定会重复上述失败 | 在获得 Mac 前精确取消；修复经 CI 合并后才允许新的 accepted/WDC 运行 |
 | `32404690724` | `e8c2f31f7b8ef02900051e1882c857f95df8218a` | WDC 取得 Mac 时 main 已由合法 core 推进到 `61d4d52e` | 旧 event head 只完成 7d 小组合、exact root 约 131MB；继续会发布陈旧 source commit | 已精确取消；cleanup success、Mac root absent、relay inactive、WDC 未写入；仅允许最新 main 唯一发布 |
 | `32406152304` | `61d4d52ecf260894679cf0d0dac6f15efb15b669` | backfill `Checkout` 后的 `Commit backfill bundle` | 旧共享 37GB checkout 先以 Git 单核约 91%、RSS 约 10GB 阻塞；bundle 生成成功后，`git add data/backfill-inbox/32406152304.json` 又因路径在旧 sparse 定义外失败 | 后续 backfill 改用 owner-marked `backfill-update-source`，显式 sparse 纳入 `/data/backfill-inbox/**`，`.git` 设 1GB fail-closed 门禁；回归同时锁定 inbox 路径和 commit add 命令 |
+| `32431807706` | `18fb09de2a1f6bf053b0fee30ca216b092c3f00d` | `derive_filtered_ranking_scopes`，已完成 affected `21018/21018` 与 parent video `42936/42936` | `all/songs/0007036316d9dffa`：ranking=`771/1 song/737 videos`，source=`771/6 songs/737 videos`；父详情唯一 owner 为 `忘れじの言の葉::未来古代楽団feat安次嶺希和子`，771 条 occurrence 的原始标题有 2 种、歌手拼写有 7 种，错误地逐 occurrence 重算 canonical key | Song 来源写入强制使用详情 `key + title/workTitle` 权威 owner，raw 拼写仅保留在 payload；新增生产形态回归，并在昂贵 occurrence copy 前对全 revision Song 来源执行 owner 元数据门禁。生产只读核验：`32331` 个 Song 排名来源缺详情 `0`，父 revision `40204` 个 Song 详情 owner 不完整 `0` |
 
 ### 当前状态与下一步
 
@@ -28,8 +29,9 @@
 - `done`：PR #74 已把同一隔离和 fail-closed 容量门禁补到 core workflow；core `32393374772` success 并推进 main 到 `54e0a841`。
 - `done`：PR #75 修复 WDC gate 两份 sparse checkout 未携带 core workflow 的快速失败；core `32405289528` 已验证隔离 `.git` 约 133MB，整条 run 约 16 分钟完成。
 - `done`：PR #76 / CI `32411760609` 已修复 titleless 7D commentary；真实 artifact `32405289528` 转换为 `256 videos / 4209 valid occurrences`，精确跳过 1 条，main=`a0e0efe3`。
-- `in_progress`：accepted run `32411979961` 使用同一 source/base 做正式 candidate/API/activation 证明；分支 `codex/isolate-backfill-checkout-v2` 同时闭合 backfill 的共享 37GB checkout 与 sparse inbox 提交失败。
-- `pending`：accepted 成功且合法 core/backfill、Mac writer、VPS2 relay 均空闲后，只调度唯一最新-head `sync-wdc-release.yml force=true`。
+- `done`：空标题 accepted 修复与 backfill 隔离 checkout 已分别由 PR #76/#77 发布验证；overlay-only parent fallback 与 WDC sparse gate 已由 PR #78/#80 修复。
+- `in_progress`：run `32431807706` 的 Song owner 晚失败已完成源码、全 revision 前置门禁和精确回归；完整 next-serving 测试收口、PR/CI/squash merge后才允许下一次唯一 latest-head WDC。
+- `pending`：合法 core/accepted、Mac writer、VPS2 relay 均空闲后，只调度唯一最新-head `sync-wdc-release.yml force=true`；同类失败无新增门禁时禁止重跑。
 - `pending`：成功后立即验证 health/meta/release、一致的四类视图、artists、31 distinct-video 跨页与多 occurrence、搜索/两个筛选、真实浏览器详情、同协议延迟、10 分钟稳定性和精确残留清理。
 
 ## Pre-release gate: VTuber source-detail paging and cover mapping
