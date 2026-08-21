@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-21T05:09:48.245Z",
+  "generatedAt": "2026-08-21T09:25:36.629Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-21T05:09:48.245Z",
+    "fetchedAt": "2026-08-21T09:25:36.629Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-21T05:09:48.245Z",
+    "generatedAt": "2026-08-21T09:25:36.629Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,41 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@neru_utano",
+        "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
+        "displayName": "歌野ねる / Utano neru",
+        "sourceUrl": "https://www.youtube.com/@neru_utano",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Unifee_koyoi",
+        "channelId": "UC7GlwpI06mf8wQflsW7frTw",
+        "displayName": "風魔小宵 / Fuuma Koyoi",
+        "sourceUrl": "https://www.youtube.com/@Unifee_koyoi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@mishiomolf",
+        "channelId": "UCyVypf7vg9KqoDiXkDIvetg",
+        "displayName": "Molf Ch. 海汐もるふ",
+        "sourceUrl": "https://www.youtube.com/@mishiomolf",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@hiyori_hiyoko",
+        "channelId": "UCcSbyt7yvsljZijP3ePvvZw",
+        "displayName": "ひよりひよこ θ Hiyori Hiyoko θ PiYO Ch",
+        "sourceUrl": "https://www.youtube.com/@hiyori_hiyoko",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@KMNZOFFICIAL",
+        "channelId": "UCwuS0uY-Z2Gr_5OV2oFybFA",
+        "displayName": "KMNZ",
+        "sourceUrl": "https://www.youtube.com/channel/UCwuS0uY-Z2Gr_5OV2oFybFA",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kanade_awayuki",
         "channelId": "UCPUi4e7wnbhFdjsm3KqD3KA",
@@ -11814,41 +11849,6 @@
         "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
         "displayName": "音魂ヒビクHibiku Otodama",
         "sourceUrl": "https://www.youtube.com/@otodama_hibiku",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@yura_ayami",
-        "channelId": "UCB-aip0wsqKQPcrLW1BBJaw",
-        "displayName": "綾見ユラ / YuraAyami",
-        "sourceUrl": "https://www.youtube.com/@yura_ayami",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-%E8%91%89%E5%B1%B1%E7%BF%A0",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@HibachiMana",
-        "channelId": "UCqXxS-9x9Ha_UiH6hG4kh5Q",
-        "displayName": "緋八マナ / Hibachi Mana【にじさんじ】",
-        "sourceUrl": "https://www.youtube.com/@HibachiMana",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Mcca25",
-        "channelId": "UCs8hDV9LLPSd-1SgdlMNm5Q",
-        "displayName": "MelanchoDori",
-        "sourceUrl": "https://www.youtube.com/@Mcca25",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@cuffy-games",
-        "channelId": "UCQQdOoK-lTBhXzZIukAX1sw",
-        "displayName": "Cuffy ch. カフィー",
-        "sourceUrl": "https://www.youtube.com/@cuffy-games",
         "reason": "batch_limit_reached"
       }
     ]
