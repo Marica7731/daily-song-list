@@ -48,6 +48,10 @@ MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
+SOURCE_EXPORT_STREAM_FETCH_SIZE = 2_048
+SNAPSHOT_TRANSPORT_RETRIES = 3
+SNAPSHOT_RECONNECT_ATTEMPTS = 12
+SNAPSHOT_RECONNECT_DELAY_SECONDS = 5
 # A read-only progress probe can briefly hold a shared SQLite lock while the
 # private candidate is being written.  The default sqlite3 timeout is only
 # five seconds, which is shorter than a full-table count on this snapshot.
@@ -1773,6 +1777,11 @@ class CanonicalSnapshotWriter:
         ) WITHOUT ROWID;
         CREATE INDEX ranking_rows_source_lookup
           ON ranking_rows(range_id,detail_key);
+        CREATE TABLE source_export_checkpoints(
+          stage TEXT NOT NULL,range_id TEXT NOT NULL,source_key TEXT NOT NULL,
+          occurrence_count INTEGER NOT NULL,
+          PRIMARY KEY(stage,range_id,source_key)
+        ) WITHOUT ROWID;
         """)
         self.ranking_rows = 0
         self.source_details = 0
@@ -1821,6 +1830,131 @@ class CanonicalSnapshotWriter:
         if shrink:
             self.connection.execute("PRAGMA shrink_memory")
         self._drop_file_cache("checkpoint")
+
+    def _delete_source(self, source_key: str, range_id: str) -> None:
+        occurrence_row = self.connection.execute(
+            "SELECT count(*) FROM source_occurrences "
+            "WHERE source_key=? AND range_id=?",
+            (source_key, range_id),
+        ).fetchone()
+        detail_row = self.connection.execute(
+            "SELECT count(*) FROM source_details "
+            "WHERE source_key=? AND range_id=?",
+            (source_key, range_id),
+        ).fetchone()
+        occurrence_count = int(occurrence_row[0] or 0)
+        detail_count = int(detail_row[0] or 0)
+        self.connection.execute(
+            "DELETE FROM source_occurrences WHERE source_key=? AND range_id=?",
+            (source_key, range_id),
+        )
+        self.connection.execute(
+            "DELETE FROM source_details WHERE source_key=? AND range_id=?",
+            (source_key, range_id),
+        )
+        self.source_occurrences = max(0, self.source_occurrences - occurrence_count)
+        self.source_details = max(0, self.source_details - detail_count)
+
+    def prepare_checkpointed_sources(
+        self,
+        stage: str,
+        range_id: str,
+        source_keys: Iterable[str],
+    ) -> set[str]:
+        """Return durable source completions and discard only partial rows.
+
+        Source occurrence batches are committed periodically so a transient
+        PostgreSQL disconnect cannot grow the SQLite dirty-page set without
+        bound.  The completion row is committed only after one whole source
+        has passed its count/identity checks.  On reconnect, rows without that
+        marker belong to the interrupted source and are safe to replace.
+        """
+
+        requested = {_text(value) for value in source_keys if _text(value)}
+        checkpoint_rows = self.connection.execute(
+            "SELECT source_key FROM source_export_checkpoints "
+            "WHERE stage=? AND range_id=?",
+            (stage, range_id),
+        ).fetchall()
+        completed = {
+            _text(row[0]) for row in checkpoint_rows if _text(row[0]) in requested
+        }
+        existing_rows = self.connection.execute(
+            "SELECT source_key FROM source_details WHERE range_id=?",
+            (range_id,),
+        ).fetchall()
+        partial = sorted(
+            {
+                _text(row[0])
+                for row in existing_rows
+                if _text(row[0]) in requested
+            }
+            - completed
+        )
+        for source_key in partial:
+            self._delete_source(source_key, range_id)
+        if partial:
+            self.connection.commit()
+            self._pending_writes = 0
+        if completed or partial:
+            print(
+                "PG_SNAPSHOT_SOURCE_RESUME "
+                f"stage={stage} complete={len(completed)} "
+                f"discardedPartial={len(partial)} total={len(requested)}",
+                flush=True,
+            )
+        return completed
+
+    def begin_checkpointed_source(
+        self,
+        stage: str,
+        source_key: str,
+        range_id: str,
+        record: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        self._delete_source(source_key, range_id)
+        self.connection.execute(
+            "DELETE FROM source_export_checkpoints "
+            "WHERE stage=? AND range_id=? AND source_key=?",
+            (stage, range_id, source_key),
+        )
+        return self.begin_source(source_key, range_id, record)
+
+    def mark_source_checkpoint(
+        self,
+        stage: str,
+        source_key: str,
+        range_id: str,
+        occurrence_count: int,
+    ) -> None:
+        self.connection.execute(
+            "INSERT INTO source_export_checkpoints"
+            "(stage,range_id,source_key,occurrence_count) VALUES(?,?,?,?) "
+            "ON CONFLICT(stage,range_id,source_key) DO UPDATE SET "
+            "occurrence_count=excluded.occurrence_count",
+            (stage, range_id, source_key, int(occurrence_count)),
+        )
+        # Data rows and their marker become a durable resume boundary together.
+        self.connection.commit()
+        self._pending_writes = 0
+
+    def add_checkpointed_source(
+        self,
+        stage: str,
+        source_key: str,
+        range_id: str,
+        record: Mapping[str, Any],
+        occurrences: Iterable[Mapping[str, Any]],
+    ) -> int:
+        state = self.begin_checkpointed_source(
+            stage, source_key, range_id, record,
+        )
+        self.add_source_occurrences(state, occurrences)
+        written = self.finish_source(state)
+        self.mark_source_checkpoint(
+            stage, source_key, range_id, written,
+        )
+        return written
 
     def add_ranking(self, row: Sequence[Any]) -> None:
         self.connection.execute(
@@ -3047,6 +3181,18 @@ class CanonicalSnapshotWriter:
         )
 
     def finish(self) -> dict[str, Any]:
+        # Checkpoint metadata is private build state, never part of the serving
+        # contract.  Remove it only after every export phase has completed.
+        self.connection.execute("DROP TABLE source_export_checkpoints")
+        self.ranking_rows = int(
+            self.connection.execute("SELECT count(*) FROM ranking_rows").fetchone()[0]
+        )
+        self.source_details = int(
+            self.connection.execute("SELECT count(*) FROM source_details").fetchone()[0]
+        )
+        self.source_occurrences = int(
+            self.connection.execute("SELECT count(*) FROM source_occurrences").fetchone()[0]
+        )
         self.checkpoint(shrink=True)
         quick = str(self.connection.execute("PRAGMA quick_check").fetchone()[0])
         if quick.casefold() != "ok":
@@ -3070,6 +3216,56 @@ class CanonicalSnapshotWriter:
             self.connection.close()
         finally:
             self.temp.unlink(missing_ok=True)
+
+
+def _prepare_writer_source_checkpoints(
+    writer: Any,
+    stage: str,
+    range_id: str,
+    source_keys: Iterable[str],
+) -> set[str]:
+    prepare = getattr(writer, "prepare_checkpointed_sources", None)
+    return set(prepare(stage, range_id, source_keys)) if callable(prepare) else set()
+
+
+def _begin_writer_checkpointed_source(
+    writer: Any,
+    stage: str,
+    source_key: str,
+    range_id: str,
+    record: Mapping[str, Any],
+) -> dict[str, Any]:
+    begin = getattr(writer, "begin_checkpointed_source", None)
+    if callable(begin):
+        return begin(stage, source_key, range_id, record)
+    return writer.begin_source(source_key, range_id, record)
+
+
+def _mark_writer_source_checkpoint(
+    writer: Any,
+    stage: str,
+    source_key: str,
+    range_id: str,
+    occurrence_count: int,
+) -> None:
+    mark = getattr(writer, "mark_source_checkpoint", None)
+    if callable(mark):
+        mark(stage, source_key, range_id, occurrence_count)
+
+
+def _add_writer_checkpointed_source(
+    writer: Any,
+    stage: str,
+    source_key: str,
+    range_id: str,
+    record: Mapping[str, Any],
+    occurrences: Iterable[Mapping[str, Any]],
+) -> None:
+    add = getattr(writer, "add_checkpointed_source", None)
+    if callable(add):
+        add(stage, source_key, range_id, record, occurrences)
+        return
+    writer.add_source(source_key, range_id, record, occurrences)
 
 
 def _source_query(
@@ -4067,9 +4263,16 @@ def export_unaffected_parent_video_sources(
     using the delta-aware adapter path.
     """
 
-    ordered = _ordered_parent_video_sources(sources)
-
-    completed: set[str] = set()
+    checkpoint_stage = "parent-video-sources"
+    full_ordered = _ordered_parent_video_sources(sources)
+    requested = {source_key for source_key, _video_id in full_ordered}
+    completed = _prepare_writer_source_checkpoints(
+        writer,
+        checkpoint_stage, "all", requested,
+    )
+    ordered = tuple(
+        item for item in full_ordered if item[0] not in completed
+    )
     for offset in range(0, len(ordered), PARENT_VIDEO_EXPORT_BATCH):
         batch = ordered[offset : offset + PARENT_VIDEO_EXPORT_BATCH]
         batch_by_video = {
@@ -4133,7 +4336,14 @@ def export_unaffected_parent_video_sources(
                     f"parent video source has no occurrences: {current_video_id}"
                 )
             detail["rangeId"] = "all"
-            writer.add_source(source_key, "all", detail, occurrences)
+            _add_writer_checkpointed_source(
+                writer,
+                checkpoint_stage,
+                source_key,
+                "all",
+                detail,
+                occurrences,
+            )
             completed.add(source_key)
             current_video_id = ""
             current_occurrences = []
@@ -4204,18 +4414,18 @@ def export_unaffected_parent_video_sources(
         if len(completed) % 1_000 < len(batch):
             print(
                 "PG_SNAPSHOT_PARENT_VIDEO_SOURCES "
-                f"complete={len(completed)} total={len(ordered)}",
+                f"complete={len(completed)} total={len(full_ordered)}",
                 flush=True,
             )
         video_by_id = None
         current_occurrences = []
         gc.collect()
-    if len(completed) != len(ordered):
+    if completed != requested:
         raise RuntimeError("parent video source bulk export is incomplete")
     if len(completed) % 1_000:
         print(
             "PG_SNAPSHOT_PARENT_VIDEO_SOURCES "
-            f"complete={len(completed)} total={len(ordered)}",
+            f"complete={len(completed)} total={len(full_ordered)}",
             flush=True,
         )
     return completed
@@ -4244,8 +4454,15 @@ def export_unaffected_parent_sources(
     affected = {
         _text(value) for value in affected_source_keys if _text(value)
     }
-    ordered = tuple(sorted(requested - affected))
-    completed: set[str] = set()
+    checkpoint_stage = "parent-sources"
+    full_ordered = tuple(sorted(requested - affected))
+    completed = _prepare_writer_source_checkpoints(
+        writer,
+        checkpoint_stage, "all", full_ordered,
+    )
+    ordered = tuple(
+        source_key for source_key in full_ordered if source_key not in completed
+    )
     for offset in range(0, len(ordered), PARENT_SOURCE_EXPORT_BATCH):
         batch = ordered[offset : offset + PARENT_SOURCE_EXPORT_BATCH]
         detail_rows = adapter._rows(
@@ -4346,6 +4563,13 @@ def export_unaffected_parent_sources(
                     "parent source video total disagrees with detail: "
                     + current_key
                 )
+            _mark_writer_source_checkpoint(
+                writer,
+                checkpoint_stage,
+                current_key,
+                "all",
+                written,
+            )
             completed.add(current_key)
             current_key = ""
             state = None
@@ -4370,7 +4594,7 @@ def export_unaffected_parent_sources(
                 sorted(details),
                 MAX_SOURCE_SCOPE_ROWS + 1,
             ],
-            fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+            fetch_size=SOURCE_EXPORT_STREAM_FETCH_SIZE,
         ) if details else ():
             streamed_rows += 1
             if streamed_rows > MAX_SOURCE_SCOPE_ROWS:
@@ -4382,7 +4606,13 @@ def export_unaffected_parent_sources(
                 finish_current()
             if not current_key:
                 current_key = source_key
-                state = writer.begin_source(source_key, "all", details[source_key])
+                state = _begin_writer_checkpointed_source(
+                    writer,
+                    checkpoint_stage,
+                    source_key,
+                    "all",
+                    details[source_key],
+                )
             physical_rows += 1
             video_id = _text(row.get("video_id"))
             if video_id:
@@ -4397,7 +4627,7 @@ def export_unaffected_parent_sources(
         if len(completed) % 1_000 < len(batch):
             print(
                 "PG_SNAPSHOT_PARENT_SOURCES "
-                f"complete={len(completed)} eligible={len(ordered)}",
+                f"complete={len(completed)} eligible={len(full_ordered)}",
                 flush=True,
             )
         detail_rows = None
@@ -4406,7 +4636,7 @@ def export_unaffected_parent_sources(
     if len(completed) % 1_000:
         print(
             "PG_SNAPSHOT_PARENT_SOURCES "
-            f"complete={len(completed)} eligible={len(ordered)}",
+            f"complete={len(completed)} eligible={len(full_ordered)}",
             flush=True,
         )
     return completed
@@ -4440,9 +4670,14 @@ def export_affected_parent_sources(
     )))
     if not source_lineage or not _text(parent_revision_id):
         raise RuntimeError("affected parent source lineage is empty")
-    completed: set[str] = set()
+    checkpoint_stage = "affected-parent-sources"
+    completed = _prepare_writer_source_checkpoints(
+        writer,
+        checkpoint_stage, "all", requested,
+    )
+    remaining = requested - completed
     for metadata_index, (batch, scoped, _union_videos) in enumerate(
-        source_scope.source_batches(requested)
+        source_scope.source_batches(remaining)
     ):
         detail_rows = adapter._rows(
             connection,
@@ -4793,7 +5028,14 @@ def export_affected_parent_sources(
                         )
                     detail = dict(record)
                     detail.pop("occurrences", None)
-                    writer.add_source(source_key, "all", detail, occurrences)
+                    _add_writer_checkpointed_source(
+                        writer,
+                        checkpoint_stage,
+                        source_key,
+                        "all",
+                        detail,
+                        occurrences,
+                    )
                     completed.add(source_key)
                 finally:
                     # The overlay is shared metadata for this stream batch, but
@@ -4858,7 +5100,7 @@ def export_affected_parent_sources(
                     [detail_revisions[source_key] for source_key in persisted_keys],
                     expected_parent_rows + 1,
                 ],
-                fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+                fetch_size=SOURCE_EXPORT_STREAM_FETCH_SIZE,
             ) if expected_parent_rows else ():
                 streamed_parent_rows += 1
                 if streamed_parent_rows > expected_parent_rows:
@@ -4944,7 +5186,7 @@ def export_affected_parent_sources(
                     ["all", ""],
                     expected_direct_rows + 1,
                 ],
-                fetch_size=SOURCE_SCOPE_PAYLOAD_FETCH_SIZE,
+                fetch_size=SOURCE_EXPORT_STREAM_FETCH_SIZE,
             ) if expected_direct_rows else ():
                 streamed_direct_rows += 1
                 if streamed_direct_rows > expected_direct_rows:
@@ -5200,6 +5442,126 @@ def begin_snapshot(connection: Any) -> None:
         cursor.close()
 
 
+def _is_retryable_pg_transport_error(exc: BaseException) -> bool:
+    """Recognize driver-level connection loss without masking data errors."""
+
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    transport_phrases = (
+        "server closed the connection unexpectedly",
+        "consuming input failed",
+        "connection is closed",
+        "connection not open",
+        "terminating connection due to administrator command",
+    )
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        error_type = type(current)
+        module_name = error_type.__module__.casefold()
+        class_name = error_type.__name__.casefold()
+        message = str(current).casefold()
+        if (
+            module_name.startswith("psycopg")
+            and class_name in {"operationalerror", "interfaceerror"}
+            and any(phrase in message for phrase in transport_phrases)
+        ):
+            return True
+        current = current.__cause__ or current.__context__
+    return False
+
+
+def _run_resumable_snapshot_operation(
+    connection: Any,
+    *,
+    phase: str,
+    operation: Callable[[Any], Any],
+    checkpoint: Callable[[], None],
+    reconnect: Callable[[Any, int], Any],
+) -> tuple[Any, Any]:
+    """Retry only a transport-lost phase from its durable source boundary."""
+
+    current = connection
+    for retry in range(SNAPSHOT_TRANSPORT_RETRIES + 1):
+        try:
+            return current, operation(current)
+        except Exception as exc:
+            if (
+                retry >= SNAPSHOT_TRANSPORT_RETRIES
+                or not _is_retryable_pg_transport_error(exc)
+            ):
+                raise
+            checkpoint()
+            print(
+                "PG_SNAPSHOT_TRANSPORT_RETRY "
+                f"phase={phase} attempt={retry + 1}/"
+                f"{SNAPSHOT_TRANSPORT_RETRIES} error={type(exc).__name__}",
+                flush=True,
+            )
+            current = reconnect(current, retry + 1)
+    raise AssertionError("snapshot transport retry loop escaped")
+
+
+class SnapshotIdentityChangedError(RuntimeError):
+    pass
+
+
+def _reconnect_readonly_snapshot(
+    connection: Any,
+    *,
+    expected_meta: Mapping[str, str],
+    phase: str,
+    transport_attempt: int,
+) -> Any:
+    try:
+        connection.close()
+    except Exception:
+        pass
+    last_error: Exception | None = None
+    for reconnect_attempt in range(1, SNAPSHOT_RECONNECT_ATTEMPTS + 1):
+        if reconnect_attempt > 1:
+            time.sleep(SNAPSHOT_RECONNECT_DELAY_SECONDS)
+        candidate = None
+        try:
+            candidate = adapter.connect_from_env()
+            begin_snapshot(candidate)
+            actual = canonical_meta(adapter.meta_payload(candidate))
+            for name in (
+                "active_revision_id", "content_sha256", "source_commit_sha",
+            ):
+                if actual[name] != expected_meta[name]:
+                    raise SnapshotIdentityChangedError(
+                        "snapshot identity changed during transport recovery: "
+                        f"field={name} expected={expected_meta[name]} "
+                        f"actual={actual[name]}"
+                    )
+            print(
+                "PG_SNAPSHOT_TRANSPORT_RECOVERED "
+                f"phase={phase} transportAttempt={transport_attempt} "
+                f"connectAttempt={reconnect_attempt} "
+                f"revision={actual['active_revision_id']}",
+                flush=True,
+            )
+            return candidate
+        except SnapshotIdentityChangedError:
+            if candidate is not None:
+                try:
+                    candidate.close()
+                except Exception:
+                    pass
+            raise
+        except Exception as exc:
+            last_error = exc
+            if candidate is not None:
+                try:
+                    candidate.close()
+                except Exception:
+                    pass
+    raise RuntimeError(
+        "PostgreSQL snapshot transport did not recover within bounded attempts: "
+        f"phase={phase} attempts={SNAPSHOT_RECONNECT_ATTEMPTS}"
+    ) from last_error
+
+
 def materialize(
     output_root: Path,
     meta_output: Path,
@@ -5235,6 +5597,32 @@ def materialize(
         builder = SnapshotPageBuilder(connection)
         writer = CanonicalSnapshotWriter(snapshot_output)
         writer.static_ranking_root = output_root / "rankings"
+
+        def run_snapshot_operation(
+            phase: str,
+            operation: Callable[[Any], Any],
+        ) -> Any:
+            nonlocal connection
+
+            def with_current_builder(current: Any) -> Any:
+                builder.connection = current
+                return operation(current)
+
+            connection, result = _run_resumable_snapshot_operation(
+                connection,
+                phase=phase,
+                operation=with_current_builder,
+                checkpoint=lambda: writer.checkpoint(shrink=False),
+                reconnect=lambda current, attempt: _reconnect_readonly_snapshot(
+                    current,
+                    expected_meta=before,
+                    phase=phase,
+                    transport_attempt=attempt,
+                ),
+            )
+            builder.connection = connection
+            return result
+
         written = 0
         static_page_cache_drop_attempts = 0
         static_page_cache_drop_count = 0
@@ -5544,7 +5932,12 @@ def materialize(
 
         prepare_source_scope = getattr(builder, "prepare_source_scope", None)
         source_scope = (
-            prepare_source_scope(writer.connection, source_keys["all"])
+            run_snapshot_operation(
+                "source-scope",
+                lambda _connection: prepare_source_scope(
+                    writer.connection, source_keys["all"],
+                ),
+            )
             if callable(prepare_source_scope)
             else None
         )
@@ -5556,35 +5949,47 @@ def materialize(
         }
         if source_scope is not None and getattr(builder, "parent", None):
             affected_parent_sources = source_scope.affected_source_keys()
-            preflight_artist_source_owners(
-                connection,
-                parent_revision_id=builder.parent[0],
-                overlay_revision_ids=builder.overlay_ids,
-                source_scope=source_scope,
-                source_keys=source_keys["all"],
+            run_snapshot_operation(
+                "artist-source-owner-preflight",
+                lambda current: preflight_artist_source_owners(
+                    current,
+                    parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=source_keys["all"],
+                ),
             )
-            preflight_song_source_owners(
-                connection,
-                parent_revision_id=builder.parent[0],
-                overlay_revision_ids=builder.overlay_ids,
-                source_scope=source_scope,
-                source_keys=source_keys["all"],
+            run_snapshot_operation(
+                "song-source-owner-preflight",
+                lambda current: preflight_song_source_owners(
+                    current,
+                    parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=source_keys["all"],
+                ),
             )
             if affected_parent_sources:
-                preflight_affected_parent_sources(
-                    connection,
-                    parent_revision_id=builder.parent[0],
-                    overlay_revision_ids=builder.overlay_ids,
-                    source_scope=source_scope,
-                    source_keys=affected_parent_sources,
+                run_snapshot_operation(
+                    "affected-source-preflight",
+                    lambda current: preflight_affected_parent_sources(
+                        current,
+                        parent_revision_id=builder.parent[0],
+                        overlay_revision_ids=builder.overlay_ids,
+                        source_scope=source_scope,
+                        source_keys=affected_parent_sources,
+                    ),
                 )
-                exported_affected = export_affected_parent_sources(
-                    connection,
-                    writer,
-                    parent_revision_id=builder.parent[0],
-                    overlay_revision_ids=builder.overlay_ids,
-                    source_scope=source_scope,
-                    source_keys=affected_parent_sources,
+                exported_affected = run_snapshot_operation(
+                    "affected-parent-sources",
+                    lambda current: export_affected_parent_sources(
+                        current,
+                        writer,
+                        parent_revision_id=builder.parent[0],
+                        overlay_revision_ids=builder.overlay_ids,
+                        source_scope=source_scope,
+                        source_keys=affected_parent_sources,
+                    ),
                 )
                 if exported_affected != set(affected_parent_sources):
                     raise RuntimeError(
@@ -5595,19 +6000,25 @@ def materialize(
                 source_scope.unaffected_parent_video_sources()
             )
             preflight_parent_video_keys = (
-                preflight_unaffected_parent_video_sources(
-                    connection,
-                    parent_revision_id=builder.parent[0],
-                    sources=unaffected_parent_video_sources,
+                run_snapshot_operation(
+                    "parent-video-source-preflight",
+                    lambda current: preflight_unaffected_parent_video_sources(
+                        current,
+                        parent_revision_id=builder.parent[0],
+                        sources=unaffected_parent_video_sources,
+                    ),
                 )
                 if unaffected_parent_video_sources else set()
             )
-            exported_parent_sources = export_unaffected_parent_sources(
-                connection,
-                writer,
-                parent_revision_id=builder.parent[0],
-                source_keys=source_keys["all"],
-                affected_source_keys=affected_parent_sources,
+            exported_parent_sources = run_snapshot_operation(
+                "parent-sources",
+                lambda current: export_unaffected_parent_sources(
+                    current,
+                    writer,
+                    parent_revision_id=builder.parent[0],
+                    source_keys=source_keys["all"],
+                    affected_source_keys=affected_parent_sources,
+                ),
             )
             if not exported_parent_sources.issubset(source_keys["all"]):
                 raise RuntimeError(
@@ -5629,11 +6040,14 @@ def materialize(
                     f"actual={len(actual_parent_video_keys)}"
                 )
             if parent_video_sources:
-                exported_parent_videos = export_unaffected_parent_video_sources(
-                    connection,
-                    writer,
-                    parent_revision_id=builder.parent[0],
-                    sources=parent_video_sources,
+                exported_parent_videos = run_snapshot_operation(
+                    "parent-video-sources",
+                    lambda current: export_unaffected_parent_video_sources(
+                        current,
+                        writer,
+                        parent_revision_id=builder.parent[0],
+                        sources=parent_video_sources,
+                    ),
                 )
                 if not exported_parent_videos.issubset(source_keys["all"]):
                     raise RuntimeError(
@@ -5665,13 +6079,16 @@ def materialize(
                     raise RuntimeError(
                         "generic all source batch has no exact overlay scope"
                     )
-                exported_affected = export_affected_parent_sources(
-                    connection,
-                    writer,
-                    parent_revision_id=builder.parent[0],
-                    overlay_revision_ids=builder.overlay_ids,
-                    source_scope=source_scope,
-                    source_keys=pending_source_keys,
+                exported_affected = run_snapshot_operation(
+                    "remaining-affected-parent-sources",
+                    lambda current: export_affected_parent_sources(
+                        current,
+                        writer,
+                        parent_revision_id=builder.parent[0],
+                        overlay_revision_ids=builder.overlay_ids,
+                        source_scope=source_scope,
+                        source_keys=pending_source_keys,
+                    ),
                 ) if pending_source_keys else set()
                 pending_source_keys = sorted(
                     set(pending_source_keys) - exported_affected
