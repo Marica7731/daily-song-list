@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-21T09:25:36.629Z",
+  "generatedAt": "2026-08-21T09:42:08.466Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-21T09:25:36.629Z",
+    "fetchedAt": "2026-08-21T09:42:08.466Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-21T09:25:36.629Z",
+    "generatedAt": "2026-08-21T09:42:08.466Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1210,
-      "parseableChannels": 1191,
+      "totalChannels": 1211,
+      "parseableChannels": 1192,
       "realAvatar": 650,
-      "thumbnailFallback": 560,
+      "thumbnailFallback": 561,
       "missingDisplayImage": 0,
-      "missingAvatar": 560,
+      "missingAvatar": 561,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1367,
+      "skipped_collected_evidence": 1368,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1348,
+      "batch_limit_reached": 1349,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11709,6 +11709,34 @@
         "channelId": "UCwuS0uY-Z2Gr_5OV2oFybFA",
         "displayName": "KMNZ",
         "sourceUrl": "https://www.youtube.com/channel/UCwuS0uY-Z2Gr_5OV2oFybFA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@aoisizukuv",
+        "channelId": "UCWNV-ixuEAxaso9rLk5PRFQ",
+        "displayName": "aoi sizuku ch. 葵井詩雫",
+        "sourceUrl": "https://www.youtube.com/@aoisizukuv",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Vam0414",
+        "channelId": "UCPm62fhXzHQiUupKUDlRSig",
+        "displayName": "ヴァンパイアップル",
+        "sourceUrl": "https://www.youtube.com/@Vam0414",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Luchat",
+        "channelId": "UCk0zRInAOHqfglcIJQ8Aa9g",
+        "displayName": "ねこてんしルシャ",
+        "sourceUrl": "https://www.youtube.com/@Luchat",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@_AkaneRin_",
+        "channelId": "UCu40QKlXxrj-S4s-Fw3kEPQ",
+        "displayName": "朱音りん / Akane Rin",
+        "sourceUrl": "https://www.youtube.com/@_AkaneRin_",
         "reason": "batch_limit_reached"
       },
       {
@@ -11821,34 +11849,6 @@
         "channelId": "UCcQsDietWkYakBKbGpCaeLA",
         "displayName": "陽月るるふ / Hizuki Rurufu",
         "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@onigayaten0512",
-        "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
-        "displayName": "鬼ヶ谷 テン / Onigaya Ten",
-        "sourceUrl": "https://www.youtube.com/@onigayaten0512",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@PIROPARU",
-        "channelId": "UCSCmu_VjL4RR7rBjrvSAwSg",
-        "displayName": "字ぴろぱる / AZANA PIROPARU",
-        "sourceUrl": "https://www.youtube.com/@PIROPARU",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@SidenLime",
-        "channelId": "UC2f11iZvrPBtA_S1LE2soeA",
-        "displayName": "Lime Ch. 紫電ライム",
-        "sourceUrl": "https://www.youtube.com/@SidenLime",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@otodama_hibiku",
-        "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
-        "displayName": "音魂ヒビクHibiku Otodama",
-        "sourceUrl": "https://www.youtube.com/@otodama_hibiku",
         "reason": "batch_limit_reached"
       }
     ]
