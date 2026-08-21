@@ -5841,6 +5841,94 @@ class Tests(unittest.TestCase):
         self.assertEqual(counts,(32,31))
         self.assertEqual(vtuber_counts,(32,31))
 
+    def test_authoritative_artist_source_pins_nfkc_title_variants_by_song_key(self):
+        artist="B小町"
+        canonical_key="e3bf8d66f08c946857927c15"
+        arrange_key="908a09c7e57538dc7f81632e"
+        rows=(
+            ("video-one",canonical_key,"サインはB"),
+            ("video-two",canonical_key,"サインはB"),
+            ("video-three",canonical_key,"サインはＢ"),
+            ("video-four",arrange_key,"サインはB -New Arrange Ver"),
+        )
+        records=[{
+            "video":{
+                "videoId":video_id,"title":f"Video {index}",
+                "channelName":"Fixture","channelId":"UCfixture",
+            },
+            "occurrences":({
+                "occurrenceId":f"{video_id}:1:1","position":1,
+                "rangeId":"7d","songKey":song_key,
+                "title":title,"artist":artist,"seconds":index,
+            },),
+        } for index,(video_id,song_key,title) in enumerate(rows,start=1)]
+
+        self.assertEqual(
+            pg_materializer.preflight_authoritative_artist_source_owners(
+                records,range_id="7d",
+            ),
+            (1,4,2),
+        )
+        source_key=pg_adapter._stable_key("source-artist","7d",artist)
+        target=self.temp/"authoritative-artist-owner.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        self.assertEqual(pg_materializer.export_sources_from_records(
+            writer,records=records,range_id="7d",source_keys={source_key},
+        ),1)
+        writer.finish()
+        with closing(sqlite3.connect(target)) as database:
+            detail=json.loads(database.execute(
+                "SELECT payload_json FROM source_details "
+                "WHERE source_key=? AND range_id='7d'",(source_key,),
+            ).fetchone()[0])
+            canonical=database.execute(
+                "SELECT count(*),count(DISTINCT canonical_song_key),"
+                "count(DISTINCT canonical_song_name) FROM source_occurrences "
+                "WHERE source_key=? AND range_id='7d'",(source_key,),
+            ).fetchone()
+            raw_payloads=[json.loads(row[0]) for row in database.execute(
+                "SELECT payload_json FROM source_occurrences "
+                "WHERE source_key=? AND range_id='7d' ORDER BY position",
+                (source_key,),
+            )]
+        self.assertEqual(detail["songs"],[
+            {"key":canonical_key,"name":"サインはB","count":3},
+            {"key":arrange_key,"name":"サインはB -New Arrange Ver","count":1},
+        ])
+        self.assertEqual(canonical,(4,2,2))
+        self.assertEqual(raw_payloads[2]["song"]["title"],"サインはＢ")
+
+    def test_snapshot_builder_runs_authoritative_artist_owner_preflight_once(self):
+        records=({
+            "video":{"videoId":"video","channelId":"UCfixture"},
+            "occurrences":({
+                "videoId":"video","occurrenceId":"video:1:1",
+                "rangeId":"7d","songKey":"song-key",
+                "title":"Song","artist":"Artist",
+            },),
+        },)
+        builder=pg_materializer.SnapshotPageBuilder.__new__(
+            pg_materializer.SnapshotPageBuilder
+        )
+        builder.connection=object()
+        builder.generic_runtime=("active",{})
+        builder.parent=("parent",{})
+        builder.overlay_ids=("accepted",)
+        builder.authoritative_ids=("accepted",)
+        builder.authoritative_records=None
+        builder.authoritative_artist_source_preflight_done=False
+        with patch.object(
+            pg_materializer.adapter,"_authoritative_7d_records",
+            return_value=records,
+        ) as load,patch.object(
+            pg_materializer,"preflight_authoritative_artist_source_owners",
+            return_value=(1,1,1),
+        ) as preflight:
+            builder.build_combo("7d","songs","count")
+            builder.build_combo("7d","artists","count")
+        load.assert_called_once_with(builder.connection,("accepted",))
+        preflight.assert_called_once_with(records,range_id="7d")
+
     def test_source_export_streams_validated_pages_without_whole_source_list(self):
         source_key="streaming-source"
         pages={
