@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-21T20:23:53.904Z",
+  "generatedAt": "2026-08-21T20:40:10.855Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-21T20:23:53.904Z",
+    "fetchedAt": "2026-08-21T20:40:10.855Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-21T20:23:53.904Z",
+    "generatedAt": "2026-08-21T20:40:10.855Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,22 +11657,22 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1217,
-      "parseableChannels": 1198,
+      "totalChannels": 1218,
+      "parseableChannels": 1199,
       "realAvatar": 650,
-      "thumbnailFallback": 567,
+      "thumbnailFallback": 568,
       "missingDisplayImage": 0,
-      "missingAvatar": 567,
+      "missingAvatar": 568,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1374,
+      "skipped_collected_evidence": 1375,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1355,
+      "batch_limit_reached": 1356,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
@@ -11702,6 +11702,27 @@
         "channelId": "UCMCooZqVMD2ZmUxjRxGuUjg",
         "displayName": "花鹿 める / Kajica Mel",
         "sourceUrl": "https://www.youtube.com/@mel_samui",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Hao_RKMusic",
+        "channelId": "UCjoGLVLapRciX38bwgDtttw",
+        "displayName": "羽緒",
+        "sourceUrl": "https://www.youtube.com/channel/UCjoGLVLapRciX38bwgDtttw",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RANZETOKINIWA",
+        "channelId": "UCw9_unaq1z9CJXeFOZm-MfQ",
+        "displayName": "時庭らんぜ / RANZE TOKINIWA",
+        "sourceUrl": "https://www.youtube.com/@RANZETOKINIWA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Azri_0822",
+        "channelId": "UC4oIghT3W9Y99nyiNCTXwlg",
+        "displayName": "アズリ / Azri【ななしいんく】",
+        "sourceUrl": "https://www.youtube.com/@Azri_0822",
         "reason": "batch_limit_reached"
       },
       {
@@ -11828,27 +11849,6 @@
         "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
         "displayName": "汐音ベリーちゃん Berry Ch",
         "sourceUrl": "https://www.youtube.com/@Berrych0623",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@DengekiNico",
-        "channelId": "UCOalOOX6-5TCEVRApZjj5-Q",
-        "displayName": "電撃ニコ / Dengeki Nico",
-        "sourceUrl": "https://www.youtube.com/@DengekiNico",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shairu.ch_0801",
-        "channelId": "UCe_8qM8Wk4cU5oD3WO07gZg",
-        "displayName": "Shairu.chしゃいる",
-        "sourceUrl": "https://www.youtube.com/@Shairu.ch_0801",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aoisui_",
-        "channelId": "UCcZPZ680duJJXnm9J0AAuBg",
-        "displayName": "蒼星すい",
-        "sourceUrl": "https://www.youtube.com/@aoisui_",
         "reason": "batch_limit_reached"
       }
     ]
