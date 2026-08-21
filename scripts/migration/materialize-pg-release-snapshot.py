@@ -1539,6 +1539,8 @@ def _source_occurrence_row(
     raw: Mapping[str, Any],
     *,
     entity_type: str,
+    source_song_key: str = "",
+    source_song_name: str = "",
 ) -> tuple[Any, ...]:
     item = dict(raw)
     payload = _nested_mapping(item, "payload")
@@ -1552,7 +1554,19 @@ def _source_occurrence_row(
     song = _nested_mapping(item, "song")
     song_title = _text(song.get("title") or item.get("songTitle"))
     artist = _text(song.get("artist") or item.get("artist") or item.get("songArtist"))
-    if entity_type == "vtuber":
+    if entity_type == "song" and (source_song_key or source_song_name):
+        if not source_song_key or not source_song_name:
+            raise RuntimeError(
+                f"song source canonical owner is incomplete: {range_id}/{source_key}"
+            )
+        # A Song source is one authoritative work.  Individual occurrences
+        # retain their raw spelling in payload_json, but they must not create
+        # extra public songs when title punctuation or artist spelling varies.
+        # This mirrors pg_adapter._generic_group_source_payload(), which pins
+        # every effective occurrence to persisted_record["key"].
+        canonical_song_key = source_song_key
+        canonical_song_name = source_song_name
+    elif entity_type == "vtuber":
         canonical_song_name, canonical_song_key = (
             adapter._vtuber_canonical_song_identity(song_title)
         )
@@ -2646,6 +2660,17 @@ class CanonicalSnapshotWriter:
         entity_key = _text(
             record.get("key") or record.get("entityKey") or record.get("videoId") or source_key
         )
+        source_song_key = ""
+        source_song_name = ""
+        if entity_type == "song":
+            source_song_key = entity_key
+            source_song_name = _text(
+                record.get("title") or record.get("workTitle") or record.get("name")
+            )
+            if not source_song_key or not source_song_name:
+                raise RuntimeError(
+                    f"song source canonical owner is incomplete: {range_id}/{source_key}"
+                )
         detail = dict(record)
         detail.pop("occurrences", None)
         detail["sourceDetailKey"] = source_key
@@ -2660,6 +2685,8 @@ class CanonicalSnapshotWriter:
             "source_key": source_key,
             "range_id": range_id,
             "entity_type": entity_type,
+            "source_song_key": source_song_key,
+            "source_song_name": source_song_name,
             "position": 0,
             "source_search": _BoundedTextAccumulator(MAX_RANKING_SEARCH_CHARS),
             "channel_search": _BoundedTextAccumulator(MAX_CHANNEL_SEARCH_CHARS),
@@ -2700,6 +2727,8 @@ class CanonicalSnapshotWriter:
                 int(state["position"]),
                 raw,
                 entity_type=_text(state["entity_type"]),
+                source_song_key=_text(state.get("source_song_key")),
+                source_song_name=_text(state.get("source_song_name")),
             )
             source_search.add(row[15])
             for value in (row[5], row[6], row[7], row[8]):
@@ -3457,6 +3486,116 @@ def preflight_unaffected_parent_video_sources(
         flush=True,
     )
     return direct_source_keys
+
+
+def preflight_song_source_owners(
+    connection: Any,
+    *,
+    parent_revision_id: str,
+    overlay_revision_ids: Sequence[str],
+    source_scope: SnapshotSourceScope,
+    source_keys: Iterable[str],
+) -> set[str]:
+    """Validate every all-range Song owner before copying source occurrences.
+
+    Song source occurrences deliberately preserve raw titles and artists for
+    provenance.  Their public canonical identity, however, belongs to the one
+    persisted Song detail.  Validate that owner across the complete requested
+    revision before either affected or immutable parent source expansion, so
+    legacy spelling variants cannot become a four-hour late count failure.
+    """
+
+    requested = {_text(value) for value in source_keys if _text(value)}
+    song_keys = {
+        _text(row[0])
+        for row in source_scope.connection.execute(
+            "SELECT DISTINCT source_key FROM source_scope_targets "
+            "WHERE view='songs' ORDER BY source_key"
+        )
+        if _text(row[0])
+    }
+    if not song_keys.issubset(requested):
+        raise RuntimeError("song source owner preflight escaped requested keys")
+    affected = set(source_scope.affected_source_keys())
+    source_lineage = tuple(dict.fromkeys((
+        *(_text(value) for value in overlay_revision_ids if _text(value)),
+        _text(parent_revision_id),
+    )))
+    if song_keys and not source_lineage:
+        raise RuntimeError("song source owner preflight lineage is empty")
+
+    persisted: set[str] = set()
+    ordered = tuple(sorted(song_keys))
+    for offset in range(0, len(ordered), SOURCE_SCOPE_FETCH_SIZE):
+        batch = ordered[offset : offset + SOURCE_SCOPE_FETCH_SIZE]
+        rows = adapter._rows(
+            connection,
+            """
+            SELECT DISTINCT ON (source_key)
+                   revision_id,source_key,entity_type,entity_key,
+                   coalesce(payload_json::jsonb->>'type','') AS payload_type,
+                   coalesce(payload_json::jsonb->>'key','') AS payload_key,
+                   coalesce(payload_json::jsonb->>'sourceDetailKey','')
+                     AS payload_source_key,
+                   coalesce(payload_json::jsonb->>'rangeId','') AS payload_range,
+                   coalesce(payload_json::jsonb->>'title','') AS payload_title,
+                   coalesce(payload_json::jsonb->>'workTitle','') AS payload_work_title
+            FROM runtime_source_details
+            WHERE revision_id::text = ANY(%s::text[]) AND range_id = 'all'
+              AND source_key = ANY(%s)
+            ORDER BY source_key,
+                     array_position(%s::text[],revision_id::text)
+            LIMIT %s
+            """,
+            [
+                list(source_lineage), list(batch), list(source_lineage),
+                len(batch) + 1,
+            ],
+        )
+        if len(rows) > len(batch):
+            raise RuntimeError("song source owner preflight exceeded batch")
+        for row in rows:
+            source_key = _text(row.get("source_key"))
+            if source_key not in batch or source_key in persisted:
+                raise RuntimeError("song source owner preflight changed identity")
+            entity_type = _text(row.get("entity_type") or row.get("payload_type"))
+            entity_key = _text(row.get("entity_key") or row.get("payload_key"))
+            payload_key = _text(row.get("payload_key"))
+            canonical_name = _text(
+                row.get("payload_title") or row.get("payload_work_title")
+            )
+            if entity_type != "song" or not entity_key or not canonical_name:
+                raise RuntimeError(
+                    "song source canonical owner is incomplete: all/" + source_key
+                )
+            if payload_key and payload_key != entity_key:
+                raise RuntimeError(
+                    "song source canonical owner changed entity key: all/" + source_key
+                )
+            if _text(row.get("payload_source_key")) not in {"", source_key}:
+                raise RuntimeError(
+                    "song source canonical owner changed source key: all/" + source_key
+                )
+            if _text(row.get("payload_range")) not in {"", "all"}:
+                raise RuntimeError(
+                    "song source canonical owner changed range: all/" + source_key
+                )
+            persisted.add(source_key)
+
+    overlay_only = song_keys - persisted
+    unexpected_missing = sorted(overlay_only - affected)
+    if unexpected_missing:
+        raise RuntimeError(
+            "song source canonical owner detail is missing: all/"
+            + ", ".join(unexpected_missing[:3])
+        )
+    print(
+        "PG_SNAPSHOT_SONG_SOURCE_OWNER_PREFLIGHT "
+        f"total={len(song_keys)} persisted={len(persisted)} "
+        f"overlayOnly={len(overlay_only)}",
+        flush=True,
+    )
+    return persisted
 
 
 def preflight_affected_parent_sources(
@@ -5082,6 +5221,13 @@ def materialize(
         }
         if source_scope is not None and getattr(builder, "parent", None):
             affected_parent_sources = source_scope.affected_source_keys()
+            preflight_song_source_owners(
+                connection,
+                parent_revision_id=builder.parent[0],
+                overlay_revision_ids=builder.overlay_ids,
+                source_scope=source_scope,
+                source_keys=source_keys["all"],
+            )
             if affected_parent_sources:
                 preflight_affected_parent_sources(
                     connection,
