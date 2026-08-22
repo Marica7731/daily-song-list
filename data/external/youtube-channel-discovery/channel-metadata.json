@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T08:53:59.237Z",
+  "generatedAt": "2026-08-22T09:46:30.958Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T08:53:59.237Z",
+    "fetchedAt": "2026-08-22T09:46:30.958Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T08:53:59.237Z",
+    "generatedAt": "2026-08-22T09:46:30.958Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1222,
-      "parseableChannels": 1203,
+      "totalChannels": 1223,
+      "parseableChannels": 1204,
       "realAvatar": 650,
-      "thumbnailFallback": 572,
+      "thumbnailFallback": 573,
       "missingDisplayImage": 0,
-      "missingAvatar": 572,
+      "missingAvatar": 573,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1378,
+      "skipped_collected_evidence": 1379,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1359,
+      "batch_limit_reached": 1360,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@itsukinatsume",
+        "channelId": "UCXN-ZRdGnFtLiJ8EY1i_alg",
+        "displayName": "Itsuki Natsume / 棗いつき",
+        "sourceUrl": "https://www.youtube.com/@itsukinatsume",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@otodama_hibiku",
+        "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
+        "displayName": "音魂ヒビクHibiku Otodama",
+        "sourceUrl": "https://www.youtube.com/@otodama_hibiku",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@erurun33",
+        "channelId": "UCy6Fu_0fDzQ7H-UWZFENklQ",
+        "displayName": "えるるん / Erurun Channel",
+        "sourceUrl": "https://www.youtube.com/channel/UCy6Fu_0fDzQ7H-UWZFENklQ",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@ibaramuan",
         "channelId": "UC9zLKU6WiRdcKtAh-6o_zmA",
@@ -11828,27 +11849,6 @@
         "channelId": "UC8-eGfSMfbQ-ILxIvKn55qw",
         "displayName": "羊野メリー",
         "sourceUrl": "https://www.youtube.com/@hituzino_mery",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ykn0911v",
-        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
-        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
-        "sourceUrl": "https://www.youtube.com/@ykn0911v",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@LewehorstShiran",
-        "channelId": "UCxiRdYNqojKL29H7gEVwlzA",
-        "displayName": "レーヴェホルスト紫蘭🦋Lewehorst Shiran",
-        "sourceUrl": "https://www.youtube.com/@LewehorstShiran",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mishiomolf",
-        "channelId": "UCyVypf7vg9KqoDiXkDIvetg",
-        "displayName": "Molf Ch. 海汐もるふ",
-        "sourceUrl": "https://www.youtube.com/@mishiomolf",
         "reason": "batch_limit_reached"
       }
     ]
