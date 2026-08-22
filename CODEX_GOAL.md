@@ -316,3 +316,9 @@
 - unique latest-head WDC run `32590039517`（head `7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2`）在所有 7d/all 四类排名生成完成后、昂贵 source copy 前由新 Artist owner 门禁 fail closed：`all/6653c1838b14e4a3 ranking=285 owners=3`。构建只使用 WDC 固定 32GB 隔离卷和 2.5GiB memory cgroup；实际失败前卷约 3GB、VPS2→WDC tunnel 约 1.35GB，Mac 不在传输或物化链路。
 - 生产数据没有被删改。精确根因为 compact Artist 列表卡按公开契约只保留前三首 `songs` 预览，而门禁错误把 compact payload 当成完整 285 首权威 owner 列表；`songCount=285` 本身正确。失败 run 未 bundle/deploy，cleanup 已删除约 6.85GB 临时 SQLite/固定卷，VPS2 relay inactive，WDC 项目回到旧 release 约 7.61GB。
 - 最小修复在 compact 前把完整 Artist song owners 写入构建期私有 SQLite 表；门禁和 source canonicalization 使用完整表，同时验证公开三首预览必须是完整列表前缀。私有表在 `finish()` 前删除，不进入 serving SQLite。缺表、计数不符、顺序/身份漂移继续 fail closed。新增 285-owner 生产形态回归和缺失完整表回归；完成全量门禁、PR/CI/squash merge 后仅运行唯一 latest-head WDC。
+
+### 2026-08-23 03:34 Asia/Taipei — WDC Artist owner 捕获调用边界修复
+
+- unique latest-head WDC run `32593000694`（head `f1dfa3b04ca98748fa7f8f4d65c62ca47030d559`）在 7d 四类与 all/songs 三指标完成后，于 `all/artists` 首次写私有 owner 表时再次 fail closed：`all/6653c1838b14e4a3 ranking=285 owners=3`。精确原因不是上一轮数据判断错误，而是 `SnapshotPageBuilder` 已在 adapter 的 page-independent preparation 阶段启用 `_snapshotCompactCards`；受 overlay 影响的 Artist summary 在 writer 的“compact 前”循环之前就已截为三首，因此 writer 仍收不到完整列表。
+- run 失败前固定卷约 `1.82GB`，cgroup memory peak `2,536,812,544` bytes、swap `0`，relay 未超 `16GB/2`；未 bundle/deploy。Actions 的 exact cleanup 成功，WDC 项目恢复 `7,611,437,438` bytes、可用约 `79.4GB`，VPS2 relay inactive，生产 release 未写入。
+- 最小修复只给离线 `all/artists` snapshot preparation 增加 `_snapshotPreserveArtistOwnerSongs`：保留完整、当前约 21k 条 canonical Artist-song owner 到 writer 私有表；公开 serving ranking 仍在后续统一 compact 步骤截为三首。该 flag 只允许与 snapshot compact 同时使用，在线 API 不设置。新增生产键 285-owner adapter 回归与 `SnapshotPageBuilder` 真实 flag 传递回归；完成全量门禁、PR/CI/squash merge 后仅运行唯一 latest-head WDC。
