@@ -1798,6 +1798,11 @@ class CanonicalSnapshotWriter:
         # ranking pages after the pass completes.
         self.static_ranking_root: Path | None = None
         self.song_count_corrections: dict[tuple[str, str], int] = {}
+        # Ranges are enabled only after a complete ranking-owner preflight.
+        # Direct writer/export helpers used outside the full materializer keep
+        # their existing source-detail owner contract unless they explicitly
+        # run the same fail-closed gate first.
+        self.artist_ranking_owner_ranges: set[str] = set()
 
     def _drop_file_cache(self, reason: str) -> None:
         self.cache_drop_attempts += 1
@@ -2893,6 +2898,123 @@ class CanonicalSnapshotWriter:
             self.connection.execute(f"DROP TABLE IF EXISTS {base_table}")
         return result
 
+    def _artist_ranking_song_owners(
+        self,
+        *,
+        range_id: str,
+        source_key: str,
+    ) -> tuple[
+        list[dict[str, Any]],
+        dict[str, str],
+        dict[str, tuple[str, str] | None],
+        bool,
+    ]:
+        rows = self.connection.execute(
+            """
+            SELECT song_count,payload_json
+            FROM ranking_rows INDEXED BY ranking_rows_source_lookup
+            WHERE range_id=? AND view='artists' AND metric='count'
+              AND scope_key='all' AND detail_key=?
+            ORDER BY rank
+            """,
+            (range_id, source_key),
+        ).fetchall()
+        if len(rows) != 1:
+            raise RuntimeError(
+                "artist ranking canonical owner is missing or ambiguous: "
+                f"{range_id}/{source_key} rows={len(rows)}"
+            )
+        expected_song_count = int(rows[0][0] or 0)
+        try:
+            payload = json.loads(rows[0][1])
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise RuntimeError(
+                "artist ranking canonical owner payload is invalid: "
+                f"{range_id}/{source_key}"
+            ) from exc
+        if not isinstance(payload, Mapping):
+            raise RuntimeError(
+                "artist ranking canonical owner payload is not an object: "
+                f"{range_id}/{source_key}"
+            )
+        if _text(payload.get("sourceDetailKey")) != source_key:
+            raise RuntimeError(
+                "artist ranking canonical owner changed source key: "
+                f"{range_id}/{source_key}"
+            )
+        raw_songs = payload.get("songs")
+        if not isinstance(raw_songs, list):
+            raise RuntimeError(
+                "artist ranking canonical song owners are incomplete: "
+                f"{range_id}/{source_key}"
+            )
+        songs = [dict(item) for item in raw_songs if isinstance(item, Mapping)]
+        if len(songs) != len(raw_songs):
+            raise RuntimeError(
+                "artist ranking canonical song owner is invalid: "
+                f"{range_id}/{source_key}"
+            )
+        owners_by_key, owners_by_name, all_keyed = _artist_song_owners(
+            {"songs": songs},
+            context=f"artist ranking {range_id}/{source_key}",
+            require_complete=True,
+        )
+        if (
+            not all_keyed
+            or expected_song_count != len(owners_by_key)
+            or _integer(payload.get("songCount")) != expected_song_count
+        ):
+            raise RuntimeError(
+                "artist ranking canonical song owner count disagrees: "
+                f"{range_id}/{source_key} ranking={expected_song_count} "
+                f"owners={len(owners_by_key)}"
+            )
+        return songs, owners_by_key, owners_by_name, all_keyed
+
+    def preflight_artist_ranking_source_owners(
+        self,
+        *,
+        range_id: str,
+    ) -> tuple[int, int]:
+        source_keys = [
+            _text(row[0])
+            for row in self.connection.execute(
+                """
+                SELECT detail_key
+                FROM ranking_rows
+                WHERE range_id=? AND view='artists' AND metric='count'
+                  AND scope_key='all'
+                ORDER BY rank
+                """,
+                (range_id,),
+            )
+        ]
+        if not source_keys or any(not source_key for source_key in source_keys):
+            raise RuntimeError(
+                f"artist ranking canonical owners are empty: {range_id}"
+            )
+        if len(source_keys) != len(set(source_keys)):
+            raise RuntimeError(
+                f"artist ranking canonical owner source is duplicated: {range_id}"
+            )
+        owner_count = 0
+        for source_key in source_keys:
+            _songs, owners_by_key, _owners_by_name, _all_keyed = (
+                self._artist_ranking_song_owners(
+                    range_id=range_id,
+                    source_key=source_key,
+                )
+            )
+            owner_count += len(owners_by_key)
+        print(
+            "PG_SNAPSHOT_ARTIST_RANKING_SOURCE_OWNER_PREFLIGHT "
+            f"range={range_id} total={len(source_keys)} "
+            f"songOwners={owner_count}",
+            flush=True,
+        )
+        self.artist_ranking_owner_ranges.add(range_id)
+        return len(source_keys), owner_count
+
     def begin_source(
         self,
         source_key: str,
@@ -2919,17 +3041,35 @@ class CanonicalSnapshotWriter:
                 raise RuntimeError(
                     f"song source canonical owner is incomplete: {range_id}/{source_key}"
                 )
-        elif entity_type == "artist":
-            (
-                source_artist_song_owners_by_key,
-                source_artist_song_owners_by_name,
-                source_artist_songs_are_keyed,
-            ) = _artist_song_owners(
-                record,
-                context=f"artist source {range_id}/{source_key}",
-            )
         detail = dict(record)
         detail.pop("occurrences", None)
+        if entity_type == "artist":
+            if range_id in self.artist_ranking_owner_ranges:
+                (
+                    ranking_songs,
+                    source_artist_song_owners_by_key,
+                    source_artist_song_owners_by_name,
+                    source_artist_songs_are_keyed,
+                ) = self._artist_ranking_song_owners(
+                    range_id=range_id,
+                    source_key=source_key,
+                )
+                # The current ranking card is the authoritative public owner
+                # list.  A delta-materialized source count list may retain a
+                # legacy raw song key, but it must not split one canonical
+                # work in source details or occurrences.  Raw provenance
+                # remains untouched in each occurrence payload_json.
+                detail["songs"] = ranking_songs
+                detail["songCount"] = len(source_artist_song_owners_by_key)
+            else:
+                (
+                    source_artist_song_owners_by_key,
+                    source_artist_song_owners_by_name,
+                    source_artist_songs_are_keyed,
+                ) = _artist_song_owners(
+                    record,
+                    context=f"artist source {range_id}/{source_key}",
+                )
         detail["sourceDetailKey"] = source_key
         detail["rangeId"] = range_id
         self.connection.execute(
@@ -5911,6 +6051,11 @@ def materialize(
         for range_id in RANGES:
             if not source_keys[range_id]:
                 raise RuntimeError(f"ranking snapshot has no canonical source keys for {range_id}")
+        # Validate the full current Artist owner contract before any expensive
+        # parent/affected source copy.  Source materialization later reuses
+        # these exact ranking owners, so raw/legacy delta keys cannot create a
+        # multi-hour late ranking/source cardinality mismatch.
+        writer.preflight_artist_ranking_source_owners(range_id="all")
         _release_materializer_memory(writer, builder, phase="rankings")
         bulk_exported_ranges: set[str] = set()
         if (
