@@ -1,5 +1,18 @@
 # daily-song-list 主线：增量数据库与安全发布迁移
 
+## 2026-08-22 WDC 服务端受限构建与精确清理（当前 active goal）
+
+- 目标：把 next-serving-v3 的重型 PostgreSQL 物化从 Windows/Mac 移到 WDC 受限沙箱，完成唯一 latest-head 发布、公网 API/浏览器验收、10 分钟稳定观察，并清理本轮精确归属且已闲置的构建垃圾。
+- 架构边界：VPS2 仅提供只读 PostgreSQL/有界 relay；Windows/Mac 不再生成或上传全量 SQLite/bundle；WDC 使用带 source commit/content/revision 身份的稀疏代码输入执行物化、serving build 和本机原子激活。
+- 强制容量门禁：构建临时卷固定上限 `32,000,000,000` bytes，位于同文件系统且项目树外的 exact owner-marked `/var/tmp/dsl-wdc-volume-<run>-<attempt>`；最终 release `< 16,000,000,000` bytes；WDC 宿主在写入前、构建中里程碑和激活前均须保留 `>= 20,000,000,000` bytes；项目逻辑占用与实际分配占用均 `< 40,000,000,000` bytes。任一测量缺失、达到上限或身份不一致都在生产写入/激活前 fail closed。
+- 强制资源门禁：构建 cgroup `MemoryMax <= 2.5GB`、`MemorySwapMax <= 1GB`，限制 CPU/IO/PIDs；relay 单 run 累计 wire bytes `< 16,000,000,000`、连接数 `<= 2`。不得用增大 timeout、无界复制、完整 clone 或清理无关目录换取完成。
+- 激活与回滚：不允许压缩 archive 与完整解压 release 同时占用两份空间；只在同一文件系统以 exact owner manifest/realpath/CAS 进入 `releases/<sha>`，保留 current/previous，完整线上门禁通过后才回收精确旧 release。
+- 清理授权：仅删除可由 run/owner marker、Git worktree/branch、进程引用和 clean status 共同证明为本轮产生且已闲置的 Mac exact roots、本地 worktree/临时脚本、VPS2 relay roots 与 WDC transient。含用户改动、仍被合法 run 使用、归属不明或不在允许根下的对象一律保留。
+- 禁止事项：不修改 DNS、canonical PostgreSQL 内容、生产歌曲数据、共享 index、共享 dirty checkout 或无关目录；不以 green workflow 或 `/healthz` 单点代替真实 release/meta/ranking/source/browser 验收。
+- 当前状态：`implementation-tested`。合法 core `32558002994` 已 success，把 latest main 推进到 `198715988eef97d46455d270eaffbfbebc74e8ea`；accepted `32559614201` 已 success 并激活 `accepted_32559614201_1`（parent=`accepted_32556931860_1`，240 videos/3910 occurrences，content=`ad65b1867e514ead22614e5e9ece3d42e73171f4578b670db6590c338e1d7fe9`，`PG_ONLINE_HEALTH_META_OK`）。该 core commit 的 GitHub API 文件集只含 `data/**`，其直接 parent 为本分支基线 `2e5acc978f70a7442eb2348a67a5504ff7a8c862`，与本轮代码写集不重叠；为避免 partial clone 获取大型数据树，本地不下载该数据 commit，交由 GitHub PR 在 current main 上合并。旧 Mac-heavy WDC `32559924687` 已在 sync job 仍 queued/无步骤时精确取消并确认 completed/cancelled；此前 `32557748233` 亦已 cleanup。Mac 端实测 exact roots 不存在。WDC 仍为旧 release，交付未完成。
+- 已完成实现/验证：relay 累计 16GB 与并发 2 连接门禁、WDC 32GB loop/cgroup/20GB reserve supervisor、server-local materialize/build/activate、incoming owner 断线清理、latest-main no-write、激活前后 source triplet、发布前 exact data gate、同协议前后延迟、10 分钟观察和 current/previous 回滚保留。临时卷现固定在同文件系统的 owner-marked `/var/tmp`，项目逻辑/实际字节双门禁避免稀疏镜像把项目逻辑占用顶过 40GB。next-serving `204/204`、新增 relay/storage/data/workflow/latency `13/13`、3 个 workflow YAML 的 `22` 个 shell block、Python/shell 语法均通过；WDC 真实 `/var/tmp` 64MiB loop 冒烟确认 project/volume device 均为 `2050`、项目逻辑占用保持 `7,611,437,438` bytes；生产版 preflight 对真实项目测得 logical=`7,613,755,792`、allocated=`7,629,680,640`、hostFree=`79,855,972,352`、projectedCopy=`23,747,973,520` bytes，所有 exact probe 均已清理；此前 systemd append/cgroup 冒烟与 3 个哈希锁 wheel 下载亦通过。
+- 下一步：等合法 core/accepted 释放 Mac 后重新读取 latest main 并 rebase；完成 diff/status、commit/push/PR/CI/squash merge；只运行一个 latest-head WDC，并做公网 API/浏览器验收、10 分钟观察与最终精确清理。
+
 ## 2026-08-20 next-serving-v3 WDC 自愈发布（当前权威状态）
 
 - 目标：完成 next-serving-v3 正确性/性能修复、唯一最新-head WDC 发布、真实公网 API/浏览器验收、同协议前后延迟、10 分钟观察与精确清理；未完成部署和公网门禁前不得标记 complete。

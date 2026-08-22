@@ -46,9 +46,18 @@ jobs:
             .github/workflows/test-next-serving-v3.yml
             assets/app.js
             index.html
+            deploy/check-wdc-build-storage.py
+            deploy/cleanup-wdc-bounded-build.sh
             deploy/daily-song-list-api.service
+            deploy/finalize-wdc-bounded-release.sh
             deploy/install-wdc-release.sh
             deploy/nginx-next-api.conf
+            deploy/orchestrate-wdc-bounded-release.sh
+            deploy/run-wdc-bounded-build.sh
+            deploy/start-wdc-pg-tunnel.sh
+            deploy/verify-wdc-public-release.py
+            deploy/verify-wdc-release-data.py
+            deploy/wdc-vps2-askpass.sh
             scripts/migration/7d-json-to-patch.py
             scripts/migration/materialize-pg-release-snapshot.py
             scripts/migration/materialize-ranking-pages.py
@@ -57,7 +66,7 @@ jobs:
             scripts/migration/prepare-wdc-frontend.py
             scripts/migration/patch-next-frontend.py
             scripts/migration/pg-peer-relay.py
-            scripts/migration/requirements-wdc-mac.txt
+            scripts/migration/requirements-wdc-linux.txt
             server/pg_adapter.py
             server/release_serving_server.py
             tests/test_next_serving_v3.py
@@ -78,39 +87,51 @@ jobs:
             scripts/migration/prepare-wdc-frontend.py \
             scripts/migration/patch-next-frontend.py \
             scripts/migration/pg-peer-relay.py \
+            deploy/check-wdc-build-storage.py \
+            deploy/verify-wdc-public-release.py \
+            deploy/verify-wdc-release-data.py \
             tests/test_next_serving_v3.py \
             tests/test_pg_peer_relay.py
           python3 - <<'PY'
           from pathlib import Path
-          requirements=Path("scripts/migration/requirements-wdc-mac.txt").read_text(encoding="utf-8")
+          requirements=Path("scripts/migration/requirements-wdc-linux.txt").read_text(encoding="utf-8")
           expected={
               "psycopg==3.3.4":"b6bbc25ccf05c8fad3b061d9db2ef0909a555171b84b07f29458a447253d679a",
-              "psycopg-binary==3.3.4":"6402a9d8146cf4b3974ded3fd28a971e83dc6a0333eb7822524a3aa20b546578",
+              "psycopg-binary==3.3.4":"e7510c37550f91a187e3660a8cc50d4b760f8c3b8b2f89ebc5698cd2c7f2c85d",
               "typing-extensions==4.16.0":"481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
           }
           if requirements.count("==")!=3 or requirements.count("--hash=sha256:")!=3:
-              raise SystemExit("Mac dependency set must contain exactly three pinned hashes")
+              raise SystemExit("WDC Linux dependency set must contain exactly three pinned hashes")
           for package,digest in expected.items():
               if package not in requirements or f"--hash=sha256:{digest}" not in requirements:
-                  raise SystemExit(f"Mac dependency lock mismatch: {package}")
-          print("MAC_REQUIREMENTS_HASHES_OK")
+                  raise SystemExit(f"WDC Linux dependency lock mismatch: {package}")
+          print("WDC_LINUX_REQUIREMENTS_HASHES_OK")
           PY
           node --check assets/app.js
-          bash -n deploy/install-wdc-release.sh
+          for script in \
+            deploy/cleanup-wdc-bounded-build.sh \
+            deploy/finalize-wdc-bounded-release.sh \
+            deploy/install-wdc-release.sh \
+            deploy/orchestrate-wdc-bounded-release.sh \
+            deploy/run-wdc-bounded-build.sh \
+            deploy/start-wdc-pg-tunnel.sh \
+            deploy/wdc-vps2-askpass.sh; do
+            bash -n "$script"
+          done
           grep -Fq '40,000,000,000 bytes' AGENTS.md
           grep -Fq '40,000,000,000 bytes' README.md
           grep -Fq '/opt/culua/ytb-song-rank' AGENTS.md
           grep -Fq '/opt/culua/ytb-song-rank' README.md
           grep -Fq 'must stop before writing to WDC' AGENTS.md
           grep -Fq 'must stop before writing to WDC' README.md
-          grep -Fq 'daily-song-list-mac' AGENTS.md
-          grep -Fq 'daily-song-list-mac' README.md
+          grep -Fq 'Windows and the Mac runner must not carry' AGENTS.md
+          grep -Fq 'neither Windows nor the Mac runner carries' README.md
           grep -Fq 'REPEATABLE READ READ ONLY' AGENTS.md
           grep -Fq 'REPEATABLE READ READ ONLY' README.md
           grep -Fq '32,000,000,000 bytes' AGENTS.md
           grep -Fq '32,000,000,000' README.md
-          grep -Fq '/Users/be/.local/bin/python3' AGENTS.md
-          grep -Fq '/Users/be/.local/bin/python3' README.md
+          grep -Fq 'requirements-wdc-linux.txt' AGENTS.md
+          grep -Fq 'requirements-wdc-linux.txt' README.md
           grep -Fq 'same-filesystem' AGENTS.md
           grep -Fq 'same-filesystem' README.md
           echo "WDC_STORAGE_DOCS_OK"

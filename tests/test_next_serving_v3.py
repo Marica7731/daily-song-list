@@ -7332,9 +7332,18 @@ class Tests(unittest.TestCase):
             ".github/workflows/test-next-serving-v3.yml",
             ".github/workflows/update-backfill.yml",
             ".github/workflows/update-core.yml",
+            "deploy/check-wdc-build-storage.py",
+            "deploy/cleanup-wdc-bounded-build.sh",
             "deploy/daily-song-list-api.service",
+            "deploy/finalize-wdc-bounded-release.sh",
             "deploy/install-wdc-release.sh",
             "deploy/nginx-next-api.conf",
+            "deploy/orchestrate-wdc-bounded-release.sh",
+            "deploy/run-wdc-bounded-build.sh",
+            "deploy/start-wdc-pg-tunnel.sh",
+            "deploy/verify-wdc-public-release.py",
+            "deploy/verify-wdc-release-data.py",
+            "deploy/wdc-vps2-askpass.sh",
             "scripts/migration/7d-json-to-patch.py",
             "scripts/migration/build-release-bundle.py",
             "scripts/migration/build-serving-store.py",
@@ -7343,6 +7352,7 @@ class Tests(unittest.TestCase):
             "scripts/migration/patch-next-frontend.py",
             "scripts/migration/pg-peer-relay.py",
             "scripts/migration/prepare-wdc-frontend.py",
+            "scripts/migration/requirements-wdc-linux.txt",
             "scripts/migration/requirements-wdc-mac.txt",
             "server/pg_adapter.py",
             "server/release_serving_server.py",
@@ -7359,44 +7369,41 @@ class Tests(unittest.TestCase):
             workflow.index('node --test "${test_files[@]}"'),
         )
 
-    def test_wdc_release_checkouts_include_check_code_contract_for_both_gates(self):
+    def test_wdc_ubuntu_gate_checkout_includes_check_code_contract(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
             encoding="utf-8",
         )
         self.assertEqual(
             workflow.count("            .github/workflows/check-code.yml\n"),
-            2,
+            1,
         )
         self.assertLess(
-            workflow.index("Checkout release gate inputs"),
+            workflow.index("Checkout bounded release inputs"),
             workflow.index("            .github/workflows/check-code.yml\n"),
-        )
-        self.assertLess(
-            workflow.index("Checkout complete serving implementation"),
-            workflow.rindex("            .github/workflows/check-code.yml\n"),
         )
 
     def test_wdc_release_supervises_tunnel_for_snapshot_transport_resume(self):
-        workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
-            encoding="utf-8",
-        )
+        controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(encoding="utf-8")
+        tunnel=(ROOT/"deploy"/"start-wdc-pg-tunnel.sh").read_text(encoding="utf-8")
+        combined=controller+"\n"+tunnel
         for required in (
-            'TUNNEL_MONITOR_STOP="$MAC_RUN_ROOT/ssh/vps2-tunnel-monitor.stop"',
-            "start_pg_tunnel()",
-            "stop_pg_tunnel()",
-            'ssh -S "$TUNNEL_CONTROL" -O check',
-            'echo "WDC_PG_TUNNEL_RESTART attempt=$reconnect_attempt"',
-            "trap stop_pg_tunnel EXIT",
-            "trap - EXIT",
+            'TUNNEL_UNIT="dsl-wdc-pg-tunnel-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"',
+            "--property=Restart=on-failure",
+            "--property=RestartSec=3",
+            "--property=MemoryMax=134217728",
+            "--property=MemorySwapMax=0",
+            "--property=RuntimeMaxSec=32400",
+            "-o ExitOnForwardFailure=yes",
+            "-o ServerAliveInterval=15",
+            "-o ServerAliveCountMax=3",
+            '-L "127.0.0.1:${LOCAL_PORT}:127.0.0.1:${RELAY_PORT}"',
+            "WDC_DIRECT_PG_TUNNEL_READY",
         ):
-            self.assertIn(required,workflow)
-        self.assertEqual(workflow.count("-o Compression=yes"),1)
-        self.assertLess(
-            workflow.index("-o Compression=yes"),
-            workflow.index("start_pg_tunnel()"),
-        )
-        self.assertEqual(workflow.count("RuntimeMaxSec=32400"),1)
-        self.assertNotIn("RuntimeMaxSec=64800",workflow)
+            self.assertIn(required,combined)
+        self.assertIn("-o Compression=no",tunnel)
+        self.assertNotIn("-o Compression=yes",combined)
+        self.assertNotIn("RuntimeMaxSec=64800",combined)
+        self.assertNotIn("/Users/",combined)
 
     def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
@@ -7457,7 +7464,7 @@ class Tests(unittest.TestCase):
             workflow.index("Configure Mac toolchain"),
         )
 
-    def test_workflow_deploys_complete_artifact_and_never_marks_proxy_fallback(self):
+    def _legacy_mac_workflow_contract_superseded_by_server_side_release(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
         ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
         installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
@@ -7600,6 +7607,95 @@ class Tests(unittest.TestCase):
         self.assertIn("core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",ci)
         self.assertIn('diff --check "$diff_base" HEAD',ci)
         self.assertNotIn('ranking_scope_series\"] == 72',workflow)
+        self.assertNotIn("https://ytb-song-rank.culua.com",installer)
+
+    def test_workflow_builds_complete_release_on_wdc_and_preserves_rollback(self):
+        workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(encoding="utf-8")
+        ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(encoding="utf-8")
+        controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(encoding="utf-8")
+        build=(ROOT/"deploy"/"run-wdc-bounded-build.sh").read_text(encoding="utf-8")
+        cleanup=(ROOT/"deploy"/"cleanup-wdc-bounded-build.sh").read_text(encoding="utf-8")
+        finalizer=(ROOT/"deploy"/"finalize-wdc-bounded-release.sh").read_text(encoding="utf-8")
+        data_verifier=(ROOT/"deploy"/"verify-wdc-release-data.py").read_text(encoding="utf-8")
+        public=(ROOT/"deploy"/"verify-wdc-public-release.py").read_text(encoding="utf-8")
+        installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
+        combined="\n".join((workflow,controller,build,cleanup,finalizer,data_verifier,public))
+        for required in (
+            "ubuntu_gate:",
+            "runs-on: ubuntu-latest",
+            "Checkout hashed sparse controller inputs",
+            "materialize-pg-release-snapshot.py",
+            "scripts/migration/pg-peer-relay.py",
+            "server/pg_adapter.py",
+            "build-serving-store.py",
+            "release_serving_server.py",
+            "install-wdc-release.sh",
+            "--snapshot-output",
+            "--consume-source-db",
+            "--link-serving-sqlite",
+            "--build-logic-sha",
+            ".codex-owned-run",
+            "--socket /var/run/postgresql/.s.PGSQL.5432",
+            "--require-user www-data",
+            "PGHOST=127.0.0.1",
+            'PGPORT="$PG_PORT"',
+            'PGAPPNAME="dsl-wdc-snapshot-${RUN_ID}-${RUN_ATTEMPT}"',
+            "PYTHONUNBUFFERED=1",
+            '2>&1 | tee "$MATERIALIZE_LOG"',
+            "SOURCE_TRIPLET_STABLE_BEFORE_ACTIVATE",
+            "WDC_PG_CANONICAL_SNAPSHOT_OK",
+            "WDC_RELEASE_DATA_VERIFIED",
+            "WDC_PUBLIC_RELEASE_VERIFIED",
+            "WDC_FINAL_STORAGE_OK",
+            "WDC_FINAL_RESIDUE_OK",
+            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity",
+            "VPS2_BOUNDED_RELAY_CLEAN",
+            "WDC_BOUNDED_CLEANUP_OK",
+            "WDC_CLEANUP_ACTIVE_RELEASE_PRESERVED",
+            "WDC_CLEANUP_ROLLBACK_RELEASE_PRESERVED",
+            "0007036316d9dffa",
+            "000c1914748382f4",
+            "9d99a4a482ed24b2536f0058",
+            "for sample in $(seq 0 10)",
+        ):
+            self.assertIn(required,combined)
+        for forbidden in (
+            "self-hosted",
+            "daily-song-list-mac",
+            "/Users/",
+            "release.tar",
+            "requirements-wdc-mac.txt",
+            "actions/upload-artifact",
+            "actions/download-artifact",
+            "StrictHostKeyChecking=no",
+            "https://ytb-song-rank.culua.com",
+            "/var/lib/culua/ytb-song-rank/song-rank.sqlite",
+            "PGHOST=/var/run/postgresql",
+            "snapshot-runtime-db.py",
+            "git clone",
+        ):
+            self.assertNotIn(forbidden,workflow+"\n"+controller+"\n"+build)
+        self.assertEqual(workflow.count("runs-on: ubuntu-latest"),2)
+        self.assertLess(build.index("verify-wdc-release-data.py"),build.index('cp -a --no-preserve=ownership'))
+        self.assertLess(controller.index("verify-wdc-public-release.py"),controller.index("for sample in $(seq 0 10)"))
+        self.assertLess(finalizer.index("WDC_FINAL_STORAGE_OK"),finalizer.index("--action finalize"))
+        self.assertIn("DEPLOY_ROLLBACK",installer)
+        self.assertIn("PREVIOUS_RELEASE_HEALTH_OK",installer)
+        self.assertIn("--previous-release-sha",installer)
+        self.assertIn("sourceFallbackEnabled",installer)
+        self.assertIn("computed release content hash mismatch",installer)
+        self.assertLess(installer.index("LIVE_MUTATION_STARTED=1"),installer.index('atomic_install "$SERVER_ARTIFACT" "$SERVER_PATH"'))
+        self.assertIn("DEPLOY_ACTIVATED_PENDING_PUBLIC",installer)
+        self.assertIn('ACTION" == "rollback"',installer)
+        self.assertIn('ACTION" == "finalize"',installer)
+        self.assertIn("backups-complete",installer)
+        self.assertIn("PREP_STATE_DIR",installer)
+        self.assertIn("state preserved at",installer)
+        self.assertIn('git grep -nE -e "$pattern"',ci)
+        self.assertIn("sparse-checkout-cone-mode: false",ci)
+        self.assertIn("fetch-depth: 2",ci)
+        self.assertIn("core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",ci)
+        self.assertIn('diff --check "$diff_base" HEAD',ci)
         self.assertNotIn("https://ytb-song-rank.culua.com",installer)
 
 if __name__=="__main__":unittest.main(verbosity=2)
