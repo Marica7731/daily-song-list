@@ -47,6 +47,27 @@ WDC_SSH=(
 vps2() {
   timeout 40s ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "$@"
 }
+vps2_source_meta() {
+  local attempt output rc
+  for attempt in 1 2; do
+    if output="$(timeout 75s ssh "${VPS2_SSH[@]}" "$VPS2_USER@$VPS2_HOST" "$@")"; then
+      printf '%s' "$output"
+      return 0
+    else
+      rc=$?
+    fi
+    case "$rc" in
+      28|124|255) ;;
+      *) return "$rc" ;;
+    esac
+    if ((attempt == 1)); then
+      echo "PG_SOURCE_META_RETRY attempt=$attempt status=$rc" >&2
+      continue
+    fi
+    return "$rc"
+  done
+  return 70
+}
 wdc() {
   timeout 40s ssh "${WDC_SSH[@]}" "$WDC_USER@$WDC_HOST" "$@"
 }
@@ -219,7 +240,7 @@ BUILD_LOGIC_SHA="$({
 [[ "$BUILD_LOGIC_SHA" =~ ^[0-9a-f]{64}$ ]]
 echo "WDC_BUILD_LOGIC_SHA $BUILD_LOGIC_SHA"
 
-META_JSON="$(vps2 "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"
+META_JSON="$(vps2_source_meta "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"
 mapfile -t META_FIELDS < <(META_JSON="$META_JSON" python3 - <<'PY'
 import json,os
 meta=(json.loads(os.environ["META_JSON"]).get("meta") or {})
