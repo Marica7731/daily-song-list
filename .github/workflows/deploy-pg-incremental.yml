@@ -453,9 +453,10 @@ jobs:
         id: wdc_window
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          QUEUED_LEASE_MAX_AGE_SECONDS: "3600"
         run: |
           set -Eeuo pipefail
-          active_wdc="$(
+          observed_wdc="$(
             for release_status in in_progress queued; do
               curl --fail --silent --show-error --location --retry 2 \
                 --connect-timeout 5 --max-time 30 \
@@ -466,10 +467,24 @@ jobs:
               [.[].workflow_runs[] |
                 select(.id != $current_run) |
                 select(.name == "Sync complete immutable release to WDC") |
-                {id,name,status,head_sha}
+                {id,name,status,head_sha,created_at}
               ] | unique_by(.id)
             '
           )"
+          active_wdc="$(jq -c --argjson max_age "$QUEUED_LEASE_MAX_AGE_SECONDS" '
+            [.[] | select(
+              .status == "in_progress" or
+              (.status == "queued" and (now - (.created_at | fromdateiso8601)) <= $max_age)
+            )]
+          ' <<<"$observed_wdc")"
+          stale_queued="$(jq -c --argjson max_age "$QUEUED_LEASE_MAX_AGE_SECONDS" '
+            [.[] | select(
+              .status == "queued" and (now - (.created_at | fromdateiso8601)) > $max_age
+            )]
+          ' <<<"$observed_wdc")"
+          if [ "$(jq -r 'length' <<<"$stale_queued")" -gt 0 ]; then
+            echo "WDC_STALE_QUEUED_LEASE_IGNORED runs=$stale_queued"
+          fi
           if [ "$(jq -r 'length' <<<"$active_wdc")" -gt 0 ]; then
             echo 'blocked=true' >> "$GITHUB_OUTPUT"
             echo "PG_INCREMENT_NOOP reason=active-wdc-release runs=$(jq -c . <<<"$active_wdc")"

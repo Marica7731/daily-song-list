@@ -7496,8 +7496,12 @@ class Tests(unittest.TestCase):
                 "if: ${{ needs.release_window.outputs.blocked != 'true' }}",
                 producer,
             )
+            self.assertIn('QUEUED_LEASE_MAX_AGE_SECONDS: "3600"',producer)
+            self.assertIn("WDC_STALE_QUEUED_LEASE_IGNORED",producer)
         self.assertIn("Detect active bounded WDC release window",accepted)
         self.assertIn("PG_INCREMENT_NOOP reason=active-wdc-release",accepted)
+        self.assertIn('QUEUED_LEASE_MAX_AGE_SECONDS: "3600"',accepted)
+        self.assertIn("WDC_STALE_QUEUED_LEASE_IGNORED",accepted)
         self.assertIn(
             "steps.wdc_window.outputs.blocked != 'true' && "
             "(github.event_name != 'workflow_run'",
@@ -7507,6 +7511,9 @@ class Tests(unittest.TestCase):
             wdc.count("            .github/workflows/deploy-pg-incremental.yml\n"),
             2,
         )
+        self.assertIn('QUEUED_LEASE_MAX_AGE_SECONDS: "3600"',wdc)
+        for workflow in (wdc,core,backfill,accepted):
+            self.assertIn("fromdateiso8601",workflow)
 
     def test_wdc_cancel_always_cleans_deleted_backing_loop_and_relay(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
