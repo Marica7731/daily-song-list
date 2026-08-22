@@ -30,6 +30,7 @@ BUNDLE_PATH=ROOT/"scripts"/"migration"/"build-release-bundle.py"
 PATCHER_PATH=ROOT/"scripts"/"migration"/"patch-next-frontend.py"
 PREPARE_FRONTEND_PATH=ROOT/"scripts"/"migration"/"prepare-wdc-frontend.py"
 SEVEN_DAY_PATCH_PATH=ROOT/"scripts"/"migration"/"7d-json-to-patch.py"
+README_SCOPE_PATH=ROOT/"scripts"/"migration"/"check-wdc-readme-scope.py"
 INSTALLER_PATH=ROOT/"deploy"/"install-wdc-release.sh"
 APP_PATH=ROOT/"assets"/"app.js"
 NGINX_PATH=ROOT/"deploy"/"nginx-next-api.conf"
@@ -41,7 +42,7 @@ def load(name:str,path:Path):
 
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
-pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH);seven_day_patch=load("seven_day_patch",SEVEN_DAY_PATCH_PATH)
+pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH);seven_day_patch=load("seven_day_patch",SEVEN_DAY_PATCH_PATH);readme_scope=load("readme_scope",README_SCOPE_PATH)
 ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";VTUBER_KEY="dc6aa541a6dff484";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
 
@@ -7347,6 +7348,7 @@ class Tests(unittest.TestCase):
             "scripts/migration/7d-json-to-patch.py",
             "scripts/migration/build-release-bundle.py",
             "scripts/migration/build-serving-store.py",
+            "scripts/migration/check-wdc-readme-scope.py",
             "scripts/migration/materialize-pg-release-snapshot.py",
             "scripts/migration/materialize-ranking-pages.py",
             "scripts/migration/patch-next-frontend.py",
@@ -7368,6 +7370,80 @@ class Tests(unittest.TestCase):
             workflow.index('if [ "${run_node_tests}" = "0" ]; then'),
             workflow.index('node --test "${test_files[@]}"'),
         )
+
+    def test_check_code_only_exempts_readme_bounded_wdc_sections(self):
+        base=(
+            "# Daily Song List\n\n"
+            "intro\n\n"
+            "## WDC server-side release workflow\n\n"
+            "old workflow\n\n"
+            "## WDC storage safety\n\n"
+            "old limits\n\n"
+            "## UI Screenshots\n\n"
+            "ui proof\n"
+        )
+        bounded=base.replace("old limits","new limits")
+        outside=base.replace("ui proof","changed ui proof")
+        self.assertTrue(readme_scope.has_only_bounded_wdc_changes(base,bounded))
+        self.assertFalse(readme_scope.has_only_bounded_wdc_changes(base,outside))
+        self.assertFalse(readme_scope.has_only_bounded_wdc_changes(base,base))
+        self.assertFalse(
+            readme_scope.has_only_bounded_wdc_changes(
+                base,
+                bounded.replace("## UI Screenshots\n",""),
+            )
+        )
+        workflow=(ROOT/".github"/"workflows"/"check-code.yml").read_text(
+            encoding="utf-8",
+        )
+        self.assertIn("README.md)",workflow)
+        self.assertIn(
+            'python3 scripts/migration/check-wdc-readme-scope.py --base "${base}"',
+            workflow,
+        )
+        self.assertIn('if [ "${readme_scope_status}" -ne 1 ]; then',workflow)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo=Path(temp_dir)
+            readme=repo/"README.md"
+            readme.write_text(base,encoding="utf-8")
+            subprocess.run(["git","init","-q"],cwd=repo,check=True)
+            subprocess.run(["git","add","README.md"],cwd=repo,check=True)
+            subprocess.run(
+                [
+                    "git","-c","user.name=Codex Test",
+                    "-c","user.email=codex-test@example.invalid",
+                    "commit","-qm","base",
+                ],
+                cwd=repo,
+                check=True,
+            )
+            base_sha=subprocess.check_output(
+                ["git","rev-parse","HEAD"],cwd=repo,text=True,
+            ).strip()
+            readme.write_text(bounded,encoding="utf-8")
+            accepted=subprocess.run(
+                [sys.executable,str(README_SCOPE_PATH),"--base",base_sha],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(accepted.returncode,0,accepted.stderr)
+            self.assertIn("CODEX_README_WDC_SCOPE_OK",accepted.stdout)
+            readme.write_text(outside,encoding="utf-8")
+            rejected=subprocess.run(
+                [sys.executable,str(README_SCOPE_PATH),"--base",base_sha],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(rejected.returncode,1,rejected.stderr)
+            invalid=subprocess.run(
+                [sys.executable,str(README_SCOPE_PATH),"--base","0"*40],
+                cwd=repo,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(invalid.returncode,2,invalid.stderr)
 
     def test_wdc_ubuntu_gate_checkout_includes_check_code_contract(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(

@@ -63,6 +63,7 @@ jobs:
             scripts/migration/materialize-ranking-pages.py
             scripts/migration/build-serving-store.py
             scripts/migration/build-release-bundle.py
+            scripts/migration/check-wdc-readme-scope.py
             scripts/migration/prepare-wdc-frontend.py
             scripts/migration/patch-next-frontend.py
             scripts/migration/pg-peer-relay.py
@@ -84,6 +85,7 @@ jobs:
             scripts/migration/materialize-ranking-pages.py \
             scripts/migration/build-serving-store.py \
             scripts/migration/build-release-bundle.py \
+            scripts/migration/check-wdc-readme-scope.py \
             scripts/migration/prepare-wdc-frontend.py \
             scripts/migration/patch-next-frontend.py \
             scripts/migration/pg-peer-relay.py \
