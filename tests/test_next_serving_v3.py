@@ -7481,6 +7481,35 @@ class Tests(unittest.TestCase):
         self.assertNotIn("RuntimeMaxSec=64800",combined)
         self.assertNotIn("/Users/",combined)
 
+    def test_wdc_tunnel_executes_askpass_from_hashed_source_not_noexec_run(self):
+        controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(
+            encoding="utf-8",
+        )
+        tunnel=(ROOT/"deploy"/"start-wdc-pg-tunnel.sh").read_text(
+            encoding="utf-8",
+        )
+        for required in (
+            'SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"',
+            'EXPECTED_SCRIPT_DIR="/opt/culua/ytb-song-rank/.build/'
+            'dsl-wdc-${RUN_ID}-${RUN_ATTEMPT}/source/deploy"',
+            '[[ "$SCRIPT_DIR" == "$EXPECTED_SCRIPT_DIR" ]]',
+            'for required in vps2-password vps2-knownhosts; do',
+            'ASKPASS="$SCRIPT_DIR/wdc-vps2-askpass.sh"',
+            '[[ "$(stat -c %a "$ASKPASS")" == "500" ]]',
+            'export VPS2_PASSWORD_FILE="$SECRET_ROOT/vps2-password"',
+            'export SSH_ASKPASS="$ASKPASS"',
+        ):
+            self.assertIn(required,tunnel)
+        self.assertNotIn("vps2-knownhosts vps2-askpass.sh",tunnel)
+        self.assertNotIn('SSH_ASKPASS="$SECRET_ROOT/vps2-askpass.sh"',tunnel)
+        self.assertNotIn(
+            'install -m 0500 "$source/deploy/wdc-vps2-askpass.sh" '
+            '"$secret/vps2-askpass.sh"',
+            controller,
+        )
+        self.assertIn("  deploy/wdc-vps2-askpass.sh\n",controller)
+        self.assertIn('chmod 0500 "$root"/deploy/*.sh',controller)
+
     def test_wdc_source_meta_probe_retries_only_bounded_transport_failures(self):
         controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(
             encoding="utf-8",

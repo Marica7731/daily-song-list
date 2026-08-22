@@ -288,3 +288,10 @@
 - 失败 run 的 Actions cleanup 未能关闭 VPS2 relay，已只针对 `dsl-wdc-pg-relay-32528974605-1` 和 `/tmp/dsl-pg-relay-32528974605-1` 精确清理；结果为 unit inactive、remaining backends `0`、root absent。重复 scheduled WDC `32553341859` 已精确取消，合法 core/accepted/backfill 未取消。
 - 永久最小修复：WDC SSH control tunnel 从启动即启用 `Compression=yes`；`pg_adapter.meta_payload(..., identity_only=True)` 在 runtime 与 generic runtime 路径读取到轻量身份后立即返回，跳过 overlay reconciliation/counts；transport 重连只使用该轻量模式并继续 fail-closed 比对 active/content/source 三元组。数据错误、身份漂移和 schema 错误仍不得重试，9 小时上限不增加。
 - 回归覆盖 workflow 压缩合同、重连必须使用 `identity_only=True`、generic identity-only 不执行昂贵 overlay reconciliation。当前 targeted `4/4`、完整 next-serving `204/204`、relay `5/5`、Python compile、workflow YAML 与 `git diff --check` 均通过。下一步为 commit/push/PR/CI/squash merge；等待最新合法 accepted 完成后只调度唯一 latest-head WDC，并验证压缩 tunnel、轻量重连/完整-source resume、最终 bundle/deploy 与公网验收。
+
+### 2026-08-22 18:13 Asia/Taipei — WDC `/run` noexec askpass 修复
+
+- latest-head WDC run `32566517174`（head `1a05b948ee1e361f0ee14d15b5ae219ab18cb709`）已越过 Ubuntu gate、轻量 meta 身份读取和稀疏源码传输，但在启动 WDC 到 VPS2 的 SSH tunnel 后于 42 秒内退出 `124`。WDC journal 的永久错误为 `/run/dsl-wdc-32566517174-1/vps2-askpass.sh: Permission denied`；宿主 `/run` 挂载含 `noexec`，systemd 按 Restart=on-failure 重启仍必然重复同一错误。不是超时不足，也不能用加长 timeout 修复。
+- 失败 run 未创建 32GB 构建卷、未启动 bundle/deploy、未写生产；Actions cleanup 后 WDC control/secret/volume roots 均不存在，tunnel/build units inactive，VPS2 relay/root 已清理，线上仍为旧 release。旧或重复 WDC 不恢复。
+- 最小修复保持密码和 known-hosts 仅存于 run-scoped `/run` secret root；经过 source manifest 哈希验证且 mode `0500` 的 `wdc-vps2-askpass.sh` 改从 `/opt/culua/ytb-song-rank/.build/dsl-wdc-<run>-<attempt>/source/deploy` 执行，并精确校验真实脚本目录。删除把可执行脚本复制进 `noexec /run` 的步骤，不放宽 owner、路径、mode、host key 或身份门禁。
+- 回归与本地门禁已通过：精确 askpass/noexec 回归 `1/1`、完整 next-serving `207/207`、relay `13/13`，controller/tunnel/askpass shell syntax 与 `git diff --check` 均成功。下一步为 commit/push/PR/CI/squash merge；合法 writer 空闲后只运行唯一 latest-head WDC，并验证 tunnel、32GB 固定卷、2.5GB/1GB cgroup、16GB/2 relay、最终发布与公网验收。
