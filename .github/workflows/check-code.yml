@@ -326,6 +326,7 @@ jobs:
                 scripts/migration/7d-json-to-patch.py|\
                 scripts/migration/build-release-bundle.py|\
                 scripts/migration/build-serving-store.py|\
+                scripts/migration/check-wdc-readme-scope.py|\
                 scripts/migration/materialize-pg-release-snapshot.py|\
                 scripts/migration/materialize-ranking-pages.py|\
                 scripts/migration/patch-next-frontend.py|\
@@ -336,6 +337,17 @@ jobs:
                 server/pg_adapter.py|\
                 server/release_serving_server.py)
                   continue
+                  ;;
+                README.md)
+                  if python3 scripts/migration/check-wdc-readme-scope.py --base "${base}"; then
+                    continue
+                  else
+                    readme_scope_status=$?
+                    if [ "${readme_scope_status}" -ne 1 ]; then
+                      echo "::error::README WDC scope classifier failed with status ${readme_scope_status}." >&2
+                      exit "${readme_scope_status}"
+                    fi
+                  fi
                   ;;
               esac
               node_changes+=("${changed_path}")
