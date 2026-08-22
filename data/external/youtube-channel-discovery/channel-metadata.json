@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T06:20:13.980Z",
+  "generatedAt": "2026-08-22T07:21:44.229Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T06:20:13.980Z",
+    "fetchedAt": "2026-08-22T07:21:44.229Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T06:20:13.980Z",
+    "generatedAt": "2026-08-22T07:21:44.229Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,39 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1221,
-      "parseableChannels": 1202,
+      "totalChannels": 1222,
+      "parseableChannels": 1203,
       "realAvatar": 650,
-      "thumbnailFallback": 571,
+      "thumbnailFallback": 572,
       "missingDisplayImage": 0,
-      "missingAvatar": 571,
+      "missingAvatar": 572,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1377,
+      "skipped_collected_evidence": 1378,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1358,
+      "batch_limit_reached": 1359,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@KannagiAnna",
+        "channelId": "UCvuAdWg_I8U9kwVGZ4XLvog",
+        "displayName": "神凪アンナ - Kannagi Anna -",
+        "sourceUrl": "https://www.youtube.com/@KannagiAnna",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@AstelLeda",
+        "channelId": "UCNVEsYbiZjH5QLmGeSgTSzg",
+        "displayName": "astel ch.アステル",
+        "sourceUrl": "https://www.youtube.com/@AstelLeda",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kanade_awayuki",
         "channelId": "UCPUi4e7wnbhFdjsm3KqD3KA",
@@ -11789,6 +11803,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@LewehorstShiran",
+        "channelId": "UCxiRdYNqojKL29H7gEVwlzA",
+        "displayName": "レーヴェホルスト紫蘭🦋Lewehorst Shiran",
+        "sourceUrl": "https://www.youtube.com/@LewehorstShiran",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@mishiomolf",
         "channelId": "UCyVypf7vg9KqoDiXkDIvetg",
         "displayName": "Molf Ch. 海汐もるふ",
@@ -11828,27 +11849,6 @@
         "channelId": "UCk0zRInAOHqfglcIJQ8Aa9g",
         "displayName": "ねこてんしルシャ",
         "sourceUrl": "https://www.youtube.com/@Luchat",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@_AkaneRin_",
-        "channelId": "UCu40QKlXxrj-S4s-Fw3kEPQ",
-        "displayName": "朱音りん / Akane Rin",
-        "sourceUrl": "https://www.youtube.com/@_AkaneRin_",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@SHIRASESHIRAKAWA",
-        "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
-        "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
-        "sourceUrl": "https://www.youtube.com/@SHIRASESHIRAKAWA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@shiramochidango",
-        "channelId": "UCSB9S5M1ktSjDEdmTTOZqkA",
-        "displayName": "白餅だんご🍡✤",
-        "sourceUrl": "https://www.youtube.com/channel/UCSB9S5M1ktSjDEdmTTOZqkA",
         "reason": "batch_limit_reached"
       }
     ]
