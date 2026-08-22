@@ -7329,6 +7329,7 @@ class Tests(unittest.TestCase):
         )
         for excluded in (
             ".github/workflows/check-code.yml",
+            ".github/workflows/deploy-pg-incremental.yml",
             ".github/workflows/sync-wdc-release.yml",
             ".github/workflows/test-next-serving-v3.yml",
             ".github/workflows/update-backfill.yml",
@@ -7456,6 +7457,95 @@ class Tests(unittest.TestCase):
         self.assertLess(
             workflow.index("Checkout bounded release inputs"),
             workflow.index("            .github/workflows/check-code.yml\n"),
+        )
+
+    def test_wdc_release_window_freezes_core_backfill_and_pg_activation(self):
+        wdc=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
+            encoding="utf-8",
+        )
+        core=(ROOT/".github"/"workflows"/"update-core.yml").read_text(
+            encoding="utf-8",
+        )
+        backfill=(ROOT/".github"/"workflows"/"update-backfill.yml").read_text(
+            encoding="utf-8",
+        )
+        accepted=(ROOT/".github"/"workflows"/"deploy-pg-incremental.yml").read_text(
+            encoding="utf-8",
+        )
+        self.assertIn("WDC_RELEASE_WINDOW_READY head=$GITHUB_SHA",wdc)
+        self.assertIn("reason=not-latest-main",wdc)
+        for writer_name in (
+            "Update core song-list data",
+            "Prepare backfill inbox bundle",
+            "Prepare PostgreSQL accepted increment handoff",
+            "Deploy PostgreSQL accepted increment",
+        ):
+            self.assertIn(writer_name,wdc)
+        self.assertLess(
+            wdc.index("Bind latest stable release window"),
+            wdc.index("Checkout bounded release inputs"),
+        )
+        for producer,marker,job in (
+            (core,"CORE_UPDATE_NOOP reason=active-wdc-release","update"),
+            (backfill,"BACKFILL_UPDATE_NOOP reason=active-wdc-release","backfill"),
+        ):
+            self.assertIn("release_window:",producer)
+            self.assertIn(marker,producer)
+            self.assertIn(f"  {job}:\n    needs: release_window\n",producer)
+            self.assertIn(
+                "if: ${{ needs.release_window.outputs.blocked != 'true' }}",
+                producer,
+            )
+        self.assertIn("Detect active bounded WDC release window",accepted)
+        self.assertIn("PG_INCREMENT_NOOP reason=active-wdc-release",accepted)
+        self.assertIn(
+            "steps.wdc_window.outputs.blocked != 'true' && "
+            "(github.event_name != 'workflow_run'",
+            accepted,
+        )
+        self.assertEqual(
+            wdc.count("            .github/workflows/deploy-pg-incremental.yml\n"),
+            2,
+        )
+
+    def test_wdc_cancel_always_cleans_deleted_backing_loop_and_relay(self):
+        workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
+            encoding="utf-8",
+        )
+        controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(
+            encoding="utf-8",
+        )
+        cleanup=(ROOT/"deploy"/"cleanup-wdc-bounded-build.sh").read_text(
+            encoding="utf-8",
+        )
+        for required in (
+            "Cleanup exact remote run resources",
+            "if: always() && env.SSH_ROOT != ''",
+            'WDC_CLEANUP_ONLY: "1"',
+            "WDC_CLEANUP_STATUS: ${{ job.status }}",
+        ):
+            self.assertIn(required,workflow)
+        self.assertLess(
+            workflow.index("Cleanup exact remote run resources"),
+            workflow.index("Cleanup exact controller SSH root"),
+        )
+        for required in (
+            "cleanup_exact_remote_run() {",
+            'if [[ "${WDC_CLEANUP_ONLY:-0}" == "1" ]]; then',
+            "WDC_CONTROLLER_ALWAYS_CLEANUP_OK",
+            "VPS2_BOUNDED_RELAY_CLEAN",
+        ):
+            self.assertIn(required,controller)
+        for required in (
+            "CONTROL_OWNER_OK=0",
+            "WDC_CLEANUP_VOLUME_OWNER_RECOVERED",
+            '"$RECOVERY_BACKING" == "$VOLUME_IMAGE (deleted)"',
+            "WDC_CLEANUP_VOLUME_OWNER_RECOVERY_REJECTED",
+        ):
+            self.assertIn(required,cleanup)
+        self.assertLess(
+            cleanup.index("systemctl stop \"$unit\""),
+            cleanup.index("WDC_CLEANUP_VOLUME_OWNER_RECOVERED"),
         )
 
     def test_wdc_release_supervises_tunnel_for_snapshot_transport_resume(self):

@@ -78,10 +78,49 @@ for unit in "$GUARD_UNIT" "$BUILD_UNIT" "$TUNNEL_UNIT"; do
   fi
 done
 
+CONTROL_OWNER_OK=0
+if [[ -e "$CONTROL_ROOT" || -L "$CONTROL_ROOT" ]]; then
+  [[ -d "$CONTROL_ROOT" && ! -L "$CONTROL_ROOT" ]]
+  [[ "$(readlink -f "$CONTROL_ROOT")" == "$CONTROL_ROOT" ]]
+  if [[ -f "$CONTROL_ROOT/.codex-owned-run" && ! -L "$CONTROL_ROOT/.codex-owned-run" ]] &&
+     [[ "$(cat "$CONTROL_ROOT/.codex-owned-run")" == "$EXPECTED_OWNER" ]]; then
+    CONTROL_OWNER_OK=1
+  fi
+fi
+
 if [[ -e "$VOLUME_CONTROL_ROOT" || -L "$VOLUME_CONTROL_ROOT" ]]; then
   [[ -d "$VOLUME_CONTROL_ROOT" && ! -L "$VOLUME_CONTROL_ROOT" ]]
   [[ "$(readlink -f "$VOLUME_CONTROL_ROOT")" == "$VOLUME_CONTROL_ROOT" ]]
-  [[ "$(cat "$VOLUME_CONTROL_ROOT/.codex-owned-run")" == "$EXPECTED_OWNER" ]]
+  if [[ -f "$VOLUME_CONTROL_ROOT/.codex-owned-run" &&
+        ! -L "$VOLUME_CONTROL_ROOT/.codex-owned-run" ]]; then
+    [[ "$(cat "$VOLUME_CONTROL_ROOT/.codex-owned-run")" == "$EXPECTED_OWNER" ]]
+  else
+    # A cancelled transient unit can unlink its sparse image and owner marker
+    # before the controller's always() cleanup reaches the still-mounted loop.
+    # Recover only when the independently owned control root proves this run,
+    # the volume root contains no unexpected entry, and any live mount points
+    # at this exact run path to the now-deleted exact backing image.
+    ((CONTROL_OWNER_OK == 1))
+    [[ ! -e "$VOLUME_IMAGE" && ! -L "$VOLUME_IMAGE" ]]
+    [[ ! -e "$LOOP_MARKER" && ! -L "$LOOP_MARKER" ]]
+    while IFS= read -r top_entry; do
+      [[ "$top_entry" == "volume" ]] || {
+        echo "WDC_CLEANUP_VOLUME_OWNER_RECOVERY_REJECTED entry=$top_entry" >&2
+        exit 76
+      }
+    done < <(find "$VOLUME_CONTROL_ROOT" -mindepth 1 -maxdepth 1 -printf '%f\n')
+    if mountpoint -q "$VOLUME_ROOT"; then
+      RECOVERY_LOOP="$(findmnt -n -o SOURCE --target "$VOLUME_ROOT")"
+      [[ "$RECOVERY_LOOP" =~ ^/dev/loop[0-9]+$ ]]
+      RECOVERY_BACKING="$(losetup -n -O BACK-FILE "$RECOVERY_LOOP")"
+      [[ "$RECOVERY_BACKING" == "$VOLUME_IMAGE" ||
+         "$RECOVERY_BACKING" == "$VOLUME_IMAGE (deleted)" ]]
+    else
+      [[ -d "$VOLUME_ROOT" && ! -L "$VOLUME_ROOT" ]]
+      [[ -z "$(find "$VOLUME_ROOT" -mindepth 1 -print -quit)" ]]
+    fi
+    echo "WDC_CLEANUP_VOLUME_OWNER_RECOVERED owner=$EXPECTED_OWNER"
+  fi
   if mountpoint -q "$VOLUME_ROOT"; then
     umount "$VOLUME_ROOT"
   fi

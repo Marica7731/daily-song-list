@@ -12,6 +12,7 @@ on:
         default: "false"
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -39,6 +40,44 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
+      - name: Bind latest stable release window
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          api_headers=(-H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json')
+          main_sha="$(
+            curl --fail --silent --show-error --location --retry 2 \
+              --connect-timeout 5 --max-time 30 "${api_headers[@]}" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/branches/main" |
+              jq -er '.commit.sha'
+          )"
+          if [ "$main_sha" != "$GITHUB_SHA" ]; then
+            echo "WDC_RELEASE_WINDOW_BLOCKED reason=not-latest-main runHead=$GITHUB_SHA mainHead=$main_sha"
+            exit 75
+          fi
+          active_writers="$(
+            for writer_status in in_progress queued; do
+              curl --fail --silent --show-error --location --retry 2 \
+                --connect-timeout 5 --max-time 30 "${api_headers[@]}" \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?status=${writer_status}&per_page=100"
+            done | jq -sr --argjson current_run "$GITHUB_RUN_ID" '
+              [.[].workflow_runs[] |
+                select(.id != $current_run) |
+                select(.name == "Update core song-list data" or
+                       .name == "Prepare backfill inbox bundle" or
+                       .name == "Prepare PostgreSQL accepted increment handoff" or
+                       .name == "Deploy PostgreSQL accepted increment") |
+                {id,name,status,head_sha}
+              ] | unique_by(.id)
+            '
+          )"
+          if [ "$(jq -r 'length' <<<"$active_writers")" -gt 0 ]; then
+            echo "WDC_RELEASE_WINDOW_BLOCKED reason=active-writer runs=$(jq -c . <<<"$active_writers")"
+            exit 75
+          fi
+          echo "WDC_RELEASE_WINDOW_READY head=$GITHUB_SHA"
+
       - name: Checkout bounded release inputs
         uses: actions/checkout@v4
         with:
@@ -72,6 +111,7 @@ jobs:
             assets/app.js
             index.html
             .github/workflows/check-code.yml
+            .github/workflows/deploy-pg-incremental.yml
             .github/workflows/sync-wdc-release.yml
             .github/workflows/test-next-serving-v3.yml
             .github/workflows/update-backfill.yml
@@ -173,6 +213,7 @@ jobs:
             assets/app.js
             index.html
             .github/workflows/sync-wdc-release.yml
+            .github/workflows/deploy-pg-incremental.yml
 
       - name: Prepare exact controller SSH root
         env:
@@ -206,6 +247,15 @@ jobs:
           echo "SSH_ROOT=$root" >> "$GITHUB_ENV"
 
       - name: Build on WDC within fixed disk memory and wire budgets
+        run: |
+          set -Eeuo pipefail
+          deploy/orchestrate-wdc-bounded-release.sh
+
+      - name: Cleanup exact remote run resources
+        if: always() && env.SSH_ROOT != ''
+        env:
+          WDC_CLEANUP_ONLY: "1"
+          WDC_CLEANUP_STATUS: ${{ job.status }}
         run: |
           set -Eeuo pipefail
           deploy/orchestrate-wdc-bounded-release.sh

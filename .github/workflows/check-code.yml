@@ -307,6 +307,7 @@ jobs:
               [ -n "${changed_path}" ] || continue
               case "${changed_path}" in
                 .github/workflows/check-code.yml|\
+                .github/workflows/deploy-pg-incremental.yml|\
                 .github/workflows/sync-wdc-release.yml|\
                 .github/workflows/test-next-serving-v3.yml|\
                 .github/workflows/update-backfill.yml|\

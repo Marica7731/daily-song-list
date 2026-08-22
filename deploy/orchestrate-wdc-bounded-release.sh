@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Ubuntu controller for one bounded VPS2 -> WDC build and public release.
 set -Eeuo pipefail
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 require_env() {
   local name="$1"
@@ -182,6 +183,40 @@ REMOTE
   fi
   return "$original_rc"
 }
+
+cleanup_exact_remote_run() {
+  local cleanup_status="${WDC_CLEANUP_STATUS:-cancelled}"
+  [[ "$cleanup_status" =~ ^(success|failure|cancelled|skipped)$ ]]
+  [[ -f "$SCRIPT_DIR/cleanup-wdc-bounded-build.sh" &&
+     ! -L "$SCRIPT_DIR/cleanup-wdc-bounded-build.sh" ]]
+  wdc bash -s -- "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$cleanup_status" \
+    < "$SCRIPT_DIR/cleanup-wdc-bounded-build.sh"
+  vps2 bash -s -- "$RELAY_ROOT" "$RELAY_UNIT" "$APP_NAME" "$OWNER" <<'REMOTE'
+set -Eeuo pipefail
+root="$1";unit="$2";app="$3";owner="$4"
+systemctl stop "$unit.service" >/dev/null 2>&1 || true
+systemctl is-active --quiet "$unit.service" && exit 76
+runuser -u www-data -- psql -d song_rank -v ON_ERROR_STOP=1 -Atqc \
+  "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name = '$app' AND pid <> pg_backend_pid()" >/dev/null
+remaining="$(runuser -u www-data -- psql -d song_rank -v ON_ERROR_STOP=1 -Atqc \
+  "SELECT count(*) FROM pg_stat_activity WHERE application_name = '$app'")"
+[[ "$remaining" == "0" ]]
+if [[ -e "$root" || -L "$root" ]]; then
+  [[ -d "$root" && ! -L "$root" && "$(readlink -f "$root")" == "$root" ]]
+  [[ "$(cat "$root/.codex-owned-run")" == "$owner" ]]
+  rm -rf -- "$root"
+fi
+systemctl reset-failed "$unit.service" >/dev/null 2>&1 || true
+echo "VPS2_BOUNDED_RELAY_CLEAN unit=$unit"
+REMOTE
+  echo "WDC_CONTROLLER_ALWAYS_CLEANUP_OK run=$GITHUB_RUN_ID attempt=$GITHUB_RUN_ATTEMPT status=$cleanup_status"
+}
+
+if [[ "${WDC_CLEANUP_ONLY:-0}" == "1" ]]; then
+  cleanup_exact_remote_run
+  exit 0
+fi
+
 trap cleanup_resources EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
