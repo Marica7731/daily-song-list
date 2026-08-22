@@ -18557,7 +18557,7 @@ def _generic_public_all_range_baseline(
     return occurrences, occurrences * 3
 
 
-def meta_payload(connection) -> dict[str, Any]:
+def meta_payload(connection, *, identity_only: bool = False) -> dict[str, Any]:
     runtime = _runtime_projection_revision(connection)
     if runtime:
         revision_id, revision = runtime
@@ -18572,6 +18572,8 @@ def meta_payload(connection) -> dict[str, Any]:
             "content_sha256": revision.get("content_sha256", ""),
             "built_at": _jsonable(revision.get("activated_at") or revision.get("created_at") or ""),
         })
+        if identity_only:
+            return {"schemaVersion": 1, "meta": meta, "counts": {}}
         def meta_int(*keys: str) -> int:
             for key in keys:
                 value = meta.get(key)
@@ -18611,6 +18613,8 @@ def meta_payload(connection) -> dict[str, Any]:
             "built_at": _jsonable(generic_runtime[1].get("activated_at") or generic_runtime[1].get("created_at") or ""),
             "parent_revision_id": parent_id,
         })
+        if identity_only:
+            return {"schemaVersion": 1, "meta": meta, "counts": {}}
         counts = {}
         for key, fallback in (("latest_videos", 0), ("latest_songs", 0), ("latest_occurrences", 0), ("latest_ranking_rows", 0), ("source_occurrences_rows", 0), ("channel_metadata", 0), ("external_songs", 0), ("external_videos", 0), ("external_occurrences", 0)):
             try:

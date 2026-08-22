@@ -2291,6 +2291,73 @@ class Tests(unittest.TestCase):
             )
         self.assertEqual(checkpoints,["durable"])
 
+    def test_snapshot_transport_reconnect_uses_lightweight_identity_meta(self):
+        class Connection:
+            def __init__(self):self.closed=False
+            def close(self):self.closed=True
+        current=Connection();candidate=Connection()
+        expected={
+            "active_revision_id":"accepted-current",
+            "content_sha256":"content-current",
+            "source_commit_sha":"source-current",
+        }
+        payload={"meta":{
+            **expected,
+            "parent_revision_id":"accepted-parent",
+            "built_at":"2026-08-22T00:00:00Z",
+            "latestGeneratedAt":"2026-08-22T00:00:00Z",
+        }}
+        with patch.object(
+            pg_materializer.adapter,"connect_from_env",return_value=candidate,
+        ),patch.object(
+            pg_materializer,"begin_snapshot",
+        ) as begin,patch.object(
+            pg_materializer.adapter,"meta_payload",return_value=payload,
+        ) as meta:
+            recovered=pg_materializer._reconnect_readonly_snapshot(
+                current,
+                expected_meta=expected,
+                phase="affected-parent-sources",
+                transport_attempt=1,
+            )
+        self.assertIs(recovered,candidate)
+        self.assertTrue(current.closed)
+        begin.assert_called_once_with(candidate)
+        meta.assert_called_once_with(candidate,identity_only=True)
+
+    def test_generic_identity_meta_skips_expensive_overlay_reconciliation(self):
+        active={
+            "manifest_json":{
+                "source_commit_sha":"source-current",
+                "latestGeneratedAt":"2026-08-22T00:00:00Z",
+            },
+            "status":"activated",
+            "content_sha256":"content-current",
+            "created_at":"2026-08-22T00:00:00Z",
+        }
+        parent={"manifest_json":{},"status":"activated"}
+        with patch.object(
+            pg_adapter,"_runtime_projection_revision",return_value=None,
+        ),patch.object(
+            pg_adapter,"_generic_runtime_projection_revision",
+            return_value=("accepted-current",active),
+        ),patch.object(
+            pg_adapter,"_generic_parent_runtime_revision",
+            return_value=("accepted-parent",parent),
+        ),patch.object(
+            pg_adapter,"_rows",return_value=[],
+        ) as rows,patch.object(
+            pg_adapter,"_overlay_revision_ids",
+            side_effect=AssertionError("expensive overlay reconciliation ran"),
+        ) as overlays:
+            payload=pg_adapter.meta_payload(object(),identity_only=True)
+        self.assertEqual(payload["counts"],{})
+        self.assertEqual(payload["meta"]["active_revision_id"],"accepted-current")
+        self.assertEqual(payload["meta"]["content_sha256"],"content-current")
+        self.assertEqual(payload["meta"]["source_commit_sha"],"source-current")
+        self.assertEqual(rows.call_count,1)
+        overlays.assert_not_called()
+
     def test_snapshot_bulk_source_stream_uses_latency_bounded_fetches(self):
         self.assertGreaterEqual(
             pg_materializer.SOURCE_EXPORT_STREAM_FETCH_SIZE,1_024,
@@ -7323,6 +7390,11 @@ class Tests(unittest.TestCase):
             "trap - EXIT",
         ):
             self.assertIn(required,workflow)
+        self.assertEqual(workflow.count("-o Compression=yes"),1)
+        self.assertLess(
+            workflow.index("-o Compression=yes"),
+            workflow.index("start_pg_tunnel()"),
+        )
         self.assertEqual(workflow.count("RuntimeMaxSec=32400"),1)
         self.assertNotIn("RuntimeMaxSec=64800",workflow)
 

@@ -5524,7 +5524,9 @@ def _reconnect_readonly_snapshot(
         try:
             candidate = adapter.connect_from_env()
             begin_snapshot(candidate)
-            actual = canonical_meta(adapter.meta_payload(candidate))
+            actual = canonical_meta(
+                adapter.meta_payload(candidate, identity_only=True)
+            )
             for name in (
                 "active_revision_id", "content_sha256", "source_commit_sha",
             ):
