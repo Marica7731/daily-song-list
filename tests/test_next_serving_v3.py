@@ -7399,9 +7399,19 @@ class Tests(unittest.TestCase):
             workflow.index('node --test "${test_files[@]}"'),
         )
 
-    def test_check_code_uses_bounded_resumable_owned_mac_checkouts(self):
+    def test_check_code_uses_bounded_owned_hosted_checkouts(self):
         workflow=(ROOT/".github"/"workflows"/"check-code.yml").read_text(
             encoding="utf-8",
+        )
+        check_job=workflow.split("  curation_audit:",1)[0]
+        curation_job=workflow.split("  curation_audit:",1)[1]
+        self.assertIn("    runs-on: ubuntu-latest",check_job)
+        self.assertNotIn("daily-song-list-mac",check_job)
+        self.assertIn("      - name: Set up hosted Node.js",check_job)
+        self.assertIn("        uses: actions/setup-node@v4",check_job)
+        self.assertIn(
+            "    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]",
+            curation_job,
         )
         for required in (
             "timeout-minutes: 30",
