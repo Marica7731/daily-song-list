@@ -2721,6 +2721,7 @@ class Tests(unittest.TestCase):
             "occurrences": occurrences,
         }
         compact = pg_adapter.compact_ranking_payloads([record], "artists")[0]
+        writer.add_artist_ranking_song_owners("all", source_key, record)
         writer.add_ranking(
             pg_materializer._ranking_row(
                 record,
@@ -2851,6 +2852,122 @@ class Tests(unittest.TestCase):
                 raw_payload["song"]["songKey"],
                 "Honeycomb Summer\x1fCrazy:B",
             )
+        finally:
+            writer.abort()
+
+    def test_snapshot_writer_keeps_full_artist_owners_behind_compact_preview(self):
+        target = self.temp / "full-artist-owner-preview.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        source_key = "6653c1838b14e4a3"
+        songs = [
+            {
+                "key": f"canonical-song-{index:03d}",
+                "name": f"Canonical Song {index:03d}",
+                "count": 1,
+            }
+            for index in range(285)
+        ]
+        record = {
+            "rank": 1,
+            "key": "full-owner-artist",
+            "sourceDetailKey": source_key,
+            "name": "Full Owner Artist",
+            "count": 771,
+            "songCount": 285,
+            "videoCount": 737,
+            "timestampCount": 771,
+            "songs": songs,
+            "occurrences": [],
+        }
+        compact = pg_adapter.compact_ranking_payloads([record], "artists")[0]
+        self.assertEqual(len(compact["songs"]), 3)
+        self.assertEqual(compact["songCount"], 285)
+        writer.add_artist_ranking_song_owners("all", source_key, record)
+        writer.add_ranking(
+            pg_materializer._ranking_row(
+                record,
+                payload_record=compact,
+                range_id="all",
+                view="artists",
+                metric="occurrences",
+                scope_key="all",
+                expected_rank=1,
+            )
+        )
+        try:
+            self.assertEqual(
+                writer.preflight_artist_ranking_source_owners(range_id="all"),
+                (1, 285),
+            )
+            writer.add_source(
+                source_key,
+                "all",
+                {
+                    "type": "artist",
+                    "key": "full-owner-artist",
+                    "songs": songs[:3],
+                },
+                [],
+            )
+            detail = json.loads(
+                writer.connection.execute(
+                    "SELECT payload_json FROM source_details "
+                    "WHERE range_id='all' AND source_key=?",
+                    (source_key,),
+                ).fetchone()[0]
+            )
+            self.assertEqual(detail["songCount"], 285)
+            self.assertEqual(detail["songs"], songs)
+            writer.finish()
+            with sqlite3.connect(target) as serving:
+                self.assertEqual(
+                    serving.execute(
+                        "SELECT count(*) FROM sqlite_master "
+                        "WHERE type='table' "
+                        "AND name='artist_ranking_song_owners'"
+                    ).fetchone()[0],
+                    0,
+                )
+        finally:
+            writer.abort()
+
+    def test_snapshot_writer_fails_closed_without_full_artist_owner_table(self):
+        target = self.temp / "missing-full-artist-owner.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        source_key = "missing-full-owner"
+        record = {
+            "rank": 1,
+            "key": "missing-full-owner-artist",
+            "sourceDetailKey": source_key,
+            "name": "Missing Full Owner Artist",
+            "count": 4,
+            "songCount": 4,
+            "videoCount": 4,
+            "timestampCount": 4,
+            "songs": [
+                {"key": f"missing-song-{index}", "name": f"Missing Song {index}"}
+                for index in range(4)
+            ],
+            "occurrences": [],
+        }
+        compact = pg_adapter.compact_ranking_payloads([record], "artists")[0]
+        writer.add_ranking(
+            pg_materializer._ranking_row(
+                record,
+                payload_record=compact,
+                range_id="all",
+                view="artists",
+                metric="occurrences",
+                scope_key="all",
+                expected_rank=1,
+            )
+        )
+        try:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "canonical song owners are incomplete",
+            ):
+                writer.preflight_artist_ranking_source_owners(range_id="all")
         finally:
             writer.abort()
 

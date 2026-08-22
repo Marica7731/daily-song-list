@@ -310,3 +310,9 @@
 - PR `#93` 合并后的真实 main Check run `32584508285` 证明 owner-bound 重试和精确回收均按合同执行，但用户切换后的 Mac 网络无法在三次有界尝试内取回同一 promisor object `7c4ce83ecf4963503d766717eade0227bf6634c4`：attempt 1 为 `curl 18` 且尚缺 `25` bytes，attempt 2 为 `curl 92 HTTP/2 CANCEL` 且尚缺 `19642` bytes，attempt 3 再次 `curl 18`/`early EOF`。失败不是磁盘或内存：owned checkout 峰值约 `57.6 MiB`、Mac 可用约 `564 GiB`；job-end cleanup success，source root 与 owner marker 均已删除。
 - 继续增加重试次数只会重复消耗用户本地网络并阻塞唯一 Mac runner。最小流程修复把日常 `check` job 迁到 GitHub-hosted `ubuntu-latest`，使用固定 Node 20；真正专用且仅手动触发的 `curation_audit` 仍保留 Mac label。checkout 的 `<1 GB` 硬限、owner marker、仅 transport 重试、非 transport fail-closed 和精确 cleanup 合同全部保留。
 - 新回归精确分割两个 job，要求普通 Check 不再含 `daily-song-list-mac` 且必须使用 hosted Node，curation audit 仍为 self-hosted Mac。完成 targeted/full/relay/YAML/shell/diff、PR/CI/squash merge 后，必须由新 main push run 证明 Mac 不再被普通 Check 占用；随后等待合法 core/accepted 收敛并只调度唯一 latest-head WDC。
+
+### 2026-08-23 03:18 Asia/Taipei — WDC Artist 完整 owner 与三首预览边界
+
+- unique latest-head WDC run `32590039517`（head `7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2`）在所有 7d/all 四类排名生成完成后、昂贵 source copy 前由新 Artist owner 门禁 fail closed：`all/6653c1838b14e4a3 ranking=285 owners=3`。构建只使用 WDC 固定 32GB 隔离卷和 2.5GiB memory cgroup；实际失败前卷约 3GB、VPS2→WDC tunnel 约 1.35GB，Mac 不在传输或物化链路。
+- 生产数据没有被删改。精确根因为 compact Artist 列表卡按公开契约只保留前三首 `songs` 预览，而门禁错误把 compact payload 当成完整 285 首权威 owner 列表；`songCount=285` 本身正确。失败 run 未 bundle/deploy，cleanup 已删除约 6.85GB 临时 SQLite/固定卷，VPS2 relay inactive，WDC 项目回到旧 release 约 7.61GB。
+- 最小修复在 compact 前把完整 Artist song owners 写入构建期私有 SQLite 表；门禁和 source canonicalization 使用完整表，同时验证公开三首预览必须是完整列表前缀。私有表在 `finish()` 前删除，不进入 serving SQLite。缺表、计数不符、顺序/身份漂移继续 fail closed。新增 285-owner 生产形态回归和缺失完整表回归；完成全量门禁、PR/CI/squash merge 后仅运行唯一 latest-head WDC。
