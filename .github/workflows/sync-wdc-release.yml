@@ -445,7 +445,7 @@ jobs:
           EXPECTED_SOURCE_COMMIT: ${{ steps.check.outputs.source_commit }}
         run: |
           set -Eeuo pipefail
-          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_ROOT/vps2-knownhosts" -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3)
+          VPS2_SSH=(-o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$SSH_ROOT/vps2-knownhosts" -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o Compression=yes)
           RELAY_ROOT="/tmp/dsl-pg-relay-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           RELAY_UNIT="dsl-wdc-pg-relay-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           RELAY_READY="$RELAY_ROOT/ready.json"

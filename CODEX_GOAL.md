@@ -265,3 +265,11 @@
 - force WDC run `32431309635`（head `3c562c8ae2d550a59dbe9ba544bdec3e2f8cc459`）在 Ubuntu gate 失败：完整 next-serving 测试的 190 项通过，新增 Check code 路由测试因 `.github/workflows/check-code.yml` 未包含在 WDC sparse checkout 而唯一报 `FileNotFoundError`；sync job skipped，Mac materialize/relay/WDC 写入均未开始。
 - 最小修复：将 `.github/workflows/check-code.yml` 同时加入 WDC Ubuntu gate 与 Mac source 两份 sparse checkout，避免 Ubuntu 修好后又在 Mac regression 阶段重复失败；不改变发布逻辑、超时、数据或生产状态。
 - 新回归 `test_wdc_release_checkouts_include_check_code_contract_for_both_gates` 精确要求该路径出现两次并位于两个 checkout 之后；通过完整测试和 CI 后才允许唯一 latest-head WDC 重跑。
+
+### 2026-08-22 13:35 Asia/Taipei — WDC 传输提速与断线恢复修复
+
+- WDC run `32528974605`（head `33b091564eff5f54e142c9ab92c30ab016076811`）在昂贵 affected-parent source 阶段发生精确 PostgreSQL/SSH transport EOF。热切换同一 run 的 SSH tunnel 到压缩模式后，真实生产形态样本为 raw `4,879,204` bytes、gzip `1,015,917` bytes（约 `4.80x`），实际 relay raw/wire 约 `56.2/12.2 MB`（约 `4.6x`），证明旧 tunnel 未压缩是主要速度瓶颈。
+- run 随后未能恢复的第二根因是重连身份检查调用完整 `meta_payload`，错误地重新生成并传输约 `56 MB` 的 overlay/meta，而身份复核实际只需要 active revision、content hash 与 source commit。该长传输再次遇到 SSH 关闭，最终以 `RuntimeError: PostgreSQL snapshot transport did not recover within bounded attempts: phase=affected-parent-sources attempts=12` 失败；WDC 未 bundle/deploy，Mac exact root 已清理。
+- 失败 run 的 Actions cleanup 未能关闭 VPS2 relay，已只针对 `dsl-wdc-pg-relay-32528974605-1` 和 `/tmp/dsl-pg-relay-32528974605-1` 精确清理；结果为 unit inactive、remaining backends `0`、root absent。重复 scheduled WDC `32553341859` 已精确取消，合法 core/accepted/backfill 未取消。
+- 永久最小修复：WDC SSH control tunnel 从启动即启用 `Compression=yes`；`pg_adapter.meta_payload(..., identity_only=True)` 在 runtime 与 generic runtime 路径读取到轻量身份后立即返回，跳过 overlay reconciliation/counts；transport 重连只使用该轻量模式并继续 fail-closed 比对 active/content/source 三元组。数据错误、身份漂移和 schema 错误仍不得重试，9 小时上限不增加。
+- 回归覆盖 workflow 压缩合同、重连必须使用 `identity_only=True`、generic identity-only 不执行昂贵 overlay reconciliation。当前 targeted `4/4`、完整 next-serving `204/204`、relay `5/5`、Python compile、workflow YAML 与 `git diff --check` 均通过。下一步为 commit/push/PR/CI/squash merge；等待最新合法 accepted 完成后只调度唯一 latest-head WDC，并验证压缩 tunnel、轻量重连/完整-source resume、最终 bundle/deploy 与公网验收。
