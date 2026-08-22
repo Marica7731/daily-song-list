@@ -405,6 +405,31 @@ jobs:
             echo "- route: ordinary data/7d.json push triggers the PostgreSQL release workflow"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Remove controlled core checkout
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.core-update-source-owned"
+          [[ "$CORE_SOURCE_ROOT" == "$GITHUB_WORKSPACE/core-update-source" ]]
+          [[ "${CORE_SOURCE_ROOT%/*}" == "$GITHUB_WORKSPACE" ]]
+          [[ "${CORE_SOURCE_ROOT##*/}" == "core-update-source" ]]
+          if [[ -e "$CORE_SOURCE_ROOT" || -L "$CORE_SOURCE_ROOT" ]]; then
+            [[ -d "$CORE_SOURCE_ROOT" && ! -L "$CORE_SOURCE_ROOT" ]]
+            [[ -f "$OWNER_PATH" ]]
+            [[ "$(cat "$OWNER_PATH")" == "daily-song-list-core-source-v1" ]]
+            source_real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$CORE_SOURCE_ROOT")"
+            [[ "$source_real" == "$CORE_SOURCE_ROOT" ]]
+            before_kib="$(du -sk "$CORE_SOURCE_ROOT" | awk '{print $1}')"
+            rm -rf -- "$CORE_SOURCE_ROOT"
+          else
+            before_kib=0
+          fi
+          rm -f -- "$OWNER_PATH"
+          [[ ! -e "$CORE_SOURCE_ROOT" && ! -L "$CORE_SOURCE_ROOT" ]]
+          echo "CORE_SOURCE_CHECKOUT_POSTCLEAN before_bytes=$((before_kib * 1024)) after_bytes=0"
+
       - name: Fail only when core program failed
         if: always() && steps.core.outcome != 'success'
+        working-directory: ${{ github.workspace }}
         run: exit 1

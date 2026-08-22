@@ -297,3 +297,10 @@
 - 失败 run 未创建 32GB 构建卷、未启动 bundle/deploy、未写生产；Actions cleanup 后 WDC control/secret/volume roots 均不存在，tunnel/build units inactive，VPS2 relay/root 已清理，线上仍为旧 release。旧或重复 WDC 不恢复。
 - 最小修复保持密码和 known-hosts 仅存于 run-scoped `/run` secret root；经过 source manifest 哈希验证且 mode `0500` 的 `wdc-vps2-askpass.sh` 改从 `/opt/culua/ytb-song-rank/.build/dsl-wdc-<run>-<attempt>/source/deploy` 执行，并精确校验真实脚本目录。删除把可执行脚本复制进 `noexec /run` 的步骤，不放宽 owner、路径、mode、host key 或身份门禁。
 - 回归与本地门禁已通过：精确 askpass/noexec 回归 `1/1`、完整 next-serving `207/207`、relay `13/13`，controller/tunnel/askpass shell syntax 与 `git diff --check` 均成功。下一步为 commit/push/PR/CI/squash merge；合法 writer 空闲后只运行唯一 latest-head WDC，并验证 tunnel、32GB 固定卷、2.5GB/1GB cgroup、16GB/2 relay、最终发布与公网验收。
+
+### 2026-08-23 00:12 Asia/Taipei — Mac 稀疏 checkout 断线恢复与精确回收
+
+- scheduled core run `32581739087` 在隔离 checkout 的初次 filtered fetch 已完成后，于 sparse promisor blob 读取遇到 `curl 18 Transferred a partial file`、`unexpected disconnect`、`early EOF`，精确缺失对象 `2aad4b...`；checkout 约 34 MiB、Git RSS 约 9 MiB、Mac 可用约 564 GiB，证明是用户切换节点后的 transport 中断，不是内存或磁盘不足。未进入 build/commit/accepted；旧 cleanup 因无完整 `HEAD` 又执行 `git restore data/ui/meta.json` 而失败。
+- main push Check code run `32581763970` 复现同类边界：action 内建 fetch 重试曾从 `curl 92 HTTP/2 CANCEL` 恢复，随后 sparse checkout 又以 `curl 18`、剩余 `12880` bytes、`early EOF`、promisor object `7c4ce8...` 失败；后续 checks 全部 skipped，精确 source cleanup success。该证据要求修复不能只覆盖 core。
+- PR `#93` 首个 commit `d2b8681a341c354fa10d152fbe50b153ee07814d` 已为 core checkout 增加 owner-bound partial-clone 复用、仅 transport 错误最多 3 次重试、非 transport fail-closed 和无完整 checkout 时的安全 cleanup；Ubuntu CI run `32583673762` success。
+- 本轮继续将同一边界覆盖 Check code 主 checkout、单文件 canonical blocklist checkout 与 backfill checkout，并为 Check/core/backfill 增加 owner marker 下的 job-end 精确删除；Check source 总量硬限 `<1,000,000,000` bytes。accepted run `32583012992` 已按 producer failure 正确 no-op success，没有伪造候选或激活生产。完整回归、PR CI、merge 后 main Check marker及唯一 latest-head WDC 仍待执行，交付未完成。
