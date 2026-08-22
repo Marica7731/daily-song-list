@@ -4315,10 +4315,12 @@ def preflight_overlay_artist_occurrence_owners(
     An overlay-only Artist source has no parent detail, however, and used to
     discover a stale ingestion ``songKey`` only when its source was reached
     during the multi-hour affected-source copy.  Read the selected overlay
-    rows without JSON payloads, project compatible full resets, and reconcile
-    each tuple against the already-persisted full ranking owner list now.
-    This keeps the gate bounded to the affected video set and leaves raw
-    occurrence payloads untouched.
+    rows without JSON payloads, project compatible full resets, apply the
+    resolved runtime tombstone/replacement chain, and reconcile only the
+    final effective tuples against the already-persisted full ranking owner
+    list now.  This keeps the gate bounded to the affected video set, avoids
+    rejecting a superseded legacy spelling, and leaves raw occurrence
+    payloads untouched.
     """
 
     requested = {_text(value) for value in source_keys if _text(value)}
@@ -4363,14 +4365,53 @@ def preflight_overlay_artist_occurrence_owners(
     ):
         selected.setdefault(adapter._overlay_candidate_identity(row), dict(row))
 
+    runtime_changes = adapter._overlay_rows_for_range(
+        adapter._runtime_tombstones(
+            connection,
+            revision_ids,
+            resets.values(),
+            selected.values(),
+        ),
+        "all",
+    )
+    overridden_identities = {
+        adapter._overlay_candidate_identity(change)
+        for change in runtime_changes
+        if (
+            not bool(change.get("acceptedVideoReset"))
+            and _text(change.get("entityType") or change.get("entity_type"))
+            in {"occurrences", "runtime_occurrences"}
+            and all(adapter._overlay_candidate_identity(change))
+        )
+    }
+    replacement_rows = adapter._overlay_rows_for_range(
+        adapter._runtime_replacement_candidate_rows(runtime_changes),
+        "all",
+    )
+    replacements: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in replacement_rows:
+        identity = adapter._overlay_candidate_identity(row)
+        if not all(identity) or identity in replacements:
+            raise RuntimeError(
+                "overlay Artist occurrence owner replacement identity is invalid"
+            )
+        replacements[identity] = dict(row)
+    effective = {
+        identity: row
+        for identity, row in selected.items()
+        if identity not in overridden_identities and identity not in replacements
+    }
+    effective.update(replacements)
+
     owner_cache: dict[
         str,
         tuple[dict[str, str], dict[str, tuple[str, str] | None], bool],
     ] = {}
     validated = 0
     validated_sources: set[str] = set()
+    mismatches: list[str] = []
     for row in sorted(
-        selected.values(),
+        effective.values(),
         key=lambda value: (
             _text(value.get("video_id")),
             int(value.get("position") or 0),
@@ -4413,26 +4454,44 @@ def preflight_overlay_artist_occurrence_owners(
                 "overlay Artist occurrence owner projection changed cardinality: "
                 + source_key
             )
-        _source_occurrence_row(
-            source_key,
-            "all",
-            1,
-            occurrences[0],
-            entity_type="artist",
-            source_artist_song_owners_by_key=owners[0],
-            source_artist_song_owners_by_name=owners[1],
-            source_artist_songs_are_keyed=owners[2],
-        )
+        try:
+            _source_occurrence_row(
+                source_key,
+                "all",
+                1,
+                occurrences[0],
+                entity_type="artist",
+                source_artist_song_owners_by_key=owners[0],
+                source_artist_song_owners_by_name=owners[1],
+                source_artist_songs_are_keyed=owners[2],
+            )
+        except RuntimeError as exc:
+            message = str(exc)
+            if message.startswith((
+                "artist source occurrence has no canonical song owner:",
+                "artist source song owner is ambiguous:",
+            )):
+                mismatches.append(message)
+                continue
+            raise
         validated += 1
         validated_sources.add(source_key)
 
+    if mismatches:
+        raise RuntimeError(
+            "overlay Artist occurrence owner preflight found "
+            f"{len(mismatches)} mismatch(es): "
+            + " | ".join(mismatches[:5])
+        )
+
     print(
         "PG_SNAPSHOT_OVERLAY_ARTIST_OCCURRENCE_OWNER_PREFLIGHT "
-        f"total={len(selected)} validated={validated} "
-        f"sources={len(validated_sources)}",
+        f"total={len(effective)} validated={validated} "
+        f"sources={len(validated_sources)} rawCandidates={len(selected)} "
+        f"replacements={len(replacements)}",
         flush=True,
     )
-    return len(selected), validated
+    return len(effective), validated
 
 
 def preflight_song_source_owners(
