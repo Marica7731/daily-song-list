@@ -46,7 +46,7 @@ concurrency:
 
 jobs:
   check:
-    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       CHECK_SOURCE_ROOT: ${{ github.workspace }}/.codex-check-source
@@ -167,10 +167,10 @@ jobs:
           }
           echo "CODEX_CHECK_SOURCE_CHECKOUT_BYTES bytes=$source_bytes limit=1000000000"
 
-      - name: Configure Mac toolchain
-        run: |
-          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
-          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
+      - name: Set up hosted Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Checkout canonical blocklist
         id: blocklist_checkout

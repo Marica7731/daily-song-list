@@ -304,3 +304,9 @@
 - main push Check code run `32581763970` 复现同类边界：action 内建 fetch 重试曾从 `curl 92 HTTP/2 CANCEL` 恢复，随后 sparse checkout 又以 `curl 18`、剩余 `12880` bytes、`early EOF`、promisor object `7c4ce8...` 失败；后续 checks 全部 skipped，精确 source cleanup success。该证据要求修复不能只覆盖 core。
 - PR `#93` 首个 commit `d2b8681a341c354fa10d152fbe50b153ee07814d` 已为 core checkout 增加 owner-bound partial-clone 复用、仅 transport 错误最多 3 次重试、非 transport fail-closed 和无完整 checkout 时的安全 cleanup；Ubuntu CI run `32583673762` success。
 - 本轮继续将同一边界覆盖 Check code 主 checkout、单文件 canonical blocklist checkout 与 backfill checkout，并为 Check/core/backfill 增加 owner marker 下的 job-end 精确删除；Check source 总量硬限 `<1,000,000,000` bytes。accepted run `32583012992` 已按 producer failure 正确 no-op success，没有伪造候选或激活生产。完整回归、PR CI、merge 后 main Check marker及唯一 latest-head WDC 仍待执行，交付未完成。
+
+### 2026-08-23 00:41 Asia/Taipei — 普通 Check 迁出 Mac 本地网络
+
+- PR `#93` 合并后的真实 main Check run `32584508285` 证明 owner-bound 重试和精确回收均按合同执行，但用户切换后的 Mac 网络无法在三次有界尝试内取回同一 promisor object `7c4ce83ecf4963503d766717eade0227bf6634c4`：attempt 1 为 `curl 18` 且尚缺 `25` bytes，attempt 2 为 `curl 92 HTTP/2 CANCEL` 且尚缺 `19642` bytes，attempt 3 再次 `curl 18`/`early EOF`。失败不是磁盘或内存：owned checkout 峰值约 `57.6 MiB`、Mac 可用约 `564 GiB`；job-end cleanup success，source root 与 owner marker 均已删除。
+- 继续增加重试次数只会重复消耗用户本地网络并阻塞唯一 Mac runner。最小流程修复把日常 `check` job 迁到 GitHub-hosted `ubuntu-latest`，使用固定 Node 20；真正专用且仅手动触发的 `curation_audit` 仍保留 Mac label。checkout 的 `<1 GB` 硬限、owner marker、仅 transport 重试、非 transport fail-closed 和精确 cleanup 合同全部保留。
+- 新回归精确分割两个 job，要求普通 Check 不再含 `daily-song-list-mac` 且必须使用 hosted Node，curation audit 仍为 self-hosted Mac。完成 targeted/full/relay/YAML/shell/diff、PR/CI/squash merge 后，必须由新 main push run 证明 Mac 不再被普通 Check 占用；随后等待合法 core/accepted 收敛并只调度唯一 latest-head WDC。
