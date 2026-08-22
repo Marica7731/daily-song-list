@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T07:59:44.071Z",
+  "generatedAt": "2026-08-22T08:53:59.237Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T07:59:44.071Z",
+    "fetchedAt": "2026-08-22T08:53:59.237Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T07:59:44.071Z",
+    "generatedAt": "2026-08-22T08:53:59.237Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@ibaramuan",
+        "channelId": "UC9zLKU6WiRdcKtAh-6o_zmA",
+        "displayName": "Muan ch.茨むあん",
+        "sourceUrl": "https://www.youtube.com/@ibaramuan",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@%E5%8F%AF%E5%90%A6%E3%83%A2%E3%82%AB",
         "channelId": "UC_lRlTJ2E_e8DrdikQil6pQ",
@@ -11842,13 +11849,6 @@
         "channelId": "UCyVypf7vg9KqoDiXkDIvetg",
         "displayName": "Molf Ch. 海汐もるふ",
         "sourceUrl": "https://www.youtube.com/@mishiomolf",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hiyori_hiyoko",
-        "channelId": "UCcSbyt7yvsljZijP3ePvvZw",
-        "displayName": "ひよりひよこ θ Hiyori Hiyoko θ PiYO Ch",
-        "sourceUrl": "https://www.youtube.com/@hiyori_hiyoko",
         "reason": "batch_limit_reached"
       }
     ]
