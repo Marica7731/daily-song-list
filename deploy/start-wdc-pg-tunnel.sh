@@ -21,16 +21,23 @@ LOCAL_PORT="${6:-}"
 
 SECRET_ROOT="/run/dsl-wdc-${RUN_ID}-${RUN_ATTEMPT}"
 EXPECTED_OWNER="${RUN_ID}:${RUN_ATTEMPT}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+EXPECTED_SCRIPT_DIR="/opt/culua/ytb-song-rank/.build/dsl-wdc-${RUN_ID}-${RUN_ATTEMPT}/source/deploy"
+[[ "$SCRIPT_DIR" == "$EXPECTED_SCRIPT_DIR" ]]
+[[ -d "$SCRIPT_DIR" && ! -L "$SCRIPT_DIR" && "$(readlink -f "$SCRIPT_DIR")" == "$SCRIPT_DIR" ]]
 [[ -d "$SECRET_ROOT" && ! -L "$SECRET_ROOT" && "$(readlink -f "$SECRET_ROOT")" == "$SECRET_ROOT" ]]
 [[ "$(cat "$SECRET_ROOT/.codex-owned-run")" == "$EXPECTED_OWNER" ]]
-for required in vps2-password vps2-knownhosts vps2-askpass.sh; do
+for required in vps2-password vps2-knownhosts; do
   path="$SECRET_ROOT/$required"
   [[ -f "$path" && ! -L "$path" ]]
   [[ "$(stat -c %a "$path")" =~ ^(400|500|600|700)$ ]]
 done
+ASKPASS="$SCRIPT_DIR/wdc-vps2-askpass.sh"
+[[ -f "$ASKPASS" && ! -L "$ASKPASS" ]]
+[[ "$(stat -c %a "$ASKPASS")" == "500" ]]
 
 export VPS2_PASSWORD_FILE="$SECRET_ROOT/vps2-password"
-export SSH_ASKPASS="$SECRET_ROOT/vps2-askpass.sh"
+export SSH_ASKPASS="$ASKPASS"
 export SSH_ASKPASS_REQUIRE=force
 export DISPLAY=daily-song-list-wdc
 

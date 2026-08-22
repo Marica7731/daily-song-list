@@ -392,16 +392,15 @@ timeout 60s scp "${WDC_SSH[@]}" "$SSH_ROOT/vps2-password" \
   "$WDC_USER@$WDC_HOST:$SECRET_ROOT/vps2-password.part"
 timeout 60s scp "${WDC_SSH[@]}" "$SSH_ROOT/vps2-knownhosts" \
   "$WDC_USER@$WDC_HOST:$SECRET_ROOT/vps2-knownhosts.part"
-wdc bash -s -- "$SECRET_ROOT" "$SOURCE_ROOT" "$OWNER" <<'REMOTE'
+wdc bash -s -- "$SECRET_ROOT" "$OWNER" <<'REMOTE'
 set -Eeuo pipefail
-secret="$1";source="$2";owner="$3"
+secret="$1";owner="$2"
 [[ "$(cat "$secret/.codex-owned-run")" == "$owner" ]]
 for name in vps2-password vps2-knownhosts; do
   [[ -f "$secret/$name.part" && ! -L "$secret/$name.part" ]]
   chmod 0600 "$secret/$name.part"
   mv "$secret/$name.part" "$secret/$name"
 done
-install -m 0500 "$source/deploy/wdc-vps2-askpass.sh" "$secret/vps2-askpass.sh"
 REMOTE
 
 LOCAL_PORT="$((24000 + (GITHUB_RUN_ID % 10000)))"
