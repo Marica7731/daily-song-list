@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T10:41:39.345Z",
+  "generatedAt": "2026-08-22T11:37:50.211Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T10:41:39.345Z",
+    "fetchedAt": "2026-08-22T11:37:50.211Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T10:41:39.345Z",
+    "generatedAt": "2026-08-22T11:37:50.211Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,27 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@MunMosh",
+        "channelId": "UC7cZJOAJZD1W4aOfqnRgWiA",
+        "displayName": "むんもっしゅ",
+        "sourceUrl": "https://www.youtube.com/@MunMosh",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Sakura_mochimochi",
+        "channelId": "UCLOnKw76ypBM5PeYr4OdkJQ",
+        "displayName": "Sakura CH.餅々さくら",
+        "sourceUrl": "https://www.youtube.com/@Sakura_mochimochi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@NemukumoTsukuri",
+        "channelId": "UCekc8SI533NI675r9aCBRcQ",
+        "displayName": "眠雲ツクリ / NemukumoTsukuri",
+        "sourceUrl": "https://www.youtube.com/@NemukumoTsukuri",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@Coco_Jester",
         "channelId": "UCuDfldiO-ujdFC-36eYMl2g",
@@ -11828,27 +11849,6 @@
         "channelId": "UCw9_unaq1z9CJXeFOZm-MfQ",
         "displayName": "時庭らんぜ / RANZE TOKINIWA",
         "sourceUrl": "https://www.youtube.com/@RANZETOKINIWA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Azri_0822",
-        "channelId": "UC4oIghT3W9Y99nyiNCTXwlg",
-        "displayName": "アズリ / Azri【ななしいんく】",
-        "sourceUrl": "https://www.youtube.com/@Azri_0822",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Loveca_Boss",
-        "channelId": "UCXzUC9yZOYLmxn16LF0IYTQ",
-        "displayName": "ラヴカ💎ラピス",
-        "sourceUrl": "https://www.youtube.com/@Loveca_Boss",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Ryushen",
-        "channelId": "UCt5-0i4AVHXaWJrL8Wql3mw",
-        "displayName": "緑仙 / Ryushen",
-        "sourceUrl": "https://www.youtube.com/channel/UCt5-0i4AVHXaWJrL8Wql3mw",
         "reason": "batch_limit_reached"
       }
     ]
