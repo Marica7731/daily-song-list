@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T07:21:44.229Z",
+  "generatedAt": "2026-08-22T07:59:44.071Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T07:21:44.229Z",
+    "fetchedAt": "2026-08-22T07:59:44.071Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T07:21:44.229Z",
+    "generatedAt": "2026-08-22T07:59:44.071Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,27 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@%E5%8F%AF%E5%90%A6%E3%83%A2%E3%82%AB",
+        "channelId": "UC_lRlTJ2E_e8DrdikQil6pQ",
+        "displayName": "可否モカ",
+        "sourceUrl": "https://www.youtube.com/@%E5%8F%AF%E5%90%A6%E3%83%A2%E3%82%AB",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@yurayurausui",
+        "channelId": "UC4g6i7aL2fn2EME3r9fEHxA",
+        "displayName": "碓氷ゆら / Yura Usui",
+        "sourceUrl": "https://www.youtube.com/@yurayurausui",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Suu_Usuwa",
+        "channelId": "UCeqIMtLuGc3YgwkhEaG8oDg",
+        "displayName": "稀羽すう - Suu Usuwa -",
+        "sourceUrl": "https://www.youtube.com/channel/UCeqIMtLuGc3YgwkhEaG8oDg",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KannagiAnna",
         "channelId": "UCvuAdWg_I8U9kwVGZ4XLvog",
@@ -11803,6 +11824,13 @@
         "reason": "batch_limit_reached"
       },
       {
+        "handle": "/@ykn0911v",
+        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
+        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
+        "sourceUrl": "https://www.youtube.com/@ykn0911v",
+        "reason": "batch_limit_reached"
+      },
+      {
         "handle": "/@LewehorstShiran",
         "channelId": "UCxiRdYNqojKL29H7gEVwlzA",
         "displayName": "レーヴェホルスト紫蘭🦋Lewehorst Shiran",
@@ -11821,34 +11849,6 @@
         "channelId": "UCcSbyt7yvsljZijP3ePvvZw",
         "displayName": "ひよりひよこ θ Hiyori Hiyoko θ PiYO Ch",
         "sourceUrl": "https://www.youtube.com/@hiyori_hiyoko",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KMNZOFFICIAL",
-        "channelId": "UCwuS0uY-Z2Gr_5OV2oFybFA",
-        "displayName": "KMNZ",
-        "sourceUrl": "https://www.youtube.com/channel/UCwuS0uY-Z2Gr_5OV2oFybFA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@aoisizukuv",
-        "channelId": "UCWNV-ixuEAxaso9rLk5PRFQ",
-        "displayName": "aoi sizuku ch. 葵井詩雫",
-        "sourceUrl": "https://www.youtube.com/@aoisizukuv",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Vam0414",
-        "channelId": "UCPm62fhXzHQiUupKUDlRSig",
-        "displayName": "ヴァンパイアップル",
-        "sourceUrl": "https://www.youtube.com/@Vam0414",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Luchat",
-        "channelId": "UCk0zRInAOHqfglcIJQ8Aa9g",
-        "displayName": "ねこてんしルシャ",
-        "sourceUrl": "https://www.youtube.com/@Luchat",
         "reason": "batch_limit_reached"
       }
     ]
