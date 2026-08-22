@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-21T21:07:14.628Z",
+  "generatedAt": "2026-08-22T05:41:57.719Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-21T21:07:14.628Z",
+    "fetchedAt": "2026-08-22T05:41:57.719Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-21T21:07:14.628Z",
+    "generatedAt": "2026-08-22T05:41:57.719Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,12 +11657,12 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1218,
-      "parseableChannels": 1199,
+      "totalChannels": 1219,
+      "parseableChannels": 1200,
       "realAvatar": 650,
-      "thumbnailFallback": 568,
+      "thumbnailFallback": 569,
       "missingDisplayImage": 0,
-      "missingAvatar": 568,
+      "missingAvatar": 569,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
@@ -11676,6 +11676,27 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@kanade_awayuki",
+        "channelId": "UCPUi4e7wnbhFdjsm3KqD3KA",
+        "displayName": "淡雪 花奏(かなで)",
+        "sourceUrl": "https://www.youtube.com/@kanade_awayuki",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@MerunCh",
+        "channelId": "UCDjutWNYx0gRgrnTLHYWgtA",
+        "displayName": "Merun Ch. MorinoMerun",
+        "sourceUrl": "https://www.youtube.com/@MerunCh",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@somana_tsukumo",
+        "channelId": "UC03qR3pGMWsUBUrHn437mAg",
+        "displayName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+        "sourceUrl": "https://www.youtube.com/@somana_tsukumo",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@KUGURUKASAYA",
         "channelId": "UCfpcs6jK285d1TJWFhjej-Q",
@@ -11817,13 +11838,6 @@
         "reason": "batch_limit_reached"
       },
       {
-        "handle": "/@kanade_awayuki",
-        "channelId": "UCPUi4e7wnbhFdjsm3KqD3KA",
-        "displayName": "淡雪 花奏(かなで)",
-        "sourceUrl": "https://www.youtube.com/@kanade_awayuki",
-        "reason": "batch_limit_reached"
-      },
-      {
         "handle": "/@SHIRASESHIRAKAWA",
         "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
         "displayName": "白河しらせ / SHIRASE SHIRAKAWA",
@@ -11835,20 +11849,6 @@
         "channelId": "UCSB9S5M1ktSjDEdmTTOZqkA",
         "displayName": "白餅だんご🍡✤",
         "sourceUrl": "https://www.youtube.com/channel/UCSB9S5M1ktSjDEdmTTOZqkA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
-        "channelId": "UCzLN4T6XcjYztoXLcFDHe0g",
-        "displayName": "一二美アユ ch / Hifumi Aryu",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E4%BA%8C%E7%BE%8E%E3%82%A2%E3%83%A6ch-HifumiAryu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
-        "channelId": "UCeG3tgJze9QqUgD2GI33OjQ",
-        "displayName": "一色イズ ⟡ Isshiki_IS",
-        "sourceUrl": "https://www.youtube.com/@%E4%B8%80%E8%89%B2%E3%82%A4%E3%82%BA",
         "reason": "batch_limit_reached"
       }
     ]
