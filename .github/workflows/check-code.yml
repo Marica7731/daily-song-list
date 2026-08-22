@@ -47,7 +47,9 @@ concurrency:
 jobs:
   check:
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      CHECK_SOURCE_ROOT: ${{ github.workspace }}/.codex-check-source
     defaults:
       run:
         working-directory: .codex-check-source
@@ -62,6 +64,8 @@ jobs:
           home="$(cd -- "$HOME" && pwd -P)"
           source_parent="$(cd -- "$workspace" && pwd -P)"
           source="$source_parent/.codex-check-source"
+          owner="$workspace/.codex-check-source-owned"
+          [[ "$CHECK_SOURCE_ROOT" == "$source" ]]
           if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
             echo "refusing unsafe workspace: $workspace" >&2
             exit 1
@@ -81,8 +85,11 @@ jobs:
           echo "CODEX_CHECK_SOURCE_PRECLEAN before_bytes=$before_bytes path=$source"
           rm -rf -- "$source"
           mkdir -p -- "$source"
+          printf '%s\n' "daily-song-list-check-source-v1" > "$owner"
 
       - name: Checkout
+        id: check_checkout
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           path: .codex-check-source
@@ -106,12 +113,68 @@ jobs:
             /README.md
           sparse-checkout-cone-mode: false
 
+      - name: Recover Check code checkout after transport interruption
+        if: steps.check_checkout.outcome == 'failure'
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.codex-check-source-owned"
+          RETRY_LOG="$RUNNER_TEMP/check-code-checkout-transport-retry.log"
+          [[ "$CHECK_SOURCE_ROOT" == "$GITHUB_WORKSPACE/.codex-check-source" ]]
+          [[ -d "$CHECK_SOURCE_ROOT/.git" && ! -L "$CHECK_SOURCE_ROOT" ]]
+          [[ -f "$OWNER_PATH" ]]
+          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-check-source-v1" ]]
+          cd "$CHECK_SOURCE_ROOT"
+          for attempt in 1 2 3; do
+            : > "$RETRY_LOG"
+            if {
+              git show-ref --verify --quiet refs/remotes/origin/codex-check-target ||
+                git -c protocol.version=2 fetch \
+                  --no-tags --prune --no-recurse-submodules \
+                  --filter=blob:none --depth=50 origin \
+                  "+${GITHUB_SHA}:refs/remotes/origin/codex-check-target"
+              git checkout --progress --force --detach refs/remotes/origin/codex-check-target
+            } >"$RETRY_LOG" 2>&1; then
+              rm -f -- "$RETRY_LOG"
+              echo "CODEX_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
+              exit 0
+            else
+              status=$?
+            fi
+            cat "$RETRY_LOG" >&2
+            if ! grep -Eiq \
+              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
+              "$RETRY_LOG"; then
+              echo "CODEX_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
+              exit "$status"
+            fi
+            echo "CODEX_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
+            if (( attempt == 3 )); then
+              exit "$status"
+            fi
+            sleep "$(( attempt * 2 ))"
+          done
+
+      - name: Validate bounded Check code checkout
+        run: |
+          set -Eeuo pipefail
+          source_kib="$(du -sk "$CHECK_SOURCE_ROOT" | awk '{print $1}')"
+          [[ "$source_kib" =~ ^[0-9]+$ ]]
+          source_bytes=$((source_kib * 1024))
+          (( source_bytes < 1000000000 )) || {
+            echo "CODEX_CHECK_SOURCE_CHECKOUT_LIMIT_EXCEEDED bytes=$source_bytes" >&2
+            exit 74
+          }
+          echo "CODEX_CHECK_SOURCE_CHECKOUT_BYTES bytes=$source_bytes limit=1000000000"
+
       - name: Configure Mac toolchain
         run: |
           echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
           echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
 
       - name: Checkout canonical blocklist
+        id: blocklist_checkout
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           repository: Marica7731/mygit
@@ -121,6 +184,48 @@ jobs:
           sparse-checkout: |
             config/blocked-vtuber-channels.json
           sparse-checkout-cone-mode: false
+
+      - name: Recover canonical blocklist checkout after transport interruption
+        if: steps.blocklist_checkout.outcome == 'failure'
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.codex-check-source-owned"
+          BLOCKLIST_ROOT="$CHECK_SOURCE_ROOT/.tmp/check-code-mygit"
+          RETRY_LOG="$RUNNER_TEMP/check-code-blocklist-transport-retry.log"
+          [[ "$BLOCKLIST_ROOT" == "$GITHUB_WORKSPACE/.codex-check-source/.tmp/check-code-mygit" ]]
+          [[ -d "$BLOCKLIST_ROOT/.git" && ! -L "$BLOCKLIST_ROOT" ]]
+          [[ -f "$OWNER_PATH" ]]
+          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-check-source-v1" ]]
+          cd "$BLOCKLIST_ROOT"
+          for attempt in 1 2 3; do
+            : > "$RETRY_LOG"
+            if {
+              git show-ref --verify --quiet refs/remotes/origin/main ||
+                git -c protocol.version=2 fetch \
+                  --no-tags --prune --no-recurse-submodules \
+                  --filter=blob:none --depth=1 origin \
+                  '+refs/heads/main:refs/remotes/origin/main'
+              git checkout --progress --force -B main refs/remotes/origin/main
+            } >"$RETRY_LOG" 2>&1; then
+              rm -f -- "$RETRY_LOG"
+              echo "CODEX_BLOCKLIST_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
+              exit 0
+            else
+              status=$?
+            fi
+            cat "$RETRY_LOG" >&2
+            if ! grep -Eiq \
+              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
+              "$RETRY_LOG"; then
+              echo "CODEX_BLOCKLIST_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
+              exit "$status"
+            fi
+            echo "CODEX_BLOCKLIST_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
+            if (( attempt == 3 )); then
+              exit "$status"
+            fi
+            sleep "$(( attempt * 2 ))"
+          done
 
       - name: Check blocklist mirror sync
         run: node scripts/check-blocked-vtuber-sync.js --source .tmp/check-code-mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
@@ -427,6 +532,8 @@ jobs:
           home="$(cd -- "$HOME" && pwd -P)"
           source_parent="$(cd -- "$workspace" && pwd -P)"
           source="$source_parent/.codex-check-source"
+          owner="$workspace/.codex-check-source-owned"
+          [[ "$CHECK_SOURCE_ROOT" == "$source" ]]
           if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
             echo "refusing unsafe workspace: $workspace" >&2
             exit 1
@@ -439,11 +546,16 @@ jobs:
             echo "refusing anomalous Check code source: $source" >&2
             exit 1
           fi
+          if [ -e "$source" ]; then
+            [[ -f "$owner" ]]
+            [[ "$(cat "$owner")" == "daily-song-list-check-source-v1" ]]
+          fi
           before_bytes=0
           if [ -e "$source" ]; then
             before_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
           fi
           rm -rf -- "$source"
+          rm -f -- "$owner"
           after_bytes=0
           if [ -e "$source" ] || [ -L "$source" ]; then
             after_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"

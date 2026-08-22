@@ -98,6 +98,8 @@ jobs:
           echo "BACKFILL_SOURCE_CHECKOUT_RESET root=$BACKFILL_SOURCE_ROOT"
 
       - name: Checkout controlled backfill inputs
+        id: backfill_checkout
+        continue-on-error: true
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: backfill-update-source
@@ -110,6 +112,48 @@ jobs:
             /scripts/run-backfill-update.js
             /data/latest.json
             /data/backfill-inbox/**
+
+      - name: Recover controlled backfill checkout after transport interruption
+        if: steps.backfill_checkout.outcome == 'failure'
+        working-directory: .
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.backfill-update-source-owned"
+          RETRY_LOG="$RUNNER_TEMP/backfill-checkout-transport-retry.log"
+          [[ "$BACKFILL_SOURCE_ROOT" == "$GITHUB_WORKSPACE/backfill-update-source" ]]
+          [[ -d "$BACKFILL_SOURCE_ROOT/.git" && ! -L "$BACKFILL_SOURCE_ROOT" ]]
+          [[ -f "$OWNER_PATH" ]]
+          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-backfill-source-v1" ]]
+          cd "$BACKFILL_SOURCE_ROOT"
+          for attempt in 1 2 3; do
+            : > "$RETRY_LOG"
+            if {
+              git show-ref --verify --quiet refs/remotes/origin/main ||
+                git -c protocol.version=2 fetch \
+                  --no-tags --prune --no-recurse-submodules \
+                  --filter=blob:none --depth=50 origin \
+                  "+${GITHUB_SHA}:refs/remotes/origin/main"
+              git checkout --progress --force -B main refs/remotes/origin/main
+            } >"$RETRY_LOG" 2>&1; then
+              rm -f -- "$RETRY_LOG"
+              echo "BACKFILL_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
+              exit 0
+            else
+              status=$?
+            fi
+            cat "$RETRY_LOG" >&2
+            if ! grep -Eiq \
+              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
+              "$RETRY_LOG"; then
+              echo "BACKFILL_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
+              exit "$status"
+            fi
+            echo "BACKFILL_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
+            if (( attempt == 3 )); then
+              exit "$status"
+            fi
+            sleep "$(( attempt * 2 ))"
+          done
 
       - name: Validate bounded isolated backfill checkout
         run: |
@@ -187,3 +231,27 @@ jobs:
             echo "- backfill_outcome: ${{ steps.backfill.outcome }}"
             echo "- failure_hint: if this fails, record whether the failure was sync, prepare bundle, commit/rebase, or push before rerunning"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove controlled backfill checkout
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.backfill-update-source-owned"
+          [[ "$BACKFILL_SOURCE_ROOT" == "$GITHUB_WORKSPACE/backfill-update-source" ]]
+          [[ "${BACKFILL_SOURCE_ROOT%/*}" == "$GITHUB_WORKSPACE" ]]
+          [[ "${BACKFILL_SOURCE_ROOT##*/}" == "backfill-update-source" ]]
+          if [[ -e "$BACKFILL_SOURCE_ROOT" || -L "$BACKFILL_SOURCE_ROOT" ]]; then
+            [[ -d "$BACKFILL_SOURCE_ROOT" && ! -L "$BACKFILL_SOURCE_ROOT" ]]
+            [[ -f "$OWNER_PATH" ]]
+            [[ "$(cat "$OWNER_PATH")" == "daily-song-list-backfill-source-v1" ]]
+            source_real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$BACKFILL_SOURCE_ROOT")"
+            [[ "$source_real" == "$BACKFILL_SOURCE_ROOT" ]]
+            before_kib="$(du -sk "$BACKFILL_SOURCE_ROOT" | awk '{print $1}')"
+            rm -rf -- "$BACKFILL_SOURCE_ROOT"
+          else
+            before_kib=0
+          fi
+          rm -f -- "$OWNER_PATH"
+          [[ ! -e "$BACKFILL_SOURCE_ROOT" && ! -L "$BACKFILL_SOURCE_ROOT" ]]
+          echo "BACKFILL_SOURCE_CHECKOUT_POSTCLEAN before_bytes=$((before_kib * 1024)) after_bytes=0"

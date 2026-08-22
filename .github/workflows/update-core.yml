@@ -136,6 +136,8 @@ jobs:
           echo "CORE_SOURCE_CHECKOUT_RESET root=$CORE_SOURCE_ROOT"
 
       - name: Checkout controlled core inputs
+        id: core_checkout
+        continue-on-error: true
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: core-update-source
@@ -169,6 +171,48 @@ jobs:
             /data/catalog-segments/**
             /data/diff/**
             /data/ui/meta.json
+
+      - name: Recover controlled core checkout after transport interruption
+        if: steps.core_checkout.outcome == 'failure'
+        working-directory: .
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.core-update-source-owned"
+          RETRY_LOG="$RUNNER_TEMP/core-checkout-transport-retry.log"
+          [[ "$CORE_SOURCE_ROOT" == "$GITHUB_WORKSPACE/core-update-source" ]]
+          [[ -d "$CORE_SOURCE_ROOT/.git" && ! -L "$CORE_SOURCE_ROOT" ]]
+          [[ -f "$OWNER_PATH" ]]
+          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-core-source-v1" ]]
+          cd "$CORE_SOURCE_ROOT"
+          for attempt in 1 2 3; do
+            : > "$RETRY_LOG"
+            if {
+              git show-ref --verify --quiet refs/remotes/origin/main ||
+                git -c protocol.version=2 fetch \
+                  --no-tags --prune --no-recurse-submodules \
+                  --filter=blob:none --depth=50 origin \
+                  "+${GITHUB_SHA}:refs/remotes/origin/main"
+              git checkout --progress --force -B main refs/remotes/origin/main
+            } >"$RETRY_LOG" 2>&1; then
+              rm -f -- "$RETRY_LOG"
+              echo "CORE_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
+              exit 0
+            else
+              status=$?
+            fi
+            cat "$RETRY_LOG" >&2
+            if ! grep -Eiq \
+              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
+              "$RETRY_LOG"; then
+              echo "CORE_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
+              exit "$status"
+            fi
+            echo "CORE_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
+            if (( attempt == 3 )); then
+              exit "$status"
+            fi
+            sleep "$(( attempt * 2 ))"
+          done
 
       - name: Validate bounded isolated core checkout
         run: |
@@ -229,8 +273,14 @@ jobs:
             find data/ui -mindepth 1 -type f ! -path data/ui/meta.json -delete
             find data/ui -mindepth 1 -depth -type d -empty -delete
           fi
-          git restore --worktree -- data/ui/meta.json
-          git clean -fd -- data/ui
+          if git rev-parse --verify HEAD >/dev/null 2>&1; then
+            if git ls-files --error-unmatch data/ui/meta.json >/dev/null 2>&1; then
+              git restore --worktree -- data/ui/meta.json
+            fi
+            git clean -fd -- data/ui
+          else
+            echo "CORE_TRANSIENT_CLEANUP_SKIPPED reason=no-complete-checkout"
+          fi
           rm -f -- artifacts/channel-avatar-cache/checkpoint.json
           rmdir artifacts/channel-avatar-cache 2>/dev/null || true
           rmdir artifacts 2>/dev/null || true
@@ -355,6 +405,31 @@ jobs:
             echo "- route: ordinary data/7d.json push triggers the PostgreSQL release workflow"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Remove controlled core checkout
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -Eeuo pipefail
+          OWNER_PATH="$GITHUB_WORKSPACE/.core-update-source-owned"
+          [[ "$CORE_SOURCE_ROOT" == "$GITHUB_WORKSPACE/core-update-source" ]]
+          [[ "${CORE_SOURCE_ROOT%/*}" == "$GITHUB_WORKSPACE" ]]
+          [[ "${CORE_SOURCE_ROOT##*/}" == "core-update-source" ]]
+          if [[ -e "$CORE_SOURCE_ROOT" || -L "$CORE_SOURCE_ROOT" ]]; then
+            [[ -d "$CORE_SOURCE_ROOT" && ! -L "$CORE_SOURCE_ROOT" ]]
+            [[ -f "$OWNER_PATH" ]]
+            [[ "$(cat "$OWNER_PATH")" == "daily-song-list-core-source-v1" ]]
+            source_real="$(/usr/bin/python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$CORE_SOURCE_ROOT")"
+            [[ "$source_real" == "$CORE_SOURCE_ROOT" ]]
+            before_kib="$(du -sk "$CORE_SOURCE_ROOT" | awk '{print $1}')"
+            rm -rf -- "$CORE_SOURCE_ROOT"
+          else
+            before_kib=0
+          fi
+          rm -f -- "$OWNER_PATH"
+          [[ ! -e "$CORE_SOURCE_ROOT" && ! -L "$CORE_SOURCE_ROOT" ]]
+          echo "CORE_SOURCE_CHECKOUT_POSTCLEAN before_bytes=$((before_kib * 1024)) after_bytes=0"
+
       - name: Fail only when core program failed
         if: always() && steps.core.outcome != 'success'
+        working-directory: ${{ github.workspace }}
         run: exit 1
