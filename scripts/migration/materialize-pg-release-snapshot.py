@@ -1777,6 +1777,12 @@ class CanonicalSnapshotWriter:
         ) WITHOUT ROWID;
         CREATE INDEX ranking_rows_source_lookup
           ON ranking_rows(range_id,detail_key);
+        CREATE TABLE artist_ranking_song_owners(
+          range_id TEXT NOT NULL,source_key TEXT NOT NULL,position INTEGER NOT NULL,
+          song_key TEXT NOT NULL,song_name TEXT NOT NULL,payload_json TEXT NOT NULL,
+          PRIMARY KEY(range_id,source_key,position),
+          UNIQUE(range_id,source_key,song_key)
+        ) WITHOUT ROWID;
         CREATE TABLE source_export_checkpoints(
           stage TEXT NOT NULL,range_id TEXT NOT NULL,source_key TEXT NOT NULL,
           occurrence_count INTEGER NOT NULL,
@@ -1968,6 +1974,87 @@ class CanonicalSnapshotWriter:
         )
         self.ranking_rows += 1
         self._record_writes(1)
+
+    def add_artist_ranking_song_owners(
+        self,
+        range_id: str,
+        source_key: str,
+        record: Mapping[str, Any],
+    ) -> None:
+        """Persist the full Artist owner list before compact card projection.
+
+        Public Artist ranking cards intentionally keep only a three-song
+        preview.  Source canonicalization needs the complete authoritative
+        list, so retain it in private build state until every source has been
+        checked and written.  ``finish()`` removes this table before the
+        serving database is published.
+        """
+
+        range_id = _text(range_id)
+        source_key = _text(source_key)
+        if not range_id or not source_key:
+            raise RuntimeError("artist ranking canonical owner identity is incomplete")
+        if _text(record.get("sourceDetailKey")) != source_key:
+            raise RuntimeError(
+                "artist ranking canonical owner changed source key: "
+                f"{range_id}/{source_key}"
+            )
+        owners_by_key, _owners_by_name, all_keyed = _artist_song_owners(
+            record,
+            context=f"artist ranking {range_id}/{source_key}",
+            require_complete=True,
+        )
+        expected_song_count = _integer(record.get("songCount"), -1)
+        if not all_keyed or expected_song_count != len(owners_by_key):
+            raise RuntimeError(
+                "artist ranking canonical song owner count disagrees: "
+                f"{range_id}/{source_key} ranking={expected_song_count} "
+                f"owners={len(owners_by_key)}"
+            )
+        existing = int(
+            self.connection.execute(
+                "SELECT count(*) FROM artist_ranking_song_owners "
+                "WHERE range_id=? AND source_key=?",
+                (range_id, source_key),
+            ).fetchone()[0]
+            or 0
+        )
+        if existing:
+            raise RuntimeError(
+                "artist ranking canonical owner was written more than once: "
+                f"{range_id}/{source_key} rows={existing}"
+            )
+        rows: list[tuple[Any, ...]] = []
+        for position, raw_song in enumerate(record["songs"], start=1):
+            song = dict(raw_song)
+            item_owners, _item_names, item_keyed = _artist_song_owners(
+                {"songs": [song]},
+                context=(
+                    f"artist ranking {range_id}/{source_key} owner {position}"
+                ),
+                require_complete=True,
+            )
+            if not item_keyed or len(item_owners) != 1:
+                raise RuntimeError(
+                    "artist ranking canonical song owner is invalid: "
+                    f"{range_id}/{source_key}/{position}"
+                )
+            song_key, song_name = next(iter(item_owners.items()))
+            rows.append(
+                (
+                    range_id,
+                    source_key,
+                    position,
+                    song_key,
+                    song_name,
+                    _json_text(song),
+                )
+            )
+        self.connection.executemany(
+            "INSERT INTO artist_ranking_song_owners VALUES(?,?,?,?,?,?)",
+            rows,
+        )
+        self._record_writes(len(rows))
 
     def ranking_series_totals(
         self,
@@ -2942,32 +3029,88 @@ class CanonicalSnapshotWriter:
                 "artist ranking canonical owner changed source key: "
                 f"{range_id}/{source_key}"
             )
-        raw_songs = payload.get("songs")
-        if not isinstance(raw_songs, list):
+        compact_raw_songs = payload.get("songs")
+        if not isinstance(compact_raw_songs, list):
             raise RuntimeError(
-                "artist ranking canonical song owners are incomplete: "
+                "artist ranking canonical song preview is incomplete: "
                 f"{range_id}/{source_key}"
             )
-        songs = [dict(item) for item in raw_songs if isinstance(item, Mapping)]
-        if len(songs) != len(raw_songs):
+        compact_songs = [
+            dict(item) for item in compact_raw_songs if isinstance(item, Mapping)
+        ]
+        if len(compact_songs) != len(compact_raw_songs):
             raise RuntimeError(
-                "artist ranking canonical song owner is invalid: "
+                "artist ranking canonical song preview is invalid: "
                 f"{range_id}/{source_key}"
             )
+        owner_rows = self.connection.execute(
+            """
+            SELECT position,song_key,song_name,payload_json
+            FROM artist_ranking_song_owners
+            WHERE range_id=? AND source_key=?
+            ORDER BY position
+            """,
+            (range_id, source_key),
+        ).fetchall()
+        songs: list[dict[str, Any]] = []
+        for expected_position, row in enumerate(owner_rows, start=1):
+            if int(row[0]) != expected_position:
+                raise RuntimeError(
+                    "artist ranking canonical song owner order is invalid: "
+                    f"{range_id}/{source_key}"
+                )
+            try:
+                song = json.loads(row[3])
+            except (TypeError, json.JSONDecodeError) as exc:
+                raise RuntimeError(
+                    "artist ranking canonical song owner payload is invalid: "
+                    f"{range_id}/{source_key}/{expected_position}"
+                ) from exc
+            if not isinstance(song, Mapping):
+                raise RuntimeError(
+                    "artist ranking canonical song owner payload is not an object: "
+                    f"{range_id}/{source_key}/{expected_position}"
+                )
+            item_owners, _item_names, item_keyed = _artist_song_owners(
+                {"songs": [song]},
+                context=(
+                    f"artist ranking {range_id}/{source_key} "
+                    f"owner {expected_position}"
+                ),
+                require_complete=True,
+            )
+            if (
+                not item_keyed
+                or len(item_owners) != 1
+                or next(iter(item_owners.items())) != (_text(row[1]), _text(row[2]))
+            ):
+                raise RuntimeError(
+                    "artist ranking canonical song owner identity changed: "
+                    f"{range_id}/{source_key}/{expected_position}"
+                )
+            songs.append(dict(song))
         owners_by_key, owners_by_name, all_keyed = _artist_song_owners(
             {"songs": songs},
             context=f"artist ranking {range_id}/{source_key}",
             require_complete=True,
         )
+        expected_preview_count = min(
+            adapter.COMPACT_VTUBER_PREVIEW_LIMIT,
+            expected_song_count,
+        )
         if (
             not all_keyed
             or expected_song_count != len(owners_by_key)
             or _integer(payload.get("songCount")) != expected_song_count
+            or len(compact_songs) != expected_preview_count
+            or _integer(payload.get("songPreviewCount"), -1)
+            != expected_preview_count
+            or compact_songs != songs[:expected_preview_count]
         ):
             raise RuntimeError(
                 "artist ranking canonical song owner count disagrees: "
                 f"{range_id}/{source_key} ranking={expected_song_count} "
-                f"owners={len(owners_by_key)}"
+                f"owners={len(owners_by_key)} preview={len(compact_songs)}"
             )
         return songs, owners_by_key, owners_by_name, all_keyed
 
@@ -3324,6 +3467,7 @@ class CanonicalSnapshotWriter:
         # Checkpoint metadata is private build state, never part of the serving
         # contract.  Remove it only after every export phase has completed.
         self.connection.execute("DROP TABLE source_export_checkpoints")
+        self.connection.execute("DROP TABLE artist_ranking_song_owners")
         self.ranking_rows = int(
             self.connection.execute("SELECT count(*) FROM ranking_rows").fetchone()[0]
         )
@@ -5845,6 +5989,14 @@ def materialize(
                             _complete_ranking_metric_scalars(raw, view)
                             for raw in records
                         ]
+                        if range_id == "all" and view == "artists":
+                            for raw in records:
+                                detail_key = _text(raw.get("sourceDetailKey"))
+                                writer.add_artist_ranking_song_owners(
+                                    range_id,
+                                    detail_key,
+                                    raw,
+                                )
                         compact_records = adapter.compact_ranking_payloads(
                             [dict(record) for record in records],
                             view,
