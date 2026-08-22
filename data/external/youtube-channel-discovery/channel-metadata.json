@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T11:37:50.211Z",
+  "generatedAt": "2026-08-22T17:17:13.069Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T11:37:50.211Z",
+    "fetchedAt": "2026-08-22T17:17:13.069Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T11:37:50.211Z",
+    "generatedAt": "2026-08-22T17:17:13.069Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11657,25 +11657,67 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 1223,
-      "parseableChannels": 1204,
+      "totalChannels": 1224,
+      "parseableChannels": 1205,
       "realAvatar": 650,
-      "thumbnailFallback": 573,
+      "thumbnailFallback": 574,
       "missingDisplayImage": 0,
-      "missingAvatar": 573,
+      "missingAvatar": 574,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "skipped_collected_evidence": 1379,
+      "skipped_collected_evidence": 1380,
       "already_cached": 26
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 1360,
+      "batch_limit_reached": 1361,
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@kashiotoha8669",
+        "channelId": "UCYcnLc0n1ryBDZeGWQTVJ_g",
+        "displayName": "カシ・オトハ / Kashi Otoha",
+        "sourceUrl": "https://www.youtube.com/channel/UCYcnLc0n1ryBDZeGWQTVJ_g",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Mei-Mei2024",
+        "channelId": "UCHT_vElA_6ERjOvRbww01dw",
+        "displayName": "羊羊🐏meimei",
+        "sourceUrl": "https://www.youtube.com/@Mei-Mei2024",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@EngakuAsobi",
+        "channelId": "UCcgspKfdWRiCKtJ1E1pAWwA",
+        "displayName": "苑楽アソビ【びじぱと】",
+        "sourceUrl": "https://www.youtube.com/@EngakuAsobi",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@IZUMIMINAMI",
+        "channelId": "UCHefdkPE5A4EqGHgDhrVfzw",
+        "displayName": "ミナミイズミ / IZUMI MINAMI",
+        "sourceUrl": "https://www.youtube.com/@IZUMIMINAMI",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@TakamiyaAki",
+        "channelId": "UCm7UljkFpl0cEYkjidFtqFQ",
+        "displayName": "高宮煌 / - Takamiya Aki -",
+        "sourceUrl": "https://www.youtube.com/@TakamiyaAki",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@RurufuHizuki",
+        "channelId": "UCcQsDietWkYakBKbGpCaeLA",
+        "displayName": "陽月るるふ / Hizuki Rurufu",
+        "sourceUrl": "https://www.youtube.com/channel/UCcQsDietWkYakBKbGpCaeLA",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@MunMosh",
         "channelId": "UC7cZJOAJZD1W4aOfqnRgWiA",
@@ -11807,48 +11849,6 @@
         "channelId": "UCfpcs6jK285d1TJWFhjej-Q",
         "displayName": "傘屋くぐる / KUGURU KASAYA",
         "sourceUrl": "https://www.youtube.com/@KUGURUKASAYA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Mikage_RKMusic",
-        "channelId": "UC2daHxnuJJBM5NWci1RRkeA",
-        "displayName": "深影",
-        "sourceUrl": "https://www.youtube.com/channel/UC2daHxnuJJBM5NWci1RRkeA",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@urame0711",
-        "channelId": "UCmiYJycZXBGc4s_zjIRUHhQ",
-        "displayName": "うらめちゃんねる /あおぎり高校",
-        "sourceUrl": "https://www.youtube.com/@urame0711",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@mel_samui",
-        "channelId": "UCMCooZqVMD2ZmUxjRxGuUjg",
-        "displayName": "花鹿 める / Kajica Mel",
-        "sourceUrl": "https://www.youtube.com/@mel_samui",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@delutaya",
-        "channelId": "UC7YXqPO3eUnxbJ6rN0z2z1Q",
-        "displayName": "DELUTAYA Δ.",
-        "sourceUrl": "https://www.youtube.com/@delutaya",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Hao_RKMusic",
-        "channelId": "UCjoGLVLapRciX38bwgDtttw",
-        "displayName": "羽緒",
-        "sourceUrl": "https://www.youtube.com/channel/UCjoGLVLapRciX38bwgDtttw",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RANZETOKINIWA",
-        "channelId": "UCw9_unaq1z9CJXeFOZm-MfQ",
-        "displayName": "時庭らんぜ / RANZE TOKINIWA",
-        "sourceUrl": "https://www.youtube.com/@RANZETOKINIWA",
         "reason": "batch_limit_reached"
       }
     ]
