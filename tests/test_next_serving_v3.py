@@ -7481,6 +7481,96 @@ class Tests(unittest.TestCase):
         self.assertNotIn("RuntimeMaxSec=64800",combined)
         self.assertNotIn("/Users/",combined)
 
+    def test_wdc_source_meta_probe_retries_only_bounded_transport_failures(self):
+        controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(
+            encoding="utf-8",
+        )
+        for required in (
+            "vps2_source_meta() {",
+            "for attempt in 1 2; do",
+            'output="$(timeout 75s ssh "${VPS2_SSH[@]}"',
+            "printf '%s' \"$output\"",
+            "28|124|255) ;;",
+            'echo "PG_SOURCE_META_RETRY attempt=$attempt status=$rc" >&2',
+            'META_JSON="$(vps2_source_meta "timeout 65 curl --silent '
+            '--show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"',
+        ):
+            self.assertIn(required,controller)
+        self.assertEqual(controller.count('timeout 40s ssh "${VPS2_SSH[@]}"'),1)
+        self.assertEqual(controller.count('timeout 40s ssh "${WDC_SSH[@]}"'),1)
+        self.assertLess(
+            controller.index("vps2_source_meta() {"),
+            controller.index('META_JSON="$(vps2_source_meta '),
+        )
+        helper_start=controller.index("vps2_source_meta() {")
+        helper_end=controller.index("\nwdc() {",helper_start)
+        helper=controller[helper_start:helper_end]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp=Path(temp_dir)
+            fake_ssh=temp/"ssh"
+            fake_ssh.write_text(
+                """#!/usr/bin/env bash
+set -eu
+count=0
+if [[ -f "$FAKE_SSH_STATE" ]]; then count="$(cat "$FAKE_SSH_STATE")"; fi
+count=$((count + 1))
+printf '%s' "$count" > "$FAKE_SSH_STATE"
+case "${FAKE_SSH_MODE:-transport}" in
+  transport)
+    if ((count == 1)); then printf 'discard-me'; exit 255; fi
+    printf '{"meta":"ok"}'
+    ;;
+  http) exit 22 ;;
+  *) exit 91 ;;
+esac
+""",
+                encoding="utf-8",
+            )
+            fake_ssh.chmod(0o755)
+            state=temp/"state"
+            env=os.environ.copy()
+            env["PATH"]=f"{temp}{os.pathsep}{env['PATH']}"
+            env["FAKE_SSH_STATE"]=str(state)
+            env["FAKE_SSH_MODE"]="transport"
+            transport_script=(
+                "set -Eeuo pipefail\n"
+                "VPS2_SSH=()\nVPS2_USER=test\nVPS2_HOST=test\n"
+                +helper+
+                "\nvalue=\"$(vps2_source_meta ignored)\"\n"
+                "[[ \"$value\" == '{\"meta\":\"ok\"}' ]]\n"
+                "[[ \"$(cat \"$FAKE_SSH_STATE\")\" == 2 ]]\n"
+                "printf '%s\\n' \"$value\"\n"
+            )
+            transport=subprocess.run(
+                ["bash"],
+                input=transport_script,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(transport.returncode,0,transport.stderr)
+            self.assertEqual(transport.stdout,'{"meta":"ok"}\n')
+            self.assertIn("PG_SOURCE_META_RETRY attempt=1 status=255",transport.stderr)
+            state.unlink()
+            env["FAKE_SSH_MODE"]="http"
+            http_script=(
+                "set -Eeuo pipefail\n"
+                "VPS2_SSH=()\nVPS2_USER=test\nVPS2_HOST=test\n"
+                +helper+
+                "\nif vps2_source_meta ignored; then exit 91; else status=$?; fi\n"
+                "[[ \"$status\" == 22 ]]\n"
+                "[[ \"$(cat \"$FAKE_SSH_STATE\")\" == 1 ]]\n"
+            )
+            http=subprocess.run(
+                ["bash"],
+                input=http_script,
+                env=env,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(http.returncode,0,http.stderr)
+            self.assertNotIn("PG_SOURCE_META_RETRY",http.stderr)
+
     def test_core_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
         for required in (
