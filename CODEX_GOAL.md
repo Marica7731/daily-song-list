@@ -322,3 +322,9 @@
 - unique latest-head WDC run `32593000694`（head `f1dfa3b04ca98748fa7f8f4d65c62ca47030d559`）在 7d 四类与 all/songs 三指标完成后，于 `all/artists` 首次写私有 owner 表时再次 fail closed：`all/6653c1838b14e4a3 ranking=285 owners=3`。精确原因不是上一轮数据判断错误，而是 `SnapshotPageBuilder` 已在 adapter 的 page-independent preparation 阶段启用 `_snapshotCompactCards`；受 overlay 影响的 Artist summary 在 writer 的“compact 前”循环之前就已截为三首，因此 writer 仍收不到完整列表。
 - run 失败前固定卷约 `1.82GB`，cgroup memory peak `2,536,812,544` bytes、swap `0`，relay 未超 `16GB/2`；未 bundle/deploy。Actions 的 exact cleanup 成功，WDC 项目恢复 `7,611,437,438` bytes、可用约 `79.4GB`，VPS2 relay inactive，生产 release 未写入。
 - 最小修复只给离线 `all/artists` snapshot preparation 增加 `_snapshotPreserveArtistOwnerSongs`：保留完整、当前约 21k 条 canonical Artist-song owner 到 writer 私有表；公开 serving ranking 仍在后续统一 compact 步骤截为三首。该 flag 只允许与 snapshot compact 同时使用，在线 API 不设置。新增生产键 285-owner adapter 回归与 `SnapshotPageBuilder` 真实 flag 传递回归；完成全量门禁、PR/CI/squash merge 后仅运行唯一 latest-head WDC。
+
+### 2026-08-23 04:11 Asia/Taipei — WDC 交接文档的 Check code 范围修复
+
+- PR `#97` 只新增/更新 `AGENTS.md`、`README.md` 与 `docs/WDC_RELEASE_RUNBOOK.md`，用于固化 WDC 的 32GB 构建卷、2.5GiB 内存、1GiB swap、16GB/2 relay、稀疏源码、唯一 latest-head run、SSH/GitHub 操作和精确 cleanup 交接合同；其 PR CI `32595581848` success，squash merge 为 `4208fcbfb2734497c75131c5a2ca9875a8433002`。
+- main push Check code run `32595673008` 精确失败边界为 `CODEX_NODE_TESTS_SELECTED count=1 first=docs/WDC_RELEASE_RUNBOOK.md`；随后执行与该 Markdown 文档无关的根 Node 套件，结果 `723 pass / 81 fail / 2 skipped`。这是路径路由误判，不是 WDC 数据、发布代码或公网回归。
+- 最小修复仅将精确路径 `docs/WDC_RELEASE_RUNBOOK.md` 加入 next-serving/WDC-owned 排除清单；不排除其他 `docs/*`，真正影响根 Node/前端/通用迁移输入的变更仍执行完整 Node 套件。回归同时要求精确路径存在且禁止宽泛 `docs/*`。完成 targeted/full/relay/YAML/shell/diff、PR/CI/squash merge并由 main push 日志证明 `CODEX_NODE_TESTS_SKIPPED reason=no-node-input-changes` 后，才允许唯一 latest-head WDC。

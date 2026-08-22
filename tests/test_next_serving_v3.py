@@ -7557,6 +7557,7 @@ class Tests(unittest.TestCase):
             "deploy/verify-wdc-public-release.py",
             "deploy/verify-wdc-release-data.py",
             "deploy/wdc-vps2-askpass.sh",
+            "docs/WDC_RELEASE_RUNBOOK.md",
             "scripts/migration/7d-json-to-patch.py",
             "scripts/migration/build-release-bundle.py",
             "scripts/migration/build-serving-store.py",
@@ -7572,6 +7573,10 @@ class Tests(unittest.TestCase):
             "server/release_serving_server.py",
         ):
             self.assertIn(excluded,workflow)
+        node_exclusions=workflow.split('case "${changed_path}" in',1)[1].split(
+            "README.md)",1,
+        )[0]
+        self.assertNotIn("docs/*",node_exclusions)
         self.assertNotIn("scripts/migration/*.py",workflow)
         self.assertIn("candidate_node_changes=",workflow)
         self.assertIn('run_node_tests=0',workflow)
