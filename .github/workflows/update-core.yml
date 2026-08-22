@@ -18,6 +18,7 @@ on:
         default: "manual"
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -25,7 +26,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release_window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      blocked: ${{ steps.detect.outputs.blocked }}
+    steps:
+      - name: Skip while bounded WDC release owns the snapshot
+        id: detect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          active_wdc="$(
+            for release_status in in_progress queued; do
+              curl --fail --silent --show-error --location --retry 2 \
+                --connect-timeout 5 --max-time 30 \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H 'Accept: application/vnd.github+json' \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?status=${release_status}&per_page=100"
+            done | jq -sr '
+              [.[].workflow_runs[] |
+                select(.name == "Sync complete immutable release to WDC") |
+                {id,name,status,head_sha}
+              ] | unique_by(.id)
+            '
+          )"
+          if [ "$(jq -r 'length' <<<"$active_wdc")" -gt 0 ]; then
+            echo 'blocked=true' >> "$GITHUB_OUTPUT"
+            echo "CORE_UPDATE_NOOP reason=active-wdc-release runs=$(jq -c . <<<"$active_wdc")"
+          else
+            echo 'blocked=false' >> "$GITHUB_OUTPUT"
+            echo "CORE_UPDATE_RELEASE_WINDOW_CLEAR"
+          fi
+
   update:
+    needs: release_window
+    if: ${{ needs.release_window.outputs.blocked != 'true' }}
     runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
     timeout-minutes: 240
     env:

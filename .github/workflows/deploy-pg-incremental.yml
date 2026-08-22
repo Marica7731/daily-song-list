@@ -449,8 +449,37 @@ jobs:
       ARTIFACT_NAME: ${{ inputs.artifact_name || '' }}
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id || '' }}
     steps:
+      - name: Detect active bounded WDC release window
+        id: wdc_window
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          active_wdc="$(
+            for release_status in in_progress queued; do
+              curl --fail --silent --show-error --location --retry 2 \
+                --connect-timeout 5 --max-time 30 \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H 'Accept: application/vnd.github+json' \
+                "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?status=${release_status}&per_page=100"
+            done | jq -sr --argjson current_run "$GITHUB_RUN_ID" '
+              [.[].workflow_runs[] |
+                select(.id != $current_run) |
+                select(.name == "Sync complete immutable release to WDC") |
+                {id,name,status,head_sha}
+              ] | unique_by(.id)
+            '
+          )"
+          if [ "$(jq -r 'length' <<<"$active_wdc")" -gt 0 ]; then
+            echo 'blocked=true' >> "$GITHUB_OUTPUT"
+            echo "PG_INCREMENT_NOOP reason=active-wdc-release runs=$(jq -c . <<<"$active_wdc")"
+          else
+            echo 'blocked=false' >> "$GITHUB_OUTPUT"
+            echo "PG_INCREMENT_RELEASE_WINDOW_CLEAR"
+          fi
+
       - name: Download generated accepted increment
-        if: ${{ inputs.artifact_name != '' }}
+        if: ${{ inputs.artifact_name != '' && steps.wdc_window.outputs.blocked != 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.artifact_name }}
@@ -459,11 +488,11 @@ jobs:
           repository: ${{ github.repository }}
           github-token: ${{ github.token }}
       - name: No-op unsuccessful producer workflow_run
-        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
+        if: ${{ steps.wdc_window.outputs.blocked != 'true' && github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
         run: |
           echo "PG_INCREMENT_NOOP owner=workflow_run reason=producer-conclusion-${{ github.event.workflow_run.conclusion || 'missing' }}"
       - name: Build, activate, and observe candidate
-        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+        if: ${{ steps.wdc_window.outputs.blocked != 'true' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') }}
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           VPS2_KNOWN_HOSTS: ${{ secrets.VPS2_KNOWN_HOSTS }}
