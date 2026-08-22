@@ -167,6 +167,11 @@ class FakeSnapshotPageBuilder:
                         for index in range(5)
                     ]}
             record["sourceDetailKey"]=key
+            if view=="artists":
+                record["songs"]=[
+                    {"key":"song-0","name":"Song 0","count":101},
+                    {"key":"song-1","name":"Song 1","count":100},
+                ]
             return {"schemaVersion":1,"rangeId":range_id,"view":view,"metric":metric,
                     "page":page,"pageSize":200,"totalCount":1,"filteredBaseCount":1,
                     "totalOccurrenceCount":201,"totalSongCount":song_count,"totalVideoCount":201,
@@ -2727,10 +2732,32 @@ class Tests(unittest.TestCase):
                 expected_rank=1,
             )
         )
+        self.assertEqual(
+            writer.preflight_artist_ranking_source_owners(range_id="all"),
+            (1, 1),
+        )
         writer.add_source(
             source_key,
             "all",
-            {"type": "artist", "key": "crazyb", "songs": record["songs"]},
+            {
+                "type": "artist",
+                "key": "crazyb",
+                # The delta-materialized source count list is the real
+                # production failure shape: it has reintroduced one legacy
+                # key even though the current ranking owner list has one song.
+                "songs": [
+                    {
+                        "key": "honeycomb summer",
+                        "name": "Honeycomb Summer",
+                        "count": 6,
+                    },
+                    {
+                        "key": "Honeycomb Summer\x1fCrazy:B",
+                        "name": "Honeycomb Summer",
+                        "count": 1,
+                    },
+                ],
+            },
             occurrences,
         )
         for view in ("songs", "videos", "vtubers"):
