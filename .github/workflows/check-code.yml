@@ -311,9 +311,18 @@ jobs:
                 .github/workflows/test-next-serving-v3.yml|\
                 .github/workflows/update-backfill.yml|\
                 .github/workflows/update-core.yml|\
+                deploy/check-wdc-build-storage.py|\
+                deploy/cleanup-wdc-bounded-build.sh|\
                 deploy/daily-song-list-api.service|\
+                deploy/finalize-wdc-bounded-release.sh|\
                 deploy/install-wdc-release.sh|\
                 deploy/nginx-next-api.conf|\
+                deploy/orchestrate-wdc-bounded-release.sh|\
+                deploy/run-wdc-bounded-build.sh|\
+                deploy/start-wdc-pg-tunnel.sh|\
+                deploy/verify-wdc-public-release.py|\
+                deploy/verify-wdc-release-data.py|\
+                deploy/wdc-vps2-askpass.sh|\
                 scripts/migration/7d-json-to-patch.py|\
                 scripts/migration/build-release-bundle.py|\
                 scripts/migration/build-serving-store.py|\
@@ -322,6 +331,7 @@ jobs:
                 scripts/migration/patch-next-frontend.py|\
                 scripts/migration/pg-peer-relay.py|\
                 scripts/migration/prepare-wdc-frontend.py|\
+                scripts/migration/requirements-wdc-linux.txt|\
                 scripts/migration/requirements-wdc-mac.txt|\
                 server/pg_adapter.py|\
                 server/release_serving_server.py)
