@@ -4736,6 +4736,83 @@ class Tests(unittest.TestCase):
                     pg_adapter,"_overlay_candidate_rows",return_value=[candidate],
                 ), patch.object(
                     pg_adapter,"_selected_full_reset_candidate_rows",return_value=(),
+                ), patch.object(
+                    pg_adapter,"_runtime_tombstones",return_value=[],
+                ):
+                    result=(
+                        pg_materializer.preflight_overlay_artist_occurrence_owners(
+                            object(),writer,
+                            overlay_revision_ids=("overlay",),
+                            source_scope=scope,source_keys=(source_key,),
+                        )
+                    )
+            self.assertEqual(result,(1,1))
+        finally:
+            writer.abort()
+
+    def test_snapshot_overlay_artist_occurrence_owner_preflight_applies_runtime_replacement(self):
+        source_key="4e55bbe59fa2793b"
+        video_id="aPsKoVWQs-E"
+        occurrence_id=f"{video_id}:21:3293"
+        owner_name="Butter-Fly"
+        owner_key=pg_adapter._runtime_entity_key(owner_name)
+        target=self.temp/"overlay-artist-owner-replacement-preflight.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        record={
+            "rank":1,"key":"unknown","sourceDetailKey":source_key,
+            "name":"unknown","count":1,"songCount":1,"videoCount":1,
+            "timestampCount":1,
+            "songs":[{"key":owner_key,"name":owner_name,"count":1}],
+            "occurrences":[],
+        }
+        writer.add_artist_ranking_song_owners("all",source_key,record)
+        writer.add_ranking(pg_materializer._ranking_row(
+            record,
+            payload_record=pg_adapter.compact_ranking_payloads(
+                [record],"artists",
+            )[0],
+            range_id="all",view="artists",metric="occurrences",
+            scope_key="all",expected_rank=1,
+        ))
+        writer.preflight_artist_ranking_source_owners(range_id="all")
+        candidate={
+            "revision_id":"accepted_30901883026_1",
+            "video_id":video_id,"occurrence_id":occurrence_id,
+            "position":21,"range_id":"all",
+            "song_key":"8e9501ebdfb186aa4b98134a","seconds":3293,
+            "title":(
+                "Butter-Fly/和田光司 "
+                "https://www.youtube.com/watch?v=emj_7G0y6n8"
+            ),
+            "artist":"","video_title":"Fixture stream",
+            "channel_name":"Fixture","channel_id":"fixture-channel",
+            "video_tombstone":False,
+        }
+        change={
+            "revisionId":"accepted_30977555895_1",
+            "entityType":"occurrences","videoId":video_id,
+            "occurrenceId":occurrence_id,"rangeId":"all",
+            "title":candidate["title"],"artist":"","replacement":True,
+            "replacementPayload":{
+                "videoId":video_id,"occurrenceId":occurrence_id,
+                "position":21,"rangeId":"all","seconds":3293,
+                "title":owner_name,"artist":"",
+            },
+        }
+        try:
+            with closing(sqlite3.connect(":memory:")) as database:
+                scope=pg_materializer.SnapshotSourceScope(database)
+                scope.add_videos((video_id,))
+                scope.add_pairs(((source_key,video_id),))
+                scope.add_targets((("artists","unknown",source_key),))
+                with patch.object(
+                    pg_adapter,"_accepted_video_resets",return_value={},
+                ), patch.object(
+                    pg_adapter,"_overlay_candidate_rows",return_value=[candidate],
+                ), patch.object(
+                    pg_adapter,"_selected_full_reset_candidate_rows",return_value=(),
+                ), patch.object(
+                    pg_adapter,"_runtime_tombstones",return_value=[change],
                 ):
                     result=(
                         pg_materializer.preflight_overlay_artist_occurrence_owners(
