@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T17:17:13.069Z",
+  "generatedAt": "2026-08-22T17:52:54.918Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T17:17:13.069Z",
+    "fetchedAt": "2026-08-22T17:52:54.918Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T17:17:13.069Z",
+    "generatedAt": "2026-08-22T17:52:54.918Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,13 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Mahiru-verykawaii",
+        "channelId": "UCKkuyVYFvDv4Urr3FDruRzA",
+        "displayName": "尾長 真昼 -Onaga Mahiru-",
+        "sourceUrl": "https://www.youtube.com/@Mahiru-verykawaii",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@kashiotoha8669",
         "channelId": "UCYcnLc0n1ryBDZeGWQTVJ_g",
@@ -11842,13 +11849,6 @@
         "channelId": "UC03qR3pGMWsUBUrHn437mAg",
         "displayName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
         "sourceUrl": "https://www.youtube.com/@somana_tsukumo",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@KUGURUKASAYA",
-        "channelId": "UCfpcs6jK285d1TJWFhjej-Q",
-        "displayName": "傘屋くぐる / KUGURU KASAYA",
-        "sourceUrl": "https://www.youtube.com/@KUGURUKASAYA",
         "reason": "batch_limit_reached"
       }
     ]
