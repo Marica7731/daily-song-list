@@ -2931,6 +2931,89 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
+    def test_snapshot_writer_reconciles_artist_owner_with_folded_whitespace(self):
+        target = self.temp / "artist-owner-folded-whitespace.sqlite"
+        writer = pg_materializer.CanonicalSnapshotWriter(target)
+        source_key = "4e55bbe59fa2793b"
+        owner_name = "09≫Butterfly // 倖田來未"
+        owner_key = pg_adapter._runtime_entity_key(owner_name)
+        record = {
+            "rank": 1,
+            "key": "unknown",
+            "sourceDetailKey": source_key,
+            "name": "unknown",
+            "count": 2,
+            "songCount": 1,
+            "videoCount": 1,
+            "timestampCount": 2,
+            "songs": [{"key": owner_key, "name": owner_name, "count": 2}],
+            "occurrences": [],
+        }
+        writer.add_artist_ranking_song_owners("all", source_key, record)
+        writer.add_ranking(
+            pg_materializer._ranking_row(
+                record,
+                payload_record=pg_adapter.compact_ranking_payloads(
+                    [record], "artists",
+                )[0],
+                range_id="all",
+                view="artists",
+                metric="occurrences",
+                scope_key="all",
+                expected_rank=1,
+            )
+        )
+        self.assertEqual(
+            writer.preflight_artist_ranking_source_owners(range_id="all"),
+            (1, 1),
+        )
+        stale_key = "34ae49b3c7f0e35ca2d1ea90"
+        occurrences = [
+            {
+                "videoId": "cAmudvGb0YM",
+                "occurrenceId": f"cAmudvGb0YM:{position}:3737",
+                "song": {
+                    "songKey": stale_key,
+                    "title": title,
+                    "artist": "",
+                },
+            }
+            for position, title in (
+                (10, owner_name),
+                (30, "09≫Butterfly  // 倖田來未"),
+            )
+        ]
+        try:
+            writer.add_source(
+                source_key,
+                "all",
+                {
+                    "type": "artist",
+                    "key": "unknown",
+                    "songs": record["songs"],
+                },
+                occurrences,
+            )
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*),count(DISTINCT canonical_song_key),"
+                    "min(canonical_song_key),min(canonical_song_name) "
+                    "FROM source_occurrences WHERE range_id='all' "
+                    "AND source_key=?",
+                    (source_key,),
+                ).fetchone(),
+                (2, 1, owner_key, owner_name),
+            )
+            raw = json.loads(writer.connection.execute(
+                "SELECT payload_json FROM source_occurrences "
+                "WHERE range_id='all' AND source_key=? AND position=2",
+                (source_key,),
+            ).fetchone()[0])
+            self.assertEqual(raw["song"]["songKey"], stale_key)
+            self.assertEqual(raw["song"]["title"], "09≫Butterfly  // 倖田來未")
+        finally:
+            writer.abort()
+
     def test_snapshot_writer_fails_closed_without_full_artist_owner_table(self):
         target = self.temp / "missing-full-artist-owner.sqlite"
         writer = pg_materializer.CanonicalSnapshotWriter(target)
@@ -4605,6 +4688,65 @@ class Tests(unittest.TestCase):
                         overlay_revision_ids=("overlay",),source_scope=scope,
                         source_keys=(source_key,),
                     )
+
+    def test_snapshot_overlay_artist_occurrence_owner_preflight_covers_whitespace_variant(self):
+        source_key="4e55bbe59fa2793b"
+        video_id="cAmudvGb0YM"
+        owner_name="09≫Butterfly // 倖田來未"
+        owner_key=pg_adapter._runtime_entity_key(owner_name)
+        target=self.temp/"overlay-artist-owner-preflight.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        record={
+            "rank":1,"key":"unknown","sourceDetailKey":source_key,
+            "name":"unknown","count":2,"songCount":1,"videoCount":1,
+            "timestampCount":2,
+            "songs":[{"key":owner_key,"name":owner_name,"count":2}],
+            "occurrences":[],
+        }
+        writer.add_artist_ranking_song_owners("all",source_key,record)
+        writer.add_ranking(pg_materializer._ranking_row(
+            record,
+            payload_record=pg_adapter.compact_ranking_payloads(
+                [record],"artists",
+            )[0],
+            range_id="all",view="artists",metric="occurrences",
+            scope_key="all",expected_rank=1,
+        ))
+        writer.preflight_artist_ranking_source_owners(range_id="all")
+        candidate={
+            "revision_id":"accepted_30903093948_1",
+            "video_id":video_id,
+            "occurrence_id":f"{video_id}:30:3737",
+            "position":30,"range_id":"all",
+            "song_key":"34ae49b3c7f0e35ca2d1ea90",
+            "seconds":3737,"title":"09≫Butterfly  // 倖田來未",
+            "artist":"","video_title":"Fixture stream",
+            "channel_name":"Fixture","channel_id":"fixture-channel",
+            "video_tombstone":False,
+        }
+        try:
+            with closing(sqlite3.connect(":memory:")) as database:
+                scope=pg_materializer.SnapshotSourceScope(database)
+                scope.add_videos((video_id,))
+                scope.add_pairs(((source_key,video_id),))
+                scope.add_targets((("artists","unknown",source_key),))
+                with patch.object(
+                    pg_adapter,"_accepted_video_resets",return_value={},
+                ), patch.object(
+                    pg_adapter,"_overlay_candidate_rows",return_value=[candidate],
+                ), patch.object(
+                    pg_adapter,"_selected_full_reset_candidate_rows",return_value=(),
+                ):
+                    result=(
+                        pg_materializer.preflight_overlay_artist_occurrence_owners(
+                            object(),writer,
+                            overlay_revision_ids=("overlay",),
+                            source_scope=scope,source_keys=(source_key,),
+                        )
+                    )
+            self.assertEqual(result,(1,1))
+        finally:
+            writer.abort()
 
     def test_snapshot_song_source_owner_preflight_covers_full_revision(self):
         persisted_key="0007036316d9dffa"
@@ -6472,6 +6614,9 @@ class Tests(unittest.TestCase):
         def artist_owner_preflight(*_args,**_kwargs):
             phase_order.append("artist-owner-preflight")
             return set()
+        def overlay_artist_owner_preflight(*_args,**_kwargs):
+            phase_order.append("overlay-artist-owner-preflight")
+            return (0,0)
         def unaffected_export(*_args,**_kwargs):
             phase_order.append("unaffected")
             return set()
@@ -6488,6 +6633,10 @@ class Tests(unittest.TestCase):
                           side_effect=song_owner_preflight), \
              patch.object(pg_materializer,"preflight_artist_source_owners",
                           side_effect=artist_owner_preflight), \
+             patch.object(
+                 pg_materializer,"preflight_overlay_artist_occurrence_owners",
+                 side_effect=overlay_artist_owner_preflight,
+             ), \
              patch.object(pg_materializer,"export_unaffected_parent_sources",
                           side_effect=unaffected_export), \
              patch.object(pg_materializer,"SnapshotPageBuilder",GenericBuilder):
@@ -6499,8 +6648,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(bulk_calls[0]),4)
         self.assertEqual(
             phase_order,
-            ["artist-owner-preflight","song-owner-preflight",
-             "preflight","affected","unaffected"],
+            ["artist-owner-preflight","overlay-artist-owner-preflight",
+             "song-owner-preflight","preflight","affected","unaffected"],
         )
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)

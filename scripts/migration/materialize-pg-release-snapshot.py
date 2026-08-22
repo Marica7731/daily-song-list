@@ -18,7 +18,6 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import time
-import unicodedata
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
 import pg_adapter as adapter
@@ -65,9 +64,15 @@ def _text(value: Any) -> str:
 
 
 def _canonical_song_name_key(value: Any) -> str:
-    """Compare display names without treating Unicode/case variants as new songs."""
+    """Use the exact Artist owner identity used by the ranking builder."""
 
-    return unicodedata.normalize("NFKC", _text(value)).casefold()
+    # Artist ``songs[]`` owners are keyed by pg_adapter._runtime_entity_key,
+    # which applies NFKC, case normalization, and whitespace folding.  Source
+    # occurrences may retain older ingestion hashes and raw spelling (for
+    # example one versus two spaces before ``//``), so their name fallback
+    # must use the same identity contract.  The raw occurrence payload is
+    # still written unchanged; only its canonical SQLite columns converge.
+    return adapter._runtime_entity_key(value)
 
 
 def _artist_song_owners(
@@ -4296,6 +4301,140 @@ def preflight_artist_source_owners(
     return persisted
 
 
+def preflight_overlay_artist_occurrence_owners(
+    connection: Any,
+    writer: CanonicalSnapshotWriter,
+    *,
+    overlay_revision_ids: Sequence[str],
+    source_scope: SnapshotSourceScope,
+    source_keys: Iterable[str],
+) -> tuple[int, int]:
+    """Validate every selected overlay Artist tuple before source copying.
+
+    Persisted Artist details are covered by ``preflight_artist_source_owners``.
+    An overlay-only Artist source has no parent detail, however, and used to
+    discover a stale ingestion ``songKey`` only when its source was reached
+    during the multi-hour affected-source copy.  Read the selected overlay
+    rows without JSON payloads, project compatible full resets, and reconcile
+    each tuple against the already-persisted full ranking owner list now.
+    This keeps the gate bounded to the affected video set and leaves raw
+    occurrence payloads untouched.
+    """
+
+    requested = {_text(value) for value in source_keys if _text(value)}
+    revision_ids = tuple(dict.fromkeys(
+        _text(value) for value in overlay_revision_ids if _text(value)
+    ))
+    affected_videos = source_scope.affected_videos()
+    if not requested or not affected_videos:
+        print(
+            "PG_SNAPSHOT_OVERLAY_ARTIST_OCCURRENCE_OWNER_PREFLIGHT "
+            "total=0 validated=0 sources=0",
+            flush=True,
+        )
+        return 0, 0
+    if not revision_ids:
+        raise RuntimeError("overlay Artist occurrence owner preflight lineage is empty")
+    if "all" not in writer.artist_ranking_owner_ranges:
+        raise RuntimeError("overlay Artist occurrence owner preflight lacks ranking owners")
+
+    resets = adapter._accepted_video_resets(
+        connection,
+        revision_ids,
+        include_payload=False,
+        video_scope=affected_videos,
+    )
+    selected = {
+        adapter._overlay_candidate_identity(row): dict(row)
+        for row in adapter._overlay_candidate_rows(
+            connection,
+            revision_ids,
+            include_payload=False,
+            range_id="all",
+            video_scope=affected_videos,
+        )
+    }
+    for row in adapter._selected_full_reset_candidate_rows(
+        connection,
+        revision_ids,
+        resets,
+        "all",
+        include_payload=False,
+    ):
+        selected.setdefault(adapter._overlay_candidate_identity(row), dict(row))
+
+    owner_cache: dict[
+        str,
+        tuple[dict[str, str], dict[str, tuple[str, str] | None], bool],
+    ] = {}
+    validated = 0
+    validated_sources: set[str] = set()
+    for row in sorted(
+        selected.values(),
+        key=lambda value: (
+            _text(value.get("video_id")),
+            int(value.get("position") or 0),
+            _text(value.get("occurrence_id")),
+        ),
+    ):
+        if row.get("video_tombstone") or not _text(row.get("title")):
+            continue
+        artist_group = adapter._overlay_artist_group_norm(
+            row.get("artist")
+        ) or "unknown"
+        targets = source_scope.source_keys_for_group("artists", artist_group)
+        if not targets:
+            continue
+        if len(targets) != 1 or targets[0] not in requested:
+            raise RuntimeError(
+                "overlay Artist occurrence owner target is ambiguous: "
+                + artist_group
+            )
+        source_key = targets[0]
+        owners = owner_cache.get(source_key)
+        if owners is None:
+            (
+                _songs,
+                owners_by_key,
+                owners_by_name,
+                all_keyed,
+            ) = writer._artist_ranking_song_owners(
+                range_id="all",
+                source_key=source_key,
+            )
+            owners = (owners_by_key, owners_by_name, all_keyed)
+            owner_cache[source_key] = owners
+        record = adapter._overlay_source_record(row)
+        if record is None:
+            continue
+        occurrences = adapter._occurrences_for_range(record, "all")
+        if len(occurrences) != 1:
+            raise RuntimeError(
+                "overlay Artist occurrence owner projection changed cardinality: "
+                + source_key
+            )
+        _source_occurrence_row(
+            source_key,
+            "all",
+            1,
+            occurrences[0],
+            entity_type="artist",
+            source_artist_song_owners_by_key=owners[0],
+            source_artist_song_owners_by_name=owners[1],
+            source_artist_songs_are_keyed=owners[2],
+        )
+        validated += 1
+        validated_sources.add(source_key)
+
+    print(
+        "PG_SNAPSHOT_OVERLAY_ARTIST_OCCURRENCE_OWNER_PREFLIGHT "
+        f"total={len(selected)} validated={validated} "
+        f"sources={len(validated_sources)}",
+        flush=True,
+    )
+    return len(selected), validated
+
+
 def preflight_song_source_owners(
     connection: Any,
     *,
@@ -6262,6 +6401,16 @@ def materialize(
                 lambda current: preflight_artist_source_owners(
                     current,
                     parent_revision_id=builder.parent[0],
+                    overlay_revision_ids=builder.overlay_ids,
+                    source_scope=source_scope,
+                    source_keys=source_keys["all"],
+                ),
+            )
+            run_snapshot_operation(
+                "overlay-artist-occurrence-owner-preflight",
+                lambda current: preflight_overlay_artist_occurrence_owners(
+                    current,
+                    writer,
                     overlay_revision_ids=builder.overlay_ids,
                     source_scope=source_scope,
                     source_keys=source_keys["all"],
