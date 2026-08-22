@@ -328,3 +328,11 @@
 - PR `#97` 只新增/更新 `AGENTS.md`、`README.md` 与 `docs/WDC_RELEASE_RUNBOOK.md`，用于固化 WDC 的 32GB 构建卷、2.5GiB 内存、1GiB swap、16GB/2 relay、稀疏源码、唯一 latest-head run、SSH/GitHub 操作和精确 cleanup 交接合同；其 PR CI `32595581848` success，squash merge 为 `4208fcbfb2734497c75131c5a2ca9875a8433002`。
 - main push Check code run `32595673008` 精确失败边界为 `CODEX_NODE_TESTS_SELECTED count=1 first=docs/WDC_RELEASE_RUNBOOK.md`；随后执行与该 Markdown 文档无关的根 Node 套件，结果 `723 pass / 81 fail / 2 skipped`。这是路径路由误判，不是 WDC 数据、发布代码或公网回归。
 - 最小修复仅将精确路径 `docs/WDC_RELEASE_RUNBOOK.md` 加入 next-serving/WDC-owned 排除清单；不排除其他 `docs/*`，真正影响根 Node/前端/通用迁移输入的变更仍执行完整 Node 套件。回归同时要求精确路径存在且禁止宽泛 `docs/*`。完成 targeted/full/relay/YAML/shell/diff、PR/CI/squash merge并由 main push 日志证明 `CODEX_NODE_TESTS_SKIPPED reason=no-node-input-changes` 后，才允许唯一 latest-head WDC。
+
+### 2026-08-23 05:28 Asia/Taipei — WDC overlay Artist occurrence owner 前置门禁
+
+- unique latest-head WDC run `32596661131`（head `13328b64982122d810b5f1144b2d7bb0ddb2e778`）已完成 7d/all 四类排名、7d authoritative sources、完整 Artist/Song owner 与 affected-source 前置门禁，并进入 affected-parent source `6000/21018`；随后精确失败于 `all/4e55bbe59fa2793b`：raw title `09≫Butterfly  // 倖田來未`、legacy ingestion `songKey=34ae49b3c7f0e35ca2d1ea90` 无法映射到当前 Artist ranking owner。
+- 只读 PostgreSQL 核验定位到 `accepted_30232192378_1` / video `cAmudvGb0YM`：相同 occurrence 有单空格与双空格标题，artist 为空，raw payload 与 scalar 都保留旧 ingestion key；生产 canonical 内容未删除或修改。Artist ranking owner 使用 `normalizeEntityKey`（NFKC、大小写与内部空白折叠），而 source 的名称回退只做 NFKC/casefold，导致双空格变体绕过同一 owner；这不是磁盘、内存或网络失败。
+- 失败 run 的资源硬门禁均真实生效：source checkout `1,742,752` bytes 且无 `.git`，固定卷 `32,000,000,000` bytes，cgroup MemoryMax `2,684,354,560`、swap max `1,073,741,824`、实际 swap `0`，relay `16GB/2` 上限；未 OOM、未 bundle/deploy、WDC 未写入。Actions cleanup success，固定卷/exact root/relay 均 absent/inactive。
+- 最小修复让 source name fallback 复用 ranking 的同一 `normalizeEntityKey`，只修 canonical SQLite key/name，raw occurrence JSON 保持原样；新增无 payload 的全 affected-video overlay Artist occurrence owner 前置门禁，在任何 source copy 前用完整 ranking owner 表验证每条被选 occurrence。精确生产形态回归覆盖同一 legacy key 下单/双空格标题，并锁定原始 payload 不变；完成全量测试、PR/CI/squash merge后只运行唯一 latest-head WDC。
+- 验证已完成：精确回归 `3/3`、完整 next-serving `218/218`、relay `13/13`、Python compile、`git diff --check`、7 份 workflow YAML 与其中 59 个 shell block 均通过；提交严格只包含物化器、回归测试和本失败账本。
