@@ -7737,6 +7737,16 @@ esac
             "CORE_SOURCE_CHECKOUT_BYTES",
             "CORE_SOURCE_CHECKOUT_LIMIT_EXCEEDED",
             "source_git_bytes < 5000000000",
+            "Recover controlled core checkout after transport interruption",
+            "steps.core_checkout.outcome == 'failure'",
+            "for attempt in 1 2 3; do",
+            "Transferred a partial file",
+            "unexpected disconnect",
+            "early EOF",
+            "CORE_CHECKOUT_TRANSPORT_RETRY",
+            "CORE_CHECKOUT_TRANSPORT_RECOVERED",
+            "CORE_CHECKOUT_NON_TRANSPORT_FAILURE",
+            "CORE_TRANSIENT_CLEANUP_SKIPPED reason=no-complete-checkout",
         ):
             self.assertIn(required,workflow)
         self.assertLess(
@@ -7745,12 +7755,92 @@ esac
         )
         self.assertLess(
             workflow.index("Checkout controlled core inputs"),
+            workflow.index("Recover controlled core checkout after transport interruption"),
+        )
+        self.assertLess(
+            workflow.index("Recover controlled core checkout after transport interruption"),
             workflow.index("Validate bounded isolated core checkout"),
         )
         self.assertLess(
             workflow.index("CORE_SOURCE_CHECKOUT_BYTES"),
             workflow.index("Configure Mac toolchain"),
         )
+
+    def test_core_workflow_resumes_only_checkout_transport_failures(self):
+        workflow=(ROOT/".github"/"workflows"/"update-core.yml").read_text(encoding="utf-8")
+        recovery_name="      - name: Recover controlled core checkout after transport interruption\n"
+        start=workflow.index(recovery_name)
+        run_start=workflow.index("        run: |\n",start)+len("        run: |\n")
+        end=workflow.index("\n      - name: Validate bounded isolated core checkout",run_start)
+        recovery="\n".join(
+            line[10:] if line.startswith("          ") else line
+            for line in workflow[run_start:end].splitlines()
+        )+"\n"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp=Path(temp_dir)
+            workspace=temp/"workspace"
+            source=workspace/"core-update-source"
+            source.mkdir(parents=True)
+            (source/".git").mkdir()
+            (workspace/".core-update-source-owned").write_text(
+                "daily-song-list-core-source-v1\n",encoding="utf-8"
+            )
+            fake_bin=temp/"bin"
+            fake_bin.mkdir()
+            fake_git=fake_bin/"git"
+            fake_git.write_text(
+                """#!/usr/bin/env bash
+set -eu
+case "$1" in
+  show-ref) exit 0 ;;
+  checkout)
+    count=0
+    [[ ! -f "$FAKE_GIT_STATE" ]] || count="$(cat "$FAKE_GIT_STATE")"
+    count=$(( count + 1 ))
+    printf '%s\n' "$count" > "$FAKE_GIT_STATE"
+    if [[ "${FAKE_GIT_MODE:-transport}" == transport && "$count" == 1 ]]; then
+      echo 'error: RPC failed; curl 18 Transferred a partial file' >&2
+      echo 'fatal: early EOF' >&2
+      exit 128
+    fi
+    if [[ "${FAKE_GIT_MODE:-transport}" == nontransport ]]; then
+      echo 'fatal: reference is not a tree: missing-object' >&2
+      exit 128
+    fi
+    exit 0
+    ;;
+  *) exit 91 ;;
+esac
+""",
+                encoding="utf-8",
+            )
+            fake_git.chmod(0o755)
+            state=temp/"git-state"
+            env=os.environ.copy()
+            env.update({
+                "PATH":f"{fake_bin}{os.pathsep}{env['PATH']}",
+                "GITHUB_WORKSPACE":str(workspace),
+                "CORE_SOURCE_ROOT":str(source),
+                "RUNNER_TEMP":str(temp),
+                "GITHUB_SHA":"a"*40,
+                "FAKE_GIT_STATE":str(state),
+            })
+            recovered=subprocess.run(
+                ["bash"],input=recovery,env=env,capture_output=True,text=True
+            )
+            self.assertEqual(recovered.returncode,0,recovered.stderr)
+            self.assertEqual(state.read_text(encoding="utf-8").strip(),"2")
+            self.assertIn("CORE_CHECKOUT_TRANSPORT_RETRY attempt=1 status=128",recovered.stderr)
+            self.assertIn("CORE_CHECKOUT_TRANSPORT_RECOVERED attempt=2",recovered.stdout)
+            state.unlink()
+            env["FAKE_GIT_MODE"]="nontransport"
+            rejected=subprocess.run(
+                ["bash"],input=recovery,env=env,capture_output=True,text=True
+            )
+            self.assertEqual(rejected.returncode,128,rejected.stderr)
+            self.assertEqual(state.read_text(encoding="utf-8").strip(),"1")
+            self.assertIn("CORE_CHECKOUT_NON_TRANSPORT_FAILURE attempt=1 status=128",rejected.stderr)
+            self.assertNotIn("CORE_CHECKOUT_TRANSPORT_RETRY",rejected.stderr)
 
     def test_backfill_workflow_uses_bounded_isolated_mac_checkout(self):
         workflow=(ROOT/".github"/"workflows"/"update-backfill.yml").read_text(encoding="utf-8")
