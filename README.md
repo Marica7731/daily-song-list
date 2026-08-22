@@ -32,6 +32,10 @@ WDC production has a project-specific hard ceiling of **40 GB = 40,000,000,000 b
 
 The authoritative agent instructions are in [`AGENTS.md`](AGENTS.md). Capacity uncertainty always fails closed and leaves production unchanged.
 
+Canonical song entities are not the same population as raw or historical occurrences, source rows, video rows, or revisions. A canonical count in the tens of thousands is therefore not evidence that the larger history was deleted. Release cleanup never authorizes changes to canonical PostgreSQL or production song data.
+
+Operators and future controllers must use [`docs/WDC_RELEASE_RUNBOOK.md`](docs/WDC_RELEASE_RUNBOOK.md) for the audited state machine, SSH and GitHub commands, marker interpretation, public/browser acceptance, and exact cross-platform cleanup rules.
+
 ## UI Screenshots
 
 These committed screenshots are the repository homepage proof set for the current UI. Refresh them whenever a UI-facing change is shipped or when the deployed page needs to show the latest layout:
