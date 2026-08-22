@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-08-22T09:46:30.958Z",
+  "generatedAt": "2026-08-22T10:41:39.345Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-08-22T09:46:30.958Z",
+    "fetchedAt": "2026-08-22T10:41:39.345Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -11649,7 +11649,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-08-22T09:46:30.958Z",
+    "generatedAt": "2026-08-22T10:41:39.345Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -11676,6 +11676,27 @@
       "missing_channel_url_or_handle": 19
     },
     "skippedSamples": [
+      {
+        "handle": "/@Coco_Jester",
+        "channelId": "UCuDfldiO-ujdFC-36eYMl2g",
+        "displayName": "ここ・じぇす汰 / Coco･Jester【ななしいんく】",
+        "sourceUrl": "https://www.youtube.com/@Coco_Jester",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@anyakumori",
+        "channelId": "UCHnbtVLZYGuKkGh6iFxxTpw",
+        "displayName": "杏夜 くもり - Anya Kumori -",
+        "sourceUrl": "https://www.youtube.com/@anyakumori",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E4%B8%89%E3%83%84%E6%98%9F%E3%83%AB%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93",
+        "channelId": "UCwS7xvdBtL3P2V4-Su_fwhA",
+        "displayName": "歌う 三ツ星ルナちゃん",
+        "sourceUrl": "https://www.youtube.com/@%E4%B8%89%E3%83%84%E6%98%9F%E3%83%AB%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "/@itsukinatsume",
         "channelId": "UCXN-ZRdGnFtLiJ8EY1i_alg",
@@ -11828,27 +11849,6 @@
         "channelId": "UCt5-0i4AVHXaWJrL8Wql3mw",
         "displayName": "緑仙 / Ryushen",
         "sourceUrl": "https://www.youtube.com/channel/UCt5-0i4AVHXaWJrL8Wql3mw",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@neru_utano",
-        "channelId": "UCYsZcucFXXwtAaWNvjIkZaA",
-        "displayName": "歌野ねる / Utano neru",
-        "sourceUrl": "https://www.youtube.com/@neru_utano",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Unifee_koyoi",
-        "channelId": "UC7GlwpI06mf8wQflsW7frTw",
-        "displayName": "風魔小宵 / Fuuma Koyoi",
-        "sourceUrl": "https://www.youtube.com/@Unifee_koyoi",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@hituzino_mery",
-        "channelId": "UC8-eGfSMfbQ-ILxIvKn55qw",
-        "displayName": "羊野メリー",
-        "sourceUrl": "https://www.youtube.com/@hituzino_mery",
         "reason": "batch_limit_reached"
       }
     ]
