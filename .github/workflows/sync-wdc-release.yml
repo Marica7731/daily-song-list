@@ -43,6 +43,7 @@ jobs:
       - name: Bind latest stable release window
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          QUEUED_LEASE_MAX_AGE_SECONDS: "3600"
         run: |
           set -Eeuo pipefail
           api_headers=(-H "Authorization: Bearer $GITHUB_TOKEN" -H 'Accept: application/vnd.github+json')
@@ -68,10 +69,16 @@ jobs:
                        .name == "Prepare backfill inbox bundle" or
                        .name == "Prepare PostgreSQL accepted increment handoff" or
                        .name == "Deploy PostgreSQL accepted increment") |
-                {id,name,status,head_sha}
+                {id,name,status,head_sha,created_at}
               ] | unique_by(.id)
             '
           )"
+          active_writers="$(jq -c --argjson max_age "$QUEUED_LEASE_MAX_AGE_SECONDS" '
+            [.[] | select(
+              .status == "in_progress" or
+              (.status == "queued" and (now - (.created_at | fromdateiso8601)) <= $max_age)
+            )]
+          ' <<<"$active_writers")"
           if [ "$(jq -r 'length' <<<"$active_writers")" -gt 0 ]; then
             echo "WDC_RELEASE_WINDOW_BLOCKED reason=active-writer runs=$(jq -c . <<<"$active_writers")"
             exit 75
