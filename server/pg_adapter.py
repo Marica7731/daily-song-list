@@ -8803,9 +8803,16 @@ def _authoritative_artist_summary_rows(
 
     range_id = _text(options.get("range")) or "all"
     snapshot_compact_cards = bool(options.get("_snapshotCompactCards"))
+    snapshot_preserve_artist_owner_songs = bool(
+        options.get("_snapshotPreserveArtistOwnerSongs")
+    )
     snapshot_song_search_max_chars = int(
         options.get("_snapshotSongSearchMaxChars") or 0
     )
+    if snapshot_preserve_artist_owner_songs and not snapshot_compact_cards:
+        raise PostgresAdapterError(
+            "snapshot Artist owner preservation requires compact cards"
+        )
     if snapshot_compact_cards and not (
         1 <= snapshot_song_search_max_chars <= 1_048_576
     ):
@@ -9502,7 +9509,8 @@ def _authoritative_artist_summary_rows(
                 fragments.append(fragment)
                 remaining -= len(fragment) + 1
             snapshot_song_search_text = " ".join(fragments)
-            public_songs = songs[:COMPACT_VTUBER_PREVIEW_LIMIT]
+            if not snapshot_preserve_artist_owner_songs:
+                public_songs = songs[:COMPACT_VTUBER_PREVIEW_LIMIT]
         previews: list[dict[str, Any]] = []
         for item in artist_additions:
             group = _overlay_candidate_groups((item["row"],), "artists")

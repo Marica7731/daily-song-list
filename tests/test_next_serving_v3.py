@@ -5652,6 +5652,73 @@ class Tests(unittest.TestCase):
         compact=pg_adapter.compact_ranking_card(payload,"artists")
         self.assertNotIn("_snapshotSongSearchText",compact)
 
+    def test_snapshot_authoritative_artist_exposes_full_owners_before_compaction(self):
+        artist_key="full-owner-artist";source_key="6653c1838b14e4a3"
+        songs=[
+            {"key":f"canonical song {index:03d}",
+             "name":f"Canonical Song {index:03d}","count":1}
+            for index in range(285)
+        ]
+        detail={
+            "type":"artist","key":artist_key,"name":"Full Owner Artist",
+            "count":285,"occurrenceCount":285,"timestampCount":285,
+            "songCount":285,"videoCount":285,"songs":songs,
+            "sourceDetailKey":source_key,
+        }
+        rows=[
+            [{"artist_key":artist_key,"source_key":source_key,
+              "entity_key":artist_key,"payload_json":detail,
+              "songs_is_array":True,"song_array_count":285,
+              "distinct_song_key_count":285,"song_occurrence_count":285,
+              "invalid_song_count":0}],
+            [{"source_key":source_key,"occurrence_count":285,
+              "video_count":285}],
+        ]
+        options=pg_adapter._query_options({
+            "range":"all","view":"artists","metric":"count",
+            "page":"1","pageSize":"30",
+        })
+        options["_snapshotCompactCards"]=True
+        options["_snapshotSongSearchMaxChars"]=4096
+        options["_snapshotPreserveArtistOwnerSongs"]=True
+        with patch.object(pg_adapter,"_rows",side_effect=rows):
+            actual=pg_adapter._authoritative_artist_summary_rows(
+                object(),"parent",{artist_key},{artist_key:source_key},
+                {artist_key:"Full Owner Artist"},
+                {"full owner artist":artist_key},(),(),(),(),options,
+            )
+        payload=actual[artist_key]["payload_json"]
+        self.assertEqual(len(payload["songs"]),285)
+        self.assertEqual(payload["songs"],songs)
+        compact=pg_adapter.compact_ranking_card(payload,"artists")
+        self.assertEqual(compact["songCount"],285)
+        self.assertEqual(compact["songs"],songs[:3])
+
+    def test_snapshot_page_builder_requests_full_all_artist_owners(self):
+        builder=object.__new__(pg_materializer.SnapshotPageBuilder)
+        builder.connection=object()
+        builder.generic_runtime=("active",{})
+        builder.parent=("parent",{})
+        builder.overlay_ids=()
+        builder.reconciliation_counts={}
+        builder.snapshot_reset_changes={}
+        builder.snapshot_original_group_counts={}
+        builder.snapshot_vtuber_source_totals={}
+        builder.snapshot_artist_aliases={}
+        builder.snapshot_artist_source_totals={}
+        captured={}
+
+        def prepare(_connection,_revision_id,_parent,options,**_kwargs):
+            captured.update(options)
+            return {}
+
+        with patch.object(
+            pg_adapter,"_prepare_generic_overlay_rankings",side_effect=prepare,
+        ):
+            builder.build_combo("all","artists","occurrences","all")
+        self.assertTrue(captured["_snapshotCompactCards"])
+        self.assertTrue(captured["_snapshotPreserveArtistOwnerSongs"])
+
     def test_authoritative_artist_summary_uses_unique_source_only_preimage(self):
         artist_key="artist";source_key="source-artist"
         detail={

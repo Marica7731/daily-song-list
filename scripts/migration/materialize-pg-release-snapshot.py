@@ -5682,6 +5682,15 @@ class SnapshotPageBuilder:
         options["_snapshotCompactCards"] = True
         options["_snapshotSongSearchMaxChars"] = MAX_RANKING_SEARCH_CHARS
         options["_snapshotBulkHydrateCards"] = True
+        # The public Artist card remains a three-song preview, but the
+        # snapshot writer must see every canonical song owner before that
+        # projection so source details can be checked and normalized against
+        # the complete immutable ranking identity.  Artist owner cardinality
+        # is bounded (about 21k rows in the current all-range snapshot), so
+        # retaining it only for this one offline page walk stays within the
+        # fixed WDC cgroup while avoiding a second PostgreSQL traversal.
+        if range_id == "all" and view == "artists":
+            options["_snapshotPreserveArtistOwnerSongs"] = True
         prepared = adapter._prepare_generic_overlay_rankings(
             self.connection,
             revision_id,
