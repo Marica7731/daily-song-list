@@ -352,3 +352,12 @@
 - 最小修复只收紧 Song 类视图（`songs`、`songIndex`、`vsingerSongs`）的不变量：一个正数 canonical 卡的 `songCount` 恒为 `1`，既覆盖新卡/既有卡 delta，也覆盖 streamed affected reconciliation；Artist/VTuber/video 仍按不同 canonical song identity 计数。raw occurrence payload、canonical PostgreSQL、source writer 和 cardinality gate 均不修改、不放宽。
 - 失败 run 的受限资源合同真实生效：固定 image `32,000,000,000` bytes，实际占用峰值约 `3.21GB`，MemoryMax `2,684,354,560`、swap peak `0`、OOM/kill `0`，relay wire 约 `1.48GB / 16GB` 且最多 2 connections；Mac/Windows 不在数据链路。Actions exact cleanup success，WDC 项目回到 `7,611,437,438` bytes、可用约 `79.4GB`，build/guard/tunnel 与 VPS2 relay 均 inactive，生产 release 未写入。
 - 验证已完成：精确生产形态回归 `4/4`、完整 next-serving `227/227`、relay/storage/release contract `13/13`、Python compile、`git diff --check`、7 份 workflow YAML 与其中 59 个 shell block 均通过。PR/CI/squash merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。
+
+### 2026-08-23 13:08 Asia/Taipei — VTuber 同视频 replacement 不得从来源丢失
+
+- unique latest-head WDC run `32617382575`（head `abaffff6408c38a46e397b3c4f92732b1d60f1d2`）在全量排名、7d sources 及 Artist/Song/affected-source 前置门禁通过后，于首个 affected-parent source checkpoint fail closed：`all/vtubers/02a4448308f0bbdf ranking=(56,53,2,56) source=(55,52,2,55)`。未进入 bundle/deploy，生产 release 未写入。
+- 只读 PostgreSQL 证据确认父 source `戌峯 ひぐれ` 有 56 条；唯一变化是 `accepted_30745527918_1` 对 video `M4iBwhm_hRI`、occurrence `ffca0d2f8e3f1d0b5aa3fd75` 的同视频 `replace_entry`，标题从 `⭐逆光（ウタfrom ONE PIECE FILM RED）` 改为 `逆光`。replacement 保留精确 video/occurrence identity，但不重复携带 channelId/handle/name；它不是删除。
+- 根因是来源物化先按精确 identity 删除父 tuple，随后又要求 replacement payload 单独证明 VTuber channel owner，因 channel 字段缺失而静默跳过回填。排名路径使用父视频身份，故仍为正确的 `56/53/2/56`；cardinality gate 正确，不放宽。
+- 最小修复只对唯一匹配、`replacementSameVideo=true` 的 VTuber occurrence 使用精确父 source preimage：保留父 video/channel authority，原位更新公开 occurrence；replacement 显式给出冲突 channel identity、缺 title 或改变 video/occurrence identity 时继续 fail closed。raw payload 与 canonical PostgreSQL 均不修改。
+- 全 revision 早期门禁复用最终 affected/unaffected source exporter 和 durable checkpoint，先物化所有 all-range VTuber sources，再进入其他 source copy；后续通用阶段跳过已完成 key，不新增第二套算法或磁盘副本。失败 run 的 32GB image、2.5GiB/1GiB cgroup、16GB/2 relay 与 exact cleanup 均生效；WDC 项目恢复约 `7.61GB`、VPS2 relay inactive。
+- 验证已完成：精确 replacement 与冲突 owner 回归 `2/2`、完整 next-serving `229/229`、relay/storage/release contract `13/13`、Python compile、`git diff --check`、7 份 workflow YAML 与其中 59 个 shell block 均通过。PR/CI/squash merge及唯一 latest-head WDC 重跑仍待完成，交付未完成。

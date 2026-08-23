@@ -511,6 +511,18 @@ class SnapshotSourceScope:
             )
         )
 
+    def source_keys_for_view(self, view: str) -> tuple[str, ...]:
+        """Return every exact source key owned by one ranking view."""
+
+        return tuple(
+            str(row[0])
+            for row in self.connection.execute(
+                "SELECT DISTINCT source_key FROM source_scope_targets "
+                "WHERE view=? ORDER BY source_key",
+                (_text(view),),
+            )
+        )
+
     def affected_videos(self) -> tuple[str, ...]:
         return tuple(
             str(row[0])
@@ -6584,6 +6596,64 @@ def materialize(
                         source_keys=affected_parent_sources,
                     ),
                 )
+            # Materialize the complete all-range VTuber source revision before
+            # any non-VTuber source copy. This deliberately reuses the final
+            # affected/unaffected exporters and their cardinality gate rather
+            # than inventing a second scalar check. Durable source checkpoints
+            # make the later generic passes skip these exact keys.
+            vtuber_source_keys = set(
+                source_scope.source_keys_for_view("vtubers")
+            ) & source_keys["all"]
+            vtuber_affected = vtuber_source_keys & set(affected_parent_sources)
+            vtuber_unaffected = vtuber_source_keys - vtuber_affected
+            exported_vtuber_affected = (
+                run_snapshot_operation(
+                    "vtuber-affected-source-preflight",
+                    lambda current: export_affected_parent_sources(
+                        current,
+                        writer,
+                        parent_revision_id=builder.parent[0],
+                        overlay_revision_ids=builder.overlay_ids,
+                        source_scope=source_scope,
+                        source_keys=vtuber_affected,
+                    ),
+                )
+                if vtuber_affected else set()
+            )
+            exported_vtuber_unaffected = (
+                run_snapshot_operation(
+                    "vtuber-parent-source-preflight",
+                    lambda current: export_unaffected_parent_sources(
+                        current,
+                        writer,
+                        parent_revision_id=builder.parent[0],
+                        source_keys=vtuber_unaffected,
+                        affected_source_keys=(),
+                    ),
+                )
+                if vtuber_unaffected else set()
+            )
+            if (
+                exported_vtuber_affected != vtuber_affected
+                or exported_vtuber_unaffected != vtuber_unaffected
+            ):
+                raise RuntimeError(
+                    "VTuber source preflight changed the exact revision key set"
+                )
+            bulk_exported_source_keys["all"].update(
+                exported_vtuber_affected | exported_vtuber_unaffected
+            )
+            print(
+                "PG_SNAPSHOT_VTUBER_SOURCE_PREFLIGHT "
+                f"total={len(vtuber_source_keys)} "
+                f"affected={len(vtuber_affected)} "
+                f"persisted={len(vtuber_unaffected)}",
+                flush=True,
+            )
+            remaining_affected_parent_sources = (
+                set(affected_parent_sources) - exported_vtuber_affected
+            )
+            if remaining_affected_parent_sources:
                 exported_affected = run_snapshot_operation(
                     "affected-parent-sources",
                     lambda current: export_affected_parent_sources(
@@ -6592,10 +6662,10 @@ def materialize(
                         parent_revision_id=builder.parent[0],
                         overlay_revision_ids=builder.overlay_ids,
                         source_scope=source_scope,
-                        source_keys=affected_parent_sources,
+                        source_keys=remaining_affected_parent_sources,
                     ),
                 )
-                if exported_affected != set(affected_parent_sources):
+                if exported_affected != remaining_affected_parent_sources:
                     raise RuntimeError(
                         "affected source early export changed requested keys"
                     )
@@ -6620,7 +6690,10 @@ def materialize(
                     current,
                     writer,
                     parent_revision_id=builder.parent[0],
-                    source_keys=source_keys["all"],
+                    source_keys=(
+                        source_keys["all"]
+                        - bulk_exported_source_keys["all"]
+                    ),
                     affected_source_keys=affected_parent_sources,
                 ),
             )

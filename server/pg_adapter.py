@@ -17098,6 +17098,7 @@ def _snapshot_materialized_source_payload(
         if record:
             insert_record(record)
 
+    vtuber_replacements_applied_in_place: set[tuple[str, str]] = set()
     for change in runtime_changes:
         entity_type = _text(
             change.get("entityType") or change.get("entity_type")
@@ -17171,9 +17172,82 @@ def _snapshot_materialized_source_payload(
                 "source occurrence preimage does not uniquely match authority"
             )
         if len(matches) == 1:
+            # A same-video VTuber replacement remains a member of the exact
+            # persisted channel source even when the curation payload omits
+            # denormalised channel fields.  Ranking already binds this change
+            # to the immutable parent video; doing a generic delete followed
+            # by a standalone replacement match here could silently drop the
+            # tuple because the replacement alone cannot prove channel
+            # ownership.  Apply only the public occurrence delta in place and
+            # retain the exact parent video's authoritative channel identity.
+            if (
+                source_type == "vtuber"
+                and bool(change.get("replacement"))
+                and bool(change.get("replacementSameVideo"))
+            ):
+                replacement = change.get("replacementPayload")
+                replacement_occurrence = (
+                    _overlay_public_occurrence(replacement)
+                    if isinstance(replacement, Mapping) else {}
+                )
+                replacement_identity = (
+                    _text(replacement_occurrence.get("videoId")),
+                    _text(replacement_occurrence.get("occurrenceId")),
+                )
+                if (
+                    replacement_identity != (video_id, occurrence_id)
+                    or not _text(replacement_occurrence.get("title"))
+                ):
+                    raise PostgresAdapterError(
+                        "same-video VTuber replacement has invalid immutable identity"
+                    )
+                current = effective[matches[0]]
+                current_occurrences = current.get("occurrences") or ()
+                if (
+                    len(current_occurrences) != 1
+                    or not isinstance(current_occurrences[0], Mapping)
+                ):
+                    raise PostgresAdapterError(
+                        "same-video VTuber replacement preimage is not one occurrence"
+                    )
+                current_video = dict(current.get("video") or {})
+                if not matches_target(current_video):
+                    raise PostgresAdapterError(
+                        "same-video VTuber replacement disagrees with source owner"
+                    )
+                replacement_video = _overlay_video_projection(
+                    change.get("replacementVideoPayload") or replacement
+                )
+                for public_name, normalizer in (
+                    ("channelId", _text),
+                    ("channelHandle", _normalized_channel_handle),
+                    ("channelName", _overlay_norm),
+                ):
+                    explicit = normalizer(replacement_video.get(public_name))
+                    if not explicit:
+                        continue
+                    authoritative = normalizer(current_video.get(public_name))
+                    if not authoritative or explicit != authoritative:
+                        raise PostgresAdapterError(
+                            "same-video VTuber replacement conflicts with source owner"
+                        )
+                updated_occurrence = dict(current_occurrences[0])
+                updated_occurrence.update(replacement_occurrence)
+                effective[matches[0]] = {
+                    "video": current_video,
+                    "occurrences": (updated_occurrence,),
+                }
+                vtuber_replacements_applied_in_place.add(replacement_identity)
+                continue
             effective.pop(matches[0])
 
     for row in _runtime_replacement_candidate_rows(runtime_changes):
+        if (
+            source_type == "vtuber"
+            and (row_video_id(row), _text(row.get("occurrence_id")))
+                in vtuber_replacements_applied_in_place
+        ):
+            continue
         if not matches_target(row):
             continue
         record = _overlay_source_record(row)
