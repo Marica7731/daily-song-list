@@ -10680,21 +10680,7 @@ def _vtuber_owned_overlay_changes(
 
     owned: list[Mapping[str, Any]] = []
     for change in changes:
-        entity_type = _text(
-            change.get("entityType") or change.get("entity_type")
-        )
-        parent_exists = change.get("_parentRuntimeOccurrenceExists")
-        owner_was_explicit = change.get("_runtimeOccurrenceOwnerWasExplicit")
-        for marker in (parent_exists, owner_was_explicit):
-            if marker is not None and not isinstance(marker, bool):
-                raise PostgresAdapterError(
-                    "VTuber parent occurrence coverage marker is invalid"
-                )
-        if (
-            entity_type in {"occurrences", "runtime_occurrences"}
-            and parent_exists is False
-            and owner_was_explicit is False
-        ):
+        if not _runtime_occurrence_has_immutable_old_side(change):
             # A later video-level repair may infer which channel owns this
             # video, but it cannot prove that a historical occurrence ever
             # existed in the immutable full-runtime parent.  Do not turn that
@@ -10709,6 +10695,37 @@ def _vtuber_owned_overlay_changes(
         ):
             owned.append(change)
     return tuple(owned)
+
+
+def _runtime_occurrence_has_immutable_old_side(
+    change: Mapping[str, Any],
+) -> bool:
+    """Return whether an occurrence change may subtract a parent tuple.
+
+    ``_enrich_runtime_parent_group_keys`` records exact parent coverage before
+    any later video-level VTuber owner inference.  A change absent from that
+    parent and lacking an originally explicit owner is overlay-only: it may
+    still contribute an independently validated replacement, but it is never
+    permission to remove a persisted source occurrence.  Missing markers are
+    retained for legacy callers and must still pass their normal strict
+    identity checks.
+    """
+
+    entity_type = _text(
+        change.get("entityType") or change.get("entity_type")
+    )
+    if entity_type not in {"occurrences", "runtime_occurrences"}:
+        return True
+    parent_exists = change.get("_parentRuntimeOccurrenceExists")
+    owner_was_explicit = change.get("_runtimeOccurrenceOwnerWasExplicit")
+    for marker in (parent_exists, owner_was_explicit):
+        if marker is not None and not isinstance(marker, bool):
+            raise PostgresAdapterError(
+                "VTuber parent occurrence coverage marker is invalid"
+            )
+    return not (
+        parent_exists is False and owner_was_explicit is False
+    )
 
 
 def _bounded_parent_vtuber_video_owners(
@@ -10928,6 +10945,89 @@ def _bind_direct_vtuber_parent_owners(
             change["parentVtuberChannelHandle"] = parent_handle
         if parent_name:
             change["parentVtuberChannelName"] = parent_name
+
+        # A same-video replacement may omit denormalised channel fields even
+        # though this exact video has one unique persisted VTuber source
+        # owner.  Ranking used to drop that replacement in strict mode while
+        # source detail retained it in place, creating 73 production-only
+        # cardinality differences.  The owner lookup above proves only the
+        # immutable video/channel tuple; it never proves an occurrence old
+        # side.  Bind that tuple to the replacement without altering its raw
+        # occurrence payload.  Cross-video replacements and any conflicting
+        # identity remain fail closed.
+        replacement = _json_object(change.get("replacementPayload"))
+        replacement_video_id = _text(
+            replacement.get("videoId") or replacement.get("video_id")
+        )
+        if not (
+            bool(change.get("replacement"))
+            and bool(change.get("replacementSameVideo"))
+            and replacement_video_id == video_id
+        ):
+            continue
+        parent_ids, parent_handles, _parent_names = _vtuber_owner_alias_sets(
+            owner, persisted=True,
+        )
+        if len(parent_ids) != 1:
+            continue
+        parent_channel_id = next(iter(parent_ids))
+        old_payload = _json_object(change.get("videoPayload"))
+        replacement_video = _json_object(change.get("replacementVideoPayload"))
+        explicit_video_ids = {
+            _text(value)
+            for value in (
+                change.get("videoId"), change.get("video_id"),
+                old_payload.get("videoId"), old_payload.get("video_id"),
+                replacement.get("videoId"), replacement.get("video_id"),
+                replacement_video.get("videoId"),
+                replacement_video.get("video_id"),
+            )
+            if _text(value)
+        }
+        explicit_channel_ids = {
+            _text(value)
+            for value in (
+                change.get("channelId"), change.get("channel_id"),
+                old_payload.get("channelId"), old_payload.get("channel_id"),
+                replacement.get("channelId"), replacement.get("channel_id"),
+                replacement_video.get("channelId"),
+                replacement_video.get("channel_id"),
+            )
+            if _text(value)
+        }
+        if explicit_video_ids != {video_id} or (
+            explicit_channel_ids
+            and explicit_channel_ids != {parent_channel_id}
+        ):
+            raise PostgresAdapterError(
+                "VTuber same-video replacement conflicts with source owner"
+            )
+        parent_handle = (
+            next(iter(parent_handles)) if len(parent_handles) == 1 else ""
+        )
+        parent_url = _canonical_channel_url(
+            parent_channel_id, parent_handle,
+        )
+        immutable_video = {
+            "videoId": video_id,
+            "channelId": parent_channel_id,
+            "channelHandle": parent_handle,
+            "channelUrl": parent_url,
+        }
+        if parent_name:
+            immutable_video["channelName"] = parent_name
+        for key, value in immutable_video.items():
+            if value:
+                old_payload.setdefault(key, value)
+                replacement_video.setdefault(key, value)
+        change["channel_id"] = parent_channel_id
+        if parent_handle:
+            change["channel_handle"] = parent_handle
+        change["channel_url"] = parent_url
+        if parent_name:
+            change["channel_name"] = parent_name
+        change["videoPayload"] = old_payload
+        change["replacementVideoPayload"] = replacement_video
 
     bound_resets = {
         _text(video_id): dict(row)
@@ -15838,7 +15938,17 @@ def _source_record_identity(record: Mapping[str, Any]) -> tuple[str, str]:
 def _source_record_matches_change(
     record: Mapping[str, Any], change: Mapping[str, Any],
 ) -> bool:
-    """Match one legacy source row to one immutable runtime preimage."""
+    """Match one source row to one immutable runtime old-side identity.
+
+    Modern source rows and curation changes both carry ``occurrenceId``.  A
+    differing non-empty id is conclusive evidence that they are different
+    tuples, even when legacy display fields happen to collide.  Persisted
+    source storage predates occurrence ids and retains only video, seconds,
+    title, and artist.  That reduced identity is accepted only after an exact
+    ``runtime_occurrences`` lookup has proved the change's immutable parent
+    tuple exists.  A legacy caller without that proof must still provide the
+    complete legacy identity below.
+    """
 
     video = record.get("video") if isinstance(record.get("video"), Mapping) else {}
     target_video_id = _text(change.get("videoId") or change.get("video_id"))
@@ -15848,15 +15958,79 @@ def _source_record_matches_change(
     if len(occurrences) != 1 or not isinstance(occurrences[0], Mapping):
         return False
     occurrence = occurrences[0]
-    if change.get("seconds") is not None:
+
+    source_occurrence_id = _text(
+        occurrence.get("occurrenceId") or occurrence.get("occurrence_id")
+    )
+    change_occurrence_id = _text(
+        change.get("occurrenceId") or change.get("occurrence_id")
+    )
+    if source_occurrence_id:
+        return bool(
+            change_occurrence_id
+            and source_occurrence_id == change_occurrence_id
+        )
+
+    def value(
+        row: Mapping[str, Any], *names: str,
+    ) -> Any:
+        for source in _scope_value_sources(row):
+            for name in names:
+                if name in source and source.get(name) is not None:
+                    return source.get(name)
+        return None
+
+    def integer_text(raw: Any) -> str:
         try:
-            if int(occurrence.get("seconds")) != int(change.get("seconds")):
-                return False
-        except (TypeError, ValueError):
-            return False
+            return str(int(raw))
+        except (TypeError, ValueError, OverflowError):
+            return ""
+
+    source_identity = (
+        _text(value(occurrence, "rangeId", "range_id")),
+        integer_text(value(occurrence, "position")),
+        _text(value(occurrence, "songKey", "song_key")),
+        integer_text(value(occurrence, "seconds")),
+        _runtime_entity_key(value(occurrence, "title", "workTitle")),
+        _runtime_entity_key(value(occurrence, "artist")),
+    )
+    change_identity = (
+        _text(value(change, "rangeId", "range_id")),
+        integer_text(value(change, "position")),
+        _text(value(change, "songKey", "song_key")),
+        integer_text(value(change, "seconds")),
+        _runtime_entity_key(value(change, "title", "workTitle")),
+        _runtime_entity_key(value(change, "artist")),
+    )
+    parent_exists = change.get("_parentRuntimeOccurrenceExists")
+    owner_was_explicit = change.get("_runtimeOccurrenceOwnerWasExplicit")
+    for marker in (parent_exists, owner_was_explicit):
+        if marker is not None and not isinstance(marker, bool):
+            raise PostgresAdapterError(
+                "source occurrence parent coverage marker is invalid"
+            )
+    if parent_exists is True:
+        # ``runtime_source_occurrences.position`` is source-local ordering,
+        # not the immutable ingestion position, and the table has no song-key
+        # or occurrence-id column.  Do not fabricate either coordinate.  The
+        # exact parent lookup proves the change identity; video + seconds +
+        # canonical title/artist then locates its unique persisted source row.
+        source_parent_identity = source_identity[3:]
+        change_parent_identity = change_identity[3:]
+        return bool(
+            all(source_parent_identity[:2])
+            and all(change_parent_identity[:2])
+            and source_parent_identity == change_parent_identity
+        )
+    if parent_exists is False:
+        return False
+    # Artist may legitimately be empty for an explicitly unknown-artist song;
+    # all other legacy coordinates are mandatory.  An incomplete tuple is not
+    # permission to delete a persisted source occurrence.
     return bool(
-        _text(occurrence.get("title")) == _text(change.get("title"))
-        and _text(occurrence.get("artist")) == _text(change.get("artist"))
+        all(source_identity[:5])
+        and all(change_identity[:5])
+        and source_identity == change_identity
     )
 
 
@@ -16034,7 +16208,7 @@ def _snapshot_source_overlay_inputs(
     # range.  Source rebuilding must use the same contract: replaying a 7d
     # same-video replacement into ``all`` can overwrite the persisted tuple's
     # rangeId and make that occurrence disappear during final range filtering.
-    runtime_changes = tuple(_overlay_rows_for_range(
+    runtime_changes = [dict(change) for change in _overlay_rows_for_range(
         _runtime_tombstones(
             connection,
             overlay_revision_ids,
@@ -16045,8 +16219,30 @@ def _snapshot_source_overlay_inputs(
             scoped_parent_video_ids=scoped_videos,
         ),
         range_id,
-    ))
-    return candidate_rows, accepted_video_resets, runtime_changes
+    )]
+    _enrich_runtime_parent_group_keys(
+        connection,
+        parent_revision_id,
+        runtime_changes,
+        range_id=range_id,
+    )
+    # Ranking and source materialization load independent change objects.  A
+    # same-video VTuber replacement may omit denormalised channel fields, so
+    # relying on ranking's earlier in-place owner binding makes source output
+    # order-dependent.  Reuse the same bounded, unique persisted-owner proof
+    # on this source path after exact parent coverage has been recorded.  The
+    # binding may authorize only the replacement's new video/channel tuple;
+    # ``_runtime_occurrence_has_immutable_old_side`` still independently
+    # decides whether any parent occurrence may be subtracted.
+    candidate_rows, accepted_video_resets = _bind_direct_vtuber_parent_owners(
+        connection,
+        parent_revision_id,
+        range_id,
+        candidate_rows,
+        accepted_video_resets,
+        runtime_changes,
+    )
+    return tuple(candidate_rows), accepted_video_resets, tuple(runtime_changes)
 
 
 def _generic_group_source_payload(
@@ -17515,6 +17711,22 @@ def _snapshot_materialized_source_payload(
             index for index, record in enumerate(effective)
             if identity(record) == (video_id, occurrence_id)
         ] if occurrence_id else []
+        if len(matches) > 1:
+            raise PostgresAdapterError(
+                "source occurrence preimage does not uniquely match authority"
+            )
+        if (
+            source_type == "vtuber"
+            and not matches
+            and not _runtime_occurrence_has_immutable_old_side(change)
+        ):
+            # An exact source occurrence id is itself immutable old-side
+            # evidence, even when the runtime parent table no longer carries
+            # that tuple.  Only an exact miss is overlay-only: keep every
+            # weakly similar persisted row untouched while allowing the
+            # independently validated replacement loop below to add a new
+            # side without inventing a subtraction.
+            continue
         if not matches:
             if source_type in {"song", "artist"} and not matches_target(change):
                 continue

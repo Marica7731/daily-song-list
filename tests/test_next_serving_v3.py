@@ -1,5 +1,6 @@
 from __future__ import annotations
 import copy
+import gc
 import importlib.util
 import gzip
 import http.client
@@ -16,6 +17,7 @@ import tempfile
 import time
 from types import SimpleNamespace
 import unittest
+import weakref
 from unittest.mock import patch
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -2671,6 +2673,48 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(len(calls),2)
 
+    def test_vtuber_cardinality_collector_does_not_retain_exception_traceback(self):
+        stage="affected-parent-sources";range_id="all"
+        mismatches={};payload_refs=[]
+
+        class Payload:
+            pass
+
+        class Writer:
+            def prepare_checkpointed_sources(
+                self,_stage,_range_id,_source_keys,
+            ):
+                return set()
+
+        def exporter(_source_keys):
+            payload=Payload();payload_refs.append(weakref.ref(payload))
+            try:
+                raise RuntimeError(payload)
+            except RuntimeError as cause:
+                raise pg_materializer.SnapshotSourceCardinalityMismatch(
+                    stage=stage,range_id=range_id,view="vtubers",
+                    source_key="only-bad",expected=(2,2,1,2),
+                    actual=(1,1,1,1),
+                ) from cause
+
+        completed=(
+            pg_materializer._export_sources_collecting_cardinality_mismatches(
+                Writer(),stage=stage,range_id=range_id,
+                source_keys={"only-bad"},mismatches=mismatches,
+                exporter=exporter,
+            )
+        )
+        gc.collect()
+        self.assertEqual(completed,set())
+        self.assertIsNone(payload_refs[0]())
+        record=next(iter(mismatches.values()))
+        self.assertIsInstance(
+            record,
+            pg_materializer.SnapshotSourceCardinalityMismatchRecord,
+        )
+        self.assertNotIsInstance(record,BaseException)
+        self.assertFalse(hasattr(record,"__dict__"))
+
     def test_vtuber_cardinality_collector_resumes_without_hiding_transport(self):
         stage="parent-sources";range_id="all"
         requested={"a-bad","b-good"};mismatches={}
@@ -4865,6 +4909,8 @@ class Tests(unittest.TestCase):
             "entityType":"runtime_occurrences","videoId":video_id,
             "occurrenceId":"legacy-drop-id","rangeId":"all",
             "title":"Drop Song","artist":"Artist","seconds":22,
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":True,
         }
         with closing(sqlite3.connect(":memory:")) as database:
             scope=pg_materializer.SnapshotSourceScope(database)
@@ -5938,6 +5984,301 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(replaced["song"]["title"],"Canonical Spelling")
         self.assertEqual(replaced["song"]["songKey"],"song-canonical")
+
+    def test_vtuber_same_video_replacement_uses_unique_persisted_owner_everywhere(self):
+        channel_id="UC1234567890123456789012"
+        source_key="source-vtuber"
+        owner={
+            "video_id":"video-vtuber","source_key":source_key,
+            "entity_key":channel_id,"payload_json":{
+                "type":"vtuber","key":channel_id,"channelId":channel_id,
+                "channelHandle":"/@fixture","channelName":"Fixture VTuber",
+            },
+        }
+        raw_change={
+            "entityType":"runtime_occurrences","videoId":"video-vtuber",
+            "occurrenceId":"occ-old","rangeId":"all","position":1,
+            "seconds":20,"title":"Old","artist":"Artist",
+            "songKey":"song-old","replacement":True,
+            "replacementSameVideo":True,"replacementPayload":{
+                "videoId":"video-vtuber","occurrenceId":"occ-old",
+                "rangeId":"all","position":1,"seconds":20,
+                "title":"New","artist":"Artist","songKey":"song-new",
+            },"replacementVideoPayload":{"videoId":"video-vtuber"},
+        }
+        ranking_change=copy.deepcopy(raw_change)
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ):
+            pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(),{},(ranking_change,),
+            )
+        replacements=pg_adapter._runtime_replacement_candidate_rows(
+            (ranking_change,),strict_immutable_identity=True,
+        )
+        self.assertEqual(len(replacements),1)
+        self.assertEqual(replacements[0]["channel_id"],channel_id)
+        self.assertEqual(
+            replacements[0]["occurrence_id"],"occ-old",
+        )
+        source_change=copy.deepcopy(raw_change)
+
+        def enrich(_connection,_parent,changes,*,range_id,**_kwargs):
+            self.assertEqual(range_id,"all")
+            self.assertEqual(len(changes),1)
+            changes[0]["_parentRuntimeOccurrenceExists"]=False
+            changes[0]["_runtimeOccurrenceOwnerWasExplicit"]=False
+
+        with patch.object(
+            pg_adapter,"_accepted_video_resets",return_value={},
+        ), patch.object(
+            pg_adapter,"_overlay_candidate_rows",return_value=(),
+        ), patch.object(
+            pg_adapter,"_runtime_tombstones",return_value=(source_change,),
+        ), patch.object(
+            pg_adapter,"_enrich_runtime_parent_group_keys",side_effect=enrich,
+        ), patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ):
+            source_candidates,source_resets,source_changes=(
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(),"parent",("overlay",),"all",("video-vtuber",),
+                )
+            )
+        self.assertIsNot(source_changes[0],ranking_change)
+        self.assertEqual(source_changes[0]["channel_id"],channel_id)
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"vtuber","key":channel_id,"channelId":channel_id,
+                "channelHandle":"/@fixture","channelName":"Fixture VTuber",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },targets=(("vtubers",channel_id),),
+            video_scope=("video-vtuber",),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=source_candidates,
+            accepted_video_resets=source_resets,
+            runtime_changes=source_changes,
+        )
+        self.assertEqual(payload["record"]["occurrenceCount"],1)
+        self.assertEqual(
+            payload["record"]["occurrences"][0]["song"]["occurrenceId"],
+            "occ-old",
+        )
+
+    def test_vtuber_same_video_replacement_rejects_conflicting_persisted_owner(self):
+        owner_id="UC1234567890123456789012"
+        other_id="UCabcdefghijklmnopqrstuv"
+        owner={
+            "video_id":"video-vtuber","source_key":"source-vtuber",
+            "entity_key":owner_id,"payload_json":{
+                "type":"vtuber","key":owner_id,"channelId":owner_id,
+            },
+        }
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-vtuber",
+            "occurrenceId":"occ-old","replacement":True,
+            "replacementSameVideo":True,"replacementPayload":{
+                "videoId":"video-vtuber","occurrenceId":"occ-new",
+                "title":"New","artist":"Artist","channelId":other_id,
+            },
+        }
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ), self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "same-video replacement conflicts with source owner",
+        ):
+            pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(),{},(change,),
+            )
+
+    def test_source_preimage_does_not_fallback_across_occurrence_ids(self):
+        record={"video":{"videoId":"video-one"},"occurrences":({
+            "occurrenceId":"occ-persisted","rangeId":"all",
+            "position":1,"songKey":"song","seconds":10,
+            "title":"Same","artist":"Artist",
+        },)}
+        change={
+            "videoId":"video-one","occurrenceId":"occ-different",
+            "rangeId":"all","position":1,"songKey":"song","seconds":10,
+            "title":"Same","artist":"Artist",
+        }
+        self.assertFalse(
+            pg_adapter._source_record_matches_change(record,change),
+        )
+
+    def test_source_preimage_legacy_fallback_requires_complete_tuple(self):
+        record={"video":{"videoId":"video-one"},"occurrences":({
+            "rangeId":"all","position":1,"songKey":"song","seconds":10,
+            "title":"Ｓａｍｅ","artist":"ARTIST",
+        },)}
+        change={
+            "videoId":"video-one","occurrenceId":"occ-new",
+            "rangeId":"all","position":1,"songKey":"song","seconds":10,
+            "title":"Same","artist":"artist",
+        }
+        self.assertTrue(
+            pg_adapter._source_record_matches_change(record,change),
+        )
+        incomplete=dict(change)
+        incomplete.pop("position")
+        self.assertFalse(
+            pg_adapter._source_record_matches_change(record,incomplete),
+        )
+        wrong_position=dict(change,position=2)
+        self.assertFalse(
+            pg_adapter._source_record_matches_change(record,wrong_position),
+        )
+
+    def test_source_preimage_uses_reduced_tuple_only_after_exact_parent_proof(self):
+        record={"video":{"videoId":"video-one"},"occurrences":({
+            "seconds":10,"title":"Ｓａｍｅ  Title","artist":"ARTIST",
+        },)}
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-parent","rangeId":"all","position":99,
+            "seconds":10,"title":"Same Title","artist":"artist",
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+        }
+        self.assertTrue(
+            pg_adapter._source_record_matches_change(record,change),
+        )
+        overlay_only=dict(
+            change,
+            _parentRuntimeOccurrenceExists=False,
+        )
+        self.assertFalse(
+            pg_adapter._source_record_matches_change(record,overlay_only),
+        )
+        invalid=dict(change,_parentRuntimeOccurrenceExists="yes")
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "parent coverage marker is invalid",
+        ):
+            pg_adapter._source_record_matches_change(record,invalid)
+
+    def test_snapshot_source_inputs_attach_exact_parent_coverage(self):
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-parent","rangeId":"all",
+            "seconds":10,"title":"Same","artist":"Artist",
+        }
+
+        def enrich(_connection,_parent,changes,*,range_id,**_kwargs):
+            self.assertEqual(range_id,"all")
+            self.assertEqual(len(changes),1)
+            changes[0]["_parentRuntimeOccurrenceExists"]=True
+            changes[0]["_runtimeOccurrenceOwnerWasExplicit"]=False
+
+        with patch.object(
+            pg_adapter,"_accepted_video_resets",return_value={},
+        ), patch.object(
+            pg_adapter,"_overlay_candidate_rows",return_value=(),
+        ), patch.object(
+            pg_adapter,"_runtime_tombstones",return_value=(change,),
+        ), patch.object(
+            pg_adapter,"_enrich_runtime_parent_group_keys",side_effect=enrich,
+        ) as exact_parent, patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",return_value={},
+        ):
+            _candidates,_resets,changes=pg_adapter._snapshot_source_overlay_inputs(
+                object(),"parent",("overlay",),"all",("video-one",),
+            )
+        exact_parent.assert_called_once()
+        self.assertIs(changes[0].get("_parentRuntimeOccurrenceExists"),True)
+        self.assertIs(changes[0].get("_runtimeOccurrenceOwnerWasExplicit"),False)
+
+    def test_snapshot_vtuber_source_skips_only_unproven_old_side(self):
+        source_key="source-vtuber"
+        channel_id="UCfixture"
+        parent=({
+            "videoId":"video-one","seconds":10,
+            "title":"Legacy Title","artist":"Artist",
+            "channelId":channel_id,"channelName":"Fixture VTuber",
+        },)
+        common=dict(
+            requested_key=source_key,range_id="all",
+            persisted_record={
+                "type":"vtuber","key":channel_id,
+                "channelId":channel_id,"channelName":"Fixture VTuber",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("vtubers",channel_id),),
+            video_scope=("video-one",),parent_occurrences=parent,
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=(),accepted_video_resets={},
+        )
+        overlay_only={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-overlay-only","rangeId":"all",
+            "position":1,"seconds":10,"title":"Legacy Title",
+            "artist":"Artist","_parentRuntimeOccurrenceExists":False,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+        }
+        preserved=pg_adapter._snapshot_materialized_source_payload(
+            runtime_changes=(overlay_only,),**common,
+        )
+        self.assertTrue(preserved["found"])
+        self.assertEqual(preserved["record"]["occurrenceCount"],1)
+
+        exact_source_common={**common,"parent_occurrences":({
+            "videoId":"video-one","occurrenceId":"occ-overlay-only",
+            "seconds":10,"title":"Legacy Title","artist":"Artist",
+            "channelId":channel_id,"channelName":"Fixture VTuber",
+        },)}
+        exact_removed=pg_adapter._snapshot_materialized_source_payload(
+            runtime_changes=(overlay_only,),**exact_source_common,
+        )
+        self.assertFalse(exact_removed["found"])
+
+        parent_change=dict(
+            overlay_only,
+            occurrenceId="occ-parent",
+            _parentRuntimeOccurrenceExists=True,
+        )
+        removed=pg_adapter._snapshot_materialized_source_payload(
+            runtime_changes=(parent_change,),**common,
+        )
+        self.assertFalse(removed["found"])
+
+    def test_snapshot_vtuber_source_updates_parent_proven_legacy_row_in_place(self):
+        source_key="source-vtuber"
+        channel_id="UCfixture"
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"vtuber","key":channel_id,
+                "channelId":channel_id,"channelName":"Fixture VTuber",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },targets=(("vtubers",channel_id),),
+            video_scope=("video-one",),parent_occurrences=({
+                "videoId":"video-one","seconds":10,
+                "title":"Legacy Title","artist":"Artist",
+                "channelId":channel_id,"channelName":"Fixture VTuber",
+            },),direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=(),accepted_video_resets={},runtime_changes=({
+                "entityType":"runtime_occurrences","videoId":"video-one",
+                "occurrenceId":"occ-parent","rangeId":"all","position":1,
+                "seconds":10,"title":"Legacy Title","artist":"Artist",
+                "replacement":True,"replacementSameVideo":True,
+                "_parentRuntimeOccurrenceExists":True,
+                "_runtimeOccurrenceOwnerWasExplicit":False,
+                "replacementPayload":{
+                    "videoId":"video-one","occurrenceId":"occ-parent",
+                    "rangeId":"all","position":1,"seconds":10,
+                    "title":"Canonical Title","artist":"Artist",
+                },
+            },),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(payload["record"]["occurrenceCount"],1)
+        occurrence=payload["record"]["occurrences"][0]["song"]
+        self.assertEqual(occurrence["occurrenceId"],"occ-parent")
+        self.assertEqual(occurrence["title"],"Canonical Title")
 
     def test_snapshot_vtuber_source_rejects_conflicting_replacement_owner(self):
         with self.assertRaisesRegex(
