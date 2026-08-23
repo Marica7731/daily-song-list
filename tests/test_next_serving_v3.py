@@ -1220,6 +1220,54 @@ class Tests(unittest.TestCase):
         self.assertNotIn("song-2", {item["songKey"] for item in payload["songs"]})
         self.assertNotIn("song-11", {item["songKey"] for item in payload["songs"]})
 
+    def test_generic_video_overlay_uses_strict_ranking_fallback_without_runtime_rows(self):
+        video_id = "9RARtsp7ong"
+        parent_songs = [
+            {"songKey": "song-0", "title": "Song 0", "artist": "Artist"},
+            {"songKey": "song-1", "title": "Song 1", "artist": "Artist"},
+        ]
+        row = {
+            "detail_key": video_id, "row_count": 1, "song_count": 1,
+            "video_count": 1, "timestamp_count": 1,
+            "payload_json": {
+                "type": "video", "key": video_id, "videoId": video_id,
+                "title": "Legacy video", "songs": parent_songs,
+            },
+            "_snapshot_parent_payload_preloaded": True,
+            "_deferred_runtime_preview_changes": [{
+                "entityType": "runtime_occurrences", "videoId": video_id,
+                "occurrenceId": "missing-legacy-id", "title": "Song 1",
+                "artist": "Artist",
+            }],
+        }
+
+        def fake_rows(_connection, statement, params):
+            if "exact affected generic video-card parent occurrence hydration" in statement:
+                return []
+            self.assertIn(
+                "exact legacy generic video-card ranking fallback", statement,
+            )
+            self.assertEqual(
+                params, ["parent", "all", "count", "all", video_id],
+            )
+            return [{
+                "detail_key": video_id, "row_count": 2, "video_count": 1,
+                "timestamp_count": 2,
+                "payload_json": row["payload_json"],
+            }]
+
+        with patch.object(pg_adapter, "_rows", side_effect=fake_rows):
+            payload = pg_adapter._hydrated_generic_ranking_payload(
+                object(), "parent", row,
+                {"range": "all", "view": "videos"}, "count",
+            )
+
+        self.assertEqual(
+            [item["title"] for item in payload["occurrences"]], ["Song 0"],
+        )
+        self.assertEqual(payload["songCount"], 1)
+        self.assertEqual(payload["songs"][0]["songKey"], "song-0")
+
     def test_complete_parent_window_recomputes_final_canonical_totals(self):
         filtered=[
             {"detail_key":"artist-one","row_count":3,"song_count":2,

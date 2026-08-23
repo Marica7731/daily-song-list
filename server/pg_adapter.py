@@ -13503,11 +13503,104 @@ def _generic_ranking_payload_is_complete(
     )
 
 
+def _fallback_generic_video_parent_occurrences(
+    connection,
+    parent_revision_id: str,
+    video_id: str,
+    range_id: str,
+    scope_key: str,
+    db_metric: str,
+) -> list[dict[str, Any]] | None:
+    """Recover one legacy ranking-only video card under an exact contract."""
+
+    rows = _rows(
+        connection,
+        """
+        /* exact legacy generic video-card ranking fallback */
+        SELECT detail_key, row_count, video_count, timestamp_count,
+               payload_json
+        FROM runtime_ranking_rows
+        WHERE revision_id = %s AND range_id = %s AND view = 'videos'
+          AND metric = %s AND scope_key = %s AND detail_key = %s
+        LIMIT 2
+        """,
+        [parent_revision_id, range_id, db_metric, scope_key, video_id],
+    )
+    if not rows:
+        return None
+    if len(rows) != 1:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback returned duplicate rows"
+        )
+    row = rows[0]
+    if _text(row.get("detail_key")) != video_id:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback changed identity"
+        )
+    payload = _json_object(row.get("payload_json"))
+    payload_video_id = _text(payload.get("videoId"))
+    if payload_video_id and payload_video_id != video_id:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback changed video identity"
+        )
+    if _text(payload.get("key")) and _text(payload.get("key")) != video_id:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback changed public key"
+        )
+    if _text(payload.get("type")) not in {"", "video"}:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback changed type"
+        )
+    raw_songs = payload.get("songs")
+    parent_count = int(row.get("row_count") or 0)
+    parent_video_count = int(row.get("video_count") or 0)
+    parent_timestamp_count = int(row.get("timestamp_count") or 0)
+    if not isinstance(raw_songs, list):
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback songs are invalid"
+        )
+    if parent_count != len(raw_songs) or parent_timestamp_count != len(raw_songs):
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback count changed"
+        )
+    if parent_count > 0 and parent_video_count != 1:
+        raise PostgresAdapterError(
+            "generic video parent ranking fallback video count changed"
+        )
+    occurrences: list[dict[str, Any]] = []
+    video_title = _text(payload.get("title"))
+    for position, raw_song in enumerate(raw_songs):
+        if not isinstance(raw_song, Mapping):
+            raise PostgresAdapterError(
+                "generic video parent ranking fallback song is invalid"
+            )
+        song = dict(raw_song)
+        occurrence = dict(song)
+        occurrence.update({
+            "videoId": video_id,
+            "videoTitle": video_title,
+            "rangeId": range_id,
+            "position": position,
+            "song": song,
+        })
+        for name in (
+            "channelName", "channelId", "channelHandle", "channelUrl",
+            "publishedTimestamp", "publishedAt",
+        ):
+            if payload.get(name) is not None:
+                occurrence.setdefault(name, payload.get(name))
+        occurrences.append(occurrence)
+    return occurrences
+
+
 def _hydrate_generic_video_parent_occurrences(
     connection,
     parent_revision_id: str,
     video_id: str,
     range_id: str,
+    *,
+    scope_key: str = "all",
+    db_metric: str = "count",
 ) -> list[dict[str, Any]]:
     """Load the bounded parent occurrence set for one affected video card.
 
@@ -13547,6 +13640,17 @@ def _hydrate_generic_video_parent_occurrences(
         raise PostgresAdapterError(
             "generic video parent occurrence hydration exceeded cap"
         )
+    if not rows:
+        fallback = _fallback_generic_video_parent_occurrences(
+            connection,
+            parent_revision_id,
+            video_id,
+            range_id,
+            scope_key,
+            db_metric,
+        )
+        if fallback is not None:
+            return fallback
     occurrences: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     positions: defaultdict[str, int] = defaultdict(int)
@@ -13748,6 +13852,8 @@ def _hydrated_generic_ranking_payload(
                 parent_revision_id,
                 detail_key,
                 _text(options.get("range")) or "all",
+                scope_key=_ranking_scope_key(options),
+                db_metric=db_metric,
             )
             if parent_row_count > 0 and not parent_occurrences:
                 raise PostgresAdapterError(
