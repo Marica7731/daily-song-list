@@ -2321,6 +2321,106 @@ class Tests(unittest.TestCase):
         finally:
             writer.abort()
 
+    def test_vtuber_cardinality_collector_reports_every_exact_key(self):
+        stage="affected-parent-sources";range_id="all"
+        requested={"a-good","b-bad","c-good","d-bad"}
+        mismatches={}
+
+        class Writer:
+            def __init__(self):
+                self.durable=set();self.partial=set()
+            def prepare_checkpointed_sources(
+                self,checkpoint_stage,checkpoint_range,source_keys,
+            ):
+                self.assert_contract=(checkpoint_stage,checkpoint_range)
+                scoped=set(source_keys)
+                self.partial.difference_update(scoped-self.durable)
+                return self.durable & scoped
+
+        writer=Writer();calls=[]
+        def exporter(source_keys):
+            source_keys=set(source_keys);calls.append(source_keys)
+            for source_key in sorted(source_keys):
+                if source_key.endswith("-bad"):
+                    writer.partial.add(source_key)
+                    raise pg_materializer.SnapshotSourceCardinalityMismatch(
+                        stage=stage,range_id=range_id,view="vtubers",
+                        source_key=source_key,expected=(2,2,1,2),
+                        actual=(1,1,1,1),
+                    )
+                writer.durable.add(source_key)
+            return source_keys
+
+        completed=(
+            pg_materializer._export_sources_collecting_cardinality_mismatches(
+                writer,stage=stage,range_id=range_id,
+                source_keys=requested,mismatches=mismatches,
+                exporter=exporter,
+            )
+        )
+        self.assertEqual(completed,{"a-good","c-good"})
+        self.assertEqual(writer.durable,completed)
+        self.assertEqual(writer.partial,set())
+        self.assertEqual(
+            {key[2] for key in mismatches},{"b-bad","d-bad"},
+        )
+        self.assertEqual(len(calls),2)
+
+    def test_vtuber_cardinality_collector_resumes_without_hiding_transport(self):
+        stage="parent-sources";range_id="all"
+        requested={"a-bad","b-good"};mismatches={}
+
+        class Writer:
+            def __init__(self):
+                self.durable=set();self.partial=set()
+            def prepare_checkpointed_sources(
+                self,_stage,_range_id,source_keys,
+            ):
+                scoped=set(source_keys)
+                self.partial.difference_update(scoped-self.durable)
+                return self.durable & scoped
+
+        writer=Writer();attempts=0
+        transport=RuntimeError("simulated PostgreSQL transport boundary")
+        def interrupted(source_keys):
+            nonlocal attempts
+            attempts+=1
+            if attempts==1:
+                writer.partial.add("a-bad")
+                raise pg_materializer.SnapshotSourceCardinalityMismatch(
+                    stage=stage,range_id=range_id,view="vtubers",
+                    source_key="a-bad",expected=(2,2,1,2),
+                    actual=(1,1,1,1),
+                )
+            raise transport
+
+        with self.assertRaisesRegex(
+            RuntimeError,"simulated PostgreSQL transport boundary",
+        ):
+            pg_materializer._export_sources_collecting_cardinality_mismatches(
+                writer,stage=stage,range_id=range_id,
+                source_keys=requested,mismatches=mismatches,
+                exporter=interrupted,
+            )
+        self.assertEqual({key[2] for key in mismatches},{"a-bad"})
+        self.assertEqual(writer.partial,set())
+
+        seen=[]
+        def resumed(source_keys):
+            seen.append(set(source_keys))
+            writer.durable.update(source_keys)
+            return set(source_keys)
+        completed=(
+            pg_materializer._export_sources_collecting_cardinality_mismatches(
+                writer,stage=stage,range_id=range_id,
+                source_keys=requested,mismatches=mismatches,
+                exporter=resumed,
+            )
+        )
+        self.assertEqual(seen,[{"b-good"}])
+        self.assertEqual(completed,{"b-good"})
+        self.assertEqual(writer.durable,{"b-good"})
+
     def test_snapshot_transport_retry_resumes_only_driver_connection_loss(self):
         transport_error=type(
             "OperationalError",(Exception,),{"__module__":"psycopg"},
@@ -5399,6 +5499,78 @@ class Tests(unittest.TestCase):
             (record["count"],record["occurrenceCount"],
              record["timestampCount"],record["videoCount"]),
             (2,2,2,2),
+        )
+
+    def test_snapshot_vtuber_source_does_not_replay_7d_change_into_all(self):
+        source_key="2b696ea285946929"
+        channel_id="UCpKdAmIYIkpySO7tsTN0oJA"
+        cross_range_change={
+            "entityType":"occurrences","videoId":"MhemBDB0yJo",
+            "occurrenceId":"position:4","rangeId":"7d","position":5,
+            "seconds":1747,"title":"逆光(ウタ from ONE PIECE FILM RED)",
+            "artist":"Ado","songKey":"de3ab6da570b6beb9ca42cc3",
+            "replacement":True,"replacementSameVideo":True,
+            "replacementPayload":{
+                "videoId":"MhemBDB0yJo","occurrenceId":"position:4",
+                "rangeId":"7d","position":5,"seconds":1747,
+                "title":"逆光","artist":"Ado",
+                "songKey":"6e23be58785aff1366249e64",
+                "channelHandle":"/@ShibireiAmoru88",
+            },
+        }
+        with patch.object(
+            pg_adapter,"_accepted_video_resets",return_value={},
+        ), patch.object(
+            pg_adapter,"_overlay_candidate_rows",return_value=(),
+        ), patch.object(
+            pg_adapter,"_runtime_tombstones",
+            return_value=(cross_range_change,),
+        ):
+            candidate_rows,resets,runtime_changes=(
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(),"parent",("overlay",),"all",
+                    ("MhemBDB0yJo",),
+                )
+            )
+        self.assertEqual(candidate_rows,())
+        self.assertEqual(resets,{})
+        self.assertEqual(runtime_changes,())
+
+        parent=tuple({
+            "videoId":"MhemBDB0yJo","occurrenceId":occurrence_id,
+            "rangeId":"all","position":position,"seconds":seconds,
+            "title":title,"artist":"Ado","songKey":song_key,
+            "channelId":channel_id,"channelHandle":"/@ShibireiAmoru88",
+            "channelName":"紫薇令あもる / Shibirei Amoru",
+        } for occurrence_id,position,seconds,title,song_key in (
+            ("position:3",4,1700,"Keep Song","song-keep"),
+            ("position:4",5,1747,
+             "逆光(ウタ from ONE PIECE FILM RED)",
+             "de3ab6da570b6beb9ca42cc3"),
+        ))
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"vtuber","key":channel_id,
+                "channelId":channel_id,
+                "channelHandle":"/@ShibireiAmoru88",
+                "channelName":"紫薇令あもる / Shibirei Amoru",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("vtubers",channel_id),),
+            video_scope=("MhemBDB0yJo",),parent_occurrences=parent,
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=candidate_rows,accepted_video_resets=resets,
+            runtime_changes=runtime_changes,
+        )
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["songCount"],record["videoCount"],
+             record["timestampCount"]),(2,2,1,2),
+        )
+        self.assertEqual(
+            {item["song"]["title"] for item in record["occurrences"]},
+            {"Keep Song","逆光(ウタ from ONE PIECE FILM RED)"},
         )
 
     def test_snapshot_vtuber_source_preserves_same_video_runtime_replacement(self):
