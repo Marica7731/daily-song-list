@@ -58,7 +58,9 @@ _DEFERRED_ID_KEYS = frozenset({
     "artist", "name", "channelUrl", "channel_url", "count", "songCount",
     "videoCount", "timestampCount", "seconds", "sourcePosition",
     "parentSongGroupKey", "parentArtistGroupKey",
-    "persistedSourceAuthority",
+    "persistedSourceAuthority", "parentVtuberChannelKey",
+    "parentVtuberSourceKey", "parentVtuberChannelHandle",
+    "parentVtuberChannelName", "canonicalVtuberChannelKey",
 })
 
 
@@ -4725,7 +4727,7 @@ def _runtime_replacement_candidate_rows(
             ).hexdigest()[:24]
         occurrence = dict(replacement)
         occurrence["songKey"] = song_key
-        rows.append({
+        row = {
             "revision_id": change.get("revisionId"),
             "video_id": video_id,
             "occurrence_id": occurrence_id,
@@ -4755,7 +4757,13 @@ def _runtime_replacement_candidate_rows(
             "runtime_replacement": True,
             "replacement_same_artist": change.get("replacementSameArtist"),
             "replacement_same_video": change.get("replacementSameVideo"),
-        })
+        }
+        canonical_vtuber_owner = _text(
+            change.get("canonicalVtuberChannelKey")
+        )
+        if canonical_vtuber_owner:
+            row["canonicalVtuberChannelKey"] = canonical_vtuber_owner
+        rows.append(row)
     return rows
 
 
@@ -5182,6 +5190,9 @@ def _runtime_change_group_key(change: Mapping[str, Any], view: str) -> str:
         return _overlay_artist_group_norm(artist) or "unknown"
     if view == "videos":
         return video_id
+    parent_vtuber_key = _text(change.get("parentVtuberChannelKey"))
+    if parent_vtuber_key:
+        return parent_vtuber_key
     return _text(change.get("channelId") or change.get("channel_id")) or _text(change.get("channelHandle") or change.get("channel_handle")).lstrip("@/") or _overlay_norm(change.get("channelName") or change.get("channel_name"))
 
 
@@ -5569,7 +5580,8 @@ def _runtime_view_group_key(row: Mapping[str, Any], view: str) -> str:
         return _text(row.get("video_id") or row.get("videoId"))
     video = _overlay_public_video(row)
     return (
-        _text(row.get("channel_id") or video.get("channelId"))
+        _text(row.get("canonicalVtuberChannelKey"))
+        or _text(row.get("channel_id") or video.get("channelId"))
         or _text(row.get("channel_handle") or video.get("channelHandle")).lstrip("@/")
         # Parent ranking rows deliberately carry only the public aggregate
         # fields; their stable channel identity is therefore ``detail_key``.
@@ -9625,7 +9637,26 @@ def _overlay_vtuber_replacement_rows(
         # The caller has already supplied a bounded parent tuple when this
         # historical change lacked a channel.  Never let scalar precedence
         # hide a scalar/payload conflict in the exact aggregation path.
-        return _validated_overlay_change_identity(row, validate_urls=False)[1]
+        return (
+            _text(row.get("parentVtuberChannelKey"))
+            or _text(row.get("canonicalVtuberChannelKey"))
+            or _validated_overlay_change_identity(
+                row, validate_urls=False,
+            )[1]
+        )
+
+    def candidate_video(row: Mapping[str, Any]) -> dict[str, Any]:
+        video = _overlay_public_video(row)
+        owner_key = _text(row.get("canonicalVtuberChannelKey"))
+        if not owner_key:
+            return video
+        video = dict(video)
+        handle = _text(video.get("channelHandle"))
+        video.update({
+            "channelId": owner_key,
+            "channelUrl": _canonical_channel_url(owner_key, handle),
+        })
+        return video
 
     def require_identity(row: Mapping[str, Any], require_occurrence: bool = True) -> None:
         video_id = _text(row.get("videoId") or row.get("video_id"))
@@ -9669,6 +9700,10 @@ def _overlay_vtuber_replacement_rows(
     for video_id, accepted in (accepted_video_resets or {}).items():
         selected_video_id, selected_channel_id = _validated_overlay_change_identity(
             {"videoId": _text(video_id)}, accepted, validate_urls=False,
+        )
+        selected_channel_id = (
+            _text(accepted.get("canonicalVtuberChannelKey"))
+            or selected_channel_id
         )
         if selected_video_id and selected_channel_id:
             affected_channel_ids.add(selected_channel_id)
@@ -9723,8 +9758,12 @@ def _overlay_vtuber_replacement_rows(
         occurrence_id = _text(row.get("occurrence_id"))
         if is_accepted_row and (video_id, occurrence_id) in affected_occurrence_ids:
             continue
-        video = _overlay_public_video(row)
-        channel_id = _text(video.get("channelId") or row.get("channel_id"))
+        video = candidate_video(row)
+        channel_id = _text(
+            row.get("canonicalVtuberChannelKey")
+            or video.get("channelId")
+            or row.get("channel_id")
+        )
         # Exact VTuber aggregation has no safe fuzzy identity fallback.  A
         # partially projected accepted/replacement tuple would otherwise
         # quietly omit a public channel while the endpoint still returns 200.
@@ -9784,7 +9823,9 @@ def _overlay_vtuber_replacement_rows(
             continue
         old_video = _json_object(changed.get("videoPayload"))
         old_handle = _normalized_channel_handle(
-            changed.get("channel_handle") or old_video.get("channelHandle")
+            changed.get("parentVtuberChannelHandle")
+            or changed.get("channel_handle")
+            or old_video.get("channelHandle")
         )
         old_url = _text(changed.get("channel_url") or old_video.get("channelUrl")).casefold()
         if old_handle:
@@ -9824,8 +9865,12 @@ def _overlay_vtuber_replacement_rows(
         candidate_previews: dict[str, list[dict[str, Any]]] = defaultdict(list)
         candidate_videos: dict[str, Mapping[str, Any]] = {}
         for accepted in (accepted_video_resets or {}).values():
-            video = _overlay_public_video(accepted)
-            channel_id = _text(video.get("channelId") or accepted.get("channel_id"))
+            video = candidate_video(accepted)
+            channel_id = _text(
+                accepted.get("canonicalVtuberChannelKey")
+                or video.get("channelId")
+                or accepted.get("channel_id")
+            )
             if channel_id:
                 candidate_videos.setdefault(channel_id, video)
         for record in candidate_records.values():
@@ -9893,6 +9938,18 @@ def _overlay_vtuber_replacement_rows(
         scoped_authority = bool(
             options.get("nicheOnly") or options.get("hideUnknownArtist")
         )
+        persisted_parent_sources: dict[str, str] = {}
+        for changed in (*reset_changes, *runtime_changes):
+            owner_key = _text(changed.get("parentVtuberChannelKey"))
+            source_key = _text(changed.get("parentVtuberSourceKey"))
+            if not owner_key or not source_key:
+                continue
+            existing_source = persisted_parent_sources.get(owner_key)
+            if existing_source and existing_source != source_key:
+                raise PostgresAdapterError(
+                    "VTuber persisted owner source identity is ambiguous"
+                )
+            persisted_parent_sources[owner_key] = source_key
         parent_sources = (
             _resolved_vtuber_parent_sources(
                 connection,
@@ -9914,6 +9971,17 @@ def _overlay_vtuber_replacement_rows(
                 if base_groups.get(channel_id)
             }
         )
+        for owner_key, source_key in persisted_parent_sources.items():
+            if owner_key not in base_groups:
+                raise PostgresAdapterError(
+                    "VTuber persisted owner ranking coverage is incomplete"
+                )
+            existing_source = parent_sources.get(owner_key)
+            if existing_source and existing_source != source_key:
+                raise PostgresAdapterError(
+                    "VTuber persisted owner source disagrees with ranking"
+                )
+            parent_sources[owner_key] = source_key
         summaries = (
             _authoritative_vtuber_summary_rows(
                 connection,
@@ -10600,10 +10668,283 @@ def _vtuber_owned_overlay_changes(
     return tuple(
         change
         for change in changes
-        if _validated_overlay_change_identity(
-            change, validate_urls=False,
-        )[1]
+        if (
+            _text(change.get("parentVtuberChannelKey"))
+            or _validated_overlay_change_identity(
+                change, validate_urls=False,
+            )[1]
+        )
     )
+
+
+def _bounded_parent_vtuber_video_owners(
+    connection,
+    parent_revision_id: str,
+    video_ids: Iterable[str],
+    range_id: str,
+) -> dict[str, dict[str, Any]]:
+    """Resolve only touched videos against persisted VTuber source authority.
+
+    ``runtime_source_occurrences`` deliberately has no broad ``video_id``
+    btree.  The production-safe lookup therefore probes the existing trigram
+    video-search index once per already-bounded requested video and rechecks
+    exact equality.  Zero rows means that the old tuple never belonged to a
+    persisted VTuber source; two source owners are always ambiguous.
+    """
+
+    requested_ids = sorted({_text(value) for value in video_ids if _text(value)})
+    if not requested_ids:
+        return {}
+    if len(requested_ids) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "VTuber persisted owner lookup exceeded bounded video cap"
+        )
+    requested = [
+        {
+            "video_id": video_id,
+            "search_pattern": f"%{_sql_like_literal(video_id)}%",
+        }
+        for video_id in requested_ids
+    ]
+    rows = _rows(
+        connection,
+        """
+        /* bounded persisted VTuber old-owner repair */
+        WITH requested AS MATERIALIZED (
+          SELECT video_id, search_pattern
+          FROM jsonb_to_recordset(%s::jsonb)
+            AS item(video_id text, search_pattern text)
+        )
+        SELECT requested.video_id, authority.source_key,
+               authority.entity_key, authority.payload_json
+        FROM requested
+        JOIN LATERAL (
+          SELECT DISTINCT ON (occurrence.source_key)
+                 occurrence.source_key, detail.entity_key,
+                 detail.payload_json
+          FROM runtime_source_occurrences AS occurrence
+          JOIN runtime_source_details AS detail
+            ON detail.revision_id = occurrence.revision_id
+           AND detail.source_key = occurrence.source_key
+           AND detail.range_id = occurrence.range_id
+           AND detail.entity_type = 'vtuber'
+          WHERE occurrence.revision_id = %s
+            AND occurrence.range_id = %s
+            AND daily_song_source_video_search_text(
+                  occurrence.title,
+                  occurrence.video_id,
+                  occurrence.payload_json
+                ) ILIKE requested.search_pattern ESCAPE E'\\\\'
+            AND occurrence.video_id = requested.video_id
+          ORDER BY occurrence.source_key, occurrence.position
+          LIMIT 2
+        ) AS authority ON TRUE
+        ORDER BY requested.video_id, authority.source_key
+        LIMIT %s
+        """,
+        [
+            json.dumps(requested, ensure_ascii=False),
+            parent_revision_id,
+            range_id,
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    )
+    if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "VTuber persisted owner lookup exceeded bounded result cap"
+        )
+    requested_set = set(requested_ids)
+    owners: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        video_id = _text(row.get("video_id"))
+        source_key = _text(row.get("source_key"))
+        owner_key = _text(row.get("entity_key"))
+        payload = _json_object(row.get("payload_json"))
+        if (
+            video_id not in requested_set
+            or not source_key
+            or not owner_key
+            or not payload
+        ):
+            raise PostgresAdapterError(
+                "VTuber persisted owner identity is invalid"
+            )
+        if video_id in owners:
+            raise PostgresAdapterError(
+                "VTuber persisted owner identity is ambiguous"
+            )
+        owners[video_id] = {
+            "video_id": video_id,
+            "source_key": source_key,
+            "entity_key": owner_key,
+            "payload_json": payload,
+        }
+    return owners
+
+
+def _vtuber_owner_alias_sets(
+    value: Mapping[str, Any], *, persisted: bool,
+) -> tuple[set[str], set[str], set[str]]:
+    """Return strict strong-id, handle, and display-name alias sets."""
+
+    payload = _json_object(
+        value.get("payload_json") or value.get("video_payload_json")
+    )
+    if isinstance(payload.get("payload"), Mapping):
+        payload = dict(payload["payload"])
+    public_video = {} if persisted else _overlay_public_video(value)
+    id_values = {
+        _text(value.get("entity_key")) if persisted else "",
+        _text(value.get("channel_id") or value.get("channelId")),
+        _text(payload.get("key")),
+        _text(payload.get("channelId")),
+        _text(public_video.get("channelId")),
+    }
+    strong_ids = {
+        item
+        for item in id_values
+        if re.fullmatch(r"UC[A-Za-z0-9_-]{22}", item)
+    }
+    handles = {
+        normalized
+        for item in (
+            value.get("channel_handle"), value.get("channelHandle"),
+            payload.get("channelHandle"), public_video.get("channelHandle"),
+        )
+        if (normalized := _normalized_channel_handle(item))
+    }
+    name_values = {
+        _text(value.get("entity_key")) if persisted else "",
+        _text(value.get("channel_name") or value.get("channelName")),
+        _text(payload.get("key")), _text(payload.get("name")),
+        _text(payload.get("channelName")),
+        _text(public_video.get("channelName")),
+    }
+    names = {
+        normalized
+        for item in name_values
+        if item and not re.fullmatch(r"UC[A-Za-z0-9_-]{22}", item)
+        if (normalized := _overlay_norm(item))
+    }
+    return strong_ids, handles, names
+
+
+def _bind_direct_vtuber_parent_owners(
+    connection,
+    parent_revision_id: str,
+    range_id: str,
+    candidate_rows: Sequence[Mapping[str, Any]],
+    accepted_video_resets: Mapping[str, Mapping[str, Any]],
+    changes: Sequence[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """Bind direct-ranking old sides to exact persisted VTuber owners.
+
+    Candidate rows retain their raw accepted metadata.  A separate aggregate
+    owner override is added only when a selected full reset has the same
+    strong channel id, the same exact handle, or one batch-unique normalized
+    legacy display name.  Otherwise it remains a genuine two-sided move.
+    """
+
+    unresolved_video_ids = {
+        video_id
+        for change in changes
+        for video_id, channel_id in (
+            (_validated_overlay_change_identity(
+                change, validate_urls=False,
+            )),
+        )
+        if video_id and not channel_id
+    }
+    requested_video_ids = unresolved_video_ids | {
+        _text(video_id)
+        for video_id in accepted_video_resets
+        if _text(video_id)
+    }
+    owners = _bounded_parent_vtuber_video_owners(
+        connection, parent_revision_id, requested_video_ids, range_id,
+    )
+    owner_by_key: dict[str, dict[str, Any]] = {}
+    name_owners: dict[str, set[str]] = defaultdict(set)
+    for owner in owners.values():
+        owner_key = _text(owner.get("entity_key"))
+        source_key = _text(owner.get("source_key"))
+        existing = owner_by_key.get(owner_key)
+        if existing and _text(existing.get("source_key")) != source_key:
+            raise PostgresAdapterError(
+                "VTuber persisted owner source identity is ambiguous"
+            )
+        owner_by_key[owner_key] = owner
+        _, _, names = _vtuber_owner_alias_sets(owner, persisted=True)
+        for name in names:
+            name_owners[name].add(owner_key)
+
+    for change in changes:
+        video_id, channel_id = _validated_overlay_change_identity(
+            change, validate_urls=False,
+        )
+        owner = owners.get(video_id)
+        if not owner or (channel_id and not bool(change.get("acceptedVideoReset"))):
+            continue
+        payload = _json_object(owner.get("payload_json"))
+        change["parentVtuberChannelKey"] = _text(owner.get("entity_key"))
+        change["parentVtuberSourceKey"] = _text(owner.get("source_key"))
+        parent_handle = _text(payload.get("channelHandle"))
+        parent_name = _text(payload.get("channelName") or payload.get("name"))
+        if parent_handle:
+            change["parentVtuberChannelHandle"] = parent_handle
+        if parent_name:
+            change["parentVtuberChannelName"] = parent_name
+
+    bound_resets = {
+        _text(video_id): dict(row)
+        for video_id, row in accepted_video_resets.items()
+        if _text(video_id)
+    }
+    alias_owner_by_video: dict[str, dict[str, Any]] = {}
+    for video_id, reset in bound_resets.items():
+        owner = owners.get(video_id)
+        if not owner:
+            continue
+        parent_ids, parent_handles, parent_names = _vtuber_owner_alias_sets(
+            owner, persisted=True,
+        )
+        candidate_ids, candidate_handles, candidate_names = (
+            _vtuber_owner_alias_sets(reset, persisted=False)
+        )
+        same_owner = bool(parent_ids and parent_ids & candidate_ids)
+        if not parent_ids:
+            if parent_handles:
+                same_owner = bool(parent_handles & candidate_handles)
+            elif parent_names:
+                same_owner = any(
+                    name in candidate_names and len(name_owners[name]) == 1
+                    for name in parent_names
+                )
+        if not same_owner:
+            continue
+        owner_key = _text(owner.get("entity_key"))
+        reset["canonicalVtuberChannelKey"] = owner_key
+        reset["parentVtuberSourceKey"] = _text(owner.get("source_key"))
+        alias_owner_by_video[video_id] = owner
+
+    for change in changes:
+        video_id = _text(change.get("videoId") or change.get("video_id"))
+        owner = alias_owner_by_video.get(video_id)
+        if owner:
+            change["canonicalVtuberChannelKey"] = _text(
+                owner.get("entity_key")
+            )
+
+    bound_candidates: list[dict[str, Any]] = []
+    for raw_row in candidate_rows:
+        row = dict(raw_row)
+        video_id = _text(row.get("video_id") or row.get("videoId"))
+        owner = alias_owner_by_video.get(video_id)
+        if owner:
+            row["canonicalVtuberChannelKey"] = _text(owner.get("entity_key"))
+            row["parentVtuberSourceKey"] = _text(owner.get("source_key"))
+        bound_candidates.append(row)
+    return bound_candidates, bound_resets
 
 
 def _canonical_channel_url(channel_id: str, handle: Any) -> str:
@@ -11457,6 +11798,18 @@ def _prepare_generic_overlay_rankings(
             evidence.get("channel_name") or evidence_video.get("channelName"),
         )
         _validated_overlay_change_identity(change, evidence, validate_urls=False)
+    if direct_overlay_revision_ids and options["view"] == "vtubers":
+        candidate_rows, accepted_video_resets = (
+            _bind_direct_vtuber_parent_owners(
+                connection,
+                parent[0],
+                options["range"],
+                candidate_rows,
+                accepted_video_resets,
+                identity_changes,
+            )
+        )
+        exact_candidate_rows = tuple(candidate_rows)
     replacement_rows = _runtime_replacement_candidate_rows(
         runtime_changes,
         options["view"] == "vtubers",
