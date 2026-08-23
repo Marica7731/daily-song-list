@@ -997,12 +997,21 @@ class Tests(unittest.TestCase):
         with closing(sqlite3.connect(":memory:")) as database:
             scope=pg_materializer.SnapshotSourceScope(database)
             scope.add_videos(("video-affected",))
+            scope.add_targets((
+                ("vtubers","UC-one","source-affected"),
+                ("vtubers","UC-two","source-clean"),
+                ("songs","song::artist","source-song"),
+            ))
             scope.add_pairs((
                 ("source-affected","video-affected"),
                 ("source-affected","video-clean"),
                 ("source-clean","video-clean"),
             ))
             self.assertEqual(scope.affected_source_keys(),("source-affected",))
+            self.assertEqual(
+                scope.source_keys_for_view("vtubers"),
+                ("source-affected","source-clean"),
+            )
 
     def test_snapshot_stream_cursor_honors_small_payload_batch(self):
         class Cursor:
@@ -5392,6 +5401,103 @@ class Tests(unittest.TestCase):
             (2,2,2,2),
         )
 
+    def test_snapshot_vtuber_source_preserves_same_video_runtime_replacement(self):
+        source_key="02a4448308f0bbdf"
+        channel_id="UCfixture-vtuber"
+        parent=tuple({
+            "videoId":"video-vtuber","occurrenceId":occurrence_id,
+            "rangeId":"all","position":position,"seconds":seconds,
+            "title":title,"artist":"Ado","songKey":song_key,
+            "channelId":channel_id,"channelHandle":"@fixture-vtuber",
+            "channelName":"Fixture VTuber",
+        } for occurrence_id,position,seconds,title,song_key in (
+            ("occ-keep",0,10,"Keep Song","song-keep"),
+            ("occ-replace",1,20,"Legacy Spelling","song-legacy"),
+        ))
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"vtuber","key":channel_id,
+                "channelId":channel_id,"channelHandle":"@fixture-vtuber",
+                "channelName":"Fixture VTuber",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("vtubers",channel_id),),
+            video_scope=("video-vtuber",),parent_occurrences=parent,
+            direct_video_rows=(),direct_occurrence_rows=(),candidate_rows=(),
+            accepted_video_resets={},runtime_changes=({
+                "entityType":"runtime_occurrences",
+                "videoId":"video-vtuber","occurrenceId":"occ-replace",
+                "rangeId":"all","position":1,"seconds":20,
+                "title":"Legacy Spelling","artist":"Ado",
+                "songKey":"song-legacy","replacement":True,
+                "replacementSameVideo":True,
+                # This is the production shape: the curated occurrence has
+                # immutable occurrence/video identity, while channel identity
+                # remains authoritative on the exact persisted source tuple.
+                "replacementPayload":{
+                    "videoId":"video-vtuber",
+                    "occurrenceId":"occ-replace","rangeId":"all",
+                    "position":1,"seconds":20,"title":"Canonical Spelling",
+                    "artist":"Ado","songKey":"song-canonical",
+                },
+            },),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],
+             record["songCount"],record["videoCount"],
+             record["timestampCount"]),(2,2,2,1,2),
+        )
+        occurrences=record["occurrences"]
+        self.assertEqual(
+            {item["song"]["occurrenceId"] for item in occurrences},
+            {"occ-keep","occ-replace"},
+        )
+        replaced=next(
+            item for item in occurrences
+            if item["song"]["occurrenceId"]=="occ-replace"
+        )
+        self.assertEqual(replaced["song"]["title"],"Canonical Spelling")
+        self.assertEqual(replaced["song"]["songKey"],"song-canonical")
+
+    def test_snapshot_vtuber_source_rejects_conflicting_replacement_owner(self):
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "replacement conflicts with source owner",
+        ):
+            pg_adapter._snapshot_materialized_source_payload(
+                "source-vtuber",range_id="all",
+                persisted_record={
+                    "type":"vtuber","key":"UCfixture",
+                    "channelId":"UCfixture","channelHandle":"@fixture",
+                    "sourceDetailKey":"source-vtuber","rangeId":"all",
+                },
+                targets=(("vtubers","UCfixture"),),
+                video_scope=("video-vtuber",),parent_occurrences=({
+                    "videoId":"video-vtuber","occurrenceId":"occ-replace",
+                    "rangeId":"all","position":1,"seconds":20,
+                    "title":"Old","artist":"Artist","songKey":"song-old",
+                    "channelId":"UCfixture","channelHandle":"@fixture",
+                },),direct_video_rows=(),direct_occurrence_rows=(),
+                candidate_rows=(),accepted_video_resets={},runtime_changes=({
+                    "entityType":"runtime_occurrences",
+                    "videoId":"video-vtuber","occurrenceId":"occ-replace",
+                    "rangeId":"all","replacement":True,
+                    "replacementSameVideo":True,
+                    "replacementPayload":{
+                        "videoId":"video-vtuber",
+                        "occurrenceId":"occ-replace","rangeId":"all",
+                        "title":"New","artist":"Artist","songKey":"song-new",
+                    },
+                    "replacementVideoPayload":{
+                        "videoId":"video-vtuber","channelId":"UCother",
+                        "channelHandle":"@other",
+                    },
+                },),
+            )
+
     def test_snapshot_overlay_song_source_keeps_exact_ranking_group(self):
         artist="Fixture Artist";title="A-B";other_title="AB"
         exact_group=f"{pg_adapter._overlay_norm(title)}::"
@@ -6948,12 +7054,16 @@ class Tests(unittest.TestCase):
         self.assertEqual(export_ranges,["7d"]*4)
         self.assertTrue(payload_ranges)
         self.assertEqual(set(payload_ranges),{"7d"})
-        self.assertEqual(len(bulk_calls),1)
-        self.assertEqual(len(bulk_calls[0]),4)
+        self.assertEqual(len(bulk_calls),2)
+        self.assertEqual(tuple(map(len,bulk_calls)),(1,3))
+        self.assertTrue(bulk_calls[0][0].endswith("-vtubers"))
+        self.assertFalse(set(bulk_calls[0]) & set(bulk_calls[1]))
+        self.assertEqual(len(set(bulk_calls[0]) | set(bulk_calls[1])),4)
         self.assertEqual(
             phase_order,
             ["artist-owner-preflight","overlay-artist-owner-preflight",
-             "song-owner-preflight","preflight","affected","unaffected"],
+             "song-owner-preflight","preflight","affected","affected",
+             "unaffected"],
         )
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)
