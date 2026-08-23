@@ -8,6 +8,7 @@ export, so later parent-CAS activations cannot mix revisions across pages.
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from decimal import Decimal
 import gc
@@ -1768,6 +1769,31 @@ class SnapshotSourceCardinalityMismatch(RuntimeError):
             "source cardinality gate failed: "
             f"{self.stage}/{self.range_id}/{self.view}/{self.source_key} "
             f"ranking={self.expected} source={self.actual}"
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class SnapshotSourceCardinalityMismatchRecord:
+    """Traceback-free scalar evidence retained across the bounded scan."""
+
+    stage: str
+    range_id: str
+    view: str
+    source_key: str
+    expected: tuple[int, int, int, int]
+    actual: tuple[int, int, int, int]
+
+    @classmethod
+    def from_error(
+        cls, mismatch: SnapshotSourceCardinalityMismatch,
+    ) -> "SnapshotSourceCardinalityMismatchRecord":
+        return cls(
+            stage=mismatch.stage,
+            range_id=mismatch.range_id,
+            view=mismatch.view,
+            source_key=mismatch.source_key,
+            expected=mismatch.expected,
+            actual=mismatch.actual,
         )
 
 
@@ -3659,7 +3685,7 @@ def _export_sources_collecting_cardinality_mismatches(
     range_id: str,
     source_keys: Iterable[str],
     mismatches: dict[
-        tuple[str, str, str], SnapshotSourceCardinalityMismatch
+        tuple[str, str, str], SnapshotSourceCardinalityMismatchRecord
     ],
     exporter: Callable[[set[str]], set[str]],
 ) -> set[str]:
@@ -3733,16 +3759,23 @@ def _export_sources_collecting_cardinality_mismatches(
                     + mismatch.source_key
                 )
             mismatch_key = (stage, range_id, mismatch.source_key)
+            record = SnapshotSourceCardinalityMismatchRecord.from_error(
+                mismatch
+            )
             previous = mismatches.get(mismatch_key)
             if previous is not None and (
-                previous.expected != mismatch.expected
-                or previous.actual != mismatch.actual
+                previous.expected != record.expected
+                or previous.actual != record.actual
             ):
                 raise RuntimeError(
                     "source cardinality mismatch changed inside one snapshot: "
                     + mismatch.source_key
                 )
-            mismatches[mismatch_key] = mismatch
+            # Never retain the exception itself: its traceback owns the
+            # exporter frame, which may still reference a complete source
+            # batch and several hydrated payload collections.  The immutable
+            # scalar record is all downstream reporting needs.
+            mismatches[mismatch_key] = record
             pending.remove(mismatch.source_key)
             continue
         if exported != attempted:
@@ -6754,7 +6787,7 @@ def materialize(
             vtuber_affected = vtuber_source_keys & set(affected_parent_sources)
             vtuber_unaffected = vtuber_source_keys - vtuber_affected
             vtuber_cardinality_mismatches: dict[
-                tuple[str, str, str], SnapshotSourceCardinalityMismatch
+                tuple[str, str, str], SnapshotSourceCardinalityMismatchRecord
             ] = {}
             exported_vtuber_affected = (
                 run_snapshot_operation(
