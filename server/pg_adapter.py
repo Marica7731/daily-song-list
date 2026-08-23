@@ -1902,7 +1902,30 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
         selected_from_occurrence = True
     if selected is None:
         return _with_source_detail_path(result)
-    channel_key = _text(selected.get("channelId") or selected.get("channelKey") or selected.get("channel_key"))
+    # ``channelKey`` is the internal owner key and may be a historical display
+    # name.  Only an explicit channelId, or one unique immutable UC id carried
+    # by every preview occurrence, is safe to expose as public channelId.
+    selected_channel_id = _text(
+        selected.get("channelId") or selected.get("channel_id")
+    )
+    selected_channel_key = _text(
+        selected.get("channelKey") or selected.get("channel_key")
+    )
+    occurrence_public_ids = {
+        value
+        for value in occurrence_ids
+        if re.fullmatch(r"UC[A-Za-z0-9_-]{22}", value)
+    }
+    public_channel_id = selected_channel_id
+    if (
+        not public_channel_id
+        and len(occurrence_public_ids) == 1
+        and occurrence_ids <= occurrence_public_ids
+    ):
+        public_channel_id = next(iter(occurrence_public_ids))
+    if not selected_channel_key and selected_channel_id:
+        selected_channel_key = selected_channel_id
+    channel_key = selected_channel_key or public_channel_id
     display_name = _text(selected.get("channelName") or selected.get("display_name"))
     handle = _text(selected.get("channelHandle") or selected.get("handle"))
     channel_url = _text(selected.get("channelUrl") or selected.get("channel_url"))
@@ -1913,15 +1936,15 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
         or (normalized_handle and normalized_handle in normalized_channel_url)
     ):
         channel_url = ""
-    if not channel_url and channel_key:
-        channel_url = f"https://www.youtube.com/channel/{channel_key}"
-    if canonical_url_hint and _channel_url_is_coherent(canonical_url_hint, channel_key, handle):
+    if not channel_url and public_channel_id:
+        channel_url = f"https://www.youtube.com/channel/{public_channel_id}"
+    if canonical_url_hint and _channel_url_is_coherent(canonical_url_hint, public_channel_id, handle):
         channel_url = canonical_url_hint
     field_values = {
         "key": channel_key,
         "name": display_name,
         "channelName": display_name,
-        "channelId": channel_key,
+        "channelId": public_channel_id,
         "channelHandle": handle,
         "channelUrl": channel_url,
         "avatarUrl": selected.get("avatarUrl") or selected.get("avatar_url"),
@@ -1935,6 +1958,11 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
         if value is not None and value != "":
             result[key] = value
     canonical_occurrences: list[Any] = []
+    if not public_channel_id:
+        # A legacy owner key is not a public YouTube channel id.  Do not leak
+        # it through a stale payload or manufacture a channel URL from it.
+        result.pop("channelId", None)
+        result.pop("channelUrl", None)
     canonical_handle = handle.lstrip("/@").casefold()
     for occurrence in result.get("occurrences") or ():
         if not isinstance(occurrence, Mapping):
@@ -1947,14 +1975,14 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
                 continue
             nested_id = _text(nested.get("channelId") or nested.get("channel_id"))
             nested_handle = _text(nested.get("channelHandle") or nested.get("channel_handle")).lstrip("/@").casefold()
-            if not channel_key or not (
-                nested_id == channel_key
+            if not public_channel_id or not (
+                nested_id == public_channel_id
                 or (not nested_id and canonical_handle and nested_handle == canonical_handle)
             ):
                 continue
             canonical_video = dict(nested)
             for key, value in {
-                "channelId": channel_key,
+                "channelId": public_channel_id,
                 "channelHandle": handle,
                 "channelName": display_name,
                 "channelUrl": channel_url,
@@ -1963,7 +1991,7 @@ def _apply_channel_metadata(payload: Mapping[str, Any], row: Mapping[str, Any], 
                     canonical_video[key] = value
             occurrence_result[nested_key] = canonical_video
         nested = occurrence_result.get("item") if isinstance(occurrence_result.get("item"), Mapping) else occurrence_result.get("video")
-        if canonical_url_hint and isinstance(nested, Mapping) and _text(nested.get("channelId")) == channel_key:
+        if canonical_url_hint and isinstance(nested, Mapping) and _text(nested.get("channelId")) == public_channel_id:
             occurrence_result["item"] = dict(nested)
             occurrence_result["video"] = dict(nested)
         canonical_occurrences.append(occurrence_result)
