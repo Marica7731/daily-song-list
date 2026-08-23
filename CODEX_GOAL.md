@@ -425,3 +425,8 @@
 - 资源与清理证据：固定 volume 约 `31.3GB/32GB`，cgroup `MemoryMax=2,684,354,560`、实际 peak 约 `1.2–1.37GB`、swap `0`；relay/tunnel 数据约数百 MB、连接正常；Actions exact cleanup success，临时 root/volume/relay 均已回收，旧 release `3cfb9f8...` 保持不变。
 - 最小修复仅在元数据没有显式公开 ID，且全部预览 occurrence 的 channelId 集合恰为一个合法 `UC[A-Za-z0-9_-]{22}` 时，将该 immutable occurrence ID提升为公开 `channelId`；内部 `key`/source detail key 保持历史 owner，多个 UC、显式冲突或非 UC legacy ID继续 fail closed，并移除 legacy 伪 channelId/URL。
 - 新增单一合法 UC 提升与多 owner 歧义回归；本地 targeted `2/2`、完整 next-serving `251/251`、`git diff --check` 已通过。提交、PR/CI/squash merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。
+
+### 2026-08-24 02:03 Asia/Taipei — main Check code 必须监听 server/tests 输入
+
+- main 手动 Check code run `32656479632`（head `05a71cad22c9da6108a358cd201fe74a8b3a73aa`）真实失败于 `Run checks`：`723 pass / 81 fail / 2 skipped`。失败原因是 workflow 的 `on.push.paths` 没有 `server/**` 或 `tests/**`；本次 Python 修复未自动触发 push Check，手动 dispatch 没有 base SHA，因而按合同执行了不适用的完整根 Node 套件。不是 WDC 数据、发布代码、网络或生产内容失败。
+- 最小流程修复仅在 `.github/workflows/check-code.yml` 的 push path 中加入 `server/**` 与 `tests/**`；真正 server/tests 变化会进入 next-serving Python/WDC gate，其他根 Node/前端/迁移输入仍走完整 Node 套件。该 workflow 合同回归需在 PR/merge 后由 main push run 证明；在成功 Check code 前不得调度 WDC。
