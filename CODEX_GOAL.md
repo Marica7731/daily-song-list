@@ -417,3 +417,11 @@
 - 最小修复新增只由 bounded persisted-owner binder 产生的私有证明：仅当 exact parent occurrence、same video、same occurrence、唯一 source/entity owner、无任何显式 channel/handle/url 冲突时，replacement 以 `canonicalVtuberChannelKey` 回到同一聚合 owner；overlay payload 不能自带或伪造该证明。legacy entity key 永不写入公开 `channelId`，也不生成 `/channel/<legacy-name>` URL；cross-video、parent miss、owner ambiguity、强身份冲突继续 fail closed。强 `UC...` owner 与 accepted reset alias 仍走原合同。
 - 总控提交前复审又锁定两个旁路：exact-channel scope 旧筛选只认公开强 ID，会漏掉已经由私有 proof 绑定的 legacy replacement；历史 base payload 若错误携带非 `UC...` 的 `channelId`，也不得由 legacy owner 路径生成伪 `/channel/...` URL。现统一通过私有 aggregate owner 选择器进入 exact scope，并在 candidate 缺公开 ID 时对 base channelId 严格 fail closed；legacy key 仍只作内部聚合键。
 - 本地验证已完成：legacy 生产形态、exact scope、公开 metadata、parent-miss、冲突 identity 与 strong-owner 路径精确回归 `6/6`，完整 next-serving `249/249`、relay/storage/release contract `13/13`、Python compile、7 份 workflow YAML、7 个部署 shell 脚本、Node syntax 与 `git diff --check` 均通过。push/PR/CI/squash merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。
+
+### 2026-08-24 01:42 Asia/Taipei — legacy VTuber metadata 不得把内部 owner 键当公开 channelId
+
+- 唯一 latest-head WDC run `32653596544`（head `483270209d34a7ac4fca63dc6f93f9a53fac0be0`）通过固定 32GB image、2.5GiB memory cgroup、7d/all songs 与 artists 视图后，在首次 all/vtubers 页面 hydration 失败：`PostgresAdapterError: VTuber ranking preview identity is invalid`，精确触发 `_canonicalize_vtuber_card_preview` line `7316`。失败 run 未 bundle/deploy，WDC 生产 release 未写入。
+- 精确代码形态为旧 owner 的 `channelKey`/`detail_key` 是历史文本键，而同一张卡的全部 occurrence preview 带唯一合法 `UC...` channelId；`_apply_channel_metadata` 在没有公开 `channelId` 时回退把内部键写入 `channelId`，随后严格预览门禁把真实 occurrence 的 UC 身份误判为跨 owner。不是生产数据删除、容量、内存或 transport 故障。
+- 资源与清理证据：固定 volume 约 `31.3GB/32GB`，cgroup `MemoryMax=2,684,354,560`、实际 peak 约 `1.2–1.37GB`、swap `0`；relay/tunnel 数据约数百 MB、连接正常；Actions exact cleanup success，临时 root/volume/relay 均已回收，旧 release `3cfb9f8...` 保持不变。
+- 最小修复仅在元数据没有显式公开 ID，且全部预览 occurrence 的 channelId 集合恰为一个合法 `UC[A-Za-z0-9_-]{22}` 时，将该 immutable occurrence ID提升为公开 `channelId`；内部 `key`/source detail key 保持历史 owner，多个 UC、显式冲突或非 UC legacy ID继续 fail closed，并移除 legacy 伪 channelId/URL。
+- 新增单一合法 UC 提升与多 owner 歧义回归；本地 targeted `2/2`、完整 next-serving `251/251`、`git diff --check` 已通过。提交、PR/CI/squash merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。

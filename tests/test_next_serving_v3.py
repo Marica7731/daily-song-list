@@ -6239,6 +6239,81 @@ class Tests(unittest.TestCase):
                 object(),"parent","all",(),{},(conflict,),
             )
 
+    def test_vtuber_legacy_metadata_promotes_one_verified_public_occurrence_id(self):
+        legacy_owner = "legacy fixture vtuber"
+        channel_id = "UC1234567890123456789012"
+        video_id = "dQw4w9WgXcQ"
+        video = {
+            "videoId": video_id,
+            "channelId": channel_id,
+            "channelHandle": "/@fixture",
+            "channelUrl": f"https://www.youtube.com/channel/{channel_id}",
+            "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+        }
+        payload = {
+            "key": legacy_owner,
+            "count": 1,
+            "occurrences": [{
+                "videoId": video_id,
+                "title": "Fixture Song",
+                "artist": "Fixture Artist",
+                "seconds": 120,
+                "item": dict(video),
+                "video": dict(video),
+            }],
+        }
+        result = pg_adapter._apply_channel_metadata(
+            payload,
+            {"detail_key": legacy_owner},
+            [{"channelKey": legacy_owner, "channelName": "Legacy Fixture"}],
+        )
+        self.assertEqual(result["key"], legacy_owner)
+        self.assertEqual(result["channelId"], channel_id)
+        pg_adapter._canonicalize_vtuber_card_preview(
+            result, result.get("channelId") or result.get("key"),
+        )
+        self.assertEqual(
+            result["occurrences"][0]["item"]["channelId"], channel_id,
+        )
+
+    def test_vtuber_legacy_metadata_does_not_promote_ambiguous_public_ids(self):
+        legacy_owner = "legacy fixture vtuber"
+        first_id = "UC1234567890123456789012"
+        second_id = "UCabcdefghijklmnopqrstuv"
+        payload = {
+            "key": legacy_owner,
+            "count": 2,
+            "occurrences": [
+                {
+                    "videoId": "dQw4w9WgXcQ",
+                    "title": "Fixture Song",
+                    "artist": "Fixture Artist",
+                    "item": {"videoId": "dQw4w9WgXcQ", "channelId": first_id},
+                    "video": {"videoId": "dQw4w9WgXcQ", "channelId": first_id},
+                },
+                {
+                    "videoId": "9bZkp7q19f0",
+                    "title": "Fixture Song",
+                    "artist": "Fixture Artist",
+                    "item": {"videoId": "9bZkp7q19f0", "channelId": second_id},
+                    "video": {"videoId": "9bZkp7q19f0", "channelId": second_id},
+                },
+            ],
+        }
+        result = pg_adapter._apply_channel_metadata(
+            payload,
+            {"detail_key": legacy_owner},
+            [{"channelKey": legacy_owner, "channelName": "Legacy Fixture"}],
+        )
+        self.assertNotIn("channelId", result)
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "VTuber ranking preview identity is invalid",
+        ):
+            pg_adapter._canonicalize_vtuber_card_preview(
+                result, result.get("channelId") or result.get("key"),
+            )
+
     def test_vtuber_same_video_replacement_rejects_conflicting_persisted_owner(self):
         owner_id="UC1234567890123456789012"
         other_id="UCabcdefghijklmnopqrstuv"
