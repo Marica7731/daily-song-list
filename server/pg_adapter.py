@@ -16907,6 +16907,28 @@ def _snapshot_materialized_source_payload(
             "snapshot materialized source target disagrees with detail type"
         )
 
+    def overlay_song_source_key(value: Mapping[str, Any]) -> str:
+        """Return the exact overlay ranking source key for one occurrence.
+
+        Overlay-only Song ranking cards are grouped by the punctuation-
+        preserving ``_overlay_norm(title)::...`` identity.  The broader
+        punctuation-insensitive owner identity is valid only when a persisted
+        parent detail supplies canonical authority; using it for a synthetic
+        source can merge two distinct ranking cards into one source.
+        """
+
+        occurrence = _overlay_public_occurrence(
+            value.get("occurrence_payload_json")
+        )
+        title = _text(value.get("title")) or _text(occurrence.get("title"))
+        if not title:
+            return ""
+        artist = _text(value.get("artist")) or _text(occurrence.get("artist"))
+        group_key = f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+        return _production_source_detail_key_for_group(
+            "songs", range_id, group_key,
+        )
+
     def row_video_id(value: Mapping[str, Any]) -> str:
         return _text(value.get("video_id") or value.get("videoId"))
 
@@ -16941,6 +16963,8 @@ def _snapshot_materialized_source_payload(
         if source_type == "video":
             return row_video_id(value) in target_groups.get("videos", set())
         if source_type == "song":
+            if not persisted:
+                return overlay_song_source_key(value) == requested_key
             groups = target_groups.get("songs", set())
             return bool(
                 _source_row_song_group_identity(value) in groups
@@ -17091,11 +17115,50 @@ def _snapshot_materialized_source_payload(
         if not matches:
             if source_type in {"song", "artist"} and not matches_target(change):
                 continue
+            if not occurrence_id or source_type not in {"song", "artist"}:
+                matches = [
+                    index for index, record in enumerate(effective)
+                    if _source_record_matches_change(record, change)
+                ]
+        if len(matches) > 1:
+            raise PostgresAdapterError(
+                "source occurrence preimage does not uniquely match authority"
+            )
+        if (
+            not matches
+            and not occurrence_id
+            and source_type in {"song", "artist"}
+        ):
+            expected_group = _text(
+                change.get(
+                    "parentSongGroupKey"
+                    if source_type == "song" else "parentArtistGroupKey"
+                )
+            ) or _runtime_change_group_key(
+                change, "songs" if source_type == "song" else "artists",
+            )
+
+            def record_group(record: Mapping[str, Any]) -> str:
+                occurrences = record.get("occurrences") or ()
+                occurrence = (
+                    occurrences[0]
+                    if len(occurrences) == 1
+                    and isinstance(occurrences[0], Mapping)
+                    else {}
+                )
+                if source_type == "song":
+                    return _source_row_song_group_identity(occurrence)
+                return (
+                    _overlay_artist_group_norm(_scope_artist(occurrence))
+                    or "unknown"
+                )
+
             matches = [
                 index for index, record in enumerate(effective)
-                if _source_record_matches_change(record, change)
+                if identity(record)[0] == video_id
+                and record_group(record) == expected_group
             ]
-        if len(matches) > 1:
+        if source_type in {"song", "artist"} and len(matches) != 1:
             raise PostgresAdapterError(
                 "source occurrence preimage does not uniquely match authority"
             )

@@ -2215,6 +2215,7 @@ class Tests(unittest.TestCase):
         target=self.temp/"source-checkpoint.sqlite"
         writer=pg_materializer.CanonicalSnapshotWriter(target)
         stage="affected-parent-sources"
+        rank=0
         def detail(source_key):
             return {"type":"song","key":source_key,"title":source_key,
                     "sourceDetailKey":source_key}
@@ -2222,6 +2223,19 @@ class Tests(unittest.TestCase):
             return {"videoId":video_id,"song":{
                 "songKey":song_key,"title":song_key,"artist":"Fixture",
             }}
+        def add_ranking(source_key):
+            nonlocal rank
+            rank+=1
+            record={"rank":rank,"key":source_key,
+                    "sourceDetailKey":source_key,"title":source_key,
+                    "displayArtist":"Fixture","count":1,"songCount":1,
+                    "videoCount":1,"timestampCount":1,"occurrences":[]}
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=record,range_id="all",view="songs",
+                metric="occurrences",scope_key="all",expected_rank=rank,
+            ))
+        add_ranking("source-complete")
+        add_ranking("source-partial")
         writer.add_checkpointed_source(
             stage,"source-complete","all",detail("source-complete"),
             [occurrence("video-complete","song-complete")],
@@ -2258,6 +2272,45 @@ class Tests(unittest.TestCase):
                 "SELECT name FROM sqlite_master WHERE type='table'"
             )}
         self.assertNotIn("source_export_checkpoints",tables)
+
+    def test_snapshot_source_checkpoint_rejects_cardinality_before_marker(self):
+        target=self.temp/"source-cardinality.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        source_key="source-cardinality"
+        record={"rank":1,"key":"song-cardinality",
+                "sourceDetailKey":source_key,"title":"Cardinality",
+                "displayArtist":"Fixture","count":1,"songCount":1,
+                "videoCount":1,"timestampCount":1,"occurrences":[]}
+        try:
+            writer.add_ranking(pg_materializer._ranking_row(
+                record,payload_record=record,range_id="all",view="songs",
+                metric="occurrences",scope_key="all",expected_rank=1,
+            ))
+            state=writer.begin_checkpointed_source(
+                "affected-parent-sources",source_key,"all",
+                {"type":"song","key":"song-cardinality",
+                 "title":"Cardinality","sourceDetailKey":source_key},
+            )
+            writer.add_source_occurrences(state,(
+                {"videoId":"video-one","song":{"songKey":"song-cardinality",
+                 "title":"Cardinality","artist":"Fixture"}},
+                {"videoId":"video-two","song":{"songKey":"song-cardinality",
+                 "title":"Cardinality","artist":"Fixture"}},
+            ))
+            written=writer.finish_source(state)
+            with self.assertRaisesRegex(
+                RuntimeError,"source cardinality gate failed",
+            ):
+                writer.mark_source_checkpoint(
+                    "affected-parent-sources",source_key,"all",written,
+                )
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*) FROM source_export_checkpoints"
+                ).fetchone()[0],0,
+            )
+        finally:
+            writer.abort()
 
     def test_snapshot_transport_retry_resumes_only_driver_connection_loss(self):
         transport_error=type(
@@ -5339,6 +5392,154 @@ class Tests(unittest.TestCase):
             (2,2,2,2),
         )
 
+    def test_snapshot_overlay_song_source_keeps_exact_ranking_group(self):
+        artist="Fixture Artist";title="A-B";other_title="AB"
+        exact_group=f"{pg_adapter._overlay_norm(title)}::"
+        exact_group+=pg_adapter._overlay_norm(artist)
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",exact_group,
+        )
+        owner_group="\x1f".join((
+            pg_adapter._source_song_owner_norm(title),
+            pg_adapter._source_song_owner_norm(artist),
+        ))
+        def candidate(video_id,occurrence_id,candidate_title):
+            return {
+                "revision_id":"overlay","video_id":video_id,
+                "occurrence_id":occurrence_id,"position":1,
+                "range_id":"all","song_key":"shared-song","seconds":10,
+                "title":candidate_title,"artist":artist,
+                "source_system":"fixture","video_title":video_id,
+                "channel_id":"UCfixture","channel_name":"Fixture",
+                "occurrence_payload_json":{},"video_payload_json":{},
+                "video_tombstone":False,
+            }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record=None,
+            targets=(("songs",owner_group),),
+            video_scope=("video-dash","video-plain"),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),candidate_rows=(
+                candidate("video-dash","occ-dash",title),
+                candidate("video-plain","occ-plain",other_title),
+            ),accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],
+             record["timestampCount"],record["videoCount"]),(1,1,1,1),
+        )
+        self.assertEqual(
+            [item["videoId"] for item in record["occurrences"]],
+            ["video-dash"],
+        )
+
+    def test_snapshot_overlay_song_source_uses_payload_artist_like_ranking(self):
+        title="Payload Song";artist="Payload Artist"
+        exact_group=f"{pg_adapter._overlay_norm(title)}::"
+        exact_group+=pg_adapter._overlay_norm(artist)
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",exact_group,
+        )
+        candidate={
+            "revision_id":"overlay","video_id":"video-payload",
+            "occurrence_id":"occ-payload","position":1,
+            "range_id":"all","song_key":"song-payload","seconds":10,
+            "title":title,"artist":"","source_system":"fixture",
+            "video_title":"Payload","channel_id":"UCfixture",
+            "channel_name":"Fixture","video_payload_json":{},
+            "occurrence_payload_json":{"artist":artist},
+            "video_tombstone":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record=None,
+            targets=(("songs",exact_group),),
+            video_scope=("video-payload",),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=(candidate,),accepted_video_resets={},
+            runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(payload["record"]["count"],1)
+        self.assertEqual(
+            payload["record"]["occurrences"][0]["song"]["artist"],artist,
+        )
+
+    def test_snapshot_materialized_song_source_drops_unique_group_preimage(self):
+        source_key="source-legacy-preimage";artist="Same Artist"
+        target_group="oldsong::sameartist"
+        parent={"videoId":"video-keep","occurrenceId":"occ-keep",
+                "rangeId":"all","position":1,"seconds":10,
+                "title":"Old Song","artist":artist}
+        candidate={"revision_id":"overlay","video_id":"video-stale",
+                   "occurrence_id":"occ-stale","position":2,
+                   "range_id":"all","song_key":"song-old","seconds":20,
+                   "title":"Old-Song","artist":artist,
+                   "source_system":"fixture","video_title":"Stale",
+                   "channel_id":"UCfixture","channel_name":"Fixture",
+                   "occurrence_payload_json":{},"video_payload_json":{},
+                   "video_tombstone":False}
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={"type":"song","key":target_group,
+                              "title":"Old Song","artist":artist,
+                              "sourceDetailKey":source_key,"rangeId":"all"},
+            targets=(("songs",target_group),),
+            video_scope=("video-keep","video-stale"),
+            parent_occurrences=(parent,),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=({
+                "entityType":"runtime_occurrences","videoId":"video-stale",
+                "rangeId":"all","title":"Old Song!","artist":artist,
+                "parentSongGroupKey":target_group,"replacement":True,
+                "replacementPayload":{"videoId":"video-stale",
+                    "occurrenceId":"occ-new","rangeId":"all",
+                    "title":"New Song","artist":"Other Artist"},
+            },),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],
+             record["timestampCount"],record["videoCount"]),(1,1,1,1),
+        )
+        self.assertEqual(
+            [item["videoId"] for item in record["occurrences"]],
+            ["video-keep"],
+        )
+
+    def test_snapshot_materialized_song_source_rejects_nonunique_group_preimage(self):
+        source_key="source-group-preimage";artist="Same Artist"
+        target_group="oldsong::sameartist"
+        ambiguous=tuple({
+            "videoId":"video-one","occurrenceId":f"occ-{index}",
+            "rangeId":"all","position":index,"seconds":index,
+            "title":title,"artist":artist,
+        } for index,title in enumerate(("Old Song","Old  Song"),start=1))
+        for label,parent in (("missing",()),("ambiguous",ambiguous)):
+            with self.subTest(label=label), self.assertRaisesRegex(
+                pg_adapter.PostgresAdapterError,"does not uniquely match",
+            ):
+                pg_adapter._snapshot_materialized_source_payload(
+                    source_key,range_id="all",
+                    persisted_record={
+                        "type":"song","key":target_group,
+                        "title":"Old Song","artist":artist,
+                        "sourceDetailKey":source_key,"rangeId":"all",
+                    },
+                    targets=(("songs",target_group),),
+                    video_scope=("video-one",),parent_occurrences=parent,
+                    direct_video_rows=(),direct_occurrence_rows=(),
+                    candidate_rows=(),accepted_video_resets={},
+                    runtime_changes=({
+                        "entityType":"runtime_occurrences",
+                        "videoId":"video-one","rangeId":"all",
+                        "title":"Old Song!","artist":artist,
+                        "parentSongGroupKey":target_group,
+                        "replacement":True,
+                    },),
+                )
+
     def test_snapshot_materialized_source_rejects_ambiguous_preimage_delete(self):
         source_key="source-ambiguous";title="Same Song";artist="Same Artist"
         parent=tuple({
@@ -5391,6 +5592,32 @@ class Tests(unittest.TestCase):
              for item in payload["record"]["occurrences"]],
             ["occ-2"],
         )
+
+    def test_snapshot_materialized_source_rejects_wrong_explicit_id_group_fallback(self):
+        source_key="source-wrong-id";title="Exact Song";artist="Artist"
+        parent=({"videoId":"video-one","occurrenceId":"occ-existing",
+                 "rangeId":"all","position":1,"seconds":1,
+                 "title":title,"artist":artist},)
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,"does not uniquely match",
+        ):
+            pg_adapter._snapshot_materialized_source_payload(
+                source_key,range_id="all",
+                persisted_record={
+                    "type":"song","key":"exactsong::artist",
+                    "sourceDetailKey":source_key,"rangeId":"all",
+                },
+                targets=(("songs","exactsong::artist"),),
+                video_scope=("video-one",),parent_occurrences=parent,
+                direct_video_rows=(),direct_occurrence_rows=(),
+                candidate_rows=(),accepted_video_resets={},
+                runtime_changes=({
+                    "entityType":"occurrences","videoId":"video-one",
+                    "occurrenceId":"occ-missing","rangeId":"all",
+                    "title":title,"artist":artist,
+                    "parentSongGroupKey":"exactsong::artist",
+                },),
+            )
 
     def test_snapshot_affected_source_batch_rejects_empty_scope_before_sql(self):
         with closing(sqlite3.connect(":memory:")) as database:
