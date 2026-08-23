@@ -1158,6 +1158,68 @@ class Tests(unittest.TestCase):
             [record["rank"] for record in response["records"]],[1,2,3,4],
         )
 
+    def test_generic_video_overlay_rebuilds_legacy_parent_songs_after_tombstones(self):
+        video_id = "9RARtsp7ong"
+        parent_songs = [
+            {"songKey": f"song-{index}", "title": f"Song {index}",
+             "artist": "Artist"}
+            for index in range(15)
+        ]
+        parent_occurrences = [
+            {
+                "occurrence_id": f"occ-{index}", "range_id": "all",
+                "video_id": video_id, "song_key": f"song-{index}",
+                "seconds": index, "source_system": "fixture",
+                "source_id": f"source-{index}",
+                "title": f"Song {index}", "artist": "Artist",
+                "payload_json": {},
+            }
+            for index in range(15)
+        ]
+        row = {
+            "detail_key": video_id, "row_count": 13, "song_count": 13,
+            "video_count": 1, "timestamp_count": 13,
+            "payload_json": {
+                "type": "video", "key": video_id, "videoId": video_id,
+                "songs": parent_songs,
+            },
+            "_snapshot_parent_payload_preloaded": True,
+            "_deferred_runtime_preview_changes": [
+                {
+                    "entityType": "occurrences", "videoId": video_id,
+                    "occurrenceId": "occ-2", "title": "Song 2",
+                    "artist": "Artist",
+                },
+                {
+                    "entityType": "occurrences", "videoId": video_id,
+                    "occurrenceId": "occ-11", "title": "Song 11",
+                    "artist": "Artist",
+                },
+            ],
+        }
+        def fake_rows(_connection, statement, params):
+            self.assertIn(
+                "exact affected generic video-card parent occurrence hydration",
+                statement,
+            )
+            self.assertEqual(params[:3], ["parent", video_id, ["all", ""]])
+            return parent_occurrences
+
+        with patch.object(pg_adapter, "_rows", side_effect=fake_rows):
+            payload = pg_adapter._hydrated_generic_ranking_payload(
+                object(), "parent", row,
+                {"range": "all", "view": "videos"}, "count",
+            )
+
+        self.assertEqual(
+            [item.get("occurrenceId") for item in payload.get("occurrences", [])],
+            [f"occ-{index}" for index in range(15) if index not in {2, 11}],
+        )
+        self.assertEqual(payload["songCount"], 13)
+        self.assertEqual(len(payload["songs"]), 13)
+        self.assertNotIn("song-2", {item["songKey"] for item in payload["songs"]})
+        self.assertNotIn("song-11", {item["songKey"] for item in payload["songs"]})
+
     def test_complete_parent_window_recomputes_final_canonical_totals(self):
         filtered=[
             {"detail_key":"artist-one","row_count":3,"song_count":2,

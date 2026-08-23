@@ -5754,7 +5754,15 @@ def _runtime_view_group_key(row: Mapping[str, Any], view: str) -> str:
                 return key
         return "unknown"
     if view == "videos":
-        return _text(row.get("video_id") or row.get("videoId"))
+        # Persisted parent ranking rows expose the immutable video identity as
+        # ``detail_key``; overlay/candidate rows use ``video_id``/``videoId``.
+        # Treat the shapes as the same group so deferred tombstones replay on
+        # legacy video cards instead of updating only their scalar counts.
+        return _text(
+            row.get("video_id")
+            or row.get("videoId")
+            or row.get("detail_key")
+        )
     video = _overlay_public_video(row)
     return (
         _text(row.get("canonicalVtuberChannelKey"))
@@ -13495,6 +13503,142 @@ def _generic_ranking_payload_is_complete(
     )
 
 
+def _hydrate_generic_video_parent_occurrences(
+    connection,
+    parent_revision_id: str,
+    video_id: str,
+    range_id: str,
+) -> list[dict[str, Any]]:
+    """Load the bounded parent occurrence set for one affected video card.
+
+    Legacy generic video ranking cards can persist only a ``songs`` list.  A
+    runtime tombstone still needs the immutable occurrence ids to remove the
+    right songs; matching only title/artist would be ambiguous.  Keep this
+    lookup exact, bounded, and fail closed on duplicate or missing identity.
+    """
+
+    video_id = _text(video_id)
+    range_id = _text(range_id) or "all"
+    if not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+        raise PostgresAdapterError(
+            "generic video parent occurrence hydration has invalid video identity"
+        )
+    rows = _rows(
+        connection,
+        """
+        /* exact affected generic video-card parent occurrence hydration */
+        SELECT occurrence_id, range_id, video_id, song_key, seconds,
+               source_system, source_id, title, artist,
+               is_niche, is_unknown_artist, payload_json
+        FROM runtime_occurrences
+        WHERE revision_id = %s AND video_id = %s
+          AND (range_id = ANY(%s) OR range_id IS NULL)
+        ORDER BY range_id, occurrence_id
+        LIMIT %s
+        """,
+        [
+            parent_revision_id,
+            video_id,
+            [range_id, ""],
+            _MAX_AFFECTED_RUNTIME_OCCURRENCES + 1,
+        ],
+    )
+    if len(rows) > _MAX_AFFECTED_RUNTIME_OCCURRENCES:
+        raise PostgresAdapterError(
+            "generic video parent occurrence hydration exceeded cap"
+        )
+    occurrences: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    positions: defaultdict[str, int] = defaultdict(int)
+    for row in rows:
+        row_video_id = _text(row.get("video_id"))
+        if row_video_id != video_id:
+            raise PostgresAdapterError(
+                "generic video parent occurrence hydration returned an unexpected video"
+            )
+        occurrence_id = _text(row.get("occurrence_id"))
+        row_range_id = _text(row.get("range_id")) or range_id
+        if not occurrence_id:
+            raise PostgresAdapterError(
+                "generic video parent occurrence hydration returned an empty identity"
+            )
+        identity = (row_range_id, occurrence_id)
+        if identity in seen:
+            raise PostgresAdapterError(
+                "generic video parent occurrence hydration returned a duplicate identity"
+            )
+        seen.add(identity)
+        payload = _json_object(row.get("payload_json"))
+        if isinstance(payload.get("payload"), Mapping):
+            payload = dict(payload["payload"])
+        position = payload.get("position")
+        try:
+            position = int(position)
+        except (TypeError, ValueError):
+            position = positions[row_video_id]
+        positions[row_video_id] = max(positions[row_video_id], position + 1)
+        payload.update({
+            "videoId": video_id,
+            "occurrenceId": occurrence_id,
+            "position": position,
+            "rangeId": row_range_id,
+            "songKey": row.get("song_key") if row.get("song_key") is not None else payload.get("songKey"),
+            "seconds": row.get("seconds") if row.get("seconds") is not None else payload.get("seconds"),
+            "title": row.get("title") if row.get("title") is not None else payload.get("title"),
+            "artist": row.get("artist") if row.get("artist") is not None else payload.get("artist"),
+            "sourceId": row.get("source_id") if row.get("source_id") is not None else payload.get("sourceId"),
+            "sourceSystem": (
+                row.get("source_system")
+                if row.get("source_system") is not None
+                else payload.get("sourceSystem")
+            ),
+        })
+        if "isNiche" not in payload and "is_niche" in row:
+            payload["isNiche"] = row.get("is_niche") is True
+        if "isUnknownArtist" not in payload and "is_unknown_artist" in row:
+            payload["isUnknownArtist"] = row.get("is_unknown_artist") is True
+        song = payload.get("song")
+        song = dict(song) if isinstance(song, Mapping) else {}
+        for name in (
+            "songKey", "title", "artist", "seconds", "rangeId",
+            "sourceId", "rawHash", "sourceSystem",
+        ):
+            if payload.get(name) is not None and payload.get(name) != "":
+                song[name] = payload[name]
+        payload["song"] = song
+        occurrences.append(payload)
+    return occurrences
+
+
+def _rebuild_generic_video_songs(payload: MutableMapping[str, Any]) -> None:
+    """Make a video card's song list derive from its effective occurrences."""
+
+    occurrences = payload.get("occurrences")
+    if not isinstance(occurrences, list):
+        return
+    songs: list[dict[str, Any]] = []
+    song_keys: set[str] = set()
+    for occurrence in occurrences:
+        if not isinstance(occurrence, Mapping):
+            continue
+        nested_song = occurrence.get("song")
+        song = dict(nested_song) if isinstance(nested_song, Mapping) else {}
+        for name in (
+            "songKey", "title", "artist", "seconds", "rangeId",
+            "sourceId", "rawHash", "sourceSystem",
+        ):
+            if occurrence.get(name) is not None and occurrence.get(name) != "":
+                song[name] = occurrence[name]
+        if not _text(song.get("title")) and not _text(song.get("songKey")):
+            continue
+        songs.append(song)
+        key = _song_key(song)
+        if key:
+            song_keys.add(key)
+    payload["songs"] = songs
+    payload["songCount"] = len(song_keys)
+
+
 def _hydrated_generic_ranking_payload(
     connection,
     parent_revision_id: str,
@@ -13555,6 +13699,7 @@ def _hydrated_generic_ranking_payload(
         parent_stored_found = bool(stored_payload)
         payload = copy.deepcopy(stored_payload)
     hydration_degraded = False
+    video_parent_occurrences_hydrated = False
     if (
         requires_canonical_hydration
         and view in {"songs", "songIndex", "vsingerSongs"}
@@ -13583,6 +13728,33 @@ def _hydrated_generic_ranking_payload(
             payload["occurrences"] = []
         elif parent_row_count > 0 and not parent_occurrences:
             hydration_degraded = True
+    if requires_canonical_hydration and view == "videos":
+        detail_key = _text(row.get("detail_key"))
+        parent_occurrences = payload.get("occurrences")
+        parent_row_count = int(row.get("row_count") or 0)
+        preview_limited = bool(payload.get("occurrencePreviewLimited"))
+        if (
+            not isinstance(parent_occurrences, list)
+            or preview_limited
+            or (parent_row_count > 0 and not parent_occurrences)
+            or (
+                isinstance(parent_occurrences, list)
+                and parent_row_count > 0
+                and len(parent_occurrences) != parent_row_count
+            )
+        ):
+            parent_occurrences = _hydrate_generic_video_parent_occurrences(
+                connection,
+                parent_revision_id,
+                detail_key,
+                _text(options.get("range")) or "all",
+            )
+            if parent_row_count > 0 and not parent_occurrences:
+                raise PostgresAdapterError(
+                    "generic video parent occurrence hydration returned no rows"
+                )
+            payload["occurrences"] = parent_occurrences
+            video_parent_occurrences_hydrated = True
     if reset_deferred and not hydration_degraded:
         hydrated_row = dict(row)
         hydrated_row["payload_json"] = payload
@@ -13654,6 +13826,16 @@ def _hydrated_generic_ranking_payload(
         hydration_degraded = True
         if not isinstance(payload.get("occurrences"), list):
             payload["occurrences"] = []
+    if (
+        requires_canonical_hydration
+        and view == "videos"
+        and not hydration_degraded
+        and (
+            video_parent_occurrences_hydrated
+            or isinstance(payload.get("occurrences"), list)
+        )
+    ):
+        _rebuild_generic_video_songs(payload)
     return payload
 
 
