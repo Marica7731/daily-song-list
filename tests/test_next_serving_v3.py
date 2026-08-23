@@ -2033,6 +2033,248 @@ class Tests(unittest.TestCase):
             (owned,),
         )
 
+    def test_bounded_parent_vtuber_owner_lookup_uses_indexed_exact_membership(self):
+        rows=[{
+            "video_id":"video-one","source_key":"source-one",
+            "entity_key":"legacy owner",
+            "payload_json":{"type":"vtuber","name":"Legacy Owner"},
+        }]
+        with patch.object(pg_adapter,"_rows",return_value=rows) as query:
+            owners=pg_adapter._bounded_parent_vtuber_video_owners(
+                object(),"parent",("video-one",),"all",
+            )
+        statement=" ".join(query.call_args.args[1].split())
+        params=query.call_args.args[2]
+        self.assertIn("daily_song_source_video_search_text",statement)
+        self.assertIn("occurrence.video_id = requested.video_id",statement)
+        self.assertIn("detail.entity_type = 'vtuber'",statement)
+        self.assertEqual(params[1:3],["parent","all"])
+        self.assertEqual(owners["video-one"]["entity_key"],"legacy owner")
+
+    def test_bounded_parent_vtuber_owner_lookup_rejects_two_sources(self):
+        rows=[{
+            "video_id":"video-one","source_key":source,
+            "entity_key":owner,"payload_json":{"type":"vtuber","key":owner},
+        } for source,owner in (("source-a","UCownerA00000000000000"),
+                               ("source-b","UCownerB00000000000000"))]
+        with patch.object(pg_adapter,"_rows",return_value=rows), \
+             self.assertRaisesRegex(
+                 pg_adapter.PostgresAdapterError,"owner identity is ambiguous",
+             ):
+            pg_adapter._bounded_parent_vtuber_video_owners(
+                object(),"parent",("video-one",),"all",
+            )
+
+    def test_direct_vtuber_owner_binding_repairs_tombstone_and_legacy_reset_alias(self):
+        legacy_owner="rieru ch. 我部りえる /あおぎり高校"
+        rieru_owner={
+            "video_id":"video-reset","source_key":"source-rieru",
+            "entity_key":legacy_owner,
+            "payload_json":{
+                "type":"vtuber","key":legacy_owner,
+                "name":"Rieru Ch. 我部りえる /あおぎり高校",
+                "channelName":"Rieru Ch. 我部りえる /あおぎり高校",
+            },
+        }
+        strong_owner={
+            "video_id":"video-drop","source_key":"source-strong",
+            "entity_key":"UCstrong0000000000000000",
+            "payload_json":{
+                "type":"vtuber","key":"UCstrong0000000000000000",
+                "channelId":"UCstrong0000000000000000",
+                "channelHandle":"/@strong","name":"Strong Owner",
+            },
+        }
+        candidate={
+            "video_id":"video-reset","occurrence_id":"position:0",
+            "range_id":"7d","title":"Song","artist":"Artist",
+            "song_key":"song","channel_id":"UCnew0000000000000000000",
+            "channel_handle":"/@rieru","channel_name":
+                "Rieru Ch. 我部りえる /あおぎり高校",
+            "video_payload_json":{
+                "videoId":"video-reset",
+                "channelId":"UCnew0000000000000000000",
+                "channelHandle":"/@rieru",
+                "channelName":"Rieru Ch. 我部りえる /あおぎり高校",
+            },
+        }
+        reset={
+            "video_id":"video-reset","channel_id":"UCnew0000000000000000000",
+            "channel_handle":"/@rieru","channel_name":
+                "Rieru Ch. 我部りえる /あおぎり高校",
+            "payload_json":candidate["video_payload_json"],
+        }
+        reset_change={
+            "entityType":"occurrences","videoId":"video-reset",
+            "occurrenceId":"old-reset","channel_id":
+                "UCnew0000000000000000000","acceptedVideoReset":True,
+            "replacement":True,"replacementSameVideo":True,
+            "channel_handle":"/@rieru",
+            "channel_url":"https://www.youtube.com/@rieru",
+            "videoPayload":candidate["video_payload_json"],
+            "replacementVideoPayload":candidate["video_payload_json"],
+            "replacementPayload":{
+                "title":"Song","artist":"Artist","videoId":"video-reset",
+                "occurrenceId":"new-reset","channelId":
+                    "UCnew0000000000000000000",
+            },
+        }
+        tombstone={
+            "entityType":"runtime_occurrences","videoId":"video-drop",
+            "occurrenceId":"old-drop","rangeId":"all",
+        }
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={
+                "video-reset":rieru_owner,"video-drop":strong_owner,
+            },
+        ):
+            candidates,resets=pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(candidate,),
+                {"video-reset":reset},(reset_change,tombstone),
+            )
+        self.assertEqual(
+            candidates[0]["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        self.assertEqual(
+            resets["video-reset"]["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        self.assertEqual(
+            reset_change["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        replacement_rows=pg_adapter._runtime_replacement_candidate_rows(
+            (reset_change,),strict_immutable_identity=True,
+        )
+        self.assertEqual(
+            replacement_rows[0]["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        self.assertEqual(reset_change["parentVtuberChannelKey"],legacy_owner)
+        self.assertEqual(
+            tombstone["parentVtuberChannelKey"],
+            "UCstrong0000000000000000",
+        )
+        self.assertEqual(
+            pg_adapter._runtime_change_group_key(tombstone,"vtubers"),
+            "UCstrong0000000000000000",
+        )
+        self.assertEqual(
+            pg_adapter._vtuber_owned_overlay_changes((tombstone,)),
+            (tombstone,),
+        )
+
+    def test_direct_vtuber_owner_binding_preserves_true_channel_move(self):
+        owner={
+            "video_id":"video-move","source_key":"source-old",
+            "entity_key":"UCold000000000000000000000",
+            "payload_json":{
+                "channelId":"UCold000000000000000000000",
+                "channelHandle":"/@old","name":"Old Channel",
+            },
+        }
+        candidate={
+            "video_id":"video-move","occurrence_id":"position:0",
+            "channel_id":"UCnew000000000000000000000",
+            "channel_handle":"/@new","channel_name":"New Channel",
+            "video_payload_json":{
+                "videoId":"video-move",
+                "channelId":"UCnew000000000000000000000",
+                "channelHandle":"/@new","channelName":"New Channel",
+            },
+        }
+        reset={
+            "video_id":"video-move",
+            "channel_id":"UCnew000000000000000000000",
+            "channel_handle":"/@new","channel_name":"New Channel",
+            "payload_json":candidate["video_payload_json"],
+        }
+        change={
+            "entityType":"occurrences","videoId":"video-move",
+            "occurrenceId":"old","channel_id":
+                "UCnew000000000000000000000","acceptedVideoReset":True,
+        }
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-move":owner},
+        ):
+            candidates,resets=pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(candidate,),
+                {"video-move":reset},(change,),
+            )
+        self.assertNotIn("canonicalVtuberChannelKey",candidates[0])
+        self.assertNotIn("canonicalVtuberChannelKey",resets["video-move"])
+        self.assertEqual(
+            change["parentVtuberChannelKey"],
+            "UCold000000000000000000000",
+        )
+
+    def test_exact_vtuber_replacement_uses_bound_owner_for_alias(self):
+        legacy_owner="rieru ch. 我部りえる /あおぎり高校"
+        candidate_channel="UCnew0000000000000000000"
+        video_payload={
+            "videoId":"video-reset","title":"Video",
+            "channelId":candidate_channel,"channelHandle":"/@rieru",
+            "channelName":"Rieru Ch. 我部りえる /あおぎり高校",
+            "channelUrl":"https://www.youtube.com/@rieru",
+        }
+        change={
+            "entityType":"runtime_occurrences","revisionId":"overlay",
+            "videoId":"video-reset","occurrenceId":"old-reset",
+            "rangeId":"all","channel_id":candidate_channel,
+            "channel_handle":"/@rieru",
+            "channel_url":"https://www.youtube.com/@rieru",
+            "videoPayload":video_payload,"replacementVideoPayload":video_payload,
+            "replacement":True,"replacementSameVideo":True,
+            "replacementPayload":{
+                "title":"Song","artist":"Artist","videoId":"video-reset",
+                "occurrenceId":"new-reset","rangeId":"all",
+                "channelId":candidate_channel,
+            },
+            "parentVtuberChannelKey":legacy_owner,
+            "parentVtuberSourceKey":"source-rieru",
+            "canonicalVtuberChannelKey":legacy_owner,
+        }
+        replacement_rows=pg_adapter._runtime_replacement_candidate_rows(
+            (change,),strict_immutable_identity=True,
+        )
+        options=pg_adapter._query_options({
+            "range":"all","view":"vtubers","metric":"occurrences",
+            "page":"1","pageSize":"30",
+        })
+        captured={}
+        def authority(
+            _connection,_parent,channels,_videos,_occurrences,
+            parent_sources,candidates,_range_id,**_kwargs,
+        ):
+            captured["channels"]=set(channels)
+            captured["parent_sources"]=dict(parent_sources)
+            captured["candidate_channels"]={
+                row["channel_id"] for row in candidates
+            }
+            return [{
+                "channel_id":legacy_owner,"row_count":1,"song_count":1,
+                "video_count":1,"residual_match":True,
+            }]
+        pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
+        with patch.object(
+            pg_adapter,"_authoritative_vtuber_summary_rows",
+            side_effect=authority,
+        ):
+            rows=pg_adapter._overlay_vtuber_replacement_rows(
+                SimpleNamespace(cursor=lambda:None),"active","parent",(),
+                options,{legacy_owner:{
+                    "detail_key":legacy_owner,"name":"Rieru",
+                    "payload_json":{"sourceDetailKey":"source-rieru"},
+                }},runtime_changes=(change,),
+                replacement_rows=replacement_rows,exact_required=True,
+                direct_overlay_revision_ids=("overlay",),
+            )
+        self.assertEqual(captured["channels"],{legacy_owner})
+        self.assertEqual(
+            captured["parent_sources"],{legacy_owner:"source-rieru"},
+        )
+        self.assertEqual(captured["candidate_channels"],{legacy_owner})
+        self.assertEqual(rows[legacy_owner]["row_count"],1)
+
     def test_exact_vtuber_does_not_subtract_unowned_occurrence_noop(self):
         channel_id="UCfixture"
         candidate={
