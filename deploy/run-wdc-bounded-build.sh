@@ -156,8 +156,11 @@ chmod 0600 "$VOLUME_CONTROL_ROOT/.codex-owned-run"
 truncate --size "$TEMP_VOLUME_BYTES" "$VOLUME_IMAGE"
 chmod 0600 "$VOLUME_IMAGE"
 [[ "$(stat -c %s "$VOLUME_IMAGE")" == "$TEMP_VOLUME_BYTES" ]]
-LOOP_DEVICE="$(losetup --find --show --nooverlap "$VOLUME_IMAGE")"
+LOOP_DEVICE="$(losetup --find --show --nooverlap --direct-io=on "$VOLUME_IMAGE")"
 [[ "$LOOP_DEVICE" =~ ^/dev/loop[0-9]+$ ]]
+LOOP_DIRECT_IO="$(losetup --list --noheadings --raw --output DIO "$LOOP_DEVICE")"
+[[ "$LOOP_DIRECT_IO" == "1" ]]
+echo "WDC_LOOP_DIRECT_IO_OK device=$LOOP_DEVICE dio=$LOOP_DIRECT_IO"
 printf '%s\n' "$LOOP_DEVICE" > "$LOOP_MARKER"
 chmod 0600 "$LOOP_MARKER"
 mkfs.ext4 -q -F -m 0 -E lazy_itable_init=1,lazy_journal_init=1 "$LOOP_DEVICE"

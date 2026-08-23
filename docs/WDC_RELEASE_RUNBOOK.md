@@ -87,7 +87,7 @@ WDC cleanup 的对象只有精确 run control、secret、loop volume、relay、i
 
 | 门禁 | 必须满足 | 实现位置 |
 | --- | ---: | --- |
-| WDC fixed build volume | 容量 `<= 32,000,000,000`；当前镜像精确为该值，挂载后可用总容量约 31–32GB | workflow、`run-wdc-bounded-build.sh`、storage checker |
+| WDC fixed build volume | 容量 `<= 32,000,000,000`；当前镜像精确为该值，挂载后可用总容量约 31–32GB；loop backing file 必须 `--direct-io=on` 且在 `mkfs` 前读回 `DIO=1` | workflow、`run-wdc-bounded-build.sh`、storage checker |
 | immutable release | `0 < logical bytes < 16,000,000,000` | build script、storage checker |
 | WDC host availability | runtime/copy/final `>= 20,000,000,000` | storage checker、finalize、observation |
 | WDC preflight availability | `host free - 32,000,000,000 >= 20,000,000,000` | storage checker |
@@ -267,7 +267,8 @@ for unit in dsl-wdc-build dsl-wdc-storage-guard dsl-wdc-pg-tunnel; do
     --no-pager || true
 done
 findmnt --target "$volume/volume" --output TARGET,SOURCE,FSTYPE,OPTIONS --noheadings || true
-losetup -j "$volume/build-volume.ext4" || true
+losetup --list --noheadings --raw --output NAME,DIO,BACK-FILE \
+  "$(sed -n '1p' "$volume/.loop-device" 2>/dev/null)" 2>/dev/null || true
 du -sb -- "$project"
 df -B1 --output=target,size,used,avail "$project"
 readlink "$project/releases/current"

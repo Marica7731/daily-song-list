@@ -1951,6 +1951,12 @@ class CanonicalSnapshotWriter:
         if partial:
             self.connection.commit()
             self._pending_writes = 0
+            # The cardinality collector may isolate many exact mismatches in
+            # one pass.  Deletes dirty SQLite pages but do not pass through
+            # _record_writes(), so release both SQLite heap cache and the
+            # private temp file's clean pages at this durable boundary.
+            self.connection.execute("PRAGMA shrink_memory")
+            self._drop_file_cache("discard-partial")
         if completed or partial:
             print(
                 "PG_SNAPSHOT_SOURCE_RESUME "

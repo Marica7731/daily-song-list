@@ -2556,8 +2556,15 @@ class Tests(unittest.TestCase):
         # Match the production writer's periodic SQLite commit before the PG
         # cursor later loses its transport.
         writer.connection.commit()
-        completed=writer.prepare_checkpointed_sources(
-            stage,"all",{"source-complete","source-partial"},
+        with patch.object(
+            pg_materializer,"_drop_clean_file_cache",return_value=True,
+        ) as drop:
+            completed=writer.prepare_checkpointed_sources(
+                stage,"all",{"source-complete","source-partial"},
+            )
+        drop.assert_called_once_with(writer.temp)
+        self.assertEqual(
+            (writer.cache_drop_attempts,writer.cache_drop_count),(1,1),
         )
         self.assertEqual(completed,{"source-complete"})
         self.assertEqual(
@@ -9586,5 +9593,31 @@ esac
         self.assertIn("core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol",ci)
         self.assertIn('diff --check "$diff_base" HEAD',ci)
         self.assertNotIn("https://ytb-song-rank.culua.com",installer)
+
+    def test_wdc_loop_backing_file_requires_verified_direct_io_before_mkfs(self):
+        build=(ROOT/"deploy"/"run-wdc-bounded-build.sh").read_text(
+            encoding="utf-8",
+        )
+        attach=(
+            'LOOP_DEVICE="$(losetup --find --show --nooverlap '
+            '--direct-io=on "$VOLUME_IMAGE")"'
+        )
+        readback=(
+            'LOOP_DIRECT_IO="$(losetup --list --noheadings --raw '
+            '--output DIO "$LOOP_DEVICE")"'
+        )
+        fail_closed='[[ "$LOOP_DIRECT_IO" == "1" ]]'
+        marker='WDC_LOOP_DIRECT_IO_OK device=$LOOP_DEVICE dio=$LOOP_DIRECT_IO'
+        mkfs='mkfs.ext4 -q -F -m 0'
+        self.assertEqual(build.count("--direct-io=on"),1)
+        self.assertNotIn("--direct-io=off",build)
+        for required in (attach,readback,fail_closed,marker):
+            self.assertIn(required,build)
+        self.assertLess(build.index(attach),build.index(readback))
+        self.assertLess(build.index(readback),build.index(fail_closed))
+        self.assertLess(build.index(fail_closed),build.index(marker))
+        self.assertLess(build.index(marker),build.index(mkfs))
+        self.assertIn('MEMORY_MAX_BYTES="2684354560"',build)
+        self.assertIn('TEMP_VOLUME_BYTES="32000000000"',build)
 
 if __name__=="__main__":unittest.main(verbosity=2)
