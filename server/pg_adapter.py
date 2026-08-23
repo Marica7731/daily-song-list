@@ -15643,14 +15643,21 @@ def _snapshot_source_overlay_inputs(
         ):
             selected.setdefault(_overlay_candidate_identity(row), dict(row))
         candidate_rows = tuple(selected.values())
-    runtime_changes = tuple(_runtime_tombstones(
-        connection,
-        overlay_revision_ids,
-        accepted_video_resets.values() if accepted_video_resets else (),
-        candidate_rows,
-        parent_revision_id=parent_revision_id,
-        channel_scope=(),
-        scoped_parent_video_ids=scoped_videos,
+    # Ranking projection applies runtime curation only to its exact physical
+    # range.  Source rebuilding must use the same contract: replaying a 7d
+    # same-video replacement into ``all`` can overwrite the persisted tuple's
+    # rangeId and make that occurrence disappear during final range filtering.
+    runtime_changes = tuple(_overlay_rows_for_range(
+        _runtime_tombstones(
+            connection,
+            overlay_revision_ids,
+            accepted_video_resets.values() if accepted_video_resets else (),
+            candidate_rows,
+            parent_revision_id=parent_revision_id,
+            channel_scope=(),
+            scoped_parent_video_ids=scoped_videos,
+        ),
+        range_id,
     ))
     return candidate_rows, accepted_video_resets, runtime_changes
 

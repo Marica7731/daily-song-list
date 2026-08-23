@@ -1745,6 +1745,32 @@ def _source_occurrence_row(
     )
 
 
+class SnapshotSourceCardinalityMismatch(RuntimeError):
+    """One exact ranking/source tuple mismatch safe to aggregate early."""
+
+    def __init__(
+        self,
+        *,
+        stage: str,
+        range_id: str,
+        view: str,
+        source_key: str,
+        expected: tuple[int, int, int, int],
+        actual: tuple[int, int, int, int],
+    ) -> None:
+        self.stage = _text(stage)
+        self.range_id = _text(range_id)
+        self.view = _text(view)
+        self.source_key = _text(source_key)
+        self.expected = tuple(int(value) for value in expected)
+        self.actual = tuple(int(value) for value in actual)
+        super().__init__(
+            "source cardinality gate failed: "
+            f"{self.stage}/{self.range_id}/{self.view}/{self.source_key} "
+            f"ranking={self.expected} source={self.actual}"
+        )
+
+
 class CanonicalSnapshotWriter:
     def __init__(self, output: Path):
         if output.exists():
@@ -2040,10 +2066,13 @@ class CanonicalSnapshotWriter:
                 )
                 expected = (expected[0], actual[1], expected[2], expected[3])
             else:
-                raise RuntimeError(
-                    "source cardinality gate failed: "
-                    f"{stage}/{range_id}/{view}/{source_key} "
-                    f"ranking={expected} source={actual}"
+                raise SnapshotSourceCardinalityMismatch(
+                    stage=stage,
+                    range_id=range_id,
+                    view=view,
+                    source_key=source_key,
+                    expected=expected,
+                    actual=actual,
                 )
         marker = (stage, range_id)
         if marker not in self.source_cardinality_gate_stages:
@@ -3615,6 +3644,118 @@ def _prepare_writer_source_checkpoints(
 ) -> set[str]:
     prepare = getattr(writer, "prepare_checkpointed_sources", None)
     return set(prepare(stage, range_id, source_keys)) if callable(prepare) else set()
+
+
+def _export_sources_collecting_cardinality_mismatches(
+    writer: Any,
+    *,
+    stage: str,
+    range_id: str,
+    source_keys: Iterable[str],
+    mismatches: dict[
+        tuple[str, str, str], SnapshotSourceCardinalityMismatch
+    ],
+    exporter: Callable[[set[str]], set[str]],
+) -> set[str]:
+    """Run the final exporter through every VTuber cardinality mismatch.
+
+    A cardinality mismatch is raised only after the source rows have been
+    written but before their durable completion marker.  Reusing the existing
+    checkpoint preparation therefore both discovers sources completed before
+    the exception and deletes the one unmarked partial source.  The next pass
+    receives only untouched keys.  Other errors are never caught here.
+
+    ``mismatches`` belongs to the outer materialize operation so a PostgreSQL
+    transport reconnect cannot forget an already-accounted data mismatch.
+    """
+
+    if not callable(getattr(writer, "prepare_checkpointed_sources", None)):
+        raise RuntimeError(
+            "source cardinality collector requires durable source checkpoints"
+        )
+    requested = {_text(value) for value in source_keys if _text(value)}
+
+    def failed_keys() -> set[str]:
+        return {
+            source_key
+            for (failure_stage, failure_range, source_key) in mismatches
+            if failure_stage == stage
+            and failure_range == range_id
+            and source_key in requested
+        }
+
+    known_failed = failed_keys()
+    pending = requested - known_failed
+    completed = _prepare_writer_source_checkpoints(
+        writer, stage, range_id, pending,
+    )
+    if not completed.issubset(pending):
+        raise RuntimeError(
+            "source cardinality collector found an unexpected checkpoint"
+        )
+    pending.difference_update(completed)
+
+    while pending:
+        attempted = set(pending)
+        try:
+            exported = set(exporter(attempted))
+        except SnapshotSourceCardinalityMismatch as mismatch:
+            if (
+                mismatch.stage != stage
+                or mismatch.range_id != range_id
+                or mismatch.view != "vtubers"
+                or mismatch.source_key not in attempted
+            ):
+                raise
+            durable = _prepare_writer_source_checkpoints(
+                writer, stage, range_id, attempted,
+            )
+            if not durable.issubset(attempted):
+                raise RuntimeError(
+                    "source cardinality collector found an unexpected checkpoint"
+                )
+            if mismatch.source_key in durable:
+                raise RuntimeError(
+                    "source cardinality mismatch received a durable checkpoint: "
+                    + mismatch.source_key
+                )
+            completed.update(durable)
+            pending.difference_update(durable)
+            if mismatch.source_key not in pending:
+                raise RuntimeError(
+                    "source cardinality mismatch escaped the pending key set: "
+                    + mismatch.source_key
+                )
+            mismatch_key = (stage, range_id, mismatch.source_key)
+            previous = mismatches.get(mismatch_key)
+            if previous is not None and (
+                previous.expected != mismatch.expected
+                or previous.actual != mismatch.actual
+            ):
+                raise RuntimeError(
+                    "source cardinality mismatch changed inside one snapshot: "
+                    + mismatch.source_key
+                )
+            mismatches[mismatch_key] = mismatch
+            pending.remove(mismatch.source_key)
+            continue
+        if exported != attempted:
+            raise RuntimeError(
+                "source cardinality collector changed the exact requested key set"
+            )
+        completed.update(exported)
+        pending.difference_update(exported)
+
+    accounted_failed = failed_keys()
+    if completed & accounted_failed:
+        raise RuntimeError(
+            "source cardinality mismatch also has a durable checkpoint"
+        )
+    if completed | accounted_failed != requested:
+        raise RuntimeError(
+            "source cardinality collector did not account for every requested key"
+        )
+    return completed
 
 
 def _begin_writer_checkpointed_source(
@@ -6606,16 +6747,26 @@ def materialize(
             ) & source_keys["all"]
             vtuber_affected = vtuber_source_keys & set(affected_parent_sources)
             vtuber_unaffected = vtuber_source_keys - vtuber_affected
+            vtuber_cardinality_mismatches: dict[
+                tuple[str, str, str], SnapshotSourceCardinalityMismatch
+            ] = {}
             exported_vtuber_affected = (
                 run_snapshot_operation(
                     "vtuber-affected-source-preflight",
-                    lambda current: export_affected_parent_sources(
-                        current,
+                    lambda current: _export_sources_collecting_cardinality_mismatches(
                         writer,
-                        parent_revision_id=builder.parent[0],
-                        overlay_revision_ids=builder.overlay_ids,
-                        source_scope=source_scope,
+                        stage="affected-parent-sources",
+                        range_id="all",
                         source_keys=vtuber_affected,
+                        mismatches=vtuber_cardinality_mismatches,
+                        exporter=lambda pending: export_affected_parent_sources(
+                            current,
+                            writer,
+                            parent_revision_id=builder.parent[0],
+                            overlay_revision_ids=builder.overlay_ids,
+                            source_scope=source_scope,
+                            source_keys=pending,
+                        ),
                     ),
                 )
                 if vtuber_affected else set()
@@ -6623,22 +6774,65 @@ def materialize(
             exported_vtuber_unaffected = (
                 run_snapshot_operation(
                     "vtuber-parent-source-preflight",
-                    lambda current: export_unaffected_parent_sources(
-                        current,
+                    lambda current: _export_sources_collecting_cardinality_mismatches(
                         writer,
-                        parent_revision_id=builder.parent[0],
+                        stage="parent-sources",
+                        range_id="all",
                         source_keys=vtuber_unaffected,
-                        affected_source_keys=(),
+                        mismatches=vtuber_cardinality_mismatches,
+                        exporter=lambda pending: export_unaffected_parent_sources(
+                            current,
+                            writer,
+                            parent_revision_id=builder.parent[0],
+                            source_keys=pending,
+                            affected_source_keys=(),
+                        ),
                     ),
                 )
                 if vtuber_unaffected else set()
             )
+            failed_vtuber_affected = {
+                source_key
+                for (stage, range_id, source_key) in vtuber_cardinality_mismatches
+                if stage == "affected-parent-sources" and range_id == "all"
+            }
+            failed_vtuber_unaffected = {
+                source_key
+                for (stage, range_id, source_key) in vtuber_cardinality_mismatches
+                if stage == "parent-sources" and range_id == "all"
+            }
             if (
-                exported_vtuber_affected != vtuber_affected
-                or exported_vtuber_unaffected != vtuber_unaffected
+                exported_vtuber_affected & failed_vtuber_affected
+                or exported_vtuber_unaffected & failed_vtuber_unaffected
+                or exported_vtuber_affected | failed_vtuber_affected
+                    != vtuber_affected
+                or exported_vtuber_unaffected | failed_vtuber_unaffected
+                    != vtuber_unaffected
             ):
                 raise RuntimeError(
                     "VTuber source preflight changed the exact revision key set"
+                )
+            if vtuber_cardinality_mismatches:
+                ordered_mismatches = sorted(
+                    vtuber_cardinality_mismatches.values(),
+                    key=lambda mismatch: (
+                        mismatch.source_key, mismatch.stage, mismatch.range_id,
+                    ),
+                )
+                for mismatch in ordered_mismatches:
+                    print(
+                        "PG_SNAPSHOT_VTUBER_SOURCE_CARDINALITY_MISMATCH "
+                        f"stage={mismatch.stage} range={mismatch.range_id} "
+                        f"sourceKey={mismatch.source_key} "
+                        f"ranking={mismatch.expected} source={mismatch.actual}",
+                        flush=True,
+                    )
+                raise RuntimeError(
+                    "VTuber source cardinality preflight failed: "
+                    f"mismatches={len(ordered_mismatches)} keys="
+                    + ",".join(
+                        mismatch.source_key for mismatch in ordered_mismatches
+                    )
                 )
             bulk_exported_source_keys["all"].update(
                 exported_vtuber_affected | exported_vtuber_unaffected
