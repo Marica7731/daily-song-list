@@ -6067,6 +6067,178 @@ class Tests(unittest.TestCase):
             "occ-old",
         )
 
+    def test_vtuber_same_video_replacement_binds_exact_legacy_owner_without_public_id(self):
+        legacy_owner="legacy fixture vtuber"
+        owner={
+            "video_id":"video-vtuber","source_key":"source-vtuber",
+            "entity_key":legacy_owner,"payload_json":{
+                "type":"vtuber","key":legacy_owner,
+                "name":"Legacy Fixture VTuber",
+                "channelName":"Legacy Fixture VTuber",
+            },
+        }
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-vtuber",
+            "occurrenceId":"occ-old","rangeId":"all","position":1,
+            "seconds":20,"title":"Old","artist":"Artist",
+            "songKey":"song-old","videoPayload":{
+                "videoId":"video-vtuber",
+                "channelName":"Legacy Fixture VTuber",
+            },"replacement":True,"replacementSameVideo":True,
+            "replacementPayload":{
+                "videoId":"video-vtuber","occurrenceId":"occ-old",
+                "rangeId":"all","position":1,"seconds":20,
+                "title":"New","artist":"Artist","songKey":"song-new",
+            },"replacementVideoPayload":{"videoId":"video-vtuber"},
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+        }
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ) as owner_lookup:
+            pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(),{},(change,),
+            )
+        self.assertEqual(
+            owner_lookup.call_args.args[2],{"video-vtuber"},
+        )
+        self.assertEqual(
+            change["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        self.assertIs(
+            change["_persistedVtuberSameVideoOwnerProven"],True,
+        )
+        replacements=pg_adapter._runtime_replacement_candidate_rows(
+            (change,),strict_immutable_identity=True,
+        )
+        self.assertEqual(len(replacements),1)
+        self.assertFalse(replacements[0]["channel_id"])
+        self.assertEqual(
+            replacements[0]["canonicalVtuberChannelKey"],legacy_owner,
+        )
+        self.assertEqual(
+            pg_adapter._exact_vtuber_overlay_owner_key(change),legacy_owner,
+        )
+        self.assertEqual(
+            pg_adapter._exact_vtuber_overlay_owner_key(replacements[0]),
+            legacy_owner,
+        )
+        self.assertNotIn(
+            "channelId",replacements[0]["video_payload_json"],
+        )
+        self.assertNotIn(
+            "channelUrl",replacements[0]["video_payload_json"],
+        )
+
+        options=pg_adapter._query_options({
+            "range":"all","view":"vtubers","metric":"occurrences",
+            "page":"1","pageSize":"30",
+        })
+        captured={}
+        def authority(
+            _connection,_parent,channels,_videos,_occurrences,
+            parent_sources,candidates,_range_id,**_kwargs,
+        ):
+            captured["channels"]=set(channels)
+            captured["parent_sources"]=dict(parent_sources)
+            captured["candidate_channels"]={
+                row["channel_id"] for row in candidates
+            }
+            return [{
+                "channel_id":legacy_owner,"row_count":2,"song_count":2,
+                "video_count":1,"residual_match":True,
+            }]
+        pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
+        with patch.object(
+            pg_adapter,"_authoritative_vtuber_summary_rows",
+            side_effect=authority,
+        ):
+            rows=pg_adapter._overlay_vtuber_replacement_rows(
+                SimpleNamespace(cursor=lambda:None),"active","parent",(),
+                options,{legacy_owner:{
+                    "detail_key":legacy_owner,"name":"Legacy Fixture VTuber",
+                    "payload_json":{
+                        "type":"vtuber","key":legacy_owner,
+                        "name":"Legacy Fixture VTuber",
+                        "channelName":"Legacy Fixture VTuber",
+                        "sourceDetailKey":"source-vtuber",
+                    },
+                }},runtime_changes=(change,),
+                replacement_rows=replacements,exact_required=True,
+                direct_overlay_revision_ids=("overlay",),
+            )
+        self.assertEqual(captured["channels"],{legacy_owner})
+        self.assertEqual(
+            captured["parent_sources"],
+            {legacy_owner:"source-vtuber"},
+        )
+        self.assertEqual(captured["candidate_channels"],{legacy_owner})
+        payload=rows[legacy_owner]["payload_json"]
+        self.assertEqual(payload["key"],legacy_owner)
+        self.assertNotIn("channelId",payload)
+        self.assertNotIn("channelUrl",payload)
+
+        pg_adapter._VTUBER_REPLACEMENT_CACHE.clear()
+        invalid_public_base={legacy_owner:{
+            "detail_key":legacy_owner,"name":"Legacy Fixture VTuber",
+            "payload_json":{
+                "type":"vtuber","key":legacy_owner,
+                "name":"Legacy Fixture VTuber",
+                "channelName":"Legacy Fixture VTuber",
+                "channelId":legacy_owner,
+                "sourceDetailKey":"source-vtuber",
+            },
+        }}
+        with patch.object(
+            pg_adapter,"_authoritative_vtuber_summary_rows",
+            side_effect=authority,
+        ), self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "candidate channel metadata identity is invalid",
+        ):
+            pg_adapter._overlay_vtuber_replacement_rows(
+                SimpleNamespace(cursor=lambda:None),"active","parent",(),
+                options,invalid_public_base,runtime_changes=(change,),
+                replacement_rows=replacements,exact_required=True,
+                direct_overlay_revision_ids=("overlay",),
+            )
+
+        no_parent=copy.deepcopy(change)
+        no_parent["_parentRuntimeOccurrenceExists"]=False
+        no_parent.pop("_persistedVtuberSameVideoOwnerProven",None)
+        no_parent.pop("canonicalVtuberChannelKey",None)
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ):
+            pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(),{},(no_parent,),
+            )
+        self.assertNotIn(
+            "_persistedVtuberSameVideoOwnerProven",no_parent,
+        )
+        self.assertEqual(pg_adapter._runtime_replacement_candidate_rows(
+            (no_parent,),strict_immutable_identity=True,
+        ),[])
+
+        conflict=copy.deepcopy(change)
+        conflict.pop("_persistedVtuberSameVideoOwnerProven",None)
+        conflict.pop("canonicalVtuberChannelKey",None)
+        conflict["replacementPayload"]["channelId"]=(
+            "UC1234567890123456789012"
+        )
+        with patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",
+            return_value={"video-vtuber":owner},
+        ), self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "legacy same-video replacement conflicts",
+        ):
+            pg_adapter._bind_direct_vtuber_parent_owners(
+                object(),"parent","all",(),{},(conflict,),
+            )
+
     def test_vtuber_same_video_replacement_rejects_conflicting_persisted_owner(self):
         owner_id="UC1234567890123456789012"
         other_id="UCabcdefghijklmnopqrstuv"

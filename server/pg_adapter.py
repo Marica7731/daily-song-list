@@ -4686,6 +4686,124 @@ def _strict_replacement_public_video(
     }
 
 
+def _strict_legacy_vtuber_replacement_public_video(
+    change: Mapping[str, Any], replacement: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build one same-video replacement from an exact legacy owner proof.
+
+    Historical VTuber source owners can predate immutable YouTube channel ids.
+    Their stable aggregate identity is the persisted source ``entity_key``;
+    it is not a channel id and must never be exposed as one.  The private
+    marker consumed here is cleared and set only by the bounded persisted
+    owner lookup after exact parent-occurrence coverage has been established.
+    """
+
+    marker = change.get("_persistedVtuberSameVideoOwnerProven")
+    if marker is not True:
+        raise PostgresAdapterError(
+            "VTuber legacy replacement owner proof is invalid"
+        )
+    owner_key = _text(change.get("canonicalVtuberChannelKey"))
+    source_key = _text(change.get("parentVtuberSourceKey"))
+    old_video_id = _text(change.get("videoId") or change.get("video_id"))
+    replacement_video_id = _text(
+        replacement.get("videoId") or replacement.get("video_id")
+    )
+    old_occurrence_id = _text(
+        change.get("occurrenceId") or change.get("occurrence_id")
+    )
+    replacement_occurrence_id = _text(
+        replacement.get("occurrenceId") or replacement.get("occurrence_id")
+    )
+    if (
+        not owner_key
+        or re.fullmatch(r"UC[A-Za-z0-9_-]{22}", owner_key)
+        or not source_key
+        or change.get("_parentRuntimeOccurrenceExists") is not True
+        or change.get("_runtimeOccurrenceOwnerWasExplicit") is not False
+        or not bool(change.get("replacementSameVideo"))
+        or not old_video_id
+        or replacement_video_id != old_video_id
+        or not old_occurrence_id
+        or replacement_occurrence_id != old_occurrence_id
+    ):
+        raise PostgresAdapterError(
+            "VTuber legacy replacement owner proof is invalid"
+        )
+
+    old_video = _json_object(change.get("videoPayload"))
+    source = _json_object(change.get("replacementVideoPayload"))
+    if not source:
+        source = _overlay_video_projection(replacement)
+    payload_video_ids = {
+        _text(value)
+        for value in (
+            old_video.get("videoId"), old_video.get("video_id"),
+            source.get("videoId"), source.get("video_id"),
+        )
+        if _text(value)
+    }
+    explicit_channel_ids = {
+        _text(value)
+        for value in (
+            change.get("channelId"), change.get("channel_id"),
+            old_video.get("channelId"), old_video.get("channel_id"),
+            replacement.get("channelId"), replacement.get("channel_id"),
+            source.get("channelId"), source.get("channel_id"),
+        )
+        if _text(value)
+    }
+    explicit_handles = {
+        _normalized_channel_handle(value)
+        for value in (
+            change.get("channelHandle"), change.get("channel_handle"),
+            old_video.get("channelHandle"), old_video.get("channel_handle"),
+            replacement.get("channelHandle"),
+            replacement.get("channel_handle"),
+            source.get("channelHandle"), source.get("channel_handle"),
+        )
+        if _normalized_channel_handle(value)
+    }
+    explicit_urls = {
+        _text(value)
+        for value in (
+            change.get("channelUrl"), change.get("channel_url"),
+            old_video.get("channelUrl"), old_video.get("channel_url"),
+            replacement.get("channelUrl"), replacement.get("channel_url"),
+            source.get("channelUrl"), source.get("channel_url"),
+        )
+        if _text(value)
+    }
+    if (
+        payload_video_ids - {old_video_id}
+        or explicit_channel_ids
+        or explicit_handles
+        or explicit_urls
+    ):
+        raise PostgresAdapterError(
+            "VTuber legacy replacement public identity is invalid"
+        )
+
+    public_video = dict(source)
+    for field in (
+        "channelId", "channel_id", "channelHandle", "channel_handle",
+        "channelUrl", "channel_url",
+    ):
+        public_video.pop(field, None)
+    public_video["videoId"] = old_video_id
+    parent_name = _text(change.get("parentVtuberChannelName"))
+    if parent_name and not _text(public_video.get("channelName")):
+        public_video["channelName"] = parent_name
+    return public_video, {
+        "video_id": old_video_id,
+        "channel_id": "",
+        "channel_handle": "",
+        "channel_url": "",
+        "channel_name": _text(public_video.get("channelName")),
+        "video_title": _text(public_video.get("title")),
+    }
+
+
 def _runtime_replacement_candidate_rows(
     changes: Sequence[Mapping[str, Any]],
     strict_immutable_identity: bool = False,
@@ -4705,15 +4823,33 @@ def _runtime_replacement_candidate_rows(
         if not video_payload:
             video_payload = _overlay_video_projection(replacement)
         replacement_channel_id = _text(replacement.get("channelId") or video_payload.get("channelId"))
+        legacy_owner_proven = bool(
+            change.get("_persistedVtuberSameVideoOwnerProven") is True
+            and _text(change.get("canonicalVtuberChannelKey"))
+        )
         if strict_immutable_identity and not (
-            title and replacement_video_id and replacement_occurrence_id and replacement_channel_id
+            title
+            and replacement_video_id
+            and replacement_occurrence_id
+            and (replacement_channel_id or legacy_owner_proven)
         ):
             continue
         strict_public: dict[str, Any] = {}
         if strict_immutable_identity:
             try:
-                video_payload, strict_public = _strict_replacement_public_video(change, replacement)
-                replacement_channel_id = _text(strict_public["channel_id"])
+                if legacy_owner_proven and not replacement_channel_id:
+                    video_payload, strict_public = (
+                        _strict_legacy_vtuber_replacement_public_video(
+                            change, replacement,
+                        )
+                    )
+                else:
+                    video_payload, strict_public = (
+                        _strict_replacement_public_video(change, replacement)
+                    )
+                    replacement_channel_id = _text(
+                        strict_public["channel_id"]
+                    )
             except PostgresAdapterError:
                 continue
         video_id = replacement_video_id or _text(change.get("videoId"))
@@ -9596,6 +9732,18 @@ def _authoritative_artist_summary_rows(
     return summaries
 
 
+def _exact_vtuber_overlay_owner_key(row: Mapping[str, Any]) -> str:
+    """Return an internally proven VTuber aggregate owner for exact rebuilds."""
+
+    return (
+        _text(row.get("parentVtuberChannelKey"))
+        or _text(row.get("canonicalVtuberChannelKey"))
+        or _validated_overlay_change_identity(
+            row, validate_urls=False,
+        )[1]
+    )
+
+
 def _overlay_vtuber_replacement_rows(
     connection,
     active_revision_id: str,
@@ -9650,18 +9798,12 @@ def _overlay_vtuber_replacement_rows(
         # The caller has already supplied a bounded parent tuple when this
         # historical change lacked a channel.  Never let scalar precedence
         # hide a scalar/payload conflict in the exact aggregation path.
-        return (
-            _text(row.get("parentVtuberChannelKey"))
-            or _text(row.get("canonicalVtuberChannelKey"))
-            or _validated_overlay_change_identity(
-                row, validate_urls=False,
-            )[1]
-        )
+        return _exact_vtuber_overlay_owner_key(row)
 
     def candidate_video(row: Mapping[str, Any]) -> dict[str, Any]:
         video = _overlay_public_video(row)
         owner_key = _text(row.get("canonicalVtuberChannelKey"))
-        if not owner_key:
+        if not re.fullmatch(r"UC[A-Za-z0-9_-]{22}", owner_key):
             return video
         video = dict(video)
         handle = _text(video.get("channelHandle"))
@@ -9789,8 +9931,17 @@ def _overlay_vtuber_replacement_rows(
         affected_channel_ids.add(channel_id)
         record = candidate_records.get(video_id)
         if record is None:
-            record = {"video": video, "occurrences": [], "identities": set()}
+            record = {
+                "video": video,
+                "owner_key": channel_id,
+                "occurrences": [],
+                "identities": set(),
+            }
             candidate_records[video_id] = record
+        elif _text(record.get("owner_key")) != channel_id:
+            raise PostgresAdapterError(
+                "VTuber exact overlay video owner is ambiguous"
+            )
         song = _json_object(row.get("occurrence_payload_json"))
         if isinstance(song.get("payload"), Mapping):
             song = dict(song["payload"])
@@ -9888,7 +10039,7 @@ def _overlay_vtuber_replacement_rows(
                 candidate_videos.setdefault(channel_id, video)
         for record in candidate_records.values():
             video = record["video"]
-            channel_id = _text(video.get("channelId"))
+            channel_id = _text(record.get("owner_key"))
             if not channel_id:
                 continue
             candidate_videos.setdefault(channel_id, video)
@@ -10220,15 +10371,39 @@ def _overlay_vtuber_replacement_rows(
             video = dict(candidate_videos.get(channel_id) or {})
             base_detail_key = _text(base_row.get("detail_key"))
             payload_channel_id = _text(payload.get("channelId"))
-            if (
-                (base_detail_key and base_detail_key != channel_id)
-                or (payload_channel_id and payload_channel_id != channel_id)
-            ):
+            if base_detail_key and base_detail_key != channel_id:
                 raise PostgresAdapterError(
                     "VTuber base channel metadata identity is invalid"
                 )
             candidate_channel_id = _text(video.get("channelId"))
-            if candidate_channel_id and candidate_channel_id != channel_id:
+            owner_is_channel_id = bool(
+                re.fullmatch(r"UC[A-Za-z0-9_-]{22}", channel_id)
+            )
+            if owner_is_channel_id and any(
+                value and value != channel_id
+                for value in (payload_channel_id, candidate_channel_id)
+            ):
+                raise PostgresAdapterError(
+                    "VTuber candidate channel metadata identity is invalid"
+                )
+            if (
+                not owner_is_channel_id
+                and payload_channel_id
+                and candidate_channel_id
+                and payload_channel_id != candidate_channel_id
+            ):
+                raise PostgresAdapterError(
+                    "VTuber candidate channel metadata identity is invalid"
+                )
+            public_channel_id = candidate_channel_id or payload_channel_id
+            if (
+                public_channel_id
+                and not owner_is_channel_id
+                and not candidate_channel_id
+                and not re.fullmatch(
+                    r"UC[A-Za-z0-9_-]{22}", public_channel_id,
+                )
+            ):
                 raise PostgresAdapterError(
                     "VTuber candidate channel metadata identity is invalid"
                 )
@@ -10244,7 +10419,18 @@ def _overlay_vtuber_replacement_rows(
                     "VTuber base channel metadata identity is invalid"
                 )
             handle = candidate_handle or base_handle
-            channel_url = _canonical_channel_url(channel_id, handle)
+            raw_channel_url = _text(
+                video.get("channelUrl") or payload.get("channelUrl")
+            )
+            if not public_channel_id and not handle and raw_channel_url:
+                raise PostgresAdapterError(
+                    "VTuber legacy channel metadata identity is invalid"
+                )
+            channel_url = (
+                _canonical_channel_url(public_channel_id, handle)
+                if public_channel_id or handle
+                else ""
+            )
             name = _text(video.get("channelName")) or _text(payload.get("channelName")) or channel_id
             base_previews: list[dict[str, Any]] = []
             for occurrence in payload.get("occurrences") or ():
@@ -10253,7 +10439,9 @@ def _overlay_vtuber_replacement_rows(
                 nested = occurrence.get("item") if isinstance(occurrence.get("item"), Mapping) else occurrence.get("video")
                 if not isinstance(nested, Mapping):
                     continue
-                if _text(nested.get("channelId")) not in {"", channel_id}:
+                if _text(nested.get("channelId")) not in {
+                    "", public_channel_id,
+                }:
                     continue
                 video_id = _text(nested.get("videoId") or occurrence.get("videoId"))
                 occurrence_id = _text(occurrence.get("occurrenceId"))
@@ -10271,13 +10459,22 @@ def _overlay_vtuber_replacement_rows(
                 if not isinstance(nested, Mapping):
                     continue
                 item = dict(nested)
-                if _text(item.get("channelId")) not in {"", channel_id}:
+                if _text(item.get("channelId")) not in {
+                    "", public_channel_id,
+                }:
                     continue
-                item.update({
-                    "channelId": channel_id,
-                    "channelHandle": handle,
-                    "channelUrl": channel_url,
-                })
+                if public_channel_id:
+                    item["channelId"] = public_channel_id
+                else:
+                    item.pop("channelId", None)
+                if handle:
+                    item["channelHandle"] = handle
+                else:
+                    item.pop("channelHandle", None)
+                if channel_url:
+                    item["channelUrl"] = channel_url
+                else:
+                    item.pop("channelUrl", None)
                 preview["item"] = item
                 preview["video"] = dict(item)
             payload.update({
@@ -10285,10 +10482,6 @@ def _overlay_vtuber_replacement_rows(
                 "key": channel_id,
                 "name": name,
                 "channelName": name,
-                "channelId": channel_id,
-                "channelHandle": handle,
-                "channelUrl": channel_url,
-                "_canonicalChannelUrl": channel_url,
                 "count": int(summary.get("row_count") or 0),
                 "songCount": int(summary.get("song_count") or 0),
                 "videoCount": int(summary.get("video_count") or 0),
@@ -10298,6 +10491,20 @@ def _overlay_vtuber_replacement_rows(
                     payload, _text(options.get("range")) or "all", channel_id,
                 ),
             })
+            if public_channel_id:
+                payload["channelId"] = public_channel_id
+            else:
+                payload.pop("channelId", None)
+            if handle:
+                payload["channelHandle"] = handle
+            else:
+                payload.pop("channelHandle", None)
+            if channel_url:
+                payload["channelUrl"] = channel_url
+                payload["_canonicalChannelUrl"] = channel_url
+            else:
+                payload.pop("channelUrl", None)
+                payload.pop("_canonicalChannelUrl", None)
             if isinstance(summary.get("songs"), list):
                 payload["songs"] = copy.deepcopy(summary["songs"])
             else:
@@ -10896,17 +11103,35 @@ def _bind_direct_vtuber_parent_owners(
     legacy display name.  Otherwise it remains a genuine two-sided move.
     """
 
-    unresolved_video_ids = {
-        video_id
-        for change in changes
-        for video_id, channel_id in (
-            (_validated_overlay_change_identity(
-                change, validate_urls=False,
-            )),
+    validated_change_identities: dict[int, tuple[str, str]] = {}
+    unresolved_video_ids: set[str] = set()
+    same_video_replacement_ids: set[str] = set()
+    for change in changes:
+        # Never trust a similarly named field carried by an overlay payload.
+        # Only this bounded persisted-owner lookup may mint the proof.
+        change.pop("_persistedVtuberSameVideoOwnerProven", None)
+        video_id, channel_id = _validated_overlay_change_identity(
+            change, validate_urls=False,
         )
-        if video_id and not channel_id
-    }
-    requested_video_ids = unresolved_video_ids | {
+        validated_change_identities[id(change)] = (video_id, channel_id)
+        if video_id and not channel_id:
+            unresolved_video_ids.add(video_id)
+        replacement = _json_object(change.get("replacementPayload"))
+        replacement_video_id = _text(
+            replacement.get("videoId") or replacement.get("video_id")
+        )
+        if (
+            video_id
+            and bool(change.get("replacement"))
+            and bool(change.get("replacementSameVideo"))
+            and replacement_video_id == video_id
+        ):
+            # The old side may already carry its channel while the replacement
+            # occurrence omits every denormalised channel field.  Strict
+            # ranking projection still needs the same persisted video owner
+            # that source materialisation uses to update the tuple in place.
+            same_video_replacement_ids.add(video_id)
+    requested_video_ids = unresolved_video_ids | same_video_replacement_ids | {
         _text(video_id)
         for video_id in accepted_video_resets
         if _text(video_id)
@@ -10930,11 +11155,22 @@ def _bind_direct_vtuber_parent_owners(
             name_owners[name].add(owner_key)
 
     for change in changes:
-        video_id, channel_id = _validated_overlay_change_identity(
-            change, validate_urls=False,
-        )
+        video_id, channel_id = validated_change_identities[id(change)]
         owner = owners.get(video_id)
-        if not owner or (channel_id and not bool(change.get("acceptedVideoReset"))):
+        replacement = _json_object(change.get("replacementPayload"))
+        replacement_video_id = _text(
+            replacement.get("videoId") or replacement.get("video_id")
+        )
+        same_video_replacement = bool(
+            change.get("replacement")
+            and change.get("replacementSameVideo")
+            and replacement_video_id == video_id
+        )
+        if not owner or (
+            channel_id
+            and not bool(change.get("acceptedVideoReset"))
+            and not same_video_replacement
+        ):
             continue
         payload = _json_object(owner.get("payload_json"))
         change["parentVtuberChannelKey"] = _text(owner.get("entity_key"))
@@ -10955,22 +11191,13 @@ def _bind_direct_vtuber_parent_owners(
         # side.  Bind that tuple to the replacement without altering its raw
         # occurrence payload.  Cross-video replacements and any conflicting
         # identity remain fail closed.
-        replacement = _json_object(change.get("replacementPayload"))
-        replacement_video_id = _text(
-            replacement.get("videoId") or replacement.get("video_id")
-        )
-        if not (
-            bool(change.get("replacement"))
-            and bool(change.get("replacementSameVideo"))
-            and replacement_video_id == video_id
-        ):
+        if not same_video_replacement:
             continue
         parent_ids, parent_handles, _parent_names = _vtuber_owner_alias_sets(
             owner, persisted=True,
         )
-        if len(parent_ids) != 1:
-            continue
-        parent_channel_id = next(iter(parent_ids))
+        owner_key = _text(owner.get("entity_key"))
+        owner_source_key = _text(owner.get("source_key"))
         old_payload = _json_object(change.get("videoPayload"))
         replacement_video = _json_object(change.get("replacementVideoPayload"))
         explicit_video_ids = {
@@ -10995,6 +11222,68 @@ def _bind_direct_vtuber_parent_owners(
             )
             if _text(value)
         }
+        old_occurrence_id = _text(
+            change.get("occurrenceId") or change.get("occurrence_id")
+        )
+        replacement_occurrence_id = _text(
+            replacement.get("occurrenceId")
+            or replacement.get("occurrence_id")
+        )
+        if not parent_ids:
+            # Legacy source authority can have one exact source/entity owner
+            # for this video while predating channelId entirely.  It is safe
+            # only as an aggregate owner key for an in-place occurrence
+            # replacement whose full-runtime parent tuple was independently
+            # proven.  Never turn the legacy display key into a public id.
+            if not (
+                owner_key
+                and owner_source_key
+                and change.get("_parentRuntimeOccurrenceExists") is True
+                and change.get("_runtimeOccurrenceOwnerWasExplicit") is False
+                and old_occurrence_id
+                and replacement_occurrence_id == old_occurrence_id
+                and explicit_video_ids == {video_id}
+            ):
+                continue
+            explicit_handles = {
+                _normalized_channel_handle(value)
+                for value in (
+                    change.get("channelHandle"),
+                    change.get("channel_handle"),
+                    old_payload.get("channelHandle"),
+                    old_payload.get("channel_handle"),
+                    replacement.get("channelHandle"),
+                    replacement.get("channel_handle"),
+                    replacement_video.get("channelHandle"),
+                    replacement_video.get("channel_handle"),
+                )
+                if _normalized_channel_handle(value)
+            }
+            explicit_urls = {
+                _text(value)
+                for value in (
+                    change.get("channelUrl"), change.get("channel_url"),
+                    old_payload.get("channelUrl"),
+                    old_payload.get("channel_url"),
+                    replacement.get("channelUrl"),
+                    replacement.get("channel_url"),
+                    replacement_video.get("channelUrl"),
+                    replacement_video.get("channel_url"),
+                )
+                if _text(value)
+            }
+            if explicit_channel_ids or explicit_handles or explicit_urls:
+                raise PostgresAdapterError(
+                    "VTuber legacy same-video replacement conflicts with "
+                    "source owner"
+                )
+            change["canonicalVtuberChannelKey"] = owner_key
+            change["parentVtuberSourceKey"] = owner_source_key
+            change["_persistedVtuberSameVideoOwnerProven"] = True
+            continue
+        if len(parent_ids) != 1:
+            continue
+        parent_channel_id = next(iter(parent_ids))
         if explicit_video_ids != {video_id} or (
             explicit_channel_ids
             and explicit_channel_ids != {parent_channel_id}
@@ -12294,9 +12583,7 @@ def _prepare_generic_overlay_rankings(
         exact_replacement_rows = tuple(
             row
             for row in exact_replacement_rows
-            if _validated_overlay_change_identity(
-                row, validate_urls=False,
-            )[1] in exact_scope_set
+            if _exact_vtuber_overlay_owner_key(row) in exact_scope_set
         )
         replacement_identities = {
             (
@@ -12308,17 +12595,13 @@ def _prepare_generic_overlay_rankings(
         exact_reset_changes = tuple(
             change
             for change in exact_reset_changes
-            if _validated_overlay_change_identity(
-                change, validate_urls=False,
-            )[1] in exact_scope_set
+            if _exact_vtuber_overlay_owner_key(change) in exact_scope_set
         )
         exact_runtime_changes = tuple(
             change
             for change in exact_runtime_changes
             if (
-                _validated_overlay_change_identity(
-                    change, validate_urls=False,
-                )[1] in exact_scope_set
+                _exact_vtuber_overlay_owner_key(change) in exact_scope_set
                 or (
                     _text(change.get("videoId") or change.get("video_id")),
                     _text(
