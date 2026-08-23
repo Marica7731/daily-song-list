@@ -344,3 +344,11 @@
 - 最小修复让门禁复用 adapter 的最终 runtime change 与 replacement 解析：被替换/删除的旧 candidate 不再参与 owner 校验，replacement 以最终有效 tuple 参与；raw candidate/replacement payload 均不改。门禁同时遍历完整有效集合并一次汇总 owner mismatch 数量及最多 5 个样本，避免每次重跑只暴露第一条同类故障；身份、基数、owner ambiguity 与非匹配异常仍 fail closed。
 - 失败 run 的资源合同全部生效：WDC source checkout `1,748,345` bytes 且无 `.git`，固定卷恰为 `32,000,000,000` bytes，MemoryMax `2,684,354,560`、swap max `1,073,741,824`、OOM/kill `0`，relay `16GB/2` 上限；未 bundle/deploy。Actions exact cleanup success，WDC build root/volume 与 VPS2 relay 均 absent/inactive，旧 release 未写入。
 - 验证已完成：原始 URL candidate + 后续 `Butter-Fly` replacement 生产形态与上一轮单/双空格 owner 精确回归 `2/2`，完整 next-serving `219/219`、relay/storage/release contract `13/13`、Python compile、`git diff --check`、7 份 workflow YAML 与 59 个 shell block 均通过。PR/CI/merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。
+
+### 2026-08-23 11:57 Asia/Taipei — canonical Song 卡不得按 raw `songKey` 重复计数
+
+- unique latest-head WDC run `32614567419`（head `07801ee3a28bb7a94eb4dea4753a8c041837ff63`）在所有 7d/all 排名、7d sources 及 Artist/Song/affected-source 全量前置门禁通过后，于首个 affected-parent source 由 cardinality gate 提前 fail closed：`all/songs/01a4e810b81fbd3b ranking=(554,2,553,554) source=(554,1,553,554)`。没有进入 21k/64k 昂贵来源复制、bundle 或 deploy。
+- 只读 PostgreSQL 证据确认权威卡 owner 为 `蝶々結び::aimer`，base 为 `552 occurrences / 550 videos`；overlay 仍保留 hashed `328e8b3da2343b88213af0ee` 与 legacy `蝶々結び\x1fAimer` 两种 raw ingestion key，但 canonical title/artist 同为 `蝶々結び / Aimer`。来源 writer 按权威卡 owner 正确归一为一首；ranking overlay 错把两种 raw provenance 当成两首。
+- 最小修复只收紧 Song 类视图（`songs`、`songIndex`、`vsingerSongs`）的不变量：一个正数 canonical 卡的 `songCount` 恒为 `1`，既覆盖新卡/既有卡 delta，也覆盖 streamed affected reconciliation；Artist/VTuber/video 仍按不同 canonical song identity 计数。raw occurrence payload、canonical PostgreSQL、source writer 和 cardinality gate 均不修改、不放宽。
+- 失败 run 的受限资源合同真实生效：固定 image `32,000,000,000` bytes，实际占用峰值约 `3.21GB`，MemoryMax `2,684,354,560`、swap peak `0`、OOM/kill `0`，relay wire 约 `1.48GB / 16GB` 且最多 2 connections；Mac/Windows 不在数据链路。Actions exact cleanup success，WDC 项目回到 `7,611,437,438` bytes、可用约 `79.4GB`，build/guard/tunnel 与 VPS2 relay 均 inactive，生产 release 未写入。
+- 验证已完成：精确生产形态回归 `4/4`、完整 next-serving `227/227`、relay/storage/release contract `13/13`、Python compile、`git diff --check`、7 份 workflow YAML 与其中 59 个 shell block 均通过。PR/CI/squash merge 与唯一 latest-head WDC 重跑仍待完成，交付未完成。

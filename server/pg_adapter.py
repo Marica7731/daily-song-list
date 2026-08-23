@@ -6038,7 +6038,11 @@ def _reconcile_affected_song_counts(
         if key not in affected_keys:
             return
         row_counts[key] += 1
-        songs_by_group[key].add(_runtime_song_identity(row))
+        songs_by_group[key].add(
+            key
+            if view in {"songs", "songIndex", "vsingerSongs"}
+            else _runtime_song_identity(row)
+        )
         video_id = _text(row.get("video_id") or row.get("videoId"))
         if video_id:
             videos_by_group[key].add(video_id)
@@ -6293,7 +6297,12 @@ def _apply_overlay_delta_groups(
         if row is None:
             count = int(item.get("occurrenceCount", len(item["occurrences"])))
             video_count = len(item["videoIds"])
-            song_count = len(item["songKeys"])
+            song_count = (
+                1
+                if view in {"songs", "songIndex", "vsingerSongs"}
+                and count > 0
+                else len(item["songKeys"])
+            )
             payload = {
                 "type": "video" if view == "videos" else "artist" if view == "artists" else "vtuber" if view == "vtubers" else "song",
                 "key": target_key, "title": item["title"], "displayArtist": item["artist"],
@@ -6323,10 +6332,9 @@ def _apply_overlay_delta_groups(
         if view in {"songs", "songIndex", "vsingerSongs"}:
             # These views already represent one canonical title/artist song
             # group.  A full-video refresh can remove one video's tuples while
-            # another video keeps the group alive; do not count that song twice.
-            row["song_count"] = max(
-                int(row.get("song_count") or 0), len(item["songKeys"]),
-            )
+            # another video keeps the group alive; raw accepted ``songKey``
+            # spellings are provenance, never additional canonical songs.
+            row["song_count"] = 1 if row["row_count"] > 0 else 0
         else:
             row["song_count"] = int(row.get("song_count") or 0) + len(
                 item["songKeys"]
