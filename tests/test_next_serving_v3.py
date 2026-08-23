@@ -7511,6 +7511,82 @@ class Tests(unittest.TestCase):
         self.assertEqual(groups[new_key]["video_count"],5)
         self.assertNotIn(raw_new_key,groups)
 
+    def test_song_overlay_delta_counts_canonical_card_once_across_raw_keys(self):
+        key="蝶々結び::aimer"
+        raw_keys={"328e8b3da2343b88213af0ee","蝶々結び\x1fAimer"}
+        occurrences=[
+            {"videoId":"video-hash","occurrenceId":"occ-hash",
+             "songKey":"328e8b3da2343b88213af0ee"},
+            {"videoId":"video-legacy","occurrenceId":"occ-legacy",
+             "songKey":"蝶々結び\x1fAimer"},
+        ]
+        delta={key:{
+            "title":"蝶々結び","artist":"Aimer","name":"蝶々結び",
+            "occurrenceCount":2,"occurrences":occurrences,
+            "videoIds":{"video-hash","video-legacy"},
+            "songKeys":raw_keys,"search":"蝶々結び aimer",
+        }}
+        groups={key:{
+            "detail_key":key,"title":"蝶々結び","artist":"Aimer",
+            "row_count":552,"song_count":0,"video_count":550,
+            "timestamp_count":552,"payload_json":{
+                "type":"song","key":key,"title":"蝶々結び",
+                "displayArtist":"Aimer","count":552,"songCount":0,
+                "videoCount":550,"timestampCount":552,"occurrences":[],
+            },
+        }}
+        pg_adapter._apply_overlay_delta_groups(
+            groups,{key:dict(groups[key])},delta,"songs","all",
+        )
+        self.assertEqual(
+            (groups[key]["row_count"],groups[key]["song_count"],
+             groups[key]["video_count"],groups[key]["timestamp_count"]),
+            (554,1,552,554),
+        )
+        self.assertEqual(groups[key]["payload_json"]["songCount"],1)
+        self.assertEqual(
+            {item["songKey"] for item in groups[key]["payload_json"]["occurrences"]},
+            raw_keys,
+        )
+
+        created={}
+        pg_adapter._apply_overlay_delta_groups(
+            created,{},delta,"songs","all",
+        )
+        self.assertEqual(set(created),{key})
+        self.assertEqual(created[key]["song_count"],1)
+        self.assertEqual(created[key]["payload_json"]["songCount"],1)
+
+    def test_song_reconciliation_counts_group_not_raw_song_keys(self):
+        key="蝶々結び::aimer"
+        parent_rows=[
+            {"video_id":"video-hash","occurrence_id":"occ-hash",
+             "song_key":"328e8b3da2343b88213af0ee",
+             "title":"蝶々結び","artist":"Aimer"},
+            {"video_id":"video-legacy","occurrence_id":"occ-legacy",
+             "song_key":"蝶々結び\x1fAimer",
+             "title":"蝶々結び","artist":"Aimer"},
+        ]
+        groups={key:{
+            "detail_key":key,"title":"蝶々結び","artist":"Aimer",
+            "row_count":99,"song_count":99,"video_count":99,
+            "payload_json":{"type":"song","key":key},
+        }}
+        changes=[{
+            "entityType":"occurrences","videoId":"removed",
+            "occurrenceId":"removed","title":"蝶々結び","artist":"Aimer",
+        }]
+        with patch.object(pg_adapter,"_rows",return_value=parent_rows):
+            pg_adapter._reconcile_affected_song_counts(
+                object(),"parent",[],[],changes,groups,"songs",{"range":"all"},
+            )
+        self.assertEqual(
+            (groups[key]["row_count"],groups[key]["song_count"],
+             groups[key]["video_count"]),
+            (2,1,2),
+        )
+        self.assertEqual(groups[key]["payload_json"]["songCount"],1)
+
     def test_unknown_artist_reconciliation_uses_physical_runtime_flag(self):
         change={
             "entityType":"occurrences","videoId":"video-reset",
