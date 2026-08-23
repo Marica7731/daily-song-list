@@ -1809,6 +1809,7 @@ class CanonicalSnapshotWriter:
         # ranking pages after the pass completes.
         self.static_ranking_root: Path | None = None
         self.song_count_corrections: dict[tuple[str, str], int] = {}
+        self.source_cardinality_gate_stages: set[tuple[str, str]] = set()
         # Ranges are enabled only after a complete ranking-owner preflight.
         # Direct writer/export helpers used outside the full materializer keep
         # their existing source-detail owner contract unless they explicitly
@@ -1943,6 +1944,12 @@ class CanonicalSnapshotWriter:
         range_id: str,
         occurrence_count: int,
     ) -> None:
+        self._validate_source_cardinality(
+            stage=stage,
+            source_key=source_key,
+            range_id=range_id,
+            occurrence_count=occurrence_count,
+        )
         self.connection.execute(
             "INSERT INTO source_export_checkpoints"
             "(stage,range_id,source_key,occurrence_count) VALUES(?,?,?,?) "
@@ -1953,6 +1960,87 @@ class CanonicalSnapshotWriter:
         # Data rows and their marker become a durable resume boundary together.
         self.connection.commit()
         self._pending_writes = 0
+
+    def _validate_source_cardinality(
+        self,
+        *,
+        stage: str,
+        source_key: str,
+        range_id: str,
+        occurrence_count: int,
+    ) -> None:
+        """Fail before checkpointing a source whose ranking totals diverge.
+
+        The final filtered-ranking pass retains its whole-range validation as
+        a defense in depth.  This per-source gate uses only the local SQLite
+        rows that were just written, so an affected source cannot become a
+        durable checkpoint and then fail after the much larger immutable
+        parent and parent-video copy phases.
+        """
+
+        ranking_rows = self.connection.execute(
+            """
+            SELECT view,count,song_count,video_count,timestamp_count
+            FROM ranking_rows INDEXED BY ranking_rows_source_lookup
+            WHERE range_id=? AND detail_key=?
+              AND metric='count' AND scope_key='all'
+            ORDER BY view
+            """,
+            (range_id, source_key),
+        ).fetchall()
+        if len(ranking_rows) != 1:
+            raise RuntimeError(
+                "source cardinality gate has no unique ranking authority: "
+                f"{stage}/{range_id}/{source_key} rows={len(ranking_rows)}"
+            )
+        view = _text(ranking_rows[0][0])
+        expected = tuple(int(value or 0) for value in ranking_rows[0][1:])
+        actual_row = self.connection.execute(
+            """
+            SELECT count(*),
+                   count(DISTINCT nullif(canonical_song_key,'')),
+                   count(DISTINCT video_id),count(*)
+            FROM source_occurrences
+            WHERE source_key=? AND range_id=?
+            """,
+            (source_key, range_id),
+        ).fetchone()
+        actual = tuple(int(value or 0) for value in actual_row)
+        if int(occurrence_count) != actual[0]:
+            raise RuntimeError(
+                "source cardinality gate lost writer rows: "
+                f"{stage}/{range_id}/{source_key} "
+                f"writer={int(occurrence_count)} source={actual[0]}"
+            )
+        if actual != expected:
+            if (
+                view == "vtubers"
+                and actual[0] == expected[0]
+                and actual[2] == expected[2]
+                and actual[3] == expected[3]
+                and 0 <= actual[1] < expected[1]
+            ):
+                self._reconcile_vtuber_song_count(
+                    range_id=range_id,
+                    source_key=source_key,
+                    ranking_song_count=expected[1],
+                    source_song_count=actual[1],
+                )
+                expected = (expected[0], actual[1], expected[2], expected[3])
+            else:
+                raise RuntimeError(
+                    "source cardinality gate failed: "
+                    f"{stage}/{range_id}/{view}/{source_key} "
+                    f"ranking={expected} source={actual}"
+                )
+        marker = (stage, range_id)
+        if marker not in self.source_cardinality_gate_stages:
+            self.source_cardinality_gate_stages.add(marker)
+            print(
+                "PG_SNAPSHOT_SOURCE_CARDINALITY_GATE "
+                f"stage={stage} range={range_id} enabled=1",
+                flush=True,
+            )
 
     def add_checkpointed_source(
         self,
