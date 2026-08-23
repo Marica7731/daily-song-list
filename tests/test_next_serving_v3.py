@@ -2033,6 +2033,62 @@ class Tests(unittest.TestCase):
             (owned,),
         )
 
+    def test_vtuber_inferred_video_owner_does_not_create_missing_parent_preimage(self):
+        missing={
+            "entityType":"runtime_occurrences","videoId":"2EOL2QyeZhc",
+            "occurrenceId":"0dc9297a3d137d2f35accee3","rangeId":"all",
+            "replacement":True,"replacementSameVideo":True,
+            "replacementPayload":{
+                "videoId":"2EOL2QyeZhc","occurrenceId":"replacement",
+                "rangeId":"all","title":"Replacement","artist":"Artist",
+                "channelId":"UCinferred00000000000000",
+            },
+        }
+        explicit={
+            "entityType":"runtime_occurrences","videoId":"video-explicit",
+            "occurrenceId":"occ-explicit","rangeId":"all",
+            "channel_id":"UCexplicit",
+        }
+        persisted={
+            "entityType":"runtime_occurrences","videoId":"video-persisted",
+            "occurrenceId":"occ-persisted","rangeId":"all",
+        }
+        parent_row={
+            "video_id":"video-persisted","occurrence_id":"occ-persisted",
+            "title":"Persisted","artist":"Artist","is_unknown_artist":False,
+        }
+        with patch.object(pg_adapter,"_rows",return_value=[parent_row]):
+            pg_adapter._enrich_runtime_parent_group_keys(
+                object(),"parent",[missing,explicit,persisted],range_id="all",
+            )
+        missing["parentVtuberChannelKey"]="UCinferred00000000000000"
+        explicit["parentVtuberChannelKey"]="UCexplicit"
+        persisted["parentVtuberChannelKey"]="UCparent"
+        inferred_video={
+            "videoId":"2EOL2QyeZhc",
+            "channelId":"UCinferred00000000000000",
+            "channelHandle":"/@inferred","channelName":"Inferred",
+        }
+        missing["channel_id"]="UCinferred00000000000000"
+        missing["videoPayload"]=inferred_video
+        missing["replacementVideoPayload"]=inferred_video
+        self.assertIs(missing["_parentRuntimeOccurrenceExists"],False)
+        self.assertIs(missing["_runtimeOccurrenceOwnerWasExplicit"],False)
+        self.assertIs(explicit["_parentRuntimeOccurrenceExists"],False)
+        self.assertIs(explicit["_runtimeOccurrenceOwnerWasExplicit"],True)
+        self.assertIs(persisted["_parentRuntimeOccurrenceExists"],True)
+        self.assertEqual(
+            pg_adapter._vtuber_owned_overlay_changes(
+                (missing,explicit,persisted),
+            ),
+            (explicit,persisted),
+        )
+        replacement_rows=pg_adapter._runtime_replacement_candidate_rows(
+            (missing,),strict_immutable_identity=True,
+        )
+        self.assertEqual(len(replacement_rows),1)
+        self.assertEqual(replacement_rows[0]["occurrence_id"],"replacement")
+
     def test_bounded_parent_vtuber_owner_lookup_uses_indexed_exact_membership(self):
         rows=[{
             "video_id":"video-one","source_key":"source-one",
@@ -8178,6 +8234,8 @@ class Tests(unittest.TestCase):
             "occurrence_id":"a858aab31ec7cd9ffb7d30e7",
         }])
         for change in (first,second):
+            self.assertIs(change["_parentRuntimeOccurrenceExists"],True)
+            self.assertIs(change["_runtimeOccurrenceOwnerWasExplicit"],False)
             self.assertIs(change["isUnknownArtist"],True)
             self.assertEqual(change["parentArtistGroupKey"],"unknown")
             self.assertEqual(

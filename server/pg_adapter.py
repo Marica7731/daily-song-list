@@ -4891,11 +4891,24 @@ def _enrich_runtime_parent_group_keys(
     if not isinstance(evidence, Mapping):
         raise PostgresAdapterError("runtime parent group cache is invalid")
     for change in changes:
+        entity_type = _text(
+            change.get("entityType") or change.get("entity_type")
+        )
+        if entity_type not in {"occurrences", "runtime_occurrences"}:
+            continue
         identity = (
             _text(change.get("videoId") or change.get("video_id")),
             _text(change.get("occurrenceId") or change.get("occurrence_id")),
         )
+        explicit_owner_key = "_runtimeOccurrenceOwnerWasExplicit"
+        if explicit_owner_key not in change:
+            change[explicit_owner_key] = bool(
+                _validated_overlay_change_identity(
+                    change, validate_urls=False,
+                )[1]
+            )
         resolved = evidence.get(identity)
+        change["_parentRuntimeOccurrenceExists"] = resolved is not None
         if resolved is None:
             # A runtime chain can be rooted in a newer accepted overlay and
             # therefore have no full-parent tuple.  Existing overlay identity
@@ -10665,16 +10678,37 @@ def _vtuber_owned_overlay_changes(
     ``_validated_overlay_change_identity``.
     """
 
-    return tuple(
-        change
-        for change in changes
+    owned: list[Mapping[str, Any]] = []
+    for change in changes:
+        entity_type = _text(
+            change.get("entityType") or change.get("entity_type")
+        )
+        parent_exists = change.get("_parentRuntimeOccurrenceExists")
+        owner_was_explicit = change.get("_runtimeOccurrenceOwnerWasExplicit")
+        for marker in (parent_exists, owner_was_explicit):
+            if marker is not None and not isinstance(marker, bool):
+                raise PostgresAdapterError(
+                    "VTuber parent occurrence coverage marker is invalid"
+                )
+        if (
+            entity_type in {"occurrences", "runtime_occurrences"}
+            and parent_exists is False
+            and owner_was_explicit is False
+        ):
+            # A later video-level repair may infer which channel owns this
+            # video, but it cannot prove that a historical occurrence ever
+            # existed in the immutable full-runtime parent.  Do not turn that
+            # inferred owner into a parent subtraction.  The independently
+            # validated replacement row remains eligible as the new side.
+            continue
         if (
             _text(change.get("parentVtuberChannelKey"))
             or _validated_overlay_change_identity(
                 change, validate_urls=False,
             )[1]
-        )
-    )
+        ):
+            owned.append(change)
+    return tuple(owned)
 
 
 def _bounded_parent_vtuber_video_owners(
