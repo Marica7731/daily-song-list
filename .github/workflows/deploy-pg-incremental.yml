@@ -494,7 +494,7 @@ jobs:
           test -n "$VPS2_PASSWORD" || { echo "PG_API_CODE_BLOCKED missing-vps2-password" >&2; exit 78; }
           test -n "$VPS2_KNOWN_HOSTS" || { echo "PG_API_CODE_BLOCKED missing-vps2-known-hosts" >&2; exit 78; }
 
-          active_wdc="$(
+          observed_wdc="$(
             for release_status in in_progress queued; do
               curl --fail --silent --show-error --location --retry 2 \
                 --connect-timeout 5 --max-time 30 \
@@ -505,10 +505,24 @@ jobs:
               [.[].workflow_runs[] |
                 select(.id != $current_run) |
                 select(.name == "Sync complete immutable release to WDC") |
-                {id,status,head_sha}
+                {id,status,head_sha,created_at}
               ] | unique_by(.id)
             '
           )"
+          active_wdc="$(jq -c --argjson max_age 3600 '
+            [.[] | select(
+              .status == "in_progress" or
+              (.status == "queued" and (now - (.created_at | fromdateiso8601)) <= $max_age)
+            )]
+          ' <<<"$observed_wdc")"
+          stale_queued="$(jq -c --argjson max_age 3600 '
+            [.[] | select(
+              .status == "queued" and (now - (.created_at | fromdateiso8601)) > $max_age
+            )]
+          ' <<<"$observed_wdc")"
+          if [ "$(jq -r 'length' <<<"$stale_queued")" -gt 0 ]; then
+            echo "PG_API_CODE_STALE_QUEUED_WDC_IGNORED runs=$stale_queued"
+          fi
           [ "$(jq -r 'length' <<<"$active_wdc")" -eq 0 ] || {
             echo "PG_API_CODE_BLOCKED active-wdc-release runs=$(jq -c . <<<"$active_wdc")" >&2
             exit 75
