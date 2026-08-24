@@ -10527,6 +10527,16 @@ esac
         public=(ROOT/"deploy"/"verify-wdc-public-release.py").read_text(encoding="utf-8")
         installer=(ROOT/"deploy"/"install-wdc-release.sh").read_text(encoding="utf-8")
         combined="\n".join((workflow,controller,build,cleanup,finalizer,data_verifier,public))
+        gate_checkout=workflow[
+            workflow.index("- name: Checkout bounded release inputs"):
+            workflow.index("- name: Run bounded server-side release gate")
+        ]
+        gate_script=workflow[
+            workflow.index("- name: Run bounded server-side release gate"):
+            workflow.index("\n  sync:")
+        ]
+        self.assertIn("server/pg_api_server.py",gate_checkout)
+        self.assertIn('"server/pg_api_server.py",',gate_script)
         for required in (
             "ubuntu_gate:",
             "runs-on: ubuntu-latest",
