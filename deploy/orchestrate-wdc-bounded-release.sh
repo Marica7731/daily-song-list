@@ -275,7 +275,7 @@ BUILD_LOGIC_SHA="$({
 [[ "$BUILD_LOGIC_SHA" =~ ^[0-9a-f]{64}$ ]]
 echo "WDC_BUILD_LOGIC_SHA $BUILD_LOGIC_SHA"
 
-META_JSON="$(vps2_source_meta "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"
+META_JSON="$(vps2_source_meta "timeout 65 curl --silent --show-error --fail --max-time 60 'http://127.0.0.1:8765/api/meta?identityOnly=1'")"
 mapfile -t META_FIELDS < <(META_JSON="$META_JSON" python3 - <<'PY'
 import json,os
 meta=(json.loads(os.environ["META_JSON"]).get("meta") or {})
@@ -575,7 +575,7 @@ assert data["maxConnections"]==2,data
 print("VPS2_RELAY_BUDGET_OK",data["bytesForwarded"],data["maxBytes"],data["connectionsAccepted"])
 PY
 
-LATEST_META="$(vps2 "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"
+LATEST_META="$(vps2 "timeout 65 curl --silent --show-error --fail --max-time 60 'http://127.0.0.1:8765/api/meta?identityOnly=1'")"
 META_JSON="$LATEST_META" python3 - "$ACTIVE" "$EXPECTED_CONTENT" "$EXPECTED_SOURCE_COMMIT" <<'PY'
 import json,os,sys
 meta=(json.loads(os.environ["META_JSON"]).get("meta") or {})
@@ -610,7 +610,7 @@ wdc "$SOURCE_ROOT/deploy/install-wdc-release.sh" \
   --port 18777
 ACTIVATED=1
 
-POST_ACTIVATE_META="$(vps2 "timeout 65 curl --silent --show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"
+POST_ACTIVATE_META="$(vps2 "timeout 65 curl --silent --show-error --fail --max-time 60 'http://127.0.0.1:8765/api/meta?identityOnly=1'")"
 META_JSON="$POST_ACTIVATE_META" python3 - "$ACTIVE" "$EXPECTED_CONTENT" "$EXPECTED_SOURCE_COMMIT" <<'PY'
 import json,os,sys
 meta=(json.loads(os.environ["META_JSON"]).get("meta") or {})

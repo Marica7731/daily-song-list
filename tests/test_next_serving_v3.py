@@ -25,6 +25,7 @@ from urllib.parse import parse_qs
 ROOT=Path(__file__).resolve().parents[1]
 SERVER_PATH=ROOT/"server"/"release_serving_server.py"
 PG_ADAPTER_PATH=ROOT/"server"/"pg_adapter.py"
+PG_API_PATH=ROOT/"server"/"pg_api_server.py"
 PG_MATERIALIZER_PATH=ROOT/"scripts"/"migration"/"materialize-pg-release-snapshot.py"
 MATERIALIZER_PATH=ROOT/"scripts"/"migration"/"materialize-ranking-pages.py"
 BUILDER_PATH=ROOT/"scripts"/"migration"/"build-serving-store.py"
@@ -44,6 +45,7 @@ def load(name:str,path:Path):
 
 sys.path.insert(0,str(ROOT/"server"))
 pg_adapter=load("pg_adapter",PG_ADAPTER_PATH);sys.modules["pg_adapter"]=pg_adapter
+pg_api_server=load("pg_api_server",PG_API_PATH)
 pg_materializer=load("pg_materializer",PG_MATERIALIZER_PATH);materializer=load("materializer",MATERIALIZER_PATH);builder=load("builder",BUILDER_PATH);bundle=load("bundle",BUNDLE_PATH);server=load("server",SERVER_PATH);patcher=load("patcher",PATCHER_PATH);prepare_frontend=load("prepare_frontend",PREPARE_FRONTEND_PATH);seven_day_patch=load("seven_day_patch",SEVEN_DAY_PATCH_PATH);readme_scope=load("readme_scope",README_SCOPE_PATH)
 ALL_KEY="01fc9d6830d3c230";SEVEN_KEY="7d0cafe0deadbeef";MANY_KEY="31video0feedbeef";EMPTY_KEY="empty000feedbeef";VTUBER_KEY="dc6aa541a6dff484";REV="rev-test-20260810";SERVER_COMMIT="0123456789abcdef0123456789abcdef01234567"
 
@@ -9902,6 +9904,65 @@ class Tests(unittest.TestCase):
         self.assertIn("  deploy/wdc-vps2-askpass.sh\n",controller)
         self.assertIn('chmod 0500 "$root"/deploy/*.sh',controller)
 
+    def test_pg_api_meta_identity_mode_skips_full_counts_and_fails_closed(self):
+        connections=[]
+
+        class Connection:
+            def __init__(self):
+                self.closed=False
+
+            def close(self):
+                self.closed=True
+
+        def connection_factory():
+            connection=Connection();connections.append(connection);return connection
+
+        identity_payload={
+            "schemaVersion":1,
+            "meta":{
+                "active_revision_id":"accepted_test_1",
+                "content_sha256":"a"*64,
+                "source_commit_sha":"b"*40,
+            },
+            "counts":{},
+        }
+        httpd=pg_api_server.ThreadingHTTPServer(
+            ("127.0.0.1",0),pg_api_server.make_handler(connection_factory),
+        )
+        httpd.daemon_threads=True
+        thread=threading.Thread(
+            target=httpd.serve_forever,kwargs={"poll_interval":0.05},daemon=True,
+        )
+        thread.start()
+        connection=http.client.HTTPConnection(
+            "127.0.0.1",httpd.server_address[1],timeout=5,
+        )
+        try:
+            with patch.object(
+                pg_api_server,"meta_payload",return_value=identity_payload,
+            ) as meta:
+                connection.request("GET","/api/meta?identityOnly=1")
+                response=connection.getresponse();payload=json.loads(response.read())
+                self.assertEqual(response.status,200)
+                self.assertEqual(payload,identity_payload)
+                meta.assert_called_once_with(connections[0],identity_only=True)
+                self.assertTrue(connections[0].closed)
+
+                connection.request("GET","/api/meta")
+                response=connection.getresponse();response.read()
+                self.assertEqual(response.status,200)
+                self.assertEqual(meta.call_args_list[-1].kwargs,{"identity_only":False})
+                self.assertTrue(connections[1].closed)
+
+                connection.request("GET","/api/meta?identityOnly=0")
+                response=connection.getresponse();error=json.loads(response.read())
+                self.assertEqual(response.status,400)
+                self.assertEqual(error["error"],"bad_request")
+                self.assertEqual(meta.call_count,2)
+                self.assertEqual(len(connections),2)
+        finally:
+            connection.close();httpd.shutdown();httpd.server_close();thread.join(timeout=2)
+
     def test_wdc_source_meta_probe_retries_only_bounded_transport_failures(self):
         controller=(ROOT/"deploy"/"orchestrate-wdc-bounded-release.sh").read_text(
             encoding="utf-8",
@@ -9914,9 +9975,11 @@ class Tests(unittest.TestCase):
             "28|124|255) ;;",
             'echo "PG_SOURCE_META_RETRY attempt=$attempt status=$rc" >&2',
             'META_JSON="$(vps2_source_meta "timeout 65 curl --silent '
-            '--show-error --fail --max-time 60 http://127.0.0.1:8765/api/meta")"',
+            '--show-error --fail --max-time 60 '
+            "'http://127.0.0.1:8765/api/meta?identityOnly=1'\")\"",
         ):
             self.assertIn(required,controller)
+        self.assertEqual(controller.count("api/meta?identityOnly=1"),3)
         self.assertEqual(controller.count('timeout 40s ssh "${VPS2_SSH[@]}"'),1)
         self.assertEqual(controller.count('timeout 40s ssh "${WDC_SSH[@]}"'),1)
         self.assertLess(

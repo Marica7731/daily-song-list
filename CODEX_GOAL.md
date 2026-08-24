@@ -478,3 +478,10 @@
 - 最小修复只收紧 Song 类 ranking（`songs`、`songIndex`、`vsingerSongs`）：不调用 compatible 7d full-reset 投影；accepted reset 仍只在同 range candidate 或 reset 自身明确属于目标 range 时生效。Artist/VTuber/Video 的兼容投影保持不变，exact-all Song reset 继续生效，identity/cardinality gate 不放宽。
 - 新增精确回归锁定 physical 7d reset 不进入 all Song ranking，并增加 exact-all reset 仍保留的反向保护；同轮继续复用已有 source 侧 7d/all 与 `771/737` mixed-reset 回归。targeted `4/4`、完整 next-serving `258/258`、relay/storage/release contract `13/13`、相关 Python compile 与 `git diff --check` 均通过；PR/CI/merge 尚待完成，完成前不得调度新 WDC。
 - 失败 run 资源：固定卷 total `31,317,221,376` bytes、observed used `6,194,126,848`，宿主最终 free `73,040,424,960`，MemoryMax `2,684,354,560`、MemoryPeak `1,368,158,208`、swap peak `0`，CPU `21m46s`；项目 cleanup 后 `7,611,437,438` bytes。重复 scheduled WDC `32695364080` 已精确取消并 cleanup；当前无 active WDC。
+
+### 2026-08-24 14:42 Asia/Taipei — WDC source identity 门禁不得触发完整 lineage 统计
+
+- PR #117 已修复 run `32690175992` 的 Song ranking 7d-to-all reset 投影并 squash merge 为 main `e5cc8dda72c922e159cb7eff29d743d726133e94`；CI `32696938978` 与 main Check code `32697092815` 均 success。调度前只读门禁随后发现 VPS2 accepted API 的完整 `/api/meta` 与 `/healthz` 每次需要约 `51.7–65.2s`；service/PG 均 active、无 crash/OOM/statement timeout，日志显示 payload 计算完成后客户端已到 60s deadline，形成 BrokenPipe。此时正确停止在 pre-dispatch gate，未启动新 WDC。
+- 根因不是 PostgreSQL 建连，而是 generic incremental active lineage 的完整 meta counts 每次需要重放/汇总多代 overlay。WDC 在构建前、激活前、激活后三处只校验 immutable `active_revision_id/content_sha256/source_commit_sha` 三元组，却调用完整统计端点；随着 lineage 增长，该门禁退化到 60s timeout。
+- 最小修复在 PostgreSQL API 增加严格 `/api/meta?identityOnly=1`：只调用既有 `meta_payload(..., identity_only=True)`，返回同一三元组与空 counts；无参数的 `/api/meta` 和 `/healthz` 完整统计合同不变。只接受单一精确值 `1`，未知/重复/其他值在建连前 400 fail closed。WDC 三处身份复核全部改用该 bounded identity probe，仍保持 60s deadline，不放宽 timeout、资源或数据门禁。
+- 精确 API/控制器回归 `2/2`、完整 next-serving `259/259`（`58.286s`）、relay/storage/release contract `13/13`、Python compile、部署 shell syntax 与 `git diff --check` 均通过。下一步为 commit/push/PR/CI/squash merge；随后必须经既有 accepted workflow 将 API 代码部署到 VPS2，真实证明 identity probe 快速返回且三元组一致，再复核零并发 writer/零重复 WDC后只调度一次 latest-head release。

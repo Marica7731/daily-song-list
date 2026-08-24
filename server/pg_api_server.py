@@ -417,6 +417,20 @@ def _close(connection: Any) -> None:
         close()
 
 
+def _meta_identity_only(query: dict[str, list[str]]) -> bool:
+    """Return whether a meta request is the bounded identity-only probe."""
+
+    unexpected = set(query) - {"identityOnly"}
+    if unexpected:
+        raise ValueError("unsupported meta query parameter")
+    values = query.get("identityOnly")
+    if values is None:
+        return False
+    if values != ["1"]:
+        raise ValueError("identityOnly must be exactly 1")
+    return True
+
+
 def make_handler(
     connection_factory: Callable[[], Any],
     thumbnail_fetcher: Callable[..., ThumbnailResult] | None = None,
@@ -485,12 +499,20 @@ def make_handler(
                     source_key = unquote(parsed.path.removeprefix("/api/sources/"))
                     if not source_key:
                         raise ValueError("source key is required")
+                meta_identity_only = (
+                    _meta_identity_only(query)
+                    if parsed.path == "/api/meta"
+                    else False
+                )
                 connection = connection_factory()
                 try:
                     if parsed.path == "/healthz":
                         payload = health_payload(connection)
                     elif parsed.path == "/api/meta":
-                        payload = meta_payload(connection)
+                        payload = meta_payload(
+                            connection,
+                            identity_only=meta_identity_only,
+                        )
                     elif parsed.path == "/api/rankings":
                         query = _normalize_rankings_query(query)
                         payload = rankings_payload(connection, query)
