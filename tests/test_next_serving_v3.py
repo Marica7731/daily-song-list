@@ -8874,12 +8874,14 @@ class Tests(unittest.TestCase):
         self.assertEqual(changes.call_count,2)
         self.assertEqual(len(cache),2)
 
-    def test_all_song_view_includes_selected_physical_7d_reset_once(self):
+    def test_all_song_view_does_not_project_physical_7d_reset(self):
         options=pg_adapter._query_options({
             "range":"all","view":"songs","metric":"occurrences",
             "page":"1","pageSize":"30",
         })
-        reset={"video-reset":{"video_id":"video-reset"}}
+        reset={"video-reset":{
+            "video_id":"video-reset","payload_json":{"rangeId":"7d"},
+        }}
         compatible={
             "video_id":"video-reset","occurrence_id":"accepted-7d",
             "range_id":"all","title":"Replacement","artist":"Artist",
@@ -8907,8 +8909,45 @@ class Tests(unittest.TestCase):
                 object(),"active",("parent",{}),options,
                 snapshot_reset_changes={},
             )
-        selected.assert_called_once()
-        self.assertEqual(selected.call_args.args[3],"all")
+        selected.assert_not_called()
+        self.assertTrue(calls["kwargs"]["include_persisted_source_authority"])
+        self.assertEqual(calls["resets"],{})
+
+    def test_all_song_view_keeps_exact_all_reset(self):
+        options=pg_adapter._query_options({
+            "range":"all","view":"songs","metric":"occurrences",
+            "page":"1","pageSize":"30",
+        })
+        reset={"video-reset":{
+            "video_id":"video-reset","payload_json":{"rangeId":"all"},
+        }}
+        candidate={
+            "video_id":"video-reset","occurrence_id":"accepted-all",
+            "range_id":"all","title":"Replacement","artist":"Artist",
+        }
+        calls={}
+        def stop_after_resets(*_args,**_kwargs):
+            raise RuntimeError("stop-after-resets")
+        with patch.object(pg_adapter,"_overlay_revision_ids",return_value=("overlay",)), \
+             patch.object(pg_adapter,"_resolve_exact_vtuber_channel_scope",return_value=None), \
+             patch.object(pg_adapter,"_rows",return_value=[]), \
+             patch.object(pg_adapter,"_one",return_value={
+                 "total_count":0,"total_occurrence_count":0,
+                 "total_song_count":0,"total_video_count":0,
+             }), \
+             patch.object(pg_adapter,"_overlay_candidate_rows",return_value=[candidate]), \
+             patch.object(pg_adapter,"_accepted_video_resets",return_value=reset), \
+             patch.object(pg_adapter,"_selected_full_reset_candidate_rows") as selected, \
+             patch.object(pg_adapter,"_snapshot_accepted_video_reset_changes",
+                          side_effect=lambda _c,_p,resets,_o,**kwargs:
+                          calls.update({"resets":resets,"kwargs":kwargs}) or []), \
+             patch.object(pg_adapter,"_runtime_tombstones",side_effect=stop_after_resets), \
+             self.assertRaisesRegex(RuntimeError,"stop-after-resets"):
+            pg_adapter._prepare_generic_overlay_rankings(
+                object(),"active",("parent",{}),options,
+                snapshot_reset_changes={},
+            )
+        selected.assert_not_called()
         self.assertTrue(calls["kwargs"]["include_persisted_source_authority"])
         self.assertEqual(set(calls["resets"]),{"video-reset"})
 
