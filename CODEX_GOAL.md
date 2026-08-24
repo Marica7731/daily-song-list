@@ -445,7 +445,6 @@
 - 根因是 PR #112 已修复 source exporter 的 legacy ranking-only parent（有完整 `runtime_ranking_rows` 的 `songs` 数组但没有 `runtime_videos/runtime_occurrences`），但 online-style generic ranking hydration 仍只查询物理 `runtime_occurrences`，对同一合法 legacy shape 报 no rows；不是 PostgreSQL 数据损坏、transport、内存或磁盘失败。
 - 最小修复只在 `server/pg_adapter.py` 增加严格 legacy fallback：物理 occurrence 查询为空时，按 parent revision/range/view/metric/scope/detail_key 精确读取 `runtime_ranking_rows`，校验视频 identity、type、父 row counts 与 `songs` 长度、`video_count=1`，再生成仅内存的 occurrence 形状；有 deferred tombstone/replacement 时复用现有 exact video/title/artist overlay，最后从有效 occurrences 重建 `songs`/`songCount`。没有精确 parent ranking row、重复 row、identity/count 不一致仍 fail closed；canonical PostgreSQL、raw payload、资源上限均不放宽。
 - 精确回归新增“无 runtime rows 时严格 ranking fallback、tombstone 仍从唯一 title/artist 删除”场景；generic-video 相关 `4/4`、Python compile、`git diff --check` 通过。完整本地 `254` tests 的既有环境结果为 `3` 个 Windows GBK subprocess 解码失败、1 个 Windows 临时目录 `WinError 5`、1 个 `pwd` 导入错误（Linux-only relay test），均与本修复无关；官方 CI 全量门禁仍需在 PR 上证明。失败已修复，下一步仅 commit/push/PR/CI/squash merge 后重新调度一个 latest-head WDC。
-
 ### 2026-08-24 08:30 Asia/Taipei — Song source 不得把 7d full-reset 投影进 all
 
 - 唯一 latest-head WDC run `32669828964`（head `3bac7d329ea7e438cdd61e4ca2cd2ee4fdd4a3bc`，sync job `97269031118`）已完成 7d/all 四类排名、7d authoritative sources、Artist/Song/affected-source 全量 owner/preflight 及 VTuber `675/675` 子集；在 `affected-parent-sources` 第一个 source checkpoint 精确 fail closed：`all/songs/0682f35a270f7de2 ranking=(17,1,17,17) source=(18,1,18,18)`。未 bundle/deploy，生产 release 未写入。
