@@ -18381,6 +18381,28 @@ def _snapshot_materialized_source_payload(
             return ""
         return f"{_overlay_norm(title)}::{_overlay_norm(_scope_artist(value))}"
 
+    def song_candidate_owner_group(value: Mapping[str, Any]) -> str:
+        """Mirror the ranking fallback for one ordinary overlay candidate.
+
+        Ranking candidates keep a raw unknown-artist placeholder such as
+        ``未記載`` in their own Song card.  Only persisted/runtime old-side
+        authority may coerce that marker to ``unknown``.  Reusing
+        ``_source_row_song_group_identity`` here would therefore let a source
+        absorb a candidate that rankings deliberately leave in a separate
+        card, producing a late source/ranking cardinality mismatch.
+        """
+
+        title = ""
+        for source in _scope_value_sources(value):
+            title = _text(source.get("title") or source.get("workTitle"))
+            if title:
+                break
+        title_key = _source_song_owner_norm(title)
+        artist_key = _source_song_owner_norm(_scope_artist(value))
+        if not title_key or not artist_key:
+            return ""
+        return f"{title_key}::{artist_key}"
+
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
         if source_type != "song" or not persisted:
             return False
@@ -18449,9 +18471,19 @@ def _snapshot_materialized_source_payload(
                 and raw_group in song_reset_owned_raw_keys
             ):
                 return False
+            owner_group = (
+                song_candidate_owner_group(value)
+                if split_mixed_reset_group
+                else _source_row_song_group_identity(value)
+            )
+            raw_or_change_group = (
+                raw_group
+                if split_mixed_reset_group
+                else _runtime_change_group_key(value, "songs")
+            )
             return bool(
-                _source_row_song_group_identity(value) in groups
-                or _runtime_change_group_key(value, "songs") in groups
+                owner_group in groups
+                or raw_or_change_group in groups
             )
         if source_type == "artist":
             groups = target_groups.get("artists", set())

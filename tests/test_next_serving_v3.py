@@ -6857,6 +6857,70 @@ class Tests(unittest.TestCase):
         })
         self.assertNotIn(overlay_video,{item[0] for item in identities})
 
+    def test_snapshot_song_source_keeps_unknown_placeholder_in_raw_card(self):
+        owner_key="焔::unknown"
+        source_key=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",owner_key,
+        )
+        self.assertEqual(source_key,"09e7b9fb658dd82c")
+        raw_group="焔::未記載"
+        raw_source_key=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",raw_group,
+        )
+        self.assertNotEqual(raw_source_key,source_key)
+        parent={
+            "videoId":"parent-video","occurrenceId":"parent-occurrence",
+            "rangeId":"all","position":0,"seconds":10,
+            "title":"焔","artist":"","songKey":owner_key,
+        }
+        candidate={
+            "revision_id":"accepted_30884784837_1",
+            "video_id":"cDd1kQ62M5M",
+            "occurrence_id":"cDd1kQ62M5M:206:3260","position":206,
+            "range_id":"all","song_key":"ca173beeb5b236984dd20369",
+            "seconds":3260,"title":"焔","artist":"未記載",
+            "is_unknown_artist":True,
+            "source_id":"Ugy8GJCr-fixture",
+            "source_system":"youtube_channel_discovery",
+            "video_title":"Fixture","channel_id":"UCfixture",
+            "channel_name":"Fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        persisted=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"song","key":owner_key,"title":"焔","artist":"",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },targets=(("songs",owner_key),),
+            video_scope=("parent-video","cDd1kQ62M5M"),
+            parent_occurrences=(parent,),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(persisted["found"])
+        self.assertEqual(
+            (persisted["record"]["occurrenceCount"],
+             persisted["record"]["songCount"],
+             persisted["record"]["videoCount"]),
+            (1,1,1),
+        )
+        self.assertNotIn(
+            "cDd1kQ62M5M",
+            {item["videoId"] for item in persisted["record"]["occurrences"]},
+        )
+        raw=pg_adapter._snapshot_materialized_source_payload(
+            raw_source_key,range_id="all",persisted_record=None,
+            targets=(("songs",raw_group),),video_scope=("cDd1kQ62M5M",),
+            parent_occurrences=(),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(raw["found"])
+        self.assertEqual(
+            (raw["record"]["occurrenceCount"],
+             raw["record"]["songCount"],raw["record"]["videoCount"]),
+            (1,1,1),
+        )
+
     def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
         source_key="source-ambiguous-reset-song"
         owner_key="canonical song::canonical artist"
