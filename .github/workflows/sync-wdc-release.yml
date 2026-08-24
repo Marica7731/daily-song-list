@@ -93,6 +93,7 @@ jobs:
           sparse-checkout: |
             server/release_serving_server.py
             server/pg_adapter.py
+            server/pg_api_server.py
             scripts/migration/7d-json-to-patch.py
             scripts/migration/materialize-pg-release-snapshot.py
             scripts/migration/materialize-ranking-pages.py
@@ -135,6 +136,7 @@ jobs:
           paths=(
               "server/release_serving_server.py",
               "server/pg_adapter.py",
+              "server/pg_api_server.py",
               "scripts/migration/7d-json-to-patch.py",
               "scripts/migration/materialize-pg-release-snapshot.py",
               "scripts/migration/materialize-ranking-pages.py",
