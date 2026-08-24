@@ -9813,6 +9813,38 @@ class Tests(unittest.TestCase):
         for workflow in (wdc,core,backfill,accepted):
             self.assertIn("fromdateiso8601",workflow)
 
+    def test_pg_api_code_only_deploy_is_identity_bound_and_data_inert(self):
+        workflow=(ROOT/".github"/"workflows"/"deploy-pg-incremental.yml").read_text(
+            encoding="utf-8",
+        )
+        jobs=workflow.split("\njobs:\n",1)[1]
+        code_job=jobs.split("\n  code_only:\n",1)[1].split("\n  candidate:\n",1)[0]
+        self.assertIn('runs-on: ubuntu-latest',code_job)
+        self.assertIn('inputs.code_only == true',workflow)
+        self.assertIn('inputs.code_only != true',workflow)
+        for guard in (
+            "code_expected_active_revision",
+            "code_expected_content_sha256",
+            "code_expected_source_commit_sha",
+            "EXPECTED_ACTIVE_REVISION",
+            "EXPECTED_CONTENT_SHA256",
+            "EXPECTED_SOURCE_COMMIT_SHA",
+        ):
+            self.assertIn(guard,workflow)
+        self.assertNotIn("import-pg-incremental.py",code_job)
+        self.assertNotIn("migration_state",code_job)
+        self.assertNotIn("migration_revisions",code_job)
+        self.assertNotIn("psql",code_job)
+        self.assertEqual(code_job.count("install -m 0644 \"$remote_root/pg_adapter.py\""),2)
+        self.assertEqual(code_job.count("install -m 0644 \"$remote_root/pg_api_server.py\""),2)
+        self.assertIn("PG_API_CODE_BLOCKED active-wdc-release",code_job)
+        self.assertIn("assert_identity \"$remote_root/pre-meta.json\" pre-deploy",code_job)
+        self.assertIn("/api/meta?identityOnly=1",code_job)
+        self.assertIn("--max-time 10",code_job)
+        self.assertIn("identityOnly=0",code_job)
+        self.assertIn("PG_API_CODE_ROLLBACK_VERIFIED",code_job)
+        self.assertIn("PG_API_CODE_DEPLOY_OK",code_job)
+
     def test_wdc_cancel_always_cleans_deleted_backing_loop_and_relay(self):
         workflow=(ROOT/".github"/"workflows"/"sync-wdc-release.yml").read_text(
             encoding="utf-8",
