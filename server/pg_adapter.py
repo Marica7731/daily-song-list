@@ -18421,14 +18421,13 @@ def _snapshot_materialized_source_payload(
         return f"{_overlay_norm(title)}::{_overlay_norm(_scope_artist(value))}"
 
     def song_candidate_owner_group(value: Mapping[str, Any]) -> str:
-        """Mirror the ranking fallback for one ordinary overlay candidate.
+        """Return the broad owner identity for an ordinary candidate.
 
-        Ranking candidates keep a raw unknown-artist placeholder such as
-        ``未記載`` in their own Song card.  Only persisted/runtime old-side
-        authority may coerce that marker to ``unknown``.  Reusing
-        ``_source_row_song_group_identity`` here would therefore let a source
-        absorb a candidate that rankings deliberately leave in a separate
-        card, producing a late source/ranking cardinality mismatch.
+        The caller may use this punctuation-insensitive fallback only when the
+        candidate also agrees with the persisted card's display identity.
+        Ranking candidates otherwise keep raw spellings such as
+        ``＠SHISHAMO`` and ``未記載`` in their own Song cards.  Exact accepted-
+        reset tuples remain independently bound above.
         """
 
         title = ""
@@ -18438,6 +18437,19 @@ def _snapshot_materialized_source_payload(
                 break
         title_key = _source_song_owner_norm(title)
         artist_key = _source_song_owner_norm(_scope_artist(value))
+        if not title_key or not artist_key:
+            return ""
+        return f"{title_key}::{artist_key}"
+
+    def persisted_song_display_owner_group() -> str:
+        """Mirror ranking's bounded persisted display-identity fallback."""
+
+        title_key = _source_song_owner_norm(
+            persisted.get("title") or persisted.get("workTitle")
+        )
+        artist_key = _source_song_owner_norm(
+            persisted.get("artist") or persisted.get("displayArtist")
+        )
         if not title_key or not artist_key:
             return ""
         return f"{title_key}::{artist_key}"
@@ -18530,9 +18542,22 @@ def _snapshot_materialized_source_payload(
                 if split_mixed_reset_group
                 else _runtime_change_group_key(value, "songs")
             )
+            if not split_mixed_reset_group:
+                return bool(
+                    owner_group in groups
+                    or raw_or_change_group in groups
+                )
+            raw_source_matches = (
+                overlay_song_source_key(value) == requested_key
+            )
+            display_owner_group = persisted_song_display_owner_group()
             return bool(
-                owner_group in groups
-                or raw_or_change_group in groups
+                raw_or_change_group in groups
+                or raw_source_matches
+                or (
+                    owner_group in groups
+                    and owner_group == display_owner_group
+                )
             )
         if source_type == "artist":
             groups = target_groups.get("artists", set())

@@ -6748,7 +6748,7 @@ class Tests(unittest.TestCase):
                     "seconds":14304 if video_id == reset_video
                         else index * 10 + occurrence_index,
                     "title":"忘れじの言の葉","artist":raw_artist,
-                    "songKey":owner_key,
+                    "songKey":"8e712be6ac08a28262d5eaf9",
                 })
         self.assertEqual(len(parent),771)
         candidate={
@@ -7049,6 +7049,126 @@ class Tests(unittest.TestCase):
             (raw["record"]["occurrenceCount"],
              raw["record"]["songCount"],raw["record"]["videoCount"]),
             (1,1,1),
+        )
+
+    def test_snapshot_song_source_keeps_at_prefixed_artist_in_raw_card(self):
+        source_key="10df4dffdbdef345"
+        owner_key="君と夏フェス::shishamo"
+        parent_video_ids=[f"parent-{index:03d}" for index in range(187)]
+        reset_video_ids=parent_video_ids[:4]
+        parent=[]
+        for index,video_id in enumerate(parent_video_ids):
+            occurrence_total=2 if index == 4 else 1
+            for occurrence_index in range(occurrence_total):
+                parent.append({
+                    "videoId":video_id,
+                    "occurrenceId":f"{video_id}:{occurrence_index}",
+                    "rangeId":"all","position":occurrence_index,
+                    "seconds":index * 10 + occurrence_index,
+                    "title":"君と夏フェス","artist":"SHISHAMO",
+                    "songKey":owner_key,
+                })
+        self.assertEqual((len(parent),len(parent_video_ids)),(188,187))
+
+        def candidate(
+            video_id,seconds,artist="SHISHAMO",
+            song_key="8e712be6ac08a28262d5eaf9",
+        ):
+            return {
+                "revision_id":"accepted_30884784837_1",
+                "video_id":video_id,
+                "occurrence_id":f"{video_id}:0:{seconds}","position":0,
+                "range_id":"all","song_key":song_key,
+                "seconds":seconds,"title":"君と夏フェス","artist":artist,
+                "source_id":"UgydCvO0kpc6soch7TJ4AaABAg",
+                "source_system":"youtube_channel_discovery",
+                "video_title":video_id,"channel_id":"UCfixture",
+                "channel_name":"Fixture","occurrence_payload_json":{},
+                "video_payload_json":{},"video_tombstone":False,
+            }
+
+        candidates=tuple(
+            candidate(video_id,index * 10)
+            for index,video_id in enumerate(reset_video_ids)
+        ) + (
+            candidate("overlay-shishamo",2000),
+            candidate(
+                "dUmeM96Zy-Q",3221,"＠SHISHAMO",
+                "a17703a867fa057cbfa9a59d",
+            ),
+        )
+        resets={video_id:{
+            "video_id":video_id,"payload_json":{"rangeId":"all"},
+        } for video_id in reset_video_ids}
+        video_scope=tuple((*parent_video_ids,"overlay-shishamo","dUmeM96Zy-Q"))
+
+        persisted=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"song","key":owner_key,"title":"君と夏フェス",
+                "displayArtist":"SHISHAMO (186)、SHISHAMO (2014)",
+                "sourceDetailKey":source_key,
+                "rangeId":"all",
+            },targets=(("songs",owner_key),),video_scope=video_scope,
+            parent_occurrences=tuple(parent),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=candidates,
+            accepted_video_resets=resets,runtime_changes=(),
+        )
+        self.assertTrue(persisted["found"])
+        self.assertEqual(
+            (persisted["record"]["occurrenceCount"],
+             persisted["record"]["videoCount"],
+             persisted["record"]["timestampCount"]),
+            (189,188,189),
+        )
+        self.assertNotIn(
+            "dUmeM96Zy-Q",
+            {item["videoId"] for item in persisted["record"]["occurrences"]},
+        )
+
+        target=self.temp/"at-prefixed-song-source.sqlite"
+        writer=pg_materializer.CanonicalSnapshotWriter(target)
+        ranking={
+            "rank":1,"key":owner_key,"sourceDetailKey":source_key,
+            "title":"君と夏フェス","displayArtist":"SHISHAMO",
+            "count":189,"songCount":1,"videoCount":188,
+            "timestampCount":189,"occurrences":[],
+        }
+        try:
+            writer.add_ranking(pg_materializer._ranking_row(
+                ranking,payload_record=ranking,range_id="all",view="songs",
+                metric="occurrences",scope_key="all",expected_rank=1,
+            ))
+            writer.add_checkpointed_source(
+                "affected-parent-sources",source_key,"all",
+                persisted["record"],persisted["record"]["occurrences"],
+            )
+            self.assertEqual(
+                writer.connection.execute(
+                    "SELECT count(*),count(DISTINCT canonical_song_key),"
+                    "count(DISTINCT video_id) FROM source_occurrences "
+                    "WHERE range_id='all' AND source_key=?",(source_key,),
+                ).fetchone(),
+                (189,1,188),
+            )
+        finally:
+            writer.abort()
+
+        raw_group="君と夏フェス::@shishamo"
+        raw_source=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",raw_group,
+        )
+        raw=pg_adapter._snapshot_materialized_source_payload(
+            raw_source,range_id="all",persisted_record=None,
+            targets=(("songs",raw_group),),video_scope=("dUmeM96Zy-Q",),
+            parent_occurrences=(),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidates[-1],),
+            accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(raw["found"])
+        self.assertEqual(
+            (raw["record"]["occurrenceCount"],raw["record"]["songCount"],
+             raw["record"]["videoCount"],raw["record"]["timestampCount"]),
+            (1,1,1,1),
         )
 
     def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
