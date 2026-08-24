@@ -6441,6 +6441,7 @@ def _canonical_overlay_delta_group_key(
     replacement_key: str,
     item: Mapping[str, Any],
     view: str,
+    song_reset_owner_keys: Mapping[str, str] | None = None,
 ) -> str:
     """Route a replacement to one matching affected persisted scalar row.
 
@@ -6453,6 +6454,19 @@ def _canonical_overlay_delta_group_key(
 
     if view not in {"songs", "songIndex", "vsingerSongs"}:
         return replacement_key
+    exact_owner_key = _text(
+        (song_reset_owner_keys or {}).get(replacement_key)
+    )
+    if exact_owner_key:
+        if (
+            exact_owner_key not in groups
+            and exact_owner_key not in persisted_rows
+        ):
+            raise PostgresAdapterError(
+                "accepted-video Song reset owner is missing from the "
+                "bounded ranking window"
+            )
+        return exact_owner_key
     replacement_identity = (
         _source_song_owner_norm(item.get("title")),
         _source_song_owner_norm(item.get("artist")),
@@ -6473,6 +6487,96 @@ def _canonical_overlay_delta_group_key(
     return next(iter(matches)) if len(matches) == 1 else replacement_key
 
 
+def _accepted_song_reset_candidate_owner_keys(
+    candidate_rows: Iterable[Mapping[str, Any]],
+    reset_changes: Iterable[Mapping[str, Any]],
+) -> dict[str, str]:
+    """Bind accepted Song candidates to one persisted source owner.
+
+    A full-video reset removes the immutable parent tuple before its accepted
+    candidate is added.  Historical candidate rows retain their raw display
+    spelling, while the canonical ranking/source owner may have a normalized
+    title or artist.  The source projection already carries the authoritative
+    ``parentSongGroupKey`` for every reset tuple; use the same exact
+    video/seconds/title/artist evidence for the ranking increment.  Never
+    infer an owner from a broad alias when the persisted authority is absent,
+    and fail closed if one candidate group proves more than one owner.
+    """
+
+    raw_authority: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
+    canonical_authority: dict[
+        tuple[str, str, str, str], set[str]
+    ] = defaultdict(set)
+
+    def identity(
+        row: Mapping[str, Any], *, canonical_title: bool = False,
+    ) -> tuple[str, str, str, str]:
+        title = _text(row.get("title"))
+        artist = _text(row.get("artist"))
+        title_key = (
+            _vtuber_canonical_song_identity(title)[1]
+            if canonical_title
+            else _overlay_song_group_norm(title)
+        )
+        return (
+            _text(row.get("videoId") or row.get("video_id")),
+            _text(row.get("seconds")),
+            title_key or _overlay_song_group_norm(title),
+            _overlay_song_group_norm(artist),
+        )
+
+    for change in reset_changes:
+        if not (
+            change.get("acceptedVideoReset") is True
+            and change.get("persistedSourceAuthority") is True
+        ):
+            continue
+        owner_key = _text(change.get("parentSongGroupKey"))
+        raw_identity = identity(change)
+        if not owner_key or not raw_identity[0] or not raw_identity[2]:
+            raise PostgresAdapterError(
+                "accepted-video persisted Song owner identity is invalid"
+            )
+        raw_authority[raw_identity].add(owner_key)
+        canonical_authority[identity(change, canonical_title=True)].add(
+            owner_key
+        )
+
+    owners_by_group: dict[str, set[str]] = defaultdict(set)
+    for row in candidate_rows:
+        if row.get("video_tombstone"):
+            continue
+        title = _text(row.get("title"))
+        artist = _text(row.get("artist"))
+        if not title:
+            continue
+        owners = raw_authority.get(identity(row), set())
+        if not owners:
+            owners = canonical_authority.get(
+                identity(row, canonical_title=True), set(),
+            )
+        if not owners:
+            continue
+        if len(owners) != 1:
+            raise PostgresAdapterError(
+                "accepted-video persisted Song owner is ambiguous"
+            )
+        replacement_key = (
+            f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+        )
+        owners_by_group[replacement_key].update(owners)
+
+    result: dict[str, str] = {}
+    for replacement_key, owners in owners_by_group.items():
+        if len(owners) != 1:
+            raise PostgresAdapterError(
+                "accepted-video Song candidate group has ambiguous persisted "
+                "owners"
+            )
+        result[replacement_key] = next(iter(owners))
+    return result
+
+
 def _apply_overlay_delta_groups(
     groups: dict[str, dict[str, Any]],
     persisted_rows: Mapping[str, Mapping[str, Any]],
@@ -6480,6 +6584,7 @@ def _apply_overlay_delta_groups(
     view: str,
     range_id: str,
     exact_owned_rows: Mapping[str, Mapping[str, Any]] | None = None,
+    song_reset_owner_keys: Mapping[str, str] | None = None,
 ) -> None:
     """Apply bounded candidate deltas without losing canonical parent identity."""
 
@@ -6489,11 +6594,22 @@ def _apply_overlay_delta_groups(
             continue
         target_key = _canonical_overlay_delta_group_key(
             groups, persisted_rows, key, item, view,
+            song_reset_owner_keys,
         )
         row = groups.get(target_key)
         if row is None:
             count = int(item.get("occurrenceCount", len(item["occurrences"])))
             video_count = len(item["videoIds"])
+            persisted_owner = (
+                persisted_rows.get(target_key)
+                if _text(
+                    (song_reset_owner_keys or {}).get(key)
+                ) == target_key
+                else None
+            ) or {}
+            title = _text(persisted_owner.get("title")) or item["title"]
+            artist = _text(persisted_owner.get("artist")) or item["artist"]
+            name = _text(persisted_owner.get("name")) or item["name"]
             song_count = (
                 1
                 if view in {"songs", "songIndex", "vsingerSongs"}
@@ -6502,8 +6618,8 @@ def _apply_overlay_delta_groups(
             )
             payload = {
                 "type": "video" if view == "videos" else "artist" if view == "artists" else "vtuber" if view == "vtubers" else "song",
-                "key": target_key, "title": item["title"], "displayArtist": item["artist"],
-                "name": item["name"], "count": count, "videoCount": video_count,
+                "key": target_key, "title": title, "displayArtist": artist,
+                "name": name, "count": count, "videoCount": video_count,
                 "songCount": song_count, "timestampCount": count,
                 "occurrences": item["occurrences"][:20],
             }
@@ -6514,8 +6630,8 @@ def _apply_overlay_delta_groups(
                 payload["sourceDetailKey"] = source_detail_key
                 payload["sourceDetailPath"] = ""
             groups[target_key] = {
-                "detail_key": target_key, "title": item["title"],
-                "artist": item["artist"], "name": item["name"],
+                "detail_key": target_key, "title": title,
+                "artist": artist, "name": name,
                 "row_count": count, "song_count": song_count,
                 "video_count": video_count, "timestamp_count": count,
                 "payload_json": payload, "search_text": item["search"],
@@ -12691,6 +12807,13 @@ def _prepare_generic_overlay_rankings(
         {} if options["view"] in {"artists", "vtubers"}
         else _overlay_candidate_groups(candidate_rows, options["view"])
     )
+    song_reset_owner_keys = (
+        _accepted_song_reset_candidate_owner_keys(
+            candidate_rows, generic_reset_changes,
+        )
+        if options["view"] in {"songs", "songIndex", "vsingerSongs"}
+        else {}
+    )
     phase_started = _phase_trace(
         "candidate_delta",
         phase_started,
@@ -12781,6 +12904,7 @@ def _prepare_generic_overlay_rankings(
     _apply_overlay_delta_groups(
         groups, persisted_scalar_rows, delta,
         options["view"], options["range"], exact_owned_rows,
+        song_reset_owner_keys,
     )
     if options["view"] not in {"artists", "vtubers"}:
         _apply_runtime_tombstone_groups(
