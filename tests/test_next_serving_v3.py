@@ -9598,6 +9598,7 @@ class Tests(unittest.TestCase):
             "scripts/migration/requirements-wdc-linux.txt",
             "scripts/migration/requirements-wdc-mac.txt",
             "server/pg_adapter.py",
+            "server/pg_api_server.py",
             "server/release_serving_server.py",
         ):
             self.assertIn(excluded,workflow)
