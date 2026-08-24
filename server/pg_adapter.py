@@ -17000,6 +17000,45 @@ def _snapshot_source_overlay_inputs(
                 or row.get("rangeId")
             ) == range_id
         }
+        if accepted_video_resets and candidate_rows:
+            # Generic Song rankings route only the exact accepted-reset
+            # tuples backed by persisted parent authority into that parent's
+            # canonical card.  A synthetic raw-spelling source has no parent
+            # payload from which to rediscover the same owner, so preserve
+            # the already fail-closed ranking proof on each matching
+            # candidate.  Source routing below can then keep ordinary rows in
+            # the raw card while moving only those exact tuples to the
+            # persisted source key.
+            reset_changes = _snapshot_accepted_video_reset_changes(
+                connection,
+                parent_revision_id,
+                accepted_video_resets,
+                _query_options({
+                    "range": range_id,
+                    "view": "songs",
+                    "metric": "occurrences",
+                }),
+                include_persisted_source_authority=True,
+            )
+            reset_owners = _accepted_song_reset_candidate_owner_keys(
+                candidate_rows, reset_changes,
+            )
+            if reset_owners:
+                annotated_candidates: list[Mapping[str, Any]] = []
+                for row in candidate_rows:
+                    annotated = dict(row)
+                    owner_key = _text(reset_owners.get(
+                        _accepted_song_reset_candidate_identity(row)
+                    ))
+                    if owner_key:
+                        annotated["_acceptedSongResetOwnerKey"] = owner_key
+                        annotated["_acceptedSongResetOwnerSourceKey"] = (
+                            _production_source_detail_key_for_group(
+                                "songs", range_id, owner_key,
+                            )
+                        )
+                    annotated_candidates.append(annotated)
+                candidate_rows = tuple(annotated_candidates)
     # Ranking projection applies runtime curation only to its exact physical
     # range.  Source rebuilding must use the same contract: replaying a 7d
     # same-video replacement into ``all`` can overwrite the persisted tuple's
@@ -18404,6 +18443,11 @@ def _snapshot_materialized_source_payload(
         return f"{title_key}::{artist_key}"
 
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
+        annotated_owner_source = _text(
+            value.get("_acceptedSongResetOwnerSourceKey")
+        )
+        if annotated_owner_source:
+            return bool(persisted and annotated_owner_source == requested_key)
         if source_type != "song" or not persisted:
             return False
         video_id = row_video_id(value)
@@ -18458,6 +18502,11 @@ def _snapshot_materialized_source_payload(
         if source_type == "video":
             return row_video_id(value) in target_groups.get("videos", set())
         if source_type == "song":
+            reset_owner_source_key = _text(
+                value.get("_acceptedSongResetOwnerSourceKey")
+            )
+            if reset_owner_source_key:
+                return reset_owner_source_key == requested_key
             if not persisted:
                 return overlay_song_source_key(value) == requested_key
             groups = target_groups.get("songs", set())

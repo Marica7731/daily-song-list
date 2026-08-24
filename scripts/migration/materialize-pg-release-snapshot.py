@@ -666,6 +666,34 @@ def _production_source_key(view: str, range_id: str, group_key: str) -> str:
     ))
 
 
+def _source_uses_song_range_contract(
+    source_key: str,
+    details: Mapping[str, Mapping[str, Any]],
+    scoped: Mapping[str, Mapping[str, Sequence[Any]]],
+) -> bool:
+    """Resolve synthetic source type from its exact target view.
+
+    Overlay-only Song sources have no persisted detail row.  An absent type
+    must not be treated as a non-Song source, because that would project
+    compatible physical 7d reset rows into an all-range raw Song card even
+    though rankings deliberately do not do so.
+    """
+
+    persisted_type = _text((details.get(source_key) or {}).get("type"))
+    if persisted_type:
+        return persisted_type == "song"
+    target_views = {
+        _text(view)
+        for view, _group_key in scoped[source_key]["targets"]
+        if _text(view)
+    }
+    if "songs" in target_views and target_views != {"songs"}:
+        raise RuntimeError(
+            "affected synthetic source has mixed target types: " + source_key
+        )
+    return target_views == {"songs"}
+
+
 def _derived_source_pairs(
     *,
     video_ids: Iterable[str],
@@ -5722,6 +5750,7 @@ def export_affected_parent_sources(
                     tuple[Mapping[str, Any], ...],
                 ],
             ] = {}
+
             for plan, plan_source_keys in plan_members.items():
                 source_base_revision, source_overlay_ids = plan
                 # A plan can contain persisted Song, Artist and Video details
@@ -5736,8 +5765,9 @@ def export_affected_parent_sources(
                         source_key
                         for source_key in plan_source_keys
                         if (
-                            _text((details.get(source_key) or {}).get("type"))
-                            != "song"
+                            not _source_uses_song_range_contract(
+                                source_key, details, stream_scoped,
+                            )
                         ) == include_compatible_full_reset_7d
                     )
                     if not typed_source_keys:
@@ -5775,8 +5805,9 @@ def export_affected_parent_sources(
                 direct_video_id = stream_direct_sources.get(source_key, "")
                 try:
                     include_compatible_full_reset_7d = (
-                        _text((details.get(source_key) or {}).get("type"))
-                        != "song"
+                        not _source_uses_song_range_contract(
+                            source_key, details, stream_scoped,
+                        )
                     )
                     candidate_rows, accepted_resets, runtime_changes = (
                         overlay_inputs_by_plan[
