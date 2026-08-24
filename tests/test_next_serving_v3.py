@@ -6656,6 +6656,60 @@ class Tests(unittest.TestCase):
              for item in record["occurrences"]},
         )
 
+    def test_snapshot_song_ranking_keeps_771_owner_rows_across_mixed_resets(self):
+        owner_key="忘れじの言の葉::未来古代楽団feat安次嶺希和子"
+        reset_video="PZPwqBtYM2I"
+        raw_artist="未来古代楽団feat. 安次嶺希和子さん"
+        candidate={
+            "revision_id":"overlay","video_id":reset_video,
+            "occurrence_id":f"{reset_video}:13:14304","position":13,
+            "range_id":"all",
+            "song_key":"忘れじの言の葉\x1f未来古代楽団feat. 安次嶺希和子さん",
+            "seconds":14304,"title":"忘れじの言の葉",
+            "artist":raw_artist,"source_system":"fixture",
+            "video_title":"Reset video","channel_id":"UCfixture",
+            "channel_name":"Fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        reset_change={
+            "entityType":"occurrences","videoId":reset_video,
+            "occurrenceId":"","seconds":14304,
+            "title":"忘れじの言の葉","artist":raw_artist,
+            "rangeId":"all","acceptedVideoReset":True,
+            "persistedSourceAuthority":True,
+            "parentSongGroupKey":owner_key,
+        }
+        raw_key=(
+            f"{pg_adapter._overlay_norm(candidate['title'])}::"
+            f"{pg_adapter._overlay_norm(candidate['artist'])}"
+        )
+        groups={owner_key:{
+            "detail_key":owner_key,"title":"忘れじの言の葉",
+            "artist":"未来古代楽団feat安次嶺希和子",
+            "name":"忘れじの言の葉","row_count":770,
+            "song_count":1,"video_count":736,"timestamp_count":770,
+            "payload_json":{},"search_text":"",
+            "channel_search_text":"",
+        }}
+        persisted={owner_key:dict(groups[owner_key])}
+        delta=pg_adapter._overlay_candidate_groups((candidate,),"songs")
+        owners=pg_adapter._accepted_song_reset_candidate_owner_keys(
+            (candidate,),(reset_change,),
+        )
+        self.assertEqual(owners,{raw_key:owner_key})
+        pg_adapter._apply_overlay_delta_groups(
+            groups,persisted,delta,"songs","all",
+            song_reset_owner_keys=owners,
+        )
+        self.assertEqual(
+            (groups[owner_key]["row_count"],
+             groups[owner_key]["song_count"],
+             groups[owner_key]["video_count"],
+             groups[owner_key]["timestamp_count"]),
+            (771,1,737,771),
+        )
+        self.assertNotIn(raw_key,groups)
+
     def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
         source_key="source-ambiguous-reset-song"
         owner_key="canonical song::canonical artist"
