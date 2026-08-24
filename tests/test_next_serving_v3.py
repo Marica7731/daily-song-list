@@ -6796,6 +6796,67 @@ class Tests(unittest.TestCase):
             (4,4),
         )
 
+    def test_snapshot_song_source_splits_exact_owner_from_same_raw_group(self):
+        source_key="source-mixed-reset-song"
+        owner_key="夜明けと蛍::nbuna"
+        reset_video="matched-reset"
+        stable_video="stable-parent"
+        overlay_video="overlay-only"
+        parent=({
+            "videoId":reset_video,"occurrenceId":"parent-reset",
+            "rangeId":"all","position":0,"seconds":101,
+            "title":"夜明けと蛍","artist":"n-buna","songKey":owner_key,
+        },{
+            "videoId":stable_video,"occurrenceId":"parent-stable",
+            "rangeId":"all","position":0,"seconds":102,
+            "title":"夜明けと蛍","artist":"n-buna","songKey":owner_key,
+        })
+
+        def candidate(video_id,seconds):
+            return {
+                "revision_id":"overlay","video_id":video_id,
+                "occurrence_id":f"{video_id}:0:{seconds}","position":0,
+                "range_id":"all","song_key":owner_key,
+                "seconds":seconds,"title":"夜明けと蛍","artist":"n-buna",
+                "source_system":"fixture","video_title":video_id,
+                "channel_id":"UCfixture","channel_name":"Fixture",
+                "occurrence_payload_json":{},"video_payload_json":{},
+                "video_tombstone":False,
+            }
+
+        reset_candidate=candidate(reset_video,101)
+        overlay_candidate=candidate(overlay_video,103)
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"song","key":owner_key,"title":"夜明けと蛍",
+                "artist":"n-buna","sourceDetailKey":source_key,
+                "rangeId":"all",
+            },targets=(("songs",owner_key),),
+            video_scope=(reset_video,stable_video,overlay_video),
+            parent_occurrences=parent,direct_video_rows=(),
+            direct_occurrence_rows=(),
+            candidate_rows=(reset_candidate,overlay_candidate),
+            accepted_video_resets={reset_video:{
+                "video_id":reset_video,"payload_json":{"rangeId":"all"},
+            }},runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["occurrenceCount"],record["songCount"],
+             record["videoCount"],record["timestampCount"]),
+            (2,1,2,2),
+        )
+        identities={
+            (item["videoId"],item["song"].get("occurrenceId"))
+            for item in record["occurrences"]
+        }
+        self.assertEqual(identities,{
+            (reset_video,f"{reset_video}:0:101"),
+            (stable_video,"parent-stable"),
+        })
+        self.assertNotIn(overlay_video,{item[0] for item in identities})
+
     def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
         source_key="source-ambiguous-reset-song"
         owner_key="canonical song::canonical artist"
@@ -8542,16 +8603,22 @@ class Tests(unittest.TestCase):
         self.assertEqual(export_ranges,["7d"]*4)
         self.assertTrue(payload_ranges)
         self.assertEqual(set(payload_ranges),{"7d"})
-        self.assertEqual(len(bulk_calls),2)
-        self.assertEqual(tuple(map(len,bulk_calls)),(1,3))
-        self.assertTrue(bulk_calls[0][0].endswith("-vtubers"))
+        self.assertEqual(len(bulk_calls),3)
+        self.assertEqual(tuple(map(len,bulk_calls)),(1,1,2))
+        self.assertTrue(bulk_calls[0][0].endswith("-songs"))
+        self.assertTrue(bulk_calls[1][0].endswith("-vtubers"))
         self.assertFalse(set(bulk_calls[0]) & set(bulk_calls[1]))
-        self.assertEqual(len(set(bulk_calls[0]) | set(bulk_calls[1])),4)
+        self.assertFalse(set(bulk_calls[0]) & set(bulk_calls[2]))
+        self.assertFalse(set(bulk_calls[1]) & set(bulk_calls[2]))
+        self.assertEqual(
+            len(set(bulk_calls[0]) | set(bulk_calls[1])
+                | set(bulk_calls[2])),4,
+        )
         self.assertEqual(
             phase_order,
             ["artist-owner-preflight","overlay-artist-owner-preflight",
              "song-owner-preflight","preflight","affected","affected",
-             "unaffected"],
+             "affected","unaffected"],
         )
         self.assertEqual(result["source_details"],8)
         self.assertEqual(result["source_occurrences"],1608)

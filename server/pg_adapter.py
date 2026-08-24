@@ -18332,6 +18332,7 @@ def _snapshot_materialized_source_payload(
     song_reset_parent_canonical_identities: dict[
         tuple[str, str, str, str], int
     ] = defaultdict(int)
+    song_reset_owned_raw_keys: set[str] = set()
 
     def song_reset_owner_identity(
         video_id: str,
@@ -18370,6 +18371,38 @@ def _snapshot_materialized_source_payload(
             _overlay_song_group_norm(artist),
         )
 
+    def song_candidate_raw_group(value: Mapping[str, Any]) -> str:
+        title = ""
+        for source in _scope_value_sources(value):
+            title = _text(source.get("title") or source.get("workTitle"))
+            if title:
+                break
+        if not title:
+            return ""
+        return f"{_overlay_norm(title)}::{_overlay_norm(_scope_artist(value))}"
+
+    def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
+        if source_type != "song" or not persisted:
+            return False
+        video_id = row_video_id(value)
+        if video_id not in accepted_video_resets:
+            return False
+        for identities, canonical_title in (
+            (song_reset_parent_identities, False),
+            (song_reset_parent_canonical_identities, True),
+        ):
+            owner_identity = song_reset_owner_identity(
+                video_id, value, canonical_title=canonical_title,
+            )
+            owner_count = identities.get(owner_identity, 0)
+            if owner_count > 1:
+                raise PostgresAdapterError(
+                    "accepted reset Song source owner is ambiguous"
+                )
+            if owner_count == 1:
+                return True
+        return False
+
     def channel_identities(value: Mapping[str, Any]) -> set[str]:
         payload = _json_object(value.get("video_payload_json"))
         if isinstance(payload.get("payload"), Mapping):
@@ -18395,7 +18428,9 @@ def _snapshot_materialized_source_payload(
             if item
         }
 
-    def matches_target(value: Mapping[str, Any]) -> bool:
+    def matches_target(
+        value: Mapping[str, Any], *, split_mixed_reset_group: bool = False,
+    ) -> bool:
         if row_video_id(value) not in scoped_videos:
             return False
         if source_type == "video":
@@ -18404,29 +18439,20 @@ def _snapshot_materialized_source_payload(
             if not persisted:
                 return overlay_song_source_key(value) == requested_key
             groups = target_groups.get("songs", set())
-            if bool(
+            if has_exact_song_reset_owner(value):
+                return True
+            raw_group = song_candidate_raw_group(value)
+            if (
+                split_mixed_reset_group
+                and raw_group
+                and raw_group not in groups
+                and raw_group in song_reset_owned_raw_keys
+            ):
+                return False
+            return bool(
                 _source_row_song_group_identity(value) in groups
                 or _runtime_change_group_key(value, "songs") in groups
-            ):
-                return True
-            video_id = row_video_id(value)
-            if video_id not in accepted_video_resets:
-                return False
-            for identities, canonical_title in (
-                (song_reset_parent_identities, False),
-                (song_reset_parent_canonical_identities, True),
-            ):
-                owner_identity = song_reset_owner_identity(
-                    video_id, value, canonical_title=canonical_title,
-                )
-                owner_count = identities.get(owner_identity, 0)
-                if owner_count > 1:
-                    raise PostgresAdapterError(
-                        "accepted reset Song source owner is ambiguous"
-                    )
-                if owner_count == 1:
-                    return True
-            return False
+            )
         if source_type == "artist":
             groups = target_groups.get("artists", set())
             return bool(
@@ -18527,6 +18553,21 @@ def _snapshot_materialized_source_payload(
                 "occurrences": (occurrence,),
             })
 
+    if source_type == "song" and persisted:
+        # Ranking splits a raw spelling when the same raw group contains both
+        # reset-owned tuples and ordinary overlay-only tuples.  The exact
+        # reset candidates move to the persisted owner; the remainder keeps
+        # its independent raw card.  Record those mixed-group boundaries only
+        # after the immutable parent reset identities above are complete, so
+        # source reconstruction cannot claim the remainder through its broad
+        # punctuation-insensitive owner fallback.
+        for candidate in candidate_rows:
+            if not has_exact_song_reset_owner(candidate):
+                continue
+            raw_group = song_candidate_raw_group(candidate)
+            if raw_group:
+                song_reset_owned_raw_keys.add(raw_group)
+
     def identity(record: Mapping[str, Any]) -> tuple[str, str]:
         return _source_record_identity(record)
 
@@ -18558,7 +18599,9 @@ def _snapshot_materialized_source_payload(
             if identity(record)[0] not in reset_videos
         ]
     for row in candidate_rows:
-        if row.get("video_tombstone") or not matches_target(row):
+        if row.get("video_tombstone") or not matches_target(
+            row, split_mixed_reset_group=True,
+        ):
             continue
         record = _overlay_source_record(row)
         if record:

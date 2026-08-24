@@ -3689,7 +3689,7 @@ def _export_sources_collecting_cardinality_mismatches(
     ],
     exporter: Callable[[set[str]], set[str]],
 ) -> set[str]:
-    """Run the final exporter through every VTuber cardinality mismatch.
+    """Run the final exporter through every source cardinality mismatch.
 
     A cardinality mismatch is raised only after the source rows have been
     written but before their durable completion marker.  Reusing the existing
@@ -6805,6 +6805,83 @@ def materialize(
                         source_keys=affected_parent_sources,
                     ),
                 )
+            # Song ranking/source cardinality is part of the all-revision
+            # owner contract.  Run the final affected-source exporter (and
+            # therefore its durable checkpoint/cardinality gate) before the
+            # larger VTuber and generic source passes.  This is not duplicate
+            # work: later passes subtract the completed exact keys.
+            song_source_keys = set(
+                source_scope.source_keys_for_view("songs")
+            ) & source_keys["all"]
+            song_affected = song_source_keys & set(affected_parent_sources)
+            song_cardinality_mismatches: dict[
+                tuple[str, str, str], SnapshotSourceCardinalityMismatchRecord
+            ] = {}
+            exported_song_affected = (
+                run_snapshot_operation(
+                    "song-affected-source-cardinality-preflight",
+                    lambda current: _export_sources_collecting_cardinality_mismatches(
+                        writer,
+                        stage="affected-parent-sources",
+                        range_id="all",
+                        source_keys=song_affected,
+                        mismatches=song_cardinality_mismatches,
+                        exporter=lambda pending: export_affected_parent_sources(
+                            current,
+                            writer,
+                            parent_revision_id=builder.parent[0],
+                            overlay_revision_ids=builder.overlay_ids,
+                            source_scope=source_scope,
+                            source_keys=pending,
+                        ),
+                    ),
+                )
+                if song_affected else set()
+            )
+            failed_song_affected = {
+                source_key
+                for (stage, range_id, source_key) in song_cardinality_mismatches
+                if stage == "affected-parent-sources" and range_id == "all"
+            }
+            if (
+                exported_song_affected & failed_song_affected
+                or exported_song_affected | failed_song_affected
+                    != song_affected
+            ):
+                raise RuntimeError(
+                    "Song source cardinality preflight changed the exact "
+                    "revision key set"
+                )
+            if song_cardinality_mismatches:
+                ordered_mismatches = sorted(
+                    song_cardinality_mismatches.values(),
+                    key=lambda mismatch: (
+                        mismatch.source_key, mismatch.stage, mismatch.range_id,
+                    ),
+                )
+                for mismatch in ordered_mismatches:
+                    print(
+                        "PG_SNAPSHOT_SONG_SOURCE_CARDINALITY_MISMATCH "
+                        f"stage={mismatch.stage} range={mismatch.range_id} "
+                        f"sourceKey={mismatch.source_key} "
+                        f"ranking={mismatch.expected} source={mismatch.actual}",
+                        flush=True,
+                    )
+                raise RuntimeError(
+                    "Song source cardinality preflight failed: "
+                    f"mismatches={len(ordered_mismatches)} keys="
+                    + ",".join(
+                        mismatch.source_key for mismatch in ordered_mismatches
+                    )
+                )
+            bulk_exported_source_keys["all"].update(exported_song_affected)
+            print(
+                "PG_SNAPSHOT_SONG_SOURCE_CARDINALITY_PREFLIGHT "
+                f"total={len(song_source_keys)} "
+                f"affected={len(song_affected)} "
+                f"exported={len(exported_song_affected)}",
+                flush=True,
+            )
             # Materialize the complete all-range VTuber source revision before
             # any non-VTuber source copy. This deliberately reuses the final
             # affected/unaffected exporters and their cardinality gate rather
@@ -6913,7 +6990,9 @@ def materialize(
                 flush=True,
             )
             remaining_affected_parent_sources = (
-                set(affected_parent_sources) - exported_vtuber_affected
+                set(affected_parent_sources)
+                - exported_song_affected
+                - exported_vtuber_affected
             )
             if remaining_affected_parent_sources:
                 exported_affected = run_snapshot_operation(
