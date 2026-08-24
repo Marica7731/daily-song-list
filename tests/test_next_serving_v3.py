@@ -6581,6 +6581,9 @@ class Tests(unittest.TestCase):
         ), patch.object(
             pg_adapter,"_runtime_tombstones",return_value=(),
         ) as tombstones, patch.object(
+            pg_adapter,"_snapshot_accepted_video_reset_changes",
+            return_value=(),
+        ), patch.object(
             pg_adapter,"_bounded_parent_vtuber_video_owners",return_value={},
         ), patch.object(
             pg_adapter,"_enrich_runtime_parent_group_keys",
@@ -6596,6 +6599,133 @@ class Tests(unittest.TestCase):
         self.assertEqual(
             tuple(tombstones.call_args.args[2]),(reset_all,),
         )
+
+    def test_snapshot_song_source_routes_exact_reset_owner_out_of_raw_card(self):
+        title="晩餐歌"
+        artist="tuki."
+        owner_key="晩餐歌::tuki"
+        owner_source=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",owner_key,
+        )
+        raw_group=f"{pg_adapter._overlay_norm(title)}::{pg_adapter._overlay_norm(artist)}"
+        raw_source=pg_adapter._production_source_detail_key_for_group(
+            "songs","all",raw_group,
+        )
+        self.assertEqual(owner_source,"1f302657d7e35049")
+        self.assertEqual(raw_source,"00f3ae807208eb9b")
+
+        def candidate(video_id,seconds):
+            return {
+                "revision_id":"overlay","video_id":video_id,
+                "occurrence_id":f"{video_id}:0:{seconds}","position":0,
+                "range_id":"all","song_key":"raw-song","seconds":seconds,
+                "title":title,"artist":artist,"source_system":"fixture",
+                "video_title":video_id,"channel_id":"UCfixture",
+                "channel_name":"Fixture","occurrence_payload_json":{},
+                "video_payload_json":{},"video_tombstone":False,
+            }
+
+        reset_candidate=candidate("reset-owned",2484)
+        raw_candidate=candidate("raw-only",3000)
+        reset_change={
+            "entityType":"occurrences","videoId":"reset-owned",
+            "occurrenceId":"parent-reset","rangeId":"all","seconds":2484,
+            "title":title,"artist":artist,"acceptedVideoReset":True,
+            "persistedSourceAuthority":True,
+            "parentSongGroupKey":owner_key,
+        }
+        with patch.object(
+            pg_adapter,"_accepted_video_resets",return_value={
+                "reset-owned":{
+                    "video_id":"reset-owned",
+                    "payload_json":{"rangeId":"all"},
+                },
+            },
+        ), patch.object(
+            pg_adapter,"_overlay_candidate_rows",
+            return_value=(reset_candidate,raw_candidate),
+        ), patch.object(
+            pg_adapter,"_snapshot_accepted_video_reset_changes",
+            return_value=(reset_change,),
+        ) as reset_authority, patch.object(
+            pg_adapter,"_runtime_tombstones",return_value=(),
+        ), patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",return_value={},
+        ), patch.object(
+            pg_adapter,"_enrich_runtime_parent_group_keys",
+        ):
+            candidates,resets,changes=pg_adapter._snapshot_source_overlay_inputs(
+                object(),"parent",("overlay",),"all",
+                ("reset-owned","raw-only"),
+                include_compatible_full_reset_7d=False,
+            )
+        reset_authority.assert_called_once()
+        self.assertEqual(
+            candidates[0]["_acceptedSongResetOwnerSourceKey"],owner_source,
+        )
+        self.assertNotIn("_acceptedSongResetOwnerSourceKey",candidates[1])
+
+        raw=pg_adapter._snapshot_materialized_source_payload(
+            raw_source,range_id="all",persisted_record=None,
+            targets=(("songs",owner_key),),
+            video_scope=("reset-owned","raw-only"),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=candidates,accepted_video_resets=resets,
+            runtime_changes=changes,
+        )
+        self.assertEqual(
+            (raw["record"]["occurrenceCount"],
+             raw["record"]["videoCount"]),(1,1),
+        )
+        self.assertEqual(
+            raw["record"]["occurrences"][0]["videoId"],"raw-only",
+        )
+
+        persisted=pg_adapter._snapshot_materialized_source_payload(
+            owner_source,range_id="all",persisted_record={
+                "type":"song","key":owner_key,"title":title,
+                "artist":artist,"sourceDetailKey":owner_source,
+                "rangeId":"all",
+            },targets=(("songs",owner_key),),
+            video_scope=("reset-owned","raw-only"),parent_occurrences=(),
+            direct_video_rows=(),direct_occurrence_rows=(),
+            candidate_rows=candidates,accepted_video_resets=resets,
+            runtime_changes=changes,
+        )
+        self.assertEqual(
+            (persisted["record"]["occurrenceCount"],
+             persisted["record"]["videoCount"]),(1,1),
+        )
+        self.assertEqual(
+            persisted["record"]["occurrences"][0]["videoId"],"reset-owned",
+        )
+
+    def test_affected_synthetic_song_source_uses_song_range_contract(self):
+        scoped={
+            "raw-song":{
+                "targets":(("songs","晩餐歌::tuki"),),
+                "videos":("video-one",),
+            },
+            "synthetic-video":{
+                "targets":(("videos","video-one"),),
+                "videos":("video-one",),
+            },
+        }
+        self.assertTrue(pg_materializer._source_uses_song_range_contract(
+            "raw-song",{},scoped,
+        ))
+        self.assertFalse(pg_materializer._source_uses_song_range_contract(
+            "synthetic-video",{},scoped,
+        ))
+        with self.assertRaisesRegex(RuntimeError,"mixed target types"):
+            pg_materializer._source_uses_song_range_contract(
+                "raw-song",{}, {
+                    "raw-song":{
+                        "targets":(("songs","song"),("artists","artist")),
+                        "videos":("video-one",),
+                    },
+                },
+            )
 
     def test_snapshot_song_source_keeps_771_owner_rows_across_mixed_resets(self):
         source_key="0007036316d9dffa"
