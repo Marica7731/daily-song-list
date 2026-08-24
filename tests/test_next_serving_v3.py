@@ -6692,14 +6692,20 @@ class Tests(unittest.TestCase):
             "channel_search_text":"",
         }}
         persisted={owner_key:dict(groups[owner_key])}
-        delta=pg_adapter._overlay_candidate_groups((candidate,),"songs")
         owners=pg_adapter._accepted_song_reset_candidate_owner_keys(
             (candidate,),(reset_change,),
         )
-        self.assertEqual(owners,{raw_key:owner_key})
+        candidate_identity=(
+            reset_video,"14304","忘れじの言の葉",
+            "未来古代楽団feat安次嶺希和子さん",
+        )
+        self.assertEqual(owners,{candidate_identity:owner_key})
+        delta=pg_adapter._overlay_candidate_groups(
+            (candidate,),"songs",owners,
+        )
         pg_adapter._apply_overlay_delta_groups(
             groups,persisted,delta,"songs","all",
-            song_reset_owner_keys=owners,
+            song_reset_owner_keys={owner_key:owner_key},
         )
         self.assertEqual(
             (groups[owner_key]["row_count"],
@@ -6709,6 +6715,86 @@ class Tests(unittest.TestCase):
             (771,1,737,771),
         )
         self.assertNotIn(raw_key,groups)
+
+    def test_snapshot_song_ranking_splits_exact_owner_from_same_raw_group(self):
+        owner_key="夜明けと蛍::nbuna"
+        raw_key="夜明けと蛍::n-buna"
+
+        def candidate(video_id,seconds,artist):
+            return {
+                "revision_id":"overlay","video_id":video_id,
+                "occurrence_id":f"{video_id}:0:{seconds}","position":0,
+                "range_id":"all","song_key":f"夜明けと蛍\x1f{artist}",
+                "seconds":seconds,"title":"夜明けと蛍","artist":artist,
+                "source_system":"fixture","video_title":video_id,
+                "channel_id":"UCfixture","channel_name":"Fixture",
+                "occurrence_payload_json":{},"video_payload_json":{},
+                "video_tombstone":False,
+            }
+
+        candidates=(
+            candidate("matched-one",101,"n-buna"),
+            candidate("matched-two",102,"n-buna"),
+            candidate("matched-three",103,"N-buna"),
+            # These two parent tuples are removed from the owner, but their
+            # accepted candidates have no artist and therefore no exact owner
+            # evidence.  Four more n-buna rows are overlay-only.
+            candidate("blank-four",104,""),
+            candidate("blank-five",105,""),
+            candidate("overlay-six",106,"n-buna"),
+            candidate("overlay-seven",107,"n-buna"),
+            candidate("overlay-eight",108,"n-buna"),
+            candidate("overlay-nine",109,"n-buna"),
+        )
+        reset_changes=tuple({
+            "entityType":"occurrences","videoId":video_id,
+            "occurrenceId":"","seconds":seconds,"title":"夜明けと蛍",
+            "artist":artist,"rangeId":"all","acceptedVideoReset":True,
+            "persistedSourceAuthority":True,
+            "parentSongGroupKey":owner_key,
+        } for video_id,seconds,artist in (
+            ("matched-one",101,"n-buna"),
+            ("matched-two",102,"n-buna"),
+            ("matched-three",103,"N-buna"),
+            ("blank-four",104,"n-buna"),
+            ("blank-five",105,"n-buna"),
+        ))
+        groups={owner_key:{
+            "detail_key":owner_key,"title":"夜明けと蛍","artist":"n-buna",
+            "name":"夜明けと蛍","row_count":1697,"song_count":0,
+            "video_count":1670,"timestamp_count":1697,"payload_json":{},
+            "search_text":"","channel_search_text":"",
+        }}
+        persisted={owner_key:dict(groups[owner_key])}
+
+        owners=pg_adapter._accepted_song_reset_candidate_owner_keys(
+            candidates,reset_changes,
+        )
+        self.assertEqual(len(owners),3)
+        self.assertEqual(set(owners.values()),{owner_key})
+        delta=pg_adapter._overlay_candidate_groups(
+            candidates,"songs",owners,
+        )
+        self.assertEqual(delta[owner_key]["occurrenceCount"],3)
+        self.assertEqual(delta[raw_key]["occurrenceCount"],4)
+        self.assertIs(
+            delta[raw_key]["_acceptedSongResetPassthrough"],True,
+        )
+
+        pg_adapter._apply_overlay_delta_groups(
+            groups,persisted,delta,"songs","all",
+            song_reset_owner_keys={owner_key:owner_key},
+        )
+        self.assertEqual(
+            (groups[owner_key]["row_count"],groups[owner_key]["song_count"],
+             groups[owner_key]["video_count"],
+             groups[owner_key]["timestamp_count"]),
+            (1700,1,1673,1700),
+        )
+        self.assertEqual(
+            (groups[raw_key]["row_count"],groups[raw_key]["video_count"]),
+            (4,4),
+        )
 
     def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
         source_key="source-ambiguous-reset-song"
