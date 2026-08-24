@@ -6351,8 +6351,35 @@ def _bounded_overlay_previews(items: Iterable[Mapping[str, Any]]) -> list[dict[s
     return previews
 
 
-def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> dict[str, dict[str, Any]]:
+def _accepted_song_reset_candidate_identity(
+    row: Mapping[str, Any], *, canonical_title: bool = False,
+) -> tuple[str, str, str, str]:
+    """Return the exact accepted-reset tuple used by source ownership."""
+
+    title = _text(row.get("title"))
+    artist = _text(row.get("artist"))
+    title_key = (
+        _vtuber_canonical_song_identity(title)[1]
+        if canonical_title
+        else _overlay_song_group_norm(title)
+    )
+    return (
+        _text(row.get("videoId") or row.get("video_id")),
+        _text(row.get("seconds")),
+        title_key or _overlay_song_group_norm(title),
+        _overlay_song_group_norm(artist),
+    )
+
+
+def _overlay_candidate_groups(
+    rows: Iterable[Mapping[str, Any]],
+    view: str,
+    song_reset_candidate_owners: Mapping[
+        tuple[str, str, str, str], str
+    ] | None = None,
+) -> dict[str, dict[str, Any]]:
     groups: dict[str, dict[str, Any]] = {}
+    owned_raw_song_keys: set[str] = set()
     for row in rows:
         if row.get("video_tombstone"):
             continue
@@ -6390,7 +6417,15 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
             "sourceSystem": occurrence.get("sourceSystem") or row.get("source_system"),
         })
         if view in {"songs", "songIndex", "vsingerSongs"}:
-            key = f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+            raw_key = f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+            exact_owner_key = _text(
+                (song_reset_candidate_owners or {}).get(
+                    _accepted_song_reset_candidate_identity(row)
+                )
+            )
+            key = exact_owner_key or raw_key
+            if exact_owner_key:
+                owned_raw_song_keys.add(raw_key)
             name = title
         elif view == "artists":
             key = _overlay_artist_group_norm(artist) or "unknown"
@@ -6432,6 +6467,13 @@ def _overlay_candidate_groups(rows: Iterable[Mapping[str, Any]], view: str) -> d
         group["videoIds"].add(video_id)
         group["songKeys"].add(_text(occurrence.get("songKey")) or key)
         group["search"] = f"{group['search']} {_overlay_candidate_search_text(row)}".strip()
+    # One raw spelling may contain both exact accepted-reset tuples and
+    # overlay-only tuples.  The exact tuples above move to their persisted
+    # owner; the remainder must stay in their raw group.  Mark that remainder
+    # so the broad display-name fallback cannot merge it back into the owner.
+    for raw_key in owned_raw_song_keys:
+        if raw_key in groups:
+            groups[raw_key]["_acceptedSongResetPassthrough"] = True
     return groups
 
 
@@ -6453,6 +6495,8 @@ def _canonical_overlay_delta_group_key(
     """
 
     if view not in {"songs", "songIndex", "vsingerSongs"}:
+        return replacement_key
+    if item.get("_acceptedSongResetPassthrough") is True:
         return replacement_key
     exact_owner_key = _text(
         (song_reset_owner_keys or {}).get(replacement_key)
@@ -6490,40 +6534,25 @@ def _canonical_overlay_delta_group_key(
 def _accepted_song_reset_candidate_owner_keys(
     candidate_rows: Iterable[Mapping[str, Any]],
     reset_changes: Iterable[Mapping[str, Any]],
-) -> dict[str, str]:
-    """Bind accepted Song candidates to one persisted source owner.
+) -> dict[tuple[str, str, str, str], str]:
+    """Bind each exact accepted Song candidate to one persisted owner.
 
     A full-video reset removes the immutable parent tuple before its accepted
     candidate is added.  Historical candidate rows retain their raw display
     spelling, while the canonical ranking/source owner may have a normalized
     title or artist.  The source projection already carries the authoritative
     ``parentSongGroupKey`` for every reset tuple; use the same exact
-    video/seconds/title/artist evidence for the ranking increment.  Never
-    infer an owner from a broad alias when the persisted authority is absent,
-    and fail closed if one candidate group proves more than one owner.
+    video/seconds/title/artist evidence for the ranking increment.  A raw
+    title/artist group may mix reset-owned and overlay-only tuples, so binding
+    the whole group would overcount the persisted owner.  Never infer an owner
+    from a broad alias when exact authority is absent, and fail closed only
+    when the same exact candidate tuple proves more than one owner.
     """
 
     raw_authority: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
     canonical_authority: dict[
         tuple[str, str, str, str], set[str]
     ] = defaultdict(set)
-
-    def identity(
-        row: Mapping[str, Any], *, canonical_title: bool = False,
-    ) -> tuple[str, str, str, str]:
-        title = _text(row.get("title"))
-        artist = _text(row.get("artist"))
-        title_key = (
-            _vtuber_canonical_song_identity(title)[1]
-            if canonical_title
-            else _overlay_song_group_norm(title)
-        )
-        return (
-            _text(row.get("videoId") or row.get("video_id")),
-            _text(row.get("seconds")),
-            title_key or _overlay_song_group_norm(title),
-            _overlay_song_group_norm(artist),
-        )
 
     for change in reset_changes:
         if not (
@@ -6532,28 +6561,35 @@ def _accepted_song_reset_candidate_owner_keys(
         ):
             continue
         owner_key = _text(change.get("parentSongGroupKey"))
-        raw_identity = identity(change)
+        raw_identity = _accepted_song_reset_candidate_identity(change)
         if not owner_key or not raw_identity[0] or not raw_identity[2]:
             raise PostgresAdapterError(
                 "accepted-video persisted Song owner identity is invalid"
             )
         raw_authority[raw_identity].add(owner_key)
-        canonical_authority[identity(change, canonical_title=True)].add(
-            owner_key
-        )
+        canonical_authority[
+            _accepted_song_reset_candidate_identity(
+                change, canonical_title=True,
+            )
+        ].add(owner_key)
 
-    owners_by_group: dict[str, set[str]] = defaultdict(set)
+    owners_by_candidate: dict[
+        tuple[str, str, str, str], set[str]
+    ] = defaultdict(set)
     for row in candidate_rows:
         if row.get("video_tombstone"):
             continue
         title = _text(row.get("title"))
-        artist = _text(row.get("artist"))
         if not title:
             continue
-        owners = raw_authority.get(identity(row), set())
+        candidate_identity = _accepted_song_reset_candidate_identity(row)
+        owners = raw_authority.get(candidate_identity, set())
         if not owners:
             owners = canonical_authority.get(
-                identity(row, canonical_title=True), set(),
+                _accepted_song_reset_candidate_identity(
+                    row, canonical_title=True,
+                ),
+                set(),
             )
         if not owners:
             continue
@@ -6561,19 +6597,16 @@ def _accepted_song_reset_candidate_owner_keys(
             raise PostgresAdapterError(
                 "accepted-video persisted Song owner is ambiguous"
             )
-        replacement_key = (
-            f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
-        )
-        owners_by_group[replacement_key].update(owners)
+        owners_by_candidate[candidate_identity].update(owners)
 
-    result: dict[str, str] = {}
-    for replacement_key, owners in owners_by_group.items():
+    result: dict[tuple[str, str, str, str], str] = {}
+    for candidate_identity, owners in owners_by_candidate.items():
         if len(owners) != 1:
             raise PostgresAdapterError(
-                "accepted-video Song candidate group has ambiguous persisted "
+                "accepted-video Song candidate tuple has ambiguous persisted "
                 "owners"
             )
-        result[replacement_key] = next(iter(owners))
+        result[candidate_identity] = next(iter(owners))
     return result
 
 
@@ -12803,17 +12836,28 @@ def _prepare_generic_overlay_rankings(
     # for every affected identity, including identities whose final count is
     # zero.  Building the generic delta first is redundant and can replay the
     # same reset/replacement a second time.
-    delta = (
-        {} if options["view"] in {"artists", "vtubers"}
-        else _overlay_candidate_groups(candidate_rows, options["view"])
-    )
-    song_reset_owner_keys = (
+    song_reset_candidate_owners = (
         _accepted_song_reset_candidate_owner_keys(
             candidate_rows, generic_reset_changes,
         )
         if options["view"] in {"songs", "songIndex", "vsingerSongs"}
         else {}
     )
+    delta = (
+        {} if options["view"] in {"artists", "vtubers"}
+        else _overlay_candidate_groups(
+            candidate_rows,
+            options["view"],
+            song_reset_candidate_owners,
+        )
+    )
+    # Exact candidates are already grouped under the persisted owner.  Keep
+    # the owner-to-self map only for the existing missing-owner fail-closed
+    # gate in ``_canonical_overlay_delta_group_key``.
+    song_reset_owner_keys = {
+        owner_key: owner_key
+        for owner_key in song_reset_candidate_owners.values()
+    }
     phase_started = _phase_trace(
         "candidate_delta",
         phase_started,
