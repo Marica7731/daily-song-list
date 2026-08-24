@@ -11841,7 +11841,8 @@ def _prepare_generic_overlay_rankings(
         exact_parent_video_ids if exact_channel_scope is not None else None,
     )
     compatible_reset_rows: tuple[Mapping[str, Any], ...] = ()
-    if accepted_video_resets:
+    song_view = options["view"] in {"songs", "songIndex", "vsingerSongs"}
+    if accepted_video_resets and not song_view:
         compatible_reset_rows = _selected_full_reset_candidate_rows(
             connection,
             overlay_ids,
@@ -11857,7 +11858,12 @@ def _prepare_generic_overlay_rankings(
         for row in (*candidate_range_rows, *compatible_reset_rows)
         if _text(row.get("video_id") or row.get("videoId"))
     }
-    if options["view"] in {"songs", "songIndex", "vsingerSongs"}:
+    if song_view:
+        # Persisted Song sources only apply full-video resets from the same
+        # physical range.  Rankings must use that identical boundary: a 7d
+        # reset cannot delete an immutable all-range parent occurrence and
+        # then replace it with a projected 7d tuple that the Song source
+        # contract intentionally excludes.
         accepted_video_resets = {
             video_id: row
             for video_id, row in accepted_video_resets.items()
