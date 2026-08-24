@@ -6552,6 +6552,145 @@ class Tests(unittest.TestCase):
         self.assertIs(changes[0].get("_parentRuntimeOccurrenceExists"),True)
         self.assertIs(changes[0].get("_runtimeOccurrenceOwnerWasExplicit"),False)
 
+    def test_snapshot_song_source_inputs_do_not_apply_7d_reset_to_all(self):
+        reset_7d={
+            "video_id":"video-7d",
+            "payload_json":{"rangeId":"7d"},
+        }
+        reset_all={
+            "video_id":"video-all",
+            "payload_json":{"rangeId":"all"},
+        }
+        candidate_all={
+            "revision_id":"overlay","video_id":"video-all",
+            "occurrence_id":"occ-all","position":1,"range_id":"all",
+            "song_key":"raw-song","seconds":20,"title":"Raw Song",
+            "artist":"Raw Artist","source_system":"fixture",
+            "video_title":"All video","channel_id":"UCfixture",
+            "channel_name":"Fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        with patch.object(
+            pg_adapter,"_accepted_video_resets",return_value={
+                "video-7d":reset_7d,"video-all":reset_all,
+            },
+        ), patch.object(
+            pg_adapter,"_overlay_candidate_rows",return_value=(candidate_all,),
+        ), patch.object(
+            pg_adapter,"_runtime_tombstones",return_value=(),
+        ) as tombstones, patch.object(
+            pg_adapter,"_bounded_parent_vtuber_video_owners",return_value={},
+        ), patch.object(
+            pg_adapter,"_enrich_runtime_parent_group_keys",
+        ):
+            candidates,resets,changes=pg_adapter._snapshot_source_overlay_inputs(
+                object(),"parent",("overlay",),"all",
+                ("video-7d","video-all"),
+                include_compatible_full_reset_7d=False,
+            )
+        self.assertEqual(candidates,(candidate_all,))
+        self.assertEqual(set(resets),{"video-all"})
+        self.assertEqual(changes,())
+        self.assertEqual(
+            tuple(tombstones.call_args.args[2]),(reset_all,),
+        )
+
+    def test_snapshot_song_source_keeps_771_owner_rows_across_mixed_resets(self):
+        source_key="0007036316d9dffa"
+        owner_key="忘れじの言の葉::未来古代楽団feat安次嶺希和子"
+        reset_video="PZPwqBtYM2I"
+        video_ids=[reset_video]+[f"video-{index:04d}" for index in range(736)]
+        parent=[]
+        for index,video_id in enumerate(video_ids):
+            occurrence_total=2 if 1 <= index <= 34 else 1
+            for occurrence_index in range(occurrence_total):
+                raw_artist=(
+                    "未来古代楽団feat. 安次嶺希和子さん"
+                    if video_id == reset_video
+                    else "未来古代楽団feat安次嶺希和子"
+                )
+                parent.append({
+                    "videoId":video_id,
+                    "occurrenceId":f"{video_id}:{occurrence_index}",
+                    "rangeId":"all","position":occurrence_index,
+                    "seconds":14304 if video_id == reset_video
+                        else index * 10 + occurrence_index,
+                    "title":"忘れじの言の葉","artist":raw_artist,
+                    "songKey":owner_key,
+                })
+        self.assertEqual(len(parent),771)
+        candidate={
+            "revision_id":"overlay","video_id":reset_video,
+            "occurrence_id":f"{reset_video}:13:14304","position":13,
+            "range_id":"all",
+            "song_key":"忘れじの言の葉\x1f未来古代楽団feat. 安次嶺希和子さん",
+            "seconds":14304,"title":"忘れじの言の葉",
+            "artist":"未来古代楽団feat. 安次嶺希和子さん",
+            "source_system":"fixture","video_title":"Reset video",
+            "channel_id":"UCfixture","channel_name":"Fixture",
+            "occurrence_payload_json":{},"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"song","key":owner_key,"title":"忘れじの言の葉",
+                "artist":"未来古代楽団feat安次嶺希和子",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },targets=(("songs",owner_key),),video_scope=tuple(video_ids),
+            parent_occurrences=tuple(parent),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={reset_video:{
+                "video_id":reset_video,"payload_json":{"rangeId":"all"},
+            }},runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["occurrenceCount"],record["videoCount"]),(771,737),
+        )
+        self.assertIn(
+            f"{reset_video}:13:14304",
+            {item["song"].get("occurrenceId")
+             for item in record["occurrences"]},
+        )
+
+    def test_snapshot_song_source_rejects_ambiguous_reset_owner_tuple(self):
+        source_key="source-ambiguous-reset-song"
+        owner_key="canonical song::canonical artist"
+        parent=tuple({
+            "videoId":"video-reset","occurrenceId":f"parent-{index}",
+            "rangeId":"all","position":index,"seconds":10,
+            "title":"Raw Song","artist":"Raw Artist",
+            "songKey":owner_key,
+        } for index in (1,2))
+        candidate={
+            "revision_id":"overlay","video_id":"video-reset",
+            "occurrence_id":"candidate","position":3,"range_id":"all",
+            "song_key":"raw song\x1fraw artist","seconds":10,
+            "title":"Raw Song","artist":"Raw Artist",
+            "source_system":"fixture","video_title":"Reset video",
+            "channel_id":"UCfixture","channel_name":"Fixture",
+            "occurrence_payload_json":{},"video_payload_json":{},
+            "video_tombstone":False,
+        }
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "accepted reset Song source owner is ambiguous",
+        ):
+            pg_adapter._snapshot_materialized_source_payload(
+                source_key,range_id="all",persisted_record={
+                    "type":"song","key":owner_key,"title":"Canonical Song",
+                    "artist":"Canonical Artist",
+                    "sourceDetailKey":source_key,"rangeId":"all",
+                },targets=(("songs",owner_key),),video_scope=("video-reset",),
+                parent_occurrences=parent,direct_video_rows=(),
+                direct_occurrence_rows=(),candidate_rows=(candidate,),
+                accepted_video_resets={"video-reset":{
+                    "video_id":"video-reset",
+                    "payload_json":{"rangeId":"all"},
+                }},runtime_changes=(),
+            )
+
     def test_snapshot_vtuber_source_skips_only_unproven_old_side(self):
         source_key="source-vtuber"
         channel_id="UCfixture"

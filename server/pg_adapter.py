@@ -16803,6 +16803,29 @@ def _snapshot_source_overlay_inputs(
         ):
             selected.setdefault(_overlay_candidate_identity(row), dict(row))
         candidate_rows = tuple(selected.values())
+    else:
+        # Song rankings apply a reset only when the selected video has a row
+        # in the requested physical range, or when the reset boundary itself
+        # explicitly belongs to that range.  Keep source reconstruction on
+        # the same contract.  In particular, a physical 7d refresh must not
+        # erase an immutable all-range parent Song occurrence merely because
+        # the two ranges share a video id.
+        candidate_video_ids = {
+            _text(row.get("video_id") or row.get("videoId"))
+            for row in candidate_rows
+            if _text(row.get("video_id") or row.get("videoId"))
+        }
+        accepted_video_resets = {
+            video_id: row
+            for video_id, row in accepted_video_resets.items()
+            if video_id in candidate_video_ids
+            or _text(
+                _overlay_payload(row).get("rangeId")
+                or _overlay_payload(row).get("range_id")
+                or row.get("range_id")
+                or row.get("rangeId")
+            ) == range_id
+        }
     # Ranking projection applies runtime curation only to its exact physical
     # range.  Source rebuilding must use the same contract: replaying a 7d
     # same-video replacement into ``all`` can overwrite the persisted tuple's
@@ -18129,6 +18152,50 @@ def _snapshot_materialized_source_payload(
     def row_video_id(value: Mapping[str, Any]) -> str:
         return _text(value.get("video_id") or value.get("videoId"))
 
+    song_reset_parent_identities: dict[
+        tuple[str, str, str, str], int
+    ] = defaultdict(int)
+    song_reset_parent_canonical_identities: dict[
+        tuple[str, str, str, str], int
+    ] = defaultdict(int)
+
+    def song_reset_owner_identity(
+        video_id: str,
+        value: Mapping[str, Any],
+        *,
+        canonical_title: bool = False,
+    ) -> tuple[str, str, str, str]:
+        """Match one reset row to its exact persisted Song source tuple.
+
+        Persisted source rows predate occurrence ids and source positions are
+        local to each detail.  The ranking reset reconciler therefore uses the
+        bounded ``video + seconds + raw title/artist`` tuple (with one
+        canonical-title fallback) to bind an accepted replacement to its
+        authoritative parent Song owner.  Reuse that exact evidence here so
+        source counts cannot diverge from rankings when raw spelling differs
+        from the canonical detail owner.
+        """
+
+        title = ""
+        seconds: Any = None
+        for source in _scope_value_sources(value):
+            if not title:
+                title = _text(source.get("title") or source.get("workTitle"))
+            if seconds is None and source.get("seconds") is not None:
+                seconds = source.get("seconds")
+        artist = _scope_artist(value)
+        title_key = (
+            _vtuber_canonical_song_identity(title)[1]
+            if canonical_title
+            else _overlay_song_group_norm(title)
+        )
+        return (
+            _text(video_id),
+            _text(seconds),
+            title_key or _overlay_song_group_norm(title),
+            _overlay_song_group_norm(artist),
+        )
+
     def channel_identities(value: Mapping[str, Any]) -> set[str]:
         payload = _json_object(value.get("video_payload_json"))
         if isinstance(payload.get("payload"), Mapping):
@@ -18163,10 +18230,29 @@ def _snapshot_materialized_source_payload(
             if not persisted:
                 return overlay_song_source_key(value) == requested_key
             groups = target_groups.get("songs", set())
-            return bool(
+            if bool(
                 _source_row_song_group_identity(value) in groups
                 or _runtime_change_group_key(value, "songs") in groups
-            )
+            ):
+                return True
+            video_id = row_video_id(value)
+            if video_id not in accepted_video_resets:
+                return False
+            for identities, canonical_title in (
+                (song_reset_parent_identities, False),
+                (song_reset_parent_canonical_identities, True),
+            ):
+                owner_identity = song_reset_owner_identity(
+                    video_id, value, canonical_title=canonical_title,
+                )
+                owner_count = identities.get(owner_identity, 0)
+                if owner_count > 1:
+                    raise PostgresAdapterError(
+                        "accepted reset Song source owner is ambiguous"
+                    )
+                if owner_count == 1:
+                    return True
+            return False
         if source_type == "artist":
             groups = target_groups.get("artists", set())
             return bool(
@@ -18195,7 +18281,24 @@ def _snapshot_materialized_source_payload(
                 raise PostgresAdapterError(
                     "persisted source occurrence disagrees with detail authority"
                 )
-            effective.append(records[0])
+            record = records[0]
+            effective.append(record)
+            if source_type == "song":
+                video_id = _text((record.get("video") or {}).get("videoId"))
+                if video_id in accepted_video_resets:
+                    source_occurrence = record["occurrences"][0]
+                    raw_identity = song_reset_owner_identity(
+                        video_id, source_occurrence,
+                    )
+                    canonical_identity = song_reset_owner_identity(
+                        video_id, source_occurrence, canonical_title=True,
+                    )
+                    if all(raw_identity):
+                        song_reset_parent_identities[raw_identity] += 1
+                    if all(canonical_identity):
+                        song_reset_parent_canonical_identities[
+                            canonical_identity
+                        ] += 1
     elif source_type == "video" and direct_video_rows:
         if len(direct_video_rows) != 1:
             raise PostgresAdapterError(
