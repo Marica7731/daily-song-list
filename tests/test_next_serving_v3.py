@@ -7836,6 +7836,35 @@ class Tests(unittest.TestCase):
         )
         video_detail.assert_not_called();channel_detail.assert_not_called()
 
+    def test_snapshot_persisted_song_does_not_project_7d_reset_into_all(self):
+        source_key="song-source"
+        persisted={"schemaVersion":1,"found":True,"sourceKey":source_key,
+                   "sourceRevisionId":"parent",
+                   "record":{"type":"song","key":"song::artist",
+                             "title":"Song","artist":"Artist",
+                             "sourceDetailKey":source_key,"rangeId":"all"}}
+        context=SimpleNamespace(
+            runtime=None,generic_runtime=("active",{}),parent=("parent",{}),
+            overlay_ids=("overlay",),authoritative_ids=(),authoritative_records=None,
+        )
+        prepared=((),{},())
+        missing={"schemaVersion":1,"found":False,"sourceKey":source_key}
+        with patch.object(pg_adapter,"_runtime_source_payload",return_value=persisted), \
+             patch.object(pg_adapter,"_snapshot_source_overlay_inputs",return_value=prepared) as prepare, \
+             patch.object(pg_adapter,"_generic_song_source_payload",return_value=None), \
+             patch.object(pg_adapter,"_generic_artist_source_payload",return_value=None), \
+             patch.object(pg_adapter,"_generic_video_source_payload",return_value=None), \
+             patch.object(pg_adapter,"_runtime_channel_source_payload",return_value=missing):
+            result=pg_adapter.source_payload(
+                object(),source_key,{"range":"all","page":"1","pageSize":"200"},
+                snapshot_context=context,snapshot_video_scope=("video-one",),
+            )
+        self.assertIs(result,persisted)
+        prepare.assert_called_once_with(
+            unittest.mock.ANY,"parent",["overlay"],"all",("video-one",),
+            include_compatible_full_reset_7d=False,
+        )
+
     def test_snapshot_resolved_artist_alias_reuses_exact_prepared_video(self):
         requested_key="artist-alias"
         resolved_key="artist-source"
