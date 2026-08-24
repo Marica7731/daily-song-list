@@ -18957,6 +18957,7 @@ def source_payload(
                         snapshot_video_scope,
                         include_compatible_full_reset_7d=(
                             _query_options(query)["range"] == "all"
+                            and _text(persisted_record.get("type")) != "song"
                         ),
                     )
                     if (
@@ -19061,6 +19062,7 @@ def source_payload(
                             snapshot_video_scope,
                             include_compatible_full_reset_7d=(
                                 _query_options(query)["range"] == "all"
+                                and _text(persisted_record.get("type")) != "song"
                             ),
                         )
                         if (
