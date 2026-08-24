@@ -5673,7 +5673,7 @@ class Tests(unittest.TestCase):
             scope=pg_materializer.SnapshotSourceScope(database)
             scope.add_pairs((key,f"video-{key}") for key in keys)
             scope.add_targets(("songs",f"song-{key}::artist",key) for key in keys)
-            stream_calls=[];captured_buffers=[];overlay_calls=[]
+            stream_calls=[];captured_buffers=[];overlay_calls=[];overlay_flags=[]
             class Writer:
                 def __init__(self):self.keys=[]
                 def add_source(self,key,_range,_record,_occurrences):
@@ -5707,7 +5707,9 @@ class Tests(unittest.TestCase):
                         if key=="source-small-a" and position==1:
                             self.assertEqual(writer.keys,["source-large"])
             def overlay(_connection,_base,_ids,_range,videos,**_kwargs):
-                overlay_calls.append(tuple(videos));return (),{},()
+                overlay_calls.append(tuple(videos))
+                overlay_flags.append(_kwargs.get("include_compatible_full_reset_7d"))
+                return (),{},()
             def materialized(key,**kwargs):
                 parent_rows=kwargs["parent_occurrences"]
                 captured_buffers.append(parent_rows)
@@ -5744,6 +5746,7 @@ class Tests(unittest.TestCase):
             (("source-small-b",),3),
         ])
         self.assertEqual(len(overlay_calls),2)
+        self.assertEqual(overlay_flags,[False,False])
         self.assertTrue(captured_buffers)
         self.assertTrue(all(buffer==[] for buffer in captured_buffers))
 

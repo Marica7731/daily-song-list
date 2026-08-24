@@ -5715,7 +5715,7 @@ def export_affected_parent_sources(
                     source_key
                 )
             overlay_inputs_by_plan: dict[
-                tuple[str, tuple[str, ...]],
+                tuple[tuple[str, tuple[str, ...]], bool],
                 tuple[
                     tuple[Mapping[str, Any], ...],
                     dict[str, dict[str, Any]],
@@ -5724,23 +5724,45 @@ def export_affected_parent_sources(
             ] = {}
             for plan, plan_source_keys in plan_members.items():
                 source_base_revision, source_overlay_ids = plan
-                plan_union_videos = tuple(sorted({
-                    video_id
-                    for source_key in plan_source_keys
-                    for video_id in stream_scoped[source_key]["videos"]
-                }))
-                overlay_inputs_by_plan[plan] = (
-                    adapter._snapshot_source_overlay_inputs(
-                        connection,
-                        source_base_revision,
-                        source_overlay_ids,
-                        "all",
-                        plan_union_videos,
-                        include_compatible_full_reset_7d=True,
+                # A plan can contain persisted Song, Artist and Video details
+                # that share the same overlay lineage.  Compatible physical
+                # 7d full-reset projection is valid for the latter two, but
+                # it would leak a 7d-only Song row into the all-range source
+                # and diverge from the ranking projection.  Hydrate one
+                # bounded overlay input per source type so the source writer
+                # receives the same range contract as its ranking counterpart.
+                for include_compatible_full_reset_7d in (False, True):
+                    typed_source_keys = tuple(
+                        source_key
+                        for source_key in plan_source_keys
+                        if (
+                            _text((details.get(source_key) or {}).get("type"))
+                            != "song"
+                        ) == include_compatible_full_reset_7d
                     )
-                    if source_overlay_ids
-                    else ((), {}, ())
-                )
+                    if not typed_source_keys:
+                        continue
+                    plan_union_videos = tuple(sorted({
+                        video_id
+                        for source_key in typed_source_keys
+                        for video_id in stream_scoped[source_key]["videos"]
+                    }))
+                    overlay_inputs_by_plan[
+                        (plan, include_compatible_full_reset_7d)
+                    ] = (
+                        adapter._snapshot_source_overlay_inputs(
+                            connection,
+                            source_base_revision,
+                            source_overlay_ids,
+                            "all",
+                            plan_union_videos,
+                            include_compatible_full_reset_7d=(
+                                include_compatible_full_reset_7d
+                            ),
+                        )
+                        if source_overlay_ids
+                        else ((), {}, ())
+                    )
 
             def write_source(
                 source_key: str,
@@ -5752,8 +5774,15 @@ def export_affected_parent_sources(
                 direct_rows = direct_rows if direct_rows is not None else []
                 direct_video_id = stream_direct_sources.get(source_key, "")
                 try:
+                    include_compatible_full_reset_7d = (
+                        _text((details.get(source_key) or {}).get("type"))
+                        != "song"
+                    )
                     candidate_rows, accepted_resets, runtime_changes = (
-                        overlay_inputs_by_plan[source_plans[source_key]]
+                        overlay_inputs_by_plan[
+                            (source_plans[source_key],
+                             include_compatible_full_reset_7d)
+                        ]
                     )
                     payload = adapter._snapshot_materialized_source_payload(
                         source_key,
