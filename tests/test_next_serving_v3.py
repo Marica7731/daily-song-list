@@ -9980,6 +9980,10 @@ class Tests(unittest.TestCase):
         ):
             self.assertIn(required,controller)
         self.assertEqual(controller.count("api/meta?identityOnly=1"),3)
+        ci=(ROOT/".github"/"workflows"/"test-next-serving-v3.yml").read_text(
+            encoding="utf-8",
+        )
+        self.assertEqual(ci.count("server/pg_api_server.py"),3)
         self.assertEqual(controller.count('timeout 40s ssh "${VPS2_SSH[@]}"'),1)
         self.assertEqual(controller.count('timeout 40s ssh "${WDC_SSH[@]}"'),1)
         self.assertLess(

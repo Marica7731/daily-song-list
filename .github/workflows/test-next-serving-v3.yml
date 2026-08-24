@@ -16,6 +16,7 @@ on:
       - "deploy/**"
       - "scripts/migration/**"
       - "server/pg_adapter.py"
+      - "server/pg_api_server.py"
       - "server/release_serving_server.py"
       - "tests/test_next_serving_v3.py"
       - "tests/test_pg_peer_relay.py"
@@ -72,6 +73,7 @@ jobs:
             scripts/migration/pg-peer-relay.py
             scripts/migration/requirements-wdc-linux.txt
             server/pg_adapter.py
+            server/pg_api_server.py
             server/release_serving_server.py
             tests/test_next_serving_v3.py
             tests/test_pg_peer_relay.py
@@ -83,6 +85,7 @@ jobs:
           python3 -m py_compile \
             server/release_serving_server.py \
             server/pg_adapter.py \
+            server/pg_api_server.py \
             scripts/migration/7d-json-to-patch.py \
             scripts/migration/materialize-pg-release-snapshot.py \
             scripts/migration/materialize-ranking-pages.py \
