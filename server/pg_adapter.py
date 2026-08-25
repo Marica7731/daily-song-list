@@ -16936,6 +16936,7 @@ def _snapshot_source_overlay_inputs(
     video_scope: Sequence[str],
     *,
     include_compatible_full_reset_7d: bool = False,
+    authoritative_7d_revision_ids: Sequence[str] | None = None,
 ) -> tuple[
     tuple[Mapping[str, Any], ...],
     dict[str, dict[str, Any]],
@@ -16968,8 +16969,18 @@ def _snapshot_source_overlay_inputs(
         # mark their provenance so the source matcher can distinguish them
         # from an unranked punctuation/display alias.  Ordinary 7D rows remain
         # range-isolated and cannot widen a synthetic source card.
+        # A persisted source detail can intentionally use a narrowed suffix
+        # of the active overlay lineage.  That suffix is correct for the
+        # source's ordinary all-range delta, but it can fall *after* the
+        # reviewed 7D boundary and therefore hide the authoritative boundary
+        # row from this Song source reconstruction.  The materializer passes
+        # the complete active lineage separately for this one bounded lookup;
+        # callers that do not have a wider lineage retain the old behavior.
         authoritative_7d_ids = _authoritative_7d_overlay_ids(
-            connection, overlay_revision_ids,
+            connection,
+            (authoritative_7d_revision_ids
+             if authoritative_7d_revision_ids is not None
+             else overlay_revision_ids),
         )
         if authoritative_7d_ids:
             authoritative_rows = _overlay_candidate_rows(

@@ -5855,6 +5855,10 @@ class Tests(unittest.TestCase):
                 return {"occurrence_id":occurrence_id,"video_id":video_id}
             def overlay(_connection,base,ids,_range,videos,**_kwargs):
                 call=(base,tuple(ids),tuple(videos));overlay_calls.append(call)
+                self.assertEqual(
+                    _kwargs.get("authoritative_7d_revision_ids"),
+                    ("overlay-new", "overlay-middle"),
+                )
                 if base=="overlay-middle":
                     self.assertEqual(tuple(ids),("overlay-new",))
                     return (candidate("new-c","video-new"),),{},()
@@ -7353,6 +7357,69 @@ class Tests(unittest.TestCase):
             {item["videoId"] for item in payload["record"]["occurrences"]},
             {"parent-video", "overlay-video"},
         )
+
+    def test_snapshot_song_source_inputs_uses_full_7d_lineage_for_narrow_plan(self):
+        candidate_all = {
+            "revision_id": "newer", "video_id": "video-all",
+            "occurrence_id": "occ-all", "position": 1,
+            "range_id": "all", "song_key": "song-all", "seconds": 20,
+            "title": "All Song", "artist": "Artist", "source_system": "fixture",
+            "video_title": "All video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+        candidate_7d = {
+            "revision_id": "boundary", "video_id": "video-7d",
+            "occurrence_id": "occ-7d", "position": 2,
+            "range_id": "7d", "song_key": "song-7d", "seconds": 30,
+            "title": "Boundary Song", "artist": "Artist",
+            "source_system": "core-7d", "video_title": "7d video",
+            "channel_id": "UCfixture", "channel_name": "Fixture",
+            "occurrence_payload_json": {}, "video_payload_json": {},
+            "video_tombstone": False,
+        }
+        seen_lineages = []
+
+        def overlay_rows(_connection, _revision_ids, **kwargs):
+            return (
+                (candidate_7d,)
+                if kwargs.get("range_id") == "7d"
+                else (candidate_all,)
+            )
+
+        def authoritative_ids(_connection, revision_ids):
+            seen_lineages.append(tuple(revision_ids))
+            return ("newer", "boundary")
+
+        with patch.object(
+            pg_adapter, "_accepted_video_resets", return_value={},
+        ), patch.object(
+            pg_adapter, "_overlay_candidate_rows", side_effect=overlay_rows,
+        ), patch.object(
+            pg_adapter, "_authoritative_7d_overlay_ids",
+            side_effect=authoritative_ids,
+        ), patch.object(
+            pg_adapter, "_runtime_tombstones", return_value=(),
+        ), patch.object(
+            pg_adapter, "_bounded_parent_vtuber_video_owners", return_value={},
+        ), patch.object(
+            pg_adapter, "_enrich_runtime_parent_group_keys",
+        ):
+            candidates, resets, changes = (
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(), "parent", ("newer",), "all",
+                    ("video-all", "video-7d"),
+                    include_compatible_full_reset_7d=False,
+                    authoritative_7d_revision_ids=("newer", "boundary"),
+                )
+            )
+        self.assertEqual(seen_lineages, [("newer", "boundary")])
+        self.assertEqual(resets, {})
+        self.assertEqual(changes, ())
+        self.assertEqual(
+            [row["video_id"] for row in candidates], ["video-all", "video-7d"],
+        )
+        self.assertIs(candidates[1].get("_authoritative_7d_overlay"), True)
 
     def test_snapshot_vtuber_source_skips_only_unproven_old_side(self):
         source_key="source-vtuber"
