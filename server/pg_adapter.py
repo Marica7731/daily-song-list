@@ -18553,6 +18553,15 @@ def _snapshot_materialized_source_payload(
         if source_type != "song" or not persisted:
             return False
         video_id = row_video_id(value)
+        # A source batch can contain more than one Song target sharing the
+        # same affected-video scope (for example a canonical card alongside
+        # a raw spelling card).  In that shape, a reset marker alone does not
+        # identify which target owns a candidate that has no exact persisted
+        # preimage.  Exact reset-owner annotations are handled by
+        # ``has_exact_song_reset_owner`` above; keep this broad fallback
+        # fail-closed unless the batch has one unambiguous Song target.
+        if len(target_groups.get("songs", set())) != 1:
+            return False
         return bool(
             video_id
             and video_id in accepted_video_resets
