@@ -899,6 +899,66 @@ class Tests(unittest.TestCase):
                 include_payload=False,
             )
 
+    def test_snapshot_source_scope_boundary_only_fills_parent_count_gap(self):
+        boundary_key = "boundary-song"
+        requested = {boundary_key}
+
+        def fake_stream(_connection, label, _statement, _params, *,
+                        fetch_size=pg_materializer.SOURCE_SCOPE_FETCH_SIZE):
+            if label == "targets":
+                yield {
+                    "view": "songs", "detail_key": boundary_key,
+                    "title": "Boundary Song", "artist": "Artist",
+                    "source_key": boundary_key,
+                }
+            elif label == "authoritative_7d_boundary":
+                yield {
+                    "video_id": "video-boundary", "title": "Boundary Song",
+                    "artist": "Artist",
+                }
+
+        def parent_rows(_connection, _statement, params):
+            self.assertEqual(params[0], "parent")
+            self.assertEqual(params[1], [boundary_key])
+            return [{"source_key": boundary_key, "occurrence_count": 771}]
+
+        for expected_count, should_include in ((771, False), (772, True)):
+            with self.subTest(expected_count=expected_count), \
+                 closing(sqlite3.connect(":memory:")) as database, \
+                 patch.object(pg_materializer, "_stream_pg_rows",
+                              side_effect=fake_stream), \
+                 patch.object(pg_adapter, "_authoritative_7d_overlay_ids",
+                              return_value=("overlay",)), \
+                 patch.object(pg_adapter, "_accepted_video_resets",
+                              return_value={}), \
+                 patch.object(pg_adapter, "_selected_full_reset_candidate_rows",
+                              return_value=()), \
+                 patch.object(pg_adapter, "_rows", side_effect=parent_rows):
+                database.execute("""
+                    CREATE TABLE ranking_rows(
+                      range_id TEXT, view TEXT, metric TEXT, scope_key TEXT,
+                      detail_key TEXT, count INTEGER
+                    )
+                """)
+                database.execute(
+                    "INSERT INTO ranking_rows VALUES(?,?,?,?,?,?)",
+                    ("all", "songs", "count", "all", boundary_key,
+                     expected_count),
+                )
+                scope = pg_materializer.build_snapshot_source_scope(
+                    object(), database,
+                    overlay_revision_ids=("overlay",),
+                    source_revision_ids=("overlay", "parent"),
+                    requested_keys=requested,
+                )
+                if should_include:
+                    self.assertEqual(
+                        scope.videos_for_source(boundary_key),
+                        ("video-boundary",),
+                    )
+                else:
+                    self.assertEqual(scope.videos_for_source(boundary_key), ())
+
     def test_snapshot_artist_scope_uses_exact_owner_before_alias_fallback(self):
         with closing(sqlite3.connect(":memory:")) as database:
             scope=pg_materializer.SnapshotSourceScope(database)
