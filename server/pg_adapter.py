@@ -18454,6 +18454,55 @@ def _snapshot_materialized_source_payload(
             return ""
         return f"{title_key}::{artist_key}"
 
+    def persisted_song_raw_group() -> str:
+        """Return the raw ranking group that the persisted card owns.
+
+        A display-label match alone is not ranking evidence.  Historical
+        overlay rows can share a canonical-looking title/artist while their
+        punctuation-preserving group is a separate ranking card (for
+        example ``6月`` versus ``六月``).  Only the persisted entity key can
+        prove that the ordinary candidate belongs to this source; otherwise
+        keep it in its own raw source card and let the cardinality gate catch
+        any unresolved ranking/source disagreement.
+        """
+
+        key = _text(persisted.get("key"))
+        title, separator, artist = key.partition("::")
+        if not separator or not title or not artist:
+            return ""
+        return f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
+
+    def has_explicit_runtime_preimage(value: Mapping[str, Any]) -> bool:
+        """Allow a raw candidate only when a replacement names its owner.
+
+        A replacement row can carry the persisted ``parentSongGroupKey`` while
+        its candidate preimage uses a punctuation variant (for example
+        ``Old-Song`` versus the persisted ``Old Song``).  That explicit
+        same-video parent binding is authoritative for deleting the old side.
+        It must not, however, widen ordinary candidate ownership: an overlay
+        row with no matching replacement remains in its own raw ranking card.
+        """
+
+        if source_type != "song" or not persisted:
+            return False
+        video_id = row_video_id(value)
+        if not video_id:
+            return False
+        groups = target_groups.get("songs", set())
+        for change in runtime_changes:
+            if row_video_id(change) != video_id:
+                continue
+            if _text(
+                change.get("entityType") or change.get("entity_type")
+            ) not in {"occurrences", "runtime_occurrences"}:
+                continue
+            if not bool(change.get("replacement")):
+                continue
+            parent_group = _text(change.get("parentSongGroupKey"))
+            if parent_group and parent_group in groups:
+                return True
+        return False
+
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
         annotated_owner_source = _text(
             value.get("_acceptedSongResetOwnerSourceKey")
@@ -18551,12 +18600,18 @@ def _snapshot_materialized_source_payload(
                 overlay_song_source_key(value) == requested_key
             )
             display_owner_group = persisted_song_display_owner_group()
+            persisted_raw_group = persisted_song_raw_group()
             return bool(
                 raw_or_change_group in groups
                 or raw_source_matches
                 or (
                     owner_group in groups
                     and owner_group == display_owner_group
+                    and persisted_raw_group
+                    and (
+                        raw_group == persisted_raw_group
+                        or has_explicit_runtime_preimage(value)
+                    )
                 )
             )
         if source_type == "artist":
