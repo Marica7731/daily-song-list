@@ -7498,9 +7498,16 @@ class Tests(unittest.TestCase):
             "count INTEGER,song_count INTEGER,video_count INTEGER,"
             "timestamp_count INTEGER)"
         )
-        connection.execute(
+        connection.executemany(
             "INSERT INTO ranking_rows VALUES(?,?,?,?,?,?,?,?)",
-            ("source-00df", "all", "count", "all", 321, 1, 318, 321),
+            [
+                ("source-00df", "all", "count", "all", 321, 1, 318, 321),
+                # Compatible songs/songIndex cards may persist the same
+                # scalar authority twice; equal duplicates remain usable.
+                ("source-00df", "all", "count", "all", 321, 1, 318, 321),
+                ("conflicting", "all", "count", "all", 321, 1, 318, 321),
+                ("conflicting", "all", "count", "all", 320, 1, 317, 320),
+            ],
         )
         class Writer:
             pass
@@ -7508,7 +7515,7 @@ class Tests(unittest.TestCase):
         writer.connection = connection
         self.assertEqual(
             pg_materializer._writer_source_cardinalities(
-                writer, ("source-00df", "missing"), "all",
+                writer, ("source-00df", "conflicting", "missing"), "all",
             ),
             {"source-00df": (321, 1, 318, 321)},
         )
