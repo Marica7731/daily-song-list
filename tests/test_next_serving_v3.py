@@ -7285,6 +7285,58 @@ class Tests(unittest.TestCase):
             {item["videoId"] for item in payload["record"]["occurrences"]},
         )
 
+    def test_snapshot_song_source_rejects_reset_display_alias_against_persisted_key(self):
+        """A reset raw alias must not bypass the persisted Song owner key."""
+        source_key = "source-reset-display-alias"
+        owner_key = "とても素敵な6月でした::eight"
+        parent = ({
+            "videoId": "parent-video", "occurrenceId": "parent-occurrence",
+            "rangeId": "all", "position": 0, "seconds": 101,
+            "title": "とても素敵な六月でした", "artist": "Eight",
+            "songKey": owner_key,
+        },)
+        candidate = {
+            "revision_id": "accepted-boundary",
+            "video_id": "reset-video",
+            "occurrence_id": "reset-video:0:202", "position": 0,
+            "range_id": "all", "song_key": "raw-reset-key",
+            "seconds": 202, "title": "とても素敵な六月でした",
+            "artist": "Eight", "source_id": "fixture-source",
+            "source_system": "youtube_channel_discovery",
+            "video_title": "Reset video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key,
+            range_id="all",
+            persisted_record={
+                "type": "song", "key": owner_key,
+                "title": "とても素敵な六月でした",
+                "sourceDetailKey": source_key, "rangeId": "all",
+            },
+            targets=(("songs", "とても素敵な六月でした::eight"),),
+            video_scope=("parent-video", "reset-video"),
+            parent_occurrences=parent,
+            direct_video_rows=(), direct_occurrence_rows=(),
+            candidate_rows=(candidate,),
+            accepted_video_resets={"reset-video": {
+                "video_id": "reset-video",
+                "payload_json": {"rangeId": "all"},
+            }},
+            runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            (payload["record"]["occurrenceCount"],
+             payload["record"]["videoCount"]),
+            (1, 1),
+        )
+        self.assertNotIn(
+            "reset-video",
+            {item["videoId"] for item in payload["record"]["occurrences"]},
+        )
+
     def test_snapshot_song_source_keeps_at_prefixed_artist_in_raw_card(self):
         source_key="10df4dffdbdef345"
         owner_key="君と夏フェス::shishamo"
