@@ -7208,6 +7208,49 @@ class Tests(unittest.TestCase):
                 }},runtime_changes=(),
             )
 
+    def test_snapshot_song_source_does_not_merge_unranked_display_alias(self):
+        source_key="source-display-alias-song"
+        owner_key="とても素敵な6月でした::eight"
+        parent=(
+            {
+                "videoId":"parent-video","occurrenceId":"parent-occurrence",
+                "rangeId":"all","position":0,"seconds":10,
+                "title":"とても素敵な六月でした","artist":"Eight",
+                "songKey":"7e380e7330e6c2eb2a96bff1",
+            },
+        )
+        candidate={
+            "revision_id":"accepted_30884784837_1",
+            "video_id":"overlay-video","occurrence_id":"overlay-occurrence",
+            "position":0,"range_id":"all","seconds":20,
+            "title":"とても素敵な六月でした","artist":"Eight",
+            "song_key":"7e380e7330e6c2eb2a96bff1",
+            "source_system":"youtube_channel_discovery",
+            "video_title":"Overlay video","channel_id":"UCfixture",
+            "channel_name":"Fixture","occurrence_payload_json":{},
+            "video_payload_json":{},"video_tombstone":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record={
+                "type":"song","key":owner_key,
+                "title":"とても素敵な六月でした","artist":"Eight",
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },targets=(("songs",owner_key),),
+            video_scope=("parent-video","overlay-video"),
+            parent_occurrences=parent,direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            (payload["record"]["occurrenceCount"],
+             payload["record"]["videoCount"]),(1,1),
+        )
+        self.assertEqual(
+            [item["videoId"] for item in payload["record"]["occurrences"]],
+            ["parent-video"],
+        )
+
     def test_snapshot_vtuber_source_skips_only_unproven_old_side(self):
         source_key="source-vtuber"
         channel_id="UCfixture"
