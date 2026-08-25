@@ -6600,6 +6600,63 @@ class Tests(unittest.TestCase):
             tuple(tombstones.call_args.args[2]),(reset_all,),
         )
 
+    def test_snapshot_song_source_inputs_project_reviewed_7d_boundary(self):
+        candidate_all = {
+            "revision_id": "overlay", "video_id": "video-all",
+            "occurrence_id": "occ-all", "position": 1,
+            "range_id": "all", "song_key": "song-all", "seconds": 20,
+            "title": "All Song", "artist": "Artist", "source_system": "fixture",
+            "video_title": "All video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+        candidate_7d = {
+            "revision_id": "boundary", "video_id": "video-7d",
+            "occurrence_id": "occ-7d", "position": 2,
+            "range_id": "7d", "song_key": "song-7d", "seconds": 30,
+            "title": "Boundary Song", "artist": "Artist", "source_system": "core-7d",
+            "video_title": "7d video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+
+        def overlay_rows(_connection, _revision_ids, **kwargs):
+            return (
+                (candidate_7d,)
+                if kwargs.get("range_id") == "7d"
+                else (candidate_all,)
+            )
+
+        with patch.object(
+            pg_adapter, "_accepted_video_resets", return_value={},
+        ), patch.object(
+            pg_adapter, "_overlay_candidate_rows", side_effect=overlay_rows,
+        ), patch.object(
+            pg_adapter, "_authoritative_7d_overlay_ids",
+            return_value=("boundary",),
+        ), patch.object(
+            pg_adapter, "_runtime_tombstones", return_value=(),
+        ), patch.object(
+            pg_adapter, "_bounded_parent_vtuber_video_owners", return_value={},
+        ), patch.object(
+            pg_adapter, "_enrich_runtime_parent_group_keys",
+        ):
+            candidates, resets, changes = (
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(), "parent", ("boundary",), "all",
+                    ("video-all", "video-7d"),
+                    include_compatible_full_reset_7d=False,
+                )
+            )
+        self.assertEqual(resets, {})
+        self.assertEqual(changes, ())
+        self.assertEqual(
+            [row["video_id"] for row in candidates],
+            ["video-all", "video-7d"],
+        )
+        self.assertEqual(candidates[1]["range_id"], "all")
+        self.assertIs(candidates[1].get("_authoritative_7d_overlay"), True)
+
     def test_snapshot_song_source_routes_exact_reset_owner_out_of_raw_card(self):
         title="晩餐歌"
         artist="tuki."
@@ -7249,6 +7306,52 @@ class Tests(unittest.TestCase):
         self.assertEqual(
             [item["videoId"] for item in payload["record"]["occurrences"]],
             ["parent-video"],
+        )
+
+    def test_snapshot_song_source_routes_authoritative_7d_boundary_alias(self):
+        source_key = "source-authoritative-7d-song"
+        owner_key = "ヒロイン::backnumber"
+        parent = ({
+            "videoId": "parent-video", "occurrenceId": "parent-occurrence",
+            "rangeId": "all", "position": 0, "seconds": 10,
+            "title": "ヒロイン", "artist": "back number",
+            "songKey": "song-heroine",
+        },)
+        candidate = {
+            "revision_id": "accepted-authoritative-7d",
+            "video_id": "overlay-video", "occurrence_id": "overlay-occurrence",
+            # _snapshot_source_overlay_inputs projects the reviewed 7D row
+            # into the all-range physical source before this helper runs.
+            "position": 0, "range_id": "all", "seconds": 20,
+            "title": "ヒロイン", "artist": "back number",
+            "song_key": "song-heroine", "source_system": "core-7d",
+            "video_title": "Overlay video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+            "_authoritative_7d_overlay": True,
+        }
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key, range_id="all", persisted_record={
+                "type": "song", "key": owner_key,
+                "title": "ヒロイン", "artist": "backnumber",
+                "sourceDetailKey": source_key, "rangeId": "all",
+            }, targets=(("songs", owner_key),),
+            video_scope=("parent-video", "overlay-video"),
+            parent_occurrences=parent, direct_video_rows=(),
+            direct_occurrence_rows=(), candidate_rows=(candidate,),
+            accepted_video_resets={}, runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            (payload["record"]["occurrenceCount"],
+             payload["record"]["songCount"],
+             payload["record"]["videoCount"],
+             payload["record"]["timestampCount"]),
+            (2, 1, 2, 2),
+        )
+        self.assertEqual(
+            {item["videoId"] for item in payload["record"]["occurrences"]},
+            {"parent-video", "overlay-video"},
         )
 
     def test_snapshot_vtuber_source_skips_only_unproven_old_side(self):
