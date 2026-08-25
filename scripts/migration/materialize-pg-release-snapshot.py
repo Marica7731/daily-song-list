@@ -3997,6 +3997,122 @@ def _add_writer_checkpointed_source(
     writer.add_source(source_key, range_id, record, occurrences)
 
 
+def _source_payload_cardinality(
+    record: Mapping[str, Any] | None,
+) -> tuple[int, int, int, int] | None:
+    """Read the four source scalars used by the local cardinality gate."""
+
+    if not isinstance(record, Mapping):
+        return None
+    occurrences = record.get("occurrences")
+    if not isinstance(occurrences, list):
+        return None
+    count = _integer(
+        record.get("count")
+        or record.get("occurrenceCount")
+        or record.get("timestampCount"),
+        -1,
+    )
+    song_count = _integer(record.get("songCount"), -1)
+    video_count = _integer(record.get("videoCount"), -1)
+    timestamp_count = _integer(
+        record.get("timestampCount")
+        or record.get("count")
+        or record.get("occurrenceCount"),
+        -1,
+    )
+    values = (count, song_count, video_count, timestamp_count)
+    return values if all(value >= 0 for value in values) else None
+
+
+def _writer_source_cardinalities(
+    writer: Any,
+    source_keys: Sequence[str],
+    range_id: str,
+) -> dict[str, tuple[int, int, int, int]]:
+    """Load one bounded batch of ranking authorities from the temp SQLite."""
+
+    connection = getattr(writer, "connection", None)
+    execute = getattr(connection, "execute", None)
+    if not callable(execute):
+        return {}
+    keys = tuple(sorted({_text(value) for value in source_keys if _text(value)}))
+    if not keys:
+        return {}
+    authorities: dict[str, tuple[int, int, int, int]] = {}
+    # SQLite's default host parameter limit is commonly 999. Keep each read
+    # below that limit even when the adaptive source batch is full.
+    for offset in range(0, len(keys), 500):
+        batch = keys[offset : offset + 500]
+        placeholders = ",".join("?" for _ in batch)
+        rows = execute(
+            "SELECT detail_key,count,song_count,video_count,timestamp_count "
+            "FROM ranking_rows "
+            "WHERE range_id=? AND metric='count' AND scope_key='all' "
+            f"AND detail_key IN ({placeholders})",
+            (range_id, *batch),
+        ).fetchall()
+        for row in rows:
+            detail_key = _text(row[0])
+            if detail_key in authorities:
+                # Multiple ranking authorities are unsafe for reconciliation;
+                # leave this key absent so the normal gate fails closed.
+                authorities.pop(detail_key, None)
+                continue
+            authorities[detail_key] = tuple(int(value or 0) for value in row[1:])
+    return authorities
+
+
+def _reconcile_authoritative_boundary_payload(
+    *,
+    source_key: str,
+    payload: Mapping[str, Any],
+    candidate_rows: Sequence[Mapping[str, Any]],
+    expected_cardinality: tuple[int, int, int, int] | None,
+    build_payload: Callable[[Sequence[Mapping[str, Any]]], Mapping[str, Any]],
+) -> Mapping[str, Any]:
+    """Drop only redundant reviewed-7d rows when ranking proves they duplicate.
+
+    A normal all-range overlay may already contain a source occurrence that is
+    also present in the reviewed 7d boundary projection. The boundary rows are
+    retained for the first attempt. If that attempt differs from the local
+    ranking authority, retry once without only rows carrying the explicit
+    authoritative marker, and accept the retry only on an exact four-scalar
+    match. Any ambiguity or mismatch remains fail-closed at the writer gate.
+    """
+
+    initial = _source_payload_cardinality(payload.get("record"))
+    if (
+        initial is None
+        or expected_cardinality is None
+        or initial == expected_cardinality
+    ):
+        return payload
+    boundary_rows = tuple(
+        row for row in candidate_rows
+        if row.get("_authoritative_7d_overlay") is True
+    )
+    if not boundary_rows:
+        return payload
+    reduced_rows = tuple(
+        row for row in candidate_rows
+        if row.get("_authoritative_7d_overlay") is not True
+    )
+    if len(reduced_rows) == len(candidate_rows):
+        return payload
+    reconciled = build_payload(reduced_rows)
+    final = _source_payload_cardinality(reconciled.get("record"))
+    if final != expected_cardinality:
+        return payload
+    print(
+        "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+        f"source={source_key} expected={expected_cardinality} "
+        f"initial={initial} final={final} excluded={len(boundary_rows)}",
+        flush=True,
+    )
+    return reconciled
+
+
 def _source_query(
     range_id: str,
     page: int,
@@ -5931,6 +6047,10 @@ def export_affected_parent_sources(
                         else ((), {}, ())
                     )
 
+            source_cardinalities = _writer_source_cardinalities(
+                writer, stream_batch, "all",
+            )
+
             def write_source(
                 source_key: str,
                 *,
@@ -5952,21 +6072,33 @@ def export_affected_parent_sources(
                              include_compatible_full_reset_7d)
                         ]
                     )
-                    payload = adapter._snapshot_materialized_source_payload(
-                        source_key,
-                        range_id="all",
-                        persisted_record=details.get(source_key),
-                        targets=stream_scoped[source_key]["targets"],
-                        video_scope=stream_scoped[source_key]["videos"],
-                        parent_occurrences=parent_rows,
-                        direct_video_rows=(
-                            (stream_direct_video_by_id[direct_video_id],)
-                            if direct_video_id in stream_direct_video_by_id else ()
-                        ),
-                        direct_occurrence_rows=direct_rows,
+                    def build_payload(
+                        rows: Sequence[Mapping[str, Any]],
+                    ) -> Mapping[str, Any]:
+                        return adapter._snapshot_materialized_source_payload(
+                            source_key,
+                            range_id="all",
+                            persisted_record=details.get(source_key),
+                            targets=stream_scoped[source_key]["targets"],
+                            video_scope=stream_scoped[source_key]["videos"],
+                            parent_occurrences=parent_rows,
+                            direct_video_rows=(
+                                (stream_direct_video_by_id[direct_video_id],)
+                                if direct_video_id in stream_direct_video_by_id else ()
+                            ),
+                            direct_occurrence_rows=direct_rows,
+                            candidate_rows=rows,
+                            accepted_video_resets=accepted_resets,
+                            runtime_changes=runtime_changes,
+                        )
+
+                    payload = build_payload(candidate_rows)
+                    payload = _reconcile_authoritative_boundary_payload(
+                        source_key=source_key,
+                        payload=payload,
                         candidate_rows=candidate_rows,
-                        accepted_video_resets=accepted_resets,
-                        runtime_changes=runtime_changes,
+                        expected_cardinality=source_cardinalities.get(source_key),
+                        build_payload=build_payload,
                     )
                     if payload.get("found") is not True:
                         raise RuntimeError(
