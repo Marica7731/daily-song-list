@@ -18720,10 +18720,26 @@ def _snapshot_materialized_source_payload(
             raw_source_matches = (
                 overlay_song_source_key(value) == requested_key
             )
+            raw_group_matches = raw_or_change_group in groups
+            persisted_key_owner_group = persisted_song_key_owner_group()
+            if (
+                raw_group_matches
+                and row_video_id(value) in accepted_video_resets
+                and persisted_key_owner_group
+                and owner_group != persisted_key_owner_group
+            ):
+                # A full-video reset without an owner annotation cannot widen
+                # a persisted source through a display-only title alias.  The
+                # source scope may contain the raw ranking group (for example
+                # ``六月``) while the immutable persisted key is ``6月``;
+                # accepting that raw match would add reset candidates that the
+                # parent source and ranking do not share.  Exact reset-owner
+                # evidence and the canonical fallback above remain allowed.
+                raw_group_matches = False
             display_owner_group = persisted_song_display_owner_group()
             persisted_raw_group = persisted_song_raw_group()
             return bool(
-                raw_or_change_group in groups
+                raw_group_matches
                 or raw_source_matches
                 or has_canonical_reset_owner(value, owner_group)
                 or (
