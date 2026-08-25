@@ -764,7 +764,7 @@ class Tests(unittest.TestCase):
         app.write_text('''function shouldUseRuntimeApiForRequest(request) {\n  if (!state.runtimeApi.available) return false;\n  return true;\n}\n  const releaseVersion = state.runtimeApi?.meta?.meta?.content_sha256 || state.runtimeMeta?.dataVersion || "";\nasync function loadRequestSearchRecords(query, signal) {\n  const range = state.range;\n  if (state.runtimeApi.available) {\n    const params = new URLSearchParams({\n      range,\n      view: "songs",\n      metric: "occurrences",\n      page: "1",\n      pageSize: "12",\n      q: cleanText(query),\n    });\n    const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {\n      cache: "no-cache",\n      signal,\n    });\nfunction sourceDetailPathForRecord(record, occurrences = []) {\n  const ownerRecord = record?._record || {};\n  const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);\n  if (explicitPath) return explicitPath;\n  const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);\n  const vtuberAlias = cleanText(record?.channelId || ownerRecord?.channelId || (record?.type === "vtuber" ? record?.key : "") || (ownerRecord?.type === "vtuber" ? ownerRecord?.key : ""));\n  if (detailKey || vtuberAlias) {\n    return `/api/sources/${encodeURIComponent(detailKey || vtuberAlias)}`;\n  }\n  const candidates = [\n    record?.sourceDetail?.path,\n    record?.sourceDetails?.path,\n    record?.detailPath,\n    record?.detail?.path,\n    ownerRecord?.sourceDetail?.path,\n    ownerRecord?.sourceDetails?.path,\n    ownerRecord?.detailPath,\n    ownerRecord?.detail?.path,\n    occurrences?.[0]?.sourceDetailPath,\n    occurrences?.[0]?.sourceDetail?.path,\n    occurrences?.[0]?.item?.sourceDetailPath,\n    occurrences?.[0]?.item?.sourceDetail?.path,\n    sourceDetailPathFromShard(record, occurrences),\n  ];\n  return cleanText(candidates.find(Boolean));\n}\nfunction a(path,requestPath,key){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => normalizeSourceDetailOccurrences(payload, key))\n}\nfunction b(path,requestPath){\n  const load = readJson(requestPath, { cache: cacheModeForPath(path) })\n    .then((payload) => {\n}\n  params.set("range", cleanText(state.range) || "all");\n  const suffix = params.toString();\n''',encoding="utf-8")
         self.assertTrue(patcher.patch_app(app));patched=app.read_text();self.assertIn("function runtimeApiCapabilities()",patched);self.assertIn("function runtimeSupportsLocalSources(",patched);self.assertIn("capabilities.rankingScopes",patched);self.assertIn('params.set("v", releaseVersion)',patched);self.assertFalse(patcher.patch_app(app))
 
-    def test_snapshot_source_scope_is_disk_backed_and_excludes_7d_boundary(self):
+    def test_snapshot_source_scope_indexes_only_authoritative_7d_boundary(self):
         song_key=pg_adapter._production_source_detail_key_for_group("songs","all","song::artist")
         artist_key=pg_adapter._production_source_detail_key_for_group("artists","all","artist")
         channel_key=pg_adapter._production_source_detail_key_for_group("vtubers","all","UCfixture")
@@ -775,6 +775,7 @@ class Tests(unittest.TestCase):
         reset_artist_key=pg_adapter._production_source_detail_key_for_group(
             "artists","all","resetartist",
         )
+        boundary_song_key="boundary-song"
         ordinary_7d_key=pg_adapter._production_source_detail_key_for_group(
             "songs","all","ordinary seven::reset artist",
         )
@@ -790,7 +791,7 @@ class Tests(unittest.TestCase):
         requested={song_key,artist_key,channel_key,replacement_key,video_key,
                    replacement_video_key,reset_song_key,reset_artist_key,
                    parent_video_key,ordinary_7d_key,canonical_artist_key,
-                   "parent-source","alias-song"}
+                   "parent-source","alias-song",boundary_song_key}
 
         fetch_sizes={}
         statements={}
@@ -801,6 +802,9 @@ class Tests(unittest.TestCase):
             if label=="targets":
                 yield {"view":"songs","detail_key":"legacy-alias","title":"Song",
                        "artist":"Artist","source_key":"alias-song"}
+                yield {"view":"songs","detail_key":"boundary-song",
+                       "title":"Boundary Song","artist":"Artist",
+                       "source_key":boundary_song_key}
                 yield {"view":"videos","detail_key":"video-parent","title":"Parent",
                        "artist":"","source_key":""}
             elif label=="videos":
@@ -812,6 +816,9 @@ class Tests(unittest.TestCase):
                 yield {"video_id":"video-all","range_id":"all","title":"Song","artist":"Artist"}
                 yield {"video_id":"video-punctuated","range_id":"all",
                        "title":"Punctuated","artist":punctuated_artist}
+            elif label=="authoritative_7d_boundary":
+                yield {"video_id":"video7d","title":"Boundary Song",
+                       "artist":"Artist"}
             elif label=="runtime":
                 yield {"range_id":"all","payload_json":{"rangeId":"all","videoId":"video-new","title":"Replacement","artist":"New Artist"}}
             elif label.startswith("parents_"):
@@ -824,6 +831,8 @@ class Tests(unittest.TestCase):
         }
         with closing(sqlite3.connect(":memory:")) as database, \
              patch.object(pg_materializer,"_stream_pg_rows",side_effect=fake_stream), \
+             patch.object(pg_adapter,"_authoritative_7d_overlay_ids",
+                          return_value=("overlay",)) as authoritative, \
              patch.object(pg_adapter,"_accepted_video_resets",
                           return_value={"video-full-7d":{"video_id":"video-full-7d"}}) as resets, \
              patch.object(pg_adapter,"_selected_full_reset_candidate_rows",
@@ -832,10 +841,17 @@ class Tests(unittest.TestCase):
                 object(),database,overlay_revision_ids=("overlay",),
                 source_revision_ids=("overlay","parent"),requested_keys=requested,
             )
-            self.assertNotIn("video7d",scope.affected_videos())
+            self.assertIn("video7d",scope.affected_videos())
+            self.assertEqual(
+                scope.videos_for_source(boundary_song_key),
+                ("video7d",),
+            )
             self.assertEqual(scope.videos_for_source(song_key),("video-all",))
             self.assertEqual(scope.videos_for_source("alias-song"),("video-all",))
-            self.assertEqual(scope.videos_for_source(artist_key),("video-all",))
+            self.assertEqual(
+                scope.videos_for_source(artist_key),
+                ("video-all", "video7d"),
+            )
             self.assertEqual(
                 scope.videos_for_source(canonical_artist_key),
                 ("video-punctuated",),
@@ -871,6 +887,9 @@ class Tests(unittest.TestCase):
             self.assertIn("view = ANY",statements["targets"])
             self.assertIn("view = 'videos'",statements["targets"])
             self.assertIn("view = 'artists'",statements["artist_owners"])
+            authoritative.assert_called_once_with(
+                unittest.mock.ANY,["overlay"],
+            )
             resets.assert_called_once_with(
                 unittest.mock.ANY,["overlay"],include_payload=False,
             )
