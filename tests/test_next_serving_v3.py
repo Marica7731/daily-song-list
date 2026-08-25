@@ -7437,6 +7437,83 @@ class Tests(unittest.TestCase):
             {"parent-video", "overlay-video"},
         )
 
+    def test_reconcile_authoritative_boundary_payload_requires_exact_ranking_match(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 326, "songCount": 1, "videoCount": 323,
+                "timestampCount": 326, "occurrences": [{}],
+            },
+        }
+        boundary_rows = tuple(
+            {"_authoritative_7d_overlay": True, "video_id": f"boundary-{index}"}
+            for index in range(5)
+        )
+        ordinary_rows = ({"video_id": "ordinary"},)
+        calls = []
+
+        def build(rows):
+            calls.append(tuple(rows))
+            return {
+                "found": True,
+                "record": {
+                    "count": 321, "songCount": 1, "videoCount": 318,
+                    "timestampCount": 321, "occurrences": [{}],
+                },
+            }
+
+        reconciled = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-00df",
+            payload=initial,
+            candidate_rows=ordinary_rows + boundary_rows,
+            expected_cardinality=(321, 1, 318, 321),
+            build_payload=build,
+        )
+        self.assertEqual(
+            pg_materializer._source_payload_cardinality(reconciled["record"]),
+            (321, 1, 318, 321),
+        )
+        self.assertEqual(calls, [ordinary_rows])
+
+        rejected = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-00df",
+            payload=initial,
+            candidate_rows=ordinary_rows + boundary_rows,
+            expected_cardinality=(320, 1, 317, 320),
+            build_payload=lambda _rows: {
+                "found": True,
+                "record": {
+                    "count": 321, "songCount": 1, "videoCount": 318,
+                    "timestampCount": 321, "occurrences": [{}],
+                },
+            },
+        )
+        self.assertIs(rejected, initial)
+
+    def test_writer_source_cardinalities_reads_only_unique_all_count_rows(self):
+        connection = sqlite3.connect(":memory:")
+        connection.execute(
+            "CREATE TABLE ranking_rows("
+            "detail_key TEXT,range_id TEXT,metric TEXT,scope_key TEXT,"
+            "count INTEGER,song_count INTEGER,video_count INTEGER,"
+            "timestamp_count INTEGER)"
+        )
+        connection.execute(
+            "INSERT INTO ranking_rows VALUES(?,?,?,?,?,?,?,?)",
+            ("source-00df", "all", "count", "all", 321, 1, 318, 321),
+        )
+        class Writer:
+            pass
+        writer = Writer()
+        writer.connection = connection
+        self.assertEqual(
+            pg_materializer._writer_source_cardinalities(
+                writer, ("source-00df", "missing"), "all",
+            ),
+            {"source-00df": (321, 1, 318, 321)},
+        )
+        connection.close()
+
     def test_snapshot_song_source_inputs_uses_full_7d_lineage_for_narrow_plan(self):
         candidate_all = {
             "revision_id": "newer", "video_id": "video-all",
