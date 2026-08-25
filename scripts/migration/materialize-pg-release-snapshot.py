@@ -1064,6 +1064,52 @@ def build_snapshot_source_scope(
     row = None
     _release_source_scope_stage("occurrences")
 
+    # The reviewed 7D boundary is a partial-range video projection.  It is
+    # intentionally absent from the ordinary all-range video/occurrence
+    # scans above, but the all-range ranking contract projects its
+    # authoritative Song (and Artist) occurrences into the canonical cards.
+    # Index only boundary rows that resolve to one of the requested source
+    # targets.  This keeps ordinary 7D rows isolated while ensuring the later
+    # source overlay lookup receives the boundary video in its exact scope.
+    authoritative_7d_ids = adapter._authoritative_7d_overlay_ids(
+        connection, revision_ids,
+    )
+    if authoritative_7d_ids:
+        boundary_revision_ids = tuple(authoritative_7d_ids[-1:])
+        for row in _stream_pg_rows(
+            connection,
+            "authoritative_7d_boundary",
+            """
+            SELECT video_id,title,artist
+            FROM migration_occurrence_rows
+            WHERE revision_id = ANY(%s)
+              AND range_id = '7d'
+            ORDER BY video_id,position,occurrence_id
+            LIMIT %s
+            """,
+            [list(boundary_revision_ids), MAX_SOURCE_SCOPE_ROWS + 1],
+        ):
+            video_id = _text(row.get("video_id"))
+            title = _text(row.get("title"))
+            artist = _text(row.get("artist"))
+            if not video_id or not title:
+                continue
+            boundary_pairs, boundary_targets = _derived_source_pairs(
+                video_ids=(video_id,),
+                song_pairs=((title, artist),),
+                requested_keys=requested,
+                source_scope=scope,
+            )
+            if not boundary_pairs:
+                continue
+            scope.add_videos({
+                boundary_video_id
+                for _source_key, boundary_video_id in boundary_pairs
+            })
+            scope.add_pairs(boundary_pairs)
+            scope.add_targets(boundary_targets)
+        _release_source_scope_stage("authoritative_7d_boundary")
+
     # The all-range ranking contract projects physical 7d occurrences only
     # for already-selected non-partial full-video resets.  Add those exact
     # song/artist/channel identities to the disk-backed source scope as well;
