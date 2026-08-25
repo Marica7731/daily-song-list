@@ -1066,17 +1066,21 @@ def build_snapshot_source_scope(
 
     # The reviewed 7D boundary is a partial-range video projection.  It is
     # intentionally absent from the ordinary all-range video/occurrence
-    # scans above, but the all-range ranking contract projects its
-    # authoritative Song (and Artist) occurrences into the canonical cards.
-    # Index only boundary rows that resolve to one of the requested source
-    # targets.  This keeps ordinary 7D rows isolated while ensuring the later
-    # source overlay lookup receives the boundary video in its exact scope.
+    # scans above, but the all-range ranking contract can project a boundary
+    # occurrence into a canonical card.  Do not blindly add every matching
+    # boundary row to every source: a persisted parent source may already
+    # contain the authoritative tuple, in which case doing so duplicates it
+    # (the 000703... regression was 771 ranked rows versus 773 source rows).
+    # Only add a boundary source when the just-written all-range ranking says
+    # it has more rows than the immutable parent source.  This also preserves
+    # the overlay-only case (for example 00e650..., where the parent has 282
+    # rows and the current ranking has 283) without widening ordinary 7D rows.
     authoritative_7d_ids = adapter._authoritative_7d_overlay_ids(
         connection, revision_ids,
     )
     if authoritative_7d_ids:
         boundary_revision_ids = tuple(authoritative_7d_ids[-1:])
-        for row in _stream_pg_rows(
+        boundary_rows = tuple(_stream_pg_rows(
             connection,
             "authoritative_7d_boundary",
             """
@@ -1088,7 +1092,13 @@ def build_snapshot_source_scope(
             LIMIT %s
             """,
             [list(boundary_revision_ids), MAX_SOURCE_SCOPE_ROWS + 1],
-        ):
+        ))
+        if len(boundary_rows) > MAX_SOURCE_SCOPE_ROWS:
+            raise RuntimeError("snapshot authoritative 7d boundary exceeded row cap")
+        boundary_pairs_by_source: dict[str, set[tuple[str, str]]] = {}
+        boundary_targets_by_source: dict[str, set[tuple[str, str, str]]] = {}
+        boundary_source_keys: set[str] = set()
+        for row in boundary_rows:
             video_id = _text(row.get("video_id"))
             title = _text(row.get("title"))
             artist = _text(row.get("artist"))
@@ -1100,14 +1110,90 @@ def build_snapshot_source_scope(
                 requested_keys=requested,
                 source_scope=scope,
             )
-            if not boundary_pairs:
-                continue
+            for source_key, pair_video_id in boundary_pairs:
+                boundary_source_keys.add(source_key)
+                boundary_pairs_by_source.setdefault(source_key, set()).add(
+                    (source_key, pair_video_id)
+                )
+            for view, group_key, source_key in boundary_targets:
+                boundary_source_keys.add(source_key)
+                boundary_targets_by_source.setdefault(source_key, set()).add(
+                    (view, group_key, source_key)
+                )
+
+        # The writer's all-range ranking rows are the active overlay truth;
+        # the parent occurrence table is the immutable source truth.  Compare
+        # their scalar counts only for the small set of source keys touched by
+        # boundary rows.  The ranking table is absent in isolated unit
+        # fixtures, so those fixtures retain the historical conservative
+        # behavior and exercise the boundary plumbing itself.
+        boundary_source_keys_needing_rows = set(boundary_source_keys)
+        ranking_table = sqlite_connection.execute(
+            "SELECT 1 FROM sqlite_master "
+            "WHERE type='table' AND name='ranking_rows'"
+        ).fetchone()
+        if ranking_table:
+            expected_counts: dict[str, int] = {}
+            ordered_boundary_keys = sorted(boundary_source_keys)
+            for offset in range(0, len(ordered_boundary_keys), 400):
+                batch = ordered_boundary_keys[offset : offset + 400]
+                placeholders = ",".join("?" for _ in batch)
+                rows = sqlite_connection.execute(
+                    f"""
+                    SELECT detail_key,count
+                    FROM ranking_rows
+                    WHERE range_id='all' AND metric='count' AND scope_key='all'
+                      AND view IN ('songs','songIndex','artists','vtubers','videos')
+                      AND detail_key IN ({placeholders})
+                    """,
+                    batch,
+                ).fetchall()
+                for detail_key, count in rows:
+                    source_key = _text(detail_key)
+                    scalar = int(count or 0)
+                    previous = expected_counts.get(source_key)
+                    if previous is not None and previous != scalar:
+                        raise RuntimeError(
+                            "snapshot boundary ranking authority disagrees: "
+                            + source_key
+                        )
+                    expected_counts[source_key] = scalar
+
+            parent_counts: dict[str, int] = {}
+            for offset in range(0, len(ordered_boundary_keys), 400):
+                batch = ordered_boundary_keys[offset : offset + 400]
+                rows = adapter._rows(
+                    connection,
+                    """
+                    SELECT source_key,count(*) AS occurrence_count
+                    FROM runtime_source_occurrences
+                    WHERE revision_id=%s AND range_id='all'
+                      AND source_key=ANY(%s)
+                    GROUP BY source_key
+                    """,
+                    [parent_revision_id, batch],
+                )
+                for row in rows:
+                    source_key = _text(row.get("source_key"))
+                    if source_key in boundary_source_keys:
+                        parent_counts[source_key] = int(
+                            row.get("occurrence_count") or 0
+                        )
+            boundary_source_keys_needing_rows = {
+                source_key
+                for source_key in boundary_source_keys
+                if source_key in expected_counts
+                and expected_counts[source_key] > parent_counts.get(source_key, 0)
+            }
+
+        for source_key in boundary_source_keys_needing_rows:
             scope.add_videos({
-                boundary_video_id
-                for _source_key, boundary_video_id in boundary_pairs
+                pair_video_id
+                for _pair_source_key, pair_video_id
+                in boundary_pairs_by_source.get(source_key, ())
             })
-            scope.add_pairs(boundary_pairs)
-            scope.add_targets(boundary_targets)
+            scope.add_pairs(boundary_pairs_by_source.get(source_key, ()))
+            scope.add_targets(boundary_targets_by_source.get(source_key, ()))
         _release_source_scope_stage("authoritative_7d_boundary")
 
     # The all-range ranking contract projects physical 7d occurrences only
