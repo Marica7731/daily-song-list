@@ -4040,6 +4040,7 @@ def _writer_source_cardinalities(
     if not keys:
         return {}
     authorities: dict[str, tuple[int, int, int, int]] = {}
+    conflicted: set[str] = set()
     # SQLite's default host parameter limit is commonly 999. Keep each read
     # below that limit even when the adaptive source batch is full.
     for offset in range(0, len(keys), 500):
@@ -4054,12 +4055,20 @@ def _writer_source_cardinalities(
         ).fetchall()
         for row in rows:
             detail_key = _text(row[0])
-            if detail_key in authorities:
-                # Multiple ranking authorities are unsafe for reconciliation;
-                # leave this key absent so the normal gate fails closed.
-                authorities.pop(detail_key, None)
+            if not detail_key or detail_key in conflicted:
                 continue
-            authorities[detail_key] = tuple(int(value or 0) for value in row[1:])
+            value = tuple(int(item or 0) for item in row[1:])
+            previous = authorities.get(detail_key)
+            if previous is None:
+                authorities[detail_key] = value
+                continue
+            if previous != value:
+                # Conflicting views/ranking rows are unsafe for reconciliation;
+                # keep this key absent so the normal gate fails closed. Equal
+                # duplicate rows are the same scalar authority (songs and
+                # songIndex can persist one card twice) and remain usable.
+                authorities.pop(detail_key, None)
+                conflicted.add(detail_key)
     return authorities
 
 
