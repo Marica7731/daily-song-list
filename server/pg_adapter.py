@@ -18516,6 +18516,51 @@ def _snapshot_materialized_source_payload(
             return ""
         return f"{_overlay_norm(title)}::{_overlay_norm(artist)}"
 
+    def persisted_song_key_owner_group() -> str:
+        """Return the punctuation-insensitive owner encoded by the key.
+
+        Historical persisted Song details can omit ``artist`` while their
+        canonical ``key`` still carries the owner.  An accepted reset can
+        therefore add a reviewed occurrence whose display artist has harmless
+        punctuation (for example ``iLiFE!``) without carrying an immutable
+        parent tuple.  The ranking target and persisted key together are the
+        only authority for that narrow case.
+        """
+
+        key = _text(persisted.get("key"))
+        title, separator, artist = key.partition("::")
+        if not separator or not title or not artist:
+            return ""
+        title_key = _source_song_owner_norm(title)
+        artist_key = _source_song_owner_norm(artist)
+        if not title_key or not artist_key:
+            return ""
+        return f"{title_key}::{artist_key}"
+
+    def has_canonical_reset_owner(
+        value: Mapping[str, Any], owner_group: str,
+    ) -> bool:
+        """Bind an accepted reset to a canonical Song target without a preimage.
+
+        A reset marker is stronger than an ordinary overlay candidate: the
+        ranking builder has already assigned that video to the target Song.
+        Require both the exact target group and the persisted key owner so a
+        punctuation/display alias (such as ``@SHISHAMO``) still remains in its
+        own raw card unless the accepted reset itself proves the canonical
+        ownership.
+        """
+
+        if source_type != "song" or not persisted:
+            return False
+        video_id = row_video_id(value)
+        return bool(
+            video_id
+            and video_id in accepted_video_resets
+            and owner_group
+            and owner_group in target_groups.get("songs", set())
+            and owner_group == persisted_song_key_owner_group()
+        )
+
     def has_explicit_runtime_preimage(value: Mapping[str, Any]) -> bool:
         """Allow a raw candidate only when a replacement names its owner.
 
@@ -18671,6 +18716,7 @@ def _snapshot_materialized_source_payload(
             return bool(
                 raw_or_change_group in groups
                 or raw_source_matches
+                or has_canonical_reset_owner(value, owner_group)
                 or (
                     owner_group in groups
                     and owner_group == display_owner_group
