@@ -16959,6 +16959,39 @@ def _snapshot_source_overlay_inputs(
         range_id=range_id,
         video_scope=scoped_videos,
     ))
+    if range_id == "all" and not include_compatible_full_reset_7d:
+        # The reviewed 7D boundary is a partial range reset: its rows are
+        # intentionally excluded from the ordinary all-range candidate query
+        # above.  All-range ranking nevertheless includes those authoritative
+        # boundary occurrences in its persisted Song card.  Route only the
+        # newest reviewed boundary rows into Song source reconstruction, and
+        # mark their provenance so the source matcher can distinguish them
+        # from an unranked punctuation/display alias.  Ordinary 7D rows remain
+        # range-isolated and cannot widen a synthetic source card.
+        authoritative_7d_ids = _authoritative_7d_overlay_ids(
+            connection, overlay_revision_ids,
+        )
+        if authoritative_7d_ids:
+            authoritative_rows = _overlay_candidate_rows(
+                connection,
+                authoritative_7d_ids[-1:],
+                range_id="7d",
+                video_scope=scoped_videos,
+            )
+            selected = {
+                _overlay_candidate_identity(row): dict(row)
+                for row in candidate_rows
+            }
+            for row in _project_compatible_candidate_rows(
+                authoritative_rows, "all",
+            ):
+                identity = _overlay_candidate_identity(row)
+                if identity in selected:
+                    continue
+                annotated = dict(row)
+                annotated["_authoritative_7d_overlay"] = True
+                selected[identity] = annotated
+            candidate_rows = tuple(selected.values())
     if include_compatible_full_reset_7d:
         # Keep the generic same-range source contract intact.  Only channel
         # detail reconstruction may additionally project physical 7d rows
@@ -18503,6 +18536,29 @@ def _snapshot_materialized_source_payload(
                 return True
         return False
 
+    def has_authoritative_7d_provenance(value: Mapping[str, Any]) -> bool:
+        """Allow only reviewed 7D boundary rows across the all-range split.
+
+        The marker is attached only after the manifest-validated boundary
+        lookup above.  Requiring the core-7d source identity as well keeps a
+        hand-shaped or ordinary overlay row fail-closed if it happens to
+        carry a similar punctuation-insensitive owner.
+        """
+
+        if source_type != "song":
+            return False
+        if value.get("_authoritative_7d_overlay") is not True:
+            return False
+        row_range = _text(value.get("range_id") or value.get("rangeId"))
+        if row_range not in {"7d", "all"}:
+            return False
+        return any(
+            _text(
+                source.get("source_system") or source.get("sourceSystem")
+            ) == "core-7d"
+            for source in _scope_value_sources(value)
+        )
+
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
         annotated_owner_source = _text(
             value.get("_acceptedSongResetOwnerSourceKey")
@@ -18611,6 +18667,7 @@ def _snapshot_materialized_source_payload(
                     and (
                         raw_group == persisted_raw_group
                         or has_explicit_runtime_preimage(value)
+                        or has_authoritative_7d_provenance(value)
                     )
                 )
             )
