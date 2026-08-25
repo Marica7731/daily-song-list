@@ -7191,6 +7191,53 @@ class Tests(unittest.TestCase):
             (1,1,1),
         )
 
+    def test_snapshot_song_source_accepts_canonical_reset_owner_without_preimage(self):
+        source_key = "source-canonical-reset-owner"
+        owner_key = "メロメラ::ilife"
+        parent = ({
+            "videoId": "parent-video", "occurrenceId": "parent-occurrence",
+            "rangeId": "all", "position": 0, "seconds": 101,
+            "title": "メロメラ", "artist": "iLiFE", "songKey": owner_key,
+        },)
+        candidate = {
+            "revision_id": "accepted-boundary",
+            "video_id": "reset-video",
+            "occurrence_id": "reset-video:0:202", "position": 0,
+            "range_id": "all", "song_key": "raw-reset-key", "seconds": 202,
+            "title": "メロメラ", "artist": "iLiFE!",
+            "source_id": "fixture-source", "source_system": "core-7d",
+            "video_title": "Reset video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key,
+            range_id="all",
+            persisted_record={
+                "type": "song", "key": owner_key, "title": "メロメラ",
+                "sourceDetailKey": source_key, "rangeId": "all",
+            },
+            targets=(("songs", owner_key),),
+            video_scope=("parent-video", "reset-video"),
+            parent_occurrences=parent,
+            direct_video_rows=(), direct_occurrence_rows=(),
+            candidate_rows=(candidate,),
+            accepted_video_resets={"reset-video": {
+                "video_id": "reset-video", "payload_json": {"rangeId": "all"},
+            }},
+            runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record = payload["record"]
+        self.assertEqual(
+            (record["occurrenceCount"], record["songCount"],
+             record["videoCount"], record["timestampCount"]),
+            (2, 1, 2, 2),
+        )
+        self.assertIn(
+            "reset-video", {item["videoId"] for item in record["occurrences"]},
+        )
+
     def test_snapshot_song_source_keeps_at_prefixed_artist_in_raw_card(self):
         source_key="10df4dffdbdef345"
         owner_key="君と夏フェス::shishamo"
