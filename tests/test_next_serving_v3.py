@@ -7437,6 +7437,48 @@ class Tests(unittest.TestCase):
             {"parent-video", "overlay-video"},
         )
 
+    def test_snapshot_song_source_pins_song_count_before_boundary_reconcile(self):
+        source_key = "source-authoritative-7d-song-many"
+        owner_key = "ヒロイン::backnumber"
+        parent = ({
+            "videoId": "parent-video", "occurrenceId": "parent-occurrence",
+            "rangeId": "all", "position": 0, "seconds": 10,
+            "title": "ヒロイン", "artist": "back number",
+            "songKey": "song-heroine",
+        },)
+        candidates = tuple({
+            "revision_id": "accepted-authoritative-7d",
+            "video_id": f"overlay-video-{index}",
+            "occurrence_id": f"overlay-occurrence-{index}",
+            "position": index + 1, "range_id": "all", "seconds": 20 + index,
+            "title": "ヒロイン", "artist": "back number",
+            "song_key": f"raw-song-{index}", "source_system": "core-7d",
+            "video_title": f"Overlay video {index}",
+            "channel_id": "UCfixture", "channel_name": "Fixture",
+            "occurrence_payload_json": {}, "video_payload_json": {},
+            "video_tombstone": False, "_authoritative_7d_overlay": True,
+        } for index in range(5))
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key, range_id="all", persisted_record={
+                "type": "song", "key": owner_key,
+                "title": "ヒロイン", "artist": "backnumber",
+                "sourceDetailKey": source_key, "rangeId": "all",
+            }, targets=(("songs", owner_key),),
+            video_scope=("parent-video", *(
+                f"overlay-video-{index}" for index in range(5)
+            )), parent_occurrences=parent, direct_video_rows=(),
+            direct_occurrence_rows=(), candidate_rows=candidates,
+            accepted_video_resets={}, runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            (payload["record"]["occurrenceCount"],
+             payload["record"]["songCount"],
+             payload["record"]["videoCount"],
+             payload["record"]["timestampCount"]),
+            (6, 1, 6, 6),
+        )
+
     def test_reconcile_authoritative_boundary_payload_requires_exact_ranking_match(self):
         initial = {
             "found": True,

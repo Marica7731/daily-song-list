@@ -19139,6 +19139,14 @@ def _snapshot_materialized_source_payload(
     record["occurrenceCount"] = count
     record["timestampCount"] = count
     record["videoCount"] = video_count
+    if source_type == "song" and count:
+        # The persisted Song detail is one canonical work even when several
+        # overlay rows carry distinct raw song keys.  The writer pins every
+        # occurrence to that persisted owner before its source cardinality
+        # gate, so keep the source card scalar in the same contract here;
+        # otherwise the boundary reconciler can reject an exact 7D duplicate
+        # solely because the pre-pinned payload counted raw keys.
+        record["songCount"] = 1
     result["record"] = record
     if source_type == "vtuber":
         result = _canonicalize_vtuber_source_payload(result, records, query)
