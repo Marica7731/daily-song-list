@@ -8022,7 +8022,9 @@ class Tests(unittest.TestCase):
         } for index,title in enumerate(("Old Song","Old  Song"),start=1))
         for label,parent in (("missing",()),("ambiguous",ambiguous)):
             with self.subTest(label=label), self.assertRaisesRegex(
-                pg_adapter.PostgresAdapterError,"does not uniquely match",
+                pg_adapter.PostgresAdapterError,
+                r"does not uniquely match.*source=source-group-preimage "
+                r"type=song.*video=video-one.*reason=final-cardinality",
             ):
                 pg_adapter._snapshot_materialized_source_payload(
                     source_key,range_id="all",

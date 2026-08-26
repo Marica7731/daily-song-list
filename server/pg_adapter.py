@@ -29,7 +29,7 @@ import sys
 import threading
 import time
 import unicodedata
-from typing import Any, Iterable, Mapping, MutableMapping, Sequence
+from typing import Any, Iterable, Mapping, MutableMapping, NoReturn, Sequence
 
 COMPACT_VTUBER_PREVIEW_LIMIT = 3
 _DROP_KEYS = frozenset({
@@ -18952,6 +18952,38 @@ def _snapshot_materialized_source_payload(
         if record:
             insert_record(record)
 
+    def raise_source_preimage_error(
+        change: Mapping[str, Any],
+        matches: Sequence[int],
+        *,
+        reason: str,
+    ) -> NoReturn:
+        """Raise a bounded identity-only diagnostic for a rejected preimage.
+
+        The source writer must remain fail-closed when an occurrence cannot be
+        bound uniquely.  Include only immutable routing fields and cardinality
+        in the exception so a production log identifies the exact branch
+        without dumping title/artist/payload content.
+        """
+
+        entity_type = _text(
+            change.get("entityType") or change.get("entity_type")
+        ) or "unknown"
+        change_video_id = row_video_id(change) or "unknown"
+        change_occurrence_id = _text(
+            change.get("occurrenceId") or change.get("occurrence_id")
+        ) or "none"
+        raise PostgresAdapterError(
+            "source occurrence preimage does not uniquely match authority: "
+            f"source={requested_key} type={source_type} range={range_id} "
+            f"video={change_video_id} occurrence={change_occurrence_id} "
+            f"matches={len(matches)} effective={len(effective)} "
+            f"entity={entity_type} replacement={bool(change.get('replacement'))} "
+            f"sameVideo={bool(change.get('replacementSameVideo'))} "
+            f"sameArtist={change.get('replacementSameArtist', 'unknown')} "
+            f"reason={reason}"
+        )
+
     vtuber_replacements_applied_in_place: set[tuple[str, str]] = set()
     for change in runtime_changes:
         entity_type = _text(
@@ -18976,8 +19008,8 @@ def _snapshot_materialized_source_payload(
             if identity(record) == (video_id, occurrence_id)
         ] if occurrence_id else []
         if len(matches) > 1:
-            raise PostgresAdapterError(
-                "source occurrence preimage does not uniquely match authority"
+            raise_source_preimage_error(
+                change, matches, reason="exact-identity-ambiguous",
             )
         if skip_synthetic_artist_parent_only_change(change, matches):
             continue
@@ -19002,8 +19034,8 @@ def _snapshot_materialized_source_payload(
                     if _source_record_matches_change(record, change)
                 ]
         if len(matches) > 1:
-            raise PostgresAdapterError(
-                "source occurrence preimage does not uniquely match authority"
+            raise_source_preimage_error(
+                change, matches, reason="fallback-ambiguous",
             )
         if (
             not matches
@@ -19040,8 +19072,8 @@ def _snapshot_materialized_source_payload(
                 and record_group(record) == expected_group
             ]
         if source_type in {"song", "artist"} and len(matches) != 1:
-            raise PostgresAdapterError(
-                "source occurrence preimage does not uniquely match authority"
+            raise_source_preimage_error(
+                change, matches, reason="final-cardinality",
             )
         if len(matches) == 1:
             # A same-video VTuber replacement remains a member of the exact
