@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from decimal import Decimal
 import gc
+from itertools import combinations
 import json
 import math
 import os
@@ -58,6 +59,12 @@ SOURCE_WRITE_BATCH_SIZE = 64
 # one-row-at-a-time proof; larger deltas or a large boundary set remain
 # fail-closed instead of guessing which rows to remove.
 MAX_BOUNDARY_SINGLE_RECONCILE_ROWS = 512
+# A mixed boundary can contain many rows from unrelated source groups while
+# only a handful can affect this source payload.  Probe those influential rows
+# individually, then in pairs, and accept only a unique exact four-scalar
+# proof.  A hard bound keeps the proof finite and fail-closed.
+MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS = 24
+MAX_BOUNDARY_SUBSET_SIZE = 2
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
 SOURCE_EXPORT_STREAM_FETCH_SIZE = 2_048
@@ -4173,10 +4180,66 @@ def _reconcile_authoritative_boundary_payload(
     delta = tuple(
         initial[index] - expected_cardinality[index] for index in range(4)
     )
-    if (
-        delta != (1, 0, 0, 1)
-        or len(boundary_rows) > MAX_BOUNDARY_SINGLE_RECONCILE_ROWS
-    ):
+    if delta != (1, 0, 0, 1):
+        # A mixed boundary can differ by more than one occurrence when one
+        # reviewed row is legitimate and another is redundant.  Probe only
+        # rows that change the reduced payload, then enumerate bounded pairs
+        # of those influential rows.  This proves the exact four-scalar
+        # authority without guessing from aggregate deltas or accepting an
+        # arbitrary marker out of a large unrelated boundary batch.
+        if len(boundary_rows) > MAX_BOUNDARY_SINGLE_RECONCILE_ROWS:
+            print(
+                "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+                f"source={source_key} expected={expected_cardinality} "
+                f"initial={initial} fullBoundary={final} "
+                f"markers={len(boundary_rows)} subsetMatches=0",
+                flush=True,
+            )
+            return payload
+        influential: list[
+            tuple[int, Mapping[str, Any], Mapping[str, Any]]
+        ] = []
+        for boundary_index, boundary_row in enumerate(boundary_rows):
+            trial = build_payload(reduced_rows + (boundary_row,))
+            trial_cardinality = _source_payload_cardinality(
+                trial.get("record")
+            )
+            if trial_cardinality != final:
+                influential.append((boundary_index, boundary_row, trial))
+        subset_matches: list[tuple[tuple[int, ...], Mapping[str, Any]]] = []
+        if len(influential) <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS:
+            for subset_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
+                for subset in combinations(influential, subset_size):
+                    selected_indices = tuple(item[0] for item in subset)
+                    selected_rows = tuple(item[1] for item in subset)
+                    trial = build_payload(reduced_rows + selected_rows)
+                    trial_cardinality = _source_payload_cardinality(
+                        trial.get("record")
+                    )
+                    if trial_cardinality == expected_cardinality:
+                        subset_matches.append((selected_indices, trial))
+        if len(subset_matches) == 1:
+            selected_indices, trial = subset_matches[0]
+            print(
+                "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                f"source={source_key} expected={expected_cardinality} "
+                f"initial={initial} final={expected_cardinality} "
+                f"retained={len(selected_indices)} "
+                f"markerIndices={selected_indices} "
+                f"influential={len(influential)}",
+                flush=True,
+            )
+            return trial
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} fullBoundary={final} "
+            f"markers={len(boundary_rows)} influential={len(influential)} "
+            f"subsetMatches={len(subset_matches)}",
+            flush=True,
+        )
+        return payload
+    if len(boundary_rows) > MAX_BOUNDARY_SINGLE_RECONCILE_ROWS:
         print(
             "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
             f"source={source_key} expected={expected_cardinality} "
