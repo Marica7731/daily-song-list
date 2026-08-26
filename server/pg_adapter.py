@@ -17003,21 +17003,17 @@ def _snapshot_source_overlay_inputs(
                     # that row's content, but retain the provenance of the
                     # reviewed 7D boundary so the materializer can remove
                     # only this redundant row during exact cardinality
-                    # reconciliation. Require the boundary query itself to
-                    # carry the trusted core-7d source marker; an ordinary
-                    # all-range row must never self-authorize this path.
-                    authoritative_source_systems = {
-                        _text(
-                            source.get("source_system")
-                            or source.get("sourceSystem")
-                        )
-                        for source in _scope_value_sources(row)
-                    }
-                    if "core-7d" in authoritative_source_systems:
-                        existing = dict(selected[identity])
-                        existing["_authoritative_7d_overlay"] = True
-                        existing["_authoritative_7d_source_system"] = "core-7d"
-                        selected[identity] = existing
+                    # reconciliation.  The boundary rows came from the
+                    # manifest-validated ``authoritative_7d_ids`` query
+                    # above; their physical ``source_system`` is allowed to
+                    # be a legacy/accepted value (or null), so it is not an
+                    # additional authority check.  An ordinary all-range row
+                    # still cannot self-authorize because it never enters
+                    # this branch without a matching validated 7D row.
+                    existing = dict(selected[identity])
+                    existing["_authoritative_7d_overlay"] = True
+                    existing["_authoritative_7d_source_system"] = "core-7d"
+                    selected[identity] = existing
                     continue
                 annotated = dict(row)
                 annotated["_authoritative_7d_overlay"] = True
