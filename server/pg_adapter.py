@@ -18773,6 +18773,51 @@ def _snapshot_materialized_source_payload(
             return bool(expected & channel_identities(value))
         return False
 
+    def skip_synthetic_artist_parent_only_change(
+        change: Mapping[str, Any],
+        matches: Sequence[int],
+    ) -> bool:
+        """Ignore a moved-out parent tuple absent from a synthetic Artist card.
+
+        An overlay-only Artist source has no persisted source row.  Its
+        candidate rows already represent the ranked synthetic group, while a
+        same-video replacement can still carry an exact parent-runtime proof
+        for the old Artist owner (for example ``unknown``).  That old tuple is
+        owned by the parent Song/VTuber sources, not by this synthetic card;
+        requiring it as a source preimage would therefore reject a valid
+        source even though the replacement is moving out of the group.  Keep
+        the exception narrow: only an explicitly proven parent occurrence,
+        an explicit old owner group equal to this target, and a replacement
+        that is known to leave the Artist group qualify.  Same-group
+        replacements and deletes still require an exact source preimage.
+        """
+
+        if source_type != "artist" or persisted or matches:
+            return False
+        if _text(
+            change.get("entityType") or change.get("entity_type")
+        ) not in {"occurrences", "runtime_occurrences"}:
+            return False
+        if not bool(change.get("replacement")):
+            return False
+        if change.get("replacementSameArtist") is not False:
+            return False
+        # Validate the coverage markers and require the exact parent-runtime
+        # proof used by the ranking projection.  Do not infer a missing
+        # preimage from display text alone.
+        if not _runtime_occurrence_has_immutable_old_side(change):
+            return False
+        if (
+            change.get("_parentRuntimeOccurrenceExists") is not True
+            or change.get("_runtimeOccurrenceOwnerWasExplicit") is not False
+        ):
+            return False
+        parent_group = _text(change.get("parentArtistGroupKey"))
+        return bool(
+            parent_group
+            and parent_group in target_groups.get("artists", set())
+        )
+
     effective: list[dict[str, Any]] = []
     if persisted:
         for occurrence in parent_occurrences:
@@ -18934,6 +18979,8 @@ def _snapshot_materialized_source_payload(
             raise PostgresAdapterError(
                 "source occurrence preimage does not uniquely match authority"
             )
+        if skip_synthetic_artist_parent_only_change(change, matches):
+            continue
         if (
             source_type == "vtuber"
             and not matches

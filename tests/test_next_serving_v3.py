@@ -8044,6 +8044,52 @@ class Tests(unittest.TestCase):
                     },),
                 )
 
+    def test_snapshot_materialized_synthetic_artist_skips_moved_parent_without_preimage(self):
+        """A synthetic Artist source must not claim a parent-only move."""
+
+        source_key="source-overlay-unknown-artist"
+        candidate={
+            "revision_id":"overlay","video_id":"video-current",
+            "occurrence_id":"occ-current","position":0,
+            "range_id":"all","song_key":"song-current","seconds":10,
+            "title":"Current Song","artist":"unknown",
+            "video_title":"Current Video","channel_name":"Fixture",
+            "channel_id":"UCfixture","channel_handle":"@fixture",
+        }
+        parent_only_move={
+            "entityType":"runtime_occurrences",
+            "videoId":"video-parent","occurrenceId":"occ-parent",
+            "rangeId":"all","position":1,"seconds":20,
+            "title":"Parent Song","artist":"unknown",
+            "parentArtistGroupKey":"unknown","replacement":True,
+            "replacementSameArtist":False,
+            "replacementPayload":{
+                "videoId":"video-parent","occurrenceId":"occ-parent",
+                "rangeId":"all","position":1,"seconds":20,
+                "title":"Parent Song","artist":"Named Artist",
+            },
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",persisted_record=None,
+            targets=(("artists","unknown"),),
+            video_scope=("video-current","video-parent"),
+            parent_occurrences=(),direct_video_rows=(),
+            direct_occurrence_rows=(),candidate_rows=(candidate,),
+            accepted_video_resets={},runtime_changes=(parent_only_move,),
+        )
+        self.assertTrue(payload["found"])
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["songCount"],record["videoCount"],
+             record["timestampCount"]),(1,1,1,1),
+        )
+        self.assertEqual(
+            [item["song"]["occurrenceId"] for item in record["occurrences"]],
+            ["occ-current"],
+        )
+
     def test_snapshot_materialized_source_rejects_ambiguous_preimage_delete(self):
         source_key="source-ambiguous";title="Same Song";artist="Same Artist"
         parent=tuple({
