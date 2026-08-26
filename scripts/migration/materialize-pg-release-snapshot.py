@@ -42,6 +42,12 @@ SOURCE_SCOPE_FETCH_SIZE = 10_000
 SOURCE_SCOPE_PAYLOAD_FETCH_SIZE = 64
 SOURCE_SCOPE_VIDEO_BATCH = 2_500
 PARENT_SOURCE_EXPORT_BATCH = 500
+# The affected-parent path hydrates source details, direct-video metadata and
+# one shared overlay graph before it can stream the physical parent rows.  Keep
+# that transient graph materially below the generic 500-key export window;
+# completed source keys are already durable checkpoints, so a smaller window
+# only trades a few more bounded SQL passes for a lower cgroup peak.
+AFFECTED_PARENT_SOURCE_EXPORT_BATCH = 128
 PARENT_SOURCE_OCCURRENCE_BATCH_ROWS = 100_000
 PARENT_VIDEO_EXPORT_BATCH = 500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
@@ -1594,6 +1600,39 @@ def _release_materializer_memory(
         f"trimmed={int(trimmed)}",
         flush=True,
     )
+
+
+def _release_source_export_batch_memory(
+    writer: Any,
+    *,
+    stage: str,
+    batch_index: int,
+) -> None:
+    """Persist one completed source window and release transient heap/cache.
+
+    The source writer's per-source checkpoint is necessary for reconnect
+    resume, but it does not by itself evict Python payload graphs or SQLite's
+    clean page cache.  This boundary is deliberately best-effort for the
+    lightweight fake writers used by unit tests; the production writer always
+    exposes ``checkpoint`` and therefore gets a durable shrink before the next
+    metadata window is hydrated.
+    """
+
+    checkpoint = getattr(writer, "checkpoint", None)
+    if callable(checkpoint):
+        checkpoint(shrink=True)
+    trimmed = _trim_process_heap()
+    if callable(checkpoint):
+        rss_kib = _current_rss_kib()
+        swap_kib = _current_swap_kib()
+        print(
+            f"PG_SNAPSHOT_SOURCE_BATCH_RELEASE stage={stage} "
+            f"batch={batch_index} "
+            f"rss_kib={rss_kib if rss_kib >= 0 else 'unknown'} "
+            f"swap_kib={swap_kib if swap_kib >= 0 else 'unknown'} "
+            f"trimmed={int(trimmed)}",
+            flush=True,
+        )
 
 
 def _flatten_scalars(value: Any, *, channel_only: bool = False) -> Iterable[str]:
@@ -5700,7 +5739,7 @@ def export_affected_parent_sources(
 ) -> set[str]:
     """Materialize affected generic-all sources with bounded batch SQL.
 
-    A 500-key metadata window reads parent details once and is then split by
+    A bounded metadata window reads parent details once and is then split by
     each detail's declared occurrence count.  Within each adaptive batch the
     union overlay delta is shared, while physical parent rows are retained for
     only the current ``source_key`` and are written and released at the next
@@ -5724,7 +5763,10 @@ def export_affected_parent_sources(
     )
     remaining = requested - completed
     for metadata_index, (batch, scoped, _union_videos) in enumerate(
-        source_scope.source_batches(remaining)
+        source_scope.source_batches(
+            remaining,
+            batch_size=AFFECTED_PARENT_SOURCE_EXPORT_BATCH,
+        )
     ):
         detail_rows = adapter._rows(
             connection,
@@ -6352,7 +6394,22 @@ def export_affected_parent_sources(
         direct_video_by_id = {}
         direct_ranking_fallback_occurrences = {}
         source_plans = {}
+        stream_scoped = {}
+        plan_members = {}
+        adaptive_batches = []
+        persisted_keys = ()
+        stream_direct_sources = {}
+        stream_direct_video_ids = []
+        stream_direct_video_by_id = {}
+        direct_source_by_video = {}
+        scoped = {}
+        _union_videos = ()
         gc.collect()
+        _release_source_export_batch_memory(
+            writer,
+            stage=checkpoint_stage,
+            batch_index=metadata_index,
+        )
     if completed != requested:
         missing = sorted(requested - completed)
         raise RuntimeError(

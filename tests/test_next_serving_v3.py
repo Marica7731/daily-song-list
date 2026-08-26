@@ -5675,7 +5675,7 @@ class Tests(unittest.TestCase):
                 "songs",f"song-{index:04d}::artist",key
             ) for index,key in enumerate(keys))
 
-            detail_calls=[];stream_calls=[];overlay_calls=[]
+            detail_calls=[];stream_calls=[];overlay_calls=[];checkpoints=[]
             def rows(_connection,statement,params):
                 if "runtime_source_details" not in statement:self.fail(statement)
                 self.assertEqual(params[0],["overlay","parent"])
@@ -5722,6 +5722,7 @@ class Tests(unittest.TestCase):
                 def __init__(self):self.keys=[]
                 def add_source(self,key,_range,_record,occurrences):
                     self.keys.append(key);self.assertions=list(occurrences)
+                def checkpoint(self,*,shrink):checkpoints.append(shrink)
             writer=Writer()
             with patch.object(pg_adapter,"_rows",side_effect=rows), \
                  patch.object(pg_materializer,"_stream_pg_rows",side_effect=stream), \
@@ -5739,13 +5740,28 @@ class Tests(unittest.TestCase):
                     source_keys=keys,
                 )
         self.assertEqual(completed,set(keys));self.assertEqual(set(writer.keys),set(keys))
-        self.assertEqual([len(batch) for batch in detail_calls],[500,1])
-        self.assertEqual([len(batch) for _label,batch,_revisions in stream_calls],[500,1])
+        expected_batch_sizes=[
+            min(
+                pg_materializer.AFFECTED_PARENT_SOURCE_EXPORT_BATCH,
+                len(keys)-offset,
+            )
+            for offset in range(
+                0,len(keys),pg_materializer.AFFECTED_PARENT_SOURCE_EXPORT_BATCH,
+            )
+        ]
+        self.assertEqual(
+            [len(batch) for batch in detail_calls],expected_batch_sizes,
+        )
+        self.assertEqual(
+            [len(batch) for _label,batch,_revisions in stream_calls],
+            expected_batch_sizes,
+        )
         self.assertTrue(all(
             set(revisions)=={"parent"}
             for _label,_batch,revisions in stream_calls
         ))
-        self.assertEqual(len(overlay_calls),2)
+        self.assertEqual(len(overlay_calls),len(expected_batch_sizes))
+        self.assertEqual(checkpoints,[True]*len(expected_batch_sizes))
 
     def test_snapshot_affected_source_adapts_batches_and_releases_each_preimage(self):
         counts={"source-large":4,"source-small-a":1,"source-small-b":2}
