@@ -18640,6 +18640,36 @@ def _snapshot_materialized_source_payload(
             for source in _scope_value_sources(value)
         ) or value.get("_authoritative_7d_source_system") == "core-7d"
 
+    def candidate_song_key(value: Mapping[str, Any]) -> str:
+        """Read the immutable Song key from scalar or nested occurrence data."""
+
+        for source in _scope_value_sources(value):
+            song_key = _text(source.get("song_key") or source.get("songKey"))
+            if song_key:
+                return song_key
+        return ""
+
+    # A single overlay batch can contain several punctuation/display aliases
+    # for the same persisted Song owner.  Once a reviewed 7D boundary row is
+    # present for this owner, its immutable song key is the narrow authority
+    # for ordinary all-range rows.  Without this gate, two raw candidates can
+    # each independently satisfy the source cardinality gate and reconciliation
+    # cannot determine which one belongs in the canonical source.
+    authoritative_7d_song_keys: frozenset[str] = frozenset()
+    if source_type == "song" and persisted:
+        owner_group = persisted_song_key_owner_group()
+        if owner_group:
+            authoritative_7d_song_keys = frozenset(
+                song_key
+                for value in candidate_rows
+                if (
+                    has_authoritative_7d_provenance(value)
+                    and _source_row_song_group_identity(value) == owner_group
+                )
+                for song_key in (candidate_song_key(value),)
+                if song_key
+            )
+
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
         annotated_owner_source = _text(
             value.get("_acceptedSongResetOwnerSourceKey")
@@ -18737,6 +18767,19 @@ def _snapshot_materialized_source_payload(
                 overlay_song_source_key(value) == requested_key
             )
             raw_group_matches = raw_or_change_group in groups
+            authoritative_7d_provenance = has_authoritative_7d_provenance(value)
+            explicit_runtime_preimage = has_explicit_runtime_preimage(value)
+            if authoritative_7d_song_keys and not (
+                authoritative_7d_provenance
+                or explicit_runtime_preimage
+                or raw_source_matches
+                or candidate_song_key(value) in authoritative_7d_song_keys
+            ):
+                # A broad display/raw-group match is insufficient once the
+                # reviewed 7D boundary has identified the immutable Song key.
+                # Keep unresolved aliases out of the canonical source rather
+                # than letting reconciliation choose one arbitrarily.
+                return False
             persisted_key_owner_group = persisted_song_key_owner_group()
             if (
                 raw_group_matches
@@ -18764,8 +18807,8 @@ def _snapshot_materialized_source_payload(
                     and persisted_raw_group
                     and (
                         raw_group == persisted_raw_group
-                        or has_explicit_runtime_preimage(value)
-                        or has_authoritative_7d_provenance(value)
+                        or explicit_runtime_preimage
+                        or authoritative_7d_provenance
                     )
                 )
             )

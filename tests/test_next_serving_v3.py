@@ -7657,6 +7657,74 @@ class Tests(unittest.TestCase):
             {"parent-video", "overlay-video"},
         )
 
+    def test_snapshot_song_source_binds_all_aliases_to_reviewed_7d_key(self):
+        """A reviewed 7D key must disambiguate same-owner all-range rows."""
+        source_key = "source-reviewed-song-key"
+        owner_key = "mysoulyourbeats::lia"
+        raw_group = "my soul, your beats!::lia"
+        parent = ({
+            "videoId": "parent-video", "occurrenceId": "parent-occurrence",
+            "rangeId": "all", "position": 0, "seconds": 10,
+            "title": "My Soul, Your Beats!", "artist": "Lia",
+            "songKey": owner_key,
+        },)
+
+        def candidate(
+            video_id: str, occurrence_id: str, song_key: str, *, marker=False,
+        ):
+            return {
+                "revision_id": "accepted-reviewed-boundary",
+                "video_id": video_id, "occurrence_id": occurrence_id,
+                "position": 0, "range_id": "all", "seconds": 20,
+                "title": "My Soul, Your Beats!", "artist": "Lia",
+                "song_key": song_key, "source_id": "fixture-source",
+                "source_system": "core-7d" if marker else "fixture",
+                "video_title": video_id, "channel_id": "UCfixture",
+                "channel_name": "Fixture", "occurrence_payload_json": {},
+                "video_payload_json": {}, "video_tombstone": False,
+                **({
+                    "_authoritative_7d_overlay": True,
+                    "_authoritative_7d_source_system": "core-7d",
+                } if marker else {}),
+            }
+
+        marker = candidate(
+            "boundary-video", "boundary-occurrence", "song-canonical",
+            marker=True,
+        )
+        canonical = candidate(
+            "overlay-video", "overlay-canonical", "song-canonical",
+        )
+        alias = candidate("overlay-video", "overlay-alias", "song-alias")
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key, range_id="all", persisted_record={
+                "type": "song", "key": owner_key,
+                "title": "My Soul, Your Beats!", "artist": "Lia",
+                "sourceDetailKey": source_key, "rangeId": "all",
+            }, targets=(
+                ("songs", owner_key), ("songs", raw_group),
+            ), video_scope=(
+                "parent-video", "boundary-video", "overlay-video",
+            ), parent_occurrences=parent, direct_video_rows=(),
+            direct_occurrence_rows=(), candidate_rows=(marker, canonical, alias),
+            accepted_video_resets={}, runtime_changes=(),
+        )
+        self.assertTrue(payload["found"])
+        record = payload["record"]
+        self.assertEqual(
+            (record["occurrenceCount"], record["songCount"],
+             record["videoCount"], record["timestampCount"]),
+            (3, 1, 3, 3),
+        )
+        self.assertEqual(
+            {item["song"]["occurrenceId"] for item in record["occurrences"]},
+            {"parent-occurrence", "boundary-occurrence", "overlay-canonical"},
+        )
+        self.assertNotIn(
+            "overlay-alias",
+            {item["song"]["occurrenceId"] for item in record["occurrences"]},
+        )
+
     def test_snapshot_song_source_pins_song_count_before_boundary_reconcile(self):
         source_key = "source-authoritative-7d-song-many"
         owner_key = "ヒロイン::backnumber"
