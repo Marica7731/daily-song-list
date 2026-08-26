@@ -8012,6 +8012,69 @@ class Tests(unittest.TestCase):
             ["video-keep"],
         )
 
+    def test_snapshot_materialized_song_source_matches_legacy_parent_without_occurrence_id(self):
+        """Use parent proof when persisted source rows predate occurrence ids."""
+
+        source_key = "source-legacy-id-parent"
+        artist = "Same Artist"
+        target_group = "oldsong::sameartist"
+        parent = {
+            "videoId": "video-one",
+            "rangeId": "all",
+            "seconds": 10,
+            "title": "Old Song",
+            "artist": artist,
+        }
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            source_key,
+            range_id="all",
+            persisted_record={
+                "type": "song",
+                "key": target_group,
+                "title": "Old Song",
+                "artist": artist,
+                "sourceDetailKey": source_key,
+                "rangeId": "all",
+            },
+            targets=(("songs", target_group),),
+            video_scope=("video-one",),
+            parent_occurrences=(parent,),
+            direct_video_rows=(),
+            direct_occurrence_rows=(),
+            candidate_rows=(),
+            accepted_video_resets={},
+            runtime_changes=(
+                {
+                    "entityType": "runtime_occurrences",
+                    "videoId": "video-one",
+                    "occurrenceId": "runtime-old-id",
+                    "rangeId": "all",
+                    "seconds": 10,
+                    "title": "Old Song",
+                    "artist": artist,
+                    "parentSongGroupKey": target_group,
+                    "replacement": True,
+                    "replacementSameVideo": True,
+                    "replacementSameArtist": True,
+                    "replacementPayload": {
+                        "videoId": "video-one",
+                        "occurrenceId": "runtime-new-id",
+                        "rangeId": "all",
+                        "seconds": 10,
+                        "title": "Old Song",
+                        "artist": artist,
+                    },
+                    "_parentRuntimeOccurrenceExists": True,
+                },
+            ),
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(payload["record"]["count"], 1)
+        self.assertEqual(
+            payload["record"]["occurrences"][0]["song"]["occurrenceId"],
+            "runtime-new-id",
+        )
+
     def test_snapshot_materialized_song_source_rejects_nonunique_group_preimage(self):
         source_key="source-group-preimage";artist="Same Artist"
         target_group="oldsong::sameartist"
