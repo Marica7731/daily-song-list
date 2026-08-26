@@ -18985,6 +18985,30 @@ def _snapshot_materialized_source_payload(
         )
 
     vtuber_replacements_applied_in_place: set[tuple[str, str]] = set()
+
+    def has_legacy_source_occurrence(video_id: str) -> bool:
+        """Return whether this video still uses pre-occurrence-id storage.
+
+        ``runtime_source_occurrences`` predates immutable occurrence ids.  A
+        runtime replacement can nevertheless carry an exact parent-runtime
+        occurrence id, so an exact id lookup against the persisted source is
+        expected to miss.  Only use the legacy tuple matcher when the source
+        row itself has no id; sources that do carry ids must remain strict.
+        """
+
+        for record in effective:
+            if identity(record)[0] != video_id:
+                continue
+            occurrences = record.get("occurrences") or ()
+            if len(occurrences) != 1 or not isinstance(occurrences[0], Mapping):
+                continue
+            if not _text(
+                occurrences[0].get("occurrenceId")
+                or occurrences[0].get("occurrence_id")
+            ):
+                return True
+        return False
+
     for change in runtime_changes:
         entity_type = _text(
             change.get("entityType") or change.get("entity_type")
@@ -19028,7 +19052,22 @@ def _snapshot_materialized_source_payload(
         if not matches:
             if source_type in {"song", "artist"} and not matches_target(change):
                 continue
-            if not occurrence_id or source_type not in {"song", "artist"}:
+            # Legacy source rows have no occurrence id, while the immutable
+            # runtime replacement does.  An exact parent-coverage marker is
+            # the authority for this old side; allow the bounded tuple matcher
+            # only for that legacy representation.  Newer id-bearing source
+            # rows, including a wrong explicit id, stay fail-closed.
+            legacy_parent_fallback = (
+                source_type in {"song", "artist"}
+                and change.get("_parentRuntimeOccurrenceExists") is True
+                and _runtime_occurrence_has_immutable_old_side(change)
+                and has_legacy_source_occurrence(video_id)
+            )
+            if (
+                not occurrence_id
+                or source_type not in {"song", "artist"}
+                or legacy_parent_fallback
+            ):
                 matches = [
                     index for index, record in enumerate(effective)
                     if _source_record_matches_change(record, change)
