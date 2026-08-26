@@ -4210,12 +4210,135 @@ def _reconcile_authoritative_boundary_payload(
                 # Two distinct exclusions satisfy the authority: the source
                 # data is ambiguous, so preserve the original failure.
                 break
+    ordinary_matches: list[
+        tuple[int, Mapping[str, Any], Mapping[str, Any]]
+    ] = []
+    ordinary_candidates = 0
+    ordinary_search_bounded = True
+    if len(matches) <= 1:
+        # The marked 7D rows can coexist with an ordinary overlay row that
+        # duplicates another occurrence of the same video.  In that shape the
+        # expected authority keeps the genuinely new marked video, but drops
+        # one ordinary duplicate.  Only inspect rows which are observable in
+        # the initial payload and whose video already has another occurrence;
+        # removing any other row would necessarily change ``video_count`` and
+        # cannot satisfy the observed (1,0,0,1) delta.  The same 512-row bound
+        # used for marked-row proof keeps this fallback finite and fail-closed.
+        initial_record = payload.get("record")
+        initial_occurrences = (
+            initial_record.get("occurrences")
+            if isinstance(initial_record, Mapping)
+            else None
+        )
+        initial_video_counts: dict[str, int] = {}
+        initial_occurrence_ids: set[tuple[str, str]] = set()
+        if isinstance(initial_occurrences, list):
+            for occurrence in initial_occurrences:
+                if not isinstance(occurrence, Mapping):
+                    continue
+                video_id = _text(
+                    occurrence.get("videoId")
+                    or occurrence.get("video_id")
+                )
+                occurrence_id = _text(
+                    occurrence.get("occurrenceId")
+                    or occurrence.get("occurrence_id")
+                )
+                if not video_id:
+                    continue
+                initial_video_counts[video_id] = (
+                    initial_video_counts.get(video_id, 0) + 1
+                )
+                if occurrence_id:
+                    initial_occurrence_ids.add((video_id, occurrence_id))
+        ordinary_indices: list[int] = []
+        for candidate_index, candidate_row in enumerate(candidate_rows):
+            if candidate_row.get("_authoritative_7d_overlay") is True:
+                continue
+            video_id = _text(
+                candidate_row.get("video_id")
+                or candidate_row.get("videoId")
+            )
+            occurrence_id = _text(
+                candidate_row.get("occurrence_id")
+                or candidate_row.get("occurrenceId")
+            )
+            if (
+                not video_id
+                or not occurrence_id
+                or initial_video_counts.get(video_id, 0) < 2
+                or (
+                    initial_occurrence_ids
+                    and (video_id, occurrence_id)
+                        not in initial_occurrence_ids
+                )
+            ):
+                continue
+            ordinary_indices.append(candidate_index)
+        ordinary_candidates = len(ordinary_indices)
+        if ordinary_candidates <= MAX_BOUNDARY_SINGLE_RECONCILE_ROWS:
+            for candidate_index in ordinary_indices:
+                trial_rows = [
+                    row
+                    for row_index, row in enumerate(candidate_rows)
+                    if row_index != candidate_index
+                ]
+                trial = build_payload(tuple(trial_rows))
+                trial_cardinality = _source_payload_cardinality(
+                    trial.get("record")
+                )
+                if trial_cardinality == expected_cardinality:
+                    ordinary_matches.append((
+                        candidate_index,
+                        candidate_rows[candidate_index],
+                        trial,
+                    ))
+                    if len(ordinary_matches) > 1:
+                        # Two ordinary exclusions satisfy the authority: the
+                        # source data is ambiguous, so preserve the failure.
+                        break
+        else:
+            # A unique marked-row match is not sufficient if the ordinary
+            # candidate set was too large to enumerate.  Keep this recovery
+            # fail-closed rather than accepting an unchecked alternative.
+            ordinary_search_bounded = False
+    if matches and (ordinary_matches or not ordinary_search_bounded):
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} fullBoundary={final} "
+            f"markers={len(boundary_rows)} ordinaryCandidates="
+            f"{ordinary_candidates} subsetMatches="
+            f"{len(matches) + len(ordinary_matches)}",
+            flush=True,
+        )
+        return payload
+    if not matches and len(ordinary_matches) == 1:
+        candidate_index, candidate_row, trial = ordinary_matches[0]
+        video_id = _text(
+            candidate_row.get("video_id") or candidate_row.get("videoId")
+        ) or "unknown"
+        occurrence_id = _text(
+            candidate_row.get("occurrence_id")
+            or candidate_row.get("occurrenceId")
+        ) or "unknown"
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} final={expected_cardinality} excluded=1 "
+            f"candidateIndex={candidate_index} markerIndex=none "
+            f"video={video_id} occurrence={occurrence_id}",
+            flush=True,
+        )
+        return trial
     if len(matches) != 1:
         print(
             "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
             f"source={source_key} expected={expected_cardinality} "
             f"initial={initial} fullBoundary={final} "
-            f"markers={len(boundary_rows)} subsetMatches={len(matches)}",
+            f"markers={len(boundary_rows)} ordinaryCandidates="
+            f"{ordinary_candidates} subsetMatches="
+            f"{len(matches) + len(ordinary_matches)}",
             flush=True,
         )
         return payload

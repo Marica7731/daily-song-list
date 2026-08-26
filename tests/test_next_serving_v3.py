@@ -7859,6 +7859,109 @@ class Tests(unittest.TestCase):
         )
         self.assertIs(rejected, initial)
 
+    def test_reconcile_authoritative_boundary_payload_proves_ordinary_duplicate_video(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 126, "songCount": 1, "videoCount": 121,
+                "timestampCount": 126,
+                "occurrences": [
+                    {"videoId": "duplicate-video", "occurrenceId": "old-0"},
+                    {"videoId": "duplicate-video", "occurrenceId": "old-1"},
+                    {"videoId": "boundary-video", "occurrenceId": "boundary-0"},
+                ],
+            },
+        }
+        ordinary = {
+            "video_id": "duplicate-video", "occurrence_id": "old-1",
+        }
+        legitimate = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-video", "occurrence_id": "boundary-0",
+        }
+
+        def build(rows):
+            rows = tuple(rows)
+            has_ordinary = ordinary in rows
+            has_legitimate = legitimate in rows
+            if not has_ordinary:
+                count, videos = 125, 121
+            elif not has_legitimate:
+                count, videos = 125, 120
+            else:
+                count, videos = 126, 121
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1,
+                    "videoCount": videos, "timestampCount": count,
+                    "occurrences": [{}],
+                },
+            }
+
+        reconciled = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-7444-ordinary-duplicate",
+            payload=initial,
+            candidate_rows=(ordinary, legitimate),
+            expected_cardinality=(125, 1, 121, 125),
+            build_payload=build,
+        )
+        self.assertEqual(
+            pg_materializer._source_payload_cardinality(reconciled["record"]),
+            (125, 1, 121, 125),
+        )
+
+    def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_ordinary_duplicate_video(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 126, "songCount": 1, "videoCount": 121,
+                "timestampCount": 126,
+                "occurrences": [
+                    {"videoId": "duplicate-video", "occurrenceId": "old-0"},
+                    {"videoId": "duplicate-video", "occurrenceId": "old-1"},
+                    {"videoId": "duplicate-video", "occurrenceId": "old-2"},
+                    {"videoId": "boundary-video", "occurrenceId": "boundary-0"},
+                ],
+            },
+        }
+        ordinary_one = {
+            "video_id": "duplicate-video", "occurrence_id": "old-1",
+        }
+        ordinary_two = {
+            "video_id": "duplicate-video", "occurrence_id": "old-2",
+        }
+        legitimate = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-video", "occurrence_id": "boundary-0",
+        }
+
+        def build(rows):
+            rows = tuple(rows)
+            if legitimate not in rows:
+                count, videos = 125, 120
+            elif ordinary_one not in rows or ordinary_two not in rows:
+                count, videos = 125, 121
+            else:
+                count, videos = 126, 121
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1,
+                    "videoCount": videos, "timestampCount": count,
+                    "occurrences": [{}],
+                },
+            }
+
+        rejected = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-7444-ordinary-ambiguous",
+            payload=initial,
+            candidate_rows=(ordinary_one, ordinary_two, legitimate),
+            expected_cardinality=(125, 1, 121, 125),
+            build_payload=build,
+        )
+        self.assertIs(rejected, initial)
+
     def test_writer_source_cardinalities_reads_only_unique_all_count_rows(self):
         connection = sqlite3.connect(":memory:")
         connection.execute(
