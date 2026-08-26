@@ -6756,6 +6756,60 @@ class Tests(unittest.TestCase):
         self.assertEqual(candidates[1]["range_id"], "all")
         self.assertIs(candidates[1].get("_authoritative_7d_overlay"), True)
 
+    def test_snapshot_song_source_inputs_preserve_boundary_provenance_on_overlap(self):
+        candidate_all = {
+            "revision_id": "overlay", "video_id": "video-shared",
+            "occurrence_id": "occ-shared", "position": 1,
+            "range_id": "all", "song_key": "song-shared", "seconds": 20,
+            "title": "Shared Song", "artist": "Artist", "source_system": "fixture",
+            "video_title": "All video", "channel_id": "UCfixture",
+            "channel_name": "Fixture", "occurrence_payload_json": {},
+            "video_payload_json": {}, "video_tombstone": False,
+        }
+        candidate_7d = {
+            **candidate_all,
+            "revision_id": "boundary", "range_id": "7d",
+            "source_system": "core-7d",
+        }
+
+        def overlay_rows(_connection, _revision_ids, **kwargs):
+            return (
+                (candidate_7d,)
+                if kwargs.get("range_id") == "7d"
+                else (candidate_all,)
+            )
+
+        with patch.object(
+            pg_adapter, "_accepted_video_resets", return_value={},
+        ), patch.object(
+            pg_adapter, "_overlay_candidate_rows", side_effect=overlay_rows,
+        ), patch.object(
+            pg_adapter, "_authoritative_7d_overlay_ids",
+            return_value=("boundary",),
+        ), patch.object(
+            pg_adapter, "_runtime_tombstones", return_value=(),
+        ), patch.object(
+            pg_adapter, "_bounded_parent_vtuber_video_owners", return_value={},
+        ), patch.object(
+            pg_adapter, "_enrich_runtime_parent_group_keys",
+        ):
+            candidates, resets, changes = (
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(), "parent", ("overlay",), "all",
+                    ("video-shared",),
+                    include_compatible_full_reset_7d=False,
+                )
+            )
+        self.assertEqual(resets, {})
+        self.assertEqual(changes, ())
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["range_id"], "all")
+        self.assertEqual(candidates[0]["source_system"], "fixture")
+        self.assertIs(candidates[0].get("_authoritative_7d_overlay"), True)
+        self.assertEqual(
+            candidates[0].get("_authoritative_7d_source_system"), "core-7d",
+        )
+
     def test_snapshot_song_source_routes_exact_reset_owner_out_of_raw_card(self):
         title="晩餐歌"
         artist="tuki."
@@ -7569,11 +7623,12 @@ class Tests(unittest.TestCase):
             # into the all-range physical source before this helper runs.
             "position": 0, "range_id": "all", "seconds": 20,
             "title": "ヒロイン", "artist": "back number",
-            "song_key": "song-heroine", "source_system": "core-7d",
+            "song_key": "song-heroine", "source_system": "fixture",
             "video_title": "Overlay video", "channel_id": "UCfixture",
             "channel_name": "Fixture", "occurrence_payload_json": {},
             "video_payload_json": {}, "video_tombstone": False,
             "_authoritative_7d_overlay": True,
+            "_authoritative_7d_source_system": "core-7d",
         }
         payload = pg_adapter._snapshot_materialized_source_payload(
             source_key, range_id="all", persisted_record={
