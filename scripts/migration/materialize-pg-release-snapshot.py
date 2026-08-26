@@ -52,6 +52,12 @@ PARENT_SOURCE_OCCURRENCE_BATCH_ROWS = 100_000
 PARENT_VIDEO_EXPORT_BATCH = 500
 MAX_SOURCE_SCOPE_ROWS = 5_000_000
 SOURCE_WRITE_BATCH_SIZE = 64
+# A reviewed 7D boundary can contain both an occurrence already represented by
+# the all-range parent and a genuinely new occurrence.  If the aggregate is
+# exactly one occurrence over the ranking authority, allow a bounded
+# one-row-at-a-time proof; larger deltas or a large boundary set remain
+# fail-closed instead of guessing which rows to remove.
+MAX_BOUNDARY_SINGLE_RECONCILE_ROWS = 512
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
 SOURCE_EXPORT_STREAM_FETCH_SIZE = 2_048
@@ -4150,15 +4156,85 @@ def _reconcile_authoritative_boundary_payload(
         return payload
     reconciled = build_payload(reduced_rows)
     final = _source_payload_cardinality(reconciled.get("record"))
-    if final != expected_cardinality:
+    if final == expected_cardinality:
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} final={final} excluded={len(boundary_rows)}",
+            flush=True,
+        )
+        return reconciled
+
+    # A boundary may mix an overlap with a new, legitimate 7D occurrence.
+    # Dropping the whole marker set is then too broad, while accepting the
+    # initial payload would hide a real ranking/source disagreement.  Restrict
+    # the recovery to the observed one-occurrence delta and prove the exact
+    # four-scalar authority after excluding each marked row independently.
+    delta = tuple(
+        initial[index] - expected_cardinality[index] for index in range(4)
+    )
+    if (
+        delta != (1, 0, 0, 1)
+        or len(boundary_rows) > MAX_BOUNDARY_SINGLE_RECONCILE_ROWS
+    ):
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} fullBoundary={final} "
+            f"markers={len(boundary_rows)} subsetMatches=0",
+            flush=True,
+        )
         return payload
+
+    matches: list[tuple[int, Mapping[str, Any], Mapping[str, Any]]] = []
+    for boundary_index, boundary_row in enumerate(boundary_rows):
+        removed = False
+        trial_rows: list[Mapping[str, Any]] = []
+        for row in candidate_rows:
+            if not removed and row is boundary_row:
+                removed = True
+                continue
+            trial_rows.append(row)
+        if not removed:
+            # ``boundary_rows`` is a tuple selected from ``candidate_rows``;
+            # identity should always be present, but refuse to infer an index
+            # if a custom caller violates that invariant.
+            continue
+        trial = build_payload(tuple(trial_rows))
+        trial_cardinality = _source_payload_cardinality(
+            trial.get("record")
+        )
+        if trial_cardinality == expected_cardinality:
+            matches.append((boundary_index, boundary_row, trial))
+            if len(matches) > 1:
+                # Two distinct exclusions satisfy the authority: the source
+                # data is ambiguous, so preserve the original failure.
+                break
+    if len(matches) != 1:
+        print(
+            "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+            f"source={source_key} expected={expected_cardinality} "
+            f"initial={initial} fullBoundary={final} "
+            f"markers={len(boundary_rows)} subsetMatches={len(matches)}",
+            flush=True,
+        )
+        return payload
+    boundary_index, boundary_row, trial = matches[0]
+    video_id = _text(
+        boundary_row.get("video_id") or boundary_row.get("videoId")
+    ) or "unknown"
+    occurrence_id = _text(
+        boundary_row.get("occurrence_id")
+        or boundary_row.get("occurrenceId")
+    ) or "unknown"
     print(
         "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
         f"source={source_key} expected={expected_cardinality} "
-        f"initial={initial} final={final} excluded={len(boundary_rows)}",
+        f"initial={initial} final={expected_cardinality} excluded=1 "
+        f"markerIndex={boundary_index} video={video_id} occurrence={occurrence_id}",
         flush=True,
     )
-    return reconciled
+    return trial
 
 
 def _source_query(

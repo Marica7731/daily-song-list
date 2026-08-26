@@ -7752,6 +7752,113 @@ class Tests(unittest.TestCase):
         )
         self.assertIs(rejected, initial)
 
+    def test_reconcile_authoritative_boundary_payload_proves_unique_redundant_row(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 126, "songCount": 1, "videoCount": 121,
+                "timestampCount": 126, "occurrences": [{}],
+            },
+        }
+        ordinary = {"video_id": "ordinary", "occurrence_id": "ordinary-0"}
+        redundant = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-duplicate",
+            "occurrence_id": "boundary-duplicate-0",
+        }
+        legitimate = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-legitimate",
+            "occurrence_id": "boundary-legitimate-0",
+        }
+        candidate_rows = (ordinary, redundant, legitimate)
+        calls = []
+
+        def build(rows):
+            rows = tuple(rows)
+            calls.append(rows)
+            has_redundant = any(
+                row.get("video_id") == "boundary-duplicate" for row in rows
+            )
+            has_legitimate = any(
+                row.get("video_id") == "boundary-legitimate" for row in rows
+            )
+            if has_redundant:
+                count = 126
+            elif has_legitimate:
+                count = 125
+            else:
+                # Removing the whole boundary set also removes a real 7D
+                # occurrence and must not be accepted as a reconciliation.
+                count = 124
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1, "videoCount": 121,
+                    "timestampCount": count, "occurrences": [{}],
+                },
+            }
+
+        reconciled = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-7444",
+            payload=initial,
+            candidate_rows=candidate_rows,
+            expected_cardinality=(125, 1, 121, 125),
+            build_payload=build,
+        )
+        self.assertEqual(
+            pg_materializer._source_payload_cardinality(reconciled["record"]),
+            (125, 1, 121, 125),
+        )
+        self.assertEqual(reconciled["record"]["occurrences"], [{}])
+        self.assertEqual(calls[0], (ordinary,))
+        self.assertEqual(calls[1], (ordinary, legitimate))
+        self.assertEqual(calls[2], (ordinary, redundant))
+
+    def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_row(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 126, "songCount": 1, "videoCount": 121,
+                "timestampCount": 126, "occurrences": [{}],
+            },
+        }
+        ordinary = {"video_id": "ordinary", "occurrence_id": "ordinary-0"}
+        boundary_rows = (
+            {
+                "_authoritative_7d_overlay": True,
+                "video_id": "boundary-one",
+                "occurrence_id": "boundary-one-0",
+            },
+            {
+                "_authoritative_7d_overlay": True,
+                "video_id": "boundary-two",
+                "occurrence_id": "boundary-two-0",
+            },
+        )
+        candidate_rows = (ordinary,) + boundary_rows
+
+        def build(rows):
+            # Either marker is independently sufficient, so no exclusion is
+            # uniquely proven and the reconciler must preserve the failure.
+            count = 125 if len(tuple(rows)) == 2 else 126
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1, "videoCount": 121,
+                    "timestampCount": count, "occurrences": [{}],
+                },
+            }
+
+        rejected = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-7444-ambiguous",
+            payload=initial,
+            candidate_rows=candidate_rows,
+            expected_cardinality=(125, 1, 121, 125),
+            build_payload=build,
+        )
+        self.assertIs(rejected, initial)
+
     def test_writer_source_cardinalities_reads_only_unique_all_count_rows(self):
         connection = sqlite3.connect(":memory:")
         connection.execute(
