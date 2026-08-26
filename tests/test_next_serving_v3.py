@@ -6769,7 +6769,10 @@ class Tests(unittest.TestCase):
         candidate_7d = {
             **candidate_all,
             "revision_id": "boundary", "range_id": "7d",
-            "source_system": "core-7d",
+            # The manifest-validated 7D query is authoritative even when the
+            # legacy row's physical source_system is not the marker used by
+            # newer rows.
+            "source_system": "accepted",
         }
 
         def overlay_rows(_connection, _revision_ids, **kwargs):
