@@ -16998,6 +16998,26 @@ def _snapshot_source_overlay_inputs(
             ):
                 identity = _overlay_candidate_identity(row)
                 if identity in selected:
+                    # The all-range projection wins when both physical
+                    # queries contain the same immutable occurrence. Keep
+                    # that row's content, but retain the provenance of the
+                    # reviewed 7D boundary so the materializer can remove
+                    # only this redundant row during exact cardinality
+                    # reconciliation. Require the boundary query itself to
+                    # carry the trusted core-7d source marker; an ordinary
+                    # all-range row must never self-authorize this path.
+                    authoritative_source_systems = {
+                        _text(
+                            source.get("source_system")
+                            or source.get("sourceSystem")
+                        )
+                        for source in _scope_value_sources(row)
+                    }
+                    if "core-7d" in authoritative_source_systems:
+                        existing = dict(selected[identity])
+                        existing["_authoritative_7d_overlay"] = True
+                        existing["_authoritative_7d_source_system"] = "core-7d"
+                        selected[identity] = existing
                     continue
                 annotated = dict(row)
                 annotated["_authoritative_7d_overlay"] = True
@@ -18622,7 +18642,7 @@ def _snapshot_materialized_source_payload(
                 source.get("source_system") or source.get("sourceSystem")
             ) == "core-7d"
             for source in _scope_value_sources(value)
-        )
+        ) or value.get("_authoritative_7d_source_system") == "core-7d"
 
     def has_exact_song_reset_owner(value: Mapping[str, Any]) -> bool:
         annotated_owner_source = _text(
