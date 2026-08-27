@@ -114,10 +114,22 @@ def _runtime_change_matches_persisted_source(
     persisted = dict(persisted_record or {})
     source_type = _text(
         persisted.get("type") or persisted.get("entityType")
-    )
-    if source_type in {"channel", "source"}:
-        source_type = "vtuber"
-    if source_type not in {"song", "artist", "vtuber"} or not source_key:
+    ).casefold()
+    # Source-detail payloads from older runtime revisions use both singular
+    # and view-shaped plural spellings.  Treat those as the same owner type;
+    # otherwise the filter falls through to the intentionally conservative
+    # opaque path and re-admits every shared-video change.
+    source_type = {
+        "songs": "song",
+        "songindex": "song",
+        "song_index": "song",
+        "artists": "artist",
+        "vtubers": "vtuber",
+        "channels": "vtuber",
+        "channel": "vtuber",
+        "source": "vtuber",
+    }.get(source_type, source_type)
+    if not source_key:
         return True
 
     # A direct source-owner annotation is stronger than any display fields.
@@ -187,7 +199,7 @@ def _runtime_change_matches_persisted_source(
                     "artists", range_id, group_key,
                 )
             )
-    else:
+    elif source_type == "vtuber":
         for payload in payloads:
             channel = _text(
                 payload.get("channelId") or payload.get("channel_id")
@@ -202,6 +214,69 @@ def _runtime_change_matches_persisted_source(
                         "vtubers", range_id, channel,
                     )
                 )
+        group_key = _text(change.get("parentVtuberChannelKey"))
+        if group_key:
+            owner_keys.add(
+                adapter._production_source_detail_key_for_group(
+                    "vtubers", range_id, group_key,
+                )
+            )
+
+    else:
+        # A malformed/legacy detail type must not disable ownership proof.
+        # Inspect every explicit owner representation and retain a row only
+        # when one of those representations resolves to this source.  Rows
+        # with no owner evidence remain included so the caller still fails
+        # closed instead of silently dropping a potentially relevant change.
+        for payload in payloads:
+            title = _text(payload.get("title") or payload.get("workTitle"))
+            artist = _text(
+                payload.get("artist") or payload.get("displayArtist")
+            )
+            if title and artist:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "songs", range_id,
+                        f"{adapter._overlay_norm(title)}::"
+                        f"{adapter._overlay_norm(artist)}",
+                    )
+                )
+            if artist:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "artists", range_id, adapter._overlay_norm(artist),
+                    )
+                )
+            channel = _text(
+                payload.get("channelId") or payload.get("channel_id")
+                or payload.get("channelHandle")
+                or payload.get("channel_handle")
+                or payload.get("channelName")
+                or payload.get("channel_name")
+            ).lstrip("@/")
+            if channel:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "vtubers", range_id, channel,
+                    )
+                )
+        for field in (
+            "parentSongGroupKey", "songGroupKey", "canonicalSongGroupKey",
+        ):
+            group_key = _text(change.get(field))
+            if group_key:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "songs", range_id, group_key,
+                    )
+                )
+        group_key = _text(change.get("parentArtistGroupKey"))
+        if group_key:
+            owner_keys.add(
+                adapter._production_source_detail_key_for_group(
+                    "artists", range_id, group_key,
+                )
+            )
         group_key = _text(change.get("parentVtuberChannelKey"))
         if group_key:
             owner_keys.add(

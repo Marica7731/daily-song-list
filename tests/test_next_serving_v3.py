@@ -8320,6 +8320,29 @@ class Tests(unittest.TestCase):
                 range_id="all",
             )
         )
+        # Older source-detail payloads can spell the owner type as a view
+        # name, or omit it entirely.  Those forms must still apply the same
+        # explicit song-owner proof instead of admitting every shared-video
+        # runtime row.
+        for legacy_type in ("songs", "songIndex", "legacy-source"):
+            legacy_persisted = dict(persisted)
+            legacy_persisted["type"] = legacy_type
+            self.assertTrue(
+                pg_materializer._runtime_change_matches_persisted_source(
+                    owned_replacement,
+                    source_key=source_key,
+                    persisted_record=legacy_persisted,
+                    range_id="all",
+                )
+            )
+            self.assertFalse(
+                pg_materializer._runtime_change_matches_persisted_source(
+                    unrelated_replacement,
+                    source_key=source_key,
+                    persisted_record=legacy_persisted,
+                    range_id="all",
+                )
+            )
 
     def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_row(self):
         initial = {
