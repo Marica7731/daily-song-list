@@ -6622,6 +6622,82 @@ class Tests(unittest.TestCase):
         ):
             pg_adapter._source_record_matches_change(record,invalid)
 
+    def test_source_preimage_legacy_parent_matches_canonical_same_video_replacement(self):
+        record={"video":{"videoId":"video-one"},"occurrences":({
+            "seconds":2667,"title":"逆光","artist":"Ado",
+        },)}
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-canonical","rangeId":"all",
+            "position":99,"seconds":2667,
+            "title":"逆光(ウタ from ONE PIECE FILM RED)","artist":"Ado",
+            "replacement":True,"replacementSameVideo":True,
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+            "replacementPayload":{
+                "videoId":"video-one","occurrenceId":"occ-canonical",
+                "rangeId":"all","seconds":2667,
+                "title":"逆光","artist":"Ado",
+            },
+        }
+        self.assertTrue(
+            pg_adapter._source_record_matches_change(record,change),
+        )
+        wrong_replacement=dict(
+            change,
+            replacementPayload=dict(
+                change["replacementPayload"], title="別の曲",
+            ),
+        )
+        self.assertFalse(
+            pg_adapter._source_record_matches_change(record,wrong_replacement),
+        )
+
+    def test_snapshot_source_legacy_parent_replacement_is_replaced_once(self):
+        parent={
+            "videoId":"video-one","title":"Video title","rangeId":"all",
+            "seconds":2667,"artist":"Ado",
+            "song":{"title":"song","artist":"Ado","seconds":2667},
+        }
+        change={
+            "entityType":"runtime_occurrences","videoId":"video-one",
+            "occurrenceId":"occ-canonical","rangeId":"all",
+            "position":99,"seconds":2667,"title":"song (raw)",
+            "artist":"Ado","replacement":True,
+            "replacementSameVideo":True,
+            "_parentRuntimeOccurrenceExists":True,
+            "_runtimeOccurrenceOwnerWasExplicit":False,
+            "replacementPayload":{
+                "videoId":"video-one","occurrenceId":"occ-canonical",
+                "position":99,"rangeId":"all","seconds":2667,
+                "title":"song","artist":"Ado",
+            },
+        }
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            "source-key",
+            range_id="all",
+            persisted_record={
+                "type":"song","key":"song::ado",
+                "title":"song","artist":"Ado",
+            },
+            targets=[("songs","song::ado")],
+            video_scope=["video-one"],
+            parent_occurrences=[parent],
+            direct_video_rows=(),
+            direct_occurrence_rows=(),
+            candidate_rows=(),
+            accepted_video_resets={},
+            runtime_changes=[change],
+        )
+        record=payload["record"]
+        self.assertEqual(
+            (record["count"],record["videoCount"],record["timestampCount"]),
+            (1,1,1),
+        )
+        occurrence=record["occurrences"][0]["song"]
+        self.assertEqual(occurrence["occurrenceId"],"occ-canonical")
+        self.assertEqual(occurrence["title"],"song")
+
     def test_snapshot_source_inputs_attach_exact_parent_coverage(self):
         change={
             "entityType":"runtime_occurrences","videoId":"video-one",
