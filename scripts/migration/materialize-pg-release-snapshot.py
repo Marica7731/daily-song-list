@@ -70,6 +70,10 @@ MAX_BOUNDARY_SUBSET_SIZE = 2
 # are reduced to duplicate-video groups and any ambiguous candidate set fails
 # closed instead of turning a source batch into an unbounded quadratic scan.
 MAX_BOUNDARY_ORDINARY_PAIR_PROBES = 96
+# Keep the mixed marker/candidate/runtime proof finite.  The proof enumerates
+# at most two rows from each influential input; large cross-products remain
+# fail-closed rather than turning one source boundary into an unbounded scan.
+MAX_BOUNDARY_MIXED_COMBINATION_PROBES = 4_096
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
 SOURCE_EXPORT_STREAM_FETCH_SIZE = 2_048
@@ -4353,6 +4357,104 @@ def _reconcile_authoritative_boundary_payload(
         )
         runtime_options = runtime_single_options + runtime_pair_options
 
+        # A source can require all three decisions at once: retain a marked
+        # 7D row, exclude an ordinary candidate row, and exclude a runtime
+        # curation row.  The two-input proofs above deliberately cannot see
+        # that shape because each keeps the other input at its original
+        # state.  Enumerate the complete bounded cross-product of influential
+        # subsets, accepting only one exact four-scalar result.  If the
+        # product is too large, preserve the boundary failure instead of
+        # guessing which combination is authoritative.
+        mixed_combined_matches: list[
+            tuple[
+                tuple[int, ...],
+                tuple[int, ...],
+                tuple[int, ...],
+                Mapping[str, Any],
+            ]
+        ] = []
+        mixed_search_bounded = build_payload_with_ordinary is None
+        if (
+            len(influential) <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
+            and ordinary_proof_complete
+            and runtime_proof_complete
+            and build_payload_with_ordinary is not None
+        ):
+            marker_option_count = sum(
+                math.comb(len(influential), marker_size)
+                for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1)
+            )
+            candidate_option_count = sum(
+                math.comb(
+                    len(ordinary_influential),
+                    candidate_size,
+                )
+                for candidate_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1)
+            )
+            mixed_probe_count = (
+                marker_option_count
+                * candidate_option_count
+                * len(runtime_options)
+            )
+            mixed_search_bounded = (
+                mixed_probe_count <= MAX_BOUNDARY_MIXED_COMBINATION_PROBES
+            )
+            if mixed_search_bounded:
+                for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
+                    for marker_subset in combinations(
+                        influential, marker_size,
+                    ):
+                        marker_indices = tuple(
+                            item[0] for item in marker_subset
+                        )
+                        marker_rows = tuple(
+                            item[1] for item in marker_subset
+                        )
+                        for candidate_size in range(
+                            1, MAX_BOUNDARY_SUBSET_SIZE + 1
+                        ):
+                            for candidate_subset in combinations(
+                                ordinary_influential, candidate_size,
+                            ):
+                                candidate_indices = tuple(
+                                    item[0] for item in candidate_subset
+                                )
+                                candidate_index_set = set(candidate_indices)
+                                trial_rows = tuple(
+                                    row
+                                    for row_index, row in enumerate(
+                                        reduced_rows
+                                    )
+                                    if row_index not in candidate_index_set
+                                ) + marker_rows
+                                for runtime_indices, _runtime_selected in (
+                                    runtime_options
+                                ):
+                                    runtime_index_set = set(runtime_indices)
+                                    remaining_runtime = tuple(
+                                        row
+                                        for row_index, row in enumerate(
+                                            ordinary_rows
+                                        )
+                                        if row_index not in runtime_index_set
+                                    )
+                                    trial = build_state(
+                                        trial_rows,
+                                        remaining_runtime,
+                                    )
+                                    trial_cardinality = (
+                                        _source_payload_cardinality(
+                                            trial.get("record")
+                                        )
+                                    )
+                                    if trial_cardinality == expected_cardinality:
+                                        mixed_combined_matches.append((
+                                            marker_indices,
+                                            candidate_indices,
+                                            runtime_indices,
+                                            trial,
+                                        ))
+
         combined_matches: list[
             tuple[tuple[int, ...], tuple[int, ...], Mapping[str, Any]]
         ] = []
@@ -4420,9 +4522,12 @@ def _reconcile_authoritative_boundary_payload(
             len(subset_matches)
             + len(combined_matches)
             + len(runtime_combined_matches)
+            + len(mixed_combined_matches)
         )
         if total_matches == 1 and (
-            ordinary_proof_complete and runtime_proof_complete
+            ordinary_proof_complete
+            and runtime_proof_complete
+            and mixed_search_bounded
         ):
             if subset_matches:
                 selected_indices, trial = subset_matches[0]
@@ -4472,6 +4577,30 @@ def _reconcile_authoritative_boundary_payload(
                     flush=True,
                 )
                 return trial
+            if mixed_combined_matches:
+                (
+                    marker_indices,
+                    candidate_indices,
+                    runtime_indices,
+                    trial,
+                ) = mixed_combined_matches[0]
+                print(
+                    "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                    f"source={source_key} expected={expected_cardinality} "
+                    f"initial={initial} final={expected_cardinality} "
+                    f"retained={len(marker_indices)} "
+                    f"markerIndices={marker_indices} "
+                    f"excludedOrdinary={len(candidate_indices)} "
+                    f"ordinaryIndices={candidate_indices} "
+                    f"excludedRuntimeOrdinary={len(runtime_indices)} "
+                    f"runtimeOrdinaryIndices={runtime_indices} "
+                    f"influential={len(influential)} "
+                    f"ordinaryInfluential={len(ordinary_influential)} "
+                    f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+                    f"runtimePairInfluential={runtime_pair_influential}",
+                    flush=True,
+                )
+                return trial
         print(
             "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
             f"source={source_key} expected={expected_cardinality} "
@@ -4480,6 +4609,8 @@ def _reconcile_authoritative_boundary_payload(
             f"ordinaryInfluential={len(ordinary_influential)} "
             f"runtimeOrdinaryInfluential={len(runtime_influential)} "
             f"runtimePairInfluential={runtime_pair_influential} "
+            f"mixedCombinedMatches={len(mixed_combined_matches)} "
+            f"mixedSearchBounded={mixed_search_bounded} "
             f"subsetMatches={total_matches}",
             flush=True,
         )
