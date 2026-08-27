@@ -92,6 +92,129 @@ def _text(value: Any) -> str:
     return str(value).strip() if value is not None else ""
 
 
+def _runtime_change_matches_persisted_source(
+    change: Mapping[str, Any],
+    *,
+    source_key: str,
+    persisted_record: Mapping[str, Any] | None,
+    range_id: str,
+) -> bool:
+    """Keep reconciliation runtime rows owned by the current source.
+
+    ``_runtime_tombstones`` is intentionally fetched once for a shared video
+    scope.  A source-level boundary proof must not treat every change in that
+    scope as an alternative for every source: unrelated Song replacements can
+    otherwise create scalar matches that are inert in the actual payload.  We
+    use only immutable/direct source-key evidence or the public owner identity
+    carried by the old/new occurrence; rows without enough evidence remain
+    included so the caller still fails closed rather than guessing.
+    """
+
+    source_key = _text(source_key)
+    persisted = dict(persisted_record or {})
+    source_type = _text(
+        persisted.get("type") or persisted.get("entityType")
+    )
+    if source_type in {"channel", "source"}:
+        source_type = "vtuber"
+    if source_type not in {"song", "artist", "vtuber"} or not source_key:
+        return True
+
+    # A direct source-owner annotation is stronger than any display fields.
+    for value in (
+        change.get("_acceptedSongResetOwnerSourceKey"),
+        change.get("parentVtuberSourceKey"),
+        change.get("sourceDetailKey"),
+        change.get("sourceKey"),
+    ):
+        if _text(value) == source_key:
+            return True
+
+    payloads: list[Mapping[str, Any]] = [change]
+    for field in (
+        "replacementPayload", "originalIdentity", "payload",
+        "replacement", "replacementVideoPayload",
+    ):
+        payload = _json_object(change.get(field))
+        if payload:
+            payloads.append(payload)
+            nested = payload.get("payload")
+            if isinstance(nested, Mapping):
+                payloads.append(dict(nested))
+
+    owner_keys: set[str] = set()
+    if source_type == "song":
+        for payload in payloads:
+            title = _text(payload.get("title") or payload.get("workTitle"))
+            artist = _text(
+                payload.get("artist") or payload.get("displayArtist")
+            )
+            if title and artist:
+                group_key = (
+                    f"{adapter._overlay_norm(title)}::"
+                    f"{adapter._overlay_norm(artist)}"
+                )
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "songs", range_id, group_key,
+                    )
+                )
+        for field in (
+            "parentSongGroupKey", "songGroupKey", "canonicalSongGroupKey",
+        ):
+            group_key = _text(change.get(field))
+            if group_key:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "songs", range_id, group_key,
+                    )
+                )
+    elif source_type == "artist":
+        for payload in payloads:
+            artist = _text(
+                payload.get("artist") or payload.get("displayArtist")
+            )
+            if artist:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "artists", range_id, adapter._overlay_norm(artist),
+                    )
+                )
+        group_key = _text(change.get("parentArtistGroupKey"))
+        if group_key:
+            owner_keys.add(
+                adapter._production_source_detail_key_for_group(
+                    "artists", range_id, group_key,
+                )
+            )
+    else:
+        for payload in payloads:
+            channel = _text(
+                payload.get("channelId") or payload.get("channel_id")
+                or payload.get("channelHandle")
+                or payload.get("channel_handle")
+                or payload.get("channelName")
+                or payload.get("channel_name")
+            ).lstrip("@/")
+            if channel:
+                owner_keys.add(
+                    adapter._production_source_detail_key_for_group(
+                        "vtubers", range_id, channel,
+                    )
+                )
+        group_key = _text(change.get("parentVtuberChannelKey"))
+        if group_key:
+            owner_keys.add(
+                adapter._production_source_detail_key_for_group(
+                    "vtubers", range_id, group_key,
+                )
+            )
+
+    # Missing/opaque owner evidence is deliberately retained.  Only an
+    # explicit alternative owner proves that a row cannot affect this source.
+    return not owner_keys or source_key in owner_keys
+
+
 def _canonical_song_name_key(value: Any) -> str:
     """Use the exact Artist owner identity used by the ranking builder."""
 
@@ -6878,6 +7001,12 @@ def export_affected_parent_sources(
                         if _text(
                             change.get("video_id") or change.get("videoId")
                         ) in source_video_ids
+                        and _runtime_change_matches_persisted_source(
+                            change,
+                            source_key=source_key,
+                            persisted_record=details.get(source_key),
+                            range_id="all",
+                        )
                     )
                     payload = _reconcile_authoritative_boundary_payload(
                         source_key=source_key,

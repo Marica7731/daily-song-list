@@ -8253,6 +8253,74 @@ class Tests(unittest.TestCase):
             1,
         )
 
+    def test_runtime_change_source_filter_keeps_only_persisted_song_owner(self):
+        source_key = pg_materializer.adapter._production_source_detail_key_for_group(
+            "songs", "all", "逆光::ado",
+        )
+        persisted = {
+            "type": "song",
+            "key": "逆光::ado",
+            "title": "逆光",
+            "artist": "Ado",
+            "sourceDetailKey": source_key,
+            "rangeId": "all",
+        }
+        owned_replacement = {
+            "entityType": "runtime_occurrences",
+            "videoId": "video-owned",
+            "title": "旧标题",
+            "artist": "Ado",
+            "replacement": True,
+            "replacementPayload": {
+                "videoId": "video-owned",
+                "title": "逆光",
+                "artist": "Ado",
+            },
+        }
+        unrelated_replacement = {
+            "entityType": "runtime_occurrences",
+            "videoId": "video-unrelated",
+            "title": "フィナーレ",
+            "artist": "eill",
+            "replacement": True,
+            "replacementPayload": {
+                "videoId": "video-unrelated",
+                "title": "フィナーレ",
+                "artist": "eill",
+            },
+        }
+        opaque_change = {
+            "entityType": "runtime_occurrences",
+            "videoId": "video-opaque",
+            "occurrenceId": "occ-opaque",
+        }
+        self.assertTrue(
+            pg_materializer._runtime_change_matches_persisted_source(
+                owned_replacement,
+                source_key=source_key,
+                persisted_record=persisted,
+                range_id="all",
+            )
+        )
+        self.assertFalse(
+            pg_materializer._runtime_change_matches_persisted_source(
+                unrelated_replacement,
+                source_key=source_key,
+                persisted_record=persisted,
+                range_id="all",
+            )
+        )
+        # Incomplete identity is retained so the source gate remains
+        # fail-closed instead of silently dropping a potentially relevant row.
+        self.assertTrue(
+            pg_materializer._runtime_change_matches_persisted_source(
+                opaque_change,
+                source_key=source_key,
+                persisted_record=persisted,
+                range_id="all",
+            )
+        )
+
     def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_row(self):
         initial = {
             "found": True,
