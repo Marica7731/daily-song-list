@@ -7948,6 +7948,69 @@ class Tests(unittest.TestCase):
         )
         self.assertIn((ordinary, legitimate), calls)
 
+    def test_reconcile_authoritative_boundary_payload_proves_marker_and_ordinary_pair(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 413, "songCount": 1, "videoCount": 409,
+                "timestampCount": 413, "occurrences": [{}],
+            },
+        }
+        ordinary_duplicate = {
+            "video_id": "ordinary-duplicate", "occurrence_id": "ordinary-0",
+        }
+        redundant = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-duplicate",
+            "occurrence_id": "boundary-duplicate-0",
+        }
+        legitimate = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-legitimate",
+            "occurrence_id": "boundary-legitimate-0",
+        }
+        calls = []
+
+        def build(rows):
+            rows = tuple(rows)
+            calls.append(rows)
+            has_ordinary = ordinary_duplicate in rows
+            has_redundant = redundant in rows
+            has_legitimate = legitimate in rows
+            if has_redundant and has_legitimate:
+                count, videos = 413, 409
+            elif has_redundant:
+                count, videos = 412, 407
+            elif has_legitimate and has_ordinary:
+                count, videos = 412, 408
+            elif has_legitimate:
+                count, videos = 411, 408
+            elif has_ordinary:
+                count, videos = 411, 407
+            else:
+                count, videos = 410, 407
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1,
+                    "videoCount": videos, "timestampCount": count,
+                    "occurrences": [{}],
+                },
+            }
+
+        reconciled = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-mixed-marker-ordinary",
+            payload=initial,
+            candidate_rows=(ordinary_duplicate, redundant, legitimate),
+            expected_cardinality=(411, 1, 408, 411),
+            build_payload=build,
+        )
+        self.assertEqual(
+            pg_materializer._source_payload_cardinality(reconciled["record"]),
+            (411, 1, 408, 411),
+        )
+        self.assertIn((legitimate,), calls)
+
     def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_row(self):
         initial = {
             "found": True,
