@@ -8156,6 +8156,103 @@ class Tests(unittest.TestCase):
         )
         self.assertIn(((legitimate,), ()), calls)
 
+    def test_reconcile_authoritative_boundary_payload_proves_mixed_runtime_pair_within_global_budget(self):
+        initial = {
+            "found": True,
+            "record": {
+                "count": 413, "songCount": 1, "videoCount": 409,
+                "timestampCount": 413, "occurrences": [{}],
+            },
+        }
+        ordinary_candidate = {
+            "video_id": "candidate-ordinary", "occurrence_id": "candidate-0",
+        }
+        runtime_ordinary = {
+            "video_id": "runtime-ordinary", "occurrence_id": "runtime-0",
+        }
+        runtime_padding = tuple(
+            {
+                "video_id": f"runtime-padding-{index}",
+                "occurrence_id": f"runtime-padding-{index}-0",
+            }
+            for index in range(14)
+        )
+        redundant = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-duplicate",
+            "occurrence_id": "boundary-duplicate-0",
+        }
+        legitimate = {
+            "_authoritative_7d_overlay": True,
+            "video_id": "boundary-legitimate",
+            "occurrence_id": "boundary-legitimate-0",
+        }
+        calls = []
+
+        def build(rows, changes):
+            rows = tuple(rows)
+            changes = tuple(changes)
+            is_target = (
+                legitimate in rows
+                and redundant not in rows
+                and ordinary_candidate not in rows
+                and runtime_ordinary not in changes
+                and all(item in changes for item in runtime_padding)
+            )
+            if is_target:
+                count, videos = 411, 408
+            else:
+                # Padding rows keep the runtime pair search just above the
+                # legacy standalone cap.  Removing only the required runtime
+                # row is authoritative; removing any padding row remains a
+                # distinct, non-authoritative result so uniqueness is proved.
+                if redundant in rows or legitimate in rows:
+                    count, videos = 413, 407
+                elif ordinary_candidate not in rows:
+                    count, videos = 410, 407
+                elif runtime_ordinary not in changes:
+                    count, videos = 414, 407
+                else:
+                    count, videos = 412, 407
+            calls.append((rows, changes))
+            return {
+                "found": True,
+                "record": {
+                    "count": count, "songCount": 1,
+                    "videoCount": videos, "timestampCount": count,
+                    "occurrences": [{}],
+                },
+            }
+
+        runtime_rows = (runtime_ordinary, *runtime_padding)
+        reconciled = pg_materializer._reconcile_authoritative_boundary_payload(
+            source_key="source-mixed-runtime-pair-budget",
+            payload=initial,
+            candidate_rows=(ordinary_candidate, redundant, legitimate),
+            expected_cardinality=(411, 1, 408, 411),
+            build_payload=lambda rows: build(rows, runtime_rows),
+            ordinary_rows=runtime_rows,
+            build_payload_with_ordinary=build,
+        )
+        self.assertEqual(
+            pg_materializer._source_payload_cardinality(reconciled["record"]),
+            (411, 1, 408, 411),
+        )
+        self.assertEqual(
+            sum(
+                1
+                for rows, changes in calls
+                if (
+                    legitimate in rows
+                    and redundant not in rows
+                    and ordinary_candidate not in rows
+                    and runtime_ordinary not in changes
+                    and all(item in changes for item in runtime_padding)
+                )
+            ),
+            1,
+        )
+
     def test_reconcile_authoritative_boundary_payload_rejects_ambiguous_row(self):
         initial = {
             "found": True,

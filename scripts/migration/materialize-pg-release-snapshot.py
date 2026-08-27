@@ -4374,12 +4374,14 @@ def _reconcile_authoritative_boundary_payload(
             ]
         ] = []
         mixed_search_bounded = build_payload_with_ordinary is None
+        mixed_exhaustive = False
         if (
             len(influential) <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
             and ordinary_proof_complete
-            and runtime_proof_complete
             and build_payload_with_ordinary is not None
+            and runtime_search_bounded
         ):
+            mixed_exhaustive = True
             marker_option_count = sum(
                 math.comb(len(influential), marker_size)
                 for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1)
@@ -4389,17 +4391,40 @@ def _reconcile_authoritative_boundary_payload(
                     len(ordinary_influential),
                     candidate_size,
                 )
-                for candidate_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1)
+                for candidate_size in range(0, MAX_BOUNDARY_SUBSET_SIZE + 1)
             )
+            runtime_pair_count = (
+                len(ordinary_rows) * (len(ordinary_rows) - 1) // 2
+            )
+            # The standalone runtime proof intentionally keeps its historical
+            # 96-pair cap.  The complete mixed proof has a separate global
+            # budget, so a source with just-over-cap runtime rows can still be
+            # proved without an unbounded scan.  Include an empty option as
+            # well: marker-only, marker+candidate and marker+runtime matches
+            # must be counted when establishing uniqueness of the 3-way proof.
+            mixed_runtime_option_count = 1 + len(ordinary_rows) + runtime_pair_count
             mixed_probe_count = (
                 marker_option_count
                 * candidate_option_count
-                * len(runtime_options)
+                * mixed_runtime_option_count
             )
             mixed_search_bounded = (
                 mixed_probe_count <= MAX_BOUNDARY_MIXED_COMBINATION_PROBES
             )
             if mixed_search_bounded:
+                mixed_runtime_options = [
+                    ((), ()),
+                    *runtime_single_options,
+                    *[
+                        (
+                            tuple(runtime_subset),
+                            tuple(ordinary_rows[index] for index in runtime_subset),
+                        )
+                        for runtime_subset in combinations(
+                            range(len(ordinary_rows)), 2,
+                        )
+                    ],
+                ]
                 for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
                     for marker_subset in combinations(
                         influential, marker_size,
@@ -4411,7 +4436,7 @@ def _reconcile_authoritative_boundary_payload(
                             item[1] for item in marker_subset
                         )
                         for candidate_size in range(
-                            1, MAX_BOUNDARY_SUBSET_SIZE + 1
+                            0, MAX_BOUNDARY_SUBSET_SIZE + 1
                         ):
                             for candidate_subset in combinations(
                                 ordinary_influential, candidate_size,
@@ -4428,7 +4453,7 @@ def _reconcile_authoritative_boundary_payload(
                                     if row_index not in candidate_index_set
                                 ) + marker_rows
                                 for runtime_indices, _runtime_selected in (
-                                    runtime_options
+                                    mixed_runtime_options
                                 ):
                                     runtime_index_set = set(runtime_indices)
                                     remaining_runtime = tuple(
@@ -4454,6 +4479,52 @@ def _reconcile_authoritative_boundary_payload(
                                             runtime_indices,
                                             trial,
                                         ))
+
+        if mixed_exhaustive:
+            # This branch enumerates every bounded marker/candidate/runtime
+            # combination (including empty candidate/runtime selections).  It
+            # is the complete proof for callbacks with runtime curation rows;
+            # the older three separate searches are intentionally not mixed
+            # into its uniqueness count.  If the global probe budget cannot
+            # cover all combinations, preserve the source gate failure.
+            if mixed_search_bounded and len(mixed_combined_matches) == 1:
+                (
+                    marker_indices,
+                    candidate_indices,
+                    runtime_indices,
+                    trial,
+                ) = mixed_combined_matches[0]
+                print(
+                    "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                    f"source={source_key} expected={expected_cardinality} "
+                    f"initial={initial} final={expected_cardinality} "
+                    f"retained={len(marker_indices)} "
+                    f"markerIndices={marker_indices} "
+                    f"excludedOrdinary={len(candidate_indices)} "
+                    f"ordinaryIndices={candidate_indices} "
+                    f"excludedRuntimeOrdinary={len(runtime_indices)} "
+                    f"runtimeOrdinaryIndices={runtime_indices} "
+                    f"influential={len(influential)} "
+                    f"ordinaryInfluential={len(ordinary_influential)} "
+                    f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+                    f"runtimePairInfluential={runtime_pair_influential}",
+                    flush=True,
+                )
+                return trial
+            print(
+                "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
+                f"source={source_key} expected={expected_cardinality} "
+                f"initial={initial} fullBoundary={final} "
+                f"markers={len(boundary_rows)} influential={len(influential)} "
+                f"ordinaryInfluential={len(ordinary_influential)} "
+                f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+                f"runtimePairInfluential={runtime_pair_influential} "
+                f"mixedCombinedMatches={len(mixed_combined_matches)} "
+                f"mixedSearchBounded={mixed_search_bounded} "
+                "subsetMatches=0",
+                flush=True,
+            )
+            return payload
 
         combined_matches: list[
             tuple[tuple[int, ...], tuple[int, ...], Mapping[str, Any]]
