@@ -16790,11 +16790,56 @@ def _source_record_matches_change(
         # canonical title/artist then locates its unique persisted source row.
         source_parent_identity = source_identity[3:]
         change_parent_identity = change_identity[3:]
-        return bool(
+        if (
             all(source_parent_identity[:2])
             and all(change_parent_identity[:2])
             and source_parent_identity == change_parent_identity
+        ):
+            return True
+
+        # A legacy source row has no occurrence id and may retain the raw
+        # pre-curation title while a same-video replacement carries the
+        # canonical public tuple in ``replacementPayload``.  The exact
+        # parent-runtime proof above is still required; the replacement is
+        # accepted only when it preserves the immutable video/occurrence
+        # identity and is explicitly marked as a same-video, non-explicit-owner
+        # replacement.  This lets source replay subtract the legacy preimage
+        # before inserting the canonical replacement without widening ordinary
+        # display aliases into a source owner.
+        replacement = change.get("replacementPayload")
+        replacement_occurrence = (
+            _overlay_public_occurrence(replacement)
+            if isinstance(replacement, Mapping) else {}
         )
+        replacement_video_id = _text(
+            replacement_occurrence.get("videoId")
+            or replacement.get("video_id")
+            if isinstance(replacement, Mapping) else ""
+        )
+        replacement_occurrence_id = _text(
+            replacement_occurrence.get("occurrenceId")
+            or replacement.get("occurrence_id")
+            if isinstance(replacement, Mapping) else ""
+        )
+        replacement_identity = (
+            integer_text(replacement_occurrence.get("seconds")),
+            _runtime_entity_key(
+                replacement_occurrence.get("title")
+                or replacement_occurrence.get("workTitle")
+            ),
+            _runtime_entity_key(replacement_occurrence.get("artist")),
+        )
+        if (
+            change.get("replacement") is True
+            and change.get("replacementSameVideo") is True
+            and owner_was_explicit is False
+            and replacement_video_id == target_video_id
+            and replacement_occurrence_id
+            and all(replacement_identity[:2])
+            and replacement_identity == source_parent_identity
+        ):
+            return True
+        return False
     if parent_exists is False:
         return False
     # Artist may legitimately be empty for an explicitly unknown-artist song;
@@ -18617,6 +18662,81 @@ def _snapshot_materialized_source_payload(
                 return True
         return False
 
+    def has_canonical_same_video_replacement(value: Mapping[str, Any]) -> bool:
+        """Bind a legacy replacement's old side to this canonical Song source.
+
+        Runtime curation keeps the preimage in a raw display group (for
+        example ``逆光(ウタ from ONE PIECE FILM RED)``), while the replacement
+        payload is the canonical persisted owner (``逆光``).  The source
+        replay must still subtract the legacy parent row before inserting the
+        replacement.  Accept this routing only with the same immutable
+        video/occurrence id, exact parent-runtime proof, non-explicit owner
+        provenance, and a replacement Song group equal to the persisted
+        target.  Display text alone never authorizes the binding.
+        """
+
+        if source_type != "song" or not persisted:
+            return False
+        if (
+            value.get("replacement") is not True
+            or value.get("replacementSameVideo") is not True
+            or value.get("_parentRuntimeOccurrenceExists") is not True
+            or value.get("_runtimeOccurrenceOwnerWasExplicit") is not False
+        ):
+            return False
+        replacement = value.get("replacementPayload")
+        if not isinstance(replacement, Mapping):
+            return False
+        replacement_occurrence = _overlay_public_occurrence(replacement)
+        video_id = row_video_id(value)
+        replacement_video_id = _text(
+            replacement_occurrence.get("videoId")
+            or replacement.get("video_id")
+            or replacement.get("videoId")
+        )
+        occurrence_id = _text(
+            value.get("occurrenceId") or value.get("occurrence_id")
+        )
+        replacement_occurrence_id = _text(
+            replacement_occurrence.get("occurrenceId")
+            or replacement.get("occurrence_id")
+            or replacement.get("occurrenceId")
+        )
+        if (
+            not video_id
+            or replacement_video_id != video_id
+            or not occurrence_id
+            or replacement_occurrence_id != occurrence_id
+        ):
+            return False
+        # This branch subtracts a legacy persisted preimage.  A replacement
+        # for a new overlay-only video has no source preimage to remove and
+        # must remain in the later replacement insertion loop instead.
+        if not any(
+            _text(parent.get("videoId") or parent.get("video_id")) == video_id
+            and not _text(
+                parent.get("occurrenceId") or parent.get("occurrence_id")
+            )
+            for parent in parent_occurrences
+        ):
+            return False
+        title = _text(
+            replacement_occurrence.get("title")
+            or replacement_occurrence.get("workTitle")
+        )
+        artist = _text(replacement_occurrence.get("artist"))
+        if not title or not artist:
+            return False
+        replacement_group = (
+            f"{_source_song_owner_norm(title)}::"
+            f"{_source_song_owner_norm(artist)}"
+        )
+        target_song_groups = target_groups.get("songs", set())
+        if replacement_group not in target_song_groups:
+            return False
+        persisted_owner = persisted_song_key_owner_group()
+        return bool(persisted_owner and replacement_group == persisted_owner)
+
     def has_authoritative_7d_provenance(value: Mapping[str, Any]) -> bool:
         """Allow only reviewed 7D boundary rows across the all-range split.
 
@@ -18739,6 +18859,12 @@ def _snapshot_materialized_source_payload(
                 return overlay_song_source_key(value) == requested_key
             groups = target_groups.get("songs", set())
             if has_exact_song_reset_owner(value):
+                return True
+            if has_canonical_same_video_replacement(value):
+                # The old side may retain a raw title/group, but its reviewed
+                # same-video replacement is the canonical owner of this
+                # persisted Song source.  The exact immutable proof above
+                # keeps this branch narrower than a display alias fallback.
                 return True
             raw_group = song_candidate_raw_group(value)
             if (
