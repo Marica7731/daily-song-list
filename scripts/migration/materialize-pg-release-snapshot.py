@@ -65,6 +65,11 @@ MAX_BOUNDARY_SINGLE_RECONCILE_ROWS = 512
 # proof.  A hard bound keeps the proof finite and fail-closed.
 MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS = 24
 MAX_BOUNDARY_SUBSET_SIZE = 2
+# Keep mixed marker/runtime probes finite even when a small source has many
+# distinct runtime changes.  Sources with more than this many ordinary rows
+# are reduced to duplicate-video groups and any ambiguous candidate set fails
+# closed instead of turning a source batch into an unbounded quadratic scan.
+MAX_BOUNDARY_ORDINARY_PAIR_PROBES = 96
 SQLITE_CHECKPOINT_ROWS = 2_048
 SQLITE_CACHE_DROP_ROWS = 2_048
 SOURCE_EXPORT_STREAM_FETCH_SIZE = 2_048
@@ -4131,6 +4136,11 @@ def _reconcile_authoritative_boundary_payload(
     candidate_rows: Sequence[Mapping[str, Any]],
     expected_cardinality: tuple[int, int, int, int] | None,
     build_payload: Callable[[Sequence[Mapping[str, Any]]], Mapping[str, Any]],
+    ordinary_rows: Sequence[Mapping[str, Any]] = (),
+    build_payload_with_ordinary: Callable[
+        [Sequence[Mapping[str, Any]], Sequence[Mapping[str, Any]]],
+        Mapping[str, Any],
+    ] | None = None,
 ) -> Mapping[str, Any]:
     """Drop only redundant reviewed-7d rows when ranking proves they duplicate.
 
@@ -4141,6 +4151,27 @@ def _reconcile_authoritative_boundary_payload(
     authoritative marker, and accept the retry only on an exact four-scalar
     match. Any ambiguity or mismatch remains fail-closed at the writer gate.
     """
+
+    # ``candidate_rows`` contains indexed occurrence overlays, while runtime
+    # curation replacements/tombstones are carried separately by the source
+    # builder.  A boundary proof must be able to vary both inputs: a marker
+    # can become observable only after an ordinary runtime change is removed
+    # (for example a same-video replacement which otherwise keeps the same
+    # aggregate).  Keep the legacy one-argument callback for unit callers and
+    # use the two-input callback only when the caller explicitly supplies the
+    # second input.
+    ordinary_rows = tuple(ordinary_rows)
+
+    def build_state(
+        rows: Sequence[Mapping[str, Any]],
+        ordinary: Sequence[Mapping[str, Any]] | None = None,
+    ) -> Mapping[str, Any]:
+        selected_ordinary = (
+            ordinary_rows if ordinary is None else tuple(ordinary)
+        )
+        if build_payload_with_ordinary is not None:
+            return build_payload_with_ordinary(rows, selected_ordinary)
+        return build_payload(rows)
 
     initial = _source_payload_cardinality(payload.get("record"))
     if (
@@ -4161,7 +4192,7 @@ def _reconcile_authoritative_boundary_payload(
     )
     if len(reduced_rows) == len(candidate_rows):
         return payload
-    reconciled = build_payload(reduced_rows)
+    reconciled = build_state(reduced_rows)
     final = _source_payload_cardinality(reconciled.get("record"))
     if final == expected_cardinality:
         print(
@@ -4200,7 +4231,7 @@ def _reconcile_authoritative_boundary_payload(
             tuple[int, Mapping[str, Any], Mapping[str, Any]]
         ] = []
         for boundary_index, boundary_row in enumerate(boundary_rows):
-            trial = build_payload(reduced_rows + (boundary_row,))
+            trial = build_state(reduced_rows + (boundary_row,))
             trial_cardinality = _source_payload_cardinality(
                 trial.get("record")
             )
@@ -4212,7 +4243,7 @@ def _reconcile_authoritative_boundary_payload(
                 for subset in combinations(influential, subset_size):
                     selected_indices = tuple(item[0] for item in subset)
                     selected_rows = tuple(item[1] for item in subset)
-                    trial = build_payload(reduced_rows + selected_rows)
+                    trial = build_state(reduced_rows + selected_rows)
                     trial_cardinality = _source_payload_cardinality(
                         trial.get("record")
                     )
@@ -4239,7 +4270,7 @@ def _reconcile_authoritative_boundary_payload(
                     for row_index, row in enumerate(reduced_rows)
                     if row_index != reduced_index
                 )
-                trial = build_payload(trial_rows)
+                trial = build_state(trial_rows)
                 trial_cardinality = _source_payload_cardinality(
                     trial.get("record")
                 )
@@ -4252,6 +4283,75 @@ def _reconcile_authoritative_boundary_payload(
             and len(ordinary_influential)
             <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
         )
+
+        # Runtime curation rows are a second, independent input to the source
+        # builder (they are not part of ``reduced_rows``).  A replacement can
+        # therefore hide a marked row's effect until that runtime row is
+        # excluded.  Probe every bounded single and pair removal, rather than
+        # only rows which happen to change the aggregate in isolation: the
+        # marker/runtime interaction itself may be the only exact proof.
+        runtime_influential: list[
+            tuple[int, Mapping[str, Any], Mapping[str, Any]]
+        ] = []
+        runtime_single_options: list[tuple[tuple[int, ...], tuple[Any, ...]]] = []
+        runtime_pair_options: list[tuple[tuple[int, ...], tuple[Any, ...]]] = []
+        runtime_pair_influential = 0
+        runtime_search_bounded = (
+            build_payload_with_ordinary is None
+            or len(ordinary_rows) <= MAX_BOUNDARY_SINGLE_RECONCILE_ROWS
+        )
+        runtime_pair_search_bounded = True
+        if build_payload_with_ordinary is not None and runtime_search_bounded:
+            for ordinary_index, ordinary_row in enumerate(ordinary_rows):
+                remaining = tuple(
+                    row
+                    for row_index, row in enumerate(ordinary_rows)
+                    if row_index != ordinary_index
+                )
+                trial = build_state(reduced_rows, remaining)
+                trial_cardinality = _source_payload_cardinality(
+                    trial.get("record")
+                )
+                runtime_single_options.append(((ordinary_index,), (ordinary_row,)))
+                if trial_cardinality != final:
+                    runtime_influential.append((
+                        ordinary_index, ordinary_row, trial,
+                    ))
+            runtime_pair_count = len(ordinary_rows) * (len(ordinary_rows) - 1) // 2
+            if runtime_pair_count > MAX_BOUNDARY_ORDINARY_PAIR_PROBES:
+                runtime_pair_search_bounded = False
+            else:
+                for ordinary_subset in combinations(
+                    range(len(ordinary_rows)), 2,
+                ):
+                    ordinary_index_set = set(ordinary_subset)
+                    remaining = tuple(
+                        row
+                        for row_index, row in enumerate(ordinary_rows)
+                        if row_index not in ordinary_index_set
+                    )
+                    trial = build_state(reduced_rows, remaining)
+                    trial_cardinality = _source_payload_cardinality(
+                        trial.get("record")
+                    )
+                    runtime_pair_options.append((
+                        tuple(ordinary_subset),
+                        tuple(ordinary_rows[index] for index in ordinary_subset),
+                    ))
+                    if trial_cardinality != final:
+                        runtime_pair_influential += 1
+        elif build_payload_with_ordinary is not None:
+            runtime_pair_search_bounded = False
+        runtime_proof_complete = (
+            build_payload_with_ordinary is None
+            or (
+                runtime_search_bounded
+                and runtime_pair_search_bounded
+                and len(runtime_influential)
+                <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
+            )
+        )
+        runtime_options = runtime_single_options + runtime_pair_options
 
         combined_matches: list[
             tuple[tuple[int, ...], tuple[int, ...], Mapping[str, Any]]
@@ -4277,7 +4377,7 @@ def _reconcile_authoritative_boundary_payload(
                                 for row_index, row in enumerate(reduced_rows)
                                 if row_index not in ordinary_index_set
                             ) + marker_rows
-                            trial = build_payload(trial_rows)
+                            trial = build_state(trial_rows)
                             trial_cardinality = _source_payload_cardinality(
                                 trial.get("record")
                             )
@@ -4286,9 +4386,43 @@ def _reconcile_authoritative_boundary_payload(
                                     marker_indices, ordinary_indices, trial,
                                 ))
 
-        total_matches = len(subset_matches) + len(combined_matches)
+        runtime_combined_matches: list[
+            tuple[tuple[int, ...], tuple[int, ...], Mapping[str, Any]]
+        ] = []
+        if (
+            len(influential) <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
+            and runtime_proof_complete
+        ):
+            for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
+                for marker_subset in combinations(influential, marker_size):
+                    marker_indices = tuple(item[0] for item in marker_subset)
+                    marker_rows = tuple(item[1] for item in marker_subset)
+                    for ordinary_indices, _ordinary_selected in runtime_options:
+                        ordinary_index_set = set(ordinary_indices)
+                        remaining_ordinary = tuple(
+                            row
+                            for row_index, row in enumerate(ordinary_rows)
+                            if row_index not in ordinary_index_set
+                        )
+                        trial = build_state(
+                            reduced_rows + marker_rows,
+                            remaining_ordinary,
+                        )
+                        trial_cardinality = _source_payload_cardinality(
+                            trial.get("record")
+                        )
+                        if trial_cardinality == expected_cardinality:
+                            runtime_combined_matches.append((
+                                marker_indices, ordinary_indices, trial,
+                            ))
+
+        total_matches = (
+            len(subset_matches)
+            + len(combined_matches)
+            + len(runtime_combined_matches)
+        )
         if total_matches == 1 and (
-            not subset_matches or ordinary_proof_complete
+            ordinary_proof_complete and runtime_proof_complete
         ):
             if subset_matches:
                 selected_indices, trial = subset_matches[0]
@@ -4303,26 +4437,49 @@ def _reconcile_authoritative_boundary_payload(
                     flush=True,
                 )
                 return trial
-            marker_indices, ordinary_indices, trial = combined_matches[0]
-            print(
-                "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
-                f"source={source_key} expected={expected_cardinality} "
-                f"initial={initial} final={expected_cardinality} "
-                f"retained={len(marker_indices)} "
-                f"markerIndices={marker_indices} "
-                f"excludedOrdinary={len(ordinary_indices)} "
-                f"ordinaryIndices={ordinary_indices} "
-                f"influential={len(influential)} "
-                f"ordinaryInfluential={len(ordinary_influential)}",
-                flush=True,
-            )
-            return trial
+            if combined_matches:
+                marker_indices, ordinary_indices, trial = combined_matches[0]
+                print(
+                    "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                    f"source={source_key} expected={expected_cardinality} "
+                    f"initial={initial} final={expected_cardinality} "
+                    f"retained={len(marker_indices)} "
+                    f"markerIndices={marker_indices} "
+                    f"excludedOrdinary={len(ordinary_indices)} "
+                    f"ordinaryIndices={ordinary_indices} "
+                    f"influential={len(influential)} "
+                    f"ordinaryInfluential={len(ordinary_influential)} "
+                    f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+                    f"runtimePairInfluential={runtime_pair_influential}",
+                    flush=True,
+                )
+                return trial
+            if runtime_combined_matches:
+                marker_indices, ordinary_indices, trial = (
+                    runtime_combined_matches[0]
+                )
+                print(
+                    "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                    f"source={source_key} expected={expected_cardinality} "
+                    f"initial={initial} final={expected_cardinality} "
+                    f"retained={len(marker_indices)} "
+                    f"markerIndices={marker_indices} "
+                    f"excludedRuntimeOrdinary={len(ordinary_indices)} "
+                    f"runtimeOrdinaryIndices={ordinary_indices} "
+                    f"influential={len(influential)} "
+                    f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+                    f"runtimePairInfluential={runtime_pair_influential}",
+                    flush=True,
+                )
+                return trial
         print(
             "PG_SNAPSHOT_SOURCE_BOUNDARY_MISMATCH "
             f"source={source_key} expected={expected_cardinality} "
             f"initial={initial} fullBoundary={final} "
             f"markers={len(boundary_rows)} influential={len(influential)} "
             f"ordinaryInfluential={len(ordinary_influential)} "
+            f"runtimeOrdinaryInfluential={len(runtime_influential)} "
+            f"runtimePairInfluential={runtime_pair_influential} "
             f"subsetMatches={total_matches}",
             flush=True,
         )
@@ -4351,7 +4508,7 @@ def _reconcile_authoritative_boundary_payload(
             # identity should always be present, but refuse to infer an index
             # if a custom caller violates that invariant.
             continue
-        trial = build_payload(tuple(trial_rows))
+        trial = build_state(tuple(trial_rows))
         trial_cardinality = _source_payload_cardinality(
             trial.get("record")
         )
@@ -4434,7 +4591,7 @@ def _reconcile_authoritative_boundary_payload(
                     for row_index, row in enumerate(candidate_rows)
                     if row_index != candidate_index
                 ]
-                trial = build_payload(tuple(trial_rows))
+                trial = build_state(tuple(trial_rows))
                 trial_cardinality = _source_payload_cardinality(
                     trial.get("record")
                 )
@@ -6475,6 +6632,8 @@ def export_affected_parent_sources(
                     )
                     def build_payload(
                         rows: Sequence[Mapping[str, Any]],
+                        *,
+                        changes: Sequence[Mapping[str, Any]] = runtime_changes,
                     ) -> Mapping[str, Any]:
                         return adapter._snapshot_materialized_source_payload(
                             source_key,
@@ -6490,16 +6649,42 @@ def export_affected_parent_sources(
                             direct_occurrence_rows=direct_rows,
                             candidate_rows=rows,
                             accepted_video_resets=accepted_resets,
-                            runtime_changes=runtime_changes,
+                            runtime_changes=changes,
                         )
 
+                    def build_payload_with_ordinary(
+                        rows: Sequence[Mapping[str, Any]],
+                        changes: Sequence[Mapping[str, Any]],
+                    ) -> Mapping[str, Any]:
+                        return build_payload(rows, changes=changes)
+
                     payload = build_payload(candidate_rows)
+                    source_video_ids = {
+                        _text(video_id)
+                        for video_id in stream_scoped[source_key]["videos"]
+                        if _text(video_id)
+                    }
+                    reconcile_candidate_rows = tuple(
+                        row
+                        for row in candidate_rows
+                        if _text(row.get("video_id") or row.get("videoId"))
+                        in source_video_ids
+                    )
+                    reconcile_ordinary_rows = tuple(
+                        change
+                        for change in runtime_changes
+                        if _text(
+                            change.get("video_id") or change.get("videoId")
+                        ) in source_video_ids
+                    )
                     payload = _reconcile_authoritative_boundary_payload(
                         source_key=source_key,
                         payload=payload,
-                        candidate_rows=candidate_rows,
+                        candidate_rows=reconcile_candidate_rows,
                         expected_cardinality=source_cardinalities.get(source_key),
                         build_payload=build_payload,
+                        ordinary_rows=reconcile_ordinary_rows,
+                        build_payload_with_ordinary=build_payload_with_ordinary,
                     )
                     if payload.get("found") is not True:
                         raise RuntimeError(
