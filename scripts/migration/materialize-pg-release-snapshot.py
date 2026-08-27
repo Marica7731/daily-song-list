@@ -4218,15 +4218,102 @@ def _reconcile_authoritative_boundary_payload(
                     )
                     if trial_cardinality == expected_cardinality:
                         subset_matches.append((selected_indices, trial))
-        if len(subset_matches) == 1:
-            selected_indices, trial = subset_matches[0]
+        # A mixed boundary can require both decisions at once: retain one
+        # legitimate marked row while excluding one ordinary duplicate.  The
+        # marker-only proof above intentionally cannot discover that shape,
+        # because the ordinary duplicate keeps the aggregate one occurrence
+        # (and one timestamp) too high.  Probe ordinary rows against the fully
+        # reduced payload, keep only rows which change the four-scalar result,
+        # and enumerate bounded marker/ordinary combinations.  This remains
+        # fail-closed: every accepted result must be a unique exact match, and
+        # an unbounded or ambiguous candidate set preserves the original gate
+        # failure.
+        ordinary_influential: list[
+            tuple[int, Mapping[str, Any], Mapping[str, Any]]
+        ] = []
+        ordinary_search_bounded = len(reduced_rows) <= MAX_BOUNDARY_SINGLE_RECONCILE_ROWS
+        if ordinary_search_bounded:
+            for reduced_index, ordinary_row in enumerate(reduced_rows):
+                trial_rows = tuple(
+                    row
+                    for row_index, row in enumerate(reduced_rows)
+                    if row_index != reduced_index
+                )
+                trial = build_payload(trial_rows)
+                trial_cardinality = _source_payload_cardinality(
+                    trial.get("record")
+                )
+                if trial_cardinality != final:
+                    ordinary_influential.append((
+                        reduced_index, ordinary_row, trial,
+                    ))
+        ordinary_proof_complete = (
+            ordinary_search_bounded
+            and len(ordinary_influential)
+            <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
+        )
+
+        combined_matches: list[
+            tuple[tuple[int, ...], tuple[int, ...], Mapping[str, Any]]
+        ] = []
+        if (
+            len(influential) <= MAX_BOUNDARY_SUBSET_INFLUENTIAL_ROWS
+            and ordinary_proof_complete
+        ):
+            for marker_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
+                for marker_subset in combinations(influential, marker_size):
+                    marker_indices = tuple(item[0] for item in marker_subset)
+                    marker_rows = tuple(item[1] for item in marker_subset)
+                    for ordinary_size in range(1, MAX_BOUNDARY_SUBSET_SIZE + 1):
+                        for ordinary_subset in combinations(
+                            ordinary_influential, ordinary_size,
+                        ):
+                            ordinary_indices = tuple(
+                                item[0] for item in ordinary_subset
+                            )
+                            ordinary_index_set = set(ordinary_indices)
+                            trial_rows = tuple(
+                                row
+                                for row_index, row in enumerate(reduced_rows)
+                                if row_index not in ordinary_index_set
+                            ) + marker_rows
+                            trial = build_payload(trial_rows)
+                            trial_cardinality = _source_payload_cardinality(
+                                trial.get("record")
+                            )
+                            if trial_cardinality == expected_cardinality:
+                                combined_matches.append((
+                                    marker_indices, ordinary_indices, trial,
+                                ))
+
+        total_matches = len(subset_matches) + len(combined_matches)
+        if total_matches == 1 and (
+            not subset_matches or ordinary_proof_complete
+        ):
+            if subset_matches:
+                selected_indices, trial = subset_matches[0]
+                print(
+                    "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
+                    f"source={source_key} expected={expected_cardinality} "
+                    f"initial={initial} final={expected_cardinality} "
+                    f"retained={len(selected_indices)} "
+                    f"markerIndices={selected_indices} "
+                    f"influential={len(influential)} "
+                    f"ordinaryInfluential={len(ordinary_influential)}",
+                    flush=True,
+                )
+                return trial
+            marker_indices, ordinary_indices, trial = combined_matches[0]
             print(
                 "PG_SNAPSHOT_SOURCE_BOUNDARY_RECONCILED "
                 f"source={source_key} expected={expected_cardinality} "
                 f"initial={initial} final={expected_cardinality} "
-                f"retained={len(selected_indices)} "
-                f"markerIndices={selected_indices} "
-                f"influential={len(influential)}",
+                f"retained={len(marker_indices)} "
+                f"markerIndices={marker_indices} "
+                f"excludedOrdinary={len(ordinary_indices)} "
+                f"ordinaryIndices={ordinary_indices} "
+                f"influential={len(influential)} "
+                f"ordinaryInfluential={len(ordinary_influential)}",
                 flush=True,
             )
             return trial
@@ -4235,7 +4322,8 @@ def _reconcile_authoritative_boundary_payload(
             f"source={source_key} expected={expected_cardinality} "
             f"initial={initial} fullBoundary={final} "
             f"markers={len(boundary_rows)} influential={len(influential)} "
-            f"subsetMatches={len(subset_matches)}",
+            f"ordinaryInfluential={len(ordinary_influential)} "
+            f"subsetMatches={total_matches}",
             flush=True,
         )
         return payload
