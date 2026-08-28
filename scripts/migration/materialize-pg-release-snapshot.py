@@ -1350,23 +1350,27 @@ def build_snapshot_source_scope(
         # The writer's all-range ranking rows are the active overlay truth;
         # the parent occurrence table is the immutable source truth.  Compare
         # their scalar counts only for the small set of source keys touched by
-        # boundary rows.  The ranking table is absent in isolated unit
-        # fixtures, so those fixtures retain the historical conservative
-        # behavior and exercise the boundary plumbing itself.
+        # boundary rows.  Occurrence count alone is insufficient: a boundary
+        # video can replace another occurrence without changing the count
+        # (the 7444... regression was 125 rows in both projections but 121
+        # ranked videos versus 120 source videos).  The ranking table is
+        # absent in isolated unit fixtures, so those fixtures retain the
+        # historical conservative behavior and exercise the boundary plumbing
+        # itself.
         boundary_source_keys_needing_rows = set(boundary_source_keys)
         ranking_table = sqlite_connection.execute(
             "SELECT 1 FROM sqlite_master "
             "WHERE type='table' AND name='ranking_rows'"
         ).fetchone()
         if ranking_table:
-            expected_counts: dict[str, int] = {}
+            expected_counts: dict[str, tuple[int, int]] = {}
             ordered_boundary_keys = sorted(boundary_source_keys)
             for offset in range(0, len(ordered_boundary_keys), 400):
                 batch = ordered_boundary_keys[offset : offset + 400]
                 placeholders = ",".join("?" for _ in batch)
                 rows = sqlite_connection.execute(
                     f"""
-                    SELECT detail_key,count
+                    SELECT detail_key,count,video_count
                     FROM ranking_rows
                     WHERE range_id='all' AND metric='count' AND scope_key='all'
                       AND view IN ('songs','songIndex','artists','vtubers','videos')
@@ -1374,9 +1378,9 @@ def build_snapshot_source_scope(
                     """,
                     batch,
                 ).fetchall()
-                for detail_key, count in rows:
+                for detail_key, count, video_count in rows:
                     source_key = _text(detail_key)
-                    scalar = int(count or 0)
+                    scalar = (int(count or 0), int(video_count or 0))
                     previous = expected_counts.get(source_key)
                     if previous is not None and previous != scalar:
                         raise RuntimeError(
@@ -1385,13 +1389,14 @@ def build_snapshot_source_scope(
                         )
                     expected_counts[source_key] = scalar
 
-            parent_counts: dict[str, int] = {}
+            parent_counts: dict[str, tuple[int, int]] = {}
             for offset in range(0, len(ordered_boundary_keys), 400):
                 batch = ordered_boundary_keys[offset : offset + 400]
                 rows = adapter._rows(
                     connection,
                     """
-                    SELECT source_key,count(*) AS occurrence_count
+                    SELECT source_key,count(*) AS occurrence_count,
+                           count(DISTINCT video_id) AS video_count
                     FROM runtime_source_occurrences
                     WHERE revision_id=%s AND range_id='all'
                       AND source_key=ANY(%s)
@@ -1402,14 +1407,20 @@ def build_snapshot_source_scope(
                 for row in rows:
                     source_key = _text(row.get("source_key"))
                     if source_key in boundary_source_keys:
-                        parent_counts[source_key] = int(
-                            row.get("occurrence_count") or 0
+                        parent_counts[source_key] = (
+                            int(row.get("occurrence_count") or 0),
+                            int(row.get("video_count") or 0),
                         )
             boundary_source_keys_needing_rows = {
                 source_key
                 for source_key in boundary_source_keys
                 if source_key in expected_counts
-                and expected_counts[source_key] > parent_counts.get(source_key, 0)
+                and (
+                    expected_counts[source_key][0]
+                    > parent_counts.get(source_key, (0, 0))[0]
+                    or expected_counts[source_key][1]
+                    > parent_counts.get(source_key, (0, 0))[1]
+                )
             }
 
         for source_key in boundary_source_keys_needing_rows:
@@ -6995,9 +7006,12 @@ def export_affected_parent_sources(
                             include_compatible_full_reset_7d=(
                                 include_compatible_full_reset_7d
                             ),
-                            include_authoritative_7d_boundary_rows=(
-                                include_compatible_full_reset_7d
-                            ),
+                            # Boundary rows are the all-range Song overlay
+                            # projection as well.  The adapter ignores this
+                            # flag for compatible full-reset plans, while the
+                            # narrow Song plan needs it to hydrate a ranked
+                            # video whose occurrence count is unchanged.
+                            include_authoritative_7d_boundary_rows=True,
                             authoritative_7d_revision_ids=(
                                 overlay_revision_ids
                                 if not include_compatible_full_reset_7d

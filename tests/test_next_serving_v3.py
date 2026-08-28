@@ -917,12 +917,30 @@ class Tests(unittest.TestCase):
                     "artist": "Artist",
                 }
 
+        parent_counts = (0, 0)
+
         def parent_rows(_connection, _statement, params):
             self.assertEqual(params[0], "parent")
             self.assertEqual(params[1], [boundary_key])
-            return [{"source_key": boundary_key, "occurrence_count": 771}]
+            return [{
+                "source_key": boundary_key,
+                "occurrence_count": parent_counts[0],
+                "video_count": parent_counts[1],
+            }]
 
-        for expected_count, should_include in ((771, False), (772, True)):
+        cases = (
+            # Equal occurrence and video cardinalities: no boundary row.
+            (771, 120, 771, 120, False),
+            # An occurrence-count gap still requires the boundary row.
+            (772, 120, 771, 120, True),
+            # A distinct-video gap also requires it even when row counts tie.
+            (771, 121, 771, 120, True),
+        )
+        for (
+            expected_count, expected_video_count, parent_count,
+            parent_video_count, should_include,
+        ) in cases:
+            parent_counts = (parent_count, parent_video_count)
             with self.subTest(expected_count=expected_count), \
                  closing(sqlite3.connect(":memory:")) as database, \
                  patch.object(pg_materializer, "_stream_pg_rows",
@@ -937,13 +955,13 @@ class Tests(unittest.TestCase):
                 database.execute("""
                     CREATE TABLE ranking_rows(
                       range_id TEXT, view TEXT, metric TEXT, scope_key TEXT,
-                      detail_key TEXT, count INTEGER
+                      detail_key TEXT, count INTEGER, video_count INTEGER
                     )
                 """)
                 database.execute(
-                    "INSERT INTO ranking_rows VALUES(?,?,?,?,?,?)",
+                    "INSERT INTO ranking_rows VALUES(?,?,?,?,?,?,?)",
                     ("all", "songs", "count", "all", boundary_key,
-                     expected_count),
+                     expected_count, expected_video_count),
                 )
                 scope = pg_materializer.build_snapshot_source_scope(
                     object(), database,
