@@ -19024,6 +19024,17 @@ def _snapshot_materialized_source_payload(
             raw_group_matches = raw_or_change_group in groups
             authoritative_7d_provenance = has_authoritative_7d_provenance(value)
             explicit_runtime_preimage = has_explicit_runtime_preimage(value)
+            # A reviewed 7D boundary row carries the immutable Song key that
+            # the all-range ranking projection already accepted.  Keep that
+            # exact key authoritative when its display punctuation does not
+            # reproduce the persisted raw group; ordinary aliases still fail
+            # the key gate above and cannot widen this source.
+            if (
+                authoritative_7d_provenance
+                and candidate_song_key(value) in authoritative_7d_song_keys
+                and owner_group in groups
+            ):
+                return True
             if authoritative_7d_song_keys and not (
                 authoritative_7d_provenance
                 or explicit_runtime_preimage
