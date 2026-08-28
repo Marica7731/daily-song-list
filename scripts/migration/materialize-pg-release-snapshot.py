@@ -6995,6 +6995,9 @@ def export_affected_parent_sources(
                             include_compatible_full_reset_7d=(
                                 include_compatible_full_reset_7d
                             ),
+                            include_authoritative_7d_boundary_rows=(
+                                include_compatible_full_reset_7d
+                            ),
                             authoritative_7d_revision_ids=(
                                 overlay_revision_ids
                                 if not include_compatible_full_reset_7d
