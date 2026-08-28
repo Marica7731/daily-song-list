@@ -4921,6 +4921,9 @@ def _runtime_replacement_candidate_rows(
             "runtime_replacement": True,
             "replacement_same_artist": change.get("replacementSameArtist"),
             "replacement_same_video": change.get("replacementSameVideo"),
+            "replacement_video_already_in_parent_group": bool(
+                change.get("_replacementVideoAlreadyInParentGroup")
+            ),
         }
         canonical_vtuber_owner = _text(
             change.get("canonicalVtuberChannelKey")
@@ -5205,6 +5208,30 @@ def _enrich_runtime_original_group_counts(
             f"groups={len(cached_parent_counts)}",
             flush=True,
         )
+    # Runtime replacements can retain a physical parent occurrence under a
+    # raw display alias while their replacement payload targets the canonical
+    # Song card.  Keep a second bounded index by normalized Song group so the
+    # candidate video can be excluded from the canonical card's video delta.
+    # This derives from the same parent-count query/cache and does not scan
+    # the unbounded occurrence table a second time.
+    parent_group_counts: dict[tuple[str, str], int] = defaultdict(int)
+    for parent_key, count in cached_parent_counts.items():
+        if not isinstance(parent_key, tuple) or len(parent_key) != 3:
+            continue
+        parent_video_id, parent_title_key, parent_artist_key = (
+            _text(parent_key[0]),
+            _text(parent_key[1]),
+            _text(parent_key[2]),
+        )
+        if not parent_video_id or not parent_title_key or not parent_artist_key:
+            continue
+        parent_group_key = _source_song_group_key_norm(
+            f"{parent_title_key}::{parent_artist_key}"
+        )
+        if parent_group_key:
+            parent_group_counts[(parent_video_id, parent_group_key)] += int(
+                count or 0
+            )
     for change in changes:
         video_id = _text(change.get("videoId") or change.get("video_id"))
         key = (
@@ -5216,6 +5243,34 @@ def _enrich_runtime_original_group_counts(
             candidate_counts.get(key, 0)
             if video_id in selected_video_ids
             else cached_parent_counts.get(key, 0)
+        )
+        replacement = _json_object(change.get("replacementPayload"))
+        replacement_video_id = _text(
+            replacement.get("videoId") or replacement.get("video_id")
+        )
+        replacement_title = _text(
+            replacement.get("title") or replacement.get("workTitle")
+        )
+        replacement_artist = _text(replacement.get("artist"))
+        replacement_group = (
+            _source_song_group_key_norm(
+                f"{replacement_title}::{replacement_artist}"
+            )
+            if replacement_title and replacement_artist
+            else ""
+        )
+        parent_group = _source_song_group_key_norm(
+            change.get("parentSongGroupKey")
+            or change.get("parent_song_group_key")
+        )
+        change["_replacementVideoAlreadyInParentGroup"] = bool(
+            change.get("replacement") is True
+            and change.get("replacementSameVideo") is True
+            and replacement_video_id == video_id
+            and replacement_group
+            and parent_group
+            and replacement_group != parent_group
+            and parent_group_counts.get((video_id, replacement_group), 0) > 0
         )
 
 
@@ -6441,9 +6496,12 @@ def _overlay_candidate_groups(
         group = groups.setdefault(key, {
             "key": key, "title": title, "artist": artist, "name": name,
             "occurrences": [], "occurrenceCount": 0, "videoIds": set(), "songKeys": set(),
+            "videoIdsAlreadyInParent": set(),
             "search": "",
         })
         group["occurrenceCount"] += 1
+        if row.get("replacement_video_already_in_parent_group") is True:
+            group["videoIdsAlreadyInParent"].add(video_id)
         # Card previews are an established maximum of 20.  Counting an
         # accepted increment must not retain every scalar, let alone every
         # JSON payload, merely because one returned page contains this group.
@@ -6623,6 +6681,8 @@ def _apply_overlay_delta_groups(
 
     exact_owned_rows = exact_owned_rows or {}
     for key, item in delta.items():
+        video_ids = set(item.get("videoIds") or ())
+        video_ids.difference_update(item.get("videoIdsAlreadyInParent") or ())
         if key in exact_owned_rows:
             continue
         target_key = _canonical_overlay_delta_group_key(
@@ -6632,7 +6692,7 @@ def _apply_overlay_delta_groups(
         row = groups.get(target_key)
         if row is None:
             count = int(item.get("occurrenceCount", len(item["occurrences"])))
-            video_count = len(item["videoIds"])
+            video_count = len(video_ids)
             persisted_owner = (
                 persisted_rows.get(target_key)
                 if _text(
@@ -6685,9 +6745,7 @@ def _apply_overlay_delta_groups(
             row["song_count"] = int(row.get("song_count") or 0) + len(
                 item["songKeys"]
             )
-        row["video_count"] = int(row.get("video_count") or 0) + len(
-            item["videoIds"]
-        )
+        row["video_count"] = int(row.get("video_count") or 0) + len(video_ids)
         row["timestamp_count"] = int(row.get("timestamp_count") or 0) + int(
             item.get("occurrenceCount", len(item["occurrences"]))
         )
@@ -12712,6 +12770,14 @@ def _prepare_generic_overlay_rankings(
             options=options,
             parent_count_cache=snapshot_original_group_counts,
         )
+        # ``replacement_rows`` is first prepared before the bounded parent
+        # count lookup above.  Rebuild it from the now-enriched, scope-filtered
+        # runtime changes so canonical Song replacements carry the duplicate
+        # video marker into the generic delta grouping.
+        replacement_rows = _runtime_replacement_candidate_rows(
+            generic_runtime_changes,
+        )
+        generic_replacement_rows = list(replacement_rows)
     phase_started = _phase_trace(
         "enrich",
         phase_started,
@@ -16692,6 +16758,19 @@ def _source_row_song_group_identity(value: Mapping[str, Any]) -> str:
     return f"{title_key}::{artist_key}"
 
 
+def _source_song_group_key_norm(value: Any) -> str:
+    """Normalize a persisted/parent Song group for owner comparisons."""
+
+    title, separator, artist = _text(value).partition("::")
+    if not separator:
+        return ""
+    title_key = _source_song_owner_norm(title)
+    artist_key = _source_song_owner_norm(artist)
+    if not title_key or not artist_key:
+        return ""
+    return f"{title_key}::{artist_key}"
+
+
 def _source_record_identity(record: Mapping[str, Any]) -> tuple[str, str]:
     video = record.get("video") if isinstance(record.get("video"), Mapping) else {}
     occurrences = record.get("occurrences") or ()
@@ -16829,6 +16908,37 @@ def _source_record_matches_change(
             ),
             _runtime_entity_key(replacement_occurrence.get("artist")),
         )
+        # A runtime replacement can carry an immutable old-side song/artist
+        # group. When it does, the legacy source preimage must belong to that
+        # same group before its reduced identity is accepted. Without this
+        # guard a canonical source row such as ``逆光::ado`` is incorrectly
+        # consumed by a replacement whose old group is the unranked display
+        # alias ``逆光ウタfromonepiecefilmred::ado``; source then drops one
+        # real parent row while ranking retains it. Older callers that do not
+        # provide a parent group keep the complete parent-proof fallback below
+        # for backwards-compatible legacy fixtures.
+        parent_song_group = _text(value(
+            change, "parentSongGroupKey", "parent_song_group_key",
+        ))
+        if parent_song_group:
+            source_song_group = _source_song_group_key_norm(
+                _source_row_song_group_identity(occurrence),
+            )
+            if (
+                not source_song_group
+                or source_song_group
+                != _source_song_group_key_norm(parent_song_group)
+            ):
+                return False
+        parent_artist_group = _text(value(
+            change, "parentArtistGroupKey", "parent_artist_group_key",
+        ))
+        if parent_artist_group:
+            source_artist_group = _overlay_artist_group_norm(
+                value(occurrence, "artist"),
+            )
+            if not source_artist_group or source_artist_group != parent_artist_group:
+                return False
         if (
             change.get("replacement") is True
             and change.get("replacementSameVideo") is True
@@ -16981,6 +17091,7 @@ def _snapshot_source_overlay_inputs(
     video_scope: Sequence[str],
     *,
     include_compatible_full_reset_7d: bool = False,
+    include_authoritative_7d_boundary_rows: bool = True,
     authoritative_7d_revision_ids: Sequence[str] | None = None,
 ) -> tuple[
     tuple[Mapping[str, Any], ...],
@@ -17005,7 +17116,11 @@ def _snapshot_source_overlay_inputs(
         range_id=range_id,
         video_scope=scoped_videos,
     ))
-    if range_id == "all" and not include_compatible_full_reset_7d:
+    if (
+        range_id == "all"
+        and not include_compatible_full_reset_7d
+        and include_authoritative_7d_boundary_rows
+    ):
         # The reviewed 7D boundary is a partial range reset: its rows are
         # intentionally excluded from the ordinary all-range candidate query
         # above.  All-range ranking nevertheless includes those authoritative
@@ -18735,6 +18850,20 @@ def _snapshot_materialized_source_payload(
         if replacement_group not in target_song_groups:
             return False
         persisted_owner = persisted_song_key_owner_group()
+        parent_song_group = _text(
+            value.get("parentSongGroupKey")
+            or value.get("parent_song_group_key")
+        )
+        if parent_song_group and (
+            _source_song_group_key_norm(parent_song_group)
+            != _source_song_group_key_norm(persisted_owner)
+        ):
+            # The replacement payload can be canonical for this source while
+            # its old side belongs to a different raw/display group.  In that
+            # case this change is not a preimage for the persisted source;
+            # letting it match here would subtract a canonical parent tuple
+            # that ranking intentionally retains.
+            return False
         return bool(persisted_owner and replacement_group == persisted_owner)
 
     def has_authoritative_7d_provenance(value: Mapping[str, Any]) -> bool:
@@ -19194,6 +19323,57 @@ def _snapshot_materialized_source_payload(
                 return True
         return False
 
+    def replacement_matches_persisted_song(value: Mapping[str, Any]) -> bool:
+        """Check a replacement payload against this canonical Song owner."""
+
+        if source_type != "song" or not persisted:
+            return False
+        replacement = value.get("replacementPayload")
+        if not isinstance(replacement, Mapping):
+            return False
+        occurrence = _overlay_public_occurrence(replacement)
+        title = _text(occurrence.get("title") or occurrence.get("workTitle"))
+        artist = _text(occurrence.get("artist"))
+        if not title or not artist:
+            return False
+        replacement_group = (
+            f"{_source_song_owner_norm(title)}::"
+            f"{_source_song_owner_norm(artist)}"
+        )
+        owner_group = persisted_song_key_owner_group()
+        return bool(owner_group and replacement_group == owner_group)
+
+    def legacy_parent_group_matches_persisted_owner(
+        value: Mapping[str, Any],
+    ) -> bool:
+        """Keep legacy preimage fallback bound to the persisted Song owner.
+
+        Legacy source rows have no occurrence id, so the narrow same-video
+        replacement exception below may use the tuple matcher to locate an
+        old side.  An explicit parent Song group is stronger provenance than
+        the display title: when it names a different raw/display owner (for
+        example an alias being replaced by the canonical Song), that row is
+        not a preimage for this canonical source and must be left in place.
+        The replacement insertion loop will then add the canonical side.
+        Missing parent-group metadata retains the historical, already-tested
+        fallback for legacy rows.
+        """
+
+        if source_type != "song" or not persisted:
+            return False
+        parent_group = _text(
+            value.get("parentSongGroupKey")
+            or value.get("parent_song_group_key")
+        )
+        if not parent_group:
+            return True
+        persisted_owner = persisted_song_key_owner_group()
+        return bool(
+            persisted_owner
+            and _source_song_group_key_norm(parent_group)
+            == _source_song_group_key_norm(persisted_owner)
+        )
+
     for change in runtime_changes:
         entity_type = _text(
             change.get("entityType") or change.get("entity_type")
@@ -19235,7 +19415,21 @@ def _snapshot_materialized_source_payload(
             # side without inventing a subtraction.
             continue
         if not matches:
-            if source_type in {"song", "artist"} and not matches_target(change):
+            if (
+                source_type in {"song", "artist"}
+                and not matches_target(change)
+                and not (
+                    source_type == "song"
+                    and change.get("replacement") is True
+                    and change.get("replacementSameVideo") is True
+                    and change.get("_parentRuntimeOccurrenceExists") is True
+                    and change.get("_runtimeOccurrenceOwnerWasExplicit") is False
+                    and _runtime_occurrence_has_immutable_old_side(change)
+                    and has_legacy_source_occurrence(video_id)
+                    and replacement_matches_persisted_song(change)
+                    and legacy_parent_group_matches_persisted_owner(change)
+                )
+            ):
                 continue
             # Legacy source rows have no occurrence id, while the immutable
             # runtime replacement does.  An exact parent-coverage marker is
