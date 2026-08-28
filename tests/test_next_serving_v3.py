@@ -6066,6 +6066,71 @@ class Tests(unittest.TestCase):
             (2,2,2,2),
         )
 
+    def test_snapshot_song_source_keeps_reviewed_7d_boundary_key(self):
+        title="My Soul,Your Beats!";artist="Lia"
+        source_key="7444cd75bc76437f"
+        group_key="\x1f".join((
+            pg_adapter._overlay_song_group_norm(title),
+            pg_adapter._overlay_song_group_norm(artist),
+        ))
+
+        def candidate(video_id, occurrence_id, song_key, *, range_id="all",
+                      source_system="youtube_channel_discovery"):
+            return {
+                "video_id":video_id,"occurrence_id":occurrence_id,
+                "position":1,"range_id":range_id,"song_key":song_key,
+                "seconds":10,"title":title,"artist":artist,
+                "source_id":"fixture-source","source_system":source_system,
+                "occurrence_payload_json":{
+                    "videoId":video_id,"occurrenceId":occurrence_id,
+                    "position":1,"rangeId":range_id,"songKey":song_key,
+                    "seconds":10,"title":title,"artist":artist,
+                    "sourceSystem":source_system,
+                },
+                "video_title":video_id,"channel_name":"Fixture",
+                "channel_id":"UCfixture","channel_handle":"@fixture",
+            }
+
+        parent=(
+            {"videoId":"video-parent","occurrenceId":"occ-parent",
+             "rangeId":"all","position":0,"seconds":5,
+             "title":title,"artist":artist},
+        )
+        canonical=candidate("video-reset","occ-canonical",
+                            "song-canonical")
+        alias=candidate("video-reset","occ-alias","song-alias")
+        boundary=candidate(
+            "video-boundary","occ-boundary","song-canonical",
+            range_id="all",source_system="core-7d",
+        )
+        boundary["_authoritative_7d_overlay"]=True
+        boundary["_authoritative_7d_source_system"]="core-7d"
+        payload=pg_adapter._snapshot_materialized_source_payload(
+            source_key,range_id="all",
+            persisted_record={
+                "type":"song","key":"mysoulyourbeats::lia",
+                "title":title,"artist":artist,
+                "sourceDetailKey":source_key,"rangeId":"all",
+            },
+            targets=(("songs",group_key),),
+            video_scope=("video-parent","video-reset","video-boundary"),
+            parent_occurrences=parent,direct_video_rows=(),
+            direct_occurrence_rows=(),
+            candidate_rows=(canonical,alias,boundary),
+            accepted_video_resets={"video-reset":{"video_id":"video-reset"}},
+            runtime_changes=(),
+        )
+        record=payload["record"]
+        occurrences=record["occurrences"]
+        self.assertEqual(
+            (record["count"],record["occurrenceCount"],record["videoCount"]),
+            (3,3,3),
+        )
+        self.assertEqual(
+            {item["videoId"] for item in occurrences},
+            {"video-parent","video-reset","video-boundary"},
+        )
+
     def test_snapshot_vtuber_source_does_not_replay_7d_change_into_all(self):
         source_key="2b696ea285946929"
         channel_id="UCpKdAmIYIkpySO7tsTN0oJA"
