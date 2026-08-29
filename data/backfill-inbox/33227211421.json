@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "daily-song-list-backfill-inbox",
+  "runId": "33227211421",
+  "runAttempt": "1",
+  "createdAt": "2026-08-29T01:45:12.405Z",
+  "mode": "backfill",
+  "baseCapturedAt": "2026-08-22T17:52:03.305Z",
+  "baseDataVersion": "",
+  "status": "prepared",
+  "note": "Backfill runs write immutable inbox bundles only; fast updates merge accepted bundles before publishing runtime.",
+  "inputs": {
+    "monthBackfillTarget": "3000",
+    "mygitSnapshotDays": "7"
+  }
+}
