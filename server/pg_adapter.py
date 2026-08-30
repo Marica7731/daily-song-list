@@ -6661,7 +6661,7 @@ def _canonical_overlay_delta_group_key(
         ):
             owner_identity = _source_song_group_key_norm(exact_owner_key)
             alias_matches: set[str] = set()
-            if owner_identity:
+            if owner_identity or exact_owner_key:
                 for mapping in (groups, persisted_rows):
                     for mapping_key, row in mapping.items():
                         candidate_key = _text(mapping_key) or _text(
@@ -6680,7 +6680,24 @@ def _canonical_overlay_delta_group_key(
                                     f"{title}::{artist}"
                                 )
                             )
-                        if owner_identity in candidate_identities:
+                        source_detail_key = _text(
+                            row.get("source_detail_key")
+                        )
+                        if not source_detail_key:
+                            payload = _json_object(row.get("payload_json"))
+                            source_detail_key = _text(
+                                payload.get("sourceDetailKey")
+                                or payload.get("source_detail_key")
+                            )
+                        if source_detail_key:
+                            candidate_identities.add(source_detail_key)
+                        if (
+                            owner_identity
+                            and owner_identity in candidate_identities
+                        ) or (
+                            source_detail_key
+                            and source_detail_key == exact_owner_key
+                        ):
                             alias_matches.add(candidate_key)
             if len(alias_matches) == 1:
                 exact_owner_key = next(iter(alias_matches))
@@ -12808,11 +12825,20 @@ def _prepare_generic_overlay_rankings(
                 """
                 SELECT rank, detail_key, title, artist, name, row_count,
                        song_count, video_count, timestamp_count,
+                       coalesce(
+                         payload_json::jsonb->>'sourceDetailKey', ''
+                       ) AS source_detail_key,
                        NULL::jsonb AS payload_json,
                        '' AS search_text, '' AS channel_search_text
                 FROM runtime_ranking_rows
                 WHERE revision_id = %s AND range_id = %s AND view = %s
-                  AND metric = %s AND scope_key = %s AND detail_key = ANY(%s)
+                  AND metric = %s AND scope_key = %s
+                  AND (
+                    detail_key = ANY(%s)
+                    OR coalesce(
+                      payload_json::jsonb->>'sourceDetailKey', ''
+                    ) = ANY(%s)
+                  )
                 ORDER BY rank
                 LIMIT %s
                 """,
@@ -12823,17 +12849,25 @@ def _prepare_generic_overlay_rankings(
                     db_metric,
                     db_scope,
                     sorted(bounded_affected_keys),
+                    sorted(bounded_affected_keys),
                     len(bounded_affected_keys) + 1,
                 ],
             )
             affected_base_rows = [
                 row for row in affected_base_rows
-                if _text(row.get("detail_key")) in bounded_affected_keys
+                if (
+                    _text(row.get("detail_key")) in bounded_affected_keys
+                    or _text(row.get("source_detail_key"))
+                    in bounded_affected_keys
+                )
             ]
             affected_detail_keys = [
                 _text(row.get("detail_key")) for row in affected_base_rows
             ]
-            if len(affected_detail_keys) != len(set(affected_detail_keys)):
+            if (
+                any(not key for key in affected_detail_keys)
+                or len(affected_detail_keys) != len(set(affected_detail_keys))
+            ):
                 raise PostgresAdapterError(
                     "bounded generic ranking window returned duplicate groups"
                 )
@@ -12874,7 +12908,13 @@ def _prepare_generic_overlay_rankings(
                       AND NOT EXISTS (
                           SELECT 1
                           FROM affected_keys
-                          WHERE affected_keys.detail_key = parent_row.detail_key
+                          WHERE (
+                            affected_keys.detail_key = parent_row.detail_key
+                            OR affected_keys.detail_key = coalesce(
+                              parent_row.payload_json::jsonb
+                                ->>'sourceDetailKey', ''
+                            )
+                          )
                       )
                     ORDER BY parent_row.rank
                     LIMIT %s
