@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "architecture": "github-actions-static-shards-v1",
+  "generatedAt": "2026-08-30T19:29:52.371Z",
+  "continuityStart": "2026-08-30T19:29:52.371Z",
+  "historyGaps": [
+    {
+      "from": "2026-08-23",
+      "through": "2026-08-31",
+      "status": "MISSING"
+    }
+  ],
+  "sourceSnapshotId": "20260830T191527Z",
+  "sourceCapturedAt": "2026-08-30T19:15:27.516Z",
+  "sourceCoverage": {
+    "provider": "Marica7731/mygit today snapshot",
+    "status": "success",
+    "fetchedSnapshots": 1,
+    "selectedSnapshots": 1,
+    "candidateVideos": 585
+  },
+  "pendingVideoCount": 561,
+  "processedVideoCount": 24,
+  "videoCount": 7,
+  "songOccurrenceCount": 70,
+  "ranges": {
+    "7d": {
+      "songs": {
+        "totalCount": 70,
+        "pageCount": 2,
+        "pageSize": 50,
+        "path": "rankings/7d/songs/page-{page}.json"
+      },
+      "artists": {
+        "totalCount": 58,
+        "pageCount": 2,
+        "pageSize": 50,
+        "path": "rankings/7d/artists/page-{page}.json"
+      },
+      "vtubers": {
+        "totalCount": 7,
+        "pageCount": 1,
+        "pageSize": 50,
+        "path": "rankings/7d/vtubers/page-{page}.json"
+      }
+    },
+    "30d": {
+      "songs": {
+        "totalCount": 70,
+        "pageCount": 2,
+        "pageSize": 50,
+        "path": "rankings/30d/songs/page-{page}.json"
+      },
+      "artists": {
+        "totalCount": 58,
+        "pageCount": 2,
+        "pageSize": 50,
+        "path": "rankings/30d/artists/page-{page}.json"
+      },
+      "vtubers": {
+        "totalCount": 7,
+        "pageCount": 1,
+        "pageSize": 50,
+        "path": "rankings/30d/vtubers/page-{page}.json"
+      }
+    },
+    "all": {
+      "songs": {
+        "totalCount": 0,
+        "pageCount": 1,
+        "pageSize": 50,
+        "path": "rankings/all/songs/page-{page}.json"
+      },
+      "artists": {
+        "totalCount": 0,
+        "pageCount": 1,
+        "pageSize": 50,
+        "path": "rankings/all/artists/page-{page}.json"
+      },
+      "vtubers": {
+        "totalCount": 0,
+        "pageCount": 1,
+        "pageSize": 50,
+        "path": "rankings/all/vtubers/page-{page}.json"
+      }
+    }
+  }
+}
