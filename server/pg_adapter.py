@@ -5976,12 +5976,19 @@ def _bounded_affected_parent_occurrences(
         ordered_pairs = sorted(pairs)
         if not ordered_pairs:
             return
+        # Keep title/artist paired while presenting PostgreSQL with an
+        # uncorrelated row-valued IN subquery.  The former correlated EXISTS
+        # could be planned as a nested loop over every runtime occurrence and
+        # every affected pair (the all/songs reconciliation has many pairs),
+        # leaving the bounded query with no observable progress for an hour.
+        # A row-valued IN is a semi-join candidate and lets PostgreSQL build a
+        # hash of the bounded pair set instead of repeatedly rescanning the
+        # unnest function.  Do not split this into independent ANY predicates:
+        # title and artist are one canonical identity and must remain paired.
         predicate = """
-          EXISTS (
-            SELECT 1
+          (lower(coalesce(o.title, '')), lower(coalesce(o.artist, ''))) IN (
+            SELECT affected.title, affected.artist
             FROM unnest(%s::text[], %s::text[]) AS affected(title, artist)
-            WHERE affected.title = lower(coalesce(o.title, ''))
-              AND affected.artist = lower(coalesce(o.artist, ''))
           )
         """
         predicate_params: list[Any] = [
