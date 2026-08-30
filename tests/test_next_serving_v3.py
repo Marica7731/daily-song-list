@@ -7295,6 +7295,52 @@ class Tests(unittest.TestCase):
         )
         self.assertEqual(groups[source_key]["row_count"], 579)
 
+    def test_snapshot_song_ranking_routes_source_owner_to_opaque_parent_row(self):
+        """Legacy parent rows may key rankings by entity_key, not source key."""
+
+        title = "そばかす"
+        artist = "JUDY AND MARY"
+        source_key = pg_adapter._production_source_detail_key_for_group(
+            "songs", "all", f"{title}::{pg_adapter._overlay_norm(artist)}",
+        )
+        opaque_key = "opaque-song-record-key"
+        delta = {
+            source_key: {
+                "title": title,
+                "artist": None,
+                "name": title,
+                "occurrenceCount": 1,
+                "videoIds": {"cKCU91iVHBA"},
+                "songKeys": {"reviewed-unknown:cKCU91iVHBA"},
+                "occurrences": [],
+                "search": "そばかす judy and mary",
+            },
+        }
+        parent = {
+            "detail_key": opaque_key,
+            "source_detail_key": source_key,
+            "title": title,
+            "artist": artist,
+            "name": title,
+            "row_count": 578,
+            "song_count": 1,
+            "video_count": 573,
+            "timestamp_count": 578,
+            "payload_json": None,
+        }
+        groups = {opaque_key: dict(parent)}
+        pg_adapter._apply_overlay_delta_groups(
+            groups,
+            {opaque_key: dict(parent)},
+            delta,
+            "songs",
+            "all",
+            song_reset_owner_keys={source_key: source_key},
+        )
+        self.assertEqual(groups[opaque_key]["row_count"], 579)
+        self.assertEqual(groups[opaque_key]["video_count"], 574)
+        self.assertNotIn(source_key, groups)
+
     def test_snapshot_song_unknown_artist_owner_fails_closed_when_ambiguous(self):
         candidate = {
             "video_id": "same-video", "seconds": 42,
