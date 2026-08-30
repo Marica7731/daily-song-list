@@ -6873,7 +6873,11 @@ class Tests(unittest.TestCase):
     def test_snapshot_song_source_inputs_do_not_apply_7d_reset_to_all(self):
         reset_7d={
             "video_id":"video-7d",
-            "payload_json":{"rangeId":"7d"},
+            # Production full-video rows can declare the physical range only
+            # on their nested song payload, without a scalar video-level
+            # rangeId.  The source reset gate must still keep this 7D row out
+            # of an all-range Song source.
+            "payload_json":{"songs":[{"rangeId":"7d"}]},
         }
         reset_all={
             "video_id":"video-all",
@@ -6888,12 +6892,17 @@ class Tests(unittest.TestCase):
             "channel_name":"Fixture","occurrence_payload_json":{},
             "video_payload_json":{},"video_tombstone":False,
         }
+        candidate_7d=dict(candidate_all)
+        candidate_7d.update({
+            "video_id":"video-7d", "occurrence_id":"occ-7d",
+        })
         with patch.object(
             pg_adapter,"_accepted_video_resets",return_value={
                 "video-7d":reset_7d,"video-all":reset_all,
             },
         ), patch.object(
-            pg_adapter,"_overlay_candidate_rows",return_value=(candidate_all,),
+            pg_adapter,"_overlay_candidate_rows",
+            return_value=(candidate_all,candidate_7d),
         ), patch.object(
             pg_adapter,"_runtime_tombstones",return_value=(),
         ) as tombstones, patch.object(
@@ -6909,7 +6918,7 @@ class Tests(unittest.TestCase):
                 ("video-7d","video-all"),
                 include_compatible_full_reset_7d=False,
             )
-        self.assertEqual(candidates,(candidate_all,))
+        self.assertEqual(candidates,(candidate_all,candidate_7d))
         self.assertEqual(set(resets),{"video-all"})
         self.assertEqual(changes,())
         self.assertEqual(
