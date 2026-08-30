@@ -6694,6 +6694,19 @@ def _accepted_song_reset_candidate_owner_keys(
     canonical_authority: dict[
         tuple[str, str, str, str], set[str]
     ] = defaultdict(set)
+    # Reviewed full-video resets can carry a replacement occurrence whose
+    # artist is empty/unknown (for example a ``reviewed-unknown`` Song key).
+    # The reset's persisted source row still proves the owner, but the raw
+    # four-field tuple cannot match while its artist is missing.  Keep a
+    # separate title+seconds index for that narrow case.  Video and seconds
+    # are immutable occurrence identity here; if more than one persisted
+    # owner claims the same tuple, fail closed rather than guessing.
+    raw_title_seconds_authority: dict[
+        tuple[str, str, str], set[str]
+    ] = defaultdict(set)
+    canonical_title_seconds_authority: dict[
+        tuple[str, str, str], set[str]
+    ] = defaultdict(set)
 
     for change in reset_changes:
         if not (
@@ -6713,6 +6726,11 @@ def _accepted_song_reset_candidate_owner_keys(
                 change, canonical_title=True,
             )
         ].add(owner_key)
+        raw_title_seconds_authority[raw_identity[:3]].add(owner_key)
+        canonical_identity = _accepted_song_reset_candidate_identity(
+            change, canonical_title=True,
+        )
+        canonical_title_seconds_authority[canonical_identity[:3]].add(owner_key)
 
     owners_by_candidate: dict[
         tuple[str, str, str, str], set[str]
@@ -6732,6 +6750,37 @@ def _accepted_song_reset_candidate_owner_keys(
                 ),
                 set(),
             )
+        song_key = _text(row.get("song_key") or row.get("songKey"))
+        explicitly_reviewed_unknown = (
+            song_key.casefold().startswith("reviewed-unknown:")
+            or _scope_boolean_flag(
+                row, "isUnknownArtist", "is_unknown_artist",
+            ) is True
+        )
+        if (
+            not owners
+            and _unknown_artist_name(row.get("artist"))
+            and explicitly_reviewed_unknown
+        ):
+            # Do not widen ordinary overlays: only an explicitly reviewed
+            # unknown/reset candidate with no usable artist may use this
+            # fallback.  Ambiguity is an integrity failure, not a reason to
+            # pick one persisted Song owner.
+            title_seconds_identity = candidate_identity[:3]
+            owners = raw_title_seconds_authority.get(
+                title_seconds_identity,
+                set(),
+            )
+            if not owners:
+                canonical_candidate_identity = (
+                    _accepted_song_reset_candidate_identity(
+                        row, canonical_title=True,
+                    )
+                )
+                owners = canonical_title_seconds_authority.get(
+                    canonical_candidate_identity[:3],
+                    set(),
+                )
         if not owners:
             continue
         if len(owners) != 1:
