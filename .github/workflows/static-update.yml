@@ -11,6 +11,7 @@ on:
         default: "24"
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -98,3 +99,9 @@ jobs:
           NODE
         env:
           UPDATED: ${{ steps.commit.outputs.updated }}
+
+      - name: Deploy the new immutable static snapshot
+        if: steps.commit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
