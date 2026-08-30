@@ -7695,6 +7695,45 @@ class Tests(unittest.TestCase):
                 song_reset_owner_keys={"reset-owner-alias": owner_key},
             )
 
+    def test_song_parent_lookup_uses_paired_hashable_identity_predicate(self):
+        queries = []
+
+        def rows(_connection, sql, params):
+            queries.append((sql, params))
+            return []
+
+        changes = (
+            {
+                "entityType": "occurrences",
+                "videoId": "video-target",
+                "occurrenceId": "old-target",
+                "title": "Alpha",
+                "artist": "Singer A",
+                "replacementPayload": {
+                    "videoId": "video-target",
+                    "occurrenceId": "old-target",
+                    "title": "Beta",
+                    "artist": "Singer B",
+                },
+            },
+        )
+        connection = SimpleNamespace(autocommit=True)
+        with patch.object(pg_adapter, "_rows", rows):
+            list(pg_adapter._bounded_affected_parent_occurrences(
+                connection, "parent", changes, "songs", {"range": "all"},
+            ))
+
+        self.assertEqual(len(queries), 1)
+        sql, params = queries[0]
+        self.assertIn("FROM unnest(%s::text[], %s::text[])", sql)
+        self.assertIn(
+            "(lower(coalesce(o.title, '')), lower(coalesce(o.artist, ''))) IN",
+            sql,
+        )
+        self.assertNotIn("EXISTS (", sql)
+        self.assertEqual(params[2], ["alpha", "beta"])
+        self.assertEqual(params[3], ["singer a", "singer b"])
+
     def test_snapshot_song_source_splits_exact_owner_from_same_raw_group(self):
         source_key="source-mixed-reset-song"
         owner_key="夜明けと蛍::nbuna"
