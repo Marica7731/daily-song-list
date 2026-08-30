@@ -44,17 +44,7 @@ jobs:
             /.github/workflows/deploy-pages.yml
             /package.json
             /package-lock.json
-            /scripts/static/**
-            /scripts/update-songlist.js
-            /scripts/song-utils.js
-            /scripts/curation.js
-            /scripts/entry-repair.js
-            /scripts/song-aliases.js
-            /scripts/song-search-index.js
-            /scripts/video-catalog.js
-            /scripts/range-config.js
-            /scripts/build-runtime-data.js
-            /scripts/blocked-vtuber-utils.js
+            /scripts/**
             /assets/**
             /config/**
             /test/static-github-pipeline.test.mjs
