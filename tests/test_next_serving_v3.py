@@ -7139,6 +7139,134 @@ class Tests(unittest.TestCase):
             persisted["record"]["occurrences"][0]["videoId"],"reset-owned",
         )
 
+    def test_snapshot_song_source_routes_unknown_artist_reset_to_owner(self):
+        """A reviewed reset may omit artist while retaining exact owner proof."""
+
+        title = "そばかす"
+        artist = "JUDY AND MARY"
+        owner_key = f"{title}::{pg_adapter._overlay_norm(artist)}"
+        owner_source = pg_adapter._production_source_detail_key_for_group(
+            "songs", "all", owner_key,
+        )
+        video_id = "cKCU91iVHBA"
+
+        candidate = {
+            "revision_id": "overlay", "video_id": video_id,
+            "occurrence_id": "accepted-occurrence", "position": 3,
+            "range_id": "all", "song_key": (
+                "reviewed-unknown:cKCU91iVHBA:cKCU91iVHBA:3:9860"
+            ), "seconds": 9860, "title": title, "artist": None,
+            "source_system": "accepted", "video_title": video_id,
+            "channel_id": "UCfixture", "channel_name": "Fixture",
+            "occurrence_payload_json": {}, "video_payload_json": {},
+            "video_tombstone": False,
+        }
+        reset_change = {
+            "entityType": "occurrences", "videoId": video_id,
+            "occurrenceId": "parent-occurrence", "rangeId": "all",
+            "seconds": 9860, "title": title, "artist": artist,
+            "acceptedVideoReset": True,
+            "persistedSourceAuthority": True,
+            "parentSongGroupKey": owner_key,
+        }
+
+        with patch.object(
+            pg_adapter, "_accepted_video_resets", return_value={
+                video_id: {
+                    "video_id": video_id,
+                    "payload_json": {"rangeId": "all"},
+                },
+            },
+        ), patch.object(
+            pg_adapter, "_overlay_candidate_rows",
+            return_value=(candidate,),
+        ), patch.object(
+            pg_adapter, "_snapshot_accepted_video_reset_changes",
+            return_value=(reset_change,),
+        ), patch.object(
+            pg_adapter, "_runtime_tombstones", return_value=(),
+        ), patch.object(
+            pg_adapter, "_bounded_parent_vtuber_video_owners",
+            return_value={},
+        ), patch.object(
+            pg_adapter, "_enrich_runtime_parent_group_keys",
+        ):
+            candidates, resets, changes = (
+                pg_adapter._snapshot_source_overlay_inputs(
+                    object(), "parent", ("overlay",), "all", (video_id,),
+                    include_compatible_full_reset_7d=False,
+                )
+            )
+
+        self.assertEqual(
+            candidates[0]["_acceptedSongResetOwnerSourceKey"], owner_source,
+        )
+        owners = pg_adapter._accepted_song_reset_candidate_owner_keys(
+            (candidate,), (reset_change,),
+        )
+        delta = pg_adapter._overlay_candidate_groups(
+            (candidate,), "songs", owners,
+        )
+        self.assertEqual(delta[owner_key]["occurrenceCount"], 1)
+        payload = pg_adapter._snapshot_materialized_source_payload(
+            owner_source,
+            range_id="all",
+            persisted_record={
+                "type": "song", "key": owner_key, "title": title,
+                "artist": artist, "sourceDetailKey": owner_source,
+                "rangeId": "all",
+            },
+            targets=(("songs", owner_key),),
+            video_scope=(video_id,),
+            parent_occurrences=({
+                "videoId": video_id,
+                "occurrenceId": "parent-occurrence",
+                "position": 3, "rangeId": "all", "seconds": 9860,
+                "title": title, "artist": artist,
+                "songKey": "parent-song",
+            },),
+            direct_video_rows=(), direct_occurrence_rows=(),
+            candidate_rows=candidates,
+            accepted_video_resets=resets,
+            runtime_changes=changes,
+        )
+        self.assertTrue(payload["found"])
+        self.assertEqual(
+            (payload["record"]["occurrenceCount"],
+             payload["record"]["videoCount"]),
+            (1, 1),
+        )
+        self.assertEqual(
+            payload["record"]["occurrences"][0]["videoId"], video_id,
+        )
+        self.assertIsNone(
+            payload["record"]["occurrences"][0]["song"].get("artist"),
+        )
+
+    def test_snapshot_song_unknown_artist_owner_fails_closed_when_ambiguous(self):
+        candidate = {
+            "video_id": "same-video", "seconds": 42,
+            "title": "same title", "artist": None,
+            "song_key": "reviewed-unknown:same-video:42",
+        }
+        changes = tuple({
+            "acceptedVideoReset": True,
+            "persistedSourceAuthority": True,
+            "videoId": "same-video", "seconds": 42,
+            "title": "same title", "artist": owner_artist,
+            "parentSongGroupKey": owner_key,
+        } for owner_key, owner_artist in (
+            ("same title::artist one", "Artist One"),
+            ("same title::artist two", "Artist Two"),
+        ))
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "accepted-video persisted Song owner is ambiguous",
+        ):
+            pg_adapter._accepted_song_reset_candidate_owner_keys(
+                (candidate,), changes,
+            )
+
     def test_affected_synthetic_song_source_uses_song_range_contract(self):
         scoped={
             "raw-song":{
