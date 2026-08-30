@@ -64,9 +64,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-
-      - run: npm ci --ignore-scripts
 
       - name: Static pipeline unit tests
         run: |
