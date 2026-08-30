@@ -6643,6 +6643,45 @@ def _canonical_overlay_delta_group_key(
         (song_reset_owner_keys or {}).get(replacement_key)
     )
     if exact_owner_key:
+        # ``parentSongGroupKey`` comes from persisted source authority, while
+        # the bounded ranking row may retain a display/canonical spelling from
+        # an older runtime build.  Probe only the already-bounded groups and
+        # persisted rows for the same punctuation-insensitive Song identity;
+        # never widen the SQL window or pick one of multiple aliases.
+        if (
+            exact_owner_key not in groups
+            and exact_owner_key not in persisted_rows
+        ):
+            owner_identity = _source_song_group_key_norm(exact_owner_key)
+            alias_matches: set[str] = set()
+            if owner_identity:
+                for mapping in (groups, persisted_rows):
+                    for mapping_key, row in mapping.items():
+                        candidate_key = _text(mapping_key) or _text(
+                            row.get("detail_key")
+                        )
+                        if not candidate_key:
+                            continue
+                        candidate_identities = {
+                            _source_song_group_key_norm(candidate_key),
+                        }
+                        title = _text(row.get("title"))
+                        artist = _text(row.get("artist"))
+                        if title and artist:
+                            candidate_identities.add(
+                                _source_song_group_key_norm(
+                                    f"{title}::{artist}"
+                                )
+                            )
+                        if owner_identity in candidate_identities:
+                            alias_matches.add(candidate_key)
+            if len(alias_matches) == 1:
+                exact_owner_key = next(iter(alias_matches))
+            elif len(alias_matches) > 1:
+                raise PostgresAdapterError(
+                    "accepted-video Song reset owner is ambiguous in the "
+                    "bounded ranking window"
+                )
         if (
             exact_owner_key not in groups
             and exact_owner_key not in persisted_rows
@@ -12674,6 +12713,36 @@ def _prepare_generic_overlay_rankings(
                     _runtime_change_song_group_identity(row),
                 )
                 if title_key
+            )
+            # Persisted source authority identifies a Song by its group key,
+            # while runtime ranking rows are addressed by the 16-char source
+            # detail key derived from that group. Include both the exact and
+            # punctuation-insensitive group-derived source keys in this same
+            # bounded query so the resolver above has an eligible row to
+            # match; this remains finite and does not scan unrelated sources.
+            bounded_affected_keys.update(
+                source_key
+                for change in reset_changes
+                if (
+                    change.get("acceptedVideoReset") is True
+                    and change.get("persistedSourceAuthority") is True
+                )
+                for parent_key in (
+                    _text(
+                        change.get("parentSongGroupKey")
+                        or change.get("parent_song_group_key")
+                    ),
+                )
+                for group_key in (
+                    parent_key,
+                    _source_song_group_key_norm(parent_key),
+                )
+                for source_key in (
+                    _production_source_detail_key_for_group(
+                        "songs", options["range"], group_key,
+                    ),
+                )
+                if source_key
             )
         bounded_affected_keys.update(
             key
