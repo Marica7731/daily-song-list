@@ -11985,6 +11985,76 @@ def _accepted_reset_identity_evidence(
     return _canonical_accepted_reset_row(candidate)
 
 
+def _bounded_unaffected_parent_ranking_prefix(
+    connection,
+    parent_revision_id: str,
+    options: Mapping[str, Any],
+    db_metric: str,
+    db_scope: str,
+    metric_column: str,
+    min_count: int,
+    affected_keys: Iterable[str],
+    base_window_end: int,
+) -> list[dict[str, Any]]:
+    """Read the persisted ranking prefix after excluding affected identities.
+
+    ``detail_key`` and the exporter ``sourceDetailKey`` are alternative
+    identities for the same parent card.  Keep both anti-joins hashable: the
+    previous correlated ``NOT EXISTS`` with an ``OR`` could be planned as a
+    nested loop over every ranking row and affected key, making the all-range
+    Song reconciliation effectively unbounded in wall time.
+    """
+
+    bounded_keys = sorted({
+        _text(key) for key in affected_keys if _text(key)
+    })
+    return _rows(
+        connection,
+        f"""
+        /* bounded unaffected parent ranking prefix */
+        /* NOT EXISTS is intentionally replaced by hashable anti-joins. */
+        WITH affected_keys(detail_key) AS MATERIALIZED (
+            SELECT DISTINCT affected.detail_key
+            FROM unnest(%s::text[]) AS affected(detail_key)
+        )
+        SELECT parent_row.rank, parent_row.detail_key,
+               parent_row.title, parent_row.artist,
+               parent_row.name, parent_row.row_count,
+               parent_row.song_count, parent_row.video_count,
+               parent_row.timestamp_count,
+               NULL::jsonb AS payload_json,
+               '' AS search_text, '' AS channel_search_text
+        FROM runtime_ranking_rows AS parent_row
+        LEFT JOIN affected_keys AS detail_affected
+          ON detail_affected.detail_key = parent_row.detail_key
+        LEFT JOIN affected_keys AS source_affected
+          ON source_affected.detail_key = coalesce(
+            parent_row.payload_json::jsonb ->>'sourceDetailKey', ''
+          )
+        WHERE parent_row.revision_id = %s
+          AND parent_row.range_id = %s
+          AND parent_row.view = %s
+          AND parent_row.metric = %s
+          AND parent_row.scope_key = %s
+          AND parent_row.{metric_column} >= %s
+          AND detail_affected.detail_key IS NULL
+          AND source_affected.detail_key IS NULL
+        ORDER BY parent_row.rank
+        LIMIT %s
+        """,
+        [
+            bounded_keys,
+            parent_revision_id,
+            options["range"],
+            options["view"],
+            db_metric,
+            db_scope,
+            int(min_count),
+            int(base_window_end),
+        ],
+    )
+
+
 def _prepare_generic_overlay_rankings(
     connection,
     revision_id: str,
@@ -12940,52 +13010,16 @@ def _prepare_generic_overlay_rankings(
                 # groups back by exact identity below.  The persisted rank is
                 # the parent's complete metric/tie ordering, so a parent row
                 # after this prefix cannot outrank a returned unaffected row.
-                unaffected_base_rows = _rows(
+                unaffected_base_rows = _bounded_unaffected_parent_ranking_prefix(
                     connection,
-                    f"""
-                    /* bounded unaffected parent ranking prefix */
-                    WITH affected_keys(detail_key) AS MATERIALIZED (
-                        SELECT DISTINCT affected.detail_key
-                        FROM unnest(%s::text[]) AS affected(detail_key)
-                    )
-                    SELECT parent_row.rank, parent_row.detail_key,
-                           parent_row.title, parent_row.artist,
-                           parent_row.name, parent_row.row_count,
-                           parent_row.song_count, parent_row.video_count,
-                           parent_row.timestamp_count,
-                           NULL::jsonb AS payload_json,
-                           '' AS search_text, '' AS channel_search_text
-                    FROM runtime_ranking_rows AS parent_row
-                    WHERE parent_row.revision_id = %s
-                      AND parent_row.range_id = %s
-                      AND parent_row.view = %s
-                      AND parent_row.metric = %s
-                      AND parent_row.scope_key = %s
-                      AND parent_row.{metric_column} >= %s
-                      AND NOT EXISTS (
-                          SELECT 1
-                          FROM affected_keys
-                          WHERE (
-                            affected_keys.detail_key = parent_row.detail_key
-                            OR affected_keys.detail_key = coalesce(
-                              parent_row.payload_json::jsonb
-                                ->>'sourceDetailKey', ''
-                            )
-                          )
-                      )
-                    ORDER BY parent_row.rank
-                    LIMIT %s
-                    """,
-                    [
-                        sorted(bounded_affected_keys),
-                        parent[0],
-                        options["range"],
-                        options["view"],
-                        db_metric,
-                        db_scope,
-                        int(options["minCount"]),
-                        base_window_end,
-                    ],
+                    parent[0],
+                    options,
+                    db_metric,
+                    db_scope,
+                    metric_column,
+                    int(options["minCount"]),
+                    bounded_affected_keys,
+                    base_window_end,
                 )
                 unaffected_detail_keys = [
                     _text(row.get("detail_key"))

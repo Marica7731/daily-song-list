@@ -7734,6 +7734,41 @@ class Tests(unittest.TestCase):
         self.assertEqual(params[2], ["alpha", "beta"])
         self.assertEqual(params[3], ["singer a", "singer b"])
 
+    def test_unaffected_parent_prefix_uses_hashable_anti_joins(self):
+        queries = []
+
+        def rows(_connection, sql, params):
+            queries.append((sql, params))
+            return []
+
+        with patch.object(pg_adapter, "_rows", rows):
+            result = pg_adapter._bounded_unaffected_parent_ranking_prefix(
+                SimpleNamespace(autocommit=True),
+                "parent",
+                {"range": "all", "view": "songs"},
+                "count",
+                "all",
+                "row_count",
+                1,
+                {"source-b", "source-a"},
+                50000,
+            )
+
+        self.assertEqual(result, [])
+        self.assertEqual(len(queries), 1)
+        sql, params = queries[0]
+        self.assertIn("WITH affected_keys(detail_key) AS MATERIALIZED", sql)
+        self.assertIn("LEFT JOIN affected_keys AS detail_affected", sql)
+        self.assertIn("LEFT JOIN affected_keys AS source_affected", sql)
+        self.assertIn("detail_affected.detail_key IS NULL", sql)
+        self.assertIn("source_affected.detail_key IS NULL", sql)
+        self.assertNotIn("NOT EXISTS (", sql)
+        self.assertNotIn("OR affected_keys.detail_key", sql)
+        self.assertEqual(params, [
+            ["source-a", "source-b"],
+            "parent", "all", "songs", "count", "all", 1, 50000,
+        ])
+
     def test_snapshot_song_source_splits_exact_owner_from_same_raw_group(self):
         source_key="source-mixed-reset-song"
         owner_key="夜明けと蛍::nbuna"
