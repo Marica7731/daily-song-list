@@ -7493,6 +7493,105 @@ class Tests(unittest.TestCase):
             (4,4),
         )
 
+    def test_snapshot_song_ranking_resolves_owner_alias_in_bounded_window(self):
+        owner_key = "そばかす::JUDY AND MARY"
+        persisted_key = pg_adapter._production_source_detail_key_for_group(
+            "songs", "all", "そばかす::judymary",
+        )
+        group = {
+            "detail_key": persisted_key,
+            "title": "そばかす",
+            "artist": "JUDY AND MARY",
+            "name": "そばかす",
+            "row_count": 578,
+            "song_count": 1,
+            "video_count": 573,
+            "timestamp_count": 578,
+            "payload_json": {},
+            "search_text": "",
+            "channel_search_text": "",
+        }
+        groups = {persisted_key: dict(group)}
+        persisted = {persisted_key: dict(group)}
+        delta = {
+            owner_key: {
+                "title": "そばかす",
+                "artist": "JUDY AND MARY",
+                "name": "そばかす",
+                "occurrenceCount": 1,
+                "videoIds": {"cKCU91iVHBA"},
+                "songKeys": {owner_key},
+                "occurrences": [],
+                "search": "",
+            }
+        }
+
+        pg_adapter._apply_overlay_delta_groups(
+            groups,
+            persisted,
+            delta,
+            "songs",
+            "all",
+            song_reset_owner_keys={owner_key: owner_key},
+        )
+
+        self.assertNotIn(owner_key, groups)
+        self.assertEqual(
+            (
+                groups[persisted_key]["row_count"],
+                groups[persisted_key]["video_count"],
+                groups[persisted_key]["timestamp_count"],
+            ),
+            (579, 574, 579),
+        )
+
+    def test_snapshot_song_ranking_rejects_ambiguous_owner_alias_window(self):
+        owner_key = "same title::N/BUNA"
+        rows = {
+            pg_adapter._production_source_detail_key_for_group(
+                "songs", "all", "same title::n-buna",
+            ): {
+                "detail_key": pg_adapter._production_source_detail_key_for_group(
+                    "songs", "all", "same title::n-buna",
+                ),
+                "title": "same title",
+                "artist": "n-buna",
+            },
+            pg_adapter._production_source_detail_key_for_group(
+                "songs", "all", "same title::n buna",
+            ): {
+                "detail_key": pg_adapter._production_source_detail_key_for_group(
+                    "songs", "all", "same title::n buna",
+                ),
+                "title": "same title",
+                "artist": "n buna",
+            },
+        }
+        delta = {
+            "reset-owner-alias": {
+                "title": "same title",
+                "artist": "n-buna",
+                "name": "same title",
+                "occurrenceCount": 1,
+                "videoIds": {"same-video"},
+                "songKeys": {owner_key},
+                "occurrences": [],
+                "search": "",
+            }
+        }
+        with self.assertRaisesRegex(
+            pg_adapter.PostgresAdapterError,
+            "accepted-video Song reset owner is ambiguous in the bounded ranking window",
+        ):
+            pg_adapter._apply_overlay_delta_groups(
+                {key: dict(row) for key, row in rows.items()},
+                {key: dict(row) for key, row in rows.items()},
+                delta,
+                "songs",
+                "all",
+                song_reset_owner_keys={"reset-owner-alias": owner_key},
+            )
+
     def test_snapshot_song_source_splits_exact_owner_from_same_raw_group(self):
         source_key="source-mixed-reset-song"
         owner_key="夜明けと蛍::nbuna"
