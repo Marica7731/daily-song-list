@@ -5891,11 +5891,13 @@ changes = (
         },
     },
 )
-module._bounded_affected_parent_occurrences(
+list(module._bounded_affected_parent_occurrences(
     object(), "parent", changes, "songs", {"range": "all"},
-)
+))
 sql, params = queries.pop()
 assert "FROM unnest(%s::text[], %s::text[])" in sql
+assert "(lower(coalesce(o.title, '')), lower(coalesce(o.artist, ''))) IN" in sql
+assert "EXISTS (" not in sql
 assert "lower(coalesce(o.title, '')) = ANY" not in sql
 assert "o.payload_json" not in sql and "v.payload_json" not in sql
 assert params[2] == ["alpha", "beta"]
