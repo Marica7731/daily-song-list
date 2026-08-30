@@ -14,6 +14,7 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   fs.mkdirSync(path.join(dataRoot, "days"), { recursive: true });
   const now = new Date("2026-09-01T00:00:00Z");
   const state = initialState(now);
+  state.continuityStart = "2026-09-01T00:01:00Z";
   state.lastSourceSnapshotId = "fixture-1";
   state.lastSourceCapturedAt = now.toISOString();
   state.sourceCoverage = { status: "success", candidateVideos: 1 };

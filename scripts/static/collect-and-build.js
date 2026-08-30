@@ -215,7 +215,7 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
   ];
   const rangeManifest = {};
   for (const range of ranges) {
-    const selected = filterRange(videos, now, range.days, state.continuityStart);
+    const selected = filterRange(videos, now, range.days);
     rangeManifest[range.id] = {};
     for (const type of ["songs", "artists", "vtubers"]) {
       const records = rankRecords(type, selected);
@@ -371,8 +371,8 @@ function readDayVideos(dataRoot) {
     .flatMap((name) => readJson(path.join(daysRoot, name)).videos || []);
 }
 
-function filterRange(videos, now, days, continuityStart) {
-  const start = days ? now.getTime() - days * 86400000 : Date.parse(continuityStart);
+function filterRange(videos, now, days) {
+  const start = days ? now.getTime() - days * 86400000 : Number.NEGATIVE_INFINITY;
   return videos.filter((video) => Date.parse(video.publishedAt) >= start && Date.parse(video.publishedAt) <= now.getTime() + 6 * 3600000);
 }
 
