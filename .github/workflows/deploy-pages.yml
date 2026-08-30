@@ -58,7 +58,7 @@ jobs:
           test -s _site/data/static/v1/rankings/7d/songs/manifest.json
           test -s _site/data/static/v1/rankings/30d/songs/manifest.json
           test -s _site/data/static/v1/rankings/all/songs/manifest.json
-          find _site -type f -printf '%s %p\n' | sort -nr | head -20
+          find _site -type f -printf '%s %p\n' | sort -nr | awk 'NR <= 20'
           du -sh _site
 
       - name: Upload Pages artifact
