@@ -3634,6 +3634,89 @@ def _overlay_payload(row: Mapping[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def _overlay_video_range_id(row: Mapping[str, Any]) -> str:
+    """Return an accepted video row's unambiguous physical range.
+
+    Some production ``migration_video_rows`` payloads do not carry a scalar
+    ``rangeId`` at the video level; the physical range is only present on the
+    nested song/occurrence entries (for example ``songs[0].rangeId ==
+    \"7d\"``).  Range gates must still see that declaration, otherwise a 7D
+    full-video reset is mistaken for an all-range reset and removes an
+    immutable parent occurrence from Song sources.  Mixed or missing nested
+    declarations remain unknown so callers fail closed.
+    """
+
+    for key in (
+        "range_id", "rangeId", "partial_range_id", "partialRangeId",
+    ):
+        value = _text(row.get(key))
+        if value:
+            return value
+
+    payloads: list[Mapping[str, Any]] = []
+    for key in ("payload_json", "video_payload_json"):
+        payload = _json_object(row.get(key))
+        if isinstance(payload.get("payload"), Mapping):
+            payload = dict(payload["payload"])
+        if payload:
+            payloads.append(payload)
+
+    for payload in payloads:
+        explicit = _text(
+            payload.get("rangeId")
+            or payload.get("range_id")
+            or payload.get("range")
+        )
+        if explicit:
+            return explicit
+
+        nested_ranges: set[str] = set()
+
+        def collect(value: Any, depth: int = 0) -> None:
+            if depth > 4 or len(nested_ranges) > 1:
+                return
+            if isinstance(value, Mapping):
+                for key in ("rangeId", "range_id"):
+                    nested = _text(value.get(key))
+                    if nested:
+                        nested_ranges.add(nested)
+                for key in ("songs", "occurrences", "items"):
+                    children = value.get(key)
+                    if isinstance(children, (list, tuple)):
+                        for child in children:
+                            collect(child, depth + 1)
+                return
+            if isinstance(value, (list, tuple)):
+                for child in value:
+                    collect(child, depth + 1)
+
+        collect(payload)
+        if len(nested_ranges) == 1:
+            return next(iter(nested_ranges))
+    return ""
+
+
+def _accepted_video_reset_matches_range(
+    video_id: str,
+    row: Mapping[str, Any],
+    candidate_video_ids: set[str],
+    range_id: str,
+) -> bool:
+    """Keep a reset only when its declared physical range is compatible.
+
+    A candidate row for the same video is not enough evidence: a newer video
+    payload can declare a 7D reset while older all-range occurrences for that
+    video are still visible in the bounded candidate query.  An explicit
+    payload range therefore takes precedence; only rows with no declaration
+    use the historical candidate-video fallback.
+    """
+
+    declared_range = _overlay_video_range_id(row)
+    if declared_range:
+        return declared_range == range_id
+    return video_id in candidate_video_ids
+
+
 def _runtime_tombstones(
     connection,
     revision_ids: Sequence[str],
@@ -12074,13 +12157,9 @@ def _prepare_generic_overlay_rankings(
         accepted_video_resets = {
             video_id: row
             for video_id, row in accepted_video_resets.items()
-            if video_id in candidate_range_video_ids
-            or _text(
-                _overlay_payload(row).get("rangeId")
-                or _overlay_payload(row).get("range_id")
-                or row.get("range_id")
-                or row.get("rangeId")
-            ) == options["range"]
+            if _accepted_video_reset_matches_range(
+                video_id, row, candidate_range_video_ids, options["range"],
+            )
         }
     candidate_rows = list(candidate_range_rows)
     if compatible_reset_rows:
@@ -17212,13 +17291,9 @@ def _snapshot_source_overlay_inputs(
         accepted_video_resets = {
             video_id: row
             for video_id, row in accepted_video_resets.items()
-            if video_id in candidate_video_ids
-            or _text(
-                _overlay_payload(row).get("rangeId")
-                or _overlay_payload(row).get("range_id")
-                or row.get("range_id")
-                or row.get("rangeId")
-            ) == range_id
+            if _accepted_video_reset_matches_range(
+                video_id, row, candidate_video_ids, range_id,
+            )
         }
         if accepted_video_resets and candidate_rows:
             # Generic Song rankings route only the exact accepted-reset
@@ -17403,13 +17478,9 @@ def _generic_group_source_payload(
     accepted_video_resets = {
         video_id: row
         for video_id, row in accepted_video_resets.items()
-        if video_id in candidate_range_video_ids
-        or _text(
-            _overlay_payload(row).get("rangeId")
-            or _overlay_payload(row).get("range_id")
-            or row.get("range_id")
-            or row.get("rangeId")
-        ) == range_id
+        if _accepted_video_reset_matches_range(
+            video_id, row, candidate_range_video_ids, range_id,
+        )
     }
     changes = list(runtime_changes) if runtime_changes is not None else _runtime_tombstones(
         connection, overlay_revision_ids, accepted_video_resets.values() if accepted_video_resets else None,
