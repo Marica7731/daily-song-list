@@ -1,0 +1,36 @@
+{
+  "complete": true,
+  "snapshotId": "fixture-20260901",
+  "capturedAt": "2026-09-01T00:00:00.000Z",
+  "coverage": {
+    "provider": "test-fixture",
+    "status": "success",
+    "candidateVideos": 1
+  },
+  "items": [
+    {
+      "videoId": "abcdefghijk",
+      "title": "fixture singing stream",
+      "channelName": "Fixture VTuber",
+      "channelId": "UCfixture",
+      "keyword": "歌枠",
+      "keywords": ["歌枠"],
+      "publishedTimestamp": 1788220800000,
+      "thumbnailUrl": "https://example.invalid/fixture.jpg",
+      "fixtureDetail": {
+        "videoId": "abcdefghijk",
+        "title": "fixture singing stream",
+        "channelName": "Fixture VTuber",
+        "channelId": "UCfixture",
+        "keyword": "歌枠",
+        "keywords": ["歌枠"],
+        "publishedTimestamp": 1788220800000,
+        "thumbnailUrl": "https://example.invalid/fixture.jpg",
+        "songs": [
+          { "index": 1, "time": "00:10", "seconds": 10, "title": "Song A", "artist": "Artist A" },
+          { "index": 2, "time": "00:20", "seconds": 20, "title": "Song B", "artist": "Artist B" }
+        ]
+      }
+    }
+  ]
+}

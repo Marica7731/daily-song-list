@@ -1,252 +1,35 @@
 <!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YouTube 歌枠歌曲排行</title>
-    <meta
-      name="description"
-      content="YouTube 最近7天和累计全量时间戳歌单快照，支持直接跳转到歌曲时间点。"
-    />
-    <link rel="canonical" href="https://ytb-song-rank.culua.com/" />
-    <meta name="theme-color" content="#0f766e" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="YouTube 歌枠歌曲排行" />
-    <meta
-      property="og:description"
-      content="YouTube 最近7天和累计全量时间戳歌单快照，支持直接跳转到歌曲时间点。"
-    />
-    <meta property="og:url" content="https://ytb-song-rank.culua.com/" />
-    <link rel="icon" href="favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles-hb327ccca4aa0.css" />
-  </head>
-  <body>
-    <main class="layout">
-      <section class="controls" id="controls" aria-label="榜单查询">
-        <div class="controls-inner">
-          <div class="segmented range-mode" role="group" aria-label="范围">
-            <button class="tab active" type="button" data-range="7d" aria-pressed="true">最近7天</button>
-            <button
-              class="tab"
-              type="button"
-              data-range="all"
-              aria-pressed="false"
-              title="累计全量；YouTube 月度搜索和历史快照用于补充发现视频。"
-              aria-description="累计全量；YouTube 月度搜索和历史快照用于补充发现视频。"
-            >
-              本月
-            </button>
-          </div>
-
-          <div class="segmented view-mode" role="group" aria-label="视图">
-            <button class="tab active" type="button" data-view="songRank" aria-pressed="true">歌曲榜</button>
-            <button class="tab" type="button" data-view="artistRank" aria-pressed="false">歌手榜</button>
-            <button class="tab" type="button" data-view="vtuberRank" aria-pressed="false">VTuber频道</button>
-            <button class="tab" type="button" data-view="songAz" aria-pressed="false">歌曲索引</button>
-            <button class="tab" type="button" data-view="videos" aria-pressed="false">视频</button>
-          </div>
-
-          <form class="query-search-form" id="querySearchForm" role="search">
-            <div class="query-input-shell">
-              <button class="query-submit-button" type="submit" aria-label="搜索">
-                <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
-                </svg>
-              </button>
-              <label class="sr-only" for="queryInput">搜索歌曲、歌手、VTuber或视频</label>
-              <input id="queryInput" type="text" autocomplete="off" placeholder="歌手/频道 + 歌曲，空格分隔" />
-              <button class="icon-button clear-query-button" id="clearQueryButton" type="button" aria-label="清空搜索词">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="m6 6 12 12M18 6 6 18" />
-                </svg>
-              </button>
-            </div>
-            <div class="query-field-bar" role="group" aria-label="搜索字段">
-              <label class="query-field-toggle"><input type="checkbox" name="searchField" value="title" checked />歌名</label>
-              <label class="query-field-toggle"><input type="checkbox" name="searchField" value="artist" checked />歌手</label>
-              <label class="query-field-toggle"><input type="checkbox" name="searchField" value="channel" checked />频道</label>
-              <label class="query-field-toggle"><input type="checkbox" name="searchField" value="video" />视频</label>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <div class="status" id="status" hidden aria-hidden="true">载入中</div>
-      <section class="active-query-strip" id="activeQueryStrip" aria-label="当前搜索与筛选条件" hidden></section>
-      <section class="summary" id="summary" aria-live="polite"></section>
-      <section class="status-alerts" id="statusAlerts" aria-live="polite"></section>
-      <section class="content-shell rank-panel skeleton-panel" id="videoList" aria-busy="true">
-        <div class="rank-header skeleton-header" aria-hidden="true">
-          <span>排名</span>
-          <span>歌曲</span>
-          <span>次数</span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-        <div class="rank-row skeleton-row" aria-hidden="true">
-          <span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>
-        </div>
-      </section>
-    </main>
-
-    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="主视图">
-      <button class="bottom-nav-item active" type="button" data-view="songRank" aria-current="page">
-        <span class="bottom-nav-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 18V5l10-2v13M9 10l10-2M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm10-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" />
-          </svg>
-        </span>
-        <span>歌曲榜</span>
-      </button>
-      <button class="bottom-nav-item" type="button" data-view="artistRank">
-        <span class="bottom-nav-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0" />
-          </svg>
-        </span>
-        <span>歌手榜</span>
-      </button>
-      <button class="bottom-nav-item" type="button" data-view="songAz">
-        <span class="bottom-nav-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M5 5h14M5 12h14M5 19h10" />
-          </svg>
-        </span>
-        <span>歌曲索引</span>
-      </button>
-      <button class="bottom-nav-item" type="button" data-view="vtuberRank">
-        <span class="bottom-nav-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8.5 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2.5 21a5.5 5.5 0 0 1 11 0M12.5 21a5 5 0 0 1 9 0" />
-          </svg>
-        </span>
-        <span>频道</span>
-      </button>
-      <button class="bottom-nav-item" type="button" data-view="videos">
-        <span class="bottom-nav-icon-wrap" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M4 6h16v12H4zM10 9l5 3-5 3z" />
-          </svg>
-        </span>
-        <span>视频</span>
-      </button>
-    </nav>
-
-    <div class="overlay-root" id="queryDialog" hidden role="dialog" aria-modal="true" aria-labelledby="queryDialogTitle">
-      <div class="overlay-backdrop" data-close-overlay="query"></div>
-      <section class="query-panel" tabindex="-1">
-        <header class="query-panel-header">
-          <h2 id="queryDialogTitle">搜索与筛选</h2>
-          <button class="icon-button" id="cancelQueryButton" type="button" aria-label="关闭搜索与筛选">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m6 6 12 12M18 6 6 18" />
-            </svg>
-          </button>
-        </header>
-        <div class="query-panel-body">
-          <section class="query-filter-matrix query-form-grid" aria-label="搜索筛选条件">
-            <label class="query-toggle" title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。">
-              <input id="nicheOnlyToggle" type="checkbox" aria-describedby="nicheHelp" />
-              <span>只看小众</span>
-              <small id="nicheHelp">未匹配到已知曲库的歌曲</small>
-            </label>
-            <label class="query-toggle" title="开启后排除空歌手、未記載、待补歌手等收录。">
-              <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" />
-              <span>隐藏无歌手</span>
-              <small id="hideUnknownHelp">开启后排除空歌手、未記載、待补歌手等收录</small>
-            </label>
-
-            <div class="query-sort-field" id="metricFilterGroup">
-              <span class="query-field-caption">排序</span>
-              <span class="query-segmented" role="group" aria-label="排行口径">
-                <label><input type="radio" name="queryMetric" value="occurrences" checked />按次数</label>
-                <label hidden><input type="radio" name="queryMetric" value="songs" disabled />按歌曲数</label>
-                <label><input type="radio" name="queryMetric" value="videos" />按视频数</label>
-              </span>
-            </div>
-
-            <label class="query-field query-compact-field" id="trendFilterGroup" title="趋势筛选">
-              <span class="query-field-caption" aria-label="趋势筛选">趋势</span>
-              <select id="trendFilterSelect" aria-label="趋势筛选">
-                <option value="all">全部</option>
-                <option value="new">新上榜</option>
-                <option value="up">上升</option>
-                <option value="down">下降</option>
-              </select>
-              <small id="trendFilterHint"></small>
-            </label>
-            <label class="query-field query-compact-field" id="minCountFilterGroup" title="最低收录">
-              <span class="query-field-caption" aria-label="最低收录">最低</span>
-              <select id="minCountSelect" aria-label="最低收录">
-                <option value="1">不限</option>
-                <option value="2">2次以上</option>
-                <option value="5">5次以上</option>
-                <option value="10">10次以上</option>
-              </select>
-            </label>
-
-            <label class="query-field query-compact-field query-context-card page-size-filter" id="displayFilterGroup" title="每页数量">
-              <span class="query-field-caption" aria-label="每页数量">每页</span>
-              <select id="queryPageSizeSelect" aria-label="每页数量">
-                <option value="20">20</option>
-                <option value="30">30</option>
-              </select>
-            </label>
-            <section class="query-history-section query-context-card" aria-labelledby="queryHistoryHeading">
-              <div class="query-history-heading">
-                <span class="query-field-caption" id="queryHistoryHeading">历史快照</span>
-                <strong id="querySnapshotSummary">最新数据</strong>
-              </div>
-              <div class="query-history-fields">
-                <label class="query-field query-compact-field">
-                  <span class="query-field-caption">快照日期</span>
-                  <select id="querySnapshotDateSelect"></select>
-                </label>
-                <label class="query-field query-compact-field">
-                  <span class="query-field-caption">快照时间</span>
-                  <select id="querySnapshotSelect"></select>
-                </label>
-              </div>
-            </section>
-          </section>
-        </div>
-        <footer class="query-panel-footer">
-          <button class="secondary-button" id="resetQueryButton" type="button">重置条件</button>
-          <span class="query-preview sr-only" id="queryResultPreview" aria-live="polite">计算中</span>
-          <button class="primary-button" id="applyQueryButton" type="button">查看结果</button>
-        </footer>
-      </section>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="GitHub Actions 生成的 VTuber 歌回静态排行榜">
+  <title>Daily Song List</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/static.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">GitHub-only static data</p>
+      <h1>Daily Song List</h1>
+      <p id="status">正在读取静态数据…</p>
     </div>
-
-    <button class="back-to-top" id="backToTop" type="button" aria-label="返回顶部" title="返回顶部" hidden>
-      &uarr;
-    </button>
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-
-    <script src="assets/blocked-vtuber-meta-hb327ccca4aa0.js" defer></script>
-    <script src="assets/frontend-utils-hb327ccca4aa0.js" defer></script>
-    <script src="assets/ranking-utils-hb327ccca4aa0.js" defer></script>
-    <script src="assets/app-hb327ccca4aa0.js" defer></script>
-  </body>
+    <a class="repo" href="https://github.com/Marica7731/daily-song-list">数据与更新记录</a>
+  </header>
+  <aside id="gap" hidden></aside>
+  <main>
+    <section class="controls" aria-label="排行榜筛选">
+      <label>范围<select id="range"><option value="7d">最近 7 天</option><option value="30d">最近 30 天</option><option value="all">连续数据全部</option></select></label>
+      <label>类型<select id="type"><option value="songs">歌曲</option><option value="artists">歌手</option><option value="vtubers">VTuber</option></select></label>
+      <label>来源筛选<input id="keyword" placeholder="例如：歌枠"></label>
+      <label>全局搜索<input id="search" type="search" placeholder="歌曲、歌手、VTuber"></label>
+    </section>
+    <section class="summary" id="summary"></section>
+    <ol id="ranking" class="ranking" aria-live="polite"></ol>
+    <nav class="pager" aria-label="分页"><button id="prev">上一页</button><span id="page"></span><button id="next">下一页</button></nav>
+  </main>
+  <dialog id="detail"><button class="close" aria-label="关闭">×</button><div id="detail-body"></div></dialog>
+  <script src="assets/static-app.js" defer></script>
+</body>
 </html>

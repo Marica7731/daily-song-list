@@ -1,4 +1,18 @@
-# daily-song-list 主线：增量数据库与安全发布迁移
+# daily-song-list 主线：旧系统退役与 GitHub-native 静态站重建
+
+## 2026-08-31 二叉决策与 B 分支（当前 active goal）
+
+- 硬截止：`2026-08-31 15:00 +08:00`，不可延期，也不是观察节点。截止前仅以 GitHub 持久数据、实际成功的增量 Action 和可读取 7d/30d/all 的公网静态站同时成立为成功；接近完成、仍在运行或仅代码已 push 均不算。若门槛未全部通过，立即停止开发/诊断/测试/等待，删除 Windows、WSL、Mac、两个 VPS 上所有已确认属于本项目的 repo/worktree/运行环境/数据库/构建与历史垃圾，只保留 GitHub 远端仓库和已 push 历史，15:00 后永不返回 WDC 路线。
+- 目标已改变：停止以完成 WDC 为目标。只使用现有可靠来源判定 2026-08-23 至 2026-08-31 九个自然日是否逐日完整可恢复；不进行新的网络补采，不把部分数据或 metadata 当作完整来源。
+- 判定结果：`2026-08-23`、`2026-08-24`、`2026-08-25`、`2026-08-26`、`2026-08-27`、`2026-08-28`、`2026-08-29`、`2026-08-30`、`2026-08-31` 均为 `MISSING`。GitHub core workflow 在 2026-08-22 后无运行，`data/7d.json`、`data/all.json`、`data/latest.json` 的最后生产提交均为 2026-08-22；23 日后的 backfill inbox 仅为 487-byte metadata 且绑定 `baseCapturedAt=2026-08-22T17:52:03.305Z`；canonical PostgreSQL active revision 为 `accepted_32589432063_1`，最新 video `published_at=2026-08-22T16:45:34.831Z`；Mac 持久目录和 GitHub Actions artifact 均没有 23–31 日完整来源。
+- 决策：立即进入 B 分支；不再修复 WDC、owner/cardinality、旧 release、旧补录研究或旧架构性能。
+- 退役范围：关闭所有会再次产生 daily-song-list run/write 的 GitHub schedule/workflow、Mac runner job、VPS writer/relay/tunnel/storage guard、systemd timer/service/cron；确认不会重启后删除仅属于 daily-song-list 的旧 PostgreSQL 数据库对象、WDC release/build/cache/checkpoint 与服务架构。
+- 新架构：复用唯一固定 worktree `G:\codex-work\daily-song-list-wdc-7444-repair2`，分支 `codex/github-static-retirement`；实现 GitHub Actions 增量采集/标准化/去重、持久分片数据、7d/30d/all 静态 ranking/detail/source/search shards 与 GitHub Pages 原子发布。不依赖 VPS、PostgreSQL、WDC、Mac/Windows 常驻任务。
+- 连续性边界：不伪造 2026-08-23 至 2026-08-31；新数据集从第一个能够证明完整的采集点开始，并在 meta/UI 显式标记历史缺口。
+- 清理范围：Windows、WSL、Mac、racknerd VPS、WDC VPS；先用 remote/worktree/marker/owner/service/process 证明归属，记录空间 before/after，只删除明确属于 `Marica7731/daily-song-list` 或其生成物的对象，归属不明和其他项目一律不动。
+- 完成条件：旧调度/服务/数据库全部退役；新 Actions 数据链路实际成功，Pages 公网展示并可由下一轮从最后成功状态继续；五个环境的明确归属垃圾已清理并报告实际释放 bytes；代码已测试、commit、push、合并/部署，真实公网验收通过。
+
+# 历史目标：增量数据库与安全发布迁移（已由上方 B 分支取代）
 
 ## 2026-08-22 WDC 服务端受限构建与精确清理（当前 active goal）
 

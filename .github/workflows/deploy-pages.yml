@@ -9,7 +9,8 @@ on:
       - "index.html"
       - ".nojekyll"
       - "assets/**"
-      - "data/status.json"
+      - "favicon.ico"
+      - "data/static/**"
   workflow_dispatch:
 
 permissions:
@@ -37,8 +38,9 @@ jobs:
             .github/workflows/deploy-pages.yml
             index.html
             .nojekyll
+            favicon.ico
             assets
-            data/status.json
+            data/static
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -46,11 +48,16 @@ jobs:
       - name: Prepare static site
         run: |
           set -Eeuo pipefail
-          mkdir -p _site/data
+          mkdir -p _site/data/static
           cp -f index.html _site/index.html
           cp -f .nojekyll _site/.nojekyll
-          cp -f data/status.json _site/data/status.json
+          cp -f favicon.ico _site/favicon.ico
+          cp -a data/static/. _site/data/static/
           cp -a assets _site/assets
+          test -s _site/data/static/v1/meta.json
+          test -s _site/data/static/v1/rankings/7d/songs/manifest.json
+          test -s _site/data/static/v1/rankings/30d/songs/manifest.json
+          test -s _site/data/static/v1/rankings/all/songs/manifest.json
           find _site -type f -printf '%s %p\n' | sort -nr | head -20
           du -sh _site
 
