@@ -7243,6 +7243,58 @@ class Tests(unittest.TestCase):
             payload["record"]["occurrences"][0]["song"].get("artist"),
         )
 
+    def test_snapshot_song_ranking_uses_direct_source_detail_owner_key(self):
+        """Ranking owners use the persisted exporter key, not opaque entity_key."""
+
+        title = "そばかす"
+        artist = "JUDY AND MARY"
+        owner_group = f"{title}::{pg_adapter._overlay_norm(artist)}"
+        source_key = pg_adapter._production_source_detail_key_for_group(
+            "songs", "all", owner_group,
+        )
+        video_id = "cKCU91iVHBA"
+        candidate = {
+            "video_id": video_id, "seconds": 9860,
+            "title": title, "artist": None,
+            "song_key": "reviewed-unknown:cKCU91iVHBA:cKCU91iVHBA:3:9860",
+            "occurrence_payload_json": {},
+            "video_payload_json": {},
+        }
+        reset_change = {
+            "acceptedVideoReset": True,
+            "persistedSourceAuthority": True,
+            "videoId": video_id, "seconds": 9860,
+            "title": title, "artist": artist,
+            # This is the production source detail key; entity_key itself is
+            # an opaque Song record key and is intentionally different.
+            "parentSongGroupKey": "opaque-song-record-key",
+            "parentSongSourceDetailKey": source_key,
+        }
+        owners = pg_adapter._accepted_song_reset_candidate_owner_keys(
+            (candidate,), (reset_change,),
+            owner_key_field="parentSongSourceDetailKey",
+        )
+        identity = pg_adapter._accepted_song_reset_candidate_identity(candidate)
+        self.assertEqual(owners[identity], source_key)
+        delta = pg_adapter._overlay_candidate_groups(
+            (candidate,), "songs", owners,
+        )
+        self.assertIn(source_key, delta)
+        groups = {
+            source_key: {
+                "detail_key": source_key, "title": title,
+                "artist": artist, "name": title, "row_count": 578,
+                "song_count": 1, "video_count": 573,
+                "timestamp_count": 578, "payload_json": {},
+                "search_text": "", "channel_search_text": "",
+            },
+        }
+        pg_adapter._apply_overlay_delta_groups(
+            groups, {source_key: dict(groups[source_key])}, delta,
+            "songs", "all", song_reset_owner_keys={source_key: source_key},
+        )
+        self.assertEqual(groups[source_key]["row_count"], 579)
+
     def test_snapshot_song_unknown_artist_owner_fails_closed_when_ambiguous(self):
         candidate = {
             "video_id": "same-video", "seconds": 42,

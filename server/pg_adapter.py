@@ -57,7 +57,7 @@ _DEFERRED_ID_KEYS = frozenset({
     "entity_type", "acceptedVideoReset", "runtime_replacement", "title",
     "artist", "name", "channelUrl", "channel_url", "count", "songCount",
     "videoCount", "timestampCount", "seconds", "sourcePosition",
-    "parentSongGroupKey", "parentArtistGroupKey",
+    "parentSongGroupKey", "parentSongSourceDetailKey", "parentArtistGroupKey",
     "persistedSourceAuthority", "parentVtuberChannelKey",
     "parentVtuberSourceKey", "parentVtuberChannelHandle",
     "parentVtuberChannelName", "canonicalVtuberChannelKey",
@@ -3209,6 +3209,13 @@ def _accepted_video_reset_changes(
                     "isNiche": is_niche,
                     "isUnknownArtist": is_unknown_artist,
                     "parentSongGroupKey": parent_song_group_key,
+                    # Persisted Song ``entity_key`` is opaque, whereas
+                    # ranking rows are addressed by the exporter-generated
+                    # source-detail key. Keep both identities so the
+                    # bounded ranking resolver can use the direct key.
+                    "parentSongSourceDetailKey": source_key
+                    if _text(row.get("entity_type")) == "song"
+                    else "",
                     "parentArtistGroupKey": parent_artist_key,
                     "songKey": _text(song.get("songKey") or song.get("key")),
                     "seconds": (
@@ -6714,6 +6721,8 @@ def _canonical_overlay_delta_group_key(
 def _accepted_song_reset_candidate_owner_keys(
     candidate_rows: Iterable[Mapping[str, Any]],
     reset_changes: Iterable[Mapping[str, Any]],
+    *,
+    owner_key_field: str = "parentSongGroupKey",
 ) -> dict[tuple[str, str, str, str], str]:
     """Bind each exact accepted Song candidate to one persisted owner.
 
@@ -6726,7 +6735,10 @@ def _accepted_song_reset_candidate_owner_keys(
     title/artist group may mix reset-owned and overlay-only tuples, so binding
     the whole group would overcount the persisted owner.  Never infer an owner
     from a broad alias when exact authority is absent, and fail closed only
-    when the same exact candidate tuple proves more than one owner.
+    when the same exact candidate tuple proves more than one owner.  Production
+    Song ranking reconciliation passes ``parentSongSourceDetailKey`` so the
+    owner is the direct exporter key; source materialization keeps the default
+    ``parentSongGroupKey`` contract.
     """
 
     raw_authority: dict[tuple[str, str, str, str], set[str]] = defaultdict(set)
@@ -6753,7 +6765,11 @@ def _accepted_song_reset_candidate_owner_keys(
             and change.get("persistedSourceAuthority") is True
         ):
             continue
-        owner_key = _text(change.get("parentSongGroupKey"))
+        owner_key = _text(change.get(owner_key_field))
+        if not owner_key and owner_key_field != "parentSongGroupKey":
+            # Legacy changes/fixtures have no direct source-detail field.
+            # Preserve the established group-key behavior for those rows.
+            owner_key = _text(change.get("parentSongGroupKey"))
         raw_identity = _accepted_song_reset_candidate_identity(change)
         if not owner_key or not raw_identity[0] or not raw_identity[2]:
             raise PostgresAdapterError(
@@ -12744,6 +12760,24 @@ def _prepare_generic_overlay_rankings(
                 )
                 if source_key
             )
+            # Modern persisted source rows already expose the exact
+            # exporter-generated source-detail key. Include it directly; it
+            # must not be re-hashed as if it were a Song group identity.
+            bounded_affected_keys.update(
+                direct_source_key
+                for change in reset_changes
+                if (
+                    change.get("acceptedVideoReset") is True
+                    and change.get("persistedSourceAuthority") is True
+                )
+                for direct_source_key in (
+                    _text(
+                        change.get("parentSongSourceDetailKey")
+                        or change.get("parent_song_source_detail_key")
+                    ),
+                )
+                if direct_source_key
+            )
         bounded_affected_keys.update(
             key
             for key in _runtime_change_view_keys(
@@ -13102,6 +13136,7 @@ def _prepare_generic_overlay_rankings(
     song_reset_candidate_owners = (
         _accepted_song_reset_candidate_owner_keys(
             candidate_rows, generic_reset_changes,
+            owner_key_field="parentSongSourceDetailKey",
         )
         if options["view"] in {"songs", "songIndex", "vsingerSongs"}
         else {}
