@@ -6625,6 +6625,41 @@ def _overlay_candidate_groups(
     return groups
 
 
+def _bounded_source_detail_aliases(
+    groups: Mapping[str, Mapping[str, Any]],
+    persisted_rows: Mapping[str, Mapping[str, Any]],
+) -> dict[str, set[str]]:
+    """Index bounded source-detail owners to their ranking group keys.
+
+    Runtime ranking rows may be keyed by an opaque entity key even though
+    accepted Song reset authority names the exporter-generated
+    ``sourceDetailKey``.  Build this reverse index once from the bounded
+    parent window so owner routing is linear in the window size, rather than
+    rescanning every group for every reset candidate.  A source key mapping to
+    multiple ranking keys remains represented as a set; the canonical resolver
+    will fail closed on that ambiguity.
+    """
+
+    aliases: dict[str, set[str]] = defaultdict(set)
+    for mapping in (groups, persisted_rows):
+        for mapping_key, row in mapping.items():
+            candidate_key = _text(mapping_key) or _text(row.get("detail_key"))
+            if not candidate_key:
+                continue
+            source_detail_key = _text(
+                row.get("source_detail_key") or row.get("sourceDetailKey")
+            )
+            if not source_detail_key:
+                payload = _json_object(row.get("payload_json"))
+                source_detail_key = _text(
+                    payload.get("sourceDetailKey")
+                    or payload.get("source_detail_key")
+                )
+            if source_detail_key:
+                aliases[source_detail_key].add(candidate_key)
+    return dict(aliases)
+
+
 def _canonical_overlay_delta_group_key(
     groups: Mapping[str, Mapping[str, Any]],
     persisted_rows: Mapping[str, Mapping[str, Any]],
@@ -6632,6 +6667,7 @@ def _canonical_overlay_delta_group_key(
     item: Mapping[str, Any],
     view: str,
     song_reset_owner_keys: Mapping[str, str] | None = None,
+    source_detail_aliases: Mapping[str, set[str]] | None = None,
 ) -> str:
     """Route a replacement to one matching affected persisted scalar row.
 
@@ -6661,7 +6697,20 @@ def _canonical_overlay_delta_group_key(
         ):
             owner_identity = _source_song_group_key_norm(exact_owner_key)
             alias_matches: set[str] = set()
-            if owner_identity or exact_owner_key:
+            indexed_aliases = (
+                source_detail_aliases.get(exact_owner_key)
+                if source_detail_aliases is not None
+                else None
+            )
+            if indexed_aliases is not None:
+                # ``source_detail_aliases`` is built from the already bounded
+                # parent window.  A direct source-owner hit avoids the
+                # O(groups * reset-delta) scan that can otherwise repeat for
+                # every accepted candidate in a large all-range build.
+                alias_matches.update(indexed_aliases)
+            elif owner_identity or exact_owner_key:
+                # Keep the legacy title/artist alias fallback for callers
+                # that do not provide the bounded source-key index.
                 for mapping in (groups, persisted_rows):
                     for mapping_key, row in mapping.items():
                         candidate_key = _text(mapping_key) or _text(
@@ -6880,6 +6929,7 @@ def _apply_overlay_delta_groups(
     range_id: str,
     exact_owned_rows: Mapping[str, Mapping[str, Any]] | None = None,
     song_reset_owner_keys: Mapping[str, str] | None = None,
+    source_detail_aliases: Mapping[str, set[str]] | None = None,
 ) -> None:
     """Apply bounded candidate deltas without losing canonical parent identity."""
 
@@ -6891,7 +6941,7 @@ def _apply_overlay_delta_groups(
             continue
         target_key = _canonical_overlay_delta_group_key(
             groups, persisted_rows, key, item, view,
-            song_reset_owner_keys,
+            song_reset_owner_keys, source_detail_aliases,
         )
         row = groups.get(target_key)
         if row is None:
@@ -13283,10 +13333,15 @@ def _prepare_generic_overlay_rankings(
         if bounded_no_search
         else filtered_persisted_scalar_rows
     )
+    source_detail_aliases = (
+        _bounded_source_detail_aliases(groups, persisted_scalar_rows)
+        if options["view"] in {"songs", "songIndex", "vsingerSongs"}
+        else None
+    )
     _apply_overlay_delta_groups(
         groups, persisted_scalar_rows, delta,
         options["view"], options["range"], exact_owned_rows,
-        song_reset_owner_keys,
+        song_reset_owner_keys, source_detail_aliases,
     )
     if options["view"] not in {"artists", "vtubers"}:
         _apply_runtime_tombstone_groups(
