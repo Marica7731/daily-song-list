@@ -7329,6 +7329,10 @@ class Tests(unittest.TestCase):
             "payload_json": None,
         }
         groups = {opaque_key: dict(parent)}
+        source_detail_aliases = pg_adapter._bounded_source_detail_aliases(
+            groups, {opaque_key: dict(parent)},
+        )
+        self.assertEqual(source_detail_aliases, {source_key: {opaque_key}})
         pg_adapter._apply_overlay_delta_groups(
             groups,
             {opaque_key: dict(parent)},
@@ -7336,6 +7340,7 @@ class Tests(unittest.TestCase):
             "songs",
             "all",
             song_reset_owner_keys={source_key: source_key},
+            source_detail_aliases=source_detail_aliases,
         )
         self.assertEqual(groups[opaque_key]["row_count"], 579)
         self.assertEqual(groups[opaque_key]["video_count"], 574)
