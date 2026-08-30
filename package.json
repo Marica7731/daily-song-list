@@ -34,6 +34,8 @@
     "mark:failure": "node scripts/mark-failure.js",
     "health:update": "node scripts/analyze-update-health.js",
     "watchdog:update": "node scripts/watchdog-update.js",
+    "static:update": "node scripts/static/collect-and-build.js",
+    "static:validate": "node scripts/static/validate-static.js",
     "backfill:inbox": "node scripts/run-backfill-update.js",
     "vsinger:probe": "node scripts/vsinger-http/probe-public-pages.js",
     "vsinger:crawl:songs": "node scripts/vsinger-http/crawl-songs.js",

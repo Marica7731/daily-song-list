@@ -2,707 +2,97 @@ name: Check code
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - ".github/workflows/**"
-      - "scripts/**"
-      - "server/**"
-      - "tests/**"
-      - "assets/**"
+      - ".github/workflows/check-code.yml"
+      - ".github/workflows/static-update.yml"
+      - ".github/workflows/deploy-pages.yml"
+      - "scripts/static/**"
+      - "scripts/update-songlist.js"
+      - "assets/static-*"
+      - "assets/frontend-utils.js"
+      - "assets/source-filter.js"
+      - "assets/ranking-utils.js"
       - "config/**"
-      - "test/**"
-      - "docs/**"
-      - "data/latest.json"
-      - "data/snapshots/**"
-      - "data/diff/**"
-      - "data/ui/**"
-      - "data/video-catalog.json"
-      - "data/review/**"
-      - "data/song-search-known-songs.json"
+      - "test/static-github-pipeline.test.mjs"
+      - "test/fixtures/static-source.json"
       - "index.html"
       - "package.json"
-      - "README.md"
   workflow_dispatch:
-    inputs:
-      expected_selector_count:
-        description: Exact number of selectors tagged for this cleanup batch
-        required: false
-        default: "0"
-      checkpoint_run_id:
-        description: Optional prior run ID containing a compatible inventory checkpoint
-        required: false
-        default: ""
-      checkpoint_artifact_name:
-        description: Optional exact checkpoint artifact name from that run
-        required: false
-        default: ""
 
 permissions:
-  actions: read
   contents: read
 
 concurrency:
-  group: daily-song-list-check-${{ github.ref }}
-  cancel-in-progress: false
+  group: daily-song-list-static-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      CHECK_SOURCE_ROOT: ${{ github.workspace }}/.codex-check-source
-    defaults:
-      run:
-        working-directory: .codex-check-source
+    timeout-minutes: 10
     steps:
-      - name: Prepare clean Check code source
-        working-directory: ${{ github.workspace }}
-        run: |
-          set -Eeuo pipefail
-          : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
-          : "${HOME:?HOME is required}"
-          workspace="$(cd -- "$GITHUB_WORKSPACE" && pwd -P)"
-          home="$(cd -- "$HOME" && pwd -P)"
-          source_parent="$(cd -- "$workspace" && pwd -P)"
-          source="$source_parent/.codex-check-source"
-          owner="$workspace/.codex-check-source-owned"
-          [[ "$CHECK_SOURCE_ROOT" == "$source" ]]
-          if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
-            echo "refusing unsafe workspace: $workspace" >&2
-            exit 1
-          fi
-          if [ "$source_parent" != "$workspace" ] || [ "$source" != "$workspace/.codex-check-source" ] || [ "$source" = "/" ] || [ "$source" = "$home" ] || [ "$source" = "$workspace" ]; then
-            echo "refusing unexpected Check code source: $source" >&2
-            exit 1
-          fi
-          if [ -L "$source" ] || { [ -e "$source" ] && [ ! -d "$source" ]; }; then
-            echo "refusing anomalous Check code source: $source" >&2
-            exit 1
-          fi
-          before_bytes=0
-          if [ -e "$source" ] || [ -L "$source" ]; then
-            before_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
-          fi
-          echo "CODEX_CHECK_SOURCE_PRECLEAN before_bytes=$before_bytes path=$source"
-          rm -rf -- "$source"
-          mkdir -p -- "$source"
-          printf '%s\n' "daily-song-list-check-source-v1" > "$owner"
-
-      - name: Checkout
-        id: check_checkout
-        continue-on-error: true
+      - name: Checkout GitHub-only delivery surface
         uses: actions/checkout@v4
         with:
-          path: .codex-check-source
-          fetch-depth: 50
+          fetch-depth: 1
           filter: blob:none
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
-            .github
-            /artifacts/migration/curation-global-singleton-minimal.json
-            assets
-            config
-            data/review
-            /data/external/youtube-channel-discovery/accepted/2026-07-25-source-backfill-kanaruhanon.json
-            /data/external/youtube-channel-discovery/accepted/2026-07-25-source-backfill-noa-polaris.json
-            deploy
-            docs
-            scripts
-            server
-            test
+            /.github/workflows/check-code.yml
+            /.github/workflows/static-update.yml
+            /.github/workflows/deploy-pages.yml
             /package.json
+            /package-lock.json
+            /scripts/static/**
+            /scripts/update-songlist.js
+            /scripts/song-utils.js
+            /scripts/curation.js
+            /scripts/entry-repair.js
+            /scripts/song-aliases.js
+            /scripts/song-search-index.js
+            /scripts/video-catalog.js
+            /scripts/range-config.js
+            /scripts/build-runtime-data.js
+            /scripts/blocked-vtuber-utils.js
+            /assets/**
+            /config/**
+            /test/static-github-pipeline.test.mjs
+            /test/fixtures/static-source.json
             /index.html
-            /README.md
-          sparse-checkout-cone-mode: false
 
-      - name: Recover Check code checkout after transport interruption
-        if: steps.check_checkout.outcome == 'failure'
-        working-directory: ${{ github.workspace }}
-        run: |
-          set -Eeuo pipefail
-          OWNER_PATH="$GITHUB_WORKSPACE/.codex-check-source-owned"
-          RETRY_LOG="$RUNNER_TEMP/check-code-checkout-transport-retry.log"
-          [[ "$CHECK_SOURCE_ROOT" == "$GITHUB_WORKSPACE/.codex-check-source" ]]
-          [[ -d "$CHECK_SOURCE_ROOT/.git" && ! -L "$CHECK_SOURCE_ROOT" ]]
-          [[ -f "$OWNER_PATH" ]]
-          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-check-source-v1" ]]
-          cd "$CHECK_SOURCE_ROOT"
-          for attempt in 1 2 3; do
-            : > "$RETRY_LOG"
-            if {
-              git show-ref --verify --quiet refs/remotes/origin/codex-check-target ||
-                git -c protocol.version=2 fetch \
-                  --no-tags --prune --no-recurse-submodules \
-                  --filter=blob:none --depth=50 origin \
-                  "+${GITHUB_SHA}:refs/remotes/origin/codex-check-target"
-              git checkout --progress --force --detach refs/remotes/origin/codex-check-target
-            } >"$RETRY_LOG" 2>&1; then
-              rm -f -- "$RETRY_LOG"
-              echo "CODEX_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
-              exit 0
-            else
-              status=$?
-            fi
-            cat "$RETRY_LOG" >&2
-            if ! grep -Eiq \
-              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
-              "$RETRY_LOG"; then
-              echo "CODEX_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
-              exit "$status"
-            fi
-            echo "CODEX_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
-            if (( attempt == 3 )); then
-              exit "$status"
-            fi
-            sleep "$(( attempt * 2 ))"
-          done
-
-      - name: Validate bounded Check code checkout
-        run: |
-          set -Eeuo pipefail
-          source_kib="$(du -sk "$CHECK_SOURCE_ROOT" | awk '{print $1}')"
-          [[ "$source_kib" =~ ^[0-9]+$ ]]
-          source_bytes=$((source_kib * 1024))
-          (( source_bytes < 1000000000 )) || {
-            echo "CODEX_CHECK_SOURCE_CHECKOUT_LIMIT_EXCEEDED bytes=$source_bytes" >&2
-            exit 74
-          }
-          echo "CODEX_CHECK_SOURCE_CHECKOUT_BYTES bytes=$source_bytes limit=1000000000"
-
-      - name: Set up hosted Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+          cache: npm
 
-      - name: Checkout canonical blocklist
-        id: blocklist_checkout
-        continue-on-error: true
-        uses: actions/checkout@v4
-        with:
-          repository: Marica7731/mygit
-          path: .codex-check-source/.tmp/check-code-mygit
-          fetch-depth: 1
-          filter: blob:none
-          sparse-checkout: |
-            config/blocked-vtuber-channels.json
-          sparse-checkout-cone-mode: false
+      - run: npm ci --ignore-scripts
 
-      - name: Recover canonical blocklist checkout after transport interruption
-        if: steps.blocklist_checkout.outcome == 'failure'
+      - name: Static pipeline unit tests
         run: |
           set -Eeuo pipefail
-          OWNER_PATH="$GITHUB_WORKSPACE/.codex-check-source-owned"
-          BLOCKLIST_ROOT="$CHECK_SOURCE_ROOT/.tmp/check-code-mygit"
-          RETRY_LOG="$RUNNER_TEMP/check-code-blocklist-transport-retry.log"
-          [[ "$BLOCKLIST_ROOT" == "$GITHUB_WORKSPACE/.codex-check-source/.tmp/check-code-mygit" ]]
-          [[ -d "$BLOCKLIST_ROOT/.git" && ! -L "$BLOCKLIST_ROOT" ]]
-          [[ -f "$OWNER_PATH" ]]
-          [[ "$(cat "$OWNER_PATH")" == "daily-song-list-check-source-v1" ]]
-          cd "$BLOCKLIST_ROOT"
-          for attempt in 1 2 3; do
-            : > "$RETRY_LOG"
-            if {
-              git show-ref --verify --quiet refs/remotes/origin/main ||
-                git -c protocol.version=2 fetch \
-                  --no-tags --prune --no-recurse-submodules \
-                  --filter=blob:none --depth=1 origin \
-                  '+refs/heads/main:refs/remotes/origin/main'
-              git checkout --progress --force -B main refs/remotes/origin/main
-            } >"$RETRY_LOG" 2>&1; then
-              rm -f -- "$RETRY_LOG"
-              echo "CODEX_BLOCKLIST_CHECKOUT_TRANSPORT_RECOVERED attempt=$attempt"
-              exit 0
-            else
-              status=$?
-            fi
-            cat "$RETRY_LOG" >&2
-            if ! grep -Eiq \
-              'RPC failed|Transferred a partial file|bytes of body are still expected|unexpected disconnect|early EOF|Failed to connect|Connection reset by peer|Operation timed out|Could not resolve host|stream .* was not closed cleanly|TLS.*error|Recv failure' \
-              "$RETRY_LOG"; then
-              echo "CODEX_BLOCKLIST_CHECKOUT_NON_TRANSPORT_FAILURE attempt=$attempt status=$status" >&2
-              exit "$status"
-            fi
-            echo "CODEX_BLOCKLIST_CHECKOUT_TRANSPORT_RETRY attempt=$attempt status=$status" >&2
-            if (( attempt == 3 )); then
-              exit "$status"
-            fi
-            sleep "$(( attempt * 2 ))"
-          done
+          node --check scripts/static/collect-and-build.js
+          node --check scripts/static/validate-static.js
+          node --check assets/static-app.js
+          node --test test/static-github-pipeline.test.mjs
 
-      - name: Check blocklist mirror sync
-        run: node scripts/check-blocked-vtuber-sync.js --source .tmp/check-code-mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
-
-      - name: Run checks
+      - name: Fixture end-to-end generation
         env:
-          CHECK_EVENT_NAME: ${{ github.event_name }}
-          CHECK_BASE_SHA: ${{ github.event.before }}
+          STATIC_DATA_ROOT: ${{ runner.temp }}/daily-song-list-fixture/data/static/v1
+          STATIC_SOURCE_FIXTURE: ${{ github.workspace }}/test/fixtures/static-source.json
+          STATIC_NOW: "2026-09-01T00:00:00Z"
+          STATIC_VIDEO_LIMIT: "1"
         run: |
           set -Eeuo pipefail
-          event_name="${CHECK_EVENT_NAME:?CHECK_EVENT_NAME is required}"
-          base=""
-          case "$event_name" in
-            push)
-              base="${CHECK_BASE_SHA:-}"
-              if ! [[ "$base" =~ ^[0-9a-f]{40}$ ]] || [[ "$base" =~ ^0{40}$ ]]; then
-                echo "::error::Push event requires a non-zero 40-hex before SHA." >&2
-                exit 1
-              fi
-              if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
-                echo "CODEX_CHECK_BASE_FETCH base=$base"
-                fetch_deadline_seconds=90
-                fetch_log="$(mktemp)"
-                cleanup_fetch_log() { rm -f -- "$fetch_log"; }
-                trap cleanup_fetch_log EXIT
-                if fetch_result="$(python3 - "$fetch_deadline_seconds" "$fetch_log" "$base" <<'PY'
-          import os
-          import signal
-          import subprocess
-          import sys
-          deadline = float(sys.argv[1])
-          log_path = sys.argv[2]
-          base = sys.argv[3]
-          process = None
-          timed_out = False
-          def signal_group(sig):
-              try:
-                  os.killpg(process.pid, sig)
-              except ProcessLookupError:
-                  pass
-          try:
-              with open(log_path, "wb") as log_file:
-                  process = subprocess.Popen(
-                      ["git", "-c", "http.lowSpeedLimit=1024", "-c", "http.lowSpeedTime=30", "fetch", "--no-tags", "--depth=1", "origin", base],
-                      stdout=log_file,
-                      stderr=subprocess.STDOUT,
-                      start_new_session=True,
-                  )
-                  try:
-                      status = process.wait(timeout=deadline)
-                  except subprocess.TimeoutExpired:
-                      timed_out = True
-                      signal_group(signal.SIGTERM)
-                      try:
-                          process.wait(timeout=2)
-                      except subprocess.TimeoutExpired:
-                          pass
-                      signal_group(signal.SIGKILL)
-                      if process.poll() is None:
-                          process.wait(timeout=5)
-                      status = 124
-              print("timeout" if timed_out else "completed")
-              raise SystemExit(status)
-          finally:
-              if process is not None:
-                  signal_group(signal.SIGKILL)
-                  if process.poll() is None:
-                      try:
-                          process.wait(timeout=5)
-                      except subprocess.TimeoutExpired:
-                          pass
-          PY
-                )"; then
-                  fetch_status=0
-                else
-                  fetch_status=$?
-                fi
-                if [ "$fetch_result" = "timeout" ]; then
-                  echo "::error::CODEX_CHECK_BASE_FETCH_TIMEOUT seconds=$fetch_deadline_seconds base=$base" >&2
-                fi
-                cat "$fetch_log" >&2
-                rm -f -- "$fetch_log"
-                trap - EXIT
-                if [ "$fetch_status" -ne 0 ]; then
-                  echo "::error::CODEX_CHECK_BASE_FETCH_FAILED base=$base" >&2
-                  exit 1
-                fi
-              fi
-              if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
-                echo "::error::CODEX_CHECK_BASE_MISSING_AFTER_FETCH base=$base" >&2
-                exit 1
-              fi
-              echo "CODEX_CHECK_BASE_OK event=push base=$base"
-              ;;
-            workflow_dispatch)
-              echo "CODEX_CHECK_BASE_FULL_GATES event=workflow_dispatch"
-              ;;
-            *)
-              echo "::error::Unsupported Check code event for base-diff gating: $event_name" >&2
-              exit 1
-              ;;
-          esac
-          run_ui_proof=1
-          if [ -n "${base}" ]; then
-            ui_changes="$(git diff --name-only "${base}" HEAD -- \
-              index.html \
-              assets/app.js \
-              assets/styles.css \
-              assets/frontend-utils.js \
-              README.md \
-              docs/ui-spec.md \
-              docs/ui-proof.md \
-              scripts/capture-readme-screenshots.js \
-              scripts/validate-ui-proof.js \
-              scripts/ui-proof-config.js \
-              test/fixtures/ui-proof-runtime.json \
-              test/ui-proof-fixtures.test.js \
-              docs/data-architecture.md \
-              docs/range-migration.md \
-              docs/storage-layout.md \
-              docs/backfill.md)"
-            if [ -z "${ui_changes}" ]; then
-              run_ui_proof=0
-            fi
-          fi
-          run_data_validate=1
-          if [ -n "${base}" ]; then
-            # validate-data.js default scope=all require closure; keep this list exact so
-            # unrelated migration/accepted-discovery changes do not materialize data/ui.
-            data_changes="$(git diff --name-only "${base}" HEAD -- \
-              config \
-              package.json \
-              scripts/validate-data.js \
-              scripts/curation.js \
-              scripts/entry-repair.js \
-              scripts/song-aliases.js \
-              scripts/song-search-index.js \
-              scripts/video-catalog.js \
-              scripts/range-config.js \
-              scripts/recent-all-continuity.js \
-              scripts/blocked-vtuber-utils.js \
-              assets/source-filter.js \
-              assets/ranking-utils.js \
-              assets/frontend-utils.js \
-              data/latest.json \
-              data/snapshots \
-              data/diff \
-              data/ui \
-              data/video-catalog.json \
-              data/review \
-              data/song-search-known-songs.json)"
-            if [ -z "${data_changes}" ]; then
-              run_data_validate=0
-            fi
-          fi
-          run_budget=1
-          if [ -n "${base}" ]; then
-            budget_changes="$(git diff --name-only "${base}" HEAD -- \
-              index.html \
-              assets \
-              data/ui \
-              data/diff \
-              scripts/check-runtime-budgets.js)"
-            if [ -z "${budget_changes}" ]; then
-              run_budget=0
-            fi
-          fi
-          run_node_tests=1
-          if [ -n "${base}" ]; then
-            candidate_node_changes="$(git diff --name-only "${base}" HEAD -- \
-              .github/workflows \
-              assets \
-              config \
-              deploy \
-              docs \
-              index.html \
-              package.json \
-              README.md \
-              scripts \
-              server \
-              test)"
-            node_changes=()
-            while IFS= read -r changed_path; do
-              [ -n "${changed_path}" ] || continue
-              case "${changed_path}" in
-                .github/workflows/check-code.yml|\
-                .github/workflows/deploy-pg-incremental.yml|\
-                .github/workflows/sync-wdc-release.yml|\
-                .github/workflows/test-next-serving-v3.yml|\
-                .github/workflows/update-backfill.yml|\
-                .github/workflows/update-core.yml|\
-                deploy/check-wdc-build-storage.py|\
-                deploy/cleanup-wdc-bounded-build.sh|\
-                deploy/daily-song-list-api.service|\
-                deploy/finalize-wdc-bounded-release.sh|\
-                deploy/install-wdc-release.sh|\
-                deploy/nginx-next-api.conf|\
-                deploy/orchestrate-wdc-bounded-release.sh|\
-                deploy/run-wdc-bounded-build.sh|\
-                deploy/start-wdc-pg-tunnel.sh|\
-                deploy/verify-wdc-public-release.py|\
-                deploy/verify-wdc-release-data.py|\
-                deploy/wdc-vps2-askpass.sh|\
-                docs/WDC_RELEASE_RUNBOOK.md|\
-                scripts/migration/7d-json-to-patch.py|\
-                scripts/migration/build-release-bundle.py|\
-                scripts/migration/build-serving-store.py|\
-                scripts/migration/check-wdc-readme-scope.py|\
-                scripts/migration/materialize-pg-release-snapshot.py|\
-                scripts/migration/materialize-ranking-pages.py|\
-                scripts/migration/patch-next-frontend.py|\
-                scripts/migration/pg-peer-relay.py|\
-                scripts/migration/prepare-wdc-frontend.py|\
-                scripts/migration/requirements-wdc-linux.txt|\
-                scripts/migration/requirements-wdc-mac.txt|\
-                server/pg_adapter.py|\
-                server/pg_api_server.py|\
-                server/release_serving_server.py)
-                  continue
-                  ;;
-                README.md)
-                  if python3 scripts/migration/check-wdc-readme-scope.py --base "${base}"; then
-                    continue
-                  else
-                    readme_scope_status=$?
-                    if [ "${readme_scope_status}" -ne 1 ]; then
-                      echo "::error::README WDC scope classifier failed with status ${readme_scope_status}." >&2
-                      exit "${readme_scope_status}"
-                    fi
-                  fi
-                  ;;
-              esac
-              node_changes+=("${changed_path}")
-            done <<< "${candidate_node_changes}"
-            if [ "${#node_changes[@]}" -eq 0 ]; then
-              run_node_tests=0
-            else
-              echo "CODEX_NODE_TESTS_SELECTED count=${#node_changes[@]} first=${node_changes[0]}"
-            fi
-          fi
-          node scripts/check-js-syntax.js
-          ui_proof_ok=0
-          if [ "${run_ui_proof}" = "1" ]; then
-            if npm run check:ui-proof; then
-              ui_proof_ok=1
-              echo "CODEX_UI_PROOF_OK"
-            else
-              echo "::warning::UI proof is deferred until the planned screenshot matrix refresh; code and contract checks remain blocking."
-              echo "CODEX_UI_PROOF_DEFERRED"
-            fi
-          else
-            echo "CODEX_UI_PROOF_SKIPPED reason=no-ui-proof-input-changes"
-          fi
-          npm run blocklist:validate
-          if [ "${run_node_tests}" = "0" ]; then
-            echo "CODEX_NODE_TESTS_SKIPPED reason=no-node-input-changes"
-          elif [ "${run_ui_proof}" = "1" ] && [ "${ui_proof_ok}" = "1" ]; then
-            npm test
-          else
-            test_files=()
-            while IFS= read -r -d '' test_file; do
-              case "${test_file}" in
-                test/ui-proof.test.js|test/ui-proof.test.mjs) continue ;;
-              esac
-              test_files+=("${test_file}")
-            done < <(git ls-files -z -- \
-              'test/*.test.js' \
-              'test/**/*.test.js' \
-              'test/*.test.mjs' \
-              'test/**/*.test.mjs')
-            if [ "${#test_files[@]}" -eq 0 ]; then
-              echo "::error::No tracked non-UI test files were selected." >&2
-              exit 1
-            fi
-            node --test "${test_files[@]}"
-          fi
-          if [ "${run_data_validate}" = "1" ]; then
-            git sparse-checkout add \
-              /data/latest.json \
-              /data/snapshots/ \
-              /data/diff/ \
-              /data/ui/ \
-              /data/video-catalog.json \
-              /data/song-search-known-songs.json
-            npm run validate
-          else
-            echo "CODEX_DATA_VALIDATE_SKIPPED reason=no-data-input-changes"
-          fi
-          if [ "${run_budget}" = "1" ]; then
-            git sparse-checkout add \
-              /data/ui/ \
-              /data/diff/
-            npm run check:budget
-          else
-            echo "CODEX_BUDGET_SKIPPED reason=no-budget-input-changes"
-          fi
+          npm run static:update
+          npm run static:validate
+          test "$(find "$STATIC_DATA_ROOT" -type f -size +4000000c -print -quit)" = ""
+          echo "STATIC_FIXTURE_BYTES bytes=$(du -sb "$STATIC_DATA_ROOT" | awk '{print $1}')"
 
-      - name: Remove Check code source
-        if: always()
-        working-directory: ${{ github.workspace }}
+      - name: Workflow retirement gates
         run: |
           set -Eeuo pipefail
-          : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
-          : "${HOME:?HOME is required}"
-          workspace="$(cd -- "$GITHUB_WORKSPACE" && pwd -P)"
-          home="$(cd -- "$HOME" && pwd -P)"
-          source_parent="$(cd -- "$workspace" && pwd -P)"
-          source="$source_parent/.codex-check-source"
-          owner="$workspace/.codex-check-source-owned"
-          [[ "$CHECK_SOURCE_ROOT" == "$source" ]]
-          if [ -z "$workspace" ] || [ "$workspace" = "/" ] || [ "$workspace" = "$home" ]; then
-            echo "refusing unsafe workspace: $workspace" >&2
-            exit 1
-          fi
-          if [ "$source_parent" != "$workspace" ] || [ "$source" != "$workspace/.codex-check-source" ] || [ "$source" = "/" ] || [ "$source" = "$home" ] || [ "$source" = "$workspace" ]; then
-            echo "refusing unexpected Check code source: $source" >&2
-            exit 1
-          fi
-          if [ -L "$source" ] || { [ -e "$source" ] && [ ! -d "$source" ]; }; then
-            echo "refusing anomalous Check code source: $source" >&2
-            exit 1
-          fi
-          if [ -e "$source" ]; then
-            [[ -f "$owner" ]]
-            [[ "$(cat "$owner")" == "daily-song-list-check-source-v1" ]]
-          fi
-          before_bytes=0
-          if [ -e "$source" ]; then
-            before_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
-          fi
-          rm -rf -- "$source"
-          rm -f -- "$owner"
-          after_bytes=0
-          if [ -e "$source" ] || [ -L "$source" ]; then
-            after_bytes="$(du -sk "$source" | awk '{print $1 * 1024}')"
-          fi
-          if [ "$after_bytes" != "0" ] || [ -e "$source" ] || [ -L "$source" ]; then
-            echo "::error::Check code source cleanup left residue at $source bytes=$after_bytes" >&2
-            exit 1
-          fi
-          echo "CODEX_CHECK_SOURCE_POSTCLEAN before_bytes=$before_bytes after_bytes=$after_bytes path=$source"
-
-  curation_audit:
-    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'codex/global-singleton-cleanup-20260726'
-    runs-on: [self-hosted, macOS, ARM64, daily-song-list-mac]
-    timeout-minutes: 150
-    steps:
-      - name: Checkout audit branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          filter: blob:none
-
-      - name: Ensure full audit workspace checkout
-        run: |
-          set -Eeuo pipefail
-          git sparse-checkout disable || true
-          git checkout --force
-
-      - name: Configure Mac audit toolchain
-        run: |
-          echo "/Users/be/.local/bin" >> "$GITHUB_PATH"
-          echo "/Users/be/.local/codex-toolchains/node/bin" >> "$GITHUB_PATH"
-
-      - name: Prepare isolated audit directories
-        run: |
-          set -Eeuo pipefail
-          audit_root="$RUNNER_TEMP/daily-song-list-curation-audit/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          echo "AUDIT_ROOT=$audit_root" >> "$GITHUB_ENV"
-          mkdir -p \
-            "$audit_root/checkpoint/global" \
-            "$audit_root/checkpoint/pages" \
-            "$audit_root/reports/global" \
-            "$audit_root/reports/pages" \
-            "$audit_root/runtime-db"
-
-      - name: Restore compatible inventory checkpoint
-        if: inputs.checkpoint_run_id != '' && inputs.checkpoint_artifact_name != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          CHECKPOINT_RUN_ID: ${{ inputs.checkpoint_run_id }}
-          CHECKPOINT_ARTIFACT_NAME: ${{ inputs.checkpoint_artifact_name }}
-        run: |
-          set -Eeuo pipefail
-          gh run download "$CHECKPOINT_RUN_ID" \
-            --repo "$GITHUB_REPOSITORY" \
-            --name "$CHECKPOINT_ARTIFACT_NAME" \
-            --dir "$AUDIT_ROOT/checkpoint"
-
-      - name: Run focused audit tests
-        timeout-minutes: 5
-        run: |
-          set -Eeuo pipefail
-          node --check scripts/audit-global-song-quality.js
-          node --check scripts/audit-production-vtuber-pages.js
-          python3 -m py_compile scripts/audit-runtime-db.py
-          python3 test/audit_runtime_db_test.py
-          node --test \
-            test/audit-global-song-quality.test.js \
-            test/audit-production-vtuber-pages.test.js \
-            test/curation.test.js \
-            test/song-aliases.test.js
-
-      - name: Build resumable global inventory and before-after audit
-        timeout-minutes: 35
-        env:
-          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS: "1"
-          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "100"
-        run: |
-          set -Eeuo pipefail
-          node --max-old-space-size=12288 scripts/audit-global-song-quality.js \
-            --input data/latest.json \
-            --vsinger-dir data/external/vsinger-http/backfill \
-            --youtube-dir data/external/youtube-channel-discovery \
-            --require-vsinger \
-            --require-youtube-channel-discovery \
-            --expected-selector-count "${{ inputs.expected_selector_count || '0' }}" \
-            --checkpoint-dir "$AUDIT_ROOT/checkpoint/global" \
-            --output-dir "$AUDIT_ROOT/reports/global"
-
-      - name: Audit four production VTuber pages
-        timeout-minutes: 10
-        run: |
-          set -Eeuo pipefail
-          node scripts/audit-production-vtuber-pages.js \
-            --api-base https://ytb-song-rank.culua.com \
-            --timeout-ms 30000 \
-            --checkpoint-dir "$AUDIT_ROOT/checkpoint/pages" \
-            --output-dir "$AUDIT_ROOT/reports/pages"
-
-      - name: Materialize full runtime SQLite
-        timeout-minutes: 50
-        run: |
-          set -Eeuo pipefail
-          npm run db:build -- \
-            --require-youtube-channel-discovery \
-            --output "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
-            2>&1 | tee "$AUDIT_ROOT/reports/runtime-db-build.log"
-
-      - name: Extract runtime DB audit
-        timeout-minutes: 15
-        run: |
-          set -Eeuo pipefail
-          python3 scripts/audit-runtime-db.py \
-            --db "$AUDIT_ROOT/runtime-db/song-rank.sqlite" \
-            --output "$AUDIT_ROOT/reports/runtime-db-audit.json"
-
-      - name: Remove full temporary DB
-        if: always()
-        run: |
-          set -Eeuo pipefail
-          db="$AUDIT_ROOT/runtime-db/song-rank.sqlite"
-          tmp_db="$db.tmp"
-          case "$db" in
-            "$RUNNER_TEMP"/*) ;;
-            *) echo "refusing to remove DB outside RUNNER_TEMP: $db" >&2; exit 1 ;;
-          esac
-          rm -f -- "$db" "$tmp_db"
-          echo "CODEX_CURATION_AUDIT_DB_REMOVED path=$db"
-
-      - name: Upload resumable inventory checkpoint
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: global-singleton-curation-checkpoint-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}/checkpoint
-          if-no-files-found: warn
-          retention-days: 3
-          compression-level: 0
-
-      - name: Upload bounded audit reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: global-singleton-curation-audit-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/daily-song-list-curation-audit/${{ github.run_id }}-${{ github.run_attempt }}/reports
-          if-no-files-found: warn
-          retention-days: 14
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-update.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-update.yml
+          grep -Fq 'data/static/v1' .github/workflows/static-update.yml
+          grep -Fq 'data/static' .github/workflows/deploy-pages.yml

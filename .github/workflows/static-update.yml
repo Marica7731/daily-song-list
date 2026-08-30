@@ -1,0 +1,104 @@
+name: Update GitHub static song data
+
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+    inputs:
+      video_limit:
+        description: "Maximum pending videos to inspect in this run"
+        required: false
+        default: "24"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-song-list-static-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout bounded static inputs
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/static-update.yml
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /data/static/**
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install lockfile dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Collect one bounded batch and rebuild static shards
+        env:
+          STATIC_VIDEO_LIMIT: ${{ inputs.video_limit || '24' }}
+          STATIC_PAGE_SIZE: "50"
+          STATIC_MAX_SHARD_BYTES: "4000000"
+          DAILY_SONG_FETCH_RETRIES: "2"
+          DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
+          DAILY_SONG_REQUEST_DELAY_MS: "400"
+          DAILY_SONG_REQUEST_JITTER_MS: "250"
+          DAILY_SONG_MAX_429_ERRORS: "6"
+        run: npm run static:update
+
+      - name: Validate resumability and shard limits
+        run: npm run static:validate
+
+      - name: Commit persistent data only
+        id: commit
+        run: |
+          set -Eeuo pipefail
+          mapfile -t changed < <(git status --short --untracked-files=all | awk '{print $2}')
+          for path in "${changed[@]}"; do
+            [[ "$path" == data/static/v1/* ]] || {
+              echo "STATIC_UPDATE_UNEXPECTED_PATH path=$path" >&2
+              exit 71
+            }
+          done
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "STATIC_UPDATE_NO_CHANGES"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/static/v1
+          git commit -m "data: update static song shards"
+          git push origin HEAD:main
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+          echo "STATIC_UPDATE_PUSHED commit=$(git rev-parse HEAD)"
+
+      - name: Publish evidence
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const meta = JSON.parse(fs.readFileSync('data/static/v1/meta.json', 'utf8'));
+          console.log(JSON.stringify({
+            sourceSnapshotId: meta.sourceSnapshotId,
+            sourceCapturedAt: meta.sourceCapturedAt,
+            processedVideoCount: meta.processedVideoCount,
+            pendingVideoCount: meta.pendingVideoCount,
+            videoCount: meta.videoCount,
+            songOccurrenceCount: meta.songOccurrenceCount,
+            updated: process.env.UPDATED,
+          }, null, 2));
+          NODE
+        env:
+          UPDATED: ${{ steps.commit.outputs.updated }}
