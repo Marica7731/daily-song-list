@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-08-31T22:03:21.102Z",
+  "generatedAt": "2026-08-31T22:24:56.927Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -59,9 +59,9 @@
       "updatedAt": "2026-08-31T20:57:33.532Z"
     },
     "2026-08-24": {
-      "attempts": 1,
+      "attempts": 2,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 158,
+      "processedEligibleVideos": 272,
       "status": "MISSING",
       "processingStatus": "IN_PROGRESS",
       "source": {
@@ -75,24 +75,32 @@
         "rawSha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
       },
       "eligibleVideos": 582,
-      "remainingVideos": 424,
+      "remainingVideos": 310,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 109,
-      "lastInspected": 110,
+      "lastCompleted": 114,
+      "lastInspected": 117,
       "lastFailures": [
         {
-          "videoId": "OIEr7PaqmkM",
+          "videoId": "hytdswIauos",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "EZW5GL6KdJ8",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "9z-PXtf8ao0",
           "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
         }
       ],
       "checkpointReason": "time_budget",
-      "checkpointElapsedMs": 1218355,
-      "updatedAt": "2026-08-31T22:03:21.102Z"
+      "checkpointElapsedMs": 1202994,
+      "updatedAt": "2026-08-31T22:24:56.927Z"
     }
   },
   "legacyBaseline": {
@@ -123,9 +131,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 4136,
-  "videoCount": 3653,
-  "songOccurrenceCount": 53898,
+  "processedVideoCount": 4250,
+  "videoCount": 3720,
+  "songOccurrenceCount": 54460,
   "ranges": {
     "7d": {
       "songs": {
@@ -152,22 +160,22 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 10368,
-        "pageCount": 208,
+        "totalCount": 10640,
+        "pageCount": 213,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 4603,
-        "pageCount": 93,
+        "totalCount": 4742,
+        "pageCount": 95,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1053,
-        "pageCount": 22,
+        "totalCount": 1111,
+        "pageCount": 23,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/vtubers/page-{page:04d}.json"
@@ -175,22 +183,22 @@
     },
     "all": {
       "songs": {
-        "totalCount": 20171,
-        "pageCount": 404,
+        "totalCount": 20406,
+        "pageCount": 409,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 8296,
-        "pageCount": 166,
+        "totalCount": 8412,
+        "pageCount": 169,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1880,
-        "pageCount": 38,
+        "totalCount": 1925,
+        "pageCount": 39,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/vtubers/page-{page:04d}.json"
