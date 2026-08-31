@@ -135,7 +135,7 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   assert.match(workflow, /default: "180"/);
   assert.match(workflow, /checkpoint_minutes:/);
   assert.match(workflow, /checkpoint_minutes >= 5 && checkpoint_minutes <= 25/);
-  assert.match(workflow, /STATIC_RECOVERY_BUDGET_MS:/);
+  assert.match(workflow, /STATIC_RECOVERY_BUDGET_MS=\$\(\(checkpoint_minutes \* 60000\)\)/);
   assert.match(workflow, /Validate bounded recovery batch/);
   assert.match(workflow, /limit >= 1 && limit <= 200/);
   assert.match(workflow, /npm run static:recover/);

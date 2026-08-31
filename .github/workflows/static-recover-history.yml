@@ -75,11 +75,11 @@ jobs:
             echo "STATIC_RECOVERY_CHECKPOINT_INVALID minutes=$checkpoint_minutes min=5 max=25" >&2
             exit 75
           }
+          echo "STATIC_RECOVERY_BUDGET_MS=$((checkpoint_minutes * 60000))" >> "$GITHUB_ENV"
 
       - name: Recover one bounded immutable source
         env:
           STATIC_RECOVERY_LIMIT: ${{ inputs.video_limit || '180' }}
-          STATIC_RECOVERY_BUDGET_MS: ${{ fromJSON(inputs.checkpoint_minutes || '20') * 60000 }}
           STATIC_MAX_SHARD_BYTES: "4000000"
           DAILY_SONG_FETCH_RETRIES: "2"
           DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
