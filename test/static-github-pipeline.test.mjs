@@ -126,6 +126,12 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   assert.match(workflow, /timeout-minutes: 55/);
   assert.match(workflow, /npm run static:recover/);
   assert.match(workflow, /Resume an incomplete date checkpoint/);
+  assert.match(workflow, /through_date:/);
+  assert.match(workflow, /Advance to the next pinned date/);
+  assert.match(workflow, /fromJSON\(steps\.outcome\.outputs\.remaining\) == 0/);
+  assert.match(workflow, /date -u -d "\$current \+ 1 day" \+%F/);
+  assert.match(workflow, /DAILY_SONG_REQUEST_DELAY_MS: "2500"/);
+  assert.match(workflow, /DAILY_SONG_429_COOLDOWN_MS: "60000"/);
   assert.match(workflow, /git add -- data\/static\/v1/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);
 });
