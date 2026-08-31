@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-08-31T20:00:40.870Z",
+  "generatedAt": "2026-08-31T20:07:23.159Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -23,9 +23,9 @@
   },
   "historyRecovery": {
     "2026-08-23": {
-      "attempts": 1,
+      "attempts": 2,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 159,
+      "processedEligibleVideos": 310,
       "status": "MISSING",
       "processingStatus": "IN_PROGRESS",
       "source": {
@@ -39,7 +39,7 @@
         "rawSha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
       },
       "eligibleVideos": 595,
-      "remainingVideos": 436,
+      "remainingVideos": 285,
       "coverage": {
         "complete": false,
         "status": "MISSING",
@@ -54,90 +54,90 @@
           }
         ]
       },
-      "lastCompleted": 152,
+      "lastCompleted": 151,
       "lastFailures": [
         {
-          "videoId": "eN_RiGzrEyk",
+          "videoId": "qkMLBQfy8J4",
           "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
         },
         {
-          "videoId": "A2aTbBmDrtU",
+          "videoId": "e7r4Bgg8Zss",
           "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
         },
         {
-          "videoId": "Tzn7pUp2gNQ",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+          "videoId": "Ouvm6QGm3vY",
+          "message": "https://www.youtube.com/watch?v=Ouvm6QGm3vY&hl=ja&persist_hl=1 HTTP 429"
         },
         {
-          "videoId": "xpy3Vr2TpCE",
-          "message": "https://www.youtube.com/watch?v=xpy3Vr2TpCE&hl=ja&persist_hl=1 HTTP 429"
+          "videoId": "3kN-Mvo3LYM",
+          "message": "https://www.youtube.com/watch?v=3kN-Mvo3LYM&hl=ja&persist_hl=1 HTTP 429"
         },
         {
-          "videoId": "jYgkjyf8o-A",
-          "message": "https://www.youtube.com/watch?v=jYgkjyf8o-A&hl=ja&persist_hl=1 HTTP 429"
-        },
-        {
-          "videoId": "FO4VNr2aCfg",
+          "videoId": "-XcwPk6Gtmo",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "d_bf_GxSijM",
+          "videoId": "yyWYBtbeV-c",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "3gspY-zJFY0",
+          "videoId": "WTl9_QmPrP0",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "Jv5rlPjGpRs",
+          "videoId": "DhESoP1zHts",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "FXVwjQ3bciI",
+          "videoId": "0rCYC2J8s7U",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "CV1P8eOJGLs",
+          "videoId": "UqAHrLMef8Q",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "lJCEf2l59Nk",
+          "videoId": "Ev7MsffbmIc",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "8x9Nlz-GAGU",
+          "videoId": "IJBW8oBJ23U",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "Cxaya6eAFus",
+          "videoId": "La0RN85tyTQ",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "wuhZh6ADObI",
+          "videoId": "watyA_0LNHU",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "ytlP_eLxk1E",
+          "videoId": "M-GIcPQaUoQ",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "eR3HwpiUcXM",
+          "videoId": "K1YoRl51sxU",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "cMC6JAx8Fvg",
+          "videoId": "F6sLB5qx2DU",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "Sw0AahgPHmk",
+          "videoId": "WzaQUo-TJpQ",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         },
         {
-          "videoId": "T0Ot-ZoXQbQ",
+          "videoId": "qt9Hdpdh9_Q",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "eHGMrN3fpEw",
           "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
         }
       ],
-      "updatedAt": "2026-08-31T20:00:40.870Z"
+      "updatedAt": "2026-08-31T20:07:23.159Z"
     }
   },
   "legacyBaseline": {
@@ -168,9 +168,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 3591,
-  "videoCount": 3379,
-  "songOccurrenceCount": 51388,
+  "processedVideoCount": 3742,
+  "videoCount": 3459,
+  "songOccurrenceCount": 52234,
   "ranges": {
     "7d": {
       "songs": {
@@ -194,40 +194,40 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 9366,
-        "pageCount": 188,
+        "totalCount": 9802,
+        "pageCount": 197,
         "pageSize": 50,
         "path": "rankings/30d/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 4155,
-        "pageCount": 84,
+        "totalCount": 4390,
+        "pageCount": 88,
         "pageSize": 50,
         "path": "rankings/30d/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 811,
-        "pageCount": 17,
+        "totalCount": 886,
+        "pageCount": 18,
         "pageSize": 50,
         "path": "rankings/30d/vtubers/page-{page}.json"
       }
     },
     "all": {
       "songs": {
-        "totalCount": 19280,
-        "pageCount": 386,
+        "totalCount": 19669,
+        "pageCount": 394,
         "pageSize": 50,
         "path": "rankings/all/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 7902,
-        "pageCount": 159,
+        "totalCount": 8106,
+        "pageCount": 163,
         "pageSize": 50,
         "path": "rankings/all/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 1669,
-        "pageCount": 34,
+        "totalCount": 1726,
+        "pageCount": 35,
         "pageSize": 50,
         "path": "rankings/all/vtubers/page-{page}.json"
       }
