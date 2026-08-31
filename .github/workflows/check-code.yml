@@ -6,6 +6,7 @@ on:
     paths:
       - ".github/workflows/check-code.yml"
       - ".github/workflows/static-update.yml"
+      - ".github/workflows/static-recover-history.yml"
       - ".github/workflows/deploy-pages.yml"
       - "scripts/static/**"
       - "scripts/update-songlist.js"
@@ -41,6 +42,7 @@ jobs:
           sparse-checkout: |
             /.github/workflows/check-code.yml
             /.github/workflows/static-update.yml
+            /.github/workflows/static-recover-history.yml
             /.github/workflows/deploy-pages.yml
             /package.json
             /package-lock.json
@@ -59,6 +61,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           node --check scripts/static/collect-and-build.js
+          node --check scripts/static/recover-history.js
           node --check scripts/static/validate-static.js
           node --check assets/static-app.js
           node --test test/static-github-pipeline.test.mjs
@@ -80,6 +83,8 @@ jobs:
         run: |
           set -Eeuo pipefail
           ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-update.yml
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-recover-history.yml
           grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-update.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-recover-history.yml
           grep -Fq 'data/static/v1' .github/workflows/static-update.yml
           grep -Fq 'data/static' .github/workflows/deploy-pages.yml

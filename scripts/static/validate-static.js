@@ -11,7 +11,12 @@ const state = read("state.json");
 
 if (meta.architecture !== "github-actions-static-shards-v1") fail("unexpected architecture");
 if (!meta.continuityStart || !state.continuityStart) fail("continuityStart missing");
-if (!Array.isArray(meta.historyGaps) || !meta.historyGaps.some((gap) => gap.from === "2026-08-23" && gap.through === "2026-08-31" && gap.status === "MISSING")) fail("required history gap missing");
+if (!Array.isArray(meta.historyGaps)) fail("historyGaps missing");
+if (meta.historyDays) {
+  for (const date of dates("2026-08-23", "2026-08-31")) {
+    if (!['COMPLETE', 'MISSING'].includes(meta.historyDays[date])) fail(`history day status invalid: ${date}`);
+  }
+}
 for (const range of ["7d", "30d", "all"]) {
   for (const type of ["songs", "artists", "vtubers"]) {
     const manifest = read(`rankings/${range}/${type}/manifest.json`);
@@ -41,5 +46,12 @@ function read(relative) {
 function checkSize(relative) {
   const bytes = fs.statSync(path.resolve(root, relative)).size;
   if (bytes > maxBytes) fail(`${relative} exceeds ${maxBytes}: ${bytes}`);
+}
+function dates(from, through) {
+  const values = [];
+  const cursor = new Date(`${from}T00:00:00Z`);
+  const end = new Date(`${through}T00:00:00Z`);
+  while (cursor <= end) { values.push(cursor.toISOString().slice(0, 10)); cursor.setUTCDate(cursor.getUTCDate() + 1); }
+  return values;
 }
 function fail(message) { throw new Error(message); }

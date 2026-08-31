@@ -158,14 +158,14 @@ function compactCandidate(item, source) {
   };
 }
 
-function persistCompleted(state, completed, now) {
+function persistCompleted(state, completed, now, dataRoot = DATA_ROOT) {
   const processed = new Set(state.processedVideoIds || []);
   for (const { candidate, result } of completed) {
     processed.add(candidate.videoId);
     const detail = result.detail;
     if (!detail?.songs?.length) continue;
     const day = isoDay(detail.publishedTimestamp || candidate.publishedTimestamp || candidate.snapshotCapturedAt || now);
-    const dayPath = path.join(DATA_ROOT, "days", `${day}.json`);
+    const dayPath = path.join(dataRoot, "days", `${day}.json`);
     const shard = readJsonIfExists(dayPath) || { schemaVersion: 1, day, videos: [] };
     const normalized = normalizeVideo(detail, candidate, now);
     shard.videos = [...shard.videos.filter((item) => item.videoId !== normalized.videoId), normalized]
@@ -230,6 +230,9 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
     generatedAt: now.toISOString(),
     continuityStart: state.continuityStart,
     historyGaps: state.historyGaps || [HISTORY_GAP],
+    historyDays: state.historyDays || null,
+    historyRecovery: state.recoveryDates || {},
+    legacyBaseline: state.legacyBaseline || null,
     sourceSnapshotId: state.lastSourceSnapshotId || "",
     sourceCapturedAt: state.lastSourceCapturedAt || "",
     sourceCoverage: state.sourceCoverage || {},
@@ -367,8 +370,19 @@ function writeSearch(dataRoot, entities, now, maxShardBytes) {
 function readDayVideos(dataRoot) {
   const daysRoot = path.join(dataRoot, "days");
   if (!fs.existsSync(daysRoot)) return [];
-  return fs.readdirSync(daysRoot).filter((name) => /^\d{4}-\d{2}-\d{2}\.json$/u.test(name)).sort()
-    .flatMap((name) => readJson(path.join(daysRoot, name)).videos || []);
+  const files = [];
+  for (const name of fs.readdirSync(daysRoot).sort()) {
+    const target = path.join(daysRoot, name);
+    if (/^\d{4}-\d{2}-\d{2}\.json$/u.test(name) && fs.statSync(target).isFile()) files.push(target);
+    if (/^\d{4}-\d{2}-\d{2}$/u.test(name) && fs.statSync(target).isDirectory()) {
+      for (const part of fs.readdirSync(target).filter((item) => /^part-\d{4}\.json$/u.test(item)).sort()) files.push(path.join(target, part));
+    }
+  }
+  const byVideoId = new Map();
+  for (const file of files) {
+    for (const video of readJson(file).videos || []) byVideoId.set(video.videoId, video);
+  }
+  return [...byVideoId.values()];
 }
 
 function filterRange(videos, now, days) {
@@ -408,8 +422,12 @@ function isoDay(value) { return new Date(value).toISOString().slice(0, 10); }
 module.exports = {
   HISTORY_GAP,
   buildStaticSite,
+  compactCandidate,
+  enqueueSnapshot,
   fixtureSource,
   hashId,
   initialState,
   normalizeKey,
+  persistCompleted,
+  readDayVideos,
 };
