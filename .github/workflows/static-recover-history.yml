@@ -15,6 +15,10 @@ on:
         description: "Required for date mode: 2026-08-23 through 2026-08-31"
         required: false
         default: ""
+      through_date:
+        description: "Optional inclusive end date; advances only after the current date has no remaining candidates"
+        required: false
+        default: ""
       video_limit:
         description: "Bounded eligible videos inspected in this run"
         required: false
@@ -60,9 +64,11 @@ jobs:
           STATIC_MAX_SHARD_BYTES: "4000000"
           DAILY_SONG_FETCH_RETRIES: "2"
           DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
-          DAILY_SONG_REQUEST_DELAY_MS: "300"
-          DAILY_SONG_REQUEST_JITTER_MS: "200"
-          DAILY_SONG_MAX_429_ERRORS: "6"
+          DAILY_SONG_REQUEST_DELAY_MS: "2500"
+          DAILY_SONG_REQUEST_JITTER_MS: "1500"
+          DAILY_SONG_429_COOLDOWN_MS: "60000"
+          DAILY_SONG_RETRY_JITTER_MS: "5000"
+          DAILY_SONG_MAX_429_ERRORS: "8"
         run: npm run static:recover -- --mode "${{ inputs.mode }}" --date "${{ inputs.recovery_date }}"
 
       - name: Validate recovered static shards
@@ -112,4 +118,19 @@ jobs:
         if: inputs.mode == 'date' && fromJSON(steps.outcome.outputs.remaining) > 0 && fromJSON(steps.outcome.outputs.no_progress) < 3
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="${{ inputs.recovery_date }}" -f video_limit="${{ inputs.video_limit || '700' }}"
+        run: gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="${{ inputs.recovery_date }}" -f through_date="${{ inputs.through_date }}" -f video_limit="${{ inputs.video_limit || '700' }}"
+
+      - name: Advance to the next pinned date
+        if: inputs.mode == 'date' && inputs.through_date != '' && fromJSON(steps.outcome.outputs.remaining) == 0 && inputs.recovery_date != inputs.through_date
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          current="${{ inputs.recovery_date }}"
+          through="${{ inputs.through_date }}"
+          next=$(date -u -d "$current + 1 day" +%F)
+          [[ "$next" < "$through" || "$next" == "$through" ]] || {
+            echo "STATIC_RECOVERY_SEQUENCE_RANGE_INVALID current=$current next=$next through=$through" >&2
+            exit 72
+          }
+          gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="$next" -f through_date="$through" -f video_limit="${{ inputs.video_limit || '700' }}"
