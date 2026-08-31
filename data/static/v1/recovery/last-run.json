@@ -1,31 +1,26 @@
 {
   "schemaVersion": 1,
   "mode": "date",
-  "date": "2026-08-23",
-  "at": "2026-08-31T20:57:33.532Z",
+  "date": "2026-08-24",
+  "at": "2026-08-31T22:03:21.102Z",
   "status": "MISSING",
-  "processingStatus": "PROCESSED",
-  "remaining": 0,
-  "completed": 95,
-  "failures": 0,
+  "processingStatus": "IN_PROGRESS",
+  "remaining": 424,
+  "inspected": 110,
+  "completed": 109,
+  "failures": 1,
+  "checkpointReason": "time_budget",
+  "checkpointElapsedMs": 1218355,
   "noProgressAttempts": 0,
   "coverage": {
-    "complete": false,
-    "status": "MISSING",
+    "complete": true,
+    "status": "COMPLETE",
     "sourceCount": 2,
-    "incomplete": [
-      {
-        "keyword": "歌枠",
-        "itemCount": 500,
-        "limit": 500,
-        "reachedBottom": false,
-        "truncatedByLimit": true
-      }
-    ]
+    "incomplete": []
   },
   "proof": {
-    "bytes": 2603822,
-    "gitBlobSha1": "4d2a49b5310a3c6ff9a0c00dd2b45c64148b53c7",
-    "sha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
+    "bytes": 2544117,
+    "gitBlobSha1": "4113a9255d3e8fce6de54b6adec6c77058d597f1",
+    "sha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
   }
 }
