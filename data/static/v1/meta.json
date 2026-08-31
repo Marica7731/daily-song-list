@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-08-31T18:46:47.821Z",
-  "continuityStart": "2026-08-30T19:29:52.371Z",
+  "generatedAt": "2026-08-31T19:54:26.743Z",
+  "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
       "from": "2026-08-23",
@@ -10,19 +10,49 @@
       "status": "MISSING"
     }
   ],
+  "historyDays": {
+    "2026-08-23": "MISSING",
+    "2026-08-24": "MISSING",
+    "2026-08-25": "MISSING",
+    "2026-08-26": "MISSING",
+    "2026-08-27": "MISSING",
+    "2026-08-28": "MISSING",
+    "2026-08-29": "MISSING",
+    "2026-08-30": "MISSING",
+    "2026-08-31": "MISSING"
+  },
+  "historyRecovery": {},
+  "legacyBaseline": {
+    "status": "COMPLETE",
+    "repository": "Marica7731/daily-song-list",
+    "commit": "7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2",
+    "path": "data/all.json",
+    "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d",
+    "bytes": 54175861,
+    "generatedAt": "2026-08-22T17:52:03.305Z",
+    "rawSha256": "21860b0a38d1200a4681fe8f74ee270770f959e28c52eb4eb353bac3839ee4b2",
+    "videoCount": 3082,
+    "occurrenceCount": 47649,
+    "reviewedUnknown": 0,
+    "derivedOccurrenceIds": 31638,
+    "rejectedEmptyTitles": 1,
+    "missingChannelIds": 520,
+    "dayCount": 57,
+    "shardCount": 57,
+    "importedAt": "2026-08-31T19:54:26.743Z"
+  },
   "sourceSnapshotId": "20260831T183147Z",
   "sourceCapturedAt": "2026-08-31T18:31:47.672Z",
   "sourceCoverage": {
-    "provider": "Marica7731/mygit today snapshot",
+    "provider": "GitHub immutable legacy all",
     "status": "success",
-    "fetchedSnapshots": 1,
-    "selectedSnapshots": 1,
-    "candidateVideos": 526
+    "commit": "7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2",
+    "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 357,
-  "videoCount": 195,
-  "songOccurrenceCount": 2082,
+  "processedVideoCount": 3439,
+  "videoCount": 3277,
+  "songOccurrenceCount": 49731,
   "ranges": {
     "7d": {
       "songs": {
@@ -46,40 +76,40 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 1626,
-        "pageCount": 33,
+        "totalCount": 8750,
+        "pageCount": 175,
         "pageSize": 50,
         "path": "rankings/30d/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 796,
-        "pageCount": 16,
+        "totalCount": 3929,
+        "pageCount": 79,
         "pageSize": 50,
         "path": "rankings/30d/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 190,
-        "pageCount": 4,
+        "totalCount": 740,
+        "pageCount": 15,
         "pageSize": 50,
         "path": "rankings/30d/vtubers/page-{page}.json"
       }
     },
     "all": {
       "songs": {
-        "totalCount": 1626,
-        "pageCount": 33,
+        "totalCount": 18803,
+        "pageCount": 377,
         "pageSize": 50,
         "path": "rankings/all/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 796,
-        "pageCount": 16,
+        "totalCount": 7747,
+        "pageCount": 155,
         "pageSize": 50,
         "path": "rankings/all/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 190,
-        "pageCount": 4,
+        "totalCount": 1621,
+        "pageCount": 33,
         "pageSize": 50,
         "path": "rankings/all/vtubers/page-{page}.json"
       }
