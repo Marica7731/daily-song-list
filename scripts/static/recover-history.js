@@ -123,7 +123,7 @@ function importLegacyDocument(dataRoot, state, document, source, now, maxShardBy
   const byDay = new Map();
   const seenVideos = new Set();
   const seenOccurrences = new Set();
-  const identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0 };
+  const identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0, missingChannelIds: 0 };
   let occurrences = 0;
   let reviewedUnknown = 0;
   for (const item of document.items) {
@@ -152,9 +152,10 @@ function importLegacyDocument(dataRoot, state, document, source, now, maxShardBy
   return { videoCount: seenVideos.size, occurrenceCount: occurrences, reviewedUnknown, ...identityAudit, dayCount: byDay.size, shardCount, importedAt: now.toISOString() };
 }
 
-function normalizeLegacyVideo(item, source, generatedAt, identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0 }) {
+function normalizeLegacyVideo(item, source, generatedAt, identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0, missingChannelIds: 0 }) {
   if (!/^[A-Za-z0-9_-]{11}$/u.test(String(item.videoId || ""))) throw new Error(`invalid legacy videoId: ${item.videoId}`);
-  if (!item.title || !item.channelName || !item.channelId) throw new Error(`legacy video metadata incomplete: ${item.videoId}`);
+  if (!item.title || !item.channelName) throw new Error(`legacy video metadata incomplete: ${item.videoId}`);
+  if (!item.channelId) identityAudit.missingChannelIds += 1;
   const publishedMs = Number(item.publishedTimestamp);
   if (!Number.isFinite(publishedMs)) throw new Error(`legacy eventTime missing: ${item.videoId}`);
   if (publishedMs > Date.parse(generatedAt) + 6 * 3600000) throw new Error(`legacy eventTime is future: ${item.videoId}`);
@@ -163,8 +164,9 @@ function normalizeLegacyVideo(item, source, generatedAt, identityAudit = { deriv
     videoId: item.videoId,
     title: item.title,
     channelName: item.channelName,
-    channelId: item.channelId,
+    channelId: item.channelId || "",
     channelHandle: item.channelHandle || "",
+    channelIdentityStatus: item.channelId ? "known" : "legacy-missing",
     publishedAt: new Date(publishedMs).toISOString(),
     thumbnailUrl: item.thumbnailUrl || `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
     watchUrl: `https://www.youtube.com/watch?v=${item.videoId}`,

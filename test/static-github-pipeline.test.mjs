@@ -75,7 +75,7 @@ test("legacy all is byte-bound, split into day shards, and restores all beyond 7
   const legacy = {
     id: "all", retentionPolicy: "permanent", generatedAt: "2026-08-22T17:52:03.305Z",
     items: [{
-      videoId: "abcdefghijk", title: "old stream", channelName: "Old VTuber", channelId: "UCold",
+      videoId: "abcdefghijk", title: "old stream", channelName: "Old VTuber", channelId: "",
       publishedTimestamp: Date.parse("2026-01-02T03:04:05Z"), sourceGroups: ["today"], selectedSourceId: "source",
       songs: [
         { occurrenceId: null, index: 1, time: "0:10", seconds: 10, title: "Old Song", artist: "Old Artist", raw: "old", rawHash: "raw-hash", sourceId: "source", sourceHash: "hash", needsReview: false },
@@ -89,6 +89,7 @@ test("legacy all is byte-bound, split into day shards, and restores all beyond 7
   assert.equal(summary.occurrenceCount, 1);
   assert.equal(summary.derivedOccurrenceIds, 1);
   assert.equal(summary.rejectedEmptyTitles, 1);
+  assert.equal(summary.missingChannelIds, 1);
   assert.equal(fs.readdirSync(path.join(dataRoot, "days/2026-01-02")).length, 1);
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 50, maxShardBytes: 100000 });
   assert.equal(meta.ranges["7d"].songs.totalCount, 0);
