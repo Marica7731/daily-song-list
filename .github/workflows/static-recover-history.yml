@@ -22,7 +22,7 @@ on:
       video_limit:
         description: "Bounded eligible videos inspected in this run"
         required: false
-        default: "700"
+        default: "180"
 
 permissions:
   actions: write
@@ -58,9 +58,18 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Validate bounded recovery batch
+        run: |
+          set -Eeuo pipefail
+          limit="${{ inputs.video_limit || '180' }}"
+          [[ "$limit" =~ ^[0-9]+$ ]] && (( limit >= 1 && limit <= 200 )) || {
+            echo "STATIC_RECOVERY_LIMIT_INVALID limit=$limit max=200" >&2
+            exit 70
+          }
+
       - name: Recover one bounded immutable source
         env:
-          STATIC_RECOVERY_LIMIT: ${{ inputs.video_limit || '700' }}
+          STATIC_RECOVERY_LIMIT: ${{ inputs.video_limit || '180' }}
           STATIC_MAX_SHARD_BYTES: "4000000"
           DAILY_SONG_FETCH_RETRIES: "2"
           DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
@@ -131,7 +140,7 @@ jobs:
         if: inputs.mode == 'date' && fromJSON(steps.outcome.outputs.remaining) > 0 && fromJSON(steps.outcome.outputs.no_progress) < 3
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="${{ inputs.recovery_date }}" -f through_date="${{ inputs.through_date }}" -f video_limit="${{ inputs.video_limit || '700' }}"
+        run: gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="${{ inputs.recovery_date }}" -f through_date="${{ inputs.through_date }}" -f video_limit="${{ inputs.video_limit || '180' }}"
 
       - name: Advance to the next pinned date
         if: inputs.mode == 'date' && inputs.through_date != '' && fromJSON(steps.outcome.outputs.remaining) == 0 && inputs.recovery_date != inputs.through_date
@@ -146,4 +155,4 @@ jobs:
             echo "STATIC_RECOVERY_SEQUENCE_RANGE_INVALID current=$current next=$next through=$through" >&2
             exit 72
           }
-          gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="$next" -f through_date="$through" -f video_limit="${{ inputs.video_limit || '700' }}"
+          gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="$next" -f through_date="$through" -f video_limit="${{ inputs.video_limit || '180' }}"

@@ -126,6 +126,9 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   const workflow = fs.readFileSync(path.resolve(".github/workflows/static-recover-history.yml"), "utf8");
   assert.match(workflow, /runs-on: ubuntu-latest/);
   assert.match(workflow, /timeout-minutes: 55/);
+  assert.match(workflow, /default: "180"/);
+  assert.match(workflow, /Validate bounded recovery batch/);
+  assert.match(workflow, /limit >= 1 && limit <= 200/);
   assert.match(workflow, /npm run static:recover/);
   assert.match(workflow, /Resume an incomplete date checkpoint/);
   assert.match(workflow, /through_date:/);
