@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "mode": "date",
-  "date": "2026-08-24",
-  "at": "2026-08-31T23:32:19.344Z",
-  "status": "COMPLETE",
-  "processingStatus": "PROCESSED",
-  "remaining": 0,
-  "inspected": 2,
-  "completed": 2,
-  "failures": 0,
-  "checkpointReason": "batch_exhausted",
-  "checkpointElapsedMs": 8400,
+  "date": "2026-08-25",
+  "at": "2026-08-31T23:33:48.715Z",
+  "status": "MISSING",
+  "processingStatus": "IN_PROGRESS",
+  "remaining": 319,
+  "inspected": 124,
+  "completed": 123,
+  "failures": 1,
+  "checkpointReason": "time_budget",
+  "checkpointElapsedMs": 1219080,
   "noProgressAttempts": 0,
   "coverage": {
     "complete": true,
@@ -19,8 +19,8 @@
     "incomplete": []
   },
   "proof": {
-    "bytes": 2544117,
-    "gitBlobSha1": "4113a9255d3e8fce6de54b6adec6c77058d597f1",
-    "sha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
+    "bytes": 2167152,
+    "gitBlobSha1": "4e45e3c123702928db2920b5e8af0522cea5f2f2",
+    "sha256": "94b7cd35d7c1bb1585f820cb89de2214ee18d21667d4dced9d3acf940596ba5c"
   }
 }
