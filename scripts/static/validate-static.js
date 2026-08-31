@@ -21,8 +21,10 @@ for (const range of ["7d", "30d", "all"]) {
   for (const type of ["songs", "artists", "vtubers"]) {
     const manifest = read(`rankings/${range}/${type}/manifest.json`);
     if (!Number.isInteger(manifest.pageCount) || manifest.pageCount < 1) fail(`${range}/${type} pageCount invalid`);
+    if (manifest.pageNumberWidth !== 4) fail(`${range}/${type} pageNumberWidth invalid`);
+    if (manifest.path !== `rankings/${range}/${type}/page-{page:04d}.json`) fail(`${range}/${type} page path contract invalid`);
     for (let page = 1; page <= manifest.pageCount; page += 1) {
-      const relative = `rankings/${range}/${type}/page-${String(page).padStart(4, "0")}.json`;
+      const relative = manifest.path.replace("{page:04d}", String(page).padStart(manifest.pageNumberWidth, "0"));
       const payload = read(relative);
       if (payload.range !== range || payload.type !== type || payload.page !== page) fail(`${relative} identity mismatch`);
       checkSize(relative);

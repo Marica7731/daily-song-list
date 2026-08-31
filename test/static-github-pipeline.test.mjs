@@ -43,6 +43,8 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
 
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 1, maxShardBytes: 100000 });
   assert.equal(meta.ranges["7d"].songs.totalCount, 1);
+  assert.equal(meta.ranges["7d"].songs.pageNumberWidth, 4);
+  assert.equal(meta.ranges["7d"].songs.path, "rankings/7d/songs/page-{page:04d}.json");
   assert.equal(meta.ranges["30d"].artists.totalCount, 1);
   assert.equal(meta.ranges.all.vtubers.totalCount, 1);
   assert.deepEqual(meta.historyGaps, [HISTORY_GAP]);
