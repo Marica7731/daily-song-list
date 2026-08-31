@@ -1,0 +1,115 @@
+name: Recover GitHub static song history
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "legacy imports the pinned all baseline; date resumes one pinned missing day"
+        required: true
+        default: "legacy"
+        type: choice
+        options:
+          - legacy
+          - date
+      recovery_date:
+        description: "Required for date mode: 2026-08-23 through 2026-08-31"
+        required: false
+        default: ""
+      video_limit:
+        description: "Bounded eligible videos inspected in this run"
+        required: false
+        default: "700"
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: daily-song-list-static-update
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout bounded recovery inputs
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/static-recover-history.yml
+            /.github/workflows/deploy-pages.yml
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /data/static/**
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Recover one bounded immutable source
+        env:
+          STATIC_RECOVERY_LIMIT: ${{ inputs.video_limit || '700' }}
+          STATIC_MAX_SHARD_BYTES: "4000000"
+          DAILY_SONG_FETCH_RETRIES: "2"
+          DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
+          DAILY_SONG_REQUEST_DELAY_MS: "300"
+          DAILY_SONG_REQUEST_JITTER_MS: "200"
+          DAILY_SONG_MAX_429_ERRORS: "6"
+        run: npm run static:recover -- --mode "${{ inputs.mode }}" --date "${{ inputs.recovery_date }}"
+
+      - name: Validate recovered static shards
+        run: npm run static:validate
+
+      - name: Read recovery outcome
+        id: outcome
+        run: |
+          set -Eeuo pipefail
+          status=$(node -p "require('./data/static/v1/recovery/last-run.json').status")
+          no_progress=$(node -p "require('./data/static/v1/recovery/last-run.json').noProgressAttempts || 0")
+          remaining=$(node -p "require('./data/static/v1/recovery/last-run.json').remaining || 0")
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "no_progress=$no_progress" >> "$GITHUB_OUTPUT"
+          echo "remaining=$remaining" >> "$GITHUB_OUTPUT"
+
+      - name: Commit persistent recovery data only
+        id: commit
+        run: |
+          set -Eeuo pipefail
+          mapfile -t changed < <(git status --short --untracked-files=all | awk '{print $2}')
+          for path in "${changed[@]}"; do
+            [[ "$path" == data/static/v1/* ]] || {
+              echo "STATIC_RECOVERY_UNEXPECTED_PATH path=$path" >&2
+              exit 71
+            }
+          done
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/static/v1
+          git commit -m "data: recover static song history"
+          git push origin HEAD:main
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+          echo "STATIC_RECOVERY_PUSHED commit=$(git rev-parse HEAD)"
+
+      - name: Deploy recovered immutable snapshot
+        if: steps.commit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
+
+      - name: Resume an incomplete date checkpoint
+        if: inputs.mode == 'date' && fromJSON(steps.outcome.outputs.remaining) > 0 && fromJSON(steps.outcome.outputs.no_progress) < 3
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run static-recover-history.yml --ref main -f mode=date -f recovery_date="${{ inputs.recovery_date }}" -f video_limit="${{ inputs.video_limit || '700' }}"

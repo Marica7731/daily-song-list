@@ -1,3 +1,15 @@
+# 2026-09-01 GitHub 静态历史恢复（当前 active goal）
+
+- 目标：修复新静态站把 `all` 实际裁成当前 `7d` 的迁移缺陷。以 Git 历史中最后一个可证明完整的旧 `all` 基线为父数据，再由 GitHub Actions 逐日核验并补入 `2026-08-23` 至 `2026-08-31` 的可靠快照，重新生成 7d/30d/all、排行榜、搜索、详情与来源分片并发布 Pages。
+- 当前事实：公网 `7d`、`30d`、`all` 都是 1,626 首，旧全量历史没有迁入；旧生产 `data/all.json` 仍存在于提交 `7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2`，文件大小 54,175,861 bytes、Git blob `43d0bbab4d0221604aa4a2a470c685284448ef4d`。该基线必须在 Action 内校验并转换，不得重新提交单个无限增长大 JSON。
+- 来源门禁：日期只能在存在不可变来源 bytes、真实 `eventTime`、视频/频道/歌曲/occurrence 身份、来源 SHA 与完整覆盖证据时从 `MISSING` 改为 `COMPLETE`；部分频道、部分记录、metadata、日志、WDC cache 或半成品一律不能冒充完整日数据。
+- 架构边界：仅使用 GitHub Actions、Git 持久化静态分片和 GitHub Pages；不复活 VPS、PostgreSQL、WDC、relay、Mac/Windows 常驻任务，不创建第二 clone、时间戳备份或大型本地数据库副本。
+- 实施顺序：在单一固定分支实现旧 all 基线导入、逐日 immutable source manifest、稳定去重与可恢复 Action；聚焦测试和完整静态验证通过后 commit/push/PR/CI/合并，实际运行恢复 Action，再运行 Pages。
+- 验收：Action terminal success；数据 commit 已进入 `main`；公网 `all` 数量显著大于 `7d` 且旧歌曲详情可读；7d/30d 按 `publishedAt` 取窗；每个 2026-08-23..31 日期只显示 `COMPLETE` 或 `MISSING`，已恢复日期从 history gap 中移除；公开 meta/ranking/search/detail/source 与真实浏览器均通过。
+- 禁止把“代码已写”“Action 已启动”“endpoint 200”或“all 名称存在”当成完成。未真实发布和在线核验前 goal 保持 active。
+
+---
+
 # daily-song-list 主线：旧系统退役与 GitHub-native 静态站重建
 
 ## 2026-08-31 二叉决策与 B 分支（当前 active goal）

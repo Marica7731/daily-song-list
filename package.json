@@ -35,6 +35,7 @@
     "health:update": "node scripts/analyze-update-health.js",
     "watchdog:update": "node scripts/watchdog-update.js",
     "static:update": "node scripts/static/collect-and-build.js",
+    "static:recover": "node scripts/static/recover-history.js",
     "static:validate": "node scripts/static/validate-static.js",
     "backfill:inbox": "node scripts/run-backfill-update.js",
     "vsinger:probe": "node scripts/vsinger-http/probe-public-pages.js",
