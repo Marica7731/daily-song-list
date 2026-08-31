@@ -1,21 +1,31 @@
 {
   "schemaVersion": 1,
-  "mode": "legacy",
-  "date": null,
-  "at": "2026-08-31T19:54:26.743Z",
-  "status": "COMPLETE",
-  "proof": {
-    "bytes": 54175861,
-    "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d",
-    "sha256": "21860b0a38d1200a4681fe8f74ee270770f959e28c52eb4eb353bac3839ee4b2"
+  "mode": "date",
+  "date": "2026-08-23",
+  "at": "2026-08-31T20:00:40.870Z",
+  "status": "MISSING",
+  "processingStatus": "IN_PROGRESS",
+  "remaining": 436,
+  "completed": 152,
+  "failures": 436,
+  "noProgressAttempts": 0,
+  "coverage": {
+    "complete": false,
+    "status": "MISSING",
+    "sourceCount": 2,
+    "incomplete": [
+      {
+        "keyword": "歌枠",
+        "itemCount": 500,
+        "limit": 500,
+        "reachedBottom": false,
+        "truncatedByLimit": true
+      }
+    ]
   },
-  "videoCount": 3082,
-  "occurrenceCount": 47649,
-  "reviewedUnknown": 0,
-  "derivedOccurrenceIds": 31638,
-  "rejectedEmptyTitles": 1,
-  "missingChannelIds": 520,
-  "dayCount": 57,
-  "shardCount": 57,
-  "importedAt": "2026-08-31T19:54:26.743Z"
+  "proof": {
+    "bytes": 2603822,
+    "gitBlobSha1": "4d2a49b5310a3c6ff9a0c00dd2b45c64148b53c7",
+    "sha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
+  }
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-08-31T19:54:26.743Z",
+  "generatedAt": "2026-08-31T20:00:40.870Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -21,7 +21,125 @@
     "2026-08-30": "MISSING",
     "2026-08-31": "MISSING"
   },
-  "historyRecovery": {},
+  "historyRecovery": {
+    "2026-08-23": {
+      "attempts": 1,
+      "noProgressAttempts": 0,
+      "processedEligibleVideos": 159,
+      "status": "MISSING",
+      "processingStatus": "IN_PROGRESS",
+      "source": {
+        "commit": "e7892ced185fc24731ee9be1adcb25f651e7ba4e",
+        "snapshotId": "20260823T155046Z",
+        "capturedAt": "2026-08-23T15:50:46.174Z",
+        "gitBlobSha1": "4d2a49b5310a3c6ff9a0c00dd2b45c64148b53c7",
+        "bytes": 2603822,
+        "videoCount": 611,
+        "path": "data/today-snapshots/20260823T155046Z.json",
+        "rawSha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
+      },
+      "eligibleVideos": 595,
+      "remainingVideos": 436,
+      "coverage": {
+        "complete": false,
+        "status": "MISSING",
+        "sourceCount": 2,
+        "incomplete": [
+          {
+            "keyword": "歌枠",
+            "itemCount": 500,
+            "limit": 500,
+            "reachedBottom": false,
+            "truncatedByLimit": true
+          }
+        ]
+      },
+      "lastCompleted": 152,
+      "lastFailures": [
+        {
+          "videoId": "eN_RiGzrEyk",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "A2aTbBmDrtU",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "Tzn7pUp2gNQ",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "xpy3Vr2TpCE",
+          "message": "https://www.youtube.com/watch?v=xpy3Vr2TpCE&hl=ja&persist_hl=1 HTTP 429"
+        },
+        {
+          "videoId": "jYgkjyf8o-A",
+          "message": "https://www.youtube.com/watch?v=jYgkjyf8o-A&hl=ja&persist_hl=1 HTTP 429"
+        },
+        {
+          "videoId": "FO4VNr2aCfg",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "d_bf_GxSijM",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "3gspY-zJFY0",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "Jv5rlPjGpRs",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "FXVwjQ3bciI",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "CV1P8eOJGLs",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "lJCEf2l59Nk",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "8x9Nlz-GAGU",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "Cxaya6eAFus",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "wuhZh6ADObI",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "ytlP_eLxk1E",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "eR3HwpiUcXM",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "cMC6JAx8Fvg",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "Sw0AahgPHmk",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        },
+        {
+          "videoId": "T0Ot-ZoXQbQ",
+          "message": "YouTube HTTP 429 limit reached (6/6); stopped further inspections"
+        }
+      ],
+      "updatedAt": "2026-08-31T20:00:40.870Z"
+    }
+  },
   "legacyBaseline": {
     "status": "COMPLETE",
     "repository": "Marica7731/daily-song-list",
@@ -41,8 +159,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260831T183147Z",
-  "sourceCapturedAt": "2026-08-31T18:31:47.672Z",
+  "sourceSnapshotId": "20260823T155046Z",
+  "sourceCapturedAt": "2026-08-23T15:50:46.174Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
@@ -50,9 +168,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 3439,
-  "videoCount": 3277,
-  "songOccurrenceCount": 49731,
+  "processedVideoCount": 3591,
+  "videoCount": 3379,
+  "songOccurrenceCount": 51388,
   "ranges": {
     "7d": {
       "songs": {
@@ -76,40 +194,40 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 8750,
-        "pageCount": 175,
+        "totalCount": 9366,
+        "pageCount": 188,
         "pageSize": 50,
         "path": "rankings/30d/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 3929,
-        "pageCount": 79,
+        "totalCount": 4155,
+        "pageCount": 84,
         "pageSize": 50,
         "path": "rankings/30d/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 740,
-        "pageCount": 15,
+        "totalCount": 811,
+        "pageCount": 17,
         "pageSize": 50,
         "path": "rankings/30d/vtubers/page-{page}.json"
       }
     },
     "all": {
       "songs": {
-        "totalCount": 18803,
-        "pageCount": 377,
+        "totalCount": 19280,
+        "pageCount": 386,
         "pageSize": 50,
         "path": "rankings/all/songs/page-{page}.json"
       },
       "artists": {
-        "totalCount": 7747,
-        "pageCount": 155,
+        "totalCount": 7902,
+        "pageCount": 159,
         "pageSize": 50,
         "path": "rankings/all/artists/page-{page}.json"
       },
       "vtubers": {
-        "totalCount": 1621,
-        "pageCount": 33,
+        "totalCount": 1669,
+        "pageCount": 34,
         "pageSize": 50,
         "path": "rankings/all/vtubers/page-{page}.json"
       }
