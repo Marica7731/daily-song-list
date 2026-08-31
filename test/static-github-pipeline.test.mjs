@@ -135,5 +135,8 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   assert.match(workflow, /DAILY_SONG_REQUEST_DELAY_MS: "2500"/);
   assert.match(workflow, /DAILY_SONG_429_COOLDOWN_MS: "60000"/);
   assert.match(workflow, /git add -- data\/static\/v1/);
+  assert.match(workflow, /git fetch --depth=2 origin main/);
+  assert.match(workflow, /git rebase origin\/main/);
+  assert.match(workflow, /STATIC_RECOVERY_REBASE_UNEXPECTED_PATH/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);
 });
