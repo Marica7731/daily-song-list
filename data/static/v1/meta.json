@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-08-31T23:07:38.337Z",
+  "generatedAt": "2026-08-31T23:29:06.914Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -59,9 +59,9 @@
       "updatedAt": "2026-08-31T20:57:33.532Z"
     },
     "2026-08-24": {
-      "attempts": 4,
+      "attempts": 5,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 564,
+      "processedEligibleVideos": 580,
       "status": "MISSING",
       "processingStatus": "IN_PROGRESS",
       "source": {
@@ -75,19 +75,28 @@
         "rawSha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
       },
       "eligibleVideos": 582,
-      "remainingVideos": 18,
+      "remainingVideos": 2,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 158,
-      "lastInspected": 158,
-      "lastFailures": [],
-      "checkpointReason": "time_budget",
-      "checkpointElapsedMs": 1204333,
-      "updatedAt": "2026-08-31T23:07:38.337Z"
+      "lastCompleted": 16,
+      "lastInspected": 18,
+      "lastFailures": [
+        {
+          "videoId": "MHKsi-oL2wg",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        },
+        {
+          "videoId": "bGuSdhPIRx4",
+          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        }
+      ],
+      "checkpointReason": "batch_exhausted",
+      "checkpointElapsedMs": 109223,
+      "updatedAt": "2026-08-31T23:29:06.914Z"
     }
   },
   "legacyBaseline": {
@@ -118,9 +127,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 4542,
-  "videoCount": 3860,
-  "songOccurrenceCount": 55149,
+  "processedVideoCount": 4558,
+  "videoCount": 3864,
+  "songOccurrenceCount": 55153,
   "ranges": {
     "7d": {
       "songs": {
@@ -161,7 +170,7 @@
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1228,
+        "totalCount": 1230,
         "pageCount": 25,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -184,7 +193,7 @@
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2033,
+        "totalCount": 2035,
         "pageCount": 41,
         "pageSize": 50,
         "pageNumberWidth": 4,
