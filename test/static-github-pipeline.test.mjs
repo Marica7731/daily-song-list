@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const { HISTORY_GAP, buildStaticSite, hashId, initialState } = require("../scripts/static/collect-and-build.js");
-const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
+const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
 
 test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-static-"));
@@ -122,11 +122,20 @@ test("truncated immutable discovery remains MISSING even after its records can b
   assert.equal(snapshotCoverage({ groups: { today: { sources: [{ keyword: "弾き語り", itemCount: 80, limit: 500, reachedBottom: true, truncatedByLimit: false }] } } }).status, "COMPLETE");
 });
 
+test("history recovery wall-clock budget checkpoints only after an inspected video", () => {
+  assert.equal(recoveryBudgetExpired(1_000, 20_000, 21_000, 0), false);
+  assert.equal(recoveryBudgetExpired(1_000, 20_000, 20_999, 1), false);
+  assert.equal(recoveryBudgetExpired(1_000, 20_000, 21_000, 1), true);
+});
+
 test("history recovery workflow is GitHub-hosted, bounded, resumable, and static-only", () => {
   const workflow = fs.readFileSync(path.resolve(".github/workflows/static-recover-history.yml"), "utf8");
   assert.match(workflow, /runs-on: ubuntu-latest/);
   assert.match(workflow, /timeout-minutes: 55/);
   assert.match(workflow, /default: "180"/);
+  assert.match(workflow, /checkpoint_minutes:/);
+  assert.match(workflow, /checkpoint_minutes >= 5 && checkpoint_minutes <= 25/);
+  assert.match(workflow, /STATIC_RECOVERY_BUDGET_MS:/);
   assert.match(workflow, /Validate bounded recovery batch/);
   assert.match(workflow, /limit >= 1 && limit <= 200/);
   assert.match(workflow, /npm run static:recover/);

@@ -22,6 +22,7 @@ const SOURCES = require("./recovery-sources.json");
 const MODE = argument("--mode") || process.env.STATIC_RECOVERY_MODE || "legacy";
 const DATE = argument("--date") || process.env.STATIC_RECOVERY_DATE || "";
 const LIMIT = positiveInt(process.env.STATIC_RECOVERY_LIMIT, 700);
+const BUDGET_MS = positiveInt(process.env.STATIC_RECOVERY_BUDGET_MS, 20 * 60 * 1000);
 const MAX_SHARD_BYTES = positiveInt(process.env.STATIC_MAX_SHARD_BYTES, 4_000_000);
 const NOW = new Date(process.env.STATIC_NOW || Date.now());
 const TARGET_DATES = Object.keys(SOURCES.dates).sort();
@@ -85,13 +86,29 @@ async function recoverDate(state, date) {
   const batch = pending.slice(0, LIMIT);
   const completed = [];
   const failures = [];
+  const startedAtMs = Date.now();
+  let inspected = 0;
+  let checkpointReason = batch.length
+    ? pending.length > batch.length ? "video_limit" : "batch_exhausted"
+    : "no_pending_videos";
   for (const candidate of batch) {
+    if (recoveryBudgetExpired(startedAtMs, BUDGET_MS, Date.now(), inspected)) {
+      checkpointReason = "time_budget";
+      break;
+    }
+    console.log(`[static-recovery] date=${date} video=${candidate.videoId} checkpoint=${inspected + 1}/${batch.length} elapsedMs=${Date.now() - startedAtMs}`);
     try {
       const result = await fetchVideoSongList(candidate);
       completed.push({ candidate: compactCandidate(candidate, { snapshotId: source.snapshotId, capturedAt: source.capturedAt }), result });
       console.log(`[static-recovery] date=${date} video=${candidate.videoId} result=${result.audit?.result || "unknown"} songs=${result.detail?.songs?.length || 0}`);
     } catch (error) {
       failures.push({ videoId: candidate.videoId, message: error.message });
+    } finally {
+      inspected += 1;
+    }
+    if (recoveryBudgetExpired(startedAtMs, BUDGET_MS, Date.now(), inspected)) {
+      checkpointReason = "time_budget";
+      break;
     }
   }
   persistCompleted(state, completed, NOW, DATA_ROOT);
@@ -106,13 +123,16 @@ async function recoverDate(state, date) {
   progress.remainingVideos = remaining;
   progress.coverage = coverage;
   progress.lastCompleted = completed.length;
+  progress.lastInspected = inspected;
   progress.lastFailures = failures.slice(0, 20);
+  progress.checkpointReason = checkpointReason;
+  progress.checkpointElapsedMs = Date.now() - startedAtMs;
   progress.updatedAt = NOW.toISOString();
   state.recoveryDates[date] = progress;
   state.historyDays[date] = progress.status;
   state.lastSourceSnapshotId = source.snapshotId;
   state.lastSourceCapturedAt = source.capturedAt;
-  return { status: progress.status, processingStatus: progress.processingStatus, remaining, completed: completed.length, failures: failures.length, noProgressAttempts: progress.noProgressAttempts, coverage, proof };
+  return { status: progress.status, processingStatus: progress.processingStatus, remaining, inspected, completed: completed.length, failures: failures.length, checkpointReason, checkpointElapsedMs: progress.checkpointElapsedMs, noProgressAttempts: progress.noProgressAttempts, coverage, proof };
 }
 
 function importLegacyDocument(dataRoot, state, document, source, now, maxShardBytes) {
@@ -271,8 +291,9 @@ async function fetchBytes(url) { const response = await fetch(url); if (!respons
 function rawUrl(repository, commit, file) { return `https://raw.githubusercontent.com/${repository}/${commit}/${file}`; }
 function argument(name) { const index = process.argv.indexOf(name); return index >= 0 ? String(process.argv[index + 1] || "") : ""; }
 function positiveInt(value, fallback) { const parsed = Number.parseInt(value, 10); return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback; }
+function recoveryBudgetExpired(startedAtMs, budgetMs, nowMs = Date.now(), inspected = 0) { return inspected > 0 && nowMs - startedAtMs >= budgetMs; }
 function assertOwnedRoot(root) { const normalized = path.resolve(root); if (normalized === path.parse(normalized).root || !normalized.replaceAll("\\", "/").endsWith("/data/static/v1")) throw new Error(`refusing unsafe static data root: ${normalized}`); }
 function readJsonIfExists(file) { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return null; } }
 function writeJson(file, value) { fs.mkdirSync(path.dirname(file), { recursive: true }); const temporary = `${file}.tmp`; fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8"); fs.renameSync(temporary, file); }
 
-module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, snapshotCoverage, verifySourceBytes };
+module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, recoveryBudgetExpired, snapshotCoverage, verifySourceBytes };
