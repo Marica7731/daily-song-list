@@ -13,6 +13,7 @@ const ROOT = path.resolve(__dirname, "../..");
 const DATA_ROOT = path.resolve(process.env.STATIC_DATA_ROOT || path.join(ROOT, "data/static/v1"));
 const VIDEO_LIMIT = positiveInt(process.env.STATIC_VIDEO_LIMIT, 24);
 const PAGE_SIZE = positiveInt(process.env.STATIC_PAGE_SIZE, 50);
+const PAGE_NUMBER_WIDTH = 4;
 const MAX_SHARD_BYTES = positiveInt(process.env.STATIC_MAX_SHARD_BYTES, 4_000_000);
 const NOW = new Date(process.env.STATIC_NOW || Date.now());
 const HISTORY_GAP = Object.freeze({ from: "2026-08-23", through: "2026-08-31", status: "MISSING" });
@@ -288,7 +289,7 @@ function addGroup(groups, key, name, secondary, video, song, keywords = []) {
 function writePagedRanking(dataRoot, range, type, records, pageSize, now, state) {
   const pages = Math.max(1, Math.ceil(records.length / pageSize));
   for (let index = 0; index < pages; index += 1) {
-    const file = path.join(dataRoot, "rankings", range, type, `page-${String(index + 1).padStart(4, "0")}.json`);
+    const file = path.join(dataRoot, "rankings", range, type, `page-${String(index + 1).padStart(PAGE_NUMBER_WIDTH, "0")}.json`);
     writeJson(file, {
       schemaVersion: 1,
       generatedAt: now.toISOString(),
@@ -302,7 +303,13 @@ function writePagedRanking(dataRoot, range, type, records, pageSize, now, state)
       items: records.slice(index * pageSize, (index + 1) * pageSize),
     });
   }
-  const manifest = { totalCount: records.length, pageCount: pages, pageSize, path: `rankings/${range}/${type}/page-{page}.json` };
+  const manifest = {
+    totalCount: records.length,
+    pageCount: pages,
+    pageSize,
+    pageNumberWidth: PAGE_NUMBER_WIDTH,
+    path: `rankings/${range}/${type}/page-{page:04d}.json`,
+  };
   writeJson(path.join(dataRoot, "rankings", range, type, "manifest.json"), manifest);
   return manifest;
 }

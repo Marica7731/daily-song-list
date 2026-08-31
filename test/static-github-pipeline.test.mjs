@@ -43,6 +43,8 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
 
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 1, maxShardBytes: 100000 });
   assert.equal(meta.ranges["7d"].songs.totalCount, 1);
+  assert.equal(meta.ranges["7d"].songs.pageNumberWidth, 4);
+  assert.equal(meta.ranges["7d"].songs.path, "rankings/7d/songs/page-{page:04d}.json");
   assert.equal(meta.ranges["30d"].artists.totalCount, 1);
   assert.equal(meta.ranges.all.vtubers.totalCount, 1);
   assert.deepEqual(meta.historyGaps, [HISTORY_GAP]);
@@ -124,6 +126,9 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   const workflow = fs.readFileSync(path.resolve(".github/workflows/static-recover-history.yml"), "utf8");
   assert.match(workflow, /runs-on: ubuntu-latest/);
   assert.match(workflow, /timeout-minutes: 55/);
+  assert.match(workflow, /default: "180"/);
+  assert.match(workflow, /Validate bounded recovery batch/);
+  assert.match(workflow, /limit >= 1 && limit <= 200/);
   assert.match(workflow, /npm run static:recover/);
   assert.match(workflow, /Resume an incomplete date checkpoint/);
   assert.match(workflow, /through_date:/);
@@ -133,5 +138,8 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   assert.match(workflow, /DAILY_SONG_REQUEST_DELAY_MS: "2500"/);
   assert.match(workflow, /DAILY_SONG_429_COOLDOWN_MS: "60000"/);
   assert.match(workflow, /git add -- data\/static\/v1/);
+  assert.match(workflow, /git fetch --depth=2 origin main/);
+  assert.match(workflow, /git rebase origin\/main/);
+  assert.match(workflow, /STATIC_RECOVERY_REBASE_UNEXPECTED_PATH/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);
 });
