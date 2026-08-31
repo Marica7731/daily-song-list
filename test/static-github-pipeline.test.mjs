@@ -77,13 +77,18 @@ test("legacy all is byte-bound, split into day shards, and restores all beyond 7
     items: [{
       videoId: "abcdefghijk", title: "old stream", channelName: "Old VTuber", channelId: "UCold",
       publishedTimestamp: Date.parse("2026-01-02T03:04:05Z"), sourceGroups: ["today"], selectedSourceId: "source",
-      songs: [{ occurrenceId: "old-one", time: "0:10", seconds: 10, title: "Old Song", artist: "Old Artist", raw: "", sourceId: "source", sourceHash: "hash", needsReview: false }],
+      songs: [
+        { occurrenceId: null, index: 1, time: "0:10", seconds: 10, title: "Old Song", artist: "Old Artist", raw: "old", rawHash: "raw-hash", sourceId: "source", sourceHash: "hash", needsReview: false },
+        { occurrenceId: "empty", index: 2, time: "0:20", seconds: 20, title: "", artist: "未記載", raw: "", rawHash: "empty-hash", sourceId: "source", sourceHash: "hash", needsReview: false },
+      ],
     }],
   };
   const source = { commit: "fixture", generatedAt: legacy.generatedAt };
   const summary = importLegacyDocument(dataRoot, state, legacy, source, now, 100000);
   assert.equal(summary.videoCount, 1);
   assert.equal(summary.occurrenceCount, 1);
+  assert.equal(summary.derivedOccurrenceIds, 1);
+  assert.equal(summary.rejectedEmptyTitles, 1);
   assert.equal(fs.readdirSync(path.join(dataRoot, "days/2026-01-02")).length, 1);
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 50, maxShardBytes: 100000 });
   assert.equal(meta.ranges["7d"].songs.totalCount, 0);
