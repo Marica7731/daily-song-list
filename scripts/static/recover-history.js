@@ -123,10 +123,11 @@ function importLegacyDocument(dataRoot, state, document, source, now, maxShardBy
   const byDay = new Map();
   const seenVideos = new Set();
   const seenOccurrences = new Set();
+  const identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0 };
   let occurrences = 0;
   let reviewedUnknown = 0;
   for (const item of document.items) {
-    const video = normalizeLegacyVideo(item, source, document.generatedAt);
+    const video = normalizeLegacyVideo(item, source, document.generatedAt, identityAudit);
     if (seenVideos.has(video.videoId)) throw new Error(`duplicate legacy video: ${video.videoId}`);
     seenVideos.add(video.videoId);
     for (const song of video.songs) {
@@ -148,10 +149,10 @@ function importLegacyDocument(dataRoot, state, document, source, now, maxShardBy
   state.processedVideoIds = [...new Set([...(state.processedVideoIds || []), ...seenVideos])].sort();
   const timestamps = document.items.map((item) => Number(item.publishedTimestamp)).filter(Number.isFinite);
   state.continuityStart = new Date(Math.min(...timestamps)).toISOString();
-  return { videoCount: seenVideos.size, occurrenceCount: occurrences, reviewedUnknown, dayCount: byDay.size, shardCount, importedAt: now.toISOString() };
+  return { videoCount: seenVideos.size, occurrenceCount: occurrences, reviewedUnknown, ...identityAudit, dayCount: byDay.size, shardCount, importedAt: now.toISOString() };
 }
 
-function normalizeLegacyVideo(item, source, generatedAt) {
+function normalizeLegacyVideo(item, source, generatedAt, identityAudit = { derivedOccurrenceIds: 0, rejectedEmptyTitles: 0 }) {
   if (!/^[A-Za-z0-9_-]{11}$/u.test(String(item.videoId || ""))) throw new Error(`invalid legacy videoId: ${item.videoId}`);
   if (!item.title || !item.channelName || !item.channelId) throw new Error(`legacy video metadata incomplete: ${item.videoId}`);
   const publishedMs = Number(item.publishedTimestamp);
@@ -171,10 +172,22 @@ function normalizeLegacyVideo(item, source, generatedAt) {
     keywords: item.sourceGroups || [],
     sourceSnapshotId: source.commit,
     sourceCapturedAt: generatedAt,
-    songs: item.songs.map((song) => {
-      if (!song.occurrenceId || !song.title || typeof song.artist !== "string" || !song.sourceHash) throw new Error(`legacy occurrence incomplete: ${item.videoId}`);
+    songs: item.songs.flatMap((song) => {
+      if (!song.title) {
+        identityAudit.rejectedEmptyTitles += 1;
+        return [];
+      }
+      if (typeof song.artist !== "string" || !song.sourceHash) throw new Error(`legacy occurrence incomplete: video=${item.videoId} index=${song.index || ""}`);
+      let occurrenceId = song.occurrenceId || "";
+      if (!occurrenceId) {
+        const sourceId = song.sourceId || item.selectedSourceId || "";
+        const seconds = Number(song.seconds);
+        if (!sourceId || !Number.isFinite(seconds) || !song.rawHash) throw new Error(`legacy occurrence identity unavailable: video=${item.videoId} index=${song.index || ""}`);
+        occurrenceId = `${item.videoId}:${sourceId}:${seconds}:${song.rawHash.slice(0, 16)}`;
+        identityAudit.derivedOccurrenceIds += 1;
+      }
       return {
-        occurrenceId: song.occurrenceId,
+        occurrenceId,
         time: song.time || "",
         seconds: Number.isFinite(Number(song.seconds)) ? Number(song.seconds) : 0,
         title: song.title,
