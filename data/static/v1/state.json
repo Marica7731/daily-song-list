@@ -4,6 +4,11 @@
   "historyGaps": [
     {
       "from": "2026-08-23",
+      "through": "2026-08-23",
+      "status": "MISSING"
+    },
+    {
+      "from": "2026-08-25",
       "through": "2026-08-31",
       "status": "MISSING"
     }
@@ -1664,6 +1669,7 @@
     "MF_faUMeFkw",
     "MFxqSJwByJg",
     "MGZeBtAroTk",
+    "MHKsi-oL2wg",
     "MIDEBZ0i1rg",
     "MI_yyBBJVnM",
     "MIgCUrmqhXI",
@@ -2774,6 +2780,7 @@
     "bEI6VNlo4vk",
     "bFEwAbBwrxs",
     "bGBLqufvFPY",
+    "bGuSdhPIRx4",
     "bHC0ZtkQAAo",
     "bHFSuGTSjjg",
     "bHg7pHteCNk",
@@ -30355,7 +30362,7 @@
       "snapshotCapturedAt": "2026-08-31T18:31:47.672Z"
     }
   ],
-  "updatedAt": "2026-08-31T23:29:06.914Z",
+  "updatedAt": "2026-08-31T23:32:19.344Z",
   "lastAttemptAt": "2026-08-31T18:46:47.821Z",
   "lastSourceSnapshotId": "20260824T155007Z",
   "lastSourceCapturedAt": "2026-08-24T15:50:07.863Z",
@@ -30373,7 +30380,7 @@
   ],
   "historyDays": {
     "2026-08-23": "MISSING",
-    "2026-08-24": "MISSING",
+    "2026-08-24": "COMPLETE",
     "2026-08-25": "MISSING",
     "2026-08-26": "MISSING",
     "2026-08-27": "MISSING",
@@ -30420,11 +30427,11 @@
       "updatedAt": "2026-08-31T20:57:33.532Z"
     },
     "2026-08-24": {
-      "attempts": 5,
+      "attempts": 6,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 580,
-      "status": "MISSING",
-      "processingStatus": "IN_PROGRESS",
+      "processedEligibleVideos": 582,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
       "source": {
         "commit": "ed64335e2434685fbcbdee0fe876cd8e0a74c69b",
         "snapshotId": "20260824T155007Z",
@@ -30436,28 +30443,19 @@
         "rawSha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
       },
       "eligibleVideos": 582,
-      "remainingVideos": 2,
+      "remainingVideos": 0,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 16,
-      "lastInspected": 18,
-      "lastFailures": [
-        {
-          "videoId": "MHKsi-oL2wg",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        },
-        {
-          "videoId": "bGuSdhPIRx4",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        }
-      ],
+      "lastCompleted": 2,
+      "lastInspected": 2,
+      "lastFailures": [],
       "checkpointReason": "batch_exhausted",
-      "checkpointElapsedMs": 109223,
-      "updatedAt": "2026-08-31T23:29:06.914Z"
+      "checkpointElapsedMs": 8400,
+      "updatedAt": "2026-08-31T23:32:19.344Z"
     }
   },
   "legacyBaseline": {
