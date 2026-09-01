@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T02:35:32.568Z",
+  "generatedAt": "2026-09-01T02:56:57.629Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -157,9 +157,9 @@
       "updatedAt": "2026-09-01T01:45:57.170Z"
     },
     "2026-08-27": {
-      "attempts": 3,
+      "attempts": 4,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 434,
+      "processedEligibleVideos": 509,
       "status": "MISSING",
       "processingStatus": "IN_PROGRESS",
       "source": {
@@ -173,28 +173,28 @@
         "rawSha256": "283ae1e8582aede7560b7b1be7c3b7156d9f7e1d0b6d095cbe7ed68db5f519a8"
       },
       "eligibleVideos": 511,
-      "remainingVideos": 77,
+      "remainingVideos": 2,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 154,
-      "lastInspected": 156,
+      "lastCompleted": 75,
+      "lastInspected": 77,
       "lastFailures": [
         {
-          "videoId": "39QUc00i42A",
+          "videoId": "_Vzhd-nJHQI",
           "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
         },
         {
-          "videoId": "7Jc7kL1hjcE",
+          "videoId": "8FMvSbeiQEY",
           "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
         }
       ],
-      "checkpointReason": "time_budget",
-      "checkpointElapsedMs": 1201039,
-      "updatedAt": "2026-09-01T02:35:32.568Z"
+      "checkpointReason": "batch_exhausted",
+      "checkpointElapsedMs": 510072,
+      "updatedAt": "2026-09-01T02:56:57.629Z"
     }
   },
   "legacyBaseline": {
@@ -225,28 +225,28 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 5830,
-  "videoCount": 4541,
-  "songOccurrenceCount": 61620,
+  "processedVideoCount": 5905,
+  "videoCount": 4565,
+  "songOccurrenceCount": 61677,
   "ranges": {
     "7d": {
       "songs": {
-        "totalCount": 4350,
-        "pageCount": 87,
+        "totalCount": 4366,
+        "pageCount": 88,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 1947,
-        "pageCount": 39,
+        "totalCount": 1951,
+        "pageCount": 40,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 593,
-        "pageCount": 12,
+        "totalCount": 608,
+        "pageCount": 13,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/vtubers/page-{page:04d}.json"
@@ -254,21 +254,21 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 13025,
+        "totalCount": 13021,
         "pageCount": 261,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 5670,
+        "totalCount": 5671,
         "pageCount": 114,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1662,
+        "totalCount": 1674,
         "pageCount": 34,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -277,21 +277,21 @@
     },
     "all": {
       "songs": {
-        "totalCount": 22410,
+        "totalCount": 22424,
         "pageCount": 449,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 9144,
+        "totalCount": 9147,
         "pageCount": 183,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2411,
+        "totalCount": 2423,
         "pageCount": 49,
         "pageSize": 50,
         "pageNumberWidth": 4,
