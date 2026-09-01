@@ -8,7 +8,7 @@
       "status": "MISSING"
     },
     {
-      "from": "2026-08-29",
+      "from": "2026-08-30",
       "through": "2026-08-31",
       "status": "MISSING"
     }
@@ -1649,6 +1649,7 @@
     "EMfSf25B3Lk",
     "EOeyn9TxWRk",
     "EP5YF7u4IMY",
+    "EPyrUK_8bvs",
     "EQFJ9k1Dyis",
     "EQe4ODA3gXE",
     "EQi_3JNo6AQ",
@@ -3257,6 +3258,7 @@
     "TQyMLDuwB6M",
     "TR83vHxWey4",
     "TRBzlQ3MTRw",
+    "TRaaFkyPLMA",
     "TT-5Vkp20So",
     "TTF_TjszDNo",
     "TVd40MtazI4",
@@ -5343,6 +5345,7 @@
     "lLYPDK7a8AM",
     "lN8EV5Kf2PE",
     "lNQ85Tir1TA",
+    "lOcvUaC1HjI",
     "lOqg6MuiWs4",
     "lPjnU9Osra0",
     "lPpst3Jwtzc",
@@ -32670,7 +32673,7 @@
       "snapshotCapturedAt": "2026-08-31T18:31:47.672Z"
     }
   ],
-  "updatedAt": "2026-09-01T05:34:46.410Z",
+  "updatedAt": "2026-09-01T05:51:31.377Z",
   "lastAttemptAt": "2026-08-31T18:46:47.821Z",
   "lastSourceSnapshotId": "20260829T153832Z",
   "lastSourceCapturedAt": "2026-08-29T15:38:32.205Z",
@@ -32693,7 +32696,7 @@
     "2026-08-26": "COMPLETE",
     "2026-08-27": "COMPLETE",
     "2026-08-28": "COMPLETE",
-    "2026-08-29": "MISSING",
+    "2026-08-29": "COMPLETE",
     "2026-08-30": "MISSING",
     "2026-08-31": "MISSING"
   },
@@ -32890,11 +32893,11 @@
       "updatedAt": "2026-09-01T04:19:27.055Z"
     },
     "2026-08-29": {
-      "attempts": 4,
+      "attempts": 5,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 562,
-      "status": "MISSING",
-      "processingStatus": "IN_PROGRESS",
+      "processedEligibleVideos": 565,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
       "source": {
         "commit": "a0fdb9c8be2d7accc2a3210b38037dc0181b6d79",
         "snapshotId": "20260829T153832Z",
@@ -32906,32 +32909,19 @@
         "rawSha256": "e97db78131a4b5702dcbd13320d5e152d9e72845ae89db8ee7245202a9af0e86"
       },
       "eligibleVideos": 565,
-      "remainingVideos": 3,
+      "remainingVideos": 0,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 119,
-      "lastInspected": 122,
-      "lastFailures": [
-        {
-          "videoId": "TRaaFkyPLMA",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        },
-        {
-          "videoId": "EPyrUK_8bvs",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        },
-        {
-          "videoId": "lOcvUaC1HjI",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        }
-      ],
+      "lastCompleted": 3,
+      "lastInspected": 3,
+      "lastFailures": [],
       "checkpointReason": "batch_exhausted",
-      "checkpointElapsedMs": 914768,
-      "updatedAt": "2026-09-01T05:34:46.410Z"
+      "checkpointElapsedMs": 14682,
+      "updatedAt": "2026-09-01T05:51:31.377Z"
     }
   },
   "legacyBaseline": {
