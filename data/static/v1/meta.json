@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T07:16:59.080Z",
+  "generatedAt": "2026-09-01T07:18:39.637Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -196,8 +196,8 @@
       "updatedAt": "2026-09-01T07:16:59.080Z"
     },
     "2026-08-28": {
-      "attempts": 5,
-      "noProgressAttempts": 0,
+      "attempts": 6,
+      "noProgressAttempts": 1,
       "processedEligibleVideos": 511,
       "status": "COMPLETE",
       "processingStatus": "PROCESSED",
@@ -219,12 +219,12 @@
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 71,
-      "lastInspected": 71,
+      "lastCompleted": 0,
+      "lastInspected": 0,
       "lastFailures": [],
-      "checkpointReason": "batch_exhausted",
-      "checkpointElapsedMs": 519948,
-      "updatedAt": "2026-09-01T04:19:27.055Z"
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 7,
+      "updatedAt": "2026-09-01T07:18:39.637Z"
     },
     "2026-08-29": {
       "attempts": 5,
@@ -348,8 +348,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260827T154402Z",
-  "sourceCapturedAt": "2026-08-27T15:44:02.962Z",
+  "sourceSnapshotId": "20260828T154855Z",
+  "sourceCapturedAt": "2026-08-28T15:48:55.290Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
