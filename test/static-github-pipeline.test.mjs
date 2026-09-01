@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const { HISTORY_GAP, buildStaticSite, hashId, initialState } = require("../scripts/static/collect-and-build.js");
-const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
+const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
 
 test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-static-"));
@@ -112,7 +112,7 @@ test("recovery source proof uses Git blob identity and missing days compact into
   ]);
 });
 
-test("truncated immutable discovery remains MISSING even after its records can be processed", () => {
+test("truncated immutable discovery remains MISSING", () => {
   assert.deepEqual(snapshotCoverage({ groups: { today: { sources: [{ keyword: "歌枠", itemCount: 500, limit: 500, reachedBottom: false, truncatedByLimit: true }] } } }), {
     complete: false,
     status: "MISSING",
@@ -120,6 +120,40 @@ test("truncated immutable discovery remains MISSING even after its records can b
     incomplete: [{ keyword: "歌枠", itemCount: 500, limit: 500, reachedBottom: false, truncatedByLimit: true }],
   });
   assert.equal(snapshotCoverage({ groups: { today: { sources: [{ keyword: "弾き語り", itemCount: 80, limit: 500, reachedBottom: true, truncatedByLimit: false }] } } }).status, "COMPLETE");
+});
+
+test("truncated immutable discovery is rejected before partial videos are ingested", () => {
+  const state = { recoveryDates: {}, historyDays: {}, processedVideoIds: ["existing-video"] };
+  const coverage = snapshotCoverage({ groups: { today: { sources: [{ keyword: "歌枠", itemCount: 500, limit: 500, reachedBottom: false, truncatedByLimit: true }] } } });
+  const outcome = rejectIncompleteSource(
+    state,
+    "2026-08-30",
+    { attempts: 0, noProgressAttempts: 0, processedEligibleVideos: 0 },
+    { snapshotId: "snapshot-0830", capturedAt: "2026-08-30T15:48:12.759Z", videoCount: 600 },
+    "data/today-snapshots/snapshot-0830.json",
+    { sha256: "fixture-sha" },
+    coverage,
+    new Date("2026-09-01T06:00:00Z"),
+  );
+
+  assert.deepEqual(outcome, {
+    status: "MISSING",
+    processingStatus: "SKIPPED_INCOMPLETE_SOURCE",
+    remaining: 0,
+    inspected: 0,
+    completed: 0,
+    failures: 0,
+    checkpointReason: "incomplete_source",
+    checkpointElapsedMs: 0,
+    noProgressAttempts: 0,
+    coverage,
+    proof: { sha256: "fixture-sha" },
+  });
+  assert.equal(state.historyDays["2026-08-30"], "MISSING");
+  assert.equal(state.recoveryDates["2026-08-30"].sourceVideoCount, 600);
+  assert.equal(state.recoveryDates["2026-08-30"].eligibleVideos, 0);
+  assert.equal(state.recoveryDates["2026-08-30"].processedEligibleVideos, 0);
+  assert.deepEqual(state.processedVideoIds, ["existing-video"]);
 });
 
 test("history recovery wall-clock budget checkpoints only after an inspected video", () => {
