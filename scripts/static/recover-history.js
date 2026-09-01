@@ -75,12 +75,15 @@ async function recoverDate(state, date) {
   const snapshot = JSON.parse(bytes.toString("utf8"));
   if (snapshot.snapshotId !== source.snapshotId) throw new Error(`snapshot identity mismatch: ${snapshot.snapshotId}`);
   const coverage = snapshotCoverage(snapshot);
+  const progress = state.recoveryDates[date] || { attempts: 0, noProgressAttempts: 0, processedEligibleVideos: 0 };
+  if (!coverage.complete) {
+    return rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, NOW);
+  }
   const items = extractMygitTodaySnapshotItems(snapshot, {
     snapshotId: source.snapshotId,
     snapshotUrl: rawUrl("Marica7731/mygit", source.commit, sourcePath),
     capturedAt: source.capturedAt,
   });
-  const progress = state.recoveryDates[date] || { attempts: 0, noProgressAttempts: 0, processedEligibleVideos: 0 };
   const processed = new Set(state.processedVideoIds || []);
   const pending = items.filter((item) => !processed.has(item.videoId));
   const batch = pending.slice(0, LIMIT);
@@ -133,6 +136,42 @@ async function recoverDate(state, date) {
   state.lastSourceSnapshotId = source.snapshotId;
   state.lastSourceCapturedAt = source.capturedAt;
   return { status: progress.status, processingStatus: progress.processingStatus, remaining, inspected, completed: completed.length, failures: failures.length, checkpointReason, checkpointElapsedMs: progress.checkpointElapsedMs, noProgressAttempts: progress.noProgressAttempts, coverage, proof };
+}
+
+function rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, now = NOW) {
+  progress.attempts += 1;
+  progress.noProgressAttempts = 0;
+  progress.status = "MISSING";
+  progress.processingStatus = "SKIPPED_INCOMPLETE_SOURCE";
+  progress.source = { ...source, path: sourcePath, rawSha256: proof.sha256 };
+  progress.sourceVideoCount = source.videoCount;
+  progress.eligibleVideos = 0;
+  progress.processedEligibleVideos = 0;
+  progress.remainingVideos = 0;
+  progress.coverage = coverage;
+  progress.lastCompleted = 0;
+  progress.lastInspected = 0;
+  progress.lastFailures = [];
+  progress.checkpointReason = "incomplete_source";
+  progress.checkpointElapsedMs = 0;
+  progress.updatedAt = now.toISOString();
+  state.recoveryDates[date] = progress;
+  state.historyDays[date] = "MISSING";
+  state.lastSourceSnapshotId = source.snapshotId;
+  state.lastSourceCapturedAt = source.capturedAt;
+  return {
+    status: "MISSING",
+    processingStatus: progress.processingStatus,
+    remaining: 0,
+    inspected: 0,
+    completed: 0,
+    failures: 0,
+    checkpointReason: progress.checkpointReason,
+    checkpointElapsedMs: 0,
+    noProgressAttempts: 0,
+    coverage,
+    proof,
+  };
 }
 
 function importLegacyDocument(dataRoot, state, document, source, now, maxShardBytes) {
@@ -296,4 +335,4 @@ function assertOwnedRoot(root) { const normalized = path.resolve(root); if (norm
 function readJsonIfExists(file) { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return null; } }
 function writeJson(file, value) { fs.mkdirSync(path.dirname(file), { recursive: true }); const temporary = `${file}.tmp`; fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8"); fs.renameSync(temporary, file); }
 
-module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, recoveryBudgetExpired, snapshotCoverage, verifySourceBytes };
+module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes };
