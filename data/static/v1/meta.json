@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T00:17:01.520Z",
+  "generatedAt": "2026-09-01T00:38:29.476Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -10,7 +10,7 @@
       "status": "MISSING"
     },
     {
-      "from": "2026-08-25",
+      "from": "2026-08-26",
       "through": "2026-08-31",
       "status": "MISSING"
     }
@@ -18,7 +18,7 @@
   "historyDays": {
     "2026-08-23": "MISSING",
     "2026-08-24": "COMPLETE",
-    "2026-08-25": "MISSING",
+    "2026-08-25": "COMPLETE",
     "2026-08-26": "MISSING",
     "2026-08-27": "MISSING",
     "2026-08-28": "MISSING",
@@ -95,11 +95,11 @@
       "updatedAt": "2026-08-31T23:32:19.344Z"
     },
     "2026-08-25": {
-      "attempts": 3,
+      "attempts": 4,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 481,
-      "status": "MISSING",
-      "processingStatus": "IN_PROGRESS",
+      "processedEligibleVideos": 496,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
       "source": {
         "commit": "43cc15b412db43c175b1bc4a89856063f9638bc8",
         "snapshotId": "20260825T154054Z",
@@ -111,24 +111,19 @@
         "rawSha256": "94b7cd35d7c1bb1585f820cb89de2214ee18d21667d4dced9d3acf940596ba5c"
       },
       "eligibleVideos": 496,
-      "remainingVideos": 15,
+      "remainingVideos": 0,
       "coverage": {
         "complete": true,
         "status": "COMPLETE",
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 168,
-      "lastInspected": 169,
-      "lastFailures": [
-        {
-          "videoId": "vEtLrBf7XN8",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
-        }
-      ],
-      "checkpointReason": "time_budget",
-      "checkpointElapsedMs": 1206817,
-      "updatedAt": "2026-09-01T00:17:01.520Z"
+      "lastCompleted": 15,
+      "lastInspected": 15,
+      "lastFailures": [],
+      "checkpointReason": "batch_exhausted",
+      "checkpointElapsedMs": 109086,
+      "updatedAt": "2026-09-01T00:38:29.476Z"
     }
   },
   "legacyBaseline": {
@@ -159,9 +154,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 4987,
-  "videoCount": 4099,
-  "songOccurrenceCount": 57251,
+  "processedVideoCount": 5002,
+  "videoCount": 4100,
+  "songOccurrenceCount": 57252,
   "ranges": {
     "7d": {
       "songs": {
@@ -188,7 +183,7 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 11589,
+        "totalCount": 11588,
         "pageCount": 232,
         "pageSize": 50,
         "pageNumberWidth": 4,
