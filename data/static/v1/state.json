@@ -32706,10 +32706,10 @@
       "snapshotCapturedAt": "2026-08-31T18:31:47.672Z"
     }
   ],
-  "updatedAt": "2026-09-01T07:22:00.027Z",
+  "updatedAt": "2026-09-01T07:23:38.085Z",
   "lastAttemptAt": "2026-08-31T18:46:47.821Z",
-  "lastSourceSnapshotId": "20260830T154812Z",
-  "lastSourceCapturedAt": "2026-08-30T15:48:12.759Z",
+  "lastSourceSnapshotId": "20260831T153846Z",
+  "lastSourceCapturedAt": "2026-08-31T15:38:46.747Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
@@ -33009,8 +33009,8 @@
       "requeuedVideos": 0
     },
     "2026-08-31": {
-      "attempts": 3,
-      "noProgressAttempts": 0,
+      "attempts": 4,
+      "noProgressAttempts": 1,
       "processedEligibleVideos": 427,
       "status": "COMPLETE",
       "processingStatus": "PROCESSED",
@@ -33032,12 +33032,12 @@
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 50,
-      "lastInspected": 50,
+      "lastCompleted": 0,
+      "lastInspected": 0,
       "lastFailures": [],
-      "checkpointReason": "batch_exhausted",
-      "checkpointElapsedMs": 391571,
-      "updatedAt": "2026-09-01T06:47:41.761Z"
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 5,
+      "updatedAt": "2026-09-01T07:23:38.085Z"
     }
   },
   "legacyBaseline": {
