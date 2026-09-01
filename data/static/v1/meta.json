@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T03:08:23.496Z",
+  "generatedAt": "2026-09-01T03:30:14.477Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -188,8 +188,8 @@
       "updatedAt": "2026-09-01T03:06:45.116Z"
     },
     "2026-08-28": {
-      "attempts": 1,
-      "noProgressAttempts": 0,
+      "attempts": 2,
+      "noProgressAttempts": 1,
       "processedEligibleVideos": 159,
       "status": "MISSING",
       "processingStatus": "IN_PROGRESS",
@@ -211,17 +211,93 @@
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 110,
-      "lastInspected": 111,
+      "lastCompleted": 0,
+      "lastInspected": 180,
       "lastFailures": [
         {
           "videoId": "6CJTZWLfoN8",
-          "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+          "message": "https://www.youtube.com/watch?v=6CJTZWLfoN8&hl=ja&persist_hl=1 HTTP 429"
+        },
+        {
+          "videoId": "jnf1gVoh8n0",
+          "message": "https://www.youtube.com/watch?v=jnf1gVoh8n0&hl=ja&persist_hl=1 HTTP 429"
+        },
+        {
+          "videoId": "Lis-XfQjo0Y",
+          "message": "https://www.youtube.com/watch?v=Lis-XfQjo0Y&hl=ja&persist_hl=1 HTTP 429"
+        },
+        {
+          "videoId": "eZmATCLWGAs",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "rMXmHm85MMw",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "hnYP0RHCOj4",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "2Geg5cutJTU",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "J-ypcrYCGw8",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "cqnz8_bQl0U",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "e3EAt42lLEI",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "LDfuzKcBAvk",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "FQUPiia02mo",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "85BI6qEyh0M",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "TR83vHxWey4",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "5IGVYec-bZk",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "dFBNl9EB9VM",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "AYttaoJdgpw",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "yE7LF1Zjsj4",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "jw6tKr69pDY",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+        },
+        {
+          "videoId": "nVY6zv1VDAo",
+          "message": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
         }
       ],
-      "checkpointReason": "time_budget",
-      "checkpointElapsedMs": 1215321,
-      "updatedAt": "2026-09-01T03:08:23.496Z"
+      "checkpointReason": "video_limit",
+      "checkpointElapsedMs": 261661,
+      "updatedAt": "2026-09-01T03:30:14.477Z"
     }
   },
   "legacyBaseline": {
