@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T05:51:31.377Z",
+  "generatedAt": "2026-09-01T06:02:46.891Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -248,6 +248,46 @@
       "checkpointReason": "batch_exhausted",
       "checkpointElapsedMs": 14682,
       "updatedAt": "2026-09-01T05:51:31.377Z"
+    },
+    "2026-08-30": {
+      "attempts": 1,
+      "noProgressAttempts": 0,
+      "processedEligibleVideos": 0,
+      "status": "MISSING",
+      "processingStatus": "SKIPPED_INCOMPLETE_SOURCE",
+      "source": {
+        "commit": "c98550789b85ad72befbfb6c7c3d4c55a14790e4",
+        "snapshotId": "20260830T154812Z",
+        "capturedAt": "2026-08-30T15:48:12.759Z",
+        "gitBlobSha1": "328af9afcfd1d023115162b49f6de0a098c25d2d",
+        "bytes": 2567445,
+        "videoCount": 600,
+        "path": "data/today-snapshots/20260830T154812Z.json",
+        "rawSha256": "855220703d7062efbbb962da200adcdfa0ec62481eec3114eee10a4828de46a3"
+      },
+      "sourceVideoCount": 600,
+      "eligibleVideos": 0,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": false,
+        "status": "MISSING",
+        "sourceCount": 2,
+        "incomplete": [
+          {
+            "keyword": "歌枠",
+            "itemCount": 500,
+            "limit": 500,
+            "reachedBottom": false,
+            "truncatedByLimit": true
+          }
+        ]
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "incomplete_source",
+      "checkpointElapsedMs": 0,
+      "updatedAt": "2026-09-01T06:02:46.891Z"
     }
   },
   "legacyBaseline": {
@@ -269,8 +309,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260829T153832Z",
-  "sourceCapturedAt": "2026-08-29T15:38:32.205Z",
+  "sourceSnapshotId": "20260830T154812Z",
+  "sourceCapturedAt": "2026-08-30T15:48:12.759Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
