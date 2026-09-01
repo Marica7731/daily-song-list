@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T07:20:20.163Z",
+  "generatedAt": "2026-09-01T07:22:00.027Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -258,7 +258,7 @@
       "updatedAt": "2026-09-01T07:20:20.163Z"
     },
     "2026-08-30": {
-      "attempts": 1,
+      "attempts": 2,
       "noProgressAttempts": 0,
       "processedEligibleVideos": 0,
       "status": "MISSING",
@@ -295,7 +295,11 @@
       "lastFailures": [],
       "checkpointReason": "incomplete_source",
       "checkpointElapsedMs": 0,
-      "updatedAt": "2026-09-01T06:02:46.891Z"
+      "updatedAt": "2026-09-01T07:22:00.027Z",
+      "purgedVideos": 0,
+      "purgedOccurrences": 0,
+      "purgedFiles": 0,
+      "requeuedVideos": 0
     },
     "2026-08-31": {
       "attempts": 3,
@@ -348,8 +352,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260829T153832Z",
-  "sourceCapturedAt": "2026-08-29T15:38:32.205Z",
+  "sourceSnapshotId": "20260830T154812Z",
+  "sourceCapturedAt": "2026-08-30T15:48:12.759Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
