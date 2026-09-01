@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T06:47:41.761Z",
+  "generatedAt": "2026-09-01T07:07:07.311Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -28,11 +28,11 @@
   },
   "historyRecovery": {
     "2026-08-23": {
-      "attempts": 4,
+      "attempts": 5,
       "noProgressAttempts": 0,
-      "processedEligibleVideos": 595,
+      "processedEligibleVideos": 0,
       "status": "MISSING",
-      "processingStatus": "PROCESSED",
+      "processingStatus": "SKIPPED_INCOMPLETE_SOURCE",
       "source": {
         "commit": "e7892ced185fc24731ee9be1adcb25f651e7ba4e",
         "snapshotId": "20260823T155046Z",
@@ -43,7 +43,7 @@
         "path": "data/today-snapshots/20260823T155046Z.json",
         "rawSha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
       },
-      "eligibleVideos": 595,
+      "eligibleVideos": 0,
       "remainingVideos": 0,
       "coverage": {
         "complete": false,
@@ -59,9 +59,17 @@
           }
         ]
       },
-      "lastCompleted": 95,
+      "lastCompleted": 0,
       "lastFailures": [],
-      "updatedAt": "2026-08-31T20:57:33.532Z"
+      "updatedAt": "2026-09-01T07:07:07.311Z",
+      "sourceVideoCount": 611,
+      "lastInspected": 0,
+      "checkpointReason": "incomplete_source",
+      "checkpointElapsedMs": 0,
+      "purgedVideos": 320,
+      "purgedOccurrences": 3127,
+      "purgedFiles": 2,
+      "requeuedVideos": 320
     },
     "2026-08-24": {
       "attempts": 6,
@@ -340,8 +348,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260831T153846Z",
-  "sourceCapturedAt": "2026-08-31T15:38:46.747Z",
+  "sourceSnapshotId": "20260823T155046Z",
+  "sourceCapturedAt": "2026-08-23T15:50:46.174Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
@@ -349,9 +357,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 7202,
-  "videoCount": 5250,
-  "songOccurrenceCount": 67530,
+  "processedVideoCount": 6882,
+  "videoCount": 4930,
+  "songOccurrenceCount": 64403,
   "ranges": {
     "7d": {
       "songs": {
@@ -378,22 +386,22 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 15042,
-        "pageCount": 301,
+        "totalCount": 13924,
+        "pageCount": 279,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 6473,
-        "pageCount": 130,
+        "totalCount": 5978,
+        "pageCount": 120,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2084,
-        "pageCount": 42,
+        "totalCount": 1903,
+        "pageCount": 39,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/vtubers/page-{page:04d}.json"
@@ -401,22 +409,22 @@
     },
     "all": {
       "songs": {
-        "totalCount": 24198,
-        "pageCount": 484,
+        "totalCount": 23215,
+        "pageCount": 465,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 9824,
-        "pageCount": 197,
+        "totalCount": 9408,
+        "pageCount": 189,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2788,
-        "pageCount": 56,
+        "totalCount": 2623,
+        "pageCount": 53,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/vtubers/page-{page:04d}.json"
