@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-09-01T07:07:07.311Z",
+  "generatedAt": "2026-09-01T07:09:02.826Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -72,7 +72,7 @@
       "requeuedVideos": 320
     },
     "2026-08-24": {
-      "attempts": 6,
+      "attempts": 7,
       "noProgressAttempts": 0,
       "processedEligibleVideos": 582,
       "status": "COMPLETE",
@@ -95,12 +95,12 @@
         "sourceCount": 2,
         "incomplete": []
       },
-      "lastCompleted": 2,
-      "lastInspected": 2,
+      "lastCompleted": 22,
+      "lastInspected": 22,
       "lastFailures": [],
       "checkpointReason": "batch_exhausted",
-      "checkpointElapsedMs": 8400,
-      "updatedAt": "2026-08-31T23:32:19.344Z"
+      "checkpointElapsedMs": 188862,
+      "updatedAt": "2026-09-01T07:09:02.826Z"
     },
     "2026-08-25": {
       "attempts": 4,
@@ -348,8 +348,8 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20260823T155046Z",
-  "sourceCapturedAt": "2026-08-23T15:50:46.174Z",
+  "sourceSnapshotId": "20260824T155007Z",
+  "sourceCapturedAt": "2026-08-24T15:50:07.863Z",
   "sourceCoverage": {
     "provider": "GitHub immutable legacy all",
     "status": "success",
@@ -357,9 +357,9 @@
     "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d"
   },
   "pendingVideoCount": 917,
-  "processedVideoCount": 6882,
-  "videoCount": 4930,
-  "songOccurrenceCount": 64403,
+  "processedVideoCount": 6904,
+  "videoCount": 4950,
+  "songOccurrenceCount": 64554,
   "ranges": {
     "7d": {
       "songs": {
@@ -386,21 +386,21 @@
     },
     "30d": {
       "songs": {
-        "totalCount": 13924,
-        "pageCount": 279,
+        "totalCount": 13974,
+        "pageCount": 280,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 5978,
+        "totalCount": 5993,
         "pageCount": 120,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1903,
+        "totalCount": 1911,
         "pageCount": 39,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -409,21 +409,21 @@
     },
     "all": {
       "songs": {
-        "totalCount": 23215,
-        "pageCount": 465,
+        "totalCount": 23262,
+        "pageCount": 466,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 9408,
+        "totalCount": 9419,
         "pageCount": 189,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2623,
+        "totalCount": 2630,
         "pageCount": 53,
         "pageSize": 50,
         "pageNumberWidth": 4,

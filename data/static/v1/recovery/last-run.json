@@ -1,38 +1,26 @@
 {
   "schemaVersion": 1,
   "mode": "date",
-  "date": "2026-08-23",
-  "at": "2026-09-01T07:07:07.311Z",
-  "status": "MISSING",
-  "processingStatus": "SKIPPED_INCOMPLETE_SOURCE",
+  "date": "2026-08-24",
+  "at": "2026-09-01T07:09:02.826Z",
+  "status": "COMPLETE",
+  "processingStatus": "PROCESSED",
   "remaining": 0,
-  "inspected": 0,
-  "completed": 0,
+  "inspected": 22,
+  "completed": 22,
   "failures": 0,
-  "checkpointReason": "incomplete_source",
-  "checkpointElapsedMs": 0,
+  "checkpointReason": "batch_exhausted",
+  "checkpointElapsedMs": 188862,
   "noProgressAttempts": 0,
-  "purgedVideos": 320,
-  "purgedOccurrences": 3127,
-  "purgedFiles": 2,
-  "requeuedVideos": 320,
   "coverage": {
-    "complete": false,
-    "status": "MISSING",
+    "complete": true,
+    "status": "COMPLETE",
     "sourceCount": 2,
-    "incomplete": [
-      {
-        "keyword": "歌枠",
-        "itemCount": 500,
-        "limit": 500,
-        "reachedBottom": false,
-        "truncatedByLimit": true
-      }
-    ]
+    "incomplete": []
   },
   "proof": {
-    "bytes": 2603822,
-    "gitBlobSha1": "4d2a49b5310a3c6ff9a0c00dd2b45c64148b53c7",
-    "sha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
+    "bytes": 2544117,
+    "gitBlobSha1": "4113a9255d3e8fce6de54b6adec6c77058d597f1",
+    "sha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
   }
 }
