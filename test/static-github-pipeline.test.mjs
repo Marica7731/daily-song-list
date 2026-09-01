@@ -146,6 +146,10 @@ test("truncated immutable discovery is rejected before partial videos are ingest
     checkpointReason: "incomplete_source",
     checkpointElapsedMs: 0,
     noProgressAttempts: 0,
+    purgedVideos: 0,
+    purgedOccurrences: 0,
+    purgedFiles: 0,
+    requeuedVideos: 0,
     coverage,
     proof: { sha256: "fixture-sha" },
   });
@@ -154,6 +158,61 @@ test("truncated immutable discovery is rejected before partial videos are ingest
   assert.equal(state.recoveryDates["2026-08-30"].eligibleVideos, 0);
   assert.equal(state.recoveryDates["2026-08-30"].processedEligibleVideos, 0);
   assert.deepEqual(state.processedVideoIds, ["existing-video"]);
+});
+
+test("truncated immutable discovery purges prior partial writes and requeues only their videos", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-incomplete-source-"));
+  const dataRoot = path.join(root, "data/static/v1");
+  const daysRoot = path.join(dataRoot, "days");
+  const partRoot = path.join(daysRoot, "2026-08-22");
+  fs.mkdirSync(partRoot, { recursive: true });
+  const incompleteVideo = {
+    videoId: "partial0001", sourceSnapshotId: "snapshot-0823",
+    songs: [{ occurrenceId: "one" }, { occurrenceId: "two" }],
+  };
+  const secondIncompleteVideo = {
+    videoId: "partial0002", sourceSnapshotId: "snapshot-0823",
+    songs: [{ occurrenceId: "three" }],
+  };
+  const completeVideo = {
+    videoId: "complete001", sourceSnapshotId: "snapshot-0824",
+    songs: [{ occurrenceId: "four" }],
+  };
+  fs.writeFileSync(path.join(daysRoot, "2026-08-23.json"), JSON.stringify({
+    schemaVersion: 1, day: "2026-08-23", videos: [incompleteVideo, completeVideo],
+  }));
+  fs.writeFileSync(path.join(partRoot, "part-0001.json"), JSON.stringify({
+    schemaVersion: 1, day: "2026-08-22", videos: [secondIncompleteVideo],
+  }));
+  const state = {
+    recoveryDates: {}, historyDays: {},
+    processedVideoIds: ["partial0001", "partial0002", "complete001", "metadata-only"],
+  };
+  const coverage = snapshotCoverage({ groups: { today: { sources: [{
+    keyword: "歌枠", itemCount: 500, limit: 500, reachedBottom: false, truncatedByLimit: true,
+  }] } } });
+  const outcome = rejectIncompleteSource(
+    state,
+    "2026-08-23",
+    { attempts: 3, noProgressAttempts: 0, processedEligibleVideos: 595 },
+    { snapshotId: "snapshot-0823", capturedAt: "2026-08-23T15:50:46.174Z", videoCount: 611 },
+    "data/today-snapshots/snapshot-0823.json",
+    { sha256: "fixture-sha" },
+    coverage,
+    new Date("2026-09-01T07:00:00Z"),
+    dataRoot,
+  );
+
+  assert.equal(outcome.purgedVideos, 2);
+  assert.equal(outcome.purgedOccurrences, 3);
+  assert.equal(outcome.purgedFiles, 2);
+  assert.equal(outcome.requeuedVideos, 2);
+  assert.deepEqual(state.processedVideoIds, ["complete001", "metadata-only"]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(daysRoot, "2026-08-23.json"))).videos, [completeVideo]);
+  assert.equal(fs.existsSync(partRoot), false);
+  assert.equal(state.recoveryDates["2026-08-23"].processingStatus, "SKIPPED_INCOMPLETE_SOURCE");
+  assert.equal(state.recoveryDates["2026-08-23"].purgedVideos, 2);
+  fs.rmSync(root, { recursive: true, force: true });
 });
 
 test("history recovery wall-clock budget checkpoints only after an inspected video", () => {

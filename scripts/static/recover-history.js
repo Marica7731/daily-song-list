@@ -77,7 +77,7 @@ async function recoverDate(state, date) {
   const coverage = snapshotCoverage(snapshot);
   const progress = state.recoveryDates[date] || { attempts: 0, noProgressAttempts: 0, processedEligibleVideos: 0 };
   if (!coverage.complete) {
-    return rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, NOW);
+    return rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, NOW, DATA_ROOT);
   }
   const items = extractMygitTodaySnapshotItems(snapshot, {
     snapshotId: source.snapshotId,
@@ -138,7 +138,8 @@ async function recoverDate(state, date) {
   return { status: progress.status, processingStatus: progress.processingStatus, remaining, inspected, completed: completed.length, failures: failures.length, checkpointReason, checkpointElapsedMs: progress.checkpointElapsedMs, noProgressAttempts: progress.noProgressAttempts, coverage, proof };
 }
 
-function rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, now = NOW) {
+function rejectIncompleteSource(state, date, progress, source, sourcePath, proof, coverage, now = NOW, dataRoot = DATA_ROOT) {
+  const purge = purgeIncompleteSourceVideos(state, source.snapshotId, dataRoot, now);
   progress.attempts += 1;
   progress.noProgressAttempts = 0;
   progress.status = "MISSING";
@@ -154,6 +155,10 @@ function rejectIncompleteSource(state, date, progress, source, sourcePath, proof
   progress.lastFailures = [];
   progress.checkpointReason = "incomplete_source";
   progress.checkpointElapsedMs = 0;
+  progress.purgedVideos = purge.videoCount;
+  progress.purgedOccurrences = purge.occurrenceCount;
+  progress.purgedFiles = purge.fileCount;
+  progress.requeuedVideos = purge.videoCount;
   progress.updatedAt = now.toISOString();
   state.recoveryDates[date] = progress;
   state.historyDays[date] = "MISSING";
@@ -169,9 +174,56 @@ function rejectIncompleteSource(state, date, progress, source, sourcePath, proof
     checkpointReason: progress.checkpointReason,
     checkpointElapsedMs: 0,
     noProgressAttempts: 0,
+    purgedVideos: purge.videoCount,
+    purgedOccurrences: purge.occurrenceCount,
+    purgedFiles: purge.fileCount,
+    requeuedVideos: purge.videoCount,
     coverage,
     proof,
   };
+}
+
+function purgeIncompleteSourceVideos(state, snapshotId, dataRoot, now = NOW) {
+  const result = { videoCount: 0, occurrenceCount: 0, fileCount: 0 };
+  if (!snapshotId) return result;
+  const daysRoot = path.join(dataRoot, "days");
+  if (!fs.existsSync(daysRoot)) return result;
+  const removedVideoIds = new Set();
+  const files = [];
+  for (const name of fs.readdirSync(daysRoot).sort()) {
+    const target = path.join(daysRoot, name);
+    if (/^\d{4}-\d{2}-\d{2}\.json$/u.test(name) && fs.statSync(target).isFile()) files.push(target);
+    if (/^\d{4}-\d{2}-\d{2}$/u.test(name) && fs.statSync(target).isDirectory()) {
+      for (const part of fs.readdirSync(target).filter((item) => /^part-\d{4}\.json$/u.test(item)).sort()) {
+        files.push(path.join(target, part));
+      }
+    }
+  }
+  for (const file of files) {
+    const shard = readJsonIfExists(file);
+    if (!Array.isArray(shard?.videos)) throw new Error(`invalid day shard while purging incomplete source: ${file}`);
+    const removed = shard.videos.filter((video) => video.sourceSnapshotId === snapshotId);
+    if (!removed.length) continue;
+    for (const video of removed) {
+      removedVideoIds.add(video.videoId);
+      result.occurrenceCount += Array.isArray(video.songs) ? video.songs.length : 0;
+    }
+    const videos = shard.videos.filter((video) => video.sourceSnapshotId !== snapshotId);
+    if (videos.length) writeJson(file, { ...shard, updatedAt: now.toISOString(), videos });
+    else fs.rmSync(file);
+    result.fileCount += 1;
+  }
+  for (const name of fs.readdirSync(daysRoot).sort()) {
+    const target = path.join(daysRoot, name);
+    if (/^\d{4}-\d{2}-\d{2}$/u.test(name) && fs.statSync(target).isDirectory() && fs.readdirSync(target).length === 0) {
+      fs.rmdirSync(target);
+    }
+  }
+  result.videoCount = removedVideoIds.size;
+  if (removedVideoIds.size) {
+    state.processedVideoIds = (state.processedVideoIds || []).filter((videoId) => !removedVideoIds.has(videoId));
+  }
+  return result;
 }
 
 function importLegacyDocument(dataRoot, state, document, source, now, maxShardBytes) {
@@ -335,4 +387,4 @@ function assertOwnedRoot(root) { const normalized = path.resolve(root); if (norm
 function readJsonIfExists(file) { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return null; } }
 function writeJson(file, value) { fs.mkdirSync(path.dirname(file), { recursive: true }); const temporary = `${file}.tmp`; fs.writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8"); fs.renameSync(temporary, file); }
 
-module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes };
+module.exports = { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, normalizeLegacyVideo, purgeIncompleteSourceVideos, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes };
