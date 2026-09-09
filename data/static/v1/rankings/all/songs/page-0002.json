@@ -1,16 +1,33 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-08T21:54:37.657Z",
+  "generatedAt": "2026-09-09T00:19:25.882Z",
   "range": "all",
   "type": "songs",
   "page": 2,
   "pageSize": 50,
   "pageCount": 486,
-  "totalCount": 24253,
+  "totalCount": 24270,
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "items": [
     {
       "rank": 51,
+      "id": "fc73863def7c1c85",
+      "name": "言って",
+      "secondary": "ヨルシカ",
+      "occurrenceCount": 86,
+      "videoCount": 86,
+      "keywords": [
+        "month",
+        "mygit_today_snapshot",
+        "mygit今日快照",
+        "today",
+        "弾き語り",
+        "歌枠"
+      ],
+      "detailPath": "entities/songs/fc73863def7c1c85.json"
+    },
+    {
+      "rank": 52,
       "id": "b9fabb3d7fb42752",
       "name": "イケナイ太陽",
       "secondary": "ORANGE RANGE",
@@ -27,24 +44,21 @@
       "detailPath": "entities/songs/b9fabb3d7fb42752.json"
     },
     {
-      "rank": 52,
-      "id": "fc73863def7c1c85",
-      "name": "言って",
-      "secondary": "ヨルシカ",
-      "occurrenceCount": 85,
-      "videoCount": 85,
+      "rank": 53,
+      "id": "f47e5b1ae1dc94be",
+      "name": "31/07/2026",
+      "secondary": "Live Ao vivo",
+      "occurrenceCount": 84,
+      "videoCount": 84,
       "keywords": [
-        "month",
-        "mygit_today_snapshot",
         "mygit今日快照",
-        "today",
         "弾き語り",
         "歌枠"
       ],
-      "detailPath": "entities/songs/fc73863def7c1c85.json"
+      "detailPath": "entities/songs/f47e5b1ae1dc94be.json"
     },
     {
-      "rank": 53,
+      "rank": 54,
       "id": "3f0bec3d94b34185",
       "name": "風になる",
       "secondary": "つじあやの",
@@ -61,7 +75,7 @@
       "detailPath": "entities/songs/3f0bec3d94b34185.json"
     },
     {
-      "rank": 54,
+      "rank": 55,
       "id": "f043a217f7a5bfac",
       "name": "あぶく",
       "secondary": "ヨルシカ",
@@ -78,21 +92,41 @@
       "detailPath": "entities/songs/f043a217f7a5bfac.json"
     },
     {
-      "rank": 55,
-      "id": "f47e5b1ae1dc94be",
-      "name": "31/07/2026",
-      "secondary": "Live Ao vivo",
+      "rank": 56,
+      "id": "0a45ba19ce866e80",
+      "name": "たばこ",
+      "secondary": "コレサワ",
       "occurrenceCount": 83,
       "videoCount": 83,
       "keywords": [
+        "month",
+        "mygit_today_snapshot",
         "mygit今日快照",
+        "today",
         "弾き語り",
         "歌枠"
       ],
-      "detailPath": "entities/songs/f47e5b1ae1dc94be.json"
+      "detailPath": "entities/songs/0a45ba19ce866e80.json"
     },
     {
-      "rank": 56,
+      "rank": 57,
+      "id": "4a67ec590f80b15a",
+      "name": "花火",
+      "secondary": "aiko",
+      "occurrenceCount": 83,
+      "videoCount": 83,
+      "keywords": [
+        "month",
+        "mygit_today_snapshot",
+        "mygit今日快照",
+        "today",
+        "弾き語り",
+        "歌枠"
+      ],
+      "detailPath": "entities/songs/4a67ec590f80b15a.json"
+    },
+    {
+      "rank": 58,
       "id": "d2d53bf24147f33c",
       "name": "星間飛行",
       "secondary": "ランカ・リー（中島愛）",
@@ -108,7 +142,7 @@
       "detailPath": "entities/songs/d2d53bf24147f33c.json"
     },
     {
-      "rank": 57,
+      "rank": 59,
       "id": "c0ad2bf756980b1e",
       "name": "星座になれたら",
       "secondary": "結束バンド",
@@ -125,7 +159,7 @@
       "detailPath": "entities/songs/c0ad2bf756980b1e.json"
     },
     {
-      "rank": 58,
+      "rank": 60,
       "id": "dc7857ec400b0b09",
       "name": "JANE DOE",
       "secondary": "米津玄師、 宇多田ヒカル",
@@ -139,40 +173,6 @@
         "歌枠"
       ],
       "detailPath": "entities/songs/dc7857ec400b0b09.json"
-    },
-    {
-      "rank": 59,
-      "id": "0a45ba19ce866e80",
-      "name": "たばこ",
-      "secondary": "コレサワ",
-      "occurrenceCount": 82,
-      "videoCount": 82,
-      "keywords": [
-        "month",
-        "mygit_today_snapshot",
-        "mygit今日快照",
-        "today",
-        "弾き語り",
-        "歌枠"
-      ],
-      "detailPath": "entities/songs/0a45ba19ce866e80.json"
-    },
-    {
-      "rank": 60,
-      "id": "4a67ec590f80b15a",
-      "name": "花火",
-      "secondary": "aiko",
-      "occurrenceCount": 82,
-      "videoCount": 82,
-      "keywords": [
-        "month",
-        "mygit_today_snapshot",
-        "mygit今日快照",
-        "today",
-        "弾き語り",
-        "歌枠"
-      ],
-      "detailPath": "entities/songs/4a67ec590f80b15a.json"
     },
     {
       "rank": 61,
@@ -291,6 +291,23 @@
     },
     {
       "rank": 68,
+      "id": "94a800a4db9cee1b",
+      "name": "少年時代",
+      "secondary": "井上陽水",
+      "occurrenceCount": 78,
+      "videoCount": 78,
+      "keywords": [
+        "month",
+        "mygit_today_snapshot",
+        "mygit今日快照",
+        "today",
+        "弾き語り",
+        "歌枠"
+      ],
+      "detailPath": "entities/songs/94a800a4db9cee1b.json"
+    },
+    {
+      "rank": 69,
       "id": "553567d28ad976fd",
       "name": "ギラギラ",
       "secondary": "Ado",
@@ -304,23 +321,6 @@
         "歌枠"
       ],
       "detailPath": "entities/songs/553567d28ad976fd.json"
-    },
-    {
-      "rank": 69,
-      "id": "94a800a4db9cee1b",
-      "name": "少年時代",
-      "secondary": "井上陽水",
-      "occurrenceCount": 77,
-      "videoCount": 77,
-      "keywords": [
-        "month",
-        "mygit_today_snapshot",
-        "mygit今日快照",
-        "today",
-        "弾き語り",
-        "歌枠"
-      ],
-      "detailPath": "entities/songs/94a800a4db9cee1b.json"
     },
     {
       "rank": 70,
