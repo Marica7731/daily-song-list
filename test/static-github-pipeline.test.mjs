@@ -55,9 +55,39 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   assert.equal(page.items[0].detailPath, `entities/songs/${hashId("songs\u001fsonga\u001fartista")}.json`);
   const detail = JSON.parse(fs.readFileSync(path.join(dataRoot, page.items[0].detailPath)));
   assert.equal(detail.occurrences.length, 2);
+  assert.equal(page.items[0].videoCount, 1);
+  assert.equal(page.items[0].sourcesPreview.length, 1);
+  assert.equal(page.items[0].sourcesPreview[0].channelName, "Fixture VTuber");
+
+  const vtuberPage = JSON.parse(fs.readFileSync(path.join(dataRoot, "rankings/7d/vtubers/page-0001.json")));
+  assert.equal(vtuberPage.items[0].occurrenceCount, 2);
+  assert.equal(vtuberPage.items[0].videoCount, 1);
+  assert.equal(vtuberPage.items[0].songCount, 1);
+  assert.equal(vtuberPage.items[0].sourcesPreview.length, 1);
+
+  const songId = hashId("songs\u001fsonga\u001fartista");
+  const searchShard = JSON.parse(fs.readFileSync(path.join(dataRoot, `search/${songId[0]}.json`)));
+  const searchSong = searchShard.items.find((item) => item.id === songId);
+  assert.ok(searchSong);
+  assert.equal(searchSong.occurrenceCount, 2);
+  assert.equal(searchSong.videoCount, 1);
+  assert.equal(searchSong.sourcesPreview.length, 1);
+  assert.deepEqual(searchSong.keywords, ["歌枠"]);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+
+
+test("static frontend keeps operational gaps out of the normal UI and never fabricates dash metrics", () => {
+  const html = fs.readFileSync(path.resolve("index.html"), "utf8");
+  const app = fs.readFileSync(path.resolve("assets/static-app.js"), "utf8");
+  assert.doesNotMatch(html, /id=["']gap["']|MISSING|历史缺口|不会把缺失历史伪装成完整数据/);
+  assert.doesNotMatch(app, /不会把缺失历史伪装成完整数据|occurrenceCount\s*:\s*["']–["']|videoCount\s*:\s*["']–["']/);
+  assert.match(html, /class="rank-header"/);
+  assert.match(app, /sourcesPreview/);
+  assert.match(app, /查看全部来源/);
+  assert.match(app, /hydrateSearchMetrics/);
+});
 
 test("static inspection batch prioritizes fresh videos and still drains backlog", () => {
   const now = new Date("2026-09-16T00:00:00Z");
