@@ -37,12 +37,14 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
       songs: [
         { occurrenceId: "one", time: "00:10", seconds: 10, title: "Song A", artist: "Artist A" },
         { occurrenceId: "two", time: "00:20", seconds: 20, title: "Song A", artist: "Artist A" },
+        { occurrenceId: "bad-live-meta", time: "04:00", seconds: 240, title: "24/07/2026", artist: "Live Ao vivo", raw: "Santo Rosário | Sexta-feira | 04:00 | 24/07/2026 | Live Ao vivo" },
       ],
     }],
   }));
 
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 1, maxShardBytes: 100000 });
   assert.equal(meta.ranges["7d"].songs.totalCount, 1);
+  assert.equal(meta.songOccurrenceCount, 2);
   assert.equal(meta.ranges["7d"].songs.pageNumberWidth, 4);
   assert.equal(meta.ranges["7d"].songs.path, "rankings/7d/songs/page-{page:04d}.json");
   assert.equal(meta.ranges["30d"].artists.totalCount, 1);
