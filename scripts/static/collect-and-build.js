@@ -8,6 +8,7 @@ const {
   fetchMygitTodaySnapshotSource,
   fetchVideoSongList,
 } = require("../update-songlist");
+const { isLikelyNonSongEntry } = require("../song-utils");
 
 const ROOT = path.resolve(__dirname, "../..");
 const DATA_ROOT = path.resolve(process.env.STATIC_DATA_ROOT || path.join(ROOT, "data/static/v1"));
@@ -433,7 +434,11 @@ function readDayVideos(dataRoot) {
   }
   const byVideoId = new Map();
   for (const file of files) {
-    for (const video of readJson(file).videos || []) byVideoId.set(video.videoId, video);
+    for (const video of readJson(file).videos || []) {
+      const sourceContext = { channelName: video.channelName || "", title: video.title || "" };
+      const songs = (video.songs || []).filter((song) => !isLikelyNonSongEntry(song, sourceContext));
+      byVideoId.set(video.videoId, { ...video, songs });
+    }
   }
   return [...byVideoId.values()];
 }
