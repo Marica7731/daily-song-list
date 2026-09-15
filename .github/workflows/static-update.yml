@@ -1,6 +1,13 @@
 name: Update GitHub static song data
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/static-update.yml"
+      - "scripts/static/**"
+      - "scripts/update-songlist.js"
   schedule:
     - cron: "23 * * * *"
   workflow_dispatch:
