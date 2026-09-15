@@ -15,6 +15,7 @@ const VIDEO_LIMIT = positiveInt(process.env.STATIC_VIDEO_LIMIT, 24);
 const PAGE_SIZE = positiveInt(process.env.STATIC_PAGE_SIZE, 50);
 const PAGE_NUMBER_WIDTH = 4;
 const MAX_SHARD_BYTES = positiveInt(process.env.STATIC_MAX_SHARD_BYTES, 4_000_000);
+const RECENT_PRIORITY_DAYS = positiveInt(process.env.STATIC_RECENT_PRIORITY_DAYS, 8);
 const NOW = new Date(process.env.STATIC_NOW || Date.now());
 const HISTORY_GAP = Object.freeze({ from: "2026-08-23", through: "2026-08-31", status: "MISSING" });
 
@@ -36,7 +37,7 @@ async function main() {
   const statePath = path.join(DATA_ROOT, "state.json");
   const state = readJsonIfExists(statePath) || initialState(NOW);
   enqueueSnapshot(state, source, NOW);
-  const batch = state.queue.slice(0, VIDEO_LIMIT);
+  const batch = selectInspectionBatch(state.queue, VIDEO_LIMIT, NOW);
   const completed = [];
   const failures = [];
   for (const candidate of batch) {
@@ -157,6 +158,36 @@ function compactCandidate(item, source) {
     snapshotCapturedAt: source.capturedAt,
     ...(item.fixtureDetail ? { fixtureDetail: item.fixtureDetail } : {}),
   };
+}
+
+function selectInspectionBatch(queue, limit, now = NOW) {
+  const boundedLimit = Math.max(0, Number.parseInt(limit, 10) || 0);
+  if (!boundedLimit || !Array.isArray(queue) || queue.length === 0) return [];
+
+  const nowMs = now instanceof Date ? now.getTime() : Date.parse(now);
+  const cutoff = nowMs - RECENT_PRIORITY_DAYS * 86400000;
+  const recent = [];
+  const backlog = [];
+
+  for (let index = 0; index < queue.length; index += 1) {
+    const candidate = queue[index];
+    const parsed = Date.parse(candidate?.publishedTimestamp || candidate?.snapshotCapturedAt || "");
+    const entry = { candidate, index, timestamp: Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY };
+    if (entry.timestamp >= cutoff) recent.push(entry);
+    else backlog.push(entry);
+  }
+
+  recent.sort((a, b) => b.timestamp - a.timestamp || a.index - b.index);
+  const backlogReserve = boundedLimit >= 6 ? Math.max(1, Math.floor(boundedLimit / 6)) : 0;
+  const recentTarget = Math.max(0, boundedLimit - backlogReserve);
+  const chosen = recent.slice(0, recentTarget);
+
+  chosen.push(...backlog.slice(0, Math.max(0, boundedLimit - chosen.length)));
+  if (chosen.length < boundedLimit) {
+    chosen.push(...recent.slice(recentTarget, recentTarget + (boundedLimit - chosen.length)));
+  }
+
+  return chosen.slice(0, boundedLimit).map((entry) => entry.candidate);
 }
 
 function persistCompleted(state, completed, now, dataRoot = DATA_ROOT) {
@@ -437,4 +468,5 @@ module.exports = {
   normalizeKey,
   persistCompleted,
   readDayVideos,
+  selectInspectionBatch,
 };
