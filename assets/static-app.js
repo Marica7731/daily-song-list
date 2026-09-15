@@ -2,7 +2,7 @@
 
 const BASE = "data/static/v1/";
 const state = { meta: null, page: 1, pageCount: 1, searchIndex: null };
-const el = Object.fromEntries(["status","gap","range","type","keyword","search","summary","ranking","prev","next","page","page-input","page-go","page-tokens","detail","detail-body"].map((id) => [id, document.getElementById(id)]));
+const el = Object.fromEntries(["status","range","type","keyword","search","summary","ranking","prev","next","page","page-input","page-go","page-tokens","detail","detail-body"].map((id) => [id, document.getElementById(id)]));
 
 start().catch(showError);
 
@@ -12,11 +12,7 @@ async function start() {
   const thirtyDaySongs = Number(state.meta.ranges?.["30d"]?.songs?.totalCount || 0);
   if (sevenDaySongs === 0 && thirtyDaySongs > 0) el.range.value = "30d";
   const pending = Number(state.meta.pendingVideoCount || 0);
-  el.status.textContent = `更新：${dateText(state.meta.generatedAt)} · 已处理 ${Number(state.meta.processedVideoCount || 0).toLocaleString()} 个视频${pending ? ` · 待处理 ${pending.toLocaleString()} 个` : ""}${sevenDaySongs === 0 && thirtyDaySongs > 0 ? " · 近 7 天数据正在追赶，已先显示近 30 天" : ""}`;
-  if (state.meta.historyGaps?.length) {
-    el.gap.hidden = false;
-    el.gap.textContent = `历史缺口：${state.meta.historyGaps.map((gap) => `${gap.from}～${gap.through}（${gap.status}）`).join("、")}。页面不会把缺失历史伪装成完整数据。`;
-  }
+  el.status.textContent = `更新 ${dateText(state.meta.generatedAt)} · ${Number(state.meta.videoCount || 0).toLocaleString("zh-CN")} 个视频 · ${Number(state.meta.songOccurrenceCount || 0).toLocaleString("zh-CN")} 条收录${pending ? ` · ${pending.toLocaleString("zh-CN")} 待处理` : ""}${sevenDaySongs === 0 && thirtyDaySongs > 0 ? " · 已临时显示近 30 天" : ""}`;
   for (const control of [el.range, el.type]) control.addEventListener("change", () => { state.page = 1; load(); });
   el.keyword.addEventListener("input", renderCurrent);
   el.search.addEventListener("input", debounce(search, 180));
@@ -36,7 +32,7 @@ async function load() {
   state.pageCount = manifest.pageCount;
   state.page = Math.min(state.page, state.pageCount);
   state.current = await json(`rankings/${range}/${type}/page-${String(state.page).padStart(4,"0")}.json`);
-  el.summary.textContent = `${label(type)} · ${label(range)} · ${state.current.totalCount} 项 · 静态分片 ${state.page}/${state.pageCount}`;
+  el.summary.textContent = `${label(type)} · ${label(range)} · ${Number(state.current.totalCount || 0).toLocaleString("zh-CN")} 项 · 第 ${state.page}/${state.pageCount} 页`;
   renderCurrent();
 }
 
@@ -49,7 +45,8 @@ function renderCurrent() {
 }
 
 async function search() {
-  const query = normalize(el.search.value);
+  const raw = el.search.value.trim();
+  const query = normalize(raw);
   if (!query) { state.page = 1; return load(); }
   if (!state.searchIndex) {
     const manifest = await json("search/manifest.json");
@@ -57,9 +54,13 @@ async function search() {
     state.searchIndex = shards.flatMap((shard) => shard.items);
   }
   const type = el.type.value;
-  const results = state.searchIndex.filter((item) => item.type === type && item.text.includes(query)).slice(0,100)
-    .map((item,index) => ({ rank:index+1,...item,occurrenceCount:"–",videoCount:"–",keywords:[] }));
-  el.summary.textContent = `全局搜索：${results.length} 项（最多显示 100）`;
+  let results = state.searchIndex.filter((item) => item.type === type && item.text.includes(query)).slice(0,100);
+  results = await hydrateSearchMetrics(results);
+  results.sort((a,b) => Number(b.occurrenceCount || 0) - Number(a.occurrenceCount || 0) || Number(b.videoCount || 0) - Number(a.videoCount || 0) || String(a.name).localeCompare(String(b.name), "ja"));
+  results = results.map((item,index) => ({ rank:index+1, ...item, keywords:item.keywords || [] }));
+  const keyword = normalize(el.keyword.value);
+  if (keyword) results = results.filter((item) => (item.keywords || []).some((value) => normalize(value).includes(keyword)));
+  el.summary.textContent = `全量搜索 · ${label(type)} · “${raw}” · ${results.length} 项${results.length === 100 ? "（最多显示 100）" : ""}`;
   render(results);
   el.page.textContent = "搜索";
   el["page-tokens"].replaceChildren();
@@ -70,17 +71,87 @@ async function search() {
   el.next.disabled = true;
 }
 
+async function hydrateSearchMetrics(items) {
+  const missing = items.filter((item) => !Number.isFinite(Number(item.occurrenceCount)) || !Number.isFinite(Number(item.videoCount)));
+  if (!missing.length) return items;
+  const metrics = new Map();
+  await Promise.all(missing.map(async (item) => {
+    try {
+      const detailPayload = await json(item.detailPath);
+      metrics.set(item.id, {
+        occurrenceCount: Number(detailPayload.occurrenceCount || 0),
+        videoCount: Number(detailPayload.videoCount || 0),
+        keywords: detailPayload.keywords || item.keywords || [],
+        sourcesPreview: detailPayload.sourcesPreview || item.sourcesPreview || [],
+      });
+    } catch { metrics.set(item.id, {}); }
+  }));
+  return items.map((item) => metrics.has(item.id) ? { ...item, ...metrics.get(item.id) } : item);
+}
+
 function render(items) {
   el.ranking.replaceChildren(...items.map((item) => {
     const li = document.createElement("li");
     li.className = "rank-row";
-    li.innerHTML = `<span class="rank">#${escapeText(item.rank)}</span><div class="rank-main"><div class="name">${escapeText(item.name)}</div><div class="secondary">${escapeText(item.secondary || "")}</div><div class="metrics">${escapeText(item.occurrenceCount)} 次 · ${escapeText(item.videoCount)} 个视频</div></div>`;
-    const button = document.createElement("button");
-    button.textContent = "详情";
-    button.addEventListener("click", () => detail(item));
-    li.append(button);
+
+    const rank = document.createElement("span");
+    rank.className = "rank";
+    rank.textContent = `#${item.rank ?? ""}`;
+
+    const main = document.createElement("div");
+    main.className = "rank-main";
+    main.innerHTML = `<div class="name">${escapeText(item.name)}</div>${item.secondary ? `<div class="secondary">${escapeText(item.secondary)}</div>` : ""}`;
+
+    const metrics = document.createElement("div");
+    metrics.className = "metrics";
+    const occurrenceCount = Number(item.occurrenceCount);
+    const videoCount = Number(item.videoCount);
+    metrics.innerHTML = Number.isFinite(occurrenceCount)
+      ? `<strong>${occurrenceCount.toLocaleString("zh-CN")}</strong><span>${el.type.value === "vtubers" ? "收录" : "次"}</span>${Number.isFinite(videoCount) ? `<small>${videoCount.toLocaleString("zh-CN")} 个视频</small>` : ""}`
+      : "<span>统计载入中</span>";
+
+    const sourceCell = document.createElement("div");
+    sourceCell.className = "source-preview";
+    const previews = uniqueVideoPreviews(item.sourcesPreview || []).slice(0,3);
+    for (const source of previews) {
+      const link = document.createElement("a");
+      link.className = "source-chip";
+      link.href = watchUrl(source);
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      const time = source.time || formatSeconds(source.seconds);
+      link.innerHTML = `<span>${escapeText(source.channelName || "YouTube")}</span>${time ? `<b>${escapeText(time)}</b>` : ""}`;
+      sourceCell.append(link);
+    }
+    const detailButton = document.createElement("button");
+    detailButton.type = "button";
+    detailButton.className = "detail-button";
+    detailButton.textContent = previews.length && Number.isFinite(videoCount) && videoCount <= previews.length ? "详情" : Number.isFinite(videoCount) ? `查看全部来源（${videoCount.toLocaleString("zh-CN")}）` : "查看来源";
+    detailButton.addEventListener("click", () => detail(item));
+    sourceCell.append(detailButton);
+
+    li.append(rank, main, metrics, sourceCell);
     return li;
   }));
+}
+
+function uniqueVideoPreviews(items) {
+  const seen = new Set();
+  return items.filter((item) => item?.videoId && !seen.has(item.videoId) && seen.add(item.videoId));
+}
+
+function watchUrl(entry) {
+  const base = `https://www.youtube.com/watch?v=${encodeURIComponent(entry.videoId || "")}`;
+  return Number(entry.seconds || 0) > 0 ? `${base}&t=${Math.floor(Number(entry.seconds))}s` : base;
+}
+
+function formatSeconds(value) {
+  const seconds = Math.max(0, Math.floor(Number(value) || 0));
+  if (!seconds) return "";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  return hours ? `${hours}:${String(minutes).padStart(2,"0")}:${String(rest).padStart(2,"0")}` : `${minutes}:${String(rest).padStart(2,"0")}`;
 }
 
 function renderPager() {
@@ -137,26 +208,33 @@ function goPage(target) {
 }
 
 async function detail(item) {
-  el["detail-body"].innerHTML = "<p>正在加载来源…</p>";
+  el["detail-body"].innerHTML = "<p class=\"detail-loading\">正在加载来源…</p>";
   el.detail.showModal();
   const payload = await json(item.detailPath);
-  const sorted = [...(payload.occurrences || [])].sort((a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
-  const visible = sorted.slice(0, 20);
+  const days = el.search.value.trim() ? null : (el.range.value === "7d" ? 7 : el.range.value === "30d" ? 30 : null);
+  const end = new Date(state.meta.generatedAt || Date.now()).getTime();
+  const start = days ? end - days * 86400000 : Number.NEGATIVE_INFINITY;
+  const sorted = [...(payload.occurrences || [])]
+    .filter((entry) => !days || (Date.parse(entry.publishedAt || "") >= start && Date.parse(entry.publishedAt || "") <= end + 21600000))
+    .sort((a,b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
+  renderDetailList(item, payload, sorted, Math.min(30, sorted.length));
+}
+
+function renderDetailList(item, payload, sorted, limit) {
+  const visible = sorted.slice(0, limit);
+  const videoCount = new Set(sorted.map((entry) => entry.videoId)).size;
   const occurrences = visible.map((entry) => {
-    const seconds = Number(entry.seconds || 0);
-    const watch = `https://www.youtube.com/watch?v=${encodeURIComponent(entry.videoId || "")}${seconds > 0 ? `&t=${Math.floor(seconds)}s` : ""}`;
-    return `<article class="occurrence"><a class="occurrence-thumb" href="${escapeAttr(watch)}" target="_blank" rel="noreferrer"><img src="${escapeAttr(entry.thumbnailUrl)}" alt="" loading="lazy" decoding="async"></a><div class="occurrence-body"><a class="occurrence-title" href="${escapeAttr(watch)}" target="_blank" rel="noreferrer">${escapeText(entry.videoTitle)}</a><div>${escapeText(entry.channelName)} · ${escapeText(entry.publishedAt?.slice(0,10) || "")}</div><div>${escapeText(entry.songTitle || payload.name)} ${escapeText(entry.artist || payload.secondary || "")} ${escapeText(entry.time || "")}</div><div class="occurrence-actions"><a href="${escapeAttr(watch)}" target="_blank" rel="noreferrer">▶ ${escapeText(entry.time || "YouTube")}</a><a href="${escapeAttr(entry.sourcePath)}" data-source="${escapeAttr(entry.sourcePath)}">完整歌单</a></div></div></article>`;
+    const watch = watchUrl(entry);
+    return `<article class="occurrence"><a class="occurrence-thumb" href="${escapeAttr(watch)}" target="_blank" rel="noreferrer"><img src="${escapeAttr(entry.thumbnailUrl)}" alt="" loading="lazy" decoding="async"></a><div class="occurrence-body"><a class="occurrence-title" href="${escapeAttr(watch)}" target="_blank" rel="noreferrer">${escapeText(entry.videoTitle || "YouTube 视频")}</a><div class="occurrence-meta">${escapeText(entry.channelName || "未知频道")} · ${escapeText(entry.publishedAt?.slice(0,10) || "")}</div><div class="occurrence-song">${escapeText([entry.songTitle || payload.name, entry.artist || payload.secondary, entry.time].filter(Boolean).join(" · "))}</div><div class="occurrence-actions"><a href="${escapeAttr(watch)}" target="_blank" rel="noreferrer">${escapeText(entry.time || "打开 YouTube")}</a>${entry.sourcePath ? `<button type="button" data-source="${escapeAttr(entry.sourcePath)}">完整歌单</button>` : ""}</div></div></article>`;
   }).join("");
-  const more = sorted.length > visible.length ? `<p class="detail-note">共 ${sorted.length} 条来源，为避免一次加载大量缩略图，这里先显示最新 20 条。</p>` : "";
-  el["detail-body"].innerHTML = `<h2>${escapeText(payload.name)}</h2><p>${escapeText(payload.secondary || "")} · ${payload.occurrenceCount} 次 · ${payload.videoCount} 个视频</p>${more}${occurrences || "<p>暂无来源。</p>"}`;
-  el["detail-body"].querySelectorAll("[data-source]").forEach((link) => link.addEventListener("click", async (event) => {
-    event.preventDefault();
-    const source = await json(link.dataset.source);
-    el["detail-body"].innerHTML = `<button class="detail-back" type="button">← 返回来源</button><h2>${escapeText(source.title)}</h2><p>${escapeText(source.channelName)} · ${escapeText(source.publishedAt)}</p><p><a href="${escapeAttr(source.watchUrl)}" target="_blank" rel="noreferrer">打开 YouTube</a></p>${source.songs.map((song) => {
-      const watch = `${source.watchUrl || `https://www.youtube.com/watch?v=${encodeURIComponent(source.videoId || "")}`}${Number(song.seconds || 0) > 0 ? `&t=${Math.floor(Number(song.seconds))}s` : ""}`;
-      return `<div class="source-song"><a href="${escapeAttr(watch)}" target="_blank" rel="noreferrer">${escapeText(song.time)} ${escapeText(song.title)} — ${escapeText(song.artist)}</a></div>`;
-    }).join("")}`;
-    el["detail-body"].querySelector(".detail-back").addEventListener("click", () => detail(item));
+  const more = limit < sorted.length ? `<button class="load-more" type="button">显示全部 ${sorted.length.toLocaleString("zh-CN")} 条来源</button>` : "";
+  el["detail-body"].innerHTML = `<div class="detail-title-row"><div><h2>${escapeText(payload.name)}</h2>${payload.secondary ? `<p>${escapeText(payload.secondary)}</p>` : ""}</div><strong>${sorted.length.toLocaleString("zh-CN")} 次 · ${videoCount.toLocaleString("zh-CN")} 个视频</strong></div>${occurrences || "<p>当前范围暂无来源。</p>"}${more}`;
+  const loadMore = el["detail-body"].querySelector(".load-more");
+  if (loadMore) loadMore.addEventListener("click", () => renderDetailList(item, payload, sorted, sorted.length));
+  el["detail-body"].querySelectorAll("[data-source]").forEach((button) => button.addEventListener("click", async () => {
+    const source = await json(button.dataset.source);
+    el["detail-body"].innerHTML = `<button class="detail-back" type="button">← 返回来源</button><h2>${escapeText(source.title || "完整歌单")}</h2><p>${escapeText(source.channelName || "")} · ${escapeText(source.publishedAt?.slice(0,10) || "")}</p><div class="source-song-list">${(source.songs || []).map((song) => { const url = `${source.watchUrl || `https://www.youtube.com/watch?v=${encodeURIComponent(source.videoId || "")}`}${Number(song.seconds || 0) > 0 ? `&t=${Math.floor(Number(song.seconds))}s` : ""}`; return `<a href="${escapeAttr(url)}" target="_blank" rel="noreferrer">${escapeText([song.time,song.title,song.artist].filter(Boolean).join(" · "))}</a>`; }).join("")}</div>`;
+    el["detail-body"].querySelector(".detail-back").addEventListener("click", () => renderDetailList(item, payload, sorted, limit));
   }));
 }
 
@@ -165,8 +243,8 @@ async function json(relative) {
   if (!response.ok) throw new Error(`${relative}: HTTP ${response.status}`);
   return response.json();
 }
-function label(value){return ({songs:"歌曲",artists:"歌手",vtubers:"VTuber","7d":"最近 7 天","30d":"最近 30 天",all:"连续数据全部"})[value]||value}
-function dateText(value){return value?new Intl.DateTimeFormat("zh-Hant",{dateStyle:"medium",timeStyle:"short",timeZone:"Asia/Taipei"}).format(new Date(value)):"未知"}
+function label(value){return ({songs:"歌曲榜",artists:"歌手榜",vtubers:"VTuber 频道榜","7d":"最近 7 天","30d":"最近 30 天",all:"全部"})[value]||value}
+function dateText(value){return value?new Intl.DateTimeFormat("zh-CN",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Shanghai"}).format(new Date(value)):"未知"}
 function normalize(value){return String(value||"").normalize("NFKC").toLocaleLowerCase("ja").replace(/[\s\p{P}\p{S}]+/gu,"")}
 function escapeText(value){return String(value??"").replace(/[&<>"']/g,(ch)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch])}
 function escapeAttr(value){return escapeText(value)}
