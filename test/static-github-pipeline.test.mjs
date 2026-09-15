@@ -6,7 +6,7 @@ import test from "node:test";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { HISTORY_GAP, buildStaticSite, hashId, initialState } = require("../scripts/static/collect-and-build.js");
+const { HISTORY_GAP, buildStaticSite, hashId, initialState, selectInspectionBatch } = require("../scripts/static/collect-and-build.js");
 const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
 
 test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () => {
@@ -54,6 +54,27 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   const detail = JSON.parse(fs.readFileSync(path.join(dataRoot, page.items[0].detailPath)));
   assert.equal(detail.occurrences.length, 2);
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+
+test("static inspection batch prioritizes fresh videos and still drains backlog", () => {
+  const now = new Date("2026-09-16T00:00:00Z");
+  const old = Array.from({ length: 30 }, (_, index) => ({
+    videoId: `old-${String(index).padStart(2, "0")}`,
+    publishedTimestamp: Date.parse("2026-08-01T00:00:00Z") + index * 1000,
+  }));
+  const recent = Array.from({ length: 30 }, (_, index) => ({
+    videoId: `recent-${String(index).padStart(2, "0")}`,
+    publishedTimestamp: Date.parse("2026-09-15T00:00:00Z") + index * 1000,
+  }));
+
+  const batch = selectInspectionBatch([...old, ...recent], 24, now);
+  assert.equal(batch.length, 24);
+  assert.deepEqual(batch.slice(0, 3).map((item) => item.videoId), ["recent-29", "recent-28", "recent-27"]);
+  assert.deepEqual(batch.slice(-4).map((item) => item.videoId), ["old-00", "old-01", "old-02", "old-03"]);
+
+  const backlogOnly = selectInspectionBatch(old, 24, now);
+  assert.deepEqual(backlogOnly.map((item) => item.videoId), old.slice(0, 24).map((item) => item.videoId));
 });
 
 test("static update workflow is GitHub-hosted, resumable, and commits only static data", () => {
