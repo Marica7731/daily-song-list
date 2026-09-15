@@ -454,7 +454,6 @@ function writeEntities(dataRoot, videos, now) {
         occurrenceCount,
         videoCount,
         keywords: [...entity.keywords].sort(),
-        sourcesPreview: sourcePreviews(entity.occurrences),
         detailPath,
         text: normalizeKey(`${entity.name} ${entity.secondary}`),
       });
