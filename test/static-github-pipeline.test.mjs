@@ -71,7 +71,7 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   assert.ok(searchSong);
   assert.equal(searchSong.occurrenceCount, 2);
   assert.equal(searchSong.videoCount, 1);
-  assert.equal(searchSong.sourcesPreview.length, 1);
+  assert.equal("sourcesPreview" in searchSong, false);
   assert.deepEqual(searchSong.keywords, ["歌枠"]);
   fs.rmSync(root, { recursive: true, force: true });
 });
