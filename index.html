@@ -1,35 +1,77 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="GitHub Actions 生成的 VTuber 歌回静态排行榜">
+  <meta name="description" content="VTuber 歌回歌曲、歌手和频道静态排行榜">
   <title>Daily Song List</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="assets/static.css">
 </head>
 <body>
-  <header>
-    <div>
-      <p class="eyebrow">GitHub-only static data</p>
-      <h1>Daily Song List</h1>
-      <p id="status">正在读取静态数据…</p>
+  <header class="site-header">
+    <div class="header-main">
+      <div>
+        <div class="brand">Daily Song List</div>
+        <p id="status">正在读取静态数据…</p>
+      </div>
+      <a class="repo" href="https://github.com/Marica7731/daily-song-list">GitHub</a>
     </div>
-    <a class="repo" href="https://github.com/Marica7731/daily-song-list">数据与更新记录</a>
   </header>
+
   <aside id="gap" hidden></aside>
+
   <main>
     <section class="controls" aria-label="排行榜筛选">
-      <label>范围<select id="range"><option value="7d">最近 7 天</option><option value="30d">最近 30 天</option><option value="all">连续数据全部</option></select></label>
-      <label>类型<select id="type"><option value="songs">歌曲</option><option value="artists">歌手</option><option value="vtubers">VTuber</option></select></label>
-      <label>来源筛选<input id="keyword" placeholder="例如：歌枠"></label>
-      <label>全局搜索<input id="search" type="search" placeholder="歌曲、歌手、VTuber"></label>
+      <label class="search-control">全量搜索
+        <input id="search" type="search" autocomplete="off" placeholder="歌曲、歌手、VTuber">
+      </label>
+      <label>类型
+        <select id="type">
+          <option value="songs">歌曲</option>
+          <option value="artists">歌手</option>
+          <option value="vtubers">VTuber</option>
+        </select>
+      </label>
+      <label>范围
+        <select id="range">
+          <option value="7d">最近 7 天</option>
+          <option value="30d">最近 30 天</option>
+          <option value="all">全部</option>
+        </select>
+      </label>
+      <label>当前页来源标签
+        <input id="keyword" autocomplete="off" placeholder="例如：歌枠、弾き語り">
+      </label>
     </section>
+
     <section class="summary" id="summary"></section>
-    <ol id="ranking" class="ranking" aria-live="polite"></ol>
-    <nav class="pager" aria-label="分页"><button id="prev">上一页</button><span id="page"></span><button id="next">下一页</button></nav>
+
+    <nav class="pager pager-top" aria-label="分页">
+      <button id="prev" type="button">上一页</button>
+      <div id="page-tokens" class="page-tokens" aria-label="页码"></div>
+      <span id="page" class="page-state"></span>
+      <label class="page-jump">跳到
+        <input id="page-input" type="number" inputmode="numeric" min="1" value="1" aria-label="页码">
+      </label>
+      <button id="page-go" type="button">跳转</button>
+      <button id="next" type="button">下一页</button>
+    </nav>
+
+    <ol id="ranking" class="ranking" aria-live="polite" aria-busy="false"></ol>
+
+    <nav class="pager pager-bottom" aria-label="底部分页">
+      <button type="button" onclick="document.getElementById('prev').click()">上一页</button>
+      <span class="pager-copy">可在上方输入页码快速跳转</span>
+      <button type="button" onclick="document.getElementById('next').click()">下一页</button>
+    </nav>
   </main>
-  <dialog id="detail"><button class="close" aria-label="关闭">×</button><div id="detail-body"></div></dialog>
+
+  <dialog id="detail">
+    <button class="close" type="button" aria-label="关闭">×</button>
+    <div id="detail-body"></div>
+  </dialog>
+
   <script src="assets/static-app.js" defer></script>
 </body>
 </html>
