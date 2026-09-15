@@ -14,7 +14,7 @@ async function start() {
   const pending = Number(state.meta.pendingVideoCount || 0);
   el.status.textContent = `更新 ${dateText(state.meta.generatedAt)} · ${Number(state.meta.videoCount || 0).toLocaleString("zh-CN")} 个视频 · ${Number(state.meta.songOccurrenceCount || 0).toLocaleString("zh-CN")} 条收录${pending ? ` · ${pending.toLocaleString("zh-CN")} 待处理` : ""}${sevenDaySongs === 0 && thirtyDaySongs > 0 ? " · 已临时显示近 30 天" : ""}`;
   for (const control of [el.range, el.type]) control.addEventListener("change", () => { state.page = 1; load(); });
-  el.keyword.addEventListener("input", renderCurrent);
+  el.keyword.addEventListener("input", () => { if (el.search.value.trim()) search(); else renderCurrent(); });
   el.search.addEventListener("input", debounce(search, 180));
   el.prev.addEventListener("click", () => goPage(state.page - 1));
   el.next.addEventListener("click", () => goPage(state.page + 1));
