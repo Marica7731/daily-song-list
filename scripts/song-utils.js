@@ -423,6 +423,12 @@ function isLikelyNonSongEntry(song, source = {}) {
 
   if (isCustomEmojiOnlyText(title)) return true;
   if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
+  if (
+    /^(?:\d{1,2}[\/.-]\d{1,2}[\/.-](?:19|20)\d{2}|(?:19|20)\d{2}[\/.-]\d{1,2}[\/.-]\d{1,2})$/u.test(title) &&
+    /^(?:live\s+ao\s+vivo|ao\s+vivo|live\s*stream)$/iu.test(artist)
+  ) {
+    return true;
+  }
   if (isBlockedSongEntry({ title, artist, raw }, source)) return true;
   if (!hasArtist && isStandaloneNonSongMarker(title)) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
