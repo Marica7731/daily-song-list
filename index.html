@@ -3,71 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="VTuber 歌回歌曲、歌手和频道静态排行榜">
-  <title>Daily Song List</title>
+  <meta name="description" content="YouTube VTuber 歌回歌曲、歌手与频道排行榜">
+  <meta name="theme-color" content="#f5f7fa">
+  <title>YouTube 歌回排行</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="assets/static.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-main">
-      <div>
-        <div class="brand">Daily Song List</div>
-        <p id="status">正在读取静态数据…</p>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="control-group compact-control">
+          <label for="range">范围</label>
+          <select id="range">
+            <option value="7d">最近 7 天</option>
+            <option value="30d">最近 30 天</option>
+            <option value="all">全部</option>
+          </select>
+        </div>
+        <div class="control-group compact-control">
+          <label for="type">榜单</label>
+          <select id="type">
+            <option value="songs">歌曲</option>
+            <option value="artists">歌手</option>
+            <option value="vtubers">VTuber 频道</option>
+          </select>
+        </div>
+        <label class="search-box" for="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" autocomplete="off" placeholder="全量搜索：歌曲、歌手、VTuber">
+        </label>
+        <details class="filter-popover">
+          <summary>筛选</summary>
+          <label for="keyword">来源标签</label>
+          <input id="keyword" autocomplete="off" placeholder="歌枠、弾き語り">
+          <small>仅筛当前载入页已有来源标签。</small>
+        </details>
+        <a class="repo-link" href="https://github.com/Marica7731/daily-song-list" target="_blank" rel="noreferrer">GitHub</a>
       </div>
-      <a class="repo" href="https://github.com/Marica7731/daily-song-list">GitHub</a>
-    </div>
-  </header>
+    </header>
 
-  <aside id="gap" hidden></aside>
-
-  <main>
-    <section class="controls" aria-label="排行榜筛选">
-      <label class="search-control">全量搜索
-        <input id="search" type="search" autocomplete="off" placeholder="歌曲、歌手、VTuber">
-      </label>
-      <label>类型
-        <select id="type">
-          <option value="songs">歌曲</option>
-          <option value="artists">歌手</option>
-          <option value="vtubers">VTuber</option>
-        </select>
-      </label>
-      <label>范围
-        <select id="range">
-          <option value="7d">最近 7 天</option>
-          <option value="30d">最近 30 天</option>
-          <option value="all">全部</option>
-        </select>
-      </label>
-      <label>当前页来源标签
-        <input id="keyword" autocomplete="off" placeholder="例如：歌枠、弾き語り">
-      </label>
+    <section class="content-head">
+      <div>
+        <div class="summary" id="summary">正在载入排行榜…</div>
+        <p id="status" class="status">正在读取静态数据…</p>
+      </div>
     </section>
 
-    <section class="summary" id="summary"></section>
+    <section class="rank-panel" aria-label="排行榜">
+      <div class="rank-header" aria-hidden="true">
+        <span>排名</span><span>名称</span><span>统计</span><span>来源</span>
+      </div>
+      <ol id="ranking" class="ranking" aria-live="polite" aria-busy="false"></ol>
+    </section>
 
     <nav class="pager pager-top" aria-label="分页">
       <button id="prev" type="button">上一页</button>
       <div id="page-tokens" class="page-tokens" aria-label="页码"></div>
       <span id="page" class="page-state"></span>
-      <label class="page-jump">跳到
+      <label class="page-jump">第
         <input id="page-input" type="number" inputmode="numeric" min="1" value="1" aria-label="页码">
+        页
       </label>
       <button id="page-go" type="button">跳转</button>
       <button id="next" type="button">下一页</button>
     </nav>
-
-    <ol id="ranking" class="ranking" aria-live="polite" aria-busy="false"></ol>
-
-    <nav class="pager pager-bottom" aria-label="底部分页">
-      <button type="button" onclick="document.getElementById('prev').click()">上一页</button>
-      <span class="pager-copy">可在上方输入页码快速跳转</span>
-      <button type="button" onclick="document.getElementById('next').click()">下一页</button>
-    </nav>
   </main>
 
-  <dialog id="detail">
+  <dialog id="detail" class="detail-dialog">
     <button class="close" type="button" aria-label="关闭">×</button>
     <div id="detail-body"></div>
   </dialog>

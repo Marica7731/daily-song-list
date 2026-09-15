@@ -299,7 +299,9 @@ function rankRecords(type, videos) {
   for (const video of videos) {
     if (type === "vtubers") {
       const name = video.channelName || video.channelHandle || video.videoId;
-      addGroup(groups, `${name}\u001f${video.channelId || video.channelHandle}`, name, "", video, null, video.keywords);
+      for (const song of video.songs || []) {
+        addGroup(groups, `${name}\u001f${video.channelId || video.channelHandle}`, name, "", video, song, video.keywords);
+      }
       continue;
     }
     for (const song of video.songs) {
@@ -317,7 +319,9 @@ function rankRecords(type, videos) {
       secondary: group.secondary,
       occurrenceCount: group.occurrences.length,
       videoCount: group.videoIds.size,
+      songCount: group.songKeys.size,
       keywords: [...group.keywords].sort(),
+      sourcesPreview: sourcePreviews(group.occurrences),
       detailPath: `entities/${type}/${hashId(`${type}\u001f${group.key}`)}.json`,
     }))
     .sort((a, b) => b.occurrenceCount - a.occurrenceCount || b.videoCount - a.videoCount || a.name.localeCompare(b.name, "ja"))
@@ -326,11 +330,58 @@ function rankRecords(type, videos) {
 
 function addGroup(groups, key, name, secondary, video, song, keywords = []) {
   const normalizedKey = normalizeKey(key);
-  const group = groups.get(normalizedKey) || { key: normalizedKey, name, secondary, occurrences: [], videoIds: new Set(), keywords: new Set() };
-  group.occurrences.push({ videoId: video.videoId, seconds: song?.seconds ?? null });
+  const group = groups.get(normalizedKey) || {
+    key: normalizedKey,
+    name,
+    secondary,
+    occurrences: [],
+    videoIds: new Set(),
+    songKeys: new Set(),
+    keywords: new Set(),
+  };
+  group.occurrences.push({
+    videoId: video.videoId,
+    videoTitle: video.title || "",
+    channelName: video.channelName || "",
+    publishedAt: video.publishedAt || "",
+    thumbnailUrl: video.thumbnailUrl || "",
+    sourcePath: `sources/${video.videoId.slice(0, 2)}/${video.videoId}.json`,
+    time: song?.time || "",
+    seconds: song?.seconds ?? null,
+    songTitle: song?.title || "",
+    artist: song?.artist || "",
+  });
   group.videoIds.add(video.videoId);
+  if (song?.title) group.songKeys.add(normalizeKey(`${song.title}\u001f${song.artist || ""}`));
   for (const keyword of keywords || []) if (keyword) group.keywords.add(keyword);
   groups.set(normalizedKey, group);
+}
+
+function sourcePreviews(occurrences) {
+  const output = [];
+  const seen = new Set();
+  const sorted = [...(occurrences || [])].sort(
+    (a, b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")) ||
+      Number(a.seconds || 0) - Number(b.seconds || 0),
+  );
+  for (const item of sorted) {
+    if (!item.videoId || seen.has(item.videoId)) continue;
+    seen.add(item.videoId);
+    output.push({
+      videoId: item.videoId,
+      videoTitle: item.videoTitle || "",
+      channelName: item.channelName || "",
+      publishedAt: item.publishedAt || "",
+      thumbnailUrl: item.thumbnailUrl || "",
+      sourcePath: item.sourcePath || "",
+      time: item.time || "",
+      seconds: item.seconds ?? null,
+      songTitle: item.songTitle || "",
+      artist: item.artist || "",
+    });
+    if (output.length >= 3) break;
+  }
+  return output;
 }
 
 function writePagedRanking(dataRoot, range, type, records, pageSize, now, state) {
@@ -366,7 +417,9 @@ function writeEntities(dataRoot, videos, now) {
   for (const video of videos) {
     writeJson(path.join(dataRoot, "sources", video.videoId.slice(0, 2), `${video.videoId}.json`), { schemaVersion: 1, generatedAt: now.toISOString(), ...video });
     const vtuberKey = normalizeKey(`${video.channelName}\u001f${video.channelId || video.channelHandle}`);
-    pushEntity(maps.vtubers, vtuberKey, video.channelName || video.channelHandle || video.videoId, "", video, null);
+    for (const song of video.songs) {
+      pushEntity(maps.vtubers, vtuberKey, video.channelName || video.channelHandle || video.videoId, "", video, song);
+    }
     for (const song of video.songs) {
       pushEntity(maps.songs, normalizeKey(`${song.title}\u001f${song.artist}`), song.title, song.artist, video, song);
       pushEntity(maps.artists, normalizeKey(song.artist || "未知歌手"), song.artist || "未知歌手", "", video, song);
@@ -377,16 +430,41 @@ function writeEntities(dataRoot, videos, now) {
     for (const entity of map.values()) {
       const id = hashId(`${type}\u001f${entity.key}`);
       const detailPath = `entities/${type}/${id}.json`;
-      const payload = { schemaVersion: 1, generatedAt: now.toISOString(), id, type, name: entity.name, secondary: entity.secondary, occurrenceCount: entity.occurrences.length, videoCount: new Set(entity.occurrences.map((item) => item.videoId)).size, occurrences: entity.occurrences };
+      const occurrenceCount = entity.occurrences.length;
+      const videoCount = new Set(entity.occurrences.map((item) => item.videoId)).size;
+      const payload = {
+        schemaVersion: 1,
+        generatedAt: now.toISOString(),
+        id,
+        type,
+        name: entity.name,
+        secondary: entity.secondary,
+        occurrenceCount,
+        videoCount,
+        keywords: [...entity.keywords].sort(),
+        sourcesPreview: sourcePreviews(entity.occurrences),
+        occurrences: entity.occurrences,
+      };
       writeJson(path.join(dataRoot, detailPath), payload);
-      search.push({ id, type, name: entity.name, secondary: entity.secondary, detailPath, text: normalizeKey(`${entity.name} ${entity.secondary}`) });
+      search.push({
+        id,
+        type,
+        name: entity.name,
+        secondary: entity.secondary,
+        occurrenceCount,
+        videoCount,
+        keywords: [...entity.keywords].sort(),
+        sourcesPreview: sourcePreviews(entity.occurrences),
+        detailPath,
+        text: normalizeKey(`${entity.name} ${entity.secondary}`),
+      });
     }
   }
   return search;
 }
 
 function pushEntity(map, key, name, secondary, video, song) {
-  const entity = map.get(key) || { key, name, secondary, occurrences: [] };
+  const entity = map.get(key) || { key, name, secondary, occurrences: [], keywords: new Set() };
   entity.occurrences.push({
     videoId: video.videoId,
     videoTitle: video.title,
@@ -399,6 +477,7 @@ function pushEntity(map, key, name, secondary, video, song) {
     songTitle: song?.title || "",
     artist: song?.artist || "",
   });
+  for (const keyword of video.keywords || []) if (keyword) entity.keywords.add(keyword);
   map.set(key, entity);
 }
 

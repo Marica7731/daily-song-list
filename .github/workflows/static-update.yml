@@ -15,7 +15,7 @@ on:
       video_limit:
         description: "Maximum pending videos to inspect in this run"
         required: false
-        default: "24"
+        default: "60"
 
 permissions:
   actions: write
@@ -52,7 +52,7 @@ jobs:
 
       - name: Collect one bounded batch and rebuild static shards
         env:
-          STATIC_VIDEO_LIMIT: ${{ inputs.video_limit || '24' }}
+          STATIC_VIDEO_LIMIT: ${{ inputs.video_limit || '60' }}
           STATIC_PAGE_SIZE: "50"
           STATIC_MAX_SHARD_BYTES: "4000000"
           DAILY_SONG_FETCH_RETRIES: "2"
