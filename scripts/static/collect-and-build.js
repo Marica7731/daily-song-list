@@ -160,6 +160,22 @@ function compactCandidate(item, source) {
   };
 }
 
+function candidateTimestampMs(candidate) {
+  const raw = candidate?.publishedTimestamp ?? candidate?.snapshotCapturedAt ?? "";
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return raw < 1_000_000_000_000 ? raw * 1000 : raw;
+  }
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if (/^\d+(?:\.\d+)?$/u.test(trimmed)) {
+      const numeric = Number(trimmed);
+      if (Number.isFinite(numeric)) return numeric < 1_000_000_000_000 ? numeric * 1000 : numeric;
+    }
+  }
+  const parsed = Date.parse(raw);
+  return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
+}
+
 function selectInspectionBatch(queue, limit, now = NOW) {
   const boundedLimit = Math.max(0, Number.parseInt(limit, 10) || 0);
   if (!boundedLimit || !Array.isArray(queue) || queue.length === 0) return [];
@@ -171,8 +187,7 @@ function selectInspectionBatch(queue, limit, now = NOW) {
 
   for (let index = 0; index < queue.length; index += 1) {
     const candidate = queue[index];
-    const parsed = Date.parse(candidate?.publishedTimestamp || candidate?.snapshotCapturedAt || "");
-    const entry = { candidate, index, timestamp: Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY };
+    const entry = { candidate, index, timestamp: candidateTimestampMs(candidate) };
     if (entry.timestamp >= cutoff) recent.push(entry);
     else backlog.push(entry);
   }
