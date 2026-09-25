@@ -19,7 +19,7 @@ function reviewReasons(song) {
       /\d{1,2}[./-]\d{1,2}|日|年|月|20\d{2}|配信|ライブ|Live/u.test(raw)) {
     reasons.push("possible_date_as_artist");
   }
-  if (/(?:アルバム|リリース|発売|より|配信日|公開日|20\d{2}[./-]\d{1,2}[./-]\d{1,2})/iu.test(artist)) {
+  if (/(?:アルバム|リリース|発売|配信日|公開日|(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2})/iu.test(artist)) {
     reasons.push("possible_release_metadata_as_artist");
   }
   if (title.length > 75 || artist.length > 75) reasons.push("possible_unparsed_credits");

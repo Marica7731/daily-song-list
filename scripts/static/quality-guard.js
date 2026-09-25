@@ -59,6 +59,70 @@ function unambiguousNonSongReason(song) {
     return "spoken_fraction_split_as_artist";
   }
 
+  // A date/comment show description mistakenly became a karaoke song.
+  if (/^【一般ライブ】\d{1,2}$/u.test(title) &&
+      /^[月火水木金土日]$/u.test(artist) &&
+      /【一般ライブ】\d{1,2}\/\d{1,2}\s*[（(][月火水木金土日][）)]/u.test(raw)) {
+    return "unrelated_livestream_listing";
+  }
+  if (/^【マンデーバスターズ】/u.test(title) && raw.includes(title)) {
+    return "unrelated_talk_show_listing";
+  }
+  if (/^am Worship Livestream$/iu.test(title) &&
+      /^\d{1,2}-20\d{2}$/u.test(artist) &&
+      /Worship Livestream\s*[|｜]\s*\d{1,2}-\d{1,2}-20\d{2}/iu.test(raw)) {
+    return "unrelated_worship_livestream_listing";
+  }
+  if (/^【#?雑談】.{0,12}\d{1,2}$/u.test(title) &&
+      /^\d{1,2}$/u.test(artist) &&
+      raw.trim().endsWith(title + "/" + artist)) {
+    return "unrelated_talk_stream_listing";
+  }
+  if (/^\d{1,2}$/u.test(title) && /^[月火水木金土日]$/u.test(artist) &&
+      /(?:^|\s)\d{1,2}\/\d{1,2}[（(][月火水木金土日][）)]\s*$/u.test(raw)) {
+    return "date_split_as_song_and_artist";
+  }
+  if (/^(?:次回の配信は|現地ライブ|焔魔るり Birthday Live|†最強漆黒キングダム† で R\.E\.P\.O\.)/iu.test(title) &&
+      /^[月火水木金土日]$/u.test(artist) &&
+      /\d{1,2}\/\d{1,2}[（(][月火水木金土日][）)]/u.test(raw)) {
+    return "dated_future_stream_announcement";
+  }
+  if (/^【茶話会】/u.test(title) &&
+      /^\d{1,2}$/u.test(artist) &&
+      /20\d{2}\/\d{1,2}\/\d{1,2}\s+\d{1,2}:\d{2}/u.test(raw)) {
+    return "dated_talk_event_announcement";
+  }
+  if (title === "ここらへんで一回ブツブツになり、YouTubeを再起動" &&
+      raw.includes(title)) {
+    return "confirmed_stream_technical_note";
+  }
+
+  if (/^次回の配信は\d{1,2}日$/u.test(title) &&
+      /^[月火水木金土日]$/u.test(artist) &&
+      /次回の配信は\d{1,2}日[（(][月火水木金土日][）)]/u.test(raw)) {
+    return "dated_future_stream_announcement";
+  }
+  if (/^(?:19|20)\d{2}\/(?:0?[1-9]|1[0-2])$/u.test(title) &&
+      /^(?:[1-9]|[12]\d|3[01])$/u.test(artist) &&
+      raw.endsWith(title + "/" + artist)) {
+    return "date_split_as_song_and_artist";
+  }
+  // Section markers require surrounding topic metadata in the original row,
+  // not just a song title that happens to contain "talk" or "MC".
+  if (/^MC\d{1,2}$/iu.test(title) &&
+      /MC\d{1,2}[（(][^）)]{1,40}[）)]/iu.test(raw)) {
+    return "confirmed_mc_break";
+  }
+  if (/^トーク$/u.test(title) &&
+      /トーク[（(].{2,70}(?:お話|話)[）)]/u.test(raw) &&
+      /話/u.test(artist)) {
+    return "confirmed_talk_section";
+  }
+  if (/^雑談タイム[①-⑳\d]+$/u.test(title) &&
+      /雑談タイム[①-⑳\d]+[（(].{2,70}[）)]/u.test(raw)) {
+    return "confirmed_chat_section";
+  }
+
   // Do not apply generic song-title or artist-name dictionaries: they can
   // silently remove real songs with everyday-language titles.
   return null;
@@ -114,12 +178,35 @@ function normalizeConservativeArtist(song) {
   return { ...song, artist: matched[1].trim() };
 }
 
+function repairReleaseDateCredit(song) {
+  const title = String(song?.title || "").trim();
+  const artist = String(song?.artist || "").trim();
+  const raw = String(song?.raw || "").trim();
+  // Recorded source ends with title/artist YYYY/MM/DD, but the slash parser
+  // split the publication date and placed DD in the artist field.
+  if (/^\d{1,2}$/u.test(artist) && Number(artist) >= 1 && Number(artist) <= 31 &&
+      raw.endsWith(title + "/" + artist)) {
+    const match = title.match(/^(.+)[/／]([^/／]{2,}?)\s+((?:19|20)\d{2})[/／](0?[1-9]|1[0-2])$/u);
+    if (match?.[1]?.trim() && match?.[2]?.trim()) {
+      return { ...song, title: match[1].trim(), artist: match[2].trim() };
+    }
+  }
+  // Some sources have a year only; require exactly one title/artist slash so
+  // impromptu song/version descriptions with several slashes are untouched.
+  if (/^20\d{2}$/u.test(artist) && raw.endsWith(title + "/" + artist)) {
+    const match = title.match(/^([^/／]+)[/／]([^/／]{2,})$/u);
+    if (match) return { ...song, title: match[1].trim(), artist: match[2].trim() };
+  }
+  return song;
+}
+
 function cleanStaticVideos(videos) {
   const collisions = repeatedDescriptionSources(videos);
-  const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, normalizedArtistOccurrences: 0, byReason: {} };
+  const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, normalizedArtistOccurrences: 0, repairedDateCreditOccurrences: 0, byReason: {} };
   const examples = [];
   const byDay = {};
   const normalizedArtistExamples = [];
+  const repairedDateCreditExamples = [];
   const cleaned = videos.map((video) => {
     const songs = (video.songs || []).filter((song) => {
       counters.inputOccurrences += 1;
@@ -149,8 +236,16 @@ function cleanStaticVideos(videos) {
       }
       return false;
     }).map((song) => {
-      const normalized = normalizeConservativeArtist(song);
-      if (normalized !== song) {
+      const dateRepaired = repairReleaseDateCredit(song);
+      if (dateRepaired !== song) {
+        counters.repairedDateCreditOccurrences += 1;
+        if (repairedDateCreditExamples.length < 30) repairedDateCreditExamples.push({
+          videoId: video.videoId, before: song.title + " - " + song.artist,
+          after: dateRepaired.title + " - " + dateRepaired.artist, raw: song.raw || "",
+        });
+      }
+      const normalized = normalizeConservativeArtist(dateRepaired);
+      if (normalized !== dateRepaired) {
         counters.normalizedArtistOccurrences += 1;
         if (normalizedArtistExamples.length < 25) normalizedArtistExamples.push({
           videoId: video.videoId, title: song.title || "",
@@ -174,9 +269,10 @@ function cleanStaticVideos(videos) {
     repeatedDescriptionSources: [...collisions].map(([sourceHash, info]) => ({ sourceHash, ...info })),
     byDay,
     normalizedArtistExamples,
+    repairedDateCreditExamples,
     examples,
   };
   return { videos: cleaned, audit };
 }
 
-module.exports = { cleanStaticVideos, normalizeConservativeArtist, repeatedDescriptionSources, unambiguousNonSongReason };
+module.exports = { cleanStaticVideos, normalizeConservativeArtist, repairReleaseDateCredit, repeatedDescriptionSources, unambiguousNonSongReason };

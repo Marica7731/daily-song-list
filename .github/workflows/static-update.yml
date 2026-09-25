@@ -85,22 +85,31 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- data/static/v1
           git commit -m "data: update static song shards"
-          git fetch --depth=2 origin main
-          git rebase origin/main
-          mapfile -t committed < <(git diff --name-only origin/main HEAD)
-          for path in "${committed[@]}"; do
-            [[ "$path" == data/static/v1/* ]] || {
-              echo "STATIC_UPDATE_REBASE_UNEXPECTED_PATH path=$path" >&2
-              exit 73
+          for publish_attempt in 1 2 3; do
+            git fetch --depth=2 origin main
+            git rebase origin/main
+            mapfile -t committed < <(git diff --name-only origin/main HEAD)
+            for path in "${committed[@]}"; do
+              [[ "$path" == data/static/v1/* ]] || {
+                echo "STATIC_UPDATE_REBASE_UNEXPECTED_PATH path=$path" >&2
+                exit 73
+              }
+            done
+            [[ ${#committed[@]} -gt 0 ]] || {
+              echo "STATIC_UPDATE_REBASE_EMPTY" >&2
+              exit 74
             }
+            if git push origin HEAD:main; then
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              echo "STATIC_UPDATE_PUSHED commit=$(git rev-parse HEAD) attempts=$publish_attempt"
+              break
+            fi
+            if [[ $publish_attempt -eq 3 ]]; then
+              echo "STATIC_UPDATE_PUSH_RACE_EXHAUSTED" >&2
+              exit 75
+            fi
+            echo "STATIC_UPDATE_PUSH_RACE retry=$publish_attempt"
           done
-          [[ ${#committed[@]} -gt 0 ]] || {
-            echo "STATIC_UPDATE_REBASE_EMPTY" >&2
-            exit 74
-          }
-          git push origin HEAD:main
-          echo "updated=true" >> "$GITHUB_OUTPUT"
-          echo "STATIC_UPDATE_PUSHED commit=$(git rev-parse HEAD)"
 
       - name: Publish evidence
         run: |

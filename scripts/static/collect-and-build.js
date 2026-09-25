@@ -297,6 +297,7 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
       quarantinedOccurrences: audit.quarantinedOccurrences,
       quarantinedVideos: audit.quarantinedVideos,
       normalizedArtistOccurrences: audit.normalizedArtistOccurrences,
+      repairedDateCreditOccurrences: audit.repairedDateCreditOccurrences,
       repeatedDescriptionSources: audit.repeatedDescriptionSources.length,
       byReason: audit.byReason,
       reviewedDayCount: review.scannedDays.length,
