@@ -41,6 +41,12 @@ test("religious livestream date and weekday-coded livestream notice are not song
     raw: "ばた音るーむ Vol.109 配信 2026.9.24(木)21:00-",
   });
   assert.equal(unambiguousNonSongReason(announcement), "dated_stream_announcement");
+  assert.equal(unambiguousNonSongReason(song("まで！達成できず😭9", "26土", {
+    raw: "8:00まで！達成できず😭9/26土",
+  })), "dated_stream_challenge_result");
+  assert.equal(unambiguousNonSongReason(song("ANTES DE COMEÇAR O SEU DIA, OUÇA ESTA PALAVRA", "LUCAS", {
+    raw: "ANTES DE COMEÇAR O SEU DIA, OUÇA ESTA PALAVRA | LUCAS 12:31",
+  })), "bible_verse_broadcast");
 });
 
 test("source hash collision requires several independent channels and video titles", () => {
