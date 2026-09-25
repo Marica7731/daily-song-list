@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   cleanStaticVideos,
+  normalizeConservativeArtist,
   repeatedDescriptionSources,
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
@@ -124,4 +125,30 @@ test("full-history review surfaces questionable records without dropping real so
   assert.equal(review.scannedDays[0].quarantinedOccurrences, 2);
   assert(review.candidates.some((item) => item.reason === "possible_release_metadata_as_artist"));
   assert.equal(JSON.stringify(videos), original);
+});
+
+test("repair separator-polluted artist credits without changing historical input or counts", () => {
+  assert.equal(normalizeConservativeArtist(song("Butter-Fly", "/ 和田光司")).artist, "和田光司");
+  assert.equal(normalizeConservativeArtist(song("盛れ！ミ・アモーレ", "／ Juice=Juice")).artist, "Juice=Juice");
+  assert.equal(normalizeConservativeArtist(song("猫", "DISH//")).artist, "DISH//");
+  assert.equal(normalizeConservativeArtist(song("Untouched", "/meme")).artist, "/meme");
+  const input = [video(1, [song("Butter-Fly", "/ 和田光司"), song("Butter-Fly", "和田光司")])];
+  const saved = JSON.stringify(input);
+  const { videos, audit } = cleanStaticVideos(input);
+  assert.equal(audit.normalizedArtistOccurrences, 1);
+  assert.equal(audit.quarantinedOccurrences, 0);
+  assert.equal(videos[0].songs.length, 2);
+  assert.deepEqual(videos[0].songs.map(row => row.artist), ["和田光司", "和田光司"]);
+  assert.equal(JSON.stringify(input), saved);
+});
+
+test("intentional 100-song endurance singing is not confused with duplicate dirty data", () => {
+  const repeated = video(2, Array.from({ length: 87 }, (_, index) => ({
+    ...song("勝利のマシンロボ", "未記載"),
+    occurrenceId: `bUb_oMOzuf4:${index}`,
+    seconds: 915 + index * 165,
+  })), { title: "勝利のマシンロボ100回歌唱耐久" });
+  const { videos, audit } = cleanStaticVideos([repeated]);
+  assert.equal(audit.quarantinedOccurrences, 0);
+  assert.equal(videos[0].songs.length, 87);
 });
