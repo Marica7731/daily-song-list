@@ -5,6 +5,7 @@ const test = require("node:test");
 const {
   cleanStaticVideos,
   normalizeConservativeArtist,
+  repairReleaseDateCredit,
   repeatedDescriptionSources,
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
@@ -151,4 +152,60 @@ test("intentional 100-song endurance singing is not confused with duplicate dirt
   const { videos, audit } = cleanStaticVideos([repeated]);
   assert.equal(audit.quarantinedOccurrences, 0);
   assert.equal(videos[0].songs.length, 87);
+});
+
+test("audit-confirmed historical non-song examples are quarantined without generic labels", () => {
+  const confirmed = [
+    ["【一般ライブ】8", "月", "16:58 【一般ライブ】8/3 (月)"],
+    ["【マンデーバスターズ】ほんこん×門田隆将", "未記載", "17:40【マンデーバスターズ】ほんこん×門田隆将"],
+    ["am Worship Livestream", "20-2026", "10:30am Worship Livestream | 9-20-2026"],
+    ["【#雑談】🍔9", "24", "12:00 【#雑談】🍔9/24"],
+    ["6", "土", "43:17 6/27（土）"],
+    ["次回の配信は26日", "水", "20:00 次回の配信は26日(水)"],
+    ["2026/07", "19", "1:41:57 2026/07/19"],
+    ["現地ライブ「ちょっとそこまで」第三弾 12", "土", "1:31:34 現地ライブ「ちょっとそこまで」第三弾 12/19(土)"],
+    ["焔魔るり Birthday Live 2026〜黄昏と揺らめいて〜 9", "木", "1:25:01 焔魔るり Birthday Live 2026〜黄昏と揺らめいて〜 9/3(木)"],
+    ["【茶話会】今日のテーマは「お彼岸」です！のんびり質疑応答するだけの会 2026/09", "16", "【茶話会】今日のテーマは「お彼岸」です！のんびり質疑応答するだけの会 2026/09/16 20:00"],
+    ["ここらへんで一回ブツブツになり、YouTubeを再起動", "", "ちなみに俺の不調は大体 2:40:58 ここらへんで一回ブツブツになり、YouTubeを再起動"],
+    ["MC1", "クラフェス", "0:40:57 MC1（クラフェス）"],
+    ["トーク", "HiMEのお話", "1:03:26 トーク(HiMEのお話)"],
+    ["雑談タイム②", "意外な禁句ワード", "00:42:46 雑談タイム②(意外な禁句ワード)"],
+  ];
+  for (const [title, artist, raw] of confirmed) {
+    assert.ok(unambiguousNonSongReason(song(title, artist, {raw})), title + " should be flagged");
+  }
+  for (const [title, artist, raw] of [
+    ["1/2", "川本真琴", "01:17:00 1/2 / 川本真琴"],
+    ["MC", "Original Artist", "10:15 MC / Original Artist"],
+    ["トーク", "Original Artist", "1:03:26 トーク / Original Artist"],
+    ["6", "土", "43:17 6 / 土"],
+    ["ひゆるりらぱっぱ", "月", "【02:03:19】ひゆるりらぱっぱ / 月"],
+  ]) assert.equal(unambiguousNonSongReason(song(title, artist, {raw})), null, title + " must be retained");
+});
+
+test("restore release-date-split song credits and never discard the source occurrence", () => {
+  const table = [
+    ["Go For It! \"style EDGE\"/GRANRODEO 2015/09", "30", "00:20:53 Go For It! \"style EDGE\"/GRANRODEO 2015/09/30", "Go For It! \"style EDGE\"", "GRANRODEO"],
+    ["春よ、来い/松任谷由実 1994/10", "24", "01:10:55 春よ、来い/松任谷由実 1994/10/24", "春よ、来い", "松任谷由実"],
+    ["Kitai/あさぎーにょ", "2017", "0:54:05 Kitai/あさぎーにょ/2017", "Kitai", "あさぎーにょ"],
+  ];
+  for (const [title, artist, raw, expectedTitle, expectedArtist] of table) {
+    const original = song(title, artist, {raw});
+    const repaired = repairReleaseDateCredit(original);
+    assert.equal(repaired.title, expectedTitle);
+    assert.equal(repaired.artist, expectedArtist);
+    assert.equal(original.title, title);
+    assert.equal(original.artist, artist);
+  }
+  const improvisation = song("惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング", "2026", {
+    raw: "1:06:14 惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング/2026",
+  });
+  assert.strictEqual(repairReleaseDateCredit(improvisation), improvisation);
+  const input = [video(1, table.map(([title, artist, raw]) => song(title, artist, {raw})))];
+  const originalBytes = JSON.stringify(input);
+  const {videos, audit} = cleanStaticVideos(input);
+  assert.equal(audit.repairedDateCreditOccurrences, 3);
+  assert.equal(audit.quarantinedOccurrences, 0);
+  assert.equal(videos[0].songs.length, 3);
+  assert.equal(JSON.stringify(input), originalBytes);
 });
