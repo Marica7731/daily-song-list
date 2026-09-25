@@ -40,6 +40,25 @@ function unambiguousNonSongReason(song) {
     /^LUCAS$/iu.test(artist)
   ) return "bible_verse_broadcast";
 
+  // Identified from historical day shards: a spoken transition, not the
+  // track title. Do not generalize this to songs with titles like "雑談".
+  if (/^雑談パート[①-⑳\d]*$/u.test(title) && /雑談パート/u.test(raw)) {
+    return "confirmed_chat_segment_label";
+  }
+  if (/^(?:枠スタート|歌枠スタート|配信スタート)$/u.test(title) &&
+      /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist) &&
+      /(?:^|[\s　])(?:枠スタート|歌枠スタート|配信スタート)[!！\s　]*$/u.test(raw)) {
+    return "confirmed_stream_start_marker";
+  }
+
+  // Complete spoken sentence split at the slash in 1/3 by the parser:
+  // original: "VTuberのライブ制作費は生身の半分～1/3".
+  if (/^VTuberのライブ制作費は生身の半分[～~〜]1$/iu.test(title) &&
+      /^3$/u.test(artist) &&
+      /VTuberのライブ制作費は生身の半分[～~〜]1\/3/iu.test(raw)) {
+    return "spoken_fraction_split_as_artist";
+  }
+
   // Do not apply generic song-title or artist-name dictionaries: they can
   // silently remove real songs with everyday-language titles.
   return null;
@@ -90,6 +109,7 @@ function cleanStaticVideos(videos) {
   const collisions = repeatedDescriptionSources(videos);
   const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, byReason: {} };
   const examples = [];
+  const byDay = {};
   const cleaned = videos.map((video) => {
     const songs = (video.songs || []).filter((song) => {
       counters.inputOccurrences += 1;
@@ -99,6 +119,10 @@ function cleanStaticVideos(videos) {
           : null);
       if (!reason) return true;
       counters.quarantinedOccurrences += 1;
+      const day = String(video.publishedAt || "").slice(0, 10) || "unknown";
+      byDay[day] ||= { quarantinedOccurrences: 0, byReason: {} };
+      byDay[day].quarantinedOccurrences += 1;
+      byDay[day].byReason[reason] = (byDay[day].byReason[reason] || 0) + 1;
       counters.byReason[reason] = (counters.byReason[reason] || 0) + 1;
       if (examples.length < 40) {
         examples.push({
@@ -128,6 +152,7 @@ function cleanStaticVideos(videos) {
     policy: "quarantine derived pages only; retain unmodified days/* and state.json",
     ...counters,
     repeatedDescriptionSources: [...collisions].map(([sourceHash, info]) => ({ sourceHash, ...info })),
+    byDay,
     examples,
   };
   return { videos: cleaned, audit };
