@@ -41,6 +41,7 @@ for (const shard of search.shards || []) {
 if ((meta.sourceCoverage?.status || "") !== "success") fail("source coverage is not success");
 const quality = read("quality-audit.json");
 if (quality.quarantinedOccurrences !== meta.quality?.quarantinedOccurrences) fail("quality audit vs meta mismatch");
+if (quality.normalizedArtistOccurrences !== meta.quality?.normalizedArtistOccurrences) fail("normalization audit vs meta mismatch");
 if (quality.visibleOccurrences !== meta.songOccurrenceCount) fail("quality audit vs published count mismatch");
 if (quality.visibleVideos !== meta.videoCount) fail("quality visible video count mismatch");
 const review = read("quality-review.json");
