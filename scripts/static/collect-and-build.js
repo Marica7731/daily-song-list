@@ -424,6 +424,12 @@ function writePagedRanking(dataRoot, range, type, records, pageSize, now, state)
 
 function writeEntities(dataRoot, videos, now) {
   const maps = { songs: new Map(), artists: new Map(), vtubers: new Map() };
+  const rangeStarts = {
+    today: shanghaiCalendarStart(now, 1),
+    "3d": shanghaiCalendarStart(now, 3),
+    "7d": now.getTime() - 7 * 86400000,
+    "30d": now.getTime() - 30 * 86400000,
+  };
   for (const video of videos) {
     writeJson(path.join(dataRoot, "sources", video.videoId.slice(0, 2), `${video.videoId}.json`), { schemaVersion: 1, generatedAt: now.toISOString(), ...video });
     const vtuberKey = normalizeKey(`${video.channelName}\u001f${video.channelId || video.channelHandle}`);
@@ -442,6 +448,20 @@ function writeEntities(dataRoot, videos, now) {
       const detailPath = `entities/${type}/${id}.json`;
       const occurrenceCount = entity.occurrences.length;
       const videoCount = new Set(entity.occurrences.map((item) => item.videoId)).size;
+      const rangeMetrics = {};
+      for (const [rangeId, start] of Object.entries(rangeStarts)) {
+        const end = now.getTime() + (rangeId === "today" || rangeId === "3d" ? 300000 : 21600000);
+        const occurrences = entity.occurrences.filter((item) => {
+          const date = Date.parse(item.publishedAt);
+          return Number.isFinite(date) && date >= start && date <= end;
+        });
+        if (occurrences.length) {
+          rangeMetrics[rangeId] = {
+            occurrenceCount: occurrences.length,
+            videoCount: new Set(occurrences.map((item) => item.videoId)).size,
+          };
+        }
+      }
       const payload = {
         schemaVersion: 1,
         generatedAt: now.toISOString(),
@@ -465,6 +485,7 @@ function writeEntities(dataRoot, videos, now) {
         videoCount,
         keywords: [...entity.keywords].sort(),
         detailPath,
+        rangeMetrics,
         text: normalizeKey(`${entity.name} ${entity.secondary}`),
       });
     }
