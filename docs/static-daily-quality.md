@@ -46,3 +46,20 @@ challenge results, three Bible-verse notices and one dated streaming announcemen
 
 Regression coverage: `node --test test/static-quality-ranges.test.js
 test/static-github-pipeline.test.mjs`.
+
+## Historical sweep
+
+The builder reads *every* retained day shard, including the older June, July,
+August, and September parts, not just the selected frontend range. It records
+quarantined counts per original video's UTC publication date in
+`quality-audit.json.byDay`. It also produces `quality-review.json`, a
+**review-only** report of suspicious remaining titles/credits and description
+hashes shared across two to four channels. Review-only candidates are not
+automatically discarded. `static:validate` reconciles its day sums and
+published occurrence totals so a partial scan cannot masquerade as a full sweep.
+
+Confirmed older-row patterns now include `雑談パート` transitions, clearly
+timestamped start-of-stream markers with no credited artist, and one specifically
+corroborated spoken sentence where the parser split the fraction `1/3` into
+a false artist. Do not turn these examples into generic short-title, slash,
+date, or talk-word deletions: valid song names can use all of them.
