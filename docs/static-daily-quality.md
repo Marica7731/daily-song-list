@@ -76,3 +76,31 @@ It does not change slash-containing legitimate names such as `DISH//`.
 Do not deduplicate a song merely because one video sings it repeatedly. The
 July 10 `勝利のマシンロボ100回歌唱耐久` video has 87 distinct timestamps for
 the same song and they are genuine occurrences, not a scrape artifact.
+
+## September 26 historical cleanup continuation
+
+The latest completed full-history sweep (before this additional rule set)
+reconciled 81 retained publication dates, 86,209 visible song occurrences,
+298 quarantined non-song rows, and 381 purely cosmetic slash-prefix artist
+credit repairs. These are the observed baseline, **not** a guaranteed count
+for a later regenerated snapshot, because the hourly source queue continues.
+
+Confirmed additional non-song patterns are narrowly tied to source-text
+evidence: unrelated Japanese talk/news listings, worship livestream notices,
+dated chat/stream promotions, timestamps that split dates into fictional
+artists, explicit MC/talk/chat sections with their subject in parentheses,
+and one technical comment about restarting YouTube. A genuine song named
+`1/2`, `MC`, or `トーク` must not be dropped from its title alone.
+
+When a source explicitly formats a real song as
+`Song/Artist YYYY/MM/DD`, the date may have been wrongly split into the
+displayed artist. The publication layer restores `Song - Artist` only for
+unambiguous source-ending patterns; similarly, year-only `Song/Artist/YYYY`
+requires just one slash. Ambiguous multi-slash improvised-song credits remain
+review-only. `repairedDateCreditOccurrences` and
+`repairedDateCreditExamples` record the repair evidence. All original
+occurrences and daily source shards are preserved.
+
+The static workflow allows at most three fetch/rebase/fast-forward push
+attempts to resolve races with newer main commits, and rechecks that the
+generated commit touches only the static-data root before every attempt.
