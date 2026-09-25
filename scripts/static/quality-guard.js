@@ -28,6 +28,18 @@ function unambiguousNonSongReason(song) {
     /^[月火水木金土日]$/u.test(artist)
   ) return "dated_stream_announcement";
 
+  if (
+    /(?:達成できず|未達成)/u.test(title) &&
+    /^\d{1,2}[月火水木金土日]$/u.test(artist) &&
+    /^\d{1,2}:\d{2}まで[!！]?(?:達成できず|未達成)[^\n]{0,30}\d{1,2}\/\d{1,2}[月火水木金土日]$/u.test(raw)
+  ) return "dated_stream_challenge_result";
+
+  if (
+    /\bANTES DE COMEÇAR O SEU DIA, OUÇA ESTA PALAVRA\b/iu.test(title) &&
+    /\bLUCAS\s+12:31\b/iu.test(raw) &&
+    /^LUCAS$/iu.test(artist)
+  ) return "bible_verse_broadcast";
+
   // Do not apply generic song-title or artist-name dictionaries: they can
   // silently remove real songs with everyday-language titles.
   return null;
