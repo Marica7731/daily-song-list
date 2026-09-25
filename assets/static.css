@@ -566,3 +566,42 @@ body{
   .page-jump span{display:none}
   .page-jump input{width:50px}
 }
+
+/* Daily-range segmented tabs: keyboard-focusable, compact on desktop and mobile. */
+.range-tabs{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:9px;
+  white-space:nowrap;
+}
+.range-tabs button{
+  min-height:31px;
+  padding:0 9px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--muted);
+  font:inherit;
+  font-size:12px;
+  font-weight:650;
+  cursor:pointer;
+}
+.range-tabs button[aria-selected="true"]{
+  background:var(--accent-soft);
+  color:var(--accent-strong);
+  box-shadow:inset 0 0 0 1px rgba(15,118,110,.12);
+}
+.range-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.range-tabs button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:720px){
+  .topbar-row{grid-template-columns:minmax(0,1fr) auto}
+  .range-tabs{grid-column:1/-1;grid-row:1;justify-content:space-between}
+  .range-tabs button{flex:1;min-width:0;padding:0 4px;font-size:11px}
+  .topbar-row>.control-group{grid-column:1;grid-row:2}
+  .topbar-row>.filter-popover{grid-column:2;grid-row:2}
+  .topbar-row>.search-box{grid-column:1/-1;grid-row:3}
+}
