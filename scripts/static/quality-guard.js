@@ -105,11 +105,21 @@ function repeatedDescriptionSources(videos) {
   return collisions;
 }
 
+function normalizeConservativeArtist(song) {
+  const artist = String(song?.artist || "");
+  const matched = artist.match(/^[/／|｜][\s　]+(.+)$/u);
+  if (!matched?.[1]?.trim()) return song;
+  // A delimiter copied from "title / artist" should never become part of
+  // an artist name. A slash with no following whitespace or DISH// stays.
+  return { ...song, artist: matched[1].trim() };
+}
+
 function cleanStaticVideos(videos) {
   const collisions = repeatedDescriptionSources(videos);
-  const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, byReason: {} };
+  const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, normalizedArtistOccurrences: 0, byReason: {} };
   const examples = [];
   const byDay = {};
+  const normalizedArtistExamples = [];
   const cleaned = videos.map((video) => {
     const songs = (video.songs || []).filter((song) => {
       counters.inputOccurrences += 1;
@@ -138,6 +148,16 @@ function cleanStaticVideos(videos) {
         });
       }
       return false;
+    }).map((song) => {
+      const normalized = normalizeConservativeArtist(song);
+      if (normalized !== song) {
+        counters.normalizedArtistOccurrences += 1;
+        if (normalizedArtistExamples.length < 25) normalizedArtistExamples.push({
+          videoId: video.videoId, title: song.title || "",
+          before: song.artist || "", after: normalized.artist, sourceId: song.sourceId || "",
+        });
+      }
+      return normalized;
     });
     if (songs.length) counters.visibleVideos += 1;
     else if ((video.songs || []).length) counters.quarantinedVideos += 1;
@@ -153,9 +173,10 @@ function cleanStaticVideos(videos) {
     ...counters,
     repeatedDescriptionSources: [...collisions].map(([sourceHash, info]) => ({ sourceHash, ...info })),
     byDay,
+    normalizedArtistExamples,
     examples,
   };
   return { videos: cleaned, audit };
 }
 
-module.exports = { cleanStaticVideos, repeatedDescriptionSources, unambiguousNonSongReason };
+module.exports = { cleanStaticVideos, normalizeConservativeArtist, repeatedDescriptionSources, unambiguousNonSongReason };

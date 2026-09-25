@@ -63,3 +63,16 @@ timestamped start-of-stream markers with no credited artist, and one specificall
 corroborated spoken sentence where the parser split the fraction `1/3` into
 a false artist. Do not turn these examples into generic short-title, slash,
 date, or talk-word deletions: valid song names can use all of them.
+
+## Safe credit normalization and real repetitions
+
+Some legacy titles use the normal `title / artist` setlist syntax but the
+parser retained the initial delimiter in the credited artist. The publication
+layer now converts `/ 和田光司` to `和田光司` (also the full-width separator)
+in generated rankings, full setlists and search without rewriting day shards.
+It does not change slash-containing legitimate names such as `DISH//`.
+`quality-audit.json.normalizedArtistOccurrences` counts corrected rows.
+
+Do not deduplicate a song merely because one video sings it repeatedly. The
+July 10 `勝利のマシンロボ100回歌唱耐久` video has 87 distinct timestamps for
+the same song and they are genuine occurrences, not a scrape artifact.
