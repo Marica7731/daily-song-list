@@ -1,16 +1,20 @@
 {
-  "generatedAt": "2026-09-25T19:51:38.846Z",
+  "generatedAt": "2026-09-25T20:36:55.436Z",
   "schemaVersion": 1,
   "policy": "quarantine derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7085,
-  "inputOccurrences": 86225,
-  "visibleVideos": 5850,
-  "visibleOccurrences": 85940,
-  "quarantinedOccurrences": 285,
-  "quarantinedVideos": 272,
+  "inputVideos": 7113,
+  "inputOccurrences": 86507,
+  "visibleVideos": 5871,
+  "visibleOccurrences": 86209,
+  "quarantinedOccurrences": 298,
+  "quarantinedVideos": 279,
+  "normalizedArtistOccurrences": 381,
   "byReason": {
+    "spoken_fraction_split_as_artist": 1,
     "reused_description_across_unrelated_channels": 33,
-    "prayer_broadcast_timeline": 240,
+    "confirmed_chat_segment_label": 1,
+    "confirmed_stream_start_marker": 4,
+    "prayer_broadcast_timeline": 247,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_stream_announcement": 1
@@ -73,9 +77,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 92,
-      "channelCount": 88,
-      "distinctVideoTitles": 92,
+      "videoCount": 95,
+      "channelCount": 91,
+      "distinctVideoTitles": 95,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -127,9 +131,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 65,
-      "channelCount": 65,
-      "distinctVideoTitles": 65,
+      "videoCount": 66,
+      "channelCount": 66,
+      "distinctVideoTitles": 66,
       "examples": [
         {
           "videoId": "K2_yRIPIUmE",
@@ -154,9 +158,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 52,
-      "channelCount": 52,
-      "distinctVideoTitles": 52,
+      "videoCount": 55,
+      "channelCount": 55,
+      "distinctVideoTitles": 55,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -179,7 +183,355 @@
       ]
     }
   ],
+  "byDay": {
+    "2026-06-26": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "spoken_fraction_split_as_artist": 1
+      }
+    },
+    "2026-08-04": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 2
+      }
+    },
+    "2026-08-07": {
+      "quarantinedOccurrences": 4,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 4
+      }
+    },
+    "2026-08-09": {
+      "quarantinedOccurrences": 4,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 4
+      }
+    },
+    "2026-08-10": {
+      "quarantinedOccurrences": 10,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 10
+      }
+    },
+    "2026-08-12": {
+      "quarantinedOccurrences": 3,
+      "byReason": {
+        "confirmed_chat_segment_label": 1,
+        "reused_description_across_unrelated_channels": 2
+      }
+    },
+    "2026-08-13": {
+      "quarantinedOccurrences": 4,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 4
+      }
+    },
+    "2026-08-24": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1
+      }
+    },
+    "2026-08-29": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "confirmed_stream_start_marker": 1
+      }
+    },
+    "2026-08-31": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1
+      }
+    },
+    "2026-09-01": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1,
+        "confirmed_stream_start_marker": 1
+      }
+    },
+    "2026-09-02": {
+      "quarantinedOccurrences": 13,
+      "byReason": {
+        "prayer_broadcast_timeline": 10,
+        "reused_description_across_unrelated_channels": 3
+      }
+    },
+    "2026-09-03": {
+      "quarantinedOccurrences": 17,
+      "byReason": {
+        "prayer_broadcast_timeline": 14,
+        "bible_verse_broadcast": 1,
+        "dated_stream_challenge_result": 1,
+        "confirmed_stream_start_marker": 1
+      }
+    },
+    "2026-09-15": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "prayer_broadcast_timeline": 1
+      }
+    },
+    "2026-09-16": {
+      "quarantinedOccurrences": 19,
+      "byReason": {
+        "prayer_broadcast_timeline": 19
+      }
+    },
+    "2026-09-17": {
+      "quarantinedOccurrences": 7,
+      "byReason": {
+        "prayer_broadcast_timeline": 7
+      }
+    },
+    "2026-09-18": {
+      "quarantinedOccurrences": 11,
+      "byReason": {
+        "prayer_broadcast_timeline": 11
+      }
+    },
+    "2026-09-19": {
+      "quarantinedOccurrences": 13,
+      "byReason": {
+        "prayer_broadcast_timeline": 12,
+        "reused_description_across_unrelated_channels": 1
+      }
+    },
+    "2026-09-20": {
+      "quarantinedOccurrences": 30,
+      "byReason": {
+        "prayer_broadcast_timeline": 24,
+        "dated_stream_challenge_result": 4,
+        "bible_verse_broadcast": 1,
+        "confirmed_stream_start_marker": 1
+      }
+    },
+    "2026-09-21": {
+      "quarantinedOccurrences": 10,
+      "byReason": {
+        "prayer_broadcast_timeline": 7,
+        "dated_stream_challenge_result": 1,
+        "bible_verse_broadcast": 2
+      }
+    },
+    "2026-09-22": {
+      "quarantinedOccurrences": 19,
+      "byReason": {
+        "prayer_broadcast_timeline": 19
+      }
+    },
+    "2026-09-23": {
+      "quarantinedOccurrences": 30,
+      "byReason": {
+        "prayer_broadcast_timeline": 30
+      }
+    },
+    "2026-09-24": {
+      "quarantinedOccurrences": 66,
+      "byReason": {
+        "prayer_broadcast_timeline": 65,
+        "dated_stream_challenge_result": 1
+      }
+    },
+    "2026-09-25": {
+      "quarantinedOccurrences": 29,
+      "byReason": {
+        "dated_stream_announcement": 1,
+        "prayer_broadcast_timeline": 28
+      }
+    }
+  },
+  "normalizedArtistExamples": [
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "Ti Amo",
+      "before": "/ EXILE",
+      "after": "EXILE",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "God knows",
+      "before": "/ 涼宮ハルヒ(C.V.平野綾)",
+      "after": "涼宮ハルヒ(C.V.平野綾)",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "チャンカパーナ",
+      "before": "/ NEWS",
+      "after": "NEWS",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "エゴロック",
+      "before": "/ すりぃ",
+      "after": "すりぃ",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "ルマ",
+      "before": "/ かいりきベア",
+      "after": "かいりきベア",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "タマシイレボリューション",
+      "before": "/ Superfly",
+      "after": "Superfly",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "好きすぎて滅！",
+      "before": "/ M!LK",
+      "after": "M!LK",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "爆裂愛してる",
+      "before": "/ M!LK",
+      "after": "M!LK",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "Shangri-La",
+      "before": "/ angela",
+      "after": "angela",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "weeeek",
+      "before": "/ NEWS",
+      "after": "NEWS",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "めざせポケモンマスター",
+      "before": "/ 松本梨香",
+      "after": "松本梨香",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "Butter-Fly",
+      "before": "/ 和田光司",
+      "after": "和田光司",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "盛れ！ミ・アモーレ",
+      "before": "/ Juice=Juice",
+      "after": "Juice=Juice",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "pblQVDMegZE",
+      "title": "革命道中- On The Way",
+      "before": "/ アイナ・ジ・エンド",
+      "after": "アイナ・ジ・エンド",
+      "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
+    },
+    {
+      "videoId": "NqBPO5xp0eQ",
+      "title": "This Love",
+      "before": "/ Angela Aki",
+      "after": "Angela Aki",
+      "sourceId": "legacy:NqBPO5xp0eQ"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "勇侠青春謳",
+      "before": "/ ALI PROJECT",
+      "after": "ALI PROJECT",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "ダイアモンドクレバス",
+      "before": "/ シェリル・ノーム",
+      "after": "シェリル・ノーム",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "KING",
+      "before": "/ Kanaria feat. GUMI",
+      "after": "Kanaria feat. GUMI",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "モニタリング",
+      "before": "/ DECO*27 feat. 初音ミク",
+      "after": "DECO*27 feat. 初音ミク",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "リードコントロール",
+      "before": "/ なるみや",
+      "after": "なるみや",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "r4jVO0Dobrg",
+      "title": "暁の車",
+      "before": "/ FictionJunction YUUKA",
+      "after": "FictionJunction YUUKA",
+      "sourceId": "UgwwBTKBa-Te08yr07J4AaABAg"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "最後の恋",
+      "before": "/ 奥華子",
+      "after": "奥華子",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "プラネタリウム",
+      "before": "/ 大塚愛",
+      "after": "大塚愛",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "クラゲ、流れ星",
+      "before": "/ 大塚愛",
+      "after": "大塚愛",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "恋愛写真",
+      "before": "/ 大塚愛",
+      "after": "大塚愛",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    }
+  ],
   "examples": [
+    {
+      "reason": "spoken_fraction_split_as_artist",
+      "videoId": "78SkkDdtmX0",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "occurrenceId": "78SkkDdtmX0:Ugz5J3D-3JH67P2zWNV4AaABAg:10621:e9c13178c3aada19",
+      "sourceId": "Ugz5J3D-3JH67P2zWNV4AaABAg",
+      "sourceHash": "fb2ec8cc569c66c514115fb04efe4fe0718524fff9811d43094901a4ac35db80",
+      "title": "VTuberのライブ制作費は生身の半分～1",
+      "artist": "3",
+      "raw": "02:57:01 VTuberのライブ制作費は生身の半分～1/3"
+    },
     {
       "reason": "reused_description_across_unrelated_channels",
       "videoId": "bNtObG23Hto",
@@ -401,6 +753,17 @@
       "raw": "23:59) globe tour 1999 Relation Remaster Edition"
     },
     {
+      "reason": "confirmed_chat_segment_label",
+      "videoId": "N8rS2XESc3Y",
+      "channelName": "伊月知世 / CHISE ITSUKI",
+      "occurrenceId": "N8rS2XESc3Y:340:4794",
+      "sourceId": "Ugw4lYxD_yd0cfMLJv14AaABAg",
+      "sourceHash": "cfe67870f27141c181f2a8cb829880096405fe0f079b51017c0bf5f0c20f7ebe",
+      "title": "雑談パート",
+      "artist": "海、夏ボイス",
+      "raw": "1:19:54\t雑談パート - 海、夏ボイス"
+    },
+    {
       "reason": "reused_description_across_unrelated_channels",
       "videoId": "ShymQbV2hOs",
       "channelName": "アイリナ・ゼファリオ【StellArt.】",
@@ -478,6 +841,17 @@
       "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
     },
     {
+      "reason": "confirmed_stream_start_marker",
+      "videoId": "XxegsDg0D_4",
+      "channelName": "五十嵐斎 / いっちゃんいっちゃんねる",
+      "occurrenceId": "XxegsDg0D_4:11:0",
+      "sourceId": "Ugwail2lKbI3zvfW2hd4AaABAg",
+      "sourceHash": "354f27d200a7c8a087685782b1aa60191aefd09b32e6465c44b90cef6014ef8a",
+      "title": "枠スタート",
+      "artist": "",
+      "raw": "00:00  枠スタート"
+    },
+    {
       "reason": "reused_description_across_unrelated_channels",
       "videoId": "q50U2AjiAXE",
       "channelName": "Mecori",
@@ -498,6 +872,17 @@
       "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
       "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
       "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
+    },
+    {
+      "reason": "confirmed_stream_start_marker",
+      "videoId": "XA-SUnAD8U0",
+      "channelName": "水沢オペラ / Opera Ch.",
+      "occurrenceId": "XA-SUnAD8U0:11:0",
+      "sourceId": "UgxP61_5mh7JMcF4n_x4AaABAg",
+      "sourceHash": "fb34a2c9080237bff53c22a310cc81354501122d051d53bd332a9fbf283f79aa",
+      "title": "枠スタート",
+      "artist": "",
+      "raw": "00:00:00  枠スタート"
     },
     {
       "reason": "prayer_broadcast_timeline",
@@ -575,50 +960,6 @@
       "title": "12/09",
       "artist": "25° Dia [Live Ao vivo]",
       "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "gAc6atQP8y4",
-      "channelName": "みうゼノちゃんねる",
-      "occurrenceId": "gAc6atQP8y4:54:220",
-      "sourceId": "description:gAc6atQP8y4:f1607090b7c35ffa",
-      "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
-      "title": "12/09",
-      "artist": "25° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "7eZ8jCh9CHk",
-      "channelName": "ぁぉ2さい",
-      "occurrenceId": "7eZ8jCh9CHk:6:1200",
-      "sourceId": "description:7eZ8jCh9CHk:1b7c875f9609f9d0",
-      "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
-      "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
-      "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
-      "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "XNuqBDLZLh8",
-      "channelName": "松中 啓憲 Official Channel",
-      "occurrenceId": "XNuqBDLZLh8:54:220",
-      "sourceId": "description:XNuqBDLZLh8:6efbd19caefbbe84",
-      "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
-      "title": "11/09",
-      "artist": "24° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 11/09 | 24° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "ZPb4bys3YCo",
-      "channelName": "なるみゆう／763ちゃんねる",
-      "occurrenceId": "ZPb4bys3YCo:6:1200",
-      "sourceId": "description:ZPb4bys3YCo:1b7c875f9609f9d0",
-      "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
-      "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
-      "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
-      "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
     }
   ]
 }
