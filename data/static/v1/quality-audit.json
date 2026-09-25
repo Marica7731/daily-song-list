@@ -1,22 +1,34 @@
 {
-  "generatedAt": "2026-09-25T20:36:55.436Z",
+  "generatedAt": "2026-09-25T20:46:05.255Z",
   "schemaVersion": 1,
   "policy": "quarantine derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7113,
-  "inputOccurrences": 86507,
-  "visibleVideos": 5871,
-  "visibleOccurrences": 86209,
-  "quarantinedOccurrences": 298,
-  "quarantinedVideos": 279,
+  "inputVideos": 7135,
+  "inputOccurrences": 86674,
+  "visibleVideos": 5875,
+  "visibleOccurrences": 86320,
+  "quarantinedOccurrences": 354,
+  "quarantinedVideos": 297,
   "normalizedArtistOccurrences": 381,
+  "repairedDateCreditOccurrences": 24,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
+    "date_split_as_song_and_artist": 2,
+    "confirmed_mc_break": 1,
+    "confirmed_talk_section": 18,
+    "confirmed_chat_section": 8,
+    "unrelated_livestream_listing": 5,
+    "unrelated_talk_show_listing": 3,
     "reused_description_across_unrelated_channels": 33,
     "confirmed_chat_segment_label": 1,
+    "dated_future_stream_announcement": 5,
     "confirmed_stream_start_marker": 4,
-    "prayer_broadcast_timeline": 247,
+    "confirmed_stream_technical_note": 1,
+    "prayer_broadcast_timeline": 255,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
+    "dated_talk_event_announcement": 1,
+    "unrelated_worship_livestream_listing": 2,
+    "unrelated_talk_stream_listing": 2,
     "dated_stream_announcement": 1
   },
   "repeatedDescriptionSources": [
@@ -77,9 +89,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 95,
-      "channelCount": 91,
-      "distinctVideoTitles": 95,
+      "videoCount": 98,
+      "channelCount": 94,
+      "distinctVideoTitles": 98,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -158,9 +170,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 55,
-      "channelCount": 55,
-      "distinctVideoTitles": 55,
+      "videoCount": 60,
+      "channelCount": 60,
+      "distinctVideoTitles": 60,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -169,15 +181,15 @@
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 10/09 | 23° Dia | Live Ao vivo"
         },
         {
-          "videoId": "T_ZUXuzKAsA",
-          "channelName": "常世めぐる / Meguru tokoyo",
-          "videoTitle": "【#歌枠/singing】残暑と９月【常世めぐる】",
+          "videoId": "MzqGrcgQnmw",
+          "channelName": "潤主アシュリ Vsinger / ASMR",
+          "videoTitle": "【 歌枠 】リクエストOK🎤まったり歌うよ♪｜#Karaoke【 #潤主アシュリ / #Vsinger 】初見歓迎",
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 10/09 | 23° Dia | Live Ao vivo"
         },
         {
-          "videoId": "edxBngyf8QM",
-          "channelName": "艾茵莉思 Aynlice アインリス『個人勢Vtuber』",
-          "videoTitle": "魔法少女小圓歌回｜瓦爾普吉斯的迴天終於要在台灣上映了｜艾茵莉思Aynlice｜#魔法少女小圓 #歌回 #歌枠 #歌回配信 #日文歌回 #翻唱 #動漫歌曲 #vtuber #twvtuber #台V",
+          "videoId": "T_ZUXuzKAsA",
+          "channelName": "常世めぐる / Meguru tokoyo",
+          "videoTitle": "【#歌枠/singing】残暑と９月【常世めぐる】",
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 10/09 | 23° Dia | Live Ao vivo"
         }
       ]
@@ -185,15 +197,75 @@
   ],
   "byDay": {
     "2026-06-26": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "spoken_fraction_split_as_artist": 1,
+        "date_split_as_song_and_artist": 1
+      }
+    },
+    "2026-07-11": {
       "quarantinedOccurrences": 1,
       "byReason": {
-        "spoken_fraction_split_as_artist": 1
+        "date_split_as_song_and_artist": 1
+      }
+    },
+    "2026-07-12": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "confirmed_mc_break": 1
+      }
+    },
+    "2026-07-15": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "confirmed_talk_section": 2
+      }
+    },
+    "2026-07-16": {
+      "quarantinedOccurrences": 6,
+      "byReason": {
+        "confirmed_talk_section": 1,
+        "confirmed_chat_section": 5
+      }
+    },
+    "2026-07-22": {
+      "quarantinedOccurrences": 3,
+      "byReason": {
+        "confirmed_chat_section": 3
+      }
+    },
+    "2026-07-31": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "unrelated_livestream_listing": 1
+      }
+    },
+    "2026-08-01": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "unrelated_livestream_listing": 1,
+        "unrelated_talk_show_listing": 1
+      }
+    },
+    "2026-08-02": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "unrelated_livestream_listing": 1,
+        "unrelated_talk_show_listing": 1
       }
     },
     "2026-08-04": {
+      "quarantinedOccurrences": 4,
+      "byReason": {
+        "unrelated_livestream_listing": 1,
+        "unrelated_talk_show_listing": 1,
+        "reused_description_across_unrelated_channels": 2
+      }
+    },
+    "2026-08-05": {
       "quarantinedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 2
+        "confirmed_talk_section": 2
       }
     },
     "2026-08-07": {
@@ -203,8 +275,9 @@
       }
     },
     "2026-08-09": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 7,
       "byReason": {
+        "confirmed_talk_section": 3,
         "reused_description_across_unrelated_channels": 4
       }
     },
@@ -227,10 +300,29 @@
         "reused_description_across_unrelated_channels": 4
       }
     },
+    "2026-08-23": {
+      "quarantinedOccurrences": 2,
+      "byReason": {
+        "confirmed_talk_section": 2
+      }
+    },
     "2026-08-24": {
       "quarantinedOccurrences": 1,
       "byReason": {
         "reused_description_across_unrelated_channels": 1
+      }
+    },
+    "2026-08-25": {
+      "quarantinedOccurrences": 1,
+      "byReason": {
+        "dated_future_stream_announcement": 1
+      }
+    },
+    "2026-08-26": {
+      "quarantinedOccurrences": 4,
+      "byReason": {
+        "confirmed_talk_section": 2,
+        "dated_future_stream_announcement": 2
       }
     },
     "2026-08-29": {
@@ -239,15 +331,23 @@
         "confirmed_stream_start_marker": 1
       }
     },
-    "2026-08-31": {
-      "quarantinedOccurrences": 1,
+    "2026-08-30": {
+      "quarantinedOccurrences": 3,
       "byReason": {
+        "confirmed_talk_section": 3
+      }
+    },
+    "2026-08-31": {
+      "quarantinedOccurrences": 3,
+      "byReason": {
+        "dated_future_stream_announcement": 2,
         "reused_description_across_unrelated_channels": 1
       }
     },
     "2026-09-01": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "byReason": {
+        "confirmed_stream_technical_note": 1,
         "reused_description_across_unrelated_channels": 1,
         "confirmed_stream_start_marker": 1
       }
@@ -260,24 +360,27 @@
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 17,
+      "quarantinedOccurrences": 20,
       "byReason": {
-        "prayer_broadcast_timeline": 14,
+        "confirmed_talk_section": 1,
+        "prayer_broadcast_timeline": 16,
         "bible_verse_broadcast": 1,
         "dated_stream_challenge_result": 1,
         "confirmed_stream_start_marker": 1
       }
     },
     "2026-09-15": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 3,
       "byReason": {
+        "confirmed_talk_section": 2,
         "prayer_broadcast_timeline": 1
       }
     },
     "2026-09-16": {
-      "quarantinedOccurrences": 19,
+      "quarantinedOccurrences": 20,
       "byReason": {
-        "prayer_broadcast_timeline": 19
+        "prayer_broadcast_timeline": 19,
+        "dated_talk_event_announcement": 1
       }
     },
     "2026-09-17": {
@@ -323,23 +426,26 @@
       }
     },
     "2026-09-23": {
-      "quarantinedOccurrences": 30,
+      "quarantinedOccurrences": 32,
       "byReason": {
-        "prayer_broadcast_timeline": 30
+        "prayer_broadcast_timeline": 30,
+        "unrelated_worship_livestream_listing": 2
       }
     },
     "2026-09-24": {
-      "quarantinedOccurrences": 66,
+      "quarantinedOccurrences": 74,
       "byReason": {
-        "prayer_broadcast_timeline": 65,
+        "prayer_broadcast_timeline": 71,
+        "unrelated_talk_stream_listing": 2,
         "dated_stream_challenge_result": 1
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 29,
+      "quarantinedOccurrences": 30,
       "byReason": {
         "dated_stream_announcement": 1,
-        "prayer_broadcast_timeline": 28
+        "prayer_broadcast_timeline": 28,
+        "unrelated_livestream_listing": 1
       }
     }
   },
@@ -520,6 +626,152 @@
       "sourceId": "legacy:f7o6Hqiqn5U"
     }
   ],
+  "repairedDateCreditExamples": [
+    {
+      "videoId": "RJZKQyNjrOQ",
+      "before": "Go For It! \"style EDGE\"/GRANRODEO 2015/09 - 30",
+      "after": "Go For It! \"style EDGE\" - GRANRODEO",
+      "raw": "00:20:53 Go For It! \"style EDGE\"/GRANRODEO 2015/09/30"
+    },
+    {
+      "videoId": "IVNayNo7j0E",
+      "before": "Kitai/あさぎーにょ - 2017",
+      "after": "Kitai - あさぎーにょ",
+      "raw": "0:54:05   Kitai/あさぎーにょ/2017"
+    },
+    {
+      "videoId": "IVNayNo7j0E",
+      "before": "スーパーヒーロー/Guiano.IA - 2018",
+      "after": "スーパーヒーロー - Guiano.IA",
+      "raw": "1:16:55    スーパーヒーロー/Guiano.IA/2018"
+    },
+    {
+      "videoId": "B2NNCFyBwbw",
+      "before": "灰色と青(＋菅田将暉)/米津玄師 - 2017",
+      "after": "灰色と青(＋菅田将暉) - 米津玄師",
+      "raw": "1:03:13    灰色と青(＋菅田将暉)/米津玄師/2017"
+    },
+    {
+      "videoId": "XOOKbRvdMLE",
+      "before": "努努～ゆめゆめ～/ONE OK ROCK 2007/07 - 25",
+      "after": "努努～ゆめゆめ～ - ONE OK ROCK",
+      "raw": "00:40:14 努努～ゆめゆめ～/ONE OK ROCK 2007/07/25"
+    },
+    {
+      "videoId": "XOOKbRvdMLE",
+      "before": "アンサイズニア/ONE OK ROCK 2011/02 - 16",
+      "after": "アンサイズニア - ONE OK ROCK",
+      "raw": "00:45:14 アンサイズニア/ONE OK ROCK 2011/02/16"
+    },
+    {
+      "videoId": "XOOKbRvdMLE",
+      "before": "FAKE LAND/FAKE TYPE. 2021/02 - 17",
+      "after": "FAKE LAND - FAKE TYPE.",
+      "raw": "01:16:14 FAKE LAND/FAKE TYPE. 2021/02/17"
+    },
+    {
+      "videoId": "a1Ny-znPD9k",
+      "before": "ウェカピポ/SOUL'd OUT 2003/01 - 22",
+      "after": "ウェカピポ - SOUL'd OUT",
+      "raw": "00:07:11 ウェカピポ/SOUL'd OUT 2003/01/22"
+    },
+    {
+      "videoId": "a1Ny-znPD9k",
+      "before": "楽園ベイベー/RIP SLYME 2002/06 - 26",
+      "after": "楽園ベイベー - RIP SLYME",
+      "raw": "00:57:31 楽園ベイベー/RIP SLYME 2002/06/26"
+    },
+    {
+      "videoId": "_MuUvQbKCmw",
+      "before": "好きすぎて滅！/M!LK 2025/10 - 27",
+      "after": "好きすぎて滅！ - M!LK",
+      "raw": "00:20:34 好きすぎて滅！/M!LK 2025/10/27"
+    },
+    {
+      "videoId": "gNKIbkX6Hhk",
+      "before": "赤黄色の金木犀/フジファブリック 2004/09 - 29",
+      "after": "赤黄色の金木犀 - フジファブリック",
+      "raw": "00:19:52 赤黄色の金木犀/フジファブリック 2004/09/29"
+    },
+    {
+      "videoId": "gNKIbkX6Hhk",
+      "before": "今宵の月のように/エレファントカシマシ 1997/07 - 30",
+      "after": "今宵の月のように - エレファントカシマシ",
+      "raw": "00:24:02 今宵の月のように/エレファントカシマシ 1997/07/30"
+    },
+    {
+      "videoId": "gNKIbkX6Hhk",
+      "before": "三日月/絢香 2006/09 - 27",
+      "after": "三日月 - 絢香",
+      "raw": "00:28:45 三日月/絢香 2006/09/27"
+    },
+    {
+      "videoId": "gNKIbkX6Hhk",
+      "before": "粉雪/レミオロメン 2005/11 - 16",
+      "after": "粉雪 - レミオロメン",
+      "raw": "00:58:01 粉雪/レミオロメン 2005/11/16"
+    },
+    {
+      "videoId": "gNKIbkX6Hhk",
+      "before": "春よ、来い/松任谷由実 1994/10 - 24",
+      "after": "春よ、来い - 松任谷由実",
+      "raw": "01:10:55 春よ、来い/松任谷由実 1994/10/24"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "(New)シュガーサイン/チャリけんP feat. Mew 2012/04 - 27",
+      "after": "(New)シュガーサイン - チャリけんP feat. Mew",
+      "raw": "00:05:02 0 (New)シュガーサイン/チャリけんP feat. Mew 2012/04/27"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "刹那プラス/みきとP feat. 初音ミク 2012/05 - 14",
+      "after": "刹那プラス - みきとP feat. 初音ミク",
+      "raw": "00:18:07 0 刹那プラス/みきとP feat. 初音ミク 2012/05/14"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "(New)Equation×**/椎名もた（ぽわぽわP） feat. 鏡音リン 2011/06 - 13",
+      "after": "(New)Equation×** - 椎名もた（ぽわぽわP） feat. 鏡音リン",
+      "raw": "00:26:40 0 (New)Equation×**/椎名もた（ぽわぽわP） feat. 鏡音リン 2011/06/13"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "Twig/大沼パセリ feat. 初音ミク 2017/08 - 16",
+      "after": "Twig - 大沼パセリ feat. 初音ミク",
+      "raw": "00:32:51 0 Twig/大沼パセリ feat. 初音ミク 2017/08/16"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "花瓶に触れた/バルーン feat. v flower 2016/02 - 23",
+      "after": "花瓶に触れた - バルーン feat. v flower",
+      "raw": "00:37:37 0 花瓶に触れた/バルーン feat. v flower 2016/02/23"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "ヒール/ルワン feat. flower 2020/08 - 28",
+      "after": "ヒール - ルワン feat. flower",
+      "raw": "01:06:04 0 ヒール/ルワン feat. flower 2020/08/28"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "サイハテ/小林オニキス feat. 初音ミク 2008/01 - 16",
+      "after": "サイハテ - 小林オニキス feat. 初音ミク",
+      "raw": "01:14:40 0 サイハテ/小林オニキス feat. 初音ミク 2008/01/16"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "メルティランドナイトメア/はるまきごはん feat. 初音ミク 2018/02 - 16",
+      "after": "メルティランドナイトメア - はるまきごはん feat. 初音ミク",
+      "raw": "01:27:42 -2 メルティランドナイトメア/はるまきごはん feat. 初音ミク 2018/02/16"
+    },
+    {
+      "videoId": "0kJGf9CMegA",
+      "before": "crack/keeno feat. 初音ミク 2010/10 - 22",
+      "after": "crack - keeno feat. 初音ミク",
+      "raw": "01:33:55 0 crack/keeno feat. 初音ミク 2010/10/22"
+    }
+  ],
   "examples": [
     {
       "reason": "spoken_fraction_split_as_artist",
@@ -531,6 +783,237 @@
       "title": "VTuberのライブ制作費は生身の半分～1",
       "artist": "3",
       "raw": "02:57:01 VTuberのライブ制作費は生身の半分～1/3"
+    },
+    {
+      "reason": "date_split_as_song_and_artist",
+      "videoId": "tNWNvQyRh6c",
+      "channelName": "ブランク・ウリカ - Blanc Ulica -",
+      "occurrenceId": "tNWNvQyRh6c:Ugxsmhvkc_WnOdA_48B4AaABAg:2597:7c78ea02ac604b30",
+      "sourceId": "Ugxsmhvkc_WnOdA_48B4AaABAg",
+      "sourceHash": "459c465773a8318c0d55e461f01eecc52ea9bf48082dc50503db073cf5a38c81",
+      "title": "6",
+      "artist": "土",
+      "raw": "43:17 6/27（土）"
+    },
+    {
+      "reason": "date_split_as_song_and_artist",
+      "videoId": "71OSYnx-Vy0",
+      "channelName": "Ruka Ch. 雨海ルカ",
+      "occurrenceId": "71OSYnx-Vy0:legacy:71OSYnx-Vy0:6117:97e6a91361b333b7",
+      "sourceId": "legacy:71OSYnx-Vy0",
+      "sourceHash": "6bb534ac466b1ca219744eb068c0703ef15a04706f5cbf86748a4b56057909ab",
+      "title": "2026/07",
+      "artist": "19",
+      "raw": "1:41:57 2026/07/19"
+    },
+    {
+      "reason": "confirmed_mc_break",
+      "videoId": "M8hDtFazbGU",
+      "channelName": "漣 悠葵 / Sazanami Yuki",
+      "occurrenceId": "M8hDtFazbGU:legacy:M8hDtFazbGU:2457:b26bffb85815c330",
+      "sourceId": "legacy:M8hDtFazbGU",
+      "sourceHash": "bc8418cd01a7ee867b1d2fa548b86dc5712c1fe4c53a7e9152a3d4ff9ce01fb7",
+      "title": "MC1",
+      "artist": "クラフェス",
+      "raw": "0:40:57 MC1（クラフェス）"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "3HsBNG-zTjo",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "3HsBNG-zTjo:UgxIWHWl_8cSgmL6xUp4AaABAg:3806:d4299bf4264db364",
+      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
+      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
+      "title": "トーク",
+      "artist": "HiMEのお話",
+      "raw": "1:03:26  トーク(HiMEのお話)"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "3HsBNG-zTjo",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "3HsBNG-zTjo:UgxIWHWl_8cSgmL6xUp4AaABAg:4401:907f4e6d6e38808f",
+      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
+      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
+      "title": "トーク",
+      "artist": "おたより募集のお話",
+      "raw": "1:13:21  トーク(おたより募集のお話)"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "FyuP1SYDNzo",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "FyuP1SYDNzo:UgyjYOo_bDdaIffIsYZ4AaABAg:3666:1d61e395bbb45071",
+      "sourceId": "UgyjYOo_bDdaIffIsYZ4AaABAg",
+      "sourceHash": "6be5731abe67a6af10e68d95bed5ccfbaeae22602ab46cb19a8df93ff3a0aa44",
+      "title": "トーク",
+      "artist": "リクエストタイムのお話",
+      "raw": "1:01:06  トーク(リクエストタイムのお話)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "vb-zluSm_kM",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "vb-zluSm_kM:UgxmC4yHAxQQutY0Ya14AaABAg:2566:bddc2aaddf240414",
+      "sourceId": "UgxmC4yHAxQQutY0Ya14AaABAg",
+      "sourceHash": "c4e1e7e409baa70f6a490107147eb89729ce2be1aba8b7e8abff127220a51401",
+      "title": "雑談タイム②",
+      "artist": "意外な禁句ワード",
+      "raw": "【00:42:46】雑談タイム②(意外な禁句ワード)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "vb-zluSm_kM",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "vb-zluSm_kM:UgxmC4yHAxQQutY0Ya14AaABAg:3440:d773283749ba68b8",
+      "sourceId": "UgxmC4yHAxQQutY0Ya14AaABAg",
+      "sourceHash": "c4e1e7e409baa70f6a490107147eb89729ce2be1aba8b7e8abff127220a51401",
+      "title": "雑談タイム③",
+      "artist": "ファンアートについて",
+      "raw": "【00:57:20】雑談タイム③(ファンアートについて🐰)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "vb-zluSm_kM",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "vb-zluSm_kM:UgxmC4yHAxQQutY0Ya14AaABAg:4870:4cf50fb2452b2e6d",
+      "sourceId": "UgxmC4yHAxQQutY0Ya14AaABAg",
+      "sourceHash": "c4e1e7e409baa70f6a490107147eb89729ce2be1aba8b7e8abff127220a51401",
+      "title": "雑談タイム④",
+      "artist": "エゴサについて",
+      "raw": "【01:21:10】雑談タイム④(エゴサについて)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "vb-zluSm_kM",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "vb-zluSm_kM:UgxmC4yHAxQQutY0Ya14AaABAg:7108:08a5c4e9023af02f",
+      "sourceId": "UgxmC4yHAxQQutY0Ya14AaABAg",
+      "sourceHash": "c4e1e7e409baa70f6a490107147eb89729ce2be1aba8b7e8abff127220a51401",
+      "title": "雑談タイム⑤",
+      "artist": "キーの話",
+      "raw": "【01:58:28】雑談タイム⑤(キーの話)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "vb-zluSm_kM",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "vb-zluSm_kM:UgxmC4yHAxQQutY0Ya14AaABAg:7691:8530a2e4db6b76b7",
+      "sourceId": "UgxmC4yHAxQQutY0Ya14AaABAg",
+      "sourceHash": "c4e1e7e409baa70f6a490107147eb89729ce2be1aba8b7e8abff127220a51401",
+      "title": "雑談タイム⑥",
+      "artist": "キーの話その2",
+      "raw": "【02:08:11】雑談タイム⑥(キーの話その2)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "o2YfxIaYAek",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "o2YfxIaYAek:UgzmRrkzTW_fu-0ATsV4AaABAg:1439:f5a647046ed126ae",
+      "sourceId": "UgzmRrkzTW_fu-0ATsV4AaABAg",
+      "sourceHash": "d28eed1fd0f50acc6e14fb0686a4ce8014e5756536aeb42807382425327d01dd",
+      "title": "雑談タイム①",
+      "artist": "ギャルとメイクの話",
+      "raw": "【00:23:59】雑談タイム①(ギャルとメイクの話)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "o2YfxIaYAek",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "o2YfxIaYAek:UgzmRrkzTW_fu-0ATsV4AaABAg:3169:557f663df3344342",
+      "sourceId": "UgzmRrkzTW_fu-0ATsV4AaABAg",
+      "sourceHash": "d28eed1fd0f50acc6e14fb0686a4ce8014e5756536aeb42807382425327d01dd",
+      "title": "雑談タイム②",
+      "artist": "冷却タイムと各地の熱波について",
+      "raw": "【00:52:49】雑談タイム②(冷却タイムと各地の熱波について)"
+    },
+    {
+      "reason": "confirmed_chat_section",
+      "videoId": "o2YfxIaYAek",
+      "channelName": "ミソラソラ - Misorasora",
+      "occurrenceId": "o2YfxIaYAek:UgzmRrkzTW_fu-0ATsV4AaABAg:7572:0ce0474304dadc4a",
+      "sourceId": "UgzmRrkzTW_fu-0ATsV4AaABAg",
+      "sourceHash": "d28eed1fd0f50acc6e14fb0686a4ce8014e5756536aeb42807382425327d01dd",
+      "title": "雑談タイム③",
+      "artist": "It's Meと工藤新一の話",
+      "raw": "【02:06:12】雑談タイム③(It's Meと工藤新一の話)"
+    },
+    {
+      "reason": "unrelated_livestream_listing",
+      "videoId": "vmv-rDcYn9U",
+      "channelName": "駆空なぎ【RockSongVTuber】-Stellarhyth",
+      "occurrenceId": "vmv-rDcYn9U:description:vmv-rDcYn9U:43c34fdfdd24d5cc:1018:a9c0a31b14a0fc39",
+      "sourceId": "description:vmv-rDcYn9U:43c34fdfdd24d5cc",
+      "sourceHash": "43c34fdfdd24d5ccb926fdfc280a72bd584a3202322457b59be6c1685853c7cf",
+      "title": "【一般ライブ】7",
+      "artist": "金",
+      "raw": "16:58 【一般ライブ】7/31 (金)"
+    },
+    {
+      "reason": "unrelated_livestream_listing",
+      "videoId": "IrunfHRSxDA",
+      "channelName": "セイヤvideo /夜9時半の弾き語り🌻🎸",
+      "occurrenceId": "IrunfHRSxDA:15:1018",
+      "sourceId": "description:IrunfHRSxDA:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【一般ライブ】8",
+      "artist": "月",
+      "raw": "16:58 【一般ライブ】8/3 (月)"
+    },
+    {
+      "reason": "unrelated_talk_show_listing",
+      "videoId": "IrunfHRSxDA",
+      "channelName": "セイヤvideo /夜9時半の弾き語り🌻🎸",
+      "occurrenceId": "IrunfHRSxDA:21:1060",
+      "sourceId": "description:IrunfHRSxDA:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一",
+      "artist": "未記載",
+      "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一"
+    },
+    {
+      "reason": "unrelated_livestream_listing",
+      "videoId": "5g6SIj1Fn48",
+      "channelName": "Miyuki_ハーピストみゆき_ハープ弾き語り",
+      "occurrenceId": "5g6SIj1Fn48:15:1018",
+      "sourceId": "description:5g6SIj1Fn48:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【一般ライブ】8",
+      "artist": "月",
+      "raw": "16:58 【一般ライブ】8/3 (月)"
+    },
+    {
+      "reason": "unrelated_talk_show_listing",
+      "videoId": "5g6SIj1Fn48",
+      "channelName": "Miyuki_ハーピストみゆき_ハープ弾き語り",
+      "occurrenceId": "5g6SIj1Fn48:21:1060",
+      "sourceId": "description:5g6SIj1Fn48:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一",
+      "artist": "未記載",
+      "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一"
+    },
+    {
+      "reason": "unrelated_livestream_listing",
+      "videoId": "H9tglBshSyU",
+      "channelName": "Ridel. Live",
+      "occurrenceId": "H9tglBshSyU:15:1018",
+      "sourceId": "description:H9tglBshSyU:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【一般ライブ】8",
+      "artist": "月",
+      "raw": "16:58 【一般ライブ】8/3 (月)"
+    },
+    {
+      "reason": "unrelated_talk_show_listing",
+      "videoId": "H9tglBshSyU",
+      "channelName": "Ridel. Live",
+      "occurrenceId": "H9tglBshSyU:21:1060",
+      "sourceId": "description:H9tglBshSyU:7659c14e45c6f34f",
+      "sourceHash": "7659c14e45c6f34f953217f983d21b4e3bc437aa40be5af9d1162ed32f187257",
+      "title": "【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一",
+      "artist": "未記載",
+      "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×斎藤七夏瑚×高橋洋一"
     },
     {
       "reason": "reused_description_across_unrelated_channels",
@@ -553,6 +1036,28 @@
       "title": "globe tour 1999 Relation Remaster Edition",
       "artist": "未記載",
       "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "OLidAXBtpJI",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "OLidAXBtpJI:80:951",
+      "sourceId": "UgyKT7eCjSHE_A8DDel4AaABAg",
+      "sourceHash": "523fcf9353daa24f149f3c19375a2c686fe57f18e8d3d252f7339c0e37aacdbe",
+      "title": "トーク",
+      "artist": "友人の甥っ子ちゃんの好きなもののお話",
+      "raw": "0:15:51  トーク(友人の甥っ子ちゃんの好きなもののお話)"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "OLidAXBtpJI",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "OLidAXBtpJI:451:3690",
+      "sourceId": "UgyKT7eCjSHE_A8DDel4AaABAg",
+      "sourceHash": "523fcf9353daa24f149f3c19375a2c686fe57f18e8d3d252f7339c0e37aacdbe",
+      "title": "トーク",
+      "artist": "スパロボで気づいた、見た目での興味のお話",
+      "raw": "1:01:30  トーク(スパロボで気づいた、見た目での興味のお話)"
     },
     {
       "reason": "reused_description_across_unrelated_channels",
@@ -597,6 +1102,39 @@
       "title": "globe tour 1999 Relation Remaster Edition",
       "artist": "未記載",
       "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "NG89zrkEkK0",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "NG89zrkEkK0:55:367",
+      "sourceId": "Ugz8hT3WSFsPamPCUod4AaABAg",
+      "sourceHash": "b2fc65c7856380b261c0ae322e30905dd39a9c31ec31594b32a18f1fc8664a11",
+      "title": "トーク",
+      "artist": "ネット回線不調のお話",
+      "raw": "0:06:07  トーク(ネット回線不調のお話)"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "NG89zrkEkK0",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "NG89zrkEkK0:348:3733",
+      "sourceId": "Ugz8hT3WSFsPamPCUod4AaABAg",
+      "sourceHash": "b2fc65c7856380b261c0ae322e30905dd39a9c31ec31594b32a18f1fc8664a11",
+      "title": "トーク",
+      "artist": "ぶいかふぇ裏話のお話",
+      "raw": "1:02:13  トーク(ぶいかふぇ裏話のお話)"
+    },
+    {
+      "reason": "confirmed_talk_section",
+      "videoId": "NG89zrkEkK0",
+      "channelName": "らんちぅ寿希Live",
+      "occurrenceId": "NG89zrkEkK0:375:5127",
+      "sourceId": "Ugz8hT3WSFsPamPCUod4AaABAg",
+      "sourceHash": "b2fc65c7856380b261c0ae322e30905dd39a9c31ec31594b32a18f1fc8664a11",
+      "title": "トーク",
+      "artist": "早乙女あずきさんと語り合いのお話",
+      "raw": "1:25:27  トーク(早乙女あずきさんと語り合いのお話)"
     },
     {
       "reason": "reused_description_across_unrelated_channels",
@@ -674,292 +1212,6 @@
       "title": "～8",
       "artist": "15",
       "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "9jp25d2K8Wg",
-      "channelName": "メルティch",
-      "occurrenceId": "9jp25d2K8Wg:33:1439",
-      "sourceId": "description:9jp25d2K8Wg:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "qnNUKGEP6GI",
-      "channelName": "真白ユキ*JPN Vtuber",
-      "occurrenceId": "qnNUKGEP6GI:22:1140",
-      "sourceId": "description:qnNUKGEP6GI:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "qnNUKGEP6GI",
-      "channelName": "真白ユキ*JPN Vtuber",
-      "occurrenceId": "qnNUKGEP6GI:33:1439",
-      "sourceId": "description:qnNUKGEP6GI:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "VspzJvHtodM",
-      "channelName": "なれたん Naraetan Ch.",
-      "occurrenceId": "VspzJvHtodM:22:1140",
-      "sourceId": "description:VspzJvHtodM:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "VspzJvHtodM",
-      "channelName": "なれたん Naraetan Ch.",
-      "occurrenceId": "VspzJvHtodM:33:1439",
-      "sourceId": "description:VspzJvHtodM:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "Ez_6fcA_AOM",
-      "channelName": "紗倉おと-Sakura Oto-🎸",
-      "occurrenceId": "Ez_6fcA_AOM:22:1140",
-      "sourceId": "description:Ez_6fcA_AOM:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "Ez_6fcA_AOM",
-      "channelName": "紗倉おと-Sakura Oto-🎸",
-      "occurrenceId": "Ez_6fcA_AOM:33:1439",
-      "sourceId": "description:Ez_6fcA_AOM:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "confirmed_chat_segment_label",
-      "videoId": "N8rS2XESc3Y",
-      "channelName": "伊月知世 / CHISE ITSUKI",
-      "occurrenceId": "N8rS2XESc3Y:340:4794",
-      "sourceId": "Ugw4lYxD_yd0cfMLJv14AaABAg",
-      "sourceHash": "cfe67870f27141c181f2a8cb829880096405fe0f079b51017c0bf5f0c20f7ebe",
-      "title": "雑談パート",
-      "artist": "海、夏ボイス",
-      "raw": "1:19:54\t雑談パート - 海、夏ボイス"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "ShymQbV2hOs",
-      "channelName": "アイリナ・ゼファリオ【StellArt.】",
-      "occurrenceId": "ShymQbV2hOs:22:1140",
-      "sourceId": "description:ShymQbV2hOs:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "ShymQbV2hOs",
-      "channelName": "アイリナ・ゼファリオ【StellArt.】",
-      "occurrenceId": "ShymQbV2hOs:33:1439",
-      "sourceId": "description:ShymQbV2hOs:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "ijjnLDo3om0",
-      "channelName": "月音-TUKUNE-",
-      "occurrenceId": "ijjnLDo3om0:22:1140",
-      "sourceId": "description:ijjnLDo3om0:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "ijjnLDo3om0",
-      "channelName": "月音-TUKUNE-",
-      "occurrenceId": "ijjnLDo3om0:33:1439",
-      "sourceId": "description:ijjnLDo3om0:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "WTWVXaaefuc",
-      "channelName": "LiccaLin",
-      "occurrenceId": "WTWVXaaefuc:22:1140",
-      "sourceId": "description:WTWVXaaefuc:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "～8",
-      "artist": "15",
-      "raw": "19:00～8/15"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "WTWVXaaefuc",
-      "channelName": "LiccaLin",
-      "occurrenceId": "WTWVXaaefuc:33:1439",
-      "sourceId": "description:WTWVXaaefuc:aecd22582a4e2bbd",
-      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
-      "title": "globe tour 1999 Relation Remaster Edition",
-      "artist": "未記載",
-      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "L8aflLy-WGM",
-      "channelName": "乙夜へりか Helica Itsuya - Vtuber & Streamer",
-      "occurrenceId": "L8aflLy-WGM:6:1200",
-      "sourceId": "description:L8aflLy-WGM:1b7c875f9609f9d0",
-      "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
-      "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
-      "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
-      "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
-    },
-    {
-      "reason": "confirmed_stream_start_marker",
-      "videoId": "XxegsDg0D_4",
-      "channelName": "五十嵐斎 / いっちゃんいっちゃんねる",
-      "occurrenceId": "XxegsDg0D_4:11:0",
-      "sourceId": "Ugwail2lKbI3zvfW2hd4AaABAg",
-      "sourceHash": "354f27d200a7c8a087685782b1aa60191aefd09b32e6465c44b90cef6014ef8a",
-      "title": "枠スタート",
-      "artist": "",
-      "raw": "00:00  枠スタート"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "q50U2AjiAXE",
-      "channelName": "Mecori",
-      "occurrenceId": "q50U2AjiAXE:6:1200",
-      "sourceId": "description:q50U2AjiAXE:1b7c875f9609f9d0",
-      "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
-      "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
-      "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
-      "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
-    },
-    {
-      "reason": "reused_description_across_unrelated_channels",
-      "videoId": "GfjppqbWiJQ",
-      "channelName": "波宮-Hamia-",
-      "occurrenceId": "GfjppqbWiJQ:6:1200",
-      "sourceId": "description:GfjppqbWiJQ:1b7c875f9609f9d0",
-      "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
-      "title": "～『葬送のフリーレン』～トークの魔法～【近況報告】",
-      "artist": "出演:種﨑敦美、岡本信彦、市ノ瀬加那",
-      "raw": "3/5(水)20:00～『葬送のフリーレン』～トークの魔法～【近況報告】／出演:種﨑敦美、岡本信彦、市ノ瀬加那"
-    },
-    {
-      "reason": "confirmed_stream_start_marker",
-      "videoId": "XA-SUnAD8U0",
-      "channelName": "水沢オペラ / Opera Ch.",
-      "occurrenceId": "XA-SUnAD8U0:11:0",
-      "sourceId": "UgxP61_5mh7JMcF4n_x4AaABAg",
-      "sourceHash": "fb34a2c9080237bff53c22a310cc81354501122d051d53bd332a9fbf283f79aa",
-      "title": "枠スタート",
-      "artist": "",
-      "raw": "00:00:00  枠スタート"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "m7UWtllKH_8",
-      "channelName": "CuffRoN[カフロン]",
-      "occurrenceId": "m7UWtllKH_8:54:220",
-      "sourceId": "description:m7UWtllKH_8:f1607090b7c35ffa",
-      "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
-      "title": "12/09",
-      "artist": "25° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "btlg8SYtyyk",
-      "channelName": "白熊白秋",
-      "occurrenceId": "btlg8SYtyyk:54:220",
-      "sourceId": "description:btlg8SYtyyk:0c47b0169b5b7768",
-      "sourceHash": "0c47b0169b5b7768c29dbad4a0ed577381d014977251c66b76895bf29c8ea325",
-      "title": "09/09",
-      "artist": "22° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 09/09 | 22° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "YnU2PSh4tDY",
-      "channelName": "燈舞りん from まりなす",
-      "occurrenceId": "YnU2PSh4tDY:54:220",
-      "sourceId": "description:YnU2PSh4tDY:0c47b0169b5b7768",
-      "sourceHash": "0c47b0169b5b7768c29dbad4a0ed577381d014977251c66b76895bf29c8ea325",
-      "title": "09/09",
-      "artist": "22° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 09/09 | 22° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "K2_yRIPIUmE",
-      "channelName": "KAITOちゃんの音楽道",
-      "occurrenceId": "K2_yRIPIUmE:54:220",
-      "sourceId": "description:K2_yRIPIUmE:6efbd19caefbbe84",
-      "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
-      "title": "11/09",
-      "artist": "24° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 11/09 | 24° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "dZzzd6Fo4gs",
-      "channelName": "疼木 天茉音",
-      "occurrenceId": "dZzzd6Fo4gs:54:220",
-      "sourceId": "description:dZzzd6Fo4gs:6efbd19caefbbe84",
-      "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
-      "title": "11/09",
-      "artist": "24° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 11/09 | 24° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "Pgrs3Y1Epyw",
-      "channelName": "カストル・ウィンター",
-      "occurrenceId": "Pgrs3Y1Epyw:54:220",
-      "sourceId": "description:Pgrs3Y1Epyw:f1607090b7c35ffa",
-      "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
-      "title": "12/09",
-      "artist": "25° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
-    },
-    {
-      "reason": "prayer_broadcast_timeline",
-      "videoId": "xV-8CJrYlPQ",
-      "channelName": "あやぎみ",
-      "occurrenceId": "xV-8CJrYlPQ:54:220",
-      "sourceId": "description:xV-8CJrYlPQ:f1607090b7c35ffa",
-      "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
-      "title": "12/09",
-      "artist": "25° Dia [Live Ao vivo]",
-      "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
     }
   ]
 }
