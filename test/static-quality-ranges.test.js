@@ -10,15 +10,15 @@ const {
 const { filterRange, shanghaiCalendarStart } = require("../scripts/static/collect-and-build");
 
 function song(title, artist, options = {}) {
-  return { title, artist, raw: options.raw ?? \`00:10 \${title} - \${artist}\`, ...options };
+  return { title, artist, raw: options.raw ?? `00:10 ${title} - ${artist}`, ...options };
 }
 
 function video(index, rows, overrides = {}) {
   return {
-    videoId: \`test-video-\${index}\`,
-    channelId: \`test-channel-\${index}\`,
-    channelName: \`Test Channel \${index}\`,
-    title: \`Unrelated karaoke title \${index}\`,
+    videoId: `test-video-${index}`,
+    channelId: `test-channel-${index}`,
+    channelName: `Test Channel ${index}`,
+    title: `Unrelated karaoke title ${index}`,
     publishedAt: "2026-09-25T12:00:00.000Z",
     songs: rows,
     ...overrides,
@@ -66,7 +66,7 @@ test("contaminated descriptions are reversibly quarantined, while unrelated and 
   // sample: six bad rows across different channels, 120 legitimate rows.
   const input = Array.from({ length: 6 }, (_, i) => video(i, [
     copied,
-    ...Array.from({ length: 20 }, (_, n) => song(n ? \`Legitimate song \${n}\` : "1/2", n ? "Artist" : "川本真琴")),
+    ...Array.from({ length: 20 }, (_, n) => song(n ? `Legitimate song ${n}` : "1/2", n ? "Artist" : "川本真琴")),
   ]));
   const before = JSON.stringify(input);
   const result = cleanStaticVideos(input);
