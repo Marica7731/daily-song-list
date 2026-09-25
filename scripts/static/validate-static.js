@@ -43,6 +43,13 @@ const quality = read("quality-audit.json");
 if (quality.quarantinedOccurrences !== meta.quality?.quarantinedOccurrences) fail("quality audit vs meta mismatch");
 if (quality.visibleOccurrences !== meta.songOccurrenceCount) fail("quality audit vs published count mismatch");
 if (quality.visibleVideos !== meta.videoCount) fail("quality visible video count mismatch");
+const review = read("quality-review.json");
+if (review.status !== "REVIEW_ONLY_NO_AUTO_DELETION") fail("quality review is not explicitly review-only");
+if (review.scannedVideoCount !== meta.videoCount || review.scannedOccurrenceCount !== meta.songOccurrenceCount) fail("quality review scan vs published counts mismatch");
+if (review.scannedDays.length !== meta.quality?.reviewedDayCount) fail("quality review day count mismatch");
+if (review.candidates.length !== meta.quality?.reviewOnlyCandidateCount) fail("quality review candidate count mismatch");
+if (review.scannedDays.reduce((sum, day) => sum + day.occurrences, 0) !== meta.songOccurrenceCount) fail("quality review daily totals mismatch");
+if (review.scannedDays.reduce((sum, day) => sum + day.quarantinedOccurrences, 0) !== quality.quarantinedOccurrences) fail("quality audit daily quarantines mismatch");
 for (const range of ["today", "3d", "7d", "30d", "all"]) {
   for (const type of ["songs", "artists", "vtubers"]) {
     const ranking = read(`rankings/${range}/${type}/page-0001.json`);

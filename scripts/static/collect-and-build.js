@@ -10,6 +10,7 @@ const {
 } = require("../update-songlist");
 const { isLikelyNonSongEntry } = require("../song-utils");
 const { cleanStaticVideos } = require("./quality-guard");
+const { buildQualityReview } = require("./quality-review");
 
 const ROOT = path.resolve(__dirname, "../..");
 const DATA_ROOT = path.resolve(process.env.STATIC_DATA_ROOT || path.join(ROOT, "data/static/v1"));
@@ -255,6 +256,7 @@ function normalizeVideo(detail, candidate, now) {
 
 function buildStaticSite(dataRoot, state, now, options = {}) {
   const { videos, audit } = cleanStaticVideos(readDayVideos(dataRoot));
+  const review = buildQualityReview(videos, audit, now);
   const generatedRoots = ["rankings", "entities", "sources", "search"];
   for (const name of generatedRoots) resetGeneratedRoot(dataRoot, name);
   const ranges = [
@@ -296,10 +298,13 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
       quarantinedVideos: audit.quarantinedVideos,
       repeatedDescriptionSources: audit.repeatedDescriptionSources.length,
       byReason: audit.byReason,
+      reviewedDayCount: review.scannedDays.length,
+      reviewOnlyCandidateCount: review.candidates.length,
     },
     ranges: rangeManifest,
   };
   writeJson(path.join(dataRoot, "quality-audit.json"), { generatedAt: now.toISOString(), ...audit });
+  writeJson(path.join(dataRoot, "quality-review.json"), review);
   writeJson(path.join(dataRoot, "meta.json"), meta);
   return meta;
 }

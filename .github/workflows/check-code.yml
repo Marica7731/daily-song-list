@@ -82,6 +82,7 @@ jobs:
           set -Eeuo pipefail
           node --check scripts/static/collect-and-build.js
           node --check scripts/static/quality-guard.js
+          node --check scripts/static/quality-review.js
           node --check scripts/static/recover-history.js
           node --check scripts/static/validate-static.js
           node --check assets/static-app.js

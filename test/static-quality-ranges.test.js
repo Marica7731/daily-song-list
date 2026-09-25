@@ -8,6 +8,7 @@ const {
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
 const { filterRange, shanghaiCalendarStart } = require("../scripts/static/collect-and-build");
+const { buildQualityReview, reviewReasons } = require("../scripts/static/quality-review");
 
 function song(title, artist, options = {}) {
   return { title, artist, raw: options.raw ?? `00:10 ${title} - ${artist}`, ...options };
@@ -104,4 +105,23 @@ test("today and three-day ranges use Shanghai calendar days, not trailing 24/72 
   assert.deepEqual(filterRange(input, now, null, 1).map((v) => v.videoId), ["test-video-2"]);
   assert.deepEqual(filterRange(input, now, null, 3).map((v) => v.videoId), ["test-video-1", "test-video-2", "test-video-3"]);
   assert.equal(filterRange(input, now, 7).length, 4);
+});
+
+test("full-history review surfaces questionable records without dropping real songs", () => {
+  assert.deepEqual(reviewReasons(song("1/2", "川本真琴")), []);
+  const videos = [
+    video(1, [song("1/2", "川本真琴"),
+      song("栞", "6thアルバム「PUZZLE」より", { raw: "00:20 栞 / 6thアルバム「PUZZLE」より" })],
+    { publishedAt: "2026-07-17T11:30:00Z" }),
+    video(2, [song("新曲", "テスト", { raw: "00:50 新曲 / テスト" })],
+    { publishedAt: "2026-08-20T11:30:00Z" }),
+  ];
+  const original = JSON.stringify(videos);
+  const review = buildQualityReview(videos, { byDay: { "2026-07-17": { quarantinedOccurrences: 2 } } }, new Date("2026-09-25T19:00:00Z"));
+  assert.equal(review.status, "REVIEW_ONLY_NO_AUTO_DELETION");
+  assert.equal(review.scannedOccurrenceCount, 3);
+  assert.equal(review.scannedDays.length, 2);
+  assert.equal(review.scannedDays[0].quarantinedOccurrences, 2);
+  assert(review.candidates.some((item) => item.reason === "possible_release_metadata_as_artist"));
+  assert.equal(JSON.stringify(videos), original);
 });
