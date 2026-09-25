@@ -209,3 +209,9 @@ test("restore release-date-split song credits and never discard the source occur
   assert.equal(videos[0].songs.length, 3);
   assert.equal(JSON.stringify(input), originalBytes);
 });
+
+test("the artist 後ろから這いより隊G is not mistaken for release metadata", () => {
+  const record = song("太陽曰く燃えよカオス", "後ろから這いより隊G");
+  assert.equal(reviewReasons(record).includes("possible_release_metadata_as_artist"), false);
+  assert.equal(reviewReasons(song("栞", "6thアルバム「PUZZLE」より")).includes("possible_release_metadata_as_artist"), true);
+});
