@@ -8,11 +8,26 @@ start().catch(showError);
 
 async function start() {
   state.meta = await json("meta.json");
-  const sevenDaySongs = Number(state.meta.ranges?.["7d"]?.songs?.totalCount || 0);
-  const thirtyDaySongs = Number(state.meta.ranges?.["30d"]?.songs?.totalCount || 0);
-  if (sevenDaySongs === 0 && thirtyDaySongs > 0) el.range.value = "30d";
+  const available = ["today", "3d", "7d", "30d", "all"].filter((range) => state.meta.ranges?.[range]?.songs);
+  if (!available.length) throw new Error("没有可用的排行榜范围");
+  el.range.value = available.find((range) => Number(state.meta.ranges[range].songs.totalCount) > 0) || available[0];
+  const rangeTabs = [...document.querySelectorAll(".range-tabs [data-range]")];
+  function syncRangeTabs() {
+    for (const tab of rangeTabs) {
+      tab.disabled = !state.meta.ranges?.[tab.dataset.range];
+      tab.setAttribute("aria-selected", String(tab.dataset.range === el.range.value));
+    }
+  }
+  for (const tab of rangeTabs) tab.addEventListener("click", () => {
+    if (tab.disabled || el.range.value === tab.dataset.range) return;
+    el.range.value = tab.dataset.range;
+    el.range.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  el.range.addEventListener("change", syncRangeTabs);
+  syncRangeTabs();
   const pending = Number(state.meta.pendingVideoCount || 0);
-  el.status.textContent = `更新 ${dateText(state.meta.generatedAt)} · ${Number(state.meta.videoCount || 0).toLocaleString("zh-CN")} 个视频 · ${Number(state.meta.songOccurrenceCount || 0).toLocaleString("zh-CN")} 条收录${pending ? ` · ${pending.toLocaleString("zh-CN")} 待处理` : ""}${sevenDaySongs === 0 && thirtyDaySongs > 0 ? " · 已临时显示近 30 天" : ""}`;
+  const quarantined = Number(state.meta.quality?.quarantinedOccurrences || 0);
+  el.status.textContent = `更新 ${dateText(state.meta.generatedAt)} · ${Number(state.meta.videoCount || 0).toLocaleString("zh-CN")} 个视频 · ${Number(state.meta.songOccurrenceCount || 0).toLocaleString("zh-CN")} 条收录${pending ? ` · ${pending.toLocaleString("zh-CN")} 待处理` : ""}${quarantined ? ` · 隔离 ${quarantined.toLocaleString("zh-CN")} 条异常记录` : ""}`;
   for (const control of [el.range, el.type]) control.addEventListener("change", () => { state.page = 1; load(); });
   el.keyword.addEventListener("input", () => { if (el.search.value.trim()) search(); else renderCurrent(); });
   el.search.addEventListener("input", debounce(search, 180));
@@ -28,7 +43,8 @@ async function load() {
   if (el.search.value.trim()) return search();
   const range = el.range.value;
   const type = el.type.value;
-  const manifest = state.meta.ranges[range][type];
+  const manifest = state.meta.ranges?.[range]?.[type];
+  if (!manifest) throw new Error(`范围 ${range} 尚未生成，请选择其他范围`);
   state.pageCount = manifest.pageCount;
   state.page = Math.min(state.page, state.pageCount);
   state.current = await json(`rankings/${range}/${type}/page-${String(state.page).padStart(4,"0")}.json`);
@@ -54,13 +70,27 @@ async function search() {
     state.searchIndex = shards.flatMap((shard) => shard.items);
   }
   const type = el.type.value;
-  let results = state.searchIndex.filter((item) => item.type === type && item.text.includes(query)).slice(0,100);
-  results = await hydrateSearchMetrics(results);
+  const range = el.range.value;
+  const hasScopedIndex = state.searchIndex.some((item) => item.rangeMetrics);
+  let results = state.searchIndex.filter((item) => item.type === type && item.text.includes(query));
+  if (hasScopedIndex && range !== "all") {
+    results = results.flatMap((item) => {
+      const metrics = item.rangeMetrics?.[range];
+      return metrics?.occurrenceCount > 0 ? [{
+        ...item,
+        occurrenceCount: metrics.occurrenceCount,
+        videoCount: metrics.videoCount,
+        sourcesPreview: [],
+      }] : [];
+    });
+  } else {
+    results = await hydrateSearchMetrics(results);
+  }
   results.sort((a,b) => Number(b.occurrenceCount || 0) - Number(a.occurrenceCount || 0) || Number(b.videoCount || 0) - Number(a.videoCount || 0) || String(a.name).localeCompare(String(b.name), "ja"));
-  results = results.map((item,index) => ({ rank:index+1, ...item, keywords:item.keywords || [] }));
+  results = results.slice(0, 100).map((item,index) => ({ rank:index+1, ...item, keywords:item.keywords || [] }));
   const keyword = normalize(el.keyword.value);
   if (keyword) results = results.filter((item) => (item.keywords || []).some((value) => normalize(value).includes(keyword)));
-  el.summary.textContent = `全量搜索 · ${label(type)} · “${raw}” · ${results.length} 项${results.length === 100 ? "（最多显示 100）" : ""}`;
+  el.summary.textContent = `${hasScopedIndex ? label(range) : "全量"}搜索 · ${label(type)} · “${raw}” · ${results.length} 项${results.length === 100 ? "（最多显示 100）" : ""}`;
   render(results);
   el.page.textContent = "搜索";
   el["page-tokens"].replaceChildren();
@@ -211,11 +241,12 @@ async function detail(item) {
   el["detail-body"].innerHTML = "<p class=\"detail-loading\">正在加载来源…</p>";
   el.detail.showModal();
   const payload = await json(item.detailPath);
-  const days = el.search.value.trim() ? null : (el.range.value === "7d" ? 7 : el.range.value === "30d" ? 30 : null);
   const end = new Date(state.meta.generatedAt || Date.now()).getTime();
-  const start = days ? end - days * 86400000 : Number.NEGATIVE_INFINITY;
+  const range = el.range.value;
+  const start = rangeStartMs(range, new Date(end));
+  const maxEnd = end + (range === "today" || range === "3d" ? 300000 : 21600000);
   const sorted = [...(payload.occurrences || [])]
-    .filter((entry) => !days || (Date.parse(entry.publishedAt || "") >= start && Date.parse(entry.publishedAt || "") <= end + 21600000))
+    .filter((entry) => Date.parse(entry.publishedAt || "") >= start && Date.parse(entry.publishedAt || "") <= maxEnd)
     .sort((a,b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
   renderDetailList(item, payload, sorted, Math.min(30, sorted.length));
 }
@@ -243,7 +274,16 @@ async function json(relative) {
   if (!response.ok) throw new Error(`${relative}: HTTP ${response.status}`);
   return response.json();
 }
-function label(value){return ({songs:"歌曲榜",artists:"歌手榜",vtubers:"VTuber 频道榜","7d":"最近 7 天","30d":"最近 30 天",all:"全部"})[value]||value}
+function rangeStartMs(range, now) {
+  if (range === "all") return Number.NEGATIVE_INFINITY;
+  if (range === "7d" || range === "30d") return now.getTime() - (range === "7d" ? 7 : 30) * 86400000;
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(now).filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+  const midnight = Date.parse(`${parts.year}-${parts.month}-${parts.day}T00:00:00+08:00`);
+  return midnight - (range === "3d" ? 2 : 0) * 86400000;
+}
+function label(value){return ({songs:"歌曲榜",artists:"歌手榜",vtubers:"VTuber 频道榜",today:"今日","3d":"近 3 天","7d":"近 7 天","30d":"近 30 天",all:"全部"})[value]||value}
 function dateText(value){return value?new Intl.DateTimeFormat("zh-CN",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Shanghai"}).format(new Date(value)):"未知"}
 function normalize(value){return String(value||"").normalize("NFKC").toLocaleLowerCase("ja").replace(/[\s\p{P}\p{S}]+/gu,"")}
 function escapeText(value){return String(value??"").replace(/[&<>"']/g,(ch)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch])}

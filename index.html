@@ -7,20 +7,26 @@
   <meta name="theme-color" content="#f5f7fa">
   <title>YouTube 歌回排行</title>
   <link rel="icon" href="favicon.ico">
-  <link rel="stylesheet" href="assets/static.css">
+  <link rel="stylesheet" href="assets/static.css?v=20260926-daily-ranges">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div class="topbar-row">
-        <div class="control-group compact-control">
-          <label for="range">范围</label>
-          <select id="range">
-            <option value="7d">最近 7 天</option>
-            <option value="30d">最近 30 天</option>
-            <option value="all">全部</option>
-          </select>
-        </div>
+        <nav class="range-tabs" role="tablist" aria-label="统计范围">
+          <button type="button" role="tab" data-range="today" aria-selected="false">今日</button>
+          <button type="button" role="tab" data-range="3d" aria-selected="false">近 3 天</button>
+          <button type="button" role="tab" data-range="7d" aria-selected="false">近 7 天</button>
+          <button type="button" role="tab" data-range="30d" aria-selected="false">近 30 天</button>
+          <button type="button" role="tab" data-range="all" aria-selected="false">全部</button>
+        </nav>
+        <select id="range" hidden aria-hidden="true" tabindex="-1">
+          <option value="today">今日</option>
+          <option value="3d">近 3 天</option>
+          <option value="7d">近 7 天</option>
+          <option value="30d">近 30 天</option>
+          <option value="all">全部</option>
+        </select>
         <div class="control-group compact-control">
           <label for="type">榜单</label>
           <select id="type">
@@ -75,6 +81,6 @@
     <div id="detail-body"></div>
   </dialog>
 
-  <script src="assets/static-app.js" defer></script>
+  <script src="assets/static-app.js?v=20260926-daily-ranges" defer></script>
 </body>
 </html>

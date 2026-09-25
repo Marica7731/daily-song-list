@@ -17,10 +17,12 @@ if (meta.historyDays) {
     if (!['COMPLETE', 'MISSING'].includes(meta.historyDays[date])) fail(`history day status invalid: ${date}`);
   }
 }
-for (const range of ["7d", "30d", "all"]) {
+for (const range of ["today", "3d", "7d", "30d", "all"]) {
+  if (!meta.ranges?.[range]) fail(`${range} meta range missing`);
   for (const type of ["songs", "artists", "vtubers"]) {
     const manifest = read(`rankings/${range}/${type}/manifest.json`);
     if (!Number.isInteger(manifest.pageCount) || manifest.pageCount < 1) fail(`${range}/${type} pageCount invalid`);
+    if (manifest.totalCount !== meta.ranges[range][type]?.totalCount || manifest.pageCount !== meta.ranges[range][type]?.pageCount) fail(`${range}/${type} manifest vs meta mismatch`);
     if (manifest.pageNumberWidth !== 4) fail(`${range}/${type} pageNumberWidth invalid`);
     if (manifest.path !== `rankings/${range}/${type}/page-{page:04d}.json`) fail(`${range}/${type} page path contract invalid`);
     for (let page = 1; page <= manifest.pageCount; page += 1) {
@@ -37,6 +39,16 @@ for (const shard of search.shards || []) {
   checkSize(shard.path);
 }
 if ((meta.sourceCoverage?.status || "") !== "success") fail("source coverage is not success");
+const quality = read("quality-audit.json");
+if (quality.quarantinedOccurrences !== meta.quality?.quarantinedOccurrences) fail("quality audit vs meta mismatch");
+if (quality.visibleOccurrences !== meta.songOccurrenceCount) fail("quality audit vs published count mismatch");
+if (quality.visibleVideos !== meta.videoCount) fail("quality visible video count mismatch");
+for (const range of ["today", "3d", "7d", "30d", "all"]) {
+  for (const type of ["songs", "artists", "vtubers"]) {
+    const ranking = read(`rankings/${range}/${type}/page-0001.json`);
+    if (ranking.totalCount !== meta.ranges[range][type].totalCount) fail(`${range}/${type} rank count mismatch`);
+  }
+}
 console.log(`STATIC_DATA_OK videos=${meta.videoCount} songs=${meta.songOccurrenceCount} processed=${meta.processedVideoCount} pending=${meta.pendingVideoCount}`);
 
 function read(relative) {

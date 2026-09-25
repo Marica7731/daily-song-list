@@ -16,6 +16,7 @@ on:
       - "assets/ranking-utils.js"
       - "config/**"
       - "test/static-github-pipeline.test.mjs"
+      - "test/static-quality-ranges.test.js"
       - "test/fixtures/static-source.json"
       - "index.html"
       - "package.json"
@@ -68,6 +69,7 @@ jobs:
             /assets/**
             /config/**
             /test/static-github-pipeline.test.mjs
+            /test/static-quality-ranges.test.js
             /test/fixtures/static-source.json
             /index.html
 
@@ -79,10 +81,11 @@ jobs:
         run: |
           set -Eeuo pipefail
           node --check scripts/static/collect-and-build.js
+          node --check scripts/static/quality-guard.js
           node --check scripts/static/recover-history.js
           node --check scripts/static/validate-static.js
           node --check assets/static-app.js
-          node --test test/static-github-pipeline.test.mjs
+          node --test test/static-github-pipeline.test.mjs test/static-quality-ranges.test.js
 
       - name: Fixture end-to-end generation
         env:

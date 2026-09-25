@@ -9,6 +9,7 @@ const {
   fetchVideoSongList,
 } = require("../update-songlist");
 const { isLikelyNonSongEntry } = require("../song-utils");
+const { cleanStaticVideos } = require("./quality-guard");
 
 const ROOT = path.resolve(__dirname, "../..");
 const DATA_ROOT = path.resolve(process.env.STATIC_DATA_ROOT || path.join(ROOT, "data/static/v1"));
@@ -253,17 +254,19 @@ function normalizeVideo(detail, candidate, now) {
 }
 
 function buildStaticSite(dataRoot, state, now, options = {}) {
-  const videos = readDayVideos(dataRoot);
+  const { videos, audit } = cleanStaticVideos(readDayVideos(dataRoot));
   const generatedRoots = ["rankings", "entities", "sources", "search"];
   for (const name of generatedRoots) resetGeneratedRoot(dataRoot, name);
   const ranges = [
+    { id: "today", calendarDays: 1 },
+    { id: "3d", calendarDays: 3 },
     { id: "7d", days: 7 },
     { id: "30d", days: 30 },
     { id: "all", days: null },
   ];
   const rangeManifest = {};
   for (const range of ranges) {
-    const selected = filterRange(videos, now, range.days);
+    const selected = filterRange(videos, now, range.days, range.calendarDays);
     rangeManifest[range.id] = {};
     for (const type of ["songs", "artists", "vtubers"]) {
       const records = rankRecords(type, selected);
@@ -288,8 +291,15 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
     processedVideoCount: state.processedVideoIds?.length || 0,
     videoCount: videos.length,
     songOccurrenceCount: videos.reduce((sum, item) => sum + item.songs.length, 0),
+    quality: {
+      quarantinedOccurrences: audit.quarantinedOccurrences,
+      quarantinedVideos: audit.quarantinedVideos,
+      repeatedDescriptionSources: audit.repeatedDescriptionSources.length,
+      byReason: audit.byReason,
+    },
     ranges: rangeManifest,
   };
+  writeJson(path.join(dataRoot, "quality-audit.json"), { generatedAt: now.toISOString(), ...audit });
   writeJson(path.join(dataRoot, "meta.json"), meta);
   return meta;
 }
@@ -414,6 +424,12 @@ function writePagedRanking(dataRoot, range, type, records, pageSize, now, state)
 
 function writeEntities(dataRoot, videos, now) {
   const maps = { songs: new Map(), artists: new Map(), vtubers: new Map() };
+  const rangeStarts = {
+    today: shanghaiCalendarStart(now, 1),
+    "3d": shanghaiCalendarStart(now, 3),
+    "7d": now.getTime() - 7 * 86400000,
+    "30d": now.getTime() - 30 * 86400000,
+  };
   for (const video of videos) {
     writeJson(path.join(dataRoot, "sources", video.videoId.slice(0, 2), `${video.videoId}.json`), { schemaVersion: 1, generatedAt: now.toISOString(), ...video });
     const vtuberKey = normalizeKey(`${video.channelName}\u001f${video.channelId || video.channelHandle}`);
@@ -432,6 +448,20 @@ function writeEntities(dataRoot, videos, now) {
       const detailPath = `entities/${type}/${id}.json`;
       const occurrenceCount = entity.occurrences.length;
       const videoCount = new Set(entity.occurrences.map((item) => item.videoId)).size;
+      const rangeMetrics = {};
+      for (const [rangeId, start] of Object.entries(rangeStarts)) {
+        const end = now.getTime() + (rangeId === "today" || rangeId === "3d" ? 300000 : 21600000);
+        const occurrences = entity.occurrences.filter((item) => {
+          const date = Date.parse(item.publishedAt);
+          return Number.isFinite(date) && date >= start && date <= end;
+        });
+        if (occurrences.length) {
+          rangeMetrics[rangeId] = {
+            occurrenceCount: occurrences.length,
+            videoCount: new Set(occurrences.map((item) => item.videoId)).size,
+          };
+        }
+      }
       const payload = {
         schemaVersion: 1,
         generatedAt: now.toISOString(),
@@ -455,6 +485,7 @@ function writeEntities(dataRoot, videos, now) {
         videoCount,
         keywords: [...entity.keywords].sort(),
         detailPath,
+        rangeMetrics,
         text: normalizeKey(`${entity.name} ${entity.secondary}`),
       });
     }
@@ -521,9 +552,22 @@ function readDayVideos(dataRoot) {
   return [...byVideoId.values()];
 }
 
-function filterRange(videos, now, days) {
-  const start = days ? now.getTime() - days * 86400000 : Number.NEGATIVE_INFINITY;
-  return videos.filter((video) => Date.parse(video.publishedAt) >= start && Date.parse(video.publishedAt) <= now.getTime() + 6 * 3600000);
+function shanghaiCalendarStart(now, lookbackDays = 1) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(now).filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+  const midnight = Date.parse(`${parts.year}-${parts.month}-${parts.day}T00:00:00+08:00`);
+  return midnight - (lookbackDays - 1) * 86400000;
+}
+
+function filterRange(videos, now, days, calendarDays = null) {
+  const start = calendarDays ? shanghaiCalendarStart(now, calendarDays)
+    : days ? now.getTime() - days * 86400000 : Number.NEGATIVE_INFINITY;
+  const end = now.getTime() + (calendarDays ? 300000 : 6 * 3600000);
+  return videos.filter((video) => {
+    const published = Date.parse(video.publishedAt);
+    return Number.isFinite(published) && published >= start && published <= end;
+  });
 }
 
 function resetGeneratedRoot(dataRoot, name) {
@@ -566,5 +610,7 @@ module.exports = {
   normalizeKey,
   persistCompleted,
   readDayVideos,
+  filterRange,
+  shanghaiCalendarStart,
   selectInspectionBatch,
 };

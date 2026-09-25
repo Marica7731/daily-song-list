@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 const { HISTORY_GAP, buildStaticSite, hashId, initialState, selectInspectionBatch } = require("../scripts/static/collect-and-build.js");
 const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
 
-test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () => {
+test("static pipeline emits resumable today/3d/7d/30d/all shards and explicit gap", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-static-"));
   const dataRoot = path.join(root, "data/static/v1");
   fs.mkdirSync(path.join(dataRoot, "days"), { recursive: true });
@@ -43,6 +43,8 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   }));
 
   const meta = buildStaticSite(dataRoot, state, now, { pageSize: 1, maxShardBytes: 100000 });
+  assert.equal(meta.ranges.today.songs.totalCount, 1);
+  assert.equal(meta.ranges["3d"].songs.totalCount, 1);
   assert.equal(meta.ranges["7d"].songs.totalCount, 1);
   assert.equal(meta.songOccurrenceCount, 2);
   assert.equal(meta.ranges["7d"].songs.pageNumberWidth, 4);
@@ -71,6 +73,9 @@ test("static pipeline emits resumable 7d/30d/all shards and explicit gap", () =>
   assert.ok(searchSong);
   assert.equal(searchSong.occurrenceCount, 2);
   assert.equal(searchSong.videoCount, 1);
+  assert.equal(searchSong.rangeMetrics.today.occurrenceCount, 2);
+  assert.equal(searchSong.rangeMetrics["3d"].videoCount, 1);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dataRoot, "quality-audit.json"))).visibleOccurrences, 2);
   assert.equal("sourcesPreview" in searchSong, false);
   assert.deepEqual(searchSong.keywords, ["歌枠"]);
   fs.rmSync(root, { recursive: true, force: true });
