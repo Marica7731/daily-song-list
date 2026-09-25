@@ -62,6 +62,7 @@ function buildQualityReview(videos, audit, now) {
       }
     }
   }
+  for (const day of Object.keys(audit.byDay || {})) if (!days.has(day)) days.set(day, 0);
   const byReason = {};
   for (const row of groups.values()) byReason[row.reason] = (byReason[row.reason] || 0) + row.count;
   return {
