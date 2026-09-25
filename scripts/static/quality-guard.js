@@ -97,6 +97,32 @@ function unambiguousNonSongReason(song) {
     return "confirmed_stream_technical_note";
   }
 
+  if (/^次回の配信は\d{1,2}日$/u.test(title) &&
+      /^[月火水木金土日]$/u.test(artist) &&
+      /次回の配信は\d{1,2}日[（(][月火水木金土日][）)]/u.test(raw)) {
+    return "dated_future_stream_announcement";
+  }
+  if (/^(?:19|20)\d{2}\/(?:0?[1-9]|1[0-2])$/u.test(title) &&
+      /^(?:[1-9]|[12]\d|3[01])$/u.test(artist) &&
+      raw.endsWith(title + "/" + artist)) {
+    return "date_split_as_song_and_artist";
+  }
+  // Section markers require surrounding topic metadata in the original row,
+  // not just a song title that happens to contain "talk" or "MC".
+  if (/^MC\d{1,2}$/iu.test(title) &&
+      /MC\d{1,2}[（(][^）)]{1,40}[）)]/iu.test(raw)) {
+    return "confirmed_mc_break";
+  }
+  if (/^トーク$/u.test(title) &&
+      /トーク[（(].{2,70}(?:お話|話)[）)]/u.test(raw) &&
+      /話/u.test(artist)) {
+    return "confirmed_talk_section";
+  }
+  if (/^雑談タイム[①-⑳\d]+$/u.test(title) &&
+      /雑談タイム[①-⑳\d]+[（(].{2,70}[）)]/u.test(raw)) {
+    return "confirmed_chat_section";
+  }
+
   // Do not apply generic song-title or artist-name dictionaries: they can
   // silently remove real songs with everyday-language titles.
   return null;
@@ -160,7 +186,7 @@ function repairReleaseDateCredit(song) {
   // split the publication date and placed DD in the artist field.
   if (/^\d{1,2}$/u.test(artist) && Number(artist) >= 1 && Number(artist) <= 31 &&
       raw.endsWith(title + "/" + artist)) {
-    const match = title.match(/^(.+)[/／]([^/／]{2,}?)\s+(20\d{2})[/／](0?[1-9]|1[0-2])$/u);
+    const match = title.match(/^(.+)[/／]([^/／]{2,}?)\s+((?:19|20)\d{2})[/／](0?[1-9]|1[0-2])$/u);
     if (match?.[1]?.trim() && match?.[2]?.trim()) {
       return { ...song, title: match[1].trim(), artist: match[2].trim() };
     }
