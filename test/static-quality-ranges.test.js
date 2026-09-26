@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   cleanStaticVideos,
+  isExplicitNumberedSetlistRow,
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   repairKnownSourceCredit,
@@ -13,7 +14,7 @@ const {
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
 const { filterRange, shanghaiCalendarStart } = require("../scripts/static/collect-and-build");
-const { buildQualityReview, reviewReasons } = require("../scripts/static/quality-review");
+const { buildQualityReview, hasUnbalancedCreditDelimiters, reviewReasons } = require("../scripts/static/quality-review");
 
 function song(title, artist, options = {}) {
   return { title, artist, raw: options.raw ?? `00:10 ${title} - ${artist}`, ...options };
@@ -691,4 +692,70 @@ test("three-part year credits and commercial metadata recover artist without bro
 
   const ambiguous = song("A/B", "", {raw: "1:00 A/B/not-a-year"});
   assert.strictEqual(repairStructuredSlashCredit(ambiguous), ambiguous);
+});
+
+
+test("reviewed numbered setlists keep explicit songs and reject only unnumbered chapters", () => {
+  const hash = "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b";
+  const real = song("残機", "ずっと真夜中でいいのに。", {
+    raw: "0:08:18 01. 残機 - ずっと真夜中でいいのに。",
+    sourceHash: hash,
+  });
+  const talk = song("豪華なドレス姿のらんぜ", "", {
+    raw: "┗ 0:38:08 豪華なドレス姿のらんぜ",
+    sourceHash: hash,
+  });
+  assert.equal(isExplicitNumberedSetlistRow(real.raw), true);
+  assert.equal(unambiguousNonSongReason(real), null);
+  assert.equal(isExplicitNumberedSetlistRow(talk.raw), false);
+  assert.equal(unambiguousNonSongReason(talk), "reviewed_non_song_chapter_in_numbered_setlist");
+  assert.equal(isExplicitNumberedSetlistRow("𝟎𝟏. 0:04:33 Hero’s Come Back!!✦nobodyknows+"), true);
+});
+
+test("full-history review no longer treats long valid cast credits as dirt", () => {
+  const legitimate = song(
+    "Love∞Destiny",
+    "佐久間まゆ (CV: 牧野由依)、北条加蓮 (CV: 渕上舞)、小日向美穂 (CV: 津田美波)、多田李衣菜 (CV: 青木瑠璃子)、緒方智絵里 (CV: 大空直美)",
+  );
+  assert.deepEqual(reviewReasons(legitimate), []);
+  assert.equal(hasUnbalancedCreditDelimiters("妹S [土間うまる(CV.田中あいみ)"), true);
+  assert.ok(reviewReasons(song("うまるん体操", "妹S [土間うまる(CV.田中あいみ)")).includes("possible_unparsed_credits"));
+});
+
+test("mixed-source review requires numbered-song evidence instead of guessing from artist presence", () => {
+  const hash = "review-mixed";
+  const ordinary = Array.from({length:8}, (_, i) => song("Song " + i, i < 3 ? "Artist " + i : "", {
+    raw: String(i + 1) + ":00 Song " + i,
+    sourceHash: hash,
+  }));
+  const ordinaryReview = buildQualityReview([video(30, ordinary)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(ordinaryReview.mixedStructuredSetlistSources.length, 0);
+
+  const structured = [
+    song("Song A", "Artist A", {raw:"1:00 01. Song A - Artist A",sourceHash:hash}),
+    song("Song B", "Artist B", {raw:"5:00 02. Song B - Artist B",sourceHash:hash}),
+    song("Song C", "Artist C", {raw:"9:00 03. Song C - Artist C",sourceHash:hash}),
+    ...Array.from({length:5}, (_, i) => song("chat " + i, "", {raw:(i+2)+":30 chat "+i,sourceHash:hash})),
+  ];
+  const structuredReview = buildQualityReview([video(31, structured)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(structuredReview.mixedStructuredSetlistSources.length, 1);
+});
+
+test("Japanese game metadata and source-proven malformed credits are repaired", () => {
+  const game = normalizeReleaseMetadataArtist(song(
+    "愛ADRENALIN",
+    "狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録",
+  ));
+  assert.equal(game.artist, "狛江・クリストフ・ヨウスケ(鈴木達央)");
+
+  const repaired = repairKnownSourceCredit(song(
+    "うまるん体操",
+    "妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)",
+    {
+      raw: "② 51:38 うまるん体操 / 妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)]",
+      sourceHash: "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f",
+    },
+  ));
+  assert.match(repaired.artist, /\]$/u);
+  assert.deepEqual(reviewReasons(repaired), []);
 });
