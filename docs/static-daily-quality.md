@@ -156,3 +156,23 @@ it sits directly before an explicit release date, so e.g.
 `Vaundy【王様ランキング】（2022/01/07）...` becomes `Vaundy` in the
 derived ranking. Year-range structured credits and trailing delimiter artifacts
 are repaired only where their original row proves the field boundaries.
+
+
+### Final residual pass
+
+A second source-structure scan found six setlist comments where the real songs are
+consistently numbered and the remaining timestamp rows are chapter notes. These
+six source hashes were reviewed in full before adding any filter. Their numbered
+rows are retained; only unnumbered rows in those exact sources are quarantined.
+This avoids turning “numbered = song” into a global assumption.
+
+The review detector itself now requires at least three explicitly numbered song
+rows before labelling a source as a mixed structured setlist. Merely having
+unknown-artist rows next to a few known songs is not enough. This prevents normal
+uncredited song lists from flooding the review queue.
+
+Likewise, a long artist credit alone is no longer suspicious: legitimate ensemble
+and character-song credits can be hundreds of characters. The review queue now
+uses length only together with stronger structural evidence such as unknown
+artist, multiple slash fields with a year placeholder, or unbalanced credit
+delimiters.
