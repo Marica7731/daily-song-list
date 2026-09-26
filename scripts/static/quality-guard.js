@@ -555,9 +555,36 @@ function isUnknownArtistValue(value) {
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
+
+  // Four-column full-width slash setlists can be misparsed even when the last
+  // brand/year field lands in artist. Parse only when the complete row proves
+  // title／credited artist／work metadata／brand(year).
+  if (body.includes("／")) {
+    const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
+    if (
+      fields.length === 4 &&
+      /^.+\s*[（(](?:19|20)\d{2}[）)]$/u.test(fields[3]) &&
+      /(?:OP|ED|挿入歌|主題歌|ゲーム|アニメ|「[^」]+」)/iu.test(fields[2]) &&
+      fields[0].length >= 1 &&
+      fields[1].length >= 1
+    ) {
+      const currentTitle = String(song?.title || "").normalize("NFKC").trim();
+      const currentArtist = String(song?.artist || "").normalize("NFKC").trim();
+      if (
+        currentTitle === fields[0] ||
+        currentTitle.startsWith(fields[0] + "／") ||
+        currentArtist === fields.slice(1).join("／") ||
+        currentArtist === fields[3] ||
+        currentArtist.endsWith("／" + fields[3])
+      ) {
+        return { ...song, title: fields[0], artist: fields[1] };
+      }
+    }
+  }
+
   if (!isUnknownArtistValue(artist) &&
       !/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist)) return song;
-  const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
   const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u);
   const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
   if (match && (!artistYear || match[4] === artistYear)) {
@@ -582,32 +609,6 @@ function repairStructuredSlashCredit(song) {
     }
   }
 
-  // Some setlists use a four-column full-width slash format:
-  // title／credited artist／work/OP metadata／game or label (year).
-  // The parser can otherwise leave the latter fields in title/artist. Require
-  // the whole structured row before repairing; never split arbitrary slashes.
-  if (body.includes("／")) {
-    const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
-    if (
-      fields.length === 4 &&
-      /^.+\s*[（(](?:19|20)\d{2}[）)]$/u.test(fields[3]) &&
-      /(?:OP|ED|挿入歌|主題歌|ゲーム|アニメ|「[^」]+」)/iu.test(fields[2]) &&
-      fields[0].length >= 1 &&
-      fields[1].length >= 1
-    ) {
-      const currentTitle = String(song?.title || "").normalize("NFKC").trim();
-      const currentArtist = String(song?.artist || "").normalize("NFKC").trim();
-      if (
-        currentTitle === fields[0] ||
-        currentTitle.startsWith(fields[0] + "／") ||
-        currentArtist === fields.slice(1).join("／") ||
-        currentArtist === fields[3] ||
-        currentArtist.endsWith("／" + fields[3])
-      ) {
-        return { ...song, title: fields[0], artist: fields[1] };
-      }
-    }
-  }
   return song;
 }
 
@@ -667,7 +668,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     if (guitar?.[1]?.trim() && raw.includes(guitar[1].trim() + "(ギター弾き語り)")) cleaned = guitar[1].trim();
   }
   if (cleaned) {
-    const square = cleaned.match(/^(.+?)\s+\[([^\]]*)\]?$/u);
+    const square = cleaned.match(/^(.+?)\s*\[([^\]]*)\]?$/u);
     const note = square?.[2] || "";
     if (square?.[1]?.trim() &&
         /^(?:歌詞動画|途中迷子|歌声迷子|迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ|キー(?:プラス|マイナス)?|テンポ(?:プラス|マイナス)?)/iu.test(note) &&
