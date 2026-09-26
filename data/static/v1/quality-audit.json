@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-26T13:11:15.857Z",
+  "generatedAt": "2026-09-26T17:14:57.620Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7306,
-  "inputOccurrences": 87979,
-  "visibleVideos": 5963,
-  "visibleOccurrences": 87417,
-  "quarantinedOccurrences": 499,
-  "quarantinedVideos": 380,
+  "inputVideos": 7329,
+  "inputOccurrences": 88226,
+  "visibleVideos": 5984,
+  "visibleOccurrences": 87662,
+  "quarantinedOccurrences": 501,
+  "quarantinedVideos": 382,
   "deduplicatedOccurrences": 63,
   "normalizedArtistOccurrences": 381,
   "normalizedReleaseMetadataOccurrences": 194,
@@ -29,7 +29,7 @@
     "confirmed_stream_start_marker": 4,
     "reviewed_bad_description_source": 3,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 334,
+    "prayer_broadcast_timeline": 336,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -95,9 +95,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 148,
-      "channelCount": 139,
-      "distinctVideoTitles": 147,
+      "videoCount": 149,
+      "channelCount": 140,
+      "distinctVideoTitles": 148,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -176,9 +176,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 78,
-      "channelCount": 78,
-      "distinctVideoTitles": 78,
+      "videoCount": 79,
+      "channelCount": 79,
+      "distinctVideoTitles": 79,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -428,6 +428,13 @@
         "confirmed_stream_start_marker": 1
       }
     },
+    "2026-09-04": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "prayer_broadcast_timeline": 1
+      }
+    },
     "2026-09-15": {
       "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
@@ -521,10 +528,10 @@
       }
     },
     "2026-09-26": {
-      "quarantinedOccurrences": 16,
+      "quarantinedOccurrences": 17,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 16
+        "prayer_broadcast_timeline": 17
       }
     }
   },
