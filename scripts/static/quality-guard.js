@@ -630,11 +630,21 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     const guitar = artist.match(/^(.+?)[(]ギター$/u);
     if (guitar?.[1]?.trim() && raw.includes(guitar[1].trim() + "(ギター弾き語り)")) cleaned = guitar[1].trim();
   }
+  if (cleaned === artist) {
+    const year = artist.match(/^(.+?)\s*\((?:19|20)\d{2}\)$/u);
+    if (year?.[1]?.trim()) {
+      const artistFlat = artist.replace(/\s+/gu, " ");
+      const rawFlat = raw.replace(/\s+/gu, " ");
+      const index = rawFlat.indexOf(artistFlat);
+      const prefix = index >= 0 ? rawFlat.slice(Math.max(0, index - 4), index) : "";
+      if (index >= 0 && /\/\s*$/u.test(prefix)) cleaned = year[1].trim();
+    }
+  }
   if (cleaned) {
-    const square = cleaned.match(/^(.+?)\s+\[([^\]]*)\]?$/u);
+    const square = cleaned.match(/^(.+?)\s*\[([^\]]*)\]?$/u);
     const note = square?.[2] || "";
     if (square?.[1]?.trim() &&
-        /^(?:歌詞動画|途中迷子|迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ)/iu.test(note) &&
+        /^(?:歌詞動画|途中迷子|迷子|歌声迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ|キーマイナス\d+\s*\/\s*テンポマイナス\d+)/iu.test(note) &&
         raw.includes(square[1].trim()) && raw.includes("[" + note)) {
       cleaned = square[1].trim();
     }
@@ -653,7 +663,31 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
 function repairResidualKnownSourceCredit(song) {
   const hash = String(song?.sourceHash || "");
   const title = String(song?.title || "").trim();
-  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const originalRaw = String(song?.raw || "").trim();
+  const raw = originalRaw.normalize("NFKC").trim();
+
+  const reviewedFullwidthSlashCredits = new Set([
+    "eb8c0c335488de7013dfc43396ea9a8ebe3b9ee7b637672b6d15fd78aa5c9710",
+    "2076f6ccd7897ac05df6037234823cdaf01a61247687f0af4d83e3c56f04d38a",
+    "6e3135cfb7e768c05a15c36ee837a3438dfb83990a244eb227cbf664ddb83b98",
+    "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a",
+    "5a7f0a1a023119e5571d5f1eb10894e67fdf361b4309005b76dabe7c77664819",
+    "80923c4f194b93e4f4653fc4a21257b485eff0cf0a4588d5a21b5d7915f09201",
+    "d120dc8056791dc79eb28ae0865a1a7f9ecdda09a71f47b0b3d9dee210fba1f8",
+  ]);
+  if (reviewedFullwidthSlashCredits.has(hash) && originalRaw.includes("／") &&
+      !(hash === "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a" && /^観覧車[~〜～]/u.test(title))) {
+    const body = originalRaw.replace(/^\s*(?:\d{1,2}:\d{2}(?::\d{2})?\s*)+/u, "").trim();
+    const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
+    if (fields.length >= 2 && fields[0] && fields[1]) {
+      return { ...song, title: fields[0], artist: fields[1] };
+    }
+  }
+
+  if (hash === "d6870653d1a294ccccf28184ac05c57268eb6c0a6934e9d4cd1d1a870ab3fdaf" &&
+      title === "LOSER" && /LOSER\s*\/\s*米津玄師\s*\[LOSER\s*\/\s*Yonezu Kenshi/u.test(raw)) {
+    return { ...song, artist: "米津玄師" };
+  }
 
   if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc" &&
       /[\/／]/u.test(title)) {
