@@ -338,6 +338,12 @@ function repairKnownSourceCredit(song) {
       song?.title === "FLAGS" && /^T[.]M[.]Revolution\s*[（(].*(?:OP|主題歌)/iu.test(String(song?.artist || ""))) {
     return { ...song, artist: "T.M.Revolution" };
   }
+  if (hash === "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f" &&
+      song?.title === "うまるん体操" &&
+      /^妹S（シスターズ）\s*\[土間うまる/u.test(String(song?.artist || "")) &&
+      /うまるん体操\s*[/／]\s*妹S（シスターズ）\s*\[[^\n]+\]\s*$/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: String(song.artist).trim() + "]" };
+  }
   if (hash === MIXED_CLAUDE_CHAPTER_HASH &&
       song?.title === "ハッピーシンセサイザ" &&
       isUnknownArtistValue(song?.artist) &&
