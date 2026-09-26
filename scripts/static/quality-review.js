@@ -36,6 +36,13 @@ function reviewReasons(song) {
   if (/(?:アルバム|リリース|発売|配信日|公開日|(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2})/iu.test(artist)) {
     reasons.push("possible_release_metadata_as_artist");
   }
+  if (/^.+[（(](?:19|20)\d{2}[）)]$/u.test(artist) &&
+      /(?:アニメ|ゲーム|OP|ED|主題歌|挿入歌)/iu.test(raw)) {
+    reasons.push("possible_year_suffix_as_artist_metadata");
+  }
+  if (/\[(?:[^\]]*?)(?:ピアノ|アカペラ|迷子|ワンコーラス|合いの手|朗読|キー|挑戦)(?:[^\]]*?)\]$/u.test(artist)) {
+    reasons.push("possible_performance_status_in_artist");
+  }
   if (
     (title.length > 75 && unknownArtist) ||
     (slashFieldCount >= 2 && (unknownArtist || /^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist))) ||
@@ -71,6 +78,10 @@ function buildQualityReview(videos, audit, now) {
     for (const song of video.songs || []) {
       occurrenceCount++;
       for (const reason of reviewReasons(song)) add(reason, video, song);
+      if (String(song.sourceId || "").startsWith("description:") &&
+          String(song.title || "").normalize("NFKC").trim() === String(video.title || "").normalize("NFKC").trim()) {
+        add("possible_video_title_as_song", video, song);
+      }
       const hash = String(song.sourceHash || "");
       if (hash) {
         const structureKey = [video.videoId || "", hash].join("\u001f");

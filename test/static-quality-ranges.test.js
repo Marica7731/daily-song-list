@@ -841,3 +841,77 @@ test("double-slash work metadata source repairs FictionJunction without splittin
   assert.equal(fixed.title, "Silly-Go-Round");
   assert.equal(fixed.artist, "FictionJunction");
 });
+
+
+test("residual full-history review removes only source-proven activity chapters", () => {
+  const dirty = [
+    song("26日", "土", {
+      raw: "26:43　26日(土)",
+      sourceHash: "c2f658ac301da176cdf73b8d81f27f47ab9b8cead6a5bbd48f952a11703fa81f",
+    }),
+    song("???", "??? )↓と同じ？", {
+      raw: "( 1:34:36 ??? / ??? )↓と同じ？",
+      sourceHash: "04d86c87e7b05ace07991f6073189c1c62a6a2e56723a2555514fe52a323285b",
+    }),
+    song("Talk Time", "月見バーガー ! !", {
+      raw: "【01:09:48】:_あのー: Talk Time // 月見バーガー ! !",
+      sourceHash: "cc5f41656f02400f6cb81c857ca689a0fc3bb1b7e2c0ae6cfba3c744ee7886b7",
+    }),
+    song("コンビニOBとして先輩風", "", {
+      raw: "01:17:11 コンビニOBとして先輩風",
+      sourceHash: "4f438a8da6cd94680ce230ff82d670100ea645c7a9ee37a4d00eccd82386687a",
+    }),
+  ];
+  for (const row of dirty) assert.equal(unambiguousNonSongReason(row), "reviewed_source_activity_chapter");
+
+  assert.equal(unambiguousNonSongReason(song("ひゆるりらぱっぱ", "月", {
+    raw: "【02:03:19】ひゆるりらぱっぱ / 月",
+    sourceHash: "e52b04dc28b044bee7527bf9081090b23d0daf09c7e2f9b9257d1320a29bad41",
+  })), null);
+});
+
+test("residual malformed credits are repaired from their reviewed source rows", () => {
+  const rows = [
+    [song("GO!GO!MANIAC", "", {
+      raw: "1:17:06 GO!GO!MANIAC / 桜高軽音部/放課後ティータイム / アニメ けいおん!!(2011)",
+      sourceHash: "7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963",
+    }), "GO!GO!MANIAC", "放課後ティータイム"],
+    [song("鳥の詩", "", {
+      raw: "40:14 鳥の詩/key作品/AIR",
+      sourceHash: "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
+    }), "鳥の詩", "Lia"],
+    [song("猫／DISH//", "", {
+      raw: "00:19:07 04. 猫／DISH//",
+      sourceHash: "6bf40ecd74e76a6bbff3bd013cf1fa7096c4f281178f5347e399de678d5b5b63",
+    }), "猫", "DISH//"],
+    [song("KISS OF DEATH (Produced", "HYDE)／中島美嘉", {
+      raw: "0:39:44 KISS OF DEATH (Produced by HYDE)／中島美嘉",
+      sourceHash: "6ca8928630b3a52aebc13bbeaed3af13dcd186955da7b5ad5c87b48ee3c0be29",
+    }), "KISS OF DEATH (Produced by HYDE)", "中島美嘉"],
+    [song("檄!帝国華撃団", "", {
+      raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
+      sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
+    }), "檄!帝国華撃団", "横山智佐（真宮寺さくら）＆帝国歌劇団"],
+    [song("前前前世", "RADWIMPS [途中迷子", {
+      raw: "20:43  02. 前前前世  /  RADWIMPS  [途中迷子]",
+      sourceHash: "75f339dfc59363f1494867a75be85070cd4d0ef485456472535d3a2578c864f1",
+    }), "前前前世", "RADWIMPS"],
+  ];
+  for (const [row, title, artist] of rows) {
+    const repaired = repairKnownSourceCredit(row);
+    assert.equal(repaired.title, title);
+    assert.equal(repaired.artist, artist);
+  }
+});
+
+test("review-only scan detects status/year metadata while keeping them out of auto-delete rules", () => {
+  assert(reviewReasons(song("irony", "ClariS(2010)", {
+    raw: "04:01 irony / ClariS(2010) / アニメ 俺の妹がこんなに可愛いわけがない/OP",
+  })).includes("possible_year_suffix_as_artist_metadata"));
+  assert(reviewReasons(song("CLEAR", "坂本真綾 [ワンコーラスVer.]", {
+    raw: "8:29  01. CLEAR / 坂本真綾 [ワンコーラスVer.]",
+  })).includes("possible_performance_status_in_artist"));
+  assert.equal(unambiguousNonSongReason(song("irony", "ClariS(2010)", {
+    raw: "04:01 irony / ClariS(2010) / アニメ 俺の妹がこんなに可愛いわけがない/OP",
+  })), null);
+});
