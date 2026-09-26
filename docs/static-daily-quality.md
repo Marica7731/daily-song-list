@@ -104,3 +104,39 @@ occurrences and daily source shards are preserved.
 The static workflow allows at most three fetch/rebase/fast-forward push
 attempts to resolve races with newer main commits, and rechecks that the
 generated commit touches only the static-data root before every attempt.
+
+
+## Full-history cleanup pass: mixed chapters, exact duplicates, and credit repairs
+
+The all-history review also uncovered source-level corruption that broad title
+heuristics cannot safely detect. The publication layer now has narrowly reviewed
+rules for those exact source formats:
+
+- Mixed karaoke chapter comments where real songs are explicitly numbered and
+  conversational timestamps are not. The Maria Aikatsu source keeps all ten
+  `♡ N.` song rows; the Claude/Kaelix DAM source keeps all eleven numbered
+  song rows and removes the forty reaction/chat chapters.
+- The reviewed three-channel `God Miracles Today 11:11` description hash is
+  quarantined even though it is below the generic five-channel collision gate.
+  The lower threshold is **not** applied globally.
+- `MCパート(...)` and `間奏MC(...)` are removed only when the original
+  row explicitly contains the parenthesized spoken topic.
+- Exact duplicates are deduplicated only inside the same video when timestamp,
+  normalized title, and normalized artist all agree. Repeats at different
+  timestamps remain separate performances.
+
+Credit cleanup is also derived-only. It strips unambiguous release dates/scoring
+notes from artist fields, repairs `Song / Artist / Work / Year` records when the
+work field proves the structure, restores a reviewed 岡村靖幸-only stream whose
+album labels were parsed as artists, and repairs five undelimited Roboco setlist
+credits from the exact reviewed source. Every repair is counted and sampled in
+`quality-audit.json`.
+
+None of these operations rewrites the retained `days/*` shards. The accounting
+identity is now:
+
+`inputOccurrences = visibleOccurrences + quarantinedOccurrences + deduplicatedOccurrences`
+
+so a generated release cannot silently lose rows. Ambiguous candidates (for
+example a plausible song whose artist happens to be `月`, or a long legitimate
+character-song credit) stay review-only rather than being guessed away.

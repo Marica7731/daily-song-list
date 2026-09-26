@@ -42,7 +42,12 @@ if ((meta.sourceCoverage?.status || "") !== "success") fail("source coverage is 
 const quality = read("quality-audit.json");
 if (quality.quarantinedOccurrences !== meta.quality?.quarantinedOccurrences) fail("quality audit vs meta mismatch");
 if (quality.normalizedArtistOccurrences !== meta.quality?.normalizedArtistOccurrences) fail("normalization audit vs meta mismatch");
+if (quality.normalizedReleaseMetadataOccurrences !== meta.quality?.normalizedReleaseMetadataOccurrences) fail("release metadata normalization vs meta mismatch");
 if (quality.repairedDateCreditOccurrences !== meta.quality?.repairedDateCreditOccurrences) fail("release-date repair audit vs meta mismatch");
+if (quality.repairedStructuredCreditOccurrences !== meta.quality?.repairedStructuredCreditOccurrences) fail("structured credit repair vs meta mismatch");
+if (quality.repairedKnownSourceCreditOccurrences !== meta.quality?.repairedKnownSourceCreditOccurrences) fail("known-source credit repair vs meta mismatch");
+if (quality.deduplicatedOccurrences !== meta.quality?.deduplicatedOccurrences) fail("dedupe audit vs meta mismatch");
+if (quality.visibleOccurrences + quality.quarantinedOccurrences + quality.deduplicatedOccurrences !== quality.inputOccurrences) fail("quality occurrence accounting mismatch");
 if (quality.visibleOccurrences !== meta.songOccurrenceCount) fail("quality audit vs published count mismatch");
 if (quality.visibleVideos !== meta.videoCount) fail("quality visible video count mismatch");
 const review = read("quality-review.json");
@@ -52,6 +57,7 @@ if (review.scannedDays.length !== meta.quality?.reviewedDayCount) fail("quality 
 if (review.candidates.length !== meta.quality?.reviewOnlyCandidateCount) fail("quality review candidate count mismatch");
 if (review.scannedDays.reduce((sum, day) => sum + day.occurrences, 0) !== meta.songOccurrenceCount) fail("quality review daily totals mismatch");
 if (review.scannedDays.reduce((sum, day) => sum + day.quarantinedOccurrences, 0) !== quality.quarantinedOccurrences) fail("quality audit daily quarantines mismatch");
+if (Object.values(quality.byDay || {}).reduce((sum, day) => sum + Number(day.deduplicatedOccurrences || 0), 0) !== quality.deduplicatedOccurrences) fail("quality audit daily dedupe mismatch");
 for (const range of ["today", "3d", "7d", "30d", "all"]) {
   for (const type of ["songs", "artists", "vtubers"]) {
     const ranking = read(`rankings/${range}/${type}/page-0001.json`);

@@ -5,11 +5,40 @@
 const MIN_COLLISION_VIDEOS = 5;
 const MIN_COLLISION_CHANNELS = 5;
 const MIN_COLLISION_TITLES = 4;
+const REVIEWED_BAD_DESCRIPTION_HASHES = new Set([
+  // Seen on three unrelated karaoke channels; the attached text is a
+  // non-music miracle broadcast chapter, not a song timestamp.
+  "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8",
+]);
+const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47";
+const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
+const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
 
 function unambiguousNonSongReason(song) {
   const title = String(song?.title || "").trim();
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").trim();
+  const sourceHash = String(song?.sourceHash || "");
+
+  if (REVIEWED_BAD_DESCRIPTION_HASHES.has(sourceHash) && /God Miracles Today\s+11:11/iu.test(raw)) {
+    return "reviewed_bad_description_source";
+  }
+
+  // This one setlist comment mixes numbered songs with many prose chapters.
+  // Every actual song row in the source is explicitly marked "♡ N.".
+  if (sourceHash === MIXED_AIKATSU_CHAPTER_HASH && !/♡\s*\d+[.．]/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+  // This DAM karaoke chapter comment explicitly numbers each song; all other
+  // timestamp rows are reactions/conversation chapters.
+  if (sourceHash === MIXED_CLAUDE_CHAPTER_HASH &&
+      !/(?:-\s*\d+[.．]\s*|\b\d+[.．]\s*-\s*)/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+  if (sourceHash === "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a" &&
+      /^54:51\s+joshi idol anime that mariring knows/iu.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
 
   // A foreign prayer broadcast was parsed as a Japanese karaoke song and its
   // identical YouTube description was attached to unrelated VTuber videos.
@@ -113,6 +142,11 @@ function unambiguousNonSongReason(song) {
       /MC\d{1,2}[（(][^）)]{1,40}[）)]/iu.test(raw)) {
     return "confirmed_mc_break";
   }
+  if (/^(?:MCパート|間奏MC)$/iu.test(title) &&
+      /(?:MCパート|間奏MC)[（(][^）)]{1,80}[）)]/iu.test(raw) &&
+      artist.length > 0) {
+    return "confirmed_mc_break";
+  }
   if (/^トーク$/u.test(title) &&
       /トーク[（(].{2,70}(?:お話|話)[）)]/u.test(raw) &&
       /話/u.test(artist)) {
@@ -200,79 +234,241 @@ function repairReleaseDateCredit(song) {
   return song;
 }
 
+function isUnknownArtistValue(value) {
+  return /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(String(value || "").trim());
+}
+
+function repairStructuredSlashCredit(song) {
+  const artist = String(song?.artist || "").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  if (!isUnknownArtistValue(artist) && !/^(?:19|20)\d{2}$/u.test(artist)) return song;
+  const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
+  const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
+  if (!match || (/^(?:19|20)\d{2}$/u.test(artist) && match[4] !== artist)) return song;
+  const [, title, creditedArtist, metadata] = match;
+  if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
+    return song;
+  }
+  if (!title.trim() || !creditedArtist.trim()) return song;
+  return { ...song, title: title.trim(), artist: creditedArtist.trim() };
+}
+
+function normalizeReleaseMetadataArtist(song, video = {}) {
+  const artist = String(song?.artist || "").normalize("NFKC").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  if (!artist) return song;
+
+  // The source video is explicitly an 岡村靖幸-only karaoke stream; these
+  // rows contain album names in the artist slot.
+  if (video.videoId === "jsQX01izzbY" && /^アルバム\s*/u.test(artist) && /[（(]アルバム\s*/u.test(raw)) {
+    return { ...song, artist: "岡村靖幸" };
+  }
+
+  let cleaned = artist
+    .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
+    .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
+    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .trim();
+  if (!cleaned || cleaned === artist) return song;
+  return { ...song, artist: cleaned };
+}
+
+function repairKnownSourceCredit(song) {
+  const hash = String(song?.sourceHash || "");
+  if (hash === MIXED_CLAUDE_CHAPTER_HASH &&
+      song?.title === "ハッピーシンセサイザ" &&
+      isUnknownArtistValue(song?.artist) &&
+      /ハッピーシンセサイザ.*\bby\s+EasyPop\b/iu.test(String(song?.raw || ""))) {
+    return { ...song, artist: "EasyPop" };
+  }
+  if (hash !== ROBOCO_UNDELIMITED_CREDIT_HASH || !isUnknownArtistValue(song?.artist)) return song;
+  const known = new Map([
+    ["はなびら (Hanabira / Petals) 奥華子", ["はなびら", "奥華子"]],
+    ["Answer、幾田りら", ["Answer", "幾田りら"]],
+    ["秒針を噛む (Byoushin wo Kamu / Biting the Second Hand) ずっと真夜中でいいのに。ZUTOMAYO", ["秒針を噛む", "ずっと真夜中でいいのに。"]],
+    ["ギブス (Gibbs / Plaster Caster) 椎名林檎", ["ギブス", "椎名林檎"]],
+    ["115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism", ["115万キロのフィルム", "Official髭男dism"]],
+  ]);
+  const repaired = known.get(String(song?.title || "").trim());
+  return repaired ? { ...song, title: repaired[0], artist: repaired[1] } : song;
+}
+
+function occurrenceIdentity(song) {
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  const artist = String(song?.artist || "").normalize("NFKC").trim();
+  const seconds = Number(song?.seconds);
+  const time = String(song?.time || "").trim();
+  if (!Number.isFinite(seconds) && !time) return "";
+  const point = Number.isFinite(seconds) ? String(seconds) : time;
+  return [point, title, artist].join("\u001f");
+}
+
 function cleanStaticVideos(videos) {
   const collisions = repeatedDescriptionSources(videos);
-  const counters = { inputVideos: videos.length, inputOccurrences: 0, visibleVideos: 0, visibleOccurrences: 0, quarantinedOccurrences: 0, quarantinedVideos: 0, normalizedArtistOccurrences: 0, repairedDateCreditOccurrences: 0, byReason: {} };
+  const counters = {
+    inputVideos: videos.length,
+    inputOccurrences: 0,
+    visibleVideos: 0,
+    visibleOccurrences: 0,
+    quarantinedOccurrences: 0,
+    quarantinedVideos: 0,
+    deduplicatedOccurrences: 0,
+    normalizedArtistOccurrences: 0,
+    normalizedReleaseMetadataOccurrences: 0,
+    repairedDateCreditOccurrences: 0,
+    repairedStructuredCreditOccurrences: 0,
+    repairedKnownSourceCreditOccurrences: 0,
+    byReason: {},
+  };
   const examples = [];
   const byDay = {};
   const normalizedArtistExamples = [];
+  const normalizedReleaseMetadataExamples = [];
   const repairedDateCreditExamples = [];
+  const repairedStructuredCreditExamples = [];
+  const repairedKnownSourceCreditExamples = [];
+  const duplicateExamples = [];
+
   const cleaned = videos.map((video) => {
-    const songs = (video.songs || []).filter((song) => {
+    const day = String(video.publishedAt || "").slice(0, 10) || "unknown";
+    const seen = new Set();
+    const songs = [];
+
+    for (const originalSong of video.songs || []) {
       counters.inputOccurrences += 1;
-      const reason = unambiguousNonSongReason(song) ||
-        (String(song.sourceId || "").startsWith("description:") && collisions.has(String(song.sourceHash || ""))
+      const reason = unambiguousNonSongReason(originalSong) ||
+        (String(originalSong.sourceId || "").startsWith("description:") &&
+         collisions.has(String(originalSong.sourceHash || ""))
           ? "reused_description_across_unrelated_channels"
           : null);
-      if (!reason) return true;
-      counters.quarantinedOccurrences += 1;
-      const day = String(video.publishedAt || "").slice(0, 10) || "unknown";
-      byDay[day] ||= { quarantinedOccurrences: 0, byReason: {} };
-      byDay[day].quarantinedOccurrences += 1;
-      byDay[day].byReason[reason] = (byDay[day].byReason[reason] || 0) + 1;
-      counters.byReason[reason] = (counters.byReason[reason] || 0) + 1;
-      if (examples.length < 40) {
-        examples.push({
-          reason,
-          videoId: video.videoId,
-          channelName: video.channelName || "",
-          occurrenceId: song.occurrenceId || "",
-          sourceId: song.sourceId || "",
-          sourceHash: song.sourceHash || "",
-          title: song.title || "",
-          artist: song.artist || "",
-          raw: String(song.raw || "").slice(0, 200),
-        });
+      if (reason) {
+        counters.quarantinedOccurrences += 1;
+        byDay[day] ||= { quarantinedOccurrences: 0, deduplicatedOccurrences: 0, byReason: {} };
+        byDay[day].quarantinedOccurrences += 1;
+        byDay[day].byReason[reason] = (byDay[day].byReason[reason] || 0) + 1;
+        counters.byReason[reason] = (counters.byReason[reason] || 0) + 1;
+        if (examples.length < 80) {
+          examples.push({
+            reason,
+            videoId: video.videoId,
+            channelName: video.channelName || "",
+            occurrenceId: originalSong.occurrenceId || "",
+            sourceId: originalSong.sourceId || "",
+            sourceHash: originalSong.sourceHash || "",
+            title: originalSong.title || "",
+            artist: originalSong.artist || "",
+            raw: String(originalSong.raw || "").slice(0, 200),
+          });
+        }
+        continue;
       }
-      return false;
-    }).map((song) => {
-      const dateRepaired = repairReleaseDateCredit(song);
-      if (dateRepaired !== song) {
+
+      let song = repairReleaseDateCredit(originalSong);
+      if (song !== originalSong) {
         counters.repairedDateCreditOccurrences += 1;
-        if (repairedDateCreditExamples.length < 30) repairedDateCreditExamples.push({
-          videoId: video.videoId, before: song.title + " - " + song.artist,
-          after: dateRepaired.title + " - " + dateRepaired.artist, raw: song.raw || "",
+        if (repairedDateCreditExamples.length < 40) repairedDateCreditExamples.push({
+          videoId: video.videoId, before: originalSong.title + " - " + originalSong.artist,
+          after: song.title + " - " + song.artist, raw: originalSong.raw || "",
         });
       }
-      const normalized = normalizeConservativeArtist(dateRepaired);
-      if (normalized !== dateRepaired) {
+
+      const structured = repairStructuredSlashCredit(song);
+      if (structured !== song) {
+        counters.repairedStructuredCreditOccurrences += 1;
+        if (repairedStructuredCreditExamples.length < 40) repairedStructuredCreditExamples.push({
+          videoId: video.videoId, before: song.title + " - " + song.artist,
+          after: structured.title + " - " + structured.artist, raw: song.raw || "",
+        });
+        song = structured;
+      }
+
+      const knownSourceRepaired = repairKnownSourceCredit(song);
+      if (knownSourceRepaired !== song) {
+        counters.repairedKnownSourceCreditOccurrences += 1;
+        if (repairedKnownSourceCreditExamples.length < 30) repairedKnownSourceCreditExamples.push({
+          videoId: video.videoId, before: song.title + " - " + song.artist,
+          after: knownSourceRepaired.title + " - " + knownSourceRepaired.artist, raw: song.raw || "",
+        });
+        song = knownSourceRepaired;
+      }
+
+      const releaseNormalized = normalizeReleaseMetadataArtist(song, video);
+      if (releaseNormalized !== song) {
+        counters.normalizedReleaseMetadataOccurrences += 1;
+        if (normalizedReleaseMetadataExamples.length < 50) normalizedReleaseMetadataExamples.push({
+          videoId: video.videoId, title: song.title || "",
+          before: song.artist || "", after: releaseNormalized.artist, raw: song.raw || "",
+        });
+        song = releaseNormalized;
+      }
+
+      const normalized = normalizeConservativeArtist(song);
+      if (normalized !== song) {
         counters.normalizedArtistOccurrences += 1;
-        if (normalizedArtistExamples.length < 25) normalizedArtistExamples.push({
+        if (normalizedArtistExamples.length < 40) normalizedArtistExamples.push({
           videoId: video.videoId, title: song.title || "",
           before: song.artist || "", after: normalized.artist, sourceId: song.sourceId || "",
         });
+        song = normalized;
       }
-      return normalized;
-    });
+
+      const identity = occurrenceIdentity(song);
+      if (identity && seen.has(identity)) {
+        counters.deduplicatedOccurrences += 1;
+        byDay[day] ||= { quarantinedOccurrences: 0, deduplicatedOccurrences: 0, byReason: {} };
+        byDay[day].deduplicatedOccurrences += 1;
+        if (duplicateExamples.length < 50) duplicateExamples.push({
+          videoId: video.videoId,
+          seconds: Number(song.seconds) || 0,
+          title: song.title || "",
+          artist: song.artist || "",
+          sourceId: song.sourceId || "",
+        });
+        continue;
+      }
+      if (identity) seen.add(identity);
+      songs.push(song);
+    }
+
     if (songs.length) counters.visibleVideos += 1;
     else if ((video.songs || []).length) counters.quarantinedVideos += 1;
     counters.visibleOccurrences += songs.length;
     return { ...video, songs };
   }).filter((video) => video.songs.length);
+
   if (counters.inputOccurrences && counters.quarantinedOccurrences / counters.inputOccurrences > 0.1) {
     throw new Error("static quality guard quarantined over 10% of all occurrences; manual review required before publishing");
   }
+  if (counters.visibleOccurrences + counters.quarantinedOccurrences + counters.deduplicatedOccurrences !== counters.inputOccurrences) {
+    throw new Error("static quality guard occurrence accounting mismatch");
+  }
+
   const audit = {
     schemaVersion: 1,
-    policy: "quarantine derived pages only; retain unmodified days/* and state.json",
+    policy: "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
     ...counters,
     repeatedDescriptionSources: [...collisions].map(([sourceHash, info]) => ({ sourceHash, ...info })),
+    reviewedBadDescriptionHashes: [...REVIEWED_BAD_DESCRIPTION_HASHES],
     byDay,
     normalizedArtistExamples,
+    normalizedReleaseMetadataExamples,
     repairedDateCreditExamples,
+    repairedStructuredCreditExamples,
+    repairedKnownSourceCreditExamples,
+    duplicateExamples,
     examples,
   };
   return { videos: cleaned, audit };
 }
 
-module.exports = { cleanStaticVideos, normalizeConservativeArtist, repairReleaseDateCredit, repeatedDescriptionSources, unambiguousNonSongReason };
+module.exports = {
+  cleanStaticVideos,
+  normalizeConservativeArtist,
+  normalizeReleaseMetadataArtist,
+  occurrenceIdentity,
+  repairKnownSourceCredit,
+  repairReleaseDateCredit,
+  repairStructuredSlashCredit,
+  repeatedDescriptionSources,
+  unambiguousNonSongReason,
+};

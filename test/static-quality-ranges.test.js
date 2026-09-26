@@ -5,7 +5,10 @@ const test = require("node:test");
 const {
   cleanStaticVideos,
   normalizeConservativeArtist,
+  normalizeReleaseMetadataArtist,
+  repairKnownSourceCredit,
   repairReleaseDateCredit,
+  repairStructuredSlashCredit,
   repeatedDescriptionSources,
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
@@ -214,4 +217,105 @@ test("the artist 後ろから這いより隊G is not mistaken for release metada
   const record = song("太陽曰く燃えよカオス", "後ろから這いより隊G");
   assert.equal(reviewReasons(record).includes("possible_release_metadata_as_artist"), false);
   assert.equal(reviewReasons(song("栞", "6thアルバム「PUZZLE」より")).includes("possible_release_metadata_as_artist"), true);
+});
+
+
+test("reviewed mixed chapter sources keep marked songs and remove prose timestamps", () => {
+  const hash = "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47";
+  const prose = song("potato discussions", "未記載", {
+    sourceHash: hash,
+    sourceId: "Ugz51dlxGcqCVz2Zylt4AaABAg",
+    raw: "26:13 potato discussions...",
+  });
+  const actualSong = song("STARDOM!", "未記載", {
+    sourceHash: hash,
+    sourceId: "Ugz51dlxGcqCVz2Zylt4AaABAg",
+    raw: "2:12 ♡ 1. STARDOM!",
+  });
+  assert.equal(unambiguousNonSongReason(prose), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(actualSong), null);
+});
+
+test("MC prose and the reviewed three-channel miracle description are quarantined", () => {
+  assert.equal(unambiguousNonSongReason(song("MCパート", "今年の目標は少しでも歌を上手くなること！", {
+    raw: "6:30 MCパート（今年の目標は少しでも歌を上手くなること！）",
+  })), "confirmed_mc_break");
+  assert.equal(unambiguousNonSongReason(song("間奏MC", "手汗がすごい！", {
+    raw: "└4:20 間奏MC（手汗がすごい！）",
+  })), "confirmed_mc_break");
+  assert.equal(unambiguousNonSongReason(song("God Miracles Today", "", {
+    raw: "God Miracles Today 11:11",
+    sourceId: "description:XnDe6MpY83w:508e5918d7aa133e",
+    sourceHash: "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8",
+  })), "reviewed_bad_description_source");
+});
+
+test("release metadata and known album labels are normalized without deleting songs", () => {
+  assert.equal(normalizeReleaseMetadataArtist(song("Web of Night", "T.M.Revolution（2004/07/28）※English Version")).artist, "T.M.Revolution");
+  assert.equal(normalizeReleaseMetadataArtist(song("Tell Your World", "kz ※2012-01-18")).artist, "kz");
+  assert.equal(normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist, "Vaundy【王様ランキング】");
+  assert.equal(normalizeReleaseMetadataArtist(song("ビバナミダ", "アルバム 幸福", {
+    raw: "2:01 ビバナミダ（アルバム 幸福）",
+  }), {videoId: "jsQX01izzbY"}).artist, "岡村靖幸");
+  assert.equal(normalizeReleaseMetadataArtist(song("DATE", "アルバム DATE"), {videoId: "another-video"}).artist, "アルバム DATE");
+});
+
+test("structured slash credits recover title and artist only when metadata proves the format", () => {
+  const anime = song("Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP", "", {
+    raw: "1:03:20 Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP/2008",
+  });
+  const repaired = repairStructuredSlashCredit(anime);
+  assert.equal(repaired.title, "Lion");
+  assert.equal(repaired.artist, "Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)");
+  const improv = song("惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング", "2026", {
+    raw: "1:06:14 惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング/2026",
+  });
+  const repairedImprov = repairStructuredSlashCredit(improv);
+  assert.equal(repairedImprov.title, "惑星と恒星の違いがわからないの歌");
+  assert.equal(repairedImprov.artist, "幽音しの");
+  const ambiguous = song("A/B/C", "", { raw: "1:00 A/B/C/2020" });
+  assert.strictEqual(repairStructuredSlashCredit(ambiguous), ambiguous);
+});
+
+test("exact same-video same-timestamp duplicate is removed, different timestamps remain", () => {
+  const input = [video(1, [
+    {...song("花に亡霊", "ヨルシカ"), seconds: 531, occurrenceId: "a"},
+    {...song("花に亡霊", "ヨルシカ"), seconds: 531, occurrenceId: "b"},
+    {...song("花に亡霊", "ヨルシカ"), seconds: 900, occurrenceId: "c"},
+  ])];
+  const saved = JSON.stringify(input);
+  const {videos, audit} = cleanStaticVideos(input);
+  assert.equal(audit.deduplicatedOccurrences, 1);
+  assert.equal(audit.quarantinedOccurrences, 0);
+  assert.deepEqual(videos[0].songs.map(x => x.seconds), [531, 900]);
+  assert.equal(JSON.stringify(input), saved);
+});
+
+
+test("source-specific chapter formats keep numbered songs and repair known missing credits", () => {
+  const claudeHash = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
+  assert.equal(unambiguousNonSongReason(song("they're so giggly today", "未記載", {
+    raw: "33:58 - they're so giggly today", sourceHash: claudeHash,
+  })), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(song("PAPERMOON", "Tommy heavenly6", {
+    raw: "52:59 - 9. PAPERMOON by Tommy heavenly6 【🎫❔】", sourceHash: claudeHash,
+  })), null);
+  const synth = repairKnownSourceCredit(song("ハッピーシンセサイザ", "未記載", {
+    raw: "47:15 - 8. ハッピーシンセサイザ (Happy Synthesizer) by EasyPop 【❔🍸】",
+    sourceHash: claudeHash,
+  }));
+  assert.equal(synth.artist, "EasyPop");
+  assert.equal(unambiguousNonSongReason(song("joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22", "7?????", {
+    raw: "54:51 joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22/7?????",
+    sourceHash: "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a",
+  })), "reviewed_mixed_chapter_comment");
+
+  const robocoHash = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
+  const repaired = repairKnownSourceCredit(song(
+    "115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism",
+    "未記載",
+    {sourceHash: robocoHash},
+  ));
+  assert.equal(repaired.title, "115万キロのフィルム");
+  assert.equal(repaired.artist, "Official髭男dism");
 });
