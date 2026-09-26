@@ -13,6 +13,19 @@ const REVIEWED_BAD_DESCRIPTION_HASHES = new Set([
 const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47";
 const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
 const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
+const REVIEWED_NUMBERED_SETLIST_HASHES = new Set([
+  "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+  "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b",
+  "472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80",
+  "cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67",
+  "da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad",
+  "af9b78791e417efa33bc5d649ed166553507376faf8b4b6e7564a0fc5a9194c3",
+]);
+
+function isExplicitNumberedSetlistRow(value) {
+  const text = String(value || "").normalize("NFKC");
+  return /(?:^|\s)(?:[-–—]\s*)?(?:♡\s*)?\d{1,2}[.．]\s*|(?:^|\s)\d{1,2}[.．]\s*[-–—]?\s*/u.test(text);
+}
 
 function unambiguousNonSongReason(song) {
   const title = String(song?.title || "").trim();
@@ -38,6 +51,16 @@ function unambiguousNonSongReason(song) {
   if (sourceHash === "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a" &&
       /^54:51\s+joshi idol anime that mariring knows/iu.test(raw)) {
     return "reviewed_mixed_chapter_comment";
+  }
+  // These six sources were reviewed row-by-row. Their actual setlists are
+  // consistently numbered, while unnumbered timestamps are reactions, MC,
+  // participant callouts, roulette/mimic bits, or other chapter notes.
+  if (REVIEWED_NUMBERED_SETLIST_HASHES.has(sourceHash) && !isExplicitNumberedSetlistRow(raw)) {
+    return "reviewed_non_song_chapter_in_numbered_setlist";
+  }
+  if (sourceHash === "4f0ebf635214d0dc35c7423a0a51578f8996f8086ee17aa5ec573be364db84a9" &&
+      title === "トーク" && artist === "お見送り" && /トーク\s*[（(]お見送り[）)]/u.test(raw)) {
+    return "confirmed_talk_section";
   }
 
   // A foreign prayer broadcast was parsed as a Japanese karaoke song and its
@@ -511,6 +534,7 @@ module.exports = {
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   occurrenceIdentity,
+  isExplicitNumberedSetlistRow,
   repairKnownSourceCredit,
   repairReleaseDateCredit,
   repairStructuredSlashCredit,
