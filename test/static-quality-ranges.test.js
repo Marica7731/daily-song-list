@@ -483,3 +483,17 @@ test("reviewed farewell talk marker is rejected only with its exact source evide
   assert.equal(unambiguousNonSongReason(exact), "confirmed_talk_section");
   assert.equal(unambiguousNonSongReason(song("トーク", "お見送り", {raw:"トーク (お見送り)"})), null);
 });
+
+
+test("reviewed Umarun Taisou credit restores the source-proven closing bracket", () => {
+  const repaired = repairKnownSourceCredit(song(
+    "うまるん体操",
+    "妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)",
+    {
+      raw: "② 51:38 うまるん体操 / 妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)]",
+      sourceHash: "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f",
+    },
+  ));
+  assert.match(repaired.artist, /\]$/u);
+  assert.deepEqual(reviewReasons(repaired), []);
+});
