@@ -32,6 +32,7 @@ function reviewReasons(song) {
 function buildQualityReview(videos, audit, now) {
   const groups = new Map();
   const descriptionHash = new Map();
+  const sourceStructures = new Map();
   let occurrenceCount = 0;
   const days = new Map();
   const add = (reason, video, song) => {
@@ -53,6 +54,43 @@ function buildQualityReview(videos, audit, now) {
       occurrenceCount++;
       for (const reason of reviewReasons(song)) add(reason, video, song);
       const hash = String(song.sourceHash || "");
+      if (hash) {
+        const structureKey = [video.videoId || "", hash].join("\u001f");
+        let structure = sourceStructures.get(structureKey);
+        if (!structure) {
+          structure = {
+            videoId: video.videoId || "",
+            channelName: video.channelName || "",
+            publishedAt: video.publishedAt || "",
+            sourceHash: hash,
+            total: 0,
+            explicitNumberedSongs: 0,
+            knownArtistRows: 0,
+            unknownNonNumberedRows: 0,
+            unknownExamples: [],
+            numberedExamples: [],
+          };
+          sourceStructures.set(structureKey, structure);
+        }
+        const raw = String(song.raw || "").normalize("NFKC");
+        const artist = String(song.artist || "").normalize("NFKC").trim();
+        const unknownArtist = /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist);
+        const numbered = /(?:^|\s)(?:[-–—]\s*)?(?:♡\s*)?\d{1,2}[.．]\s*|(?:^|\s)\d{1,2}[.．]\s*[-–—]\s*/u.test(raw);
+        structure.total += 1;
+        if (numbered) {
+          structure.explicitNumberedSongs += 1;
+          if (structure.numberedExamples.length < 3) structure.numberedExamples.push({
+            title: song.title || "", artist: song.artist || "", raw: raw.slice(0, 180),
+          });
+        }
+        if (!unknownArtist) structure.knownArtistRows += 1;
+        if (unknownArtist && !numbered) {
+          structure.unknownNonNumberedRows += 1;
+          if (structure.unknownExamples.length < 5) structure.unknownExamples.push({
+            title: song.title || "", raw: raw.slice(0, 180),
+          });
+        }
+      }
       if (hash && String(song.sourceId || "").startsWith("description:")) {
         let row = descriptionHash.get(hash);
         if (!row) { row = { videos: new Set(), channels: new Set(), raw: String(song.raw || "").slice(0, 200), sample: [] }; descriptionHash.set(hash, row); }
@@ -73,6 +111,16 @@ function buildQualityReview(videos, audit, now) {
     candidates: [...groups.values()]
       .sort((a,b)=>b.channels.size-a.channels.size || b.count-a.count || a.reason.localeCompare(b.reason))
       .slice(0,250).map(({channels,videos,...row})=>({...row,videoCount:videos.size,channelCount:channels.size})),
+    mixedStructuredSetlistSources: [...sourceStructures.values()]
+      .filter((row) =>
+        row.total >= 8 &&
+        row.unknownNonNumberedRows >= 3 &&
+        (row.explicitNumberedSongs >= 3 || row.knownArtistRows >= 3))
+      .sort((a,b) =>
+        b.unknownNonNumberedRows - a.unknownNonNumberedRows ||
+        b.explicitNumberedSongs - a.explicitNumberedSongs ||
+        a.videoId.localeCompare(b.videoId))
+      .slice(0,120),
     descriptionsSharedAcrossTwoToFourChannels: [...descriptionHash]
       .filter(([,row])=>row.channels.size >= 2 && row.channels.size < 5)
       .sort((a,b)=>b[1].channels.size-a[1].channels.size)

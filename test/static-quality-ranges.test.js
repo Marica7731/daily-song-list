@@ -253,7 +253,7 @@ test("MC prose and the reviewed three-channel miracle description are quarantine
 test("release metadata and known album labels are normalized without deleting songs", () => {
   assert.equal(normalizeReleaseMetadataArtist(song("Web of Night", "T.M.Revolution（2004/07/28）※English Version")).artist, "T.M.Revolution");
   assert.equal(normalizeReleaseMetadataArtist(song("Tell Your World", "kz ※2012-01-18")).artist, "kz");
-  assert.equal(normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist, "Vaundy【王様ランキング】");
+  assert.equal(normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist, "Vaundy");
   assert.equal(normalizeReleaseMetadataArtist(song("ビバナミダ", "アルバム 幸福", {
     raw: "2:01 ビバナミダ（アルバム 幸福）",
   }), {videoId: "jsQX01izzbY"}).artist, "岡村靖幸");
@@ -318,4 +318,100 @@ test("source-specific chapter formats keep numbered songs and repair known missi
   ));
   assert.equal(repaired.title, "115万キロのフィルム");
   assert.equal(repaired.artist, "Official髭男dism");
+});
+
+
+test("year-range structured credits and reviewed parser artifacts are repaired conservatively", () => {
+  const range = repairStructuredSlashCredit(song(
+    'Happy☆Material (June)/Mahora Academy Middle School Class 2-A/Anime "Negima!"',
+    "2005–2008",
+    {raw: '7:36:15 Happy☆Material (June)/Mahora Academy Middle School Class 2-A/Anime "Negima!" /2005–2008'},
+  ));
+  assert.equal(range.title, "Happy☆Material (June)");
+  assert.equal(range.artist, "Mahora Academy Middle School Class 2-A");
+  assert.equal(normalizeReleaseMetadataArtist(song("Lolita", "Konata Izumi /", {
+    raw: "1:23:46 Lolita / Konata Izumi / 2007",
+  })).artist, "Konata Izumi");
+  const titleArtifact = repairKnownSourceCredit(song("34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ", "ぬぬぬ", {
+    raw: "♪2:44:34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ | ぬぬぬ",
+    sourceHash: "087f98b90de544c80795a5f24729ba2a5e1e9df8250379c29fc361e02012c6ef",
+  }));
+  assert.equal(titleArtifact.title, "(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ");
+});
+
+test("review scanner surfaces mixed setlist/comment sources without auto-deleting them", () => {
+  const hash = "mixed-review-hash";
+  const rows = [
+    song("Song A", "Artist A", {raw:"2:00 - 1. Song A by Artist A",sourceHash:hash}),
+    song("Song B", "Artist B", {raw:"6:00 - 2. Song B by Artist B",sourceHash:hash}),
+    song("Song C", "Artist C", {raw:"10:00 - 3. Song C by Artist C",sourceHash:hash}),
+    song("they laugh", "未記載", {raw:"3:00 - they laugh",sourceHash:hash}),
+    song("chat about food", "未記載", {raw:"7:00 - chat about food",sourceHash:hash}),
+    song("wrap up", "未記載", {raw:"11:00 - wrap up",sourceHash:hash}),
+    song("small reaction", "未記載", {raw:"12:00 - wow",sourceHash:hash}),
+    song("another note", "未記載", {raw:"13:00 - note",sourceHash:hash}),
+  ];
+  const review = buildQualityReview([video(9, rows)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(review.mixedStructuredSetlistSources.length, 1);
+  assert.equal(review.mixedStructuredSetlistSources[0].unknownNonNumberedRows, 5);
+  assert.equal(review.mixedStructuredSetlistSources[0].explicitNumberedSongs, 3);
+});
+
+
+test("full-history source-proven residual credits are repaired without inference", () => {
+  const table = [
+    [song("奏", "オリ曲 YOU＆合図 リリース／明日は祝日", {
+      raw: "1:11:42 奏／オリ曲 YOU＆合図 リリース／明日は祝日",
+      sourceHash: "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa",
+    }), "奏", "スキマスイッチ"],
+    [song("祝日天国", "7", {
+      raw: "1:05:43　10.祝日天国／35.7（2022/07/31）【NEW】",
+      sourceHash: "924e1a18c91dd603a7be0e9523559988d299ff51e649624795ba0402d60f5a4e",
+    }), "祝日天国", "35.7"],
+    [song("乙女のルートはひとつじゃない！", "乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった…", {
+      sourceHash: "3665facacaf3ad5caa221a2a0bbd346a2c5adf66fe0f69ce4bcc9bae83a46c6a",
+    }), "乙女のルートはひとつじゃない！", "angela"],
+    [song("1", "2", {
+      raw: '8:55:05 1/2/Kawamoto Makoto/Anime "Rurouni Kenshin" OP/1997',
+      sourceHash: "7b6b7ed5a0d5ef6faa6271a57adca3ce57654e5984e7f515845853adfb0e8da0",
+    }), "1/2", "川本真琴"],
+    [song("FLAGS", "T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))", {
+      sourceHash: "401adaa520f8e84434c4e8581ede7277564e44dc0448fe962bccd7fe78d6046a",
+    }), "FLAGS", "T.M.Revolution"],
+  ];
+  for (const [input, expectedTitle, expectedArtist] of table) {
+    const repaired = repairKnownSourceCredit(input);
+    assert.equal(repaired.title, expectedTitle);
+    assert.equal(repaired.artist, expectedArtist);
+  }
+  const eightyEight = repairKnownSourceCredit(song("栞", "6thアルバム「PUZZLE」より", {
+    sourceHash: "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9",
+  }));
+  assert.equal(eightyEight.artist, "Eighty eight");
+  const duca = repairKnownSourceCredit(song("観覧車~あの日と、昨日と今日と明日と~／Duca／work", "あざらしそふと (2020)", {
+    raw: "2:37:05 観覧車~あの日と、昨日と今日と明日と~／Duca／work／2020",
+    sourceHash: "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a",
+  }));
+  assert.equal(duca.title, "観覧車～あの日と、昨日と今日と明日と～");
+  assert.equal(duca.artist, "Duca");
+});
+
+test("structured slash repair accepts a trailing reviewed year annotation", () => {
+  const input = song("世界の約束/倍賞千恵子/ハウルの動く城 主題歌", "2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー", {
+    raw: "1:53:42 世界の約束/倍賞千恵子/ハウルの動く城 主題歌/2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー",
+  });
+  const repaired = repairStructuredSlashCredit(input);
+  assert.equal(repaired.title, "世界の約束");
+  assert.equal(repaired.artist, "倍賞千恵子");
+});
+
+test("release metadata normalization removes work labels only when coupled to a release date", () => {
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist,
+    "Vaundy",
+  );
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("Maybe Artist", "Unit【Official Artist Name】")).artist,
+    "Unit【Official Artist Name】",
+  );
 });
