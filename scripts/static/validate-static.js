@@ -45,6 +45,7 @@ if (quality.normalizedArtistOccurrences !== meta.quality?.normalizedArtistOccurr
 if (quality.normalizedReleaseMetadataOccurrences !== meta.quality?.normalizedReleaseMetadataOccurrences) fail("release metadata normalization vs meta mismatch");
 if (quality.repairedDateCreditOccurrences !== meta.quality?.repairedDateCreditOccurrences) fail("release-date repair audit vs meta mismatch");
 if (quality.repairedStructuredCreditOccurrences !== meta.quality?.repairedStructuredCreditOccurrences) fail("structured credit repair vs meta mismatch");
+if (quality.repairedKnownSourceCreditOccurrences !== meta.quality?.repairedKnownSourceCreditOccurrences) fail("known-source credit repair vs meta mismatch");
 if (quality.deduplicatedOccurrences !== meta.quality?.deduplicatedOccurrences) fail("dedupe audit vs meta mismatch");
 if (quality.visibleOccurrences + quality.quarantinedOccurrences + quality.deduplicatedOccurrences !== quality.inputOccurrences) fail("quality occurrence accounting mismatch");
 if (quality.visibleOccurrences !== meta.songOccurrenceCount) fail("quality audit vs published count mismatch");
