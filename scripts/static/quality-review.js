@@ -2,11 +2,21 @@
 
 // Review-only scan: none of these signals is sufficient to delete a song.
 // Helps distinguish single-source metadata errors from genuine song names.
+function hasUnbalancedCreditDelimiters(value) {
+  const text = String(value || "").normalize("NFKC");
+  for (const [open, close] of [["(", ")"], ["[", "]"], ["【", "】"], ["「", "」"]]) {
+    if (text.split(open).length !== text.split(close).length) return true;
+  }
+  return false;
+}
+
 function reviewReasons(song) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
   const reasons = [];
+  const unknownArtist = /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist);
+  const slashFieldCount = (raw.match(/[\/／]/gu) || []).length;
 
   if (/^(?:雑談|トーク|MC|スパチャ|コメント|告知)(?:パート|タイム|読み|紹介|開始|終了)?[①-⑳\d]*$/iu.test(title)) {
     reasons.push("possible_spoken_section");
@@ -22,7 +32,11 @@ function reviewReasons(song) {
   if (/(?:アルバム|リリース|発売|配信日|公開日|(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2})/iu.test(artist)) {
     reasons.push("possible_release_metadata_as_artist");
   }
-  if (title.length > 75 || artist.length > 75) reasons.push("possible_unparsed_credits");
+  if (
+    (title.length > 75 && unknownArtist) ||
+    (slashFieldCount >= 2 && (unknownArtist || /^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist))) ||
+    (artist.length > 75 && hasUnbalancedCreditDelimiters(artist))
+  ) reasons.push("possible_unparsed_credits");
   if (title.length > 25 && /\b(?:YouTube|チャンネル登録|スパチャ|メンバーシップ|配信開始|配信終了|アーカイブ|コメント欄)\b/iu.test(title)) {
     reasons.push("possible_promotion_as_song");
   }
@@ -115,7 +129,7 @@ function buildQualityReview(videos, audit, now) {
       .filter((row) =>
         row.total >= 8 &&
         row.unknownNonNumberedRows >= 3 &&
-        (row.explicitNumberedSongs >= 3 || row.knownArtistRows >= 3))
+        row.explicitNumberedSongs >= 3)
       .sort((a,b) =>
         b.unknownNonNumberedRows - a.unknownNonNumberedRows ||
         b.explicitNumberedSongs - a.explicitNumberedSongs ||
@@ -129,4 +143,4 @@ function buildQualityReview(videos, audit, now) {
   };
 }
 
-module.exports = { buildQualityReview, reviewReasons };
+module.exports = { buildQualityReview, hasUnbalancedCreditDelimiters, reviewReasons };
