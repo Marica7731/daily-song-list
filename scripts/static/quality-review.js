@@ -91,7 +91,7 @@ function buildQualityReview(videos, audit, now) {
         if (!unknownArtist) structure.knownArtistRows += 1;
         if (unknownArtist && !numbered) {
           structure.unknownNonNumberedRows += 1;
-          if (structure.unknownExamples.length < 5) structure.unknownExamples.push({
+          if (structure.unknownExamples.length < 12) structure.unknownExamples.push({
             title: song.title || "", raw: raw.slice(0, 180),
           });
         }

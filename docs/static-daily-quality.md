@@ -179,3 +179,21 @@ where the source itself proves which rows are songs.
 The review-only scanner also surfaces strong activity-chapter candidates and no longer truncates
 mixed-source candidates at 120. Detection remains intentionally broader than deletion: ambiguous
 rows stay visible until source context proves that they are not songs.
+
+### Second source-format pass
+
+The complete 176-source review exposed additional cases where unknown artist cannot be used as a
+deletion signal. The cleaner therefore uses exact source grammar:
+
+- Otsuka Ray songs retain `NN-` song rows while Q&A, merch and announcement rows from the same
+  reviewed source are removed.
+- The reviewed Hisagi timeline keeps its explicit `［song／artist］` row and removes prose chapters.
+- The reviewed suimin timeline removes only `MC - ...` rows; uncredited song rows stay.
+- The MerrySummerFest source keeps credited song rows and removes the four uncredited OP/MC/cue rows.
+- Two parser formats are repaired rather than dropped: tab-separated `index / song / artist / time`
+  records, and Omakirara's full-width underscore song/artist separator.
+- A harp-stream source has three split translation/comment continuations quarantined and a handful
+  of source-proven attached annotations repaired without inventing missing artists.
+
+Review output now retains up to 12 unknown-row examples per mixed source so later dirty chapters
+cannot hide merely because the first five rows happen to be songs.

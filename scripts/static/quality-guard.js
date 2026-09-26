@@ -23,6 +23,13 @@ const REVIEWED_MIXED_SOURCE_HASHES = Object.freeze({
   inoriAcoustic: "1922f6d700c7615e8ff682c9ea9ac82ea19d0b2a145d31e4ea73df7d243bc352",
   pleuvoirFirstKaraoke: "c2fe7785dffa7d43c6405b4efd19edb8dfa6d3d0d276084a42c6431f16ee8777",
   aranneHundredSongs: "2f784a14e4122ab625a239f2693dd725658688982e1b9aa526fad3f379efe188",
+  otsukaRay: "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+  hisagiDay: "ca0982ddee79fcf66cff3f5f20e2ac15539603a7d8a538d5cd9176d40f6d5d61",
+  suiminMc: "92a7e650f684e741d7da5d2dfc6c2344abb06d8829c46237b25604f8716a5da6",
+  minaseSummerFest: "930bc7636c4c769fa8a832e8ea56faed82c9a6c76b31db3f000a499885f18b26",
+  piimanHarp: "6c02c324915aa78e9c30deda5783635ebff969c99c89d8828f8f24486711c5bd",
+  suiTabSetlist: "a2014dae610c4d64cabf398a0ac40f72c0a8f6475d02e05d068393071cd545a1",
+  omakiraraUnderscore: "478f401bb24ee9ed1d84eb42f0679395ee7b93c24c8bbff25d86e3120ea79661",
 });
 
 const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
@@ -57,7 +64,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["4a9f8e9d2068168b661e82152a89e22e58ff6ced50711a9491391b15730d761e", new Set(["機材トラブルにつきここから！"])],
   ["d1168c68e8b644a8a07427f9af72bb6b73e00f3c06255002e04914f16fd743d3", new Set(["MC2 (Talk)"])],
   ["f82ca590f5648863fff5bc9c0435aa99f44a210b0f055433e18178f603c258be", new Set(["開演前のご挨拶"])],
-  ["8f6931da27cc8151b3f7fb4e0163c07b238cebca5bd9ee21790850b466063ebf", new Set(["40万人達成!!"])],
+  ["8f6931da27cc8151b3f7fb4e0163c07b238cebca5bd9ee21790850b466063ebf", new Set(["顔が", "世代が…", "動くメモ帳の時に聞いてた", "取り立て再び", "どっか行っちゃった", "40万人達成!!", "ゴールは100億万人", "声が", "お面付けよ", "今日は酒やな"])],
   ["252d604b36225d4a16ad3a4b0e3a0b64f9656d7fe0ada9c101c3735b6714e923", new Set(["電波チェック"])],
   ["f90c0d67a7cc35526d97b7f46e03172c1db3094cddf6043654e0e3108a0a7af9", new Set(["さまとんについて"])],
   ["b79cdf8deac7d22c36320bc75d4c69ecc3bbe4891dae163ef78aa5d247e76606", new Set(["離席中のつぶれたなこ"])],
@@ -76,6 +83,12 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710", new Set(["～8"])],
   ["1417a20bd96f281a8175858186e650a70612f18bb745400dc20ca8d0161c253f", new Set(["ワンマンライブ12"])],
   ["4bb6b16914332005d78c5618640485453eff7d6369b6b5a2216185e6647522ac", new Set(["【#雑談】🍔9"])],
+  ["e3d480117f9e4eb504e6ffea2c5998a689bb46c3fe9019446acdf971e0b2ff40", new Set(["わこチョま", "おっチョまでした！"])],
+  ["2419b0e29aeb1329a357d68bc6cb1632df8ffa3a1bd6129db2ba96212c55e9c8", new Set(["エルちゃんコラボ振り返り"])],
+  ["2dc3f49c2917e6d0f05a56e800bb2e05d7dfac79e2deee0be29b40efd18d69db", new Set(["締めの挨拶"])],
+  ["bddbda04442cade80cb79d3c3671bba11f75cbeb89cbf687850766fd02742fdc", new Set(["～　初見さん20人達成"])],
+  ["6c02c324915aa78e9c30deda5783635ebff969c99c89d8828f8f24486711c5bd", new Set(["雖然知道只是翻譯歌詞，但還是要再說一次:「不可能！絕對不可能！」)", "好聽故事一直聽)", "的笑聲最真實)"])],
+  ["478f401bb24ee9ed1d84eb42f0679395ee7b93c24c8bbff25d86e3120ea79661", new Set(["いーや俺に手を振ってたね！合戦", "騎士バッチ進化記念", "1144記念、私(隷)の一番カワイイトコロ", "全て(ｼﾞｮﾊﾞを)受け止めるよぉ"])],
 ]);
 
 function reviewedSourceNonSongReason(song) {
@@ -110,6 +123,26 @@ function reviewedSourceNonSongReason(song) {
   if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.aranneHundredSongs &&
       (/^休憩\d+$/u.test(title) || title === "100曲達成！")) {
     return "reviewed_source_activity_chapter";
+  }
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.otsukaRay &&
+      !/^\d+:\d{2}:\d{2}\s+\d{2}-/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.hisagiDay &&
+      !/［[^］]+[／/][^］]+］/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.suiminMc &&
+      /^MC\s*-\s*/iu.test(title)) {
+    return "reviewed_source_activity_chapter";
+  }
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.minaseSummerFest &&
+      unknownArtist) {
+    return "reviewed_mixed_chapter_comment";
   }
 
   if (sourceHash === "4f0ebf635214d0dc35c7423a0a51578f8996f8086ee17aa5ec573be364db84a9" &&
@@ -397,6 +430,39 @@ function repairKnownSourceCredit(song) {
   if (hash === REVIEWED_MIXED_SOURCE_HASHES.uraraAnniversary &&
       /^Luv Rendezvous\s*💎\s*七海うらら$/u.test(String(song?.title || "").trim())) {
     return { ...song, title: "Luv Rendezvous", artist: "七海うらら" };
+  }
+
+  if (hash === REVIEWED_MIXED_SOURCE_HASHES.piimanHarp) {
+    const title = String(song?.title || "").trim();
+    if (title === "世界で一番幸せな死に方(") return { ...song, title: "世界で一番幸せな死に方" };
+    if (title === "バースデイ(") return { ...song, title: "バースデイ" };
+    if (title === "忘れじ言の葉(整段話只有") return { ...song, title: "忘れじ言の葉" };
+    if (title === "フクロウ" && song?.artist === "學貓頭鷹叫真的架勾錐") return { ...song, artist: "" };
+    if (title === "練舞功" && song?.artist === "一小段") return { ...song, artist: "" };
+  }
+
+  if (hash === REVIEWED_MIXED_SOURCE_HASHES.suiTabSetlist) {
+    const raw = String(song?.raw || "");
+    const match = raw.match(/^\d+\t([^\t]+)\t([^\t]+)\t\d+:\d{2}:\d{2}\s*$/u);
+    if (match &&
+        (isUnknownArtistValue(song?.artist) || String(song?.title || "").includes("\t") || raw.includes("W/X/Y"))) {
+      let artist = match[2].trim();
+      if (artist === "Back number") artist = "back number";
+      if (artist === "Tuki.") artist = "tuki.";
+      return { ...song, title: match[1].replace(/\s{2,}/gu, " ").trim(), artist };
+    }
+  }
+
+  if (hash === REVIEWED_MIXED_SOURCE_HASHES.omakiraraUnderscore) {
+    const raw = String(song?.raw || "");
+    const match = raw.match(/^\d+:\d{2}(?::\d{2})?\s+(.+?)\s*＿\s*(.+?)\s*$/u);
+    if (match) {
+      let title = match[1].trim();
+      if (/^[（(]アンコール[）)]/u.test(title)) {
+        title = title.replace(/^[（(]アンコール[）)]\s*/u, "").normalize("NFKC");
+      }
+      return { ...song, title, artist: match[2].trim() };
+    }
   }
   if (hash === "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9" &&
       /^\d+(?:st|nd|rd|th)アルバム「[^」]+」より$/iu.test(String(song?.artist || "").normalize("NFKC").trim())) {
