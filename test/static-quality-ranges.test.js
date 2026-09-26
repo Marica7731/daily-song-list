@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   cleanStaticVideos,
+  isExplicitNumberedSetlistRow,
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   repairKnownSourceCredit,
@@ -423,4 +424,62 @@ test("Japanese game metadata suffix is removed from an otherwise valid artist cr
     "狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録",
   ));
   assert.equal(repaired.artist, "狛江･クリストフ･ヨウスケ(鈴木達央)");
+});
+
+
+test("six reviewed numbered-setlist sources drop only unnumbered chapter rows", () => {
+  const hash = "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b";
+  const songRow = song("残機", "ずっと真夜中でいいのに。", {
+    raw: "0:08:18 01. 残機 - ずっと真夜中でいいのに。",
+    sourceHash: hash,
+  });
+  const chatter = song("豪華なドレス姿のらんぜ", "", {
+    raw: "┗ 0:38:08 豪華なドレス姿のらんぜ",
+    sourceHash: hash,
+  });
+  assert.equal(isExplicitNumberedSetlistRow(songRow.raw), true);
+  assert.equal(unambiguousNonSongReason(songRow), null);
+  assert.equal(isExplicitNumberedSetlistRow(chatter.raw), false);
+  assert.equal(unambiguousNonSongReason(chatter), "reviewed_non_song_chapter_in_numbered_setlist");
+
+  const unicodeNumber = "𝟎𝟏. 0:04:33 Hero’s Come Back!!✦nobodyknows+";
+  assert.equal(isExplicitNumberedSetlistRow(unicodeNumber), true);
+});
+
+test("review-only mixed source detector requires explicit numbered songs", () => {
+  const hash = "review-mixed";
+  const unnumberedSongs = Array.from({length: 8}, (_, i) => song("Song " + i, i < 3 ? "Artist " + i : "", {
+    raw: String(i + 1) + ":00 Song " + i,
+    sourceHash: hash,
+  }));
+  const falsePositiveReview = buildQualityReview([video(30, unnumberedSongs)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(falsePositiveReview.mixedStructuredSetlistSources.length, 0);
+
+  const numbered = [
+    song("Song A", "Artist A", {raw:"1:00 01. Song A - Artist A",sourceHash:hash}),
+    song("Song B", "Artist B", {raw:"5:00 02. Song B - Artist B",sourceHash:hash}),
+    song("Song C", "Artist C", {raw:"9:00 03. Song C - Artist C",sourceHash:hash}),
+    ...Array.from({length: 5}, (_, i) => song("chat " + i, "", {raw:(i+2)+":30 chat "+i,sourceHash:hash})),
+  ];
+  const trueReview = buildQualityReview([video(31, numbered)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(trueReview.mixedStructuredSetlistSources.length, 1);
+});
+
+test("long legitimate cast credits are no longer review noise, malformed credits still are", () => {
+  const legitimate = song(
+    "Love∞Destiny",
+    "佐久間まゆ (CV: 牧野由依)、北条加蓮 (CV: 渕上舞)、小日向美穂 (CV: 津田美波)、多田李衣菜 (CV: 青木瑠璃子)、緒方智絵里 (CV: 大空直美)",
+  );
+  assert.deepEqual(reviewReasons(legitimate), []);
+  assert.equal(hasUnbalancedCreditDelimiters("妹S [土間うまる(CV.田中あいみ)"), true);
+  assert.ok(reviewReasons(song("うまるん体操", "妹S [土間うまる(CV.田中あいみ)")).includes("possible_unparsed_credits"));
+});
+
+test("reviewed farewell talk marker is rejected only with its exact source evidence", () => {
+  const exact = song("トーク", "お見送り", {
+    raw: "3:10:24 トーク (お見送り)",
+    sourceHash: "4f0ebf635214d0dc35c7423a0a51578f8996f8086ee17aa5ec573be364db84a9",
+  });
+  assert.equal(unambiguousNonSongReason(exact), "confirmed_talk_section");
+  assert.equal(unambiguousNonSongReason(song("トーク", "お見送り", {raw:"トーク (お見送り)"})), null);
 });
