@@ -1029,3 +1029,88 @@ test("reviewed September 26 slash-setlist source restores song and artist fields
     assert.equal(unambiguousNonSongReason(song(title, "", { raw: title, sourceHash: hash })), "reviewed_source_activity_chapter");
   }
 });
+
+
+test("year-only artist metadata is removed without touching real numeric song titles", () => {
+  const cases = [
+    [song("君の知らない物語", "supercell (2009)", {
+      raw: "02:27:06 君の知らない物語 / supercell (2009) / TVアニメ「化物語」ED",
+    }), "君の知らない物語", "supercell"],
+    [song("1/2", "川本真琴 (1997)", {
+      raw: "00:23:33 1/2 / 川本真琴 (1997) / TVアニメ「るろうに剣心」2代目OP",
+    }), "1/2", "川本真琴"],
+    [song("drop", "keeno（2013）", {
+      raw: "⑫【2:14:38】 drop / keeno（2013）",
+    }), "drop", "keeno"],
+  ];
+  for (const [row, title, artist] of cases) {
+    const repaired = normalizeReleaseMetadataArtist(row);
+    assert.equal(repaired.title, title);
+    assert.equal(repaired.artist, artist);
+  }
+
+  const unrelated = song("1984", "The Artist (1984)", {
+    raw: "00:10 The Artist (1984) performed live",
+  });
+  assert.equal(normalizeReleaseMetadataArtist(unrelated).artist, "The Artist (1984)");
+});
+
+test("reviewed fullwidth-slash sources restore title and performer instead of company metadata", () => {
+  const cases = [
+    [song("as×sist ～甘えベタな私なりに～／川田まみ／「甘えかたは彼女なりに。」OP", "戯画 (2016)", {
+      raw: "0:15:53 as×sist ～甘えベタな私なりに～／川田まみ／「甘えかたは彼女なりに。」OP／戯画 (2016)",
+      sourceHash: "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a",
+    }), "as×sist ～甘えベタな私なりに～", "川田まみ"],
+    [song("Call／霜月はるか／「できない私が、くり返す。」OP", "あかべぇそふとすりぃ (2014)", {
+      raw: "1:49:23 Re:Call／霜月はるか／「できない私が、くり返す。」OP／あかべぇそふとすりぃ (2014)",
+      sourceHash: "80923c4f194b93e4f4653fc4a21257b485eff0cf0a4588d5a21b5d7915f09201",
+    }), "Re:Call", "霜月はるか"],
+    [song("紬の夏休み／紬 ヴェンダース(CV:岩井映美里)／「Summer Pockets」挿入歌", "Key (2018)", {
+      raw: "0:34:34 紬の夏休み／紬 ヴェンダース(CV:岩井映美里)／「Summer Pockets」挿入歌／Key (2018)",
+      sourceHash: "5a7f0a1a023119e5571d5f1eb10894e67fdf361b4309005b76dabe7c77664819",
+    }), "紬の夏休み", "紬 ヴェンダース(CV:岩井映美里)"],
+  ];
+  for (const [row, title, artist] of cases) {
+    const repaired = repairKnownSourceCredit(row);
+    assert.equal(repaired.title, title);
+    assert.equal(repaired.artist, artist);
+  }
+});
+
+test("reviewed performance notes are removed from artist credits but ordinary brackets survive", () => {
+  const statusRows = [
+    [song("メーベル", "バルーン [歌声迷子]", {
+      raw: "25:08 03. メーベル / バルーン [歌声迷子]",
+    }), "バルーン"],
+    [song("StaRt", "Mrs. GREEN APPLE［キーマイナス6 / テンポマイナス4］", {
+      raw: "03:18:33 StaRt / Mrs. GREEN APPLE［キーマイナス6 / テンポマイナス4］",
+    }), "Mrs. GREEN APPLE"],
+  ];
+  for (const [row, artist] of statusRows) assert.equal(normalizeReleaseMetadataArtist(row).artist, artist);
+
+  const officialLike = song("Example", "Band [Unit A]", { raw: "00:10 Example / Band [Unit A]" });
+  assert.equal(normalizeReleaseMetadataArtist(officialLike).artist, "Band [Unit A]");
+});
+
+test("remaining source-proven malformed credits are repaired without broad title heuristics", () => {
+  const cases = [
+    [song("LOSER", "米津玄師 [LOSER / Yonezu Kenshi", {
+      raw: "0:27:32 LOSER / 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)",
+      sourceHash: "d6870653d1a294ccccf28184ac05c57268eb6c0a6934e9d4cd1d1a870ab3fdaf",
+    }), "米津玄師"],
+    [song("鳥の詩", "未記載", {
+      raw: "40:14 鳥の詩/key作品/AIR",
+      sourceHash: "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
+    }), "Lia"],
+    [song("檄!帝国華撃団", "", {
+      raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
+      sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
+    }), "横山智佐（真宮寺さくら）＆帝国歌劇団"],
+  ];
+  for (const [row, artist] of cases) assert.equal(repairKnownSourceCredit(row).artist, artist);
+
+  assert.equal(repairKnownSourceCredit(song("鳥の詩", "別の歌手", {
+    raw: "40:14 鳥の詩 - 別の歌手",
+    sourceHash: "different-source",
+  })).artist, "別の歌手");
+});
