@@ -55,6 +55,7 @@ if (review.status !== "REVIEW_ONLY_NO_AUTO_DELETION") fail("quality review is no
 if (review.scannedVideoCount !== meta.videoCount || review.scannedOccurrenceCount !== meta.songOccurrenceCount) fail("quality review scan vs published counts mismatch");
 if (review.scannedDays.length !== meta.quality?.reviewedDayCount) fail("quality review day count mismatch");
 if (review.candidates.length !== meta.quality?.reviewOnlyCandidateCount) fail("quality review candidate count mismatch");
+if (review.mixedStructuredSetlistSources.length !== meta.quality?.mixedStructuredSourceCount) fail("mixed structured source review count mismatch");
 if (review.scannedDays.reduce((sum, day) => sum + day.occurrences, 0) !== meta.songOccurrenceCount) fail("quality review daily totals mismatch");
 if (review.scannedDays.reduce((sum, day) => sum + day.quarantinedOccurrences, 0) !== quality.quarantinedOccurrences) fail("quality audit daily quarantines mismatch");
 if (Object.values(quality.byDay || {}).reduce((sum, day) => sum + Number(day.deduplicatedOccurrences || 0), 0) !== quality.deduplicatedOccurrences) fail("quality audit daily dedupe mismatch");
