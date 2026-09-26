@@ -356,3 +356,62 @@ test("review scanner surfaces mixed setlist/comment sources without auto-deletin
   assert.equal(review.mixedStructuredSetlistSources[0].unknownNonNumberedRows, 5);
   assert.equal(review.mixedStructuredSetlistSources[0].explicitNumberedSongs, 3);
 });
+
+
+test("full-history source-proven residual credits are repaired without inference", () => {
+  const table = [
+    [song("奏", "オリ曲 YOU＆合図 リリース／明日は祝日", {
+      raw: "1:11:42 奏／オリ曲 YOU＆合図 リリース／明日は祝日",
+      sourceHash: "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa",
+    }), "奏", "スキマスイッチ"],
+    [song("祝日天国", "7", {
+      raw: "1:05:43　10.祝日天国／35.7（2022/07/31）【NEW】",
+      sourceHash: "924e1a18c91dd603a7be0e9523559988d299ff51e649624795ba0402d60f5a4e",
+    }), "祝日天国", "35.7"],
+    [song("乙女のルートはひとつじゃない！", "乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった…", {
+      sourceHash: "3665facacaf3ad5caa221a2a0bbd346a2c5adf66fe0f69ce4bcc9bae83a46c6a",
+    }), "乙女のルートはひとつじゃない！", "angela"],
+    [song("1", "2", {
+      raw: '8:55:05 1/2/Kawamoto Makoto/Anime "Rurouni Kenshin" OP/1997',
+      sourceHash: "7b6b7ed5a0d5ef6faa6271a57adca3ce57654e5984e7f515845853adfb0e8da0",
+    }), "1/2", "川本真琴"],
+    [song("FLAGS", "T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))", {
+      sourceHash: "401adaa520f8e84434c4e8581ede7277564e44dc0448fe962bccd7fe78d6046a",
+    }), "FLAGS", "T.M.Revolution"],
+  ];
+  for (const [input, expectedTitle, expectedArtist] of table) {
+    const repaired = repairKnownSourceCredit(input);
+    assert.equal(repaired.title, expectedTitle);
+    assert.equal(repaired.artist, expectedArtist);
+  }
+  const eightyEight = repairKnownSourceCredit(song("栞", "6thアルバム「PUZZLE」より", {
+    sourceHash: "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9",
+  }));
+  assert.equal(eightyEight.artist, "Eighty eight");
+  const duca = repairKnownSourceCredit(song("観覧車~あの日と、昨日と今日と明日と~／Duca／work", "あざらしそふと (2020)", {
+    raw: "2:37:05 観覧車~あの日と、昨日と今日と明日と~／Duca／work／2020",
+    sourceHash: "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a",
+  }));
+  assert.equal(duca.title, "観覧車～あの日と、昨日と今日と明日と～");
+  assert.equal(duca.artist, "Duca");
+});
+
+test("structured slash repair accepts a trailing reviewed year annotation", () => {
+  const input = song("世界の約束/倍賞千恵子/ハウルの動く城 主題歌", "2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー", {
+    raw: "1:53:42 世界の約束/倍賞千恵子/ハウルの動く城 主題歌/2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー",
+  });
+  const repaired = repairStructuredSlashCredit(input);
+  assert.equal(repaired.title, "世界の約束");
+  assert.equal(repaired.artist, "倍賞千恵子");
+});
+
+test("release metadata normalization removes work labels only when coupled to a release date", () => {
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist,
+    "Vaundy",
+  );
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("Maybe Artist", "Unit【Official Artist Name】")).artist,
+    "Unit【Official Artist Name】",
+  );
+});
