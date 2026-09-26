@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-26T17:14:57.620Z",
+  "generatedAt": "2026-09-26T19:55:17.333Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7329,
-  "inputOccurrences": 88226,
-  "visibleVideos": 5984,
-  "visibleOccurrences": 87662,
-  "quarantinedOccurrences": 501,
-  "quarantinedVideos": 382,
+  "inputVideos": 7355,
+  "inputOccurrences": 88594,
+  "visibleVideos": 6005,
+  "visibleOccurrences": 88025,
+  "quarantinedOccurrences": 506,
+  "quarantinedVideos": 387,
   "deduplicatedOccurrences": 63,
   "normalizedArtistOccurrences": 381,
   "normalizedReleaseMetadataOccurrences": 194,
@@ -29,7 +29,7 @@
     "confirmed_stream_start_marker": 4,
     "reviewed_bad_description_source": 3,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 336,
+    "prayer_broadcast_timeline": 341,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -95,9 +95,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 149,
-      "channelCount": 140,
-      "distinctVideoTitles": 148,
+      "videoCount": 152,
+      "channelCount": 143,
+      "distinctVideoTitles": 151,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -149,9 +149,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 76,
-      "channelCount": 76,
-      "distinctVideoTitles": 76,
+      "videoCount": 78,
+      "channelCount": 78,
+      "distinctVideoTitles": 78,
       "examples": [
         {
           "videoId": "K2_yRIPIUmE",
@@ -417,11 +417,11 @@
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 30,
+      "quarantinedOccurrences": 31,
       "deduplicatedOccurrences": 2,
       "byReason": {
         "confirmed_talk_section": 1,
-        "prayer_broadcast_timeline": 25,
+        "prayer_broadcast_timeline": 26,
         "dated_future_stream_announcement": 1,
         "bible_verse_broadcast": 1,
         "dated_stream_challenge_result": 1,
@@ -429,10 +429,10 @@
       }
     },
     "2026-09-04": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 1
+        "prayer_broadcast_timeline": 2
       }
     },
     "2026-09-15": {
@@ -528,10 +528,10 @@
       }
     },
     "2026-09-26": {
-      "quarantinedOccurrences": 17,
+      "quarantinedOccurrences": 20,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 17
+        "prayer_broadcast_timeline": 20
       }
     }
   },
