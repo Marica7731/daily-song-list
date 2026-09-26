@@ -131,7 +131,7 @@ function reviewedSourceNonSongReason(song) {
   }
 
   if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.hisagiDay &&
-      !/［[^］]+[／/][^］]+］/u.test(raw)) {
+      !/\[[^\]]+\/[^\]]+\]/u.test(raw)) {
     return "reviewed_mixed_chapter_comment";
   }
 
