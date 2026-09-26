@@ -590,9 +590,9 @@ function repairResidualKnownSourceCredit(song) {
   const raw = String(song?.raw || "").normalize("NFKC").trim();
 
   if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc" &&
-      title.includes("／")) {
+      /[\/／]/u.test(title)) {
     const body = raw.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/u, "");
-    const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
+    const fields = body.split(/[\/／]/u).map((value) => value.trim()).filter(Boolean);
     if (fields.length >= 2 && fields[0] && fields[1]) {
       const artist = fields[0].toLocaleLowerCase() === "starry heavens" ? "day after tomorrow" : fields[1];
       return { ...song, title: fields[0], artist };
