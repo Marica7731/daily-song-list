@@ -306,6 +306,7 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
       byReason: audit.byReason,
       reviewedDayCount: review.scannedDays.length,
       reviewOnlyCandidateCount: review.candidates.length,
+      mixedStructuredSourceCount: review.mixedStructuredSetlistSources.length,
     },
     ranges: rangeManifest,
   };
