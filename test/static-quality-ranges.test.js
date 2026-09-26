@@ -879,7 +879,7 @@ test("residual malformed credits are repaired from their reviewed source rows", 
     [song("鳥の詩", "", {
       raw: "40:14 鳥の詩/key作品/AIR",
       sourceHash: "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
-    }), "鳥の詩", ""],
+    }), "鳥の詩", "Lia"],
     [song("猫／DISH//", "", {
       raw: "00:19:07 04. 猫／DISH//",
       sourceHash: "6bf40ecd74e76a6bbff3bd013cf1fa7096c4f281178f5347e399de678d5b5b63",
@@ -891,7 +891,7 @@ test("residual malformed credits are repaired from their reviewed source rows", 
     [song("檄!帝国華撃団", "", {
       raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
       sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
-    }), "檄!帝国華撃団", ""],
+    }), "檄!帝国華撃団", "横山智佐（真宮寺さくら）＆帝国歌劇団"],
     [song("前前前世", "RADWIMPS [途中迷子", {
       raw: "20:43  02. 前前前世  /  RADWIMPS  [途中迷子]",
       sourceHash: "75f339dfc59363f1494867a75be85070cd4d0ef485456472535d3a2578c864f1",
@@ -963,17 +963,18 @@ test("reviewed source repairs recover literal credits without inventing missing 
   assert.equal(fixed.title,"水平線");
   assert.equal(fixed.artist,"");
 
-  // Source gives only work metadata, not the performer: keep it unknown.
+  // These two exact source hashes were externally verified after the original
+  // conservative pass, so they are the narrow exceptions to "do not invent".
   fixed = repairKnownSourceCredit(song("鳥の詩","",{
     raw:"40:14 鳥の詩/key作品/AIR",
     sourceHash:"03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
   }));
-  assert.equal(fixed.artist,"");
+  assert.equal(fixed.artist,"Lia");
   fixed = repairKnownSourceCredit(song("檄!帝国華撃団","",{
     raw:"40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
     sourceHash:"28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
   }));
-  assert.equal(fixed.artist,"");
+  assert.equal(fixed.artist,"横山智佐（真宮寺さくら）＆帝国歌劇団");
 });
 
 test("full-width note separator source repairs every malformed song/artist row, not only one example", () => {
