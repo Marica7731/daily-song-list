@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-26T21:18:23.732Z",
+  "generatedAt": "2026-09-26T21:47:36.164Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7399,
-  "inputOccurrences": 88972,
-  "visibleVideos": 6032,
-  "visibleOccurrences": 88048,
-  "quarantinedOccurrences": 861,
-  "quarantinedVideos": 404,
+  "inputVideos": 7420,
+  "inputOccurrences": 89190,
+  "visibleVideos": 6048,
+  "visibleOccurrences": 88139,
+  "quarantinedOccurrences": 988,
+  "quarantinedVideos": 409,
   "deduplicatedOccurrences": 63,
-  "normalizedArtistOccurrences": 381,
-  "normalizedReleaseMetadataOccurrences": 194,
+  "normalizedArtistOccurrences": 403,
+  "normalizedReleaseMetadataOccurrences": 196,
   "repairedDateCreditOccurrences": 24,
-  "repairedStructuredCreditOccurrences": 155,
-  "repairedKnownSourceCreditOccurrences": 65,
+  "repairedStructuredCreditOccurrences": 212,
+  "repairedKnownSourceCreditOccurrences": 66,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 2,
     "reviewed_mixed_chapter_comment": 288,
-    "reviewed_source_activity_chapter": 125,
+    "reviewed_source_activity_chapter": 229,
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 18,
     "confirmed_chat_section": 8,
@@ -28,11 +28,12 @@
     "confirmed_chat_segment_label": 1,
     "dated_future_stream_announcement": 6,
     "confirmed_stream_start_marker": 4,
-    "reviewed_bad_description_source": 5,
+    "reviewed_bad_description_source": 7,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 353,
+    "prayer_broadcast_timeline": 356,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
+    "reviewed_non_song_chapter_in_numbered_setlist": 18,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
     "dated_stream_announcement": 1
@@ -95,9 +96,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 162,
-      "channelCount": 153,
-      "distinctVideoTitles": 161,
+      "videoCount": 164,
+      "channelCount": 155,
+      "distinctVideoTitles": 163,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -176,9 +177,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 81,
-      "channelCount": 81,
-      "distinctVideoTitles": 81,
+      "videoCount": 82,
+      "channelCount": 82,
+      "distinctVideoTitles": 82,
       "examples": [
         {
           "videoId": "tL9lPVUU2QE",
@@ -259,17 +260,18 @@
       }
     },
     "2026-07-11": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 6,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 2,
+        "reviewed_source_activity_chapter": 5,
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-07-12": {
-      "quarantinedOccurrences": 51,
+      "quarantinedOccurrences": 58,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "reviewed_source_activity_chapter": 7,
         "confirmed_mc_break": 1,
         "reviewed_mixed_chapter_comment": 50
       }
@@ -319,10 +321,10 @@
       }
     },
     "2026-07-31": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 6,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 1,
+        "reviewed_source_activity_chapter": 5,
         "unrelated_livestream_listing": 1
       }
     },
@@ -374,6 +376,13 @@
         "reused_description_across_unrelated_channels": 2
       }
     },
+    "2026-08-08": {
+      "quarantinedOccurrences": 11,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_source_activity_chapter": 11
+      }
+    },
     "2026-08-09": {
       "quarantinedOccurrences": 7,
       "deduplicatedOccurrences": 0,
@@ -415,6 +424,20 @@
         "reviewed_mixed_chapter_comment": 16
       }
     },
+    "2026-08-15": {
+      "quarantinedOccurrences": 10,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_source_activity_chapter": 10
+      }
+    },
+    "2026-08-17": {
+      "quarantinedOccurrences": 10,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_source_activity_chapter": 10
+      }
+    },
     "2026-08-18": {
       "quarantinedOccurrences": 40,
       "deduplicatedOccurrences": 0,
@@ -447,11 +470,11 @@
       }
     },
     "2026-08-25": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 6,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "dated_future_stream_announcement": 1,
-        "reviewed_source_activity_chapter": 3
+        "reviewed_source_activity_chapter": 5
       }
     },
     "2026-08-26": {
@@ -478,20 +501,20 @@
       }
     },
     "2026-08-29": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 24,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "confirmed_stream_start_marker": 1,
-        "reviewed_source_activity_chapter": 2
+        "reviewed_source_activity_chapter": 23,
+        "confirmed_stream_start_marker": 1
       }
     },
     "2026-08-30": {
-      "quarantinedOccurrences": 22,
+      "quarantinedOccurrences": 31,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 3,
         "reviewed_mixed_chapter_comment": 4,
-        "reviewed_source_activity_chapter": 15
+        "reviewed_source_activity_chapter": 24
       }
     },
     "2026-08-31": {
@@ -524,12 +547,12 @@
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 36,
+      "quarantinedOccurrences": 37,
       "deduplicatedOccurrences": 2,
       "byReason": {
         "confirmed_talk_section": 1,
         "prayer_broadcast_timeline": 30,
-        "reviewed_source_activity_chapter": 1,
+        "reviewed_source_activity_chapter": 2,
         "dated_future_stream_announcement": 1,
         "bible_verse_broadcast": 1,
         "dated_stream_challenge_result": 1,
@@ -544,27 +567,30 @@
       }
     },
     "2026-09-15": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 9,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2,
-        "prayer_broadcast_timeline": 1
+        "prayer_broadcast_timeline": 1,
+        "reviewed_source_activity_chapter": 6
       }
     },
     "2026-09-16": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 26,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 19,
+        "reviewed_non_song_chapter_in_numbered_setlist": 6,
         "dated_talk_event_announcement": 1
       }
     },
     "2026-09-17": {
-      "quarantinedOccurrences": 8,
+      "quarantinedOccurrences": 20,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reviewed_source_activity_chapter": 1,
-        "prayer_broadcast_timeline": 7
+        "prayer_broadcast_timeline": 7,
+        "reviewed_non_song_chapter_in_numbered_setlist": 12
       }
     },
     "2026-09-18": {
@@ -576,23 +602,23 @@
       }
     },
     "2026-09-19": {
-      "quarantinedOccurrences": 14,
+      "quarantinedOccurrences": 15,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 12,
-        "reused_description_across_unrelated_channels": 1,
-        "reviewed_source_activity_chapter": 1
+        "reviewed_source_activity_chapter": 2,
+        "reused_description_across_unrelated_channels": 1
       }
     },
     "2026-09-20": {
-      "quarantinedOccurrences": 31,
+      "quarantinedOccurrences": 41,
       "deduplicatedOccurrences": 16,
       "byReason": {
         "prayer_broadcast_timeline": 24,
         "dated_stream_challenge_result": 4,
         "bible_verse_broadcast": 1,
-        "confirmed_stream_start_marker": 1,
-        "reviewed_source_activity_chapter": 1
+        "reviewed_source_activity_chapter": 11,
+        "confirmed_stream_start_marker": 1
       }
     },
     "2026-09-21": {
@@ -620,11 +646,11 @@
       }
     },
     "2026-09-24": {
-      "quarantinedOccurrences": 89,
+      "quarantinedOccurrences": 98,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 82,
-        "reviewed_source_activity_chapter": 5,
+        "reviewed_source_activity_chapter": 14,
         "reviewed_bad_description_source": 1,
         "dated_stream_challenge_result": 1
       }
@@ -641,12 +667,12 @@
       }
     },
     "2026-09-26": {
-      "quarantinedOccurrences": 43,
+      "quarantinedOccurrences": 48,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 28,
+        "prayer_broadcast_timeline": 31,
         "reviewed_source_activity_chapter": 13,
-        "reviewed_bad_description_source": 2
+        "reviewed_bad_description_source": 4
       }
     }
   },
@@ -750,11 +776,32 @@
       "sourceId": "UgxpHjE_5PxQZrY7Djx4AaABAg"
     },
     {
+      "videoId": "fTUHY9j2X_8",
+      "title": "Sunday n\"AI\"ght (with BT)",
+      "before": "ロマニードットアイオー ✨Original Song",
+      "after": "ロマニードットアイオー",
+      "sourceId": "legacy:fTUHY9j2X_8"
+    },
+    {
+      "videoId": "fTUHY9j2X_8",
+      "title": "イキナクチャ",
+      "before": "ロマニードットアイオー ✨Original Song",
+      "after": "ロマニードットアイオー",
+      "sourceId": "legacy:fTUHY9j2X_8"
+    },
+    {
       "videoId": "NqBPO5xp0eQ",
       "title": "This Love",
       "before": "/ Angela Aki",
       "after": "Angela Aki",
       "sourceId": "legacy:NqBPO5xp0eQ"
+    },
+    {
+      "videoId": "sAvPguxfkbI",
+      "title": "てにをは",
+      "before": "練習中",
+      "after": "",
+      "sourceId": "legacy:sAvPguxfkbI"
     },
     {
       "videoId": "r4jVO0Dobrg",
@@ -890,46 +937,25 @@
       "sourceId": "legacy:yWKHVGfkzkU"
     },
     {
+      "videoId": "ha8UTmta4es",
+      "title": "Sunday n\"AI\"ght (with BT)",
+      "before": "ロマニードットアイオー ✨Original Song",
+      "after": "ロマニードットアイオー",
+      "sourceId": "legacy:ha8UTmta4es"
+    },
+    {
+      "videoId": "ha8UTmta4es",
+      "title": "初期衝動",
+      "before": "ロマニードットアイオー ✨Original Song",
+      "after": "ロマニードットアイオー",
+      "sourceId": "legacy:ha8UTmta4es"
+    },
+    {
       "videoId": "sCeiBucgOrM",
       "title": "Bunny Girl",
       "before": "/ AKASAKI",
       "after": "AKASAKI",
       "sourceId": "Ugz3KIEwwBD1Fg_tPTB4AaABAg"
-    },
-    {
-      "videoId": "BH02tkDy0bE",
-      "title": "アンノウン・マザーグース",
-      "before": "/ wowaka",
-      "after": "wowaka",
-      "sourceId": "legacy:BH02tkDy0bE"
-    },
-    {
-      "videoId": "BH02tkDy0bE",
-      "title": "シャルル",
-      "before": "/ バルーン",
-      "after": "バルーン",
-      "sourceId": "legacy:BH02tkDy0bE"
-    },
-    {
-      "videoId": "BH02tkDy0bE",
-      "title": "ジャンキーナイトタウンオーケストラ",
-      "before": "/ すりぃ",
-      "after": "すりぃ",
-      "sourceId": "legacy:BH02tkDy0bE"
-    },
-    {
-      "videoId": "BH02tkDy0bE",
-      "title": "命に嫌われている",
-      "before": "/ カンザキイオリ",
-      "after": "カンザキイオリ",
-      "sourceId": "legacy:BH02tkDy0bE"
-    },
-    {
-      "videoId": "BH02tkDy0bE",
-      "title": "曖昧劣情Lover",
-      "before": "/ koyori(電ポルP)",
-      "after": "koyori(電ポルP)",
-      "sourceId": "legacy:BH02tkDy0bE"
     }
   ],
   "normalizedReleaseMetadataExamples": [
@@ -1201,6 +1227,20 @@
     },
     {
       "videoId": "O6ALZkiXXo8",
+      "title": "愛ADRENALIN",
+      "before": "狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録",
+      "after": "狛江・クリストフ・ヨウスケ(鈴木達央)",
+      "raw": "1:18:14 愛ADRENALIN / 狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録"
+    },
+    {
+      "videoId": "O6ALZkiXXo8",
+      "title": "Laboratory Love",
+      "before": "天宮静(宮野真守) / ゲーム『金色のコルダ3』ボーカル集第四弾『金色のコルダ3 SS(スクールシリーズ)Ⅳ～天音学園～』収録",
+      "after": "天宮静(宮野真守)",
+      "raw": "1:36:12 Laboratory Love / 天宮静(宮野真守) / ゲーム『金色のコルダ3』ボーカル集第四弾『金色のコルダ3 SS(スクールシリーズ)Ⅳ～天音学園～』収録"
+    },
+    {
+      "videoId": "O6ALZkiXXo8",
       "title": "オ･ト･ナ BREAK OUT",
       "before": "雅臣(興津和幸)＆右京(平川大輔)＆要(諏訪部順一)＆光(岡本信彦)＆椿(鈴村健一)＆梓(鳥海浩輔)＆棗(前野智昭) / TVアニメ『BROTHERS CONFLICT』 キャラクターソングコンセプトミニアルバム① 「オ・ト・ナ」収録",
       "after": "雅臣(興津和幸)&右京(平川大輔)&要(諏訪部順一)&光(岡本信彦)&椿(鈴村健一)&梓(鳥海浩輔)&棗(前野智昭)",
@@ -1268,20 +1308,6 @@
       "before": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana / Anime “Pani Poni Dash!” OP /",
       "after": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana",
       "raw": "1:29:42  Kiiroi Vacance / Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana / Anime “Pani Poni Dash!” OP / 2005"
-    },
-    {
-      "videoId": "zj5OZcQKOH8",
-      "title": "Lucky Pool",
-      "before": "JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song /",
-      "after": "JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song",
-      "raw": "1:37:02  Lucky Pool / JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song / 2001"
-    },
-    {
-      "videoId": "zj5OZcQKOH8",
-      "title": "winning the soul",
-      "before": "Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song /",
-      "after": "Tokai Teio (CV: Machico)",
-      "raw": "1:47:38  winning the soul / Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song / 2021"
     }
   ],
   "repairedDateCreditExamples": [
@@ -1463,6 +1489,12 @@
     },
     {
       "videoId": "TEMzHXrTR6I",
+      "before": "ビビデバ/星街すいせい - ",
+      "after": "ビビデバ - 星街すいせい",
+      "raw": "0:18:39 ビビデバ/星街すいせい/2024"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
       "before": "only my railgun/FripSide/とある科学の超電磁砲 OP1 - 2009 ※コーラス有り",
       "after": "only my railgun - FripSide",
       "raw": "0:23:06 only my railgun/FripSide/とある科学の超電磁砲 OP1/2009　※コーラス有り"
@@ -1493,6 +1525,12 @@
     },
     {
       "videoId": "TEMzHXrTR6I",
+      "before": "もっと、夢、見よう!!/桃井はるこ - ",
+      "after": "もっと、夢、見よう!! - 桃井はるこ",
+      "raw": "1:19:44 もっと、夢、見よう!!/桃井はるこ/2004"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
       "before": "片翼の鳥/志方あきこ/うみねこのなく頃に OP - ",
       "after": "片翼の鳥 - 志方あきこ",
       "raw": "1:28:09 片翼の鳥/志方あきこ/うみねこのなく頃に OP/2009"
@@ -1508,6 +1546,12 @@
       "before": "アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED - ",
       "after": "アムリタ - 牧野由依",
       "raw": "1:39:58 アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED/2005"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "いのちの名前/木村弓/千と千尋の神隠し テーマソング - ",
+      "after": "いのちの名前/木村弓 - 千と千尋の神隠し テーマソング",
+      "raw": "1:47:21 いのちの名前/木村弓/千と千尋の神隠し テーマソング/2001"
     },
     {
       "videoId": "TEMzHXrTR6I",
@@ -1582,6 +1626,18 @@
       "raw": "02:38 イケナイ太陽/ORANGE RANGE/ドラマ「花ざかりの君たちへ〜イケメン♂パラダイス〜」OP /2007"
     },
     {
+      "videoId": "jMI_6tW_EvY",
+      "before": "小さな恋のうた/MONGOL800/ドラマ「プロポーズ大作戦」劇中歌etc… - ",
+      "after": "小さな恋のうた/MONGOL800 - ドラマ「プロポーズ大作戦」劇中歌etc...",
+      "raw": "25:24 小さな恋のうた/MONGOL800/ドラマ「プロポーズ大作戦」劇中歌etc…/2001"
+    },
+    {
+      "videoId": "LYKjz9hLOEI",
+      "before": "SUMMER SONG/YUI - ",
+      "after": "SUMMER SONG - YUI",
+      "raw": "02:32 SUMMER SONG/YUI/2008"
+    },
+    {
       "videoId": "LYKjz9hLOEI",
       "before": "若者のすべて/フジファブリック/ドラマ「SUMMER NUDE」挿入歌etc… - ",
       "after": "若者のすべて - フジファブリック",
@@ -1594,82 +1650,52 @@
       "raw": "18:55 more  than words/羊文学/アニメ「呪術廻戦 渋谷事変」ED/2023"
     },
     {
+      "videoId": "LYKjz9hLOEI",
+      "before": "(オケ)Magic/Mrs. GREEN APPLE/「コカ・コーラ Coke STUDIO Magic」篇CMソング - ",
+      "after": "(オケ)Magic - Mrs. GREEN APPLE",
+      "raw": "26:16 (オケ)Magic/Mrs. GREEN APPLE/「コカ・コーラ Coke STUDIO Magic」篇CMソング/2023"
+    },
+    {
+      "videoId": "jrwP4K4o4zA",
+      "before": "青春“サブリミナル”/=LOVE - ",
+      "after": "青春“サブリミナル” - =LOVE",
+      "raw": "00:55 青春“サブリミナル”/=LOVE/2020"
+    },
+    {
+      "videoId": "jrwP4K4o4zA",
+      "before": "今夜だけ浮かれたかった/つばきファクトリー - ",
+      "after": "今夜だけ浮かれたかった - つばきファクトリー",
+      "raw": "07:43 今夜だけ浮かれたかった/つばきファクトリー/2018"
+    },
+    {
       "videoId": "jrwP4K4o4zA",
       "before": "ラッキープール/JUDY AND MARY/ドラマ｢2001年のおとこ運｣主題歌 - ",
       "after": "ラッキープール - JUDY AND MARY",
       "raw": "12:27 ラッキープール/JUDY AND MARY/ドラマ｢2001年のおとこ運｣主題歌/2001"
     },
     {
+      "videoId": "jrwP4K4o4zA",
+      "before": "碧天に尽き/宗谷いちか/宗谷いちか10thオリジナルソング - ",
+      "after": "碧天に尽き/宗谷いちか - 宗谷いちか10thオリジナルソング",
+      "raw": "19:07 碧天に尽き/宗谷いちか/宗谷いちか10thオリジナルソング/2015"
+    },
+    {
+      "videoId": "jrwP4K4o4zA",
+      "before": "盛れ!ミ・アモーレ/Juice=Juice - ",
+      "after": "盛れ!ミ・アモーレ - Juice=Juice",
+      "raw": "26:13 盛れ!ミ・アモーレ/Juice=Juice/2025"
+    },
+    {
+      "videoId": "x0byH-JYzwI",
+      "before": "熱帯夜/RIP SLMYME - ",
+      "after": "熱帯夜 - RIP SLMYME",
+      "raw": "02:15 熱帯夜/RIP SLMYME/2007"
+    },
+    {
       "videoId": "x0byH-JYzwI",
       "before": "花火/aiko/アニメ｢まっすぐにいこう。｣ED - 1999",
       "after": "花火 - aiko",
       "raw": "08:35 花火/aiko/アニメ｢まっすぐにいこう。｣ED/1999"
-    },
-    {
-      "videoId": "x0byH-JYzwI",
-      "before": "真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌 - 1990",
-      "after": "真夏の果実 - サザンオールスターズ",
-      "raw": "14:48 真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌/1990"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "さよならエレジー/菅田将暉/ドラマ「トドメの接吻(キス)」主題歌 - ",
-      "after": "さよならエレジー - 菅田将暉",
-      "raw": "15:34  さよならエレジー/菅田将暉/ドラマ「トドメの接吻(キス)」主題歌/2018"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "Here/JUNNA/アニメ「魔法使いの嫁」OP - ",
-      "after": "Here - JUNNA",
-      "raw": "21:30  Here/JUNNA/アニメ「魔法使いの嫁」OP/2017"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "unlasting/LiSA/アニメ「ソードアート・オンライン アリシゼーション War of Underworld」ED - ",
-      "after": "unlasting - LiSA",
-      "raw": "27:16  unlasting/LiSA/アニメ「ソードアート・オンライン アリシゼーション War of Underworld」ED/2019"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "ブラック★ロックシューター/ryo(supercell) feat.初音ミク/アニメ「ブラック★ロックシューター　DAWN FALL」OP - ",
-      "after": "ブラック★ロックシューター - ryo(supercell) feat.初音ミク",
-      "raw": "59:46 ブラック★ロックシューター/ryo(supercell) feat.初音ミク/アニメ「ブラック★ロックシューター　DAWN FALL」OP/2008"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "怪物/YOASOBI/アニメ「BEASTARS」OP - ",
-      "after": "怪物 - YOASOBI",
-      "raw": "1:06:31 怪物/YOASOBI/アニメ「BEASTARS」OP/2021"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "そばかす/JUDY AND MARY/アニメ「るろうに剣心」OP - 1996",
-      "after": "そばかす - JUDY AND MARY",
-      "raw": "1:24:59 そばかす/JUDY AND MARY/アニメ「るろうに剣心」OP/1996"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "ルンがピカッと光ったら/ワルキューレ/アニメ「マクロスΔ」ED - ",
-      "after": "ルンがピカッと光ったら - ワルキューレ",
-      "raw": "1:31:44  ルンがピカッと光ったら/ワルキューレ/アニメ「マクロスΔ」ED/2016"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "アイワナムチュー/MAISONdes/アニメ「うる星やつら」OP - ",
-      "after": "アイワナムチュー - MAISONdes",
-      "raw": "1:39:32 アイワナムチュー/MAISONdes/アニメ「うる星やつら」OP/2022"
-    },
-    {
-      "videoId": "3eFVgs9iW00",
-      "before": "悪魔の子/ヒグチアイ/アニメ「進撃の巨人」ED - ",
-      "after": "悪魔の子 - ヒグチアイ",
-      "raw": "1:45:16  悪魔の子/ヒグチアイ/アニメ「進撃の巨人」ED/2022"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED - ",
-      "after": "Sakuranbo - Ai Otsuka",
-      "raw": "0:18:08 Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED/2003"
     }
   ],
   "repairedKnownSourceCreditExamples": [
