@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-25T22:27:11.734Z",
+  "generatedAt": "2026-09-26T01:38:46.941Z",
   "schemaVersion": 1,
   "policy": "quarantine derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7156,
-  "inputOccurrences": 86776,
-  "visibleVideos": 5885,
-  "visibleOccurrences": 86411,
-  "quarantinedOccurrences": 365,
-  "quarantinedVideos": 308,
+  "inputVideos": 7177,
+  "inputOccurrences": 87018,
+  "visibleVideos": 5902,
+  "visibleOccurrences": 86649,
+  "quarantinedOccurrences": 369,
+  "quarantinedVideos": 312,
   "normalizedArtistOccurrences": 381,
   "repairedDateCreditOccurrences": 24,
   "byReason": {
@@ -23,7 +23,7 @@
     "dated_future_stream_announcement": 5,
     "confirmed_stream_start_marker": 4,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 266,
+    "prayer_broadcast_timeline": 270,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -89,9 +89,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 102,
-      "channelCount": 98,
-      "distinctVideoTitles": 102,
+      "videoCount": 104,
+      "channelCount": 100,
+      "distinctVideoTitles": 104,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -170,9 +170,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 64,
-      "channelCount": 64,
-      "distinctVideoTitles": 64,
+      "videoCount": 66,
+      "channelCount": 66,
+      "distinctVideoTitles": 66,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -441,10 +441,10 @@
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 30,
+      "quarantinedOccurrences": 34,
       "byReason": {
+        "prayer_broadcast_timeline": 32,
         "dated_stream_announcement": 1,
-        "prayer_broadcast_timeline": 28,
         "unrelated_livestream_listing": 1
       }
     }
