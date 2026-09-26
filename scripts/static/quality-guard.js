@@ -14,6 +14,21 @@ const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47
 const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
 const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
 
+const REVIEWED_NUMBERED_SETLIST_HASHES = new Set([
+  "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+  "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b",
+  "472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80",
+  "cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67",
+  "da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad",
+  "af9b78791e417efa33bc5d649ed166553507376faf8b4b6e7564a0fc5a9194c3",
+]);
+
+function isExplicitNumberedSetlistRow(value) {
+  const text = String(value || "").normalize("NFKC");
+  return /(?:^|\s)(?:[-–—]\s*)?(?:♡\s*)?\d{1,2}[.．]\s*|(?:^|\s)\d{1,2}[.．]\s*[-–—]?\s*/u.test(text);
+}
+
+
 const REVIEWED_MIXED_SOURCE_HASHES = Object.freeze({
   hinataVocaloid: "30d4fba63bb782028af7ca03a506cf94714933e93de48d1c5eef13b84d9438a4",
   kokoneConan: "e0d69e03eeba0ccb8e420e88af51d810907dfb9b1e8b50d98579bf4d8646df60",
@@ -89,6 +104,63 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["bddbda04442cade80cb79d3c3671bba11f75cbeb89cbf687850766fd02742fdc", new Set(["～　初見さん20人達成"])],
   ["6c02c324915aa78e9c30deda5783635ebff969c99c89d8828f8f24486711c5bd", new Set(["雖然知道只是翻譯歌詞，但還是要再說一次:「不可能！絕對不可能！」)", "好聽故事一直聽)", "的笑聲最真實)"])],
   ["478f401bb24ee9ed1d84eb42f0679395ee7b93c24c8bbff25d86e3120ea79661", new Set(["いーや俺に手を振ってたね！合戦", "騎士バッチ進化記念", "1144記念、私(隷)の一番カワイイトコロ", "全て(ｼﾞｮﾊﾞを)受け止めるよぉ"])],
+  ["eaa8f87146f3fb5bc0d06b8c918efa421fafcd0a68053d288ab233a87900821a", new Set([
+    "学文路トキ さん", "さはらしょう さん", "雅はつる さん", "咲月羽兎 さん", "リーエ香澄 さん", "おもやいっか さん",
+    "デュクス・オルトゥス さん", "羽月うずな さん", "瀬川ネガ さん", "百珠百珠しのぶ さん", "喜常みお さん", "ささみん さん", "燈璃ライト さん",
+  ])],
+  ["cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67", new Set([
+    "Soraさん", "小鳥遊ゆとはさん", "花開ふりるさん", "Ibukiさん", "すとらてぃあさん", "夜紺火花さん",
+    "からくりんねさん", "INARIさん", "音魂ヒビクさん", "にじゅなさん",
+  ])],
+  ["92e6dbcf323ba0aefd66e44f6627b6947cde9d8fe666a345ec6999e5d6e3e652", new Set([
+    "本日のお夕飯の発表", "猿飛佐奈さん", "音羽ララさん", "凪乃ましろさん", "焔魔るりさん",
+    "にじゅなさん", "メラ・アカルさん", "ノア・ポラリスさん", "woucaさん", "ブランク・ウリカさん",
+  ])],
+  ["da325a515ad3121f2a0fe37bc45584256c47215217244fb1d849a2188d9d9947", new Set([
+    "九十九みな (つくもみな) さん", "羽鳥あん (はとりあん) さん", "詠音ガト (うたねがと) さん", "時音ありす (ときねありす) さん",
+    "竹雫まい (たけだまい) さん", "間宵しゃな (まよいしゃな) さん", "天才八雲 (てんさいやくも) さん", "熨斗目メナ (のしめめな) さん",
+  ])],
+  ["da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad", new Set([
+    "メーデーじゃなかったｗ", "記憶が曖昧～当日の朝〜ポエトリー", "これから反応するよ", "異種のアプローチ",
+    "昼公演と夜公演の-ERROR", "何選曲したっけ…", "お互いのオリ曲", "嬉しさと悔しさ", "記憶が…",
+  ])],
+  ["472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80", new Set([
+    "̗̀ start ̖́", "イベントの規模がでかい", "クローゼットがスッキリする", "なんだか陽気になれる", "夏のやなとこ",
+    "終わるのやだ", "湿気爆発やだ", "日焼け止めべたべたやだ", "何故か蚊に刺されない体質のらんぜ", "̗̀ Last Talk ̖́",
+  ])],
+  ["0c2ce3917069fe9808059242f460c98cc2782c355cabcd8b9af00249d326dd0a", new Set([
+    "お前らは天使じゃない", "総再生時間あと1000時間で収益化条件クリア！", "1129の日のピザのすすめ", "村民みんなのお家にピザを届ける村長",
+    "草原のとうふ小僧-その1", "音楽は家族みたいなもの", "草原のとうふ小僧-その2", "泥くさいロックがいいね", "ワンナイトカーニバルのショート上げるよ！あっぽー！",
+  ])],
+  ["f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0", new Set([
+    "令和8年8月8日", "今日はお披露目あり", "仮眠した", "1on1楽しかった", "18時にショートが上がる", "お披露目",
+    "良い曲", "デスクツアー", "スピーカー気になってる", "カメラ買った", "低音みっちゃん",
+  ])],
+  ["14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93", new Set([
+    "重大発表②『歌ってみた』", "余韻タイム♪",
+  ])],
+  ["42d4d97e7d15d913149a925e1f84604c9085df3123b373a8662329f736fa5829", new Set([
+    "ろれつがまわらない", "wow Oh", "よいちょチャレンジ", "クリスマスイベントを画策するぷれち", "バットルートへ", "ポンデリ発言",
+  ])],
+  ["0ec641ae9fdbac9c09a70b10019eaa89660dfd1a4567e28ed91dbd5dd871e030", new Set([
+    "夏曲の自己解釈", "口内炎の二次被害", "ICE BOX", "次枠:折咲もしゅ さん",
+  ])],
+  ["8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875", new Set([
+    "起動 -START", "ロムがみんなのために改めて思うこと", "『イキナクチャ』導入",
+  ])],
+  ["c42bc673a091cab8fb3a026527c7452440b7b34814debb56a9b944b7248811f1", new Set([
+    "初のシチュエーションボイス発売！", "ストーリーのあらすじ", "内容詳細＆ラインナップ",
+  ])],
+  ["aa41fbab29fc5cb71d37fcb3ab6b4cb4cf1b64f9ef1e73253d905e001c0d102a", new Set([
+    "直近の出来事", "モーニングページを始めました！", "そういえばVIVANT始まったよね！", "ちぃかわ気になってる！",
+  ])],
+  ["82a8c48d1fd261a6bd987b9a956db0ddb7d5476ab4dd875873ce3e4728fc2a8c", new Set([
+    "(ボイス)ねぇまって　終わってる",
+  ])],
+  ["2d5b755ce969ec2a9a7970440f52728f4054b8daa5a15efcb0451752502cd0c0", new Set([
+    "Talk segment",
+  ])],
+
 ]);
 
 function reviewedSourceNonSongReason(song) {
@@ -184,6 +256,10 @@ function unambiguousNonSongReason(song) {
   if (sourceHash === "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a" &&
       /^54:51\s+joshi idol anime that mariring knows/iu.test(raw)) {
     return "reviewed_mixed_chapter_comment";
+  }
+
+  if (REVIEWED_NUMBERED_SETLIST_HASHES.has(sourceHash) && !isExplicitNumberedSetlistRow(raw)) {
+    return "reviewed_non_song_chapter_in_numbered_setlist";
   }
 
   // A foreign prayer broadcast was parsed as a Japanese karaoke song and its
@@ -351,6 +427,19 @@ function repeatedDescriptionSources(videos) {
 
 function normalizeConservativeArtist(song) {
   const artist = String(song?.artist || "");
+  const title = String(song?.title || "").trim();
+  const raw = String(song?.raw || "").normalize("NFKC");
+  const trimmed = artist.normalize("NFKC").trim();
+
+  if (/^(?:歌えません|練習中)$/u.test(trimmed) &&
+      raw.includes(title) &&
+      /[（(]\s*(?:歌えません|練習中)\s*[）)]\s*$/u.test(raw)) {
+    return { ...song, artist: "" };
+  }
+
+  const originalSong = trimmed.match(/^(.+?)\s*[✨⭐★☆]*\s*Original\s+Song\s*[✨⭐★☆]*$/iu);
+  if (originalSong?.[1]?.trim()) return { ...song, artist: originalSong[1].trim() };
+
   const matched = artist.match(/^[/／|｜][\s　]+(.+)$/u);
   if (!matched?.[1]?.trim()) return song;
   // A delimiter copied from "title / artist" should never become part of
@@ -392,13 +481,21 @@ function repairStructuredSlashCredit(song) {
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
   const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u);
   const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
-  if (!match || (artistYear && match[4] !== artistYear)) return song;
-  const [, title, creditedArtist, metadata] = match;
-  if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
-    return song;
+  if (match && (!artistYear || match[4] === artistYear)) {
+    const [, title, creditedArtist, metadata] = match;
+    if (/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング|CM(?:ソング)?|commercial)/iu.test(metadata) &&
+        title.trim() && creditedArtist.trim()) {
+      return { ...song, title: title.trim(), artist: creditedArtist.trim() };
+    }
   }
-  if (!title.trim() || !creditedArtist.trim()) return song;
-  return { ...song, title: title.trim(), artist: creditedArtist.trim() };
+
+  if (isUnknownArtistValue(artist)) {
+    const simple = body.match(/^(.+?)\s*[/／]\s*([^/／]{2,})\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
+    if (simple?.[1]?.trim() && simple?.[2]?.trim()) {
+      return { ...song, title: simple[1].trim(), artist: simple[2].trim() };
+    }
+  }
+  return song;
 }
 
 function normalizeReleaseMetadataArtist(song, video = {}) {
@@ -416,7 +513,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/【[^】]{1,160}】\s*(?=[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)])/u, "")
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
-    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
     .replace(/\s*[（(](?=(?:劇場版|TVアニメ|アニメ|ゲーム|映画)\b).*?[）)]\s*$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
@@ -467,6 +564,13 @@ function repairKnownSourceCredit(song) {
   if (hash === "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9" &&
       /^\d+(?:st|nd|rd|th)アルバム「[^」]+」より$/iu.test(String(song?.artist || "").normalize("NFKC").trim())) {
     return { ...song, artist: "Eighty eight" };
+  }
+
+  if (hash === "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f" &&
+      song?.title === "うまるん体操" &&
+      /^妹S（シスターズ）\s*\[土間うまる/u.test(String(song?.artist || "")) &&
+      /うまるん体操\s*[/／]\s*妹S（シスターズ）\s*\[[^\n]+\]\s*$/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: String(song.artist).trim() + "]" };
   }
   if (hash === "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa" &&
       song?.title === "奏" && /オリ曲\s*YOU＆合図\s*リリース/u.test(String(song?.raw || ""))) {
@@ -694,6 +798,7 @@ module.exports = {
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   occurrenceIdentity,
+  isExplicitNumberedSetlistRow,
   repairKnownSourceCredit,
   repairReleaseDateCredit,
   repairStructuredSlashCredit,

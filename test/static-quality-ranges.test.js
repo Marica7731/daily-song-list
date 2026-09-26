@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 const {
   cleanStaticVideos,
+  isExplicitNumberedSetlistRow,
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   repairKnownSourceCredit,
@@ -13,7 +14,7 @@ const {
   unambiguousNonSongReason,
 } = require("../scripts/static/quality-guard");
 const { filterRange, shanghaiCalendarStart } = require("../scripts/static/collect-and-build");
-const { buildQualityReview, reviewReasons } = require("../scripts/static/quality-review");
+const { buildQualityReview, hasUnbalancedCreditDelimiters, reviewReasons } = require("../scripts/static/quality-review");
 
 function song(title, artist, options = {}) {
   return { title, artist, raw: options.raw ?? `00:10 ${title} - ${artist}`, ...options };
@@ -633,4 +634,128 @@ test("reviewed harp timeline drops comment continuations and repairs attached an
   }));
   assert.equal(repaired.title, "フクロウ");
   assert.equal(repaired.artist, "");
+});
+
+
+test("reviewed historical mixed setlists drop only source-bound talk chapters", () => {
+  const rows = [
+    ["eaa8f87146f3fb5bc0d06b8c918efa421fafcd0a68053d288ab233a87900821a", "学文路トキ さん"],
+    ["cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67", "Soraさん"],
+    ["da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad", "何選曲したっけ…"],
+    ["472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80", "イベントの規模がでかい"],
+    ["f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0", "今日はお披露目あり"],
+    ["14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93", "重大発表②『歌ってみた』"],
+    ["c42bc673a091cab8fb3a026527c7452440b7b34814debb56a9b944b7248811f1", "ストーリーのあらすじ"],
+    ["2d5b755ce969ec2a9a7970440f52728f4054b8daa5a15efcb0451752502cd0c0", "Talk segment"],
+  ];
+  for (const [sourceHash, title] of rows) {
+    assert.equal(unambiguousNonSongReason(song(title, "", {sourceHash, raw: "1:00 " + title})), "reviewed_source_activity_chapter");
+    assert.equal(unambiguousNonSongReason(song(title, "", {sourceHash: "not-reviewed", raw: "1:00 " + title})), null);
+  }
+  assert.equal(unambiguousNonSongReason(song("どこまでも", "", {
+    sourceHash: "f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0",
+    raw: "0:37:01 どこまでも (アカペラ)",
+  })), null);
+  assert.equal(unambiguousNonSongReason(song("花に亡霊", "", {
+    sourceHash: "14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93",
+    raw: "11:58 【花に亡霊】",
+  })), null);
+});
+
+test("performance-status text is not published as the song artist", () => {
+  assert.equal(normalizeConservativeArtist(song("残響讃歌", "歌えません", {
+    raw: "42:27 残響讃歌(歌えません)",
+  })).artist, "");
+  assert.equal(normalizeConservativeArtist(song("グリーンライツ・セレナーデ-piano Ver", "練習中", {
+    raw: "1:37:35 グリーンライツ・セレナーデ-piano Ver.-(練習中)",
+  })).artist, "");
+  assert.equal(normalizeConservativeArtist(song("イキナクチャ", "ロマニードットアイオー ✨Original Song✨", {
+    raw: "1:39:40 06. イキナクチャ - ロマニードットアイオー ✨Original Song✨",
+  })).artist, "ロマニードットアイオー");
+  assert.equal(normalizeConservativeArtist(song("歌えません", "歌えません", {
+    raw: "1:00 歌えません / 歌えません",
+  })).artist, "歌えません");
+});
+
+test("three-part year credits and commercial metadata recover artist without broad guessing", () => {
+  const simple = repairStructuredSlashCredit(song("Koi no Ageha/Yukari Tamura", "", {
+    raw: "2:01:12 Koi no Ageha/Yukari Tamura/2009",
+  }));
+  assert.equal(simple.title, "Koi no Ageha");
+  assert.equal(simple.artist, "Yukari Tamura");
+
+  const commercial = repairStructuredSlashCredit(song("StaRt/Mrs. GREEN APPLE/花王「メリット」のCMソング", "", {
+    raw: "06:33 StaRt/Mrs. GREEN APPLE/花王「メリット」のCMソング/2015",
+  }));
+  assert.equal(commercial.title, "StaRt");
+  assert.equal(commercial.artist, "Mrs. GREEN APPLE");
+
+  const ambiguous = song("A/B", "", {raw: "1:00 A/B/not-a-year"});
+  assert.strictEqual(repairStructuredSlashCredit(ambiguous), ambiguous);
+});
+
+
+test("reviewed numbered setlists keep explicit songs and reject only unnumbered chapters", () => {
+  const hash = "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b";
+  const real = song("残機", "ずっと真夜中でいいのに。", {
+    raw: "0:08:18 01. 残機 - ずっと真夜中でいいのに。",
+    sourceHash: hash,
+  });
+  const talk = song("豪華なドレス姿のらんぜ", "", {
+    raw: "┗ 0:38:08 豪華なドレス姿のらんぜ",
+    sourceHash: hash,
+  });
+  assert.equal(isExplicitNumberedSetlistRow(real.raw), true);
+  assert.equal(unambiguousNonSongReason(real), null);
+  assert.equal(isExplicitNumberedSetlistRow(talk.raw), false);
+  assert.equal(unambiguousNonSongReason(talk), "reviewed_non_song_chapter_in_numbered_setlist");
+  assert.equal(isExplicitNumberedSetlistRow("𝟎𝟏. 0:04:33 Hero’s Come Back!!✦nobodyknows+"), true);
+});
+
+test("full-history review no longer treats long valid cast credits as dirt", () => {
+  const legitimate = song(
+    "Love∞Destiny",
+    "佐久間まゆ (CV: 牧野由依)、北条加蓮 (CV: 渕上舞)、小日向美穂 (CV: 津田美波)、多田李衣菜 (CV: 青木瑠璃子)、緒方智絵里 (CV: 大空直美)",
+  );
+  assert.deepEqual(reviewReasons(legitimate), []);
+  assert.equal(hasUnbalancedCreditDelimiters("妹S [土間うまる(CV.田中あいみ)"), true);
+  assert.ok(reviewReasons(song("うまるん体操", "妹S [土間うまる(CV.田中あいみ)")).includes("possible_unparsed_credits"));
+});
+
+test("mixed-source review requires numbered-song evidence instead of guessing from artist presence", () => {
+  const hash = "review-mixed";
+  const ordinary = Array.from({length:8}, (_, i) => song("Song " + i, i < 3 ? "Artist " + i : "", {
+    raw: String(i + 1) + ":00 Song " + i,
+    sourceHash: hash,
+  }));
+  const ordinaryReview = buildQualityReview([video(30, ordinary)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(ordinaryReview.mixedStructuredSetlistSources.length, 0);
+
+  const structured = [
+    song("Song A", "Artist A", {raw:"1:00 01. Song A - Artist A",sourceHash:hash}),
+    song("Song B", "Artist B", {raw:"5:00 02. Song B - Artist B",sourceHash:hash}),
+    song("Song C", "Artist C", {raw:"9:00 03. Song C - Artist C",sourceHash:hash}),
+    ...Array.from({length:5}, (_, i) => song("chat " + i, "", {raw:(i+2)+":30 chat "+i,sourceHash:hash})),
+  ];
+  const structuredReview = buildQualityReview([video(31, structured)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(structuredReview.mixedStructuredSetlistSources.length, 1);
+});
+
+test("Japanese game metadata and source-proven malformed credits are repaired", () => {
+  const game = normalizeReleaseMetadataArtist(song(
+    "愛ADRENALIN",
+    "狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録",
+  ));
+  assert.equal(game.artist, "狛江・クリストフ・ヨウスケ(鈴木達央)");
+
+  const repaired = repairKnownSourceCredit(song(
+    "うまるん体操",
+    "妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)",
+    {
+      raw: "② 51:38 うまるん体操 / 妹S（シスターズ） [土間うまる(CV.田中あいみ)、海老名菜々(CV.影山 灯)、本場切絵(CV.白石晴香)、橘・シルフィンフォード(CV.古川由利奈)]",
+      sourceHash: "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f",
+    },
+  ));
+  assert.match(repaired.artist, /\]$/u);
+  assert.deepEqual(reviewReasons(repaired), []);
 });
