@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-09-26T05:27:37.814Z",
+  "generatedAt": "2026-09-26T05:35:07.471Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7204,
-  "inputOccurrences": 87257,
-  "visibleVideos": 5915,
-  "visibleOccurrences": 86750,
-  "quarantinedOccurrences": 445,
-  "quarantinedVideos": 326,
-  "deduplicatedOccurrences": 62,
+  "inputVideos": 7236,
+  "inputOccurrences": 87515,
+  "visibleVideos": 5935,
+  "visibleOccurrences": 86995,
+  "quarantinedOccurrences": 457,
+  "quarantinedVideos": 338,
+  "deduplicatedOccurrences": 63,
   "normalizedArtistOccurrences": 381,
-  "normalizedReleaseMetadataOccurrences": 165,
+  "normalizedReleaseMetadataOccurrences": 189,
   "repairedDateCreditOccurrences": 24,
-  "repairedStructuredCreditOccurrences": 137,
-  "repairedKnownSourceCreditOccurrences": 6,
+  "repairedStructuredCreditOccurrences": 155,
+  "repairedKnownSourceCreditOccurrences": 23,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 2,
@@ -29,7 +29,7 @@
     "confirmed_stream_start_marker": 4,
     "reviewed_bad_description_source": 3,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 280,
+    "prayer_broadcast_timeline": 292,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -95,9 +95,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 112,
-      "channelCount": 106,
-      "distinctVideoTitles": 111,
+      "videoCount": 119,
+      "channelCount": 112,
+      "distinctVideoTitles": 118,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -149,9 +149,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 68,
-      "channelCount": 68,
-      "distinctVideoTitles": 68,
+      "videoCount": 72,
+      "channelCount": 72,
+      "distinctVideoTitles": 72,
       "examples": [
         {
           "videoId": "K2_yRIPIUmE",
@@ -176,9 +176,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 68,
-      "channelCount": 68,
-      "distinctVideoTitles": 68,
+      "videoCount": 69,
+      "channelCount": 69,
+      "distinctVideoTitles": 69,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -511,10 +511,10 @@
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 42,
-      "deduplicatedOccurrences": 15,
+      "quarantinedOccurrences": 54,
+      "deduplicatedOccurrences": 16,
       "byReason": {
-        "prayer_broadcast_timeline": 39,
+        "prayer_broadcast_timeline": 51,
         "reviewed_bad_description_source": 1,
         "dated_stream_announcement": 1,
         "unrelated_livestream_listing": 1
@@ -822,7 +822,7 @@
       "videoId": "QxSgLRB0SO4",
       "title": "まもりたい～White Wishes～",
       "before": "BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断",
-      "after": "BoA【テイルズ オブ グレイセス】",
+      "after": "BoA",
       "raw": "0:28:33　07.まもりたい～White Wishes～／BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断"
     },
     {
@@ -1004,7 +1004,7 @@
       "videoId": "R98zixhrevE",
       "title": "RE:I AM",
       "before": "Aimer【機動戦士ガンダムUC】（2013/03/20）",
-      "after": "Aimer【機動戦士ガンダムUC】",
+      "after": "Aimer",
       "raw": "0:18:30　04.RE:I AM／Aimer【機動戦士ガンダムUC】（2013/03/20）"
     },
     {
@@ -1029,6 +1029,48 @@
       "raw": "07:49:09  そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1"
     },
     {
+      "videoId": "3s_1yRIJwIo",
+      "title": "骸骨楽団とリリア",
+      "before": "トーマ 🐟🍴 /",
+      "after": "トーマ 🐟🍴",
+      "raw": "33:12 骸骨楽団とリリア / トーマ　🐟🍴 / 🎻🛵"
+    },
+    {
+      "videoId": "3s_1yRIJwIo",
+      "title": "六兆年と一夜物語",
+      "before": "Ayasa 🎻🛵 /",
+      "after": "Ayasa 🎻🛵",
+      "raw": "38:28 六兆年と一夜物語 / Ayasa　🎻🛵 / 🏰🍬"
+    },
+    {
+      "videoId": "3s_1yRIJwIo",
+      "title": "地球最後の告白を",
+      "before": "堀江晶太 🐟🍴 /",
+      "after": "堀江晶太 🐟🍴",
+      "raw": "43:24 地球最後の告白を / 堀江晶太　🐟🍴 / 💍📘"
+    },
+    {
+      "videoId": "3s_1yRIJwIo",
+      "title": "フィクサー",
+      "before": "ぬゆり 🐟🍴 /",
+      "after": "ぬゆり 🐟🍴",
+      "raw": "50:01 フィクサー / ぬゆり　🐟🍴 / 🏰🍬"
+    },
+    {
+      "videoId": "3s_1yRIJwIo",
+      "title": "First love",
+      "before": "宇多田ヒカル 🎻🛵 /",
+      "after": "宇多田ヒカル 🎻🛵",
+      "raw": "56:12 First love / 宇多田ヒカル　🎻🛵 / 💍📘"
+    },
+    {
+      "videoId": "3s_1yRIJwIo",
+      "title": "ロウワー",
+      "before": "ぬゆり 🏰🍬 /",
+      "after": "ぬゆり 🏰🍬",
+      "raw": "1:03:54 ロウワー / ぬゆり　🏰🍬 / 💍📘"
+    },
+    {
       "videoId": "O6ALZkiXXo8",
       "title": "DRAMATIC NONFICTION",
       "before": "DRAMATIC STAR[天道輝(CV｡仲村宗悟),桜庭薫(CV.内田雄馬),柏木翼(CV.八代拓)] / 『THE IDOLM@STER SideM 10th ANNIVERSARY P@SSION 01 DRAMATIC STARS』 収録",
@@ -1044,10 +1086,31 @@
     },
     {
       "videoId": "zj5OZcQKOH8",
+      "title": "Paleo wa Emerald",
+      "before": "SKE48 /",
+      "after": "SKE48",
+      "raw": "0:10:40  Paleo wa Emerald / SKE48 / 2011"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Kujira 12-gou",
+      "before": "JUDY AND MARY / Honda “Live Dio” CM song /",
+      "after": "JUDY AND MARY / Honda “Live Dio” CM song",
+      "raw": "0:20:46  Kujira 12-gou / JUDY AND MARY / Honda “Live Dio” CM song / 1997"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
       "title": "Daydream café",
       "before": "Petit Rabbit’s / Anime “Is the Order a Rabbit?” OP /",
       "after": "Petit Rabbit’s",
       "raw": "0:35:54  Daydream café / Petit Rabbit’s / Anime “Is the Order a Rabbit?” OP / 2014"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "POP MASTER",
+      "before": "Nana Mizuki / “National High School Quiz Championship” tie-up /",
+      "after": "Nana Mizuki / “National High School Quiz Championship” tie-up",
+      "raw": "0:43:16  POP MASTER / Nana Mizuki / “National High School Quiz Championship” tie-up / 2011"
     },
     {
       "videoId": "zj5OZcQKOH8",
@@ -1058,6 +1121,27 @@
     },
     {
       "videoId": "zj5OZcQKOH8",
+      "title": "Sakare! Mi Amore",
+      "before": "Juice=Juice /",
+      "after": "Juice=Juice",
+      "raw": "1:09:34  Sakare! Mi Amore / Juice=Juice / 2025"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Konya Dake Ukaretakatta",
+      "before": "Tsubaki Factory /",
+      "after": "Tsubaki Factory",
+      "raw": "1:15:10  Konya Dake Ukaretakatta / Tsubaki Factory / 2018"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Lolita Teikoku Bishoujo Taitei",
+      "before": "Konata Izumi (CV: Aya Hirano) & Yutaka Kobayakawa (CV: Shizuka Hasegawa) & Minami Iwasaki (CV: Minori Chihara) /",
+      "after": "Konata Izumi (CV: Aya Hirano) & Yutaka Kobayakawa (CV: Shizuka Hasegawa) & Minami Iwasaki (CV: Minori Chihara)",
+      "raw": "1:23:46  Lolita Teikoku Bishoujo Taitei / Konata Izumi (CV: Aya Hirano) & Yutaka Kobayakawa (CV: Shizuka Hasegawa) & Minami Iwasaki (CV: Minori Chihara) / 2007"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
       "title": "Kiiroi Vacance",
       "before": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana / Anime “Pani Poni Dash!” OP /",
       "after": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana",
@@ -1065,101 +1149,17 @@
     },
     {
       "videoId": "zj5OZcQKOH8",
+      "title": "Lucky Pool",
+      "before": "JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song /",
+      "after": "JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song",
+      "raw": "1:37:02  Lucky Pool / JUDY AND MARY / Drama “2001 Nen no Otoko-un” theme song / 2001"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
       "title": "winning the soul",
       "before": "Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song /",
       "after": "Tokai Teio (CV: Machico)",
       "raw": "1:47:38  winning the soul / Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song / 2021"
-    },
-    {
-      "videoId": "zj5OZcQKOH8",
-      "title": "your gravitation",
-      "before": "SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa) / Anime “My Bride is a Mermaid” insert song /",
-      "after": "SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa)",
-      "raw": "2:01:37  your gravitation / SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa) / Anime “My Bride is a Mermaid” insert song / 2007"
-    },
-    {
-      "videoId": "zj5OZcQKOH8",
-      "title": "Aousu",
-      "before": "Yui Horie / Anime “Samurai Deeper Kyo” image song /",
-      "after": "Yui Horie",
-      "raw": "2:56:47  Aousu / Yui Horie / Anime “Samurai Deeper Kyo” image song / 2003"
-    },
-    {
-      "videoId": "zj5OZcQKOH8",
-      "title": "Koi seyo Onnanoko",
-      "before": "Yukari Tamura / Anime “Gokujou Seitokai” OP /",
-      "after": "Yukari Tamura",
-      "raw": "3:09:18  Koi seyo Onnanoko / Yukari Tamura / Anime “Gokujou Seitokai” OP / 2005"
-    },
-    {
-      "videoId": "b_Y_jnQ4nk8",
-      "title": "さぁ",
-      "before": "SURFACE【まもって守護月天!】（1998/11/11）",
-      "after": "SURFACE【まもって守護月天!】",
-      "raw": "0:04:09　01.さぁ／SURFACE【まもって守護月天!】（1998/11/11）"
-    },
-    {
-      "videoId": "b_Y_jnQ4nk8",
-      "title": "亡國覚醒カタルシス",
-      "before": "ALI PROJECT【.hack//Roots】（2006/05/24）",
-      "after": "ALI PROJECT【.hack//Roots】",
-      "raw": "0:38:52　08.亡國覚醒カタルシス／ALI PROJECT【.hack//Roots】（2006/05/24）"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "虚ろを扇ぐ",
-      "before": "獅子志司 (2022/09/28)",
-      "after": "獅子志司",
-      "raw": "0:17:39 💮虚ろを扇ぐ / 獅子志司 (2022/09/28)"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "アウターサイエンス",
-      "before": "じん (2015/03/28)",
-      "after": "じん",
-      "raw": "0:32:44 💮アウターサイエンス / じん (2015/03/28)"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "へべれけジャンキー",
-      "before": "Syudou (2021/03/30)",
-      "after": "Syudou",
-      "raw": "0:46:36 💮へべれけジャンキー / Syudou (2021/03/30)"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "君じゃなきゃダメみたい",
-      "before": "大石昌良 (2014/08/27)",
-      "after": "大石昌良",
-      "raw": "0:57:35 🍈君じゃなきゃダメみたい / 大石昌良 (2014/08/27)"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "ジブラ",
-      "before": "すりぃ (2022/06/24)",
-      "after": "すりぃ",
-      "raw": "1:46:15 🍈ジブラ / すりぃ (2022/06/24)"
-    },
-    {
-      "videoId": "MCu3BvC8gN8",
-      "title": "バグ",
-      "before": "かいりきベア (2022/06/25)",
-      "after": "かいりきベア",
-      "raw": "2:00:24 ✨バグ / かいりきベア (2022/06/25)"
-    },
-    {
-      "videoId": "4BDwkLfKc_Y",
-      "title": "Tell Your World",
-      "before": "kz ※2012-01-18",
-      "after": "kz",
-      "raw": "🔥0:14:21 【Tell Your World】/ kz ※2012-01-18"
-    },
-    {
-      "videoId": "4BDwkLfKc_Y",
-      "title": "千本桜",
-      "before": "黒うさP ※2011-09-17",
-      "after": "黒うさP",
-      "raw": "🔺0:21:05 【千本桜】/ 黒うさP ※2011-09-17"
     }
   ],
   "repairedDateCreditExamples": [
@@ -1341,9 +1341,33 @@
     },
     {
       "videoId": "TEMzHXrTR6I",
+      "before": "only my railgun/FripSide/とある科学の超電磁砲 OP1 - 2009 ※コーラス有り",
+      "after": "only my railgun - FripSide",
+      "raw": "0:23:06 only my railgun/FripSide/とある科学の超電磁砲 OP1/2009　※コーラス有り"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "to the beginning/Kalafina/Fate/Zero 2ndシーズン OP - 2014 ※コーラス（梶浦語）有り",
+      "after": "to the beginning - Kalafina",
+      "raw": "0:29:09 to the beginning/Kalafina/Fate/Zero 2ndシーズン OP/2014　※コーラス（梶浦語）有り"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "光るなら/Goose house/四月は君の嘘 OP1 - 2014 ※コーラス（男性⇒女性）有り",
+      "after": "光るなら - Goose house",
+      "raw": "0:35:39 光るなら/Goose house/四月は君の嘘 OP1/2014　※コーラス（男性⇒女性）有り"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
       "before": "SAVED./坂本真綾/いなり、こんこん、恋いろは。ED - ",
       "after": "SAVED. - 坂本真綾",
       "raw": "1:00:44 SAVED./坂本真綾/いなり、こんこん、恋いろは。ED/2014"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "Magia/Kalafina/魔法少女まどか☆マギカ ED - 2011 ※コーラス有り",
+      "after": "Magia - Kalafina",
+      "raw": "1:10:07 Magia/Kalafina/魔法少女まどか☆マギカ ED/2011　※コーラス有り"
     },
     {
       "videoId": "TEMzHXrTR6I",
@@ -1362,6 +1386,12 @@
       "before": "アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED - ",
       "after": "アムリタ - 牧野由依",
       "raw": "1:39:58 アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED/2005"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "世界の約束/倍賞千恵子/ハウルの動く城 主題歌 - 2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー",
+      "after": "世界の約束 - 倍賞千恵子",
+      "raw": "1:53:42 世界の約束/倍賞千恵子/ハウルの動く城 主題歌/2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー"
     },
     {
       "videoId": "67WLeuCp8nk",
@@ -1407,6 +1437,12 @@
     },
     {
       "videoId": "67WLeuCp8nk",
+      "before": "secret base〜君がくれたもの〜/ZONE/ドラマ「キッズ・ウォー3 〜ざけんなよ〜」主題歌etc - ",
+      "after": "secret base〜君がくれたもの〜 - ZONE",
+      "raw": "1:16:55 secret base〜君がくれたもの〜/ZONE/ドラマ「キッズ・ウォー3 〜ざけんなよ〜」主題歌etc/2001"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
       "before": "鳥の詩/Lia/ゲーム「AIR」OP - ",
       "after": "鳥の詩 - Lia",
       "raw": "1:21:54 鳥の詩/Lia/ゲーム「AIR」OP/2000"
@@ -1436,6 +1472,12 @@
       "raw": "18:55 more  than words/羊文学/アニメ「呪術廻戦 渋谷事変」ED/2023"
     },
     {
+      "videoId": "jrwP4K4o4zA",
+      "before": "ラッキープール/JUDY AND MARY/ドラマ｢2001年のおとこ運｣主題歌 - ",
+      "after": "ラッキープール - JUDY AND MARY",
+      "raw": "12:27 ラッキープール/JUDY AND MARY/ドラマ｢2001年のおとこ運｣主題歌/2001"
+    },
+    {
       "videoId": "x0byH-JYzwI",
       "before": "花火/aiko/アニメ｢まっすぐにいこう。｣ED - 1999",
       "after": "花火 - aiko",
@@ -1446,6 +1488,12 @@
       "before": "真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌 - 1990",
       "after": "真夏の果実 - サザンオールスターズ",
       "raw": "14:48 真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌/1990"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "さよならエレジー/菅田将暉/ドラマ「トドメの接吻(キス)」主題歌 - ",
+      "after": "さよならエレジー - 菅田将暉",
+      "raw": "15:34  さよならエレジー/菅田将暉/ドラマ「トドメの接吻(キス)」主題歌/2018"
     },
     {
       "videoId": "3eFVgs9iW00",
@@ -1500,57 +1548,21 @@
       "before": "Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED - ",
       "after": "Sakuranbo - Ai Otsuka",
       "raw": "0:18:08 Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED/2003"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Fuwa Fuwa Time/Ho-kago Tea Time/K-On! insert song - ",
-      "after": "Fuwa Fuwa Time - Ho-kago Tea Time",
-      "raw": "0:24:48 Fuwa Fuwa Time/Ho-kago Tea Time/K-On! insert song/2009"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Luminous/ClariS/Puella Magi Madoka Magica the Movie Part 1: Beginnings OP - ",
-      "after": "Luminous - ClariS",
-      "raw": "0:38:44 Luminous/ClariS/Puella Magi Madoka Magica the Movie Part 1: Beginnings OP/2012"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP - ",
-      "after": "Lion - Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)",
-      "raw": "1:03:20 Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP/2008"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Little Wish 〜lyrical step〜/Yukari Tamura/Magical Girl Lyrical Nanoha ED - ",
-      "after": "Little Wish 〜lyrical step〜 - Yukari Tamura",
-      "raw": "1:23:24 Little Wish 〜lyrical step〜/Yukari Tamura/Magical Girl Lyrical Nanoha ED/2004"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Guuzen Angel/Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))/Best Student Council ED - ",
-      "after": "Guuzen Angel - Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))",
-      "raw": "1:30:21 Guuzen Angel/Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))/Best Student Council ED/2005"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Spiritual Garden/Yukari Tamura/Magical Girl Lyrical Nanoha A's ED - ",
-      "after": "Spiritual Garden - Yukari Tamura",
-      "raw": "1:40:56 Spiritual Garden/Yukari Tamura/Magical Girl Lyrical Nanoha A's ED/2005"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Hatsukoi Cider/Buono!/Sugaku♥Joshi Gakuen ED - ",
-      "after": "Hatsukoi Cider - Buono!",
-      "raw": "2:46:19 Hatsukoi Cider/Buono!/Sugaku♥Joshi Gakuen ED/2012"
-    },
-    {
-      "videoId": "s2NDnqiDKiA",
-      "before": "Aozora no Rhapsody/fhána/Miss Kobayashi's Dragon Maid OP - ",
-      "after": "Aozora no Rhapsody - fhána",
-      "raw": "2:51:31 Aozora no Rhapsody/fhána/Miss Kobayashi's Dragon Maid OP/2017"
     }
   ],
   "repairedKnownSourceCreditExamples": [
+    {
+      "videoId": "zFZgawUHBas",
+      "before": "FLAGS - T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))",
+      "after": "FLAGS - T.M.Revolution",
+      "raw": "2:17:01 FLAGS / T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))"
+    },
+    {
+      "videoId": "QB2tT48CvOI",
+      "before": "奏 - オリ曲 YOU＆合図 リリース／明日は祝日",
+      "after": "奏 - スキマスイッチ",
+      "raw": "1:11:42 奏／オリ曲 YOU＆合図 リリース／明日は祝日"
+    },
     {
       "videoId": "Q8ktjMwiE4I",
       "before": "はなびら (Hanabira / Petals) 奥華子 - 未記載",
@@ -1582,10 +1594,100 @@
       "raw": "1:03:52 115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism"
     },
     {
+      "videoId": "bJzjN1pmjvQ",
+      "before": "34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ - ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)",
+      "after": "(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ - ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)",
+      "raw": "♪2:44:34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ | ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)"
+    },
+    {
+      "videoId": "wiOr0NfQPow",
+      "before": "Song 5: \"Chiisana Boukensha\" - Sora Amamiya, Rie Takahashi, Ai Kayano [Kono Subarashii Sekai ni Shukufuku o! ED 1",
+      "after": "Chiisana Boukensha - Sora Amamiya, Rie Takahashi, Ai Kayano",
+      "raw": "34:00 Song 5: \"Chiisana Boukensha\" by Sora Amamiya, Rie Takahashi, Ai Kayano [Kono Subarashii Sekai ni Shukufuku o! ED 1]"
+    },
+    {
       "videoId": "zyngx4g-sy4",
       "before": "ハッピーシンセサイザ - 未記載",
       "after": "ハッピーシンセサイザ - EasyPop",
       "raw": "47:15 - 8. ハッピーシンセサイザ (Happy Synthesizer) by EasyPop 【❔🍸】"
+    },
+    {
+      "videoId": "2G0ajYvs638",
+      "before": "乙女のルートはひとつじゃない！ - 乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった… My Next Life as a Villainess: All Routes Lead to Doom!",
+      "after": "乙女のルートはひとつじゃない！ - angela",
+      "raw": "49:28 乙女のルートはひとつじゃない！/乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった…\tMy Next Life as a Villainess: All Routes Lead to Doom!"
+    },
+    {
+      "videoId": "Gp4Jt_09NJE",
+      "before": "1 - 2",
+      "after": "1/2 - 川本真琴",
+      "raw": "8:55:05 1/2/Kawamoto Makoto/Anime \"Rurouni Kenshin\" OP/1997"
+    },
+    {
+      "videoId": "uhyW9UF9fVk",
+      "before": "観覧車~あの日と、昨日と今日と明日と~／Duca／「めぐる季節の約束と、つないだその手のぬくもりと」テーマソング／だんでらいおん (????)／「アマカノ2」挿入歌 - あざらしそふと (2020)",
+      "after": "観覧車～あの日と、昨日と今日と明日と～ - Duca",
+      "raw": "2:37:05 観覧車~あの日と、昨日と今日と明日と~／Duca／「めぐる季節の約束と、つないだその手のぬくもりと」テーマソング／だんでらいおん (????)／「アマカノ2」挿入歌／あざらしそふと (2020)"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "美しきこの世界 - 5thアルバム「5/5」より",
+      "after": "美しきこの世界 - Eighty eight",
+      "raw": "3:14 美しきこの世界（5thアルバム「5/5」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "万華鏡 - 4thアルバム「輪廻転生」より",
+      "after": "万華鏡 - Eighty eight",
+      "raw": "13:41 万華鏡（4thアルバム「輪廻転生」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "青空に書いたラブレター - 5thアルバム「5/5」より",
+      "after": "青空に書いたラブレター - Eighty eight",
+      "raw": "19:54 青空に書いたラブレター（5thアルバム「5/5」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "栞 - 6thアルバム「PUZZLE」より",
+      "after": "栞 - Eighty eight",
+      "raw": "31:38 栞（6thアルバム「PUZZLE」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "弱虫ピエロ - 8thアルバム「風詩花伝」より",
+      "after": "弱虫ピエロ - Eighty eight",
+      "raw": "41:46 弱虫ピエロ（8thアルバム「風詩花伝」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "満月の夜に - 4thアルバム「輪廻転生」より",
+      "after": "満月の夜に - Eighty eight",
+      "raw": "51:56 満月の夜に（4thアルバム「輪廻転生」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "ハコイリ狼 - 6thアルバム「PUZZLE」より",
+      "after": "ハコイリ狼 - Eighty eight",
+      "raw": "59:35 ハコイリ狼（6thアルバム「PUZZLE」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "つま先立ちのマドモアゼル - 7thアルバム「ANTIQUE」より",
+      "after": "つま先立ちのマドモアゼル - Eighty eight",
+      "raw": "1:07:49 つま先立ちのマドモアゼル（7thアルバム「ANTIQUE」より）"
+    },
+    {
+      "videoId": "7zFPOeHfUmE",
+      "before": "ミッドナイトレコード - 7thアルバム「ANTIQUE」より",
+      "after": "ミッドナイトレコード - Eighty eight",
+      "raw": "1:18:34 ミッドナイトレコード（7thアルバム「ANTIQUE」より）"
+    },
+    {
+      "videoId": "KpFf0z0H6pc",
+      "before": "祝日天国 - 7（2022/07/31）",
+      "after": "祝日天国 - 35.7",
+      "raw": "1:05:43　10.祝日天国／35.7（2022/07/31）【NEW】"
     }
   ],
   "duplicateExamples": [
@@ -1919,6 +2021,13 @@
       "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
     },
     {
+      "videoId": "Mle4e6OSw_M",
+      "seconds": 3892,
+      "title": "天体観測",
+      "artist": "BUMP OF CHICKEN",
+      "sourceId": "Ugw1C-n5Uc2k4iNVES54AaABAg"
+    },
+    {
       "videoId": "i5N8Y8nPzfQ",
       "seconds": 3852,
       "title": "いけないボーダーライン",
@@ -1929,13 +2038,6 @@
       "videoId": "i5N8Y8nPzfQ",
       "seconds": 4198,
       "title": "ルンがピカッと光ったら",
-      "artist": "ワルキューレ",
-      "sourceId": "UgwXwEIIlRzAGxVmtxx4AaABAg"
-    },
-    {
-      "videoId": "i5N8Y8nPzfQ",
-      "seconds": 4429,
-      "title": "AXIA ～ダイスキでダイキライ～",
       "artist": "ワルキューレ",
       "sourceId": "UgwXwEIIlRzAGxVmtxx4AaABAg"
     }
