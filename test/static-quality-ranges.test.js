@@ -1002,3 +1002,30 @@ test("performance annotations are stripped only when the raw row proves the suff
   }
   assert.equal(normalizeReleaseMetadataArtist(song("Bracket Song","Artist [Unit",{raw:"1:00 Bracket Song / Artist [Unit"})).artist,"Artist [Unit");
 });
+
+
+test("reviewed September 26 slash-setlist source restores song and artist fields", () => {
+  const hash = "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc";
+  const rows = [
+    [song("Raise your flag／MAN WITH A MISSION", "", {
+      raw: "15:32\tRaise your flag／MAN WITH A MISSION／機動戦士ガンダム 鉄血のオルフェンズ OP", sourceHash: hash,
+    }), "Raise your flag", "MAN WITH A MISSION"],
+    [song("ファンサ／mona(CV:夏川椎菜)【HoneyWorks】", "告白実行委員会～アイドルシリーズ～", {
+      raw: "17:30 1:56:53\tファンサ／mona(CV:夏川椎菜)【HoneyWorks】／告白実行委員会～アイドルシリーズ～", sourceHash: hash,
+    }), "ファンサ", "mona(CV:夏川椎菜)【HoneyWorks】"],
+    [song("Starry heavens／Day after tomorrow", "", {
+      raw: "1:23:10\tStarry heavens／Day after tomorrow／GC版テイルズ オブ シンフォニア 主題歌", sourceHash: hash,
+    }), "Starry heavens", "day after tomorrow"],
+    [song("モエチャッカファイア／弌誠／ゼンレスゾーンゼロ", "エレン・ジョー イメージソング", {
+      raw: "1:31:25\tモエチャッカファイア／弌誠／ゼンレスゾーンゼロ／エレン・ジョー イメージソング", sourceHash: hash,
+    }), "モエチャッカファイア", "弌誠"],
+  ];
+  for (const [row, expectedTitle, expectedArtist] of rows) {
+    const repaired = repairKnownSourceCredit(row);
+    assert.equal(repaired.title, expectedTitle);
+    assert.equal(repaired.artist, expectedArtist);
+  }
+  for (const title of ["～)　※蒼木さんの出番は", "まで！)"]) {
+    assert.equal(unambiguousNonSongReason(song(title, "", { raw: title, sourceHash: hash })), "reviewed_source_activity_chapter");
+  }
+});
