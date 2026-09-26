@@ -207,6 +207,9 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ])],
   ["7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963", new Set(["(waiting)"])],
   ["28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad", new Set(["(waiting)"])],
+  ["ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc", new Set([
+    "～)　※蒼木さんの出番は", "まで！)",
+  ])],
 
 ]);
 
@@ -651,6 +654,16 @@ function repairResidualKnownSourceCredit(song) {
   const hash = String(song?.sourceHash || "");
   const title = String(song?.title || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
+
+  if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc" &&
+      /[\/／]/u.test(title)) {
+    const body = raw.replace(/^(?:\d{1,2}:\d{2}(?::\d{2})?\s*)+/u, "");
+    const fields = body.split(/[\/／]/u).map((value) => value.trim()).filter(Boolean);
+    if (fields.length >= 2 && fields[0] && fields[1]) {
+      const artist = fields[0].toLocaleLowerCase() === "starry heavens" ? "day after tomorrow" : fields[1];
+      return { ...song, title: fields[0], artist };
+    }
+  }
 
   if (hash === "434ba28abf9d83918a57deff756fa17ac80849b9ebeb68e05d3b03aee05b14fd" &&
       title === "ライラック") return { ...song, artist: "Mrs. GREEN APPLE" };
