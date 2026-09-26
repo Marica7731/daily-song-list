@@ -265,7 +265,9 @@ function occurrenceIdentity(song) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
   const seconds = Number(song?.seconds);
-  const point = Number.isFinite(seconds) ? String(seconds) : String(song?.time || "").trim();
+  const time = String(song?.time || "").trim();
+  if (!Number.isFinite(seconds) && !time) return "";
+  const point = Number.isFinite(seconds) ? String(seconds) : time;
   return [point, title, artist].join("\u001f");
 }
 
@@ -367,7 +369,7 @@ function cleanStaticVideos(videos) {
       }
 
       const identity = occurrenceIdentity(song);
-      if (seen.has(identity)) {
+      if (identity && seen.has(identity)) {
         counters.deduplicatedOccurrences += 1;
         byDay[day] ||= { quarantinedOccurrences: 0, deduplicatedOccurrences: 0, byReason: {} };
         byDay[day].deduplicatedOccurrences += 1;
@@ -380,7 +382,7 @@ function cleanStaticVideos(videos) {
         });
         continue;
       }
-      seen.add(identity);
+      if (identity) seen.add(identity);
       songs.push(song);
     }
 
