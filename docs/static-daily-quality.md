@@ -197,3 +197,32 @@ deletion signal. The cleaner therefore uses exact source grammar:
 
 Review output now retains up to 12 unknown-row examples per mixed source so later dirty chapters
 cannot hide merely because the first five rows happen to be songs.
+
+
+## 2026-09-27 full-history residual pass
+
+The generated review now covers every retained static day, not only the recent
+ranking window. Residual cleanup remains reversible: `days/*` and `state.json`
+are immutable inputs, while quarantine and credit repair affect generated
+rankings/search/detail/source outputs only.
+
+For mixed timestamp comments, there are two evidence levels:
+
+- Fully reviewed sources whose actual songs are consistently numbered may use an
+  exact source-hash structural rule: numbered song rows stay; unnumbered chapter
+  rows are quarantined.
+- Sources that mix unnumbered real songs and conversation rows use only exact
+  `sourceHash + title` decisions. Generic rules such as “unknown artist”,
+  “ends with さん”, or natural-language titles are intentionally forbidden.
+
+This pass also repairs, rather than deletes, source-proven metadata mistakes:
+performance status such as `歌えません` / `練習中` is not published as the
+artist when the original timestamp row proves it is a parenthetical status;
+`title / artist / year` and supported CM/game metadata layouts recover their
+artist credit; decorative `Original Song` suffixes are removed from the artist
+field. Ambiguous uncredited songs stay untouched.
+
+The review detector itself requires explicit numbered-song evidence before
+calling a source a mixed structured setlist. Long ensemble/character credits are
+not suspicious merely because they are long; structural defects such as
+unbalanced delimiters or an unresolved slash/year parse are required.
