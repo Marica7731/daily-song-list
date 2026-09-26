@@ -21,6 +21,7 @@ const REVIEWED_NUMBERED_SETLIST_HASHES = new Set([
   "cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67",
   "da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad",
   "af9b78791e417efa33bc5d649ed166553507376faf8b4b6e7564a0fc5a9194c3",
+  "228c383678249eecd538161b93282bc2215495be1736c2d7270cbdbc9993f6e1",
 ]);
 
 function isExplicitNumberedSetlistRow(value) {
@@ -161,6 +162,19 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
     "Talk segment",
   ])],
 
+  ["e916c9ce505c107c706f25bdcd129e6892b2acd1143aeebafafe63bd5e3b7a2c", new Set([
+    "本日の意気込み", "次枠リレー出演者様のご案内", "おさらばえ～！",
+  ])],
+  ["38fe0f2d9dee92873519c6f764a80955788c6683f315bfa0a1535102bdd5bbcf", new Set([
+    "僕は耳を耳を愛したw)", "ロストワンの号哭…可愛い)", "藤井風さん弾き語り入りモノマネ)",
+  ])],
+  ["891b820cfb8e6a53645d354b197fffef38e415e4f944ac14d5844b30d685fd78", new Set([
+    "聊天室的一位觀眾請打CALL", "DC有剁甲魚和打籃球的小遊戲", "4周年重大發表宣傳", "黛比名字請打對",
+  ])],
+  ["50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064", new Set([
+    "7月の配信予定",
+  ])],
+
 ]);
 
 function reviewedSourceNonSongReason(song) {
@@ -261,6 +275,12 @@ function unambiguousNonSongReason(song) {
   if (REVIEWED_NUMBERED_SETLIST_HASHES.has(sourceHash) && !isExplicitNumberedSetlistRow(raw)) {
     return "reviewed_non_song_chapter_in_numbered_setlist";
   }
+
+  if (sourceHash === "eb659bd57798713ec33ed807d1086758e7611b52e9567197983478e92fd74193" &&
+      /シスタークレア罵倒ボイス/u.test(raw)) {
+    return "reviewed_source_activity_chapter";
+  }
+
 
   // A foreign prayer broadcast was parsed as a Japanese karaoke song and its
   // identical YouTube description was attached to unrelated VTuber videos.
@@ -483,16 +503,23 @@ function repairStructuredSlashCredit(song) {
   const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
   if (match && (!artistYear || match[4] === artistYear)) {
     const [, title, creditedArtist, metadata] = match;
-    if (/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング|CM(?:ソング)?|commercial)/iu.test(metadata) &&
+    if (/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング|CM(?:ソング)?|commercial|テーマソング|TV[^/／]{0,80}曲)/iu.test(metadata) &&
         title.trim() && creditedArtist.trim()) {
       return { ...song, title: title.trim(), artist: creditedArtist.trim() };
     }
   }
 
-  if (isUnknownArtistValue(artist)) {
+  if (isUnknownArtistValue(artist) || artistYear) {
     const simple = body.match(/^(.+?)\s*[/／]\s*([^/／]{2,})\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
-    if (simple?.[1]?.trim() && simple?.[2]?.trim()) {
+    if (simple?.[1]?.trim() && simple?.[2]?.trim() && (!artistYear || simple[3] === artistYear)) {
       return { ...song, title: simple[1].trim(), artist: simple[2].trim() };
+    }
+  }
+
+  if (isUnknownArtistValue(artist)) {
+    const workDate = body.match(/^(?:\d+[.．]\s*)?(.+?)\s*[/／]\s*([^/／【]{2,})【[^】]+】[（(](?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}[）)]\s*$/u);
+    if (workDate?.[1]?.trim() && workDate?.[2]?.trim()) {
+      return { ...song, title: workDate[1].trim(), artist: workDate[2].trim() };
     }
   }
   return song;
@@ -515,14 +542,53 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
     .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
     .replace(/\s*[（(](?=(?:劇場版|TVアニメ|アニメ|ゲーム|映画)\b).*?[）)]\s*$/iu, "")
+    .replace(/\s*\((?:作詞|作曲):.*$/u, "")
+    .replace(/\s*\(J\s*$/u, "")
+    .replace(/\s*[（(]\s*(?:19|20)\d{2}\s*$/u, "")
+    .replace(/\s*\[\s*(?:19|20)\d{2}年?\s*$/u, "")
+    .replace(/\s*[（(](?:Piano\s*Ver[.]?|take\d+.*|前口上.*|[🍹🛼].*ソロ|&閉会の挨拶|二重ハモリ版.*|Newバージョン|挑戦枠|※?1回目の挑戦.*)$/iu, "")
+    .replace(/\s*\[(?:オリ曲|新オリ曲|一瞬迷子|歌えるかチャレンジ[^\]]*|漢字大敵|不完全[^\]]*)\s*$/u, "")
+    .replace(/\s*\[(?:Honkai[^\]]*|Love Live|Chainsaw man|Mob Psycho[^\]]*|Gurren Lagann|Golden Kamuy[^\]]*|Hetalia)\s*$/iu, "")
+    .replace(/\s*\(cover\s+.+$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
+
+  if (cleaned === artist) {
+    const openSquare = (artist.match(/\[/gu) || []).length;
+    const closeSquare = (artist.match(/\]/gu) || []).length;
+    if (openSquare === closeSquare + 1 && raw.includes(artist + "]")) cleaned = artist + "]";
+    const openParen = (artist.match(/\(/gu) || []).length;
+    const closeParen = (artist.match(/\)/gu) || []).length;
+    if (cleaned === artist && openParen === closeParen + 1 && raw.includes(artist + ")")) cleaned = artist + ")";
+    if (cleaned === artist && /^\][^\]]+/u.test(artist) === false && raw.includes("[" + artist) && artist.includes("]")) cleaned = "[" + artist;
+  }
+
   if (!cleaned || cleaned === artist) return song;
   return { ...song, artist: cleaned };
 }
 
 function repairKnownSourceCredit(song) {
   const hash = String(song?.sourceHash || "");
+
+  if (hash === "eb659bd57798713ec33ed807d1086758e7611b52e9567197983478e92fd74193") {
+    const raw = String(song?.raw || "").normalize("NFKC");
+    const match = raw.match(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s*[「｢](.+?)\/(.+?)[」｣]\s*(?:19|20)\d{2}年\d{1,2}月\d{1,2}日【([^】]+)】/u);
+    if (match?.[1]?.trim() && match?.[3]?.trim()) {
+      return { ...song, title: match[1].trim(), artist: match[3].trim() };
+    }
+  }
+
+  if (hash === "9cbc8fd9b1f9f5bc24b2ae7929994e406e7b574af0eda8d0ef74b6a666535e1e" &&
+      /^Silly-Go-Round[／/]FictionJunction/u.test(String(song?.title || "")) &&
+      /Silly-Go-Round[／/]FictionJunction[／/][.]hack\/\/Roots OP/u.test(String(song?.raw || ""))) {
+    return { ...song, title: "Silly-Go-Round", artist: "FictionJunction" };
+  }
+
+  if (hash === "04d86c87e7b05ace07991f6073189c1c62a6a2e56723a2555514fe52a323285b" &&
+      song?.title === "Problem" && /^Ariana Grande/u.test(String(song?.artist || ""))) {
+    return { ...song, artist: "Ariana Grande" };
+  }
+
 
   if (hash === REVIEWED_MIXED_SOURCE_HASHES.uraraAnniversary &&
       /^Luv Rendezvous\s*💎\s*七海うらら$/u.test(String(song?.title || "").trim())) {
