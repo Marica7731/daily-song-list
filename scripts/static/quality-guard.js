@@ -207,6 +207,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ])],
   ["7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963", new Set(["(waiting)"])],
   ["28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad", new Set(["(waiting)"])],
+  ["ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc", new Set(["～)　※蒼木さんの出番は", "まで！)"])],
 
 ]);
 
@@ -785,6 +786,17 @@ function repairResidualKnownSourceCredit(song) {
   if (hash === "6ca8928630b3a52aebc13bbeaed3af13dcd186955da7b5ad5c87b48ee3c0be29" &&
       title === "KISS OF DEATH (Produced" && /KISS OF DEATH \(Produced by HYDE\)[\/／]中島美嘉/u.test(raw)) {
     return { ...song, title: "KISS OF DEATH", artist: "中島美嘉" };
+  }
+
+  if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc") {
+    const sourceRaw = String(song?.raw || "");
+    const bodyMatch = sourceRaw.match(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:\t|　| )*(.+)$/u);
+    if (bodyMatch?.[1] && bodyMatch[1].includes("／")) {
+      const fields = bodyMatch[1].split("／").map((value) => value.trim()).filter(Boolean);
+      if (fields.length >= 2 && fields[0] && fields[1]) {
+        return { ...song, title: fields[0], artist: fields[1] };
+      }
+    }
   }
 
   if (hash === "3ddc8b1b3a39f0f7754cefd5d692c8c83c24902d902a802421e61d19c9b97c00") {
