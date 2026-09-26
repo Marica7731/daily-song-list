@@ -11,6 +11,11 @@ function reviewReasons(song) {
   if (/^(?:雑談|トーク|MC|スパチャ|コメント|告知)(?:パート|タイム|読み|紹介|開始|終了)?[①-⑳\d]*$/iu.test(title)) {
     reasons.push("possible_spoken_section");
   }
+  const unknownArtist = /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist);
+  if (unknownArtist &&
+      /(?:^休憩\d*$|弾き語り再開|音量チェック|電波チェック|機材トラブル|(?:はじめ|終わり|締め|最後|閉め)の挨拶|達成[!！㊗\s]*$|再起動の為|離席中|水分補給|振り返り|次回[!！]|予告|販売中|(?:^|[\s　])MC\d*(?:[\s（(]|$)|の雑談$|について$|の感想$)/iu.test(title)) {
+    reasons.push("possible_activity_chapter");
+  }
   if (/^(?:.*(?:配信|ライブ|stream|Live).*)?(?:20\d{2})[./-]\d{1,2}[./-]\d{1,2}/iu.test(title) &&
       /(?:配信|stream|live|配信予定|ch\.?)/iu.test(raw)) {
     reasons.push("possible_stream_poster");
@@ -119,8 +124,7 @@ function buildQualityReview(videos, audit, now) {
       .sort((a,b) =>
         b.unknownNonNumberedRows - a.unknownNonNumberedRows ||
         b.explicitNumberedSongs - a.explicitNumberedSongs ||
-        a.videoId.localeCompare(b.videoId))
-      .slice(0,120),
+        a.videoId.localeCompare(b.videoId)),
     descriptionsSharedAcrossTwoToFourChannels: [...descriptionHash]
       .filter(([,row])=>row.channels.size >= 2 && row.channels.size < 5)
       .sort((a,b)=>b[1].channels.size-a[1].channels.size)

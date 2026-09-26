@@ -156,3 +156,26 @@ it sits directly before an explicit release date, so e.g.
 `Vaundy【王様ランキング】（2022/01/07）...` becomes `Vaundy` in the
 derived ranking. Year-range structured credits and trailing delimiter artifacts
 are repaired only where their original row proves the field boundaries.
+
+## September 27 all-day source-level sweep
+
+The follow-up sweep reads every retained publication day rather than only recent rankings.
+The second pass reviewed mixed timeline sources in context and adds source-bound rules only
+where the source itself proves which rows are songs.
+
+- Numbered Vocaloid/DAM setlists retain their explicitly numbered song rows while unnumbered
+  commentary/reaction chapters from those exact source hashes are quarantined.
+- The reviewed Conan setlist keeps rows carrying its explicit `▶` song marker and drops only
+  unmarked discussion chapters from that exact source.
+- The reviewed Kanra and Pleuvoir timelines keep rows with explicit `song / artist` structure
+  and quarantine unstructured chat chapters from those exact source hashes.
+- The Nanami Urara anniversary source contains one recoverable song row. It is normalized to
+  `Luv Rendezvous - 七海うらら`; unrelated chapter notes from that exact source are quarantined.
+- The 100-song endurance source keeps unknown-artist song rows and removes only `休憩N` plus
+  the explicit `100曲達成！` milestone. Unknown artist is never a deletion condition by itself.
+- Isolated greetings, audio checks, stream restarts, milestone notices, and short cross-video
+  date fragments are keyed to their reviewed source hash. These are not global title bans.
+
+The review-only scanner also surfaces strong activity-chapter candidates and no longer truncates
+mixed-source candidates at 120. Detection remains intentionally broader than deletion: ambiguous
+rows stay visible until source context proves that they are not songs.

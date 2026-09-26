@@ -14,11 +14,124 @@ const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47
 const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
 const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
 
+const REVIEWED_MIXED_SOURCE_HASHES = Object.freeze({
+  hinataVocaloid: "30d4fba63bb782028af7ca03a506cf94714933e93de48d1c5eef13b84d9438a4",
+  kokoneConan: "e0d69e03eeba0ccb8e420e88af51d810907dfb9b1e8b50d98579bf4d8646df60",
+  kanraMorning: "c2f39a5fb479d4d148f076609150d3662d0bef7611973817c5f56f2ea7d6af4e",
+  vezaliusDam: "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+  uraraAnniversary: "7d072c6a6bd42aa23a499fbc04ed5cbffc12a44a51d5456644a1b6cff6ace681",
+  inoriAcoustic: "1922f6d700c7615e8ff682c9ea9ac82ea19d0b2a145d31e4ea73df7d243bc352",
+  pleuvoirFirstKaraoke: "c2fe7785dffa7d43c6405b4efd19edb8dfa6d3d0d276084a42c6431f16ee8777",
+  aranneHundredSongs: "2f784a14e4122ab625a239f2693dd725658688982e1b9aa526fad3f379efe188",
+});
+
+const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
+  ["0d63e5c4ca38df917fb58c74f1b5be81c8a54a893fdd1050b81aad849e18314d", new Set([
+    "しずさん感想", "ミアさん感想", "もこさん感想", "えうさん感想", "ちびさん感想", "ミルフィさん感想", "アメリアさん感想",
+  ])],
+  ["659ae22b401a27a4bca6da0ef342efd58b28b1cc165f3d32cc8b802135116607", new Set(["3年前の今頃は1万人耐久してた"])],
+  ["59d1c427961b10883c2d3b17b772920ce0148f27b9ba08c7ceefa993588dd8d6", new Set(["(キャンセル)"])],
+  ["addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88", new Set(["今日歌えなかったのは次回に"])],
+  ["e7222a91ae57bdfda1f088c68eda67af15f2e205b416603a3cd95dd84713043a", new Set(["㊗ 1,000人達成 ㊗"])],
+  ["9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1", new Set(["(予告の時間だよ)"])],
+  ["daa5b33f30849ad8f51e3e4a341e4437211118a6345e7c3c9c18c570a9f391f4", new Set(["再起動の為一旦オフラインに"])],
+  ["eea0b29c20df0499c8615d9923b9ac1461e842580dc94a8bb75e87694a960dd3", new Set(["音量チェック"])],
+  ["016e10a4d788a2121bf17ef9ce966e5619f39b907249a7f1f1ad9d991b7fcc5d", new Set(["サイゼリヤの話オモロかったw"])],
+  ["06bd48e78ee945d7277ad6a7129142a29217e446b396311f90e7647d0cef12c9", new Set(["サドデレボイス販売中！"])],
+  ["f24981ce65cfc831d89cf1a30adeeca3c27a168c2b1f22e93e5392ff66103894", new Set(["8月の新しいチャレンジ"])],
+  ["b04aa8bcb7319194e2eb49532361b52f9c69682e2391caa690f814dbbf240a3c", new Set(["弾き語り再開"])],
+  ["42905902c261c911575a27b731c7b2787aa9198c4a7df808ac4135eb18de5118", new Set(["(音量チェックから"])],
+  ["d8fa84948e6a14761c1282b08d3ff97909311696b94e344fb9cb66e17e19c565", new Set(["休憩:牛乳パンもぐもぐ"])],
+  ["1af631bc2ab20bdb747ac3472747891c983e70837523efde6ad2a7b65c4d41d7", new Set(["100曲歌いきり達成！！"])],
+  ["82f54a2f57ce35898615d6b461eab89604fb94a22958c5b4ff65d485024153d7", new Set(["はじめの挨拶", "終わりの挨拶"])],
+  ["e3c5ffcfd932a59fdcb1509d526c512c6113a00c519195153ec91d5d19bf85a7", new Set(["はじめの挨拶", "終わりの挨拶"])],
+  ["443da0c1db13b4aa0ccab16fb9669ba9ea086f290ee9322498ab6f352f7050cc", new Set(["伯方の塩キャンセル", "ミリしらプリキュアチャレンジ"])],
+  ["135df318540aff50b6c0aae4adfce203debcd1b63a4a750dd61c5749eab9f893", new Set(["勇者と悪の美学について", "フリーレンや勇者ヨシヒコの感想"])],
+  ["2c8b3e1800a624fe53dc9a2f1bafb6568f8820c1ed7cb3082bffbd745cd1887c", new Set(["000名様達成"])],
+  ["e1e8ceae96c624fa64f350e8fca4b5e743608c5ca0435626fb6417b350a79c83", new Set(["締めの挨拶"])],
+  ["5c51cf7224987245ad77ddc3ed788f0af7bc2a26dc5e861e4dd51dc44854c9e3", new Set(["2万人達成㊗㊗㊗"])],
+  ["4ade3d7cd6fee19793ebf822817b2bf7f750973b32450adc3e4f02fdba63e5fc", new Set(["入信用タイムスタンプ"])],
+  ["9f7992f8df392d38f9331321486300c71ce474117ea78741b2261be2941917ec", new Set(["閉めの挨拶"])],
+  ["c728d89c08ae88a35328e561e0e8237a7ca41603f41602cf84b3e3cfb7dc4743", new Set(["名探偵コナンの雑談"])],
+  ["c393b3aa879ae4155bd68579997d51538e5846b2c76f5d0b684a42d2e22a20a1", new Set(["㊗ 4,000人達成 ㊗"])],
+  ["4a9f8e9d2068168b661e82152a89e22e58ff6ced50711a9491391b15730d761e", new Set(["機材トラブルにつきここから！"])],
+  ["d1168c68e8b644a8a07427f9af72bb6b73e00f3c06255002e04914f16fd743d3", new Set(["MC2 (Talk)"])],
+  ["f82ca590f5648863fff5bc9c0435aa99f44a210b0f055433e18178f603c258be", new Set(["開演前のご挨拶"])],
+  ["8f6931da27cc8151b3f7fb4e0163c07b238cebca5bd9ee21790850b466063ebf", new Set(["40万人達成!!"])],
+  ["252d604b36225d4a16ad3a4b0e3a0b64f9656d7fe0ada9c101c3735b6714e923", new Set(["電波チェック"])],
+  ["f90c0d67a7cc35526d97b7f46e03172c1db3094cddf6043654e0e3108a0a7af9", new Set(["さまとんについて"])],
+  ["b79cdf8deac7d22c36320bc75d4c69ecc3bbe4891dae163ef78aa5d247e76606", new Set(["離席中のつぶれたなこ"])],
+  ["0381d99c0dd2c8c3cacd9d7ade4eb9a1340d3cc4f8e7f32fe221fdf858cd2b4b", new Set(["水分補給助かる〜"])],
+  ["70b8b925725feb23b4743e3479c8f071cce4736534011f9d694da3feae736ce2", new Set(["200％達成"])],
+  ["201cea643e0d3e23851743bb3cb0c05e648834548e928ec3ed06e9003e6e08b3", new Set(["最後の挨拶"])],
+  ["6f6c5c547c35d25427ecd8780243a858466436857172c345f855c47230bd76c8", new Set(["OPスタート"])],
+  ["636b75d9748c69f725265fed45b7378faa9b68454e299da8b894744213a9189d", new Set(["※編み物について", "※まどマギ新作についての感想"])],
+  ["0bf3b8880078abf8016686411df9674e22bdb3514ecc1fa32a007781474cb9e6", new Set(["個展・コラボカフェについて"])],
+  ["42734abd53f8dd702c0aabc0d2752c43dcb7945662049393d75dbf29c00237ff", new Set(["1通目・・・仕事の変化→ペットの話に"])],
+  ["cd68601d67481f8a25c11b8544fd5ec4566e940701c9d1b57114109670e5a611", new Set(["開演"])],
+  ["f72d3dc695600b152a61ec0c4825039bf03653af7bd50a24c7761ad8ae8e3c84", new Set(["Vack-ON!! Blink side 振り返り"])],
+  ["c776f69a9e14e5f412e5084def96b086dedf3664a62a995b244ede5a39706984", new Set(["ばちゃすての振り返り"])],
+  ["0307ee20170acfbb8ec4f9f52cfb1d136a76e01c0c0ff3589f4360fe5df096df", new Set(["特大スクープ詳細は次回！！！"])],
+  ["db6e48ac96ece9a1ffb1fabc447175845a31779438fa722efb07879587e64838", new Set(["締めの挨拶"])],
+  ["aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710", new Set(["～8"])],
+  ["1417a20bd96f281a8175858186e650a70612f18bb745400dc20ca8d0161c253f", new Set(["ワンマンライブ12"])],
+  ["4bb6b16914332005d78c5618640485453eff7d6369b6b5a2216185e6647522ac", new Set(["【#雑談】🍔9"])],
+]);
+
+function reviewedSourceNonSongReason(song) {
+  const sourceHash = String(song?.sourceHash || "");
+  const title = String(song?.title || "").trim();
+  const artist = String(song?.artist || "").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const unknownArtist = /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist);
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.hinataVocaloid &&
+      !/^\d{2},\d{1,2}:\d{2}/u.test(raw) &&
+      title !== "桜ノ雨ｱｶﾍﾟﾗ") return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.kokoneConan &&
+      !raw.includes("▶")) return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.kanraMorning &&
+      !/\s[\/／]\s/u.test(raw)) return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.vezaliusDam &&
+      !/^\p{Nd}{2}[.．]\s/u.test(raw)) return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.uraraAnniversary &&
+      title !== "Luv Rendezvous 💎 七海うらら") return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.inoriAcoustic &&
+      unknownArtist) return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.pleuvoirFirstKaraoke &&
+      !/[\/／]/u.test(raw)) return "reviewed_mixed_chapter_comment";
+
+  if (sourceHash === REVIEWED_MIXED_SOURCE_HASHES.aranneHundredSongs &&
+      (/^休憩\d+$/u.test(title) || title === "100曲達成！")) {
+    return "reviewed_source_activity_chapter";
+  }
+
+  if (sourceHash === "4f0ebf635214d0dc35c7423a0a51578f8996f8086ee17aa5ec573be364db84a9" &&
+      title === "トーク" && artist === "お見送り" &&
+      /トーク\s*[（(]お見送り[）)]/u.test(raw)) {
+    return "reviewed_source_activity_chapter";
+  }
+
+  if (REVIEWED_ACTIVITY_TITLES_BY_HASH.get(sourceHash)?.has(title)) {
+    return "reviewed_source_activity_chapter";
+  }
+  return null;
+}
+
 function unambiguousNonSongReason(song) {
   const title = String(song?.title || "").trim();
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").trim();
   const sourceHash = String(song?.sourceHash || "");
+
+  const reviewedReason = reviewedSourceNonSongReason(song);
+  if (reviewedReason) return reviewedReason;
 
   if (REVIEWED_BAD_DESCRIPTION_HASHES.has(sourceHash) && /God Miracles Today\s+11:11/iu.test(raw)) {
     return "reviewed_bad_description_source";
@@ -281,6 +394,10 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
 function repairKnownSourceCredit(song) {
   const hash = String(song?.sourceHash || "");
 
+  if (hash === REVIEWED_MIXED_SOURCE_HASHES.uraraAnniversary &&
+      /^Luv Rendezvous\s*💎\s*七海うらら$/u.test(String(song?.title || "").trim())) {
+    return { ...song, title: "Luv Rendezvous", artist: "七海うらら" };
+  }
   if (hash === "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9" &&
       /^\d+(?:st|nd|rd|th)アルバム「[^」]+」より$/iu.test(String(song?.artist || "").normalize("NFKC").trim())) {
     return { ...song, artist: "Eighty eight" };
