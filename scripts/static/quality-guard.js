@@ -311,6 +311,10 @@ function repairKnownSourceCredit(song) {
       /\b1\/2\/Kawamoto Makoto\/Anime\b/iu.test(String(song?.raw || ""))) {
     return { ...song, title: "1/2", artist: "川本真琴" };
   }
+  if (hash === "401adaa520f8e84434c4e8581ede7277564e44dc0448fe962bccd7fe78d6046a" &&
+      song?.title === "FLAGS" && /^T[.]M[.]Revolution\s*[（(].*(?:OP|主題歌)/iu.test(String(song?.artist || ""))) {
+    return { ...song, artist: "T.M.Revolution" };
+  }
   if (hash === MIXED_CLAUDE_CHAPTER_HASH &&
       song?.title === "ハッピーシンセサイザ" &&
       isUnknownArtistValue(song?.artist) &&
