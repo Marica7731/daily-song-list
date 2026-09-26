@@ -1031,6 +1031,17 @@ test("reviewed September 26 slash-setlist source restores song and artist fields
 });
 
 
+test("year suffix normalization tolerates alignment whitespace in raw setlists", () => {
+  for (const [title, artist, raw, expected] of [
+    ["ヒトリゴト", "ClariS (2017)", "04:02:18   ヒトリゴト / ClariS  (2017) / TVアニメ「エロマンガ先生」OP", "ClariS"],
+    ["そばかす", "JUDY AND MARY (1996)", "05:07:15   そばかす / JUDY AND MARY   (1996) / TVアニメ「るろうに剣心」OP1", "JUDY AND MARY"],
+    ["青のすみか", "キタニタツヤ (2023)", "04:34:28 青のすみか / キタニタツヤ  (2023) / TVアニメ「呪術廻戦」OP", "キタニタツヤ"],
+    ["もうどうなってもいいや", "星街すいせい (2025)", "02:23:57 もうどうなってもいいや / 星街すいせい  (2025) / TVアニメ「GQuuuuuuX」ED", "星街すいせい"],
+  ]) {
+    assert.equal(normalizeReleaseMetadataArtist(song(title, artist, {raw})).artist, expected);
+  }
+});
+
 test("trailing release years are removed only from slash-delimited artist credits", () => {
   assert.equal(
     normalizeReleaseMetadataArtist(song("1/2", "川本真琴 (1997)", {
@@ -1105,7 +1116,7 @@ test("reviewed malformed LOSER bilingual credit is normalized without deleting t
   assert.equal(repaired.artist, "米津玄師");
 });
 
-test("metadata-only slash rows with no credited artist are retained, not guessed or deleted", () => {
+test("externally verified residual source hashes enrich missing artists without deleting rows", () => {
   const rows = [
     song("鳥の詩", "未記載", {
       raw: "40:14 鳥の詩/key作品/AIR",
@@ -1115,8 +1126,19 @@ test("metadata-only slash rows with no credited artist are retained, not guessed
       raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
       sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
     }),
+    song("猫/DISH//", "", {
+      raw: "01:17:26　猫/DISH//",
+      sourceHash: "a0168868ebd80d68af686eb1b99bd745475277f435c70baaf9d5122a4a3aac37",
+    }),
   ];
   const result = cleanStaticVideos([video(99, rows)]);
   assert.equal(result.audit.quarantinedOccurrences, 0);
-  assert.deepEqual(result.videos[0].songs.map((row) => row.title), ["鳥の詩", "檄!帝国華撃団"]);
+  assert.deepEqual(
+    result.videos[0].songs.map((row) => [row.title, row.artist]),
+    [
+      ["鳥の詩", "Lia"],
+      ["檄!帝国華撃団", "横山智佐（真宮寺さくら）＆帝国歌劇団"],
+      ["猫", "DISH//"],
+    ],
+  );
 });
