@@ -415,3 +415,12 @@ test("release metadata normalization removes work labels only when coupled to a 
     "Unit【Official Artist Name】",
   );
 });
+
+
+test("Japanese game metadata suffix is removed from an otherwise valid artist credit", () => {
+  const repaired = normalizeReleaseMetadataArtist(song(
+    "愛ADRENALIN",
+    "狛江･クリストフ･ヨウスケ(鈴木達央) / ゲーム『Scared Rider Xechs』キャラクターソングCD第四弾『Scared Rider Xechs DRAMATIC CHARACTER CD Vol.4』収録",
+  ));
+  assert.equal(repaired.artist, "狛江･クリストフ･ヨウスケ(鈴木達央)");
+});
