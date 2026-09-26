@@ -300,6 +300,7 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
       normalizedReleaseMetadataOccurrences: audit.normalizedReleaseMetadataOccurrences,
       repairedDateCreditOccurrences: audit.repairedDateCreditOccurrences,
       repairedStructuredCreditOccurrences: audit.repairedStructuredCreditOccurrences,
+      repairedKnownSourceCreditOccurrences: audit.repairedKnownSourceCreditOccurrences,
       deduplicatedOccurrences: audit.deduplicatedOccurrences,
       repeatedDescriptionSources: audit.repeatedDescriptionSources.length,
       byReason: audit.byReason,
