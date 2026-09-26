@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-26T23:05:18.686Z",
+  "generatedAt": "2026-09-26T23:45:51.263Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7475,
-  "inputOccurrences": 89611,
-  "visibleVideos": 6080,
-  "visibleOccurrences": 88461,
-  "quarantinedOccurrences": 1086,
-  "quarantinedVideos": 432,
-  "deduplicatedOccurrences": 64,
+  "inputVideos": 7502,
+  "inputOccurrences": 89842,
+  "visibleVideos": 6101,
+  "visibleOccurrences": 88684,
+  "quarantinedOccurrences": 1095,
+  "quarantinedVideos": 438,
+  "deduplicatedOccurrences": 63,
   "normalizedArtistOccurrences": 403,
-  "normalizedReleaseMetadataOccurrences": 519,
+  "normalizedReleaseMetadataOccurrences": 1122,
   "repairedDateCreditOccurrences": 24,
-  "repairedStructuredCreditOccurrences": 224,
-  "repairedKnownSourceCreditOccurrences": 136,
+  "repairedStructuredCreditOccurrences": 268,
+  "repairedKnownSourceCreditOccurrences": 148,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 2,
     "reviewed_mixed_chapter_comment": 288,
-    "reviewed_source_activity_chapter": 298,
+    "reviewed_source_activity_chapter": 301,
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 18,
     "confirmed_chat_section": 8,
@@ -29,9 +29,9 @@
     "confirmed_stream_start_marker": 10,
     "reviewed_non_song_chapter_in_numbered_setlist": 23,
     "dated_future_stream_announcement": 6,
-    "reviewed_bad_description_source": 11,
+    "reviewed_bad_description_source": 13,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 370,
+    "prayer_broadcast_timeline": 374,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -96,9 +96,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 173,
-      "channelCount": 164,
-      "distinctVideoTitles": 172,
+      "videoCount": 176,
+      "channelCount": 167,
+      "distinctVideoTitles": 175,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -150,9 +150,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 78,
-      "channelCount": 78,
-      "distinctVideoTitles": 78,
+      "videoCount": 79,
+      "channelCount": 79,
+      "distinctVideoTitles": 79,
       "examples": [
         {
           "videoId": "K2_yRIPIUmE",
@@ -574,11 +574,11 @@
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 43,
+      "quarantinedOccurrences": 44,
       "deduplicatedOccurrences": 2,
       "byReason": {
         "confirmed_talk_section": 1,
-        "prayer_broadcast_timeline": 35,
+        "prayer_broadcast_timeline": 36,
         "reviewed_source_activity_chapter": 2,
         "dated_future_stream_announcement": 1,
         "bible_verse_broadcast": 1,
@@ -685,22 +685,22 @@
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 80,
+      "quarantinedOccurrences": 85,
       "deduplicatedOccurrences": 16,
       "byReason": {
-        "prayer_broadcast_timeline": 74,
-        "reviewed_bad_description_source": 2,
+        "prayer_broadcast_timeline": 77,
+        "reviewed_bad_description_source": 4,
         "dated_stream_announcement": 1,
         "reviewed_source_activity_chapter": 2,
         "unrelated_livestream_listing": 1
       }
     },
     "2026-09-26": {
-      "quarantinedOccurrences": 59,
-      "deduplicatedOccurrences": 1,
+      "quarantinedOccurrences": 62,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 37,
-        "reviewed_source_activity_chapter": 14,
+        "reviewed_source_activity_chapter": 17,
         "confirmed_stream_start_marker": 1,
         "reviewed_bad_description_source": 7
       }
@@ -990,6 +990,181 @@
   ],
   "normalizedReleaseMetadataExamples": [
     {
+      "videoId": "qt3CZg8GcXs",
+      "title": "milk",
+      "before": "Aiko(2010)",
+      "after": "Aiko",
+      "raw": "1.      5:24　 『milk』/Aiko(2010)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "さよならを おしえて",
+      "before": "田村 ゆかり(2002)",
+      "after": "田村 ゆかり",
+      "raw": "2. 　 10:24   『さよならを おしえて』/田村 ゆかり(2002)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "フォニイ",
+      "before": "ツミキ feat. 可不(2021)",
+      "after": "ツミキ feat. 可不",
+      "raw": "3.      15:33   『フォニイ』/ツミキ feat. 可不(2021)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "運命共同体！",
+      "before": "音莉飴(2023)",
+      "after": "音莉飴",
+      "raw": "4.      19:14   『運命共同体！』/音莉飴(2023)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "staple stable",
+      "before": "戦場ヶ原ひたぎ(斎藤千和)(2009)",
+      "after": "戦場ヶ原ひたぎ(斎藤千和)",
+      "raw": "5.      23:45   『staple stable』/戦場ヶ原ひたぎ(斎藤千和)(2009)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "BLUE BIRD",
+      "before": "浜崎あゆみ(2006)",
+      "after": "浜崎あゆみ",
+      "raw": "6.      29:00   『BLUE BIRD』/浜崎あゆみ(2006)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "恋愛レボリューション21",
+      "before": "モーニング娘。(2000)",
+      "after": "モーニング娘。",
+      "raw": "7.      33:30   『 恋愛レボリューション21』/モーニング娘。(2000)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "Yeah! めっちゃホリディ",
+      "before": "松浦亜弥(2003)",
+      "after": "松浦亜弥",
+      "raw": "8.      38:48   『Yeah! めっちゃホリディ』/松浦亜弥(2003)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "Sparkling Daydream",
+      "before": "ZAQ(2012)",
+      "after": "ZAQ",
+      "raw": "9.      43:06   『Sparkling Daydream』/ZAQ(2012)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "シャボン玉",
+      "before": "モーニング娘。(2003)",
+      "after": "モーニング娘。",
+      "raw": "10.    47:30   『シャボン玉』/モーニング娘。(2003)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "I can't stop my love for you",
+      "before": "愛内里菜(2002)",
+      "after": "愛内里菜",
+      "raw": "11.    52:13   『I can't stop my love for you』/愛内里菜(2002)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "チェリーポップ",
+      "before": "DECO*27(2025)",
+      "after": "DECO*27",
+      "raw": "12.    57:55   『チェリーポップ』/DECO*27(2025)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "マシュマロ",
+      "before": "DECO*27(2025)",
+      "after": "DECO*27",
+      "raw": "13.    1:00:30『マシュマロ』/DECO*27(2025)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "空色デイズ",
+      "before": "中川翔子(2007)",
+      "after": "中川翔子",
+      "raw": "14.    1:03:36『空色デイズ』/中川翔子(2007)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "シリウス",
+      "before": "藍井エイル(2013)",
+      "after": "藍井エイル",
+      "raw": "15.    1:07:52『シリウス』/藍井エイル(2013)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "ココ☆ナツ",
+      "before": "ももいろクローバー(2010)",
+      "after": "ももいろクローバー",
+      "raw": "16.    1:13:48『ココ☆ナツ』/ももいろクローバー(2010)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "オリオンをなぞる",
+      "before": "UNISON SQUARE GARDEN(2011)",
+      "after": "UNISON SQUARE GARDEN",
+      "raw": "17.    1:18:48『オリオンをなぞる』/UNISON SQUARE GARDEN(2011)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "車輪の唄",
+      "before": "BUMP OF CHICKEN(2004)",
+      "after": "BUMP OF CHICKEN",
+      "raw": "18.    1:23:29『車輪の唄』/BUMP OF CHICKEN(2004)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "サウダージ",
+      "before": "ポルノグラフィティ(2001)",
+      "after": "ポルノグラフィティ",
+      "raw": "19.    1:28:00『サウダージ』/ポルノグラフィティ(2001)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "ラビュー・ラビュー",
+      "before": "ポルノグラフィティ(2000)",
+      "after": "ポルノグラフィティ",
+      "raw": "20.    1:32:12『ラビュー・ラビュー』/ポルノグラフィティ(2000)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "ファッとして桃源郷",
+      "before": "新庄かなえ(三森すずこ) (2015)",
+      "after": "新庄かなえ(三森すずこ)",
+      "raw": "21.    1:37:47『ファッとして桃源郷』/新庄かなえ(三森すずこ) (2015)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "正解はひとつ!じゃない!!",
+      "before": "ミルキィホームズ(2013)",
+      "after": "ミルキィホームズ",
+      "raw": "22.    1:42:02『正解はひとつ!じゃない!!』/ミルキィホームズ(2013)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "Daydream cafe 歌詞",
+      "before": "Petit Rabbit's(2014)",
+      "after": "Petit Rabbit's",
+      "raw": "23.    1:46:17『Daydream cafe 歌詞』/Petit Rabbit's(2014)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "ハッピー☆マテリアル",
+      "before": "鳴滝風香（こやまきみこ）鳴滝史伽（狩野茉莉）葉加瀬聡美（門脇舞以）長谷川千雨（志村由美）エヴァンジェリン・A・K・マクダウェル（松岡由貴）(2005)",
+      "after": "鳴滝風香(こやまきみこ)鳴滝史伽(狩野茉莉)葉加瀬聡美(門脇舞以)長谷川千雨(志村由美)エヴァンジェリン・A・K・マクダウェル(松岡由貴)",
+      "raw": "24.    1:50:36『ハッピー☆マテリアル』/鳴滝風香（こやまきみこ）鳴滝史伽（狩野茉莉）葉加瀬聡美（門脇舞以）長谷川千雨（志村由美）エヴァンジェリン・A・K・マクダウェル（松岡由貴）(2005)"
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "1000%SPARKING!",
+      "before": "絡繰茶々丸（渡辺明乃）葉加瀬聡美（門脇舞）エヴァンジェリン・A・K・マクダウェル（松岡由貴）(2006)",
+      "after": "絡繰茶々丸(渡辺明乃)葉加瀬聡美(門脇舞)エヴァンジェリン・A・K・マクダウェル(松岡由貴)",
+      "raw": "25.    1:55:43『1000%SPARKING!』/絡繰茶々丸（渡辺明乃）葉加瀬聡美（門脇舞）エヴァンジェリン・A・K・マクダウェル（松岡由貴）(2006)"
+    },
+    {
       "videoId": "GwBi6DHUHXI",
       "title": "Web of Night",
       "before": "T.M.Revolution（2004/07/28）※English Version",
@@ -1002,6 +1177,13 @@
       "before": "BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断",
       "after": "BoA",
       "raw": "0:28:33　07.まもりたい～White Wishes～／BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断"
+    },
+    {
+      "videoId": "yywAfEC5zbU",
+      "title": "革命道中",
+      "before": "アイナ・ジ・エンド（2025）",
+      "after": "アイナ・ジ・エンド",
+      "raw": "8:32:27 革命道中/アイナ・ジ・エンド（2025）"
     },
     {
       "videoId": "8Ih_yJAksUs",
@@ -1156,188 +1338,6 @@
       "before": "アルバム 幸福",
       "after": "岡村靖幸",
       "raw": "1:53:27 彼氏になって優しくなって（アルバム 幸福）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "イケナイコトカイ",
-      "before": "アルバム DATE",
-      "after": "岡村靖幸",
-      "raw": "2:00:45 イケナイコトカイ（アルバム DATE）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "真夜中のサイクリング",
-      "before": "アルバム OH!ベスト",
-      "after": "岡村靖幸",
-      "raw": "2:06:25 真夜中のサイクリング（アルバム OH!ベスト）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "カルアミルク",
-      "before": "アルバム 家庭教師",
-      "after": "岡村靖幸",
-      "raw": "2:21:41 カルアミルク（アルバム 家庭教師）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "ぶーしゃかLOOP",
-      "before": "アルバム 幸福",
-      "after": "岡村靖幸",
-      "raw": "2:27:12 ぶーしゃかLOOP（アルバム 幸福）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "あの娘ぼくがロングシュート決めたらどんな顔するだろう",
-      "before": "アルバム 家庭教師",
-      "after": "岡村靖幸",
-      "raw": "2:32:37 あの娘ぼくがロングシュート決めたらどんな顔するだろう（アルバム 家庭教師）"
-    },
-    {
-      "videoId": "jsQX01izzbY",
-      "title": "だいすき",
-      "before": "アルバム 靖幸",
-      "after": "岡村靖幸",
-      "raw": "2:37:02 だいすき（アルバム 靖幸）"
-    },
-    {
-      "videoId": "fnDcGmE0duc",
-      "title": "そばかす",
-      "before": "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
-      "after": "JUDY AND MARY (1996)",
-      "raw": "05:07:15   そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1"
-    },
-    {
-      "videoId": "R98zixhrevE",
-      "title": "RE:I AM",
-      "before": "Aimer【機動戦士ガンダムUC】（2013/03/20）",
-      "after": "Aimer",
-      "raw": "0:18:30　04.RE:I AM／Aimer【機動戦士ガンダムUC】（2013/03/20）"
-    },
-    {
-      "videoId": "kZLz1DFbCUU",
-      "title": "キェルツェの螺旋",
-      "before": "the cabs（Take1）",
-      "after": "the cabs",
-      "raw": "1:47:38　キェルツェの螺旋/the cabs（Take1）"
-    },
-    {
-      "videoId": "kZLz1DFbCUU",
-      "title": "キェルツェの螺旋",
-      "before": "the cabs（Take2）",
-      "after": "the cabs",
-      "raw": "1:49:53キェルツェの螺旋/the cabs（Take2）"
-    },
-    {
-      "videoId": "Kg4cWnWbWkc",
-      "title": "少女レイ",
-      "before": "みきとP(ピアノver.)",
-      "after": "みきとP",
-      "raw": "0:13:40   少女レイ/みきとP(ピアノver.)"
-    },
-    {
-      "videoId": "Kg4cWnWbWkc",
-      "title": "ハナミズキ",
-      "before": "一青窈(ピアノver.)",
-      "after": "一青窈",
-      "raw": "1:37:34   ハナミズキ/一青窈(ピアノver.)"
-    },
-    {
-      "videoId": "Kg4cWnWbWkc",
-      "title": "センティメント",
-      "before": "ポリスピカデリー(cover 羽月うずな",
-      "after": "ポリスピカデリー",
-      "raw": "EDBGM  2:46:59  センティメント/ポリスピカデリー(cover 羽月うずな"
-    },
-    {
-      "videoId": "Za-Ef-BffQ4",
-      "title": "When She Loved Me",
-      "before": "Jessie [CV: Sarah McLachlan",
-      "after": "Jessie [CV: Sarah McLachlan]",
-      "raw": "00:30:20  05. When She Loved Me / Jessie [CV: Sarah McLachlan]"
-    },
-    {
-      "videoId": "UdoA0Hh2HCg",
-      "title": "パプリカ",
-      "before": "米津玄師 (2020/02/03)",
-      "after": "米津玄師",
-      "raw": "0:26:11 🎼パプリカ / 米津玄師 (2020/02/03)"
-    },
-    {
-      "videoId": "UdoA0Hh2HCg",
-      "title": "真夏の果実",
-      "before": "サザンオールスターズ (1990/07/25)※1コーラスのみ",
-      "after": "サザンオールスターズ",
-      "raw": "0:39:00 🎼真夏の果実 / サザンオールスターズ (1990/07/25)※1コーラスのみ"
-    },
-    {
-      "videoId": "qENxBvbn29Y",
-      "title": "Kick&Spin",
-      "before": "Alexandros] ※初出し",
-      "after": "[Alexandros] ※初出し",
-      "raw": "M.08🔺 0:36:02 【Kick&Spin】/ [Alexandros] ※初出し"
-    },
-    {
-      "videoId": "qENxBvbn29Y",
-      "title": "Oblivion",
-      "before": "Alexandros] ※初出し",
-      "after": "[Alexandros] ※初出し",
-      "raw": "M.09🔥 0:41:40 【Oblivion】/ [Alexandros] ※初出し"
-    },
-    {
-      "videoId": "qENxBvbn29Y",
-      "title": "今まで君が泣いた分取り戻そう",
-      "before": "Alexandros] ※初出し",
-      "after": "[Alexandros] ※初出し",
-      "raw": "M.10🔺 0:45:45 【今まで君が泣いた分取り戻そう】/ [Alexandros] ※初出し"
-    },
-    {
-      "videoId": "4bXA550Sl9Y",
-      "title": "センティメント",
-      "before": "ポリスピカデリー(cover 羽月うずな",
-      "after": "ポリスピカデリー",
-      "raw": "EDBGM  2:56:13  センティメント/ポリスピカデリー(cover 羽月うずな"
-    },
-    {
-      "videoId": "GOfpl8Mx73k",
-      "title": "LOSER",
-      "before": "米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)",
-      "after": "米津玄師 [LOSER / Yonezu Kenshi",
-      "raw": "0:27:32 LOSER / 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)"
-    },
-    {
-      "videoId": "3DSHxsHub6g",
-      "title": "可愛くてごめん",
-      "before": "HoneyWorks feat.ちゅーたん（cv:早見沙織",
-      "after": "HoneyWorks feat.ちゅーたん(cv:早見沙織)",
-      "raw": "3:08:02　11. 可愛くてごめん / HoneyWorks feat.ちゅーたん（cv:早見沙織)"
-    },
-    {
-      "videoId": "vrCUudRPI_w",
-      "title": "キェルツェの螺旋",
-      "before": "the cabs（Take1）",
-      "after": "the cabs",
-      "raw": "1:28:06　キェルツェの螺旋/the cabs（Take1）"
-    },
-    {
-      "videoId": "vrCUudRPI_w",
-      "title": "キェルツェの螺旋",
-      "before": "the cabs（Take2）",
-      "after": "the cabs",
-      "raw": "1:30:26 キェルツェの螺旋/the cabs（Take2）"
-    },
-    {
-      "videoId": "YlCF-NgqZ84",
-      "title": "僕らのステラ",
-      "before": "流星隊]守沢千秋(CV.帆世雄一)、深海奏汰(CV.西山宏太朗)、南雲鉄虎(CV.中島ヨシキ)、高峯翠(CV.渡辺拓海)、仙石忍(CV.新田杏樹)",
-      "after": "[流星隊]守沢千秋(CV.帆世雄一)、深海奏汰(CV.西山宏太朗)、南雲鉄虎(CV.中島ヨシキ)、高峯翠(CV.渡辺拓海)、仙石忍(CV.新田杏樹)",
-      "raw": "0:36:15 ④　僕らのステラ / [流星隊]守沢千秋(CV.帆世雄一)、深海奏汰(CV.西山宏太朗)、南雲鉄虎(CV.中島ヨシキ)、高峯翠(CV.渡辺拓海)、仙石忍(CV.新田杏樹)"
-    },
-    {
-      "videoId": "Lhuj1lhlD7g",
-      "title": "センティメント",
-      "before": "ポリスピカデリー(cover 羽月うずな",
-      "after": "ポリスピカデリー",
-      "raw": "EDBGM  1:50:05  センティメント/ポリスピカデリー(cover 羽月うずな"
     }
   ],
   "repairedDateCreditExamples": [
@@ -1518,10 +1518,100 @@
       "raw": "1:55:29　20.FLAGS／T.M.Revolution【戦国BASARA 劇場版-The Last Party-】（2011/06/22）"
     },
     {
+      "videoId": "34_589cgF_0",
+      "before": "さくらとことり／はな／「向日葵の教会と長い夏休み」ED - 枕 (2013)",
+      "after": "さくらとことり - はな",
+      "raw": "0:10:02 さくらとことり／はな／「向日葵の教会と長い夏休み」ED／枕 (2013)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "Secret Liqueur／霜月はるか／「働くオトナの恋愛事情」OP - あかべぇそふとすりぃ (2016)",
+      "after": "Secret Liqueur - 霜月はるか",
+      "raw": "0:26:10 Secret Liqueur／霜月はるか／「働くオトナの恋愛事情」OP／あかべぇそふとすりぃ (2016)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "空恋／安田みずほ／「ソラコイ」ED - チェルシーソフト (2015)",
+      "after": "空恋 - 安田みずほ",
+      "raw": "0:45:13 空恋／安田みずほ／「ソラコイ」ED／チェルシーソフト (2015)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "sign - 夢乃ゆき／「ソラコイ」OP／チェルシーソフト (2015)",
+      "after": "sign - 夢乃ゆき",
+      "raw": "0:55:23 sign／夢乃ゆき／「ソラコイ」OP／チェルシーソフト (2015)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "恋ひ恋ふ縁／KOTOKO／「千恋＊万花」OP - ゆずソフト (2016)",
+      "after": "恋ひ恋ふ縁 - KOTOKO",
+      "raw": "1:04:00 恋ひ恋ふ縁／KOTOKO／「千恋＊万花」OP／ゆずソフト (2016)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "astral ability／橋本みゆき&佐咲紗花／「RIDDLE JOKER」OP - ゆずソフト (2018)",
+      "after": "astral ability - 橋本みゆき&佐咲紗花",
+      "raw": "1:06:45 astral ability／橋本みゆき&佐咲紗花／「RIDDLE JOKER」OP／ゆずソフト (2018)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "Scarlet／榊原ゆい／「DRACU-RIOT!」OP - ゆずソフト (2012)",
+      "after": "Scarlet - 榊原ゆい",
+      "raw": "1:08:49 Scarlet／榊原ゆい／「DRACU-RIOT!」OP／ゆずソフト (2012)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "Change&Chance!／榊原ゆい／「のーぶる☆わーくす」OP - ゆずソフト (2010)",
+      "after": "Change&Chance! - 榊原ゆい",
+      "raw": "1:10:49 Change&Chance!／榊原ゆい／「のーぶる☆わーくす」OP／ゆずソフト (2010)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "メチャ恋らんまん☆／榊原ゆい／「天神乱漫 LUCKY or UNLUCKY!?」OP - ゆずソフト (2009)",
+      "after": "メチャ恋らんまん☆ - 榊原ゆい",
+      "raw": "1:14:01 メチャ恋らんまん☆／榊原ゆい／「天神乱漫 LUCKY or UNLUCKY!?」OP／ゆずソフト (2009)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "allegretto ～そらときみ～／KOTOKO／「この青空に約束を―」OP - 戯画 (2006)",
+      "after": "allegretto ～そらときみ～ - KOTOKO",
+      "raw": "1:43:21 allegretto ～そらときみ～／KOTOKO／「この青空に約束を―」OP／戯画 (2006)"
+    },
+    {
+      "videoId": "34_589cgF_0",
+      "before": "ダ・カーポII ～あさきゆめみし君と～ - yozuca*／「D.C.II ～ダ・カーポII～」OP／CIRCUS (2006)",
+      "after": "ダ・カーポII ～あさきゆめみし君と～ - yozuca*",
+      "raw": "1:59:04 ダ・カーポII ～あさきゆめみし君と～／yozuca*／「D.C.II ～ダ・カーポII～」OP／CIRCUS (2006)"
+    },
+    {
       "videoId": "deCbXl4T9RQ",
       "before": "惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング - 2026",
       "after": "惑星と恒星の違いがわからないの歌 - 幽音しの",
       "raw": "1:06:14    惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング/2026"
+    },
+    {
+      "videoId": "wf69gudLsmM",
+      "before": "ラムネ／Duca／「ラムネ」ED - ねこねこソフト (2004)",
+      "after": "ラムネ - Duca",
+      "raw": "1:03:58 ラムネ／Duca／「ラムネ」ED／ねこねこソフト (2004)"
+    },
+    {
+      "videoId": "wf69gudLsmM",
+      "before": "青い鳥／青葉りんご／「のーぶる☆わーくす」キャラソン - ゆずソフト (2010)",
+      "after": "青い鳥 - 青葉りんご",
+      "raw": "1:35:13 青い鳥／青葉りんご／「のーぶる☆わーくす」キャラソン／ゆずソフト (2010)"
+    },
+    {
+      "videoId": "wf69gudLsmM",
+      "before": "Call／霜月はるか／「できない私が、くり返す。」OP - あかべぇそふとすりぃ (2014)",
+      "after": "Re:Call - 霜月はるか",
+      "raw": "1:49:23 Re:Call／霜月はるか／「できない私が、くり返す。」OP／あかべぇそふとすりぃ (2014)"
+    },
+    {
+      "videoId": "wf69gudLsmM",
+      "before": "Liblume／霜月はるか／「生命のスペア I was born for you」OP - あかべぇそふとすりぃ (2016)",
+      "after": "Liblume - 霜月はるか",
+      "raw": "2:00:10 Liblume／霜月はるか／「生命のスペア I was born for you」OP／あかべぇそふとすりぃ (2016)"
     },
     {
       "videoId": "5HmM1qR9GkI",
@@ -1542,10 +1632,70 @@
       "raw": "2:26:26   おべんとうばこのうた(しのぴエディション)(Let me Go)/Sharp Hawks/1960"
     },
     {
+      "videoId": "d-w4f0zitV0",
+      "before": "Angelic Symphony／佐藤ひろ美／「GALAXY ANGEL Eternal Lovers」OP - ブロッコリー (2004)",
+      "after": "Angelic Symphony - 佐藤ひろ美",
+      "raw": "0:23:00 Angelic Symphony／佐藤ひろ美／「GALAXY ANGEL Eternal Lovers」OP／ブロッコリー (2004)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "Eternal Love 2004／佐藤ひろ美／「GALAXY ANGEL Eternal Lovers」ED - ブロッコリー (2004)",
+      "after": "Eternal Love 2004 - 佐藤ひろ美",
+      "raw": "0:27:37 Eternal Love 2004／佐藤ひろ美／「GALAXY ANGEL Eternal Lovers」ED／ブロッコリー (2004)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "Rumbling hearts／栗林みな実／「君が望む永遠」OP - âge (2001)",
+      "after": "Rumbling hearts - 栗林みな実",
+      "raw": "0:39:18 Rumbling hearts／栗林みな実／「君が望む永遠」OP／âge (2001)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "君が望む永遠／MEGUMI／「君が望む永遠」ED - âge (2001)",
+      "after": "君が望む永遠 - MEGUMI",
+      "raw": "0:44:19 君が望む永遠／MEGUMI／「君が望む永遠」ED／âge (2001)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "eternal promise／Dreamy crown／「終わりなき夏 永遠なる音律」OP - φâge (2009)",
+      "after": "eternal promise - Dreamy crown",
+      "raw": "1:25:48 eternal promise／Dreamy crown／「終わりなき夏 永遠なる音律」OP／φâge (2009)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "終わりなき夏 永遠なる音律／Dreamy crown／「終わりなき夏 永遠なる音律」ED - φâge (2009)",
+      "after": "終わりなき夏 永遠なる音律 - Dreamy crown",
+      "raw": "1:31:10 終わりなき夏 永遠なる音律／Dreamy crown／「終わりなき夏 永遠なる音律」ED／φâge (2009)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "最後のエデン／美郷あき／「マブラヴ オルタネイティヴ クロニクルズ」OP - âge (2010)",
+      "after": "最後のエデン - 美郷あき",
+      "raw": "1:42:18 最後のエデン／美郷あき／「マブラヴ オルタネイティヴ クロニクルズ」OP／âge (2010)"
+    },
+    {
+      "videoId": "d-w4f0zitV0",
+      "before": "マブラヴ／栗林みな実／「マブラヴ」OP - âge (2003)",
+      "after": "マブラヴ - 栗林みな実",
+      "raw": "1:48:30 マブラヴ／栗林みな実／「マブラヴ」OP／âge (2003)"
+    },
+    {
       "videoId": "1_kpWs0BAP4",
       "before": "ハローキティ/藤本房子/ハローキティテーマソング - 1977",
       "after": "ハローキティ - 藤本房子",
       "raw": "0:14:31   ハローキティ/藤本房子/ハローキティテーマソング/1977"
+    },
+    {
+      "videoId": "qMf7UuFfTJc",
+      "before": "Secret Liqueur／霜月はるか／ゲーム「働くオトナの恋愛事情」OP - あかべぇそふとすりぃ (2016)",
+      "after": "Secret Liqueur - 霜月はるか",
+      "raw": "0:25:09 Secret Liqueur／霜月はるか／ゲーム「働くオトナの恋愛事情」OP／あかべぇそふとすりぃ (2016)"
+    },
+    {
+      "videoId": "qMf7UuFfTJc",
+      "before": "Magenta Tear／霜月はるか／ゲーム「働くオトナの恋愛事情2」OP - あかべぇそふとすりぃ (2018)",
+      "after": "Magenta Tear - 霜月はるか",
+      "raw": "0:31:01 Magenta Tear／霜月はるか／ゲーム「働くオトナの恋愛事情2」OP／あかべぇそふとすりぃ (2018)"
     },
     {
       "videoId": "qMf7UuFfTJc",
@@ -1555,177 +1705,27 @@
     },
     {
       "videoId": "qMf7UuFfTJc",
-      "before": "Hanabi／Lia／アニメ「リトルバスターズ！〜Refrain〜」ED - ",
-      "after": "Hanabi - Lia",
-      "raw": "2:44:01 Hanabi／Lia／アニメ「リトルバスターズ！〜Refrain〜」ED／2013"
+      "before": "忘れじの最果て／nayuta／ゲーム「プトリカ 1st.cut:The Reason She Must Perish」OP - トトメトリ (2024)",
+      "after": "忘れじの最果て - nayuta",
+      "raw": "1:44:09 忘れじの最果て／nayuta／ゲーム「プトリカ 1st.cut:The Reason She Must Perish」OP／トトメトリ (2024)"
     },
     {
-      "videoId": "TEMzHXrTR6I",
-      "before": "トライアングラー/坂本真綾/マクロスＦ OP1 - ",
-      "after": "トライアングラー - 坂本真綾",
-      "raw": "0:09:12 トライアングラー/坂本真綾/マクロスＦ OP1/2008"
+      "videoId": "qMf7UuFfTJc",
+      "before": "櫻ノ詩／はな／ゲーム「サクラノ詩 -櫻の森の上を舞う-」OP - 枕 (2015)",
+      "after": "櫻ノ詩 - はな",
+      "raw": "1:53:51 櫻ノ詩／はな／ゲーム「サクラノ詩 -櫻の森の上を舞う-」OP／枕 (2015)"
     },
     {
-      "videoId": "TEMzHXrTR6I",
-      "before": "ビビデバ/星街すいせい - ",
-      "after": "ビビデバ - 星街すいせい",
-      "raw": "0:18:39 ビビデバ/星街すいせい/2024"
+      "videoId": "qMf7UuFfTJc",
+      "before": "ヒマワリの教会／はな／ゲーム「向日葵の教会と長い夏休み」OP - 枕 (2013)",
+      "after": "ヒマワリの教会 - はな",
+      "raw": "1:58:20 ヒマワリの教会／はな／ゲーム「向日葵の教会と長い夏休み」OP／枕 (2013)"
     },
     {
-      "videoId": "TEMzHXrTR6I",
-      "before": "only my railgun/FripSide/とある科学の超電磁砲 OP1 - 2009 ※コーラス有り",
-      "after": "only my railgun - FripSide",
-      "raw": "0:23:06 only my railgun/FripSide/とある科学の超電磁砲 OP1/2009　※コーラス有り"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "to the beginning/Kalafina/Fate/Zero 2ndシーズン OP - 2014 ※コーラス（梶浦語）有り",
-      "after": "to the beginning - Kalafina",
-      "raw": "0:29:09 to the beginning/Kalafina/Fate/Zero 2ndシーズン OP/2014　※コーラス（梶浦語）有り"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "光るなら/Goose house/四月は君の嘘 OP1 - 2014 ※コーラス（男性⇒女性）有り",
-      "after": "光るなら - Goose house",
-      "raw": "0:35:39 光るなら/Goose house/四月は君の嘘 OP1/2014　※コーラス（男性⇒女性）有り"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "SAVED./坂本真綾/いなり、こんこん、恋いろは。ED - ",
-      "after": "SAVED. - 坂本真綾",
-      "raw": "1:00:44 SAVED./坂本真綾/いなり、こんこん、恋いろは。ED/2014"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "Magia/Kalafina/魔法少女まどか☆マギカ ED - 2011 ※コーラス有り",
-      "after": "Magia - Kalafina",
-      "raw": "1:10:07 Magia/Kalafina/魔法少女まどか☆マギカ ED/2011　※コーラス有り"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "もっと、夢、見よう!!/桃井はるこ - ",
-      "after": "もっと、夢、見よう!! - 桃井はるこ",
-      "raw": "1:19:44 もっと、夢、見よう!!/桃井はるこ/2004"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "片翼の鳥/志方あきこ/うみねこのなく頃に OP - ",
-      "after": "片翼の鳥 - 志方あきこ",
-      "raw": "1:28:09 片翼の鳥/志方あきこ/うみねこのなく頃に OP/2009"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "花帰葬/志方あきこ/PCゲーム 花帰葬 OP - ",
-      "after": "花帰葬 - 志方あきこ",
-      "raw": "1:33:24 花帰葬/志方あきこ/PCゲーム 花帰葬 OP/2003"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED - ",
-      "after": "アムリタ - 牧野由依",
-      "raw": "1:39:58 アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED/2005"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "いのちの名前/木村弓/千と千尋の神隠し テーマソング - ",
-      "after": "いのちの名前 - 木村弓",
-      "raw": "1:47:21 いのちの名前/木村弓/千と千尋の神隠し テーマソング/2001"
-    },
-    {
-      "videoId": "TEMzHXrTR6I",
-      "before": "世界の約束/倍賞千恵子/ハウルの動く城 主題歌 - 2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー",
-      "after": "世界の約束 - 倍賞千恵子",
-      "raw": "1:53:42 世界の約束/倍賞千恵子/ハウルの動く城 主題歌/2004 ※木村弓のアルバム『流星』（2003年）収録の同名曲のカバー"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "My Soul Your Beats!/Lia/アニメ「Angel Beats」OP - ",
-      "after": "My Soul Your Beats! - Lia",
-      "raw": "10:15  My Soul Your Beats!/Lia/アニメ「Angel Beats」OP/2010"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "一番の宝物(Yui ver)/Girls Dead Monster/アニメ「Angel Beats」挿入歌 - ",
-      "after": "一番の宝物(Yui ver) - Girls Dead Monster",
-      "raw": "16:54 一番の宝物(Yui ver)/Girls Dead Monster/アニメ「Angel Beats」挿入歌/2010"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "嘘/シド/アニメ「鋼の錬金術師 FULLMETAL ALCHEMIST」ED - ",
-      "after": "嘘 - シド",
-      "raw": "26:23 嘘/シド/アニメ「鋼の錬金術師 FULLMETAL ALCHEMIST」ED/2009"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "射手座☆午後九時Don't be late/シェリル・ノームstarring May'n/アニメマクロスF - ",
-      "after": "射手座☆午後九時Don't be late - シェリル・ノームstarring May'n",
-      "raw": "32:17 射手座☆午後九時Don't be late/シェリル・ノームstarring May'n/アニメマクロスF/2008"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "創聖のアクエリオン/AKINO/アニメ「創聖のアクエリオン」OP - ",
-      "after": "創聖のアクエリオン - AKINO",
-      "raw": "40:24 創聖のアクエリオン/AKINO/アニメ「創聖のアクエリオン」OP/2005"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "ハルモニア/RHYTHM/アニメ「NARUTO-ナルト-」ED - ",
-      "after": "ハルモニア - RHYTHM",
-      "raw": "55:29 ハルモニア/RHYTHM/アニメ「NARUTO-ナルト-」ED/2002"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "カサブタ/千綿ヒデノリ/アニメ「金色のガッシュベル」OP - ",
-      "after": "カサブタ - 千綿ヒデノリ",
-      "raw": "1:10:37 カサブタ/千綿ヒデノリ/アニメ「金色のガッシュベル」OP/2003"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "secret base〜君がくれたもの〜/ZONE/ドラマ「キッズ・ウォー3 〜ざけんなよ〜」主題歌etc - ",
-      "after": "secret base〜君がくれたもの〜 - ZONE",
-      "raw": "1:16:55 secret base〜君がくれたもの〜/ZONE/ドラマ「キッズ・ウォー3 〜ざけんなよ〜」主題歌etc/2001"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "鳥の詩/Lia/ゲーム「AIR」OP - ",
-      "after": "鳥の詩 - Lia",
-      "raw": "1:21:54 鳥の詩/Lia/ゲーム「AIR」OP/2000"
-    },
-    {
-      "videoId": "67WLeuCp8nk",
-      "before": "世界が終るまでは…/WANDS/アニメ「SLAM DUNK」ED - 1994",
-      "after": "世界が終るまでは... - WANDS",
-      "raw": "1:34:44 世界が終るまでは…/WANDS/アニメ「SLAM DUNK」ED/1994"
-    },
-    {
-      "videoId": "jMI_6tW_EvY",
-      "before": "イケナイ太陽/ORANGE RANGE/ドラマ「花ざかりの君たちへ〜イケメン♂パラダイス〜」OP - ",
-      "after": "イケナイ太陽 - ORANGE RANGE",
-      "raw": "02:38 イケナイ太陽/ORANGE RANGE/ドラマ「花ざかりの君たちへ〜イケメン♂パラダイス〜」OP /2007"
-    },
-    {
-      "videoId": "jMI_6tW_EvY",
-      "before": "夏色/ゆず/「スペースシャワーTV」6月期の曲 - 1998",
-      "after": "夏色 - ゆず",
-      "raw": "08:31 夏色/ゆず/「スペースシャワーTV」6月期の曲/1998"
-    },
-    {
-      "videoId": "jMI_6tW_EvY",
-      "before": "小さな恋のうた/MONGOL800/ドラマ「プロポーズ大作戦」劇中歌etc… - ",
-      "after": "小さな恋のうた/MONGOL800 - ドラマ「プロポーズ大作戦」劇中歌etc...",
-      "raw": "25:24 小さな恋のうた/MONGOL800/ドラマ「プロポーズ大作戦」劇中歌etc…/2001"
-    },
-    {
-      "videoId": "LYKjz9hLOEI",
-      "before": "SUMMER SONG/YUI - ",
-      "after": "SUMMER SONG - YUI",
-      "raw": "02:32 SUMMER SONG/YUI/2008"
-    },
-    {
-      "videoId": "LYKjz9hLOEI",
-      "before": "若者のすべて/フジファブリック/ドラマ「SUMMER NUDE」挿入歌etc… - ",
-      "after": "若者のすべて - フジファブリック",
-      "raw": "10:11 若者のすべて/フジファブリック/ドラマ「SUMMER NUDE」挿入歌etc…/2007"
+      "videoId": "qMf7UuFfTJc",
+      "before": "二人色／Duca／ゲーム「恋色空模様」OP - すたじお緑茶 (2010)",
+      "after": "二人色 - Duca",
+      "raw": "2:08:28 二人色／Duca／ゲーム「恋色空模様」OP／すたじお緑茶 (2010)"
     }
   ],
   "repairedKnownSourceCreditExamples": [
@@ -1844,6 +1844,12 @@
       "raw": "2:17:01 FLAGS / T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))"
     },
     {
+      "videoId": "GOfpl8Mx73k",
+      "before": "LOSER - 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)",
+      "after": "LOSER - 米津玄師",
+      "raw": "0:27:32 LOSER / 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)"
+    },
+    {
       "videoId": "Ni4eel4yuXk",
       "before": "スーパーウルトラハイパーミラクルロマンチック - 未記載",
       "after": "スーパーウルトラハイパーミラクルロマンチック - 井口裕香,井澤美香子",
@@ -1902,12 +1908,6 @@
       "before": "115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism - 未記載",
       "after": "115万キロのフィルム - Official髭男dism",
       "raw": "1:03:52 115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism"
-    },
-    {
-      "videoId": "HvnB0lEMLxA",
-      "before": "恋愛サーキュレーション - 千石撫子(花澤香菜",
-      "after": "恋愛サーキュレーション - 千石撫子(花澤香菜)",
-      "raw": "2:01:21 　恋愛サーキュレーション／千石撫子(花澤香菜"
     }
   ],
   "duplicateExamples": [
