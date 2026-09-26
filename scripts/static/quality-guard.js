@@ -80,8 +80,8 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
 
 function reviewedSourceNonSongReason(song) {
   const sourceHash = String(song?.sourceHash || "");
-  const title = String(song?.title || "").normalize("NFKC").trim();
-  const artist = String(song?.artist || "").normalize("NFKC").trim();
+  const title = String(song?.title || "").trim();
+  const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
   const unknownArtist = /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist);
 
