@@ -415,3 +415,130 @@ test("release metadata normalization removes work labels only when coupled to a 
     "Unit【Official Artist Name】",
   );
 });
+
+
+test("reviewed historical mixed-source policies keep proven songs and quarantine chapters", () => {
+  const cases = [
+    [song("ひな結構基本おしがま", "未記載", {
+      raw: "2:06:458 ひな結構基本おしがま",
+      sourceHash: "30d4fba63bb782028af7ca03a506cf94714933e93de48d1c5eef13b84d9438a4",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("ワールドイズマイン", "ryo(supercell) feat. 初音ミク", {
+      raw: "01,10:17 ワールドイズマイン / ryo(supercell) feat. 初音ミク",
+      sourceHash: "30d4fba63bb782028af7ca03a506cf94714933e93de48d1c5eef13b84d9438a4",
+    }), null],
+    [song("歯医者", "未記載", {
+      raw: "3:02 歯医者",
+      sourceHash: "e0d69e03eeba0ccb8e420e88af51d810907dfb9b1e8b50d98579bf4d8646df60",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("謎", "未記載", {
+      raw: "13:12 ▶ 謎",
+      sourceHash: "e0d69e03eeba0ccb8e420e88af51d810907dfb9b1e8b50d98579bf4d8646df60",
+    }), null],
+    [song("猫の鳴き声1", "未記載", {
+      raw: "50:19 猫の鳴き声1",
+      sourceHash: "c2f39a5fb479d4d148f076609150d3662d0bef7611973817c5f56f2ea7d6af4e",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("No Logic", "ジミーサムP", {
+      raw: "1:50:40 No Logic / ジミーサムP",
+      sourceHash: "c2f39a5fb479d4d148f076609150d3662d0bef7611973817c5f56f2ea7d6af4e",
+    }), null],
+    [song("船キャンセル", "未記載", {
+      raw: "30:18 船キャンセル",
+      sourceHash: "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("Hero’s Come Back!!", "nobodyknows+", {
+      raw: "𝟎𝟏. 0:04:33 Hero’s Come Back!!✦nobodyknows+",
+      sourceHash: "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+    }), null],
+    [song("（次回に延期）", "未記載", {
+      raw: "9:48 （次回に延期）",
+      sourceHash: "1922f6d700c7615e8ff682c9ea9ac82ea19d0b2a145d31e4ea73df7d243bc352",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("メトロノーム", "米津玄師", {
+      raw: "8:35 メトロノーム / 米津玄師",
+      sourceHash: "1922f6d700c7615e8ff682c9ea9ac82ea19d0b2a145d31e4ea73df7d243bc352",
+    }), null],
+    [song("MC(初歌の感想、風呂エコー)", "", {
+      raw: "23:20 MC(初歌の感想、風呂エコー)",
+      sourceHash: "c2fe7785dffa7d43c6405b4efd19edb8dfa6d3d0d276084a42c6431f16ee8777",
+    }), "reviewed_mixed_chapter_comment"],
+    [song("だから僕は音楽を辞めた", "ヨルシカ", {
+      raw: "29:50 だから僕は音楽を辞めた/ヨルシカ",
+      sourceHash: "c2fe7785dffa7d43c6405b4efd19edb8dfa6d3d0d276084a42c6431f16ee8777",
+    }), null],
+    [song("休憩9", "", {
+      raw: "4:25:26 休憩9",
+      sourceHash: "2f784a14e4122ab625a239f2693dd725658688982e1b9aa526fad3f379efe188",
+    }), "reviewed_source_activity_chapter"],
+    [song("点描の唄", "", {
+      raw: "4:16:11 点描の唄",
+      sourceHash: "2f784a14e4122ab625a239f2693dd725658688982e1b9aa526fad3f379efe188",
+    }), null],
+  ];
+  for (const [row, expected] of cases) assert.equal(unambiguousNonSongReason(row), expected);
+  assert.equal(
+    unambiguousNonSongReason(song("弾き語り再開", "未記載", { sourceHash: "different-source" })),
+    null,
+    "source-reviewed activity names must never become global title bans",
+  );
+});
+
+test("reviewed exact historical activity rows are source-bound", () => {
+  const cases = [
+    ["しずさん感想", "未記載", "0d63e5c4ca38df917fb58c74f1b5be81c8a54a893fdd1050b81aad849e18314d"],
+    ["弾き語り再開", "未記載", "b04aa8bcb7319194e2eb49532361b52f9c69682e2391caa690f814dbbf240a3c"],
+    ["100曲歌いきり達成！！", "未記載", "1af631bc2ab20bdb747ac3472747891c983e70837523efde6ad2a7b65c4d41d7"],
+    ["～8", "15", "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710"],
+    ["ワンマンライブ12", "19", "1417a20bd96f281a8175858186e650a70612f18bb745400dc20ca8d0161c253f"],
+    ["【#雑談】🍔9", "24", "4bb6b16914332005d78c5618640485453eff7d6369b6b5a2216185e6647522ac"],
+  ];
+  for (const [title, artist, sourceHash] of cases) {
+    assert.equal(
+      unambiguousNonSongReason(song(title, artist, { raw: "00:10 " + title + "/" + artist, sourceHash })),
+      "reviewed_source_activity_chapter",
+    );
+  }
+  assert.equal(
+    unambiguousNonSongReason(song("トーク", "お見送り", {
+      raw: "3:10:24 トーク (お見送り)",
+      sourceHash: "4f0ebf635214d0dc35c7423a0a51578f8996f8086ee17aa5ec573be364db84a9",
+    })),
+    "reviewed_source_activity_chapter",
+  );
+});
+
+test("reviewed Urara chapter source keeps and repairs its actual song", () => {
+  const sourceHash = "7d072c6a6bd42aa23a499fbc04ed5cbffc12a44a51d5456644a1b6cff6ace681";
+  assert.equal(unambiguousNonSongReason(song("おはうら～", "未記載", {
+    raw: "0:07:55 おはうら～", sourceHash,
+  })), "reviewed_mixed_chapter_comment");
+  const row = song("Luv Rendezvous 💎 七海うらら", "七海の日～！ｺｰﾚｽ", {
+    raw: "1:56:14🎤08. Luv Rendezvous 💎 七海うらら (七海の日～！ｺｰﾚｽ）",
+    sourceHash,
+  });
+  assert.equal(unambiguousNonSongReason(row), null);
+  const repaired = repairKnownSourceCredit(row);
+  assert.equal(repaired.title, "Luv Rendezvous");
+  assert.equal(repaired.artist, "七海うらら");
+});
+
+test("quality review exposes activity candidates and no longer truncates mixed sources at 120", () => {
+  assert.ok(reviewReasons(song("締めの挨拶", "未記載", { raw: "1:49:50 締めの挨拶" }))
+    .includes("possible_activity_chapter"));
+  const videos = Array.from({ length: 121 }, (_, index) => {
+    const sourceHash = "hash-" + index;
+    return video(index + 1000, [
+      song("Song A", "Artist A", { raw: "01. Song A / Artist A", sourceHash }),
+      song("Song B", "Artist B", { raw: "02. Song B / Artist B", sourceHash }),
+      song("Song C", "Artist C", { raw: "03. Song C / Artist C", sourceHash }),
+      song("chat one", "未記載", { raw: "04:00 chat one", sourceHash }),
+      song("chat two", "未記載", { raw: "05:00 chat two", sourceHash }),
+      song("chat three", "未記載", { raw: "06:00 chat three", sourceHash }),
+      song("chat four", "未記載", { raw: "07:00 chat four", sourceHash }),
+      song("chat five", "未記載", { raw: "08:00 chat five", sourceHash }),
+    ]);
+  });
+  const result = buildQualityReview(videos, { byDay: {} }, new Date("2026-09-27T00:00:00Z"));
+  assert.equal(result.mixedStructuredSetlistSources.length, 121);
+});
