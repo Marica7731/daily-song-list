@@ -675,7 +675,8 @@ function repairResidualKnownSourceCredit(song) {
     "80923c4f194b93e4f4653fc4a21257b485eff0cf0a4588d5a21b5d7915f09201",
     "d120dc8056791dc79eb28ae0865a1a7f9ecdda09a71f47b0b3d9dee210fba1f8",
   ]);
-  if (reviewedFullwidthSlashCredits.has(hash) && originalRaw.includes("／")) {
+  if (reviewedFullwidthSlashCredits.has(hash) && originalRaw.includes("／") &&
+      !(hash === "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a" && /^観覧車[~〜～]/u.test(title))) {
     const body = originalRaw.replace(/^\s*(?:\d{1,2}:\d{2}(?::\d{2})?\s*)+/u, "").trim();
     const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
     if (fields.length >= 2 && fields[0] && fields[1]) {
@@ -686,16 +687,6 @@ function repairResidualKnownSourceCredit(song) {
   if (hash === "d6870653d1a294ccccf28184ac05c57268eb6c0a6934e9d4cd1d1a870ab3fdaf" &&
       title === "LOSER" && /LOSER\s*\/\s*米津玄師\s*\[LOSER\s*\/\s*Yonezu Kenshi/u.test(raw)) {
     return { ...song, artist: "米津玄師" };
-  }
-
-  if (hash === "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6" &&
-      title === "鳥の詩" && /鳥の詩\s*\/\s*key作品\s*\/\s*AIR/iu.test(raw)) {
-    return { ...song, artist: "Lia" };
-  }
-
-  if (hash === "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad" &&
-      title === "檄!帝国華撃団" && /ゲーム\s*サクラ大戦/u.test(raw)) {
-    return { ...song, artist: "横山智佐（真宮寺さくら）＆帝国歌劇団" };
   }
 
   if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc" &&
