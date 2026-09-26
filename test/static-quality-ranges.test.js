@@ -759,3 +759,85 @@ test("Japanese game metadata and source-proven malformed credits are repaired", 
   assert.match(repaired.artist, /\]$/u);
   assert.deepEqual(reviewReasons(repaired), []);
 });
+
+
+test("final numbered-source pass removes speeches while keeping unnumbered real songs in mixed sources", () => {
+  const speechHash = "228c383678249eecd538161b93282bc2215495be1736c2d7270cbdbc9993f6e1";
+  assert.equal(unambiguousNonSongReason(song("口上①", "", {raw:"07:27 口上①", sourceHash:speechHash})), "reviewed_non_song_chapter_in_numbered_setlist");
+  assert.equal(unambiguousNonSongReason(song("思想犯", "ヨルシカ", {raw:"03:15 1. 思想犯/ヨルシカ", sourceHash:speechHash})), null);
+
+  const relayHash = "e916c9ce505c107c706f25bdcd129e6892b2acd1143aeebafafe63bd5e3b7a2c";
+  assert.equal(unambiguousNonSongReason(song("本日の意気込み", "未記載", {raw:"08:47 本日の意気込み",sourceHash:relayHash})), "reviewed_source_activity_chapter");
+  assert.equal(unambiguousNonSongReason(song("OP曲:烈火", "百瀬ヒバナ", {raw:"00:55 OP曲:烈火 / 百瀬ヒバナ",sourceHash:relayHash})), null);
+
+  const devilithHash = "891b820cfb8e6a53645d354b197fffef38e415e4f944ac14d5844b30d685fd78";
+  assert.equal(unambiguousNonSongReason(song("4周年重大發表宣傳", "", {raw:"36:25 4周年重大發表宣傳",sourceHash:devilithHash})), "reviewed_source_activity_chapter");
+  assert.equal(unambiguousNonSongReason(song("肚子餓之歌", "", {raw:"44:53 肚子餓之歌",sourceHash:devilithHash})), null);
+});
+
+test("source-proven artist metadata suffixes are normalized without deleting the song", () => {
+  const cases = [
+    ["Aimer (作詞:aimerrhythm、田中ユウスケ / 作曲:田中ユウスケ) [2025年", "Aimer", "01. 00:12:13 やさしい舞踏会 / Aimer (作詞:aimerrhythm、田中ユウスケ / 作曲:田中ユウスケ) [2025年]"],
+    ["Whiteberry (J", "Whiteberry", "2:22:30 17.夏祭り/Whiteberry (J)"],
+    ["黒うさP(2011", "黒うさP", "7:09 (1)千本桜/黒うさP(2011)"],
+    ["ONE OK ROCK [2010年", "ONE OK ROCK", "00:42:19 Wherver you are / ONE OK ROCK [2010年]"],
+    ["米津玄師(🛼ソロ", "米津玄師", "00:29:06 M04. 地球儀 / 米津玄師(🛼ソロ)"],
+    ["ロクデナシ [一瞬迷子", "ロクデナシ", "37:44 06. 心の奥 / ロクデナシ [一瞬迷子]"],
+    ["Zhou Shen hoyo-mix [Honkai Impact 3rd", "Zhou Shen hoyo-mix", "39:55 Rubia - Zhou Shen hoyo-mix [Honkai Impact 3rd]"],
+    ["ポリスピカデリー(cover 羽月うずな", "ポリスピカデリー", "EDBGM 2:46:59 センティメント/ポリスピカデリー(cover 羽月うずな"],
+  ];
+  for (const [artist, expected, raw] of cases) {
+    assert.equal(normalizeReleaseMetadataArtist(song("fixture", artist, {raw})).artist, expected);
+  }
+});
+
+test("raw-proven closing credit delimiters are restored, but invented closers are not", () => {
+  assert.equal(normalizeReleaseMetadataArtist(song("When She Loved Me", "Jessie [CV: Sarah McLachlan", {
+    raw:"00:30:20 05. When She Loved Me / Jessie [CV: Sarah McLachlan]",
+  })).artist, "Jessie [CV: Sarah McLachlan]");
+  assert.equal(normalizeReleaseMetadataArtist(song("可愛くてごめん", "HoneyWorks feat.ちゅーたん(cv:早見沙織", {
+    raw:"3:08:02 11. 可愛くてごめん / HoneyWorks feat.ちゅーたん(cv:早見沙織)",
+  })).artist, "HoneyWorks feat.ちゅーたん(cv:早見沙織)");
+  assert.equal(normalizeReleaseMetadataArtist(song("千石", "千石撫子(花澤香菜", {
+    raw:"2:01:21 千石 / 千石撫子(花澤香菜",
+  })).artist, "千石撫子(花澤香菜");
+});
+
+test("year-split, work-date, and four-field metadata rows recover title and artist from raw evidence", () => {
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(repairStructuredSlashCredit(song("お化けなんていないさ/弘田三枝子", "1966", {
+      raw:"0:04:32 お化けなんていないさ/弘田三枝子/1966",
+    }))).filter(([key]) => ["title","artist"].includes(key))),
+    {title:"お化けなんていないさ",artist:"弘田三枝子"},
+  );
+  const work = repairStructuredSlashCredit(song("Beautiful World", "未記載", {
+    raw:"1:07:46 11.Beautiful World/宇多田ヒカル【ヱヴァンゲリヲン新劇場版:序】(2007/08/29)",
+  }));
+  assert.equal(work.artist, "宇多田ヒカル");
+  const tv = repairStructuredSlashCredit(song("夏色/ゆず/「スペースシャワーTV」6月期の曲", "1998", {
+    raw:"08:31 夏色/ゆず/「スペースシャワーTV」6月期の曲/1998",
+  }));
+  assert.equal(tv.title, "夏色");
+  assert.equal(tv.artist, "ゆず");
+});
+
+test("quoted work/date source recovers its artist and voice-only chapter stays quarantined", () => {
+  const hash = "eb659bd57798713ec33ed807d1086758e7611b52e9567197983478e92fd74193";
+  const raw = "8:01 ｢創聖のアクエリオン/創聖のアクエリオン:OP｣2005年4月27日【AKINO from bless4】";
+  const fixed = repairKnownSourceCredit(song("｢創聖のアクエリオン", "創聖のアクエリオン:OP｣2005年4月27日", {raw,sourceHash:hash}));
+  assert.equal(fixed.title, "創聖のアクエリオン");
+  assert.equal(fixed.artist, "AKINO from bless4");
+  assert.equal(unambiguousNonSongReason(song("｢ゴミ", "シスタークレア罵倒ボイス｣2026年7月1日", {
+    raw:"1:12:01 ｢ゴミ/シスタークレア罵倒ボイス｣2026年7月1日【シスタークレア】",
+    sourceHash:hash,
+  })), "reviewed_source_activity_chapter");
+});
+
+test("double-slash work metadata source repairs FictionJunction without splitting .hack//Roots", () => {
+  const fixed = repairKnownSourceCredit(song("Silly-Go-Round／FictionJunction／.hack", "未記載", {
+    raw:"19:50 Silly-Go-Round／FictionJunction／.hack//Roots OP",
+    sourceHash:"9cbc8fd9b1f9f5bc24b2ae7929994e406e7b574af0eda8d0ef74b6a666535e1e",
+  }));
+  assert.equal(fixed.title, "Silly-Go-Round");
+  assert.equal(fixed.artist, "FictionJunction");
+});
