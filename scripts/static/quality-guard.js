@@ -270,7 +270,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/【[^】]{1,160}】\s*(?=[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)])/u, "")
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
-    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
     .replace(/\s*[（(](?=(?:劇場版|TVアニメ|アニメ|ゲーム|映画)\b).*?[）)]\s*$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
