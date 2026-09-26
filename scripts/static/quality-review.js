@@ -30,7 +30,7 @@ function reviewReasons(song) {
     reasons.push("possible_stream_poster");
   }
   if (/^(?:[月火水木金土日]|\d{1,2}|20\d{2}|\d{1,2}[月火水木金土日])$/u.test(artist) &&
-      /\d{1,2}[./-]\d{1,2}|日|年|月|20\d{2}|配信|ライブ|Live/u.test(raw)) {
+      /(?:\d{1,2}[./-]\d{1,2}|(?:19|20)\d{2}|配信|ライブ|Live|\d{1,2}日(?:[）)\s]|$))/u.test(raw)) {
     reasons.push("possible_date_as_artist");
   }
   if (/(?:アルバム|リリース|発売|配信日|公開日|(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2})/iu.test(artist)) {

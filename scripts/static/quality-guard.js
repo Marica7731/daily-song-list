@@ -554,10 +554,39 @@ function isUnknownArtistValue(value) {
 
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
-  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const sourceRaw = String(song?.raw || "").trim();
+  const raw = sourceRaw.normalize("NFKC").trim();
+  const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
+  const sourceBody = sourceRaw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
+
+  // Preserve the pre-NFKC source here: NFKC turns "／" into "/", which would
+  // erase the evidence that this is a four-column full-width setlist and risk
+  // confusing legitimate slash-containing names such as DISH//.
+  if (sourceBody.includes("／")) {
+    const fields = sourceBody.split("／").map((value) => value.trim()).filter(Boolean);
+    if (
+      fields.length === 4 &&
+      /^.+\s*[（(](?:19|20)\d{2}[）)]$/u.test(fields[3]) &&
+      /(?:OP|ED|挿入歌|主題歌|ゲーム|アニメ|「[^」]+」)/iu.test(fields[2]) &&
+      fields[0].length >= 1 &&
+      fields[1].length >= 1
+    ) {
+      const currentTitle = String(song?.title || "").trim();
+      const currentArtist = String(song?.artist || "").trim();
+      if (
+        currentTitle === fields[0] ||
+        currentTitle.startsWith(fields[0] + "／") ||
+        currentArtist === fields.slice(1).join("／") ||
+        currentArtist === fields[3] ||
+        currentArtist.endsWith("／" + fields[3])
+      ) {
+        return { ...song, title: fields[0], artist: fields[1] };
+      }
+    }
+  }
+
   if (!isUnknownArtistValue(artist) &&
       !/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist)) return song;
-  const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
   const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u);
   const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
   if (match && (!artistYear || match[4] === artistYear)) {
@@ -581,6 +610,7 @@ function repairStructuredSlashCredit(song) {
       return { ...song, title: workDate[1].trim(), artist: workDate[2].trim() };
     }
   }
+
   return song;
 }
 
@@ -613,6 +643,15 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .trim();
 
   if (cleaned === artist) {
+    const yearSuffix = artist.match(/^(.+?)\s*[（(]\s*(?:19|20)\d{2}\s*[）)]$/u);
+    if (yearSuffix?.[1]?.trim()) {
+      const creditIndex = raw.indexOf(artist);
+      const prefix = creditIndex >= 0 ? raw.slice(Math.max(0, creditIndex - 4), creditIndex) : "";
+      if (creditIndex >= 0 && /[\/／]\s*$/u.test(prefix)) cleaned = yearSuffix[1].trim();
+    }
+  }
+
+  if (cleaned === artist) {
     const openSquare = (artist.match(/\[/gu) || []).length;
     const closeSquare = (artist.match(/\]/gu) || []).length;
     if (openSquare === closeSquare + 1 && raw.includes(artist + "]")) cleaned = artist + "]";
@@ -631,10 +670,10 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     if (guitar?.[1]?.trim() && raw.includes(guitar[1].trim() + "(ギター弾き語り)")) cleaned = guitar[1].trim();
   }
   if (cleaned) {
-    const square = cleaned.match(/^(.+?)\s+\[([^\]]*)\]?$/u);
+    const square = cleaned.match(/^(.+?)\s*\[([^\]]*)\]?$/u);
     const note = square?.[2] || "";
     if (square?.[1]?.trim() &&
-        /^(?:歌詞動画|途中迷子|迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ)/iu.test(note) &&
+        /^(?:歌詞動画|途中迷子|歌声迷子|迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ|キー(?:プラス|マイナス)?|テンポ(?:プラス|マイナス)?)/iu.test(note) &&
         raw.includes(square[1].trim()) && raw.includes("[" + note)) {
       cleaned = square[1].trim();
     }
@@ -663,6 +702,12 @@ function repairResidualKnownSourceCredit(song) {
       const artist = fields[0].toLocaleLowerCase() === "starry heavens" ? "day after tomorrow" : fields[1];
       return { ...song, title: fields[0], artist };
     }
+  }
+
+  if (hash === "d6870653d1a294ccccf28184ac05c57268eb6c0a6934e9d4cd1d1a870ab3fdaf" &&
+      title === "LOSER" &&
+      /LOSER\s*[\/／]\s*米津玄師\s*\[LOSER\s*[\/／]\s*Yonezu Kenshi\]/iu.test(raw)) {
+    return { ...song, artist: "米津玄師" };
   }
 
   if (hash === "434ba28abf9d83918a57deff756fa17ac80849b9ebeb68e05d3b03aee05b14fd" &&

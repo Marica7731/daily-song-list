@@ -1029,3 +1029,94 @@ test("reviewed September 26 slash-setlist source restores song and artist fields
     assert.equal(unambiguousNonSongReason(song(title, "", { raw: title, sourceHash: hash })), "reviewed_source_activity_chapter");
   }
 });
+
+
+test("trailing release years are removed only from slash-delimited artist credits", () => {
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("1/2", "川本真琴 (1997)", {
+      raw: "00:23:33 1/2 / 川本真琴 (1997) / TVアニメ「るろうに剣心」OP",
+    })).artist,
+    "川本真琴",
+  );
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("ファッとして桃源郷", "新庄かなえ/三森すずこ(2015)", {
+      raw: "47:46 ファッとして桃源郷 / 新庄かなえ/三森すずこ(2015) / アニメ てーきゅう/4期OP",
+    })).artist,
+    "新庄かなえ/三森すずこ",
+  );
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("Unrelated", "Project 2020", {
+      raw: "00:10 Unrelated - Project 2020",
+    })).artist,
+    "Project 2020",
+  );
+});
+
+test("full-width four-column work metadata restores song and credited artist", () => {
+  const original = song("さくらとことり／はな／「向日葵の教会と長い夏休み」ED", "枕 (2013)", {
+    raw: "0:10:02 さくらとことり／はな／「向日葵の教会と長い夏休み」ED／枕 (2013)",
+  });
+  const repaired = repairStructuredSlashCredit(original);
+  assert.equal(repaired.title, "さくらとことり");
+  assert.equal(repaired.artist, "はな");
+
+  const shifted = song("sign", "夢乃ゆき／「ソラコイ」OP／チェルシーソフト (2015)", {
+    raw: "0:55:23 sign／夢乃ゆき／「ソラコイ」OP／チェルシーソフト (2015)",
+  });
+  const repairedShifted = repairStructuredSlashCredit(shifted);
+  assert.equal(repairedShifted.title, "sign");
+  assert.equal(repairedShifted.artist, "夢乃ゆき");
+});
+
+test("performance annotations are removed from artist credit but actual artist is kept", () => {
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("StaRt", "Mrs. GREEN APPLE［キーマイナス6 / テンポマイナス4］", {
+      raw: "03:18:33 StaRt / Mrs. GREEN APPLE［キーマイナス6 / テンポマイナス4］",
+    })).artist,
+    "Mrs. GREEN APPLE",
+  );
+  assert.equal(
+    normalizeReleaseMetadataArtist(song("メーベル", "バルーン [歌声迷子]", {
+      raw: "25:08 03. メーベル / バルーン [歌声迷子]",
+    })).artist,
+    "バルーン",
+  );
+});
+
+test("review date heuristic keeps legitimate artist 月 while still surfacing real date splits", () => {
+  assert.equal(
+    reviewReasons(song("ひゆるりらぱっぱ", "月", { raw: "【02:03:19】ひゆるりらぱっぱ / 月" }))
+      .includes("possible_date_as_artist"),
+    false,
+  );
+  assert.equal(
+    reviewReasons(song("6", "土", { raw: "43:17 6/27（土）" }))
+      .includes("possible_date_as_artist"),
+    true,
+  );
+});
+
+test("reviewed malformed LOSER bilingual credit is normalized without deleting the row", () => {
+  const repaired = repairKnownSourceCredit(song("LOSER", "米津玄師 [LOSER / Yonezu Kenshi", {
+    raw: "0:27:32 LOSER / 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)",
+    sourceHash: "d6870653d1a294ccccf28184ac05c57268eb6c0a6934e9d4cd1d1a870ab3fdaf",
+  }));
+  assert.equal(repaired.title, "LOSER");
+  assert.equal(repaired.artist, "米津玄師");
+});
+
+test("metadata-only slash rows with no credited artist are retained, not guessed or deleted", () => {
+  const rows = [
+    song("鳥の詩", "未記載", {
+      raw: "40:14 鳥の詩/key作品/AIR",
+      sourceHash: "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
+    }),
+    song("檄!帝国華撃団", "", {
+      raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
+      sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
+    }),
+  ];
+  const result = cleanStaticVideos([video(99, rows)]);
+  assert.equal(result.audit.quarantinedOccurrences, 0);
+  assert.deepEqual(result.videos[0].songs.map((row) => row.title), ["鳥の詩", "檄!帝国華撃団"]);
+});
