@@ -241,12 +241,14 @@ function isUnknownArtistValue(value) {
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
-  if (!isUnknownArtistValue(artist) && !/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?$/u.test(artist)) return song;
+  if (!isUnknownArtistValue(artist) &&
+      !/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist)) return song;
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
-  const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)\s*$/u);
-  if (!match || (/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?$/u.test(artist) && match[4] !== artist)) return song;
+  const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u);
+  const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
+  if (!match || (artistYear && match[4] !== artistYear)) return song;
   const [, title, creditedArtist, metadata] = match;
-  if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
+  if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
     return song;
   }
   if (!title.trim() || !creditedArtist.trim()) return song;
@@ -269,6 +271,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
     .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .replace(/\s*[（(](?=(?:劇場版|TVアニメ|アニメ|ゲーム|映画)\b).*?[）)]\s*$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
   if (!cleaned || cleaned === artist) return song;
@@ -277,6 +280,37 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
 
 function repairKnownSourceCredit(song) {
   const hash = String(song?.sourceHash || "");
+
+  if (hash === "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9" &&
+      /^\d+(?:st|nd|rd|th)アルバム「[^」]+」より$/iu.test(String(song?.artist || "").normalize("NFKC").trim())) {
+    return { ...song, artist: "Eighty eight" };
+  }
+  if (hash === "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa" &&
+      song?.title === "奏" && /オリ曲\s*YOU＆合図\s*リリース/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: "スキマスイッチ" };
+  }
+  if (hash === "924e1a18c91dd603a7be0e9523559988d299ff51e649624795ba0402d60f5a4e" &&
+      song?.title === "祝日天国" && /祝日天国[／/]35[.]7[（(]\d{4}[／/]\d{1,2}[／/]\d{1,2}/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: "35.7" };
+  }
+  if (hash === "3665facacaf3ad5caa221a2a0bbd346a2c5adf66fe0f69ce4bcc9bae83a46c6a" &&
+      song?.title === "乙女のルートはひとつじゃない！") {
+    return { ...song, artist: "angela" };
+  }
+  if (hash === "d723897d567d473dd7aea57f04f8ad70a15479135d554e912b12368fcf1b117a" &&
+      /^観覧車[~〜]/u.test(String(song?.title || "")) &&
+      /[／/]Duca[／/]/u.test(String(song?.raw || ""))) {
+    return { ...song, title: "観覧車～あの日と、昨日と今日と明日と～", artist: "Duca" };
+  }
+  if (hash === "8dd644fb109f602a35f481a3f792d3511298f8ec5bafc63627a162487dbe7e67" &&
+      /^Song 5: ["“]Chiisana Boukensha["”]$/u.test(String(song?.title || ""))) {
+    return { ...song, title: "Chiisana Boukensha", artist: "Sora Amamiya, Rie Takahashi, Ai Kayano" };
+  }
+  if (hash === "7b6b7ed5a0d5ef6faa6271a57adca3ce57654e5984e7f515845853adfb0e8da0" &&
+      song?.title === "1" && song?.artist === "2" &&
+      /\b1\/2\/Kawamoto Makoto\/Anime\b/iu.test(String(song?.raw || ""))) {
+    return { ...song, title: "1/2", artist: "川本真琴" };
+  }
   if (hash === MIXED_CLAUDE_CHAPTER_HASH &&
       song?.title === "ハッピーシンセサイザ" &&
       isUnknownArtistValue(song?.artist) &&
