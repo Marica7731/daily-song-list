@@ -879,7 +879,7 @@ test("residual malformed credits are repaired from their reviewed source rows", 
     [song("鳥の詩", "", {
       raw: "40:14 鳥の詩/key作品/AIR",
       sourceHash: "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
-    }), "鳥の詩", "Lia"],
+    }), "鳥の詩", ""],
     [song("猫／DISH//", "", {
       raw: "00:19:07 04. 猫／DISH//",
       sourceHash: "6bf40ecd74e76a6bbff3bd013cf1fa7096c4f281178f5347e399de678d5b5b63",
@@ -887,11 +887,11 @@ test("residual malformed credits are repaired from their reviewed source rows", 
     [song("KISS OF DEATH (Produced", "HYDE)／中島美嘉", {
       raw: "0:39:44 KISS OF DEATH (Produced by HYDE)／中島美嘉",
       sourceHash: "6ca8928630b3a52aebc13bbeaed3af13dcd186955da7b5ad5c87b48ee3c0be29",
-    }), "KISS OF DEATH (Produced by HYDE)", "中島美嘉"],
+    }), "KISS OF DEATH", "中島美嘉"],
     [song("檄!帝国華撃団", "", {
       raw: "40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
       sourceHash: "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
-    }), "檄!帝国華撃団", "横山智佐（真宮寺さくら）＆帝国歌劇団"],
+    }), "檄!帝国華撃団", ""],
     [song("前前前世", "RADWIMPS [途中迷子", {
       raw: "20:43  02. 前前前世  /  RADWIMPS  [途中迷子]",
       sourceHash: "75f339dfc59363f1494867a75be85070cd4d0ef485456472535d3a2578c864f1",
@@ -914,4 +914,91 @@ test("review-only scan detects status/year metadata while keeping them out of au
   assert.equal(unambiguousNonSongReason(song("irony", "ClariS(2010)", {
     raw: "04:01 irony / ClariS(2010) / アニメ 俺の妹がこんなに可愛いわけがない/OP",
   })), null);
+});
+
+
+test("older reviewed source-specific activity rows stay quarantined after concurrent main cleanup", () => {
+  const exact = [
+    ["配信はじまり","待機画面","0:00 配信はじまり(待機画面)","deccea4d95fcaa96325871f5ed82c40abc6abb50b8be53dcc232d1a229f5291c"],
+    ["自己紹介","コール＆レスポンス","4:51 自己紹介（コール＆レスポンス）","e9a92bc803fb76ead17d288c98d72548f8dab5988948579aaaf9f2550346c630"],
+    ["小休憩","あめタイム","3:18:43 小休憩(あめタイム)","5f0c0d169ed3de44f989ba355295f9648abf73f33ac9aaa232b69f661ebf05d9"],
+    ["Talk Time","休憩タイム","【02:36:42】 Talk Time // 休憩タイム","1d7cd95ec5c5614d37369fc63a26ca622d9eb0733495f9ca301abd90a5dfa5b9"],
+    ["(waiting)","","00:00 (waiting)","28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad"],
+  ];
+  for (const [title,artist,raw,sourceHash] of exact) {
+    assert.equal(unambiguousNonSongReason(song(title,artist,{raw,sourceHash})), "reviewed_source_activity_chapter");
+  }
+
+  assert.equal(unambiguousNonSongReason(song("スタート","待機画面",{raw:"0:00 スタート（待機画面）"})), "confirmed_stream_start_marker");
+  assert.equal(unambiguousNonSongReason(song("自己紹介","コール＆レスポンス",{raw:"4:51 自己紹介（コール＆レスポンス）"})), "confirmed_self_intro_segment");
+  assert.equal(unambiguousNonSongReason(song("小休憩","あめタイム",{raw:"3:18:43 小休憩(あめタイム)"})), "confirmed_break_segment");
+  assert.equal(unambiguousNonSongReason(song("OP Start","",{raw:"2:03 OP Start"})), "confirmed_stream_start_marker");
+  assert.equal(unambiguousNonSongReason(song("Opening 3","",{raw:"8:47 Opening 3"})), null);
+});
+
+test("reviewed source repairs recover literal credits without inventing missing artists", () => {
+  let fixed = repairKnownSourceCredit(song("戒厳のシグナル/神咒Kajiri （1st originalSong）https","www.youtube.com/watch?v=8WoHr8lxxXY",{
+    raw:"28:27 戒厳のシグナル/神咒Kajiri （1st originalSong）https://www.youtube.com/watch?v=8WoHr8lxxXY",
+    sourceHash:"3ddc8b1b3a39f0f7754cefd5d692c8c83c24902d902a802421e61d19c9b97c00",
+  }));
+  assert.equal(fixed.title,"戒厳のシグナル");
+  assert.equal(fixed.artist,"神咒Kajiri");
+
+  fixed = repairKnownSourceCredit(song("糸","中島みゆき / https://youtu.be/O6e_00LPex8",{
+    raw:"1:38:14 糸 / 中島みゆき / https://youtu.be/O6e_00LPex8",
+    sourceHash:"54d387bc5821e57e0a9567d2003c8b96568b1dc746b5481b1e0f0da1ec492a47",
+  }));
+  assert.equal(fixed.artist,"中島みゆき");
+
+  fixed = repairKnownSourceCredit(song("彗星","チャレンジ失敗",{
+    raw:"1:48:37 彗星/monaca:factory（チャレンジ失敗）",
+    sourceHash:"6a82a15578d2ce6cf9144390e8f59a24bfe230a73aa3844962dfce436463cd20",
+  }));
+  assert.equal(fixed.artist,"monaca:factory");
+
+  fixed = repairKnownSourceCredit(song("休憩〜水平線歌唱〜","未記載",{
+    raw:"1:00:50 休憩〜水平線歌唱〜",
+    sourceHash:"ec3536420568a915fff8687d10e3c9b6cff17246c49944bac64c9d38fb0bc616",
+  }));
+  assert.equal(fixed.title,"水平線");
+  assert.equal(fixed.artist,"");
+
+  // Source gives only work metadata, not the performer: keep it unknown.
+  fixed = repairKnownSourceCredit(song("鳥の詩","",{
+    raw:"40:14 鳥の詩/key作品/AIR",
+    sourceHash:"03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6",
+  }));
+  assert.equal(fixed.artist,"");
+  fixed = repairKnownSourceCredit(song("檄!帝国華撃団","",{
+    raw:"40:20 檄!帝国華撃団 / ゲーム サクラ大戦(1996) / アニメ(2000)",
+    sourceHash:"28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad",
+  }));
+  assert.equal(fixed.artist,"");
+});
+
+test("full-width note separator source repairs every malformed song/artist row, not only one example", () => {
+  const hash="3b657c0a4983dbf17cd8f4e31c5ef607f7ca00791d0e2bca8e9e113289527222";
+  const cases=[
+    ["剣の舞(88')/光GENJI","5期生に歌ってほしい曲","04:40 剣の舞(88')/光GENJI／5期生に歌ってほしい曲","剣の舞(88')","光GENJI"],
+    ["III(24')/宝鐘マリン&Kobo Kanaeru","ちゃむ。先輩と歌いたい曲","14:00 III(24')/宝鐘マリン&Kobo Kanaeru／ちゃむ。先輩と歌いたい曲","III(24')","宝鐘マリン&Kobo Kanaeru"],
+    ["勝手にシンドバッド(78')/サザンオールスターズ","バトラ先輩に歌ってほしい曲","35:29 勝手にシンドバッド(78')/サザンオールスターズ／バトラ先輩に歌ってほしい曲","勝手にシンドバッド(78')","サザンオールスターズ"],
+  ];
+  for(const [title,artist,raw,expectedTitle,expectedArtist] of cases){
+    const fixed=repairKnownSourceCredit(song(title,artist,{raw,sourceHash:hash}));
+    assert.equal(fixed.title,expectedTitle);
+    assert.equal(fixed.artist,expectedArtist);
+  }
+});
+
+test("performance annotations are stripped only when the raw row proves the suffix", () => {
+  const cases=[
+    ["楓","スピッツ(ギター","00:56:03 08. 楓／スピッツ(ギター弾き語り)","スピッツ"],
+    ["U","millennium parade × Belle [歌詞動画","9:25 01. U / millennium parade × Belle [歌詞動画]","millennium parade × Belle"],
+    ["CLEAR","坂本真綾 [ワンコーラスVer.","8:29 01. CLEAR / 坂本真綾 [ワンコーラスVer.]","坂本真綾"],
+    ["ライラック","Mrs. GREEN APPLE］(挑戦枠)","2:28:54 21.［ライラック／Mrs. GREEN APPLE］(挑戦枠)","Mrs. GREEN APPLE"],
+  ];
+  for(const [title,artist,raw,expected] of cases){
+    assert.equal(normalizeReleaseMetadataArtist(song(title,artist,{raw})).artist,expected);
+  }
+  assert.equal(normalizeReleaseMetadataArtist(song("Bracket Song","Artist [Unit",{raw:"1:00 Bracket Song / Artist [Unit"})).artist,"Artist [Unit");
 });
