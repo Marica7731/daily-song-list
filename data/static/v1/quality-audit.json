@@ -1,24 +1,24 @@
 {
-  "generatedAt": "2026-09-26T22:56:35.475Z",
+  "generatedAt": "2026-09-26T23:05:18.686Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7454,
-  "inputOccurrences": 89465,
-  "visibleVideos": 6072,
-  "visibleOccurrences": 88386,
-  "quarantinedOccurrences": 1015,
-  "quarantinedVideos": 419,
+  "inputVideos": 7475,
+  "inputOccurrences": 89611,
+  "visibleVideos": 6080,
+  "visibleOccurrences": 88461,
+  "quarantinedOccurrences": 1086,
+  "quarantinedVideos": 432,
   "deduplicatedOccurrences": 64,
   "normalizedArtistOccurrences": 403,
-  "normalizedReleaseMetadataOccurrences": 472,
+  "normalizedReleaseMetadataOccurrences": 519,
   "repairedDateCreditOccurrences": 24,
   "repairedStructuredCreditOccurrences": 224,
-  "repairedKnownSourceCreditOccurrences": 77,
+  "repairedKnownSourceCreditOccurrences": 136,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 2,
     "reviewed_mixed_chapter_comment": 288,
-    "reviewed_source_activity_chapter": 241,
+    "reviewed_source_activity_chapter": 298,
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 18,
     "confirmed_chat_section": 8,
@@ -26,12 +26,12 @@
     "unrelated_talk_show_listing": 3,
     "reused_description_across_unrelated_channels": 20,
     "confirmed_chat_segment_label": 1,
+    "confirmed_stream_start_marker": 10,
     "reviewed_non_song_chapter_in_numbered_setlist": 23,
     "dated_future_stream_announcement": 6,
-    "confirmed_stream_start_marker": 4,
-    "reviewed_bad_description_source": 9,
+    "reviewed_bad_description_source": 11,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 364,
+    "prayer_broadcast_timeline": 370,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -96,9 +96,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 168,
-      "channelCount": 159,
-      "distinctVideoTitles": 167,
+      "videoCount": 173,
+      "channelCount": 164,
+      "distinctVideoTitles": 172,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -177,9 +177,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 86,
-      "channelCount": 86,
-      "distinctVideoTitles": 86,
+      "videoCount": 87,
+      "channelCount": 87,
+      "distinctVideoTitles": 87,
       "examples": [
         {
           "videoId": "tL9lPVUU2QE",
@@ -223,10 +223,10 @@
       }
     },
     "2026-07-02": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 1
+        "reviewed_source_activity_chapter": 2
       }
     },
     "2026-07-03": {
@@ -267,27 +267,34 @@
       }
     },
     "2026-07-11": {
-      "quarantinedOccurrences": 6,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 5,
+        "reviewed_source_activity_chapter": 7,
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-07-12": {
-      "quarantinedOccurrences": 62,
+      "quarantinedOccurrences": 63,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 11,
+        "reviewed_source_activity_chapter": 12,
         "confirmed_mc_break": 1,
         "reviewed_mixed_chapter_comment": 50
       }
     },
     "2026-07-13": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 4,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 3
+        "reviewed_source_activity_chapter": 4
+      }
+    },
+    "2026-07-14": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-07-15": {
@@ -320,11 +327,18 @@
         "reviewed_source_activity_chapter": 1
       }
     },
-    "2026-07-28": {
-      "quarantinedOccurrences": 3,
+    "2026-07-26": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 3
+        "reviewed_source_activity_chapter": 1
+      }
+    },
+    "2026-07-28": {
+      "quarantinedOccurrences": 7,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_source_activity_chapter": 7
       }
     },
     "2026-07-31": {
@@ -384,10 +398,10 @@
       }
     },
     "2026-08-08": {
-      "quarantinedOccurrences": 11,
+      "quarantinedOccurrences": 12,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 11
+        "reviewed_source_activity_chapter": 12
       }
     },
     "2026-08-09": {
@@ -408,11 +422,11 @@
       }
     },
     "2026-08-12": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 4,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "reviewed_source_activity_chapter": 2,
         "confirmed_chat_segment_label": 1,
-        "reviewed_source_activity_chapter": 1,
         "reused_description_across_unrelated_channels": 1
       }
     },
@@ -425,17 +439,19 @@
       }
     },
     "2026-08-14": {
-      "quarantinedOccurrences": 16,
+      "quarantinedOccurrences": 18,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_mixed_chapter_comment": 16
+        "confirmed_stream_start_marker": 1,
+        "reviewed_mixed_chapter_comment": 16,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-08-15": {
-      "quarantinedOccurrences": 10,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 10
+        "reviewed_source_activity_chapter": 11
       }
     },
     "2026-08-17": {
@@ -460,11 +476,11 @@
       }
     },
     "2026-08-23": {
-      "quarantinedOccurrences": 8,
+      "quarantinedOccurrences": 9,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2,
-        "reviewed_source_activity_chapter": 1,
+        "reviewed_source_activity_chapter": 2,
         "reviewed_non_song_chapter_in_numbered_setlist": 5
       }
     },
@@ -478,94 +494,96 @@
       }
     },
     "2026-08-25": {
-      "quarantinedOccurrences": 6,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "dated_future_stream_announcement": 1,
-        "reviewed_source_activity_chapter": 5
+        "reviewed_source_activity_chapter": 7,
+        "dated_future_stream_announcement": 1
       }
     },
     "2026-08-26": {
-      "quarantinedOccurrences": 6,
+      "quarantinedOccurrences": 10,
       "deduplicatedOccurrences": 3,
       "byReason": {
         "confirmed_talk_section": 2,
-        "reviewed_source_activity_chapter": 2,
+        "reviewed_source_activity_chapter": 6,
         "dated_future_stream_announcement": 2
       }
     },
     "2026-08-27": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 7,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 4
+        "reviewed_source_activity_chapter": 7
       }
     },
     "2026-08-28": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 22,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 20
+        "reviewed_source_activity_chapter": 22
       }
     },
     "2026-08-29": {
-      "quarantinedOccurrences": 24,
+      "quarantinedOccurrences": 25,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reviewed_source_activity_chapter": 23,
-        "confirmed_stream_start_marker": 1
+        "confirmed_stream_start_marker": 2
       }
     },
     "2026-08-30": {
-      "quarantinedOccurrences": 31,
+      "quarantinedOccurrences": 33,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 3,
         "reviewed_mixed_chapter_comment": 4,
-        "reviewed_source_activity_chapter": 24
+        "confirmed_stream_start_marker": 1,
+        "reviewed_source_activity_chapter": 25
       }
     },
     "2026-08-31": {
-      "quarantinedOccurrences": 17,
+      "quarantinedOccurrences": 18,
       "deduplicatedOccurrences": 11,
       "byReason": {
-        "reviewed_source_activity_chapter": 9,
+        "reviewed_source_activity_chapter": 10,
         "dated_future_stream_announcement": 2,
         "reused_description_across_unrelated_channels": 1,
         "confirmed_mc_break": 5
       }
     },
     "2026-09-01": {
-      "quarantinedOccurrences": 8,
+      "quarantinedOccurrences": 26,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "reviewed_bad_description_source": 1,
         "confirmed_stream_technical_note": 1,
-        "reviewed_source_activity_chapter": 4,
+        "reviewed_source_activity_chapter": 22,
         "reused_description_across_unrelated_channels": 1,
         "confirmed_stream_start_marker": 1
       }
     },
     "2026-09-02": {
-      "quarantinedOccurrences": 17,
+      "quarantinedOccurrences": 19,
       "deduplicatedOccurrences": 1,
       "byReason": {
+        "reviewed_source_activity_chapter": 5,
         "prayer_broadcast_timeline": 10,
-        "reused_description_across_unrelated_channels": 3,
-        "reviewed_source_activity_chapter": 4
+        "confirmed_stream_start_marker": 1,
+        "reused_description_across_unrelated_channels": 3
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 39,
+      "quarantinedOccurrences": 43,
       "deduplicatedOccurrences": 2,
       "byReason": {
         "confirmed_talk_section": 1,
-        "prayer_broadcast_timeline": 32,
+        "prayer_broadcast_timeline": 35,
         "reviewed_source_activity_chapter": 2,
         "dated_future_stream_announcement": 1,
         "bible_verse_broadcast": 1,
         "dated_stream_challenge_result": 1,
-        "confirmed_stream_start_marker": 1
+        "confirmed_stream_start_marker": 2
       }
     },
     "2026-09-04": {
@@ -585,19 +603,20 @@
       }
     },
     "2026-09-16": {
-      "quarantinedOccurrences": 26,
+      "quarantinedOccurrences": 27,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 19,
         "reviewed_non_song_chapter_in_numbered_setlist": 6,
-        "dated_talk_event_announcement": 1
+        "dated_talk_event_announcement": 1,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-09-17": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 24,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reviewed_source_activity_chapter": 1,
+        "reviewed_source_activity_chapter": 5,
         "prayer_broadcast_timeline": 7,
         "reviewed_non_song_chapter_in_numbered_setlist": 12
       }
@@ -611,11 +630,11 @@
       }
     },
     "2026-09-19": {
-      "quarantinedOccurrences": 15,
+      "quarantinedOccurrences": 16,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 12,
-        "reviewed_source_activity_chapter": 2,
+        "reviewed_source_activity_chapter": 3,
         "reused_description_across_unrelated_channels": 1
       }
     },
@@ -640,10 +659,11 @@
       }
     },
     "2026-09-22": {
-      "quarantinedOccurrences": 19,
+      "quarantinedOccurrences": 20,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 19
+        "prayer_broadcast_timeline": 19,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-09-23": {
@@ -655,33 +675,34 @@
       }
     },
     "2026-09-24": {
-      "quarantinedOccurrences": 98,
+      "quarantinedOccurrences": 99,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 82,
-        "reviewed_source_activity_chapter": 14,
+        "reviewed_source_activity_chapter": 15,
         "reviewed_bad_description_source": 1,
         "dated_stream_challenge_result": 1
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 77,
+      "quarantinedOccurrences": 80,
       "deduplicatedOccurrences": 16,
       "byReason": {
-        "prayer_broadcast_timeline": 72,
-        "reviewed_bad_description_source": 1,
+        "prayer_broadcast_timeline": 74,
+        "reviewed_bad_description_source": 2,
         "dated_stream_announcement": 1,
         "reviewed_source_activity_chapter": 2,
         "unrelated_livestream_listing": 1
       }
     },
     "2026-09-26": {
-      "quarantinedOccurrences": 55,
+      "quarantinedOccurrences": 59,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "prayer_broadcast_timeline": 36,
-        "reviewed_source_activity_chapter": 13,
-        "reviewed_bad_description_source": 6
+        "prayer_broadcast_timeline": 37,
+        "reviewed_source_activity_chapter": 14,
+        "confirmed_stream_start_marker": 1,
+        "reviewed_bad_description_source": 7
       }
     }
   },
@@ -1208,6 +1229,20 @@
     },
     {
       "videoId": "Kg4cWnWbWkc",
+      "title": "少女レイ",
+      "before": "みきとP(ピアノver.)",
+      "after": "みきとP",
+      "raw": "0:13:40   少女レイ/みきとP(ピアノver.)"
+    },
+    {
+      "videoId": "Kg4cWnWbWkc",
+      "title": "ハナミズキ",
+      "before": "一青窈(ピアノver.)",
+      "after": "一青窈",
+      "raw": "1:37:34   ハナミズキ/一青窈(ピアノver.)"
+    },
+    {
+      "videoId": "Kg4cWnWbWkc",
       "title": "センティメント",
       "before": "ポリスピカデリー(cover 羽月うずな",
       "after": "ポリスピカデリー",
@@ -1263,6 +1298,13 @@
       "raw": "EDBGM  2:56:13  センティメント/ポリスピカデリー(cover 羽月うずな"
     },
     {
+      "videoId": "GOfpl8Mx73k",
+      "title": "LOSER",
+      "before": "米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)",
+      "after": "米津玄師 [LOSER / Yonezu Kenshi",
+      "raw": "0:27:32 LOSER / 米津玄師 [LOSER / Yonezu Kenshi] (挑戦枠)"
+    },
+    {
       "videoId": "3DSHxsHub6g",
       "title": "可愛くてごめん",
       "before": "HoneyWorks feat.ちゅーたん（cv:早見沙織",
@@ -1296,27 +1338,6 @@
       "before": "ポリスピカデリー(cover 羽月うずな",
       "after": "ポリスピカデリー",
       "raw": "EDBGM  1:50:05  センティメント/ポリスピカデリー(cover 羽月うずな"
-    },
-    {
-      "videoId": "3E9Lw5JEzIs",
-      "title": "そばかす",
-      "before": "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
-      "after": "JUDY AND MARY (1996)",
-      "raw": "07:49:09  そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1"
-    },
-    {
-      "videoId": "-rbtzeqldbc",
-      "title": "泥中に咲く",
-      "before": "HarryP（針原翼) (2018",
-      "after": "HarryP(針原翼)",
-      "raw": "02:08:51 [15] 泥中に咲く / HarryP（針原翼) (2018)"
-    },
-    {
-      "videoId": "Fh-YPYTYmGE",
-      "title": "赤い月に吠える夜",
-      "before": "GO!GO!7188 [漢字大敵",
-      "after": "GO!GO!7188",
-      "raw": "2:42:07  16. 赤い月に吠える夜  /  GO!GO!7188  [漢字大敵]"
     }
   ],
   "repairedDateCreditExamples": [
@@ -1709,10 +1730,22 @@
   ],
   "repairedKnownSourceCreditExamples": [
     {
+      "videoId": "moG3mGvkZFU",
+      "before": "ライラック - Mrs. GREEN APPLE］(挑戦枠)",
+      "after": "ライラック - Mrs. GREEN APPLE",
+      "raw": "2:28:54　21.［ライラック／Mrs. GREEN APPLE］(挑戦枠)"
+    },
+    {
       "videoId": "-iOsziIkWtw",
       "before": "Problem - Ariana Grande )？",
       "after": "Problem - Ariana Grande",
       "raw": "( 1:19:54 Problem / Ariana Grande )？"
+    },
+    {
+      "videoId": "8rx98ujzukk",
+      "before": "休憩〜水平線歌唱〜 - 未記載",
+      "after": "水平線 - ",
+      "raw": "1:00:50 休憩〜水平線歌唱〜"
     },
     {
       "videoId": "sSF5iy4Mxq0",
@@ -1775,10 +1808,34 @@
       "raw": "1:56:14🎤08. Luv Rendezvous 💎 七海うらら　(七海の日～！ｺｰﾚｽ）"
     },
     {
+      "videoId": "yywAfEC5zbU",
+      "before": "secret base 〜君がくれたもの〜 - 本間芽衣子(茅野愛衣)・安城鳴子(戸松遥)・鶴見知利子(早見沙織（2011年）",
+      "after": "secret base 〜君がくれたもの〜 - 本間芽衣子(茅野愛衣)・安城鳴子(戸松遥)・鶴見知利子(早見沙織)",
+      "raw": "5:56:46 secret base 〜君がくれたもの〜/本間芽衣子(茅野愛衣)・安城鳴子(戸松遥)・鶴見知利子(早見沙織（2011年）"
+    },
+    {
+      "videoId": "2D_nSa4QzRw",
+      "before": "戒厳のシグナル/神咒Kajiri （1st originalSong）https - www.youtube.com/watch?v=8WoHr8lxxXY",
+      "after": "戒厳のシグナル - 神咒Kajiri",
+      "raw": "28:27 戒厳のシグナル/神咒Kajiri （1st originalSong）https://www.youtube.com/watch?v=8WoHr8lxxXY"
+    },
+    {
+      "videoId": "2D_nSa4QzRw",
+      "before": "祈りのフラグメンツ/神咒Kajiri （5th originalSong）https - www.youtube.com/watch?v=_3C0CU1q3lI",
+      "after": "祈りのフラグメンツ - 神咒Kajiri",
+      "raw": "38:50 祈りのフラグメンツ/神咒Kajiri （5th originalSong）https://www.youtube.com/watch?v=_3C0CU1q3lI"
+    },
+    {
       "videoId": "MWVdc1Fc8BU",
       "before": "Silly-Go-Round／FictionJunction／.hack - 未記載",
       "after": "Silly-Go-Round - FictionJunction",
       "raw": "19:50\t\tSilly-Go-Round／FictionJunction／.hack//Roots OP"
+    },
+    {
+      "videoId": "0LRtgvFNsoU",
+      "before": "糸 - 中島みゆき / https://youtu.be/O6e_00LPex8?si=C9Jw43mkApA8c5qo",
+      "after": "糸 - 中島みゆき",
+      "raw": "1:38:14 糸 / 中島みゆき / https://youtu.be/O6e_00LPex8?si=C9Jw43mkApA8c5qo"
     },
     {
       "videoId": "zFZgawUHBas",
@@ -1787,10 +1844,34 @@
       "raw": "2:17:01 FLAGS / T.M.Revolution (劇場版 戦国BASARA The Last Party OP 及び PSPの戦国BASARAクロニクルヒーローズ主題歌(やはりゲームもでした))"
     },
     {
+      "videoId": "Ni4eel4yuXk",
+      "before": "スーパーウルトラハイパーミラクルロマンチック - 未記載",
+      "after": "スーパーウルトラハイパーミラクルロマンチック - 井口裕香,井澤美香子",
+      "raw": "42:41 スーパーウルトラハイパーミラクルロマンチック / 井口裕香,井澤美香子 / アニメ VALKYRIE DRIVE MERMAID(2015)"
+    },
+    {
+      "videoId": "Ni4eel4yuXk",
+      "before": "GO!GO!MANIAC - 未記載",
+      "after": "GO!GO!MANIAC - 放課後ティータイム",
+      "raw": "1:17:06 GO!GO!MANIAC / 桜高軽音部/放課後ティータイム / アニメ けいおん!!(2011)"
+    },
+    {
+      "videoId": "uOYEY3YmxsM",
+      "before": "Bling Bang Bang Born - Creepy Nuts（R指定",
+      "after": "Bling Bang Bang Born - Creepy Nuts",
+      "raw": "31:06　🎤Bling Bang Bang Born／Creepy Nuts（R指定"
+    },
+    {
       "videoId": "QB2tT48CvOI",
       "before": "奏 - オリ曲 YOU＆合図 リリース／明日は祝日",
       "after": "奏 - スキマスイッチ",
       "raw": "1:11:42 奏／オリ曲 YOU＆合図 リリース／明日は祝日"
+    },
+    {
+      "videoId": "Yrc6x3_ikmg",
+      "before": "もうそう♡えくすぷれす - 千石撫子(花澤香菜",
+      "after": "もうそう♡えくすぷれす - 千石撫子(花澤香菜)",
+      "raw": "03:07:54 もうそう♡えくすぷれす - 千石撫子(花澤香菜"
     },
     {
       "videoId": "Q8ktjMwiE4I",
@@ -1823,70 +1904,10 @@
       "raw": "1:03:52 115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism"
     },
     {
-      "videoId": "bJzjN1pmjvQ",
-      "before": "34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ - ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)",
-      "after": "(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ - ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)",
-      "raw": "♪2:44:34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ | ぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬぬ(初音ミク)"
-    },
-    {
-      "videoId": "wiOr0NfQPow",
-      "before": "Song 5: \"Chiisana Boukensha\" - Sora Amamiya, Rie Takahashi, Ai Kayano [Kono Subarashii Sekai ni Shukufuku o! ED 1",
-      "after": "Chiisana Boukensha - Sora Amamiya, Rie Takahashi, Ai Kayano",
-      "raw": "34:00 Song 5: \"Chiisana Boukensha\" by Sora Amamiya, Rie Takahashi, Ai Kayano [Kono Subarashii Sekai ni Shukufuku o! ED 1]"
-    },
-    {
-      "videoId": "zyngx4g-sy4",
-      "before": "ハッピーシンセサイザ - 未記載",
-      "after": "ハッピーシンセサイザ - EasyPop",
-      "raw": "47:15 - 8. ハッピーシンセサイザ (Happy Synthesizer) by EasyPop 【❔🍸】"
-    },
-    {
-      "videoId": "2G0ajYvs638",
-      "before": "乙女のルートはひとつじゃない！ - 乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった… My Next Life as a Villainess: All Routes Lead to Doom!",
-      "after": "乙女のルートはひとつじゃない！ - angela",
-      "raw": "49:28 乙女のルートはひとつじゃない！/乙女ゲームの破滅フラグしかない悪役令嬢に転生してしまった…\tMy Next Life as a Villainess: All Routes Lead to Doom!"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "青と夏\tMrs. GREEN APPLE - ",
-      "after": "青と夏 - Mrs. GREEN APPLE",
-      "raw": "1\t青と夏\tMrs. GREEN APPLE\t0:13:17"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "ライラック\tMrs. GREEN APPLE - ",
-      "after": "ライラック - Mrs. GREEN APPLE",
-      "raw": "2\tライラック\tMrs. GREEN APPLE\t0:19:07"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "斜陽\tヨルシカ - ",
-      "after": "斜陽 - ヨルシカ",
-      "raw": "4\t斜陽\tヨルシカ\t0:33:31"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "雨とカプチーノ\tヨルシカ - ",
-      "after": "雨とカプチーノ - ヨルシカ",
-      "raw": "5\t雨とカプチーノ\tヨルシカ\t0:42:59"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "ただ君に晴れ\tヨルシカ - ",
-      "after": "ただ君に晴れ - ヨルシカ",
-      "raw": "6\tただ君に晴れ\tヨルシカ\t0:50:32"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "少女レイ\tみきとP - ",
-      "after": "少女レイ - みきとP",
-      "raw": "7\t少女レイ\tみきとP\t0:57:18"
-    },
-    {
-      "videoId": "r-PkiVCPXl4",
-      "before": "からくりピエロ\t40mP - ",
-      "after": "からくりピエロ - 40mP",
-      "raw": "8\tからくりピエロ\t40mP\t1:05:34"
+      "videoId": "HvnB0lEMLxA",
+      "before": "恋愛サーキュレーション - 千石撫子(花澤香菜",
+      "after": "恋愛サーキュレーション - 千石撫子(花澤香菜)",
+      "raw": "2:01:21 　恋愛サーキュレーション／千石撫子(花澤香菜"
     }
   ],
   "duplicateExamples": [
@@ -2915,6 +2936,17 @@
     },
     {
       "reason": "reviewed_source_activity_chapter",
+      "videoId": "-iOsziIkWtw",
+      "channelName": "音ノ乃のの / NononoNono",
+      "occurrenceId": "-iOsziIkWtw:UgzCsCdZYt-FSP0dEzx4AaABAg:5676:ff8080b9828914f4",
+      "sourceId": "UgzCsCdZYt-FSP0dEzx4AaABAg",
+      "sourceHash": "04d86c87e7b05ace07991f6073189c1c62a6a2e56723a2555514fe52a323285b",
+      "title": "???",
+      "artist": "??? )↓と同じ？",
+      "raw": "( 1:34:36 ??? / ??? )↓と同じ？"
+    },
+    {
+      "reason": "reviewed_source_activity_chapter",
       "videoId": "sSF5iy4Mxq0",
       "channelName": "シスター・クレア -SisterClaire-",
       "occurrenceId": "sSF5iy4Mxq0:legacy:sSF5iy4Mxq0:4321:c00a024ca6fd041d",
@@ -3110,17 +3142,6 @@
       "title": "（ロングトーン）",
       "artist": "未記載",
       "raw": "53:58❕🐙（ロングトーン）"
-    },
-    {
-      "reason": "reviewed_mixed_chapter_comment",
-      "videoId": "8KDs7OP6_KM",
-      "channelName": "Vezalius Bandage 【NIJISANJI EN】",
-      "occurrenceId": "8KDs7OP6_KM:legacy:8KDs7OP6_KM:3272:36f8c51586113b41",
-      "sourceId": "legacy:8KDs7OP6_KM",
-      "sourceHash": "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
-      "title": "高音",
-      "artist": "未記載",
-      "raw": "54:32　高音"
     }
   ]
 }
