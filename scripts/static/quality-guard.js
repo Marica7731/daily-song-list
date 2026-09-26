@@ -554,14 +554,16 @@ function isUnknownArtistValue(value) {
 
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
-  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const sourceRaw = String(song?.raw || "").trim();
+  const raw = sourceRaw.normalize("NFKC").trim();
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
+  const sourceBody = sourceRaw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
 
-  // Four-column full-width slash setlists can be misparsed even when the last
-  // brand/year field lands in artist. Parse only when the complete row proves
-  // title／credited artist／work metadata／brand(year).
-  if (body.includes("／")) {
-    const fields = body.split("／").map((value) => value.trim()).filter(Boolean);
+  // Preserve the pre-NFKC source here: NFKC turns "／" into "/", which would
+  // erase the evidence that this is a four-column full-width setlist and risk
+  // confusing legitimate slash-containing names such as DISH//.
+  if (sourceBody.includes("／")) {
+    const fields = sourceBody.split("／").map((value) => value.trim()).filter(Boolean);
     if (
       fields.length === 4 &&
       /^.+\s*[（(](?:19|20)\d{2}[）)]$/u.test(fields[3]) &&
@@ -569,8 +571,8 @@ function repairStructuredSlashCredit(song) {
       fields[0].length >= 1 &&
       fields[1].length >= 1
     ) {
-      const currentTitle = String(song?.title || "").normalize("NFKC").trim();
-      const currentArtist = String(song?.artist || "").normalize("NFKC").trim();
+      const currentTitle = String(song?.title || "").trim();
+      const currentArtist = String(song?.artist || "").trim();
       if (
         currentTitle === fields[0] ||
         currentTitle.startsWith(fields[0] + "／") ||
