@@ -6,6 +6,7 @@ const {
   cleanStaticVideos,
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
+  repairKnownSourceCredit,
   repairReleaseDateCredit,
   repairStructuredSlashCredit,
   repeatedDescriptionSources,
@@ -288,4 +289,33 @@ test("exact same-video same-timestamp duplicate is removed, different timestamps
   assert.equal(audit.quarantinedOccurrences, 0);
   assert.deepEqual(videos[0].songs.map(x => x.seconds), [531, 900]);
   assert.equal(JSON.stringify(input), saved);
+});
+
+
+test("source-specific chapter formats keep numbered songs and repair known missing credits", () => {
+  const claudeHash = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
+  assert.equal(unambiguousNonSongReason(song("they're so giggly today", "未記載", {
+    raw: "33:58 - they're so giggly today", sourceHash: claudeHash,
+  })), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(song("PAPERMOON", "Tommy heavenly6", {
+    raw: "52:59 - 9. PAPERMOON by Tommy heavenly6 【🎫❔】", sourceHash: claudeHash,
+  })), null);
+  const synth = repairKnownSourceCredit(song("ハッピーシンセサイザ", "未記載", {
+    raw: "47:15 - 8. ハッピーシンセサイザ (Happy Synthesizer) by EasyPop 【❔🍸】",
+    sourceHash: claudeHash,
+  }));
+  assert.equal(synth.artist, "EasyPop");
+  assert.equal(unambiguousNonSongReason(song("joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22", "7?????", {
+    raw: "54:51 joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22/7?????",
+    sourceHash: "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a",
+  })), "reviewed_mixed_chapter_comment");
+
+  const robocoHash = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
+  const repaired = repairKnownSourceCredit(song(
+    "115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism",
+    "未記載",
+    {sourceHash: robocoHash},
+  ));
+  assert.equal(repaired.title, "115万キロのフィルム");
+  assert.equal(repaired.artist, "Official髭男dism");
 });
