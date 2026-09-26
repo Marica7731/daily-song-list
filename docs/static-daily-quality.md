@@ -140,3 +140,19 @@ identity is now:
 so a generated release cannot silently lose rows. Ambiguous candidates (for
 example a plausible song whose artist happens to be `月`, or a long legitimate
 character-song credit) stay review-only rather than being guessed away.
+
+
+### Mixed-source review detector
+
+The review artifact additionally groups rows by video and source hash. A source is
+surfaced in `mixedStructuredSetlistSources` when it has at least eight parsed
+rows, at least three unnumbered unknown-artist rows, and either three explicitly
+numbered song rows or three known-artist rows. This detector is **review-only**:
+it does not remove anything by itself. Its purpose is to expose short reaction
+chapters that single-row length heuristics miss.
+
+Release/work metadata normalization now also removes a bracketed work label when
+it sits directly before an explicit release date, so e.g.
+`Vaundy【王様ランキング】（2022/01/07）...` becomes `Vaundy` in the
+derived ranking. Year-range structured credits and trailing delimiter artifacts
+are repaired only where their original row proves the field boundaries.
