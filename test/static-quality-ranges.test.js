@@ -1002,3 +1002,29 @@ test("performance annotations are stripped only when the raw row proves the suff
   }
   assert.equal(normalizeReleaseMetadataArtist(song("Bracket Song","Artist [Unit",{raw:"1:00 Bracket Song / Artist [Unit"})).artist,"Artist [Unit");
 });
+
+
+test("reviewed Sep 26 full-width slash source uses its first two fields as song and artist", () => {
+  const hash="ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc";
+  const rows=[
+    ["Raise your flag／MAN WITH A MISSION","", "15:32\tRaise your flag／MAN WITH A MISSION／機動戦士ガンダム 鉄血のオルフェンズ OP","Raise your flag","MAN WITH A MISSION"],
+    ["ファンサ／mona(CV:夏川椎菜)【HoneyWorks】","告白実行委員会～アイドルシリーズ～","17:30 1:56:53\tファンサ／mona(CV:夏川椎菜)【HoneyWorks】／告白実行委員会～アイドルシリーズ～","ファンサ","mona(CV:夏川椎菜)【HoneyWorks】"],
+    ["静かな夜に／ラクス・クライン","", "22:33\t静かな夜に／ラクス・クライン／機動戦士ガンダムSEED 挿入歌","静かな夜に","ラクス・クライン"],
+    ["The Everlasting Guilty Crown／EGOIST","", "33:44\tThe Everlasting Guilty Crown／EGOIST／ギルティクラウン OP","The Everlasting Guilty Crown","EGOIST"],
+    ["Super Driver／平野綾","", "43:07\tSuper Driver／平野綾／涼宮ハルヒの憂鬱(第2期) OP","Super Driver","平野綾"],
+    ["いつか空に届いて／椎名恵","", "51:34\tいつか空に届いて／椎名恵／機動戦士ガンダム0080 ポケットの中の戦争 OP","いつか空に届いて","椎名恵"],
+    ["星座になれたら／結束バンド","", "56:49\t星座になれたら／結束バンド／ぼっち・ざ・ろっく！ 挿入歌","星座になれたら","結束バンド"],
+    ["脳漿炸裂ガール","れるりり","1:02:37\t脳漿炸裂ガール／れるりり","脳漿炸裂ガール","れるりり"],
+    ["Yes! Party Time!!／島村卯月、渋谷凛、本田未央、安部菜々、赤城みりあ","アイドルマスター シンデレラガールズ","1:07:51\tYes! Party Time!!／島村卯月、渋谷凛、本田未央、安部菜々、赤城みりあ／アイドルマスター シンデレラガールズ","Yes! Party Time!!","島村卯月、渋谷凛、本田未央、安部菜々、赤城みりあ"],
+    ["Starry heavens／Day after tomorrow","", "1:23:10\tStarry heavens／Day after tomorrow／GC版テイルズ オブ シンフォニア 主題歌","Starry heavens","Day after tomorrow"],
+    ["モエチャッカファイア／弌誠／ゼンレスゾーンゼロ","エレン・ジョー イメージソング","1:31:25\tモエチャッカファイア／弌誠／ゼンレスゾーンゼロ／エレン・ジョー イメージソング","モエチャッカファイア","弌誠"],
+    ["創聖のアクエリオン／AKINO from bless4","", "1:35:17\t創聖のアクエリオン／AKINO from bless4／創聖のアクエリオン OP","創聖のアクエリオン","AKINO from bless4"],
+  ];
+  for(const [title,artist,raw,expectedTitle,expectedArtist] of rows){
+    const fixed=repairKnownSourceCredit(song(title,artist,{raw,sourceHash:hash}));
+    assert.equal(fixed.title,expectedTitle);
+    assert.equal(fixed.artist,expectedArtist);
+  }
+  assert.equal(unambiguousNonSongReason(song("～)　※蒼木さんの出番は","",{raw:"14:45～)　※蒼木さんの出番は",sourceHash:hash})),"reviewed_source_activity_chapter");
+  assert.equal(unambiguousNonSongReason(song("まで！)","",{raw:"23:59まで！)",sourceHash:hash})),"reviewed_source_activity_chapter");
+});
