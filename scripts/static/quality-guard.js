@@ -241,10 +241,10 @@ function isUnknownArtistValue(value) {
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
-  if (!isUnknownArtistValue(artist) && !/^(?:19|20)\d{2}$/u.test(artist)) return song;
+  if (!isUnknownArtistValue(artist) && !/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?$/u.test(artist)) return song;
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
-  const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
-  if (!match || (/^(?:19|20)\d{2}$/u.test(artist) && match[4] !== artist)) return song;
+  const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)\s*$/u);
+  if (!match || (/^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?$/u.test(artist) && match[4] !== artist)) return song;
   const [, title, creditedArtist, metadata] = match;
   if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
     return song;
@@ -265,9 +265,11 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
   }
 
   let cleaned = artist
+    .replace(/【[^】]{1,160}】\s*(?=[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)])/u, "")
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
     .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .replace(/\s+[/／]\s*$/u, "")
     .trim();
   if (!cleaned || cleaned === artist) return song;
   return { ...song, artist: cleaned };
@@ -280,6 +282,11 @@ function repairKnownSourceCredit(song) {
       isUnknownArtistValue(song?.artist) &&
       /ハッピーシンセサイザ.*\bby\s+EasyPop\b/iu.test(String(song?.raw || ""))) {
     return { ...song, artist: "EasyPop" };
+  }
+  if (hash === "087f98b90de544c80795a5f24729ba2a5e1e9df8250379c29fc361e02012c6ef" &&
+      /^34[\s　]+\(ｱﾝｺｰﾙ\)/u.test(String(song?.title || "")) &&
+      /2:44:34[\s　]+\(ｱﾝｺｰﾙ\)/u.test(String(song?.raw || ""))) {
+    return { ...song, title: String(song.title).replace(/^34[\s　]+/u, "") };
   }
   if (hash !== ROBOCO_UNDELIMITED_CREDIT_HASH || !isUnknownArtistValue(song?.artist)) return song;
   const known = new Map([
