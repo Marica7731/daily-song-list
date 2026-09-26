@@ -634,3 +634,61 @@ test("reviewed harp timeline drops comment continuations and repairs attached an
   assert.equal(repaired.title, "フクロウ");
   assert.equal(repaired.artist, "");
 });
+
+
+test("reviewed historical mixed setlists drop only source-bound talk chapters", () => {
+  const rows = [
+    ["eaa8f87146f3fb5bc0d06b8c918efa421fafcd0a68053d288ab233a87900821a", "学文路トキ さん"],
+    ["cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67", "Soraさん"],
+    ["da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad", "何選曲したっけ…"],
+    ["472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80", "イベントの規模がでかい"],
+    ["f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0", "今日はお披露目あり"],
+    ["14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93", "重大発表②『歌ってみた』"],
+    ["c42bc673a091cab8fb3a026527c7452440b7b34814debb56a9b944b7248811f1", "ストーリーのあらすじ"],
+    ["2d5b755ce969ec2a9a7970440f52728f4054b8daa5a15efcb0451752502cd0c0", "Talk segment"],
+  ];
+  for (const [sourceHash, title] of rows) {
+    assert.equal(unambiguousNonSongReason(song(title, "", {sourceHash, raw: "1:00 " + title})), "reviewed_source_activity_chapter");
+    assert.equal(unambiguousNonSongReason(song(title, "", {sourceHash: "not-reviewed", raw: "1:00 " + title})), null);
+  }
+  assert.equal(unambiguousNonSongReason(song("どこまでも", "", {
+    sourceHash: "f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0",
+    raw: "0:37:01 どこまでも (アカペラ)",
+  })), null);
+  assert.equal(unambiguousNonSongReason(song("花に亡霊", "", {
+    sourceHash: "14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93",
+    raw: "11:58 【花に亡霊】",
+  })), null);
+});
+
+test("performance-status text is not published as the song artist", () => {
+  assert.equal(normalizeConservativeArtist(song("残響讃歌", "歌えません", {
+    raw: "42:27 残響讃歌(歌えません)",
+  })).artist, "");
+  assert.equal(normalizeConservativeArtist(song("グリーンライツ・セレナーデ-piano Ver", "練習中", {
+    raw: "1:37:35 グリーンライツ・セレナーデ-piano Ver.-(練習中)",
+  })).artist, "");
+  assert.equal(normalizeConservativeArtist(song("イキナクチャ", "ロマニードットアイオー ✨Original Song✨", {
+    raw: "1:39:40 06. イキナクチャ - ロマニードットアイオー ✨Original Song✨",
+  })).artist, "ロマニードットアイオー");
+  assert.equal(normalizeConservativeArtist(song("歌えません", "歌えません", {
+    raw: "1:00 歌えません / 歌えません",
+  })).artist, "歌えません");
+});
+
+test("three-part year credits and commercial metadata recover artist without broad guessing", () => {
+  const simple = repairStructuredSlashCredit(song("Koi no Ageha/Yukari Tamura", "", {
+    raw: "2:01:12 Koi no Ageha/Yukari Tamura/2009",
+  }));
+  assert.equal(simple.title, "Koi no Ageha");
+  assert.equal(simple.artist, "Yukari Tamura");
+
+  const commercial = repairStructuredSlashCredit(song("StaRt/Mrs. GREEN APPLE/花王「メリット」のCMソング", "", {
+    raw: "06:33 StaRt/Mrs. GREEN APPLE/花王「メリット」のCMソング/2015",
+  }));
+  assert.equal(commercial.title, "StaRt");
+  assert.equal(commercial.artist, "Mrs. GREEN APPLE");
+
+  const ambiguous = song("A/B", "", {raw: "1:00 A/B/not-a-year"});
+  assert.strictEqual(repairStructuredSlashCredit(ambiguous), ambiguous);
+});
