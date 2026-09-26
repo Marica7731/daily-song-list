@@ -174,6 +174,20 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064", new Set([
     "7月の配信予定",
   ])],
+  ["c2f658ac301da176cdf73b8d81f27f47ab9b8cead6a5bbd48f952a11703fa81f", new Set(["26日"])],
+  ["04d86c87e7b05ace07991f6073189c1c62a6a2e56723a2555514fe52a323285b", new Set(["???"])],
+  ["96dea4357ab2688d1a8e9a46ef3189884cabb6baa0dd8399d453a1c29c7cac6a", new Set(["jsjsjs", "mi canción favorita (/^<^)"])],
+  ["341d1bba7b5f4c0bf3a103eb044dc2bf8b009d811e1e8365a1af04d93d19d601", new Set(["ピアノ弾き語り(8/26/2026"])],
+  ["e8cdaf5ee3e7bcd061f87b77af178e28936d58d52ae4b538d1e6d060212cf3b6", new Set(["現地ライブ「るりとなぎ - 冬のうたまつり"])],
+  ["cc5f41656f02400f6cb81c857ca689a0fc3bb1b7e2c0ae6cfba3c744ee7886b7", new Set(["Opening Talk", "Talk Time", "Ending Talk"])],
+  ["20a9fa8bf22586c165a7f68e548f35610006adad7288d5053d4be39f2ccccec7", new Set(["呼び捨てされちゃった"])],
+  ["2d7656ac17835d2f3dd1a3a9022de83f951ed745940409b0cb16ac2321af9614", new Set([
+    "～片頭痛と秋風。季節の変わり目、声の色～", "～君影すずは、これからも～", "～Xってさ、何を見たい？～", "～お米が炊ける。匂いを聞く～",
+  ])],
+  ["4f438a8da6cd94680ce230ff82d670100ea645c7a9ee37a4d00eccd82386687a", new Set([
+    "コンビニOBとして先輩風", "コンビニバイト時代の変な客", "連続した数字が現れた後に不幸が",
+  ])],
+  ["7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963", new Set(["(waiting)"])],
 
 ]);
 
@@ -567,7 +581,159 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
   return { ...song, artist: cleaned };
 }
 
+function repairResidualKnownSourceCredit(song) {
+  const hash = String(song?.sourceHash || "");
+  const title = String(song?.title || "").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+
+  if (hash === "434ba28abf9d83918a57deff756fa17ac80849b9ebeb68e05d3b03aee05b14fd" &&
+      title === "ライラック") return { ...song, artist: "Mrs. GREEN APPLE" };
+
+  if (hash === "a2a972a3aa15f76d72680ccf228f8e3d131a9560aa0148c3935e3a3852d848a6" &&
+      title === "secret base 〜君がくれたもの〜") {
+    return { ...song, artist: "本間芽衣子(茅野愛衣)・安城鳴子(戸松遥)・鶴見知利子(早見沙織)" };
+  }
+
+  if (hash === "7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963") {
+    if (title === "スーパーウルトラハイパーミラクルロマンチック" &&
+        /井口裕香,井澤美香子/u.test(raw)) return { ...song, artist: "井口裕香,井澤美香子" };
+    if (title === "GO!GO!MANIAC" && /桜高軽音部\/放課後ティータイム/u.test(raw)) {
+      return { ...song, artist: "放課後ティータイム" };
+    }
+  }
+
+  if (hash === "f02b19d884b0a89b7634ddb3d368afbffe43eb8b92b0034f76c277ccdab452d5" &&
+      title === "Bling Bang Bang Born") return { ...song, artist: "Creepy Nuts" };
+
+  if ((hash === "29e47bfde50be0f65802fe22e7bb7b06f541e7fab6b2b9afef75d995a946e03c" &&
+       title === "もうそう♡えくすぷれす") ||
+      (hash === "4c613d6a3de9ad09dcedf0c647fed5636f4f5fc713eb49f3e0988a4d17dfdfaf" &&
+       title === "恋愛サーキュレーション")) {
+    return { ...song, artist: "千石撫子(花澤香菜)" };
+  }
+
+  if (hash === "9a6ed0bf2f31762fbab3136d27ad114b451fe72277d07bb24fda301f0cf77b62") {
+    const artists = new Map([
+      ["楓", "スピッツ"], ["空と君のあいだに", "中島みゆき"],
+      ["東京ブギウギ", "笠置シヅ子"], ["上を向いて歩こう", "坂本九"],
+    ]);
+    if (artists.has(title) && /ギター弾き語り/u.test(raw)) return { ...song, artist: artists.get(title) };
+  }
+
+  if (hash === "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6" &&
+      title === "鳥の詩" && /鳥の詩\/key作品\/AIR/iu.test(raw)) {
+    return { ...song, artist: "Lia" };
+  }
+
+  if (hash === "2b4c90b8383f7a20f4a7dbaf170b1ae6b101236c10a523db3e4cb86ae81cdeff") {
+    const artists = new Map([
+      ["U", "millennium parade × Belle"], ["言の刃", "ロクデナシ"], ["Ring of Fortune", "佐々木恵梨"],
+    ]);
+    if (artists.has(title) && /\[歌詞動画\]/u.test(raw)) return { ...song, artist: artists.get(title) };
+  }
+
+  if (hash === "ce830b8af2d4628030b101720e38041ad37c8308e18e83388348ad0d6a71382e" &&
+      /secret base ~君がくれたもの〜/u.test(title) && /\/ ZONE/u.test(raw)) {
+    return { ...song, title: "secret base ~君がくれたもの〜", artist: "ZONE" };
+  }
+
+  if (hash === "9446e2fb54d14c23581ff5dd4cc5395b5f5c7c4399513f036504e4d62dce1377" &&
+      title === "私は最強" && /^Ado/u.test(String(song?.artist || ""))) return { ...song, artist: "Ado" };
+
+  if (hash === "df01dc87a7ae4cdb75b92806d517ed2e768ef68368cbc72b4ffab5fe1501c0af" &&
+      title === "猫 - DISH" && /猫 - DISH\/\/[（(]Piano Ver/iu.test(raw)) {
+    return { ...song, title: "猫", artist: "DISH//" };
+  }
+
+  if (hash === "62353732eb5771fb118b6609e443c7c35c7686f3296972b2bb9b0df11c5ae1d2" &&
+      title === "When You Wish Upon a Star") return { ...song, artist: "Jiminy Cricket [CV: Cliff Edwards]" };
+
+  if (hash === "d0f7f4d5083c6542d361ef70da0c1a3401465d629a6a54dcabd1352fcc996641") {
+    if (title.startsWith("不死鳥のフランメ/")) {
+      return { ...song, title: "不死鳥のフランメ", artist: "マリア CV:日笠陽子×風鳴翼 CV:水樹奈々" };
+    }
+    if (title.startsWith("逆光のフリューゲル/")) {
+      return { ...song, title: "逆光のフリューゲル", artist: "ツヴァイウィング（風鳴翼 CV:水樹奈々・天羽奏 CV:高山みなみ）" };
+    }
+  }
+
+  if (hash === "46353c45f3ac9685180421eb579e5c33e2bca6f4d2b6d01a03bc2f8498ed4b83" &&
+      title === "No.1") return { ...song, artist: "mona(CV:夏川椎菜)" };
+
+  if (hash === "3b657c0a4983dbf17cd8f4e31c5ef607f7ca00791d0e2bca8e9e113289527222" &&
+      title.startsWith("勝手にシンドバッド(78')/サザンオールスターズ")) {
+    return { ...song, title: "勝手にシンドバッド(78')", artist: "サザンオールスターズ" };
+  }
+
+  if (hash === "7c58480231e1fb5348d0a67b469db832486673116194bf2bd9167ce5b0cc0e99" &&
+      title === "さぁ" && /さぁ\s*\/\s*SURFACE/u.test(raw)) return { ...song, artist: "SURFACE" };
+
+  if (hash === "5afbd861e196975ffa0945959f043aa155683b0c5de757162472076bf1ef6b2f" &&
+      (title === "パーティを止めないで" || title === "シャンパンゴールド")) {
+    return { ...song, artist: "ヒプノシスマイク[伊弉冉一二三(CV.木島隆一)]" };
+  }
+
+  if (hash === "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad" &&
+      title === "檄!帝国華撃団" && /サクラ大戦/u.test(raw)) {
+    return { ...song, artist: "横山智佐（真宮寺さくら）＆帝国歌劇団" };
+  }
+
+  const catHashes = new Set([
+    "8e7f6571ac15fbd518bbf2b1dc672843a3844c4fe8f25dde5a80bf3f157fdd56",
+    "417232f78db6876ea1f653d33125e3c5ba2bb928f54965a426f5ef0f9a9934fc",
+    "37e4979dd7be5724086fffca470f4d14f68fee81393d0bb343d4f090cadea863",
+    "8a17f448e36e97a752437f11b88514067b1cc679c5e675c480e3efc0a4f5633b",
+    "6bf40ecd74e76a6bbff3bd013cf1fa7096c4f281178f5347e399de678d5b5b63",
+    "824192fba3664ba582dfc1857eb0587f7295e2106ac45588527270dc96320862",
+  ]);
+  if (catHashes.has(hash) && /猫[】]?[\/／]DISH\/\//u.test(raw)) return { ...song, title: "猫", artist: "DISH//" };
+
+  if (hash === "75f339dfc59363f1494867a75be85070cd4d0ef485456472535d3a2578c864f1" &&
+      title === "前前前世") return { ...song, artist: "RADWIMPS" };
+
+  if (hash === "883ad1afa6195fd14709522dd7814dd285e420f50a88190ac5e4091d0415c5d2" &&
+      title === "Don't say “lazy”") return { ...song, artist: "桜高軽音部" };
+
+  if (hash === "2c0834fa9d453cf2d6295ea934bd90159fd86679b45d2ea1b56b50eb735c1419" &&
+      title.startsWith("少年よ我に帰れ")) return { ...song, title: "少年よ我に帰れ", artist: "やくしまるえつこメトロオーケストラ" };
+
+  const statusArtistMaps = new Map([
+    ["e6642a6b238d83ea45f9978aa10f0414e83a657135ff55b5012746a2f19e546e", new Map([
+      ["CLEAR", "坂本真綾"], ["瞬き", "back number"], ["妄想感傷代償連盟", "DECO*27"],
+      ["星月夜", "由薫"], ["あぶく", "ヨルシカ"], ["最後の花弁", "EGOIST"],
+    ])],
+    ["9a959e5426266ab4f4d6b8835d6e50aadc5aa7e467a7800546f23cc57cab6fa9", new Map([
+      ["青のすみか", "キタニタツヤ"], ["クリスマスソング", "back number"],
+    ])],
+    ["333e1c421d0c6fc4f10753961c3c1713ae5c4045bab699827deba82f6405ab60", new Map([
+      ["命に嫌われている", "カンザキイオリ"],
+    ])],
+    ["d48ce12c27d1e4f7eb2a9f4b9919621702ac82423a7d4c77f7ecfa0bccba2cee", new Map([
+      ["八月の蛍", "HACHI"],
+    ])],
+  ]);
+  const statusArtists = statusArtistMaps.get(hash);
+  if (statusArtists?.has(title) && /\[[^\]]+\]\s*$/u.test(raw)) return { ...song, artist: statusArtists.get(title) };
+
+  if (hash === "d120dc8056791dc79eb28ae0865a1a7f9ecdda09a71f47b0b3d9dee210fba1f8" &&
+      title.startsWith("emotional flutter")) return { ...song, title: "emotional flutter", artist: "原田ひとみ" };
+
+  if (hash === "8e3c522b109dabe5feb1704692cf7676aa5b11e53e9a0e2a99234c5d602f3030" &&
+      title === "ドラマチックLOVE") {
+    return { ...song, artist: "一条シン(寺島惇太), 太刀花ユキノジョウ(斉藤壮馬), 香賀美タイガ(畠中祐), 十王院カケル(八代拓), 鷹梁ミナト(五十嵐雅), 西園寺レオ(永塚琢馬), 涼野ユウ(内田雄馬)" };
+  }
+
+  if (hash === "6ca8928630b3a52aebc13bbeaed3af13dcd186955da7b5ad5c87b48ee3c0be29" &&
+      title === "KISS OF DEATH (Produced" && /KISS OF DEATH \(Produced by HYDE\)[\/／]中島美嘉/u.test(raw)) {
+    return { ...song, title: "KISS OF DEATH (Produced by HYDE)", artist: "中島美嘉" };
+  }
+
+  return song;
+}
+
 function repairKnownSourceCredit(song) {
+  const residual = repairResidualKnownSourceCredit(song);
+  if (residual !== song) return residual;
   const hash = String(song?.sourceHash || "");
 
   if (hash === "eb659bd57798713ec33ed807d1086758e7611b52e9567197983478e92fd74193") {
