@@ -11,6 +11,8 @@ const REVIEWED_BAD_DESCRIPTION_HASHES = new Set([
   "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8",
 ]);
 const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47";
+const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
+const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
 
 function unambiguousNonSongReason(song) {
   const title = String(song?.title || "").trim();
@@ -25,6 +27,16 @@ function unambiguousNonSongReason(song) {
   // This one setlist comment mixes numbered songs with many prose chapters.
   // Every actual song row in the source is explicitly marked "♡ N.".
   if (sourceHash === MIXED_AIKATSU_CHAPTER_HASH && !/♡\s*\d+[.．]/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+  // This DAM karaoke chapter comment explicitly numbers each song; all other
+  // timestamp rows are reactions/conversation chapters.
+  if (sourceHash === MIXED_CLAUDE_CHAPTER_HASH &&
+      !/(?:-\s*\d+[.．]\s*|\b\d+[.．]\s*-\s*)/u.test(raw)) {
+    return "reviewed_mixed_chapter_comment";
+  }
+  if (sourceHash === "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a" &&
+      /^54:51\s+joshi idol anime that mariring knows/iu.test(raw)) {
     return "reviewed_mixed_chapter_comment";
   }
 
@@ -261,6 +273,26 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
   return { ...song, artist: cleaned };
 }
 
+function repairKnownSourceCredit(song) {
+  const hash = String(song?.sourceHash || "");
+  if (hash === MIXED_CLAUDE_CHAPTER_HASH &&
+      song?.title === "ハッピーシンセサイザ" &&
+      isUnknownArtistValue(song?.artist) &&
+      /ハッピーシンセサイザ.*\bby\s+EasyPop\b/iu.test(String(song?.raw || ""))) {
+    return { ...song, artist: "EasyPop" };
+  }
+  if (hash !== ROBOCO_UNDELIMITED_CREDIT_HASH || !isUnknownArtistValue(song?.artist)) return song;
+  const known = new Map([
+    ["はなびら (Hanabira / Petals) 奥華子", ["はなびら", "奥華子"]],
+    ["Answer、幾田りら", ["Answer", "幾田りら"]],
+    ["秒針を噛む (Byoushin wo Kamu / Biting the Second Hand) ずっと真夜中でいいのに。ZUTOMAYO", ["秒針を噛む", "ずっと真夜中でいいのに。"]],
+    ["ギブス (Gibbs / Plaster Caster) 椎名林檎", ["ギブス", "椎名林檎"]],
+    ["115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism", ["115万キロのフィルム", "Official髭男dism"]],
+  ]);
+  const repaired = known.get(String(song?.title || "").trim());
+  return repaired ? { ...song, title: repaired[0], artist: repaired[1] } : song;
+}
+
 function occurrenceIdentity(song) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
@@ -285,6 +317,7 @@ function cleanStaticVideos(videos) {
     normalizedReleaseMetadataOccurrences: 0,
     repairedDateCreditOccurrences: 0,
     repairedStructuredCreditOccurrences: 0,
+    repairedKnownSourceCreditOccurrences: 0,
     byReason: {},
   };
   const examples = [];
@@ -293,6 +326,7 @@ function cleanStaticVideos(videos) {
   const normalizedReleaseMetadataExamples = [];
   const repairedDateCreditExamples = [];
   const repairedStructuredCreditExamples = [];
+  const repairedKnownSourceCreditExamples = [];
   const duplicateExamples = [];
 
   const cleaned = videos.map((video) => {
@@ -346,6 +380,16 @@ function cleanStaticVideos(videos) {
           after: structured.title + " - " + structured.artist, raw: song.raw || "",
         });
         song = structured;
+      }
+
+      const knownSourceRepaired = repairKnownSourceCredit(song);
+      if (knownSourceRepaired !== song) {
+        counters.repairedKnownSourceCreditOccurrences += 1;
+        if (repairedKnownSourceCreditExamples.length < 30) repairedKnownSourceCreditExamples.push({
+          videoId: video.videoId, before: song.title + " - " + song.artist,
+          after: knownSourceRepaired.title + " - " + knownSourceRepaired.artist, raw: song.raw || "",
+        });
+        song = knownSourceRepaired;
       }
 
       const releaseNormalized = normalizeReleaseMetadataArtist(song, video);
@@ -410,6 +454,7 @@ function cleanStaticVideos(videos) {
     normalizedReleaseMetadataExamples,
     repairedDateCreditExamples,
     repairedStructuredCreditExamples,
+    repairedKnownSourceCreditExamples,
     duplicateExamples,
     examples,
   };
@@ -421,6 +466,7 @@ module.exports = {
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   occurrenceIdentity,
+  repairKnownSourceCredit,
   repairReleaseDateCredit,
   repairStructuredSlashCredit,
   repeatedDescriptionSources,
