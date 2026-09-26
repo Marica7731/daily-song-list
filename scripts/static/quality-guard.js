@@ -229,10 +229,10 @@ function isUnknownArtistValue(value) {
 function repairStructuredSlashCredit(song) {
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
-  if (!isUnknownArtistValue(artist)) return song;
+  if (!isUnknownArtistValue(artist) && !/^(?:19|20)\d{2}$/u.test(artist)) return song;
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
   const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
-  if (!match) return song;
+  if (!match || (/^(?:19|20)\d{2}$/u.test(artist) && match[4] !== artist)) return song;
   const [, title, creditedArtist, metadata] = match;
   if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
     return song;
