@@ -89,6 +89,63 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["bddbda04442cade80cb79d3c3671bba11f75cbeb89cbf687850766fd02742fdc", new Set(["～　初見さん20人達成"])],
   ["6c02c324915aa78e9c30deda5783635ebff969c99c89d8828f8f24486711c5bd", new Set(["雖然知道只是翻譯歌詞，但還是要再說一次:「不可能！絕對不可能！」)", "好聽故事一直聽)", "的笑聲最真實)"])],
   ["478f401bb24ee9ed1d84eb42f0679395ee7b93c24c8bbff25d86e3120ea79661", new Set(["いーや俺に手を振ってたね！合戦", "騎士バッチ進化記念", "1144記念、私(隷)の一番カワイイトコロ", "全て(ｼﾞｮﾊﾞを)受け止めるよぉ"])],
+  ["eaa8f87146f3fb5bc0d06b8c918efa421fafcd0a68053d288ab233a87900821a", new Set([
+    "学文路トキ さん", "さはらしょう さん", "雅はつる さん", "咲月羽兎 さん", "リーエ香澄 さん", "おもやいっか さん",
+    "デュクス・オルトゥス さん", "羽月うずな さん", "瀬川ネガ さん", "百珠百珠しのぶ さん", "喜常みお さん", "ささみん さん", "燈璃ライト さん",
+  ])],
+  ["cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67", new Set([
+    "Soraさん", "小鳥遊ゆとはさん", "花開ふりるさん", "Ibukiさん", "すとらてぃあさん", "夜紺火花さん",
+    "からくりんねさん", "INARIさん", "音魂ヒビクさん", "にじゅなさん",
+  ])],
+  ["92e6dbcf323ba0aefd66e44f6627b6947cde9d8fe666a345ec6999e5d6e3e652", new Set([
+    "本日のお夕飯の発表", "猿飛佐奈さん", "音羽ララさん", "凪乃ましろさん", "焔魔るりさん",
+    "にじゅなさん", "メラ・アカルさん", "ノア・ポラリスさん", "woucaさん", "ブランク・ウリカさん",
+  ])],
+  ["da325a515ad3121f2a0fe37bc45584256c47215217244fb1d849a2188d9d9947", new Set([
+    "九十九みな (つくもみな) さん", "羽鳥あん (はとりあん) さん", "詠音ガト (うたねがと) さん", "時音ありす (ときねありす) さん",
+    "竹雫まい (たけだまい) さん", "間宵しゃな (まよいしゃな) さん", "天才八雲 (てんさいやくも) さん", "熨斗目メナ (のしめめな) さん",
+  ])],
+  ["da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad", new Set([
+    "メーデーじゃなかったｗ", "記憶が曖昧～当日の朝〜ポエトリー", "これから反応するよ", "異種のアプローチ",
+    "昼公演と夜公演の-ERROR", "何選曲したっけ…", "お互いのオリ曲", "嬉しさと悔しさ", "記憶が…",
+  ])],
+  ["472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80", new Set([
+    "̗̀ start ̖́", "イベントの規模がでかい", "クローゼットがスッキリする", "なんだか陽気になれる", "夏のやなとこ",
+    "終わるのやだ", "湿気爆発やだ", "日焼け止めべたべたやだ", "何故か蚊に刺されない体質のらんぜ", "̗̀ Last Talk ̖́",
+  ])],
+  ["0c2ce3917069fe9808059242f460c98cc2782c355cabcd8b9af00249d326dd0a", new Set([
+    "お前らは天使じゃない", "総再生時間あと1000時間で収益化条件クリア！", "1129の日のピザのすすめ", "村民みんなのお家にピザを届ける村長",
+    "草原のとうふ小僧-その1", "音楽は家族みたいなもの", "草原のとうふ小僧-その2", "泥くさいロックがいいね", "ワンナイトカーニバルのショート上げるよ！あっぽー！",
+  ])],
+  ["f60e7d209b0f8a7a088c520ddf48a4003e898576dee09ba6b84742fe723cb1a0", new Set([
+    "令和8年8月8日", "今日はお披露目あり", "仮眠した", "1on1楽しかった", "18時にショートが上がる", "お披露目",
+    "良い曲", "デスクツアー", "スピーカー気になってる", "カメラ買った", "低音みっちゃん",
+  ])],
+  ["14b62e6cf9ca10b9a65ad61c8206c716303081b558d4abe1f6caac4193c16a93", new Set([
+    "重大発表②『歌ってみた』", "余韻タイム♪",
+  ])],
+  ["42d4d97e7d15d913149a925e1f84604c9085df3123b373a8662329f736fa5829", new Set([
+    "ろれつがまわらない", "wow Oh", "よいちょチャレンジ", "クリスマスイベントを画策するぷれち", "バットルートへ", "ポンデリ発言",
+  ])],
+  ["0ec641ae9fdbac9c09a70b10019eaa89660dfd1a4567e28ed91dbd5dd871e030", new Set([
+    "夏曲の自己解釈", "口内炎の二次被害", "ICE BOX", "次枠:折咲もしゅ さん",
+  ])],
+  ["8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875", new Set([
+    "起動 -START", "ロムがみんなのために改めて思うこと", "『イキナクチャ』導入",
+  ])],
+  ["c42bc673a091cab8fb3a026527c7452440b7b34814debb56a9b944b7248811f1", new Set([
+    "初のシチュエーションボイス発売！", "ストーリーのあらすじ", "内容詳細＆ラインナップ",
+  ])],
+  ["aa41fbab29fc5cb71d37fcb3ab6b4cb4cf1b64f9ef1e73253d905e001c0d102a", new Set([
+    "直近の出来事", "モーニングページを始めました！", "そういえばVIVANT始まったよね！", "ちぃかわ気になってる！",
+  ])],
+  ["82a8c48d1fd261a6bd987b9a956db0ddb7d5476ab4dd875873ce3e4728fc2a8c", new Set([
+    "(ボイス)ねぇまって　終わってる",
+  ])],
+  ["2d5b755ce969ec2a9a7970440f52728f4054b8daa5a15efcb0451752502cd0c0", new Set([
+    "Talk segment",
+  ])],
+
 ]);
 
 function reviewedSourceNonSongReason(song) {
@@ -351,6 +408,19 @@ function repeatedDescriptionSources(videos) {
 
 function normalizeConservativeArtist(song) {
   const artist = String(song?.artist || "");
+  const title = String(song?.title || "").trim();
+  const raw = String(song?.raw || "").normalize("NFKC");
+  const trimmed = artist.normalize("NFKC").trim();
+
+  if (/^(?:歌えません|練習中)$/u.test(trimmed) &&
+      (raw.includes(`${title}(${trimmed})`) || raw.includes(`${title}（${trimmed}）`) ||
+       raw.includes(`${title}-(${trimmed})`))) {
+    return { ...song, artist: "" };
+  }
+
+  const originalSong = trimmed.match(/^(.+?)\s*[✨⭐★☆]*\s*Original\s+Song\s*[✨⭐★☆]*$/iu);
+  if (originalSong?.[1]?.trim()) return { ...song, artist: originalSong[1].trim() };
+
   const matched = artist.match(/^[/／|｜][\s　]+(.+)$/u);
   if (!matched?.[1]?.trim()) return song;
   // A delimiter copied from "title / artist" should never become part of
@@ -392,13 +462,21 @@ function repairStructuredSlashCredit(song) {
   const body = raw.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+/u, "");
   const match = body.match(/^(.+?)\s*[/／]\s*(.+?)\s*[/／]\s*(.+)\s*[/／]\s*((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u);
   const artistYear = artist.match(/^((?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?)(?:\s*※.*)?$/u)?.[1] || "";
-  if (!match || (artistYear && match[4] !== artistYear)) return song;
-  const [, title, creditedArtist, metadata] = match;
-  if (!/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング)/iu.test(metadata)) {
-    return song;
+  if (match && (!artistYear || match[4] === artistYear)) {
+    const [, title, creditedArtist, metadata] = match;
+    if (/(?:Anime|アニメ|TVアニメ|ゲーム|OP|ED|insert song|挿入歌|主題歌|theme song|Culture Broadcasting|Macross|Cardcaptor|即興ソング|キャラクターソング|CM(?:ソング)?|commercial)/iu.test(metadata) &&
+        title.trim() && creditedArtist.trim()) {
+      return { ...song, title: title.trim(), artist: creditedArtist.trim() };
+    }
   }
-  if (!title.trim() || !creditedArtist.trim()) return song;
-  return { ...song, title: title.trim(), artist: creditedArtist.trim() };
+
+  if (isUnknownArtistValue(artist)) {
+    const simple = body.match(/^(.+?)\s*[/／]\s*([^/／]{2,})\s*[/／]\s*((?:19|20)\d{2})\s*$/u);
+    if (simple?.[1]?.trim() && simple?.[2]?.trim()) {
+      return { ...song, title: simple[1].trim(), artist: simple[2].trim() };
+    }
+  }
+  return song;
 }
 
 function normalizeReleaseMetadataArtist(song, video = {}) {
