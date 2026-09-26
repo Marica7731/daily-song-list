@@ -62,7 +62,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["016e10a4d788a2121bf17ef9ce966e5619f39b907249a7f1f1ad9d991b7fcc5d", new Set(["サイゼリヤの話オモロかったw"])],
   ["06bd48e78ee945d7277ad6a7129142a29217e446b396311f90e7647d0cef12c9", new Set(["サドデレボイス販売中！"])],
   ["f24981ce65cfc831d89cf1a30adeeca3c27a168c2b1f22e93e5392ff66103894", new Set(["8月の新しいチャレンジ"])],
-  ["b04aa8bcb7319194e2eb49532361b52f9c69682e2391caa690f814dbbf240a3c", new Set(["弾き語り再開"])],
+  ["b04aa8bcb7319194e2eb49532361b52f9c69682e2391caa690f814dbbf240a3c", new Set(["弾き語り再開", "未来に聴いてくださってる方へメッセージ", "配信再開", "もぐもぐタイム"])],
   ["42905902c261c911575a27b731c7b2787aa9198c4a7df808ac4135eb18de5118", new Set(["(音量チェックから"])],
   ["d8fa84948e6a14761c1282b08d3ff97909311696b94e344fb9cb66e17e19c565", new Set(["休憩:牛乳パンもぐもぐ"])],
   ["1af631bc2ab20bdb747ac3472747891c983e70837523efde6ad2a7b65c4d41d7", new Set(["100曲歌いきり達成！！"])],
@@ -94,7 +94,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["cd68601d67481f8a25c11b8544fd5ec4566e940701c9d1b57114109670e5a611", new Set(["開演"])],
   ["f72d3dc695600b152a61ec0c4825039bf03653af7bd50a24c7761ad8ae8e3c84", new Set(["Vack-ON!! Blink side 振り返り"])],
   ["c776f69a9e14e5f412e5084def96b086dedf3664a62a995b244ede5a39706984", new Set(["ばちゃすての振り返り"])],
-  ["0307ee20170acfbb8ec4f9f52cfb1d136a76e01c0c0ff3589f4360fe5df096df", new Set(["特大スクープ詳細は次回！！！"])],
+  ["0307ee20170acfbb8ec4f9f52cfb1d136a76e01c0c0ff3589f4360fe5df096df", new Set(["特大スクープ詳細は次回！！！", "ガストコラボ200個達成 Aiicoでモニターに友ちゃんPR動画！10"])],
   ["db6e48ac96ece9a1ffb1fabc447175845a31779438fa722efb07879587e64838", new Set(["締めの挨拶"])],
   ["aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710", new Set(["～8"])],
   ["1417a20bd96f281a8175858186e650a70612f18bb745400dc20ca8d0161c253f", new Set(["ワンマンライブ12"])],
@@ -174,6 +174,24 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064", new Set([
     "7月の配信予定",
   ])],
+  // Additional full-history rows reviewed against their complete immutable source.
+  ["deccea4d95fcaa96325871f5ed82c40abc6abb50b8be53dcc232d1a229f5291c", new Set(["配信はじまり"])],
+  ["c344f7ba8508d54043d97264fb168e0c26d8a6e19cc51f455dcb31438b482fd4", new Set(["スタート"])],
+  ["e9a92bc803fb76ead17d288c98d72548f8dab5988948579aaaf9f2550346c630", new Set(["自己紹介"])],
+  ["5f0c0d169ed3de44f989ba355295f9648abf73f33ac9aaa232b69f661ebf05d9", new Set(["小休憩"])],
+  ["1d7cd95ec5c5614d37369fc63a26ca622d9eb0733495f9ca301abd90a5dfa5b9", new Set(["Talk Time"])],
+  ["53f169552788bbcfa36aa2b9febf6b43da73fbd0734c5719ac1a65dc98b10b77", new Set(["OPスタート"])],
+  ["99621a54589284d5339ace31f40477dff47ce816bd84b46720fef1e2e9970f51", new Set(["OPスタート"])],
+  ["f034fa499139687e4a3ce7b0ba2544f9ce79f176fc55261a5ecb3d30d2d563c3", new Set(["OP Start"])],
+  ["f9ebe9ea2b8451d5f28c50b4c40f85d7dde7ab4884dac956ee7def48882b6c2c", new Set(["Talk Part2 曲の趣味が合ううすーも"])],
+  ["7b567876590b994a457c6dfea8b74f07263252b5ea5b24200231a6649060a3da", new Set(["2026/07"])],
+  ["36f1895c74becd1022b920f376c8c14403f28a2be1e1b64289ac972bf5d2424d", new Set(["エビカニクスありがとうございました！エビカニクスは理科の授業で甲殻類について勉強するときに見ました"])],
+  ["16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344", new Set(["おはなしタイム[Talk time] メンバーシップについて"])],
+  ["44b4d25ea698a9e0cad9f120bee10efd86252e6542b98fb469ff922d10e8e3de", new Set(["出演ライブVack-ON!!×SHUFFLE - CROSS REALITY"])],
+  ["a034e69114f86e5be138f885e133ce33bb29e3664b6093bdb57f5b2848c7edbd", new Set(["〜 キー迷子でわたわたパニックなすおくんも可愛いかったです"])],
+  ["fdafc4a94e39d1fb686c2d866a38b43438ccf1f02017acce1eaf9260af07ab42", new Set(["博多の塩♪ → 「博多の塩」については、歌唱というよりはフレーズの披露として記録されています", "博多の塩はメキシコ産⁉ →"])],
+  ["15191234d7a7781e80ee000a321b763648a4e5115f0498569392caa025766b31", new Set(["〜ライブ配信！「食料品1％減税　その正体」ゲスト:安藤裕（参政党幹事長／参議院議員・税理士）聞き手:安倍宏行"])],
+  ["5516938bb4fe9abfeeece39cad8f9834dd85d55953fb1e451d1fdff4e6d43e31", new Set(["2ndワンマン & 5周年記念ライブ ～Beyond the Future～ 9/12(土)、9"])],
   ["c2f658ac301da176cdf73b8d81f27f47ab9b8cead6a5bbd48f952a11703fa81f", new Set(["26日"])],
   ["04d86c87e7b05ace07991f6073189c1c62a6a2e56723a2555514fe52a323285b", new Set(["???"])],
   ["96dea4357ab2688d1a8e9a46ef3189884cabb6baa0dd8399d453a1c29c7cac6a", new Set(["jsjsjs", "mi canción favorita (/^<^)"])],
@@ -188,6 +206,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
     "コンビニOBとして先輩風", "コンビニバイト時代の変な客", "連続した数字が現れた後に不幸が",
   ])],
   ["7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963", new Set(["(waiting)"])],
+  ["28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad", new Set(["(waiting)"])],
 
 ]);
 
@@ -333,6 +352,29 @@ function unambiguousNonSongReason(song) {
   if (/^(?:枠スタート|歌枠スタート|配信スタート)$/u.test(title) &&
       /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist) &&
       /(?:^|[\s　])(?:枠スタート|歌枠スタート|配信スタート)[!！\s　]*$/u.test(raw)) {
+    return "confirmed_stream_start_marker";
+  }
+
+  if (/^(?:配信はじまり|スタート)$/u.test(title) &&
+      artist === "待機画面" &&
+      /(?:配信はじまり|スタート)[（(]待機画面[）)]/u.test(raw)) {
+    return "confirmed_stream_start_marker";
+  }
+  if (title === "自己紹介" && artist === "コール＆レスポンス" &&
+      /自己紹介[（(]コール＆レスポンス[）)]/u.test(raw)) {
+    return "confirmed_self_intro_segment";
+  }
+  if (title === "小休憩" && artist === "あめタイム" &&
+      /小休憩[（(]あめタイム[）)]/u.test(raw)) {
+    return "confirmed_break_segment";
+  }
+  if (title === "Talk Time" && artist === "休憩タイム" &&
+      /Talk Time\s*\/\/\s*休憩タイム/iu.test(raw)) {
+    return "confirmed_break_segment";
+  }
+  if (/^(?:OPスタート|OP Start)$/iu.test(title) &&
+      /^(?:|未記載|不明|未知歌手|unknown)$/iu.test(artist) &&
+      /^\s*\d{1,2}:\d{2}(?::\d{2})?\s+(?:OPスタート|OP Start)\s*$/iu.test(raw)) {
     return "confirmed_stream_start_marker";
   }
 
@@ -577,6 +619,30 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     if (cleaned === artist && /^\][^\]]+/u.test(artist) === false && raw.includes("[" + artist) && artist.includes("]")) cleaned = "[" + artist;
   }
 
+  if (cleaned === artist) {
+    const pianoSuffix = artist.match(/^(.+?)(?:\s*[（(]\s*|\s+)(?:Piano|ピアノ)\s*(?:Ver(?:sion)?[.]?)(?:\s*[）)])?(?:\s*※\s*練習中)?$/iu);
+    if (pianoSuffix?.[1]?.trim() && raw.includes(pianoSuffix[1].trim())) cleaned = pianoSuffix[1].trim();
+  }
+  if (cleaned === artist) {
+    const guitar = artist.match(/^(.+?)[(]ギター$/u);
+    if (guitar?.[1]?.trim() && raw.includes(guitar[1].trim() + "(ギター弾き語り)")) cleaned = guitar[1].trim();
+  }
+  if (cleaned) {
+    const square = cleaned.match(/^(.+?)\s+\[([^\]]*)\]?$/u);
+    const note = square?.[2] || "";
+    if (square?.[1]?.trim() &&
+        /^(?:歌詞動画|途中迷子|迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ)/iu.test(note) &&
+        raw.includes(square[1].trim()) && raw.includes("[" + note)) {
+      cleaned = square[1].trim();
+    }
+  }
+  if (cleaned === artist) {
+    const challenge = artist.match(/^(.+?)\]\s*[(]挑戦枠[)]$/u);
+    if (challenge?.[1]?.trim() && raw.includes(challenge[1].trim()) && /\]\s*[(]挑戦枠[)]/u.test(raw)) {
+      cleaned = challenge[1].trim();
+    }
+  }
+
   if (!cleaned || cleaned === artist) return song;
   return { ...song, artist: cleaned };
 }
@@ -620,11 +686,6 @@ function repairResidualKnownSourceCredit(song) {
     if (artists.has(title) && /ギター弾き語り/u.test(raw)) return { ...song, artist: artists.get(title) };
   }
 
-  if (hash === "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6" &&
-      title === "鳥の詩" && /鳥の詩\/key作品\/AIR/iu.test(raw)) {
-    return { ...song, artist: "Lia" };
-  }
-
   if (hash === "2b4c90b8383f7a20f4a7dbaf170b1ae6b101236c10a523db3e4cb86ae81cdeff") {
     const artists = new Map([
       ["U", "millennium parade × Belle"], ["言の刃", "ロクデナシ"], ["Ring of Fortune", "佐々木恵梨"],
@@ -660,9 +721,12 @@ function repairResidualKnownSourceCredit(song) {
   if (hash === "46353c45f3ac9685180421eb579e5c33e2bca6f4d2b6d01a03bc2f8498ed4b83" &&
       title === "No.1") return { ...song, artist: "mona(CV:夏川椎菜)" };
 
-  if (hash === "3b657c0a4983dbf17cd8f4e31c5ef607f7ca00791d0e2bca8e9e113289527222" &&
-      title.startsWith("勝手にシンドバッド(78')/サザンオールスターズ")) {
-    return { ...song, title: "勝手にシンドバッド(78')", artist: "サザンオールスターズ" };
+  if (hash === "3b657c0a4983dbf17cd8f4e31c5ef607f7ca00791d0e2bca8e9e113289527222") {
+    const sourceRaw = String(song?.raw || "");
+    const match = sourceRaw.match(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+(.+?)\/([^／]+?)／(.+)$/u);
+    if (match?.[1]?.trim() && match?.[2]?.trim() && /(?:歌ってほしい曲|歌いたい曲)/u.test(match[3])) {
+      return { ...song, title: match[1].trim(), artist: match[2].trim() };
+    }
   }
 
   if (hash === "7c58480231e1fb5348d0a67b469db832486673116194bf2bd9167ce5b0cc0e99" &&
@@ -671,11 +735,6 @@ function repairResidualKnownSourceCredit(song) {
   if (hash === "5afbd861e196975ffa0945959f043aa155683b0c5de757162472076bf1ef6b2f" &&
       (title === "パーティを止めないで" || title === "シャンパンゴールド")) {
     return { ...song, artist: "ヒプノシスマイク[伊弉冉一二三(CV.木島隆一)]" };
-  }
-
-  if (hash === "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad" &&
-      title === "檄!帝国華撃団" && /サクラ大戦/u.test(raw)) {
-    return { ...song, artist: "横山智佐（真宮寺さくら）＆帝国歌劇団" };
   }
 
   const catHashes = new Set([
@@ -725,7 +784,24 @@ function repairResidualKnownSourceCredit(song) {
 
   if (hash === "6ca8928630b3a52aebc13bbeaed3af13dcd186955da7b5ad5c87b48ee3c0be29" &&
       title === "KISS OF DEATH (Produced" && /KISS OF DEATH \(Produced by HYDE\)[\/／]中島美嘉/u.test(raw)) {
-    return { ...song, title: "KISS OF DEATH (Produced by HYDE)", artist: "中島美嘉" };
+    return { ...song, title: "KISS OF DEATH", artist: "中島美嘉" };
+  }
+
+  if (hash === "3ddc8b1b3a39f0f7754cefd5d692c8c83c24902d902a802421e61d19c9b97c00") {
+    const match = raw.match(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s+(.+?)\/([^/]+?)\s*[（(]\d+(?:st|nd|rd|th)\s+originalSong[）)]https?:\/\//iu);
+    if (match?.[1]?.trim() && match?.[2]?.trim()) return { ...song, title: match[1].trim(), artist: match[2].trim() };
+  }
+  if (hash === "54d387bc5821e57e0a9567d2003c8b96568b1dc746b5481b1e0f0da1ec492a47" &&
+      title === "糸" && /糸\s*\/\s*中島みゆき\s*\/\s*https?:\/\//iu.test(raw)) {
+    return { ...song, artist: "中島みゆき" };
+  }
+  if (hash === "6a82a15578d2ce6cf9144390e8f59a24bfe230a73aa3844962dfce436463cd20" &&
+      title === "彗星" && /彗星\s*\/\s*monaca:factory[（(]チャレンジ失敗[）)]/iu.test(raw)) {
+    return { ...song, artist: "monaca:factory" };
+  }
+  if (hash === "ec3536420568a915fff8687d10e3c9b6cff17246c49944bac64c9d38fb0bc616" &&
+      title === "休憩〜水平線歌唱〜" && /休憩[〜~～]水平線歌唱[〜~～]/u.test(raw)) {
+    return { ...song, title: "水平線", artist: "" };
   }
 
   return song;
