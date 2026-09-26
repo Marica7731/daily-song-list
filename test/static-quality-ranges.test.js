@@ -253,7 +253,7 @@ test("MC prose and the reviewed three-channel miracle description are quarantine
 test("release metadata and known album labels are normalized without deleting songs", () => {
   assert.equal(normalizeReleaseMetadataArtist(song("Web of Night", "T.M.Revolution（2004/07/28）※English Version")).artist, "T.M.Revolution");
   assert.equal(normalizeReleaseMetadataArtist(song("Tell Your World", "kz ※2012-01-18")).artist, "kz");
-  assert.equal(normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist, "Vaundy【王様ランキング】");
+  assert.equal(normalizeReleaseMetadataArtist(song("裸の勇者", "Vaundy【王様ランキング】（2022/01/07）※89.164点")).artist, "Vaundy");
   assert.equal(normalizeReleaseMetadataArtist(song("ビバナミダ", "アルバム 幸福", {
     raw: "2:01 ビバナミダ（アルバム 幸福）",
   }), {videoId: "jsQX01izzbY"}).artist, "岡村靖幸");
@@ -318,4 +318,41 @@ test("source-specific chapter formats keep numbered songs and repair known missi
   ));
   assert.equal(repaired.title, "115万キロのフィルム");
   assert.equal(repaired.artist, "Official髭男dism");
+});
+
+
+test("year-range structured credits and reviewed parser artifacts are repaired conservatively", () => {
+  const range = repairStructuredSlashCredit(song(
+    'Happy☆Material (June)/Mahora Academy Middle School Class 2-A/Anime "Negima!"',
+    "2005–2008",
+    {raw: '7:36:15 Happy☆Material (June)/Mahora Academy Middle School Class 2-A/Anime "Negima!" /2005–2008'},
+  ));
+  assert.equal(range.title, "Happy☆Material (June)");
+  assert.equal(range.artist, "Mahora Academy Middle School Class 2-A");
+  assert.equal(normalizeReleaseMetadataArtist(song("Lolita", "Konata Izumi /", {
+    raw: "1:23:46 Lolita / Konata Izumi / 2007",
+  })).artist, "Konata Izumi");
+  const titleArtifact = repairKnownSourceCredit(song("34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ", "ぬぬぬ", {
+    raw: "♪2:44:34　(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ | ぬぬぬ",
+    sourceHash: "087f98b90de544c80795a5f24729ba2a5e1e9df8250379c29fc361e02012c6ef",
+  }));
+  assert.equal(titleArtifact.title, "(ｱﾝｺｰﾙ) み む かｩ わ ナ イ ス ト ラ イ");
+});
+
+test("review scanner surfaces mixed setlist/comment sources without auto-deleting them", () => {
+  const hash = "mixed-review-hash";
+  const rows = [
+    song("Song A", "Artist A", {raw:"2:00 - 1. Song A by Artist A",sourceHash:hash}),
+    song("Song B", "Artist B", {raw:"6:00 - 2. Song B by Artist B",sourceHash:hash}),
+    song("Song C", "Artist C", {raw:"10:00 - 3. Song C by Artist C",sourceHash:hash}),
+    song("they laugh", "未記載", {raw:"3:00 - they laugh",sourceHash:hash}),
+    song("chat about food", "未記載", {raw:"7:00 - chat about food",sourceHash:hash}),
+    song("wrap up", "未記載", {raw:"11:00 - wrap up",sourceHash:hash}),
+    song("small reaction", "未記載", {raw:"12:00 - wow",sourceHash:hash}),
+    song("another note", "未記載", {raw:"13:00 - note",sourceHash:hash}),
+  ];
+  const review = buildQualityReview([video(9, rows)], {byDay:{}}, new Date("2026-09-26T00:00:00Z"));
+  assert.equal(review.mixedStructuredSetlistSources.length, 1);
+  assert.equal(review.mixedStructuredSetlistSources[0].unknownNonNumberedRows, 5);
+  assert.equal(review.mixedStructuredSetlistSources[0].explicitNumberedSongs, 3);
 });
