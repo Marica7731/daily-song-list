@@ -39,7 +39,7 @@ function reviewReasons(song) {
   if (
     (title.length > 75 && unknownArtist) ||
     (slashFieldCount >= 2 && (unknownArtist || /^(?:19|20)\d{2}(?:[–—-](?:19|20)?\d{2})?(?:\s*※.*)?$/u.test(artist))) ||
-    (artist.length > 75 && hasUnbalancedCreditDelimiters(artist))
+    (artist.length > 0 && hasUnbalancedCreditDelimiters(artist))
   ) reasons.push("possible_unparsed_credits");
   if (title.length > 25 && /\b(?:YouTube|チャンネル登録|スパチャ|メンバーシップ|配信開始|配信終了|アーカイブ|コメント欄)\b/iu.test(title)) {
     reasons.push("possible_promotion_as_song");
