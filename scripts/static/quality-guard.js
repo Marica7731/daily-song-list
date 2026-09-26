@@ -14,6 +14,21 @@ const MIXED_AIKATSU_CHAPTER_HASH = "0ed81627410668fc890661a0687651ce3c2990631a47
 const MIXED_CLAUDE_CHAPTER_HASH = "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e";
 const ROBOCO_UNDELIMITED_CREDIT_HASH = "a7b481ab3db2c4b08ded6c4e2775e67b7e75c6f2ef4c159e9870c11907975231";
 
+const REVIEWED_NUMBERED_SETLIST_HASHES = new Set([
+  "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
+  "0c4e427c76ae5910267ca613807e36fd3fb14d1a9ec2d866846481d3e59ad71b",
+  "472599b63ab850c21f239c14359636ec399e14fc860b9c5c7541e6e6c2baed80",
+  "cfdabe4c9486f849e9b103ddec6532b1f74b1d4656add59b9854342d6955fc67",
+  "da296b61ea105747d1fa4527becd8e0c253f92e7d3efedd2cd8fa8017d5e55ad",
+  "af9b78791e417efa33bc5d649ed166553507376faf8b4b6e7564a0fc5a9194c3",
+]);
+
+function isExplicitNumberedSetlistRow(value) {
+  const text = String(value || "").normalize("NFKC");
+  return /(?:^|\s)(?:[-–—]\s*)?(?:♡\s*)?\d{1,2}[.．]\s*|(?:^|\s)\d{1,2}[.．]\s*[-–—]?\s*/u.test(text);
+}
+
+
 const REVIEWED_MIXED_SOURCE_HASHES = Object.freeze({
   hinataVocaloid: "30d4fba63bb782028af7ca03a506cf94714933e93de48d1c5eef13b84d9438a4",
   kokoneConan: "e0d69e03eeba0ccb8e420e88af51d810907dfb9b1e8b50d98579bf4d8646df60",
@@ -241,6 +256,10 @@ function unambiguousNonSongReason(song) {
   if (sourceHash === "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a" &&
       /^54:51\s+joshi idol anime that mariring knows/iu.test(raw)) {
     return "reviewed_mixed_chapter_comment";
+  }
+
+  if (REVIEWED_NUMBERED_SETLIST_HASHES.has(sourceHash) && !isExplicitNumberedSetlistRow(raw)) {
+    return "reviewed_non_song_chapter_in_numbered_setlist";
   }
 
   // A foreign prayer broadcast was parsed as a Japanese karaoke song and its
@@ -494,7 +513,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/【[^】]{1,160}】\s*(?=[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)])/u, "")
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
-    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム\b|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
+    .replace(/\s+[/／]\s+(?=(?:TVアニメ|Anime\b|ゲーム|Culture Broadcasting\b|『THE IDOLM@STER\b)).*$/iu, "")
     .replace(/\s*[（(](?=(?:劇場版|TVアニメ|アニメ|ゲーム|映画)\b).*?[）)]\s*$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
@@ -545,6 +564,13 @@ function repairKnownSourceCredit(song) {
   if (hash === "99b19f47604cfddfb64f05e5317e359c4d90755ed1c2b3f5cb169c52f9f45bc9" &&
       /^\d+(?:st|nd|rd|th)アルバム「[^」]+」より$/iu.test(String(song?.artist || "").normalize("NFKC").trim())) {
     return { ...song, artist: "Eighty eight" };
+  }
+
+  if (hash === "132be6b41618301ab3f400aeda33d5eb3b287beacda40f1ddbe2b1e944a3798f" &&
+      song?.title === "うまるん体操" &&
+      /^妹S（シスターズ）\s*\[土間うまる/u.test(String(song?.artist || "")) &&
+      /うまるん体操\s*[/／]\s*妹S（シスターズ）\s*\[[^\n]+\]\s*$/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: String(song.artist).trim() + "]" };
   }
   if (hash === "f62db69ee3c93d0d093367cd8755d892498b361e289772acc62c8dd972c422aa" &&
       song?.title === "奏" && /オリ曲\s*YOU＆合図\s*リリース/u.test(String(song?.raw || ""))) {
@@ -772,6 +798,7 @@ module.exports = {
   normalizeConservativeArtist,
   normalizeReleaseMetadataArtist,
   occurrenceIdentity,
+  isExplicitNumberedSetlistRow,
   repairKnownSourceCredit,
   repairReleaseDateCredit,
   repairStructuredSlashCredit,
