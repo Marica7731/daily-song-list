@@ -591,7 +591,7 @@ function repairResidualKnownSourceCredit(song) {
 
   if (hash === "ee7156adb2bed545e5380648e55b4c036ec2f4addc690476ab56fa9c0e8caffc" &&
       /[\/／]/u.test(title)) {
-    const body = raw.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/u, "");
+    const body = raw.replace(/^(?:\d{1,2}:\d{2}(?::\d{2})?\s*)+/u, "");
     const fields = body.split(/[\/／]/u).map((value) => value.trim()).filter(Boolean);
     if (fields.length >= 2 && fields[0] && fields[1]) {
       const artist = fields[0].toLocaleLowerCase() === "starry heavens" ? "day after tomorrow" : fields[1];
