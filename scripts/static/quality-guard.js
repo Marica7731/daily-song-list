@@ -645,8 +645,12 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
   if (cleaned === artist) {
     const yearSuffix = artist.match(/^(.+?)\s*[（(]\s*(?:19|20)\d{2}\s*[）)]$/u);
     if (yearSuffix?.[1]?.trim()) {
-      const creditIndex = raw.indexOf(artist);
-      const prefix = creditIndex >= 0 ? raw.slice(Math.max(0, creditIndex - 4), creditIndex) : "";
+      // Source comments often align columns with multiple spaces. Collapse
+      // whitespace only for proving the slash-delimited credit identity.
+      const compactRaw = raw.replace(/\s+/gu, " ");
+      const compactArtist = artist.replace(/\s+/gu, " ");
+      const creditIndex = compactRaw.indexOf(compactArtist);
+      const prefix = creditIndex >= 0 ? compactRaw.slice(Math.max(0, creditIndex - 4), creditIndex) : "";
       if (creditIndex >= 0 && /[\/／]\s*$/u.test(prefix)) cleaned = yearSuffix[1].trim();
     }
   }
@@ -869,6 +873,25 @@ function repairKnownSourceCredit(song) {
   const residual = repairResidualKnownSourceCredit(song);
   if (residual !== song) return residual;
   const hash = String(song?.sourceHash || "");
+
+  // Exact source-level enrichment for three residual rows whose source text
+  // preserves the song identity but omitted/misparsed the artist. These are
+  // intentionally sourceHash-scoped rather than global title aliases.
+  if (hash === "03d057937b4a250e8401f44c925adbc863ce3eb0209a6a7b55377633c8efdda6" &&
+      song?.title === "鳥の詩" &&
+      /鳥の詩\s*[\/／]\s*key作品\s*[\/／]\s*AIR/iu.test(String(song?.raw || ""))) {
+    return { ...song, artist: "Lia" };
+  }
+  if (hash === "28ae2a831a0734f65d0780d861156e21ce1d248beeeef0f71e0c2cdae72cc3ad" &&
+      song?.title === "檄!帝国華撃団" &&
+      /檄!帝国華撃団\s*[\/／]\s*ゲーム\s*サクラ大戦/iu.test(String(song?.raw || ""))) {
+    return { ...song, artist: "横山智佐（真宮寺さくら）＆帝国歌劇団" };
+  }
+  if (hash === "a0168868ebd80d68af686eb1b99bd745475277f435c70baaf9d5122a4a3aac37" &&
+      /^猫[\/／]DISH\/\/$/u.test(String(song?.title || "").trim()) &&
+      /猫[\/／]DISH\/\//u.test(String(song?.raw || ""))) {
+    return { ...song, title: "猫", artist: "DISH//" };
+  }
 
   if (hash === "eb659bd57798713ec33ed807d1086758e7611b52e9567197983478e92fd74193") {
     const raw = String(song?.raw || "").normalize("NFKC");
