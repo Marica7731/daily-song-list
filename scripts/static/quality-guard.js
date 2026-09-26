@@ -432,8 +432,8 @@ function normalizeConservativeArtist(song) {
   const trimmed = artist.normalize("NFKC").trim();
 
   if (/^(?:歌えません|練習中)$/u.test(trimmed) &&
-      (raw.includes(`${title}(${trimmed})`) || raw.includes(`${title}（${trimmed}）`) ||
-       raw.includes(`${title}-(${trimmed})`))) {
+      raw.includes(title) &&
+      /[（(]\s*(?:歌えません|練習中)\s*[）)]\s*$/u.test(raw)) {
     return { ...song, artist: "" };
   }
 
