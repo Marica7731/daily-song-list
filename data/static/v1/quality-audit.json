@@ -1,29 +1,35 @@
 {
-  "generatedAt": "2026-09-26T01:38:46.941Z",
+  "generatedAt": "2026-09-26T05:27:37.814Z",
   "schemaVersion": 1,
-  "policy": "quarantine derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 7177,
-  "inputOccurrences": 87018,
-  "visibleVideos": 5902,
-  "visibleOccurrences": 86649,
-  "quarantinedOccurrences": 369,
-  "quarantinedVideos": 312,
+  "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
+  "inputVideos": 7204,
+  "inputOccurrences": 87257,
+  "visibleVideos": 5915,
+  "visibleOccurrences": 86750,
+  "quarantinedOccurrences": 445,
+  "quarantinedVideos": 326,
+  "deduplicatedOccurrences": 62,
   "normalizedArtistOccurrences": 381,
+  "normalizedReleaseMetadataOccurrences": 165,
   "repairedDateCreditOccurrences": 24,
+  "repairedStructuredCreditOccurrences": 137,
+  "repairedKnownSourceCreditOccurrences": 6,
   "byReason": {
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 2,
-    "confirmed_mc_break": 1,
+    "reviewed_mixed_chapter_comment": 57,
+    "confirmed_mc_break": 6,
     "confirmed_talk_section": 18,
     "confirmed_chat_section": 8,
     "unrelated_livestream_listing": 5,
     "unrelated_talk_show_listing": 3,
     "reused_description_across_unrelated_channels": 33,
     "confirmed_chat_segment_label": 1,
-    "dated_future_stream_announcement": 5,
+    "dated_future_stream_announcement": 6,
     "confirmed_stream_start_marker": 4,
+    "reviewed_bad_description_source": 3,
     "confirmed_stream_technical_note": 1,
-    "prayer_broadcast_timeline": 270,
+    "prayer_broadcast_timeline": 280,
     "bible_verse_broadcast": 4,
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
@@ -89,9 +95,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 104,
-      "channelCount": 100,
-      "distinctVideoTitles": 104,
+      "videoCount": 112,
+      "channelCount": 106,
+      "distinctVideoTitles": 111,
       "examples": [
         {
           "videoId": "m7UWtllKH_8",
@@ -170,9 +176,9 @@
     {
       "sourceHash": "e73d33f81c8e68051567406f83b9088c7ee0b93b6b5637c5ab0875cdff793daf",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 66,
-      "channelCount": 66,
-      "distinctVideoTitles": 66,
+      "videoCount": 68,
+      "channelCount": 68,
+      "distinctVideoTitles": 68,
       "examples": [
         {
           "videoId": "mnfTXdINmnI",
@@ -195,34 +201,49 @@
       ]
     }
   ],
+  "reviewedBadDescriptionHashes": [
+    "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8"
+  ],
   "byDay": {
     "2026-06-26": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "spoken_fraction_split_as_artist": 1,
         "date_split_as_song_and_artist": 1
       }
     },
+    "2026-07-06": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_mixed_chapter_comment": 1
+      }
+    },
     "2026-07-11": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-07-12": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_mc_break": 1
       }
     },
     "2026-07-15": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2
       }
     },
     "2026-07-16": {
       "quarantinedOccurrences": 6,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 1,
         "confirmed_chat_section": 5
@@ -230,18 +251,21 @@
     },
     "2026-07-22": {
       "quarantinedOccurrences": 3,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_chat_section": 3
       }
     },
     "2026-07-31": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 1
       }
     },
     "2026-08-01": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1
@@ -249,6 +273,7 @@
     },
     "2026-08-02": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1
@@ -256,6 +281,7 @@
     },
     "2026-08-04": {
       "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1,
@@ -264,18 +290,21 @@
     },
     "2026-08-05": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2
       }
     },
     "2026-08-07": {
       "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 4
       }
     },
     "2026-08-09": {
       "quarantinedOccurrences": 7,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 3,
         "reused_description_across_unrelated_channels": 4
@@ -283,12 +312,14 @@
     },
     "2026-08-10": {
       "quarantinedOccurrences": 10,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 10
       }
     },
     "2026-08-12": {
       "quarantinedOccurrences": 3,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_chat_segment_label": 1,
         "reused_description_across_unrelated_channels": 2
@@ -296,30 +327,49 @@
     },
     "2026-08-13": {
       "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 4
       }
     },
+    "2026-08-14": {
+      "quarantinedOccurrences": 16,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_mixed_chapter_comment": 16
+      }
+    },
+    "2026-08-18": {
+      "quarantinedOccurrences": 40,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_mixed_chapter_comment": 40
+      }
+    },
     "2026-08-23": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2
       }
     },
     "2026-08-24": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 5,
       "byReason": {
         "reused_description_across_unrelated_channels": 1
       }
     },
     "2026-08-25": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 1,
       "byReason": {
         "dated_future_stream_announcement": 1
       }
     },
     "2026-08-26": {
       "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 3,
       "byReason": {
         "confirmed_talk_section": 2,
         "dated_future_stream_announcement": 2
@@ -327,26 +377,32 @@
     },
     "2026-08-29": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_stream_start_marker": 1
       }
     },
     "2026-08-30": {
       "quarantinedOccurrences": 3,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 3
       }
     },
     "2026-08-31": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 8,
+      "deduplicatedOccurrences": 11,
       "byReason": {
         "dated_future_stream_announcement": 2,
-        "reused_description_across_unrelated_channels": 1
+        "reused_description_across_unrelated_channels": 1,
+        "confirmed_mc_break": 5
       }
     },
     "2026-09-01": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 7,
       "byReason": {
+        "reviewed_bad_description_source": 1,
         "confirmed_stream_technical_note": 1,
         "reused_description_across_unrelated_channels": 1,
         "confirmed_stream_start_marker": 1
@@ -354,16 +410,19 @@
     },
     "2026-09-02": {
       "quarantinedOccurrences": 13,
+      "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 10,
         "reused_description_across_unrelated_channels": 3
       }
     },
     "2026-09-03": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 23,
+      "deduplicatedOccurrences": 2,
       "byReason": {
         "confirmed_talk_section": 1,
-        "prayer_broadcast_timeline": 16,
+        "prayer_broadcast_timeline": 18,
+        "dated_future_stream_announcement": 1,
         "bible_verse_broadcast": 1,
         "dated_stream_challenge_result": 1,
         "confirmed_stream_start_marker": 1
@@ -371,6 +430,7 @@
     },
     "2026-09-15": {
       "quarantinedOccurrences": 3,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2,
         "prayer_broadcast_timeline": 1
@@ -378,6 +438,7 @@
     },
     "2026-09-16": {
       "quarantinedOccurrences": 20,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 19,
         "dated_talk_event_announcement": 1
@@ -385,18 +446,21 @@
     },
     "2026-09-17": {
       "quarantinedOccurrences": 7,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 7
       }
     },
     "2026-09-18": {
       "quarantinedOccurrences": 11,
+      "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 11
       }
     },
     "2026-09-19": {
       "quarantinedOccurrences": 13,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 12,
         "reused_description_across_unrelated_channels": 1
@@ -404,6 +468,7 @@
     },
     "2026-09-20": {
       "quarantinedOccurrences": 30,
+      "deduplicatedOccurrences": 16,
       "byReason": {
         "prayer_broadcast_timeline": 24,
         "dated_stream_challenge_result": 4,
@@ -413,6 +478,7 @@
     },
     "2026-09-21": {
       "quarantinedOccurrences": 10,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 7,
         "dated_stream_challenge_result": 1,
@@ -421,31 +487,44 @@
     },
     "2026-09-22": {
       "quarantinedOccurrences": 19,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 19
       }
     },
     "2026-09-23": {
       "quarantinedOccurrences": 32,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 30,
         "unrelated_worship_livestream_listing": 2
       }
     },
     "2026-09-24": {
-      "quarantinedOccurrences": 85,
+      "quarantinedOccurrences": 86,
+      "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 82,
         "unrelated_talk_stream_listing": 2,
+        "reviewed_bad_description_source": 1,
         "dated_stream_challenge_result": 1
       }
     },
     "2026-09-25": {
-      "quarantinedOccurrences": 34,
+      "quarantinedOccurrences": 42,
+      "deduplicatedOccurrences": 15,
       "byReason": {
-        "prayer_broadcast_timeline": 32,
+        "prayer_broadcast_timeline": 39,
+        "reviewed_bad_description_source": 1,
         "dated_stream_announcement": 1,
         "unrelated_livestream_listing": 1
+      }
+    },
+    "2026-09-26": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "prayer_broadcast_timeline": 1
       }
     }
   },
@@ -624,6 +703,463 @@
       "before": "/ 大塚愛",
       "after": "大塚愛",
       "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "片っぽ",
+      "before": "/ eill",
+      "after": "eill",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "フィナーレ。",
+      "before": "/ eill",
+      "after": "eill",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "Stay Alive",
+      "before": "/ 高橋李依",
+      "after": "高橋李依",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "glow",
+      "before": "/ keeno feat. 初音ミク",
+      "after": "keeno feat. 初音ミク",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "f7o6Hqiqn5U",
+      "title": "Calc",
+      "before": "/ ジミーサムP feat. 初音ミク",
+      "after": "ジミーサムP feat. 初音ミク",
+      "sourceId": "legacy:f7o6Hqiqn5U"
+    },
+    {
+      "videoId": "yWKHVGfkzkU",
+      "title": "ドライフラワー",
+      "before": "/ 優里",
+      "after": "優里",
+      "sourceId": "legacy:yWKHVGfkzkU"
+    },
+    {
+      "videoId": "yWKHVGfkzkU",
+      "title": "HANABI",
+      "before": "/ Mr.Children",
+      "after": "Mr.Children",
+      "sourceId": "legacy:yWKHVGfkzkU"
+    },
+    {
+      "videoId": "yWKHVGfkzkU",
+      "title": "黒猫 〜Adult Black Cat〜",
+      "before": "/ Acid Black Cherry",
+      "after": "Acid Black Cherry",
+      "sourceId": "legacy:yWKHVGfkzkU"
+    },
+    {
+      "videoId": "yWKHVGfkzkU",
+      "title": "ノンブレス・オブリージュ",
+      "before": "/ ピノキオピー",
+      "after": "ピノキオピー",
+      "sourceId": "legacy:yWKHVGfkzkU"
+    },
+    {
+      "videoId": "sCeiBucgOrM",
+      "title": "Bunny Girl",
+      "before": "/ AKASAKI",
+      "after": "AKASAKI",
+      "sourceId": "Ugz3KIEwwBD1Fg_tPTB4AaABAg"
+    },
+    {
+      "videoId": "BH02tkDy0bE",
+      "title": "アンノウン・マザーグース",
+      "before": "/ wowaka",
+      "after": "wowaka",
+      "sourceId": "legacy:BH02tkDy0bE"
+    },
+    {
+      "videoId": "BH02tkDy0bE",
+      "title": "シャルル",
+      "before": "/ バルーン",
+      "after": "バルーン",
+      "sourceId": "legacy:BH02tkDy0bE"
+    },
+    {
+      "videoId": "BH02tkDy0bE",
+      "title": "ジャンキーナイトタウンオーケストラ",
+      "before": "/ すりぃ",
+      "after": "すりぃ",
+      "sourceId": "legacy:BH02tkDy0bE"
+    },
+    {
+      "videoId": "BH02tkDy0bE",
+      "title": "命に嫌われている",
+      "before": "/ カンザキイオリ",
+      "after": "カンザキイオリ",
+      "sourceId": "legacy:BH02tkDy0bE"
+    },
+    {
+      "videoId": "BH02tkDy0bE",
+      "title": "曖昧劣情Lover",
+      "before": "/ koyori(電ポルP)",
+      "after": "koyori(電ポルP)",
+      "sourceId": "legacy:BH02tkDy0bE"
+    }
+  ],
+  "normalizedReleaseMetadataExamples": [
+    {
+      "videoId": "GwBi6DHUHXI",
+      "title": "Web of Night",
+      "before": "T.M.Revolution（2004/07/28）※English Version",
+      "after": "T.M.Revolution",
+      "raw": "1:39:17　19.Web of Night／T.M.Revolution（2004/07/28）※English Version"
+    },
+    {
+      "videoId": "QxSgLRB0SO4",
+      "title": "まもりたい～White Wishes～",
+      "before": "BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断",
+      "after": "BoA【テイルズ オブ グレイセス】",
+      "raw": "0:28:33　07.まもりたい～White Wishes～／BoA【テイルズ オブ グレイセス】（2009/12/09）※地震により中断"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "ビバナミダ",
+      "before": "アルバム 幸福",
+      "after": "岡村靖幸",
+      "raw": "2:01 ビバナミダ（アルバム 幸福）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "愛はおしゃれじゃない",
+      "before": "アルバム 幸福",
+      "after": "岡村靖幸",
+      "raw": "7:50 愛はおしゃれじゃない（アルバム 幸福）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "Super Girl",
+      "before": "アルバムDATE",
+      "after": "岡村靖幸",
+      "raw": "19:01 Super Girl（アルバムDATE）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "DATE",
+      "before": "アルバム DATE",
+      "after": "岡村靖幸",
+      "raw": "23:55 DATE（アルバム DATE）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "どぉなっちゃってんだよ",
+      "before": "アルバム 家庭教師",
+      "after": "岡村靖幸",
+      "raw": "29:51 どぉなっちゃってんだよ（アルバム 家庭教師）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "いじわる",
+      "before": "アルバム DATE",
+      "after": "岡村靖幸",
+      "raw": "34:06 いじわる（アルバム DATE）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "19(nineteen)",
+      "before": "アルバム DATE",
+      "after": "岡村靖幸",
+      "raw": "39:02 19(nineteen)（アルバム DATE）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "Vegetable",
+      "before": "アルバム 靖幸",
+      "after": "岡村靖幸",
+      "raw": "43:48 Vegetable（アルバム 靖幸）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "青年14歳",
+      "before": "アルバム 禁じられた生きがい",
+      "after": "岡村靖幸",
+      "raw": "47:38 青年14歳（アルバム 禁じられた生きがい）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "ラブ タンバリン",
+      "before": "アルバム 靖幸",
+      "after": "岡村靖幸",
+      "raw": "51:50 ラブ タンバリン（アルバム 靖幸）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "パラシュート★ガール",
+      "before": "アルバム 禁じられた生きがい",
+      "after": "岡村靖幸",
+      "raw": "55:36 パラシュート★ガール（アルバム 禁じられた生きがい）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "マクガフィン",
+      "before": "アルバム 操",
+      "after": "岡村靖幸",
+      "raw": "1:05:28 マクガフィン（アルバム 操）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "聖書",
+      "before": "アルバム 靖幸",
+      "after": "岡村靖幸",
+      "raw": "1:27:57 聖書（アルバム 靖幸）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "ア・チ・チ・チ",
+      "before": "アルバム Me-imi",
+      "after": "岡村靖幸",
+      "raw": "1:33:24 ア・チ・チ・チ（アルバム Me-imi）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "家庭教師",
+      "before": "アルバム 家庭教師",
+      "after": "岡村靖幸",
+      "raw": "1:38:25 家庭教師（アルバム 家庭教師）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "Out of Blue",
+      "before": "アルバム yellow",
+      "after": "岡村靖幸",
+      "raw": "1:46:07 Out of Blue（アルバム yellow）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "Peach Time",
+      "before": "アルバム 早熟",
+      "after": "岡村靖幸",
+      "raw": "1:50:31 Peach Time（アルバム 早熟）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "彼氏になって優しくなって",
+      "before": "アルバム 幸福",
+      "after": "岡村靖幸",
+      "raw": "1:53:27 彼氏になって優しくなって（アルバム 幸福）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "イケナイコトカイ",
+      "before": "アルバム DATE",
+      "after": "岡村靖幸",
+      "raw": "2:00:45 イケナイコトカイ（アルバム DATE）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "真夜中のサイクリング",
+      "before": "アルバム OH!ベスト",
+      "after": "岡村靖幸",
+      "raw": "2:06:25 真夜中のサイクリング（アルバム OH!ベスト）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "カルアミルク",
+      "before": "アルバム 家庭教師",
+      "after": "岡村靖幸",
+      "raw": "2:21:41 カルアミルク（アルバム 家庭教師）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "ぶーしゃかLOOP",
+      "before": "アルバム 幸福",
+      "after": "岡村靖幸",
+      "raw": "2:27:12 ぶーしゃかLOOP（アルバム 幸福）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "あの娘ぼくがロングシュート決めたらどんな顔するだろう",
+      "before": "アルバム 家庭教師",
+      "after": "岡村靖幸",
+      "raw": "2:32:37 あの娘ぼくがロングシュート決めたらどんな顔するだろう（アルバム 家庭教師）"
+    },
+    {
+      "videoId": "jsQX01izzbY",
+      "title": "だいすき",
+      "before": "アルバム 靖幸",
+      "after": "岡村靖幸",
+      "raw": "2:37:02 だいすき（アルバム 靖幸）"
+    },
+    {
+      "videoId": "fnDcGmE0duc",
+      "title": "そばかす",
+      "before": "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
+      "after": "JUDY AND MARY (1996)",
+      "raw": "05:07:15   そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1"
+    },
+    {
+      "videoId": "R98zixhrevE",
+      "title": "RE:I AM",
+      "before": "Aimer【機動戦士ガンダムUC】（2013/03/20）",
+      "after": "Aimer【機動戦士ガンダムUC】",
+      "raw": "0:18:30　04.RE:I AM／Aimer【機動戦士ガンダムUC】（2013/03/20）"
+    },
+    {
+      "videoId": "UdoA0Hh2HCg",
+      "title": "パプリカ",
+      "before": "米津玄師 (2020/02/03)",
+      "after": "米津玄師",
+      "raw": "0:26:11 🎼パプリカ / 米津玄師 (2020/02/03)"
+    },
+    {
+      "videoId": "UdoA0Hh2HCg",
+      "title": "真夏の果実",
+      "before": "サザンオールスターズ (1990/07/25)※1コーラスのみ",
+      "after": "サザンオールスターズ",
+      "raw": "0:39:00 🎼真夏の果実 / サザンオールスターズ (1990/07/25)※1コーラスのみ"
+    },
+    {
+      "videoId": "3E9Lw5JEzIs",
+      "title": "そばかす",
+      "before": "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
+      "after": "JUDY AND MARY (1996)",
+      "raw": "07:49:09  そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1"
+    },
+    {
+      "videoId": "O6ALZkiXXo8",
+      "title": "DRAMATIC NONFICTION",
+      "before": "DRAMATIC STAR[天道輝(CV｡仲村宗悟),桜庭薫(CV.内田雄馬),柏木翼(CV.八代拓)] / 『THE IDOLM@STER SideM 10th ANNIVERSARY P@SSION 01 DRAMATIC STARS』 収録",
+      "after": "DRAMATIC STAR[天道輝(CV。仲村宗悟),桜庭薫(CV.内田雄馬),柏木翼(CV.八代拓)]",
+      "raw": "0:18:09 DRAMATIC NONFICTION / DRAMATIC STAR[天道輝(CV｡仲村宗悟),桜庭薫(CV.内田雄馬),柏木翼(CV.八代拓)] / 『THE IDOLM@STER SideM 10th ANNIVERSARY P@SSION 01 DRAMATIC STARS』 収録"
+    },
+    {
+      "videoId": "O6ALZkiXXo8",
+      "title": "オ･ト･ナ BREAK OUT",
+      "before": "雅臣(興津和幸)＆右京(平川大輔)＆要(諏訪部順一)＆光(岡本信彦)＆椿(鈴村健一)＆梓(鳥海浩輔)＆棗(前野智昭) / TVアニメ『BROTHERS CONFLICT』 キャラクターソングコンセプトミニアルバム① 「オ・ト・ナ」収録",
+      "after": "雅臣(興津和幸)&右京(平川大輔)&要(諏訪部順一)&光(岡本信彦)&椿(鈴村健一)&梓(鳥海浩輔)&棗(前野智昭)",
+      "raw": "2:22:03 オ･ト･ナ BREAK OUT / 雅臣(興津和幸)＆右京(平川大輔)＆要(諏訪部順一)＆光(岡本信彦)＆椿(鈴村健一)＆梓(鳥海浩輔)＆棗(前野智昭) / TVアニメ『BROTHERS CONFLICT』 キャラクターソングコンセプトミニアルバム① 「オ・ト・ナ」収録"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Daydream café",
+      "before": "Petit Rabbit’s / Anime “Is the Order a Rabbit?” OP /",
+      "after": "Petit Rabbit’s",
+      "raw": "0:35:54  Daydream café / Petit Rabbit’s / Anime “Is the Order a Rabbit?” OP / 2014"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Sorairo Days",
+      "before": "Shoko Nakagawa / Anime “Tengen Toppa Gurren Lagann” OP /",
+      "after": "Shoko Nakagawa",
+      "raw": "1:00:06  Sorairo Days / Shoko Nakagawa / Anime “Tengen Toppa Gurren Lagann” OP / 2007"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Kiiroi Vacance",
+      "before": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana / Anime “Pani Poni Dash!” OP /",
+      "after": "Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana",
+      "raw": "1:29:42  Kiiroi Vacance / Momotsuki Academy Class 1-C feat. Himeko Katagiri & Rei Tachibana / Anime “Pani Poni Dash!” OP / 2005"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "winning the soul",
+      "before": "Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song /",
+      "after": "Tokai Teio (CV: Machico)",
+      "raw": "1:47:38  winning the soul / Tokai Teio (CV: Machico) / Anime “Uma Musume Pretty Derby Season 2” insert song / 2021"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "your gravitation",
+      "before": "SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa) / Anime “My Bride is a Mermaid” insert song /",
+      "after": "SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa)",
+      "raw": "2:01:37  your gravitation / SUN (CV: Haruko Momoi) & LUNAR (CV: Sakura Nogawa) / Anime “My Bride is a Mermaid” insert song / 2007"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Aousu",
+      "before": "Yui Horie / Anime “Samurai Deeper Kyo” image song /",
+      "after": "Yui Horie",
+      "raw": "2:56:47  Aousu / Yui Horie / Anime “Samurai Deeper Kyo” image song / 2003"
+    },
+    {
+      "videoId": "zj5OZcQKOH8",
+      "title": "Koi seyo Onnanoko",
+      "before": "Yukari Tamura / Anime “Gokujou Seitokai” OP /",
+      "after": "Yukari Tamura",
+      "raw": "3:09:18  Koi seyo Onnanoko / Yukari Tamura / Anime “Gokujou Seitokai” OP / 2005"
+    },
+    {
+      "videoId": "b_Y_jnQ4nk8",
+      "title": "さぁ",
+      "before": "SURFACE【まもって守護月天!】（1998/11/11）",
+      "after": "SURFACE【まもって守護月天!】",
+      "raw": "0:04:09　01.さぁ／SURFACE【まもって守護月天!】（1998/11/11）"
+    },
+    {
+      "videoId": "b_Y_jnQ4nk8",
+      "title": "亡國覚醒カタルシス",
+      "before": "ALI PROJECT【.hack//Roots】（2006/05/24）",
+      "after": "ALI PROJECT【.hack//Roots】",
+      "raw": "0:38:52　08.亡國覚醒カタルシス／ALI PROJECT【.hack//Roots】（2006/05/24）"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "虚ろを扇ぐ",
+      "before": "獅子志司 (2022/09/28)",
+      "after": "獅子志司",
+      "raw": "0:17:39 💮虚ろを扇ぐ / 獅子志司 (2022/09/28)"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "アウターサイエンス",
+      "before": "じん (2015/03/28)",
+      "after": "じん",
+      "raw": "0:32:44 💮アウターサイエンス / じん (2015/03/28)"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "へべれけジャンキー",
+      "before": "Syudou (2021/03/30)",
+      "after": "Syudou",
+      "raw": "0:46:36 💮へべれけジャンキー / Syudou (2021/03/30)"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "君じゃなきゃダメみたい",
+      "before": "大石昌良 (2014/08/27)",
+      "after": "大石昌良",
+      "raw": "0:57:35 🍈君じゃなきゃダメみたい / 大石昌良 (2014/08/27)"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "ジブラ",
+      "before": "すりぃ (2022/06/24)",
+      "after": "すりぃ",
+      "raw": "1:46:15 🍈ジブラ / すりぃ (2022/06/24)"
+    },
+    {
+      "videoId": "MCu3BvC8gN8",
+      "title": "バグ",
+      "before": "かいりきベア (2022/06/25)",
+      "after": "かいりきベア",
+      "raw": "2:00:24 ✨バグ / かいりきベア (2022/06/25)"
+    },
+    {
+      "videoId": "4BDwkLfKc_Y",
+      "title": "Tell Your World",
+      "before": "kz ※2012-01-18",
+      "after": "kz",
+      "raw": "🔥0:14:21 【Tell Your World】/ kz ※2012-01-18"
+    },
+    {
+      "videoId": "4BDwkLfKc_Y",
+      "title": "千本桜",
+      "before": "黒うさP ※2011-09-17",
+      "after": "黒うさP",
+      "raw": "🔺0:21:05 【千本桜】/ 黒うさP ※2011-09-17"
     }
   ],
   "repairedDateCreditExamples": [
@@ -772,6 +1308,638 @@
       "raw": "01:33:55 0 crack/keeno feat. 初音ミク 2010/10/22"
     }
   ],
+  "repairedStructuredCreditExamples": [
+    {
+      "videoId": "deCbXl4T9RQ",
+      "before": "惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング - 2026",
+      "after": "惑星と恒星の違いがわからないの歌 - 幽音しの",
+      "raw": "1:06:14    惑星と恒星の違いがわからないの歌/幽音しの/幽音しの即興ソング/2026"
+    },
+    {
+      "videoId": "5HmM1qR9GkI",
+      "before": "A Whole New World(1chorus)/Peabo Bryson&Regina Belle/映画「アラジン」挿入歌 - 1992",
+      "after": "A Whole New World(1chorus) - Peabo Bryson&Regina Belle",
+      "raw": "2:00:10   A Whole New World(1chorus)/Peabo Bryson&Regina Belle/映画「アラジン」挿入歌/1992"
+    },
+    {
+      "videoId": "qMf7UuFfTJc",
+      "before": "星空のワルツ／栗林みな実／アニメ「君が望む永遠」ED - ",
+      "after": "星空のワルツ - 栗林みな実",
+      "raw": "1:28:31 星空のワルツ／栗林みな実／アニメ「君が望む永遠」ED／2003"
+    },
+    {
+      "videoId": "qMf7UuFfTJc",
+      "before": "Hanabi／Lia／アニメ「リトルバスターズ！〜Refrain〜」ED - ",
+      "after": "Hanabi - Lia",
+      "raw": "2:44:01 Hanabi／Lia／アニメ「リトルバスターズ！〜Refrain〜」ED／2013"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "トライアングラー/坂本真綾/マクロスＦ OP1 - ",
+      "after": "トライアングラー - 坂本真綾",
+      "raw": "0:09:12 トライアングラー/坂本真綾/マクロスＦ OP1/2008"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "SAVED./坂本真綾/いなり、こんこん、恋いろは。ED - ",
+      "after": "SAVED. - 坂本真綾",
+      "raw": "1:00:44 SAVED./坂本真綾/いなり、こんこん、恋いろは。ED/2014"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "片翼の鳥/志方あきこ/うみねこのなく頃に OP - ",
+      "after": "片翼の鳥 - 志方あきこ",
+      "raw": "1:28:09 片翼の鳥/志方あきこ/うみねこのなく頃に OP/2009"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "花帰葬/志方あきこ/PCゲーム 花帰葬 OP - ",
+      "after": "花帰葬 - 志方あきこ",
+      "raw": "1:33:24 花帰葬/志方あきこ/PCゲーム 花帰葬 OP/2003"
+    },
+    {
+      "videoId": "TEMzHXrTR6I",
+      "before": "アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED - ",
+      "after": "アムリタ - 牧野由依",
+      "raw": "1:39:58 アムリタ/牧野由依/劇場版ツバサ・クロニクル 鳥カゴの国の姫君 ED/2005"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "My Soul Your Beats!/Lia/アニメ「Angel Beats」OP - ",
+      "after": "My Soul Your Beats! - Lia",
+      "raw": "10:15  My Soul Your Beats!/Lia/アニメ「Angel Beats」OP/2010"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "一番の宝物(Yui ver)/Girls Dead Monster/アニメ「Angel Beats」挿入歌 - ",
+      "after": "一番の宝物(Yui ver) - Girls Dead Monster",
+      "raw": "16:54 一番の宝物(Yui ver)/Girls Dead Monster/アニメ「Angel Beats」挿入歌/2010"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "嘘/シド/アニメ「鋼の錬金術師 FULLMETAL ALCHEMIST」ED - ",
+      "after": "嘘 - シド",
+      "raw": "26:23 嘘/シド/アニメ「鋼の錬金術師 FULLMETAL ALCHEMIST」ED/2009"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "射手座☆午後九時Don't be late/シェリル・ノームstarring May'n/アニメマクロスF - ",
+      "after": "射手座☆午後九時Don't be late - シェリル・ノームstarring May'n",
+      "raw": "32:17 射手座☆午後九時Don't be late/シェリル・ノームstarring May'n/アニメマクロスF/2008"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "創聖のアクエリオン/AKINO/アニメ「創聖のアクエリオン」OP - ",
+      "after": "創聖のアクエリオン - AKINO",
+      "raw": "40:24 創聖のアクエリオン/AKINO/アニメ「創聖のアクエリオン」OP/2005"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "ハルモニア/RHYTHM/アニメ「NARUTO-ナルト-」ED - ",
+      "after": "ハルモニア - RHYTHM",
+      "raw": "55:29 ハルモニア/RHYTHM/アニメ「NARUTO-ナルト-」ED/2002"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "カサブタ/千綿ヒデノリ/アニメ「金色のガッシュベル」OP - ",
+      "after": "カサブタ - 千綿ヒデノリ",
+      "raw": "1:10:37 カサブタ/千綿ヒデノリ/アニメ「金色のガッシュベル」OP/2003"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "鳥の詩/Lia/ゲーム「AIR」OP - ",
+      "after": "鳥の詩 - Lia",
+      "raw": "1:21:54 鳥の詩/Lia/ゲーム「AIR」OP/2000"
+    },
+    {
+      "videoId": "67WLeuCp8nk",
+      "before": "世界が終るまでは…/WANDS/アニメ「SLAM DUNK」ED - 1994",
+      "after": "世界が終るまでは... - WANDS",
+      "raw": "1:34:44 世界が終るまでは…/WANDS/アニメ「SLAM DUNK」ED/1994"
+    },
+    {
+      "videoId": "jMI_6tW_EvY",
+      "before": "イケナイ太陽/ORANGE RANGE/ドラマ「花ざかりの君たちへ〜イケメン♂パラダイス〜」OP - ",
+      "after": "イケナイ太陽 - ORANGE RANGE",
+      "raw": "02:38 イケナイ太陽/ORANGE RANGE/ドラマ「花ざかりの君たちへ〜イケメン♂パラダイス〜」OP /2007"
+    },
+    {
+      "videoId": "LYKjz9hLOEI",
+      "before": "若者のすべて/フジファブリック/ドラマ「SUMMER NUDE」挿入歌etc… - ",
+      "after": "若者のすべて - フジファブリック",
+      "raw": "10:11 若者のすべて/フジファブリック/ドラマ「SUMMER NUDE」挿入歌etc…/2007"
+    },
+    {
+      "videoId": "LYKjz9hLOEI",
+      "before": "more than words/羊文学/アニメ「呪術廻戦 渋谷事変」ED - ",
+      "after": "more  than words - 羊文学",
+      "raw": "18:55 more  than words/羊文学/アニメ「呪術廻戦 渋谷事変」ED/2023"
+    },
+    {
+      "videoId": "x0byH-JYzwI",
+      "before": "花火/aiko/アニメ｢まっすぐにいこう。｣ED - 1999",
+      "after": "花火 - aiko",
+      "raw": "08:35 花火/aiko/アニメ｢まっすぐにいこう。｣ED/1999"
+    },
+    {
+      "videoId": "x0byH-JYzwI",
+      "before": "真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌 - 1990",
+      "after": "真夏の果実 - サザンオールスターズ",
+      "raw": "14:48 真夏の果実/サザンオールスターズ/ドラマ｢悪魔のKISS｣挿入歌/1990"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "Here/JUNNA/アニメ「魔法使いの嫁」OP - ",
+      "after": "Here - JUNNA",
+      "raw": "21:30  Here/JUNNA/アニメ「魔法使いの嫁」OP/2017"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "unlasting/LiSA/アニメ「ソードアート・オンライン アリシゼーション War of Underworld」ED - ",
+      "after": "unlasting - LiSA",
+      "raw": "27:16  unlasting/LiSA/アニメ「ソードアート・オンライン アリシゼーション War of Underworld」ED/2019"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "ブラック★ロックシューター/ryo(supercell) feat.初音ミク/アニメ「ブラック★ロックシューター　DAWN FALL」OP - ",
+      "after": "ブラック★ロックシューター - ryo(supercell) feat.初音ミク",
+      "raw": "59:46 ブラック★ロックシューター/ryo(supercell) feat.初音ミク/アニメ「ブラック★ロックシューター　DAWN FALL」OP/2008"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "怪物/YOASOBI/アニメ「BEASTARS」OP - ",
+      "after": "怪物 - YOASOBI",
+      "raw": "1:06:31 怪物/YOASOBI/アニメ「BEASTARS」OP/2021"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "そばかす/JUDY AND MARY/アニメ「るろうに剣心」OP - 1996",
+      "after": "そばかす - JUDY AND MARY",
+      "raw": "1:24:59 そばかす/JUDY AND MARY/アニメ「るろうに剣心」OP/1996"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "ルンがピカッと光ったら/ワルキューレ/アニメ「マクロスΔ」ED - ",
+      "after": "ルンがピカッと光ったら - ワルキューレ",
+      "raw": "1:31:44  ルンがピカッと光ったら/ワルキューレ/アニメ「マクロスΔ」ED/2016"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "アイワナムチュー/MAISONdes/アニメ「うる星やつら」OP - ",
+      "after": "アイワナムチュー - MAISONdes",
+      "raw": "1:39:32 アイワナムチュー/MAISONdes/アニメ「うる星やつら」OP/2022"
+    },
+    {
+      "videoId": "3eFVgs9iW00",
+      "before": "悪魔の子/ヒグチアイ/アニメ「進撃の巨人」ED - ",
+      "after": "悪魔の子 - ヒグチアイ",
+      "raw": "1:45:16  悪魔の子/ヒグチアイ/アニメ「進撃の巨人」ED/2022"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED - ",
+      "after": "Sakuranbo - Ai Otsuka",
+      "raw": "0:18:08 Sakuranbo/Ai Otsuka/Mecha-Mecha Iketeru! ED/2003"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Fuwa Fuwa Time/Ho-kago Tea Time/K-On! insert song - ",
+      "after": "Fuwa Fuwa Time - Ho-kago Tea Time",
+      "raw": "0:24:48 Fuwa Fuwa Time/Ho-kago Tea Time/K-On! insert song/2009"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Luminous/ClariS/Puella Magi Madoka Magica the Movie Part 1: Beginnings OP - ",
+      "after": "Luminous - ClariS",
+      "raw": "0:38:44 Luminous/ClariS/Puella Magi Madoka Magica the Movie Part 1: Beginnings OP/2012"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP - ",
+      "after": "Lion - Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)",
+      "raw": "1:03:20 Lion/Sheryl Nome starring May'n&Ranka Lee(CV.Megumi Nakajima)/Macross Frontier OP/2008"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Little Wish 〜lyrical step〜/Yukari Tamura/Magical Girl Lyrical Nanoha ED - ",
+      "after": "Little Wish 〜lyrical step〜 - Yukari Tamura",
+      "raw": "1:23:24 Little Wish 〜lyrical step〜/Yukari Tamura/Magical Girl Lyrical Nanoha ED/2004"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Guuzen Angel/Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))/Best Student Council ED - ",
+      "after": "Guuzen Angel - Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))",
+      "raw": "1:30:21 Guuzen Angel/Best Student Council Executive Committee(Rino Randou(CV.Yukari Tamura)&Kanade Jinguji(CV.Hitomi Nabatame)&Nanaho Kaneshiro(CV.Junko Noda)&Kuon Ginga(CV.Kaori Shimizu)&Mayura Ichikawa(CV.Miyuki Sawashiro))/Best Student Council ED/2005"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Spiritual Garden/Yukari Tamura/Magical Girl Lyrical Nanoha A's ED - ",
+      "after": "Spiritual Garden - Yukari Tamura",
+      "raw": "1:40:56 Spiritual Garden/Yukari Tamura/Magical Girl Lyrical Nanoha A's ED/2005"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Hatsukoi Cider/Buono!/Sugaku♥Joshi Gakuen ED - ",
+      "after": "Hatsukoi Cider - Buono!",
+      "raw": "2:46:19 Hatsukoi Cider/Buono!/Sugaku♥Joshi Gakuen ED/2012"
+    },
+    {
+      "videoId": "s2NDnqiDKiA",
+      "before": "Aozora no Rhapsody/fhána/Miss Kobayashi's Dragon Maid OP - ",
+      "after": "Aozora no Rhapsody - fhána",
+      "raw": "2:51:31 Aozora no Rhapsody/fhána/Miss Kobayashi's Dragon Maid OP/2017"
+    }
+  ],
+  "repairedKnownSourceCreditExamples": [
+    {
+      "videoId": "Q8ktjMwiE4I",
+      "before": "はなびら (Hanabira / Petals) 奥華子 - 未記載",
+      "after": "はなびら - 奥華子",
+      "raw": "9:13 はなびら (Hanabira / Petals) 奥華子"
+    },
+    {
+      "videoId": "Q8ktjMwiE4I",
+      "before": "Answer、幾田りら - 未記載",
+      "after": "Answer - 幾田りら",
+      "raw": "26:59 Answer、幾田りら"
+    },
+    {
+      "videoId": "Q8ktjMwiE4I",
+      "before": "秒針を噛む (Byoushin wo Kamu / Biting the Second Hand) ずっと真夜中でいいのに。ZUTOMAYO - 未記載",
+      "after": "秒針を噛む - ずっと真夜中でいいのに。",
+      "raw": "34:58 秒針を噛む (Byoushin wo Kamu / Biting the Second Hand) ずっと真夜中でいいのに。ZUTOMAYO"
+    },
+    {
+      "videoId": "Q8ktjMwiE4I",
+      "before": "ギブス (Gibbs / Plaster Caster) 椎名林檎 - 未記載",
+      "after": "ギブス - 椎名林檎",
+      "raw": "41:16 ギブス (Gibbs / Plaster Caster) 椎名林檎"
+    },
+    {
+      "videoId": "Q8ktjMwiE4I",
+      "before": "115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism - 未記載",
+      "after": "115万キロのフィルム - Official髭男dism",
+      "raw": "1:03:52 115万キロのフィルム (115man Kilo no Film / 115 Million Kilometer Film) Official髭男dism"
+    },
+    {
+      "videoId": "zyngx4g-sy4",
+      "before": "ハッピーシンセサイザ - 未記載",
+      "after": "ハッピーシンセサイザ - EasyPop",
+      "raw": "47:15 - 8. ハッピーシンセサイザ (Happy Synthesizer) by EasyPop 【❔🍸】"
+    }
+  ],
+  "duplicateExamples": [
+    {
+      "videoId": "iN0wyhpoiF0",
+      "seconds": 4665,
+      "title": "気まぐれロマンチック",
+      "artist": "いきものがかり",
+      "sourceId": "Ugxe_WoEOx6iuf_mvmJ4AaABAg"
+    },
+    {
+      "videoId": "d_7n_zvLZWg",
+      "seconds": 1081,
+      "title": "Rally Go Round",
+      "artist": "LiSA",
+      "sourceId": "Ugwh9JdYX4eXHURwEvl4AaABAg"
+    },
+    {
+      "videoId": "d_7n_zvLZWg",
+      "seconds": 3201,
+      "title": "ambiguous",
+      "artist": "GARNiDELiA",
+      "sourceId": "Ugwh9JdYX4eXHURwEvl4AaABAg"
+    },
+    {
+      "videoId": "d_7n_zvLZWg",
+      "seconds": 4296,
+      "title": "Alchemy",
+      "artist": "Girls Dead Monster",
+      "sourceId": "Ugwh9JdYX4eXHURwEvl4AaABAg"
+    },
+    {
+      "videoId": "d_7n_zvLZWg",
+      "seconds": 7124,
+      "title": "I beg you",
+      "artist": "Aimer",
+      "sourceId": "Ugwh9JdYX4eXHURwEvl4AaABAg"
+    },
+    {
+      "videoId": "3J-jhzLBfmU",
+      "seconds": 4424,
+      "title": "DEAD OR ALIVE",
+      "artist": "angela",
+      "sourceId": "Ugwmu6LCvJ0w562SsV54AaABAg"
+    },
+    {
+      "videoId": "5ZeO7uc_oUY",
+      "seconds": 6128,
+      "title": "天体観測",
+      "artist": "BUMP OF CHICKEN",
+      "sourceId": "UgyxSlU97LYvdRKwNLN4AaABAg"
+    },
+    {
+      "videoId": "-ztqkSTiIQQ",
+      "seconds": 8661,
+      "title": "CHAINSAW BLOOD",
+      "artist": "Vaundy",
+      "sourceId": "Ugzg-0SE-WCjX-fvM7J4AaABAg"
+    },
+    {
+      "videoId": "-ztqkSTiIQQ",
+      "seconds": 9121,
+      "title": "L.Miranic",
+      "artist": "LiSA",
+      "sourceId": "Ugzg-0SE-WCjX-fvM7J4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 1298,
+      "title": "HARUKAZE",
+      "artist": "SCANDAL",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 2376,
+      "title": "dawn",
+      "artist": "LiSA",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 5152,
+      "title": "unlasting",
+      "artist": "LiSA",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 6449,
+      "title": "Psychedelic Drive",
+      "artist": "LiSA",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 7775,
+      "title": "Angelic Angel",
+      "artist": "μ's",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8_M6wWpWEks",
+      "seconds": 9549,
+      "title": "HADASHi NO STEP",
+      "artist": "LiSA",
+      "sourceId": "UgwBkSeLxms8SMe_jOh4AaABAg"
+    },
+    {
+      "videoId": "8c5lpUsgo2U",
+      "seconds": 124,
+      "title": "亜麻色の髪の乙女",
+      "artist": "島谷ひとみ",
+      "sourceId": "UgwmR2gqUga0opyEkXN4AaABAg"
+    },
+    {
+      "videoId": "8c5lpUsgo2U",
+      "seconds": 531,
+      "title": "花に亡霊",
+      "artist": "ヨルシカ",
+      "sourceId": "UgwmR2gqUga0opyEkXN4AaABAg"
+    },
+    {
+      "videoId": "8c5lpUsgo2U",
+      "seconds": 879,
+      "title": "青のすみか",
+      "artist": "キタニタツヤ",
+      "sourceId": "UgwmR2gqUga0opyEkXN4AaABAg"
+    },
+    {
+      "videoId": "8c5lpUsgo2U",
+      "seconds": 1218,
+      "title": "オドループ",
+      "artist": "フレデリック",
+      "sourceId": "UgwmR2gqUga0opyEkXN4AaABAg"
+    },
+    {
+      "videoId": "8c5lpUsgo2U",
+      "seconds": 1590,
+      "title": "青色の明日へ",
+      "artist": "島村シャルロット",
+      "sourceId": "UgwmR2gqUga0opyEkXN4AaABAg"
+    },
+    {
+      "videoId": "c4xiU-S3j4k",
+      "seconds": 11323,
+      "title": "SpiralNights",
+      "artist": "羽月うずな",
+      "sourceId": "Ugzzs8y8Xe4Wkfk1Del4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 2868,
+      "title": "ray",
+      "artist": "BUMP OF CHICKEN",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 3424,
+      "title": "Hello,world!",
+      "artist": "BUMP OF CHICKEN",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 5435,
+      "title": "OVERLAP",
+      "artist": "Kimeru",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 5895,
+      "title": "Make You Free",
+      "artist": "Kimeru",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 8696,
+      "title": "Shining ray",
+      "artist": "Janne Da Arc",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "PdOEGOD_yQw",
+      "seconds": 10103,
+      "title": "BRAND NEW WORLD",
+      "artist": "D-51",
+      "sourceId": "UgwEJutYas7y12f-KYd4AaABAg"
+    },
+    {
+      "videoId": "9gDa6sxdig0",
+      "seconds": 6800,
+      "title": "瑠璃色の地球",
+      "artist": "",
+      "sourceId": "UgyaZQiYxW8eT9FG-DN4AaABAg"
+    },
+    {
+      "videoId": "wwhVjsdKxFU",
+      "seconds": 2567,
+      "title": "空の青さを思い出していたんだよ",
+      "artist": "水瀬奏咲",
+      "sourceId": "UgwVqD9OXB2IWpL_6zR4AaABAg"
+    },
+    {
+      "videoId": "wwhVjsdKxFU",
+      "seconds": 2993,
+      "title": "おやすみ",
+      "artist": "水瀬奏咲",
+      "sourceId": "UgwVqD9OXB2IWpL_6zR4AaABAg"
+    },
+    {
+      "videoId": "glaO_UAprhY",
+      "seconds": 523,
+      "title": "STYX HELIX",
+      "artist": "MYTH & ROID",
+      "sourceId": "UgzpGMsPhs6GoCWlxYJ4AaABAg"
+    },
+    {
+      "videoId": "fW3mHsLpmWE",
+      "seconds": 2695,
+      "title": "White Love",
+      "artist": "",
+      "sourceId": "UgxjMgd64IKkASH7bTl4AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 2449,
+      "title": "星座になれたら",
+      "artist": "結束バンド",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 2742,
+      "title": "星間飛行",
+      "artist": "シェリル・ノーム starring May'n,ランカ・リー＝中島愛",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 2977,
+      "title": "打上花火",
+      "artist": "DAOKO×米津玄師",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 3284,
+      "title": "モニタリング",
+      "artist": "DECO*27",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 3594,
+      "title": "*ハロー、プラネット",
+      "artist": "sasakure. UK",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 3632,
+      "title": "サディスティック・ラブ",
+      "artist": "Junky",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 5095,
+      "title": "にっこり^^調査隊のテーマ",
+      "artist": "じーざす(ワンダフル☆オポチュニティ!)",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 5349,
+      "title": "ochatime",
+      "artist": "exe",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 5598,
+      "title": "Clipping Radio",
+      "artist": "exe",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 5854,
+      "title": "かみさま、あなたの言うとおり",
+      "artist": "卯花ロク",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 6086,
+      "title": "トンデモワンダーズ",
+      "artist": "sasakure. UK",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 6400,
+      "title": "真面目だけ",
+      "artist": "青谷",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 6785,
+      "title": "ラブレター",
+      "artist": "傘村トータ",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 7102,
+      "title": "花に赤い糸",
+      "artist": "麻倉もも",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "3pWJ041aDSM",
+      "seconds": 7357,
+      "title": "こっちむいてほい",
+      "artist": "てにをは",
+      "sourceId": "UgyQ9TdwmSzgTBUhct54AaABAg"
+    },
+    {
+      "videoId": "i5N8Y8nPzfQ",
+      "seconds": 3852,
+      "title": "いけないボーダーライン",
+      "artist": "ワルキューレ",
+      "sourceId": "UgwXwEIIlRzAGxVmtxx4AaABAg"
+    },
+    {
+      "videoId": "i5N8Y8nPzfQ",
+      "seconds": 4198,
+      "title": "ルンがピカッと光ったら",
+      "artist": "ワルキューレ",
+      "sourceId": "UgwXwEIIlRzAGxVmtxx4AaABAg"
+    },
+    {
+      "videoId": "i5N8Y8nPzfQ",
+      "seconds": 4429,
+      "title": "AXIA ～ダイスキでダイキライ～",
+      "artist": "ワルキューレ",
+      "sourceId": "UgwXwEIIlRzAGxVmtxx4AaABAg"
+    }
+  ],
   "examples": [
     {
       "reason": "spoken_fraction_split_as_artist",
@@ -794,6 +1962,17 @@
       "title": "6",
       "artist": "土",
       "raw": "43:17 6/27（土）"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "si7BvscMBz4",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "si7BvscMBz4:legacy:si7BvscMBz4:3291:ad1230c38e3b4ed0",
+      "sourceId": "legacy:si7BvscMBz4",
+      "sourceHash": "6e50c51d121b4aed13920f19b3f4b4adaaf5ade07819fff8fce06e075c8a857a",
+      "title": "joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22",
+      "artist": "7?????",
+      "raw": "54:51 joshi idol anime that mariring knows aside from the stuff we know: SHE KNOWS 22/7?????"
     },
     {
       "reason": "date_split_as_song_and_artist",
@@ -1212,6 +2391,435 @@
       "title": "～8",
       "artist": "15",
       "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "9jp25d2K8Wg",
+      "channelName": "メルティch",
+      "occurrenceId": "9jp25d2K8Wg:33:1439",
+      "sourceId": "description:9jp25d2K8Wg:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "qnNUKGEP6GI",
+      "channelName": "真白ユキ*JPN Vtuber",
+      "occurrenceId": "qnNUKGEP6GI:22:1140",
+      "sourceId": "description:qnNUKGEP6GI:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "qnNUKGEP6GI",
+      "channelName": "真白ユキ*JPN Vtuber",
+      "occurrenceId": "qnNUKGEP6GI:33:1439",
+      "sourceId": "description:qnNUKGEP6GI:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "VspzJvHtodM",
+      "channelName": "なれたん Naraetan Ch.",
+      "occurrenceId": "VspzJvHtodM:22:1140",
+      "sourceId": "description:VspzJvHtodM:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "VspzJvHtodM",
+      "channelName": "なれたん Naraetan Ch.",
+      "occurrenceId": "VspzJvHtodM:33:1439",
+      "sourceId": "description:VspzJvHtodM:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "Ez_6fcA_AOM",
+      "channelName": "紗倉おと-Sakura Oto-🎸",
+      "occurrenceId": "Ez_6fcA_AOM:22:1140",
+      "sourceId": "description:Ez_6fcA_AOM:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "Ez_6fcA_AOM",
+      "channelName": "紗倉おと-Sakura Oto-🎸",
+      "occurrenceId": "Ez_6fcA_AOM:33:1439",
+      "sourceId": "description:Ez_6fcA_AOM:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "confirmed_chat_segment_label",
+      "videoId": "N8rS2XESc3Y",
+      "channelName": "伊月知世 / CHISE ITSUKI",
+      "occurrenceId": "N8rS2XESc3Y:340:4794",
+      "sourceId": "Ugw4lYxD_yd0cfMLJv14AaABAg",
+      "sourceHash": "cfe67870f27141c181f2a8cb829880096405fe0f079b51017c0bf5f0c20f7ebe",
+      "title": "雑談パート",
+      "artist": "海、夏ボイス",
+      "raw": "1:19:54\t雑談パート - 海、夏ボイス"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "ShymQbV2hOs",
+      "channelName": "アイリナ・ゼファリオ【StellArt.】",
+      "occurrenceId": "ShymQbV2hOs:22:1140",
+      "sourceId": "description:ShymQbV2hOs:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "ShymQbV2hOs",
+      "channelName": "アイリナ・ゼファリオ【StellArt.】",
+      "occurrenceId": "ShymQbV2hOs:33:1439",
+      "sourceId": "description:ShymQbV2hOs:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "ijjnLDo3om0",
+      "channelName": "月音-TUKUNE-",
+      "occurrenceId": "ijjnLDo3om0:22:1140",
+      "sourceId": "description:ijjnLDo3om0:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "ijjnLDo3om0",
+      "channelName": "月音-TUKUNE-",
+      "occurrenceId": "ijjnLDo3om0:33:1439",
+      "sourceId": "description:ijjnLDo3om0:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "WTWVXaaefuc",
+      "channelName": "LiccaLin",
+      "occurrenceId": "WTWVXaaefuc:22:1140",
+      "sourceId": "description:WTWVXaaefuc:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "～8",
+      "artist": "15",
+      "raw": "19:00～8/15"
+    },
+    {
+      "reason": "reused_description_across_unrelated_channels",
+      "videoId": "WTWVXaaefuc",
+      "channelName": "LiccaLin",
+      "occurrenceId": "WTWVXaaefuc:33:1439",
+      "sourceId": "description:WTWVXaaefuc:aecd22582a4e2bbd",
+      "sourceHash": "aecd22582a4e2bbd1ee61cece9d5e420e1c8dcb5252ac3e776b159572c932710",
+      "title": "globe tour 1999 Relation Remaster Edition",
+      "artist": "未記載",
+      "raw": "23:59) globe tour 1999 Relation Remaster Edition"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:667:115",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "koe OK",
+      "artist": "未記載",
+      "raw": "1:55 koe OK"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:679:443",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "self intros: mariring then mierun",
+      "artist": "未記載",
+      "raw": "7:23 self intros: mariring then mierun"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1672:450",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "PM JST",
+      "artist": "未記載",
+      "raw": "7:30PM JST"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:718:508",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "mariring was thinking of an english version of mierun's self-intro",
+      "artist": "未記載",
+      "raw": "8:28 mariring was thinking of an english version of mierun's self-intro"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:790:671",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "helianthe had their 2nd anniv, while mariring and iluna had their 4th anniversary",
+      "artist": "未記載",
+      "raw": "11:11 helianthe had their 2nd anniv, while mariring and iluna had their 4th anniversary"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:878:818",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "brings up her puppet cafe vrchat world",
+      "artist": "未記載",
+      "raw": "13:38 brings up her puppet cafe vrchat world"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:960:1352",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "today's hashtag is MariMieru!",
+      "artist": "未記載",
+      "raw": "22:32 today's hashtag is MariMieru!"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:996:1573",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "potato discussions",
+      "artist": "未記載",
+      "raw": "26:13 potato discussions..."
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1024:1715",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "parin-chan mentioned",
+      "artist": "未記載",
+      "raw": "28:35 parin-chan mentioned"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1116:2441",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "mierun: maria-chan I mean mariring",
+      "artist": "未記載",
+      "raw": "40:41 mierun: maria-chan I mean mariring"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1157:2472",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "maria showing her love for aikatsu, and when she first saw the reveal of aikatsu academy",
+      "artist": "未記載",
+      "raw": "41:12 maria showing her love for aikatsu, and when she first saw the reveal of aikatsu academy"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1252:3049",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "mariring eigo, which makes mierun surprised~",
+      "artist": "未記載",
+      "raw": "50:49 mariring eigo, which makes mierun surprised~"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1352:3157",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "maria's love for idols on display",
+      "artist": "未記載",
+      "raw": "52:37 maria's love for idols on display"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1392:3233",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "sore mata aikatsu da ne + NOT ODAYAKA",
+      "artist": "未記載",
+      "raw": "53:53 sore mata aikatsu da ne + NOT ODAYAKA"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1436:5105",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "mierun funny language",
+      "artist": "未記載",
+      "raw": "1:25:05 mierun funny language"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "AnWncatNw7E",
+      "channelName": "Maria Marionette 【NIJISANJI EN】",
+      "occurrenceId": "AnWncatNw7E:1800:6767",
+      "sourceId": "Ugz51dlxGcqCVz2Zylt4AaABAg",
+      "sourceHash": "0ed81627410668fc890661a0687651ce3c2990631a47c4ebf2e4eb0edfb90c47",
+      "title": "wrapping up! バイバイ！",
+      "artist": "未記載",
+      "raw": "1:52:47 wrapping up! バイバイ！"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:670:116",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "woah",
+      "artist": "未記載",
+      "raw": "Start! 1:56 - woah :_clawmarkWave:"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:791:174",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "kaelix is so happy to be here",
+      "artist": "未記載",
+      "raw": "2:54 - kaelix is so happy to be here"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:883:217",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "YEAHHH",
+      "artist": "未記載",
+      "raw": "3:37 - YEAHHH"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:897:268",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "miku dayo",
+      "artist": "未記載",
+      "raw": "4:28 - miku dayo"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:914:361",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "they gotta do the parts that aren't in the lyrics too",
+      "artist": "未記載",
+      "raw": "6:01 - they gotta do the parts that aren't in the lyrics too :_clawmarkLOL:"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:990:478",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "being miku is tough",
+      "artist": "未記載",
+      "raw": "7:58 - being miku is tough"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:1017:501",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "yippee",
+      "artist": "未記載",
+      "raw": "8:21 - yippee"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:1067:549",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "they waited until the night before the due date to submit some of the songs",
+      "artist": "未記載",
+      "raw": "9:09 - they waited until the night before the due date to submit some of the songs"
+    },
+    {
+      "reason": "reviewed_mixed_chapter_comment",
+      "videoId": "zyngx4g-sy4",
+      "channelName": "Claude Clawmark 【NIJISANJI EN】",
+      "occurrenceId": "zyngx4g-sy4:1150:603",
+      "sourceId": "UgwS4gRmOU57rxeDg2R4AaABAg",
+      "sourceHash": "49c8912f79f9ef9e037189882ddbd34b2915ec8b68de9de41f314317f7fa1b7e",
+      "title": "'twas the night before karaoke",
+      "artist": "未記載",
+      "raw": "10:03 - 'twas the night before karaoke"
     }
   ]
 }
