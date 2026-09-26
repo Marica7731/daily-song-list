@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-09-26T07:48:51.480Z",
-  "scannedVideoCount": 5950,
-  "scannedOccurrenceCount": 87205,
+  "generatedAt": "2026-09-26T13:11:15.857Z",
+  "scannedVideoCount": 5963,
+  "scannedOccurrenceCount": 87417,
   "scannedDays": [
     {
       "date": "2026-06-26",
@@ -352,7 +352,7 @@
     },
     {
       "date": "2026-09-04",
-      "occurrences": 56,
+      "occurrences": 86,
       "quarantinedOccurrences": 0
     },
     {
@@ -412,13 +412,13 @@
     },
     {
       "date": "2026-09-26",
-      "occurrences": 150,
-      "quarantinedOccurrences": 7
+      "occurrences": 332,
+      "quarantinedOccurrences": 16
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 25,
-    "possible_date_as_artist": 1,
+    "possible_date_as_artist": 2,
     "possible_spoken_section": 1
   },
   "candidates": [
@@ -434,6 +434,23 @@
           "videoId": "ZT7SwaCyz58",
           "channelName": "かえる あんこう",
           "publishedAt": "2026-08-27T15:50:13.758Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "ワンマンライブ12",
+      "artist": "19",
+      "raw": "03:42:46 ワンマンライブ12/19",
+      "sourceHash": "1417a20bd96f281a8175858186e650a70612f18bb745400dc20ca8d0161c253f",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "7OGlRKCk6PI",
+          "channelName": "海月シェル Shell Ch.",
+          "publishedAt": "2026-09-26T10:51:35.306Z"
         }
       ],
       "videoCount": 1,
