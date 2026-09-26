@@ -641,7 +641,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     }
   }
   if (cleaned) {
-    const square = cleaned.match(/^(.+?)\s+\[([^\]]*)\]?$/u);
+    const square = cleaned.match(/^(.+?)\s*\[([^\]]*)\]?$/u);
     const note = square?.[2] || "";
     if (square?.[1]?.trim() &&
         /^(?:歌詞動画|途中迷子|迷子|歌声迷子|ピアノ|ワンコーラス|ルルちゃん合いの手入り|Cメロ|アカペラ|キーマイナス\d+\s*\/\s*テンポマイナス\d+)/iu.test(note) &&
