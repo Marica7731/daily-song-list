@@ -542,3 +542,95 @@ test("quality review exposes activity candidates and no longer truncates mixed s
   const result = buildQualityReview(videos, { byDay: {} }, new Date("2026-09-27T00:00:00Z"));
   assert.equal(result.mixedStructuredSetlistSources.length, 121);
 });
+
+
+test("second full-history pass uses source structure instead of unknown-artist deletion", () => {
+  const otsuka = "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1";
+  assert.equal(unambiguousNonSongReason(song("(Who is Otsuka Ray?)", "未記載", {
+    raw: "0:08:26 (Who is Otsuka Ray?)", sourceHash: otsuka,
+  })), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(song("愛♡スクリ~ム!", "未記載", {
+    raw: "0:24:21 05-愛♡スクリ~ム!", sourceHash: otsuka,
+  })), null);
+
+  const hisagi = "ca0982ddee79fcf66cff3f5f20e2ac15539603a7d8a538d5cd9176d40f6d5d61";
+  assert.equal(unambiguousNonSongReason(song("床で寝落ち", "未記載", {
+    raw: "0:07:28 床で寝落ち", sourceHash: hisagi,
+  })), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(song("さよならメモリー", "7!!", {
+    raw: "2:00:44 ［さよならメモリー／7!!］", sourceHash: hisagi,
+  })), null);
+
+  const minase = "930bc7636c4c769fa8a832e8ea56faed82c9a6c76b31db3f000a499885f18b26";
+  assert.equal(unambiguousNonSongReason(song("( MC, 曲前語り )", "", {
+    raw: "06:59 ( MC, 曲前語り )", sourceHash: minase,
+  })), "reviewed_mixed_chapter_comment");
+  assert.equal(unambiguousNonSongReason(song("蛍", "RADWIMPS", {
+    raw: "01:48 1. 蛍／RADWIMPS", sourceHash: minase,
+  })), null);
+});
+
+test("second full-history pass removes only reviewed MC, greeting and chatter rows", () => {
+  assert.equal(unambiguousNonSongReason(song("MC - リプもらった！！", "", {
+    raw: "0:20:09 MC - リプもらった!!",
+    sourceHash: "92a7e650f684e741d7da5d2dfc6c2344abb06d8829c46237b25604f8716a5da6",
+  })), "reviewed_source_activity_chapter");
+  assert.equal(unambiguousNonSongReason(song("め組のひと", "", {
+    raw: "01.【0:08:32】め組のひと",
+    sourceHash: "92a7e650f684e741d7da5d2dfc6c2344abb06d8829c46237b25604f8716a5da6",
+  })), null);
+  assert.equal(unambiguousNonSongReason(song("今日は酒やな", "", {
+    raw: "2:31:35 今日は酒やな",
+    sourceHash: "8f6931da27cc8151b3f7fb4e0163c07b238cebca5bd9ee21790850b466063ebf",
+  })), "reviewed_source_activity_chapter");
+  assert.equal(unambiguousNonSongReason(song("今日は酒やな", "", {
+    raw: "2:31:35 今日は酒やな",
+    sourceHash: "unreviewed-source",
+  })), null);
+  assert.equal(unambiguousNonSongReason(song("わこチョま", "", {
+    raw: "4:40 わこチョま",
+    sourceHash: "e3d480117f9e4eb504e6ffea2c5998a689bb46c3fe9019446acdf971e0b2ff40",
+  })), "reviewed_source_activity_chapter");
+});
+
+test("reviewed tab and underscore setlists recover title and artist from exact source rows", () => {
+  const tabHash = "a2014dae610c4d64cabf398a0ac40f72c0a8f6475d02e05d068393071cd545a1";
+  let repaired = repairKnownSourceCredit(song("青と夏\tMrs. GREEN APPLE", "", {
+    raw: "1\t青と夏\tMrs. GREEN APPLE\t0:13:17", sourceHash: tabHash,
+  }));
+  assert.equal(repaired.title, "青と夏");
+  assert.equal(repaired.artist, "Mrs. GREEN APPLE");
+  repaired = repairKnownSourceCredit(song("W/X", "Y Tani Yuuki", {
+    raw: "18\tW/X/Y\tTani Yuuki\t2:17:17", sourceHash: tabHash,
+  }));
+  assert.equal(repaired.title, "W/X/Y");
+  assert.equal(repaired.artist, "Tani Yuuki");
+
+  const underscoreHash = "478f401bb24ee9ed1d84eb42f0679395ee7b93c24c8bbff25d86e3120ea79661";
+  repaired = repairKnownSourceCredit(song("深愛　＿水樹奈々", "", {
+    raw: "11:09 深愛　＿水樹奈々", sourceHash: underscoreHash,
+  }));
+  assert.equal(repaired.title, "深愛");
+  assert.equal(repaired.artist, "水樹奈々");
+  repaired = repairKnownSourceCredit(song("(アンコール)Ｓｙｎｃｈｒｏｇａｚｅｒ　＿水樹奈々", "", {
+    raw: "1:41:39 (アンコール)Ｓｙｎｃｈｒｏｇａｚｅｒ　＿水樹奈々", sourceHash: underscoreHash,
+  }));
+  assert.equal(repaired.title, "Synchrogazer");
+  assert.equal(repaired.artist, "水樹奈々");
+});
+
+test("reviewed harp timeline drops comment continuations and repairs attached annotations only", () => {
+  const hash = "6c02c324915aa78e9c30deda5783635ebff969c99c89d8828f8f24486711c5bd";
+  assert.equal(unambiguousNonSongReason(song("好聽故事一直聽)", "", {
+    raw: "05:02:37好聽故事一直聽)", sourceHash: hash,
+  })), "reviewed_source_activity_chapter");
+  let repaired = repairKnownSourceCredit(song("忘れじ言の葉(整段話只有", "", {
+    raw: "07:18:37 忘れじ言の葉(整段話只有", sourceHash: hash,
+  }));
+  assert.equal(repaired.title, "忘れじ言の葉");
+  repaired = repairKnownSourceCredit(song("フクロウ", "學貓頭鷹叫真的架勾錐", {
+    raw: "04:25:29 フクロウ(學貓頭鷹叫真的架勾錐)", sourceHash: hash,
+  }));
+  assert.equal(repaired.title, "フクロウ");
+  assert.equal(repaired.artist, "");
+});
