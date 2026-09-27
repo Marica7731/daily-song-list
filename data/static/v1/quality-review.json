@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-09-27T01:02:36.827Z",
-  "scannedVideoCount": 6144,
-  "scannedOccurrenceCount": 89164,
+  "generatedAt": "2026-09-27T01:32:24.485Z",
+  "scannedVideoCount": 6159,
+  "scannedOccurrenceCount": 89265,
   "scannedDays": [
     {
       "date": "2026-06-26",
@@ -352,8 +352,8 @@
     },
     {
       "date": "2026-09-04",
-      "occurrences": 191,
-      "quarantinedOccurrences": 3
+      "occurrences": 211,
+      "quarantinedOccurrences": 4
     },
     {
       "date": "2026-09-15",
@@ -402,22 +402,42 @@
     },
     {
       "date": "2026-09-24",
-      "occurrences": 1299,
+      "occurrences": 1313,
       "quarantinedOccurrences": 99
     },
     {
       "date": "2026-09-25",
-      "occurrences": 1648,
-      "quarantinedOccurrences": 102
+      "occurrences": 1686,
+      "quarantinedOccurrences": 105
     },
     {
       "date": "2026-09-26",
-      "occurrences": 1703,
-      "quarantinedOccurrences": 64
+      "occurrences": 1732,
+      "quarantinedOccurrences": 65
     }
   ],
-  "byReason": {},
-  "candidates": [],
+  "byReason": {
+    "possible_unparsed_credits": 1
+  },
+  "candidates": [
+    {
+      "reason": "possible_unparsed_credits",
+      "title": "誰か、海を。/ Aimer",
+      "artist": "",
+      "raw": "00:11:51 誰か、海を。/ Aimer / TVアニメ「残響のテロル」ED",
+      "sourceHash": "dff9a4c1cc381e9f8375c450510b597e1b62c26f717f4d9e5a1b98ce57191e45",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "UCQS__RIJ04",
+          "channelName": "わおちゃんねる@りぷらい新人Vtuber",
+          "publishedAt": "2026-09-24T00:55:04.472Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    }
+  ],
   "mixedStructuredSetlistSources": [],
   "descriptionsSharedAcrossTwoToFourChannels": []
 }
