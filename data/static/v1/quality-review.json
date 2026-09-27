@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-09-27T00:51:38.011Z",
-  "scannedVideoCount": 6128,
-  "scannedOccurrenceCount": 88935,
+  "generatedAt": "2026-09-27T01:02:36.827Z",
+  "scannedVideoCount": 6144,
+  "scannedOccurrenceCount": 89164,
   "scannedDays": [
     {
       "date": "2026-06-26",
@@ -352,8 +352,8 @@
     },
     {
       "date": "2026-09-04",
-      "occurrences": 140,
-      "quarantinedOccurrences": 2
+      "occurrences": 191,
+      "quarantinedOccurrences": 3
     },
     {
       "date": "2026-09-15",
@@ -407,54 +407,17 @@
     },
     {
       "date": "2026-09-25",
-      "occurrences": 1564,
-      "quarantinedOccurrences": 91
+      "occurrences": 1648,
+      "quarantinedOccurrences": 102
     },
     {
       "date": "2026-09-26",
-      "occurrences": 1609,
-      "quarantinedOccurrences": 62
+      "occurrences": 1703,
+      "quarantinedOccurrences": 64
     }
   ],
-  "byReason": {
-    "possible_year_suffix_as_artist_metadata": 2
-  },
-  "candidates": [
-    {
-      "reason": "possible_year_suffix_as_artist_metadata",
-      "title": "そばかす",
-      "artist": "JUDY AND MARY (1996)",
-      "raw": "05:07:15   そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
-      "sourceHash": "17e5bc11b9cb32da1079c8b776f046c93f139140d3a57ed6039d163f3452d10f",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "fnDcGmE0duc",
-          "channelName": "芽森ひより",
-          "publishedAt": "2026-07-09T20:49:09.045Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_year_suffix_as_artist_metadata",
-      "title": "そばかす",
-      "artist": "JUDY AND MARY (1996)",
-      "raw": "07:49:09  そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
-      "sourceHash": "013636641490b15d1b0c1a588ff498e0ca36f65e16c0c7456f660d4fcce3624e",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "3E9Lw5JEzIs",
-          "channelName": "芽森ひより",
-          "publishedAt": "2026-07-12T05:12:35.597Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    }
-  ],
+  "byReason": {},
+  "candidates": [],
   "mixedStructuredSetlistSources": [],
   "descriptionsSharedAcrossTwoToFourChannels": []
 }
