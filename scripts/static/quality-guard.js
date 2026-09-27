@@ -874,6 +874,26 @@ function repairKnownSourceCredit(song) {
   if (residual !== song) return residual;
   const hash = String(song?.sourceHash || "");
 
+  // Final full-history residuals. These remain exact source-bound repairs:
+  // the title text itself is not a deletion or normalization signal.
+  if (hash === "82223165da762592a0fd1c396a66af25a1db41b9ee74808d17808097422fc801" &&
+      song?.title === "MAGICAL:LABYRINTH//" &&
+      isUnknownArtistValue(song?.artist) &&
+      /^\s*\d{1,2}:\d{2}(?::\d{2})?\s+MAGICAL:LABYRINTH\/\/\s*$/u.test(String(song?.raw || ""))) {
+    return { ...song, artist: "Skirt" };
+  }
+  if (new Set([
+        "17e5bc11b9cb32da1079c8b776f046c93f139140d3a57ed6039d163f3452d10f",
+        "013636641490b15d1b0c1a588ff498e0ca36f65e16c0c7456f660d4fcce3624e",
+      ]).has(hash) &&
+      song?.title === "そばかす" &&
+      /^JUDY AND MARY\s*[（(]\s*1996\s*[）)]$/u.test(String(song?.artist || "").normalize("NFKC")) &&
+      /そばかす\s*[\/／]\s*JUDY AND MARY\s*[（(]\s*1996\s*[）)]\s*[\/／]\s*TVアニメ/u.test(
+        String(song?.raw || "").normalize("NFKC"),
+      )) {
+    return { ...song, artist: "JUDY AND MARY" };
+  }
+
   // Exact source-level enrichment for three residual rows whose source text
   // preserves the song identity but omitted/misparsed the artist. These are
   // intentionally sourceHash-scoped rather than global title aliases.
