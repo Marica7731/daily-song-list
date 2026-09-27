@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-09-27T01:32:24.485Z",
-  "scannedVideoCount": 6159,
-  "scannedOccurrenceCount": 89265,
+  "generatedAt": "2026-09-27T08:18:06.154Z",
+  "scannedVideoCount": 6171,
+  "scannedOccurrenceCount": 89427,
   "scannedDays": [
     {
       "date": "2026-06-26",
@@ -352,8 +352,8 @@
     },
     {
       "date": "2026-09-04",
-      "occurrences": 211,
-      "quarantinedOccurrences": 4
+      "occurrences": 223,
+      "quarantinedOccurrences": 6
     },
     {
       "date": "2026-09-15",
@@ -412,14 +412,37 @@
     },
     {
       "date": "2026-09-26",
-      "occurrences": 1732,
-      "quarantinedOccurrences": 65
+      "occurrences": 1809,
+      "quarantinedOccurrences": 69
+    },
+    {
+      "date": "2026-09-27",
+      "occurrences": 73,
+      "quarantinedOccurrences": 4
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 1
+    "possible_unparsed_credits": 1,
+    "possible_activity_chapter": 1
   },
   "candidates": [
+    {
+      "reason": "possible_activity_chapter",
+      "title": "コラボの振り返りなど",
+      "artist": "",
+      "raw": "0:17:49 コラボの振り返りなど",
+      "sourceHash": "d81fa51c23005f45c9ebfcaec5a3563495c7a61e8c96cdbe7e28f6bd058319c5",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "QnIWxjR6U2M",
+          "channelName": "NEPHLA",
+          "publishedAt": "2026-09-27T07:02:34.908Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
     {
       "reason": "possible_unparsed_credits",
       "title": "誰か、海を。/ Aimer",
@@ -439,5 +462,17 @@
     }
   ],
   "mixedStructuredSetlistSources": [],
-  "descriptionsSharedAcrossTwoToFourChannels": []
+  "descriptionsSharedAcrossTwoToFourChannels": [
+    {
+      "sourceHash": "350d2df9c37e937e3d5aa1ee342690fd0127fef3678b9c080a65fb6b895f8076",
+      "videoCount": 3,
+      "channelCount": 3,
+      "raw": "【#秋を彩るバ美音祭】お気に入り星街すいせい4曲メドレー！！【若月とわ】2026/9/27(日) 17:20～#vtuber",
+      "sample": [
+        "v2QhEG57QPo",
+        "wmh7VuPLCpA",
+        "K874uV4tcvc"
+      ]
+    }
+  ]
 }
