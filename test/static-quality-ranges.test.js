@@ -1151,11 +1151,11 @@ test("final full-history review-only credits are repaired only for their exact s
       raw: "46:36　MAGICAL:LABYRINTH//",
       sourceHash: "82223165da762592a0fd1c396a66af25a1db41b9ee74808d17808097422fc801",
     }),
-    song("そばかす", "JUDY AND MARY (1996)", {
+    song("そばかす", "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1", {
       raw: "05:07:15   そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
       sourceHash: "17e5bc11b9cb32da1079c8b776f046c93f139140d3a57ed6039d163f3452d10f",
     }),
-    song("そばかす", "JUDY AND MARY (1996)", {
+    song("そばかす", "JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1", {
       raw: "07:49:09  そばかす / JUDY AND MARY (1996) / TVアニメ 「るろうに剣心 - 明治剣客浪漫譚 - 」OP1",
       sourceHash: "013636641490b15d1b0c1a588ff498e0ca36f65e16c0c7456f660d4fcce3624e",
     }),
