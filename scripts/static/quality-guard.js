@@ -642,14 +642,16 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
 
-  if (cleaned === artist) {
-    const yearSuffix = artist.match(/^(.+?)\s*[（(]\s*(?:19|20)\d{2}\s*[）)]$/u);
+  {
+    const yearSuffix = cleaned.match(/^(.+?)\s*[（(]\s*(?:19|20)\d{2}\s*[）)]$/u);
     if (yearSuffix?.[1]?.trim()) {
-      // Source comments often align columns with multiple spaces. Collapse
-      // whitespace only for proving the slash-delimited credit identity.
+      // The first normalization pass may already have removed trailing work
+      // metadata (for example "/ TVアニメ ..."). Prove the remaining
+      // "Artist (YYYY)" credit directly against the original slash-delimited
+      // source row, then allow the second normalization step in the same pass.
       const compactRaw = raw.replace(/\s+/gu, " ");
-      const compactArtist = artist.replace(/\s+/gu, " ");
-      const creditIndex = compactRaw.indexOf(compactArtist);
+      const compactCredit = cleaned.replace(/\s+/gu, " ");
+      const creditIndex = compactRaw.indexOf(compactCredit);
       const prefix = creditIndex >= 0 ? compactRaw.slice(Math.max(0, creditIndex - 4), creditIndex) : "";
       if (creditIndex >= 0 && /[\/／]\s*$/u.test(prefix)) cleaned = yearSuffix[1].trim();
     }
