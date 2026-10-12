@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T23:33:19Z
-[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2980
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T23:40:29Z
+[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3040
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -9,4 +9,4 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T23:33:19Z
     at main (/home/runner/work/daily-song-list/daily-song-list/scripts/static/collect-and-build.js:56:31)
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
 STATIC_REPAIR_PASS_FAILED pass=1
-STATIC_REPAIR_RUN_STATUS status=failed at=2026-10-12T23:33:20Z
+STATIC_REPAIR_RUN_STATUS status=failed at=2026-10-12T23:40:30Z
