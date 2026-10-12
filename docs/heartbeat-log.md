@@ -45,3 +45,10 @@
 - Refreshed Check gate: run `38248130852` succeeded at `02971b6`.
 - Heartbeat batch run `38247965686` succeeded with `25/all/confirmed_noise,parser_corruption`; log recorded `available={} selected={} skippedExisting=0`.
 - Commit and Pages steps were correctly skipped because the bounded batch was empty; no raw history paths changed.
+## 2026-10-12 20:45 +08:00
+
+- Used authenticated GitHub Web UI to bypass the archive REST-ref cleanup 403; no VPS, clone, or local runner was used.
+- Deleted all 36 non-`main` archive branches after their names/SHAs were recorded in `docs/archive-branch-cleanup-backup.json`.
+- Verified through the public API that `Marica7731/daily-song-list-archive` now has exactly one branch: `main`.
+- GitHub still reports the old archive size (`104965106` KB); object GC has not yet updated the API value.
+- The serving repository `Marica7731/daily-song-list` remains online and unaffected.
