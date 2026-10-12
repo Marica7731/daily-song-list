@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T15:13:07Z
-[static-repair] processed=27623 published=16398 unpublished=11225 repairable=6947 abandoned=4278 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3020
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T15:20:55Z
+[static-repair] processed=27627 published=16402 unpublished=11225 repairable=6947 abandoned=4278 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3010
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,22 +12,20 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T15:13:07Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=mGEb13ICEEA result=no_usable_song_source songs=0
-[static-update] video=yENjf6ZrCe4 result=no_timestamp_candidates songs=0
-[static-update] video=fGQwUzAU3LU result=selected songs=7
-[static-update] video=akFxuv_Ysig result=selected songs=9
-[static-update] video=CgjFCucExt4 result=no_timestamp_candidates songs=0
-[static-update] video=KGhc_MD1TGA result=selected songs=12
-[static-update] video=LyyVaQGjk9c result=no_timestamp_candidates songs=0
-[static-update] video=szIgk0B8Uwc result=no_timestamp_candidates songs=0
-[static-update] video=p68Z5cd9SSw result=no_timestamp_candidates songs=0
-[static-update] video=T1ZKIU-nR5g result=selected songs=7
-[static-update] snapshot=20261012T141417Z processed=17/17 pending=2890 videos=14198 songs=187944
+[static-update] video=z6mSSfb0CnM result=no_usable_song_source songs=0
+[static-update] video=7VdUogr8lSs result=no_usable_song_source songs=0
+[static-update] video=PRV5ROYR5wo result=selected songs=16
+[static-update] video=FMdlvAvWOgQ result=selected songs=8
+[static-update] video=kdQuKQycBTE result=no_timestamp_candidates songs=0
+[static-update] video=VpXBx8P7F9U result=no_timestamp_candidates songs=0
+[static-update] video=ggq_6usW85M result=no_timestamp_candidates songs=0
+[static-update] video=5BsWUfnXPh0 result=selected songs=12
+[static-update] snapshot=20261012T141417Z processed=15/15 pending=2882 videos=14201 songs=187980
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14198 songs=187944 processed=27627 pending=2890
-[static-repair] processed=27627 published=16402 unpublished=11225 repairable=6947 abandoned=4278 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2950
+STATIC_DATA_OK videos=14201 songs=187980 processed=27630 pending=2882
+[static-repair] processed=27630 published=16405 unpublished=11225 repairable=6947 abandoned=4278 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2942
 STATIC_REPAIR_PASS_END pass=1 dropped=6947
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T15:16:38Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T15:24:04Z
