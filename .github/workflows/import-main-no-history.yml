@@ -35,7 +35,7 @@ jobs:
           rm -rf /tmp/source
           git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git /tmp/source
           cd /tmp/source
-          git sparse-checkout set .heartbeat .github artifacts assets config data/static data/external deploy docs scripts server test tests package.json .gitignore AGENTS.md
+          git sparse-checkout set .heartbeat .github artifacts assets config data/static data/external deploy docs scripts server test tests
           test -f index.html
           test -f data/static/v1/meta.json
 
