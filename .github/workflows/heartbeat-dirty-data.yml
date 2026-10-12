@@ -1,3 +1,4 @@
+
 name: Heartbeat dirty data batch
 
 on:
@@ -102,7 +103,7 @@ jobs:
             conclusion="$(
               gh run list --repo "$GITHUB_REPOSITORY" \
                 --workflow check-code.yml \
-                --commit "$TARGET_SHA" \
+                --branch main \
                 --status completed \
                 --json conclusion \
                 --jq '[.[].conclusion] | if index("success") then "success" elif index("failure") or index("cancelled") then "failed" else "pending" end' \
