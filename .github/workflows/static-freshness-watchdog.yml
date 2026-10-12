@@ -34,11 +34,22 @@ jobs:
           stale_run=37346473983
           stale_sha=5215fe8b80f55ea63a8344572a18b6e797e21ecc
           ghq() { timeout 20 gh api "$@"; }
-          status="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.status')"
-          head_sha="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.head_sha')"
-          name="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.name')"
-          created_at="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.created_at')"
-          age_seconds=$(( $(date -u +%s) - $(date -u -d "$created_at" +%s) ))
+          status=""
+          head_sha=""
+          name=""
+          created_at=""
+          age_seconds=-1
+          if run_json="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run")"; then
+            status="$(printf '%s' "$run_json" | jq -er '.status // empty')"
+            head_sha="$(printf '%s' "$run_json" | jq -er '.head_sha // empty')"
+            name="$(printf '%s' "$run_json" | jq -er '.name // empty')"
+            created_at="$(printf '%s' "$run_json" | jq -er '.created_at // empty')"
+            if [[ -n "$created_at" ]]; then
+              age_seconds=$(( $(date -u +%s) - $(date -u -d "$created_at" +%s) ))
+            fi
+          else
+            echo "UNSTICK_RUN_MISSING run=$stale_run"
+          fi
           cancelled=false
           if [[ "$status" == "in_progress" && "$head_sha" == "$stale_sha" && "$name" == "Repair dropped static videos" && "$age_seconds" -ge 1800 ]]; then
             timeout 20 gh api -X POST "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run/cancel" >/dev/null
