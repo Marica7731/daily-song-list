@@ -70,3 +70,10 @@
 - Entity detail `songs/f2cce8376bdbca6d.json` returned HTTP 200 with 700 occurrences.
 - Heartbeat run `38271435031` succeeded at `d2528cd` with `25/all/confirmed_noise,parser_corruption`; selected 0, so publish and Pages were correctly skipped.
 - Clean archive remained healthy: no active Actions runs; its latest repair run stayed cancelled.
+
+## 2026-10-13 00:06 +08:00
+
+- Live meta: generatedAt `2026-10-12T15:20:55.856Z`, videos 14,201, song occurrences 187,980; all songs 52,853 over 1,058 pages.
+- Search manifest: 16 shards; all-range first page returned 50 items; entity detail `f2cce8376bdbca6d` returned 700 occurrences.
+- Heartbeat run `38274777581` succeeded at `e56d265` with `25/all/confirmed_noise,parser_corruption`; selected 0, publish/Pages correctly skipped.
+- Clean archive remained frozen with zero active Actions runs.
