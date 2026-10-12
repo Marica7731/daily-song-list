@@ -1,3 +1,4 @@
+
 ## 2026-10-12 19:18 +08:00
 
 - Verified live meta: generatedAt `2026-10-12T10:53:09.690Z`, sourceSnapshot `20261012T102141Z`, videos 14,111, song occurrences 187,003.
@@ -52,3 +53,12 @@
 - Verified through the public API that `Marica7731/daily-song-list-archive` now has exactly one branch: `main`.
 - GitHub still reports the old archive size (`104965106` KB); object GC has not yet updated the API value.
 - The serving repository `Marica7731/daily-song-list` remains online and unaffected.
+
+## 2026-10-12 23:25 +08:00
+
+- Live meta: generatedAt `2026-10-12T15:06:08.249Z`, sourceSnapshot `20261012T141417Z`, videos 14,194, song occurrences 187,909.
+- Verified all-range song pagination `page-0001` (50 items) and search shard `0.json` (4,805 items); song detail `f2cce8376bdbca6d` returned 698 occurrences and HTTP 200.
+- Heartbeat run `38258945891` succeeded with `25/all/confirmed_noise,parser_corruption`; selected 0, publish/Pages correctly skipped.
+- Fixed the heartbeat gate in commit `061f809e0cbb63768c4c4e983150500389e1863c`: data-only pushes now use the latest green Check code on `main` instead of waiting for a SHA that repair pushes replaced.
+- Archive recovery: old over-quota history is preserved at `daily-song-list-archive-overquota`; clean `daily-song-list-archive` was generated from the current main tree without full old history.
+- Stopped archive self-growth: cancelled the in-progress repair run and set archive Actions policy to `Disable actions` after observing push-triggered data workflows.
