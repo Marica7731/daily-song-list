@@ -1,3 +1,4 @@
+
 name: Import main without history
 
 on:
@@ -34,11 +35,21 @@ jobs:
           rm -rf /tmp/source
           git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git /tmp/source
           cd /tmp/source
-          git sparse-checkout set .heartbeat artifacts assets config data/static data/external deploy docs scripts server test tests
+          git sparse-checkout set .heartbeat .github artifacts assets config data/static data/external deploy docs scripts server test tests package.json .gitignore AGENTS.md
           test -f index.html
           test -f data/static/v1/meta.json
-          echo "SOURCE_FILES=$(find . -type f -not -path ./.git/\* | wc -l)"
-          echo "SOURCE_BYTES=$(du -sb --exclude=.git . | cut -f1)"
+
+      - name: Keep only website maintenance workflows
+        run: |
+          cd /tmp/source
+          keep="check-code.yml static-update.yml static-repair-dropped.yml static-freshness-watchdog.yml static-recover-history.yml heartbeat-dirty-data.yml deploy-pages.yml"
+          for name in $keep; do
+            test -f ".github/workflows/$name"
+          done
+          find .github/workflows -maxdepth 1 -type f ! -name 'check-code.yml' ! -name 'static-update.yml' ! -name 'static-repair-dropped.yml' ! -name 'static-freshness-watchdog.yml' ! -name 'static-recover-history.yml' ! -name 'heartbeat-dirty-data.yml' ! -name 'deploy-pages.yml' -delete
+          test -f .github/dirty-heartbeat.trigger
+          find .github -mindepth 1 -maxdepth 1 ! -name workflows ! -name dirty-heartbeat.trigger -exec rm -rf -- {} +
+          echo "WORKFLOWS=$(find .github/workflows -maxdepth 1 -type f | wc -l)"
 
       - name: Merge source into destination
         run: |
@@ -46,7 +57,10 @@ jobs:
           rm -f CNAME
           test -f index.html
           test -f data/static/v1/meta.json
-          test -f .github/workflows/import-static.yml
+          test -f .github/workflows/check-code.yml
+          test -f .github/workflows/static-update.yml
+          test -f .github/workflows/static-freshness-watchdog.yml
+          test -f .github/dirty-heartbeat.trigger
           echo "DEST_FILES=$(find . -type f -not -path ./.git/\* | wc -l)"
           echo "DEST_BYTES=$(du -sb --exclude=.git . | cut -f1)"
 
@@ -58,6 +72,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Remove Pages CNAME from clean main"
+            git commit -m "Import website maintenance workflows"
             git push
           fi
