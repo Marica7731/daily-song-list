@@ -1,0 +1,82 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-pages.yml"
+      - "index.html"
+      - ".nojekyll"
+      - "assets/**"
+      - "favicon.ico"
+      - "data/static/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-song-list-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment_retry.outputs.page_url || steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            .github/workflows/deploy-pages.yml
+            index.html
+            .nojekyll
+            favicon.ico
+            assets
+            data/static
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare static site
+        run: |
+          set -Eeuo pipefail
+          mkdir -p _site/data/static
+          cp -f index.html _site/index.html
+          cp -f .nojekyll _site/.nojekyll
+          cp -f favicon.ico _site/favicon.ico
+          cp -a data/static/. _site/data/static/
+          cp -a assets _site/assets
+          test -s _site/data/static/v1/meta.json
+          test -s _site/data/static/v1/rankings/7d/songs/manifest.json
+          test -s _site/data/static/v1/rankings/30d/songs/manifest.json
+          test -s _site/data/static/v1/rankings/all/songs/manifest.json
+          find _site -type f -printf '%s %p\n' | sort -nr | awk 'NR <= 20'
+          du -sh _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Wait for Pages artifact metadata
+        if: ${{ steps.deployment.outcome == 'failure' }}
+        run: sleep 10
+
+      - name: Retry GitHub Pages deployment
+        id: deployment_retry
+        if: ${{ steps.deployment.outcome == 'failure' }}
+        uses: actions/deploy-pages@v5
+# Refresh the release gate and Pages publish for main.
