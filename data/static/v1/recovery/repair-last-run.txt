@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T09:46:56Z
-[static-repair] processed=27509 published=16298 unpublished=11211 repairable=6947 abandoned=4264 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3158
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T09:53:34Z
+[static-repair] processed=27512 published=16300 unpublished=11212 repairable=6947 abandoned=4265 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3155
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -13,16 +13,14 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T09:46:56Z
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
 [static-update] video=0yDQmQkzlpM result=no_usable_song_source songs=0
-[static-update] video=naA8_462n2I result=selected songs=15
-[static-update] video=mWXXbxPik1s result=selected songs=6
-[static-update] video=cqLQkdhtbzc result=no_usable_song_source songs=0
-[static-update] video=2881JDkuJww result=no_usable_song_source songs=0
-[static-update] snapshot=20261012T091953Z processed=12/12 pending=3035 videos=14098 songs=186899
+[static-update] video=lwuVQ6mLYYo result=no_timestamp_candidates songs=0
+[static-update] video=molnDqBYx1Y result=no_usable_song_source songs=0
+[static-update] snapshot=20261012T091953Z processed=10/10 pending=3033 videos=14098 songs=186899
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14098 songs=186899 processed=27512 pending=3035
-[static-repair] processed=27512 published=16300 unpublished=11212 repairable=6947 abandoned=4265 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3095
+STATIC_DATA_OK videos=14098 songs=186899 processed=27512 pending=3033
+[static-repair] processed=27512 published=16300 unpublished=11212 repairable=6947 abandoned=4265 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3093
 STATIC_REPAIR_PASS_END pass=1 dropped=6947
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T09:49:38Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T09:55:47Z
