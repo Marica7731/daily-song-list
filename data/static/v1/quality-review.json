@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-12T13:31:00.691Z",
-  "scannedVideoCount": 14159,
-  "scannedOccurrenceCount": 187478,
+  "generatedAt": "2026-10-12T13:37:44.108Z",
+  "scannedVideoCount": 14161,
+  "scannedOccurrenceCount": 187498,
   "scannedDays": [
     {
       "date": "2022-10-07",
@@ -572,8 +572,8 @@
     },
     {
       "date": "2026-10-04",
-      "occurrences": 2528,
-      "quarantinedOccurrences": 5
+      "occurrences": 2548,
+      "quarantinedOccurrences": 6
     },
     {
       "date": "2026-10-05",
@@ -620,7 +620,7 @@
     "possible_unparsed_credits": 207,
     "possible_date_as_artist": 276,
     "possible_release_metadata_as_artist": 82,
-    "possible_activity_chapter": 39,
+    "possible_activity_chapter": 40,
     "possible_spoken_section": 9,
     "possible_promotion_as_song": 1
   },
@@ -1435,6 +1435,23 @@
           "videoId": "LY_cTMlEJT8",
           "channelName": "suimin.",
           "publishedAt": "2026-10-03T01:33:36.026Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "リレーテーマについて",
+      "artist": "",
+      "raw": "0:15:54　💬リレーテーマについて",
+      "sourceHash": "62a845464c7db614e6bf42324f1f35a768f102fec321ba02c7fc82c18210488d",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "AG8fDu1Gaz4",
+          "channelName": "深影",
+          "publishedAt": "2026-10-04T13:31:07.155Z"
         }
       ],
       "videoCount": 1,
@@ -4907,23 +4924,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "ツバサ／アンダーグラフ／2004/09",
-      "artist": "22",
-      "raw": "0:28:54　ツバサ／アンダーグラフ／2004/09/22",
-      "sourceHash": "855e07dc70a76e86da86e2887c5c2117a528df922359ce468448cdd95375f889",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "BmZKDfe5-5M",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-23T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -5727,6 +5727,47 @@
           "title": "うたかた花火 Piano Ver",
           "artist": "supercell",
           "raw": "00:24:29 00:24:33 3. うたかた花火 Piano Ver./supercell"
+        }
+      ]
+    },
+    {
+      "videoId": "AG8fDu1Gaz4",
+      "channelName": "深影",
+      "publishedAt": "2026-10-04T13:31:07.155Z",
+      "sourceHash": "62a845464c7db614e6bf42324f1f35a768f102fec321ba02c7fc82c18210488d",
+      "total": 8,
+      "explicitNumberedSongs": 5,
+      "knownArtistRows": 4,
+      "unknownNonNumberedRows": 3,
+      "unknownExamples": [
+        {
+          "title": "リレーテーマについて",
+          "raw": "0:15:54 💬リレーテーマについて"
+        },
+        {
+          "title": "ハムちゃん乱舞",
+          "raw": "0:17:33 ハムちゃん乱舞"
+        },
+        {
+          "title": "深影さんからの「大丈夫」",
+          "raw": "0:25:14 💬深影さんからの「大丈夫」"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "愛が灯る",
+          "artist": "ロクデナシ",
+          "raw": "0:02:53 01.愛が灯る / ロクデナシ"
+        },
+        {
+          "title": "LilaS",
+          "artist": "",
+          "raw": "0:06:20 02.LilaS"
+        },
+        {
+          "title": "晴る",
+          "artist": "ヨルシカ",
+          "raw": "0:10:43 03.晴る / ヨルシカ"
         }
       ]
     },
