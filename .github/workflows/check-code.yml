@@ -1,0 +1,340 @@
+name: Check code
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/check-code.yml"
+      - ".github/workflows/discover-vtuber-streams.yml"
+      - ".github/workflows/static-update.yml"
+      - ".github/workflows/heartbeat-dirty-data.yml"
+      - ".github/workflows/static-recover-history.yml"
+      - ".github/workflows/static-repair-dropped.yml"
+      - ".github/dirty-heartbeat.trigger"
+      - ".github/workflows/static-freshness-watchdog.yml"
+      - ".github/workflows/deploy-pages.yml"
+      - "scripts/static/**"
+      - "scripts/update-songlist.js"
+      - "assets/static-*"
+      - "assets/frontend-utils.js"
+      - "assets/source-filter.js"
+      - "assets/ranking-utils.js"
+      - "config/**"
+      - "test/static-github-pipeline.test.mjs"
+      - "test/yorushika-catalog.test.mjs"
+      - "test/heartbeat-dirty-batch.test.mjs"
+      - "test/static-quality-ranges.test.js"
+      - "test/fixtures/static-source.json"
+      - "index.html"
+      - "package.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/check-code.yml"
+      - ".github/workflows/discover-vtuber-streams.yml"
+      - ".github/workflows/static-update.yml"
+      - ".github/workflows/heartbeat-dirty-data.yml"
+      - ".github/workflows/static-recover-history.yml"
+      - ".github/workflows/static-repair-dropped.yml"
+      - ".github/dirty-heartbeat.trigger"
+      - ".github/workflows/static-freshness-watchdog.yml"
+      - ".github/workflows/deploy-pages.yml"
+      - "scripts/static/**"
+      - "scripts/update-songlist.js"
+      - "assets/static-*"
+      - "assets/frontend-utils.js"
+      - "assets/source-filter.js"
+      - "assets/ranking-utils.js"
+      - "config/**"
+      - "test/static-github-pipeline.test.mjs"
+      - "test/yorushika-catalog.test.mjs"
+      - "test/heartbeat-dirty-batch.test.mjs"
+      - "test/fixtures/static-source.json"
+      - "index.html"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-static-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # The UI proof includes package/font setup plus three viewport passes.
+    timeout-minutes: 15
+    steps:
+      - name: Checkout GitHub-only delivery surface
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/check-code.yml
+            /.github/workflows/discover-vtuber-streams.yml
+            /.github/workflows/static-update.yml
+            /.github/workflows/heartbeat-dirty-data.yml
+            /.github/dirty-heartbeat.trigger
+            /.github/workflows/static-recover-history.yml
+            /.github/workflows/static-repair-dropped.yml
+            /.github/workflows/static-freshness-watchdog.yml
+            /.github/workflows/deploy-pages.yml
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /test/static-github-pipeline.test.mjs
+            /test/yorushika-catalog.test.mjs
+            /test/heartbeat-dirty-batch.test.mjs
+            /test/static-quality-ranges.test.js
+            /test/fixtures/static-source.json
+            /index.html
+            /data/static/v1/recovery/manual-pending.json
+            /data/static/v1/imports/inspection-priority-ids.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Static pipeline unit tests
+        run: |
+          set -Eeuo pipefail
+          node --check scripts/static/collect-and-build.js
+          node --check scripts/static/yorushika-catalog.js
+          node --check scripts/static/quality-guard.js
+          node --check scripts/static/quality-review.js
+          node --check scripts/static/recover-history.js
+          node --check scripts/static/repair-dropped.js
+          node --check scripts/static/validate-static.js
+          node --check scripts/static/heartbeat-dirty-batch.js
+          node --check scripts/static/rebuild-only.js
+          node --check scripts/static/export-channel-setlists.js
+          node --check assets/static-search-utils.js
+          node --check assets/static-app.js
+          node --test test/static-github-pipeline.test.mjs test/yorushika-catalog.test.mjs test/static-quality-ranges.test.js test/heartbeat-dirty-batch.test.mjs
+
+      - name: Fixture end-to-end generation
+        env:
+          STATIC_DATA_ROOT: ${{ runner.temp }}/daily-song-list-fixture/data/static/v1
+          STATIC_SOURCE_FIXTURE: ${{ github.workspace }}/test/fixtures/static-source.json
+          STATIC_NOW: "2026-09-01T00:00:00Z"
+          STATIC_VIDEO_LIMIT: "1"
+        run: |
+          set -Eeuo pipefail
+          npm run static:update
+          npm run static:validate
+          test "$(find "$STATIC_DATA_ROOT" -type f -size +4000000c -print -quit)" = ""
+          echo "STATIC_FIXTURE_BYTES bytes=$(du -sb "$STATIC_DATA_ROOT" | awk '{print $1}')"
+
+      - name: Set up Chrome for UI proof
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+          install-dependencies: true
+
+      - name: Capture light/dark UI proof
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROMEDRIVER_BIN: ${{ steps.setup-chrome.outputs.chromedriver-path }}
+          STATIC_DATA_ROOT: ${{ runner.temp }}/daily-song-list-fixture/data/static/v1
+        run: |
+          set -Eeuo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          fc-cache -f
+          python3 -m pip install --disable-pip-version-check --no-cache-dir "selenium==4.35.0"
+          rm -rf data/static/v1
+          mkdir -p data/static
+          cp -a "$STATIC_DATA_ROOT" data/static/v1
+          python3 -m http.server 8080 --bind 127.0.0.1 >"$RUNNER_TEMP/static-ui-http.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.chrome.service import Service
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          out = Path("artifacts/static-ui-proof")
+          out.mkdir(parents=True, exist_ok=True)
+
+          options = Options()
+          options.binary_location = os.environ["CHROME_BIN"]
+          options.add_argument("--headless=new")
+          options.add_argument("--no-sandbox")
+          options.add_argument("--disable-dev-shm-usage")
+          options.add_argument("--window-size=1440,900")
+          driver = webdriver.Chrome(service=Service(os.environ["CHROMEDRIVER_BIN"]), options=options)
+          wait = WebDriverWait(driver, 20)
+
+          def wait_rows():
+              wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, ".rank-row")) > 0)
+
+          def rect(selector):
+              return driver.execute_script(
+                  "const r=document.querySelector(arguments[0]).getBoundingClientRect();"
+                  "return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};",
+                  selector,
+              )
+
+          def css_var(name):
+              return driver.execute_script(
+                  "return getComputedStyle(document.documentElement).getPropertyValue(arguments[0]).trim();",
+                  name,
+              )
+
+          def overflow():
+              return driver.execute_script(
+                  "return {scrollWidth:document.documentElement.scrollWidth,"
+                  "clientWidth:document.documentElement.clientWidth};"
+              )
+
+          def assert_no_overflow(label):
+              shape = overflow()
+              if shape["scrollWidth"] > shape["clientWidth"] + 1:
+                  raise AssertionError(f"{label}: horizontal overflow {shape}")
+
+          def assert_same_rect(before, after, label, keys=("x", "y", "width", "height"), tolerance=1.5):
+              drift = {key: round(after[key] - before[key], 3) for key in keys if abs(after[key] - before[key]) > tolerance}
+              if drift:
+                  raise AssertionError(f"{label}: geometry drift {drift}; before={before}; after={after}")
+
+          metrics = {}
+          try:
+              driver.get("http://127.0.0.1:8080/")
+              wait_rows()
+              assert driver.execute_script("return document.documentElement.dataset.theme || 'light'") == "light"
+              assert_no_overflow("desktop light")
+              light_bg = css_var("--bg")
+              light = {
+                  "search": rect(".search-box"),
+                  "filter": rect(".filter-popover"),
+                  "theme": rect(".theme-toggle"),
+                  "rankPanel": rect(".rank-panel"),
+                  "row": rect(".rank-row"),
+              }
+              metrics["desktopLight"] = light
+              metrics["lightBg"] = light_bg
+              driver.save_screenshot(str(out / "desktop-light.png"))
+
+              details = driver.find_element(By.CSS_SELECTOR, ".filter-popover")
+              driver.execute_script("arguments[0].open=true", details)
+              summary = rect(".filter-popover > summary")
+              open_filter = rect(".filter-popover")
+              panel = rect(".filter-panel")
+              if open_filter["width"] > summary["width"] + 2:
+                  raise AssertionError(f"filter details widened: summary={summary}, details={open_filter}")
+              if not 220 <= panel["width"] <= 261:
+                  raise AssertionError(f"unexpected filter panel width: {panel}")
+              before_filter_search = rect(".search-box")
+              before_filter_button = rect(".filter-popover")
+              keyword = driver.find_element(By.ID, "keyword")
+              keyword.send_keys("歌枠")
+              driver.execute_script("arguments[0].dispatchEvent(new Event('input',{bubbles:true}))", keyword)
+              after_filter_search = rect(".search-box")
+              after_filter_button = rect(".filter-popover")
+              assert_same_rect(before_filter_search, after_filter_search, "search after source-tag filtering")
+              assert_same_rect(before_filter_button, after_filter_button, "filter button after source-tag filtering")
+              assert_no_overflow("desktop filter open")
+              metrics["filterOpen"] = {"summary": summary, "details": open_filter, "panel": panel}
+              driver.save_screenshot(str(out / "desktop-filter-open.png"))
+
+              driver.execute_script("arguments[0].open=false", details)
+              driver.find_element(By.ID, "theme-toggle").click()
+              wait.until(lambda d: d.execute_script("return document.documentElement.dataset.theme") == "dark")
+              assert_no_overflow("desktop dark")
+              dark_bg = css_var("--bg")
+              if dark_bg == light_bg:
+                  raise AssertionError("dark theme did not change --bg")
+              dark = {
+                  "search": rect(".search-box"),
+                  "filter": rect(".filter-popover"),
+                  "theme": rect(".theme-toggle"),
+                  "rankPanel": rect(".rank-panel"),
+                  "row": rect(".rank-row"),
+              }
+              for key in light:
+                  assert_same_rect(light[key], dark[key], f"theme toggle {key}")
+              metrics["desktopDark"] = dark
+              metrics["darkBg"] = dark_bg
+              driver.save_screenshot(str(out / "desktop-dark.png"))
+
+              driver.refresh()
+              wait_rows()
+              if driver.execute_script("return document.documentElement.dataset.theme") != "dark":
+                  raise AssertionError("dark theme did not persist across reload")
+              driver.find_element(By.ID, "theme-toggle").click()
+              wait.until(lambda d: d.execute_script("return document.documentElement.dataset.theme || 'light'") == "light")
+              if css_var("--bg") != light_bg:
+                  raise AssertionError("light theme did not restore the default palette")
+
+              driver.set_window_size(390, 844)
+              driver.get("http://127.0.0.1:8080/")
+              wait_rows()
+              if driver.execute_script("return document.documentElement.dataset.theme || 'light'") != "light":
+                  raise AssertionError("explicit light choice did not persist")
+              driver.find_element(By.ID, "theme-toggle").click()
+              wait.until(lambda d: d.execute_script("return document.documentElement.dataset.theme") == "dark")
+              assert_no_overflow("mobile dark")
+              theme_button = rect(".theme-toggle")
+              viewport_width = driver.execute_script("return document.documentElement.clientWidth")
+              if theme_button["right"] > viewport_width + 1 or theme_button["x"] < -1:
+                  raise AssertionError(f"mobile theme button clipped: {theme_button}, viewport={viewport_width}")
+              metrics["mobileDark"] = {
+                  "theme": theme_button,
+                  "search": rect(".search-box"),
+                  "filter": rect(".filter-popover"),
+                  "rankPanel": rect(".rank-panel"),
+              }
+              driver.save_screenshot(str(out / "mobile-dark.png"))
+          finally:
+              driver.quit()
+
+          (out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(metrics, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload static UI proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-ui-proof
+          path: artifacts/static-ui-proof/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Workflow retirement gates
+        run: |
+          set -Eeuo pipefail
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-update.yml
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-recover-history.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-update.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-recover-history.yml
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh ' .github/workflows/static-repair-dropped.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-repair-dropped.yml
+          grep -Fq 'data/static/v1' .github/workflows/static-repair-dropped.yml
+          grep -Fq 'repair-last-run.txt' .github/workflows/static-repair-dropped.yml
+          grep -Fq 'data/static/v1' .github/workflows/static-update.yml
+          grep -Fq 'data/static' .github/workflows/deploy-pages.yml
+          ! grep -Eiq 'self-hosted|macOS|PostgreSQL|WDC|ssh |update-core' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'runs-on: ubuntu-latest' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'cron: "*/15 * * * *"' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'STALE_MINUTES: "45"' .github/workflows/static-freshness-watchdog.yml
+          ! grep -Fq -- '--no-cache' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'Cache-Control: no-cache' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'fromdateiso8601' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq -- '--repo "$GITHUB_REPOSITORY"' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main' .github/workflows/static-freshness-watchdog.yml
+          grep -Fq 'gh workflow run --repo "$GITHUB_REPOSITORY" deploy-pages.yml --ref main' .github/workflows/static-freshness-watchdog.yml
+          # The pending-ledger regression reads data/static/v1/recovery/manual-pending.json from the sparse checkout.
