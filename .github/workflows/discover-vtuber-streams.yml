@@ -33,7 +33,7 @@ on:
         description: Comma-separated title keywords
         required: true
         type: string
-        default: "姝,寮瑰�,寮惧�,寮俱瑾,寮硅�,�ヨ�,�ユ��,live,karaoke,��┿��"
+        default: "歌,弹唱,弾唱,弾き語,弹语,日语,日本語,live,karaoke,カラオケ"
       max_channel_pages:
         description: Maximum streams pages, including the initial page
         required: true
@@ -76,7 +76,7 @@ jobs:
       CHANNEL_SLUG: ${{ inputs.channel_slug || 'rara-takanashi' }}
       CHANNEL_URL: ${{ inputs.channel_url || 'https://www.youtube.com/@RaraTakanashi/streams' }}
       SINGER_NAME: ${{ inputs.singer_name || 'Rara Channel' }}
-      KEYWORDS: ${{ inputs.keywords || '姝,寮瑰�,寮惧�,寮俱瑾,寮硅�,�ヨ�,�ユ��,live,karaoke,��┿��' }}
+      KEYWORDS: ${{ inputs.keywords || '歌,弹唱,弾唱,弾き語,弹语,日语,日本語,live,karaoke,カラオケ' }}
       MAX_CHANNEL_PAGES: ${{ inputs.max_channel_pages || '5000' }}
       MAX_VIDEOS: ${{ inputs.max_videos || '100000' }}
       MAX_INSPECT: ${{ inputs.max_inspect || '100000' }}
@@ -381,7 +381,7 @@ jobs:
 
           const shortsProbe = {
             videoId: "AAAAAAAAAAA",
-            title: "�ü姝� �üvertical live #shorts",
+            title: "【歌枠】vertical live #shorts",
             statusText: "",
             publishedText: "",
             durationText: "1:00:00",
