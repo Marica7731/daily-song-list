@@ -20,12 +20,14 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Remove accidental source gitlink
+      - name: Remove source gitlink and Pages CNAME
         run: |
           if git ls-files --error-unmatch source >/dev/null 2>&1; then
             git rm --cached source
           fi
           rm -rf source
+          git rm --cached CNAME >/dev/null 2>&1 || true
+          rm -f CNAME
 
       - name: Sparse checkout source main
         run: |
@@ -40,7 +42,8 @@ jobs:
 
       - name: Merge source into destination
         run: |
-          rsync -a --exclude=.git /tmp/source/ ./
+          rsync -a --exclude=.git --exclude=CNAME /tmp/source/ ./
+          rm -f CNAME
           test -f index.html
           test -f data/static/v1/meta.json
           test -f .github/workflows/import-static.yml
@@ -55,6 +58,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Remove source gitlink and import runtime contents"
+            git commit -m "Remove Pages CNAME from clean main"
             git push
           fi
