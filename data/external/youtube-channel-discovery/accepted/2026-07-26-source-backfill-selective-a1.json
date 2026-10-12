@@ -1,0 +1,3622 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-25T20:58:04.398Z",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-monicamelodia",
+    "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-shirazunaiwo",
+    "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-toamall",
+    "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-uzakilarme",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch154-soraotoha-vps-jp/accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch168-nijyuna714-vps-jp/accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch173-kumahachiema-vps-jp/accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch185-nekoyashikimiku-vps-jp/accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch189-monicoch-vps-jp/accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-24-source-backfill-batch190-hanatanmusic-vps-jp/accepted-increment.json"
+  ],
+  "readStats": {
+    "inputDirs": 5,
+    "videoDetails": 87,
+    "usableVideos": 19,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 241,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "productionDedup": {
+    "baseUrl": "https://ytb-song-rank.culua.com",
+    "sourceCommit": "1d2bf94f6e69fbefc5a9e488d8fd77de1569f414",
+    "checkedAt": "2026-07-25T20:58:04.398Z",
+    "sourceVideos": 87,
+    "existingVideos": 67,
+    "acceptedVideos": 20,
+    "channels": [
+      {
+        "label": "MonicaMelodia",
+        "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
+        "sourceVideos": 3,
+        "productionVideos": 4,
+        "existingVideos": 2,
+        "acceptedVideos": 1
+      },
+      {
+        "label": "ShirazunaIwo",
+        "channelId": "UC1yZAPWNLVtfCX43IQS0gTA",
+        "sourceVideos": 48,
+        "productionVideos": 46,
+        "existingVideos": 45,
+        "acceptedVideos": 3
+      },
+      {
+        "label": "toamall",
+        "channelId": "UC5mCyt7klm0cRAp4UmcUvTA",
+        "sourceVideos": 7,
+        "productionVideos": 8,
+        "existingVideos": 5,
+        "acceptedVideos": 2
+      },
+      {
+        "label": "UzakiLarme",
+        "channelId": "UCRtHOadJugSbR0kgPlg-mqQ",
+        "sourceVideos": 16,
+        "productionVideos": 23,
+        "existingVideos": 15,
+        "acceptedVideos": 1
+      },
+      {
+        "label": "SoraOtoha",
+        "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+        "sourceVideos": 13,
+        "productionVideos": 4,
+        "existingVideos": 0,
+        "acceptedVideos": 13
+      }
+    ]
+  },
+  "videoCount": 19,
+  "occurrenceCount": 241,
+  "videos": [
+    {
+      "videoId": "EeAJ26aPjMw",
+      "title": "【収益化記念】あるじーーっ.ᐟ.ᐟありがとうっ.ᐟ.ᐟ愛をこめて歌いますっ.ᐟ.ᐟ.ᐟ.ᐟ【モニカ・メロディア/Varium】",
+      "channelName": "MonicaMelodia",
+      "channelId": "UCV0YFbQEkDoWewu-LOlLwdA",
+      "channelHandle": "/@MonicaMelodia",
+      "channelUrl": "https://www.youtube.com/@MonicaMelodia",
+      "publishedTimestamp": 1782372245398,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@MonicaMelodia/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=EeAJ26aPjMw"
+      ],
+      "selectedSourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+      "selectedSourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:03:16",
+          "seconds": 196,
+          "title": "ようこそジャパリパークへ",
+          "artist": "どうぶつビスケッツ×PPP",
+          "raw": "3:16 ようこそジャパリパークへ / どうぶつビスケッツ×PPP",
+          "rawHash": "1272cb91a1288dae7cf87297087bf06a0e8b4e4c171586fbbbd9ddc43cac47d0",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:16:01",
+          "seconds": 961,
+          "title": "創聖のアクエリオン",
+          "artist": "AKINO",
+          "raw": "16:01 創聖のアクエリオン /  AKINO",
+          "rawHash": "f55cf53dd8880e31d178e9f635f3b5b4fcd73834b6d05bef5feb02600e1f00cb",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:29:13",
+          "seconds": 1753,
+          "title": "おジャ魔女カーニバル",
+          "artist": "MAHO堂",
+          "raw": "29:13 おジャ魔女カーニバル / MAHO堂",
+          "rawHash": "7a311f90f20fa2d51926045de390c692119e527556c24d0c4dec05d8e848c51e",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:40:31",
+          "seconds": 2431,
+          "title": "メランコリック",
+          "artist": "Junky",
+          "raw": "40:31 メランコリック / Junky",
+          "rawHash": "931b1aacd824105871e36141d5cf7c7394d596f133cb00771d8759cd8e07588f",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:48:29",
+          "seconds": 2909,
+          "title": "君の知らない物語",
+          "artist": "supercell",
+          "raw": "48:29 君の知らない物語 / supercell",
+          "rawHash": "eebf7a0cfc1b18925d8dcf4f8cb7d9c7a70284bd8f6f978557d07445217fa8d9",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:00:21",
+          "seconds": 3621,
+          "title": "ハム太郎 とっとこうた",
+          "artist": "ハムちゃんず",
+          "raw": "1:00:21 ハム太郎 とっとこうた / ハムちゃんず",
+          "rawHash": "b922ee4976a957029e0f7a238edf9ca004a1316a7678fac5a05b19f870ad36f1",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:07:08",
+          "seconds": 4028,
+          "title": "Infinity Dream!",
+          "artist": "Varium",
+          "raw": "1:07:08 Infinity Dream! / Varium",
+          "rawHash": "ea32e96f9d21b253b473f17ab83e97e8efc263eb7b21d482bf6fe7439ebf45ca",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:22:03",
+          "seconds": 4923,
+          "title": "お部屋移動",
+          "artist": "未記載",
+          "raw": "1:22:03 お部屋移動",
+          "rawHash": "86c1a90c2906f4aa13977bb70cd7109e6dd1daea2c1afdb8f7ce5ee7d19042c7",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "6:22:34",
+          "seconds": 22954,
+          "title": "お部屋移動後",
+          "artist": "未記載",
+          "raw": "6:22:34 お部屋移動後",
+          "rawHash": "620738950754525ef09c06e6683f1ee16f6643dcb52790bf76d208d87c9462a6",
+          "sourceId": "UgwX9CATN0HriqzLPuJ4AaABAg",
+          "sourceHash": "20b6c417cc5653b6044c2041559e739f506b47845c95cf15c99d9965d32951e6",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:24:47.195Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-monicamelodia",
+        "discoverySingerName": "MonicaMelodia",
+        "discoveryChannelUrl": "https://www.youtube.com/@MonicaMelodia",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "VJsUvk0lmU8",
+      "title": "【歌枠 / KARAOKE 】夏歌多めの週末、踊ったっていいんじゃない？｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm",
+      "channelName": "不知名イヲ - Shirazuna Iwo -",
+      "channelId": "UC1yZAPWNLVtfCX43IQS0gTA",
+      "channelHandle": "/@ShirazunaIwo",
+      "channelUrl": "https://www.youtube.com/@ShirazunaIwo",
+      "publishedTimestamp": 1784888700827,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@ShirazunaIwo/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=VJsUvk0lmU8"
+      ],
+      "selectedSourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+      "selectedSourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:08:40",
+          "seconds": 520,
+          "title": "群青日和",
+          "artist": "東京事変",
+          "raw": "08:40 群青日和 / 東京事変",
+          "rawHash": "7c4a0f6689f992c8c63919869c2e452dd8b9c155c259b14dda2f8ea8564e29c6",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:13:19",
+          "seconds": 799,
+          "title": "絶頂讃歌",
+          "artist": "和ぬか",
+          "raw": "13:19 絶頂讃歌 / 和ぬか",
+          "rawHash": "8f244cf90464a02ecb5c30700cb14f6b23eed7520c1628874ad07380f6e9dc48",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:19:22",
+          "seconds": 1162,
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "19:22 怪獣の花唄 / Vaundy",
+          "rawHash": "15504a09065c5c4ca724c69ef36e9e568ef8f6bdf1b855e27f3cc37070f033a0",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:31:15",
+          "seconds": 1875,
+          "title": "ないものねだり",
+          "artist": "KANA-BOON",
+          "raw": "31:15 ないものねだり / KANA-BOON",
+          "rawHash": "0bb2e31fc4bb668bf3e548ae92d06f0df3490d415c9e9c1af794351ba7b075a4",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:34:15",
+          "seconds": 2055,
+          "title": "シルエット",
+          "artist": "KANA-BOON",
+          "raw": "34:15 シルエット / KANA-BOON",
+          "rawHash": "6e8170846a964f56fbcf77c69b8f88a2b8efa9b91514126554666821e926f5cf",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:42:37",
+          "seconds": 2557,
+          "title": "ライラック",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "42:37 ライラック / Mrs. GREEN APPLE",
+          "rawHash": "61592a8191848e643212c4d5a76be999845b7e857d183de911b7bea01bdfc120",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:55:22",
+          "seconds": 3322,
+          "title": "One Last Kiss",
+          "artist": "宇多田ヒカル",
+          "raw": "55:22 One Last Kiss  / 宇多田ヒカル",
+          "rawHash": "e02482cec5cee623a46fa6291d445ead3b137e1d5f32f0fd42b71f47955e34c8",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:02:48",
+          "seconds": 3768,
+          "title": "Beautiful World",
+          "artist": "宇多田ヒカル",
+          "raw": "1:02:48 Beautiful World / 宇多田ヒカル",
+          "rawHash": "29d21e9f0ce699c893a695ca2df7732bf86f79c61de681aa1400a5e4cbd3624d",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:17:43",
+          "seconds": 4663,
+          "title": "ハイド・アンド・シーク",
+          "artist": "NOMELON NOLEMON",
+          "raw": "1:17:43 ハイド・アンド・シーク / NOMELON NOLEMON",
+          "rawHash": "e8ecf1b1e4bbc20568d2519305ba8892cd8e4d8d92651b55c28a9188f040f084",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:22:54",
+          "seconds": 4974,
+          "title": "ダダ",
+          "artist": "NOMELON NOLEMON",
+          "raw": "1:22:54 ダダ / NOMELON NOLEMON",
+          "rawHash": "6a7046d9f91bf1aa90e3f37509529f6bf352159ed158db8e127d479699ce2a7a",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:29:50",
+          "seconds": 5390,
+          "title": "リコレクションエンドロウル",
+          "artist": "ツミキ",
+          "raw": "1:29:50 リコレクションエンドロウル / ツミキ",
+          "rawHash": "3552d227fbb61665551a335f65abe75c18b62f8071ba933703dff26bc9ef41e9",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:43:41",
+          "seconds": 6221,
+          "title": "夕立のりぼん",
+          "artist": "みきとＰ",
+          "raw": "1:43:41 夕立のりぼん / みきとＰ",
+          "rawHash": "8392488d27767e0f4afe1a713d54bd4af5d118d9473c8abc7cfa1bb256393326",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:49:56",
+          "seconds": 6596,
+          "title": "ハンドメイドミライ",
+          "artist": "西沢さんP",
+          "raw": "1:49:56 ハンドメイドミライ / 西沢さんP",
+          "rawHash": "441361b387e5fbb3f224c7c2c20319d77d50f50d3d657f762082eab1fe2934f4",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:55:23",
+          "seconds": 6923,
+          "title": "蛍はいなかった",
+          "artist": "はるまきごはん",
+          "raw": "1:55:23 蛍はいなかった / はるまきごはん",
+          "rawHash": "939a97f2204c8810fb1d72a849fe08e5eccc508039447b1fba2a618b7dec5a8b",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:04:19",
+          "seconds": 7459,
+          "title": "世田谷ナイトサファリ",
+          "artist": "みきとP",
+          "raw": "2:04:19 世田谷ナイトサファリ / みきとP",
+          "rawHash": "f8d31b38a6ed038bfb39e938c8245e63dd9097ced01cd6f5ec636f5f4f295146",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "2:10:47",
+          "seconds": 7847,
+          "title": "私は最強",
+          "artist": "Ado",
+          "raw": "2:10:47 私は最強 / ado",
+          "rawHash": "c834036a5e1bba4681206aea364848126391c3723fd3934fdf4256c09c6371fa",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "2:15:22",
+          "seconds": 8122,
+          "title": "青と夏",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "2:15:22 青と夏 / Mrs. GREEN APPLE",
+          "rawHash": "4fd97f69815447cfae16c33d3af0e1ef54157c159333145f785009bac40ece42",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "2:21:29",
+          "seconds": 8489,
+          "title": "我逢人",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "2:21:29 我逢人 / Mrs. GREEN APPLE",
+          "rawHash": "8f34163dec7b0da379a0cd02d373930d0d63009bbdd115d1d40254ed52818527",
+          "sourceId": "UgxMxaPCS-1nXBo18xx4AaABAg",
+          "sourceHash": "3312af1fd55cfb5ba421b5d438f1d72d5bb5073520e34af394c5eb3a7c797bd1",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:30:08.083Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-shirazunaiwo",
+        "discoverySingerName": "ShirazunaIwo",
+        "discoveryChannelUrl": "https://www.youtube.com/@ShirazunaIwo",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "fpM0Bdq7u7M",
+      "title": "【#歌枠🎙 】低音響くバラードでチルな金曜日。【不知名イヲ/Re:AcT】",
+      "channelName": "ShirazunaIwo",
+      "channelId": "UC1yZAPWNLVtfCX43IQS0gTA",
+      "channelHandle": "/@ShirazunaIwo",
+      "channelUrl": "https://www.youtube.com/@ShirazunaIwo",
+      "publishedTimestamp": 1779780300827,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@ShirazunaIwo/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=fpM0Bdq7u7M"
+      ],
+      "selectedSourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+      "selectedSourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:14:32",
+          "seconds": 872,
+          "title": "サリシノハラ",
+          "artist": "みきとP",
+          "raw": "0:14:32 サリシノハラ みきとP",
+          "rawHash": "5d304de976be04f0ebaf7b205a41d85f9d33f3005846dae2d02716327716f34a",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:21:37",
+          "seconds": 1297,
+          "title": "小夜子",
+          "artist": "みきとP",
+          "raw": "0:21:37 小夜子 みきとP",
+          "rawHash": "a2d2ba64f7edbb581547b2ceab1644bb2c974893fc29370e4603f16b87bb2b47",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:27:33",
+          "seconds": 1653,
+          "title": "いのちの名前",
+          "artist": "木村 弓",
+          "raw": "0:27:33 いのちの名前 木村 弓",
+          "rawHash": "c666d7607c7657deb7c12dbe4a0184cd8b6b7bb745feb07a8e6258b508c33820",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:38:51",
+          "seconds": 2331,
+          "title": "ギブス",
+          "artist": "椎名林檎",
+          "raw": "0:38:51 ギブス 椎名林檎",
+          "rawHash": "5f248304795e5d522420e7c22958284fc5afa342e6a0ad83f16ed96bc7c0f02f",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:51:31",
+          "seconds": 3091,
+          "title": "vivi 米津 玄師",
+          "artist": "ハチ",
+          "raw": "0:51:31 vivi 米津 玄師(ハチ)",
+          "rawHash": "3d7b1373ef19dda29744ddd04ce2240bfc24ac91b5b24d55cce4f7d7274bfaef",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:13:50",
+          "seconds": 4430,
+          "title": "チノカテ",
+          "artist": "ヨルシカ",
+          "raw": "1:13:50 チノカテ ヨルシカ",
+          "rawHash": "85718787049297ee579d3ccd26ed9ef4cf052f3ff649d18979ada84d6198ebad",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:19:35",
+          "seconds": 4775,
+          "title": "悪魔の子",
+          "artist": "ヒグチアイ",
+          "raw": "1:19:35 悪魔の子 ヒグチアイ",
+          "rawHash": "f2f74ec1e6f475d3bc3ddb2afe4139f1f416ce6520bb6b52bcc5dda65fdaa02e",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:36:26",
+          "seconds": 5786,
+          "title": "斜陽",
+          "artist": "ヨルシカ",
+          "raw": "1:36:26 斜陽 ヨルシカ",
+          "rawHash": "0c680f2edc78676ac5cb4a85620a0ddb81df7d067da35f59ff93336970567fff",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:47:55",
+          "seconds": 6475,
+          "title": "天国",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "1:47:55 天国 Mrs. GREEN APPLE",
+          "rawHash": "d1fdaf8d7c3fbf9cf9513af78d8ad8be9ca0ef4d43cd0ac73a0d3f560e560127",
+          "sourceId": "UgzHT_C9J2A1AdAvtBx4AaABAg",
+          "sourceHash": "59f21c1252ce990b7cdaae647fb48afb6465a199039f4722b85e51453517209e",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:30:08.092Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-shirazunaiwo",
+        "discoverySingerName": "ShirazunaIwo",
+        "discoveryChannelUrl": "https://www.youtube.com/@ShirazunaIwo",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "c2dL44ZOsr0",
+      "title": "【#推ススメ新人Vtuber歌枠リレー vol.3 】どうやら推ススメの歌声らしい。【不知名イヲ/Re:AcT】",
+      "channelName": "ShirazunaIwo",
+      "channelId": "UC1yZAPWNLVtfCX43IQS0gTA",
+      "channelHandle": "/@ShirazunaIwo",
+      "channelUrl": "https://www.youtube.com/@ShirazunaIwo",
+      "publishedTimestamp": 1779780300827,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@ShirazunaIwo/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=c2dL44ZOsr0"
+      ],
+      "selectedSourceId": "UgyvFMe766oqen52p0l4AaABAg",
+      "selectedSourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:02:06",
+          "seconds": 126,
+          "title": "StaRt",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "0:02:06    1. StaRt / Mrs. GREEN APPLE",
+          "rawHash": "049e724a776496145c142086a11b35d2c739e0572fd21cf4bc70c917955b9e23",
+          "sourceId": "UgyvFMe766oqen52p0l4AaABAg",
+          "sourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:07:35",
+          "seconds": 455,
+          "title": "蜜月アン・ドゥ・トロワ",
+          "artist": "DATEKEN",
+          "raw": "0:07:35    2. 蜜月アン・ドゥ・トロワ / DATEKEN",
+          "rawHash": "9a6a9f9290c86c66bb125b619fb4ac6a42ff85f74b6d146f969d87cc26a5d677",
+          "sourceId": "UgyvFMe766oqen52p0l4AaABAg",
+          "sourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:12:58",
+          "seconds": 778,
+          "title": "ANTENNA",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "0:12:58    3. ANTENNA / Mrs. GREEN APPLE",
+          "rawHash": "25a5d5ff9d8a9376d21dbee715fd33e0a1f067a1e8639510d73846e3219c4512",
+          "sourceId": "UgyvFMe766oqen52p0l4AaABAg",
+          "sourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:18:00",
+          "seconds": 1080,
+          "title": "DARMA GRAND PRIX",
+          "artist": "RADWIMPS(Ver. ヨルシカCover)",
+          "raw": "0:18:00    4. DARMA GRAND PRIX / RADWIMPS(Ver. ヨルシカCover)",
+          "rawHash": "899d0090102c9d633b6a30f864fc8bbaad83b04e0adf319cc1c6d0c3eb9fb2cf",
+          "sourceId": "UgyvFMe766oqen52p0l4AaABAg",
+          "sourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:23:19",
+          "seconds": 1399,
+          "title": "さよならミッドナイト",
+          "artist": "もじゃ(大柴広己)&れるりい",
+          "raw": "0:23:19    5. さよならミッドナイト / もじゃ(大柴広己)&れるりい",
+          "rawHash": "8141386c81aa275ba530c8861881fa560547a7f84f7d2cbf003e66925908f69a",
+          "sourceId": "UgyvFMe766oqen52p0l4AaABAg",
+          "sourceHash": "5384d81bf98abe9263e8f79237e0eb3cf9344ec0e5b92331613b59199155843b",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:30:08.092Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-shirazunaiwo",
+        "discoverySingerName": "ShirazunaIwo",
+        "discoveryChannelUrl": "https://www.youtube.com/@ShirazunaIwo",
+        "matchedKeywords": [
+          "歌",
+          "リレー"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "P_Yer52dMxU",
+      "title": "【#歌枠】ゲリラうた【#vtuber┊︎#卯丸とあ 】",
+      "channelName": "卯丸とあ - Umall Toa -",
+      "channelId": "UC5mCyt7klm0cRAp4UmcUvTA",
+      "channelHandle": "/@toamall",
+      "channelUrl": "https://www.youtube.com/@toamall",
+      "publishedTimestamp": 1783839830587,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@toamall/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=P_Yer52dMxU"
+      ],
+      "selectedSourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+      "selectedSourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:19:19",
+          "seconds": 1159,
+          "title": "GO!GO!MANIAC",
+          "artist": "未記載",
+          "raw": "19:19　01.GO!GO!MANIAC",
+          "rawHash": "8a1eb33729f1025c29270390b544dbffb18c66aa968fc1631dbbfd203e47d522",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:26:13",
+          "seconds": 1573,
+          "title": "WORLD END",
+          "artist": "未記載",
+          "raw": "26:13　02.WORLD END",
+          "rawHash": "829d7df90d15f38ffb97ca5a7ddc776f064a0f2086f9a83364cfd2ccf1421b4d",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:36:00",
+          "seconds": 2160,
+          "title": "消せない罪",
+          "artist": "未記載",
+          "raw": "36:00　03.消せない罪",
+          "rawHash": "2124a7ea902bd013f2accd46bbcfe6368296ed2706fe2811b90fa3f74f32b8af",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:42:16",
+          "seconds": 2536,
+          "title": "メリッサ",
+          "artist": "未記載",
+          "raw": "42:16　04.メリッサ",
+          "rawHash": "f841a72900bbd7b11f35e7b486fe23a59b8fac7a78b7885a645ba7b0336b9665",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:51:02",
+          "seconds": 3062,
+          "title": "モザイクロール",
+          "artist": "未記載",
+          "raw": "51:02　05.モザイクロール",
+          "rawHash": "cd685e093700c2e5beae535bf4f19bc09807c2f9e6b308aa19a7101fd8fbe83e",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:57:27",
+          "seconds": 3447,
+          "title": "桃源郷エイリアン",
+          "artist": "未記載",
+          "raw": "57:27　06.桃源郷エイリアン",
+          "rawHash": "9f1429c5f0513928f8593a0638e4d9a11927745347f73215c0089264defdac56",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:08:40",
+          "seconds": 4120,
+          "title": "曇天",
+          "artist": "未記載",
+          "raw": "1:08:40 07.曇天",
+          "rawHash": "8842f1c2eca362122fe9c969da602eb29fc980b1d371a5007f6f7d078715c5bf",
+          "sourceId": "UgyV7UGc2ZNjMV08n4B4AaABAg",
+          "sourceHash": "7d6837ec0485b0e215de4cb6d9304f8c1544c03f52915ee653395430bdb823c7",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:23:55.071Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-toamall",
+        "discoverySingerName": "toamall",
+        "discoveryChannelUrl": "https://www.youtube.com/@toamall",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "tVISLWFeMcQ",
+      "title": "【 #歌枠 】雑談多めの歌枠【卯咲らるむ / #新人Vtuber 】",
+      "channelName": "Larme Ch. 卯咲らるむ",
+      "channelId": "UCRtHOadJugSbR0kgPlg-mqQ",
+      "channelHandle": "/@UzakiLarme",
+      "channelUrl": "https://www.youtube.com/@UzakiLarme/streams",
+      "publishedTimestamp": 1774596716071,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@UzakiLarme/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=tVISLWFeMcQ"
+      ],
+      "selectedSourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+      "selectedSourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:04:30",
+          "seconds": 270,
+          "title": "〙ずうっといっしょ！",
+          "artist": "未記載",
+          "raw": "1〘 4:30 〙ずうっといっしょ！",
+          "rawHash": "4592e799257569260e5f4b9a22e25bc6f058ffdfc1a99717799ae07ff0a21e4c",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:11:19",
+          "seconds": 679,
+          "title": "〙ワールドイズマイン",
+          "artist": "未記載",
+          "raw": "2〘 11:19 〙ワールドイズマイン",
+          "rawHash": "89947c4f81783c44ac6daec14c809e2e1504deb8a27132336a605820624ab6f9",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:23:31",
+          "seconds": 1411,
+          "title": "〙ハッピーシンセサイザ",
+          "artist": "未記載",
+          "raw": "3〘 23:31 〙ハッピーシンセサイザ",
+          "rawHash": "da8b6d3c47cf851c4c696051ddbc9aa12a789c957eecae7dbe155af705bcd487",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:42:12",
+          "seconds": 2532,
+          "title": "〙ホンメイ",
+          "artist": "未記載",
+          "raw": "4〘 42:12 〙ホンメイ",
+          "rawHash": "1eecbdb16a6393808c642f85d1c985403254142e6312dfec27c82a9b794656aa",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:50:13",
+          "seconds": 3013,
+          "title": "〙通心障害",
+          "artist": "未記載",
+          "raw": "5〘 50:13 〙通心障害",
+          "rawHash": "b8ed85162c40c0ae0f66646067820088854c883c77cf772e405bdbdd948da2bc",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:56:52",
+          "seconds": 3412,
+          "title": "〙だって、優等生",
+          "artist": "未記載",
+          "raw": "6〘 56:52 〙だって、優等生",
+          "rawHash": "16ca0bcc85dedc07026ee25c11d26b2eb16b9d8757138e7c1a12226170298229",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:01:26",
+          "seconds": 3686,
+          "title": "〙初恋サイダー",
+          "artist": "未記載",
+          "raw": "7〘 1:01:26 〙初恋サイダー",
+          "rawHash": "937649cb0c2c15dcf2acd44dc34aeb62376d4009465994cf6f3119042c8f7403",
+          "sourceId": "UgzNFwX_DGgCFmmxhLV4AaABAg",
+          "sourceHash": "eb0ad948cdca2cdd56d115a525227d26e7a2851245cccdc1a266be074c2a9009",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-25T07:44:33.513Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-25-source-backfill-batch202-uzakilarme",
+        "discoverySingerName": "",
+        "discoveryChannelUrl": "https://www.youtube.com/@UzakiLarme/streams",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "CfMWE8ZopRM",
+      "title": "【#CrossReality歌枠リレー】6人で作り上げたステージの感動をもう一度…😭✨全力で歌を届ける！【Re:AcT/音羽奏來】",
+      "channelName": "音羽奏來 - Otoha Sora -",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1784672045115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=CfMWE8ZopRM"
+      ],
+      "selectedSourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+      "selectedSourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:01:50",
+          "seconds": 110,
+          "title": "名前のない怪物",
+          "artist": "EGOIST",
+          "raw": "00:01:50 名前のない怪物 / EGOIST",
+          "rawHash": "85478a3b86883f341d556443eba55c5f35147f5f2d7673ed0a5dc95c4ad03266",
+          "sourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+          "sourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:09:16",
+          "seconds": 556,
+          "title": "狂う獣",
+          "artist": "DUSTCELL",
+          "raw": "00:09:16 狂う獣 / DUSTCELL",
+          "rawHash": "7cf2e817d6892f807a3f94c71cd48b2fae410f0e92b5c676c0e473d9d954e789",
+          "sourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+          "sourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:13:56",
+          "seconds": 836,
+          "title": "灯火",
+          "artist": "DUSTCELL",
+          "raw": "00:13:56 灯火 / DUSTCELL",
+          "rawHash": "523631adf6b84d2fd9e4064390f70aa6f583a11e42ec346549d076f2c7b113cc",
+          "sourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+          "sourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:18:28",
+          "seconds": 1108,
+          "title": "Ado",
+          "artist": "未記載",
+          "raw": "00:18:28 0 / Ado",
+          "rawHash": "b5f6e87e222b106553807fbfa336fdfadaf5f1f5d60b76fb2e16d99d2ea1b2cb",
+          "sourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+          "sourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:26:57",
+          "seconds": 1617,
+          "title": "8.8",
+          "artist": "あたらよ",
+          "raw": "00:26:57 8.8 / あたらよ",
+          "rawHash": "415861f3a82f5357616f5b42bab25300535ef169fb8a11ac65e63b155496dab8",
+          "sourceId": "UgyZoaBHJNp-S9_a3xh4AaABAg",
+          "sourceHash": "398b1a5845fdcf3fe7290c31d090e1d430d616626a8b52def4df812499aded2f",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.536Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌",
+          "リレー"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "6MUcOc8U45w",
+      "title": "【1周年記念LIVE🪽🫧】1年分の”ありがとう”を歌にのせて。【Re:AcT/音羽奏來】#歌枠 #新人vtuber",
+      "channelName": "音羽奏來 - Otoha Sora -",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1782252845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=6MUcOc8U45w"
+      ],
+      "selectedSourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+      "selectedSourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:04:10",
+          "seconds": 250,
+          "title": "砕けないでw",
+          "artist": "未記載",
+          "raw": "00:04:10 砕けないでw",
+          "rawHash": "3e2c75322e4813a29b075a84584accf63172d21754046fdcd4fdb3a782a02076",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:07:52",
+          "seconds": 472,
+          "title": "Cynic",
+          "artist": "ポリスピカデリー",
+          "raw": "00:07:52 Cynic / ポリスピカデリー",
+          "rawHash": "f2d0b5e1ae62344d368702a51ba16de1777d6dfa6ae3e485b2417176f1db36bb",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:12:17",
+          "seconds": 737,
+          "title": "伝えたいこと",
+          "artist": "未記載",
+          "raw": "00:12:17 伝えたいこと",
+          "rawHash": "d0493c9c7d87a874e4c1804e3084627ee66fb2de9b3c604d205aeb5f88b1be77",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:14:14",
+          "seconds": 854,
+          "title": "日本語って難しい",
+          "artist": "未記載",
+          "raw": "00:14:14 日本語って難しい",
+          "rawHash": "418832a84dc942928df68a7ecac969f11fda25cd71282774a8e4fb43fe0383cf",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:15:52",
+          "seconds": 952,
+          "title": "隣の芝生は…",
+          "artist": "未記載",
+          "raw": "00:15:52 隣の芝生は…",
+          "rawHash": "d8417a7c8b736c8171011c2f89b98120053b5f47370aca3e533d247bc2c21e15",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:19:02",
+          "seconds": 1142,
+          "title": "目標",
+          "artist": "未記載",
+          "raw": "00:19:02 目標",
+          "rawHash": "361842de11cac3e85989a9614c923805469f8920317d101735d46ad0b437cae8",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:24:41",
+          "seconds": 1481,
+          "title": "台本を用意しない訳",
+          "artist": "未記載",
+          "raw": "00:24:41 台本を用意しない訳",
+          "rawHash": "5420694b62b7f588824ceac6806df32e1cd05a177bee778c10dee335dc15b436",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:27:23",
+          "seconds": 1643,
+          "title": "振り返り",
+          "artist": "未記載",
+          "raw": "00:27:23 振り返り",
+          "rawHash": "93ef38e600cf6101eefa5334f961b4ac62c6f97d6acde2a306e96d18ec462134",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "0:31:28",
+          "seconds": 1888,
+          "title": "2年目初PON★",
+          "artist": "未記載",
+          "raw": "∟00:31:28 ★2年目初PON★",
+          "rawHash": "79cc701b71243fd32d0f907440c3f3acc09235b4178eb4229812801eb401f2f2",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "0:33:31",
+          "seconds": 2011,
+          "title": "そらちの絵",
+          "artist": "未記載",
+          "raw": "∟00:33:31 そらちの絵",
+          "rawHash": "3173b5a8bc2d12c422c122be0ea1ce9223ced50d121fbe08481a25547afc1957",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "0:37:09",
+          "seconds": 2229,
+          "title": "歌ってみた",
+          "artist": "未記載",
+          "raw": "∟00:37:09 歌ってみた",
+          "rawHash": "844bbfbc450b5f13ccd8822d9b03e348fde4d5cbc6b7705844d4bfd65f517115",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "0:39:09",
+          "seconds": 2349,
+          "title": "季節は次々死んでいく",
+          "artist": "Amazarashi",
+          "raw": "00:39:09 季節は次々死んでいく / Amazarashi",
+          "rawHash": "d739a2063be7a0a0feeb124919a9b56567d17580ac73294c2a2af431d4bbdca9",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "0:46:06",
+          "seconds": 2766,
+          "title": "TOUBOU",
+          "artist": "DUSTCELL",
+          "raw": "00:46:06 TOUBOU / DUSTCELL",
+          "rawHash": "cca403dd8fbf51a205fd3897f788a1e824015f80f604ccb9417b82bbf68fb47a",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "0:52:18",
+          "seconds": 3138,
+          "title": "畳み掛けるPON",
+          "artist": "未記載",
+          "raw": "00:52:18 畳み掛けるPON",
+          "rawHash": "f9391324043454b82ba3511ee7d79569a24fca6acd4a111aacd5bc69a377682a",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "0:52:48",
+          "seconds": 3168,
+          "title": "やっと気付いたw",
+          "artist": "未記載",
+          "raw": "∟00:52:48 やっと気付いたw",
+          "rawHash": "42b264b63309bc4b5abdceebf6b665a3bf80092c89af9b1f6c3cd5b0b6cdf705",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "0:56:00",
+          "seconds": 3360,
+          "title": "まさに1年振り返り",
+          "artist": "未記載",
+          "raw": "00:56:00 まさに1年振り返り",
+          "rawHash": "59c3fd71f18ed0f64f874bf42661f1fa835185bb15f7ce0150a64f4b64299cb5",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "0:56:43",
+          "seconds": 3403,
+          "title": "とても素敵な六月でした",
+          "artist": "Eight",
+          "raw": "00:56:43 とても素敵な六月でした / Eight",
+          "rawHash": "529b57b8d44dbf03ca206b47fffb086634aef05ffd7fcabce2ee0e344f2112ba",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "0:57:06",
+          "seconds": 3426,
+          "title": "そらちどこ〜w",
+          "artist": "未記載",
+          "raw": "00:57:06 そらちどこ〜w",
+          "rawHash": "be89fbfa428959ccafaae6950f9f46a1c98946bccbb42c17dbd4dc1377f2fcb9",
+          "sourceId": "UgxJ9kRwLI8LCTlWJwh4AaABAg",
+          "sourceHash": "49a43ba1b4446293f6c1afda2df52c6115c44b5a294ebb9e01d62bee3055ada6",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.541Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "9blQ95zYW0g",
+      "title": "【歌枠🌟】一曲私の歌きいてかない？？本日21時に公開歌みた動画も同時視聴するよ！！🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1761516845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=9blQ95zYW0g"
+      ],
+      "selectedSourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+      "selectedSourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:02:12",
+          "seconds": 132,
+          "title": "思想犯",
+          "artist": "ヨルシカ",
+          "raw": "00:02:12 思想犯/ヨルシカ",
+          "rawHash": "3228eb6d6c1ed445eb3d9cf22a9ccd585261c8ceeb0604f95e6a2f26503d1655",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:13:09",
+          "seconds": 789,
+          "title": "二息歩行",
+          "artist": "DECO*27",
+          "raw": "00:13:09 二息歩行/DECO*27",
+          "rawHash": "bf249486067394962902fc80900255bd0eef0e9505146f2c14158281a89d0074",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:28:38",
+          "seconds": 1718,
+          "title": "インフェルノ",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "00:28:38 インフェルノ/Mrs. GREEN APPLE",
+          "rawHash": "2d777164515163f2f281e6005a69adb155c3a80bc3b26eb3e1b6962524002cab",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:33:52",
+          "seconds": 2032,
+          "title": "IRIS OUT",
+          "artist": "米津玄師",
+          "raw": "00:33:52 IRIS OUT/米津玄師",
+          "rawHash": "203f7a1e758fd2586da02a77dad06604dcb730742b46beba4090b90343dc1136",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:46:32",
+          "seconds": 2792,
+          "title": "KICK BACK",
+          "artist": "米津玄師",
+          "raw": "00:46:32 KICK BACK/米津玄師",
+          "rawHash": "b292e95e410b69aea264e2a45beca40abdbb45cca563655bc50e95d8a25343bf",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:11:27",
+          "seconds": 4287,
+          "title": "アポリア",
+          "artist": "ヨルシカ",
+          "raw": "01:11:27 アポリア/ヨルシカ",
+          "rawHash": "8248b64623fd64913858dd6d8b8b9440554568d1f3811444d9da8259ce6f56bb",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:16:37",
+          "seconds": 4597,
+          "title": "晴る",
+          "artist": "ヨルシカ",
+          "raw": "01:16:37 晴る/ヨルシカ",
+          "rawHash": "cba23bdbaa70d8a2052a7a179ba1e36d8d3a9650474c099519ef3571210ed1ee",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:23:09",
+          "seconds": 4989,
+          "title": "瞬間センチメンタル",
+          "artist": "SCANDAL",
+          "raw": "01:23:09 瞬間センチメンタル/SCANDAL",
+          "rawHash": "90b30dfe40667d0158eaf5b9df7d1c6d0e214ccc5e0e9eee662e75fe4ff60c03",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:27:53",
+          "seconds": 5273,
+          "title": "怪獣",
+          "artist": "サカナクション",
+          "raw": "01:27:53 怪獣/サカナクション",
+          "rawHash": "cdc6faa73aa60a7a060d66e6f79e921892a14ac4b148e52b3859f9bdea58ecc1",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:54:09",
+          "seconds": 6849,
+          "title": "季節は次々死んでいく",
+          "artist": "Amazarashi",
+          "raw": "01:54:09 季節は次々死んでいく/Amazarashi",
+          "rawHash": "05f229b07b14281382df36920dacd2dcb5f562dbc1095988f0866518dcfa07ce",
+          "sourceId": "UgyGH8CHnGfEj2fCNXl4AaABAg",
+          "sourceHash": "f4249f8485a6d65423552be99a284c575464dea81f0f796b30b36684061190eb",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.542Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "4I5NeWcx6Pw",
+      "title": "【定期ライブ歌枠🌟】９th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1761516845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=4I5NeWcx6Pw"
+      ],
+      "selectedSourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+      "selectedSourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:15:51",
+          "seconds": 951,
+          "title": "愛に奇術師",
+          "artist": "電ポルP",
+          "raw": "00:15:51 愛に奇術師/電ポルP",
+          "rawHash": "48f2719751a5a07b0897c7eac5734069a7ae7766a64e47b164771f1ca11231ec",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:20:21",
+          "seconds": 1221,
+          "title": "ソラニン",
+          "artist": "ASIAN KUNG-FU GENERATION",
+          "raw": "00:20:21 ソラニン/ASIAN KUNG-FU GENERATION",
+          "rawHash": "26ce18a1650316a194baad80fed9726a1467b1084685d9d08662fac36ad2f37e",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:25:33",
+          "seconds": 1533,
+          "title": "本能",
+          "artist": "椎名林檎",
+          "raw": "00:25:33 本能/椎名林檎",
+          "rawHash": "214240faa6d896d18f358b50c6d9c8d8c2c3a2d9df71a09bca37d765cbfd93ee",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:29:47",
+          "seconds": 1787,
+          "title": "本能",
+          "artist": "椎名林檎(Take2と言う名のTake4)",
+          "raw": "00:29:47 本能/椎名林檎(Take2と言う名のTake4)",
+          "rawHash": "576ed7e9a2d0063d8855cd8061a05fee628c010b680d8b0dc2dd39d288f24e45",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:46:11",
+          "seconds": 2771,
+          "title": "丸の内サディスティック",
+          "artist": "椎名林檎",
+          "raw": "00:46:11 丸の内サディスティック/椎名林檎",
+          "rawHash": "5bf4329ff416db37e78d8e9b4a1dbc6e574efc7e14729c5cbbb83cb5f131fefb",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:51:10",
+          "seconds": 3070,
+          "title": "Pretender",
+          "artist": "Official髭男dism",
+          "raw": "00:51:10 Pretender/Official髭男dism",
+          "rawHash": "97ae806013c80cbee46a2aeaa704f17af568d7f392be2e07e2acc529ddac97c1",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:57:28",
+          "seconds": 3448,
+          "title": "花に亡霊",
+          "artist": "ヨルシカ",
+          "raw": "00:57:28 花に亡霊/ヨルシカ",
+          "rawHash": "b3883da8fcfc36e874406a25326add6e6f724ebcb35291cc2ab27b7524f40dec",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:13:38",
+          "seconds": 4418,
+          "title": "ボイスメモ No.5",
+          "artist": "ちゃんみな",
+          "raw": "01:13:38 ボイスメモ No.5/ちゃんみな",
+          "rawHash": "01a528bb91aa91914c3d0a9c45096a894a5d1f0bf30185d4b72d89923abe8fb1",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:17:45",
+          "seconds": 4665,
+          "title": "マザーランド",
+          "artist": "Ado",
+          "raw": "01:17:45 マザーランド/Ado",
+          "rawHash": "854c2f10d41a320a12a0fff4788151677351394f1b5d362c61bb7ba01a5abd91",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:23:31",
+          "seconds": 5011,
+          "title": "準透明少年",
+          "artist": "ヨルシカ",
+          "raw": "01:23:31 準透明少年/ヨルシカ",
+          "rawHash": "1e8c90d1dd35d6e129928272862c1c8408ef8d1aeaa046b1bed5e0ee30f6fad1",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:44:36",
+          "seconds": 6276,
+          "title": "嘘月",
+          "artist": "ヨルシカ",
+          "raw": "01:44:36 嘘月/ヨルシカ",
+          "rawHash": "8c8c495704d0eff4d189c4b6e81db868273431010c12012060de2fa7f10184bf",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:51:05",
+          "seconds": 6665,
+          "title": "Burning",
+          "artist": "羊文学",
+          "raw": "01:51:05 Burning/羊文学",
+          "rawHash": "d6726ab1d00d3340e7baf2a0d807a91121cc0e18e745b8fe65164c1bacef893c",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:57:18",
+          "seconds": 7038,
+          "title": "左右盲",
+          "artist": "ヨルシカ",
+          "raw": "01:57:18 左右盲/ヨルシカ",
+          "rawHash": "f5425fa65156a65a4db277237ed825bd1bd7110061700d8b2f87085a7cb18bc7",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:21:51",
+          "seconds": 8511,
+          "title": "幽霊東京",
+          "artist": "Ayase",
+          "raw": "02:21:51 幽霊東京/Ayase",
+          "rawHash": "7851de3c8d0a478f187c02acf188e011e46083a6d10cd32e26c3411b199919b4",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:28:26",
+          "seconds": 8906,
+          "title": "I believe",
+          "artist": "絢香",
+          "raw": "02:28:26 I believe/絢香",
+          "rawHash": "abf7731575b3df18dd679a8c4ece94a48a39a4b0e820755b420f09bbd745f62a",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "2:35:27",
+          "seconds": 9327,
+          "title": "Moments",
+          "artist": "浜崎あゆみ",
+          "raw": "02:35:27 Moments/浜崎あゆみ",
+          "rawHash": "a14fa61f3077ebb32ec97b2d6be429ff4ceed2ace672b4155a0c78d3115f64fb",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "2:47:15",
+          "seconds": 10035,
+          "title": "永遠",
+          "artist": "EGOIST",
+          "raw": "02:47:15 永遠/EGOIST",
+          "rawHash": "1edd3535254015071f21bbff745d6609e63c2ab82f31a921a4cb4770f2ff8dba",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "2:55:50",
+          "seconds": 10550,
+          "title": "ノマド",
+          "artist": "須田景凪",
+          "raw": "02:55:50 ノマド/須田景凪",
+          "rawHash": "ccb98a4bd39735b069fc2d401d45f65ee568b7f2f5d2dfd05ad59d09c5881249",
+          "sourceId": "Ugz3XDQceaNsR2DNvy54AaABAg",
+          "sourceHash": "dbf6f6b197bfb56e872cb011603400226ab680ef4e3c72b6d576838609890ac7",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.544Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "epbJpN9K7Xg",
+      "title": "【定期ライブ歌枠🌟】重大告知あり💫＆100日記念日🎉✨８th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1761516845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=epbJpN9K7Xg"
+      ],
+      "selectedSourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+      "selectedSourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:13:15",
+          "seconds": 795,
+          "title": "アイニーク",
+          "artist": "ポリスピカデリー",
+          "raw": "00:13:15 アイニーク/ポリスピカデリー",
+          "rawHash": "5bec988c9ce2f664098b9878c0733a15744893f753db5e73d44e0fd8807220db",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:16:44",
+          "seconds": 1004,
+          "title": "二息歩行",
+          "artist": "DECO*27",
+          "raw": "00:16:44 二息歩行/DECO*27",
+          "rawHash": "104bfd024572067361255170d4a614998b9e3ceeb3deb6a292a8ed03196218d8",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:21:23",
+          "seconds": 1283,
+          "title": "ninelie",
+          "artist": "Aimer×EGOIST",
+          "raw": "00:21:23 ninelie/Aimer×EGOIST",
+          "rawHash": "be2e96b479bb076f1f38b94c638df0abd2e7cf1ba8c0aabbfc7a7e25e46315e3",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:43:50",
+          "seconds": 2630,
+          "title": "フレンズ",
+          "artist": "レベッカ",
+          "raw": "00:43:50 フレンズ/レベッカ",
+          "rawHash": "fbc2f4fb3d968b6cb8761017fc1a8a276aea24ce2ac25e9429a87b294830d90b",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:52:22",
+          "seconds": 3142,
+          "title": "紗痲",
+          "artist": "煮ル果実",
+          "raw": "00:52:22 紗痲/煮ル果実",
+          "rawHash": "84c10048c751d79ba7898f0acb73eedd265973533dae9355ee70ea1600a5a968",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:57:47",
+          "seconds": 3467,
+          "title": "8.8",
+          "artist": "あたらよ",
+          "raw": "00:57:47 8.8/あたらよ",
+          "rawHash": "88784b3458bc2685d4b32ab467780936eafa606f1d0836ff9d31758746da8b4f",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:17:39",
+          "seconds": 4659,
+          "title": "晴る",
+          "artist": "ヨルシカ",
+          "raw": "01:17:39 晴る/ヨルシカ",
+          "rawHash": "c69cd455cf9c857059f4a1836cc32503e202fa008c330406e3e0ec26238cac38",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:25:12",
+          "seconds": 5112,
+          "title": "Death Designer",
+          "artist": "Empty old City",
+          "raw": "01:25:12 Death Designer/Empty old City",
+          "rawHash": "c75cf4381fb696c5abe19f430d96db4212db585094720fe8eb5449a7b0f67120",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:29:21",
+          "seconds": 5361,
+          "title": "シャルル",
+          "artist": "須田景凪",
+          "raw": "01:29:21 シャルル/須田景凪",
+          "rawHash": "8db5d1ea2f8f80a6af62250728669f7b02329d566e52ce021b591821e8cb17d9",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:43:38",
+          "seconds": 6218,
+          "title": "瞬き",
+          "artist": "Back number",
+          "raw": "01:43:38 瞬き/Back number",
+          "rawHash": "3e4279a0de77e3ce1831a76ef78a229a9b9609b91c39965b3778b8d9ad42845f",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:50:18",
+          "seconds": 6618,
+          "title": "Bunny Girl",
+          "artist": "AKASAKI",
+          "raw": "01:50:18 Bunny Girl/AKASAKI",
+          "rawHash": "441ba304f1c4ff4857fa9ee353ff26e1b59e738ff32b0c1702f06fed5d5ea0f7",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:55:55",
+          "seconds": 6955,
+          "title": "Kiss me",
+          "artist": "YUI",
+          "raw": "01:55:55 Kiss me/YUI",
+          "rawHash": "5fb16e253adce2fa408ed24b10e16ced09eb9321fa28e37a37f15667588cb76a",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:10:15",
+          "seconds": 7815,
+          "title": "盗作",
+          "artist": "ヨルシカ",
+          "raw": "02:10:15 盗作/ヨルシカ",
+          "rawHash": "31a8f6fb14d4126ffed14bf738956548b7d47676f2fa287cae0987c1fdf16382",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:15:43",
+          "seconds": 8143,
+          "title": "プロポーズ",
+          "artist": "なとり",
+          "raw": "02:15:43 プロポーズ/なとり",
+          "rawHash": "bfbc6982186637ed27a1e57c7a57917c018f8ac3d1fe636b25671891d4cca957",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:20:32",
+          "seconds": 8432,
+          "title": "ノーチラス",
+          "artist": "ヨルシカ",
+          "raw": "02:20:32 ノーチラス/ヨルシカ",
+          "rawHash": "4a73130b5ae0c749b144329468a9594fd243de79f84cb2a75f5738d7f4fb4054",
+          "sourceId": "UgzBBSlrcsW9sjxMLbl4AaABAg",
+          "sourceHash": "69f10b24cb58a93ec03bf7842d3c5ef5e13b5b6828408e9b840cd4326bb73eb8",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.544Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "EdrK9eyPWec",
+      "title": "【歌枠】初見さんも大歓迎🙌💕2,000人突破ありがとう！！弾き語ります🎸/【Re:AcT/音羽奏來】 #shorts",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=EdrK9eyPWec"
+      ],
+      "selectedSourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+      "selectedSourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:12:43",
+          "seconds": 763,
+          "title": "準透明少年",
+          "artist": "ヨルシカ",
+          "raw": "00:12:43 準透明少年/ヨルシカ",
+          "rawHash": "5af81679ef5e5bab46ffba58cec301566d6b7d03ff9e295b24c06976fe397d44",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:21:43",
+          "seconds": 1303,
+          "title": "ヲズワルド",
+          "artist": "煮ル果実",
+          "raw": "00:21:43 ヲズワルド/煮ル果実",
+          "rawHash": "e244665623540bfecf79048f9451d9804b6b995fa9a7a28c0a963eadfe2fbcf4",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:33:09",
+          "seconds": 1989,
+          "title": "愛に奇術師",
+          "artist": "電ポルP",
+          "raw": "00:33:09 愛に奇術師/電ポルP",
+          "rawHash": "9e9a0f0e6f5b2a4a6d5f02f8a1bce14bfe524f94ec9b2d31b4c58cdf9aefa5d0",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:49:18",
+          "seconds": 2958,
+          "title": "雨とカプチーノ",
+          "artist": "ヨルシカ",
+          "raw": "00:49:18 雨とカプチーノ/ヨルシカ",
+          "rawHash": "282c1fbdb2f8548eb9a7779f34e950c5aa875ce64805f9590f4d2ba024b2a1ed",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:06:49",
+          "seconds": 4009,
+          "title": "One Last Kiss",
+          "artist": "宇多田ヒカル",
+          "raw": "01:06:49 One Last Kiss/宇多田ヒカル",
+          "rawHash": "267e5998b96388c3449d7826b4a74e94397de7f779d79d3aac61e0ef367fde81",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:14:31",
+          "seconds": 4471,
+          "title": "ヲズワルド",
+          "artist": "煮ル果実",
+          "raw": "01:14:31 ヲズワルド/煮ル果実",
+          "rawHash": "44461f268f1688efaa4425ad1534baa60eba813e85c035ec31253e8fd977653b",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:38:50",
+          "seconds": 5930,
+          "title": "DRESSING ROOM",
+          "artist": "なとり",
+          "raw": "01:38:50 DRESSING ROOM/なとり",
+          "rawHash": "abb2660ba367bf95b5b341183ed789abddcfa904c3079e21f7055d85e67198ad",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:43:01",
+          "seconds": 6181,
+          "title": "ノマド",
+          "artist": "須田景凪",
+          "raw": "01:43:01 ノマド/須田景凪",
+          "rawHash": "d4ef2756a0d2dd26d99f590e5d955a7cfc96eb2ab34b45e4803a6c1a26008224",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:56:44",
+          "seconds": 7004,
+          "title": "紗痲",
+          "artist": "煮ル果実",
+          "raw": "01:56:44 紗痲/煮ル果実",
+          "rawHash": "9c6b332f7426f2cf0d7eb946daf326b8d16951185b3363c6718081d541a85649",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:05:49",
+          "seconds": 7549,
+          "title": "名前のない怪物",
+          "artist": "EGOIST",
+          "raw": "02:05:49 名前のない怪物/EGOIST",
+          "rawHash": "50f248138a87fcae95de0a931a01c40f6d3b9c192a0912bed9c48b44192e5f68",
+          "sourceId": "UgxOeEUGzIQI1zuVr4p4AaABAg",
+          "sourceHash": "9213bb7bde0bf45a5a46e06e4c12ad3b7814626fc55bd770971df81a911fc17b",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.545Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌",
+          "弾き語"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "dwZF5fVs-og",
+      "title": "【歌枠】初見さんも大歓迎🙌💕カラオケとか弾き語ります🎸/【Re:AcT/音羽奏來】 #shorts",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=dwZF5fVs-og"
+      ],
+      "selectedSourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+      "selectedSourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:11:52",
+          "seconds": 712,
+          "title": "アポリア",
+          "artist": "ヨルシカ",
+          "raw": "00:11:52 アポリア/ヨルシカ",
+          "rawHash": "e23c5155b87b214df83233ecf6ff079ffe3b46f0268cb42d27c361f96d5a28b2",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:23:26",
+          "seconds": 1406,
+          "title": "ビビデバ",
+          "artist": "星街すいせい",
+          "raw": "00:23:26 ビビデバ/星街すいせい",
+          "rawHash": "58385ce661dccac38f3a21237b4e39aab16561c5f9127853dde44c7ec9d9e25f",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:33:04",
+          "seconds": 1984,
+          "title": "Drop",
+          "artist": "HANA",
+          "raw": "00:33:04 Drop/HANA",
+          "rawHash": "8091e4167ef53c713b248dac3062e343b4d9100d7525009dbb7b420b0d341133",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:46:32",
+          "seconds": 2792,
+          "title": "怪獣",
+          "artist": "サカナクション",
+          "raw": "00:46:32 怪獣/サカナクション",
+          "rawHash": "52514e6ebfe7a119dd6c34039b1853c1d72ed89affc45a07c2ed7728abb5b230",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:03:02",
+          "seconds": 3782,
+          "title": "ロミオとシンデレラ",
+          "artist": "Doriko",
+          "raw": "01:03:02 ロミオとシンデレラ/Doriko",
+          "rawHash": "29663de8f080a4d7ea40a8a65b63e0cd9c40c8f0a14987b71ec0220f1bd305ae",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:13:12",
+          "seconds": 4392,
+          "title": "修羅場",
+          "artist": "東京事変",
+          "raw": "01:13:12 修羅場/東京事変",
+          "rawHash": "dff67ddffa69066058cee9962e7b848740fac70d284fe0d71769c1ecead1f376",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:20:33",
+          "seconds": 4833,
+          "title": "酸欠少女",
+          "artist": "さユり",
+          "raw": "01:20:33  酸欠少女/さユり",
+          "rawHash": "d4bcafab5ec3674e7060c235701cd5ff8c3d4894477872a5b3a88dc7bb9350c2",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:30:37",
+          "seconds": 5437,
+          "title": "One Last Kiss",
+          "artist": "宇多田ヒカル",
+          "raw": "01:30:37 One Last Kiss/宇多田ヒカル",
+          "rawHash": "aae7c604d46efbe834ee45899dd98578dbfd1dcb34a9e801224c03e63d1f7748",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:37:54",
+          "seconds": 5874,
+          "title": "Rolling star",
+          "artist": "YUI",
+          "raw": "01:37:54 Rolling star/YUI",
+          "rawHash": "d34acd1565d10ea9aa836d98f838f26f51a8350cedc6d82e91dd006899373006",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:45:20",
+          "seconds": 6320,
+          "title": "八月のレイニー",
+          "artist": "はるまきごはん",
+          "raw": "01:45:20 八月のレイニー/はるまきごはん",
+          "rawHash": "60f2b8e8d37dbe467a9788a84d398dce5ea5a8a712d3f8aabcf8c1b2038b496e",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:50:46",
+          "seconds": 6646,
+          "title": "Ditto",
+          "artist": "New jeans",
+          "raw": "01:50:46 Ditto/New jeans",
+          "rawHash": "94676eede6cd93787f067a3136e6fbdc081a782b92acbdb0d701a0b9f257960a",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:01:30",
+          "seconds": 7290,
+          "title": "ワールド・ランプシェード",
+          "artist": "BuzzG",
+          "raw": "02:01:30 ワールド・ランプシェード/BuzzG",
+          "rawHash": "5d1e0159a072e70cb13b3d35ef29110580c1eeffccd4a8b7455d0e905621bd17",
+          "sourceId": "UgwYcS9ihBdRcnfWCfN4AaABAg",
+          "sourceHash": "bd9f7138a0638f18097852139461825d2d9fba342e2f49f4aff32b1d6ee1af5d",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.546Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌",
+          "弾き語"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "m-ZkWjGJHVI",
+      "title": "【歌枠】初見さんも大歓迎🙌💕朝活沢山歌います🎸/【Re:AcT/音羽奏來】 #shorts",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=m-ZkWjGJHVI"
+      ],
+      "selectedSourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+      "selectedSourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:15:36",
+          "seconds": 936,
+          "title": "月に吠える",
+          "artist": "ヨルシカ",
+          "raw": "00:15:36 月に吠える/ヨルシカ",
+          "rawHash": "593ad56703f6107916335189d603934fd62a13272f7eb63e24c67cc1da9dca90",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:24:09",
+          "seconds": 1449,
+          "title": "花に亡霊",
+          "artist": "ヨルシカ",
+          "raw": "00:24:09 花に亡霊/ヨルシカ",
+          "rawHash": "a7e9da8b81c9c646f5e0956d038014e5f236272c1857a02c94f40fa6e6312a4b",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:38:05",
+          "seconds": 2285,
+          "title": "盗作",
+          "artist": "ヨルシカ",
+          "raw": "00:38:05 盗作/ヨルシカ",
+          "rawHash": "45199573a9b1a1aca12926587dad4bc647028bb83b7f2e223b4378c1d63fe1f3",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:53:05",
+          "seconds": 3185,
+          "title": "幽霊東京",
+          "artist": "Ayase",
+          "raw": "00:53:05 幽霊東京/Ayase",
+          "rawHash": "fb6b35a45a00d8fd7eef64a3ce1d7bdd053d499d583d65728c9032b9ee414ba0",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:03:30",
+          "seconds": 3810,
+          "title": "パメラ",
+          "artist": "須田景凪",
+          "raw": "01:03:30 パメラ/須田景凪",
+          "rawHash": "31812eb6a551a06da70735a8019aa773395003ebd627e6a90d3ba49e4afad6b0",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:13:28",
+          "seconds": 4408,
+          "title": "従属ふりったー",
+          "artist": "電ポルP",
+          "raw": "01:13:28 従属ふりったー/電ポルP",
+          "rawHash": "4b2db95698f09894fd5c57f0e55b5bce5b26bd78bc38d6aa271e931e5e289320",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:30:08",
+          "seconds": 5408,
+          "title": "言って",
+          "artist": "ヨルシカ",
+          "raw": "01:30:08 言って。/ヨルシカ",
+          "rawHash": "de79dfc48370762673b00a1bb9744702dd275e3ee16383a7609ebc75d38ace88",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:46:03",
+          "seconds": 6363,
+          "title": "少女S",
+          "artist": "SCANDAL",
+          "raw": "01:46:03 少女S/SCANDAL",
+          "rawHash": "29dd1b56ad9ed5e7072deb5b929e89e2f75bd84a7cf4b28cf26095087909a992",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:57:24",
+          "seconds": 7044,
+          "title": "Rolling star",
+          "artist": "YUI",
+          "raw": "01:57:24 Rolling star/YUI",
+          "rawHash": "53533b5d23fa61b932ed33932b9c08c3acee4bdb0f14230a73207e622fa9c0e0",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:02:45",
+          "seconds": 7365,
+          "title": "一輪の花",
+          "artist": "HIGH and MIGHTY COLOR",
+          "raw": "02:02:45 一輪の花/HIGH and MIGHTY COLOR",
+          "rawHash": "3acf0aa04176c4bb691bc1318526be4f438020748b3fce881bb89e5fb8031fe3",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:09:07",
+          "seconds": 7747,
+          "title": "＊〜アスタリスク〜",
+          "artist": "ORANGE RANGE",
+          "raw": "02:09:07 ＊〜アスタリスク〜/ORANGE RANGE",
+          "rawHash": "4591c5f19d495311231ee434e0b087efd83519c01fcf16ddcdc659834a4f232c",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:27:03",
+          "seconds": 8823,
+          "title": "Again",
+          "artist": "YUI",
+          "raw": "02:27:03 Again/YUI",
+          "rawHash": "10b7b7a612895694b77855b06f6431aed97a42122fda295ce08df6a8112c6fd8",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:38:20",
+          "seconds": 9500,
+          "title": "ヒトヒラのハナビラ",
+          "artist": "ステレオポニー",
+          "raw": "02:38:20 ヒトヒラのハナビラ/ステレオポニー",
+          "rawHash": "4ea52597d14a9eb1b903291615fd334f33a5f02cfe766747bd3ef57c905726ce",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:46:53",
+          "seconds": 10013,
+          "title": "Rapport",
+          "artist": "キタニタツヤ",
+          "raw": "02:46:53 Rapport/キタニタツヤ",
+          "rawHash": "b821250899713ccf0bbb3bd3e495e9e6969aca4ad9c9f9ccddd3ef2a1cbe39e6",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:55:05",
+          "seconds": 10505,
+          "title": "レテ",
+          "artist": "さユり",
+          "raw": "02:55:05 レテ/さユり",
+          "rawHash": "0c746ab499eb5520c4f6369428a92069839e13cbbd910ee843f1ff34da21df2e",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "3:03:44",
+          "seconds": 11024,
+          "title": "chAngE",
+          "artist": "miwa",
+          "raw": "03:03:44 chAngE/miwa",
+          "rawHash": "519c2ddf1644d52537eddf854d5c05dbfd24d9482a62681109eda43848a204eb",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "3:08:59",
+          "seconds": 11339,
+          "title": "GLAMOROUS SKY",
+          "artist": "中島美嘉",
+          "raw": "03:08:59 GLAMOROUS SKY/中島美嘉",
+          "rawHash": "ba1d4ee495aaf0504bd3b11a250aed4ab63a0a9ff8a956f53cbab8c11b09998f",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "3:16:33",
+          "seconds": 11793,
+          "title": "フラレガイガール",
+          "artist": "さユり",
+          "raw": "03:16:33 フラレガイガール/さユり",
+          "rawHash": "f5377cbb3dc7238e1f2dbd388a90f2bfba05f24107f452768668b555c9e0767e",
+          "sourceId": "Ugx-MIKT8qlS8W7bvlt4AaABAg",
+          "sourceHash": "796267de80f4378232d4b73d6d27852a02094368823fa303f0eb8e61dfcf3856",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.548Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "9U34uEdPm0o",
+      "title": "【歌枠＆重大告知- ̗̀ 📢💭】メンバーシップ解放記念配信🎉本当にありがとう😭🙏✨/Re:AcT 音羽奏來",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=9U34uEdPm0o"
+      ],
+      "selectedSourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+      "selectedSourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:37:02",
+          "seconds": 2222,
+          "title": "Luna say maybe",
+          "artist": "月村手毬",
+          "raw": "00:37:02 Luna say maybe/月村手毬",
+          "rawHash": "6ea14d2ab65bcb8fa9cc0adc6798ad499a41e2894d4c74ce4782de6014c2278a",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:48:41",
+          "seconds": 2921,
+          "title": "MONOCHROME",
+          "artist": "水槽",
+          "raw": "00:48:41 MONOCHROME/水槽",
+          "rawHash": "41bb2bdfc7f1ee4afe23bd326c22c8b70db98f3912af797ca6e0f371ab02d415",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "1:07:39",
+          "seconds": 4059,
+          "title": "私は、私達は",
+          "artist": "Guiano",
+          "raw": "01:07:39 私は、私達は/Guiano",
+          "rawHash": "d2cd6d43e92fed12a82582344dcdf7f8d1bcb55e8ec9d558b7c7bf9e06ba8544",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:12:12",
+          "seconds": 4332,
+          "title": "G4L",
+          "artist": "Giga",
+          "raw": "01:12:12 G4L/Giga",
+          "rawHash": "708d57e7b25edc70fff909c6e8528ac7f69eb41a8326bc054e019316f0e93276",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:24:44",
+          "seconds": 5084,
+          "title": "Sky chord~大人になる君へ~",
+          "artist": "辻詩音",
+          "raw": "01:24:44 Sky chord~大人になる君へ~/辻詩音",
+          "rawHash": "4f3d09202f30645cffe9fdaa6fcf27ab67fa144b7d9a6b10627167f8fd3280c5",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:38:28",
+          "seconds": 5908,
+          "title": "サンフェーデッド",
+          "artist": "篠澤広",
+          "raw": "01:38:28 サンフェーデッド/篠澤広",
+          "rawHash": "02b8e0a0e4095f3b39b9453e630c9a9778fa8fa5822dadc8a105e9b4b379b0a5",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:43:17",
+          "seconds": 6197,
+          "title": "コントラスト",
+          "artist": "篠澤広",
+          "raw": "01:43:17 コントラスト/篠澤広",
+          "rawHash": "deb6124aacb1811c84176b97b644155a7536303f9d32c8974ee3ecb9ed883b1c",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:51:28",
+          "seconds": 6688,
+          "title": "Knot",
+          "artist": "さユり",
+          "raw": "01:51:28 Knot/さユり",
+          "rawHash": "e8540c69630fd211abf08d2abde5369af922de38681d69bcfc74d958c96bdccc",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "2:14:02",
+          "seconds": 8042,
+          "title": "藍二乗",
+          "artist": "ヨルシカ",
+          "raw": "02:14:02 藍二乗/ヨルシカ",
+          "rawHash": "e1ce47adaf917165f8fcd73bdbcf0b57629f13dbbf6745ec93c66db71d8ed5e7",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:33:53",
+          "seconds": 9233,
+          "title": "妄想疾患■ガール",
+          "artist": "GUMI",
+          "raw": "02:33:53 妄想疾患■ガール/GUMI",
+          "rawHash": "123720eaa10af8c92b40ad227bffae87d3ca9fda30732a210cfd42c934959fcd",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:39:42",
+          "seconds": 9582,
+          "title": "紗痲",
+          "artist": "煮ル果実",
+          "raw": "02:39:42 紗痲/煮ル果実",
+          "rawHash": "54e5ce7f6e4d5c360227fe9db03853ae7dd399195b3c24cc28b24adad0970202",
+          "sourceId": "UgzdEq3Ix9xDjTiyIL14AaABAg",
+          "sourceHash": "301ec67c2fd94f5e40cca207feccfcd40b450ad2942e192dabc70c5f9ed94af0",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.549Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "8hM_R2adLtM",
+      "title": "【歌枠🎸】◸重大告知あり⋆͛📣◿初見さんも大歓迎🔰 一週間ぶりに歌うぜ🫶🏻︎🫧Re:AcT/音羽奏來",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=8hM_R2adLtM"
+      ],
+      "selectedSourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+      "selectedSourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:05:00",
+          "seconds": 300,
+          "title": "Cynic",
+          "artist": "ポリスピカデリー",
+          "raw": "00:05:00 Cynic/ポリスピカデリー",
+          "rawHash": "f9c39b1d956a9a03e7c842273f917c3a4aceddf39ade5382775126b862d3dc8d",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:13:32",
+          "seconds": 812,
+          "title": "八月のレイニー",
+          "artist": "はるまきごはん",
+          "raw": "00:13:32 八月のレイニー/はるまきごはん",
+          "rawHash": "ef253a8eb81cd5410fa12396483f765191c035c086bc2d61632115b4514ccce7",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:31:02",
+          "seconds": 1862,
+          "title": "Bang!!!",
+          "artist": "EGOIST",
+          "raw": "00:31:02 Bang!!!/EGOIST",
+          "rawHash": "a073ecbd2aed601367bb78c13a094dcd722e18394bd2cd7549054ee5ad9e5a07",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:48:13",
+          "seconds": 2893,
+          "title": "アイのシナリオ",
+          "artist": "HoneyWorks",
+          "raw": "00:48:13 アイのシナリオ/HoneyWorks",
+          "rawHash": "6582b5e4e85efa2308489a29f6cee7cad7f8b66590c0050d6908577e6474f9a1",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:04:49",
+          "seconds": 3889,
+          "title": "Rapport",
+          "artist": "キタニタツヤ",
+          "raw": "01:04:49 Rapport/キタニタツヤ",
+          "rawHash": "7c460f7e03b5845e1ea72392c7415703e391ddcd580e0ce07652cf3cabfcd5ba",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:09:51",
+          "seconds": 4191,
+          "title": "My Generation",
+          "artist": "YUI",
+          "raw": "01:09:51 My Generation/YUI",
+          "rawHash": "25a8b4dbe0815ed5ad493be38f8c5c37af0d67dfe9d5fcacc6b36386df0993b9",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:19:36",
+          "seconds": 4776,
+          "title": "物換星移カタルシス",
+          "artist": "VALIS",
+          "raw": "01:19:36 物換星移カタルシス/VALIS",
+          "rawHash": "332a4a52c266ac6634edc3e5ba33ec11b5b3e2f07fc59abe2ed15533bf5e4233",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:36:41",
+          "seconds": 5801,
+          "title": "絶え間なく藍色",
+          "artist": "獅子志司",
+          "raw": "01:36:41 絶え間なく藍色/獅子志司",
+          "rawHash": "967d7eae82958678addbc752b4f720dcb8a6ed8594de0523a344e3c038acfa5e",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:41:30",
+          "seconds": 6090,
+          "title": "幽霊東京",
+          "artist": "Ayase",
+          "raw": "01:41:30 幽霊東京/Ayase",
+          "rawHash": "964028b4c2f3b0a802751be5b2337cca0e9089093846f071bf6f59ddbe598fd6",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:46:29",
+          "seconds": 6389,
+          "title": "バスケットワーム",
+          "artist": "ナポリP",
+          "raw": "01:46:29 バスケットワーム/ナポリP",
+          "rawHash": "44af48ce77809923002f7e9a1c69a43c443f3d573b0f3b708fa156dc5b04b912",
+          "sourceId": "UgyZxtByICRBSwEZOOZ4AaABAg",
+          "sourceHash": "f1fb5ea762a817442a7ba8c7405471678571d1ed903779d8146e8d4b42ee05b3",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.551Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "MDTAEktMzS4",
+      "title": "【定期ライブ歌枠🌟】❺th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=MDTAEktMzS4"
+      ],
+      "selectedSourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+      "selectedSourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:26:52",
+          "seconds": 1612,
+          "title": "航海の唄",
+          "artist": "さユり",
+          "raw": "00:26:52 航海の唄/さユり",
+          "rawHash": "7be94636ac27683004c820c73a29c6cb4e9e244379381c375516f51b602ae453",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:32:48",
+          "seconds": 1968,
+          "title": "嗤うマネキン",
+          "artist": "ナポリP",
+          "raw": "00:32:48 嗤うマネキン/ナポリP",
+          "rawHash": "6b5533fa898fc86fb5468d5e7bdb13e04d7328c202227d502c28e6de89f5f8c6",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:37:21",
+          "seconds": 2241,
+          "title": "アイのシナリオ",
+          "artist": "HoneyWorks",
+          "raw": "00:37:21 アイのシナリオ/HoneyWorks",
+          "rawHash": "e7fa60ba2c78736de57356354b99ebfbee55795671c87233022b7a7a60d4ccdc",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:59:04",
+          "seconds": 3544,
+          "title": "HELLO~Paradise Kiss~",
+          "artist": "YUI",
+          "raw": "00:59:04 HELLO~Paradise Kiss~/YUI",
+          "rawHash": "cfc7f0718fc34ead9df7f149043f0a16d663603437b264ab0d683416b90dfb45",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:03:41",
+          "seconds": 3821,
+          "title": "ノーチラス",
+          "artist": "ヨルシカ",
+          "raw": "01:03:41 ノーチラス/ヨルシカ",
+          "rawHash": "e78c1e73189c6cab26d7ccc3f6712367334db52837aeffa9b75a30e8bdb2f018",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:09:17",
+          "seconds": 4157,
+          "title": "8.8",
+          "artist": "あたらよ",
+          "raw": "01:09:17 8.8/あたらよ",
+          "rawHash": "378771469a404c1469de5e092cc42739732a7099144e9c48b7d48aaf42de42df",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:35:25",
+          "seconds": 5725,
+          "title": "マーシャル・マキシマイザー",
+          "artist": "柊マグネタイト",
+          "raw": "01:35:25 マーシャル・マキシマイザー/柊マグネタイト",
+          "rawHash": "0a7fcea08f47a12ffae2a5a762a34c19a40ac0a76d6f8c8cbc2aea18238e7ebc",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:39:16",
+          "seconds": 5956,
+          "title": "SUMMER SONG",
+          "artist": "YUI",
+          "raw": "01:39:16 SUMMER SONG/YUI",
+          "rawHash": "ea65801baf330019832949a11b04c8e51f4f81270fba1000d50325611be6829c",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:44:18",
+          "seconds": 6258,
+          "title": "盗作",
+          "artist": "ヨルシカ",
+          "raw": "01:44:18 盗作/ヨルシカ",
+          "rawHash": "bd2506b3d4f84e6b49f6bc155e90550bda55e3e8f8d13687f4abcccff6789c26",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "2:06:37",
+          "seconds": 7597,
+          "title": "声",
+          "artist": "羊文学",
+          "raw": "02:06:37 声/羊文学",
+          "rawHash": "fac4b75753b9efdd94767b2b4a3c9df7195f99f5aa9b64314298f56cb07afa83",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "2:11:50",
+          "seconds": 7910,
+          "title": "チェリー",
+          "artist": "スピッツ",
+          "raw": "02:11:50 チェリー/スピッツ",
+          "rawHash": "c2d2633db26e6bf7d819c7442be11a0333af421c42e9063a78cc5da6091b0c3e",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:18:40",
+          "seconds": 8320,
+          "title": "夜永唄",
+          "artist": "神はサイコロを振らない",
+          "raw": "02:18:40 夜永唄/神はサイコロを振らない",
+          "rawHash": "c024b52b65b87722f304f870de3a00df3d1519418e9be600121c4d8951c2662d",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:33:00",
+          "seconds": 9180,
+          "title": "おしゃかさま",
+          "artist": "RADWIMPS",
+          "raw": "02:33:00 おしゃかさま/RADWIMPS",
+          "rawHash": "d800f0b9fb703b842a1244479fb3c1ef3a9feef39891ce5c7955f4daa6f9067b",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:48:20",
+          "seconds": 10100,
+          "title": "絶対零度",
+          "artist": "なとり",
+          "raw": "02:48:20 絶対零度/なとり",
+          "rawHash": "f6d9de7786ba3dea2a9586a0a9fd0d4b4c91bc9655bdf6b9ac222e3f41d289b8",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:52:56",
+          "seconds": 10376,
+          "title": "B級",
+          "artist": "ちゃんみな",
+          "raw": "02:52:56 B級/ちゃんみな",
+          "rawHash": "1314506cfceb6ce7efc161c473d06b5275a51d485853d63a5c9a8a12b72a40dc",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "3:02:59",
+          "seconds": 10979,
+          "title": "Dr",
+          "artist": "安室奈美恵",
+          "raw": "03:02:59 Dr./安室奈美恵",
+          "rawHash": "a71123ddfd99bc1702d8d26abed2aefeddb6bee1447fd6117ad99db9a8a0f62f",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "3:15:07",
+          "seconds": 11707,
+          "title": "おやすみ泣き声、さよなら歌姫",
+          "artist": "クリープハイプ",
+          "raw": "03:15:07 おやすみ泣き声、さよなら歌姫/クリープハイプ",
+          "rawHash": "3501dd3cf4369d9942feeff6df62da37254b05f6763960fa88a9cbab4ea2277a",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "3:21:08",
+          "seconds": 12068,
+          "title": "Summering",
+          "artist": "じん",
+          "raw": "03:21:08 Summering/じん",
+          "rawHash": "9c48e4938b0ce370b18b755f1393a2a87d4a42721759dc84f39a447aff2af4bc",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "3:26:54",
+          "seconds": 12414,
+          "title": "モザイクロール",
+          "artist": "DECO*27",
+          "raw": "03:26:54 モザイクロール/DECO*27",
+          "rawHash": "5fd7f7cd7cb3744bc02ef7eff7e5ff5dd1f99cb5db2ad3f7aa3e17c919e89d81",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 20,
+          "time": "3:34:44",
+          "seconds": 12884,
+          "title": "ハングリーニコル",
+          "artist": "煮ル果実",
+          "raw": "03:34:44 ハングリーニコル/煮ル果実",
+          "rawHash": "abbf97dc63eec96d7ed670e6abbaa2aca4e7fdb7a3171f2cefe7bf5cfeb58b8e",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        },
+        {
+          "index": 21,
+          "time": "3:43:15",
+          "seconds": 13395,
+          "title": "紗痲",
+          "artist": "煮ル果実",
+          "raw": "03:43:15 紗痲/煮ル果実",
+          "rawHash": "9a55492ebf977686dc1dd460a5a4b81bde1dccda73668cdd21f18348bba947fd",
+          "sourceId": "Ugzg0jKw-l2ZmVHb1lR4AaABAg",
+          "sourceHash": "b8f72e01e134e59b9fcd09e0b6c967b2dec693d36a8fa55b89938ba4c662b7e6",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.551Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "LK2jolJ4WTk",
+      "title": "【定期ライブ歌枠🌟】6th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=LK2jolJ4WTk"
+      ],
+      "selectedSourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+      "selectedSourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:19:21",
+          "seconds": 1161,
+          "title": "侵食",
+          "artist": "niki",
+          "raw": "00:19:21 侵食/niki",
+          "rawHash": "a09e28b7b79d3518aeedd05c139c05344047559274d526c02de7bb01d1f217c2",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:23:23",
+          "seconds": 1403,
+          "title": "All Alone With You",
+          "artist": "EGOIST",
+          "raw": "00:23:23 All Alone With You/EGOIST",
+          "rawHash": "7fa341d24ae398ef8684bb1cb8fcfde1ecebefff57e2ac5d823b15c18afd2309",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:29:59",
+          "seconds": 1799,
+          "title": "季節は次々死んでいく",
+          "artist": "Amazarashi",
+          "raw": "00:29:59 季節は次々死んでいく/Amazarashi",
+          "rawHash": "5e79390683e6b3de9a79d9d2e884fbb84c3f109d71febdae49b109c84fc7bb7a",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:52:34",
+          "seconds": 3154,
+          "title": "おやすみ泣き声、さよなら歌姫",
+          "artist": "クリープハイプ",
+          "raw": "00:52:34 おやすみ泣き声、さよなら歌姫/クリープハイプ",
+          "rawHash": "52450ecd4d8bbac3928a1ace43f0f80a4ca0ff8d2627c81ed3b9244398256ef2",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:57:44",
+          "seconds": 3464,
+          "title": "八月のレイニー",
+          "artist": "はるまきごはん",
+          "raw": "00:57:44 八月のレイニー/はるまきごはん",
+          "rawHash": "e86109715dd20bda62793fb7c101a5c79697d1a2e9577b59ad7e12e9b411a8fd",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:02:45",
+          "seconds": 3765,
+          "title": "クリーム",
+          "artist": "yama",
+          "raw": "01:02:45 クリーム/yama",
+          "rawHash": "1cc3d33ca8bf4eb60aa796c1b8b7a4c29a4c1291dd95111526904828f1d475ef",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:22:56",
+          "seconds": 4976,
+          "title": "エウレカ",
+          "artist": "なとり",
+          "raw": "01:22:56 エウレカ/なとり",
+          "rawHash": "205c47e6489eab91342eef34e348c66d369b5dc0df97a4b4c6cf803b06fe50cd",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:26:32",
+          "seconds": 5192,
+          "title": "オルターエゴ",
+          "artist": "Misumi",
+          "raw": "01:26:32 オルターエゴ/Misumi",
+          "rawHash": "8a09883486473d0410e8a0ac5b810bb2284930b2fd53d48df03f61d9c23c8d7e",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:31:32",
+          "seconds": 5492,
+          "title": "プロポーズ",
+          "artist": "なとり",
+          "raw": "01:31:32 プロポーズ/なとり",
+          "rawHash": "4c2da33c96415713f2b76c97681186e7027bee9fd85b8fa77f30eae32a8450cc",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:48:20",
+          "seconds": 6500,
+          "title": "ラグトレイン",
+          "artist": "稲葉曇",
+          "raw": "01:48:20 ラグトレイン/稲葉曇",
+          "rawHash": "8388a51036fbb57971dd335c347c6ba71d526c9706acaa4f621c6e23ebf1f37b",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:54:06",
+          "seconds": 6846,
+          "title": "青のすみか",
+          "artist": "キタニタツヤ",
+          "raw": "01:54:06 青のすみか/キタニタツヤ",
+          "rawHash": "21a3d87536bd263d3a907021fb87af5cff94ffbb1f22bb3f7497665588a47d11",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "2:00:33",
+          "seconds": 7233,
+          "title": "YOU",
+          "artist": "YUI",
+          "raw": "02:00:33 YOU/YUI",
+          "rawHash": "7713d7ecd6a2992c638fdd240b5168fc37dcc414539ea48a7545f593e681fc7b",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:08:14",
+          "seconds": 7694,
+          "title": "おやすみ泣き声、さよなら歌姫",
+          "artist": "クリープハイプ",
+          "raw": "02:08:14 おやすみ泣き声、さよなら歌姫/クリープハイプ",
+          "rawHash": "1c8780386499c0f897a73c92dda50a4c51e7163da90c6e1cb4704c38a4582367",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:14:58",
+          "seconds": 8098,
+          "title": "ヲズワルド",
+          "artist": "煮ル果実",
+          "raw": "02:14:58 ヲズワルド/煮ル果実",
+          "rawHash": "105d325780d9f6b40dc5672d5c513c125066d9c319a2dd65497a99b67c16c8bb",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:25:08",
+          "seconds": 8708,
+          "title": "ヲズワルド",
+          "artist": "煮ル果実（アカペラ）",
+          "raw": "02:25:08 ヲズワルド/煮ル果実（アカペラ）",
+          "rawHash": "d316cb8f6b244a2a0625781e2fc870005ee2cce9740573bc323ce911f8328022",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "2:30:14",
+          "seconds": 9014,
+          "title": "シャルル",
+          "artist": "須田景凪",
+          "raw": "02:30:14 シャルル/須田景凪",
+          "rawHash": "971af9fba3a1c1f11b33010ad9be32d6cac528506fc751433c3b1eb654e01009",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "2:41:02",
+          "seconds": 9662,
+          "title": "ブリキノダンス",
+          "artist": "日向電工",
+          "raw": "02:41:02 ブリキノダンス/日向電工",
+          "rawHash": "ee007bb0f1856798730145bc1a44d221990ece339f6ba89b2f8cec2047e9b3cf",
+          "sourceId": "UgxxAC3Oc_m5X6tLVbl4AaABAg",
+          "sourceHash": "14670c52b911502439c8d5a6afe31be9dd5b8a264aea360ac3a9808b7a78cc8f",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.552Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "65rVnJ7aJa8",
+      "title": "【定期ライブ歌枠🌟】7th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "channelName": "SoraOtoha",
+      "channelId": "UC9XsF9M7lZ1BSABHjKatOSA",
+      "channelHandle": "/@SoraOtoha",
+      "channelUrl": "https://www.youtube.com/@SoraOtoha",
+      "publishedTimestamp": 1758924845115,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=65rVnJ7aJa8"
+      ],
+      "selectedSourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+      "selectedSourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:18:12",
+          "seconds": 1092,
+          "title": "IN_MY_HEAD",
+          "artist": "なとり",
+          "raw": "00:18:12 IN_MY_HEAD/なとり",
+          "rawHash": "82f57f3f00c23dd09b423fb089f6ebda74ebf370e3b968be28eea00d12e6dca8",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:23:06",
+          "seconds": 1386,
+          "title": "Cynic",
+          "artist": "ポリスピカデリー",
+          "raw": "00:23:06 Cynic/ポリスピカデリー",
+          "rawHash": "6a00a18d9ee8e529f04d74ae4fa07a4521c538ccb511583351877d501e625453",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:27:40",
+          "seconds": 1660,
+          "title": "Undercover",
+          "artist": "米津玄師",
+          "raw": "00:27:40 Undercover/米津玄師",
+          "rawHash": "a488c95232c50fccfc2f30e031f01bf3c019fbdca8d973c285a5543a7de7759b",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:43:48",
+          "seconds": 2628,
+          "title": "10月無口な君を忘れる",
+          "artist": "あたらよ",
+          "raw": "00:43:48 10月無口な君を忘れる/あたらよ",
+          "rawHash": "0067256f5ed08daa830060757404a636f536ee358d58064b9e38a09fcc5daa15",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:50:08",
+          "seconds": 3008,
+          "title": "蜂と見世物",
+          "artist": "さユり",
+          "raw": "00:50:08 蜂と見世物/さユり",
+          "rawHash": "a80c4a1a4c606c60264d985d6d6adacd1318e49ffdcbd2726d01839afcb4dc1c",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:56:08",
+          "seconds": 3368,
+          "title": "そっけない",
+          "artist": "RADWIMPS",
+          "raw": "00:56:08 そっけない/RADWIMPS",
+          "rawHash": "67e657702a43d9ab9abfff89840b18b98ac64400d55c909d808edb005971d86c",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:05:00",
+          "seconds": 3900,
+          "title": "参拝",
+          "artist": "未記載",
+          "raw": "01:05:00 参拝",
+          "rawHash": "91878e2379ebd8fe118055aec8fbf61907af5a6ef7c841c69696dc24c3cf26d9",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "1:20:08",
+          "seconds": 4808,
+          "title": "スキスキ絶頂症",
+          "artist": "電ポルP",
+          "raw": "01:20:08 スキスキ絶頂症/電ポルP",
+          "rawHash": "a27ca4c73c9f563ddaa8e8a5ea742b41e31504b31752c9cba06e53f4bd4cbfce",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:25:39",
+          "seconds": 5139,
+          "title": "おしゃかさま",
+          "artist": "RADWIMPS",
+          "raw": "01:25:39 おしゃかさま/RADWIMPS",
+          "rawHash": "e2b6cc9303bb6d1457797644328b51b2ef35cf0a09c7dce443ebad7c0c9877c5",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:30:40",
+          "seconds": 5440,
+          "title": "ヲズワルド",
+          "artist": "煮ル果実",
+          "raw": "01:30:40 ヲズワルド/煮ル果実",
+          "rawHash": "1c6b16c4cc3cfbef5eb2b1c0633f0c29c50613fc0ded2adc276b8b88f38c7d0a",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:47:04",
+          "seconds": 6424,
+          "title": "桜流し",
+          "artist": "宇多田ヒカル",
+          "raw": "01:47:04 桜流し/宇多田ヒカル",
+          "rawHash": "d2e2fae6d7fbcf87f8c09cd7a6d55075042b4438659abbeb07198fd5ba3476b5",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:54:30",
+          "seconds": 6870,
+          "title": "たばこ",
+          "artist": "コレサワ",
+          "raw": "01:54:30 たばこ/コレサワ",
+          "rawHash": "4941412205308590dc1f6ced39aab86f3ddf4b9a424604bf10f6c60f36e3e474",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "2:03:16",
+          "seconds": 7396,
+          "title": "ビビデバ",
+          "artist": "星街すいせい",
+          "raw": "02:03:16 ビビデバ/星街すいせい",
+          "rawHash": "9c724bf9d78d4422ca2231cef723b7cd71c7cc8674d64429c67a3844c0a1f66a",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "2:07:39",
+          "seconds": 7659,
+          "title": "ビビデバ",
+          "artist": "星街すいせい（オケリベンジ）",
+          "raw": "02:07:39 ビビデバ/星街すいせい（オケリベンジ）",
+          "rawHash": "e4aa2aedf0fa359efda5b674b3313670e283f84b4523cae566dadc74d7a36e3c",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "2:20:32",
+          "seconds": 8432,
+          "title": "ラグトレイン",
+          "artist": "稲葉曇",
+          "raw": "02:20:32 ラグトレイン/稲葉曇",
+          "rawHash": "ad5c071b1362c1f18d99953727be9842e1422f1398bab16fcc8d8c41220cce4c",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "2:26:07",
+          "seconds": 8767,
+          "title": "シャンティ",
+          "artist": "wotaku",
+          "raw": "02:26:07 シャンティ/wotaku",
+          "rawHash": "470a45368557a21c337ab3cc37cebd65d5c60d93a25cd7a171b83c1b33fd74c2",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "2:34:39",
+          "seconds": 9279,
+          "title": "Loveit?",
+          "artist": "biz×ZERA",
+          "raw": "02:34:39 Loveit?/biz×ZERA",
+          "rawHash": "b3f610df200ef0c7a0ff49578457f7bffd2e51430457ad5616f14a91b6c3cbc0",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "2:39:44",
+          "seconds": 9584,
+          "title": "忘れてください",
+          "artist": "ヨルシカ",
+          "raw": "02:39:44 忘れてください/ヨルシカ",
+          "rawHash": "2f2cbd9596770247eb888c721b6dacb6956d268b254100eccf0d4d454d2168f5",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "2:45:45",
+          "seconds": 9945,
+          "title": "モザイクロール",
+          "artist": "DECO*27",
+          "raw": "02:45:45 モザイクロール/DECO*27",
+          "rawHash": "9d133912474a35084120e8a634607a0de280f31a45bffcc67e0c928389c6c091",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 20,
+          "time": "2:51:01",
+          "seconds": 10261,
+          "title": "モニタリング",
+          "artist": "DECO*27",
+          "raw": "02:51:01 モニタリング/DECO*27",
+          "rawHash": "2848afcda542a9c53e15ea14d8441b8e9a7bab73d6a12b3488a4ac71d6775c51",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        },
+        {
+          "index": 21,
+          "time": "3:02:37",
+          "seconds": 10957,
+          "title": "五月は花緑青の窓辺から",
+          "artist": "ヨルシカ",
+          "raw": "03:02:37 五月は花緑青の窓辺から/ヨルシカ",
+          "rawHash": "c6bff726037eb332d350bf687eefc16c82248e9188206583dd488d5ccda15842",
+          "sourceId": "UgwcXNxbnsp-BvKc_Np4AaABAg",
+          "sourceHash": "1213d992ee8d49619514b124273efc94b8aff6fed8c793a36dfb7fc1459902fc",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-23T22:25:04.552Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "/opt/ytb-song-rank-source-backfill-20260720/batch154-soraotoha-vps-jp/work/discovery",
+        "discoverySingerName": "SoraOtoha",
+        "discoveryChannelUrl": "https://www.youtube.com/@SoraOtoha",
+        "matchedKeywords": [
+          "LIVE",
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    }
+  ],
+  "cleaningSummary": {
+    "generatedAt": "2026-07-25T20:58:36.387Z",
+    "cleaner": "scripts/clean-channel-discovery-accepted.js",
+    "videosBefore": 20,
+    "videosAfter": 19,
+    "songsBefore": 246,
+    "songsAfter": 241,
+    "droppedVideos": 1,
+    "droppedSongs": 5
+  }
+}
