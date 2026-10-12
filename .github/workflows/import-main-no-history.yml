@@ -1,0 +1,52 @@
+name: Import main without history
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-main-no-history
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Sparse checkout source main
+        run: |
+          git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git source
+          cd source
+          git sparse-checkout set .github .heartbeat artifacts assets config data/static data/external deploy docs scripts server test tests
+          test -f index.html
+          test -f data/static/v1/meta.json
+          echo "SOURCE_FILES=$(find . -type f -not -path ./.git/\* | wc -l)"
+          echo "SOURCE_BYTES=$(du -sb --exclude=.git . | cut -f1)"
+
+      - name: Merge source into destination
+        run: |
+          rsync -a --exclude=.git source/ ./
+          test -f index.html
+          test -f data/static/v1/meta.json
+          test -f .github/workflows/import-static.yml
+          echo "DEST_FILES=$(find . -type f -not -path ./.git/\* | wc -l)"
+          echo "DEST_BYTES=$(du -sb --exclude=.git . | cut -f1)"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Import main contents without snapshot history"
+            git push
+          fi
