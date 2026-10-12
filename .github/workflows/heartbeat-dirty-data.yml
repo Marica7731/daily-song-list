@@ -1,0 +1,310 @@
+name: Heartbeat dirty data batch
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_records:
+        description: "Exact records to process in this bounded batch"
+        required: false
+        default: "25"
+      scope:
+        description: "current, history, or all"
+        required: false
+        default: "all"
+      types:
+        description: "Comma-separated approved classifications"
+        required: false
+        default: "confirmed_noise,parser_corruption"
+  push:
+    branches: [main]
+    paths:
+      - ".github/dirty-heartbeat.trigger"
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: daily-song-list-dirty-heartbeat
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout bounded delivery surface
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/heartbeat-dirty-data.yml
+            /.github/dirty-heartbeat.trigger
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /test/static-github-pipeline.test.mjs
+            /test/static-quality-ranges.test.js
+            /test/heartbeat-dirty-batch.test.mjs
+            /data/review/**
+            /data/static/**
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Resolve bounded heartbeat input
+        id: input
+        env:
+          REQUESTED_MAX_RECORDS: ${{ inputs.max_records || '25' }}
+          REQUESTED_SCOPE: ${{ inputs.scope || 'all' }}
+          REQUESTED_TYPES: ${{ inputs.types || 'confirmed_noise,parser_corruption' }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -Eeuo pipefail
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            REQUESTED_MAX_RECORDS="$(jq -er '.maxRecords // 25' .github/dirty-heartbeat.trigger)"
+            REQUESTED_SCOPE="$(jq -er '.scope // "all"' .github/dirty-heartbeat.trigger)"
+            REQUESTED_TYPES="$(jq -er '.types // ["confirmed_noise","parser_corruption"] | join(",")' .github/dirty-heartbeat.trigger)"
+          fi
+          [[ "$REQUESTED_MAX_RECORDS" =~ ^[0-9]+$ ]] && (( REQUESTED_MAX_RECORDS >= 1 && REQUESTED_MAX_RECORDS <= 50 )) || {
+            echo "HEARTBEAT_INVALID_MAX_RECORDS value=$REQUESTED_MAX_RECORDS" >&2
+            exit 77
+          }
+          [[ "$REQUESTED_SCOPE" =~ ^(current|history|all)$ ]] || {
+            echo "HEARTBEAT_INVALID_SCOPE value=$REQUESTED_SCOPE" >&2
+            exit 78
+          }
+          IFS=',' read -r -a type_parts <<< "$REQUESTED_TYPES"
+          for type in "${type_parts[@]}"; do
+            [[ "$type" == "confirmed_noise" || "$type" == "parser_corruption" ]] || {
+              echo "HEARTBEAT_INVALID_TYPE value=$type" >&2
+              exit 79
+            }
+          done
+          echo "max_records=$REQUESTED_MAX_RECORDS" >> "$GITHUB_OUTPUT"
+          echo "scope=$REQUESTED_SCOPE" >> "$GITHUB_OUTPUT"
+          echo "types=$REQUESTED_TYPES" >> "$GITHUB_OUTPUT"
+
+      - name: Require a green Check code gate
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in $(seq 1 180); do
+            conclusion="$(
+              gh run list --repo "$GITHUB_REPOSITORY" \
+                --workflow check-code.yml \
+                --commit "$TARGET_SHA" \
+                --status completed \
+                --json conclusion \
+                --jq '[.[].conclusion] | if index("success") then "success" elif index("failure") or index("cancelled") then "failed" else "pending" end' \
+                2>/dev/null || printf 'pending'
+            )"
+            if [[ "$conclusion" == "success" ]]; then
+              echo "HEARTBEAT_GATE_OK sha=$TARGET_SHA attempt=$attempt"
+              echo "conclusion=success" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$conclusion" == "failed" ]]; then
+              echo "HEARTBEAT_GATE_FAILED sha=$TARGET_SHA" >&2
+              exit 71
+            fi
+            sleep 5
+          done
+          echo "HEARTBEAT_GATE_TIMEOUT sha=$TARGET_SHA" >&2
+          exit 72
+
+      - name: Wait for the shared data publishers
+        id: publishers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in $(seq 1 180); do
+            active="$(
+              gh run list --repo "$GITHUB_REPOSITORY" \
+                --workflow static-update.yml \
+                --limit 20 \
+                --json status \
+                --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length' \
+                2>/dev/null || printf '0'
+            )"
+            recovery="$(
+              gh run list --repo "$GITHUB_REPOSITORY" \
+                --workflow static-recover-history.yml \
+                --limit 20 \
+                --json status \
+                --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length' \
+                2>/dev/null || printf '0'
+            )"
+            if [[ "$active" == "0" && "$recovery" == "0" ]]; then
+              echo "HEARTBEAT_PUBLISHERS_IDLE attempt=$attempt"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "HEARTBEAT_PUBLISHERS_BUSY" >&2
+          exit 80
+
+      - name: Generate an exact bounded curation batch
+        id: batch
+        env:
+          STATIC_REVIEW_ROOT: ${{ github.workspace }}/data/review
+          STATIC_CURATION_OVERRIDES_PATH: ${{ github.workspace }}/config/curation-overrides.json
+          STATIC_HEARTBEAT_STATE_PATH: ${{ github.workspace }}/data/review/heartbeat-state.json
+          STATIC_HEARTBEAT_PATCH_PATH: ${{ github.workspace }}/data/review/heartbeat-patch.json
+          MAX_RECORDS: ${{ steps.input.outputs.max_records }}
+          SCOPE: ${{ steps.input.outputs.scope }}
+          TYPES: ${{ steps.input.outputs.types }}
+        run: |
+          set -Eeuo pipefail
+          before_days_hash="$(
+            find data/static/v1/days -type f -print0 |
+              sort -z |
+              xargs -0 shasum -a 256 |
+              shasum -a 256 |
+              awk '{print $1}'
+          )"
+          echo "days_hash_before=$before_days_hash" >> "$GITHUB_OUTPUT"
+          node scripts/static/heartbeat-dirty-batch.js \
+            --max-records "$MAX_RECORDS" \
+            --scope "$SCOPE" \
+            --types "$TYPES"
+          selected="$(jq -er '.records | length' data/review/heartbeat-patch.json)"
+          echo "selected=$selected" >> "$GITHUB_OUTPUT"
+          if (( selected == 0 )); then
+            echo "HEARTBEAT_EMPTY_BATCH scope=$SCOPE types=$TYPES"
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/apply-curation-patch.js data/review/heartbeat-patch.json
+          node scripts/static/rebuild-only.js
+          npm run static:validate
+          after_days_hash="$(
+            find data/static/v1/days -type f -print0 |
+              sort -z |
+              xargs -0 shasum -a 256 |
+              shasum -a 256 |
+              awk '{print $1}'
+          )"
+          echo "days_hash_after=$after_days_hash" >> "$GITHUB_OUTPUT"
+          [[ "$before_days_hash" == "$after_days_hash" ]] || {
+            echo "HEARTBEAT_RAW_HISTORY_CHANGED before=$before_days_hash after=$after_days_hash" >&2
+            exit 73
+          }
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit only exact selectors and derived static output
+        id: commit
+        if: steps.batch.outputs.should_publish == 'true'
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- config/curation-overrides.json data/review/heartbeat-state.json data/review/heartbeat-summary.json data/static/v1
+          if git diff --cached --name-only | grep -E '^data/static/v1/days/'; then
+            echo "HEARTBEAT_STAGED_RAW_HISTORY" >&2
+            exit 74
+          fi
+          if git diff --cached --quiet; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "HEARTBEAT_NO_DERIVED_CHANGES"
+            exit 0
+          fi
+          git commit -m "data: heartbeat dirty batch"
+          for attempt in 1 2 3; do
+            git fetch --depth=2 origin main
+            git rebase origin/main
+            mapfile -t paths < <(git diff --name-only origin/main HEAD)
+            for path in "${paths[@]}"; do
+              case "$path" in
+                config/curation-overrides.json|data/review/heartbeat-state.json|data/review/heartbeat-summary.json|data/static/v1/*) ;;
+                data/static/v1/days/*)
+                  echo "HEARTBEAT_REBASE_RAW_HISTORY path=$path" >&2
+                  exit 75 ;;
+                *)
+                  echo "HEARTBEAT_REBASE_UNEXPECTED_PATH path=$path" >&2
+                  exit 76 ;;
+              esac
+            done
+            if git push origin HEAD:main; then
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              echo "HEARTBEAT_PUSHED commit=$(git rev-parse HEAD) attempt=$attempt"
+              exit 0
+            fi
+            echo "HEARTBEAT_PUSH_RACE retry=$attempt"
+          done
+          echo "HEARTBEAT_PUSH_RACE_EXHAUSTED" >&2
+          exit 77
+
+      - name: Dispatch Pages and verify the published snapshot
+        id: publish
+        if: steps.commit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATA_COMMIT: ${{ steps.commit.outputs.commit }}
+        run: |
+          set -Eeuo pipefail
+          data_commit="$(git rev-parse HEAD)"
+          before_deploy="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0' 2>/dev/null || printf '0')"
+          gh workflow run deploy-pages.yml --ref main
+          deploy_id=""
+          for find_attempt in $(seq 1 36); do
+            latest_deploy="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0' 2>/dev/null || printf '0')"
+            if [[ "$latest_deploy" != "$before_deploy" && "$latest_deploy" =~ ^[0-9]+$ ]]; then
+              deploy_id="$latest_deploy"
+              break
+            fi
+            sleep 5
+          done
+          [[ -n "$deploy_id" ]] || {
+            echo "HEARTBEAT_PAGES_DISPATCH_NOT_FOUND" >&2
+            exit 78
+          }
+          echo "HEARTBEAT_PAGES_DISPATCH id=$deploy_id data_commit=$data_commit"
+          for attempt in $(seq 1 180); do
+            status="$(gh run view "$deploy_id" --repo "$GITHUB_REPOSITORY" --json status,conclusion --jq '.status + ":" + (.conclusion // "none")' 2>/dev/null || true)"
+            if [[ "$status" == "completed:success" ]]; then
+              generated_at="$(curl -fsS --max-time 20 https://marica7731.github.io/daily-song-list/data/static/v1/meta.json | jq -er '.generatedAt')"
+              echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at"
+              echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+              echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [[ "$status" == "completed:failure" || "$status" == "completed:cancelled" ]]; then
+              echo "HEARTBEAT_PAGES_FAILED id=$deploy_id status=$status" >&2
+              exit 78
+            fi
+            sleep 5
+          done
+          echo "HEARTBEAT_PAGES_TIMEOUT id=$deploy_id" >&2
+          exit 79
+
+      - name: Publish evidence
+        if: always()
+        env:
+          SELECTED: ${{ steps.batch.outputs.selected }}
+          SHOULD_PUBLISH: ${{ steps.batch.outputs.should_publish }}
+          UPDATED: ${{ steps.commit.outputs.updated }}
+          DEPLOY_RUN_ID: ${{ steps.publish.outputs.deploy_run_id }}
+          GENERATED_AT: ${{ steps.publish.outputs.generated_at }}
+        run: |
+          {
+            echo "### Heartbeat dirty data batch"
+            echo "- trigger: ${{ github.event_name }}"
+            echo "- input scope: ${{ steps.input.outputs.scope }}"
+            echo "- input types: ${{ steps.input.outputs.types }}"
+            echo "- selected: ${SELECTED:-0}"
+            echo "- should publish: ${SHOULD_PUBLISH:-false}"
+            echo "- updated: ${UPDATED:-false}"
+            echo "- Pages run: ${DEPLOY_RUN_ID:-not-dispatched}"
+            echo "- live generatedAt: ${GENERATED_AT:-not-checked}"
+          } >> "$GITHUB_STEP_SUMMARY"
