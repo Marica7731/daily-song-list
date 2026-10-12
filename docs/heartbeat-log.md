@@ -62,3 +62,11 @@
 - Fixed the heartbeat gate in commit `061f809e0cbb63768c4c4e983150500389e1863c`: data-only pushes now use the latest green Check code on `main` instead of waiting for a SHA that repair pushes replaced.
 - Archive recovery: old over-quota history is preserved at `daily-song-list-archive-overquota`; clean `daily-song-list-archive` was generated from the current main tree without full old history.
 - Stopped archive self-growth: cancelled the in-progress repair run and set archive Actions policy to `Disable actions` after observing push-triggered data workflows.
+
+## 2026-10-12 23:39 +08:00
+
+- Live meta: generatedAt `2026-10-12T15:20:55.856Z`, sourceSnapshot `20261012T141417Z`, videos 14,201, song occurrences 187,980; pending 2,882.
+- Verified all-range song pagination: first page 50 items, true last page `1058` 3 items, total 52,853; search manifest 16 shards and shard `0` 4,809 items.
+- Entity detail `songs/f2cce8376bdbca6d.json` returned HTTP 200 with 700 occurrences.
+- Heartbeat run `38271435031` succeeded at `d2528cd` with `25/all/confirmed_noise,parser_corruption`; selected 0, so publish and Pages were correctly skipped.
+- Clean archive remained healthy: no active Actions runs; its latest repair run stayed cancelled.
