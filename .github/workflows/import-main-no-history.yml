@@ -20,10 +20,18 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Remove accidental source gitlink
+        run: |
+          if git ls-files --error-unmatch source >/dev/null 2>&1; then
+            git rm --cached source
+          fi
+          rm -rf source
+
       - name: Sparse checkout source main
         run: |
-          git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git source
-          cd source
+          rm -rf /tmp/source
+          git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git /tmp/source
+          cd /tmp/source
           git sparse-checkout set .heartbeat artifacts assets config data/static data/external deploy docs scripts server test tests
           test -f index.html
           test -f data/static/v1/meta.json
@@ -32,7 +40,7 @@ jobs:
 
       - name: Merge source into destination
         run: |
-          rsync -a --exclude=.git source/ ./
+          rsync -a --exclude=.git /tmp/source/ ./
           test -f index.html
           test -f data/static/v1/meta.json
           test -f .github/workflows/import-static.yml
@@ -47,6 +55,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Import main runtime contents without snapshots"
+            git commit -m "Remove source gitlink and import runtime contents"
             git push
           fi
