@@ -1,0 +1,331 @@
+name: Repair dropped static videos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/static-repair-dropped.yml"
+  workflow_dispatch:
+    inputs:
+      seed_limit:
+        description: "Videos re-queued per pass from the dropped ledger (capped at 120)"
+        required: false
+        default: "60"
+      passes:
+        description: "Bounded repair passes to run in this job (capped at 4)"
+        required: false
+        default: "1"
+
+permissions:
+  actions: write
+  contents: write
+
+# Shares the hourly drain's group so a repair pass and static-update never publish at once.
+concurrency:
+  group: daily-song-list-static-update
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout bounded static inputs
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/static-repair-dropped.yml
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /data/static/**
+            /data/static/v1/recovery/dropped-videos.json
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Require a green Check code gate for workflow fixes
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in $(seq 1 180); do
+            conclusion="$(
+              gh run list --repo "$GITHUB_REPOSITORY" \
+                --workflow check-code.yml \
+                --commit "$TARGET_SHA" \
+                --status completed \
+                --json conclusion \
+                --jq '[.[].conclusion] | if index("success") then "success" elif index("failure") or index("cancelled") then "failed" else "pending" end' \
+                2>/dev/null || printf 'pending'
+            )"
+            if [[ "$conclusion" == "success" ]]; then
+              echo "STATIC_REPAIR_GATE_OK sha=$TARGET_SHA attempt=$attempt"
+              exit 0
+            fi
+            if [[ "$conclusion" == "failed" ]]; then
+              echo "STATIC_REPAIR_GATE_FAILED sha=$TARGET_SHA" >&2
+              exit 71
+            fi
+            sleep 5
+          done
+          echo "STATIC_REPAIR_GATE_TIMEOUT sha=$TARGET_SHA" >&2
+          exit 72
+
+      - name: Resolve bounded repair limits
+        id: limits
+        env:
+          REQUESTED_SEED_LIMIT: ${{ inputs.seed_limit || '60' }}
+          REQUESTED_PASSES: ${{ inputs.passes || '1' }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$REQUESTED_SEED_LIMIT" =~ ^[0-9]+$ ]] && (( REQUESTED_SEED_LIMIT >= 1 )) || {
+            echo "STATIC_REPAIR_INVALID_SEED_LIMIT value=$REQUESTED_SEED_LIMIT" >&2
+            exit 77
+          }
+          [[ "$REQUESTED_PASSES" =~ ^[0-9]+$ ]] && (( REQUESTED_PASSES >= 1 )) || {
+            echo "STATIC_REPAIR_INVALID_PASSES value=$REQUESTED_PASSES" >&2
+            exit 77
+          }
+          seed_limit="$REQUESTED_SEED_LIMIT"
+          if (( seed_limit > 120 )); then
+            echo "STATIC_REPAIR_SEED_LIMIT_CAPPED requested=$seed_limit effective=120"
+            seed_limit=120
+          fi
+          passes="$REQUESTED_PASSES"
+          if (( passes > 4 )); then
+            echo "STATIC_REPAIR_PASSES_CAPPED requested=$passes effective=4"
+            passes=4
+          fi
+          echo "seed_limit=$seed_limit" >> "$GITHUB_OUTPUT"
+          echo "passes=$passes" >> "$GITHUB_OUTPUT"
+
+      # Repair candidates are re-queued by id and re-scraped, so this pass is deliberately
+      # gentler than the hourly drain: a burst of watch-page fetches trips YouTube throttling,
+      # and collect-and-build throws when every inspection in a batch fails. A failing pass is
+      # therefore recorded and ends the job without discarding the ledger or earlier passes.
+      - name: Audit dropped videos and run bounded repair passes
+        id: repair
+        env:
+          STATIC_REPAIR_SEED_LIMIT: ${{ steps.limits.outputs.seed_limit }}
+          STATIC_REPAIR_PASSES: ${{ steps.limits.outputs.passes }}
+          STATIC_VIDEO_LIMIT: ${{ steps.limits.outputs.seed_limit }}
+          STATIC_REPAIR_MODE: "1"
+          STATIC_PAGE_SIZE: "50"
+          STATIC_MAX_SHARD_BYTES: "4000000"
+          DAILY_SONG_FETCH_RETRIES: "3"
+          DAILY_SONG_REQUEST_TIMEOUT_MS: "20000"
+          DAILY_SONG_REQUEST_DELAY_MS: "2500"
+          DAILY_SONG_REQUEST_JITTER_MS: "500"
+          DAILY_SONG_MAX_429_ERRORS: "24"
+          DAILY_SONG_429_COOLDOWN_MS: "180000"
+        run: |
+          set -uo pipefail
+          log_dir="data/static/v1/recovery"
+          mkdir -p "$log_dir"
+          log_file="$log_dir/repair-last-run.txt"
+          status=ok
+          read_dropped_count() {
+            node -e "const fs=require('node:fs'); const l=JSON.parse(fs.readFileSync('data/static/v1/recovery/dropped-videos.json','utf8')); process.stdout.write(String(l.droppedVideoCount||0));"
+          }
+          run_passes() {
+            local pass remaining
+            for (( pass = 1; pass <= STATIC_REPAIR_PASSES; pass++ )); do
+              echo "STATIC_REPAIR_PASS_BEGIN pass=$pass/$STATIC_REPAIR_PASSES at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              if node scripts/static/repair-dropped.js && npm run static:update && npm run static:validate; then
+                # Re-audit after the drain so the ledger and the continuation decision describe
+                # what is still missing, not what was missing before this pass started.
+                node scripts/static/repair-dropped.js || echo "STATIC_REPAIR_REAUDIT_FAILED pass=$pass" >&2
+                remaining="$(read_dropped_count || true)"
+                if [[ ! "$remaining" =~ ^[0-9]+$ ]]; then
+                  echo "STATIC_REPAIR_INVALID_DROPPED value=$remaining" >&2
+                  status=failed
+                  return 1
+                fi
+                echo "STATIC_REPAIR_PASS_END pass=$pass dropped=$remaining"
+                if (( remaining == 0 )); then
+                  echo "STATIC_REPAIR_DRAINED dropped=0"
+                  return 0
+                fi
+              else
+                echo "STATIC_REPAIR_PASS_FAILED pass=$pass" >&2
+                status=failed
+                return 1
+              fi
+              if (( pass < STATIC_REPAIR_PASSES )); then
+                echo "STATIC_REPAIR_PASS_COOLDOWN seconds=60"
+                sleep 60
+              fi
+            done
+          }
+          # Job logs need admin rights to read back, so the pass transcript is persisted into
+          # the data tree and committed: the next failure is diagnosable from main alone.
+          run_passes > "$log_file" 2>&1 || true
+          echo "STATIC_REPAIR_RUN_STATUS status=$status at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$log_file"
+          cat "$log_file"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Commit persistent data only
+        id: commit
+        if: always()
+        run: |
+          set -Eeuo pipefail
+          mapfile -t changed < <(git status --short --untracked-files=all | awk '{print $2}')
+          for path in "${changed[@]}"; do
+            [[ "$path" == data/static/v1/* ]] || {
+              echo "STATIC_REPAIR_UNEXPECTED_PATH path=$path" >&2
+              exit 71
+            }
+          done
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "STATIC_REPAIR_NO_CHANGES"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/static/v1
+          git commit -m "data: repair dropped static videos"
+          for publish_attempt in 1 2 3 4 5 6; do
+            if ! git fetch --deepen=50 origin main || ! git rebase origin/main; then
+              git rebase --abort >/dev/null 2>&1 || true
+              echo "STATIC_REPAIR_REBASE_RETRY attempt=$publish_attempt" >&2
+              if [[ $publish_attempt -eq 6 ]]; then
+                echo "STATIC_REPAIR_REBASE_EXHAUSTED" >&2
+                exit 75
+              fi
+              sleep 2
+              continue
+            fi
+            mapfile -t committed < <(git diff --name-only origin/main HEAD)
+            for path in "${committed[@]}"; do
+              [[ "$path" == data/static/v1/* ]] || {
+                echo "STATIC_REPAIR_REBASE_UNEXPECTED_PATH path=$path" >&2
+                exit 73
+              }
+            done
+            [[ ${#committed[@]} -gt 0 ]] || {
+              echo "STATIC_REPAIR_REBASE_EMPTY" >&2
+              exit 74
+            }
+            if git push origin HEAD:main; then
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              echo "STATIC_REPAIR_PUSHED commit=$(git rev-parse HEAD) attempts=$publish_attempt"
+              break
+            fi
+            if [[ $publish_attempt -eq 6 ]]; then
+              echo "STATIC_REPAIR_PUSH_RACE_EXHAUSTED" >&2
+              exit 75
+            fi
+            echo "STATIC_REPAIR_PUSH_RACE retry=$publish_attempt"
+            sleep 2
+          done
+
+      - name: Publish evidence
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          // Evidence must never be the reason a diagnosis fails: report each file separately.
+          const read = (file) => {
+            try {
+              return JSON.parse(fs.readFileSync(file, 'utf8'));
+            } catch (error) {
+              return { readError: `${file}: ${error.message}` };
+            }
+          };
+          const meta = read('data/static/v1/meta.json');
+          const ledger = read('data/static/v1/recovery/dropped-videos.json');
+          const state = read('data/static/v1/state.json');
+          console.log(JSON.stringify({
+            processedVideoCount: meta.processedVideoCount,
+            videoCount: meta.videoCount,
+            songOccurrenceCount: meta.songOccurrenceCount,
+            droppedVideoCount: ledger.droppedVideoCount,
+            abandonedVideoCount: ledger.abandonedVideoCount,
+            unreadableShardCount: ledger.unreadableShardCount,
+            publishedVideoCount: ledger.publishedVideoCount,
+            pendingQueueCount: (state.queue || []).length,
+            noSongRetryCount: Object.keys(state.noSongAttempts || {}).length,
+            updated: process.env.UPDATED,
+          }, null, 2));
+          NODE
+        env:
+          UPDATED: ${{ steps.commit.outputs.updated }}
+
+      - name: Deploy the new immutable static snapshot
+        if: steps.commit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
+
+      - name: Queue immediate continuation while videos remain dropped
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SEED_LIMIT: ${{ steps.limits.outputs.seed_limit }}
+          REPAIR_STATUS: ${{ steps.repair.outputs.status }}
+        run: |
+          set -Eeuo pipefail
+          remaining="$(node -e "const fs=require('node:fs'); const l=JSON.parse(fs.readFileSync('data/static/v1/recovery/dropped-videos.json','utf8')); process.stdout.write(String(l.droppedVideoCount||0));" 2>/dev/null || true)"
+          if [[ ! "$remaining" =~ ^[0-9]+$ ]]; then
+            remaining="$(git show origin/main:data/static/v1/recovery/dropped-videos.json 2>/dev/null | node -e 'let s=""; process.stdin.on("data", d => s += d).on("end", () => { try { const l=JSON.parse(s); process.stdout.write(String(l.droppedVideoCount || 0)); } catch {} });' 2>/dev/null || true)"
+          fi
+          [[ "$remaining" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_REPAIR_INVALID_DROPPED value=$remaining" >&2
+            exit 78
+          }
+          if (( remaining == 0 )); then
+            echo "STATIC_REPAIR_DRAINED dropped=0"
+            exit 0
+          fi
+          # The shared group keeps one running and one pending run. A repair continuation must
+          # never replace a pending static publication, especially a verified channel import.
+          pending_static=""
+          for queue_attempt in 1 2 3; do
+            if pending_static="$(gh run list \
+                --repo "$GITHUB_REPOSITORY" \
+                --workflow static-update.yml \
+                --limit 20 \
+                --json status \
+                --jq '[.[] | select(.status == "queued" or .status == "waiting" or .status == "pending")] | length')" && [[ "$pending_static" =~ ^[0-9]+$ ]]; then
+              break
+            fi
+            pending_static=""
+            if [[ $queue_attempt -eq 3 ]]; then
+              echo "STATIC_REPAIR_STATIC_QUEUE_QUERY_FAILED attempt=$queue_attempt" >&2
+              exit 80
+            fi
+            sleep 2
+          done
+          if (( pending_static > 0 )); then
+            echo "STATIC_REPAIR_YIELD_STATIC pending=$pending_static"
+            exit 0
+          fi
+          # A throttled pass preserved every candidate, so the backlog is still there and
+          # waiting for YouTube's rate-limit window matters more than stopping the chain.
+          if [[ "$REPAIR_STATUS" != "ok" ]]; then
+            echo "STATIC_REPAIR_THROTTLED status=$REPAIR_STATUS remaining=$remaining cooldown_seconds=300"
+            sleep 300
+          fi
+          echo "STATIC_REPAIR_CONTINUE dropped=$remaining seed_limit=$SEED_LIMIT status=$REPAIR_STATUS"
+          for dispatch_attempt in 1 2 3; do
+            if gh workflow run static-repair-dropped.yml --ref main -f seed_limit="$SEED_LIMIT" -f passes=1; then
+              echo "STATIC_REPAIR_CONTINUE_DISPATCHED attempt=$dispatch_attempt"
+              exit 0
+            fi
+            if [[ $dispatch_attempt -eq 3 ]]; then
+              echo "STATIC_REPAIR_CONTINUE_DISPATCH_FAILED attempt=$dispatch_attempt" >&2
+              exit 82
+            fi
+            sleep 2
+          done
