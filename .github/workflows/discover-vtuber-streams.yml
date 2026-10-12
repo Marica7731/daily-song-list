@@ -1,0 +1,510 @@
+name: Discover VTuber streams by title
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel_id:
+        description: Immutable YouTube channel ID
+        required: true
+        type: string
+        default: "UCLIEOGtrywxsLztMPPKtfkA"
+      channel_handle:
+        description: Canonical YouTube handle
+        required: true
+        type: string
+        default: "@RaraTakanashi"
+      channel_slug:
+        description: Lowercase artifact slug
+        required: true
+        type: string
+        default: "rara-takanashi"
+      channel_url:
+        description: Channel URL, optionally ending in /streams
+        required: true
+        type: string
+        default: "https://www.youtube.com/@RaraTakanashi/streams"
+      singer_name:
+        description: Reviewed channel display name
+        required: true
+        type: string
+        default: "Rara Channel"
+      keywords:
+        description: Comma-separated title keywords
+        required: true
+        type: string
+        default: "歌,弹唱,弾唱,弾き語,弹语,日语,日本語,live,karaoke,カラオケ"
+      max_channel_pages:
+        description: Maximum streams pages, including the initial page
+        required: true
+        type: choice
+        options: ["1000", "5000"]
+        default: "5000"
+      max_videos:
+        description: Maximum retained matching videos
+        required: true
+        type: choice
+        options: ["100000"]
+        default: "100000"
+      max_inspect:
+        description: Candidate inspections; zero discovers only
+        required: true
+        type: choice
+        options: ["0", "100000"]
+        default: "100000"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/discover-vtuber-streams.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: vtuber-streams-discovery-${{ inputs.channel_slug || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      CHANNEL_ID: ${{ inputs.channel_id || 'UCLIEOGtrywxsLztMPPKtfkA' }}
+      CHANNEL_HANDLE: ${{ inputs.channel_handle || '@RaraTakanashi' }}
+      CHANNEL_SLUG: ${{ inputs.channel_slug || 'rara-takanashi' }}
+      CHANNEL_URL: ${{ inputs.channel_url || 'https://www.youtube.com/@RaraTakanashi/streams' }}
+      SINGER_NAME: ${{ inputs.singer_name || 'Rara Channel' }}
+      KEYWORDS: ${{ inputs.keywords || '歌,弹唱,弾唱,弾き語,弹语,日语,日本語,live,karaoke,カラオケ' }}
+      MAX_CHANNEL_PAGES: ${{ inputs.max_channel_pages || '5000' }}
+      MAX_VIDEOS: ${{ inputs.max_videos || '100000' }}
+      MAX_INSPECT: ${{ inputs.max_inspect || '100000' }}
+      DISCOVERY_TIMEOUT_SECONDS: "18000"
+      TASK_CAP_BYTES: "2147483648"
+      ARTIFACT_CAP_BYTES: "134217728"
+      NODE_MAX_OLD_SPACE_SIZE_MB: "1536"
+      DAILY_SONG_429_COOLDOWN_MS: "180000"
+      DAILY_SONG_MAX_429_ERRORS: "1000"
+      DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT: "1"
+      FORCE_REINSPECT: ${{ contains(github.event.head_commit.message, '[force-rara-reinspect]') }}
+
+    steps:
+      - name: Checkout bounded source inputs
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /package.json
+            /package-lock.json
+            /assets/**
+            /config/**
+            /scripts/**
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Configure Node runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          NODE_BIN=""
+          for candidate in /Users/be/.local/codex-toolchains/node/bin/node /opt/homebrew/bin/node /usr/local/bin/node "$(command -v node || true)"; do
+            if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+              NODE_BIN="$candidate"
+              break
+            fi
+          done
+          [ -n "$NODE_BIN" ] || { echo "VTUBER_STREAMS_NODE_MISSING" >&2; exit 78; }
+          NODE_VERSION="$("$NODE_BIN" --version)"
+          [[ "$NODE_VERSION" =~ ^v([0-9]+)\. ]] || { echo "VTUBER_STREAMS_NODE_INVALID $NODE_VERSION" >&2; exit 78; }
+          [ "${BASH_REMATCH[1]}" -ge 20 ] || { echo "VTUBER_STREAMS_NODE_TOO_OLD $NODE_VERSION" >&2; exit 78; }
+          printf 'NODE_BIN=%s\n' "$NODE_BIN" >> "$GITHUB_ENV"
+          printf 'VTUBER_STREAMS_NODE_OK path=%s version=%s\n' "$NODE_BIN" "$NODE_VERSION"
+
+      - name: Discover all matching streams
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          fail() {
+            printf 'VTUBER_STREAMS_FAIL %s\n' "$1" >&2
+            exit 78
+          }
+
+          [[ "$CHANNEL_ID" =~ ^UC[A-Za-z0-9_-]{22}$ ]] || fail "invalid-channel-id"
+          [[ "$CHANNEL_HANDLE" =~ ^@[A-Za-z0-9._-]{3,30}$ ]] || fail "invalid-channel-handle"
+          [[ "$CHANNEL_SLUG" =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]] || fail "invalid-channel-slug"
+          case "$MAX_CHANNEL_PAGES" in 1000|5000) ;; *) fail "invalid-max-channel-pages" ;; esac
+          case "$MAX_VIDEOS" in 100000) ;; *) fail "invalid-max-videos" ;; esac
+          case "$MAX_INSPECT" in 0|100000) ;; *) fail "invalid-max-inspect" ;; esac
+          [ -n "$KEYWORDS" ] || fail "empty-keywords"
+          case "$KEYWORDS" in *$'\n'*) fail "multiline-keywords" ;; esac
+          [[ "$DISCOVERY_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]] || fail "invalid-discovery-timeout"
+          [[ "$TASK_CAP_BYTES" =~ ^[1-9][0-9]*$ ]] || fail "invalid-task-cap"
+          [[ "$ARTIFACT_CAP_BYTES" =~ ^[1-9][0-9]*$ ]] || fail "invalid-artifact-cap"
+          [ -n "$NODE_BIN" ] || fail "missing-node-bin"
+
+          TASK_ROOT="$RUNNER_TEMP/daily-song-vtuber-streams-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          expected_root="$RUNNER_TEMP/daily-song-vtuber-streams-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          [ "$TASK_ROOT" = "$expected_root" ] || fail "unsafe-task-root"
+          case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-vtuber-streams-*) ;; *) fail "unsafe-task-root-pattern" ;; esac
+          if [ -e "$TASK_ROOT" ]; then
+            [ -d "$TASK_ROOT" ] && [ ! -L "$TASK_ROOT" ] || fail "unsafe-existing-task-root"
+            rm -rf -- "$TASK_ROOT"
+          fi
+          mkdir -m 700 "$TASK_ROOT" "$TASK_ROOT/output" "$TASK_ROOT/cache"
+          printf 'TASK_ROOT=%s\nOUTPUT_ROOT=%s\n' "$TASK_ROOT" "$TASK_ROOT/output" >> "$GITHUB_ENV"
+
+          resume_artifact_id=""
+          if [[ "$FORCE_REINSPECT" == "true" ]]; then
+            echo "VTUBER_FORCE_REINSPECT enabled"
+          fi
+          if [[ "$FORCE_REINSPECT" != "true" && "$MAX_INSPECT" -gt 0 ]]; then
+            artifacts_json="$(curl -fsS --max-time 30 \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100")"
+              resume_artifact_id="$(jq -r \
+                --arg prefix "vtuber-streams-$CHANNEL_SLUG-" \
+                --argjson current_run "$GITHUB_RUN_ID" \
+                '[.artifacts[] |
+                    select((.name | startswith($prefix)) and (.expired == false)) |
+                    select(((.name | ltrimstr($prefix) | split("-")[0]) | tonumber) < $current_run)
+                  ] |
+                sort_by(.created_at) |
+                last.id // empty' <<< "$artifacts_json")"
+            if [ -n "$resume_artifact_id" ]; then
+              curl -fsSL --max-time 60 \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/artifacts/$resume_artifact_id/zip" \
+                -o "$TASK_ROOT/resume.zip"
+              mkdir -m 700 "$TASK_ROOT/resume"
+              unzip -q "$TASK_ROOT/resume.zip" -d "$TASK_ROOT/resume"
+              checkpoint_path="$(find "$TASK_ROOT/resume" -type f -name checkpoint.json -print -quit)"
+              [ -n "$checkpoint_path" ] || fail "resume-artifact-missing-checkpoint"
+              cp "$checkpoint_path" "$TASK_ROOT/output/checkpoint.json"
+              "$NODE_BIN" - "$TASK_ROOT/output/checkpoint.json" <<'NODE'
+          const assert = require("node:assert/strict");
+          const fs = require("node:fs");
+          const checkpoint = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          assert.equal(checkpoint.schemaVersion, 1);
+          assert.equal(Array.isArray(checkpoint.completedVideoIds), true);
+          assert.equal(Array.isArray(checkpoint.details), true);
+          assert.equal(Array.isArray(checkpoint.audits), true);
+          NODE
+              echo "VTUBER_RESUME_OK artifactId=$resume_artifact_id completed=$(jq '.completedVideoIds | length' "$TASK_ROOT/output/checkpoint.json")"
+            else
+              echo "VTUBER_RESUME_NONE"
+            fi
+          fi
+
+          before_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+          [ "$before_bytes" -le "$TASK_CAP_BYTES" ] || fail "task-cap-before"
+          start_epoch="$(date -u +%s)"
+
+          discovery_args=(
+            --channel-url "$CHANNEL_URL"
+            --channel-slug "$CHANNEL_SLUG"
+            --singer-name "$SINGER_NAME"
+            --output-dir "$TASK_ROOT/output"
+            --cache-dir "$TASK_ROOT/cache"
+            --max-channel-pages "$MAX_CHANNEL_PAGES"
+            --max-candidates "$MAX_VIDEOS"
+            --max-inspect "$MAX_INSPECT"
+            --source-commit "$GITHUB_SHA"
+            --request-timeout-ms 15000
+            --request-interval-ms 5000
+            --request-jitter-ms 2500
+            --tab streams
+            --keyword "$KEYWORDS"
+          )
+          if [ ! -f "$TASK_ROOT/output/checkpoint.json" ]; then
+            discovery_args+=(--fresh)
+          fi
+          NODE_OPTIONS="--max-old-space-size=$NODE_MAX_OLD_SPACE_SIZE_MB" \
+          "$NODE_BIN" scripts/youtube-channel-discovery.js \
+            "${discovery_args[@]}" \
+            > "$TASK_ROOT/discovery.log" 2>&1 &
+          discovery_pid=$!
+          deadline=$((SECONDS + DISCOVERY_TIMEOUT_SECONDS))
+          discovery_status=0
+          while kill -0 "$discovery_pid" 2>/dev/null; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              kill "$discovery_pid" 2>/dev/null || true
+              wait "$discovery_pid" 2>/dev/null || true
+              discovery_status=124
+              break
+            fi
+            sleep 5
+          done
+          if [ "$discovery_status" -eq 0 ]; then
+            wait "$discovery_pid" || discovery_status=$?
+          fi
+          [ "$discovery_status" -eq 0 ] || {
+            tail -n 80 "$TASK_ROOT/discovery.log" >&2 || true
+            fail "discovery-exit-$discovery_status"
+          }
+
+          end_epoch="$(date -u +%s)"
+          after_bytes="$(du -sk "$TASK_ROOT" | awk 'NR == 1 { print $1 * 1024 }')"
+          [ "$after_bytes" -le "$TASK_CAP_BYTES" ] || fail "task-cap-after"
+          artifact_bytes="$(du -sk "$TASK_ROOT/output" | awk 'NR == 1 { print $1 * 1024 }')"
+          [ "$artifact_bytes" -le "$ARTIFACT_CAP_BYTES" ] || fail "artifact-cap"
+          {
+            printf '### VTuber streams discovery\n\n'
+            jq '{complete,partial,tabs,pageUrls,pageSummaries,candidateCount,keywords,channelId,channelHandle,channelUrl}' "$TASK_ROOT/output/manifest.json"
+            printf '\n- rawVideos: '
+            jq 'length' "$TASK_ROOT/output/raw-videos.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+          printf 'VTUBER_STREAMS_DISCOVERY_OK elapsedSeconds=%s taskBytes=%s artifactBytes=%s\n' \
+            "$((end_epoch - start_epoch))" "$after_bytes" "$artifact_bytes"
+
+      - name: Gate complete streams-only keyword result
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [ -n "$NODE_BIN" ] || { echo "VTUBER_STREAMS_GATE_NODE_MISSING" >&2; exit 78; }
+          [ -n "$OUTPUT_ROOT" ] || { echo "VTUBER_STREAMS_GATE_OUTPUT_MISSING" >&2; exit 78; }
+
+          "$NODE_BIN" - "$OUTPUT_ROOT" "$CHANNEL_ID" "$CHANNEL_HANDLE" "$KEYWORDS" "$CHANNEL_URL" <<'NODE'
+          const assert = require("node:assert/strict");
+          const fs = require("node:fs");
+          const path = require("node:path");
+          process.on("uncaughtException", (error) => {
+            console.error(`::error::VTUBER_GATE_ASSERT ${error && error.message ? error.message : String(error)}`);
+            process.exit(1);
+          });
+
+          const [outputRoot, expectedId, expectedHandle, keywordInput, channelUrl] = process.argv.slice(2);
+          const manifest = JSON.parse(fs.readFileSync(path.join(outputRoot, "manifest.json"), "utf8"));
+          const rawVideos = JSON.parse(fs.readFileSync(path.join(outputRoot, "raw-videos.json"), "utf8"));
+          const details = JSON.parse(fs.readFileSync(path.join(outputRoot, "video-details.json"), "utf8"));
+          const audits = JSON.parse(fs.readFileSync(path.join(outputRoot, "audits.json"), "utf8"));
+          const checkpoint = JSON.parse(fs.readFileSync(path.join(outputRoot, "checkpoint.json"), "utf8"));
+          const keywords = keywordInput.split(",").map((item) => item.trim()).filter(Boolean);
+          console.error(`::notice::VTUBER_GATE_STATE ${JSON.stringify({
+            kind: manifest.kind,
+            candidateOnly: manifest.candidateOnly,
+            complete: manifest.complete,
+            partial: manifest.partial,
+            tabs: manifest.tabs,
+            pageUrls: manifest.pageUrls,
+            pageCount: manifest.pageSummaries && manifest.pageSummaries[0] && manifest.pageSummaries[0].pageCount,
+            reachedEnd: manifest.pageSummaries && manifest.pageSummaries[0] && manifest.pageSummaries[0].reachedEnd,
+            requiresContinuation: manifest.pageSummaries && manifest.pageSummaries[0] && manifest.pageSummaries[0].requiresContinuation,
+            candidateCount: manifest.candidateCount,
+            rawVideoCount: rawVideos.length,
+            maxInspect: manifest.maxInspect,
+            inspectedCount: manifest.inspectedInLatestRun,
+            usableVideoCount: manifest.usableVideoCount,
+            detailCount: details.length,
+            auditCount: audits.length,
+            completedCount: Array.isArray(checkpoint.completedVideoIds) ? checkpoint.completedVideoIds.length : 0,
+            resumedFromCheckpoint: Number(process.env.MAX_INSPECT) > 0 && checkpoint.completedVideoIds.length > 0,
+            keywords: manifest.keywords,
+            channelId: manifest.channelId,
+            channelHandle: manifest.channelHandle,
+          })}`);
+          assert.ok(keywords.length > 0, "keywords must not be empty");
+          assert.equal(manifest.kind, "youtube-channel-discovery");
+          assert.equal(manifest.candidateOnly, false);
+          assert.equal(manifest.complete, true);
+          assert.equal(manifest.partial, false);
+          assert.deepEqual(manifest.tabs, ["streams"]);
+          assert.deepEqual(manifest.keywords, keywords);
+          assert.equal(Number(manifest.maxInspect), Number(process.env.MAX_INSPECT));
+          assert.ok(Number(process.env.MAX_INSPECT) > 0, "candidate inspection must be enabled");
+          assert.equal(checkpoint.schemaVersion, 1, "checkpoint schema mismatch");
+          assert.equal(new Set(checkpoint.completedVideoIds).size, manifest.candidateCount, "checkpoint does not complete every candidate");
+          assert.equal(manifest.usableVideoCount, details.length, "usable detail count mismatch");
+          assert.equal(checkpoint.details.length, details.length, "checkpoint detail count mismatch");
+          assert.equal(checkpoint.audits.length, audits.length, "checkpoint audit count mismatch");
+          assert.equal(audits.length, manifest.candidateCount, "audit count mismatch");
+          assert.equal(audits.some((item) => item.result === "fetch_error"), false, "fetch errors must fail the gate");
+          assert.equal(details.every((item) => Array.isArray(item.songs) && item.songs.length > 0), true, "usable details must contain songs");
+          assert.equal(
+            details.reduce((total, item) => total + item.songs.length, 0),
+            manifest.occurrenceCount,
+            "usable detail occurrence count mismatch",
+          );
+          assert.equal(manifest.pageUrls.length, 1);
+          assert.match(manifest.pageUrls[0], /^https:\/\/www\.youtube\.com\/@[^/]+\/streams(?:\?|$)/u);
+          assert.equal(manifest.pageSummaries.length, 1);
+          const summary = manifest.pageSummaries[0];
+          assert.equal(summary.tab, "streams");
+          assert.equal(summary.status, 200);
+          assert.equal(summary.reachedEnd, true);
+          assert.equal(summary.requiresContinuation, false);
+          assert.equal(summary.pageCount >= 1, true);
+          assert.equal(summary.pageCount <= Number(process.env.MAX_CHANNEL_PAGES), true);
+          assert.equal(summary.observedChannelId, expectedId);
+          assert.equal(summary.observedChannelHandle.toLocaleLowerCase("en-US"), expectedHandle.toLocaleLowerCase("en-US"));
+          assert.equal(new URL(summary.observedChannelUrl).pathname.replace(/\/streams$/u, "").toLocaleLowerCase("en-US"), new URL(channelUrl).pathname.replace(/\/streams$/u, "").toLocaleLowerCase("en-US"));
+          assert.equal(rawVideos.length, manifest.candidateCount);
+          assert.ok(rawVideos.length > 0, "no matching stream videos found");
+
+          const allowed = new Set(keywords.map((item) => item.toLocaleLowerCase()));
+          const seen = new Set();
+          for (const item of rawVideos) {
+            const videoId = item.youtubeVideoId || item.videoId || "";
+            const itemTitle = item.videoTitle || item.title || "";
+            assert.ok(videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId), `invalid video id: ${videoId}`);
+            assert.equal(seen.has(videoId), false, `duplicate video id: ${videoId}`);
+            seen.add(videoId);
+            assert.equal(audits.some((audit) => audit.videoId === videoId), true, `missing audit: ${videoId}`);
+            assert.ok(itemTitle, `missing title: ${videoId}`);
+            const title = itemTitle.toLocaleLowerCase();
+            assert.ok([...allowed].some((keyword) => title.includes(keyword)), `title keyword missing: ${itemTitle}`);
+            assert.ok((item.matchedKeywords || []).length > 0, `matched keyword missing: ${itemTitle}`);
+            for (const sourceUrl of item.discoverySourceUrls || []) {
+              assert.match(sourceUrl, /^https:\/\/www\.youtube\.com\/@[^/]+\/streams(?:\?|$)/u, `non-streams source: ${sourceUrl}`);
+            }
+            assert.equal(/#shorts/i.test(itemTitle) && !(item.matchedKeywords || []).length, false, `shorts title unexpectedly filtered: ${itemTitle}`);
+          }
+          assert.deepEqual(
+            [...new Set(audits.map((item) => item.videoId))].sort(),
+            [...seen].sort(),
+            "audit ids must exactly cover every candidate",
+          );
+          assert.deepEqual(
+            [...new Set(checkpoint.completedVideoIds)].sort(),
+            [...seen].sort(),
+            "checkpoint ids must exactly cover every candidate",
+          );
+          assert.equal(details.every((item) => seen.has(item.videoId)), true, "detail for an unknown candidate");
+
+          const shortsProbe = {
+            videoId: "AAAAAAAAAAA",
+            title: "【歌枠】vertical live #shorts",
+            statusText: "",
+            publishedText: "",
+            durationText: "1:00:00",
+          };
+          const filteredShortsProbe = require(path.join(process.cwd(), "scripts/youtube-channel-discovery-core.js"))
+            .filterDiscoveryCandidates([shortsProbe], keywords);
+          assert.equal(filteredShortsProbe.length, 1, "#shorts must not exclude a matching stream title");
+
+          const summaryPayload = {
+            schemaVersion: 1,
+            kind: "vtuber-streams-keyword-discovery",
+            generatedAt: manifest.generatedAt,
+            channel: {
+              id: manifest.channelId,
+              handle: manifest.channelHandle,
+              url: manifest.channelUrl,
+            },
+            keywords,
+            pageCount: summary.pageCount,
+            reachedEnd: summary.reachedEnd,
+            candidateCount: rawVideos.length,
+            videoIds: rawVideos.map((item) => item.youtubeVideoId || item.videoId),
+            titles: rawVideos.map((item) => ({ videoId: item.youtubeVideoId || item.videoId, title: item.videoTitle || item.title })),
+          };
+          fs.writeFileSync(path.join(outputRoot, "streams-keyword-summary.json"), `${JSON.stringify(summaryPayload, null, 2)}\n`, "utf8");
+          console.log(`VTUBER_STREAMS_GATE_OK pages=${summary.pageCount} candidates=${rawVideos.length} reachedEnd=${summary.reachedEnd}`);
+          NODE
+
+      - name: Export verified channel setlists
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [ -n "$NODE_BIN" ] || { echo "VTUBER_EXPORT_NODE_MISSING" >&2; exit 78; }
+          [ -n "$OUTPUT_ROOT" ] || { echo "VTUBER_EXPORT_OUTPUT_MISSING" >&2; exit 78; }
+          import_path="data/static/v1/imports/$CHANNEL_SLUG.json"
+          "$NODE_BIN" scripts/static/export-channel-setlists.js \
+            --input-dir "$OUTPUT_ROOT" \
+            --output "$import_path" \
+            --run-id "$GITHUB_RUN_ID" \
+            --source-commit "$GITHUB_SHA" \
+            --channel-id "$CHANNEL_ID" \
+            --channel-handle "$CHANNEL_HANDLE" \
+            --channel-url "$CHANNEL_URL"
+          test -s "$import_path"
+          "$NODE_BIN" - "$import_path" <<'NODE'
+          const assert = require("node:assert/strict");
+          const fs = require("node:fs");
+          const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          assert.equal(payload.kind, "channel-setlists");
+          assert.equal(payload.schemaVersion, 1);
+          assert.equal(payload.summary.allCandidatesAccounted, true);
+          assert.equal(payload.summary.inspectedCount, payload.summary.candidateCount);
+          assert.equal(payload.summary.failedCount, 0);
+          assert.equal(payload.videos.length, payload.summary.setlistVideoCount);
+          assert.equal(payload.audits.length, payload.summary.candidateCount);
+          assert.equal(payload.videos.every((video) => video.songs.length > 0), true);
+          assert.equal(payload.videos.reduce((total, video) => total + video.songs.length, 0), payload.summary.occurrenceCount);
+          NODE
+          bytes="$(wc -c < "$import_path" | tr -d '[:space:]')"
+          [ "$bytes" -le 104857600 ] || { echo "VTUBER_EXPORT_TOO_LARGE $bytes" >&2; exit 78; }
+          echo "VTUBER_EXPORT_OK path=$import_path bytes=$bytes"
+
+      - name: Commit verified channel setlist import
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          import_path="data/static/v1/imports/$CHANNEL_SLUG.json"
+          expected="$import_path"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The generated import path is outside sparse checkout; --sparse stages it.
+          git add --sparse -- "$import_path"
+          changed="$(git diff --cached --name-only)"
+          if [ -z "$changed" ]; then
+            echo "VTUBER_IMPORT_UNCHANGED path=$import_path"
+            exit 0
+          fi
+          [ "$changed" = "$expected" ] || {
+            echo "VTUBER_IMPORT_SCOPE_CHANGED $changed" >&2
+            exit 78
+          }
+          git commit -m "data: publish $CHANNEL_SLUG channel setlists"
+          for attempt in 1 2 3; do
+            git fetch --no-tags --depth=1 origin main
+            if git rebase origin/main; then
+              break
+            fi
+            git rebase --abort 2>/dev/null || true
+            if [ "$attempt" -eq 3 ]; then
+              echo "VTUBER_IMPORT_REBASE_FAILED attempt=$attempt" >&2
+              exit 78
+            fi
+            sleep 5
+          done
+          changed="$(git diff --name-only origin/main..HEAD)"
+          [ "$changed" = "$expected" ] || {
+            echo "VTUBER_IMPORT_SCOPE_CHANGED_AFTER_REBASE $changed" >&2
+            exit 78
+          }
+          git push origin HEAD:main
+          echo "VTUBER_IMPORT_PUSHED path=$import_path"
+
+      - name: Upload bounded streams artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vtuber-streams-${{ inputs.channel_slug || 'rara-takanashi' }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.OUTPUT_ROOT }}
+          if-no-files-found: warn
+          include-hidden-files: false
+          retention-days: 7
+
+      - name: Cleanup owned task root
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ -n "${TASK_ROOT:-}" ]; then
+            expected="$RUNNER_TEMP/daily-song-vtuber-streams-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            [ "$TASK_ROOT" = "$expected" ] || exit 78
+            case "$TASK_ROOT" in "$RUNNER_TEMP"/daily-song-vtuber-streams-*) ;; *) exit 78 ;; esac
+            if [ -e "$TASK_ROOT" ]; then
+              rm -rf -- "$TASK_ROOT"
+            fi
+            [ ! -e "$TASK_ROOT" ] || exit 78
+          fi
+          printf 'VTUBER_STREAMS_CLEANUP_OK afterBytes=0\n' >> "$GITHUB_STEP_SUMMARY"
