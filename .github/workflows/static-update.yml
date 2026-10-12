@@ -1,0 +1,244 @@
+name: Update GitHub static song data
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/static-update.yml"
+      - "scripts/static/**"
+      - "scripts/update-songlist.js"
+      - "data/static/v1/imports/**"
+  schedule:
+    # Primary hourly cadence; static-freshness-watchdog covers missed triggers.
+    - cron: "23 * * * *"
+  workflow_dispatch:
+    inputs:
+      video_limit:
+        description: "Maximum pending videos to inspect in each continuous drain run (capped at 60)"
+        required: false
+        default: "60"
+      priority_video_ids:
+        description: "Comma-separated YouTube video IDs to inspect first (maximum 20)"
+        required: false
+        default: ""
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: daily-song-list-static-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout bounded static inputs
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/static-update.yml
+            /package.json
+            /package-lock.json
+            /scripts/**
+            /assets/**
+            /config/**
+            /data/static/**
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Resolve bounded drain size
+        id: drain
+        env:
+          REQUESTED_VIDEO_LIMIT: ${{ inputs.video_limit || '60' }}
+          REQUESTED_PRIORITY_VIDEO_IDS: ${{ inputs.priority_video_ids || '' }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$REQUESTED_VIDEO_LIMIT" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_VIDEO_LIMIT value=$REQUESTED_VIDEO_LIMIT" >&2
+            exit 77
+          }
+          (( REQUESTED_VIDEO_LIMIT >= 1 )) || {
+            echo "STATIC_UPDATE_INVALID_VIDEO_LIMIT value=$REQUESTED_VIDEO_LIMIT" >&2
+            exit 77
+          }
+          video_limit="$REQUESTED_VIDEO_LIMIT"
+          if (( video_limit > 60 )); then
+            echo "STATIC_UPDATE_LIMIT_CAPPED requested=$video_limit effective=60"
+            video_limit=60
+          fi
+          echo "video_limit=$video_limit" >> "$GITHUB_OUTPUT"
+
+          priority_ids=""
+          priority_count=0
+          declare -A seen_priority=()
+          IFS=',' read -ra requested_ids <<< "$REQUESTED_PRIORITY_VIDEO_IDS"
+          for requested_id in "${requested_ids[@]}"; do
+            video_id="${requested_id//[[:space:]]/}"
+            [[ -z "$video_id" ]] && continue
+            [[ "$video_id" =~ ^[A-Za-z0-9_-]{11}$ ]] || {
+              echo "STATIC_UPDATE_INVALID_PRIORITY_VIDEO_ID" >&2
+              exit 78
+            }
+            [[ -z "${seen_priority[$video_id]:-}" ]] || continue
+            if (( priority_count >= 20 )); then
+              echo "STATIC_UPDATE_PRIORITY_VIDEO_LIMIT" >&2
+              exit 78
+            fi
+            seen_priority[$video_id]=1
+            if [[ -n "$priority_ids" ]]; then priority_ids+=","; fi
+            priority_ids+="$video_id"
+            priority_count=$((priority_count + 1))
+          done
+          echo "priority_video_ids=$priority_ids" >> "$GITHUB_OUTPUT"
+
+      - name: Collect one bounded batch and rebuild static shards
+        env:
+          STATIC_VIDEO_LIMIT: ${{ steps.drain.outputs.video_limit }}
+          STATIC_PRIORITY_VIDEO_IDS: ${{ steps.drain.outputs.priority_video_ids }}
+          STATIC_PAGE_SIZE: "50"
+          STATIC_MAX_SHARD_BYTES: "4000000"
+          DAILY_SONG_FETCH_RETRIES: "2"
+          DAILY_SONG_REQUEST_TIMEOUT_MS: "12000"
+          DAILY_SONG_REQUEST_DELAY_MS: "400"
+          DAILY_SONG_REQUEST_JITTER_MS: "250"
+          DAILY_SONG_MAX_429_ERRORS: "6"
+        run: npm run static:update
+
+      - name: Validate resumability and shard limits
+        run: npm run static:validate
+
+      - name: Commit persistent data only
+        id: commit
+        run: |
+          set -Eeuo pipefail
+          mapfile -t changed < <(git status --short --untracked-files=all | awk '{print $2}')
+          for path in "${changed[@]}"; do
+            [[ "$path" == data/static/v1/* ]] || {
+              echo "STATIC_UPDATE_UNEXPECTED_PATH path=$path" >&2
+              exit 71
+            }
+          done
+          if [[ ${#changed[@]} -eq 0 ]]; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            echo "STATIC_UPDATE_NO_CHANGES"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/static/v1
+          git commit -m "data: update static song shards"
+          for publish_attempt in 1 2 3; do
+            if ! git fetch --deepen=10 origin main || ! git rebase origin/main; then
+              git rebase --abort >/dev/null 2>&1 || true
+              echo "STATIC_UPDATE_REBASE_RETRY attempt=$publish_attempt" >&2
+              if [[ $publish_attempt -eq 3 ]]; then
+                echo "STATIC_UPDATE_REBASE_EXHAUSTED" >&2
+                exit 75
+              fi
+              sleep 2
+              continue
+            fi
+            mapfile -t committed < <(git diff --name-only origin/main HEAD)
+            for path in "${committed[@]}"; do
+              [[ "$path" == data/static/v1/* ]] || {
+                echo "STATIC_UPDATE_REBASE_UNEXPECTED_PATH path=$path" >&2
+                exit 73
+              }
+            done
+            if [[ ${#committed[@]} -eq 0 ]]; then
+              echo "updated=false" >> "$GITHUB_OUTPUT"
+              echo "STATIC_UPDATE_ALREADY_PUBLISHED commit=$(git rev-parse HEAD)"
+              break
+            fi
+            if git push origin HEAD:main; then
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              echo "STATIC_UPDATE_PUSHED commit=$(git rev-parse HEAD) attempts=$publish_attempt"
+              break
+            fi
+            if [[ $publish_attempt -eq 3 ]]; then
+              echo "STATIC_UPDATE_PUSH_RACE_EXHAUSTED" >&2
+              exit 75
+            fi
+            echo "STATIC_UPDATE_PUSH_RACE retry=$publish_attempt"
+          done
+
+      - name: Publish evidence
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const meta = JSON.parse(fs.readFileSync('data/static/v1/meta.json', 'utf8'));
+          console.log(JSON.stringify({
+            sourceSnapshotId: meta.sourceSnapshotId,
+            sourceCapturedAt: meta.sourceCapturedAt,
+            processedVideoCount: meta.processedVideoCount,
+            pendingVideoCount: meta.pendingVideoCount,
+            videoCount: meta.videoCount,
+            songOccurrenceCount: meta.songOccurrenceCount,
+            channelSetlistImports: meta.channelSetlistImports || [],
+            updated: process.env.UPDATED,
+          }, null, 2));
+          NODE
+        env:
+          UPDATED: ${{ steps.commit.outputs.updated }}
+
+      - name: Deploy the new immutable static snapshot
+        if: steps.commit.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
+
+      - name: Queue immediate continuation while backlog remains
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VIDEO_LIMIT: ${{ steps.drain.outputs.video_limit }}
+          PRIORITY_VIDEO_IDS: ${{ steps.drain.outputs.priority_video_ids }}
+        run: |
+          set -Eeuo pipefail
+          pending="$(node -e "const fs=require('node:fs'); const meta=JSON.parse(fs.readFileSync('data/static/v1/meta.json','utf8')); process.stdout.write(String(Number(meta.pendingVideoCount)||0));")"
+          [[ "$pending" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_PENDING value=$pending" >&2
+            exit 76
+          }
+          if (( pending == 0 )); then
+            echo "STATIC_UPDATE_DRAINED pending=0"
+            exit 0
+          fi
+          echo "STATIC_UPDATE_CONTINUE pending=$pending video_limit=$VIDEO_LIMIT priority_video_ids=$PRIORITY_VIDEO_IDS"
+          gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS"
+
+      - name: Hand off dropped videos to the repair workflow
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          ledger="data/static/v1/recovery/dropped-videos.json"
+          if [[ ! -f "$ledger" ]]; then
+            node scripts/static/repair-dropped.js
+          fi
+          dropped="$(node -e "const fs=require('node:fs'); const l=JSON.parse(fs.readFileSync('$ledger','utf8')); process.stdout.write(String(l.droppedVideoCount||0));")"
+          [[ "$dropped" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_DROPPED value=$dropped" >&2
+            exit 79
+          }
+          if (( dropped == 0 )); then
+            echo "STATIC_UPDATE_NO_DROPPED_VIDEOS dropped=0"
+            exit 0
+          fi
+          echo "STATIC_UPDATE_HANDOFF dropped=$dropped"
+          gh workflow run static-repair-dropped.yml --ref main
+  # Re-arm marker: a push through this path starts a bounded recovery run after a superseded schedule at 2026-10-06T03:58Z.
+
+# Re-arm the canonical yorushika static rebuild after recovery publishing.
