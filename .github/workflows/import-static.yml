@@ -32,11 +32,12 @@ jobs:
 
       - name: Replace destination static data
         run: |
-          mkdir -p data
+          mkdir -p data/static
           rm -rf data/static/v1
           cp -a source/data/static/v1 data/static/v1
-          find data/static/v1 -type f | wc -l
-          du -sb data/static/v1
+          test -f data/static/v1/meta.json
+          echo "DEST_FILES=$(find data/static/v1 -type f | wc -l)"
+          echo "DEST_BYTES=$(du -sb data/static/v1 | cut -f1)"
 
       - name: Commit and push
         run: |
