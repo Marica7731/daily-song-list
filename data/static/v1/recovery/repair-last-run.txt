@@ -1,24 +1,24 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T22:39:49Z
-[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2974
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T22:46:09Z
+[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2973
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
 [mygit:success] snapshots=1/1 rawItems=534 items=534 errors=0
-[static-update] video=iY3xDMELfDo result=selected songs=11
-[static-update] video=opYK0veMDys result=selected songs=4
-[static-update] video=KKd9OiaVNkM result=selected songs=18
-[static-update] video=omBBRaph6so result=selected songs=8
-[static-update] video=clGY9gpI35o result=selected songs=1
-[static-update] video=s_a0Nfpp9UA result=selected songs=1
-[static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=fPoJU5zGv9Y result=no_usable_song_source songs=0
-[static-update] snapshot=20261012T175444Z processed=8/8 pending=2853 videos=14453 songs=191363
+[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=KKd9OiaVNkM: https://www.youtube.com/watch?v=KKd9OiaVNkM&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=clGY9gpI35o: https://www.youtube.com/watch?v=clGY9gpI35o&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=s_a0Nfpp9UA: https://www.youtube.com/watch?v=s_a0Nfpp9UA&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=CEipRAoiPLA: https://www.youtube.com/watch?v=CEipRAoiPLA&hl=ja&persist_hl=1 HTTP 429
+[static-update] batch_degraded attempted=7 failed=7; continuing with last successful state
+[static-update] snapshot=20261012T175444Z processed=0/7 pending=2860 videos=14453 songs=191363
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14453 songs=191363 processed=27914 pending=2853
-[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2913
+STATIC_DATA_OK videos=14453 songs=191363 processed=27914 pending=2860
+[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2920
 STATIC_REPAIR_PASS_END pass=1 dropped=7155
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T22:41:57Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T23:29:25Z
