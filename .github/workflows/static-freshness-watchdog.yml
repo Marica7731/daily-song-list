@@ -1,0 +1,125 @@
+name: Watch static update freshness
+# Push-path fallback: the heartbeat trigger runs this watchdog when GitHub schedule delivery is delayed.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/static-freshness-watchdog.yml"
+      - ".github/dirty-heartbeat.trigger"
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: daily-song-list-static-freshness
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Release completed serialized repair run
+        id: unstick
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          stale_run=37346473983
+          stale_sha=5215fe8b80f55ea63a8344572a18b6e797e21ecc
+          ghq() { timeout 20 gh api "$@"; }
+          status="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.status')"
+          head_sha="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.head_sha')"
+          name="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.name')"
+          created_at="$(ghq "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run" --jq '.created_at')"
+          age_seconds=$(( $(date -u +%s) - $(date -u -d "$created_at" +%s) ))
+          cancelled=false
+          if [[ "$status" == "in_progress" && "$head_sha" == "$stale_sha" && "$name" == "Repair dropped static videos" && "$age_seconds" -ge 1800 ]]; then
+            timeout 20 gh api -X POST "/repos/$GITHUB_REPOSITORY/actions/runs/$stale_run/cancel" >/dev/null
+            cancelled=true
+          fi
+          echo "cancelled=$cancelled status=$status age_seconds=$age_seconds" >> "$GITHUB_OUTPUT"
+          printf 'unstick cancelled=%s status=%s age_seconds=%s\n' "$cancelled" "$status" "$age_seconds"
+
+      - name: Recover missed static updates
+        id: freshness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SITE_META_URL: https://marica7731.github.io/daily-song-list/data/static/v1/meta.json
+          REPO_META_URL: https://raw.githubusercontent.com/Marica7731/daily-song-list/main/data/static/v1/meta.json
+          STALE_MINUTES: "45"
+        run: |
+          set -Eeuo pipefail
+          fetch_generated_at() {
+            curl --fail --silent --show-error --location \
+              --header 'Accept: application/json' \
+              --header 'Cache-Control: no-cache' "$1" |
+              jq -er '.generatedAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601'
+          }
+
+          now_epoch="$(date +%s)"
+          site_generated_epoch="$(fetch_generated_at "$SITE_META_URL")"
+          repo_generated_epoch="$(fetch_generated_at "$REPO_META_URL")"
+          site_age_minutes="$(((now_epoch - site_generated_epoch) / 60))"
+          repo_age_minutes="$(((now_epoch - repo_generated_epoch) / 60))"
+          active_updates="$(
+            gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow static-update.yml \
+              --limit 20 \
+              --json status \
+              --jq '[.[] | select(.status == "pending" or .status == "waiting" or .status == "queued" or .status == "in_progress")] | length'
+          )"
+          active_deploys="$(
+            gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow deploy-pages.yml \
+              --limit 10 \
+              --json status \
+              --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length'
+          )"
+
+          triggered=false
+          reason=fresh_data
+          if (( active_updates > 0 )); then
+            reason=active_static_update
+          elif (( active_deploys > 0 )); then
+            reason=active_pages_deploy
+          elif (( site_age_minutes >= STALE_MINUTES && repo_age_minutes >= STALE_MINUTES )); then
+            gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main
+            triggered=true
+            reason=stale_static_update
+          elif (( site_age_minutes >= STALE_MINUTES )); then
+            gh workflow run --repo "$GITHUB_REPOSITORY" deploy-pages.yml --ref main
+            triggered=true
+            reason=stale_pages_deploy
+          fi
+
+          {
+            echo "triggered=$triggered"
+            echo "reason=$reason"
+            echo "site_age_minutes=$site_age_minutes"
+            echo "repo_age_minutes=$repo_age_minutes"
+            echo "active_updates=$active_updates"
+            echo "active_deploys=$active_deploys"
+          } >> "$GITHUB_OUTPUT"
+
+          printf 'site_age_minutes=%s repo_age_minutes=%s active_updates=%s active_deploys=%s triggered=%s reason=%s\n' \
+            "$site_age_minutes" "$repo_age_minutes" "$active_updates" "$active_deploys" "$triggered" "$reason"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Static freshness watchdog"
+            echo "- triggered: ${{ steps.freshness.outputs.triggered }}"
+            echo "- reason: ${{ steps.freshness.outputs.reason }}"
+            echo "- site age: ${{ steps.freshness.outputs.site_age_minutes }} minutes"
+            echo "- repository age: ${{ steps.freshness.outputs.repo_age_minutes }} minutes"
+            echo "- active updates: ${{ steps.freshness.outputs.active_updates }}"
+            echo "- active deploys: ${{ steps.freshness.outputs.active_deploys }}"
+          } >> "$GITHUB_STEP_SUMMARY"
