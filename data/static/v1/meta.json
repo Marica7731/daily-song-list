@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-10-12T21:11:55.278Z",
+  "generatedAt": "2026-10-12T21:18:58.592Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -363,15 +363,15 @@
   },
   "pendingVideoCount": 2872,
   "processedVideoCount": 27685,
-  "videoCount": 14254,
-  "songOccurrenceCount": 188809,
+  "videoCount": 14252,
+  "songOccurrenceCount": 188864,
   "quality": {
     "quarantinedOccurrences": 2275,
     "quarantinedVideos": 1508,
     "normalizedArtistOccurrences": 434,
     "normalizedReleaseMetadataOccurrences": 2119,
     "repairedDateCreditOccurrences": 59,
-    "repairedStructuredCreditOccurrences": 3007,
+    "repairedStructuredCreditOccurrences": 3057,
     "repairedKnownSourceCreditOccurrences": 157,
     "deduplicatedOccurrences": 408,
     "repeatedDescriptionSources": 9,
@@ -400,7 +400,7 @@
       "unrelated_worship_livestream_listing": 2,
       "dated_stream_announcement": 1
     },
-    "reviewedDayCount": 122,
+    "reviewedDayCount": 121,
     "reviewOnlyCandidateCount": 250,
     "mixedStructuredSourceCount": 19
   },
@@ -469,7 +469,7 @@
       "stats": {
         "videoCount": 370,
         "songOccurrenceCount": 5048,
-        "pendingVideoCount": 2551,
+        "pendingVideoCount": 2550,
         "quarantinedOccurrences": 32,
         "deduplicatedOccurrences": 16
       },
@@ -497,21 +497,21 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 5947,
-        "songOccurrenceCount": 73942,
+        "videoCount": 5946,
+        "songOccurrenceCount": 73932,
         "pendingVideoCount": 2872,
         "quarantinedOccurrences": 1175,
         "deduplicatedOccurrences": 244
       },
       "songs": {
-        "totalCount": 27506,
-        "pageCount": 551,
+        "totalCount": 27498,
+        "pageCount": 550,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 10746,
+        "totalCount": 10742,
         "pageCount": 215,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -527,21 +527,21 @@
     },
     "all": {
       "stats": {
-        "videoCount": 14254,
-        "songOccurrenceCount": 188809,
+        "videoCount": 14252,
+        "songOccurrenceCount": 188864,
         "pendingVideoCount": 2872,
         "quarantinedOccurrences": 2275,
         "deduplicatedOccurrences": 408
       },
       "songs": {
-        "totalCount": 53031,
+        "totalCount": 53041,
         "pageCount": 1061,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 20072,
+        "totalCount": 20074,
         "pageCount": 402,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -559,13 +559,13 @@
   "channelSetlistImports": [
     {
       "path": "imports/rara-takanashi.json",
-      "candidateCount": 297,
-      "inspectedCount": 297,
+      "candidateCount": 298,
+      "inspectedCount": 298,
       "inspectedInLatestRun": 0,
-      "setlistVideoCount": 288,
-      "auditCount": 297,
-      "occurrenceCount": 3364,
-      "noSongCount": 9,
+      "setlistVideoCount": 287,
+      "auditCount": 298,
+      "occurrenceCount": 3429,
+      "noSongCount": 11,
       "failedCount": 0,
       "allCandidatesAccounted": true
     }
