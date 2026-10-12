@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "architecture": "github-actions-static-shards-v1",
+  "generatedAt": "2026-10-10T15:10:56.053Z",
+  "continuityStart": "2026-06-26T00:07:13.845Z",
+  "historyGaps": [
+    {
+      "from": "2026-08-23",
+      "through": "2026-08-23",
+      "status": "MISSING"
+    },
+    {
+      "from": "2026-08-30",
+      "through": "2026-08-30",
+      "status": "MISSING"
+    }
+  ],
+  "historyDays": {
+    "2026-08-23": "MISSING",
+    "2026-08-24": "COMPLETE",
+    "2026-08-25": "COMPLETE",
+    "2026-08-26": "COMPLETE",
+    "2026-08-27": "COMPLETE",
+    "2026-08-28": "COMPLETE",
+    "2026-08-29": "COMPLETE",
+    "2026-08-30": "MISSING",
+    "2026-08-31": "COMPLETE"
+  },
+  "historyRecovery": {
+    "2026-08-23": {
+      "attempts": 5,
+      "noProgressAttempts": 0,
+      "processedEligibleVideos": 0,
+      "status": "MISSING",
+      "processingStatus": "SKIPPED_INCOMPLETE_SOURCE",
+      "source": {
+        "commit": "e7892ced185fc24731ee9be1adcb25f651e7ba4e",
+        "snapshotId": "20260823T155046Z",
+        "capturedAt": "2026-08-23T15:50:46.174Z",
+        "gitBlobSha1": "4d2a49b5310a3c6ff9a0c00dd2b45c64148b53c7",
+        "bytes": 2603822,
+        "videoCount": 611,
+        "path": "data/today-snapshots/20260823T155046Z.json",
+        "rawSha256": "e242d8022b8ba098faf7523488e09153f4a95b9787d75b02a4fd4b6e0b6344e0"
+      },
+      "eligibleVideos": 0,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": false,
+        "status": "MISSING",
+        "sourceCount": 2,
+        "incomplete": [
+          {
+            "keyword": "歌枠",
+            "itemCount": 500,
+            "limit": 500,
+            "reachedBottom": false,
+            "truncatedByLimit": true
+          }
+        ]
+      },
+      "lastCompleted": 0,
+      "lastFailures": [],
+      "updatedAt": "2026-09-01T07:07:07.311Z",
+      "sourceVideoCount": 611,
+      "lastInspected": 0,
+      "checkpointReason": "incomplete_source",
+      "checkpointElapsedMs": 0,
+      "purgedVideos": 320,
+      "purgedOccurrences": 3127,
+      "purgedFiles": 2,
+      "requeuedVideos": 320
+    },
+    "2026-08-24": {
+      "attempts": 7,
+      "noProgressAttempts": 0,
+      "processedEligibleVideos": 582,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "ed64335e2434685fbcbdee0fe876cd8e0a74c69b",
+        "snapshotId": "20260824T155007Z",
+        "capturedAt": "2026-08-24T15:50:07.863Z",
+        "gitBlobSha1": "4113a9255d3e8fce6de54b6adec6c77058d597f1",
+        "bytes": 2544117,
+        "videoCount": 597,
+        "path": "data/today-snapshots/20260824T155007Z.json",
+        "rawSha256": "e001e09249a93570974bddfc6570ba3cf00ee05f6b91e8c7e0ddb3f2ab700d3d"
+      },
+      "eligibleVideos": 582,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 22,
+      "lastInspected": 22,
+      "lastFailures": [],
+      "checkpointReason": "batch_exhausted",
+      "checkpointElapsedMs": 188862,
+      "updatedAt": "2026-09-01T07:09:02.826Z"
+    },
+    "2026-08-25": {
+      "attempts": 5,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 496,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "43cc15b412db43c175b1bc4a89856063f9638bc8",
+        "snapshotId": "20260825T154054Z",
+        "capturedAt": "2026-08-25T15:40:54.524Z",
+        "gitBlobSha1": "4e45e3c123702928db2920b5e8af0522cea5f2f2",
+        "bytes": 2167152,
+        "videoCount": 507,
+        "path": "data/today-snapshots/20260825T154054Z.json",
+        "rawSha256": "94b7cd35d7c1bb1585f820cb89de2214ee18d21667d4dced9d3acf940596ba5c"
+      },
+      "eligibleVideos": 496,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 8,
+      "updatedAt": "2026-09-01T07:13:38.655Z"
+    },
+    "2026-08-26": {
+      "attempts": 5,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 485,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "f2456ebba6df0d5e18d4bb900a31cfb42772005a",
+        "snapshotId": "20260826T150443Z",
+        "capturedAt": "2026-08-26T15:04:43.431Z",
+        "gitBlobSha1": "722b33b9c3ce121661ba74bd3c8fdff014c8d4b9",
+        "bytes": 2136320,
+        "videoCount": 499,
+        "path": "data/today-snapshots/20260826T150443Z.json",
+        "rawSha256": "548be92f7a6508946259de93a9782154c2a019fe7dcb4255eb27c1ba6155a88d"
+      },
+      "eligibleVideos": 485,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 11,
+      "updatedAt": "2026-09-01T07:15:14.067Z"
+    },
+    "2026-08-27": {
+      "attempts": 6,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 511,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "03d2a5ff4a4f8000984fa5b49c05d25d3ffd2a6b",
+        "snapshotId": "20260827T154402Z",
+        "capturedAt": "2026-08-27T15:44:02.962Z",
+        "gitBlobSha1": "0dbe61b2bce24ca70ee4e1c71122e0264f29c04e",
+        "bytes": 2223489,
+        "videoCount": 520,
+        "path": "data/today-snapshots/20260827T154402Z.json",
+        "rawSha256": "283ae1e8582aede7560b7b1be7c3b7156d9f7e1d0b6d095cbe7ed68db5f519a8"
+      },
+      "eligibleVideos": 511,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 6,
+      "updatedAt": "2026-09-01T07:16:59.080Z"
+    },
+    "2026-08-28": {
+      "attempts": 6,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 511,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "aec9f79541a5e03cd9dc859a13c98d7ebfa341e0",
+        "snapshotId": "20260828T154855Z",
+        "capturedAt": "2026-08-28T15:48:55.290Z",
+        "gitBlobSha1": "cd7b80fb944761a97784012cb6e8ea2c8b5197f9",
+        "bytes": 2249992,
+        "videoCount": 526,
+        "path": "data/today-snapshots/20260828T154855Z.json",
+        "rawSha256": "fdc72a11555e11546b406ffe8fe413be6fc81c9263d78fd4c47bd06c716490a4"
+      },
+      "eligibleVideos": 511,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 7,
+      "updatedAt": "2026-09-01T07:18:39.637Z"
+    },
+    "2026-08-29": {
+      "attempts": 6,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 565,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "a0fdb9c8be2d7accc2a3210b38037dc0181b6d79",
+        "snapshotId": "20260829T153832Z",
+        "capturedAt": "2026-08-29T15:38:32.205Z",
+        "gitBlobSha1": "68e12dc4c31f962b5511b225913793b0f1a68b9e",
+        "bytes": 2453925,
+        "videoCount": 576,
+        "path": "data/today-snapshots/20260829T153832Z.json",
+        "rawSha256": "e97db78131a4b5702dcbd13320d5e152d9e72845ae89db8ee7245202a9af0e86"
+      },
+      "eligibleVideos": 565,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 7,
+      "updatedAt": "2026-09-01T07:20:20.163Z"
+    },
+    "2026-08-30": {
+      "attempts": 2,
+      "noProgressAttempts": 0,
+      "processedEligibleVideos": 0,
+      "status": "MISSING",
+      "processingStatus": "SKIPPED_INCOMPLETE_SOURCE",
+      "source": {
+        "commit": "c98550789b85ad72befbfb6c7c3d4c55a14790e4",
+        "snapshotId": "20260830T154812Z",
+        "capturedAt": "2026-08-30T15:48:12.759Z",
+        "gitBlobSha1": "328af9afcfd1d023115162b49f6de0a098c25d2d",
+        "bytes": 2567445,
+        "videoCount": 600,
+        "path": "data/today-snapshots/20260830T154812Z.json",
+        "rawSha256": "855220703d7062efbbb962da200adcdfa0ec62481eec3114eee10a4828de46a3"
+      },
+      "sourceVideoCount": 600,
+      "eligibleVideos": 0,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": false,
+        "status": "MISSING",
+        "sourceCount": 2,
+        "incomplete": [
+          {
+            "keyword": "歌枠",
+            "itemCount": 500,
+            "limit": 500,
+            "reachedBottom": false,
+            "truncatedByLimit": true
+          }
+        ]
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "incomplete_source",
+      "checkpointElapsedMs": 0,
+      "updatedAt": "2026-09-01T07:22:00.027Z",
+      "purgedVideos": 0,
+      "purgedOccurrences": 0,
+      "purgedFiles": 0,
+      "requeuedVideos": 0
+    },
+    "2026-08-31": {
+      "attempts": 4,
+      "noProgressAttempts": 1,
+      "processedEligibleVideos": 427,
+      "status": "COMPLETE",
+      "processingStatus": "PROCESSED",
+      "source": {
+        "commit": "a83e5586532ce5754e40e52ee7532859c5d91da6",
+        "snapshotId": "20260831T153846Z",
+        "capturedAt": "2026-08-31T15:38:46.747Z",
+        "gitBlobSha1": "dc93376f776d59bda4b7e4f5ec5f21525316619e",
+        "bytes": 1862846,
+        "videoCount": 434,
+        "path": "data/today-snapshots/20260831T153846Z.json",
+        "rawSha256": "3d925e4380b73bfa3f387cb50cc749a6b448e4041229de2ca8a201dc4d6efd2d"
+      },
+      "eligibleVideos": 427,
+      "remainingVideos": 0,
+      "coverage": {
+        "complete": true,
+        "status": "COMPLETE",
+        "sourceCount": 2,
+        "incomplete": []
+      },
+      "lastCompleted": 0,
+      "lastInspected": 0,
+      "lastFailures": [],
+      "checkpointReason": "no_pending_videos",
+      "checkpointElapsedMs": 5,
+      "updatedAt": "2026-09-01T07:23:38.085Z"
+    }
+  },
+  "legacyBaseline": {
+    "status": "COMPLETE",
+    "repository": "Marica7731/daily-song-list",
+    "commit": "7c7f7c339c40fb0d50d1d2b7a40fb82c55e3dcc2",
+    "path": "data/all.json",
+    "gitBlobSha1": "43d0bbab4d0221604aa4a2a470c685284448ef4d",
+    "bytes": 54175861,
+    "generatedAt": "2026-08-22T17:52:03.305Z",
+    "rawSha256": "21860b0a38d1200a4681fe8f74ee270770f959e28c52eb4eb353bac3839ee4b2",
+    "videoCount": 3082,
+    "occurrenceCount": 47649,
+    "reviewedUnknown": 0,
+    "derivedOccurrenceIds": 31638,
+    "rejectedEmptyTitles": 1,
+    "missingChannelIds": 520,
+    "dayCount": 57,
+    "shardCount": 57,
+    "importedAt": "2026-08-31T19:54:26.743Z"
+  },
+  "sourceSnapshotId": "20261010T143848Z",
+  "sourceCapturedAt": "2026-10-10T14:38:48.040Z",
+  "sourceCoverage": {
+    "provider": "Marica7731/mygit today snapshot",
+    "status": "success",
+    "fetchedSnapshots": 1,
+    "selectedSnapshots": 1,
+    "candidateVideos": 476
+  },
+  "pendingVideoCount": 3004,
+  "processedVideoCount": 27288,
+  "videoCount": 13877,
+  "songOccurrenceCount": 183777,
+  "quality": {
+    "quarantinedOccurrences": 2272,
+    "quarantinedVideos": 1506,
+    "normalizedArtistOccurrences": 432,
+    "normalizedReleaseMetadataOccurrences": 2035,
+    "repairedDateCreditOccurrences": 59,
+    "repairedStructuredCreditOccurrences": 3006,
+    "repairedKnownSourceCreditOccurrences": 157,
+    "deduplicatedOccurrences": 364,
+    "repeatedDescriptionSources": 9,
+    "byReason": {
+      "prayer_broadcast_timeline": 1178,
+      "spoken_fraction_split_as_artist": 1,
+      "date_split_as_song_and_artist": 6,
+      "reviewed_mixed_chapter_comment": 298,
+      "reviewed_source_activity_chapter": 335,
+      "confirmed_mc_break": 6,
+      "confirmed_talk_section": 34,
+      "confirmed_chat_section": 40,
+      "unrelated_livestream_listing": 34,
+      "unrelated_talk_show_listing": 29,
+      "reused_description_across_unrelated_channels": 47,
+      "confirmed_chat_segment_label": 1,
+      "confirmed_stream_start_marker": 25,
+      "reviewed_non_song_chapter_in_numbered_setlist": 23,
+      "reviewed_bad_description_source": 191,
+      "dated_future_stream_announcement": 7,
+      "unrelated_talk_stream_listing": 1,
+      "confirmed_stream_technical_note": 1,
+      "bible_verse_broadcast": 4,
+      "dated_stream_challenge_result": 7,
+      "dated_talk_event_announcement": 1,
+      "unrelated_worship_livestream_listing": 2,
+      "dated_stream_announcement": 1
+    },
+    "reviewedDayCount": 120,
+    "reviewOnlyCandidateCount": 250,
+    "mixedStructuredSourceCount": 17
+  },
+  "ranges": {
+    "today": {
+      "stats": {
+        "videoCount": 62,
+        "songOccurrenceCount": 895,
+        "pendingVideoCount": 188,
+        "quarantinedOccurrences": 5,
+        "deduplicatedOccurrences": 1
+      },
+      "songs": {
+        "totalCount": 784,
+        "pageCount": 16,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/today/songs/page-{page:04d}.json"
+      },
+      "artists": {
+        "totalCount": 490,
+        "pageCount": 10,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/today/artists/page-{page:04d}.json"
+      },
+      "vtubers": {
+        "totalCount": 61,
+        "pageCount": 2,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/today/vtubers/page-{page:04d}.json"
+      }
+    },
+    "3d": {
+      "stats": {
+        "videoCount": 200,
+        "songOccurrenceCount": 2646,
+        "pendingVideoCount": 1121,
+        "quarantinedOccurrences": 15,
+        "deduplicatedOccurrences": 16
+      },
+      "songs": {
+        "totalCount": 2019,
+        "pageCount": 41,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/3d/songs/page-{page:04d}.json"
+      },
+      "artists": {
+        "totalCount": 1102,
+        "pageCount": 23,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/3d/artists/page-{page:04d}.json"
+      },
+      "vtubers": {
+        "totalCount": 179,
+        "pageCount": 4,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/3d/vtubers/page-{page:04d}.json"
+      }
+    },
+    "7d": {
+      "stats": {
+        "videoCount": 517,
+        "songOccurrenceCount": 6396,
+        "pendingVideoCount": 2791,
+        "quarantinedOccurrences": 51,
+        "deduplicatedOccurrences": 16
+      },
+      "songs": {
+        "totalCount": 4131,
+        "pageCount": 83,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/7d/songs/page-{page:04d}.json"
+      },
+      "artists": {
+        "totalCount": 1990,
+        "pageCount": 40,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/7d/artists/page-{page:04d}.json"
+      },
+      "vtubers": {
+        "totalCount": 386,
+        "pageCount": 8,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/7d/vtubers/page-{page:04d}.json"
+      }
+    },
+    "30d": {
+      "stats": {
+        "videoCount": 6213,
+        "songOccurrenceCount": 77854,
+        "pendingVideoCount": 3004,
+        "quarantinedOccurrences": 1289,
+        "deduplicatedOccurrences": 212
+      },
+      "songs": {
+        "totalCount": 28630,
+        "pageCount": 573,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/30d/songs/page-{page:04d}.json"
+      },
+      "artists": {
+        "totalCount": 11199,
+        "pageCount": 224,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/30d/artists/page-{page:04d}.json"
+      },
+      "vtubers": {
+        "totalCount": 2973,
+        "pageCount": 60,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/30d/vtubers/page-{page:04d}.json"
+      }
+    },
+    "all": {
+      "stats": {
+        "videoCount": 13877,
+        "songOccurrenceCount": 183777,
+        "pendingVideoCount": 3004,
+        "quarantinedOccurrences": 2272,
+        "deduplicatedOccurrences": 364
+      },
+      "songs": {
+        "totalCount": 51961,
+        "pageCount": 1040,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/all/songs/page-{page:04d}.json"
+      },
+      "artists": {
+        "totalCount": 19700,
+        "pageCount": 394,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/all/artists/page-{page:04d}.json"
+      },
+      "vtubers": {
+        "totalCount": 4611,
+        "pageCount": 93,
+        "pageSize": 50,
+        "pageNumberWidth": 4,
+        "path": "rankings/all/vtubers/page-{page:04d}.json"
+      }
+    }
+  },
+  "channelSetlistImports": [
+    {
+      "path": "imports/rara-takanashi.json",
+      "candidateCount": 297,
+      "inspectedCount": 297,
+      "inspectedInLatestRun": 0,
+      "setlistVideoCount": 288,
+      "auditCount": 297,
+      "occurrenceCount": 3364,
+      "noSongCount": 9,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    }
+  ]
+}
