@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T12:35:02Z
-[static-repair] processed=27562 published=16342 unpublished=11220 repairable=6947 abandoned=4273 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3082
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T12:41:40Z
+[static-repair] processed=27566 published=16345 unpublished=11221 repairable=6947 abandoned=4274 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3112
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,14 +12,7 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T12:35:02Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=5mbgQ7fsRGQ result=no_usable_song_source songs=0
-[static-update] video=T14qYTM4rUI result=no_usable_song_source songs=0
-[static-update] video=j5eaXhfShgk result=no_usable_song_source songs=0
-[static-update] video=3GvXaZ3ypes result=selected songs=12
-[static-update] video=V3sjW1zFDR0 result=selected songs=5
-[static-update] video=9SC4pM1Q4zY result=selected songs=10
-[static-update] video=WD7kM4VKKbM result=no_usable_song_source songs=0
-[static-update] snapshot=20261012T121710Z processed=14/14 pending=2992 videos=14142 songs=187245
+[static-update] snapshot=20261012T121710Z processed=7/7 pending=2992 videos=14142 songs=187245
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
@@ -27,4 +20,4 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T12:35:02Z
 STATIC_DATA_OK videos=14142 songs=187245 processed=27566 pending=2992
 [static-repair] processed=27566 published=16345 unpublished=11221 repairable=6947 abandoned=4274 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3052
 STATIC_REPAIR_PASS_END pass=1 dropped=6947
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T12:37:53Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-12T12:43:53Z
