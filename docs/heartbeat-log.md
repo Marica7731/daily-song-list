@@ -37,3 +37,11 @@
 - Search manifest: 16 shards; first shard `0.json` has 4,785 items; last shard `f.json` has 4,798 items.
 - Entity detail `songs/f2cce8376bdbca6d.json`: HTTP success, title `少女レイ`, generatedAt matches meta.
 - At evidence capture, newer repair/deploy chain `a334141` was active; Pages deployment was in progress.
+## 2026-10-12 20:23 +08:00
+
+- Verified live meta: generatedAt `2026-10-12T12:06:27.655Z`, sourceSnapshot `20261012T111558Z`, videos 14,127, song occurrences 187,144.
+- Verified all-range boundaries: songs 52,704/1,055 pages, artists 19,958/400 pages, vtubers 4,695/94 pages; first and true-last pages returned HTTP 200.
+- Search manifest had 16 shards; song detail `f2cce8376bdbca6d` returned HTTP 200 with matching generatedAt.
+- Refreshed Check gate: run `38248130852` succeeded at `02971b6`.
+- Heartbeat batch run `38247965686` succeeded with `25/all/confirmed_noise,parser_corruption`; log recorded `available={} selected={} skippedExisting=0`.
+- Commit and Pages steps were correctly skipped because the bounded batch was empty; no raw history paths changed.
