@@ -1,4 +1,6 @@
 
+# Heartbeat log
+
 ## 2026-10-12 19:18 +08:00
 
 - Verified live meta: generatedAt `2026-10-12T10:53:09.690Z`, sourceSnapshot `20261012T102141Z`, videos 14,111, song occurrences 187,003.
@@ -84,3 +86,13 @@
 - Search manifest: 16 shards; first page 50 items; entity detail `f2cce8376bdbca6d` returned 700 occurrences.
 - Heartbeat run `38278185763` succeeded at `771b667` with `25/all/confirmed_noise,parser_corruption`; selected 0, publish/Pages correctly skipped.
 - Clean archive remained frozen with zero active Actions runs.
+
+## 2026-10-13 02:55 +08:00
+
+- Live meta: generatedAt `2026-10-12T18:50:34.634Z`, sourceSnapshot `20261012T175444Z`, videos 14,248, song occurrences 188,691.
+- Verified all-range song pagination: 53,023 songs over 1,061 pages; page 1 returned 50 items and true-last page 1061 returned 23 items, both HTTP 200.
+- Search manifest: 16 shards; shard `0` has 4,821 items and shard `f` has 4,826 items.
+- Entity detail `songs/f2cce8376bdbca6d.json` returned HTTP 200 with `少女レイ`, 705 occurrences, generatedAt matching meta.
+- Main repository size is `6,014,645 KB` (~5.74 GiB), below the 8 GiB orphan-reset threshold; pushed_at advanced to `2026-10-12T18:54:55Z`.
+- Heartbeat batch run `38291694592` succeeded at `f97abfe` with `25/all/confirmed_noise,parser_corruption`; empty-batch gates skipped commit and Pages, so no raw history changed.
+- Shiyu discovery run `38290954978` remained in progress at step `Discover all matching streams` during this check.
