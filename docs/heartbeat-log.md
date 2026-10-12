@@ -1,3 +1,11 @@
+## 2026-10-12 19:18 +08:00
+
+- Verified live meta: generatedAt `2026-10-12T10:53:09.690Z`, sourceSnapshot `20261012T102141Z`, videos 14,111, song occurrences 187,003.
+- Verified all-range boundaries: songs 52,674/1,054 pages, artists 19,950/399 pages, vtubers 4,691/94 pages; first and true-last pages returned HTTP 200.
+- Search manifest had 16 shards; song detail `f2cce8376bdbca6d` returned HTTP 200 with matching generatedAt.
+- Refreshed the missing Check gate: run `38241229985` succeeded at `cbf3aad`.
+- Heartbeat batch run `38241093052` succeeded with `25/all/confirmed_noise,parser_corruption`; log recorded `available={} selected={} skippedExisting=0`.
+- Commit and Pages steps were correctly skipped because the bounded batch was empty; no raw history paths changed.
 # Heartbeat log
 
 ## 2026-10-12 15:20 +08:00
