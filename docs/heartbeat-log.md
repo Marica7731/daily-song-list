@@ -185,3 +185,12 @@
 
 - Live meta: generatedAt `2026-10-12T15:20:55.856Z`, videos 14,201, song occurrences 187,980; all songs 52,853 over 1,058 pages.
 - Search manifest: 16 shards; all-range first page returned 50 items; entity detail `f2cce8376bdbca6d` returned 700 occurrences.
+
+## 2026-10-13 19:06 +08:00
+
+- Root cause isolated to sparse checkout: `git add -f` matched new snapshot JSON files but Git refused to update paths outside the sparse definition. Fixed mygit workflow to `git add --sparse -f ...` in commit `35f33a27d16381c8e829648ef6451eee5285fe88`; follow-up data commit `42498564512f354ec1fe930e95749fb71cf7ef35` contains both `data/today-snapshots/20261013T104109Z.json` and `data/live-snapshots/20261013T104109Z.json`.
+- The raw `/mygit/main` alias remained stale while `refs/heads/main` was current. Updated daily-song-list default source to `https://raw.githubusercontent.com/Marica7731/mygit/refs/heads/main` in commit `a4f0e1c20c1b7e8025066c99734dec3e464ad247`.
+- Verification runs: `Check code` `38386652499` success; static update `38386652557` success; continuation `38387333427` success; Pages deploy `38387330202` success; repair `38387336721` cancelled without failure.
+- Live meta: `generatedAt=2026-10-13T10:57:17.049Z`, `sourceSnapshotId=20261013T104109Z`, videos `14462`, song occurrences `191472`, pending `3104`.
+- Live probes: all songs pages `1065`, first page `50` items, true last `page-1065.json` `36` items; search manifest `16` shards, first `search/0.json=4848`, last `search/f.json=4840`; entity detail `entities/songs/051d4f00cb91d2f5.json` returned name `彗星ハネムーン`, `26` occurrences, and matching `generatedAt`.
+- Mygit raw refs probe: latest `20261013T105037Z` snapshot HTTP `200`. State probe: queue `3104`, `lastFailures=0`. Natsume discovery run `38377498728` remains in progress; import file not yet published.
