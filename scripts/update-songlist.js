@@ -1,3 +1,4 @@
+
 const fs = require("node:fs");
 const path = require("node:path");
 const {
@@ -90,7 +91,7 @@ const MYGIT_TODAY_SNAPSHOT_SOURCE_LABEL = "Marica7731/mygit today snapshots";
 const MYGIT_TODAY_SNAPSHOT_KEYWORD = "mygit今日快照";
 const MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY = "mygit_today_snapshot";
 const MYGIT_RAW_BASE_URL = String(
-  process.env.DAILY_SONG_MYGIT_RAW_BASE_URL || "https://raw.githubusercontent.com/Marica7731/mygit/main",
+  process.env.DAILY_SONG_MYGIT_RAW_BASE_URL || "https://raw.githubusercontent.com/Marica7731/mygit/refs/heads/main",
 ).replace(/\/+$/u, "");
 const MYGIT_TODAY_SNAPSHOT_INDEX_URL = joinUrl(MYGIT_RAW_BASE_URL, "data/today-snapshots/index.json");
 
