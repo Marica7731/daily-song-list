@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:01:59Z
-[static-repair] processed=28234 published=16626 unpublished=11608 repairable=7276 abandoned=4332 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3013
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:08:45Z
+[static-repair] processed=28235 published=16627 unpublished=11608 repairable=7276 abandoned=4332 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3012
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=338 items=338 errors=0
+[mygit:success] snapshots=1/1 rawItems=351 items=351 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,13 +12,12 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:01:59Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=gF5qjcd1Qxo result=selected songs=11
-[static-update] snapshot=20261013T164333Z processed=8/8 pending=2892 videos=14706 songs=195068
+[static-update] snapshot=20261013T165338Z processed=7/7 pending=2898 videos=14706 songs=195068
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14706 songs=195068 processed=28235 pending=2892
-[static-repair] processed=28235 published=16627 unpublished=11608 repairable=7276 abandoned=4332 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2952
+STATIC_DATA_OK videos=14706 songs=195068 processed=28235 pending=2898
+[static-repair] processed=28235 published=16627 unpublished=11608 repairable=7276 abandoned=4332 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2958
 STATIC_REPAIR_PASS_END pass=1 dropped=7276
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T17:04:20Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T17:10:42Z
