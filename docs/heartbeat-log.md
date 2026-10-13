@@ -194,3 +194,13 @@
 - Live meta: `generatedAt=2026-10-13T10:57:17.049Z`, `sourceSnapshotId=20261013T104109Z`, videos `14462`, song occurrences `191472`, pending `3104`.
 - Live probes: all songs pages `1065`, first page `50` items, true last `page-1065.json` `36` items; search manifest `16` shards, first `search/0.json=4848`, last `search/f.json=4840`; entity detail `entities/songs/051d4f00cb91d2f5.json` returned name `彗星ハネムーン`, `26` occurrences, and matching `generatedAt`.
 - Mygit raw refs probe: latest `20261013T105037Z` snapshot HTTP `200`. State probe: queue `3104`, `lastFailures=0`. Natsume discovery run `38377498728` remains in progress; import file not yet published.
+
+
+## 2026-10-13 19:15 +08:00
+
+- Live meta: `generatedAt=2026-10-13T11:03:08.184Z`, `sourceSnapshotId=20261013T105037Z`, videos `14470`, song occurrences `191662`, pending `3087`.
+- Actions: Pages run `38388241146` succeeded; static-update run `38387981882` is cancelled with no active static-update run.
+- Active recovery/discovery: repair run `38387985040` is in progress at `Audit dropped videos and run bounded repair passes`; Natsume discovery run `38377498728` is in progress at `Discover all matching streams`.
+- Natsume import files remain unpublished (404) while discovery is running; no import result was assumed.
+- The heartbeat dirty-data batch was not triggered this cycle because recovery is active; this avoids concurrent writes. No VPS, SSH, self-hosted runner, clone, or history download was used.
+- Main repository size is `8658229 KB` (~8.26 GiB), above the 8 GiB watch threshold; no orphan reset was performed because explicit confirmation is required.
