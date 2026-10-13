@@ -1,77 +1,76 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T11:08:42Z
-[static-repair] processed=27931 published=16490 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3147
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T12:07:30Z
+[static-repair] processed=28095 published=16496 unpublished=11599 repairable=7276 abandoned=4323 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3145
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=434 items=434 errors=0
-[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=KKd9OiaVNkM: https://www.youtube.com/watch?v=KKd9OiaVNkM&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=clGY9gpI35o: https://www.youtube.com/watch?v=clGY9gpI35o&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=s_a0Nfpp9UA: https://www.youtube.com/watch?v=s_a0Nfpp9UA&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=CEipRAoiPLA: https://www.youtube.com/watch?v=CEipRAoiPLA&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=TvEIawGTi44: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=qCf9FNu5SUw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=YFJwL3eK2BA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=JiAOXSbMAu4: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=6bIT2GbGk0g: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=aoIoM8ILbZ0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=0-WAejjS4fY: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=dMbHbIgdddQ: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=i9z4_j38GGI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=2z4JU5G8NVw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=Iq2fZYYHPpA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=ureaPD38980: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=8NkxFkWUjnE: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=KtWGULUl8Y8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=C3WyCib4ZMI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=eeaP8ojEccA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=XsPve6QEeoY: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=djJZbjHfZjo: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=GBsy-yuG1g0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=BQda8UbbbiA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=bsAnhnhcBw8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=iMglBC6CdzM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=Uwgur2cwgX0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=lUrcUF5Q3_4: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=hnpdc9FawJw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=phAVnqDJ9Ac: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=DUcYEu8FUq8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=A1TDNFvsOVE: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=kfS6VXGegGI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=fhrq17S6c7M: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=Be_aGpY1NBM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=vfPOVMFnqSM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=NqlQNeiXgX0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=t-kL0PRhFY0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=gfS14LpRNpw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=Xp96VdimJ_A: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=G5zq0649tSs: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=N8Z9sTPUXKU: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=2oaMPopM1mg: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=7BqTrc7HY8Y: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=34bskm2CApA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=VX8ca_kX8zk: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=AdO88oBXkBg: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=SZmd9NNTqwI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=4WUPFJryLlU: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=TQ8QrXU64nw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=JQ_mBGL56No: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=ujhwB3QPEJs: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=x4DnqylDOYA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=a6UkI_PQlZM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=IrR2Pa7Xi5E: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=LljhVkZJ7_E: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=jtO662AvHbc: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] batch_degraded attempted=60 failed=60; continuing with last successful state
-[static-update] snapshot=20261013T105037Z processed=0/60 pending=3138 videos=14470 songs=191662
+[mygit:success] snapshots=1/1 rawItems=457 items=457 errors=0
+[static-update] video=iY3xDMELfDo result=no_timestamp_candidates songs=0
+[static-update] video=opYK0veMDys result=no_timestamp_candidates songs=0
+[static-update] video=KKd9OiaVNkM result=selected songs=18
+[static-update] video=omBBRaph6so result=selected songs=8
+[static-update] video=clGY9gpI35o result=selected songs=1
+[static-update] video=s_a0Nfpp9UA result=selected songs=1
+[static-update] video=CEipRAoiPLA result=selected songs=8
+[static-update] video=JiAOXSbMAu4 result=no_usable_song_source songs=0
+[static-update] video=6bIT2GbGk0g result=no_timestamp_candidates songs=0
+[static-update] video=aoIoM8ILbZ0 result=no_usable_song_source songs=0
+[static-update] video=0-WAejjS4fY result=selected songs=8
+[static-update] video=dMbHbIgdddQ result=no_usable_song_source songs=0
+[static-update] video=i9z4_j38GGI result=no_usable_song_source songs=0
+[static-update] video=2z4JU5G8NVw result=selected songs=33
+[static-update] video=Iq2fZYYHPpA result=no_usable_song_source songs=0
+[static-update] video=ureaPD38980 result=selected songs=5
+[static-update] video=8NkxFkWUjnE result=no_timestamp_candidates songs=0
+[static-update] video=KtWGULUl8Y8 result=no_timestamp_candidates songs=0
+[static-update] video=C3WyCib4ZMI result=selected songs=36
+[static-update] video=eeaP8ojEccA result=selected songs=19
+[static-update] video=XsPve6QEeoY result=no_usable_song_source songs=0
+[static-update] video=djJZbjHfZjo result=selected songs=41
+[static-update] video=GBsy-yuG1g0 result=no_timestamp_candidates songs=0
+[static-update] video=BQda8UbbbiA result=selected songs=5
+[static-update] video=bsAnhnhcBw8 result=selected songs=27
+[static-update] video=iMglBC6CdzM result=selected songs=14
+[static-update] video=Uwgur2cwgX0 result=selected songs=26
+[static-update] video=lUrcUF5Q3_4 result=selected songs=15
+[static-update] video=hnpdc9FawJw result=no_timestamp_candidates songs=0
+[static-update] video=phAVnqDJ9Ac result=selected songs=6
+[static-update] video=DUcYEu8FUq8 result=no_timestamp_candidates songs=0
+[static-update] video=A1TDNFvsOVE result=no_usable_song_source songs=0
+[static-update] video=kfS6VXGegGI result=selected songs=10
+[static-update] video=fhrq17S6c7M result=no_timestamp_candidates songs=0
+[static-update] video=Be_aGpY1NBM result=selected songs=10
+[static-update] video=vfPOVMFnqSM result=no_timestamp_candidates songs=0
+[static-update] video=NqlQNeiXgX0 result=no_usable_song_source songs=0
+[static-update] video=t-kL0PRhFY0 result=selected songs=18
+[static-update] video=gfS14LpRNpw result=no_timestamp_candidates songs=0
+[static-update] video=Xp96VdimJ_A result=selected songs=1
+[static-update] video=G5zq0649tSs result=no_timestamp_candidates songs=0
+[static-update] video=N8Z9sTPUXKU result=no_timestamp_candidates songs=0
+[static-update] video=2oaMPopM1mg result=selected songs=7
+[static-update] video=7BqTrc7HY8Y result=no_timestamp_candidates songs=0
+[static-update] video=34bskm2CApA result=no_usable_song_source songs=0
+[static-update] video=VX8ca_kX8zk result=selected songs=2
+[static-update] video=AdO88oBXkBg result=no_usable_song_source songs=0
+[static-update] video=SZmd9NNTqwI result=selected songs=1
+[static-update] video=4WUPFJryLlU result=no_timestamp_candidates songs=0
+[static-update] video=TQ8QrXU64nw result=no_timestamp_candidates songs=0
+[static-update] video=JQ_mBGL56No result=selected songs=23
+[static-update] video=GvowUiJPX1U result=selected songs=1
+[static-update] video=skSkStgbEnU result=selected songs=5
+[static-update] video=54FmxYwcNjY result=no_usable_song_source songs=0
+[static-update] video=ujhwB3QPEJs result=selected songs=16
+[static-update] video=x4DnqylDOYA result=no_timestamp_candidates songs=0
+[static-update] video=a6UkI_PQlZM result=selected songs=14
+[static-update] video=IrR2Pa7Xi5E result=selected songs=9
+[static-update] video=LljhVkZJ7_E result=no_timestamp_candidates songs=0
+[static-update] video=jtO662AvHbc result=no_usable_song_source songs=0
+[static-update] snapshot=20261013T115047Z processed=60/60 pending=3039 videos=14600 songs=193749
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14470 songs=191662 processed=27931 pending=3138
-[static-repair] processed=27931 published=16490 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3198
-STATIC_REPAIR_PASS_END pass=1 dropped=7155
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T11:57:52Z
+STATIC_DATA_OK videos=14600 songs=193749 processed=28120 pending=3039
+[static-repair] processed=28120 published=16521 unpublished=11599 repairable=7276 abandoned=4323 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3099
+STATIC_REPAIR_PASS_END pass=1 dropped=7276
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T12:15:51Z
