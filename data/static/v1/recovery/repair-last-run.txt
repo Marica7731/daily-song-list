@@ -1,12 +1,77 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-12T23:40:29Z
-[static-repair] processed=27914 published=16473 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3040
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T11:08:42Z
+[static-repair] processed=27931 published=16490 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3147
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:error] snapshots=0/1 rawItems=0 items=0 errors=1
-[static-update] Error: source coverage is not complete: error
-    at main (/home/runner/work/daily-song-list/daily-song-list/scripts/static/collect-and-build.js:56:31)
-    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
-STATIC_REPAIR_PASS_FAILED pass=1
-STATIC_REPAIR_RUN_STATUS status=failed at=2026-10-12T23:40:30Z
+[mygit:success] snapshots=1/1 rawItems=434 items=434 errors=0
+[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=KKd9OiaVNkM: https://www.youtube.com/watch?v=KKd9OiaVNkM&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=clGY9gpI35o: https://www.youtube.com/watch?v=clGY9gpI35o&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=s_a0Nfpp9UA: https://www.youtube.com/watch?v=s_a0Nfpp9UA&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=CEipRAoiPLA: https://www.youtube.com/watch?v=CEipRAoiPLA&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=TvEIawGTi44: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=qCf9FNu5SUw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=YFJwL3eK2BA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=JiAOXSbMAu4: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=6bIT2GbGk0g: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=aoIoM8ILbZ0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=0-WAejjS4fY: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=dMbHbIgdddQ: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=i9z4_j38GGI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=2z4JU5G8NVw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=Iq2fZYYHPpA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=ureaPD38980: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=8NkxFkWUjnE: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=KtWGULUl8Y8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=C3WyCib4ZMI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=eeaP8ojEccA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=XsPve6QEeoY: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=djJZbjHfZjo: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=GBsy-yuG1g0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=BQda8UbbbiA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=bsAnhnhcBw8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=iMglBC6CdzM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=Uwgur2cwgX0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=lUrcUF5Q3_4: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=hnpdc9FawJw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=phAVnqDJ9Ac: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=DUcYEu8FUq8: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=A1TDNFvsOVE: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=kfS6VXGegGI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=fhrq17S6c7M: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=Be_aGpY1NBM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=vfPOVMFnqSM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=NqlQNeiXgX0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=t-kL0PRhFY0: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=gfS14LpRNpw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=Xp96VdimJ_A: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=G5zq0649tSs: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=N8Z9sTPUXKU: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=2oaMPopM1mg: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=7BqTrc7HY8Y: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=34bskm2CApA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=VX8ca_kX8zk: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=AdO88oBXkBg: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=SZmd9NNTqwI: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=4WUPFJryLlU: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=TQ8QrXU64nw: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=JQ_mBGL56No: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=ujhwB3QPEJs: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=x4DnqylDOYA: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=a6UkI_PQlZM: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=IrR2Pa7Xi5E: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=LljhVkZJ7_E: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] retry-later video=jtO662AvHbc: YouTube HTTP 429 limit reached (24/24); stopped further inspections
+[static-update] batch_degraded attempted=60 failed=60; continuing with last successful state
+[static-update] snapshot=20261013T105037Z processed=0/60 pending=3138 videos=14470 songs=191662
+
+> daily-song-list@1.0.0 static:validate
+> node scripts/static/validate-static.js
+
+STATIC_DATA_OK videos=14470 songs=191662 processed=27931 pending=3138
+[static-repair] processed=27931 published=16490 unpublished=11441 repairable=7155 abandoned=4286 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3198
+STATIC_REPAIR_PASS_END pass=1 dropped=7155
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T11:57:52Z
