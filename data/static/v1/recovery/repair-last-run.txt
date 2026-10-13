@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:39:04Z
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:45:55Z
 [static-repair] processed=28238 published=16628 unpublished=11610 repairable=7276 abandoned=4334 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3020
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=341 items=341 errors=0
+[mygit:success] snapshots=1/1 rawItems=345 items=345 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,12 +12,14 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-13T17:39:04Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] snapshot=20261013T172342Z processed=7/7 pending=2900 videos=14707 songs=195077
+[static-update] video=NggFnPtGIIQ result=no_usable_song_source songs=0
+[static-update] video=zePSGoRxNOo result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261013T173354Z processed=9/9 pending=2898 videos=14707 songs=195077
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14707 songs=195077 processed=28238 pending=2900
-[static-repair] processed=28238 published=16628 unpublished=11610 repairable=7276 abandoned=4334 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2960
+STATIC_DATA_OK videos=14707 songs=195077 processed=28238 pending=2898
+[static-repair] processed=28238 published=16628 unpublished=11610 repairable=7276 abandoned=4334 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2958
 STATIC_REPAIR_PASS_END pass=1 dropped=7276
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T17:41:29Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-13T17:48:31Z
