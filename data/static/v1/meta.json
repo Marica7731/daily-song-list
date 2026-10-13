@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-10-13T15:34:39.592Z",
+  "generatedAt": "2026-10-13T15:40:40.274Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,17 +352,17 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261013T152204Z",
-  "sourceCapturedAt": "2026-10-13T15:22:04.337Z",
+  "sourceSnapshotId": "20261013T153219Z",
+  "sourceCapturedAt": "2026-10-13T15:32:19.834Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 387
+    "candidateVideos": 353
   },
-  "pendingVideoCount": 2896,
-  "processedVideoCount": 28222,
+  "pendingVideoCount": 2894,
+  "processedVideoCount": 28223,
   "videoCount": 14696,
   "songOccurrenceCount": 194935,
   "quality": {
@@ -467,29 +467,29 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 387,
-        "songOccurrenceCount": 5251,
-        "pendingVideoCount": 2554,
-        "quarantinedOccurrences": 28,
+        "videoCount": 382,
+        "songOccurrenceCount": 5203,
+        "pendingVideoCount": 2546,
+        "quarantinedOccurrences": 27,
         "deduplicatedOccurrences": 16
       },
       "songs": {
-        "totalCount": 3498,
+        "totalCount": 3466,
         "pageCount": 70,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 1712,
-        "pageCount": 35,
+        "totalCount": 1700,
+        "pageCount": 34,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 304,
-        "pageCount": 7,
+        "totalCount": 300,
+        "pageCount": 6,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/vtubers/page-{page:04d}.json"
@@ -499,7 +499,7 @@
       "stats": {
         "videoCount": 5847,
         "songOccurrenceCount": 73088,
-        "pendingVideoCount": 2896,
+        "pendingVideoCount": 2894,
         "quarantinedOccurrences": 1151,
         "deduplicatedOccurrences": 248
       },
@@ -529,7 +529,7 @@
       "stats": {
         "videoCount": 14696,
         "songOccurrenceCount": 194935,
-        "pendingVideoCount": 2896,
+        "pendingVideoCount": 2894,
         "quarantinedOccurrences": 2275,
         "deduplicatedOccurrences": 413
       },
