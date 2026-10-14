@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T06:15:03Z
-[static-repair] processed=28319 published=16678 unpublished=11641 repairable=7276 abandoned=4365 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3092
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T06:21:17Z
+[static-repair] processed=28319 published=16678 unpublished=11641 repairable=7276 abandoned=4365 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3094
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,12 +12,16 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T06:15:03Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] snapshot=20261014T060631Z processed=7/7 pending=2974 videos=14756 songs=195689
+[static-update] video=PsBU_qcS_7Y result=selected songs=19
+[static-update] video=F3ficgLz7Lc result=no_usable_song_source songs=0
+[static-update] video=2Nbg4Ksu2TM result=no_usable_song_source songs=0
+[static-update] video=-aKfCuM7m68 result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261014T060631Z processed=11/11 pending=2970 videos=14757 songs=195708
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14756 songs=195689 processed=28319 pending=2974
-[static-repair] processed=28319 published=16678 unpublished=11641 repairable=7276 abandoned=4365 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3034
+STATIC_DATA_OK videos=14757 songs=195708 processed=28323 pending=2970
+[static-repair] processed=28323 published=16679 unpublished=11644 repairable=7276 abandoned=4368 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3030
 STATIC_REPAIR_PASS_END pass=1 dropped=7276
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T06:17:09Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T06:23:45Z
