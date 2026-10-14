@@ -217,3 +217,14 @@
 - Repo size `19882763` KB (~`18.96 GiB`), above the 8 GiB watch threshold; no orphan reset performed without explicit confirmation.
 - Archive audit: over-quota API returned 404; archive has no new runs after the cancelled cleanup run.
 - Dirty-data batch was not triggered because static-update/recovery chain is active; no VPS, SSH, self-hosted runner, clone, or history download used.
+
+
+## 2026-10-14 18:52 +08:00
+
+- Live meta: generatedAt `2026-10-14T10:41:16.701Z`, sourceSnapshot `20261014T102739Z`, videos `14807`, song occurrences `196706`.
+- Search manifest: `16` shards, generatedAt `2026-10-14T10:48:11.156Z`, first shard `4946` items, last shard `4933` items; range manifest probe returned HTTP 404 while Pages is still deploying.
+- Sen entity `entities/vtubers/b04bc5065d2c53b2.json`: HTTP 200, name `Sen†Sational/センセーショナル`, channelId `UCmoEQhDJS332hT5ryI7yFvQ`, collectionId `sen-44`, collected `true`, videoCount `33`, occurrenceCount `713`, generatedAt matches live meta.
+- Sen discover run `38546983540` completed successfully; import file `data/static/v1/imports/sen-44.json` is present.
+- Check code run `38546395599` succeeded; current repair run `38552628736` and Pages deploy run `38552623332` are in progress, so no dirty-data batch was started.
+- Main repository size is `19882763` KB (~`18.96 GiB`), above the 8 GiB watch threshold; orphan reset remains pending explicit user confirmation.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
