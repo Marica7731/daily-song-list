@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-14T00:25:55.172Z",
+  "generatedAt": "2026-10-14T00:31:36.547Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 17212,
-  "inputOccurrences": 198184,
-  "visibleVideos": 14736,
-  "visibleOccurrences": 195496,
-  "quarantinedOccurrences": 2275,
+  "inputVideos": 17214,
+  "inputOccurrences": 198199,
+  "visibleVideos": 14738,
+  "visibleOccurrences": 195510,
+  "quarantinedOccurrences": 2276,
   "quarantinedVideos": 1507,
   "deduplicatedOccurrences": 413,
   "normalizedArtistOccurrences": 435,
@@ -27,7 +27,7 @@
     "unrelated_talk_show_listing": 29,
     "reused_description_across_unrelated_channels": 48,
     "confirmed_chat_segment_label": 1,
-    "confirmed_stream_start_marker": 26,
+    "confirmed_stream_start_marker": 27,
     "reviewed_non_song_chapter_in_numbered_setlist": 23,
     "reviewed_bad_description_source": 193,
     "dated_future_stream_announcement": 7,
@@ -1075,12 +1075,13 @@
       }
     },
     "2026-10-06": {
-      "quarantinedOccurrences": 11,
+      "quarantinedOccurrences": 12,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 9,
         "unrelated_livestream_listing": 1,
-        "unrelated_talk_show_listing": 1
+        "unrelated_talk_show_listing": 1,
+        "confirmed_stream_start_marker": 1
       }
     },
     "2026-10-07": {
@@ -8099,6 +8100,10 @@
       "deduplicatedOccurrences": 0
     },
     "Gtkhx09x540": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "jskz6aE4GDg": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
