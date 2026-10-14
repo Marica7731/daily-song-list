@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-10-14T17:52:26.165Z",
+  "generatedAt": "2026-10-14T17:59:25.514Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,14 +352,14 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261014T173930Z",
-  "sourceCapturedAt": "2026-10-14T17:39:30.570Z",
+  "sourceSnapshotId": "20261014T174936Z",
+  "sourceCapturedAt": "2026-10-14T17:49:36.347Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 236
+    "candidateVideos": 223
   },
   "pendingVideoCount": 2829,
   "processedVideoCount": 28520,
@@ -470,7 +470,7 @@
         "videoCount": 352,
         "songOccurrenceCount": 4795,
         "pendingVideoCount": 2450,
-        "quarantinedOccurrences": 15,
+        "quarantinedOccurrences": 14,
         "deduplicatedOccurrences": 15
       },
       "songs": {
@@ -497,22 +497,22 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 5764,
-        "songOccurrenceCount": 72058,
+        "videoCount": 5762,
+        "songOccurrenceCount": 72030,
         "pendingVideoCount": 2829,
         "quarantinedOccurrences": 1123,
         "deduplicatedOccurrences": 245
       },
       "songs": {
-        "totalCount": 26950,
+        "totalCount": 26940,
         "pageCount": 539,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 10506,
-        "pageCount": 211,
+        "totalCount": 10498,
+        "pageCount": 210,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
