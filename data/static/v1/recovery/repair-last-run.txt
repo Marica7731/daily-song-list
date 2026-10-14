@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T12:57:29Z
-[static-repair] processed=28426 published=16732 unpublished=11694 repairable=7311 abandoned=4383 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3010
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T13:04:26Z
+[static-repair] processed=28428 published=16734 unpublished=11694 repairable=7311 abandoned=4383 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3006
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,19 +12,19 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T12:57:29Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=MKlcCcWlzYQ result=selected songs=1
-[static-update] video=TQa89sp43Yk result=no_usable_song_source songs=0
-[static-update] video=yXlVDbf7MC8 result=no_timestamp_candidates songs=0
-[static-update] video=GaZzg1eWCx8 result=no_usable_song_source songs=0
-[static-update] video=-pdkTaZ0a4s result=no_timestamp_candidates songs=0
-[static-update] video=vn0XeA4jdAc result=selected songs=7
-[static-update] video=EDohmWfNb68 result=no_usable_song_source songs=0
-[static-update] snapshot=20261014T124757Z processed=14/14 pending=2886 videos=14842 songs=197092
+[static-update] video=tfnv3qaIM-E result=no_timestamp_candidates songs=0
+[static-update] video=9Ks3AI0xJIE result=selected songs=18
+[static-update] video=S8DMAzzzQR4 result=selected songs=15
+[static-update] video=LdiyIOQkGP4 result=no_timestamp_candidates songs=0
+[static-update] video=tE-hQ4eWwOw result=no_usable_song_source songs=0
+[static-update] video=NeMA_doDZRA result=no_usable_song_source songs=0
+[static-update] video=FG1Ftsx1fwY result=selected songs=7
+[static-update] snapshot=20261014T124757Z processed=14/14 pending=2879 videos=14845 songs=197132
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14842 songs=197092 processed=28428 pending=2886
-[static-repair] processed=28428 published=16734 unpublished=11694 repairable=7311 abandoned=4383 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2946
+STATIC_DATA_OK videos=14845 songs=197132 processed=28431 pending=2879
+[static-repair] processed=28431 published=16737 unpublished=11694 repairable=7311 abandoned=4383 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2939
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T13:00:28Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T13:07:22Z
