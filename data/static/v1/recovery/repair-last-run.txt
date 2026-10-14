@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T04:24:59Z
-[static-repair] processed=28280 published=16663 unpublished=11617 repairable=7276 abandoned=4341 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3119
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T04:31:45Z
+[static-repair] processed=28281 published=16663 unpublished=11618 repairable=7276 abandoned=4342 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3121
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,13 +12,15 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-14T04:24:59Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=fj0zLwMIuBE result=no_usable_song_source songs=0
-[static-update] snapshot=20261014T041603Z processed=8/8 pending=3001 videos=14742 songs=195555
+[static-update] video=MFIJylnliJU result=no_timestamp_candidates songs=0
+[static-update] video=0294D0_QnzY result=no_timestamp_candidates songs=0
+[static-update] video=gx2FlAHwXQI result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261014T041603Z processed=10/10 pending=2998 videos=14742 songs=195555
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=14742 songs=195555 processed=28281 pending=3001
-[static-repair] processed=28281 published=16663 unpublished=11618 repairable=7276 abandoned=4342 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3061
+STATIC_DATA_OK videos=14742 songs=195555 processed=28281 pending=2998
+[static-repair] processed=28281 published=16663 unpublished=11618 repairable=7276 abandoned=4342 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3058
 STATIC_REPAIR_PASS_END pass=1 dropped=7276
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T04:27:25Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-14T04:34:06Z
