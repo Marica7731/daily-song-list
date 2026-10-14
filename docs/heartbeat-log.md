@@ -204,3 +204,16 @@
 - Natsume import files remain unpublished (404) while discovery is running; no import result was assumed.
 - The heartbeat dirty-data batch was not triggered this cycle because recovery is active; this avoids concurrent writes. No VPS, SSH, self-hosted runner, clone, or history download was used.
 - Main repository size is `8658229 KB` (~8.26 GiB), above the 8 GiB watch threshold; no orphan reset was performed because explicit confirmation is required.
+
+
+## 2026-10-14 18:25 +08:00
+
+- Live meta: generatedAt `2026-10-14T10:25:31.733Z`, sourceSnapshot `20261014T101732Z`, videos `14806`, song occurrences `196626`, pending `2910`.
+- All ranges: songs `54201`/`1085` pages; artists `20475`/`410`; vtubers `4763`/`96`; first and true-last pages returned HTTP 200.
+- Search manifest: `16` shards; first `4946`, last `4931` items.
+- Entity detail `songs/f2cce8376bdbca6d.json`: HTTP 200, `少女レイ`, `723` occurrences, generatedAt matches meta.
+- Sen import: `data/static/v1/imports/sen-44.json` HTTP 200; config has `collectionId=sen-44`, `collected=true`.
+- Actions: Sen discover 38546983540 completed/success; Check code 38546395599 completed/success; static-update 38550015428 completed/cancelled; repair 38550020035 in_progress/; Pages 38550012058 completed/success.
+- Repo size `19882763` KB (~`18.96 GiB`), above the 8 GiB watch threshold; no orphan reset performed without explicit confirmation.
+- Archive audit: over-quota API returned 404; archive has no new runs after the cancelled cleanup run.
+- Dirty-data batch was not triggered because static-update/recovery chain is active; no VPS, SSH, self-hosted runner, clone, or history download used.
