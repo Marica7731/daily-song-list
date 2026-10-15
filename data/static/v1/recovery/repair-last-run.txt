@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T15:04:41Z
-[static-repair] processed=28733 published=16988 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2964
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T15:12:44Z
+[static-repair] processed=28736 published=16991 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2968
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -9,23 +9,17 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T15:04:41Z
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
 [static-update] video=omBBRaph6so result=selected songs=8
-[static-update] video=clGY9gpI35o result=selected songs=1
+[static-update] video=clGY9gpI35o result=no_timestamp_candidates songs=0
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=DYhms-hck_c result=selected songs=1
-[static-update] video=DyKl02R6Xcc result=selected songs=2
-[static-update] video=fvQtdKk7CSY result=no_timestamp_candidates songs=0
-[static-update] video=qV60BcqpzT0 result=no_timestamp_candidates songs=0
-[static-update] video=-EI91GkG0Os result=selected songs=10
-[static-update] video=_W64iinE4Ro result=no_usable_song_source songs=0
-[static-update] video=y0P0QqE9xpw result=no_timestamp_candidates songs=0
-[static-update] video=lhrB497IXqw result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261015T145513Z processed=15/15 pending=2848 videos=15099 songs=199968
+[static-update] video=G2Z0jIccUvc result=selected songs=1
+[static-update] video=83Sj1Vxpz3s result=no_usable_song_source songs=0
+[static-update] snapshot=20261015T145513Z processed=9/9 pending=2846 videos=15100 songs=199969
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15099 songs=199968 processed=28736 pending=2848
-[static-repair] processed=28736 published=16991 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2908
+STATIC_DATA_OK videos=15100 songs=199969 processed=28737 pending=2846
+[static-repair] processed=28737 published=16992 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2906
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T15:08:11Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T15:15:11Z
