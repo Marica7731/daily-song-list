@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T14:22:18Z
-[static-repair] processed=28708 published=16963 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2994
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T14:29:52Z
+[static-repair] processed=28710 published=16965 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2983
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=314 items=314 errors=0
+[mygit:success] snapshots=1/1 rawItems=305 items=305 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,23 +12,32 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T14:22:18Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=E8GsBivOxy4 result=selected songs=10
-[static-update] video=XlgsJLfK36M result=no_usable_song_source songs=0
-[static-update] video=NTkYwmEdVuc result=no_timestamp_candidates songs=0
-[static-update] video=uN40UwbkmKA result=no_timestamp_candidates songs=0
-[static-update] video=4MIwqrIKmA4 result=no_timestamp_candidates songs=0
-[static-update] video=38rufnuV8_4 result=no_usable_song_source songs=0
-[static-update] video=-eAg8ZZAZ20 result=no_usable_song_source songs=0
-[static-update] video=azML5NaoRWA result=selected songs=1
-[static-update] video=BOgKM64Bf4Y result=no_usable_song_source songs=0
-[static-update] video=Y3T0XH1R_Ug result=no_usable_song_source songs=0
-[static-update] video=0MISECH4JlA result=no_usable_song_source songs=0
-[static-update] snapshot=20261015T140500Z processed=18/18 pending=2863 videos=15073 songs=199673
+[static-update] video=1Lj8ukcbqGE result=selected songs=22
+[static-update] video=oeRDZwNtKEQ result=selected songs=12
+[static-update] video=XOSbHTB-MA8 result=selected songs=7
+[static-update] video=43F6BmItBjo result=no_usable_song_source songs=0
+[static-update] video=V14zTbhK9Dw result=no_timestamp_candidates songs=0
+[static-update] video=mM4rlVXodhA result=selected songs=5
+[static-update] video=1505ZbnZC3o result=no_timestamp_candidates songs=0
+[static-update] video=jOxwtipIJr8 result=no_timestamp_candidates songs=0
+[static-update] video=L1vnZtm08To result=selected songs=21
+[static-update] video=QfweOpRGryw result=selected songs=17
+[static-update] video=fPxsn8RCYpA result=selected songs=30
+[static-update] video=neAD6Ma7dAw result=no_usable_song_source songs=0
+[static-update] video=uIz9L4KzCFg result=no_timestamp_candidates songs=0
+[static-update] video=nyXOMqwX2Ps result=selected songs=14
+[static-update] video=rdVISM5w3OU result=selected songs=12
+[static-update] video=rOtr90qt5BU result=no_timestamp_candidates songs=0
+[static-update] video=L_pwBH2XoNI result=no_timestamp_candidates songs=0
+[static-update] video=e1il41gJoOc result=selected songs=9
+[static-update] video=4hM02azKOZI result=selected songs=4
+[static-update] video=ppBU9LxedF8 result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261015T141505Z processed=27/27 pending=2851 videos=15084 songs=199825
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15073 songs=199673 processed=28710 pending=2863
-[static-repair] processed=28710 published=16965 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2923
+STATIC_DATA_OK videos=15084 songs=199825 processed=28721 pending=2851
+[static-repair] processed=28721 published=16976 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2911
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T14:25:33Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T14:35:34Z
