@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T11:42:45Z
-[static-repair] processed=28651 published=16906 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3051
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T11:49:42Z
+[static-repair] processed=28651 published=16906 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3057
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -12,13 +12,15 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-15T11:42:45Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=ZqPJy3iwSsY result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261015T113426Z processed=8/8 pending=2937 videos=15014 songs=199090
+[static-update] video=Yl8bz6lujtw result=selected songs=10
+[static-update] video=BQYVIvp_mks result=no_usable_song_source songs=0
+[static-update] video=eoxGowf_uLg result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261015T113426Z processed=10/10 pending=2934 videos=15015 songs=199100
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15014 songs=199090 processed=28651 pending=2937
-[static-repair] processed=28651 published=16906 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2997
+STATIC_DATA_OK videos=15015 songs=199100 processed=28652 pending=2934
+[static-repair] processed=28652 published=16907 unpublished=11745 repairable=7311 abandoned=4434 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2994
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T11:45:07Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-15T11:52:19Z
