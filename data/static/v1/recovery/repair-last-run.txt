@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T02:15:28Z
-[static-repair] processed=28839 published=17069 unpublished=11770 repairable=7311 abandoned=4459 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3088
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T02:21:43Z
+[static-repair] processed=28839 published=17069 unpublished=11770 repairable=7311 abandoned=4459 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3093
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=391 items=391 errors=0
+[mygit:success] snapshots=1/1 rawItems=337 items=337 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,12 +12,12 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T02:15:28Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] snapshot=20261016T020225Z processed=7/7 pending=2973 videos=15177 songs=200835
+[static-update] snapshot=20261016T021232Z processed=7/7 pending=2975 videos=15177 songs=200835
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15177 songs=200835 processed=28839 pending=2973
-[static-repair] processed=28839 published=17069 unpublished=11770 repairable=7311 abandoned=4459 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3033
+STATIC_DATA_OK videos=15177 songs=200835 processed=28839 pending=2975
+[static-repair] processed=28839 published=17069 unpublished=11770 repairable=7311 abandoned=4459 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3035
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T02:17:35Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T02:23:57Z
