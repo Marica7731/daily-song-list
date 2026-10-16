@@ -1,28 +1,34 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T08:25:03Z
-[static-repair] processed=28881 published=17106 unpublished=11775 repairable=7311 abandoned=4464 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3118
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T09:19:00Z
+[static-repair] processed=28881 published=17106 unpublished=11775 repairable=7311 abandoned=4464 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3135
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=403 items=403 errors=0
-[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=KKd9OiaVNkM: https://www.youtube.com/watch?v=KKd9OiaVNkM&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=clGY9gpI35o: https://www.youtube.com/watch?v=clGY9gpI35o&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=s_a0Nfpp9UA: https://www.youtube.com/watch?v=s_a0Nfpp9UA&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=CEipRAoiPLA: https://www.youtube.com/watch?v=CEipRAoiPLA&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=rL5S3w_4rhc: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=wCJAAOI2CtY: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=UOxxpmVGQrE: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] retry-later video=5jOGPXnmAFc: YouTube HTTP 429 limit reached (24/24); stopped further inspections
-[static-update] batch_degraded attempted=11 failed=11; continuing with last successful state
-[static-update] snapshot=20261016T081337Z processed=0/11 pending=3015 videos=15214 songs=201284
+[mygit:success] snapshots=1/1 rawItems=341 items=341 errors=0
+[static-update] video=iY3xDMELfDo result=selected songs=11
+[static-update] video=opYK0veMDys result=selected songs=4
+[static-update] video=KKd9OiaVNkM result=selected songs=18
+[static-update] video=omBBRaph6so result=selected songs=8
+[static-update] video=clGY9gpI35o result=selected songs=1
+[static-update] video=s_a0Nfpp9UA result=selected songs=1
+[static-update] video=CEipRAoiPLA result=selected songs=8
+[static-update] video=aH4Vne8-RGQ result=no_timestamp_candidates songs=0
+[static-update] video=C80mH5losXw result=selected songs=2
+[static-update] video=RAPB1ceXa4c result=no_timestamp_candidates songs=0
+[static-update] video=fBmhLL_ulOo result=no_usable_song_source songs=0
+[static-update] video=rL5S3w_4rhc result=no_usable_song_source songs=0
+[static-update] video=wCJAAOI2CtY result=selected songs=11
+[static-update] video=-T8avKZHkrM result=no_usable_song_source songs=0
+[static-update] video=UOxxpmVGQrE result=no_usable_song_source songs=0
+[static-update] video=ijm7nAYbx1A result=selected songs=12
+[static-update] video=5SlZdioxlQc result=no_usable_song_source songs=0
+[static-update] video=5jOGPXnmAFc result=selected songs=8
+[static-update] snapshot=20261016T090352Z processed=18/18 pending=3004 videos=15218 songs=201317
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15214 songs=201284 processed=28881 pending=3015
-[static-repair] processed=28881 published=17106 unpublished=11775 repairable=7311 abandoned=4464 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3075
+STATIC_DATA_OK videos=15218 songs=201317 processed=28885 pending=3004
+[static-repair] processed=28885 published=17110 unpublished=11775 repairable=7311 abandoned=4464 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3064
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T09:14:31Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T09:22:53Z
