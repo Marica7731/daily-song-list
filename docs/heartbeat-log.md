@@ -228,3 +228,22 @@
 - Check code run `38546395599` succeeded; current repair run `38552628736` and Pages deploy run `38552623332` are in progress, so no dirty-data batch was started.
 - Main repository size is `19882763` KB (~`18.96 GiB`), above the 8 GiB watch threshold; orphan reset remains pending explicit user confirmation.
 - All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
+## 2026-10-14 19:10 +08:00
+
+- Correction to the 2026-10-14 18:52 log: the ranking HTTP 404 was caused by probing an incorrect path, not by an incomplete Pages deployment.
+- Verified live ranking manifests: `rankings/all/songs/manifest.json` total 54,212 over 1,085 pages; `rankings/all/artists/manifest.json` total 20,482 over 410 pages; `rankings/all/vtubers/manifest.json` total 4,763 over 96 pages.
+- Boundary probes returned HTTP 200: songs first 50 / last 12; artists first 50 / last 32; vtubers first 50 / last 13.
+- Live meta generatedAt 2026-10-14T11:01:31.808Z, sourceSnapshot 20261014T104733Z, videos 14,810, song occurrences 196,725; search manifest 16 shards and entity `f2cce8376bdbca6d` also matched that generatedAt.
+
+## 2026-10-16 12:55 +08:00
+
+- Live meta: generatedAt `2026-10-16T04:46:25.114Z`, sourceSnapshot `20261016T043307Z`, videos `15181`, song occurrences `200868`, pending `2987`, processed `28843`.
+- Ranges: all songs `55146`/`1103` pages; all artists `20830`/`417`; all vtubers `4836`/`97`; first and true-last pages returned HTTP 200 with contiguous ranks.
+- Search manifest: `16` shards, declared/actual `80806/80806`; song entity `f2cce8376bdbca6d` (`少女レイ`) `729` occurrences and Sen entity `b04bc5065d2c53b2` (`sen-44`) collected `true`, both matching `generatedAt`.
+- Actions: repair `38852763358` in progress; Pages `38852760364` and pages build `38852760104` succeeded; static-update/recovery idle, so no dirty-data batch was started.
+- Repair backlog: repairable `7311`, abandoned `4459`, unreadable `0`, published `17073`, queue `3047`.
+- Main repo size `40019703` KB (~`38.17 GiB`), `pushed_at=2026-10-16T04:51:26Z`, above 8 GiB; controlled orphan reset remains prepared but unexecuted pending explicit user confirmation.
+- Archive audit: `daily-song-list-archive-overquota` API returned `404`; clean archive has no new runs after `2026-10-12T15:20:14Z`.
+- Correction: the 2026-10-14 18:52 `range manifest` 404 was an incorrect path probe, not an incomplete Pages deployment. During the active repair deployment, one mixed-version probe saw shard `7` as `5074` vs `5075`; after Pages `38852760364` completed, the full 16-shard comparison passed `80806/80806`.
+- All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
