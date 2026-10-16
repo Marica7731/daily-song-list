@@ -247,3 +247,16 @@
 - Archive audit: `daily-song-list-archive-overquota` API returned `404`; clean archive has no new runs after `2026-10-12T15:20:14Z`.
 - Correction: the 2026-10-14 18:52 `range manifest` 404 was an incorrect path probe, not an incomplete Pages deployment. During the active repair deployment, one mixed-version probe saw shard `7` as `5074` vs `5075`; after Pages `38852760364` completed, the full 16-shard comparison passed `80806/80806`.
 - All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
+
+## 2026-10-16 22:25 +08:00
+
+- Live meta: generatedAt `2026-10-16T04:53:30.980Z`, sourceSnapshot `20261016T044257Z`, videos `15182`, song occurrences `200883`, pending `3001`, processed `28844`.
+- Ranges: all songs `55150`/`1103` pages; all artists `20831`/`417`; boundary probe contiguous (page 1 ranks `1-50` `少女レイ 729` -> `ノーチラス 237`; page 2 starts rank `51` `星間飛行 235`).
+- Search manifest: `16` shards, declared/actual `80812/80812` verified by downloading every shard; search generatedAt `2026-10-16T05:08:58.661Z`.
+- Yorushika catalog: `82` titles (artist `ヨルシカ`); history gaps unchanged (`2026-08-23`, `2026-08-30` still `MISSING`).
+- Dirty-data batch executed: trigger commit `e80d8f51b9` (`25/all/confirmed_noise,parser_corruption`, requestedAt `2026-10-16T14:20:49Z`); Check code `38915300549` completed/success; batch `38915300410` completed/success with Generate success, Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`); remote head remained `e80d8f51b9`.
+- Actions: static-update and static-recover-history idle (0 in-progress; recovery has 0 lifetime runs); repair chain ran in parallel (`38913931729` success, `38914867217` in-progress).
+- Repair backlog: repairable `7311`, abandoned `4459`, unreadable `0`, published `17080`, queue `3119` (pass at `2026-10-16T05:43:04Z`); backlog not cleared.
+- Main repo size `44092405` KB (~`42.05 GiB`), `pushed_at=2026-10-16T14:22:55Z`, above the 8 GiB threshold; controlled orphan reset remains prepared but unexecuted pending explicit user confirmation.
+- Archive audit: `daily-song-list-archive` has `37` lifetime runs and none after `2026-10-12T15:20:14Z`; `daily-song-list-archive-overquota` API returned `404`.
+- All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used. Workspace rebuilt as a blobless shallow sparse clone (`--filter=blob:none --depth=1`) limited to the trigger, `AGENTS.md`, and this log.
