@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T16:41:24Z
-[static-repair] processed=29039 published=17254 unpublished=11785 repairable=7311 abandoned=4474 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2956
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T16:56:56Z
+[static-repair] processed=29066 published=17279 unpublished=11787 repairable=7311 abandoned=4476 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2849
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=352 items=352 errors=0
+[mygit:success] snapshots=1/1 rawItems=466 items=466 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,13 +12,21 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T16:41:24Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=WC-LUNS_-gc result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261016T163119Z processed=8/8 pending=2842 videos=15360 songs=202949
+[static-update] video=8V4SX5j_NfY result=selected songs=1
+[static-update] video=OFWUlvK5ozc result=selected songs=23
+[static-update] video=ZHsu1g1fIBI result=no_timestamp_candidates songs=0
+[static-update] video=LqpaiXr1b4U result=no_timestamp_candidates songs=0
+[static-update] video=AkQLTQQpPgw result=selected songs=10
+[static-update] video=UOjAa6Jcd3Q result=no_timestamp_candidates songs=0
+[static-update] video=J2WVG1gtdjs result=selected songs=13
+[static-update] video=sBAkwB3HX0U result=selected songs=24
+[static-update] video=eJFRl5ztOEU result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261016T164109Z processed=16/16 pending=2815 videos=15390 songs=203397
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15360 songs=202949 processed=29039 pending=2842
-[static-repair] processed=29039 published=17254 unpublished=11785 repairable=7311 abandoned=4474 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2902
+STATIC_DATA_OK videos=15390 songs=203397 processed=29073 pending=2815
+[static-repair] processed=29073 published=17284 unpublished=11789 repairable=7311 abandoned=4478 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2875
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T16:43:50Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T17:00:05Z
