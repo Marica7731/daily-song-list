@@ -1,22 +1,23 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T23:19:55Z
-[static-repair] processed=29123 published=17323 unpublished=11800 repairable=7311 abandoned=4489 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3033
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T23:25:59Z
+[static-repair] processed=29123 published=17323 unpublished=11800 repairable=7311 abandoned=4489 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3047
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=528 items=528 errors=0
+[mygit:success] snapshots=1/1 rawItems=533 items=533 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] snapshot=20261016T230544Z processed=6/6 pending=2927 videos=15429 songs=203908
+[static-update] video=FBKHkRaevgY result=no_timestamp_candidates songs=0
+[static-update] snapshot=20261016T231542Z processed=7/7 pending=2929 videos=15429 songs=203908
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15429 songs=203908 processed=29123 pending=2927
-[static-repair] processed=29123 published=17323 unpublished=11800 repairable=7311 abandoned=4489 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2987
+STATIC_DATA_OK videos=15429 songs=203908 processed=29123 pending=2929
+[static-repair] processed=29123 published=17323 unpublished=11800 repairable=7311 abandoned=4489 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2989
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T23:22:03Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T23:28:17Z
