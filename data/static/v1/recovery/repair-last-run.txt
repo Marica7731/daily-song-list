@@ -1,10 +1,10 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T15:21:47Z
-[static-repair] processed=29013 published=17233 unpublished=11780 repairable=7311 abandoned=4469 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2983
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T15:35:15Z
+[static-repair] processed=29017 published=17237 unpublished=11780 repairable=7311 abandoned=4469 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2969
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=358 items=358 errors=0
+[mygit:success] snapshots=1/1 rawItems=376 items=376 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=KKd9OiaVNkM result=selected songs=18
@@ -12,28 +12,25 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-16T15:21:47Z
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=s_a0Nfpp9UA result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=9CIsAmzn9RQ result=no_usable_song_source songs=0
-[static-update] video=teYMs6TcrH0 result=selected songs=17
-[static-update] video=RJFPtVGDXTA result=no_usable_song_source songs=0
-[static-update] video=O3bPRCfulQ4 result=no_usable_song_source songs=0
-[static-update] video=7-OsFIkZymM result=no_usable_song_source songs=0
-[static-update] video=HVwdRWZbsqw result=no_timestamp_candidates songs=0
-[static-update] video=ymNxnlsH77c result=selected songs=10
-[static-update] video=3gO-27C9IGY result=selected songs=22
-[static-update] video=x8uaW4mfG-Y result=no_timestamp_candidates songs=0
-[static-update] video=yIe4PiPu-qk result=no_usable_song_source songs=0
-[static-update] video=TG9ARdcLqdA result=selected songs=10
-[static-update] video=CsfQFPtSROQ result=no_timestamp_candidates songs=0
-[static-update] video=CJEtmVV1Ed8 result=no_timestamp_candidates songs=0
-[static-update] video=O9v78DZR8_M result=no_usable_song_source songs=0
-[static-update] video=kWDXZDRC9-w result=no_usable_song_source songs=0
-[static-update] video=HG8Bg-YO9xA result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261016T151037Z processed=23/23 pending=2849 videos=15343 songs=202795
+[static-update] video=h4ojimTx-Xg result=selected songs=12
+[static-update] video=zyhFVBIAxhM result=no_timestamp_candidates songs=0
+[static-update] video=x0c4DwU2xYQ result=no_timestamp_candidates songs=0
+[static-update] video=R8pcT5tv55Q result=no_timestamp_candidates songs=0
+[static-update] video=Qcc0L3w48RQ result=selected songs=6
+[static-update] video=qnewSCs-kAs result=selected songs=6
+[static-update] video=pp7TzDjRxnI result=no_timestamp_candidates songs=0
+[static-update] video=0XAlzf-pqvk result=no_usable_song_source songs=0
+[static-update] video=0OetOLSClc4 result=no_timestamp_candidates songs=0
+[static-update] video=AAXRJ-FlNcI result=no_timestamp_candidates songs=0
+[static-update] video=p5jhu2PYPUE result=no_timestamp_candidates songs=0
+[static-update] video=LdHwNCh80NA result=no_usable_song_source songs=0
+[static-update] video=9LjX-NN8glc result=selected songs=2
+[static-update] snapshot=20261016T152037Z processed=20/20 pending=2839 videos=15347 songs=202821
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15343 songs=202795 processed=29017 pending=2849
-[static-repair] processed=29017 published=17237 unpublished=11780 repairable=7311 abandoned=4469 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2909
+STATIC_DATA_OK videos=15347 songs=202821 processed=29021 pending=2839
+[static-repair] processed=29021 published=17241 unpublished=11780 repairable=7311 abandoned=4469 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2899
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T15:26:35Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-16T15:39:05Z
