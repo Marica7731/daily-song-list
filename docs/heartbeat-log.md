@@ -248,6 +248,13 @@
 - Correction: the 2026-10-14 18:52 `range manifest` 404 was an incorrect path probe, not an incomplete Pages deployment. During the active repair deployment, one mixed-version probe saw shard `7` as `5074` vs `5075`; after Pages `38852760364` completed, the full 16-shard comparison passed `80806/80806`.
 - All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
 
+## 2026-10-17 16:25 +08:00
+
+- Twenty-sixth dirty-data batch: trigger commit `42442f7fca` (rebased onto repair `9a6b52a37a`, requestedAt `2026-10-17T08:22:44Z`); Check code `39017156398` success; batch `39017156387` success with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`); remote main stayed at the trigger commit.
+- Live meta regenerated to `2026-10-17T08:15:18.241Z` (videos `15480`, pending `3042`); history gaps unchanged; publishers idle, repair ran in parallel; backlog queue `3102`.
+- Repo size stable `51780718` KB (~`49.38 GiB`); controlled orphan reset remains prepared but unexecuted pending explicit user confirmation.
+- All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
+
 ## 2026-10-17 15:55 +08:00
 
 - Twenty-fifth dirty-data batch: trigger commit `bd73066e39` (rebased onto repair `6a86a68e6a`, requestedAt `2026-10-17T07:52:40Z`); Check code `39015296752` success; batch `39015296716` success with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`).
