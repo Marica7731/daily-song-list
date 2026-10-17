@@ -5,3 +5,4 @@
 - Preserve immutable raw history under `data/static/v1/days/**`. Curation changes must use exact selectors and bounded batches.
 - Publication order is: green `Check code`, bounded heartbeat/recovery/static update, then Pages. Recheck live meta, manifests, pagination, and entity details after publishing.
 - Keep detailed per-run evidence in `docs/heartbeat-log.md`. Do not append round logs to this file.
+- Heartbeat quiet window: GLM Coding Plan peak is workdays 14:00-18:00 (Asia/Shanghai); the automation schedule excludes those hours, and no heartbeat work should be started inside the window.
