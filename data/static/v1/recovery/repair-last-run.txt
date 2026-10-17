@@ -1,23 +1,22 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-17T04:32:14Z
-[static-repair] processed=29159 published=17341 unpublished=11818 repairable=7311 abandoned=4507 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3129
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-17T04:38:01Z
+[static-repair] processed=29161 published=17343 unpublished=11818 repairable=7311 abandoned=4507 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3137
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=488 items=488 errors=0
+[mygit:success] snapshots=1/1 rawItems=501 items=501 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
-[static-update] video=opYK0veMDys result=no_timestamp_candidates songs=0
+[static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
-[static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=h-oNWqHJrVQ result=selected songs=9
-[static-update] video=m1Ba4EbUDIY result=selected songs=25
-[static-update] snapshot=20261017T041727Z processed=7/7 pending=3017 videos=15449 songs=204169
+[static-update] video=CEipRAoiPLA result=selected songs=7
+[static-update] video=CJOaYAtfCzs result=selected songs=2
+[static-update] snapshot=20261017T042732Z processed=6/6 pending=3019 videos=15450 songs=204170
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15449 songs=204169 processed=29161 pending=3017
-[static-repair] processed=29161 published=17343 unpublished=11818 repairable=7311 abandoned=4507 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3077
+STATIC_DATA_OK videos=15450 songs=204170 processed=29162 pending=3019
+[static-repair] processed=29162 published=17344 unpublished=11818 repairable=7311 abandoned=4507 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=3079
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-17T04:34:10Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-17T04:39:31Z
