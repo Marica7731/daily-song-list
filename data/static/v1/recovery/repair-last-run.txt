@@ -1,23 +1,21 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-17T18:27:03Z
-[static-repair] processed=29438 published=17603 unpublished=11835 repairable=7311 abandoned=4524 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2949
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-17T18:33:51Z
+[static-repair] processed=29439 published=17604 unpublished=11835 repairable=7311 abandoned=4524 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2958
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=447 items=447 errors=0
+[mygit:success] snapshots=1/1 rawItems=474 items=474 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=ivMQ_GDpncc result=selected songs=23
-[static-update] video=zqVvb-Lk83I result=no_usable_song_source songs=0
-[static-update] snapshot=20261017T181151Z processed=7/7 pending=2838 videos=15706 songs=207349
+[static-update] snapshot=20261017T182152Z processed=5/5 pending=2840 videos=15706 songs=207349
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=15706 songs=207349 processed=29439 pending=2838
-[static-repair] processed=29439 published=17604 unpublished=11835 repairable=7311 abandoned=4524 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2898
+STATIC_DATA_OK videos=15706 songs=207349 processed=29439 pending=2840
+[static-repair] processed=29439 published=17604 unpublished=11835 repairable=7311 abandoned=4524 priority=0 priorityRepairable=0 noSongSchema=2 unreadable=0 seeded=60 queue=2900
 STATIC_REPAIR_PASS_END pass=1 dropped=7311
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-17T18:29:25Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-17T18:35:59Z
