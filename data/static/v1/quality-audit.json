@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-10-17T22:23:19.009Z",
+  "generatedAt": "2026-10-17T22:28:55.664Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 18212,
-  "inputOccurrences": 210449,
-  "visibleVideos": 15727,
-  "visibleOccurrences": 207660,
-  "quarantinedOccurrences": 2293,
-  "quarantinedVideos": 1516,
+  "inputVideos": 18228,
+  "inputOccurrences": 210704,
+  "visibleVideos": 15742,
+  "visibleOccurrences": 207914,
+  "quarantinedOccurrences": 2294,
+  "quarantinedVideos": 1517,
   "deduplicatedOccurrences": 496,
   "normalizedArtistOccurrences": 442,
-  "normalizedReleaseMetadataOccurrences": 4011,
+  "normalizedReleaseMetadataOccurrences": 4053,
   "repairedDateCreditOccurrences": 67,
   "repairedStructuredCreditOccurrences": 3075,
   "repairedKnownSourceCreditOccurrences": 157,
@@ -25,7 +25,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 36,
     "unrelated_talk_show_listing": 29,
-    "reused_description_across_unrelated_channels": 56,
+    "reused_description_across_unrelated_channels": 57,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 27,
     "reviewed_non_song_chapter_in_numbered_setlist": 23,
@@ -124,9 +124,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 31,
-      "channelCount": 31,
-      "distinctVideoTitles": 31,
+      "videoCount": 32,
+      "channelCount": 32,
+      "distinctVideoTitles": 32,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -1146,10 +1146,10 @@
       }
     },
     "2026-10-17": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 12,
       "byReason": {
-        "reused_description_across_unrelated_channels": 1
+        "reused_description_across_unrelated_channels": 2
       }
     },
     "2025-10-13": {
@@ -8326,6 +8326,10 @@
     "fHH22Z6rgRQ": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 11
+    },
+    "oT5fa6bWccI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "NeqUW6rsTU8": {
       "quarantinedOccurrences": 1,
