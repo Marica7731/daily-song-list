@@ -109,6 +109,17 @@
 
 # Heartbeat log
 
+## 2026-10-17 19:07 +08:00
+
+- 30th dirty-data batch: trigger commit `63c93e9ed4` (`25/all/confirmed_noise,parser_corruption`); Check code `39026655256` success and batch `39026655240` success with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`).
+- Static update `39026709190` succeeded and Pages `39027272463` deployed `d26db85d9b`; remote main advanced to that data commit.
+- Live meta regenerated to `2026-10-17T11:00:22.302Z` (videos `15531`, occurrences `205090`, pending `2976`, processed `29249`); history gaps unchanged (`2026-08-23`, `2026-08-30`).
+- Ranges: songs `55900`/`1119` pages (last page `50`), artists `21095`/`422` (last page `45`), vtubers `4900`/`99` (last page `50`); search declared/actual bytes `48338489/48338489`, items `81930` across `16` shards; entity `f2cce8376bdbca6d` (`少女レイ`) had `741` occurrences; all matched the new generatedAt.
+- Latest persisted repair pass ended ok with queue `3083`; repair run `39027275831` is in progress, while static-update and recovery are otherwise idle (`recovery` lifetime `0`).
+- Repo size `53114268` KB (~`50.65 GiB`), `pushed_at=2026-10-17T11:03:58Z`, above the 8 GiB threshold; controlled orphan reset remains prepared but unexecuted pending explicit user confirmation.
+- Archive audit: `daily-song-list-archive` has `37` lifetime runs and none after `2026-10-12T15:20:14Z`; `daily-song-list-archive-overquota` returned `404` as required.
+- All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
+
 ## 2026-10-12 19:18 +08:00
 
 - Verified live meta: generatedAt `2026-10-12T10:53:09.690Z`, sourceSnapshot `20261012T102141Z`, videos 14,111, song occurrences 187,003.
