@@ -248,6 +248,14 @@
 - Correction: the 2026-10-14 18:52 `range manifest` 404 was an incorrect path probe, not an incomplete Pages deployment. During the active repair deployment, one mixed-version probe saw shard `7` as `5074` vs `5075`; after Pages `38852760364` completed, the full 16-shard comparison passed `80806/80806`.
 - All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
 
+## 2026-10-17 13:52 +08:00
+
+- Consolidated rounds (queued 04:22/04:52/05:22/05:52 heartbeats). Twenty-first dirty-data batch: trigger commit `efaf2d663d` (requestedAt `2026-10-17T03:53:01Z`); Check code `39000502286` success; batch `39000502273` success with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`).
+- This round the batch was deferred: `static-update` run is in progress, so the publisher gate is not idle; no new trigger commit pushed.
+- Live meta regenerated to `2026-10-17T05:43:54.922Z` (videos `15454`, pending `3027`); history gaps unchanged; repair chain idle this round; backlog queue `3087`.
+- Repo size `50916531` KB (~`48.56 GiB`); controlled orphan reset remains prepared but unexecuted pending explicit user confirmation.
+- All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download used.
+
 ## 2026-10-17 11:27 +08:00
 
 - Twentieth dirty-data batch: trigger commit `e04aec889d` (rebased onto repair `aedc283766`, requestedAt `2026-10-17T03:23:20Z`; first push hit a non-fast-forward and the bounded retry resolved it); Check code `38998661934` success; batch `38998661938` success with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`); remote main stayed at the trigger commit.
