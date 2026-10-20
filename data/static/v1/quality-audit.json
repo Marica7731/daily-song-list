@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-20T22:05:56.329Z",
+  "generatedAt": "2026-10-20T22:12:41.218Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 19092,
-  "inputOccurrences": 220866,
-  "visibleVideos": 16540,
-  "visibleOccurrences": 218058,
+  "inputVideos": 19179,
+  "inputOccurrences": 222633,
+  "visibleVideos": 16627,
+  "visibleOccurrences": 219823,
   "quarantinedOccurrences": 2274,
   "quarantinedVideos": 1530,
-  "deduplicatedOccurrences": 522,
+  "deduplicatedOccurrences": 524,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 56,
   "artistCatalogArchivedOccurrences": 12,
@@ -634,16 +634,32 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-08-29": {
-      "quarantinedOccurrences": 29,
+      "quarantinedOccurrences": 28,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "reviewed_source_activity_chapter": 22,
+        "reviewed_source_activity_chapter": 21,
         "confirmed_stream_start_marker": 2,
         "reused_description_across_unrelated_channels": 1,
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1,
         "prayer_broadcast_timeline": 1,
         "reviewed_bad_description_source": 1
+      },
+      "artistCatalogArchivedOccurrences": 2
+    },
+    "2026-09-20": {
+      "quarantinedOccurrences": 79,
+      "deduplicatedOccurrences": 49,
+      "byReason": {
+        "reviewed_source_activity_chapter": 15,
+        "prayer_broadcast_timeline": 44,
+        "dated_stream_challenge_result": 4,
+        "bible_verse_broadcast": 1,
+        "reviewed_bad_description_source": 9,
+        "confirmed_stream_start_marker": 1,
+        "reused_description_across_unrelated_channels": 1,
+        "unrelated_livestream_listing": 2,
+        "unrelated_talk_show_listing": 2
       },
       "artistCatalogArchivedOccurrences": 2
     },
@@ -899,22 +915,6 @@
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1
       }
-    },
-    "2026-09-20": {
-      "quarantinedOccurrences": 78,
-      "deduplicatedOccurrences": 49,
-      "byReason": {
-        "prayer_broadcast_timeline": 44,
-        "reviewed_source_activity_chapter": 14,
-        "dated_stream_challenge_result": 4,
-        "bible_verse_broadcast": 1,
-        "reviewed_bad_description_source": 9,
-        "confirmed_stream_start_marker": 1,
-        "reused_description_across_unrelated_channels": 1,
-        "unrelated_livestream_listing": 2,
-        "unrelated_talk_show_listing": 2
-      },
-      "artistCatalogArchivedOccurrences": 2
     },
     "2026-09-21": {
       "quarantinedOccurrences": 46,
@@ -1187,6 +1187,11 @@
         "date_split_as_song_and_artist": 1,
         "reused_description_across_unrelated_channels": 3
       }
+    },
+    "2024-10-20": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 2,
+      "byReason": {}
     },
     "2025-10-13": {
       "quarantinedOccurrences": 0,
@@ -8461,6 +8466,10 @@
     "18VWP8rC3KM": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 4
+    },
+    "ewbrnwMJUcQ": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 2
     },
     "Ow8Nzfiad6k": {
       "quarantinedOccurrences": 0,

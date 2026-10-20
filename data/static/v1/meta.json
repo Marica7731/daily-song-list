@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-10-20T22:05:56.329Z",
+  "generatedAt": "2026-10-20T22:12:41.218Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -361,11 +361,11 @@
     "selectedSnapshots": 1,
     "candidateVideos": 462
   },
-  "pendingVideoCount": 2788,
-  "noSongRetryPoolCount": 14587,
-  "processedVideoCount": 30558,
-  "videoCount": 16540,
-  "songOccurrenceCount": 218058,
+  "pendingVideoCount": 2889,
+  "noSongRetryPoolCount": 14572,
+  "processedVideoCount": 30862,
+  "videoCount": 16627,
+  "songOccurrenceCount": 219823,
   "quality": {
     "quarantinedOccurrences": 2274,
     "quarantinedVideos": 1530,
@@ -374,7 +374,7 @@
     "repairedDateCreditOccurrences": 0,
     "repairedStructuredCreditOccurrences": 2854,
     "repairedKnownSourceCreditOccurrences": 154,
-    "deduplicatedOccurrences": 522,
+    "deduplicatedOccurrences": 524,
     "artistCatalogNormalizedOccurrences": 56,
     "artistCatalogArchivedOccurrences": 12,
     "artistCatalogArchivedVideos": 0,
@@ -420,7 +420,7 @@
       "unrelated_worship_livestream_listing": 2,
       "dated_stream_announcement": 1
     },
-    "reviewedDayCount": 147,
+    "reviewedDayCount": 156,
     "reviewOnlyCandidateCount": 250,
     "mixedStructuredSourceCount": 27
   },
@@ -429,7 +429,7 @@
       "stats": {
         "videoCount": 15,
         "songOccurrenceCount": 261,
-        "pendingVideoCount": 0,
+        "pendingVideoCount": 18,
         "quarantinedOccurrences": 0,
         "deduplicatedOccurrences": 0,
         "artistCatalogArchivedOccurrences": 0
@@ -460,7 +460,7 @@
       "stats": {
         "videoCount": 268,
         "songOccurrenceCount": 3170,
-        "pendingVideoCount": 455,
+        "pendingVideoCount": 497,
         "quarantinedOccurrences": 6,
         "deduplicatedOccurrences": 13,
         "artistCatalogArchivedOccurrences": 0
@@ -491,7 +491,7 @@
       "stats": {
         "videoCount": 687,
         "songOccurrenceCount": 8735,
-        "pendingVideoCount": 2254,
+        "pendingVideoCount": 2295,
         "quarantinedOccurrences": 14,
         "deduplicatedOccurrences": 65,
         "artistCatalogArchivedOccurrences": 2
@@ -522,7 +522,7 @@
       "stats": {
         "videoCount": 5596,
         "songOccurrenceCount": 68838,
-        "pendingVideoCount": 2788,
+        "pendingVideoCount": 2829,
         "quarantinedOccurrences": 828,
         "deduplicatedOccurrences": 257,
         "artistCatalogArchivedOccurrences": 6
@@ -551,23 +551,23 @@
     },
     "all": {
       "stats": {
-        "videoCount": 16540,
-        "songOccurrenceCount": 218058,
-        "pendingVideoCount": 2788,
+        "videoCount": 16627,
+        "songOccurrenceCount": 219823,
+        "pendingVideoCount": 2889,
         "quarantinedOccurrences": 2274,
-        "deduplicatedOccurrences": 522,
+        "deduplicatedOccurrences": 524,
         "artistCatalogArchivedOccurrences": 12
       },
       "songs": {
-        "totalCount": 55893,
-        "pageCount": 1118,
+        "totalCount": 56079,
+        "pageCount": 1122,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 20945,
-        "pageCount": 419,
+        "totalCount": 20982,
+        "pageCount": 420,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
@@ -582,6 +582,18 @@
     }
   },
   "channelSetlistImports": [
+    {
+      "path": "imports/choma-channel.json",
+      "candidateCount": 320,
+      "inspectedCount": 320,
+      "inspectedInLatestRun": 320,
+      "setlistVideoCount": 89,
+      "auditCount": 320,
+      "occurrenceCount": 1813,
+      "noSongCount": 231,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
     {
       "path": "imports/natsume-ikune.json",
       "candidateCount": 134,
