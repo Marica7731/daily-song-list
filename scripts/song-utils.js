@@ -239,11 +239,17 @@ function cleanArtistMetadata(text) {
       .trim();
     next = next
       .replace(/\s*[\(（]\s*(?:(?:19|20)\d{2})\s*年?(?:\s*\d{1,2}\s*月)?(?:\s*[\/｜|]\s*(?:昭和|平成|令和)\s*\d{1,2}\s*年?)?\s*[\)）]\s*$/u, "")
+      .replace(/^\s*(?:(?:19|20)\d{2})\s*年の曲\s*$/u, "")
+      .replace(/[（(]\s*(?:19|20)\d{2}\s*年?\s*[）)]/gu, "")
+      .replace(/[\[【]\s*(?:19|20)\d{2}\s*年?\s*[\]】]/gu, "")
       .replace(/\s+(?:19|20)\d{2}\s*[\/.-]\s*\d{1,2}\s*$/u, "")
       .replace(/\s*[\/／]\s*(?:19|20)\d{2}\s*$/u, "")
+      .replace(/\s+(?:19|20)\d{2}\s*年(?:\s*\d{1,2}\s*月)?\s*$/u, "")
       .replace(/\s+様\s*$/u, "")
       .replace(/\s+\d{1,3}\.\d{1,3}\s*$/u, "")
+      .replace(/^\s*(?:19|20)\d{2}\s*年\s*\d{1,2}\s*月\s*$/u, "")
       .replace(/^\s*(?:(?:19|20)\d{2})\s*年?(?:\s*[\/｜|]\s*(?:昭和|平成|令和)\s*\d{1,2}\s*年?)?\s*$/u, "")
+      .replace(/\s+([（(])/gu, "$1")
       .trim();
     if (next === value) break;
     value = next;
@@ -1210,15 +1216,35 @@ function cleanSongOrArtistPart(text) {
 
 // Day shards are immutable, so legacy parser output keeps stale list markers and embedded
 // timestamps forever. Clean those decorations again when deriving the publication shards.
+function stripPublishedListMarker(text) {
+  const original = String(text || "").trim();
+  const value = original
+    .replace(/^Song\s+\d{1,3}\s*[.:：]\s*/iu, "")
+    .replace(/^(?:[⬛■□●○◆◇▣▤▥▦▧▨▩]+\s*)?\d{1,3}\s*_\s*(?=\S)/u, "")
+    .replace(/^_\s*\d{1,3}\s+(?=\S)/u, "")
+    .replace(/^〔\s*\d{1,3}\s*〕\s*/u, "")
+    .replace(/^[ー—–-]?\s*🎤\s*\d{1,3}\s*[^\p{L}\p{N}\s]*\s*/u, "")
+    .replace(/^\d{1,3}\s*[✨💠🍀🎵♪♫]+\uFE0F?\s*/u, "")
+    .trim();
+  return { value, changed: value !== original };
+}
+
 function cleanPublishedSongTitle(text) {
   let value = String(text || "").normalize("NFKC").trim();
   for (let index = 0; index < 4; index += 1) {
     const original = value;
+    value = value.replace(/^[（(]\s*New\s*[）)]\s*/iu, "").trim();
     const withoutTimestamp = value.replace(
       /^(?:(?:19|20)\d{2}\s*年\s*)?[\[【(]?\s*\d{1,2}:[0-5]\d(?::[0-5]\d)?\s*[\]】)]?\s*[・･,，、;；:：~～\-—–−|｜￤∣丨┊]*\s*/u,
       "",
     );
     if (withoutTimestamp) value = withoutTimestamp.trim();
+    const listMarker = stripPublishedListMarker(value);
+    if (listMarker.changed) {
+      value = listMarker.value
+        .replace(/^["“”'‘’]+|["“”'‘’]+$/gu, "")
+        .trim();
+    }
     value = value
       .replace(/^(?:[\[【(]\s*\d{1,3}\s*(?:位|番)?\s*[\]】)]\s*|\d{1,3}\s*(?:番\s*[:：]|[.．、:：)\]|｜￤∣丨┊]\s*|[≫»>]+\s*))/u, "")
       .trim();
@@ -1257,6 +1283,18 @@ function repairPublishedSongMetadata(song) {
   } else if (dayFragment && hasListIndex) {
     artist = "";
     parserCorruption = true;
+  }
+  // A full raw setlist row can keep the artist and release date in the title slot
+  // ("Song/Artist 1999/11"); restore the two visible fields from that structure.
+  const releaseSplit = title.match(/^(.*?)\s*[\/／]\s*(.+?)\s+(?:19|20)\d{2}\s*[\/／]\s*\d{1,2}\s*$/u);
+  if (releaseSplit) {
+    const repairedTitle = cleanPublishedSongTitle(releaseSplit[1]);
+    const repairedArtist = cleanArtistMetadata(releaseSplit[2]);
+    if (repairedTitle && repairedArtist) {
+      title = repairedTitle;
+      artist = repairedArtist;
+      parserCorruption = true;
+    }
   }
   return {
     title,

@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { cleanArtistMetadata, cleanPublishedSongTitle, isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist, parseTimestampSongs, timeToSeconds } = require("../scripts/song-utils");
+const { cleanArtistMetadata, cleanPublishedSongTitle, isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist, parseTimestampSongs, repairPublishedSongMetadata, timeToSeconds } = require("../scripts/song-utils");
 
 test("parses timestamp before song index without truncating minutes", () => {
   const songs = parseTimestampSongs([
@@ -270,6 +270,11 @@ test("normalizes reviewed artist metadata suffixes without dropping songs", () =
   assert.equal(cleanArtistMetadata("有機酸(神山羊) feat.初音ミク/2017"), "有機酸(神山羊) feat.初音ミク");
   assert.equal(cleanArtistMetadata("UNDER17(桃井はるこ) 様"), "UNDER17(桃井はるこ)");
   assert.equal(cleanArtistMetadata("AKINO 96.178"), "AKINO");
+  assert.equal(cleanArtistMetadata("2017年4月"), "");
+  assert.equal(cleanArtistMetadata("DAOKO×米津玄師 [2017年]"), "DAOKO×米津玄師");
+  assert.equal(cleanArtistMetadata("TrySail (2017)（エロマンガ先生 ED）"), "TrySail（エロマンガ先生 ED）");
+  assert.equal(cleanArtistMetadata("Amazarashi 2017年"), "Amazarashi");
+  assert.equal(cleanArtistMetadata("2017年の曲"), "");
   assert.equal(cleanArtistMetadata("tuki.(17)"), "tuki.(17)");
   assert.equal(cleanArtistMetadata("170828-29"), "170828-29");
   assert.deepEqual(normalizeParsedSong({ title: "CHE.R.RY", artist: "Yui (同接200人突破おめでとうございます)" }), {
@@ -797,6 +802,15 @@ test("cleans legacy list and timestamp prefixes at publish time", () => {
   assert.equal(cleanPublishedSongTitle("（2012）ルミナス"), "(2012)ルミナス", "four-digit work years are not list indexes");
   assert.equal(cleanPublishedSongTitle("17才"), "17才");
   assert.equal(cleanPublishedSongTitle("17"), "17");
+  assert.equal(cleanPublishedSongTitle("Song 17. 流星群"), "流星群");
+  assert.equal(cleanPublishedSongTitle("Song 17: \"River\""), "River");
+  assert.equal(cleanPublishedSongTitle("12_17歳"), "17歳");
+  assert.equal(cleanPublishedSongTitle("17_Aitai"), "Aitai");
+  assert.equal(cleanPublishedSongTitle("〔3〕愛・おぼえていますか"), "愛・おぼえていますか");
+  assert.equal(cleanPublishedSongTitle("ー🎤¹⁷✨️ 破滅の純情"), "破滅の純情");
+  assert.equal(cleanPublishedSongTitle("(New)シュガーサイン"), "シュガーサイン");
+  assert.equal(cleanPublishedSongTitle("36°C U・B・U"), "36°C U・B・U");
+  assert.equal(cleanPublishedSongTitle("20+∞Century Boys"), "20+∞Century Boys");
 });
 
 test("rejects tree child notes and channel metrics", () => {
@@ -812,6 +826,25 @@ test("rejects tree child notes and channel metrics", () => {
   ]);
 
   assert.deepEqual(songs, []);
+});
+
+test("repairs release metadata left in a slash-delimited title", () => {
+  assert.deepEqual(
+    repairPublishedSongMetadata({
+      title: "(New)ワルキューレがとまらない/ワルキューレ 2017/01",
+      artist: "25 マクロスΔ イメージソング",
+      raw: "01:11:26 (New)ワルキューレがとまらない/ワルキューレ 2017/01/25 マクロスΔ イメージソング",
+    }),
+    { title: "ワルキューレがとまらない", artist: "ワルキューレ", changed: true, parserCorruption: true },
+  );
+  assert.deepEqual(
+    repairPublishedSongMetadata({
+      title: "SKILL/JAM Project 2003/04",
+      artist: "23 RPG 第2次スーパーロボット大戦α",
+      raw: "02:02:03 SKILL/JAM Project 2003/04/23 RPG 第2次スーパーロボット大戦α",
+    }),
+    { title: "SKILL", artist: "JAM Project", changed: true, parserCorruption: true },
+  );
 });
 
 test("still rejects plain greeting and topic comments", () => {
