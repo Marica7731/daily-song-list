@@ -276,7 +276,11 @@ jobs:
           DATA_COMMIT: ${{ steps.commit.outputs.commit }}
         run: |
           set -Eeuo pipefail
-          data_commit="$(git rev-parse HEAD)"
+          data_commit="$DATA_COMMIT"
+          [[ "$data_commit" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "HEARTBEAT_INVALID_DATA_COMMIT value=$data_commit" >&2
+            exit 78
+          }
           before_deploy="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0' 2>/dev/null || printf '0')"
           gh workflow run deploy-pages.yml --ref main
           deploy_id=""

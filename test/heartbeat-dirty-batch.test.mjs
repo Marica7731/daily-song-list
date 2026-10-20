@@ -260,6 +260,9 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /git update-index --add --cacheinfo/u);
   assert.match(workflow, /git commit-tree "\$tree" -p "\$base"/u);
   assert.match(workflow, /git push origin "\$commit:main"/u);
+  assert.match(workflow, /data_commit="\$DATA_COMMIT"/u);
+  assert.doesNotMatch(workflow, /data_commit="\$\(git rev-parse HEAD\)"/u);
+  assert.match(workflow, /HEARTBEAT_INVALID_DATA_COMMIT/u);
   assert.doesNotMatch(workflow, /git rebase origin\/main/u);
   assert.match(workflow, /curl -fsSL --max-time 20 https:\/\/marica7731\.github\.io/u, "live verification must follow the Pages custom-domain redirect");
   assert.match(workflow, /HEARTBEAT_PAGES_SHA_MISMATCH/u);
