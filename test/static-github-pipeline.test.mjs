@@ -350,6 +350,10 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   const workflow = fs.readFileSync(path.resolve(".github/workflows/static-update.yml"), "utf8");
   assert.match(workflow, /runs-on: ubuntu-latest/);
   assert.match(workflow, /cron: "23 \* \* \* \*"/);
+  assert.match(workflow, /Require a green Check code gate on code pushes/);
+  assert.match(workflow, /if: github\.event_name == 'push'/);
+  assert.match(workflow, /--commit "\$TARGET_SHA"/);
+  assert(workflow.indexOf("Require a green Check code gate on code pushes") < workflow.indexOf("Collect one bounded batch"), "static collection must wait for the code check on push");
   assert.match(workflow, /default: "60"/);
   assert.match(workflow, /Resolve bounded drain size/);
   assert.match(workflow, /if \(\( video_limit > 60 \)\); then/);

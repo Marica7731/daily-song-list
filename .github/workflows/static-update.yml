@@ -56,6 +56,41 @@ jobs:
             /config/**
             /data/static/**
 
+      - name: Require a green Check code gate on code pushes
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          for attempt in $(seq 1 180); do
+            status="$(
+              gh run list --repo "$GITHUB_REPOSITORY" \
+                --workflow check-code.yml \
+                --commit "$TARGET_SHA" \
+                --limit 1 \
+                --json status,conclusion \
+                --jq 'if length == 0 then "missing:none" else .[0].status + ":" + (.[0].conclusion // "none") end' \
+                2>/dev/null || printf 'missing:none'
+            )"
+            case "$status" in
+              completed:success)
+                echo "STATIC_UPDATE_GATE_OK sha=$TARGET_SHA attempt=$attempt"
+                exit 0
+                ;;
+              completed:failure|completed:cancelled|completed:timed_out|completed:action_required|completed:stale)
+                echo "STATIC_UPDATE_GATE_FAILED sha=$TARGET_SHA status=$status" >&2
+                exit 71
+                ;;
+            esac
+            if (( attempt % 12 == 0 )); then
+              echo "STATIC_UPDATE_GATE_WAIT sha=$TARGET_SHA attempt=$attempt status=$status"
+            fi
+            sleep 5
+          done
+          echo "STATIC_UPDATE_GATE_TIMEOUT sha=$TARGET_SHA status=$status" >&2
+          exit 72
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
