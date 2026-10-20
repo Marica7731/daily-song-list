@@ -249,7 +249,6 @@ function cleanArtistMetadata(text) {
       .replace(/\s+\d{1,3}\.\d{1,3}\s*$/u, "")
       .replace(/^\s*(?:19|20)\d{2}\s*年\s*\d{1,2}\s*月\s*$/u, "")
       .replace(/^\s*(?:(?:19|20)\d{2})\s*年?(?:\s*[\/｜|]\s*(?:昭和|平成|令和)\s*\d{1,2}\s*年?)?\s*$/u, "")
-      .replace(/\s+([（(])/gu, "$1")
       .trim();
     if (next === value) break;
     value = next;
