@@ -233,6 +233,8 @@ jobs:
             exit 0
           fi
           git commit -m "data: heartbeat dirty batch"
+          # Rebuild-only output is published from the job, never committed by this workflow.
+          git restore --worktree -- data/static/v1
           for attempt in 1 2 3; do
             git fetch --depth=2 origin main
             git rebase origin/main
