@@ -178,6 +178,54 @@ test("static source export turns split release dates into bounded review candida
   assert.deepEqual(payload.entries[0].replacementSuggestion, { title: "Song", artist: "Artist" });
 });
 
+test("dirty export reparses raw lines before removing songs", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-static-raw-review-"));
+  const songs = [
+    ["〜 🎸僕が僕であるために/🎤尾崎豊", "", "15:01 〜 🎸僕が僕であるために／🎤尾崎豊／1983年"],
+    ["_那プラス", "みきとP", "1:34:27 ＿那プラス / みきとP"],
+    ["Hello,Again ~昔からある場所~", "", "2:42:23 Hello,Again ～昔からある場所～ / MY LITTLE LOVER（1995年）"],
+    ["青い栞", "", "2:04:29　🍨🎶　青い栞 - Galileo Galilei (練習中)"],
+    ["にんげんっていいな", "中嶋義実・ヤングフレッシュ", "1:42:13 【にんげんっていいな/中嶋義実・ヤングフレッシュ】"],
+    ["次回配信は9", "", "4:55:06 次回配信は9/19（土）06 : 00〜朝活配信"],
+    ["MELOKEY発売中です", "", "[0:04:20] ❗MELOKEY発売中です(31日まで)"],
+    ["NEWS 速報", "", "【00:52:33】💐 NEWS 速報 // 13日22時～ゆあんさん3周年記念配信 🌙🐰"],
+  ].map(([title, artist, raw], index) => ({
+    seconds: (index + 1) * 10,
+    title,
+    artist,
+    raw,
+    sourceId: "source-raw",
+    sourceHash: "hash-raw",
+  }));
+  writeJson(path.join(root, "data/static/v1/sources/CD/CD123456789.json"), {
+    videoId: "CD123456789",
+    title: "fixture stream",
+    channelName: "fixture channel",
+    publishedAt: "2026-01-01T00:00:00.000Z",
+    songs,
+  });
+
+  execFileSync(process.execPath, [exporterPath], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      STATIC_DATA_ROOT: path.join(root, "data/static/v1"),
+      STATIC_REVIEW_ROOT: path.join(root, "data/review"),
+      STATIC_NOW: "2026-02-01T00:00:00.000Z",
+    },
+  });
+
+  const names = fs.readdirSync(path.join(root, "data/review/sources"));
+  assert.equal(names.length, 1);
+  const payload = JSON.parse(fs.readFileSync(path.join(root, "data/review/sources", names[0]), "utf8"));
+  assert.deepEqual(
+    payload.entries.map((entry) => entry.raw),
+    [songs[5].raw, songs[6].raw, songs[7].raw],
+    "real songs survive while explicit schedule and promotion lines are removed",
+  );
+});
+
 test("heartbeat batch rejects unsafe scope and type input", () => {
   const root = fixtureRoot();
   assert.throws(() => runBatch(root, ["--scope", "maybe"]), /--scope/u);
