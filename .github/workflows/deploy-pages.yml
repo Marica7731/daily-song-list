@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/deploy-pages.yml"
+      - "CNAME"
       - "index.html"
       - ".nojekyll"
       - "assets/**"
