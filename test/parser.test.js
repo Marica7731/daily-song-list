@@ -808,9 +808,20 @@ test("cleans legacy list and timestamp prefixes at publish time", () => {
   assert.equal(cleanPublishedSongTitle("17_Aitai"), "Aitai");
   assert.equal(cleanPublishedSongTitle("〔3〕愛・おぼえていますか"), "愛・おぼえていますか");
   assert.equal(cleanPublishedSongTitle("ー🎤¹⁷✨️ 破滅の純情"), "破滅の純情");
+  assert.equal(cleanPublishedSongTitle("23. ダーリン"), "ダーリン");
   assert.equal(cleanPublishedSongTitle("(New)シュガーサイン"), "シュガーサイン");
   assert.equal(cleanPublishedSongTitle("36°C U・B・U"), "36°C U・B・U");
+  assert.equal(cleanPublishedSongTitle("37.5°Cのファンタジー"), "37.5°Cのファンタジー");
+  assert.equal(cleanPublishedSongTitle("20.1・2・3(ワン・ツー・スリー)"), "20.1・2・3(ワン・ツー・スリー)");
+  assert.equal(cleanPublishedSongTitle("12.22"), "12.22");
   assert.equal(cleanPublishedSongTitle("20+∞Century Boys"), "20+∞Century Boys");
+});
+
+test("rejects standalone MC chapter markers without rejecting MC song titles", () => {
+  for (const title of ["ーMC1ー", "ーMC2ー", "ーMC3ー"]) {
+    assert.equal(isLikelyNonSongEntry({ title, artist: "", raw: title }), true);
+  }
+  assert.equal(isLikelyNonSongEntry({ title: "MC", artist: "MONSTA X", raw: "0:10 MC / MONSTA X" }), false);
 });
 
 test("rejects tree child notes and channel metrics", () => {

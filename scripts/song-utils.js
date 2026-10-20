@@ -691,7 +691,7 @@ function compactSignalText(value) {
 function isStandaloneNonSongMarker(text) {
   const value = normalizeStandaloneMarker(text);
   if (!value) return false;
-  if (/^(?:op|ed|end|opening|ending|openingtalk|endingtalk|streamstart|streamend|streamended|karaokestart|karaokeend)$/iu.test(value)) return true;
+  if (/^(?:op|ed|end|opening|ending|openingtalk|endingtalk|streamstart|streamend|streamended|karaokestart|karaokeend|mc\d*)$/iu.test(value)) return true;
   if (/^(?:setlist|timestamp|timestamps)$/iu.test(value)) return true;
   if (/^(?:本編開始|本編終了|全曲終了|全曲结束|全曲結束|配信開始|配信終了|開始|終了|结束|結束|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/u.test(value)) return true;
   return false;
@@ -701,8 +701,8 @@ function normalizeStandaloneMarker(text) {
   return String(text || "")
     .normalize("NFKC")
     .replace(/[【】[\]「」『』"'“”‘’]/gu, "")
-    .replace(/^[\s~〜～・･:：\-—–−/／|｜￤∣丨]+|[\s~〜～・･:：\-—–−/／|｜￤∣丨]+$/gu, "")
-    .replace(/[\s~〜～・･:：\-—–−/／|｜￤∣丨]+/gu, "")
+    .replace(/^[\s~〜～・･:：\-—–−ー/／|｜￤∣丨]+|[\s~〜～・･:：\-—–−ー/／|｜￤∣丨]+$/gu, "")
+    .replace(/[\s~〜～・･:：\-—–−ー/／|｜￤∣丨]+/gu, "")
     .trim();
 }
 
@@ -1244,9 +1244,11 @@ function cleanPublishedSongTitle(text) {
         .replace(/^["“”'‘’]+|["“”'‘’]+$/gu, "")
         .trim();
     }
-    value = value
-      .replace(/^(?:[\[【(]\s*\d{1,3}\s*(?:位|番)?\s*[\]】)]\s*|\d{1,3}\s*(?:番\s*[:：]|[.．、:：)\]|｜￤∣丨┊]\s*|[≫»>]+\s*))/u, "")
-      .trim();
+    if (!shouldPreserveDecimalSongTitle(value)) {
+      value = value
+        .replace(/^(?:[\[【(]\s*\d{1,3}\s*(?:位|番)?\s*[\]】)]\s*|\d{1,3}\s*(?:番\s*[:：]|[.．、:：)\]|｜￤∣丨┊]\s*|[≫»>]+\s*))/u, "")
+        .trim();
+    }
     value = cleanSongOrArtistPart(value);
     if (!value || value === original) break;
   }
@@ -1255,7 +1257,8 @@ function cleanPublishedSongTitle(text) {
 
 function shouldPreserveDecimalSongTitle(value) {
   const text = String(value || "").trim();
-  return /^\d[.．]\d+(?:\S*|\s*[\/／].*)?$/u.test(text);
+  return /^\d[.．]\d+(?:\S*|\s*[\/／].*)?$/u.test(text) ||
+    /^\d{2,3}[.．]\d{1,2}(?:°C?|℃|・|$)/u.test(text);
 }
 
 // A release date split across fields can leave a bare day in the artist slot while the
@@ -1380,7 +1383,7 @@ function isObviouslyNonSongTitleCandidate(text) {
   const value = normalizeSectionMarker(text);
   if (!value) return true;
   if (/^(?:\d+次会|達成|歌みたの話)$/u.test(value)) return true;
-  if (/^(?:(?:配信|stream|karaoke)?start|starting|op|ed|end|opening|ending|オープニング|エンディング|エンドカード|intro|outro|setlist|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始|歌唱開始時間|歌唱開始時刻|edtalk|optalk|talk\d*|mc|雑談|雑談タイム|新しいop画面|op画面|edトーク|休憩雑談タイム|カンニングタイム(?:part\d+)?|告知|お知らせ|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|スタート|アカペラver|はのは[ー〜～]*|読み開始|ただいま)$/iu.test(value)) {
+  if (/^(?:(?:配信|stream|karaoke)?start|starting|op|ed|end|opening|ending|オープニング|エンディング|エンドカード|intro|outro|setlist|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始|歌唱開始時間|歌唱開始時刻|edtalk|optalk|talk\d*|mc\d*|雑談|雑談タイム|新しいop画面|op画面|edトーク|休憩雑談タイム|カンニングタイム(?:part\d+)?|告知|お知らせ|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|スタート|アカペラver|はのは[ー〜～]*|読み開始|ただいま)$/iu.test(value)) {
     return true;
   }
   if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(value)) return true;
