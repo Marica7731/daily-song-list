@@ -272,7 +272,7 @@ test("normalizes reviewed artist metadata suffixes without dropping songs", () =
   assert.equal(cleanArtistMetadata("AKINO 96.178"), "AKINO");
   assert.equal(cleanArtistMetadata("2017年4月"), "");
   assert.equal(cleanArtistMetadata("DAOKO×米津玄師 [2017年]"), "DAOKO×米津玄師");
-  assert.equal(cleanArtistMetadata("TrySail (2017)（エロマンガ先生 ED）"), "TrySail （エロマンガ先生 ED）");
+  assert.equal(cleanArtistMetadata("TrySail (2017)（エロマンガ先生 ED）"), "TrySail（エロマンガ先生 ED）");
   assert.equal(cleanArtistMetadata("Amazarashi 2017年"), "Amazarashi");
   assert.equal(cleanArtistMetadata("2017年の曲"), "");
   assert.equal(cleanArtistMetadata("tuki.(17)"), "tuki.(17)");
