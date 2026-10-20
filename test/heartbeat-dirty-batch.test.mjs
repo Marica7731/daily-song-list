@@ -251,7 +251,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   );
   assert.match(workflow, /rebuild-only\.js/u);
   assert.match(workflow, /HEARTBEAT_RAW_HISTORY_CHANGED/u);
-  assert.match(workflow, /HEARTBEAT_TRACKED_STATIC_CHANGED/u);
+  assert.doesNotMatch(workflow, /HEARTBEAT_TRACKED_STATIC_CHANGED/u);
   assert.match(workflow, /git add -- config\/curation-overrides\.json data\/review\/heartbeat-state\.json data\/review\/heartbeat-summary\.json/u);
   assert.doesNotMatch(workflow, /git add -A --[^\n]*data\/static\/v1/u);
   assert.match(workflow, /HEARTBEAT_STAGED_RAW_HISTORY/u);

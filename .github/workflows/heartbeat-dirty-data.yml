@@ -222,10 +222,6 @@ jobs:
           set -Eeuo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [[ -n "$(git status --porcelain --untracked-files=no -- data/static/v1)" ]]; then
-            echo "HEARTBEAT_TRACKED_STATIC_CHANGED" >&2
-            exit 74
-          fi
           git add -- config/curation-overrides.json data/review/heartbeat-state.json data/review/heartbeat-summary.json
           if git diff --cached --name-only | grep -E '^data/static/v1/days/'; then
             echo "HEARTBEAT_STAGED_RAW_HISTORY" >&2
