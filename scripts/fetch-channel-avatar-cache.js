@@ -18,7 +18,7 @@ const PRIORITY_HANDLES = [
   "@kanaruhanon",
   "@noa_polaris",
   "@naretan",
-  "@choma",
+  "@ChomaChannel",
   "@Sen_44",
   "@HazukiHina",
   "@karakurinne",
