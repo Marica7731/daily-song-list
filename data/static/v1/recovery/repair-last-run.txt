@@ -1,48 +1,21 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-20T17:14:35Z
-[static-repair] processed=30490 published=18439 unpublished=12051 retryPool=15212 repairable=15212 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=2823 [static-repair] retryDue=15108 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-20T17:25:45Z
+[static-repair] processed=30508 published=18457 unpublished=12051 retryPool=15231 repairable=15231 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=2795 [static-repair] retryDue=15102 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=428 items=428 errors=0
+[mygit:success] snapshots=1/1 rawItems=432 items=432 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=P_Sa5sZFUTg result=selected songs=1
-[static-update] video=1BWH3r6FGkA result=no_timestamp_candidates songs=0
-[static-update] video=fFnCOzO2FmE result=no_timestamp_candidates songs=0
-[static-update] video=SM0EkEFlNHM result=selected songs=17
-[static-update] video=YBgqI0CiyKQ result=selected songs=16
-[static-update] video=qkOzDxvfSDQ result=selected songs=11
-[static-update] video=7PdZiTvArUE result=selected songs=20
-[static-update] video=lsfxjeoN9Gc result=no_usable_song_source songs=0
-[static-update] video=g8g8lo1Mj4g result=selected songs=17
-[static-update] video=RMCj06G2Xn0 result=selected songs=17
-[static-update] video=wrA6yrZLFaY result=no_timestamp_candidates songs=0
-[static-update] video=-AjJynvt_ok result=no_timestamp_candidates songs=0
-[static-update] video=3WTpsgAWjwM result=selected songs=11
-[static-update] video=8a9Pq5z38hg result=selected songs=23
-[static-update] video=i7iTYRbK8Pk result=selected songs=16
-[static-update] video=yTGay1GKAUo result=no_usable_song_source songs=0
-[static-update] video=zxgqKHiipgo result=selected songs=44
-[static-update] video=xWPwsoA2Dek result=selected songs=18
-[static-update] video=62WMJO0D1qM result=no_timestamp_candidates songs=0
-[static-update] video=i1CxdjwDZbc result=no_timestamp_candidates songs=0
-[static-update] video=WFxHA0lOp3A result=selected songs=7
-[static-update] video=ZSynSXV-_BE result=no_timestamp_candidates songs=0
-[static-update] video=iWJViEGbR5E result=no_timestamp_candidates songs=0
-[static-update] video=e9VJ3lmWYbI result=no_usable_song_source songs=0
-[static-update] video=7WCxspHoOCk result=no_timestamp_candidates songs=0
-[static-update] video=tkizJqWI-tg result=no_timestamp_candidates songs=0
-[static-update] video=IEHoXEczVEE result=no_usable_song_source songs=0
-[static-update] snapshot=20261020T170237Z processed=32/32 pending=2776 videos=16487 songs=217381
+[static-update] snapshot=20261020T171241Z processed=5/5 pending=2780 videos=16492 songs=217439
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=16487 songs=217381 processed=30503 pending=2776
-[static-repair] processed=30503 published=18452 unpublished=12051 retryPool=15224 repairable=15224 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=2836 [static-repair] retryDue=15106 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=15106
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-20T17:19:55Z
+STATIC_DATA_OK videos=16492 songs=217439 processed=30508 pending=2780
+[static-repair] processed=30508 published=18457 unpublished=12051 retryPool=15231 repairable=15231 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=2840 [static-repair] retryDue=15110 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=15110
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-20T17:28:13Z
