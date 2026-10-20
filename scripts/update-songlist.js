@@ -888,14 +888,13 @@ function normalizeCarryForwardItem(item, sourceGroups, from) {
     .filter(isValidSong)
     .filter((song) => !isLikelyNonSongEntry(song, sourceContext))
     .filter((song) => !isActivityMarkerTitle(song.title, song.artist));
-  const { songs } = filterArtistRichMixedSourceSongs(normalizedSongs);
-  if (!songs.length) return null;
-  const needsRefreshFromDirtyCarryForward = hasDirtyCarriedSongs(originalSongs, songs);
+  if (!normalizedSongs.length) return null;
+  const needsRefreshFromDirtyCarryForward = hasDirtyCarriedSongs(originalSongs, normalizedSongs);
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
   const mergedSourceGroups = uniqueValues([...listValues(item.sourceGroups), item.sourceGroup, ...sourceGroups]);
   return {
     ...item,
-    songs,
+    songs: normalizedSongs,
     publishedTimestamp,
     sourceGroups: mergedSourceGroups,
     carriedFromPrevious: true,
@@ -1450,9 +1449,8 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
         artist: song.artist,
       }),
     );
-  const mixedSourceFilter = filterArtistRichMixedSourceSongs(likelySongEntries);
-  const cleaned = mixedSourceFilter.songs;
-  const allRejectedEntries = [...rejectedEntries, ...additionallyRejected, ...mixedSourceFilter.rejectedEntries];
+  const cleaned = likelySongEntries;
+  const allRejectedEntries = [...rejectedEntries, ...additionallyRejected];
   const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType, sourceContext);
   stats.sourceId = sourceId;
   stats.sourceHash = sourceHash;
@@ -1515,35 +1513,6 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
 
 function shouldRetainAuditSourceText(existingReason = false) {
   return process.env.DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT === "1" || Boolean(existingReason);
-}
-
-function filterArtistRichMixedSourceSongs(songs) {
-  const entries = Array.isArray(songs) ? songs : [];
-  const artistCount = entries.filter((song) => isUsableArtist(song.artist)).length;
-  const titleOnlyCount = entries.length - artistCount;
-  const artistRatio = entries.length ? artistCount / entries.length : 0;
-  if (artistCount < 8 || titleOnlyCount < 2 || artistRatio < 0.35) {
-    return { songs: entries, rejectedEntries: [] };
-  }
-
-  const kept = [];
-  const rejectedEntries = [];
-  for (const song of entries) {
-    if (isUsableArtist(song.artist)) {
-      kept.push(song);
-      continue;
-    }
-    rejectedEntries.push(
-      compactRejectedEntry({
-        reason: "artist_rich_source_title_only_entry",
-        line: song.raw,
-        time: song.time,
-        title: song.title,
-        artist: song.artist,
-      }),
-    );
-  }
-  return { songs: kept, rejectedEntries };
 }
 
 function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType, sourceContext = {}) {
@@ -3268,7 +3237,6 @@ module.exports = {
   extractCommentTexts,
   extractDescriptionCandidates,
   filterBlockedVideos,
-  filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
   fetchWithRetry,
   fetchVideoSongList,

@@ -48,16 +48,11 @@
             continue;
           }
           const normalizedItemSongs = (item.songs || []).map(normalizeSongEntry);
-          const dropTitleOnlyFromArtistRichList = isArtistRichMixedSongList(normalizedItemSongs);
           const songs = [];
           for (let index = 0; index < normalizedItemSongs.length; index += 1) {
             const song = (item.songs || [])[index];
             const normalizedSong = normalizedItemSongs[index];
             if (isBlockedSongEntry(normalizedSong, item)) {
-              removedSongs += 1;
-              continue;
-            }
-            if (dropTitleOnlyFromArtistRichList && !hasKnownArtist(normalizedSong)) {
               removedSongs += 1;
               continue;
             }
@@ -338,14 +333,6 @@
     if (/^\d{1,2}(?:[\/／]\d{1,2}|\([月火水木金土日]\)|（[月火水木金土日]）|[月火水木金土日]曜?)/u.test(compact)) return true;
     if (/[|｜￤∣丨]/u.test(value) && /[A-Za-zぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
     return /(?:配信予定|デビュー配信|ニコニコ生放送|ワンマンライブ|クラファン|追加ゴール|ライブ開催|開催決定|出演決定|お写真公開|写真公開|周年記念|チャンネル登録|登録者|達成|CROSS\s*REALITY|Vol\.?\s*\d+)/iu.test(value);
-  }
-
-  function isArtistRichMixedSongList(songs) {
-    const entries = Array.isArray(songs) ? songs : [];
-    const artistCount = entries.filter(hasKnownArtist).length;
-    const titleOnlyCount = entries.length - artistCount;
-    const artistRatio = entries.length ? artistCount / entries.length : 0;
-    return artistCount >= 8 && titleOnlyCount >= 2 && artistRatio >= 0.35;
   }
 
   function hasKnownArtist(song) {
@@ -1126,7 +1113,6 @@
     dropSameSecondTranslatedAliasSongs,
     filterBlockedVideos,
     filterPayloadBlockedSources,
-    isArtistRichMixedSongList,
     isBlockedSongEntry,
     isBlockedSource,
     isChannelScopedUnknownArtistDirtySong,

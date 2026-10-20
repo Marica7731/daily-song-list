@@ -19,7 +19,6 @@ const {
   extractSearchItems,
   extractMygitTodaySnapshotItems,
   extractWatchVideoMetadata,
-  filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
   fetchWithRetry,
   hasMonthlyDiscoverySource,
@@ -327,7 +326,7 @@ test("inspection cache merge records published timestamps and removes later sele
   assert.equal(merged.cache.noUsableMinAgeHours, 48);
 });
 
-test("artist-rich mixed sources drop title-only rows without rejecting pure title-only lists", () => {
+test("carry-forward preserves title-only songs regardless of known-artist density", () => {
   const artistRows = Array.from({ length: 8 }, (_, index) => ({
     title: `Song ${index + 1}`,
     artist: `Artist ${index + 1}`,
@@ -335,43 +334,30 @@ test("artist-rich mixed sources drop title-only rows without rejecting pure titl
     seconds: 60 * (index + 1),
     raw: `${index + 1}:00 Song ${index + 1} / Artist ${index + 1}`,
   }));
-  const mixed = filterArtistRichMixedSourceSongs([
-    {
-      title: "「君とのメモリー 更新中～」",
-      artist: "未記載",
-      time: "0:03:46",
-      seconds: 226,
-      raw: "03:46 「君とのメモリー 更新中～」",
+  const titleOnlyRows = [
+    { title: "夜に駆ける", artist: "未記載", time: "0:03:46", seconds: 226, raw: "03:46 夜に駆ける" },
+    { title: "群青", artist: "未記載", time: "0:08:12", seconds: 492, raw: "08:12 群青" },
+  ];
+  const previous = {
+    generatedAt: "2026-07-11T12:00:00Z",
+    groups: {
+      "72h": {
+        items: [{
+          ...candidate("AAAAAAAAAAA", 60, ["today"]),
+          publishedText: "60 hours ago",
+          songs: [...titleOnlyRows, ...artistRows],
+        }],
+      },
     },
-    {
-      title: "222人に目標変更",
-      artist: "未記載",
-      time: "3:31:11",
-      seconds: 12671,
-      raw: "03:31:11 222人に目標変更",
-    },
-    ...artistRows,
-  ]);
+  };
 
-  assert.deepEqual(
-    mixed.songs.map((song) => song.title),
-    artistRows.map((song) => song.title),
-  );
-  assert.deepEqual(
-    mixed.rejectedEntries.map((entry) => entry.reason),
-    ["artist_rich_source_title_only_entry", "artist_rich_source_title_only_entry"],
-  );
+  const carry = collectCarryForwardVideos(previous, { videos: [] }, NOW);
 
-  const titleOnly = filterArtistRichMixedSourceSongs([
-    { title: "タッチ", artist: "未記載" },
-    { title: "ラムのラブソング", artist: "未記載" },
-    { title: "ジェミニ", artist: "未記載" },
-  ]);
+  assert.equal(carry.enabled, true);
   assert.deepEqual(
-    titleOnly.songs.map((song) => song.title),
-    ["タッチ", "ラムのラブソング", "ジェミニ"],
+    carry.videos[0].songs.map((song) => song.title),
+    [...titleOnlyRows, ...artistRows].map((song) => song.title),
   );
-  assert.deepEqual(titleOnly.rejectedEntries, []);
 });
 
 test("incremental selection skips known videos, scans 7d, and reserves monthly refresh", () => {

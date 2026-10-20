@@ -7,7 +7,6 @@ const test = require("node:test");
 const {
   cleanSongTitleNoise,
   dropSameSecondTranslatedAliasSongs,
-  isArtistRichMixedSongList,
   isBlockedSongEntry,
   filterPayloadBlockedSources,
   isBlockedSource,
@@ -539,20 +538,22 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(filtered.source.clientNormalizedSongCount, 1);
 });
 
-test("source filter drops title-only rows only inside artist-rich mixed lists", () => {
+test("source filter keeps title-only songs in artist-rich lists while removing explicit noise", () => {
   const artistRows = Array.from({ length: 8 }, (_, index) => ({
     title: `Song ${index + 1}`,
     artist: `Artist ${index + 1}`,
     seconds: index + 1,
     time: `0:00:0${index + 1}`,
   }));
+  const titleOnlyRows = [
+    { title: "夜に駆ける", artist: "未記載", seconds: 226, time: "0:03:46" },
+    { title: "群青", artist: "未記載", seconds: 492, time: "0:08:12" },
+  ];
   const mixedSongs = [
-    { title: "「君とのメモリー 更新中～」", artist: "未記載", seconds: 226, time: "0:03:46" },
-    { title: "ナナフシダンス", artist: "待补歌手", seconds: 13506, time: "3:45:06" },
+    ...titleOnlyRows,
+    { title: "222人に目標変更", artist: "未記載", seconds: 12671, time: "3:31:11" },
     ...artistRows,
   ];
-
-  assert.equal(isArtistRichMixedSongList(mixedSongs), true);
 
   const payload = {
     source: { name: "fixture" },
@@ -567,7 +568,7 @@ test("source filter drops title-only rows only inside artist-rich mixed lists", 
             songs: [
               { title: "タッチ", artist: "未記載", seconds: 1, time: "0:00:01" },
               { title: "ラムのラブソング", artist: "未記載", seconds: 2, time: "0:00:02" },
-              { title: "KP", artist: "未記載", seconds: 3, time: "0:00:03" },
+              { title: "ジェミニ", artist: "未記載", seconds: 3, time: "0:00:03" },
             ],
           },
         ],
@@ -578,13 +579,13 @@ test("source filter drops title-only rows only inside artist-rich mixed lists", 
   const filtered = filterPayloadBlockedSources(payload);
   assert.deepEqual(
     filtered.groups["72h"].items[0].songs.map((song) => song.title),
-    artistRows.map((song) => song.title),
+    [...titleOnlyRows, ...artistRows].map((song) => song.title),
   );
   assert.deepEqual(
     filtered.groups["72h"].items[1].songs.map((song) => song.title),
-    ["タッチ", "ラムのラブソング"],
+    ["タッチ", "ラムのラブソング", "ジェミニ"],
   );
-  assert.equal(filtered.source.clientFilteredBlockedSongCount, 3);
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 1);
 });
 
 test("source filter drops only unknown-artist rows from Riona channel", () => {

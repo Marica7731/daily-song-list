@@ -6,6 +6,8 @@ This branch only changes data cleanup, curation, duplicate folding, tests, and b
 
 Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, and selected source provenance. They must not drop a row because a channel name or video title contains words such as `OP`, `ED`, `Start`, or `Set List`.
 
+Never drop a title-only row merely because the same timestamp source also contains many explicit `song / artist` rows. Artist density is not evidence that an uncredited row is non-song; reject only rows that match explicit noise rules.
+
 `youtube-channel-discovery` accepted JSON files are also cleaned before release with `node scripts\clean-channel-discovery-accepted.js --write`. The JS runtime ranking exporter and Python runtime DB fallback both apply source-aware non-song predicates again when merging base `data/latest.json` rows with external imports, so stale generated JSON, VSinger Moment rows, and scanned source rows cannot reintroduce already-known chat/comment rows during deploy-time DB rebuilds.
 
 ## Reviewed Inputs
