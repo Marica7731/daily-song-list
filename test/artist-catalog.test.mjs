@@ -31,6 +31,15 @@ test("official aliases and reviewed title variants canonicalize instead of being
   assert.equal(repaired.song.canonicalTitle, "明けない夜のリリィ");
   assert.equal(repaired.song.canonicalArtist, "傘村トータ");
 
+  const pianoVersion = analyzeArtistCatalogSong({
+    title: "明けない夜のリリィ -Pf",
+    artist: "傘村トータ",
+  });
+  assert.equal(pianoVersion.matched, true);
+  assert.equal(pianoVersion.archived, false);
+  assert.equal(pianoVersion.song.title, "明けない夜のリリィ");
+  assert.equal(pianoVersion.song.artist, "傘村トータ");
+
   const embedded = analyzeArtistCatalogSong({
     title: "贖罪🎤🐟傘村トータ",
     artist: "ver.",
