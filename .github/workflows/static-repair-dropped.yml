@@ -412,7 +412,20 @@ jobs:
           # rewrite while YouTube throttles us. Back off instead of re-running every few minutes.
           if [[ "${DAYS_CHANGED:-}" == "false" ]]; then
             echo "STATIC_REPAIR_NO_NEW_PUBLICATION sleep_seconds=1800"
-            sleep 1800
+            # Do not hold the shared concurrency group through the full backoff when a static
+            # publication arrives. Check every five minutes so it can run without a long wait.
+            for backoff_attempt in $(seq 1 6); do
+              sleep 300
+              if pending_static="$(gh run list \
+                  --repo "$GITHUB_REPOSITORY" \
+                  --workflow static-update.yml \
+                  --limit 20 \
+                  --json status \
+                  --jq '[.[] | select(.status == "requested" or .status == "queued" or .status == "waiting" or .status == "pending")] | length')" && [[ "$pending_static" =~ ^[0-9]+$ ]] && (( pending_static > 0 )); then
+                echo "STATIC_REPAIR_YIELD_STATIC_DURING_BACKOFF pending=$pending_static"
+                exit 0
+              fi
+            done
           fi
           pending="$(node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('data/static/v1/meta.json','utf8')); process.stdout.write(String(m.pendingVideoCount||0));" 2>/dev/null || true)"
           if [[ ! "$pending" =~ ^[0-9]+$ ]]; then

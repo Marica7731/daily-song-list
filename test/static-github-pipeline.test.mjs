@@ -1159,6 +1159,7 @@ test("dropped-video repair workflow is GitHub-hosted, bounded, resumable, and st
   assert.match(workflow, /pending_static="\$\(gh run list/u);
   assert.match(workflow, /\.status == "requested"/u, "requested runs must occupy the serialized queue slot");
   assert.match(workflow, /STATIC_REPAIR_YIELD_STATIC pending=\$pending_static/u);
+  assert.match(workflow, /STATIC_REPAIR_YIELD_STATIC_DURING_BACKOFF pending=\$pending_static/u);
   assert.match(workflow, /STATIC_REPAIR_HANDOFF_STATIC pending=\$pending dropped=\$remaining/u);
   assert.match(workflow, /gh workflow run static-update\.yml --ref main/u);
   assert.match(workflow, /group: daily-song-list-static-update/);
