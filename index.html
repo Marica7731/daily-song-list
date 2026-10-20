@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="YouTube VTuber 歌回歌曲、歌手与频道排行榜">
+  <meta name="theme-color" id="theme-color" content="#f5f7fa">
+  <script>
+    try {
+      if (localStorage.getItem("daily-song-list-theme") === "dark") {
+        document.documentElement.dataset.theme = "dark";
+      }
+    } catch {}
+  </script>
+  <title>YouTube 歌回排行</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/static.css?v=20261005-detail-layout">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="topbar-row">
+        <nav class="range-tabs" role="tablist" aria-label="统计范围">
+          <button type="button" role="tab" data-range="today" aria-selected="false">今日</button>
+          <button type="button" role="tab" data-range="3d" aria-selected="false">近 3 天</button>
+          <button type="button" role="tab" data-range="7d" aria-selected="false">近 7 天</button>
+          <button type="button" role="tab" data-range="30d" aria-selected="false">近 30 天</button>
+          <button type="button" role="tab" data-range="all" aria-selected="false">全部</button>
+        </nav>
+        <select id="range" hidden aria-hidden="true" tabindex="-1">
+          <option value="today">今日</option>
+          <option value="3d">近 3 天</option>
+          <option value="7d">近 7 天</option>
+          <option value="30d">近 30 天</option>
+          <option value="all">全部</option>
+        </select>
+        <div class="control-group compact-control">
+          <label for="type">榜单</label>
+          <select id="type">
+            <option value="songs">歌曲</option>
+            <option value="artists">歌手</option>
+            <option value="vtubers">收录</option>
+          </select>
+        </div>
+        <label class="search-box" for="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" autocomplete="off" placeholder="搜索歌曲、歌手、收录">
+        </label>
+        <details class="filter-popover">
+          <summary>筛选</summary>
+          <div class="filter-panel">
+            <label for="keyword">来源标签</label>
+            <input id="keyword" autocomplete="off" placeholder="歌枠、弾き語り">
+            <small>仅筛当前载入页已有来源标签。</small>
+          </div>
+        </details>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button>
+        <a class="repo-link" href="https://github.com/Marica7731/daily-song-list" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </header>
+
+    <section class="content-head">
+      <div>
+        <div class="summary" id="summary">正在载入排行榜…</div>
+        <p id="status" class="status">正在读取静态数据…</p>
+      </div>
+    </section>
+
+    <section class="rank-panel" aria-label="排行榜">
+      <div class="rank-header" aria-hidden="true">
+        <span>排名</span><span>名称</span><span>统计</span><span>来源</span>
+      </div>
+      <ol id="ranking" class="ranking" aria-live="polite" aria-busy="false"></ol>
+    </section>
+
+    <nav class="pager pager-top" aria-label="分页">
+      <button id="prev" type="button">上一页</button>
+      <div id="page-tokens" class="page-tokens" aria-label="页码"></div>
+      <span id="page" class="page-state"></span>
+      <label class="page-jump">第
+        <input id="page-input" type="number" inputmode="numeric" min="1" value="1" aria-label="页码">
+        页
+      </label>
+      <button id="page-go" type="button">跳转</button>
+      <button id="next" type="button">下一页</button>
+    </nav>
+  </main>
+
+  <dialog id="detail" class="detail-dialog">
+    <button class="close" type="button" aria-label="关闭">×</button>
+    <div id="detail-body"></div>
+  </dialog>
+
+  <script src="assets/static-search-utils.js?v=20260929-leading-sigil-search" defer></script>
+  <!-- Canonical runtime data: data/static/v1/meta.json. Legacy data/ui/meta.json and data/status.json are not deployed by Pages. -->
+  <script src="assets/static-app.js?v=20261005-detail-layout" defer></script>
+</body>
+</html>

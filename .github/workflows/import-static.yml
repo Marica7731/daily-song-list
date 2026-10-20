@@ -1,0 +1,52 @@
+name: Import static v1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-static-v1
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Sparse checkout source static data
+        run: |
+          git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git source
+          cd source
+          git sparse-checkout set data/static/v1
+          test -f data/static/v1/meta.json
+          test -f data/static/v1/search/manifest.json
+          echo "SOURCE_FILES=$(find data/static/v1 -type f | wc -l)"
+          echo "SOURCE_BYTES=$(du -sb data/static/v1 | cut -f1)"
+
+      - name: Replace destination static data
+        run: |
+          mkdir -p data/static
+          rm -rf data/static/v1
+          cp -a source/data/static/v1 data/static/v1
+          test -f data/static/v1/meta.json
+          echo "DEST_FILES=$(find data/static/v1 -type f | wc -l)"
+          echo "DEST_BYTES=$(du -sb data/static/v1 | cut -f1)"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/static/v1
+          if git diff --cached --quiet; then
+            echo "No data changes"
+          else
+            git commit -m "Import static v1 from archive main"
+            git push
+          fi

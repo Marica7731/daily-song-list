@@ -1,0 +1,677 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+
+const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js"), "utf8");
+const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
+const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
+const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
+const vtuberLayoutSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-vtuber-expand-layout.js"), "utf8");
+const runtimeBuildSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "build-runtime-data.js"), "utf8");
+
+function cssBlock(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const match = cssSource.match(new RegExp(`${escaped}\\s*\\{[^}]*\\}`, "u"));
+  assert.ok(match, `CSS block not found: ${selector}`);
+  return match[0];
+}
+
+function lastCssBlock(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const matches = [...cssSource.matchAll(new RegExp(`${escaped}\\s*\\{[^}]*\\}`, "gu"))];
+  assert.ok(matches.length, `CSS block not found: ${selector}`);
+  return matches[matches.length - 1][0];
+}
+
+test("mobile information architecture exposes one query center and a one-row toolbar", () => {
+  assert.match(indexSource, /id="querySearchForm"[\s\S]*id="queryInput"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"/u);
+  assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
+  assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
+  assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
+  assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
+  assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title" checked[\s\S]*name="searchField" value="artist" checked[\s\S]*name="searchField" value="channel" checked[\s\S]*name="searchField" value="video"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\s*\{[\s\S]*display: contents;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-field-bar\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/u);
+  assert.doesNotMatch(indexSource, /queryCountBadge|query-field-menu|query-count/u);
+  assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
+  assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="text"[\s\S]*id="clearQueryButton"/u);
+  assert.doesNotMatch(cssSource, /\.query-input-shell input\[type="search"\]/u);
+  assert.match(cssSource, /\.query-submit-button\s*\{[\s\S]*cursor: pointer;/u);
+  assert.match(cssSource, /\.query-search-form \.clear-query-button\s*\{[\s\S]*position: static;[\s\S]*width: 28px;[\s\S]*height: 28px;/u);
+  assert.match(cssBlock(".query-field-bar"), /grid-template-columns: repeat\(4, minmax\(48px, auto\)\)/u);
+  assert.match(cssBlock(".query-field-toggle"), /min-height: 30px/u);
+  assert.doesNotMatch(cssSource, /query-field-menu|query-count/u);
+  assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
+  assert.doesNotMatch(indexSource, /id="detailDialog"/u);
+  assert.match(indexSource, /id="activeQueryStrip"/u);
+  assert.match(indexSource, /<title>YouTube 歌枠歌曲排行<\/title>/u);
+  assert.match(indexSource, /id="status" hidden aria-hidden="true"/u);
+  assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
+  assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
+  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*id="querySearchForm"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(104px, 0\.42fr\) minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
+  assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 32px;[\s\S]*height: 24px;/u);
+  assert.match(cssSource, /\.bottom-nav-icon-wrap svg\s*\{[\s\S]*width: 19px;[\s\S]*height: 19px;/u);
+  assert.match(cssSource, /\.bottom-nav-item\.active \.bottom-nav-icon-wrap,[\s\S]*\.bottom-nav-item\[aria-current="page"\] \.bottom-nav-icon-wrap\s*\{[\s\S]*background: var\(--accent-soft\);/u);
+  assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
+});
+
+test("URL state and query draft are wired while visible share actions are removed", () => {
+  assert.match(appSource, /trend:\s*"all"/u);
+  assert.match(appSource, /minCount:\s*1/u);
+  assert.match(appSource, /sharedUrlApplied:\s*false/u);
+  assert.match(appSource, /validTrendFilters: Object\.keys\(TREND_FILTERS\)/u);
+  assert.match(appSource, /validMinCounts: MIN_COUNT_OPTIONS/u);
+  assert.match(appSource, /function makeQueryDraftFromState/u);
+  assert.match(appSource, /function applyQueryDraft/u);
+  assert.match(appSource, /function readQueryDraftFromControls[\s\S]*q: els\.queryInput\?\.value/u);
+  assert.match(appSource, /const selectedPageSize = Number\(els\.queryPageSizeSelect\?\.value \|\| state\.pageSize\)/u);
+  assert.match(appSource, /event\.isComposing \|\| state\.queryComposing/u);
+  assert.match(appSource, /function syncQueryInputValue\(draft, options = \{\}\)[\s\S]*cleanText\(els\.queryInput\.value\) === cleanText\(nextValue\)/u);
+  assert.match(appSource, /FrontendUtils\.activeQueryConditionItems/u);
+  assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
+  assert.doesNotMatch(appSource, /URL state is intentionally read-only/u);
+  assert.match(appSource, /FrontendUtils\.serializeUrlState/u);
+  assert.doesNotMatch(indexSource, /id="shareButton"|data-copy-link/u);
+  assert.doesNotMatch(appSource, /function buildShareUrl|function shareCurrentLink|function copyCurrentLink|navigator\.share|dataset\.copyLink/u);
+  assert.doesNotMatch(cssSource, /share-button/u);
+});
+
+test("VTuber view hides song-field search controls and keeps channel search semantics", () => {
+  const availabilityBody = functionBody("function updateQueryAvailability");
+  assert.match(appSource, /queryFieldBar: document\.querySelector\("\.query-field-bar"\)/u);
+  assert.match(appSource, /const DEFAULT_SEARCH_FIELDS = \["title", "artist", "channel"\]/u);
+  assert.match(availabilityBody, /const vtuberView = state\.view === "vtuberRank"/u);
+  assert.match(availabilityBody, /els\.queryFieldBar\.hidden = vtuberView/u);
+  assert.match(availabilityBody, /for \(const input of els\.searchFieldToggles\) input\.disabled = vtuberView/u);
+  assert.match(appSource, /function requestFiltersForView\(view = state\.view, filters = \{\}\)[\s\S]*searchScope: searchScopeForView\(view, filters\),[\s\S]*searchFields: searchFieldsForView\(view, filters\)/u);
+  assert.match(functionBody("function occurrenceSearchTextForCurrentView"), /if \(state\.view === "vtuberRank"\) return vtuberOccurrenceSearchText\(occurrence\);/u);
+  assert.match(functionBody("function occurrenceSearchTextForCurrentView"), /if \(state\.view === "songRank" \|\| state\.view === "songAz"\) return songOccurrenceSearchText\(occurrence, state\.searchFields \|\| DEFAULT_SEARCH_FIELDS\);/u);
+});
+
+test("request runtime view indexes are sharded instead of writing one full records file", () => {
+  const runtimeSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "build-runtime-data.js"), "utf8");
+  assert.match(runtimeSource, /const REQUEST_VIEW_INDEX_SHARD_MAX_BYTES/u);
+  assert.match(runtimeSource, /function writeRequestViewIndex/u);
+  assert.match(runtimeSource, /kind: "request-view-index-page"/u);
+  assert.match(runtimeSource, /indexPages: index\.pages/u);
+  assert.doesNotMatch(runtimeSource, /kind: "request-view-index"[\s\S]{0,500}records: node\.indexEntries/u);
+  assert.match(functionBody("async function loadRequestViewIndex"), /payload\?\.pages/u);
+  assert.match(functionBody("async function loadRequestViewIndex"), /Promise\.all/u);
+});
+
+test("source drawer is inline, grouped, and visible on mobile", () => {
+  assert.doesNotMatch(appSource, /DETAIL_BATCH_SIZE|data-open-detail|function renderDetailSources|openDetail\(/u);
+  assert.match(appSource, /toggleSourceDrawer\(sourceToggle\.closest\("\.rank-row, \.index-row"\)\)/u);
+  assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
+  assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 3/u);
+  assert.match(appSource, /className = "source-video-thumb-link"/u);
+  assert.match(appSource, /className = "source-inline-thumb source-link"/u);
+  assert.match(appSource, /thumb\.tabIndex = -1/u);
+  assert.match(appSource, /className = "source-inline-meta"/u);
+  assert.match(appSource, /for \(const occurrence of visibleTimes\) meta\.append\(renderSourceTimestampLink\(occurrence, "source-inline-time"\)\)/u);
+  assert.match(appSource, /function uniqueSourceTimeOccurrences/u);
+  assert.match(appSource, /SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS/u);
+  assert.doesNotMatch(appSource, /className = "source-inline-time-overlay"/u);
+  assert.match(appSource, /createThumbnailImage\(\{ \.\.\.item, videoId, thumbnailUrl: item\.thumbnailUrl \|\| group\.thumbnailUrl \}, "source-inline-thumb-image"[\s\S]*preferCompact: true/u);
+  assert.match(appSource, /priorityMedia: priorityInlineMedia/u);
+  assert.match(appSource, /priority: options\.priorityMedia \? "high" : "auto"/u);
+  assert.match(appSource, /img\.loading = highPriority \? "eager" : "lazy"/u);
+  assert.match(appSource, /img\.fetchPriority = highPriority \? "high" : "low"/u);
+  assert.match(appSource, /className = "source-time-extra-toggle"/u);
+  assert.match(appSource, /function renderCopySetlistIconButton/u);
+  assert.match(appSource, /function createThumbnailImage/u);
+  assert.match(appSource, /item\.videoThumbnailUrl/u);
+  assert.match(appSource, /img\.hidden = true/u);
+  assert.doesNotMatch(appSource, /return uniqueStrings\(\[\.\.\.preferred, placeholderThumbnail\(\)\]\)/u);
+  assert.doesNotMatch(appSource, /maxresdefault/u);
+  assert.match(appSource, /const RESPONSIVE_BREAKPOINTS = \{[\s\S]*mobileMax: 720,[\s\S]*tabletMax: 919/u);
+  assert.match(appSource, /const SOURCE_INLINE_LIMITS = \{[\s\S]*mobile: 2,[\s\S]*tablet: 3,[\s\S]*desktop: 3/u);
+  assert.doesNotMatch(appSource, /SOURCE_GROUP_LIMITS/u);
+  assert.match(appSource, /function getResponsiveMode/u);
+  assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.mobileMax\}px\)`\)\?\.matches/u);
+  assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.tabletMax\}px\)`\)\?\.matches/u);
+  assert.match(appSource, /function isCompactRankMode/u);
+  assert.doesNotMatch(appSource, /function sourceInitialLimitForMode/u);
+  assert.match(appSource, /function sourceInlineLimitForMode/u);
+  assert.doesNotMatch(appSource, /function sourceBatchSizeForMode/u);
+  assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
+  assert.doesNotMatch(appSource, /SOURCE_EXPAND_CHUNK_SIZE|convertSourceGroupMoreToCollapse|data-toggle-source-groups|function expandSourceVideoGroups/u);
+  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, 0, visibleCount\)/u);
+  assert.match(appSource, /document\.createDocumentFragment\(\)/u);
+  assert.doesNotMatch(appSource, /查看更多 \$\{remaining\}个来源/u);
+  assert.match(appSource, /dataset\.collapseSource = "true"/u);
+  assert.match(appSource, /dataset\.copySongLinks = "true"/u);
+  assert.match(appSource, /buildSongSourceLinksText\(occurrences,\s*\{/u);
+  assert.match(appSource, /className = "source-drawer-toolbar"/u);
+  assert.match(appSource, /renderSourceCollapseButton\(drawer\.id, drawer\.dataset\.sourceMode \|\| "song", "source-collapse-top ui-chip"\)/u);
+  assert.match(appSource, /复制全部链接/u);
+  assert.match(appSource, /function renderRankRecord[\s\S]*row\.append\(\s*renderSourceInlineStrip/u);
+  assert.match(appSource, /function renderIndexRecord[\s\S]*row\.append\(\s*renderSourceInlineStrip/u);
+  assert.doesNotMatch(functionBody("function renderRecordContent"), /renderSourceInlineStrip/u);
+  assert.match(appSource, /if \(nextExpanded && shouldKeepSingleDrawerOpen\(\)\) closeOtherMobileSourceDrawers\(row\)/u);
+  assert.doesNotMatch(appSource, /data-toggle-artist-sources|ARTIST_SOURCE_INITIAL_LIMIT/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"sources sources sources"[\s\S]*"drawer drawer drawer"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
+  assert.match(cssSource, /\.source-inline-strip\s*\{[\s\S]*grid-area: sources;/u);
+  assert.match(cssSource, /\.source-inline-thumb\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;[\s\S]*border-radius: 6px;/u);
+  assert.match(cssSource, /\.source-inline-thumb-image\s*\{[\s\S]*object-fit: cover;/u);
+  assert.doesNotMatch(cssSource, /\.source-inline-time-overlay/u);
+  assert.match(cssSource, /\.source-inline-main\s*\{[\s\S]*grid-template-rows: auto auto;[\s\S]*gap: 1px;/u);
+  assert.match(cssSource, /\.source-inline-meta\s*\{[\s\S]*display: inline-flex;[\s\S]*gap: 4px;/u);
+  assert.match(cssSource, /\.source-inline-time,[\s\S]*\.source-inline-extra-time,[\s\S]*\.source-inline-time-more\s*\{[\s\S]*background: transparent;[\s\S]*font-variant-numeric: tabular-nums;/u);
+  assert.match(cssSource, /\.source-inline-tail\s*\{[\s\S]*display: contents;/u);
+  assert.match(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
+  assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[^}]*display: none/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.index-toolbar\s*\{[\s\S]*position: static;[\s\S]*top: auto;/u);
+  assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(cssSource, /query-count|query-field-menu/u);
+  assert.doesNotMatch(cssSource, /\.query-trigger\.has-active-query::after/u);
+});
+
+test("VTuber rows render display images without default avatar fallback", () => {
+  assert.match(appSource, /function renderVtuberDisplayImage/u);
+  assert.match(appSource, /window\.FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /vtuber-display-image-thumbnail/u);
+  assert.match(cssSource, /\.vtuber-display-image-thumbnail\s*\{[\s\S]*border-radius: var\(--radius-thumbnail\);/u);
+  assert.doesNotMatch(appSource, /fallback-avatar/u);
+  assert.doesNotMatch(cssSource, /fallback-avatar/u);
+});
+
+test("high-density rank and source rules are encoded in css and browser checks", () => {
+  assert.match(cssSource, /--radius-control:\s*8px/u);
+  assert.match(cssSource, /--control-compact:\s*36px/u);
+  assert.match(cssSource, /--control-default:\s*38px/u);
+  assert.match(cssSource, /--control-large:\s*40px/u);
+  assert.match(cssSource, /--rank-leading-width:\s*44px/u);
+  assert.match(cssSource, /--rank-side-width-mobile:\s*66px/u);
+  assert.match(cssSource, /--rank-side-width-tablet:\s*76px/u);
+  assert.match(cssSource, /--rank-side-width-desktop:\s*104px/u);
+  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) var\(--rank-side-width-desktop\)/u);
+  assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
+  assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
+  assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
+  assert.match(indexSource, /<input id="queryInput" type="text" autocomplete="off"/u);
+  assert.doesNotMatch(indexSource, /<input id="queryInput" type="search"/u);
+  assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"/u);
+  assert.match(cssSource, /\.query-field-toggle\.is-selected,[\s\S]*\.query-field-toggle:has\(input:checked\)\s*\{[\s\S]*background: var\(--accent-soft\);/u);
+  assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
+  assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
+  assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=/u);
+  assert.doesNotMatch(indexSource, /recentSearchSection|recentSearches|clearRecentSearchesButton|最近搜索/u);
+  assert.doesNotMatch(appSource, /RECENT_SEARCHES_KEY|readRecentSearches|writeRecentSearches|renderRecentSearches/u);
+  assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
+  assert.match(cssSource, /\.query-sort-field\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.query-segmented\s*\{[\s\S]*grid-template-columns: repeat\(auto-fit, minmax\(78px, 1fr\)\);/u);
+  assert.match(cssSource, /\.query-filter-matrix > \.query-compact-field\s*\{[\s\S]*grid-template-columns: 1fr;[\s\S]*align-items: stretch;/u);
+  assert.match(cssSource, /\.query-compact-field\s*\{[\s\S]*grid-template-rows: auto var\(--control-default\);/u);
+  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
+  assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
+  assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
+  assert.match(appSource, /const RANK_METRICS = \{[\s\S]*occurrences: "次数",[\s\S]*songs: "歌曲数",[\s\S]*videos: "视频数"/u);
+  assert.match(appSource, /function rankMetricButtonText\(value\)[\s\S]*value === "songs"\) return "按歌曲数"[\s\S]*value === "videos"\) return "按视频数"[\s\S]*return "按次数"/u);
+  assert.match(indexSource, /value="occurrences" checked \/>按次数[\s\S]*value="songs" disabled \/>按歌曲数[\s\S]*value="videos" \/>按视频数/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-top: 8px;[\s\S]*padding-bottom: 12px;/u);
+  assert.match(cssSource, /\.query-panel-body\s*\{[\s\S]*display: grid;[\s\S]*gap: var\(--space-3\);/u);
+  assert.match(cssSource, /\.query-filter-matrix\s*\{/u);
+  assert.doesNotMatch(cssSource, /\.query-tabs\b|\.query-tab\s*\{|\.query-tab\[|\.query-tab-panel\b|\.query-panel\.is-filter-tab/u);
+  assert.doesNotMatch(cssSource, /\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*144px/u);
+  assert.match(captureSource, /async function assertQueryHistoryPanelSpacing/u);
+  assert.match(captureSource, /query history overlaps footer/u);
+  assert.doesNotMatch(captureSource, /dailySongList\.recentSearches|mobile-query-recent\.png|query-history-section\[open\]/u);
+  assert.doesNotMatch(appSource, /function setQueryPanelTab|queryTabButtons|queryTabPanels/u);
+  assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"sources sources sources"[\s\S]*"drawer drawer drawer"/u);
+  assert.match(appSource, /const VIEW_RANK_METRIC_ORDER = \{[\s\S]*vtuberRank: \["occurrences", "songs", "videos"\]/u);
+  assert.match(appSource, /function renderVtuberAvatar/u);
+  assert.match(
+    appSource,
+    /link\?\.dataset\.rankSearchLink === "true"[\s\S]*event\.preventDefault\(\)[\s\S]*window\.location\.assign\(link\.href\)/u,
+  );
+  assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /function renderVtuberChannelTextLink/u);
+  assert.match(appSource, /wrapVtuberChannelLink\(media, record \|\| \{\}, "vtuber-display-link", channelIdentity\)/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrl/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrls/u);
+  assert.match(functionBody("function getVtuberSongGroups"), /lightweightSongGroupsForRecord\(record, \{ mergeSameWorkTitle: true \}\)/u);
+  assert.match(functionBody("function getVtuberSongGroups"), /mergeVtuberSongGroupsForDrawer\(occurrenceGroups, fallbackGroups\)/u);
+  assert.match(functionBody("function sourceDetailPathForRecord"), /record\?\._record \|\| \{\}/u);
+  assert.match(appSource, /async function sourceDetailPageForContainer[\s\S]*filterOccurrencesForSongKey\(loaded, songKey, songTitle\)/u);
+  assert.match(functionBody("function renderArtistSongGroup"), /sources\._sourceSongKey = sourceSongKeyForGroup\(group\)/u);
+  assert.match(functionBody("function sourceSongKeyForGroup"), /canonicalWorkTitleKey/u);
+  assert.match(appSource, /function renderVtuberCollectionBadge/u);
+  assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
+  assert.doesNotMatch(appSource, /function vtuberSideSummaryText|vtuberSideSummaryText\(songCount, videoCount\)/u);
+  assert.match(appSource, /function renderRankSide\(\{[\s\S]*if \(expandable\) \{[\s\S]*renderSourceToggleButton\(\{ mode, drawerId, isExpanded, songCount, occurrenceCount, videoCount, rankCount, rankMetric \}\)/u);
+  assert.match(appSource, /function renderSourceToggleButton\(\{[\s\S]*button\.textContent = model\.text/u);
+  const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
+  assert.match(vtuberTitleLineBlock, /display: contents;/u);
+  assert.doesNotMatch(vtuberTitleLineBlock, /grid-template-columns/u);
+  assert.match(cssSource, /\.vtuber-display-image\s*\{[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
+  assert.match(cssSource, /\.vtuber-display-link\s*\{[\s\S]*grid-area: image;[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
+  assert.match(cssSource, /\.vtuber-title-link:hover\s*\{[\s\S]*text-decoration: underline;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;[\s\S]*padding: 3px;/u);
+  assert.match(
+    cssSource,
+    /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-header\s*\{[\s\S]*grid-template-columns: 42px minmax\(0, 1fr\);[\s\S]*"thumb title"[\s\S]*"thumb actions"/u,
+  );
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-summary-actions\s*\{[\s\S]*overflow: visible;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 0;[\s\S]*min-height: 18px;[\s\S]*margin: 0;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.song-badge\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: auto;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-group-vtuber\s*\{[\s\S]*height: auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*white-space: nowrap;[\s\S]*line-height: 1\.12;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*font-size: 10px;/u);
+  assert.match(vtuberLayoutSource, /mobile-390[\s\S]*expectedColumns: 2[\s\S]*mobile-320[\s\S]*expectedColumns: 2/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"sources sources sources"[\s\S]*"drawer drawer drawer"/u);
+  assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
+  assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(cssSource, /\.rank-actions-line|\.rank-trend-inline|\.rank-trend\s*\{/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-subline\s*\{[\s\S]*display: flex;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-subline\s*\{[\s\S]*display: flex;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
+  assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
+  assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.setAttribute\("aria-label", channelLink\.isFallbackSearch/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.title = channelLink\.isFallbackSearch/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*sourcePublishedText\(group, videoItem\)[\s\S]*className = "source-video-date"/u);
+  assert.match(appSource, /function sourcePublishedText\(group = \{\}, item = \{\}\)[\s\S]*item\.publishedText \|\| group\.publishedText[\s\S]*item\.publishedAt \|\| group\.publishedAt \|\| item\.publishedTimestamp \|\| group\.publishedTimestamp/u);
+  assert.match(cssSource, /\.source-video-date\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 44px;[\s\S]*height: 25px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 40px;[\s\S]*height: 23px;/u);
+  assert.match(lastCssBlock(".source-inline-item"), /grid-template-columns:\s*40px minmax\(0,\s*1fr\) 24px;/u);
+  assert.match(lastCssBlock(".source-inline-strip .source-inline-thumb.source-link"), /width:\s*40px;[\s\S]*height:\s*23px;/u);
+  assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);
+  assert.match(cssSource, /\.trend-badge\s*\{[\s\S]*min-height: 20px;[\s\S]*font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /\.trend-up,[\s\S]*\.trend-increase,[\s\S]*\.trend-new/u);
+  assert.match(appSource, /FrontendUtils\.trendDisplayModel\(trend\)/u);
+  assert.doesNotMatch(appSource, /formatCompactSignedDelta|formatSignedDelta/u);
+  assert.doesNotMatch(functionBody("function renderCopySetlistButton"), /textContent = label/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
+  assert.match(cssSource, /\.source-video-group\s*\{[\s\S]*grid-template-areas: "thumb main copy"/u);
+  assert.match(cssSource, /\.source-video-thumb-link\s*\{[\s\S]*aspect-ratio: 16 \/ 9/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*grid-template-columns: 64px minmax\(0, 1fr\) 28px;[\s\S]*padding: 6px 0;/u);
+  assert.match(cssSource, /\.source-video-channel\s*\{[\s\S]*font-size: 13px;[\s\S]*font-weight: 600;/u);
+  assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*font-size: 12\.5px;[\s\S]*font-weight: 500;/u);
+  assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*text-decoration: none;/u);
+  assert.match(cssSource, /\.source-video-channel:hover,[\s\S]*\.source-video-title:hover\s*\{[\s\S]*text-decoration: underline;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: clamp\(120px, 34vw, 144px\) minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-body,[\s\S]*\.video-compact \.video-body\s*\{[\s\S]*display: contents;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.song-list,[\s\S]*\.video-compact \.song-list\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.video-grid\s*\{[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
+  assert.match(appSource, /className = "video-more video-more-top"/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
+  assert.match(verifySource, /async function mobileFilterSheetFlow/u);
+  assert.match(verifySource, /async function waitForQueryFilterControls/u);
+  assert.match(verifySource, /details:not\(\[open\]\)/u);
+  assert.match(verifySource, /async function mobileRankVisualGeometry/u);
+  assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
+  assert.match(verifySource, /async function mobileVideoCardGeometry/u);
+  assert.match(verifySource, /async function desktopRankVisualGeometry/u);
+  assert.match(verifySource, /async function compactSourceDrawerFlow/u);
+  assert.match(verifySource, /query-panel-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
+  assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
+});
+
+test("mobile source preview contract matches compact documentation", () => {
+  const readmeSource = fs.readFileSync(path.join(__dirname, "..", "README.md"), "utf8");
+  const specSource = fs.readFileSync(path.join(__dirname, "..", "docs", "ui-spec.md"), "utf8");
+  assert.match(appSource, /SOURCE_INLINE_LIMITS\s*=\s*\{[\s\S]*mobile: 2,[\s\S]*tablet: 3,[\s\S]*desktop: 3,/u);
+  assert.match(readmeSource, /Mobile three-source row with two inline thumbnails and one compact view-all action/u);
+  assert.match(specSource, /3 个唯一来源视频：移动端默认内联前 2 个真实来源/u);
+  assert.doesNotMatch(readmeSource, /Mobile three source inline row with thumbnail tail action/u);
+  assert.doesNotMatch(specSource, /3 个唯一来源视频：手机两列布局/u);
+});
+
+test("desktop and tablet contracts use explicit responsive layout", () => {
+  assert.match(cssBlock(".layout"), /margin: 0 auto 40px;/u);
+  assert.match(cssBlock(".controls-inner"), /margin: 0 auto;/u);
+  assert.match(cssSource, /--content-gutter:\s*var\(--page-x\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(360px, 1fr\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.query-search-form\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-template-columns: minmax\(260px, 1fr\) auto;/u);
+  assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(540px, 1fr\);/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) var\(--rank-side-width-tablet\)/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\);/u);
+  assert.match(appSource, /mode === "mobile"[\s\S]*variant === "top"[\s\S]*renderMobileTopPagination\(pageInfo\)/u);
+  assert.match(appSource, /function renderPageJumpControl\(pageInfo\)/u);
+  assert.match(appSource, /input\.dataset\.pageInput = "true"/u);
+  assert.match(appSource, /dataPageJumpForm|data-page-jump-form|pageJumpForm/u);
+  assert.match(cssSource, /\.page-jump\s*\{[\s\S]*display: inline-flex;/u);
+  assert.match(cssSource, /\.back-to-top\s*\{[\s\S]*bottom: calc\(var\(--space-6\) \+ 56px\);/u);
+});
+
+test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
+  const highlightBody = functionBody("function appendHighlightedText");
+  assert.match(highlightBody, /document\.createElement\("mark"\)/u);
+  assert.match(highlightBody, /mark\.textContent/u);
+  assert.doesNotMatch(highlightBody, /innerHTML/u);
+  assert.doesNotMatch(indexSource, /最近搜索|recentSearch/u);
+});
+
+test("latest runtime uses request pagination instead of loading every page shard", () => {
+  const requestViewPageBody = functionBody("async function requestViewPage");
+  assert.match(appSource, /function requestRuntimeMeta/u);
+  assert.match(appSource, /function canUseRequestRuntime/u);
+  assert.match(appSource, /async function requestViewPage/u);
+  assert.match(appSource, /buildRequestPageKey/u);
+  assert.match(appSource, /AbortController/u);
+  assert.match(appSource, /scheduleAdjacentRequestPagePrefetch/u);
+  assert.match(appSource, /loadRequestSearchRecords/u);
+  assert.match(appSource, /requestSearchBuckets\(query\)/u);
+  assert.match(functionBody("function requestSearchBuckets"), /FrontendUtils\.searchTokens\(query\)/u);
+  assert.match(appSource, /loadRequestDetailRecords/u);
+  assert.match(appSource, /sourceDetailKey/u);
+  assert.doesNotMatch(requestViewPageBody, /Promise\.all\(\s*pages\.map/u);
+  assert.doesNotMatch(requestViewPageBody, /pagePayloads\.flatMap/u);
+  assert.doesNotMatch(appSource, /complete all runtime/i);
+});
+
+test("status update label includes the calendar year", () => {
+  assert.match(appSource, /function formatUpdatedAt\(value\)/u);
+  assert.match(appSource, /formatUpdatedAt\(displayAt\)/u);
+  assert.match(functionBody("function formatUpdatedAt"), /parts\.year/u);
+});
+
+test("request static search degrades to view-index fallback instead of huge bucket shards", () => {
+  assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SEARCH/u);
+  assert.match(runtimeBuildSource, /DAILY_SONG_REQUEST_STATIC_SOURCE_DETAILS/u);
+  assert.match(runtimeBuildSource, /disabled:\s*true/u);
+  assert.match(runtimeBuildSource, /fallback:\s*"view-index"/u);
+  assert.match(runtimeBuildSource, /REQUEST_STATIC_SOURCE_DETAILS_ENABLED/u);
+  assert.match(appSource, /manifest\?\.disabled\) return null/u);
+  assert.match(appSource, /candidates === null/u);
+});
+
+test("range cache song records are lazy getters", () => {
+  assert.match(appSource, /defineLazySongCache\(cache, "allSongRecords"/u);
+  assert.match(appSource, /defineLazySongCache\(cache, "nicheSongRecords"/u);
+  assert.match(appSource, /defineLazySongCache\(cache, "visibleSongRecords"/u);
+  assert.match(appSource, /defineLazySongCache\(cache, "visibleNicheSongRecords"/u);
+  assert.doesNotMatch(functionBody("function createRangeCache"), /buildSongRecords/u);
+});
+
+test("mobile summary and pagination have compact rules", () => {
+  assert.doesNotMatch(appSource, /summary-range/u);
+  assert.match(appSource, /const MOBILE_PAGE_SIZE = 20/u);
+  assert.match(appSource, /const DESKTOP_PAGE_SIZE = 30/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = MOBILE_PAGE_SIZE;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = MOBILE_PAGE_SIZE;/u);
+  assert.match(functionBody("function vtuberSongGroupPageSizeForMode"), /sourceDrawerPageSizeForMode\(mode\)/u);
+  assert.match(functionBody("function currentPageSize"), /defaultListPageSizeForMode\(\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.type = "text"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.inputMode = "numeric"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /input\.pattern = "\[0-9\]\*"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /submit\.type = "submit"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("click", handlePaginationFormSubmit\)/u);
+  assert.match(appSource, /function handlePaginationFormSubmit\(event\)/u);
+  assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
+  assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /addEventListener\("pointerdown"/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /addEventListener\("mousedown"/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /addEventListener\("touchstart"/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /addEventListener\("click"/u);
+  assert.match(appSource, /function bindPageInputSelection\(input\)/u);
+  assert.match(functionBody("function bindPageInputSelection"), /input\.select\(\)/u);
+  assert.match(functionBody("function bindPageInputSelection"), /addEventListener\("click"/u);
+  assert.match(functionBody("function handleResponsiveResize"), /document\.activeElement\?\.matches\?\.\('\[data-page-input="true"\]'\)/u);
+  assert.match(functionBody("function handleResponsiveResize"), /pageInputPointerActive/u);
+  assert.match(functionBody("function handleResponsiveResize"), /cancelPendingResponsiveResize\(\)/u);
+  assert.match(appSource, /function protectPageInputFromResize\(input\)/u);
+  assert.match(functionBody("function protectPageInputFromResize"), /window\.setTimeout/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /protectPageInputFromResize\(input\)/u);
+  assert.match(functionBody("function bindPageInputInteraction"), /releasePageInputResizeProtection\(input\)/u);
+  assert.match(appSource, /function capturePageInputState\(\)/u);
+  assert.match(appSource, /function restorePageInputState\(snapshot\)/u);
+  assert.match(appSource, /function activePageInputElement\(\)/u);
+  assert.match(appSource, /async function waitForPageInputToSettle\(options = \{\}\)/u);
+  assert.match(appSource, /async function renderRequestedRuntime[\s\S]*await waitForPageInputToSettle\(\{ allowActive: options\.preservePageInput === false \}\)/u);
+  assert.match(appSource, /const pageInputStateAtResponse = capturePageInputState\(\) \|\| preservedPageInputState/u);
+  assert.match(functionBody("function restorePageInputState"), /input\.focus\(\{ preventScroll: true \}\)/u);
+  assert.match(functionBody("function restorePageInputState"), /setSelectionRange/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /preservePageInput: false/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /bindPageInputInteraction\(input\)/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /event\.stopPropagation\(\)/u);
+  assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
+  assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
+  assert.match(functionBody("async function requestApiViewPage"), /params\.set\("hideUnknownArtist", "1"\)/u);
+  assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.nicheOnly/u);
+  assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.hideUnknownArtist/u);
+  assert.match(appSource, /function sourceDetailOccurrencesForContainer[\s\S]{0,1800}filterSourceDetailOccurrences/u);
+  assert.doesNotMatch(functionBody("function renderPageSelectControl"), /document\.createElement\("select"\)|data\.pageSelect/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /document\.createElement\("input"\)/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /dataset\.sourcePageForm = "true"/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /dataset\.sourcePageSubmit = "true"/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /textContent = "选页"/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /form\.addEventListener\("submit"/u);
+  assert.match(functionBody("function renderSourcePageSummary"), /submit\.addEventListener\("click"/u);
+  assert.doesNotMatch(functionBody("function renderSourcePageSummary"), /document\.createElement\("select"\)|data\.pageSelect/u);
+  assert.match(cssSource, /\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto 52px;/u);
+  assert.match(cssSource, /\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto 52px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
+  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*box-sizing: border-box;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.page-select input\s*\{[\s\S]*min-height: 28px;[\s\S]*height: 28px;/u);
+  assert.match(appSource, /setSourceDrawerPageForDrawer\(drawer, page\)/u);
+  assert.match(appSource, /submitSourceDrawerPageForm\(sourcePageSubmit\.closest\("\[data-source-page-form\]"\)\)/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main actions"[\s\S]*"note note"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main"[\s\S]*"note"/u);
+  assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);
+  assert.match(appSource, /summary-metrics/u);
+  assert.match(appSource, /function compactSummaryMetrics/u);
+  assert.match(appSource, /function compactSummaryNote/u);
+  assert.doesNotMatch(functionBody("function compactSummaryMetrics"), /首结果/u);
+  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|位歌手\|个频道\|个小众歌曲频道\|歌曲收录\|小众歌曲收录\|个视频/u);
+  assert.match(functionBody("function compactSummaryNote"), /已隐藏无歌手/u);
+  assert.match(functionBody("function renderActiveQueryStrip"), /if \(items\.length >= 2\)/u);
+  assert.match(functionBody("function renderActiveQueryStrip"), /清除全部筛选条件/u);
+  assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
+  assert.match(appSource, /function paginationTokenOptions/u);
+  assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);
+  assert.match(appSource, /renderPageButton\("下一页"[\s\S]*\{ icon: "next" \}/u);
+  assert.doesNotMatch(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
+  assert.match(appSource, /function renderPageSelectControl/u);
+  assert.match(appSource, /function renderMobileTopPagination/u);
+  assert.match(appSource, /function renderMobileBottomPagination/u);
+  assert.match(appSource, /function renderPageEllipsisToken/u);
+  assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
+  assert.doesNotMatch(cssSource, /\.page-select-compact select|\.page-select-compact span::after/u);
+  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*width: 46px;[\s\S]*text-align: center;/u);
+  assert.match(cssSource, /\.page-select input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
+  assert.match(cssSource, /\.page-jump input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
+  assert.match(cssSource, /\.source-page-jump input\[data-page-input="true"\]\s*\{[\s\S]*height: var\(--chip-height\);/u);
+  assert.match(cssSource, /\.page-select-compact input\s*\{[\s\S]*width: 38px;/u);
+  assert.match(cssSource, /\.page-jump input\s*\{[\s\S]*width: 52px;/u);
+});
+
+test("rank summaries keep metrics to entity count and song collections", () => {
+  const songRankBody = functionBody("function renderSongRank");
+  const artistRankBody = functionBody("function renderArtistRank");
+  const vtuberRankBody = functionBody("function renderVtuberRank");
+  const songIndexBody = functionBody("function renderSongIndexView");
+  assert.doesNotMatch(songRankBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.doesNotMatch(artistRankBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.doesNotMatch(vtuberRankBody, /metric\(selection\.videoCount, "条歌曲收录"\)/u);
+  assert.match(songIndexBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.doesNotMatch(songRankBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.doesNotMatch(songIndexBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.match(functionBody("function occurrenceVisibilityMetric"), /歌曲收录/u);
+  assert.match(appSource, /function summaryVideoCountModel\(rangeCache, selection\)[\s\S]*visibleCount: selection\?\.videoCount,[\s\S]*sourceCount: sourceVideoCountForSummary\(rangeCache\)/u);
+  assert.match(appSource, /function sourceVideoCountForSummary\(rangeCache\)[\s\S]*rangeCache\.items\.length/u);
+  assert.match(appSource, /function summaryNote\(selection, extra = "", rangeCache = null\)[\s\S]*summaryVideoVisibilityNote\(rangeCache, selection\)/u);
+});
+
+test("VTuber cards expose explicit statistics and only trusted channel identities", () => {
+  const contentBody = functionBody("function renderRecordContent");
+  const statsBody = sourceBetween("function renderVtuberStats", "function renderVtuberHandle");
+  const identityBody = sourceBetween("function vtuberChannelIdentity", "function vtuberReliableDisplayName");
+  const displayNameBody = sourceBetween("function vtuberReliableDisplayName", "function vtuberChannelMetadataRecords");
+  const displayNameGuardBody = sourceBetween("function isReliableVtuberDisplayName", "function vtuberReliableHandle");
+  const handleBody = sourceBetween("function vtuberReliableHandle", "function isReliableVtuberHandle");
+  const renderHandleBody = sourceBetween("function renderVtuberHandle", "function renderVtuberChannelTextLink");
+  const songGroupBody = functionBody("function renderArtistSongGroup");
+
+  assert.match(contentBody, /const channelIdentity = mode === "vtuber" \? vtuberChannelIdentity\(record \|\| \{\}\) : null/u);
+  assert.match(contentBody, /channelIdentity\.displayName \|\| "未知频道"/u);
+  assert.match(contentBody, /content\.append\(renderVtuberStats\(\{ songCount, videoCount, occurrenceCount, rankMetric \}\)\)/u);
+  assert.match(statsBody, /\{ metric: "videos", label: "视频", value: videoCount, ariaLabel: "视频数量" \}/u);
+  assert.match(statsBody, /\{ metric: "songs", label: "歌曲", value: songCount, ariaLabel: "歌曲数量" \}/u);
+  assert.match(statsBody, /\{ metric: "occurrences", label: "次数", value: occurrenceCount, ariaLabel: "次数" \}/u);
+  assert.match(statsBody, /rankMetric === item\.metric \? " is-active" : ""/u);
+  assert.match(cssBlock(".vtuber-card-stats"), /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
+  assert.match(cssBlock(".vtuber-card-stat-value"), /font-variant-numeric: tabular-nums;/u);
+
+  assert.match(identityBody, /displayName \? vtuberReliableHandle\(record\) : ""/u);
+  assert.match(displayNameBody, /const metadata = vtuberChannelMetadataRecords\(record\)/u);
+  assert.match(displayNameBody, /metadata\.flatMap\(\(item\) => \[item\.displayName, item\.channelDisplayName, item\.channelName, item\.name, item\.title\]\)/u);
+  assert.match(displayNameGuardBody, /\^\\\/\?@/u);
+  assert.match(displayNameGuardBody, /channel\\\/\)\?UC/u);
+  assert.match(handleBody, /return vtuberEvidenceHandle\(record\)/u);
+  assert.match(renderHandleBody, /if \(!identity\.displayName \|\| !handle\) return null/u);
+  assert.ok(appSource.includes('["27ciaztchCQ", "/@mizusawa_opera"]'));
+  assert.ok(appSource.includes('["P9HZGLHFi5c", "/@mokankamo"]'));
+  assert.ok(appSource.includes('["jOzbHf8nHYA", "/@mikumitani"]'));
+  assert.ok(appSource.includes('["ByaypQqmirQ", "/@FujiotoKanade"]'));
+
+  const compactHeaderBlock = cssBlock(".artist-song-group-vtuber .artist-song-header");
+  assert.match(compactHeaderBlock, /grid-template-areas: "thumb title actions";/u);
+  assert.match(compactHeaderBlock, /grid-template-rows: auto;/u);
+  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-title"), /font-size: 12px;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssBlock(".artist-song-group-vtuber .artist-song-artist"), /font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
+  assert.match(
+    cssSource,
+    /@media \(max-width: 720px\)[\s\S]*\.artist-song-group-vtuber \.artist-song-summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*justify-content: space-between;/u,
+  );
+  assert.match(songGroupBody, /date\.className = "artist-song-date"[\s\S]*meta\.append\(date\)/u);
+  assert.doesNotMatch(songGroupBody, /titleWrap\.append\(date\)/u);
+});
+
+test("VTuber channel expansion renders paged song groups before source pages", () => {
+  const vtuberRankBody = functionBody("function renderVtuberRank");
+  const requestedPageStart = appSource.indexOf("function renderRequestedPageResult");
+  const requestedPageEnd = appSource.indexOf("function renderRequestSummary");
+  const requestedPageBody = appSource.slice(requestedPageStart, requestedPageEnd);
+  const songSourceBody = functionBody("async function toggleArtistSongSource");
+  const sourcePageBody = functionBody("async function setSourceDrawerPage");
+  const songGroupBody = functionBody("function renderArtistSongGroup");
+  assert.match(vtuberRankBody, /const songGroups = getVtuberSongGroups\(record\)/u);
+  assert.doesNotMatch(vtuberRankBody, /songGroups,[\s\S]*songPreview: songGroups\.slice\(0, 2\)\.map\(\(group\) => group\.title\)/u);
+  assert.match(vtuberRankBody, /getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
+  assert.doesNotMatch(requestedPageBody.match(/if \(result\.view === "songRank"\)[\s\S]*?\} else if \(result\.view === "artistRank"\)/u)?.[0] || "", /getVtuberSongGroups/u);
+  assert.match(requestedPageBody, /result\.view === "vtuberRank"[\s\S]*const songGroups = getVtuberSongGroups\(record\)[\s\S]*mode: "vtuber"[\s\S]*songGroups,[\s\S]*getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
+  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*mode === "vtuber"[\s\S]*mergeVtuberSongGroupsForDrawer\(completeGroups, fallbackGroups\)/u);
+  assert.match(appSource, /function mergeVtuberSongGroupsForDrawer\(completeGroups = \[\], fallbackGroups = \[\]\)[\s\S]*sortVtuberSongGroups/u);
+  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(row\._sourceDetailOccurrences \|\| visibleOccurrences, songGroups, mode\)/u);
+  assert.match(appSource, /function filterOccurrencesForSongKey\(occurrences = \[\], songKey = "", songTitle = ""\)[\s\S]*songMatchKeys\(songKey, songTitle\)/u);
+  assert.match(appSource, /function songMatchKeys\([\s\S]*window\.RankingUtils\?\.songWorkTitleKey\?\.\(text\)/u);
+  assert.match(functionBody("function hydrateArtistSongGroup"), /filterOccurrencesForSongKey\(filterDisplaySongOccurrences\(record\.occurrences \|\| \[\]\), key, group\.title\)/u);
+  assert.doesNotMatch(appSource, /function appendVtuberSubline/u);
+  assert.doesNotMatch(appSource, /展开显示/u);
+  assert.match(functionBody("function renderRecordContent"), /if \(metaLine\.childNodes\.length\) \{[\s\S]*content\.append\(subline\);/u);
+  assert.match(cssSource, /\.rank-row-vtuber \.rank-content\s*\{[\s\S]*grid-template-areas:[\s\S]*"image title"[\s\S]*"image subline"/u);
+  assert.doesNotMatch(cssSource, /vtuber-expand-summary/u);
+  assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
+  assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
+  const artistLabelBody = functionBody("function artistLabelForSongGroup");
+  assert.match(artistLabelBody, /const counts = new Map\(\)/u);
+  assert.match(artistLabelBody, /canonicalizeArtistName\(rawName\)/u);
+  assert.match(artistLabelBody, /const entries = Array\.from\(counts\.entries\(\)\)\.sort/u);
+  assert.match(functionBody("function artistLabelForSongGroup"), /knownEntries = entries\.filter\(\(\[name\]\) => !window\.RankingUtils\.isUnknownArtistName\(name\)\)/u);
+  assert.match(artistLabelBody, /knownEntries\[0\]\[0\]/u);
+  assert.match(artistLabelBody, /entries\[0\]\[0\]/u);
+  assert.match(functionBody("function buildVtuberRecords"), /incrementCanonicalSongCount\(record\.songs, cleanText\(song\.title\)\)/u);
+  assert.match(appSource, /function normalizeVtuberSongCountMap[\s\S]*shouldShowSongGroupTitle[\s\S]*songWorkKeyForTitle/u);
+  assert.match(appSource, /function songCountForRecord\(record\)[\s\S]*const explicit = Number\(record\?\.songCount \?\? record\?\.uniqueSongCount \?\? record\?\.songsCount\)[\s\S]*if \(Number\.isFinite\(explicit\) && explicit >= 0\) return explicit;[\s\S]*record\?\.type === "vtuber" && record\?\.songs instanceof Map/u);
+  assert.match(appSource, /function incrementCanonicalSongCount[\s\S]*songWorkTitleKey/u);
+  assert.match(appSource, /function sourcePublishedText\(group = \{\}, item = \{\}\)[\s\S]*formatCalendarDate\(value\)/u);
+  assert.ok(appSource.includes("return /^\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}$/u.test(explicit)"));
+  assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? "button" : "span"/u);
+  assert.match(songGroupBody, /count\.dataset\.copySongLinks = "true"/u);
+  assert.match(songGroupBody, /count\.dataset\.copyUrlsOnly = "true"/u);
+  assert.match(songGroupBody, /count\._sourceOccurrences = group\.occurrences \|\| \[\]/u);
+  assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? vtuberSongGroupMetaLabel\(group\) : artistSongCountLabel\(group\)/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand && group\.sourceMode !== "vtuber"\) \{[\s\S]*renderArtistSongSourceToggleButton\(sourcePresentation, sources\.id, group\)/u);
+  assert.match(songGroupBody, /if \(hasOccurrences && group\.sourceMode !== "vtuber"\) \{[\s\S]*renderCopySongLinksIconButton\(group\.occurrences\)/u);
+  assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber"\) \{[\s\S]*renderSourceInlineStrip\(sourcePresentation/u);
+  assert.match(functionBody("function vtuberSongGroupMetaLabel"), /return `\$\{count\}次`/u);
+  assert.doesNotMatch(functionBody("function vtuberSongGroupMetaLabel"), /视频/u);
+  const songSearchBody = functionBody("function buildSearchUrlForSongGroup");
+  assert.match(songSearchBody, /vtuberSongSearchQueryModel/u);
+  assert.match(songSearchBody, /params\.set\("view", "songRank"\)/u);
+  assert.match(songSearchBody, /params\.set\("searchFields", query\.searchFields\.join\(","\)\)/u);
+  assert.match(songSearchBody, /vtuberReliableHandle\(record\)/u);
+  assert.match(songGroupBody, /thumb\.dataset\.rankSearchLink = "true"/u);
+  assert.match(songGroupBody, /title\.dataset\.rankSearchLink = "true"/u);
+  assert.match(functionBody("function handleContentLinkNavigation"), /link\.dataset\.rankSearchLink === "true"/u);
+  const copySongLinksBody = functionBody("async function copySongSourceLinksFromButton");
+  const copySongContainerBody = functionBody("function songSourceContainerForCopyButton");
+  assert.match(copySongLinksBody, /songSourceContainerForCopyButton\(button\)/u);
+  assert.match(copySongLinksBody, /filterOccurrencesForSongKey\(occurrences, songKey, songTitle\)/u);
+  assert.match(copySongLinksBody, /urlsOnly: button\.dataset\.copyUrlsOnly === "true"/u);
+  assert.match(
+    copySongContainerBody,
+    /group\?\._artistSongSources[\s\S]*group\?\.querySelector\("\.artist-song-sources"\)[\s\S]*button\.closest\("\.artist-song-sources"\)[\s\S]*button\.closest\("\.rank-row, \.index-row"\)/u,
+  );
+  assert.ok(
+    copySongContainerBody.indexOf("group?._artistSongSources") <
+      copySongContainerBody.indexOf('button.closest(".rank-row, .index-row")'),
+    "song-scoped source metadata must win over the outer channel row",
+  );
+  assert.doesNotMatch(appSource, /来源明细待重建/u);
+  assert.doesNotMatch(appSource, /次歌唱/u);
+  assert.doesNotMatch(requestedPageBody.match(/result\.view === "vtuberRank"[\s\S]*?\}\);[\s\S]*?\}/u)?.[0] || "", /次歌唱/u);
+  assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);
+  assert.match(songSourceBody, /groups: pageState\.groups,[\s\S]*pageInfo: pageState\.pageInfo/u);
+  const sourcePageForDrawerBody = functionBody("async function setSourceDrawerPageForDrawer");
+  assert.match(sourcePageBody, /setSourceDrawerPageForDrawer\(drawer, page\)/u);
+  assert.match(sourcePageForDrawerBody, /if \(drawer\.dataset\.sourceMode === "vtuber"\) \{[\s\S]*appendPagedVtuberSongGroups\(drawer, songGroups\)/u);
+  assert.match(sourcePageForDrawerBody, /drawer\.dataset\.sourceMode === "artist-song" \? drawer : row/u);
+  assert.match(sourcePageForDrawerBody, /sourceDetailPageForContainer\(sourceContainer, sourceContainer\._sourceDetailOccurrences \|\| sourceContainer\._sourceOccurrences \|\| \[\]/u);
+  assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
+  assert.doesNotMatch(cssSource, /\.artist-song-group-vtuber \.source-inline-strip/u);
+  assert.match(cssSource, /@media \(min-width: 920px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
+  assert.match(cssSource, /\.artist-song-group-vtuber\s*\{[\s\S]*overflow: hidden;/u);
+  assert.match(cssSource, /\.artist-song-group-vtuber button\.artist-song-count\s*\{[\s\S]*min-width: 0;[\s\S]*min-height: 20px;[\s\S]*touch-action: manipulation;/u);
+  assert.match(cssSource, /\.artist-song-group-vtuber button\.artist-song-count:focus-visible\s*\{[\s\S]*outline:/u);
+  assert.doesNotMatch(cssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);
+  assert.doesNotMatch(lastCssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand && group\.sourceMode !== "vtuber"\) section\.append\(sources\)/u);
+});
+
+function functionBody(signature) {
+  const start = appSource.indexOf(signature);
+  assert.notEqual(start, -1, `missing ${signature}`);
+  const braceStart = appSource.indexOf("{", start);
+  let depth = 0;
+  for (let index = braceStart; index < appSource.length; index += 1) {
+    const char = appSource[index];
+    if (char === "{") depth += 1;
+    if (char === "}") depth -= 1;
+    if (depth === 0) return appSource.slice(braceStart, index + 1);
+  }
+  throw new Error(`unterminated ${signature}`);
+}
+
+function sourceBetween(startSignature, endSignature) {
+  const start = appSource.indexOf(startSignature);
+  const end = appSource.indexOf(endSignature, start + startSignature.length);
+  assert.notEqual(start, -1, `missing ${startSignature}`);
+  assert.notEqual(end, -1, `missing ${endSignature}`);
+  return appSource.slice(start, end);
+}

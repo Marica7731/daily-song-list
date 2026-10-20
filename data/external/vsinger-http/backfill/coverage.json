@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "vsinger-moment-http-backfill-coverage",
+  "generatedAt": "2026-07-19T02:35:40.731Z",
+  "overallStatus": "complete",
+  "stages": {
+    "songs": {
+      "coverageStatus": "count-mismatch",
+      "stopReason": "no-next-cursor",
+      "pageCount": 12,
+      "rawRowCount": 232,
+      "duplicateRowCount": 97,
+      "duplicateRate": 0.41810344827586204,
+      "cursorLoopDetected": false,
+      "noProgressDetected": false,
+      "requestStats": {
+        "requestCount": 12,
+        "averageHtmlBytes": 117006,
+        "averageResponseTimeMs": 457,
+        "totalBytes": 1404069
+      },
+      "uniqueSongCount": 135,
+      "observedSiteSongCount": 71890,
+      "coverageRatio": 0.0018778689664765613
+    },
+    "streams": {
+      "coverageStatus": "complete",
+      "stopReason": "no-next-cursor",
+      "pageCount": 3195,
+      "rawRowCount": 60566,
+      "duplicateRowCount": 0,
+      "duplicateRate": 0,
+      "cursorLoopDetected": false,
+      "noProgressDetected": false,
+      "requestStats": {
+        "requestCount": 129,
+        "averageHtmlBytes": 266304,
+        "averageResponseTimeMs": 388,
+        "totalBytes": 34353206,
+        "coverageStatus": "partial"
+      },
+      "uniqueVideoCount": 60566,
+      "uniqueSetlistSongCount": 59135,
+      "occurrenceCount": 512605,
+      "detailQueueCount": 24267
+    },
+    "videoDetails": {
+      "coverageStatus": "partial",
+      "requestedCount": 24267,
+      "fetchedCount": 600,
+      "occurrenceCount": 28,
+      "requestStats": {
+        "requestCount": 600,
+        "averageHtmlBytes": 32378,
+        "averageResponseTimeMs": 300,
+        "totalBytes": 19426685
+      }
+    },
+    "singerSongs": {
+      "coverageStatus": "complete",
+      "detailCoverageStatus": "complete",
+      "singersProcessed": 393,
+      "pageCount": 1931,
+      "detailPageCount": 36604,
+      "uniqueSongCount": 3048,
+      "uniqueVideoCount": 28632,
+      "occurrenceCount": 121890,
+      "ownerPermission": {
+        "enabled": true,
+        "note": "site-owner email authorization",
+        "acceptedAt": "2026-07-18T07:31:52.606Z",
+        "robotsSingerSongsQueryAllowed": false,
+        "mergedShardCount": 6
+      },
+      "requestStats": {
+        "requestCount": 39131,
+        "averageHtmlBytes": 65670,
+        "averageResponseTimeMs": 342,
+        "totalBytes": 2569711289
+      },
+      "incrementalRefresh": {
+        "generatedAt": "2026-07-19T02:35:40.731Z",
+        "singerCount": 4,
+        "pageCount": 29,
+        "detailPageCount": 567,
+        "occurrenceCount": 1556,
+        "songDelta": 100,
+        "videoDelta": 338,
+        "occurrenceDelta": 1556,
+        "singers": [
+          {
+            "externalSingerId": "1c111ebb-446a-459f-9e77-4696fbd611fc",
+            "singerName": "ネモ・テルミナス",
+            "pageCount": 7,
+            "uniqueSongCount": 66,
+            "detailPagesFetched": 137,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "c7d28ae3-520e-4cff-8070-a8c20d6549ca",
+            "singerName": "儚牙紺 - Kurage Kon -",
+            "pageCount": 9,
+            "uniqueSongCount": 83,
+            "detailPagesFetched": 174,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "16611f12-cf05-401c-9f24-9d8d46e2ec57",
+            "singerName": "88nia - Nia Hachiya -",
+            "pageCount": 8,
+            "uniqueSongCount": 69,
+            "detailPagesFetched": 160,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "81faf199-2bd9-412e-a0d6-56d4ffc08ebc",
+            "singerName": "Aromaの音楽",
+            "pageCount": 5,
+            "uniqueSongCount": 74,
+            "detailPagesFetched": 96,
+            "stopReason": "no-next-cursor"
+          }
+        ]
+      }
+    }
+  },
+  "requestStats": {
+    "requestCount": 39276,
+    "averageHtmlBytes": 65858,
+    "averageResponseTimeMs": 343,
+    "totalBytes": 2586622539
+  },
+  "report": {
+    "songs": {
+      "averageHtmlBytes": 117006,
+      "averageResponseTimeMs": 457,
+      "uniqueSongCount": 135,
+      "duplicateSongRows": 97,
+      "cursorStable": true,
+      "estimatedCompleteRequests": 6391,
+      "estimatedRuntimeSecondsAtOneRequestPerSecond": 6391
+    },
+    "streams": {
+      "averageHtmlBytes": 266304,
+      "averageResponseTimeMs": 388,
+      "videosPerPage": 19,
+      "setlistsPerPage": 14,
+      "occurrencesPerPage": 160,
+      "cursorStable": true,
+      "detailQueueCount": 24267
+    }
+  },
+  "savings": {
+    "avoidedBulkMcpGetSongRequests": 71890,
+    "avoidedVideoDetailRequestsByListSetlists": 36299,
+    "singerScopedOccurrencesImported": 121890
+  },
+  "conflictCount": 5841,
+  "failureCount": 0
+}

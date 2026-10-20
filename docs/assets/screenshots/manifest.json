@@ -1,0 +1,1142 @@
+{
+  "schemaVersion": 1,
+  "kind": "daily-song-list-ui-proof",
+  "generatedAt": "2026-07-23T01:43:18.485Z",
+  "generatedBy": "scripts/capture-readme-screenshots.js",
+  "baseUrl": "http://127.0.0.1:18080/",
+  "proofInputHash": "af2c8112596745d558598c8df84b37ac78819b7bdef8919865f81455fc495c7c",
+  "uiSourceFingerprint": "af2c8112596745d558598c8df84b37ac78819b7bdef8919865f81455fc495c7c",
+  "proofInputs": [
+    {
+      "path": "index.html",
+      "sha256": "50ce5877af8e1bf303860af4e7ac5d4189517386e1c404cebb1f0a9eb66c6870"
+    },
+    {
+      "path": "assets/app.js",
+      "sha256": "cfe8f68f20b9c8d18fa4cb2666ffd0aac83520e44bd5bcea9dbdb9e11b7fdf82"
+    },
+    {
+      "path": "assets/styles.css",
+      "sha256": "48620346c57be0fa27d4459480792a16e0056827b657ba08ab11f5d78dfc6e07"
+    },
+    {
+      "path": "assets/frontend-utils.js",
+      "sha256": "7463d4ed1200dfff174e8728d013fbd107a22498c0fc86600e451da434ed58cb"
+    },
+    {
+      "path": "README.md",
+      "sha256": "73c84387b54bccf0b3563bc92a0e41536e0911c479b3099584171f8e2b47f719"
+    },
+    {
+      "path": "docs/ui-spec.md",
+      "sha256": "9de857fa3aeac553b3d5049af638ccfeebdb55e47807b0a687d5c51265d56776"
+    },
+    {
+      "path": "docs/ui-proof.md",
+      "sha256": "7c935841b2a04ee1b7e7770612c461c137f40ff53a0cff86988ec562b5aee2c1"
+    },
+    {
+      "path": "scripts/capture-readme-screenshots.js",
+      "sha256": "9936f41b4f4b2f4f8e08bca4a4e105320e732159c64d65f34c958a116159efc5"
+    },
+    {
+      "path": "scripts/validate-ui-proof.js",
+      "sha256": "deb6231744a724be5db3472e5b3e34e92f325f97b7d13df549f93484be90ce95"
+    },
+    {
+      "path": "scripts/ui-proof-config.js",
+      "sha256": "5141dde92c97a2a3b73b698ff253354d0c4b77934f3fd91a191f0f2371d45ea3"
+    },
+    {
+      "path": "test/fixtures/ui-proof-runtime.json",
+      "sha256": "e1a76d3b8ba0122bfd80703fe85d958072a9db2cb1873571346afb2687306c68"
+    },
+    {
+      "path": "test/ui-proof-fixtures.test.js",
+      "sha256": "4100e71b56a88c3003e7a0ffeaafc30d0160b5b995fa0984ffc3a60986671af6"
+    },
+    {
+      "path": "docs/data-architecture.md",
+      "sha256": "dae70941205c9569bdfb6ddff0003dc1eb44d2015e3371d418731ee220ea3882"
+    },
+    {
+      "path": "docs/range-migration.md",
+      "sha256": "5cf7efcb90ea32c7c4cfb9ba7fe670b0396f308934bc3bf230149c3cdb28a6ab"
+    },
+    {
+      "path": "docs/storage-layout.md",
+      "sha256": "34f175de18bf63d74f1a8e38fbb1f93fa55b31baec4701837bd4ca2e74203cb6"
+    },
+    {
+      "path": "docs/backfill.md",
+      "sha256": "441d60328f642cd2f33954b127d9a347ca0be74b8ecb63072feb03e5c780dad7"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "docs/assets/screenshots/desktop-song-rank.png",
+      "scene": "desktop-song-rank",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {},
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 207564,
+      "sha256": "da8d1b364d0edcb5490643f7c9f1da0b71debc40acbfa9753a616d28a3621d65"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-monthly-song-rank.png",
+      "scene": "desktop-all-range-song-rank",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "urlParams": {
+        "range": "1m"
+      },
+      "selector": "page",
+      "width": 1366,
+      "height": 768,
+      "size": 175975,
+      "sha256": "625b747d1d1b986aaf35ddbbdad0b8dbb417affbd02d612f203f0ff03d09f3bd"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-artist-rank.png",
+      "scene": "desktop-artist-rank",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "view": "artistRank"
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 151225,
+      "sha256": "c128931a6b3128870192643aa835aa5db6deee5da217b95c2ac698f230e2bc61"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-vtuber-rank.png",
+      "scene": "desktop-vtuber-rank",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 184959,
+      "sha256": "2b699f67a74ee699b9a4f19b81fbe90010eb0afefccad87eccf7e2f87169ed96"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-song-index.png",
+      "scene": "desktop-song-index",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "view": "songAz"
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 126466,
+      "sha256": "d373abbfff0dc38720e166f1ad868841dd2cb1c7ba152180104fc776a20d424c"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-range-7d.png",
+      "scene": "fixture-range-7d",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "range",
+        "range": "7d"
+      },
+      "selector": ".proof-range-fixture",
+      "width": 1440,
+      "height": 95,
+      "size": 15853,
+      "sha256": "53086305d44d91af48545a8cd415c02d2191f3571f81119add50668acd5f46f9"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-range-all.png",
+      "scene": "fixture-range-all",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "range",
+        "range": "all"
+      },
+      "selector": ".proof-range-fixture",
+      "width": 1440,
+      "height": 95,
+      "size": 15401,
+      "sha256": "f1468fe517a312c4ec155c168754e0e7a1c9624d7a69ca0375a1b6e935afc075"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-all-diff-explanation.png",
+      "scene": "fixture-diff-explanation",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "diff-explanation"
+      },
+      "selector": ".proof-diagnostic-fixture",
+      "width": 1240,
+      "height": 126,
+      "size": 17838,
+      "sha256": "417ddbab9de46ee21e30b8ec40215296f6220707e8a2165ab3ea728ad05685be"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-video-view.png",
+      "scene": "desktop-video-view",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "urlParams": {
+        "view": "videos"
+      },
+      "selector": "page",
+      "width": 1366,
+      "height": 768,
+      "size": 316427,
+      "sha256": "9c6069fc4600caa798523ac8ee7be243585c0b7d6a026b0b3d2acef438f143b6"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-summary-baseline.png",
+      "scene": "desktop-summary-baseline",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {},
+      "selector": "#summary",
+      "width": 1240,
+      "height": 50,
+      "size": 11221,
+      "sha256": "5479e783ee8906ffc9a89cc4313907275558c2afdbde4048a9733a7723a52311"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-query-panel.png",
+      "scene": "desktop-direct-query-fields",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 1440,
+      "height": 900,
+      "size": 207564,
+      "sha256": "da8d1b364d0edcb5490643f7c9f1da0b71debc40acbfa9753a616d28a3621d65"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-source-expanded.png",
+      "scene": "desktop-source-expanded",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {},
+      "selector": ".rank-row.is-expanded, .index-row.is-expanded",
+      "width": 1440,
+      "height": 900,
+      "size": 368115,
+      "sha256": "8f3319577649bd0b52272f83e31cfa55b41d22bb91897a759d36419277a03417"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-song-kana-romaji-merged.png",
+      "scene": "fixture-identity-merge",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "identity-merge"
+      },
+      "selector": ".proof-identity-fixture",
+      "width": 1240,
+      "height": 188,
+      "size": 24794,
+      "sha256": "b550e40bff135c383623ae316ea6441a019c8fe5f224b5d4df64d6b160040e58"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-source-inline-3.png",
+      "scene": "fixture-triple",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "triple"
+      },
+      "selector": ".proof-row",
+      "width": 1238,
+      "height": 101,
+      "size": 17976,
+      "sha256": "840fd6d17e3203a42e3e79720a2611eb4a924d357d265487e1450255dbfeab8a"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-partition-pagination.png",
+      "scene": "fixture-partition-pagination",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "partition-pagination"
+      },
+      "selector": ".proof-data-index-fixture",
+      "width": 1240,
+      "height": 126,
+      "size": 16009,
+      "sha256": "ad8adf577f5d0940ab7a2c41c67c5a35ca7eb122fa2bcb2115f1c46822295827"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-search-snapshot-index.png",
+      "scene": "fixture-search-snapshot-index",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "search-snapshot-index"
+      },
+      "selector": ".proof-data-index-fixture",
+      "width": 1240,
+      "height": 312,
+      "size": 43968,
+      "sha256": "749683761302e48fd6e4a2e4d9fde8e166a0a3ef1257e3149b115ae2d13f3f6d"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-pagination-middle.png",
+      "scene": "desktop-pagination-middle",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "page": 7
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 192751,
+      "sha256": "87af3fbd3b0e8d85ada5ee88b2a3685e6096bf01808014585033dfcb59fe4b50"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-request-pagination.png",
+      "scene": "desktop-request-pagination",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "range": "all",
+        "page": 2
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 197980,
+      "sha256": "78dc1e2ddf58a5a05be31a1b22685001d7adda628197eb592f057b08ce718724"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-update-failure-status.png",
+      "scene": "desktop-update-failure-status",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {},
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 208523,
+      "sha256": "777b3e2523fe6fafaa6f03130498ad9aa50a11467471616fd4c279fec70e42f1"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-source-long-time.png",
+      "scene": "fixture-longTime",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "longTime"
+      },
+      "selector": ".proof-row",
+      "width": 1238,
+      "height": 101,
+      "size": 13058,
+      "sha256": "d3102e941e3902bfe5068c1bf55bb35ceac94bf2385bc49b03ce803bc5984873"
+    },
+    {
+      "path": "docs/assets/screenshots/tablet-source-inline-3.png",
+      "scene": "fixture-triple",
+      "viewport": {
+        "width": 820,
+        "height": 900
+      },
+      "urlParams": {
+        "fixture": "triple"
+      },
+      "selector": ".proof-row",
+      "width": 796,
+      "height": 95,
+      "size": 18668,
+      "sha256": "b09f14bee6e6185b369a633f16a3c5c3f6f6b8623fcb1fa8a7f9dbea16abd824"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-song-rank.png",
+      "scene": "mobile-song-rank",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 102453,
+      "sha256": "62cf0bcd7aeb91adb0720ed6587702315f93400158cd62641ead2e31f07fad57"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-summary-baseline.png",
+      "scene": "mobile-summary-baseline",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": "#summary",
+      "width": 374,
+      "height": 57,
+      "size": 9649,
+      "sha256": "c40b4cae5fbb5a14a91e70ae472e4017a5860013430a14bc371f5619fa182a17"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-all-monotonic-summary.png",
+      "scene": "fixture-all-monotonic-summary",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "all-summary"
+      },
+      "selector": ".proof-all-summary-fixture",
+      "width": 390,
+      "height": 91,
+      "size": 13820,
+      "sha256": "1d09c016e7c76d7323ed5708f57a7087d9b395fd8612faf05b0e76888465dedb"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-trend-count-increase.png",
+      "scene": "fixture-trend-countIncrease",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "trend",
+        "case": "countIncrease"
+      },
+      "selector": ".proof-trend-fixture",
+      "width": 374,
+      "height": 70,
+      "size": 8334,
+      "sha256": "0d94de6a05782194b10ef959f64c22dc03b1bca3e9950441b66c5bbeb8d05ffd"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-trend-rank-only-down.png",
+      "scene": "fixture-trend-rankOnlyDown",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "trend",
+        "case": "rankOnlyDown"
+      },
+      "selector": ".proof-trend-fixture",
+      "width": 374,
+      "height": 70,
+      "size": 7316,
+      "sha256": "03d53a8d3f01b834f87461192288515fcec43b20d9ec96641cf4b9f3039fec23"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-trend-corrected-decrease.png",
+      "scene": "fixture-trend-correctedDecrease",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "trend",
+        "case": "correctedDecrease"
+      },
+      "selector": ".proof-trend-fixture",
+      "width": 374,
+      "height": 70,
+      "size": 7771,
+      "sha256": "f8beea089073eba2e89a51881fbddf4c6cc989dab8b040a8fbd118e0ed73043c"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-song-kana-romaji-merged.png",
+      "scene": "fixture-identity-merge",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "identity-merge"
+      },
+      "selector": ".proof-identity-fixture",
+      "width": 374,
+      "height": 206,
+      "size": 21874,
+      "sha256": "048f73d6f4db0bb0d31ea7bef32f772c2febf9bc3d174c621d7c79ca070752fc"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-video-diagnostic-result.png",
+      "scene": "fixture-video-diagnostic",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "video-diagnostic"
+      },
+      "selector": ".proof-diagnostic-fixture",
+      "width": 374,
+      "height": 158,
+      "size": 20444,
+      "sha256": "592046905f16d0a30b843d8ae2779ba461232377a94ae0abd8a0390019f99a2a"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-artist-rank.png",
+      "scene": "mobile-artist-rank",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "artistRank"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 101654,
+      "sha256": "9a9494d92396e39d4749dd8b801ced5fb1792ac1def3d10ea8bc1bbf89c8b56d"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-vtuber-rank.png",
+      "scene": "mobile-vtuber-rank",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 110797,
+      "sha256": "94591e7a4df74f637582b2728abedc5c3ca027ed3864b1086aca6500a4912a07"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-vtuber-rank-320.png",
+      "scene": "mobile-vtuber-rank-320",
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 320,
+      "height": 700,
+      "size": 77691,
+      "sha256": "50144e4ee9f5a9ba875d247f3993e5b83a95e934e4cc681d88b468d79f2307c8"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-song-index.png",
+      "scene": "mobile-song-index",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "songAz"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 92786,
+      "sha256": "6fb46148138ddcca31560815cdbcb9baabc1d50da25eb9a40fd6a69833a660bc"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-song-index-middle-page.png",
+      "scene": "mobile-song-index-middle-page",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "songAz",
+        "page": 85
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 94936,
+      "sha256": "066961f28d9817469a1ae96e102265ee4f0493a3353b54dabc5b34433f496e6d"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-song-index-last-page.png",
+      "scene": "mobile-song-index-last-page",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "songAz",
+        "page": 169
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 96141,
+      "sha256": "9104c3507eeac9b494bf7ff0016da88c0fe6ac0381060b1262694cc06f7cb3d7"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-video-view.png",
+      "scene": "mobile-video-view",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "videos"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 133489,
+      "sha256": "23bd43142d9cb9d340766865a9a49e8838f6ec78eb6e73299a1e990a1e93ac2d"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-video-expanded.png",
+      "scene": "mobile-video-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "videos"
+      },
+      "selector": ".video-card:has(.video-more[aria-expanded='true'])",
+      "width": 390,
+      "height": 844,
+      "size": 142968,
+      "sha256": "2b8b9a9dcd9272696c8c12e769b6aa008934f42222f1a6421624edaf40f6d5f0"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-video-expanded-bottom.png",
+      "scene": "mobile-video-expanded-bottom",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "videos"
+      },
+      "selector": ".video-card:has(.video-more[aria-expanded='true']) bottom",
+      "width": 390,
+      "height": 844,
+      "size": 142968,
+      "sha256": "2b8b9a9dcd9272696c8c12e769b6aa008934f42222f1a6421624edaf40f6d5f0"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-pagination-320.png",
+      "scene": "mobile-pagination-320",
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "urlParams": {
+        "page": 7
+      },
+      "selector": "page",
+      "width": 320,
+      "height": 700,
+      "size": 72684,
+      "sha256": "55c601386a39a51a4f45d9674b0f17a213bcb011c1578bbd982a5ddbbe9fd38c"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-bottom-nav-active.png",
+      "scene": "mobile-bottom-nav-active",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "videos"
+      },
+      "selector": "#mobileBottomNav",
+      "width": 390,
+      "height": 52,
+      "size": 7801,
+      "sha256": "4f1485fc180985ba46099e4cfd34e708542aeb4211e1ea02954a1da1a9ad19ed"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-active-query-strip.png",
+      "scene": "mobile-restrictive-filter-chips",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "q": "少女レイ",
+        "hideUnknown": 1,
+        "metric": "videos",
+        "minCount": 2
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 58398,
+      "sha256": "90069eb867246defe92395c7c1d5ad8a64f92680d2436c27b8e13bc7dcd7cc1a"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-toast-copy-setlist.png",
+      "scene": "mobile-toast-copy-setlist",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": "#toast",
+      "width": 158,
+      "height": 38,
+      "size": 3384,
+      "sha256": "e8b7e0e22a171f06589744dd382c142e6c05ee61671fa261da2c54fe9859db88"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-suggestions.png",
+      "scene": "mobile-direct-query-input",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 100907,
+      "sha256": "78c8161879cecb291bd27a8ff5adfd3acfa165beef6e810397eb1179bff0bb51"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-filter.png",
+      "scene": "mobile-direct-query-fields",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102453,
+      "sha256": "62cf0bcd7aeb91adb0720ed6587702315f93400158cd62641ead2e31f07fad57"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-history.png",
+      "scene": "mobile-direct-query-fields-compact",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102450,
+      "sha256": "370773d0d6ca7894ff902bd51defb1e9c1153288f78650ac972b7d72bc29d2e9"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-grid-alignment.png",
+      "scene": "mobile-direct-query-field-grid",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102450,
+      "sha256": "370773d0d6ca7894ff902bd51defb1e9c1153288f78650ac972b7d72bc29d2e9"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-empty-suggestions-compact.png",
+      "scene": "mobile-direct-query-empty",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102108,
+      "sha256": "96e3668b5377d03ba068401a1c1a9a7e7713cb5b414076c5af2f1a74e5902919"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-footer-alignment.png",
+      "scene": "mobile-direct-query-footer-free",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102453,
+      "sha256": "62cf0bcd7aeb91adb0720ed6587702315f93400158cd62641ead2e31f07fad57"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-query-history-alignment.png",
+      "scene": "mobile-direct-query-no-history",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".controls",
+      "width": 390,
+      "height": 844,
+      "size": 102453,
+      "sha256": "62cf0bcd7aeb91adb0720ed6587702315f93400158cd62641ead2e31f07fad57"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-page-request-loading.png",
+      "scene": "mobile-page-request-loading",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "page": 2
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 102633,
+      "sha256": "c934749a9cae3a77af3485346da68e9ccfe498e7b00d5f5e348928ed638a7088"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-filter-request-loading.png",
+      "scene": "mobile-filter-request-loading",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "q": "少女レイ"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 56330,
+      "sha256": "3db75bf693ad046a50c13dfa5f3b12886498ee29fec780e9de2e7d704ecb86ae"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-page-request-error.png",
+      "scene": "mobile-page-request-error",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "page": 2
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 102633,
+      "sha256": "c934749a9cae3a77af3485346da68e9ccfe498e7b00d5f5e348928ed638a7088"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-update-stale-reason.png",
+      "scene": "mobile-update-stale-reason",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 102972,
+      "sha256": "b0c814eba0efbb0322fb58d661409f5b10e8ca0558ed760e127ab0454a2877dc"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-summary-filtered.png",
+      "scene": "mobile-summary-filtered",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "q": "少女レイ"
+      },
+      "selector": "#summary",
+      "width": 374,
+      "height": 52,
+      "size": 10819,
+      "sha256": "5253f8b18dc64d19881d9f53dc320a1edeb3949ace8c0154c05837af2d32b9c4"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-controls-active.png",
+      "scene": "mobile-controls-active",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "q": "少女レイ"
+      },
+      "selector": ".controls",
+      "width": 390,
+      "height": 75,
+      "size": 11325,
+      "sha256": "58be4951e9000fa6e0f397da7d1bd9f6361fcc9e44026afbb598ef145ebc301c"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-expanded.png",
+      "scene": "mobile-source-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {},
+      "selector": ".rank-row.is-expanded, .index-row.is-expanded",
+      "width": 390,
+      "height": 844,
+      "size": 142817,
+      "sha256": "5b164d10707751f3f4a2cdcec95ac6cac86021dbb332028850f1b4b72fe5c072"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-inline-0.png",
+      "scene": "fixture-none",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "none"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 77,
+      "size": 6727,
+      "sha256": "8bf77aaabcc830e74abce0a03fac4e554305bc56beb18f0f01158c2523c626ca"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-inline-1.png",
+      "scene": "fixture-single",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "single"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 98,
+      "size": 10012,
+      "sha256": "8acc9feff3562c6c43563c4ccbe2e6e379a3cdd7a5eed9b150da9b4ca86ecf2b"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-inline-2.png",
+      "scene": "fixture-double",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "double"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 130,
+      "size": 13018,
+      "sha256": "fe5ec810bcb4d860bde8bfd4e3e9d872f54535af174615d3d074ca3a4f71bd2c"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-inline-3.png",
+      "scene": "fixture-triple",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "triple"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 134,
+      "size": 14585,
+      "sha256": "855e5f4db1cc035b42e1a95363419c6760fcbafcbdec606f20cc63709dbe3dc0"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-new-to-old.png",
+      "scene": "fixture-newToOld",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "newToOld"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 134,
+      "size": 14217,
+      "sha256": "73349be2fdc2a75a1a93e20260fd712bb65ed854af03e3ba1e64bbc8011886c1"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-more-than-3.png",
+      "scene": "mobile-source-more-than-3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "page": 1
+      },
+      "selector": ".rank-row source-more",
+      "width": 372,
+      "height": 135,
+      "size": 14877,
+      "sha256": "9caf3876a9f79d8dc300f69d35ecd9f20b4083ef18da2f870367982d92841138"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-more-than-3-expanded.png",
+      "scene": "mobile-source-more-than-3-expanded",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "page": 1
+      },
+      "selector": ".rank-row source-more",
+      "width": 390,
+      "height": 844,
+      "size": 142817,
+      "sha256": "5b164d10707751f3f4a2cdcec95ac6cac86021dbb332028850f1b4b72fe5c072"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-more-than-3-expanded-bottom.png",
+      "scene": "mobile-source-more-than-3-expanded-bottom",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "page": 1
+      },
+      "selector": ".rank-row source-more-bottom",
+      "width": 390,
+      "height": 844,
+      "size": 143904,
+      "sha256": "dbc01b0b403575e531da948901cd0e8e59219499c9ab88577f8274ba74ecbdc4"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-thumb-fallback.png",
+      "scene": "fixture-fallback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "fallback"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 98,
+      "size": 9675,
+      "sha256": "34c15a47c82d0d021f6d530f06b4fe8564416201a7665507f98480219ac42dec"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-long-channel.png",
+      "scene": "fixture-longChannel",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "longChannel"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 98,
+      "size": 12373,
+      "sha256": "721c67b7d7268ddc5d86bb7bd8b4c61f25b6fccac33c24ba35cb8fb6d5117f8a"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-long-time.png",
+      "scene": "fixture-longTime",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "longTime"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 98,
+      "size": 10672,
+      "sha256": "c7bce09e9d965e23eeced04b1fa9da0dc709d93a73ffb6afbc6830b7c5a8977a"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-source-extra-times.png",
+      "scene": "fixture-extraTimes",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "fixture": "extraTimes"
+      },
+      "selector": ".proof-row",
+      "width": 372,
+      "height": 122,
+      "size": 13434,
+      "sha256": "a3fa44bef9476a0cfb0b369729d5b5bfab98fede37d5cd8eea06a50cb9796150"
+    }
+  ]
+}

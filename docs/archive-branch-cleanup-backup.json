@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-12T15:53:52+08:00",
+  "sourceRepository": "Marica7731/daily-song-list-archive",
+  "destinationRepository": "Marica7731/daily-song-list",
+  "safetyRule": "Only branches proven ahead=0 versus archive/main are deletion candidates; main, independent-commit branches, and unknown comparisons remain untouched.",
+  "branches": [
+    {
+      "sha": "f1c9a2e8f2238165d7256cd1e1f3549730f685c0",
+      "name": "agent/source-backfill-selective-increments",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "220d3d25d9ae824f8d5f51c6d9f64d244837dda3",
+      "name": "agent/source-backfill-usable-artifacts-20260726",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "f9c75b104956fa2253351268cc107dee60acec8c",
+      "name": "codex/channel-hydration-audit-20260726",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "aa346c86ae8d475f87f5160088ecf4c38a3c628d",
+      "name": "codex/channel-hydration-ui-assets-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "6dbebf9837e61889218fca56a6fa20f073537e3d",
+      "name": "codex/channel-source-backfill-v2",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "c0984812fb0645adba675f07be08ad78ca53885c",
+      "name": "codex/cleanup-upsert-integrate-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+      "name": "codex/data-cleaning-publish-20260722",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "8ac7a0b4de2300a3a7f5fb8257ea24d0350f361b",
+      "name": "codex/data-cleaning-rules-20260722",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "32d05f8e2a4fc3ddaaa163f9ab807c61f15b67eb",
+      "name": "codex/db-api-runtime-v1",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "5cb8750a350cb8927eb8856c2a65b70430476e88",
+      "name": "codex/dbapi-channel-search-runtime",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "7034fe29c57d386746389d61a09411b241539506",
+      "name": "codex/dbapi-channel-song-fallback-20260722",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "0049dccca73203803ac19509560f5f5e9a338ad9",
+      "name": "codex/fix-rank-diff-snapshot-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "97b7775bc97c6abfec55ebe87ca551cf91fc64ab",
+      "name": "codex/global-singleton-audit-20260726",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "0fea4805ab8cde6c24de0be903b6db2532e87530",
+      "name": "codex/global-singleton-cleanup-20260726",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "149245d814899dffcbc7ebbff18fff4c09ebafd2",
+      "name": "codex/integrate-channel-hydration-audit-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "3cda603ce356c70167144d14712bdb127deaf079",
+      "name": "codex/integrate-latest-main-20260726",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "499f34585d77935770c7143118bab68295928128",
+      "name": "codex/integrate-vetted-sources-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "4a0a8f2f460ad992813caf8de6f4ae5812baf033",
+      "name": "codex/runtime-data-staging-20260723",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "dbd157feb141acaa89abbce6164650a01ecc07b6",
+      "name": "codex/source-backfill-20260720-v2",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "8244af691f5e5126082b3610e8487bcb8b4356fe",
+      "name": "codex/source-search-sql-hotfix",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "d7d1f757584afab2223fb36fb5522b4e0866c513",
+      "name": "codex/ui-h5-layout-hotfix-source",
+      "classification": "unknown-comparison"
+    },
+    {
+      "sha": "31e7da17502d9f97cdb8e939afe30972a6e9a933",
+      "name": "codex/ui-h5-layout-merge-20260722",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "7ca7adc19a45fa9fb0b4027c7e8237a5e6f4fcec",
+      "name": "codex/ui-h5-static-hotfix-20260722",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "86480f28fea677b9b7e7576531f5d1d85525e0ab",
+      "name": "codex/ui-song-count-hotfix-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "5124e2452d1062aa47b176584725510ec0d2b2bb",
+      "name": "codex/ui-song-count-static-asset-20260726",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "b75ce3f40b8b48b6f79065a8d0789c5c0e7b7629",
+      "name": "codex/ui-vtuber-expand-layout-20260722",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "8b24ffae6591fa78bd1901e529710bdb6d2e7098",
+      "name": "data-artist-clean-20260724",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "1c421f2e01d109481428f4473dd5291a23509402",
+      "name": "data/vsinger-enrichment-v1",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "d59c0b42a6df8583e0bffd4501c7e98100607610",
+      "name": "data/vsinger-mcp-adapter-v1",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "d25c79f44127aeebd7b148a846e5ac81f880daf9",
+      "name": "integration/perf-vsinger-rollup-v1",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "13795f785f47bead241adc95aa780594a794e3e4",
+      "name": "main",
+      "classification": "retain-main"
+    },
+    {
+      "sha": "d0feb2db813f3cef0c2dbc220e32213004fcb7c2",
+      "name": "ops/update-freshness-v3",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "96ccbe9ba2700a9ec3c43a608bfdceebe4f9fa1e",
+      "name": "perf/request-priority-v2",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "ce1e96cd1a54283d14df7d9f1c0f3355dcd4f8d8",
+      "name": "perf/source-entity-shards-v3",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "7f856128fe6dbf8e96b00e31024933eb1e415028",
+      "name": "qa/perf-redteam-v1",
+      "classification": "delete-candidate-ahead-0"
+    },
+    {
+      "sha": "ad3a7ea5fb701f9a1d404ccd6b6f0f5b7c4771be",
+      "name": "ui-card-filter-20260724",
+      "classification": "retain-independent-commits"
+    },
+    {
+      "sha": "87e227e6a9a5d8218ca6b1b40c2826f440448361",
+      "name": "ui/loading-experience-v3",
+      "classification": "retain-independent-commits"
+    }
+  ],
+  "counts": {
+    "totalBranches": 37,
+    "main": 1,
+    "deleteCandidates": 17,
+    "independentCommits": 18,
+    "unknown": 1
+  }
+}

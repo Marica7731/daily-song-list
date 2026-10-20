@@ -1,0 +1,77 @@
+
+name: Import main without history
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: import-main-no-history
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout destination
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Remove source gitlink and Pages CNAME
+        run: |
+          if git ls-files --error-unmatch source >/dev/null 2>&1; then
+            git rm --cached source
+          fi
+          rm -rf source
+          git rm --cached CNAME >/dev/null 2>&1 || true
+          rm -f CNAME
+
+      - name: Sparse checkout source main
+        run: |
+          rm -rf /tmp/source
+          git clone --depth 1 --single-branch --branch main --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list-archive.git /tmp/source
+          cd /tmp/source
+          git sparse-checkout set .heartbeat .github artifacts assets config data/static data/external deploy docs scripts server test tests
+          test -f index.html
+          test -f data/static/v1/meta.json
+
+      - name: Keep only website maintenance workflows
+        run: |
+          cd /tmp/source
+          keep="check-code.yml static-update.yml static-repair-dropped.yml static-freshness-watchdog.yml static-recover-history.yml heartbeat-dirty-data.yml deploy-pages.yml"
+          for name in $keep; do
+            test -f ".github/workflows/$name"
+          done
+          find .github/workflows -maxdepth 1 -type f ! -name 'check-code.yml' ! -name 'static-update.yml' ! -name 'static-repair-dropped.yml' ! -name 'static-freshness-watchdog.yml' ! -name 'static-recover-history.yml' ! -name 'heartbeat-dirty-data.yml' ! -name 'deploy-pages.yml' -delete
+          test -f .github/dirty-heartbeat.trigger
+          find .github -mindepth 1 -maxdepth 1 ! -name workflows ! -name dirty-heartbeat.trigger -exec rm -rf -- {} +
+          echo "WORKFLOWS=$(find .github/workflows -maxdepth 1 -type f | wc -l)"
+
+      - name: Merge source into destination
+        run: |
+          rsync -a --exclude=.git --exclude=CNAME /tmp/source/ ./
+          rm -f CNAME
+          test -f index.html
+          test -f data/static/v1/meta.json
+          test -f .github/workflows/check-code.yml
+          test -f .github/workflows/static-update.yml
+          test -f .github/workflows/static-freshness-watchdog.yml
+          test -f .github/dirty-heartbeat.trigger
+          echo "DEST_FILES=$(find . -type f -not -path ./.git/\* | wc -l)"
+          echo "DEST_BYTES=$(du -sb --exclude=.git . | cut -f1)"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Import website maintenance workflows"
+            git push
+          fi
