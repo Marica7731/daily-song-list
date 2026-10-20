@@ -373,6 +373,7 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   assert.match(workflow, /gh workflow run static-update\.yml --ref main -f video_limit="\$VIDEO_LIMIT"/);
   assert.match(workflow, /-f priority_video_ids="\$PRIORITY_VIDEO_IDS"/);
   assert.match(workflow, /Hand off dropped videos to the repair workflow/);
+  assert.match(workflow, /- "config\/artist-catalogs\/\*\*"/);
   assert.match(workflow, /STATIC_UPDATE_HANDOFF dropped=\$dropped/);
   assert.match(workflow, /gh workflow run static-repair-dropped\.yml --ref main/);
   assert.match(workflow, /if \(\( pending == 0 \)\); then/);
@@ -401,6 +402,7 @@ test("derived static output is rebuilt for Pages instead of committed", () => {
   assert.match(deploy, /npm run static:validate/);
   assert.match(deploy, /scripts/);
   assert.match(deploy, /data\/static/);
+  assert.match(deploy, /- "config\/artist-catalogs\/\*\*"/);
 
   const pkg = JSON.parse(fs.readFileSync(path.resolve("package.json"), "utf8"));
   assert.equal(pkg.scripts["static:rebuild"], "node scripts/static/rebuild-only.js");
