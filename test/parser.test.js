@@ -265,6 +265,13 @@ test("normalizes reviewed artist metadata suffixes without dropping songs", () =
   assert.equal(cleanArtistMetadata("いきものがかり (2:37:33) … ヒント8"), "いきものがかり");
   assert.equal(cleanArtistMetadata("修二と彰 (2005年 / 平成17年)"), "修二と彰");
   assert.equal(cleanArtistMetadata("2005年 / 平成17年"), "");
+  assert.equal(cleanArtistMetadata("雨宮天 (2017年1月)"), "雨宮天");
+  assert.equal(cleanArtistMetadata("ワルキューレ 2017/01"), "ワルキューレ");
+  assert.equal(cleanArtistMetadata("有機酸(神山羊) feat.初音ミク/2017"), "有機酸(神山羊) feat.初音ミク");
+  assert.equal(cleanArtistMetadata("UNDER17(桃井はるこ) 様"), "UNDER17(桃井はるこ)");
+  assert.equal(cleanArtistMetadata("AKINO 96.178"), "AKINO");
+  assert.equal(cleanArtistMetadata("tuki.(17)"), "tuki.(17)");
+  assert.equal(cleanArtistMetadata("170828-29"), "170828-29");
   assert.deepEqual(normalizeParsedSong({ title: "CHE.R.RY", artist: "Yui (同接200人突破おめでとうございます)" }), {
     title: "CHE.R.RY",
     artist: "Yui",

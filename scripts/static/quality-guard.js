@@ -635,6 +635,7 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
   }
 
   let cleaned = artist
+    .replace(/\s+様\s*$/u, "")
     .replace(/【[^】]{1,160}】\s*(?=[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)])/u, "")
     .replace(/\s*[（(]\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}\s*[）)].*$/u, "")
     .replace(/\s*※\s*(?:19|20)\d{2}[./-]\d{1,2}[./-]\d{1,2}.*$/u, "")
@@ -650,6 +651,22 @@ function normalizeReleaseMetadataArtist(song, video = {}) {
     .replace(/\s*\(cover\s+.+$/iu, "")
     .replace(/\s+[/／]\s*$/u, "")
     .trim();
+
+  if (cleaned === artist) {
+    const sourceProven = artist
+      .replace(/\s*[\(（]\s*(?:19|20)\d{2}\s*年\s*\d{1,2}\s*月\s*[\)）]\s*$/u, "")
+      .replace(/\s+(?:19|20)\d{2}\s*[\/.-]\s*\d{1,2}\s*$/u, "")
+      .replace(/\s*[\/／]\s*(?:19|20)\d{2}\s*$/u, "")
+      .replace(/\s+\d{1,3}\.\d{1,3}\s*$/u, "")
+      .trim();
+    if (sourceProven && sourceProven !== artist) {
+      const compactRaw = raw.replace(/\s+/gu, " ");
+      const compactCredit = artist.replace(/\s+/gu, " ");
+      const creditIndex = compactRaw.indexOf(compactCredit);
+      const prefix = creditIndex >= 0 ? compactRaw.slice(Math.max(0, creditIndex - 4), creditIndex) : "";
+      if (creditIndex >= 0 && /[\/／]\s*$/u.test(prefix)) cleaned = sourceProven;
+    }
+  }
 
   {
     const yearSuffix = cleaned.match(/^(.+?)\s*[（(]\s*(?:19|20)\d{2}\s*[）)]$/u);

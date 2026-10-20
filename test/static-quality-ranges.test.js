@@ -1076,6 +1076,17 @@ test("trailing release years are removed only from slash-delimited artist credit
     })).artist,
     "Project 2020",
   );
+  for (const [artist, expected] of [
+    ["雨宮天 (2017年1月)", "雨宮天"],
+    ["ワルキューレ 2017/01", "ワルキューレ"],
+    ["有機酸(神山羊) feat.初音ミク/2017", "有機酸(神山羊) feat.初音ミク"],
+    ["UNDER17(桃井はるこ) 様", "UNDER17(桃井はるこ)"],
+    ["AKINO 96.178", "AKINO"],
+    ["tuki.(17)", "tuki.(17)"],
+    ["170828-29", "170828-29"],
+  ]) {
+    assert.equal(normalizeReleaseMetadataArtist(song("fixture", artist, { raw: `00:10 fixture / ${artist}` })).artist, expected);
+  }
 });
 
 test("full-width four-column work metadata restores song and credited artist", () => {
