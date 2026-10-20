@@ -235,24 +235,35 @@ jobs:
           git commit -m "data: heartbeat dirty batch"
           # Rebuild-only output is published from the job, never committed by this workflow.
           git restore --worktree -- data/static/v1
-          for attempt in 1 2 3; do
-            git fetch --depth=2 origin main
-            git rebase origin/main
-            mapfile -t paths < <(git diff --name-only origin/main HEAD)
-            for path in "${paths[@]}"; do
-              case "$path" in
-                config/curation-overrides.json|data/review/heartbeat-state.json|data/review/heartbeat-summary.json) ;;
-                *)
-                  echo "HEARTBEAT_REBASE_UNEXPECTED_PATH path=$path" >&2
-                  exit 76 ;;
-              esac
+          index_file="$(mktemp)"
+          trap 'rm -f "$index_file"' EXIT
+          allowed_paths='config/curation-overrides.json|data/review/heartbeat-state.json|data/review/heartbeat-summary.json'
+          for attempt in 1 2 3 4 5; do
+            git fetch --depth=1 origin main
+            base="$(git rev-parse FETCH_HEAD)"
+            GIT_INDEX_FILE="$index_file" git read-tree "$base"
+            for path in config/curation-overrides.json data/review/heartbeat-state.json data/review/heartbeat-summary.json; do
+              mode="$(git ls-files -s -- "$path" | awk 'NR == 1 { print $1 }')"
+              blob="$(git hash-object -w "$path")"
+              GIT_INDEX_FILE="$index_file" git update-index --add --cacheinfo "$mode,$blob,$path"
             done
-            if git push origin HEAD:main; then
+            tree="$(GIT_INDEX_FILE="$index_file" git write-tree)"
+            commit="$(git commit-tree "$tree" -p "$base" -m "data: heartbeat dirty batch")"
+            mapfile -t paths < <(git diff --name-only "$base" "$commit")
+            for path in "${paths[@]}"; do
+              if [[ ! "$path" =~ ^($allowed_paths)$ ]]; then
+                echo "HEARTBEAT_TRANSPLANT_UNEXPECTED_PATH path=$path" >&2
+                exit 76
+              fi
+            done
+            if git push origin "$commit:main"; then
               echo "updated=true" >> "$GITHUB_OUTPUT"
-              echo "HEARTBEAT_PUSHED commit=$(git rev-parse HEAD) attempt=$attempt"
+              echo "commit=$commit" >> "$GITHUB_OUTPUT"
+              echo "HEARTBEAT_PUSHED commit=$commit attempt=$attempt"
               exit 0
             fi
             echo "HEARTBEAT_PUSH_RACE retry=$attempt"
+            sleep $((attempt * 3))
           done
           echo "HEARTBEAT_PUSH_RACE_EXHAUSTED" >&2
           exit 77
