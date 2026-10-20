@@ -1,14 +1,17 @@
 {
-  "generatedAt": "2026-10-20T19:05:08.941Z",
+  "generatedAt": "2026-10-20T19:12:10.247Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 19067,
-  "inputOccurrences": 220560,
-  "visibleVideos": 16516,
-  "visibleOccurrences": 217765,
+  "inputVideos": 19070,
+  "inputOccurrences": 220576,
+  "visibleVideos": 16519,
+  "visibleOccurrences": 217768,
   "quarantinedOccurrences": 2273,
   "quarantinedVideos": 1529,
   "deduplicatedOccurrences": 522,
+  "artistCatalogArchivedVideos": 0,
+  "artistCatalogNormalizedOccurrences": 55,
+  "artistCatalogArchivedOccurrences": 13,
   "normalizedArtistOccurrences": 444,
   "normalizedReleaseMetadataOccurrences": 1105,
   "repairedDateCreditOccurrences": 0,
@@ -29,6 +32,7 @@
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 27,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
+    "outside_official_release_catalog": 13,
     "reviewed_bad_description_source": 194,
     "dated_future_stream_announcement": 7,
     "unrelated_talk_stream_listing": 1,
@@ -551,7 +555,8 @@
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reviewed_source_activity_chapter": 1
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-08-22": {
       "quarantinedOccurrences": 5,
@@ -625,7 +630,8 @@
         "reviewed_source_activity_chapter": 21,
         "reviewed_bad_description_source": 1,
         "prayer_broadcast_timeline": 3
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-08-29": {
       "quarantinedOccurrences": 29,
@@ -638,7 +644,8 @@
         "unrelated_talk_show_listing": 1,
         "prayer_broadcast_timeline": 1,
         "reviewed_bad_description_source": 1
-      }
+      },
+      "artistCatalogArchivedOccurrences": 2
     },
     "2026-08-30": {
       "quarantinedOccurrences": 47,
@@ -742,7 +749,7 @@
     },
     "2026-09-07": {
       "quarantinedOccurrences": 18,
-      "deduplicatedOccurrences": 0,
+      "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 7,
         "reviewed_bad_description_source": 3,
@@ -895,7 +902,7 @@
     },
     "2026-09-20": {
       "quarantinedOccurrences": 78,
-      "deduplicatedOccurrences": 50,
+      "deduplicatedOccurrences": 49,
       "byReason": {
         "prayer_broadcast_timeline": 44,
         "reviewed_source_activity_chapter": 14,
@@ -906,7 +913,8 @@
         "reused_description_across_unrelated_channels": 1,
         "unrelated_livestream_listing": 2,
         "unrelated_talk_show_listing": 2
-      }
+      },
+      "artistCatalogArchivedOccurrences": 2
     },
     "2026-09-21": {
       "quarantinedOccurrences": 46,
@@ -948,7 +956,8 @@
         "reviewed_non_song_chapter_in_numbered_setlist": 4,
         "reviewed_bad_description_source": 3,
         "dated_stream_challenge_result": 1
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-09-25": {
       "quarantinedOccurrences": 121,
@@ -997,7 +1006,8 @@
         "reviewed_source_activity_chapter": 2,
         "reviewed_bad_description_source": 5,
         "confirmed_chat_section": 2
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-09-29": {
       "quarantinedOccurrences": 40,
@@ -1099,7 +1109,8 @@
       "byReason": {
         "reused_description_across_unrelated_channels": 5,
         "prayer_broadcast_timeline": 4
-      }
+      },
+      "artistCatalogArchivedOccurrences": 2
     },
     "2026-10-10": {
       "quarantinedOccurrences": 4,
@@ -1114,7 +1125,8 @@
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 4
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-10-12": {
       "quarantinedOccurrences": 3,
@@ -1129,7 +1141,8 @@
       "deduplicatedOccurrences": 0,
       "byReason": {
         "date_split_as_song_and_artist": 1
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-10-15": {
       "quarantinedOccurrences": 0,
@@ -1157,7 +1170,8 @@
         "date_split_as_song_and_artist": 1,
         "reused_description_across_unrelated_channels": 3,
         "unrelated_livestream_listing": 1
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2026-10-19": {
       "quarantinedOccurrences": 1,
@@ -1472,6 +1486,11 @@
       "quarantinedOccurrences": 40,
       "deduplicatedOccurrences": 0
     },
+    "mlnxXtbeIYg": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "tO80Ag3elBo": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -1744,6 +1763,11 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "xv4UTA8uOUM": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "dJfNcY24GsY": {
       "quarantinedOccurrences": 13,
       "deduplicatedOccurrences": 0
@@ -1780,9 +1804,19 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "MWX9vWY1Gno": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "ovvO6c5HrEc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
+    },
+    "wffGeQ83T1w": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
     },
     "e4b-oKzeWRU": {
       "quarantinedOccurrences": 3,
@@ -2823,6 +2857,10 @@
     "Wzmala20iik": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
+    },
+    "Jc1tXD64oqk": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 1
     },
     "GSNqrU-QRzI": {
       "quarantinedOccurrences": 1,
@@ -4850,7 +4888,8 @@
     },
     "3pWJ041aDSM": {
       "quarantinedOccurrences": 0,
-      "deduplicatedOccurrences": 15
+      "deduplicatedOccurrences": 14,
+      "artistCatalogArchivedOccurrences": 2
     },
     "3TSj6a8_gM0": {
       "quarantinedOccurrences": 1,
@@ -5659,6 +5698,11 @@
     "kMIAE2DrCus": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
+    },
+    "q6Uh1OlhuCg": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
     },
     "8qmONb90k-k": {
       "quarantinedOccurrences": 1,
@@ -7108,6 +7152,11 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "hQHmwVV5Hgc": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "LlSNHF3b9Nk": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -8232,6 +8281,16 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "WMD7xBEZme0": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
+    "fYrtORHW2HM": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "2uDdU6I4LTY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -8272,6 +8331,11 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "8ErbJBwO5PU": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "o4u5A7lVzIo": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -8299,6 +8363,11 @@
     "9mKMJb1SWzc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
+    },
+    "VneGnbyK5Us": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
     },
     "VUXXbzeaJ8g": {
       "quarantinedOccurrences": 1,
@@ -8351,6 +8420,11 @@
     "unUX-09fib4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
+    },
+    "zXzXYXcYASE": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
     },
     "imMegvABpgM": {
       "quarantinedOccurrences": 1,
@@ -10685,5 +10759,20 @@
       "artist": "未記載",
       "raw": "49:50　8年前"
     }
-  ]
+  ],
+  "artistCatalogGate": {
+    "artistCount": 1,
+    "normalizedOccurrences": 55,
+    "archivedOccurrences": 13,
+    "artists": [
+      {
+        "artistId": "kasamura-tota",
+        "officialName": "傘村トータ",
+        "maxUniqueTitles": 65,
+        "publishedUniqueTitleCount": 27,
+        "archivedOccurrences": 13,
+        "archivedUniqueTitleCount": 9
+      }
+    ]
+  }
 }
