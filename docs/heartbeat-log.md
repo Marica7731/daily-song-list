@@ -1,6 +1,18 @@
 
 # Heartbeat log
 
+## 2026-10-20 23:58 +08:00
+
+- Controlled orphan reset verified: GitHub repository size fell from `233746 KB` to `102493 KB` (`131253 KB`, about `128.2 MiB` or `56%`), with old history unreachable. Capacity is now about `0.10 GiB` and remained flat through the publication cycle.
+- Dirty-data publication was repaired end to end. Shallow-checkout `rebase` was replaced by a latest-tree `commit-tree` transplant that permits only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; Check code run `39448151142` and the follow-up publication test both passed.
+- Trigger `3acdedba5e9` selected `17` confirmed-noise records (`1` current, `16` history); all immutable raw day shards stayed unchanged. Data commit `74b4be8d510` touched exactly those three whitelisted files, and curation overrides now contain `327` exact selectors.
+- The raw-line filter now reparses immutable song lines instead of trusting already-corrupted published fields. Fixtures retain real songs such as `17 / 椎名林檎`, `〜 🎸僕が僕であるために`, `_那プラス / みきとP`, `Hello,Again`, and `青い栞`, while explicit schedule/promotion lines are removed.
+- Pages deployment run `39452197869` completed successfully on data commit `74b4be8d510`. The dirty run's verification initially reported a false SHA failure because it compared against the trigger checkout's old `HEAD`; fix `958eca62ed4` now uses the commit output, and Check code run `39452833357` is green.
+- Published metadata: `generatedAt=2026-10-20T15:29:52.095Z`, videos `16445`, occurrences `216798`, pending `2870`, quarantine `2269`; all-range songs `56643` in `1133` pages. Direct GitHub Pages origin redirects to the custom domain, whose probe was unavailable from this environment (`521/525`), so verification used the successful Pages deployment SHA plus the exact main-tree snapshot.
+- Repair backlog is non-terminal: queue `2870`, no-song retry pool `14456`, processed `30453`, abandoned `0`, unreadable shards `0`; repair run `39448524242` is in its bounded no-new-publication backoff rather than retired.
+- Archive audit: `daily-song-list-archive` API returns `200` but its Actions page remains unavailable/disabled to the public probe; `daily-song-list-archive-overquota` returns `404`. Overquota must remain absent.
+- Verification: `node --test test/heartbeat-dirty-batch.test.mjs` `6/6`, workflow YAML parse green, `git diff --check` clean. All commands bounded; no VPS, SSH, self-hosted runner, full clone, or history download.
+
 ## 2026-10-20 21:40 +08:00
 
 - Dirty-data heartbeat batch #51 executed from trigger `61ea08df858`: `25/all/confirmed_noise,parser_corruption`, selected `25` (`1` current + `24` history; all `confirmed_noise`), `rawHistoryTouched=false`; Check code #95 succeeded and the batch published data commit `b139c4154dd`.
