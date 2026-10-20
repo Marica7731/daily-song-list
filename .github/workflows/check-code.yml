@@ -23,6 +23,7 @@ on:
       - "assets/ranking-utils.js"
       - "config/**"
       - "test/static-github-pipeline.test.mjs"
+      - "test/artist-catalog.test.mjs"
       - "test/yorushika-catalog.test.mjs"
       - "test/heartbeat-dirty-batch.test.mjs"
       - "test/static-quality-ranges.test.js"
@@ -52,6 +53,7 @@ on:
       - "assets/ranking-utils.js"
       - "config/**"
       - "test/static-github-pipeline.test.mjs"
+      - "test/artist-catalog.test.mjs"
       - "test/yorushika-catalog.test.mjs"
       - "test/heartbeat-dirty-batch.test.mjs"
       - "test/parser.test.js"
@@ -116,6 +118,7 @@ jobs:
           node --check scripts/song-utils.js
           node --check scripts/static/yorushika-catalog.js
           node --check scripts/static/quality-guard.js
+          node --check scripts/static/artist-catalog.js
           node --check scripts/static/quality-review.js
           node --check scripts/static/recover-history.js
           node --check scripts/static/repair-dropped.js
@@ -127,6 +130,7 @@ jobs:
           node --check assets/static-search-utils.js
           node --check assets/static-app.js
           node --test test/static-github-pipeline.test.mjs test/yorushika-catalog.test.mjs test/static-quality-ranges.test.js test/heartbeat-dirty-batch.test.mjs test/parser.test.js
+          node --test test/static-github-pipeline.test.mjs test/artist-catalog.test.mjs test/yorushika-catalog.test.mjs test/static-quality-ranges.test.js test/heartbeat-dirty-batch.test.mjs test/parser.test.js
 
       - name: Fixture end-to-end generation
         env:

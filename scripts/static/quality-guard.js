@@ -1,5 +1,7 @@
 "use strict";
 
+const { analyzeArtistCatalogSong, loadArtistCatalogGate } = require("./artist-catalog");
+
 // Publication-time quality layer for the GitHub Pages static pipeline.
 // Keep original day shards untouched: false positives can be restored without re-scraping.
 const MIN_COLLISION_VIDEOS = 5;
@@ -1085,6 +1087,68 @@ function repairKnownSourceCredit(song) {
   return repaired ? { ...song, title: repaired[0], artist: repaired[1] } : song;
 }
 
+function createArtistCatalogArchive() {
+  const gate = loadArtistCatalogGate();
+  return new Map(gate.catalogs.map((catalog) => [catalog.id, {
+    artistId: catalog.id,
+    officialName: catalog.officialName,
+    catalogSource: catalog.catalogSource,
+    catalogRetrievedAt: catalog.catalogRetrievedAt,
+    maxUniqueTitles: catalog.maxUniqueTitles,
+    matchedOccurrences: 0,
+    normalizedOccurrences: 0,
+    archivedOccurrences: 0,
+    publishedTitles: new Set(),
+    archivedTitles: new Set(),
+    occurrences: [],
+  }]));
+}
+
+function recordArtistCatalogMatch(archives, analysis, video, originalSong) {
+  const archive = archives.get(analysis.catalog.id);
+  if (!archive) throw new Error(`missing artist catalog archive: ${analysis.catalog.id}`);
+  archive.matchedOccurrences += 1;
+  if (analysis.changed) archive.normalizedOccurrences += 1;
+  if (!analysis.archived) {
+    archive.publishedTitles.add(analysis.officialTitle);
+    return;
+  }
+  archive.archivedOccurrences += 1;
+  archive.archivedTitles.add(String(originalSong.title || "").trim());
+  archive.occurrences.push({
+    videoId: video.videoId || "",
+    videoTitle: video.title || "",
+    channelId: video.channelId || "",
+    channelName: video.channelName || "",
+    publishedAt: video.publishedAt || "",
+    occurrenceId: originalSong.occurrenceId || "",
+    sourceId: originalSong.sourceId || "",
+    sourceHash: originalSong.sourceHash || "",
+    time: originalSong.time || "",
+    seconds: originalSong.seconds ?? null,
+    title: originalSong.title || "",
+    artist: originalSong.artist || "",
+    raw: originalSong.raw || "",
+    reason: analysis.reason,
+  });
+}
+
+function finalizeArtistCatalogArchive(archives, generatedAt) {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    status: "AUTO_ARCHIVED_NOT_PUBLISHED",
+    policy: "derived artist release allowlist; immutable days/* and state.json remain authoritative",
+    artists: [...archives.values()].map((archive) => ({
+      ...archive,
+      publishedTitles: [...archive.publishedTitles].sort((left, right) => left.localeCompare(right, "ja")),
+      publishedUniqueTitleCount: archive.publishedTitles.size,
+      archivedTitles: [...archive.archivedTitles].sort((left, right) => left.localeCompare(right, "ja")),
+      archivedUniqueTitleCount: archive.archivedTitles.size,
+    })),
+  };
+}
+
 function occurrenceIdentity(song) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
@@ -1097,6 +1161,7 @@ function occurrenceIdentity(song) {
 
 function cleanStaticVideos(videos) {
   const collisions = repeatedDescriptionSources(videos);
+  const artistArchives = createArtistCatalogArchive();
   const counters = {
     inputVideos: videos.length,
     inputOccurrences: 0,
@@ -1105,6 +1170,9 @@ function cleanStaticVideos(videos) {
     quarantinedOccurrences: 0,
     quarantinedVideos: 0,
     deduplicatedOccurrences: 0,
+    artistCatalogArchivedVideos: 0,
+    artistCatalogNormalizedOccurrences: 0,
+    artistCatalogArchivedOccurrences: 0,
     normalizedArtistOccurrences: 0,
     normalizedReleaseMetadataOccurrences: 0,
     repairedDateCreditOccurrences: 0,
@@ -1207,6 +1275,42 @@ function cleanStaticVideos(videos) {
         song = normalized;
       }
 
+      const artistCatalog = analyzeArtistCatalogSong(song);
+      if (artistCatalog.matched) {
+        recordArtistCatalogMatch(artistArchives, artistCatalog, video, originalSong);
+        if (artistCatalog.changed) counters.artistCatalogNormalizedOccurrences += 1;
+        if (artistCatalog.archived) {
+          counters.artistCatalogArchivedOccurrences += 1;
+          byVideo[video.videoId] ||= {
+            quarantinedOccurrences: 0,
+            deduplicatedOccurrences: 0,
+            artistCatalogArchivedOccurrences: 0,
+          };
+          byVideo[video.videoId].artistCatalogArchivedOccurrences =
+            Number(byVideo[video.videoId].artistCatalogArchivedOccurrences || 0) + 1;
+          byDay[day] ||= { quarantinedOccurrences: 0, deduplicatedOccurrences: 0, byReason: {} };
+          byDay[day].artistCatalogArchivedOccurrences =
+            Number(byDay[day].artistCatalogArchivedOccurrences || 0) + 1;
+          counters.byReason[artistCatalog.reason] = (counters.byReason[artistCatalog.reason] || 0) + 1;
+          if (examples.length < 80) {
+            examples.push({
+              reason: artistCatalog.reason,
+              artistCatalogId: artistCatalog.catalog.id,
+              videoId: video.videoId,
+              channelName: video.channelName || "",
+              occurrenceId: originalSong.occurrenceId || "",
+              sourceId: originalSong.sourceId || "",
+              sourceHash: originalSong.sourceHash || "",
+              title: originalSong.title || "",
+              artist: originalSong.artist || "",
+              raw: String(originalSong.raw || "").slice(0, 200),
+            });
+          }
+          continue;
+        }
+        song = artistCatalog.song;
+      }
+
       const identity = occurrenceIdentity(song);
       if (identity && seen.has(identity)) {
         counters.deduplicatedOccurrences += 1;
@@ -1228,7 +1332,16 @@ function cleanStaticVideos(videos) {
     }
 
     if (songs.length) counters.visibleVideos += 1;
-    else if ((video.songs || []).length) counters.quarantinedVideos += 1;
+    else if ((video.songs || []).length) {
+      const counts = byVideo[video.videoId] || {};
+      if (Number(counts.artistCatalogArchivedOccurrences || 0) &&
+          !Number(counts.quarantinedOccurrences || 0) &&
+          !Number(counts.deduplicatedOccurrences || 0)) {
+        counters.artistCatalogArchivedVideos += 1;
+      } else {
+        counters.quarantinedVideos += 1;
+      }
+    }
     counters.visibleOccurrences += songs.length;
     return { ...video, songs };
   }).filter((video) => video.songs.length);
@@ -1236,7 +1349,8 @@ function cleanStaticVideos(videos) {
   if (counters.inputOccurrences && counters.quarantinedOccurrences / counters.inputOccurrences > 0.1) {
     throw new Error("static quality guard quarantined over 10% of all occurrences; manual review required before publishing");
   }
-  if (counters.visibleOccurrences + counters.quarantinedOccurrences + counters.deduplicatedOccurrences !== counters.inputOccurrences) {
+  if (counters.visibleOccurrences + counters.quarantinedOccurrences +
+      counters.artistCatalogArchivedOccurrences + counters.deduplicatedOccurrences !== counters.inputOccurrences) {
     throw new Error("static quality guard occurrence accounting mismatch");
   }
 
@@ -1255,8 +1369,27 @@ function cleanStaticVideos(videos) {
     repairedKnownSourceCreditExamples,
     duplicateExamples,
     examples,
+    artistCatalogGate: {
+      artistCount: artistArchives.size,
+      normalizedOccurrences: counters.artistCatalogNormalizedOccurrences,
+      archivedOccurrences: counters.artistCatalogArchivedOccurrences,
+      artists: [...artistArchives.values()].map((archive) => ({
+        artistId: archive.artistId,
+        officialName: archive.officialName,
+        maxUniqueTitles: archive.maxUniqueTitles,
+        publishedUniqueTitleCount: archive.publishedTitles.size,
+        archivedOccurrences: archive.archivedOccurrences,
+        archivedUniqueTitleCount: archive.archivedTitles.size,
+      })),
+    },
   };
-  return { videos: cleaned, audit };
+  for (const archive of artistArchives.values()) {
+    if (archive.publishedTitles.size > archive.maxUniqueTitles) {
+      throw new Error(`${archive.officialName} publishes more unique titles than its official catalog`);
+    }
+  }
+  const artistArchive = finalizeArtistCatalogArchive(artistArchives, new Date().toISOString());
+  return { videos: cleaned, audit, artistArchive };
 }
 
 module.exports = {

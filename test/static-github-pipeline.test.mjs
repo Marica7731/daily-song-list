@@ -159,6 +159,7 @@ test("static pipeline emits resumable today/3d/7d/30d/all shards and explicit ga
     pendingVideoCount: 1,
     quarantinedOccurrences: 1,
     deduplicatedOccurrences: 0,
+    artistCatalogArchivedOccurrences: 0,
   });
   assert.equal(meta.ranges["3d"].stats.pendingVideoCount, 1);
   assert.equal(meta.ranges["7d"].stats.pendingVideoCount, 1);
@@ -195,6 +196,9 @@ test("static pipeline emits resumable today/3d/7d/30d/all shards and explicit ga
   assert.equal(searchSong.rangeMetrics.today.occurrenceCount, 10);
   assert.equal(searchSong.rangeMetrics["3d"].videoCount, 1);
   assert.equal(JSON.parse(fs.readFileSync(path.join(dataRoot, "quality-audit.json"))).visibleOccurrences, 10);
+  const artistArchive = JSON.parse(fs.readFileSync(path.join(dataRoot, "quality-artist-archive.json")));
+  assert.equal(artistArchive.status, "AUTO_ARCHIVED_NOT_PUBLISHED");
+  assert.equal(artistArchive.artists.find((item) => item.artistId === "kasamura-tota").maxUniqueTitles, 65);
   assert.equal("sourcesPreview" in searchSong, false);
   assert.deepEqual(searchSong.keywords, ["歌枠"]);
   const stablePagePath = path.join(dataRoot, "rankings/7d/songs/page-0001.json");

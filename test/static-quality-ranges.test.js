@@ -53,6 +53,34 @@ test("short numeric song titles survive conservative cleaning", () => {
   );
 });
 
+test("artist release catalogs canonicalize official aliases and archive off-catalog credits", () => {
+  const input = [video(901, [
+    song("開けない夜のリリィ", "傘村トーた", {
+      raw: "00:10 開けない夜のリリィ / 傘村トーた",
+      sourceHash: "a".repeat(64),
+    }),
+    song("ラブレター", "傘村トータ", {
+      raw: "00:20 ラブレター / 傘村トータ",
+      sourceHash: "b".repeat(64),
+    }),
+    song("目抜き通り", "椎名林檎とトータス松本"),
+  ])];
+  const saved = JSON.stringify(input);
+  const { videos, audit, artistArchive } = cleanStaticVideos(input);
+  assert.equal(JSON.stringify(input), saved);
+  assert.deepEqual(
+    videos[0].songs.map((entry) => [entry.title, entry.artist]),
+    [["明けない夜のリリィ", "傘村トータ"], ["目抜き通り", "椎名林檎とトータス松本"]],
+  );
+  assert.equal(audit.artistCatalogNormalizedOccurrences, 1);
+  assert.equal(audit.artistCatalogArchivedOccurrences, 1);
+  const archive = artistArchive.artists.find((entry) => entry.artistId === "kasamura-tota");
+  assert.deepEqual(archive.archivedTitles, ["ラブレター"]);
+  assert.deepEqual(archive.publishedTitles, ["明けない夜のリリィ"]);
+  assert.equal(archive.occurrences[0].raw, "00:20 ラブレター / 傘村トータ");
+  assert.equal(archive.occurrences[0].sourceHash, "b".repeat(64));
+});
+
 test("religious livestream date and weekday-coded livestream notice are not songs", () => {
   const prayer = song("12/09", "25° Dia [Live Ao vivo]", {
     raw: "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo",

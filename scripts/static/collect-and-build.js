@@ -390,7 +390,7 @@ function normalizeVideo(detail, candidate, now) {
 function buildStaticSite(dataRoot, state, now, options = {}) {
   const channelSetlistImports = options.channelSetlistImports || readChannelSetlistImports(dataRoot);
   const inputVideos = readDayVideos(dataRoot, channelSetlistImports);
-  const { videos: cleanedVideos, audit } = cleanStaticVideos(inputVideos);
+  const { videos: cleanedVideos, audit, artistArchive } = cleanStaticVideos(inputVideos);
   const collectedChannels = loadCollectedChannels();
   const videos = cleanedVideos.map((video) => hydrateCollectedChannel(video, collectedChannels));
   const review = buildQualityReview(videos, audit, now);
@@ -420,6 +420,10 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
         ),
         deduplicatedOccurrences: selectedInput.reduce(
           (sum, item) => sum + Number(audit.byVideo?.[item.videoId]?.deduplicatedOccurrences || 0),
+          0,
+        ),
+        artistCatalogArchivedOccurrences: selectedInput.reduce(
+          (sum, item) => sum + Number(audit.byVideo?.[item.videoId]?.artistCatalogArchivedOccurrences || 0),
           0,
         ),
       },
@@ -459,6 +463,10 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
       repairedStructuredCreditOccurrences: audit.repairedStructuredCreditOccurrences,
       repairedKnownSourceCreditOccurrences: audit.repairedKnownSourceCreditOccurrences,
       deduplicatedOccurrences: audit.deduplicatedOccurrences,
+      artistCatalogNormalizedOccurrences: audit.artistCatalogNormalizedOccurrences,
+      artistCatalogArchivedOccurrences: audit.artistCatalogArchivedOccurrences,
+      artistCatalogArchivedVideos: audit.artistCatalogArchivedVideos,
+      artistCatalogGate: audit.artistCatalogGate,
       repeatedDescriptionSources: audit.repeatedDescriptionSources.length,
       byReason: audit.byReason,
       reviewedDayCount: review.scannedDays.length,
@@ -472,6 +480,10 @@ function buildStaticSite(dataRoot, state, now, options = {}) {
   // whether collection stalled, so these few small files always refresh their timestamp.
   writeJson(path.join(dataRoot, "quality-audit.json"), { generatedAt: now.toISOString(), ...audit }, { force: true });
   writeJson(path.join(dataRoot, "quality-review.json"), review, { force: true });
+  writeJson(path.join(dataRoot, "quality-artist-archive.json"), {
+    ...artistArchive,
+    generatedAt: now.toISOString(),
+  });
   writeJson(path.join(dataRoot, "meta.json"), meta, { force: true });
   for (const name of generatedRoots) pruneUnwrittenFiles(dataRoot, name);
   return meta;

@@ -33,6 +33,12 @@ Short, numeric, unknown-artist, foreign-language and natural-language song title
 **are not blanket exclusion rules**. For example, `1/2 - 川本真琴` survives.
 Song/artist aliases require separate source-supported review, not this cleaner.
 
+### Artist release catalogs
+
+`config/artist-catalogs/*.json` stores reviewed official artist names, aliases, and the complete unique-title release catalog. `maxUniqueTitles` must equal the official title count. After conservative parser repair, the publication layer detects rows credited to a catalog artist (or to an unknown/version artist with the official artist embedded in the title), normalizes aliases to the official name and title, and rejects titles outside that catalog.
+
+The unique-title count is a publication gate, not a performance limit: repeated live performances of an official song remain separate occurrences. Off-catalog rows are written to `data/static/v1/quality-artist-archive.json` with `AUTO_ARCHIVED_NOT_PUBLISHED` status and retain the video, channel, timestamp, original row, source ID/hash, and reason. The audit accounting identity is `visibleOccurrences + quarantinedOccurrences + artistCatalogArchivedOccurrences + deduplicatedOccurrences = inputOccurrences`; immutable `days/**` and `state.json` are never changed.
+
 Any run where the new quality layer would quarantine more than 10% of incoming
 occurrences **fails before publishing**. Review the generated
 `data/static/v1/quality-audit.json` and the summary in `meta.json.quality`.
