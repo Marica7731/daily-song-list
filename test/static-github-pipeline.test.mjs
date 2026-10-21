@@ -1479,6 +1479,7 @@ test("verified channel setlist imports enter generated shards and clear audited 
 test("static update triggers and reports verified channel setlist imports", () => {
   const workflow = fs.readFileSync(path.resolve(".github/workflows/static-update.yml"), "utf8");
   assert.match(workflow, /- "data\/static\/v1\/imports\/\*\*"/u);
+  assert.match(workflow, /- "config\/collected-vtubers\.json"/u);
   assert.match(workflow, /channelSetlistImports: meta\.channelSetlistImports \|\| \[\]/u);
 });
 
