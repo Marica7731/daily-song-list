@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-22 02:02 +08:00
+
+- Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T17:55:32.337Z`, source snapshot `20261021T173810Z`, videos `16799`, occurrences `221917`, pending `2970`, no-song retry pool `14836`, processed `31040`.
+- Search and pagination: the search manifest exposes 16 shards with `82898` items and `48698819` bytes; every shard returns `200` and its ETag byte length matches. All 15 range/type manifests return `200`; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals and page counts.
+- Entity proof: `@ChomaChannel` remains `チョま` with `89` videos, `1810` published occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39647058444` completed successfully and the repaired snapshot deployed through successful Pages runs `39647589960` and `39648405327`; no run created since `16:00Z` has failed. Repair run `39647594212` remains in its bounded queue-continuation step with `15630` retry-due, `0` abandoned, and `0` unreadable shards, so the dirty-data batch was skipped because recovery was not idle.
+- Capacity: main repository size fell to `108354 KB` (about `105.8 MiB` or `0.103 GiB`) with `pushed_at=2026-10-21T17:57:33Z`, down `35571 KB` from the previous heartbeat; no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` Actions settings visibly select `Disable actions`; `daily-song-list-archive-overquota` API returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-22 00:03 +08:00
 
 - Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T15:35:44.716Z`, source snapshot `20261021T152732Z`, videos `16775`, occurrences `221666`, pending `2839`, no-song retry pool `14796`, processed `31015`.
