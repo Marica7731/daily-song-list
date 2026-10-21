@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-21 18:03 +08:00
+
+- Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T09:34:44.834Z`, source snapshot `20261021T091714Z`, videos `16677`, occurrences `220482`, pending `2928`, no-song retry pool `14668`, processed `30913`.
+- Search and pagination: the search manifest exposes 16 shards with `82422` items and `48673761` bytes; every shard returns `200` and its ETag byte length matches. All 15 range/type manifests return `200`; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals and page counts.
+- Entity proof: `@ChomaChannel` remains `チョま` with `89` videos, `1810` published occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39577988509` and Pages deployment `39578422086` completed successfully; no run created since `04:00Z` has failed. Repair run `39578426113` remains in its bounded queue-continuation step with `15529` retry-due, `0` abandoned, and `0` unreadable shards, so the dirty-data batch was skipped because recovery was not idle.
+- Capacity: main repository size fell to `110133 KB` (about `107.6 MiB` or `0.105 GiB`) with `pushed_at=2026-10-21T09:41:21Z`, down `16887 KB` from the previous heartbeat; no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` Actions settings visibly select `Disable actions`; `daily-song-list-archive-overquota` API returns `404`. Transient TLS disconnects were retried within bounded commands and all probes then passed. No VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-21 12:02 +08:00
 
 - Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T03:49:10.875Z`, source snapshot `20261021T033445Z`, videos `16647`, occurrences `220072`, pending `2885`, no-song retry pool `14617`, processed `30883`.
