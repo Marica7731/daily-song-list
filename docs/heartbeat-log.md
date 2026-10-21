@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-22 06:13 +08:00
+
+- Live health: standard Pages root returns `200`; the newly deployed snapshot has `generatedAt=2026-10-21T22:03:31.710Z` and source snapshot `20261021T214910Z`, matching raw commit `c52ec3fa95a`. Videos `16829`, occurrences `222345`, pending `2948`, no-song retry pool `14908`, processed `31072`.
+- Search and pagination: the search manifest exposes 16 shards with `83071` items and `48900856` bytes; every shard returns `200` and its ETag byte length matches. All 15 range/type manifests match meta; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals.
+- Entity proof: `@ChomaChannel` remains `チョま` with `89` videos, `1810` occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39683598120` completed successfully and Pages deployment `39684112286` deployed its commit `c52ec3fa95a`; no run created since `20:00Z` has failed. Repair run `39684115739` remains in progress with `15681` retry-due, `0` abandoned, and `0` unreadable shards, so the dirty-data batch was skipped because recovery was not idle.
+- Capacity: main repository size is `129805 KB` (about `126.8 MiB` or `0.124 GiB`) with `pushed_at=2026-10-21T22:07:07Z`; the routine data snapshot added about 11 MiB this cycle, but the repository remains far below the 8 GiB reset threshold, so no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` `/actions` returns `404`, its latest historical run remains the cancelled `38269480362` from 2026-10-12, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-22 04:01 +08:00
 
 - Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T19:26:40.934Z`, source snapshot `20261021T191822Z`, videos `16811`, occurrences `222062`, pending `2913`, no-song retry pool `14866`, processed `31053`.
