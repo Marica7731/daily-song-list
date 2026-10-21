@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-21 10:06 +08:00
+
+- Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T01:41:08.618Z`, source snapshot `20261021T013412Z`, videos `16641`, occurrences `219974`, pending `2839`, no-song retry pool `14594`, processed `30877`.
+- Search and pagination: the search manifest exposes 16 shards with `82233` items and `48454068` bytes; every shard returns `200` and its ETag byte length matches the manifest. All 15 range/type manifests return `200`; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals and page counts.
+- Entity proof remains healthy: `@ChomaChannel` resolves to `チョま` with `89` videos, `1810` published occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39528717857` and freshness watchdog `39530628747` completed successfully. Repair run `39529065076` is still in its bounded queue-continuation step (`15487` retry-due, `0` abandoned, `0` unreadable shards), so the confirmed-noise/parser-corruption batch was intentionally skipped because recovery was not idle.
+- Capacity: main repository size is `124563 KB` (about `121.6 MiB` or `0.119 GiB`) with `pushed_at=2026-10-21T01:48:04Z`; this remains far below the 8 GiB reset threshold, so no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` Actions settings visibly select `Disable actions`; `daily-song-list-archive-overquota` API returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-21 08:11 +08:00
 
 - Fixed the uncredited-song loss at its source: removed the artist-rich mixed-source heuristic from collection and frontend filtering while retaining explicit chat, chapter, date, schedule, and promotion noise rules. Regression coverage now asserts title-only songs survive mixed sources and explicit noise still drops.
