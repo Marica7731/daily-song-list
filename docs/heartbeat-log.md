@@ -1,6 +1,17 @@
 
 # Heartbeat log
 
+## 2026-10-21 08:11 +08:00
+
+- Fixed the uncredited-song loss at its source: removed the artist-rich mixed-source heuristic from collection and frontend filtering while retaining explicit chat, chapter, date, schedule, and promotion noise rules. Regression coverage now asserts title-only songs survive mixed sources and explicit noise still drops.
+- Collected `@ChomaChannel` through the GitHub-hosted discovery flow: run `39490291377` completed with `320/320` candidates inspected, `89` setlist videos, `1813` occurrences, `231` no-song videos, and `0` failures. The reviewed collection entry uses canonical name `チョま`, channel `UCotQnZvYn2T-JiJTs8LrAlw`, and `collectionId=choma-channel`.
+- Trigger fix `861ff946117` makes `config/collected-vtubers.json` a static-update path trigger and adds a workflow assertion. Check code run `39519113620` succeeded. The push-triggered static run was superseded by the active hourly run, whose data commit `3b13e565d28` included the collection; Pages run `39519126791` then deployed it successfully.
+- Live verification: standard Pages root returns `200`; `generatedAt=2026-10-21T00:01:47.062Z`; videos `16634`, occurrences `219905`, pending `2804`, no-song retry pool `14584`. `channelSetlistImports` contains `imports/choma-channel.json`; all 15 range/type manifests return `200`, and the all-songs first page reports 1122 pages with 50 rows.
+- Search/entity proof: Vtuber entity `65d2141badc4b92d` is `チョま`, `@ChomaChannel`, `collected=true`, `collectionId=choma-channel`, with 89 videos and 1810 published occurrences; 1591 of those occurrences legitimately have an empty artist. Title-only `プロポーズ` is published as 10 occurrences and `鬼の宴` as 4, each including Choma video `qCWkIafBFTA` at `0:22:12` and `0:26:44` respectively with empty artist.
+- Tests: parser/source-filter/update suite `96/96` passed; static GitHub pipeline suite `46/46` passed. The prior broader collection/static runs also passed `51/51`, `167/167`, `94/94`, and channel metadata `2/2`.
+- Capacity: main repo size is `112192 KB` (about `0.107 GiB`), `pushed_at=2026-10-21T00:05:11Z`; no reset is needed. Repair run `39519129826` is in progress with `15477` retry-due and `0` abandoned, so the dirty batch was not started while publication/recovery was busy.
+- Archive audit: `daily-song-list-archive` Actions settings visibly select `Disable actions`; `daily-song-list-archive-overquota` API returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-20 23:58 +08:00
 
 - Controlled orphan reset verified: GitHub repository size fell from `233746 KB` to `102493 KB` (`131253 KB`, about `128.2 MiB` or `56%`), with old history unreachable. Capacity is now about `0.10 GiB` and remained flat through the publication cycle.
