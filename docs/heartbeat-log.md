@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-22 07:57 +08:00
+
+- Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T23:30:24.568Z`, source snapshot `20261021T232245Z`, videos `16832`, occurrences `222401`, pending `2982`, no-song retry pool `14922`, processed `31075`.
+- Search and pagination: the search manifest exposes 16 shards with `83101` items and `48937725` bytes; every shard returns `200` and its ETag byte length matches. All 15 range/type manifests match meta; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals.
+- Entity proof: `@ChomaChannel` remains `チョま` with `89` videos, `1810` occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39693413037` and Pages deployment `39694206033` completed successfully; no run created since `22:47Z` has failed. Repair run `39694209656` remains in progress with `15684` retry-due, `0` abandoned, and `0` unreadable shards, so the dirty-data batch was skipped because recovery was not idle.
+- Capacity: main repository size is `136440 KB` (about `133.2 MiB` or `0.130 GiB`) with `pushed_at=2026-10-21T23:39:00Z`; routine snapshots added about 6.5 MiB this cycle, but the repository remains far below the 8 GiB reset threshold, so no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` `/actions` returns `404`, its latest historical run remains the cancelled `38269480362` from 2026-10-12, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-22 06:13 +08:00
 
 - Live health: standard Pages root returns `200`; the newly deployed snapshot has `generatedAt=2026-10-21T22:03:31.710Z` and source snapshot `20261021T214910Z`, matching raw commit `c52ec3fa95a`. Videos `16829`, occurrences `222345`, pending `2948`, no-song retry pool `14908`, processed `31072`.
