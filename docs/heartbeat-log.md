@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-21 19:59 +08:00
+
+- Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T11:27:24.346Z`, source snapshot `20261021T111745Z`, videos `16694`, occurrences `220654`, pending `2915`, no-song retry pool `14697`, processed `30931`.
+- Search and pagination: the search manifest exposes 16 shards with `82449` items and `48709797` bytes; every shard returns `200` and its ETag byte length matches. All 15 range/type manifests return `200`; sampled first/last pages for today songs, 7d artists, 30d vtubers, all songs, all artists, and all vtubers are contiguous with the declared totals and page counts.
+- Entity proof: `@ChomaChannel` remains `チョま` with `89` videos, `1810` published occurrences, `1591` legitimate empty-artist rows, `collected=true`, and `collectionId=choma-channel`; title-only `プロポーズ` still includes Choma video `qCWkIafBFTA` at `0:22:12` with an empty artist.
+- Actions: static update `39592041051` and Pages deployment `39592391533` completed successfully; no run created since `10:00Z` has failed. Repair run `39592394583` remains in its bounded queue-continuation step with `15545` retry-due, `0` abandoned, and `0` unreadable shards, so the dirty-data batch was skipped because recovery was not idle.
+- Capacity: main repository size is `113928 KB` (about `111.3 MiB` or `0.109 GiB`) with `pushed_at=2026-10-21T11:34:52Z`; this remains far below the 8 GiB reset threshold, so no orphan reset was needed.
+- Archive audit: `daily-song-list-archive` Actions settings visibly select `Disable actions`; `daily-song-list-archive-overquota` API returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-21 18:03 +08:00
 
 - Live health: standard Pages root returns `200`; `generatedAt=2026-10-21T09:34:44.834Z`, source snapshot `20261021T091714Z`, videos `16677`, occurrences `220482`, pending `2928`, no-song retry pool `14668`, processed `30913`.
