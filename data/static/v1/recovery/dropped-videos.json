@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-22T17:04:38.656Z",
-  "processedVideoCount": 31240,
-  "publishedVideoCount": 18885,
+  "generatedAt": "2026-10-22T17:48:02.862Z",
+  "processedVideoCount": 31256,
+  "publishedVideoCount": 18901,
   "unpublishedVideoCount": 12355,
-  "droppedVideoCount": 15882,
+  "droppedVideoCount": 15887,
   "totalDroppedVideoCount": 12355,
-  "retryPoolVideoCount": 16203,
-  "retryPoolDueVideoCount": 15882,
+  "retryPoolVideoCount": 16214,
+  "retryPoolDueVideoCount": 15887,
   "abandonedVideoCount": 0,
   "metadataIncompleteVideoCount": 5,
   "metadataIncompleteVideoIds": [
@@ -33,6 +33,15 @@
   "unreadableShardCount": 0,
   "unreadableShards": [],
   "dropped": [
+    {
+      "videoId": "--CcHU97amk",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:54:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
+    },
     {
       "videoId": "--kQTaq4ZeE",
       "attempts": 3,
@@ -2012,6 +2021,15 @@
       "repairable": true,
       "lastResult": "no_usable_song_source",
       "lastAttemptAt": "2026-10-03T23:01:20.478Z"
+    },
+    {
+      "videoId": "-sAuuG1ek2Y",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:57:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "-sBnLPDVZ7g",
@@ -5471,12 +5489,12 @@
     },
     {
       "videoId": "1OKmvj9JToo",
-      "attempts": 2,
+      "attempts": 3,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T17:52:34.461Z",
+      "nextEligibleAt": "2026-10-22T20:05:22.767Z",
       "repairable": true,
-      "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastResult": "no_usable_song_source",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "1OYyhbDtfkk",
@@ -8117,12 +8135,12 @@
     },
     {
       "videoId": "2Wnj-0yp8Fc",
-      "attempts": 11,
+      "attempts": 12,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T17:48:28.169Z",
+      "nextEligibleAt": "2026-10-29T18:31:04.027Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T17:02:28.169Z"
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
     },
     {
       "videoId": "2Wo5ilHmN8Q",
@@ -12770,12 +12788,12 @@
     },
     {
       "videoId": "4kE63WWIXmo",
-      "attempts": 11,
+      "attempts": 12,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T03:25:34.461Z",
+      "nextEligibleAt": "2026-10-30T04:08:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "4kgqw7eEfeQ",
@@ -13823,12 +13841,12 @@
     },
     {
       "videoId": "5DMqdR8ziCE",
-      "attempts": 11,
+      "attempts": 12,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T16:20:34.461Z",
+      "nextEligibleAt": "2026-10-29T17:03:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "5DNj2lJ0VJo",
@@ -18575,12 +18593,12 @@
     },
     {
       "videoId": "7Lv-zrcVB1c",
-      "attempts": 13,
+      "attempts": 14,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T21:04:34.461Z",
+      "nextEligibleAt": "2026-10-29T21:47:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "7MPkSWhX8vo",
@@ -23066,12 +23084,12 @@
     },
     {
       "videoId": "9_tyLorPJV0",
-      "attempts": 8,
+      "attempts": 9,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-26T16:38:34.461Z",
+      "nextEligibleAt": "2026-10-28T17:12:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "9_xRnr8yvz0",
@@ -25136,12 +25154,12 @@
     },
     {
       "videoId": "AceWFeB-Qf0",
-      "attempts": 3,
+      "attempts": 4,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T18:48:34.461Z",
+      "nextEligibleAt": "2026-10-22T22:15:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "AdK2qr9gBe0",
@@ -29446,6 +29464,15 @@
       "lastAttemptAt": "2026-10-08T02:15:22.110Z"
     },
     {
+      "videoId": "C_RAptFvKFA",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:58:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
+    },
+    {
       "videoId": "C_oMAc9gcDs",
       "attempts": 3,
       "retryDue": true,
@@ -31734,7 +31761,7 @@
     {
       "videoId": "DX-nJ6FT_Uw",
       "attempts": 2,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:07:39.096Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -32657,6 +32684,15 @@
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
       "lastAttemptAt": "2026-10-14T14:51:35.941Z"
+    },
+    {
+      "videoId": "Dv8cqgLAdqo",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:57:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "DvejIELLsFM",
@@ -41597,12 +41633,12 @@
     },
     {
       "videoId": "HjoZJn0vcRE",
-      "attempts": 14,
+      "attempts": 15,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T18:31:34.461Z",
+      "nextEligibleAt": "2026-10-29T19:14:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "Hk3DD4DsUj8",
@@ -47446,6 +47482,15 @@
       "lastAttemptAt": "2026-10-14T15:12:25.108Z"
     },
     {
+      "videoId": "KHRMGn0IVXE",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:56:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
+    },
+    {
       "videoId": "KHTcn0VSBF4",
       "attempts": 0,
       "retryDue": true,
@@ -51083,12 +51128,12 @@
     },
     {
       "videoId": "LvsicNBKKQE",
-      "attempts": 2,
+      "attempts": 3,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T17:50:34.461Z",
+      "nextEligibleAt": "2026-10-22T19:59:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "LwAie7AYQrY",
@@ -73179,7 +73224,7 @@
     {
       "videoId": "VmwfAzuo3AE",
       "attempts": 2,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:37:34.461Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -74168,12 +74213,12 @@
     },
     {
       "videoId": "WDJVMdF3y8o",
-      "attempts": 8,
+      "attempts": 9,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-27T09:53:34.461Z",
+      "nextEligibleAt": "2026-10-29T19:03:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "WDPnR6-lDlA",
@@ -75011,6 +75056,15 @@
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
       "lastAttemptAt": "2026-10-16T11:47:53.933Z"
+    },
+    {
+      "videoId": "Waio2rKhLwU",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:54:22.767Z",
+      "repairable": true,
+      "lastResult": "no_usable_song_source",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "WbBv6KklzLc",
@@ -77921,12 +77975,12 @@
     },
     {
       "videoId": "XtkbKJD6lGc",
-      "attempts": 16,
+      "attempts": 17,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T22:28:34.461Z",
+      "nextEligibleAt": "2026-10-30T23:11:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "XttlTiwoy8s",
@@ -78461,12 +78515,12 @@
     },
     {
       "videoId": "Y8h-Uq8s4JI",
-      "attempts": 18,
+      "attempts": 19,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T06:43:34.461Z",
+      "nextEligibleAt": "2026-10-30T07:26:22.767Z",
       "repairable": true,
-      "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "Y8qqL5D2Cb8",
@@ -78479,12 +78533,12 @@
     },
     {
       "videoId": "Y8z3-tnNENA",
-      "attempts": 3,
+      "attempts": 4,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T19:03:34.461Z",
+      "nextEligibleAt": "2026-10-22T22:53:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "Y968p2R3oKA",
@@ -79325,12 +79379,12 @@
     },
     {
       "videoId": "YU5ObwthUN8",
-      "attempts": 2,
+      "attempts": 3,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T17:39:34.461Z",
+      "nextEligibleAt": "2026-10-22T19:30:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "YU6wePgnmZ4",
@@ -83977,6 +84031,15 @@
       "lastAttemptAt": "2026-10-06T14:09:29.028Z"
     },
     {
+      "videoId": "_QPiMIc6ejQ",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:58:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
+    },
+    {
       "videoId": "_QQAQwkQkpI",
       "attempts": 0,
       "retryDue": true,
@@ -84122,12 +84185,12 @@
     },
     {
       "videoId": "_T17do4v-1g",
-      "attempts": 11,
+      "attempts": 12,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T13:34:34.461Z",
+      "nextEligibleAt": "2026-10-29T14:17:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "_TObkbSFLDs",
@@ -86120,12 +86183,12 @@
     },
     {
       "videoId": "aKALMZZIx0o",
-      "attempts": 2,
+      "attempts": 3,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T17:17:39.096Z",
+      "nextEligibleAt": "2026-10-22T19:48:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:30:39.096Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "aKPo1gASRU0",
@@ -88307,12 +88370,12 @@
     },
     {
       "videoId": "bEmUPu2Qr8I",
-      "attempts": 18,
+      "attempts": 19,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T02:20:34.461Z",
+      "nextEligibleAt": "2026-10-30T03:03:22.767Z",
       "repairable": true,
-      "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastResult": "no_usable_song_source",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "bEnQvQEeTFs",
@@ -91620,7 +91683,7 @@
     {
       "videoId": "chN0j3zWadc",
       "attempts": 2,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:36:20.518Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -91728,7 +91791,7 @@
     {
       "videoId": "ckZhd6xkwFA",
       "attempts": 2,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:39:34.461Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -93832,6 +93895,15 @@
       "lastAttemptAt": null
     },
     {
+      "videoId": "dfhcUD0_pvs",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:57:04.027Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
+    },
+    {
       "videoId": "dfsEYO1kWDM",
       "attempts": 1,
       "retryDue": true,
@@ -94536,7 +94608,7 @@
     {
       "videoId": "dzFnQHJr6AI",
       "attempts": 1,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:15:34.461Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
@@ -96146,12 +96218,12 @@
     },
     {
       "videoId": "ea5dh1N5Kq4",
-      "attempts": 10,
+      "attempts": 11,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-28T09:09:34.461Z",
+      "nextEligibleAt": "2026-10-28T09:52:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "eaFWoRWt5m4",
@@ -98459,12 +98531,12 @@
     },
     {
       "videoId": "fZMegkGgZJI",
-      "attempts": 14,
+      "attempts": 15,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-31T00:01:34.461Z",
+      "nextEligibleAt": "2026-10-31T00:44:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "fZTMpBOn74U",
@@ -98684,12 +98756,12 @@
     },
     {
       "videoId": "fcmUGqy9iaY",
-      "attempts": 8,
+      "attempts": 9,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-26T02:36:34.461Z",
+      "nextEligibleAt": "2026-10-27T20:08:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "fdV8L1MQItU",
@@ -99791,12 +99863,12 @@
     },
     {
       "videoId": "g1MZgzrZn_I",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T22:07:34.461Z",
+      "nextEligibleAt": "2026-10-23T06:02:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "g1_T2744GxE",
@@ -100601,12 +100673,12 @@
     },
     {
       "videoId": "gN17aeAD0_o",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T21:00:34.461Z",
+      "nextEligibleAt": "2026-10-23T03:23:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "gNRK91Vmn24",
@@ -101339,12 +101411,12 @@
     },
     {
       "videoId": "gftXxuZi7lo",
-      "attempts": 2,
-      "retryDue": true,
-      "nextEligibleAt": "2026-10-15T08:22:33.243Z",
+      "attempts": 3,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T19:48:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-15T07:35:33.243Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "gg6I3dsR5SQ",
@@ -101411,12 +101483,12 @@
     },
     {
       "videoId": "ggum_kyOJ1Q",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T22:30:34.461Z",
+      "nextEligibleAt": "2026-10-23T06:59:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "gh8pUK3QxQ0",
@@ -102589,6 +102661,15 @@
       "lastAttemptAt": "2026-10-07T02:39:54.664Z"
     },
     {
+      "videoId": "hCC3zS30PO8",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:59:04.027Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
+    },
+    {
       "videoId": "hCJu218LFSU",
       "attempts": 1,
       "retryDue": true,
@@ -102752,12 +102833,12 @@
     },
     {
       "videoId": "hFvhuXMKuys",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T21:41:34.461Z",
+      "nextEligibleAt": "2026-10-23T05:01:22.767Z",
       "repairable": true,
       "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "hFw-RLZye1M",
@@ -104174,12 +104255,12 @@
     },
     {
       "videoId": "hvAus7F7OL0",
-      "attempts": 13,
+      "attempts": 14,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T18:14:28.169Z",
+      "nextEligibleAt": "2026-10-30T18:57:04.027Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T17:02:28.169Z"
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
     },
     {
       "videoId": "hvGg1WoVsI8",
@@ -109286,12 +109367,12 @@
     },
     {
       "videoId": "kFYBfsEoKGw",
-      "attempts": 2,
-      "retryDue": true,
-      "nextEligibleAt": "2026-10-15T08:20:33.243Z",
+      "attempts": 3,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T19:40:22.767Z",
       "repairable": true,
-      "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-15T07:35:33.243Z"
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "kFoVIm-fMjo",
@@ -110420,12 +110501,12 @@
     },
     {
       "videoId": "kf9Mph4JsS0",
-      "attempts": 12,
+      "attempts": 13,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-28T16:36:34.461Z",
+      "nextEligibleAt": "2026-10-28T17:19:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "kfLOj3tO2-U",
@@ -113588,12 +113669,12 @@
     },
     {
       "videoId": "m-wpz5GsIWw",
-      "attempts": 13,
+      "attempts": 14,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T16:30:28.169Z",
+      "nextEligibleAt": "2026-10-29T17:13:04.027Z",
       "repairable": true,
-      "lastResult": "no_usable_song_source",
-      "lastAttemptAt": "2026-10-22T17:02:28.169Z"
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
     },
     {
       "videoId": "m08VTPaV9p8",
@@ -114480,7 +114561,7 @@
     {
       "videoId": "mPt901QCtC8",
       "attempts": 5,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:38:35.511Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -118358,12 +118439,12 @@
     },
     {
       "videoId": "o8cKFca60Hk",
-      "attempts": 9,
+      "attempts": 10,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-28T07:16:34.461Z",
+      "nextEligibleAt": "2026-10-29T06:22:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "o8mDRNb-Kqw",
@@ -118674,7 +118755,7 @@
     {
       "videoId": "oHp5CRBv0pM",
       "attempts": 3,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:08:48.302Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -119822,6 +119903,15 @@
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
       "lastAttemptAt": "2026-10-12T16:23:05.900Z"
+    },
+    {
+      "videoId": "opYK0veMDys",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T18:02:04.027Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:45:04.027Z"
     },
     {
       "videoId": "opoxciE2MBY",
@@ -122372,12 +122462,12 @@
     },
     {
       "videoId": "q16QufdMOSw",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T22:16:34.461Z",
+      "nextEligibleAt": "2026-10-23T06:24:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "q1WGZRmmJWQ",
@@ -128015,12 +128105,12 @@
     },
     {
       "videoId": "sPOC8TH-sF0",
-      "attempts": 3,
+      "attempts": 4,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T19:16:34.461Z",
+      "nextEligibleAt": "2026-10-22T23:27:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "sPUsjU0tNeg",
@@ -129272,6 +129362,15 @@
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
       "lastAttemptAt": "2026-10-15T11:27:59.071Z"
+    },
+    {
+      "videoId": "sttD52e0EzY",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:54:22.767Z",
+      "repairable": true,
+      "lastResult": "no_timestamp_candidates",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "suJ41SDQEY8",
@@ -132372,7 +132471,7 @@
     {
       "videoId": "uEvyEFrIrl4",
       "attempts": 1,
-      "retryDue": false,
+      "retryDue": true,
       "nextEligibleAt": "2026-10-22T17:14:34.461Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
@@ -133082,12 +133181,12 @@
     },
     {
       "videoId": "uWGzCjgsuPM",
-      "attempts": 8,
+      "attempts": 9,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-26T15:41:34.461Z",
+      "nextEligibleAt": "2026-10-28T15:45:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "uWqJsfD4-G0",
@@ -136448,12 +136547,12 @@
     },
     {
       "videoId": "vxK2yAb1jb4",
-      "attempts": 16,
+      "attempts": 17,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-29T08:38:34.461Z",
+      "nextEligibleAt": "2026-10-29T09:21:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "vxd-hZO2PEI",
@@ -138320,12 +138419,12 @@
     },
     {
       "videoId": "wnL-Hv6R9HM",
-      "attempts": 4,
+      "attempts": 5,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-22T21:22:34.461Z",
+      "nextEligibleAt": "2026-10-23T04:15:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "wnTeiWk3T2M",
@@ -142036,15 +142135,6 @@
       "lastAttemptAt": "2026-10-08T06:13:28.596Z"
     },
     {
-      "videoId": "yLazIczslVY",
-      "attempts": 2,
-      "retryDue": true,
-      "nextEligibleAt": "2026-10-15T08:14:33.243Z",
-      "repairable": true,
-      "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-15T07:35:33.243Z"
-    },
-    {
       "videoId": "yLkmDECoS6A",
       "attempts": 1,
       "retryDue": true,
@@ -142415,12 +142505,12 @@
     },
     {
       "videoId": "yTiP5AWFNbU",
-      "attempts": 18,
+      "attempts": 19,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T02:20:34.461Z",
+      "nextEligibleAt": "2026-10-30T03:03:22.767Z",
       "repairable": true,
-      "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastResult": "no_usable_song_source",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "yTsx1acAetg",
@@ -142520,6 +142610,15 @@
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
       "lastAttemptAt": "2026-10-08T06:39:36.668Z"
+    },
+    {
+      "videoId": "yXbLQYn8HXg",
+      "attempts": 1,
+      "retryDue": false,
+      "nextEligibleAt": "2026-10-22T17:54:22.767Z",
+      "repairable": true,
+      "lastResult": "no_usable_song_source",
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "yXlVDbf7MC8",
@@ -142739,12 +142838,12 @@
     },
     {
       "videoId": "yeC6FdSoALQ",
-      "attempts": 14,
+      "attempts": 15,
       "retryDue": false,
-      "nextEligibleAt": "2026-10-30T21:24:34.461Z",
+      "nextEligibleAt": "2026-10-30T22:07:22.767Z",
       "repairable": true,
       "lastResult": "no_timestamp_candidates",
-      "lastAttemptAt": "2026-10-22T16:58:34.461Z"
+      "lastAttemptAt": "2026-10-22T17:41:22.767Z"
     },
     {
       "videoId": "yfQG10Unfv0",
