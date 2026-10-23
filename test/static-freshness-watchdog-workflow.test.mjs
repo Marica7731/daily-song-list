@@ -29,6 +29,13 @@ test("freshness probe never follows the custom-domain redirect through Cloudflar
   );
   assert.match(workflow, /select\(\.state == "success"\)/u);
   assert.match(workflow, /\.status == "requested"/u, "requested runs must count as active");
+  const activeDeploysIndex = workflow.indexOf('active_deploys="$(');
+  const deploymentEpochIndex = workflow.indexOf('site_deployed_epoch="$(fetch_pages_deployment_epoch)"');
+  assert.ok(activeDeploysIndex >= 0, "active Pages deployments must be probed");
+  assert.ok(
+    deploymentEpochIndex > activeDeploysIndex,
+    "an in-progress deployment must be detected before reading its successful status",
+  );
   assert.doesNotMatch(workflow, /SITE_META_URL|marica7731\.github\.io/u);
   assert.doesNotMatch(workflow, /fetch_generated_at/u);
 });

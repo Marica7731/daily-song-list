@@ -89,10 +89,8 @@ jobs:
           }
 
           now_epoch="$(date +%s)"
-          site_deployed_epoch="$(fetch_pages_deployment_epoch)"
-          repo_generated_epoch="$(fetch_repo_generated_at)"
-          site_age_minutes="$(((now_epoch - site_deployed_epoch) / 60))"
-          repo_age_minutes="$(((now_epoch - repo_generated_epoch) / 60))"
+          site_age_minutes=-1
+          repo_age_minutes=-1
           active_updates="$(
             gh run list --repo "$GITHUB_REPOSITORY" \
               --workflow static-update.yml \
@@ -132,20 +130,27 @@ jobs:
             reason=active_static_update
           elif (( active_deploys > 0 )); then
             reason=active_pages_deploy
-          elif (( pending_repo > 0 && collection_age_minutes >= STALL_MINUTES )); then
-            # Repair chains continuously in the shared group and keeps the published meta warm, so
-            # the age checks below never fire even while the collection queue stops draining.
-            gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main
-            triggered=true
-            reason=stalled_collection_queue
-          elif (( site_age_minutes >= STALE_MINUTES && repo_age_minutes >= STALE_MINUTES )); then
-            gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main
-            triggered=true
-            reason=stale_static_update
-          elif (( site_age_minutes >= STALE_MINUTES )); then
-            gh workflow run --repo "$GITHUB_REPOSITORY" deploy-pages.yml --ref main
-            triggered=true
-            reason=stale_pages_deploy
+          else
+            site_deployed_epoch="$(fetch_pages_deployment_epoch)"
+            repo_generated_epoch="$(fetch_repo_generated_at)"
+            site_age_minutes="$(((now_epoch - site_deployed_epoch) / 60))"
+            repo_age_minutes="$(((now_epoch - repo_generated_epoch) / 60))"
+
+            if (( pending_repo > 0 && collection_age_minutes >= STALL_MINUTES )); then
+              # Repair chains continuously in the shared group and keep the published meta warm, so
+              # the age checks below never fire even while the collection queue stops draining.
+              gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main
+              triggered=true
+              reason=stalled_collection_queue
+            elif (( site_age_minutes >= STALE_MINUTES && repo_age_minutes >= STALE_MINUTES )); then
+              gh workflow run --repo "$GITHUB_REPOSITORY" static-update.yml --ref main
+              triggered=true
+              reason=stale_static_update
+            elif (( site_age_minutes >= STALE_MINUTES )); then
+              gh workflow run --repo "$GITHUB_REPOSITORY" deploy-pages.yml --ref main
+              triggered=true
+              reason=stale_pages_deploy
+            fi
           fi
 
           {
