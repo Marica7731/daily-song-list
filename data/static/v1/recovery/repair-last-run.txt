@@ -1,24 +1,35 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-23T10:45:43Z
-[static-repair] processed=31380 published=19025 unpublished=12355 retryPool=16403 repairable=16403 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=3130 [static-repair] retryDue=16007 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-23T11:30:20Z
+[static-repair] processed=31386 published=19031 unpublished=12355 retryPool=16404 repairable=16404 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=3139 [static-repair] retryDue=16009 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=424 items=424 errors=0
-[static-update] video=iY3xDMELfDo result=selected songs=11
-[static-update] video=opYK0veMDys result=selected songs=4
-[static-update] video=omBBRaph6so result=selected songs=8
-[static-update] video=clGY9gpI35o result=selected songs=1
-[static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=m-wpz5GsIWw result=no_timestamp_candidates songs=0
-[static-update] video=2Wnj-0yp8Fc result=no_timestamp_candidates songs=0
-[static-update] video=hvAus7F7OL0 result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261023T103254Z processed=8/8 pending=3120 videos=17133 songs=226050
+[mygit:success] snapshots=1/1 rawItems=339 items=339 errors=0
+[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
+[static-update] retry-later video=clGY9gpI35o: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=CEipRAoiPLA: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=pKg6tO9SzkI: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=65wRtgfHnE8: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=LzVwaMltxq8: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=IWvOAML9Gg8: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=hmwLxXZZzLg: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=vgcgoK7gK-8: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=m-QmTnyIEVo: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=UhQ_l7PpAnA: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=YcKU1HFRAsE: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=yn40n_2vAsY: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=m-wpz5GsIWw: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=2Wnj-0yp8Fc: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] retry-later video=hvAus7F7OL0: YouTube HTTP 429 limit reached (10/10); stopped further inspections
+[static-update] batch_degraded attempted=18 failed=18; continuing with last successful state
+[static-update] snapshot=20261023T112159Z processed=0/18 pending=3122 videos=17139 songs=226143
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=17133 songs=226050 processed=31380 pending=3120
-[static-repair] processed=31380 published=19025 unpublished=12355 retryPool=16403 repairable=16403 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=3180 [static-repair] retryDue=16007 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=16007
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-23T10:48:59Z
+STATIC_DATA_OK videos=17139 songs=226143 processed=31386 pending=3122
+[static-repair] processed=31386 published=19031 unpublished=12355 retryPool=16404 repairable=16404 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=3182 [static-repair] retryDue=16015 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=16015
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-23T11:49:56Z
