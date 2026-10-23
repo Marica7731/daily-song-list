@@ -370,6 +370,13 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   assert.match(workflow, /Queue immediate continuation while backlog remains/);
   assert.match(workflow, /STATIC_UPDATE_CONTINUE pending=\$pending video_limit=\$VIDEO_LIMIT/);
   assert.match(workflow, /STATIC_UPDATE_DEFER_TO_REPAIR pending=\$pending dropped=\$dropped/);
+  assert.match(workflow, /drain_round:/);
+  assert.match(workflow, /STATIC_PENDING_PRIORITY_THRESHOLD: "500"/);
+  assert.match(workflow, /STATIC_UPDATE_PENDING_PRIORITY pending=\$pending threshold=\$STATIC_PENDING_PRIORITY_THRESHOLD/);
+  assert.match(workflow, /STATIC_UPDATE_PENDING_DRAIN_DISPATCHED attempt=\$dispatch_attempt round=\$next_round/);
+  assert.match(workflow, /-f drain_round="\$next_round"/);
+  assert.match(workflow, /if: success\(\) && steps\.continuation\.outputs\.drain_pending != 'true'/);
+  assert(workflow.indexOf("STATIC_UPDATE_PENDING_PRIORITY") < workflow.indexOf("STATIC_UPDATE_DEFER_TO_REPAIR"), "high pending backlog must outrank the historical repair pool");
   assert.match(workflow, /gh workflow run static-update\.yml --ref main -f video_limit="\$VIDEO_LIMIT"/);
   assert.match(workflow, /-f priority_video_ids="\$PRIORITY_VIDEO_IDS"/);
   assert.match(workflow, /Hand off dropped videos to the repair workflow/);
@@ -1171,6 +1178,10 @@ test("dropped-video repair workflow is GitHub-hosted, bounded, resumable, and st
   assert.match(workflow, /STATIC_REPAIR_YIELD_STATIC pending=\$pending_static/u);
   assert.match(workflow, /STATIC_REPAIR_YIELD_STATIC_DURING_BACKOFF pending=\$pending_static/u);
   assert.match(workflow, /STATIC_REPAIR_HANDOFF_STATIC pending=\$pending dropped=\$remaining/u);
+  assert.match(workflow, /STATIC_PENDING_PRIORITY_THRESHOLD: "500"/u);
+  assert.match(workflow, /STATIC_REPAIR_PRIORITY_HANDOFF_STATIC pending=\$pending threshold=\$STATIC_PENDING_PRIORITY_THRESHOLD/u);
+  assert.match(workflow, /STATIC_REPAIR_PRIORITY_HANDOFF_DISPATCHED attempt=\$dispatch_attempt/u);
+  assert(workflow.indexOf("STATIC_REPAIR_PRIORITY_HANDOFF_STATIC") < workflow.indexOf("STATIC_REPAIR_NO_NEW_PUBLICATION"), "high pending backlog must hand off before repair backoff");
   assert.match(workflow, /gh workflow run static-update\.yml --ref main/u);
   assert.match(workflow, /group: daily-song-list-static-update/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);

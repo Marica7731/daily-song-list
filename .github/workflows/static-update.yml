@@ -27,6 +27,10 @@ on:
         description: "Comma-separated YouTube video IDs to inspect first (maximum 20)"
         required: false
         default: ""
+      drain_round:
+        description: "Internal pending-drain continuation round (0-96)"
+        required: false
+        default: "0"
 
 permissions:
   actions: write
@@ -103,8 +107,18 @@ jobs:
         env:
           REQUESTED_VIDEO_LIMIT: ${{ inputs.video_limit || '60' }}
           REQUESTED_PRIORITY_VIDEO_IDS: ${{ inputs.priority_video_ids || '' }}
+          REQUESTED_DRAIN_ROUND: ${{ inputs.drain_round || '0' }}
         run: |
           set -Eeuo pipefail
+          [[ "$REQUESTED_DRAIN_ROUND" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_DRAIN_ROUND value=$REQUESTED_DRAIN_ROUND" >&2
+            exit 77
+          }
+          (( REQUESTED_DRAIN_ROUND <= 96 )) || {
+            echo "STATIC_UPDATE_DRAIN_ROUND_OUT_OF_RANGE value=$REQUESTED_DRAIN_ROUND max=96" >&2
+            exit 77
+          }
+          echo "drain_round=$REQUESTED_DRAIN_ROUND" >> "$GITHUB_OUTPUT"
           [[ "$REQUESTED_VIDEO_LIMIT" =~ ^[0-9]+$ ]] || {
             echo "STATIC_UPDATE_INVALID_VIDEO_LIMIT value=$REQUESTED_VIDEO_LIMIT" >&2
             exit 77
@@ -243,13 +257,18 @@ jobs:
         run: gh workflow run deploy-pages.yml --ref main
 
       - name: Queue immediate continuation while backlog remains
+        id: continuation
         if: success()
         env:
           GH_TOKEN: ${{ github.token }}
           VIDEO_LIMIT: ${{ steps.drain.outputs.video_limit }}
           PRIORITY_VIDEO_IDS: ${{ steps.drain.outputs.priority_video_ids }}
+          DRAIN_ROUND: ${{ steps.drain.outputs.drain_round }}
+          STATIC_PENDING_PRIORITY_THRESHOLD: "500"
+          STATIC_UPDATE_DRAIN_ROUND_LIMIT: "96"
         run: |
           set -Eeuo pipefail
+          echo "drain_pending=false" >> "$GITHUB_OUTPUT"
           ledger="data/static/v1/recovery/dropped-videos.json"
           dropped=0
           if [[ -f "$ledger" ]]; then
@@ -268,15 +287,37 @@ jobs:
             echo "STATIC_UPDATE_DRAINED pending=0"
             exit 0
           fi
+          if (( pending > STATIC_PENDING_PRIORITY_THRESHOLD )); then
+            echo "drain_pending=true" >> "$GITHUB_OUTPUT"
+            if (( DRAIN_ROUND >= STATIC_UPDATE_DRAIN_ROUND_LIMIT )); then
+              echo "STATIC_UPDATE_PENDING_DRAIN_ROUND_LIMIT pending=$pending dropped=$dropped round=$DRAIN_ROUND max=$STATIC_UPDATE_DRAIN_ROUND_LIMIT"
+              exit 0
+            fi
+            next_round=$((DRAIN_ROUND + 1))
+            echo "STATIC_UPDATE_PENDING_PRIORITY pending=$pending threshold=$STATIC_PENDING_PRIORITY_THRESHOLD dropped=$dropped round=$next_round"
+            for dispatch_attempt in 1 2 3; do
+              if gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS" -f drain_round="$next_round"; then
+                echo "STATIC_UPDATE_PENDING_DRAIN_DISPATCHED attempt=$dispatch_attempt round=$next_round"
+                exit 0
+              fi
+              if [[ $dispatch_attempt -eq 3 ]]; then
+                echo "STATIC_UPDATE_PENDING_DRAIN_DISPATCH_FAILED attempt=$dispatch_attempt" >&2
+                exit 85
+              fi
+              sleep 2
+            done
+          fi
           if (( dropped > 0 )); then
             echo "STATIC_UPDATE_DEFER_TO_REPAIR pending=$pending dropped=$dropped"
             exit 0
           fi
-          echo "STATIC_UPDATE_CONTINUE pending=$pending video_limit=$VIDEO_LIMIT priority_video_ids=$PRIORITY_VIDEO_IDS"
-          gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS"
+          echo "drain_pending=true" >> "$GITHUB_OUTPUT"
+          next_round=$((DRAIN_ROUND + 1))
+          echo "STATIC_UPDATE_CONTINUE pending=$pending video_limit=$VIDEO_LIMIT priority_video_ids=$PRIORITY_VIDEO_IDS round=$next_round"
+          gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS" -f drain_round="$next_round"
 
       - name: Hand off dropped videos to the repair workflow
-        if: success()
+        if: success() && steps.continuation.outputs.drain_pending != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
