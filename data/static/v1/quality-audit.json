@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-23T08:24:07.430Z",
+  "generatedAt": "2026-10-23T08:31:29.636Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 19670,
-  "inputOccurrences": 228481,
-  "visibleVideos": 17106,
-  "visibleOccurrences": 225638,
-  "quarantinedOccurrences": 2288,
+  "inputVideos": 19671,
+  "inputOccurrences": 228508,
+  "visibleVideos": 17107,
+  "visibleOccurrences": 225664,
+  "quarantinedOccurrences": 2289,
   "quarantinedVideos": 1542,
   "deduplicatedOccurrences": 543,
   "artistCatalogArchivedVideos": 0,
@@ -30,7 +30,7 @@
     "unrelated_talk_show_listing": 29,
     "reused_description_across_unrelated_channels": 94,
     "confirmed_chat_segment_label": 1,
-    "confirmed_stream_start_marker": 28,
+    "confirmed_stream_start_marker": 29,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
     "outside_official_release_catalog": 12,
     "reviewed_bad_description_source": 194,
@@ -1155,9 +1155,11 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-10-15": {
-      "quarantinedOccurrences": 0,
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 21,
-      "byReason": {}
+      "byReason": {
+        "confirmed_stream_start_marker": 1
+      }
     },
     "2026-10-16": {
       "quarantinedOccurrences": 1,
@@ -8442,6 +8444,10 @@
     "XNqtOFWrBZ0": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 8
+    },
+    "XgyKzVuOL1U": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "9Mybwol4opU": {
       "quarantinedOccurrences": 0,
