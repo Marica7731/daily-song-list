@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-23T18:05:10.600Z",
-  "scannedVideoCount": 17302,
-  "scannedOccurrenceCount": 227957,
+  "generatedAt": "2026-10-23T18:32:16.230Z",
+  "scannedVideoCount": 17311,
+  "scannedOccurrenceCount": 228071,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -802,14 +802,14 @@
     },
     {
       "date": "2026-10-23",
-      "occurrences": 1070,
+      "occurrences": 1184,
       "quarantinedOccurrences": 1
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 483,
     "possible_activity_chapter": 78,
-    "possible_date_as_artist": 119,
+    "possible_date_as_artist": 120,
     "possible_release_metadata_as_artist": 120,
     "possible_spoken_section": 15,
     "possible_promotion_as_song": 2
@@ -4099,6 +4099,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "受注期間:~11",
+      "artist": "火",
+      "raw": "受注期間:~11/3(火)23:59",
+      "sourceHash": "a0333397cdcd52e37e78d503af51e05e925bf4e632cc98f81a57612874a02fa7",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "8iXbUkXaumQ",
+          "channelName": "水瀬 凪/MINASE Nagi",
+          "publishedAt": "2026-10-23T16:23:18.811Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5113,23 +5130,6 @@
           "videoId": "BmZKDfe5-5M",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-09-23T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "冥王 Θανατος",
-      "artist": "アルバム『Moira』",
-      "raw": "00:10:50 - 冥王 Θανατος / Sound Horizon（アルバム『Moira』）",
-      "sourceHash": "c168c92d7b639316aa129cd5a2207a7d6e4314facc30441d39f3c2c8da09f078",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "8bFzo7a-XOA",
-          "channelName": "九傷(このきず)",
-          "publishedAt": "2026-09-27T06:54:51.348Z"
         }
       ],
       "videoCount": 1,
