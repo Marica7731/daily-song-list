@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-24T03:37:51.990Z",
-  "scannedVideoCount": 17409,
-  "scannedOccurrenceCount": 229232,
+  "generatedAt": "2026-10-24T03:43:08.515Z",
+  "scannedVideoCount": 17412,
+  "scannedOccurrenceCount": 229273,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -802,7 +802,7 @@
     },
     {
       "date": "2026-10-23",
-      "occurrences": 2259,
+      "occurrences": 2300,
       "quarantinedOccurrences": 1
     },
     {
@@ -814,7 +814,7 @@
   "byReason": {
     "possible_unparsed_credits": 485,
     "possible_activity_chapter": 79,
-    "possible_date_as_artist": 122,
+    "possible_date_as_artist": 123,
     "possible_release_metadata_as_artist": 120,
     "possible_spoken_section": 15,
     "possible_promotion_as_song": 2
@@ -4122,6 +4122,23 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "10",
+      "artist": "日",
+      "raw": "16:30 10/25 (日)",
+      "sourceHash": "1a703d988935b2c922fba291985080122d77c9d19536823f53456016f0f2324f",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "4lwAArMXJVE",
+          "channelName": "薄氷かさね / うすらひのごと",
+          "publishedAt": "2026-10-23T22:35:27.869Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "11",
       "artist": "土",
       "raw": "11/14（土）19:00",
@@ -5122,23 +5139,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "ハルジオン",
-      "artist": "YOASOBI／それでも、ハッピーエンド（橋爪駿輝）／2020/05/11",
-      "raw": "0:55:03　ハルジオン／YOASOBI／それでも、ハッピーエンド（橋爪駿輝）／2020/05/11",
-      "sourceHash": "855e07dc70a76e86da86e2887c5c2117a528df922359ce468448cdd95375f889",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "BmZKDfe5-5M",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-23T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -5873,6 +5873,71 @@
           "title": "ことばのおばけがまどからみている",
           "artist": "フロクロ",
           "raw": "18:57 03.♪ ことばのおばけがまどからみている / フロクロ"
+        }
+      ]
+    },
+    {
+      "videoId": "fGrDW-fPQk8",
+      "channelName": "妃玖 - kisaki",
+      "publishedAt": "2026-10-23T15:35:27.869Z",
+      "sourceHash": "b2ae39739b3dde9df8311f83880909bde2ec17593b8645a0a0b34ebf56580528",
+      "total": 23,
+      "explicitNumberedSongs": 14,
+      "knownArtistRows": 14,
+      "unknownNonNumberedRows": 9,
+      "unknownExamples": [
+        {
+          "title": "始まり",
+          "raw": "0:00:00 始まり"
+        },
+        {
+          "title": "素晴らしい舌の動き",
+          "raw": "0:02:35 素晴らしい舌の動き"
+        },
+        {
+          "title": "早口言葉",
+          "raw": "0:05:45 早口言葉"
+        },
+        {
+          "title": "BGM探し",
+          "raw": "0:27:08 BGM探し"
+        },
+        {
+          "title": "歌いきれたかの自認",
+          "raw": "0:42:20 歌いきれたかの自認"
+        },
+        {
+          "title": "気まずそうな妃玖さんww",
+          "raw": "0:55:14  気まずそうな妃玖さんww"
+        },
+        {
+          "title": "自認判定の可否",
+          "raw": "1:16:34 自認判定の可否"
+        },
+        {
+          "title": "用意した曲があと数曲",
+          "raw": "1:21:23 用意した曲があと数曲"
+        },
+        {
+          "title": "むりいいい!",
+          "raw": "1:28:03 むりいいい!"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "ブリキノダンス",
+          "artist": "日向電工",
+          "raw": "0:14:24 01.ブリキノダンス / 日向電工"
+        },
+        {
+          "title": "ずうっといっしょ!",
+          "artist": "キタニタツヤ",
+          "raw": "0:21:18 02.ずうっといっしょ! / キタニタツヤ"
+        },
+        {
+          "title": "おしゃかしゃま",
+          "artist": "RADWIMPS",
+          "raw": "0:30:05 03.おしゃかしゃま / RADWIMPS"
         }
       ]
     },
