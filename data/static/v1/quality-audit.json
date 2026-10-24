@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-24T17:41:49.864Z",
+  "generatedAt": "2026-10-24T17:57:04.088Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 20301,
-  "inputOccurrences": 235612,
-  "visibleVideos": 17696,
-  "visibleOccurrences": 232713,
-  "quarantinedOccurrences": 2333,
-  "quarantinedVideos": 1583,
+  "inputVideos": 20311,
+  "inputOccurrences": 235664,
+  "visibleVideos": 17701,
+  "visibleOccurrences": 232760,
+  "quarantinedOccurrences": 2338,
+  "quarantinedVideos": 1588,
   "deduplicatedOccurrences": 553,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 56,
@@ -28,7 +28,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 37,
     "unrelated_talk_show_listing": 29,
-    "reused_description_across_unrelated_channels": 115,
+    "reused_description_across_unrelated_channels": 120,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 31,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -317,9 +317,9 @@
     {
       "sourceHash": "c9561b5ec046f9f17e7236f5a551b51f369c5e5618d900b21aeac9d2f4a4780b",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 19,
-      "channelCount": 19,
-      "distinctVideoTitles": 19,
+      "videoCount": 24,
+      "channelCount": 24,
+      "distinctVideoTitles": 24,
       "examples": [
         {
           "videoId": "gSnq5itEizE",
@@ -334,9 +334,9 @@
           "raw": "LIVE: ABC7 Chicago Eyewitness News at 6:30 p.m."
         },
         {
-          "videoId": "rka8BKmM-3E",
-          "channelName": "ukuna ch.うくな",
-          "videoTitle": "【Karaoke/#縦型歌枠】作業のおともにどうですか？【うくな/#vtuber 】#shorts",
+          "videoId": "1v6bCR3y-58",
+          "channelName": "創弾き語り OHORI123（OHORI123）",
+          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 19～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
           "raw": "LIVE: ABC7 Chicago Eyewitness News at 6:30 p.m."
         }
       ]
@@ -1280,10 +1280,10 @@
       }
     },
     "2026-10-24": {
-      "quarantinedOccurrences": 24,
+      "quarantinedOccurrences": 29,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "reused_description_across_unrelated_channels": 18,
+        "reused_description_across_unrelated_channels": 23,
         "prayer_broadcast_timeline": 5,
         "date_split_as_song_and_artist": 1
       }
@@ -8740,11 +8740,27 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "1v6bCR3y-58": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "SQqfj3oJey4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "uEiLOgivp7Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "wBwxMTN2D2o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "rka8BKmM-3E": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "F1KGghhM4TA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -8797,6 +8813,10 @@
       "deduplicatedOccurrences": 0
     },
     "WdqCwbGy85c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "UN42H4bajsE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
