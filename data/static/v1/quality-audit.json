@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-24T05:04:13.588Z",
+  "generatedAt": "2026-10-24T05:09:15.179Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 19988,
-  "inputOccurrences": 232308,
+  "inputVideos": 19989,
+  "inputOccurrences": 232309,
   "visibleVideos": 17424,
   "visibleOccurrences": 229461,
-  "quarantinedOccurrences": 2291,
-  "quarantinedVideos": 1542,
+  "quarantinedOccurrences": 2292,
+  "quarantinedVideos": 1543,
   "deduplicatedOccurrences": 544,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 56,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2863,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1178,
+    "prayer_broadcast_timeline": 1179,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 11,
     "reviewed_mixed_chapter_comment": 299,
@@ -209,9 +209,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 116,
-      "channelCount": 113,
-      "distinctVideoTitles": 115,
+      "videoCount": 117,
+      "channelCount": 114,
+      "distinctVideoTitles": 116,
       "examples": [
         {
           "videoId": "3hfZdT3llr8",
@@ -1215,10 +1215,11 @@
       }
     },
     "2026-10-23": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 18,
       "byReason": {
-        "confirmed_stream_start_marker": 1
+        "confirmed_stream_start_marker": 1,
+        "prayer_broadcast_timeline": 1
       }
     },
     "2024-10-20": {
@@ -8577,6 +8578,10 @@
       "deduplicatedOccurrences": 1
     },
     "18M_DU5aLZg": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "KwTtsWQwp3k": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
