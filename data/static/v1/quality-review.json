@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-24T17:21:20.601Z",
-  "scannedVideoCount": 17690,
-  "scannedOccurrenceCount": 232647,
+  "generatedAt": "2026-10-24T17:26:13.898Z",
+  "scannedVideoCount": 17692,
+  "scannedOccurrenceCount": 232679,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -807,13 +807,13 @@
     },
     {
       "date": "2026-10-24",
-      "occurrences": 1184,
+      "occurrences": 1216,
       "quarantinedOccurrences": 16
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 498,
-    "possible_activity_chapter": 86,
+    "possible_activity_chapter": 87,
     "possible_date_as_artist": 128,
     "possible_release_metadata_as_artist": 121,
     "possible_spoken_section": 15,
@@ -2551,6 +2551,23 @@
           "videoId": "4-xQM3F5C3U",
           "channelName": "心恋音むいる / Kokone Muiru【ベルプロ】",
           "publishedAt": "2026-10-23T00:13:58.147Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "来月の予告",
+      "artist": "",
+      "raw": "[0:43:04]  来月の予告",
+      "sourceHash": "063db2012894d7460e8d43e83768ad1fa801fb1be3aedbce5db23f536eab67a3",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "A2e-W2az-HE",
+          "channelName": "memoto",
+          "publishedAt": "2026-10-24T14:17:09.131Z"
         }
       ],
       "videoCount": 1,
@@ -5122,23 +5139,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "亜麻色の髪の乙女",
-      "artist": "島谷ひとみ／2002/05/09",
-      "raw": "2:36:45　亜麻色の髪の乙女／島谷ひとみ／2002/05/09",
-      "sourceHash": "2fe8dda6617670966b7f4e195bb10ee64dc7f8704fb5d270bb68ac5499189a76",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "ybCApdlNpPc",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-13T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -6650,6 +6650,59 @@
           "title": "アンノウン・マザーグース",
           "artist": "wowaka",
           "raw": "28:09 4.アンノウン・マザーグース/wowaka【"
+        }
+      ]
+    },
+    {
+      "videoId": "A2e-W2az-HE",
+      "channelName": "memoto",
+      "publishedAt": "2026-10-24T14:17:09.131Z",
+      "sourceHash": "063db2012894d7460e8d43e83768ad1fa801fb1be3aedbce5db23f536eab67a3",
+      "total": 15,
+      "explicitNumberedSongs": 9,
+      "knownArtistRows": 9,
+      "unknownNonNumberedRows": 6,
+      "unknownExamples": [
+        {
+          "title": "と",
+          "raw": "17:19 と"
+        },
+        {
+          "title": "も)",
+          "raw": "19:13 も)"
+        },
+        {
+          "title": "ハロウィーン",
+          "raw": "[0:20:04]  ハロウィーン"
+        },
+        {
+          "title": "来月の予告",
+          "raw": "[0:43:04]  来月の予告"
+        },
+        {
+          "title": "アカペラ",
+          "raw": "[0:56:18]  アカペラ"
+        },
+        {
+          "title": "今は無理",
+          "raw": "[1:00:06]  今は無理"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "いーあるふぁんくらぶ",
+          "artist": "みきとP feat. GUMI,鏡音リン",
+          "raw": "[0:05:41]  1.  いーあるふぁんくらぶ  //  みきとP feat. GUMI,鏡音リン"
+        },
+        {
+          "title": "愛して愛して愛して",
+          "artist": "きくお feat. 初音ミク",
+          "raw": "[0:13:09]  2.  愛して愛して愛して  //  きくお feat. 初音ミク"
+        },
+        {
+          "title": "唱",
+          "artist": "Ado",
+          "raw": "[0:22:31]  3.  唱  //  Ado"
         }
       ]
     },
