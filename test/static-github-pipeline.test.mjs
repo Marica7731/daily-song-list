@@ -373,8 +373,13 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   assert.match(workflow, /drain_round:/);
   assert.match(workflow, /STATIC_PENDING_PRIORITY_THRESHOLD: "500"/);
   assert.match(workflow, /STATIC_UPDATE_PENDING_PRIORITY pending=\$pending threshold=\$STATIC_PENDING_PRIORITY_THRESHOLD/);
+  assert.match(workflow, /drain_cooldown_seconds:/);
+  assert.match(workflow, /Apply bounded continuation cooldown/);
+  assert.match(workflow, /STATIC_UPDATE_PENDING_DRAIN_COOLDOWN seconds=\$DRAIN_COOLDOWN_SECONDS/);
+  assert.match(workflow, /STATIC_UPDATE_PENDING_DRAIN_WINDOW_COMPLETE pending=\$pending dropped=\$dropped round=\$DRAIN_ROUND max=\$STATIC_UPDATE_DRAIN_ROUND_LIMIT next_round=\$next_round cooldown_seconds=\$drain_cooldown_seconds/);
+  assert.doesNotMatch(workflow, /STATIC_UPDATE_PENDING_DRAIN_ROUND_LIMIT/, "the round cap must restart a new window instead of stopping the queue");
   assert.match(workflow, /STATIC_UPDATE_PENDING_DRAIN_DISPATCHED attempt=\$dispatch_attempt round=\$next_round/);
-  assert.match(workflow, /-f drain_round="\$next_round"/);
+  assert.match(workflow, /-f drain_round="\$next_round" -f drain_cooldown_seconds="\$drain_cooldown_seconds"/);
   assert.match(workflow, /if: success\(\) && steps\.continuation\.outputs\.drain_pending != 'true'/);
   assert(workflow.indexOf("STATIC_UPDATE_PENDING_PRIORITY") < workflow.indexOf("STATIC_UPDATE_DEFER_TO_REPAIR"), "high pending backlog must outrank the historical repair pool");
   assert.match(workflow, /gh workflow run static-update\.yml --ref main -f video_limit="\$VIDEO_LIMIT"/);

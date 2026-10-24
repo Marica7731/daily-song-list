@@ -31,6 +31,10 @@ on:
         description: "Internal pending-drain continuation round (0-96)"
         required: false
         default: "0"
+      drain_cooldown_seconds:
+        description: "Bounded cooldown before a new pending-drain window (0-900)"
+        required: false
+        default: "0"
 
 permissions:
   actions: write
@@ -43,7 +47,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 65
     steps:
       - name: Checkout bounded static inputs
         uses: actions/checkout@v4
@@ -108,6 +112,7 @@ jobs:
           REQUESTED_VIDEO_LIMIT: ${{ inputs.video_limit || '60' }}
           REQUESTED_PRIORITY_VIDEO_IDS: ${{ inputs.priority_video_ids || '' }}
           REQUESTED_DRAIN_ROUND: ${{ inputs.drain_round || '0' }}
+          REQUESTED_DRAIN_COOLDOWN_SECONDS: ${{ inputs.drain_cooldown_seconds || '0' }}
         run: |
           set -Eeuo pipefail
           [[ "$REQUESTED_DRAIN_ROUND" =~ ^[0-9]+$ ]] || {
@@ -119,6 +124,15 @@ jobs:
             exit 77
           }
           echo "drain_round=$REQUESTED_DRAIN_ROUND" >> "$GITHUB_OUTPUT"
+          [[ "$REQUESTED_DRAIN_COOLDOWN_SECONDS" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_DRAIN_COOLDOWN value=$REQUESTED_DRAIN_COOLDOWN_SECONDS" >&2
+            exit 77
+          }
+          (( REQUESTED_DRAIN_COOLDOWN_SECONDS <= 900 )) || {
+            echo "STATIC_UPDATE_DRAIN_COOLDOWN_OUT_OF_RANGE value=$REQUESTED_DRAIN_COOLDOWN_SECONDS max=900" >&2
+            exit 77
+          }
+          echo "drain_cooldown_seconds=$REQUESTED_DRAIN_COOLDOWN_SECONDS" >> "$GITHUB_OUTPUT"
           [[ "$REQUESTED_VIDEO_LIMIT" =~ ^[0-9]+$ ]] || {
             echo "STATIC_UPDATE_INVALID_VIDEO_LIMIT value=$REQUESTED_VIDEO_LIMIT" >&2
             exit 77
@@ -156,6 +170,16 @@ jobs:
             priority_count=$((priority_count + 1))
           done
           echo "priority_video_ids=$priority_ids" >> "$GITHUB_OUTPUT"
+
+      - name: Apply bounded continuation cooldown
+        if: steps.drain.outputs.drain_cooldown_seconds != '0'
+        env:
+          DRAIN_COOLDOWN_SECONDS: ${{ steps.drain.outputs.drain_cooldown_seconds }}
+        run: |
+          set -Eeuo pipefail
+          echo "STATIC_UPDATE_PENDING_DRAIN_COOLDOWN seconds=$DRAIN_COOLDOWN_SECONDS"
+          sleep "$DRAIN_COOLDOWN_SECONDS"
+          echo "STATIC_UPDATE_PENDING_DRAIN_COOLDOWN_COMPLETE seconds=$DRAIN_COOLDOWN_SECONDS"
 
       - name: Collect one bounded batch and rebuild static shards
         env:
@@ -266,6 +290,7 @@ jobs:
           DRAIN_ROUND: ${{ steps.drain.outputs.drain_round }}
           STATIC_PENDING_PRIORITY_THRESHOLD: "500"
           STATIC_UPDATE_DRAIN_ROUND_LIMIT: "96"
+          STATIC_UPDATE_DRAIN_COOLDOWN_SECONDS: "600"
         run: |
           set -Eeuo pipefail
           echo "drain_pending=false" >> "$GITHUB_OUTPUT"
@@ -289,14 +314,16 @@ jobs:
           fi
           if (( pending > STATIC_PENDING_PRIORITY_THRESHOLD )); then
             echo "drain_pending=true" >> "$GITHUB_OUTPUT"
-            if (( DRAIN_ROUND >= STATIC_UPDATE_DRAIN_ROUND_LIMIT )); then
-              echo "STATIC_UPDATE_PENDING_DRAIN_ROUND_LIMIT pending=$pending dropped=$dropped round=$DRAIN_ROUND max=$STATIC_UPDATE_DRAIN_ROUND_LIMIT"
-              exit 0
-            fi
             next_round=$((DRAIN_ROUND + 1))
+            drain_cooldown_seconds=0
+            if (( DRAIN_ROUND >= STATIC_UPDATE_DRAIN_ROUND_LIMIT )); then
+              next_round=0
+              drain_cooldown_seconds=$STATIC_UPDATE_DRAIN_COOLDOWN_SECONDS
+              echo "STATIC_UPDATE_PENDING_DRAIN_WINDOW_COMPLETE pending=$pending dropped=$dropped round=$DRAIN_ROUND max=$STATIC_UPDATE_DRAIN_ROUND_LIMIT next_round=$next_round cooldown_seconds=$drain_cooldown_seconds"
+            fi
             echo "STATIC_UPDATE_PENDING_PRIORITY pending=$pending threshold=$STATIC_PENDING_PRIORITY_THRESHOLD dropped=$dropped round=$next_round"
             for dispatch_attempt in 1 2 3; do
-              if gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS" -f drain_round="$next_round"; then
+              if gh workflow run static-update.yml --ref main -f video_limit="$VIDEO_LIMIT" -f priority_video_ids="$PRIORITY_VIDEO_IDS" -f drain_round="$next_round" -f drain_cooldown_seconds="$drain_cooldown_seconds"; then
                 echo "STATIC_UPDATE_PENDING_DRAIN_DISPATCHED attempt=$dispatch_attempt round=$next_round"
                 exit 0
               fi
