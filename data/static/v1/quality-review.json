@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-24T16:40:28.405Z",
-  "scannedVideoCount": 17683,
-  "scannedOccurrenceCount": 232577,
+  "generatedAt": "2026-10-24T16:44:49.734Z",
+  "scannedVideoCount": 17685,
+  "scannedOccurrenceCount": 232598,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -807,14 +807,14 @@
     },
     {
       "date": "2026-10-24",
-      "occurrences": 1115,
+      "occurrences": 1136,
       "quarantinedOccurrences": 16
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 498,
     "possible_activity_chapter": 86,
-    "possible_date_as_artist": 126,
+    "possible_date_as_artist": 128,
     "possible_release_metadata_as_artist": 121,
     "possible_spoken_section": 15,
     "possible_promotion_as_song": 2
@@ -4326,6 +4326,40 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "18:00 ~ 11/3(火)",
+      "sourceHash": "27f7db72af88cd087b40562acb02da2b070c1dadf3e2bddc00fdc2d87afeb97e",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "t5SRnLseA2o",
+          "channelName": "瀬戸乃とと",
+          "publishedAt": "2026-10-24T15:36:50.414Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~10",
+      "artist": "土",
+      "raw": "21:00～10/24(土)",
+      "sourceHash": "27f7db72af88cd087b40562acb02da2b070c1dadf3e2bddc00fdc2d87afeb97e",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "t5SRnLseA2o",
+          "channelName": "瀬戸乃とと",
+          "publishedAt": "2026-10-24T15:36:50.414Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~ 310",
       "artist": "25",
       "raw": "13:00 ～　③10/25",
@@ -5101,40 +5135,6 @@
           "videoId": "ybCApdlNpPc",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-09-13T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "3月9日",
-      "artist": "レミオロメン／2004/03/09",
-      "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "オリビアを聴きながら",
-      "artist": "杏里／1978/11/05",
-      "raw": "2:07:13　オリビアを聴きながら／杏里／1978/11/05",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
@@ -6960,6 +6960,51 @@
           "title": "トウキョウ・シャンディ・ランデヴ",
           "artist": "ツキミ feat.花譜",
           "raw": "12:06 03.トウキョウ・シャンディ・ランデヴ / ツキミ feat.花譜"
+        }
+      ]
+    },
+    {
+      "videoId": "CuHomGxlVPU",
+      "channelName": "茜音カンナ / Canna Channel【ななしいんく】",
+      "publishedAt": "2026-10-24T14:36:50.414Z",
+      "sourceHash": "31bfc204b213af68cb75fc2a8720691d43310f46e936cb63569b85ce14ab23cf",
+      "total": 18,
+      "explicitNumberedSongs": 13,
+      "knownArtistRows": 14,
+      "unknownNonNumberedRows": 4,
+      "unknownExamples": [
+        {
+          "title": "The Core (humming ver.)",
+          "raw": "1:40:55 The Core (humming ver.)"
+        },
+        {
+          "title": "続けていてよかった",
+          "raw": "1:48:17 続けていてよかった"
+        },
+        {
+          "title": "Next Canna-chan stage",
+          "raw": "1:58:16 Next Canna-chan stage"
+        },
+        {
+          "title": "ついてきてね!",
+          "raw": "2:10:42 ついてきてね!"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "VEIL",
+          "artist": "茜音カンナ",
+          "raw": "0:10:37 01. VEIL / 茜音カンナ"
+        },
+        {
+          "title": "革命道中 - On The Way",
+          "artist": "アイナ・ジ・エンド",
+          "raw": "0:16:36 02. 革命道中 - On The Way / アイナ・ジ・エンド"
+        },
+        {
+          "title": "内秘心書",
+          "artist": "ONE OK ROCK",
+          "raw": "0:23:30 03. 内秘心書 / ONE OK ROCK"
         }
       ]
     },
