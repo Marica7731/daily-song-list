@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-24 12:08 +08:00
+
+- Live health: standard Pages root returned `200`; live meta regenerated to `2026-10-24T03:57:06.030Z` with all-songs `58236`, pending `2892`; raw main reached `2026-10-24T04:02:19.052Z` with videos `17416`, occurrences `229372`, processed `31663`, and pending `2894`.
+- Pagination and manifests: all 15 range/type manifests returned valid totals and page counts; all-songs page 1 has ranks 1-50, page 1165 has 36 items through rank 58236, and page 1166 returns `404`. Search exposes 16 shards; sampled song entity `f2cce8376bdbca6d` returned `796` occurrences across `793` videos.
+- Actions: the pending-drain chain is active (`40060995693`) and its Pages deployment (`40060994239`) is queued. The latest main state completed a 120-item batch (`119` zero-song cooldowns plus `1` published video, `0` fetch failures); the last 100 runs contain no failures.
+- Repair/backlog: dropped `16161`, retry pool `16621`, retry-due `16161`, unreadable shards `0`. The dirty-data batch was skipped because static-update was active; no recovery handoff was needed while the pending chain owns the serialized lane.
+- Capacity: main size is `125012 KB` (about `0.119 GiB`) at `pushed_at=2026-10-24T04:05:59Z`, up about 6.4 MiB from the previous measurement but far below the 8 GiB orphan-reset threshold; no reset was started.
+- Archive audit: `daily-song-list-archive` has no run after `2026-10-12T15:20:14Z`, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-24 10:33 +08:00
 
 - Pending-drain repair: `7b6c60f1b91` removed the permanent stop at round 96; a capped window now restarts after a bounded 600-second cooldown. `8ee71bf6f4c` scales a batch from 60 to 120 only while pending exceeds 500, so live-source arrivals do not keep the backlog flat.
