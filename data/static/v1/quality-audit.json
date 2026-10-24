@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-24T05:46:53.420Z",
+  "generatedAt": "2026-10-24T05:51:15.242Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 19995,
-  "inputOccurrences": 232378,
+  "inputVideos": 19996,
+  "inputOccurrences": 232379,
   "visibleVideos": 17430,
   "visibleOccurrences": 229530,
-  "quarantinedOccurrences": 2292,
-  "quarantinedVideos": 1543,
+  "quarantinedOccurrences": 2293,
+  "quarantinedVideos": 1544,
   "deduplicatedOccurrences": 544,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 56,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2863,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1179,
+    "prayer_broadcast_timeline": 1180,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 11,
     "reviewed_mixed_chapter_comment": 299,
@@ -47,9 +47,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 874,
-      "channelCount": 793,
-      "distinctVideoTitles": 855,
+      "videoCount": 875,
+      "channelCount": 794,
+      "distinctVideoTitles": 856,
       "examples": [
         {
           "videoId": "4-DUe4t2C58",
@@ -1215,11 +1215,11 @@
       }
     },
     "2026-10-23": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 18,
       "byReason": {
-        "confirmed_stream_start_marker": 1,
-        "prayer_broadcast_timeline": 1
+        "prayer_broadcast_timeline": 2,
+        "confirmed_stream_start_marker": 1
       }
     },
     "2024-10-20": {
@@ -8576,6 +8576,10 @@
     "R0oFzEM1riE": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 1
+    },
+    "s7r-gcWy1uw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "18M_DU5aLZg": {
       "quarantinedOccurrences": 1,
