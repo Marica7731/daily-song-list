@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
     inputs:
       video_limit:
-        description: "Maximum pending videos to inspect in each continuous drain run (capped at 60)"
+        description: "Base pending videos per drain run (auto-scaled to 120 above 500 pending; capped at 120)"
         required: false
         default: "60"
       priority_video_ids:
@@ -142,9 +142,18 @@ jobs:
             exit 77
           }
           video_limit="$REQUESTED_VIDEO_LIMIT"
-          if (( video_limit > 60 )); then
-            echo "STATIC_UPDATE_LIMIT_CAPPED requested=$video_limit effective=60"
-            video_limit=60
+          if (( video_limit > 120 )); then
+            echo "STATIC_UPDATE_LIMIT_CAPPED requested=$video_limit effective=120"
+            video_limit=120
+          fi
+          pending="$(node -e "const fs=require('node:fs'); const meta=JSON.parse(fs.readFileSync('data/static/v1/meta.json','utf8')); process.stdout.write(String(Number(meta.pendingVideoCount)||0));")"
+          [[ "$pending" =~ ^[0-9]+$ ]] || {
+            echo "STATIC_UPDATE_INVALID_PENDING value=$pending" >&2
+            exit 76
+          }
+          if (( pending > 500 && video_limit < 120 )); then
+            echo "STATIC_UPDATE_PENDING_BATCH_SCALED requested=$video_limit effective=120 pending=$pending threshold=500"
+            video_limit=120
           fi
           echo "video_limit=$video_limit" >> "$GITHUB_OUTPUT"
 
@@ -192,9 +201,9 @@ jobs:
           DAILY_SONG_REQUEST_DELAY_MS: "400"
           DAILY_SONG_REQUEST_JITTER_MS: "250"
           DAILY_SONG_MAX_429_ERRORS: "6"
-        # 60 videos x 2 retries x 12s plus six 180s 429 cooldowns can approach the 55 minute
-        # job timeout; a killed update writes nothing, so bounding it is safe and keeps the
-        # commit/validate/dispatch steps reachable even on a throttled day.
+        # 120 videos x 2 retries x 12s plus six 180s 429 cooldowns can exhaust the collection
+        # envelope; a killed update writes nothing, so bounding it keeps commit/validate/dispatch
+        # steps reachable even on a throttled day.
         run: timeout --signal=TERM --kill-after=30s 1800 npm run static:update
 
       - name: Validate resumability and shard limits

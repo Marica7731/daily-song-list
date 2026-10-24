@@ -360,8 +360,9 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   assert(workflow.indexOf("Require a green Check code gate on code pushes") < workflow.indexOf("Collect one bounded batch"), "static collection must wait for the code check on push");
   assert.match(workflow, /default: "60"/);
   assert.match(workflow, /Resolve bounded drain size/);
-  assert.match(workflow, /if \(\( video_limit > 60 \)\); then/);
-  assert.match(workflow, /STATIC_UPDATE_LIMIT_CAPPED requested=\$video_limit effective=60/);
+  assert.match(workflow, /if \(\( video_limit > 120 \)\); then/);
+  assert.match(workflow, /STATIC_UPDATE_LIMIT_CAPPED requested=\$video_limit effective=120/);
+  assert.match(workflow, /STATIC_UPDATE_PENDING_BATCH_SCALED requested=\$video_limit effective=120 pending=\$pending threshold=500/);
   assert.match(workflow, /STATIC_VIDEO_LIMIT: \$\{\{ steps\.drain\.outputs\.video_limit \}\}/);
   assert.match(workflow, /priority_video_ids:/);
   assert.match(workflow, /STATIC_PRIORITY_VIDEO_IDS: \$\{\{ steps\.drain\.outputs\.priority_video_ids \}\}/);
