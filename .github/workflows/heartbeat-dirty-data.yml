@@ -297,8 +297,18 @@ jobs:
                 deployed_sha="$SUPERSEDING_SHA"
                 echo "HEARTBEAT_PAGES_SUPERSEDED id=$deploy_id data_commit=$data_commit deployed_sha=$deployed_sha"
               elif (( failed_attempts >= 36 )); then
-                echo "HEARTBEAT_PAGES_FAILED id=$deploy_id status=$status" >&2
-                exit 78
+                # A concurrent deployment can finish just after the last polling iteration.
+                # Recheck successful descendants once before declaring the bounded wait failed.
+                echo "HEARTBEAT_PAGES_GRACE id=$deploy_id status=$status"
+                sleep 12
+                if find_superseding_success; then
+                  deploy_id="$SUPERSEDING_ID"
+                  deployed_sha="$SUPERSEDING_SHA"
+                  echo "HEARTBEAT_PAGES_SUPERSEDED id=$deploy_id data_commit=$data_commit deployed_sha=$deployed_sha grace=true"
+                else
+                  echo "HEARTBEAT_PAGES_FAILED id=$deploy_id status=$status" >&2
+                  exit 78
+                fi
               else
                 sleep 5
                 continue

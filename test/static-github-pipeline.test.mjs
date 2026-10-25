@@ -411,6 +411,7 @@ test("derived static output is rebuilt for Pages instead of committed", () => {
   }
 
   const deploy = fs.readFileSync(path.resolve(".github/workflows/deploy-pages.yml"), "utf8");
+  assert.match(deploy, /cancel-in-progress: false/u, "a running Pages deployment must finish before a newer data commit deploys");
   assert.match(deploy, /npm run static:rebuild/);
   assert.match(deploy, /npm run static:validate/);
   assert.match(deploy, /scripts/);
