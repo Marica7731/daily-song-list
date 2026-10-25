@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-26 03:56 +08:00
+
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T19:45:57.407Z` reported videos `18194`, occurrences `237891`, processed `32594`, pending `2425`, and all-songs `59970`; the newer raw-`a1a2dc679c6` meta returned `200` at `2026-10-25T19:48:49.004Z` with pending `2305`.
+- Pagination and manifests: all 15 range/type manifests passed 27 first/last-page probes; all-songs page 1200 has 20 items through rank 59970, page 1201 returns `404`. All 16 search shards matched declared counts and byte sizes (`87646` items); sampled song entity `f2cce8376bdbca6d` has `809` occurrences across `806` distinct videos.
+- Actions: Pages `40227768310` and update `40227770196` succeeded for `2a402da`; the next update/Pages runs `40228102121`/`40228100157` are active for `a1a2dc679c6`. The latest 100 runs contain no failures (95 success, 3 cancelled, 2 pending).
+- Repair/backlog: `data/static/v1/recovery/repair-last-run.txt` still reports retry pool `16621`, retry-due `16161`, repairable `16621`, abandoned `0`, unreadable `0`, and queue `2938`. The dirty-data batch was skipped because static update and Pages were active.
+- Capacity: main is `132851 KB` (about `0.127 GiB`) at `pushed_at=2026-10-25T19:52:35Z`, down `9846 KB` from the prior `142697 KB` reading and far below the 8 GiB orphan-reset threshold; no reset was needed.
+- Archive audit: `daily-song-list-archive` has no run after `2026-10-12T15:20:14Z`, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-26 02:01 +08:00
 
 - Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T17:48:39.237Z` reported videos `18172`, occurrences `237723`, processed `32572`, pending `2291`, and all-songs `59905`; the newer raw-`c3a0b0def8a` meta returned `200` at `2026-10-25T17:54:10.385Z` with pending `2283`.
