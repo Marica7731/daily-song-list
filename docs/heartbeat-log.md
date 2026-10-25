@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-25 14:06 +08:00
+
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T05:54:12.479Z` reported videos `17881`, occurrences `234757`, processed `32216`, pending `2618`, and all-songs `59313`; the newer raw-`b96aedf1630` meta also returned `200` at `2026-10-25T05:58:53.762Z` with pending `2554`.
+- Pagination and manifests: all 15 range/type manifests passed 29 first/last-page probes; all-songs page 1187 has 13 items through rank 59313, page 1188 returns `404`. All 16 search shards matched declared counts and byte sizes (`86706` items); sampled song entity `f2cce8376bdbca6d` has `801` occurrences across `798` distinct videos.
+- Actions: Pages `40167439253` succeeded for `ddd8722`; update `40167440541` also succeeded, and the next update/Pages runs `40167763761`/`40167762344` are active for `b96aedf1630`. The latest 100 runs contain no failures (99 success, 1 pending).
+- Repair/backlog: `data/static/v1/recovery/repair-last-run.txt` still reports retry pool `16621`, retry-due `16161`, repairable `16621`, abandoned `0`, unreadable `0`, and queue `2938`. The dirty-data batch was skipped because static update and Pages were active.
+- Capacity: main is `135964 KB` (about `0.130 GiB`) at `pushed_at=2026-10-25T05:58:29Z`, up `17752 KB` from the prior `118212 KB` reading as repository packs accumulated; it remains far below the 8 GiB orphan-reset threshold, so no reset was started.
+- Archive audit: `daily-song-list-archive` has no run after `2026-10-12T15:20:14Z`, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-25 12:01 +08:00
 
 - Live health: the Pages root returned `200`; live and raw-`5024b0983e0` meta returned `200` at `generatedAt=2026-10-25T03:49:37.182Z` with videos `17845`, occurrences `234391`, processed `32171`, pending `2607`, all-songs `59247`, and search at the same generation time.
