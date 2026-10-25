@@ -312,9 +312,15 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.doesNotMatch(workflow, /data_commit="\$\(git rev-parse HEAD\)"/u);
   assert.match(workflow, /HEARTBEAT_INVALID_DATA_COMMIT/u);
   assert.doesNotMatch(workflow, /git rebase origin\/main/u);
-  assert.match(workflow, /curl -fsSL --max-time 20 https:\/\/marica7731\.github\.io/u, "live verification must follow the Pages custom-domain redirect");
+  assert.match(workflow, /curl -fsSL --max-time 20[^\n]*https:\/\/marica7731\.github\.io/u, "live verification must follow the Pages custom-domain redirect");
+  assert.match(workflow, /Cache-Control: no-cache/u, "live verification must bypass stale edge caches");
   assert.match(workflow, /HEARTBEAT_PAGES_SHA_MISMATCH/u);
+  assert.match(workflow, /HEARTBEAT_PAGES_SUPERSEDED/u);
+  assert.match(workflow, /HEARTBEAT_PAGES_DESCENDANT/u);
+  assert.match(workflow, /compare\/\$data_commit/u);
   assert.match(workflow, /HEARTBEAT_PAGES_STALE/u);
+  assert.match(workflow, /HEARTBEAT_PAGES_META_MISMATCH/u);
+  assert.match(workflow, /jq -S -c \. \| sha256sum/u, "live verification must compare the full canonical meta digest");
   assert.match(workflow, /HEARTBEAT_PAGES_EDGE_UNAVAILABLE/u);
   assert.match(workflow, /deploy-pages\.yml/u);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh |\bjp\b/iu);

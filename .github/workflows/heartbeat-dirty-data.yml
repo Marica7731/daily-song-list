@@ -265,37 +265,100 @@ jobs:
             exit 78
           }
           echo "HEARTBEAT_PAGES_DISPATCH id=$deploy_id data_commit=$data_commit"
+
+          deploy_relation() {
+            gh api "repos/$GITHUB_REPOSITORY/compare/$data_commit...$1" --jq '.status' 2>/dev/null || true
+          }
+
+          find_superseding_success() {
+            local rows id sha relation
+            rows="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 30 --json databaseId,status,conclusion,headSha --jq '.[] | select(.status == "completed" and .conclusion == "success") | [.databaseId,.headSha] | @tsv' 2>/dev/null || true)"
+            while IFS=$'\t' read -r id sha; do
+              [[ -n "$id" && -n "$sha" && "$id" != "$deploy_id" ]] || continue
+              relation="$(deploy_relation "$sha")"
+              if [[ "$relation" == "ahead" || "$relation" == "identical" ]]; then
+                SUPERSEDING_ID="$id"
+                SUPERSEDING_SHA="$sha"
+                return 0
+              fi
+            done <<< "$rows"
+            return 1
+          }
+
+          failed_attempts=0
           for attempt in $(seq 1 180); do
             status="$(gh run view "$deploy_id" --repo "$GITHUB_REPOSITORY" --json status,conclusion --jq '.status + ":" + (.conclusion // "none")' 2>/dev/null || true)"
             if [[ "$status" == "completed:success" ]]; then
               deployed_sha="$(gh run view "$deploy_id" --repo "$GITHUB_REPOSITORY" --json headSha --jq '.headSha')"
-              [[ "$deployed_sha" == "$data_commit" ]] || {
-                echo "HEARTBEAT_PAGES_SHA_MISMATCH expected=$data_commit actual=$deployed_sha" >&2
+            elif [[ "$status" == "completed:failure" || "$status" == "completed:cancelled" ]]; then
+              failed_attempts=$((failed_attempts + 1))
+              if find_superseding_success; then
+                deploy_id="$SUPERSEDING_ID"
+                deployed_sha="$SUPERSEDING_SHA"
+                echo "HEARTBEAT_PAGES_SUPERSEDED id=$deploy_id data_commit=$data_commit deployed_sha=$deployed_sha"
+              elif (( failed_attempts >= 36 )); then
+                echo "HEARTBEAT_PAGES_FAILED id=$deploy_id status=$status" >&2
                 exit 78
-              }
-              expected_generated_at="$(git show "$data_commit:data/static/v1/meta.json" | jq -er '.generatedAt')"
-              live_generated_at="$(curl -fsSL --max-time 20 https://marica7731.github.io/daily-song-list/data/static/v1/meta.json 2>/dev/null | jq -er '.generatedAt' 2>/dev/null || true)"
-              if [[ -n "$live_generated_at" && "$live_generated_at" != "$expected_generated_at" ]]; then
-                echo "HEARTBEAT_PAGES_STALE expected=$expected_generated_at actual=$live_generated_at" >&2
-                exit 78
-              fi
-              if [[ -n "$live_generated_at" ]]; then
-                generated_at="$live_generated_at"
-                echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at"
               else
-                generated_at="$expected_generated_at"
-                echo "::warning title=Live Pages edge unavailable::Using the successful Pages deployment commit and its raw meta.json for bounded verification."
-                echo "HEARTBEAT_PAGES_EDGE_UNAVAILABLE id=$deploy_id generatedAt=$generated_at fallback=raw"
+                sleep 5
+                continue
               fi
-              echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
-              echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
-              exit 0
+            else
+              sleep 5
+              continue
             fi
-            if [[ "$status" == "completed:failure" || "$status" == "completed:cancelled" ]]; then
-              echo "HEARTBEAT_PAGES_FAILED id=$deploy_id status=$status" >&2
+
+            if [[ "$deployed_sha" != "$data_commit" ]]; then
+              relation="$(deploy_relation "$deployed_sha")"
+              if [[ "$relation" != "ahead" && "$relation" != "identical" ]]; then
+                echo "HEARTBEAT_PAGES_SHA_MISMATCH expected=$data_commit actual=$deployed_sha relation=${relation:-unknown}" >&2
+                exit 78
+              fi
+              echo "HEARTBEAT_PAGES_DESCENDANT data_commit=$data_commit deployed_sha=$deployed_sha relation=$relation"
+            fi
+            expected_meta="$(curl -fsSL --max-time 20 "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$deployed_sha/data/static/v1/meta.json")"
+            expected_generated_at="$(printf '%s' "$expected_meta" | jq -er '.generatedAt')"
+            expected_meta_sha="$(printf '%s' "$expected_meta" | jq -S -c . | sha256sum | awk '{print $1}')"
+            live_payload_seen=false
+            live_meta_seen=false
+            live_meta_sha=""
+            live_generated_at=""
+            for live_attempt in $(seq 1 36); do
+              live_meta="$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "https://marica7731.github.io/daily-song-list/data/static/v1/meta.json?heartbeat=$data_commit&attempt=$live_attempt" 2>/dev/null || true)"
+              if [[ -n "$live_meta" ]]; then
+                live_payload_seen=true
+                if printf '%s' "$live_meta" | jq -e . >/dev/null 2>&1; then
+                  live_meta_seen=true
+                  live_generated_at="$(printf '%s' "$live_meta" | jq -er '.generatedAt')"
+                  live_meta_sha="$(printf '%s' "$live_meta" | jq -S -c . | sha256sum | awk '{print $1}')"
+                  if [[ "$live_meta_sha" == "$expected_meta_sha" ]]; then
+                    generated_at="$live_generated_at"
+                    echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=$live_attempt"
+                    echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                    echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                    echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+                  echo "HEARTBEAT_PAGES_STALE attempt=$live_attempt expected=$expected_meta_sha actual=$live_meta_sha generatedAt=$live_generated_at"
+                fi
+              fi
+              sleep 5
+            done
+            if [[ "$live_payload_seen" == "true" ]]; then
+              if [[ "$live_meta_seen" == "true" ]]; then
+                echo "HEARTBEAT_PAGES_META_MISMATCH expected=$expected_meta_sha actual=${live_meta_sha:-none}" >&2
+              else
+                echo "HEARTBEAT_PAGES_META_INVALID" >&2
+              fi
               exit 78
             fi
-            sleep 5
+            generated_at="$expected_generated_at"
+            echo "::warning title=Live Pages edge unavailable::Using the successful Pages deployment commit and its raw meta.json digest for bounded verification."
+            echo "HEARTBEAT_PAGES_EDGE_UNAVAILABLE id=$deploy_id generatedAt=$generated_at metaSha=$expected_meta_sha fallback=raw"
+            echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+            echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+            echo "meta_sha=$expected_meta_sha" >> "$GITHUB_OUTPUT"
+            exit 0
           done
           echo "HEARTBEAT_PAGES_TIMEOUT id=$deploy_id" >&2
           exit 79
