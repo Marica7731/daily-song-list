@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-10-25T07:37:14.643Z",
+  "generatedAt": "2026-10-25T07:42:15.238Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 20577,
-  "inputOccurrences": 238015,
-  "visibleVideos": 17912,
-  "visibleOccurrences": 235055,
-  "quarantinedOccurrences": 2393,
-  "quarantinedVideos": 1643,
+  "inputVideos": 20583,
+  "inputOccurrences": 238088,
+  "visibleVideos": 17917,
+  "visibleOccurrences": 235127,
+  "quarantinedOccurrences": 2394,
+  "quarantinedVideos": 1644,
   "deduplicatedOccurrences": 554,
   "artistCatalogArchivedVideos": 0,
-  "artistCatalogNormalizedOccurrences": 56,
+  "artistCatalogNormalizedOccurrences": 58,
   "artistCatalogArchivedOccurrences": 13,
   "normalizedArtistOccurrences": 445,
   "normalizedReleaseMetadataOccurrences": 1152,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2863,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1236,
+    "prayer_broadcast_timeline": 1237,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 12,
     "reviewed_mixed_chapter_comment": 299,
@@ -209,9 +209,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 145,
-      "channelCount": 142,
-      "distinctVideoTitles": 144,
+      "videoCount": 146,
+      "channelCount": 143,
+      "distinctVideoTitles": 145,
       "examples": [
         {
           "videoId": "3hfZdT3llr8",
@@ -1307,10 +1307,10 @@
       }
     },
     "2026-10-24": {
-      "quarantinedOccurrences": 82,
+      "quarantinedOccurrences": 83,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "prayer_broadcast_timeline": 41,
+        "prayer_broadcast_timeline": 42,
         "reused_description_across_unrelated_channels": 40,
         "date_split_as_song_and_artist": 1
       }
@@ -8914,6 +8914,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "B3T15iB4WjY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "cGhQ0FMqNcs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11414,7 +11418,7 @@
   ],
   "artistCatalogGate": {
     "artistCount": 1,
-    "normalizedOccurrences": 56,
+    "normalizedOccurrences": 58,
     "archivedOccurrences": 13,
     "artists": [
       {
