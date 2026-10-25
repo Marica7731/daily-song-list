@@ -333,7 +333,8 @@ jobs:
             live_meta_seen=false
             live_meta_sha=""
             live_generated_at=""
-            for live_attempt in $(seq 1 36); do
+            # Pages can serve the previous artifact for several minutes after a successful deployment.
+            for live_attempt in $(seq 1 72); do
               live_meta="$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "https://marica7731.github.io/daily-song-list/data/static/v1/meta.json?heartbeat=$data_commit&attempt=$live_attempt" 2>/dev/null || true)"
               if [[ -n "$live_meta" ]]; then
                 live_payload_seen=true
