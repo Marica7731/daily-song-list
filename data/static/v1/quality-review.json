@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-25T04:16:04.520Z",
-  "scannedVideoCount": 17850,
-  "scannedOccurrenceCount": 234436,
+  "generatedAt": "2026-10-25T04:21:24.936Z",
+  "scannedVideoCount": 17853,
+  "scannedOccurrenceCount": 234460,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -772,7 +772,7 @@
     },
     {
       "date": "2026-10-17",
-      "occurrences": 1835,
+      "occurrences": 1842,
       "quarantinedOccurrences": 2
     },
     {
@@ -807,18 +807,18 @@
     },
     {
       "date": "2026-10-24",
-      "occurrences": 2692,
-      "quarantinedOccurrences": 61
+      "occurrences": 2693,
+      "quarantinedOccurrences": 62
     },
     {
       "date": "2026-10-25",
-      "occurrences": 37,
+      "occurrences": 53,
       "quarantinedOccurrences": 1
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 531,
-    "possible_activity_chapter": 87,
+    "possible_activity_chapter": 88,
     "possible_date_as_artist": 131,
     "possible_release_metadata_as_artist": 122,
     "possible_spoken_section": 15,
@@ -2590,6 +2590,23 @@
           "videoId": "7ruAd7OZS_U",
           "channelName": "リンドウネイロ -RindoNeiro-",
           "publishedAt": "2026-10-24T13:30:15.590Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "Vack-ON!! 振り返り",
+      "artist": "",
+      "raw": "2:04:55  Vack-ON!! 振り返り",
+      "sourceHash": "3b1ba1af1cf7b9dcccb815293f85d40d4797b41556636aedc8525db91dba6dfb",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "2OcI8pcvVIA",
+          "channelName": "・*♢CoCoLuce♢*・",
+          "publishedAt": "2026-10-25T03:09:08.581Z"
         }
       ],
       "videoCount": 1,
@@ -5127,23 +5144,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "グッバイ宣言|希望の花",
-      "artist": "さくらんぼキッス 音楽配信リリース",
-      "raw": "［00:09:34］ グッバイ宣言｜希望の花｜さくらんぼキッス 音楽配信リリース",
-      "sourceHash": "a56627072c0577764bf3dc5d0fedc54a070da33336e8ae5d3860e73d1556a688",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "kG7cXWFO_FE",
-          "channelName": "桜咲ちぇりぃ / Osaki Cherry【3D Vtuber】",
-          "publishedAt": "2026-09-12T04:07:05.434Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -7333,6 +7333,47 @@
       ]
     },
     {
+      "videoId": "2OcI8pcvVIA",
+      "channelName": "・*♢CoCoLuce♢*・",
+      "publishedAt": "2026-10-25T03:09:08.581Z",
+      "sourceHash": "3b1ba1af1cf7b9dcccb815293f85d40d4797b41556636aedc8525db91dba6dfb",
+      "total": 16,
+      "explicitNumberedSongs": 13,
+      "knownArtistRows": 13,
+      "unknownNonNumberedRows": 3,
+      "unknownExamples": [
+        {
+          "title": "固まる",
+          "raw": "0:58:13  固まる"
+        },
+        {
+          "title": "どや",
+          "raw": "1:04:25  どや"
+        },
+        {
+          "title": "Vack-ON!! 振り返り",
+          "raw": "2:04:55  Vack-ON!! 振り返り"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "いかないで",
+          "artist": "想太",
+          "raw": "0:20:47  01. いかないで / 想太"
+        },
+        {
+          "title": "Arrietty's Song",
+          "artist": "セシル・コルベル",
+          "raw": "0:35:57  02. Arrietty's Song / セシル・コルベル"
+        },
+        {
+          "title": "雫",
+          "artist": "スキマスイッチ",
+          "raw": "0:42:33  03. 雫 / スキマスイッチ"
+        }
+      ]
+    },
+    {
       "videoId": "syI14Qiz2WM",
       "channelName": "nekome.",
       "publishedAt": "2026-10-16T13:13:38.810Z",
@@ -7633,6 +7674,17 @@
       ]
     },
     {
+      "sourceHash": "00fb0f673012bb73ba16e902afed110e7c41113eaa125906404e28e447476381",
+      "videoCount": 3,
+      "channelCount": 3,
+      "raw": "10.24.21:00開演",
+      "sample": [
+        "nZD5xlwil7w",
+        "XVQsmuzoBPU",
+        "g5E2rlOpQxQ"
+      ]
+    },
+    {
       "sourceHash": "3278b6ad5cf1983985563013198798f5dbd0841bec9d87ab02bc174fb2136700",
       "videoCount": 5,
       "channelCount": 2,
@@ -7783,16 +7835,6 @@
       "sample": [
         "XmYhX5w4cn0",
         "-bVWdjC9FLw"
-      ]
-    },
-    {
-      "sourceHash": "00fb0f673012bb73ba16e902afed110e7c41113eaa125906404e28e447476381",
-      "videoCount": 2,
-      "channelCount": 2,
-      "raw": "10.24.21:00開演",
-      "sample": [
-        "nZD5xlwil7w",
-        "g5E2rlOpQxQ"
       ]
     }
   ]
