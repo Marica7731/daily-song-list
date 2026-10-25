@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-25 18:05 +08:00
+
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T09:54:22.919Z` reported videos `17960`, occurrences `235606`, processed `32349`, pending `2514`, and all-songs `59485`; the newer raw-`7d0cfd8e94b` meta returned `200` at `2026-10-25T09:58:35.206Z` with pending `2512`.
+- Pagination and manifests: all 15 range/type manifests passed 30 first/last-page probes; all-songs page 1190 has 35 items through rank 59485, page 1191 returns `404`. All 16 search shards matched declared counts and byte sizes (`86931` items); sampled song entity `f2cce8376bdbca6d` has `802` occurrences across `799` distinct videos.
+- Actions: Pages `40182820039` and update `40182821550` succeeded for `441405f`; the next update/Pages runs `40183121673`/`40183120011` are active for `7d0cfd8e94b`. The latest 100 runs contain no failures (97 success, 1 cancelled, 2 pending).
+- Repair/backlog: `data/static/v1/recovery/repair-last-run.txt` still reports retry pool `16621`, retry-due `16161`, repairable `16621`, abandoned `0`, unreadable `0`, and queue `2938`. The dirty-data batch was skipped because static update and Pages were active.
+- Capacity: main is `140978 KB` (about `0.134 GiB`) at `pushed_at=2026-10-25T10:02:24Z`, up `5014 KB` from the prior `135964 KB` reading as repository packs accumulated; it remains far below the 8 GiB orphan-reset threshold, so no reset was started.
+- Archive audit: `daily-song-list-archive` has no run after `2026-10-12T15:20:14Z`, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-25 14:06 +08:00
 
 - Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T05:54:12.479Z` reported videos `17881`, occurrences `234757`, processed `32216`, pending `2618`, and all-songs `59313`; the newer raw-`b96aedf1630` meta also returned `200` at `2026-10-25T05:58:53.762Z` with pending `2554`.
