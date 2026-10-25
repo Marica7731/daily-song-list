@@ -226,6 +226,55 @@ test("dirty export reparses raw lines before removing songs", () => {
   );
 });
 
+test("dirty export finds numeric markers and relay participant chapters without dropping relay songs", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dsl-static-relay-review-"));
+  writeJson(path.join(root, "data/static/v1/sources/EF/EF123456789.json"), {
+    videoId: "EF123456789",
+    title: "【歌枠リレー】10時間リレー",
+    channelName: "fixture relay",
+    publishedAt: "2026-01-01T00:00:00.000Z",
+    songs: [
+      { seconds: 10, title: "～ 蜂屋ひまわり", artist: "未記載", raw: "0:10 ～ 蜂屋ひまわり", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 20, title: "【一】", artist: "未記載", raw: "0:20 【一】", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 30, title: "残酷な天使のテーゼ", artist: "高橋洋子", raw: "0:30 残酷な天使のテーゼ / 高橋洋子", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 40, title: "1", artist: "Known Artist", raw: "0:40 1 / Known Artist", sourceId: "relay-source", sourceHash: "relay-hash" },
+    ],
+  });
+  writeJson(path.join(root, "data/static/v1/sources/FG/FG123456789.json"), {
+    videoId: "FG123456789",
+    title: "通常の歌枠",
+    channelName: "fixture channel",
+    publishedAt: "2026-01-01T00:00:00.000Z",
+    songs: [
+      { seconds: 50, title: "～ ただの曲", artist: "未記載", raw: "0:50 ～ ただの曲", sourceId: "ordinary-source", sourceHash: "ordinary-hash" },
+    ],
+  });
+
+  execFileSync(process.execPath, [exporterPath], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      STATIC_DATA_ROOT: path.join(root, "data/static/v1"),
+      STATIC_REVIEW_ROOT: path.join(root, "data/review"),
+      STATIC_NOW: "2026-02-01T00:00:00.000Z",
+    },
+  });
+
+  const names = fs.readdirSync(path.join(root, "data/review/sources"));
+  const relayName = names.find((name) => name.includes("EF123456789"));
+  assert.ok(relayName, "relay participants and numeric markers become review candidates");
+  const payload = JSON.parse(fs.readFileSync(path.join(root, "data/review/sources", relayName), "utf8"));
+  assert.deepEqual(
+    payload.entries.map((entry) => [entry.title, entry.classification, entry.riskReasons[0]]),
+    [
+      ["～ 蜂屋ひまわり", "confirmed_noise", "relay_participant_or_ceremony_chapter"],
+      ["【一】", "confirmed_noise", "bracketed_numeric_marker"],
+    ],
+  );
+  assert.equal(names.some((name) => name.includes("FG123456789")), false, "non-relay wave text is not removed by the relay rule");
+});
+
 test("heartbeat batch rejects unsafe scope and type input", () => {
   const root = fixtureRoot();
   assert.throws(() => runBatch(root, ["--scope", "maybe"]), /--scope/u);
@@ -239,8 +288,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /default: "25"/u);
   assert.match(workflow, /timeout-minutes: 35/u);
   assert.match(workflow, /Require a green Check code gate/u);
-  assert.match(workflow, /Wait for the shared data publishers/u);
-  assert.match(workflow, /\.status == "requested"/u, "requested runs must keep the heartbeat publisher gate closed");
+  assert.doesNotMatch(workflow, /Wait for the shared data publishers|HEARTBEAT_PUBLISHERS_BUSY/u);
   assert.match(workflow, /group: daily-song-list-dirty-heartbeat/u);
   assert.match(workflow, /check-code\.yml/u);
   assert.match(workflow, /static:validate/u);

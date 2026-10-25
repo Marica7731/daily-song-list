@@ -33,6 +33,7 @@ const NOA_POLARIS_AIMER_START_ARTIST_RE =
   /^Aimer(?:[\s\u3000]+|[\s\u3000]*[\/／|｜￤∣丨✦:：\-—–−・･][\s\u3000]*)(?:start|star|スター|スタート)$/iu;
 const BRACKET_OPEN = "([{（［【「『";
 const BRACKET_CLOSE = ")]}）］】」』";
+const BRACKETED_NUMERIC_MARKER_RE = /^[【\[［(（「『]\s*(?:第\s*)?(?:[0-9]{1,3}|[一二三四五六七八九十百千万零〇两]{1,4})(?:\s*(?:位|番|曲目|曲|章|回))?\s*[】\]］)）」』]$/u;
 const OFFICIAL_ARTIST_NAMES = new Map([
   ["ado", "Ado"],
   ["deco27", "DECO*27"],
@@ -1459,6 +1460,7 @@ function isBadSongField(text) {
   const value = String(text || "").trim();
   if (value === "未記載") return false;
   if (!value || /^(歌名|曲名|歌手|原唱|编号|未確定|未确定)$/iu.test(value)) return true;
+  if (BRACKETED_NUMERIC_MARKER_RE.test(value.normalize("NFKC"))) return true;
   if (TIMESTAMP_RE.test(value) && value.match(TIMESTAMP_RE)?.[0] === value) return true;
   if (!/[A-Za-z0-9ぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
   if (/^0\d+[.．]\d+$/u.test(value)) return true;

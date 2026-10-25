@@ -124,38 +124,6 @@ jobs:
           echo "HEARTBEAT_GATE_TIMEOUT sha=$TARGET_SHA" >&2
           exit 72
 
-      - name: Wait for the shared data publishers
-        id: publishers
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -Eeuo pipefail
-          for attempt in $(seq 1 180); do
-            active="$(
-              gh run list --repo "$GITHUB_REPOSITORY" \
-                --workflow static-update.yml \
-                --limit 20 \
-                --json status \
-                --jq '[.[] | select(.status == "requested" or .status == "pending" or .status == "waiting" or .status == "queued" or .status == "in_progress")] | length' \
-                2>/dev/null || printf '0'
-            )"
-            recovery="$(
-              gh run list --repo "$GITHUB_REPOSITORY" \
-                --workflow static-recover-history.yml \
-                --limit 20 \
-                --json status \
-                --jq '[.[] | select(.status == "requested" or .status == "pending" or .status == "waiting" or .status == "queued" or .status == "in_progress")] | length' \
-                2>/dev/null || printf '0'
-            )"
-            if [[ "$active" == "0" && "$recovery" == "0" ]]; then
-              echo "HEARTBEAT_PUBLISHERS_IDLE attempt=$attempt"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "HEARTBEAT_PUBLISHERS_BUSY" >&2
-          exit 80
-
       - name: Rebuild derived static sources
         run: |
           set -Eeuo pipefail

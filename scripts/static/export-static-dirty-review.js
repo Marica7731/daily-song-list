@@ -7,7 +7,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { hashNormalizedText } = require("../curation");
-const { parseTimestampSongs, repairPublishedSongMetadata } = require("../song-utils");
+const { TIMESTAMP_RE, parseTimestampSongs, repairPublishedSongMetadata } = require("../song-utils");
 
 const ROOT = path.resolve(__dirname, "../..");
 const DATA_ROOT = path.resolve(process.env.STATIC_DATA_ROOT || path.join(ROOT, "data/static/v1"));
@@ -18,7 +18,9 @@ const NOW = new Date(process.env.STATIC_NOW || Date.now());
 
 const EXPLICIT_PROMO_OR_SCHEDULE_RE = /(?:NEWS\s*速報|次回配信|記念配信|朝活配信|(?:発売|販売|受注|予約)中(?:です)?|(?:販売|受注|予約|受付)期間)/iu;
 const DATE_OR_TIME_CONTEXT_RE = /(?:\d{1,2}\s*[\/月]\s*\d{1,2}|\d{1,2}\s*日|\d{1,2}\s*(?::|時)\s*\d{0,2}|まで)/u;
-const UNKNOWN_ARTIST_RE = /^(?:|未記載|unknown|n\/a)$/iu;
+const UNKNOWN_ARTIST_RE = /^(?:|未記載|未记载|unknown|n\/a|na|none|null|不明|なし|无|待补歌手|待補歌手|待补|待補|-)$/iu;
+const RELAY_VIDEO_TITLE_RE = /(?:リレー|\brelay\b)/iu;
+const BRACKETED_NUMERIC_RE = /^[【\[［(（「『]\s*(?:第\s*)?(?:[0-9]{1,3}|[一二三四五六七八九十百千万零〇两]{1,4})(?:\s*(?:位|番|曲目|曲|章|回))?\s*[】\]］)）」』]$/u;
 const CONFIRMED_RAW_REJECTIONS = new Set([
   "empty_after_timestamp",
   "obvious_non_song_text",
@@ -146,6 +148,9 @@ function classifyRawLine(song, video, sourceId, sourceHash) {
     return "explicit_schedule_or_promotion";
   }
 
+  const patternReason = classifyHighConfidenceRawPattern(song, video, raw);
+  if (patternReason) return patternReason;
+
   // Published fields have already lost list markers and artist fragments. Reparse the immutable
   // raw line before declaring noise so real songs with degraded display metadata stay intact.
   const rejections = [];
@@ -156,6 +161,30 @@ function classifyRawLine(song, video, sourceId, sourceHash) {
   if (parsed.length) return "";
   const rejection = rejections.find((candidate) => CONFIRMED_RAW_REJECTIONS.has(candidate.reason));
   return rejection ? `raw_${rejection.reason}` : "";
+}
+
+function classifyHighConfidenceRawPattern(song, video, raw) {
+  const normalized = String(raw || "").normalize("NFKC").trim();
+  const timestamp = normalized.match(TIMESTAMP_RE);
+  const tail = timestamp ? normalized.slice(timestamp.index + timestamp[0].length).trim() : normalized;
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  const artist = String(song?.artist || "").normalize("NFKC").trim();
+
+  if ([tail, title].some(isBracketedNumericMarker)) return "bracketed_numeric_marker";
+  if (!RELAY_VIDEO_TITLE_RE.test(String(video?.title || "")) || !UNKNOWN_ARTIST_RE.test(artist)) return "";
+
+  // Relay programs often use a timestamp plus a leading wave dash for participant and ceremony
+  // chapters. Require both the relay video context and that explicit chapter marker so ordinary
+  // title-only songs in the same program remain untouched.
+  const withoutChapterMarker = tail.replace(/^[\s\u3000～〜~\-—–−ー・･:：|｜]+/u, "").trim();
+  const hadChapterMarker = withoutChapterMarker !== tail;
+  if (!hadChapterMarker || !withoutChapterMarker || withoutChapterMarker.length > 60) return "";
+  if (/[\/／|｜│]/u.test(withoutChapterMarker)) return "";
+  return "relay_participant_or_ceremony_chapter";
+}
+
+function isBracketedNumericMarker(text) {
+  return BRACKETED_NUMERIC_RE.test(String(text || "").normalize("NFKC").trim());
 }
 
 function listJsonFiles(root) {

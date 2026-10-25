@@ -321,8 +321,7 @@
     if (isStrongNonSongMarker(artistText) || isStrongNonSongActivityText(artistText) || isNonSongNoiseTitle(artistText)) return true;
     if (isNumericFragmentArtistText(artistText)) return true;
 
-    const rawText = String(raw || "").normalize("NFKC");
-    return Boolean(rawText && new RegExp(`(?:^|\\s)0?${Number(numericTitle)}\\s*[／/]\\s*${escapeRegExp(artistText)}`, "u").test(rawText));
+    return false;
   }
 
   function isNumericFragmentArtistText(text) {

@@ -48,6 +48,11 @@ test("keeps decimal-looking numeric song titles while stripping real list indexe
   );
 });
 
+test("rejects bracketed numeric chapter markers while keeping decimal numeric songs", () => {
+  const songs = parseTimestampSongs(["0:01 【一】", "0:02 【10】", "0:03 8.32 / *Luna"]);
+  assert.deepEqual(songs.map((song) => [song.title, song.artist]), [["8.32", "*Luna"]]);
+});
+
 test("rejects timestamped regular comment sentences", () => {
   const songs = parseTimestampSongs([
     ["1:45:24 むあんちゃん with JOY子の寄り酔いも", "2:49:33 COOLな酔いどれ知らずも良すぎてするする晩酌が進みました"].join(
