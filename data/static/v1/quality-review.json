@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-25T05:54:12.479Z",
-  "scannedVideoCount": 17881,
-  "scannedOccurrenceCount": 234757,
+  "generatedAt": "2026-10-25T05:58:53.762Z",
+  "scannedVideoCount": 17885,
+  "scannedOccurrenceCount": 234781,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -807,19 +807,19 @@
     },
     {
       "date": "2026-10-24",
-      "occurrences": 2827,
+      "occurrences": 2850,
       "quarantinedOccurrences": 69
     },
     {
       "date": "2026-10-25",
-      "occurrences": 103,
+      "occurrences": 104,
       "quarantinedOccurrences": 1
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 531,
     "possible_activity_chapter": 88,
-    "possible_date_as_artist": 131,
+    "possible_date_as_artist": 132,
     "possible_release_metadata_as_artist": 124,
     "possible_spoken_section": 15,
     "possible_promotion_as_song": 2
@@ -4399,6 +4399,23 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "~11",
+      "artist": "月",
+      "raw": "21:30～11/30(月)",
+      "sourceHash": "16a560fdd34e8ba8439464adf29bdecbaed333e2ed486ff72063c6bb0fcb9cfd",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "en1Tw8O3ht0",
+          "channelName": "yin ║ ｲﾝ",
+          "publishedAt": "2026-10-24T13:49:39.540Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~ 310",
       "artist": "25",
       "raw": "13:00 ～　③10/25",
@@ -5123,23 +5140,6 @@
           "videoId": "xkSW85wy6Dw",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-09-09T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "ミモザ",
-      "artist": "まにこ(オリジナル・フル)リリースVer",
-      "raw": "35:04 ミモザ/まにこ(オリジナル・フル)リリースVer",
-      "sourceHash": "4fbdd989f3f18b10678f690fcce4d68f23ad9eea021ed15855b45256bc68c39a",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "pYXC2j0M0uw",
-          "channelName": "まにこ (manico)",
-          "publishedAt": "2026-09-10T13:33:29.267Z"
         }
       ],
       "videoCount": 1,
