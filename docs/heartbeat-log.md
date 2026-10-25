@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-26 02:01 +08:00
+
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T17:48:39.237Z` reported videos `18172`, occurrences `237723`, processed `32572`, pending `2291`, and all-songs `59905`; the newer raw-`c3a0b0def8a` meta returned `200` at `2026-10-25T17:54:10.385Z` with pending `2283`.
+- Pagination and manifests: all 15 range/type manifests passed 27 first/last-page probes; the three `today` manifests are valid empty manifests at the Shanghai day boundary. All-songs page 1199 has 5 items through rank 59905, page 1200 returns `404`. All 16 search shards matched declared counts and byte sizes (`87531` items); sampled song entity `f2cce8376bdbca6d` has `809` occurrences across `806` distinct videos.
+- Actions: Pages `40218655004` and update `40218656659` succeeded for `1204080`; the next update/Pages runs `40219081956`/`40219079694` are active for `c3a0b0def8a`. The latest 100 runs contain no failures (97 success, 1 cancelled, 2 pending).
+- Repair/backlog: `data/static/v1/recovery/repair-last-run.txt` still reports retry pool `16621`, retry-due `16161`, repairable `16621`, abandoned `0`, unreadable `0`, and queue `2938`. The dirty-data batch was skipped because static update and Pages were active.
+- Capacity: main is `142697 KB` (about `0.136 GiB`) at `pushed_at=2026-10-25T17:59:20Z`, up `17069 KB` from the prior `125628 KB` reading as repository packs accumulated; it remains far below the 8 GiB orphan-reset threshold, so no reset was started.
+- Archive audit: `daily-song-list-archive` has no run after `2026-10-12T15:20:14Z`, and `daily-song-list-archive-overquota` returns `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-26 00:04 +08:00
 
 - Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T15:53:26.932Z` reported videos `18108`, occurrences `237264`, processed `32508`, pending `2335`, and all-songs `59843`; the newer raw-`5d6f637a41c` meta returned `200` at `2026-10-25T15:58:23.380Z` with pending `2333`.
