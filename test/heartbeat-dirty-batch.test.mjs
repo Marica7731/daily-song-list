@@ -320,7 +320,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /compare\/\$data_commit/u);
   assert.match(workflow, /HEARTBEAT_PAGES_STALE/u);
   assert.match(workflow, /HEARTBEAT_PAGES_META_MISMATCH/u);
-  assert.match(workflow, /jq -S -c \. \| sha256sum/u, "live verification must compare the full canonical meta digest");
+  assert.match(workflow, /del\(\.generatedAt\)/u, "live verification must exclude only the volatile generatedAt field");
   assert.match(workflow, /HEARTBEAT_PAGES_EDGE_UNAVAILABLE/u);
   assert.match(workflow, /deploy-pages\.yml/u);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh |\bjp\b/iu);

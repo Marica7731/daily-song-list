@@ -318,7 +318,7 @@ jobs:
             fi
             expected_meta="$(curl -fsSL --max-time 20 "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$deployed_sha/data/static/v1/meta.json")"
             expected_generated_at="$(printf '%s' "$expected_meta" | jq -er '.generatedAt')"
-            expected_meta_sha="$(printf '%s' "$expected_meta" | jq -S -c . | sha256sum | awk '{print $1}')"
+            expected_meta_sha="$(printf '%s' "$expected_meta" | jq -S -c 'del(.generatedAt)' | sha256sum | awk '{print $1}')"
             live_payload_seen=false
             live_meta_seen=false
             live_meta_sha=""
@@ -330,7 +330,7 @@ jobs:
                 if printf '%s' "$live_meta" | jq -e . >/dev/null 2>&1; then
                   live_meta_seen=true
                   live_generated_at="$(printf '%s' "$live_meta" | jq -er '.generatedAt')"
-                  live_meta_sha="$(printf '%s' "$live_meta" | jq -S -c . | sha256sum | awk '{print $1}')"
+                  live_meta_sha="$(printf '%s' "$live_meta" | jq -S -c 'del(.generatedAt)' | sha256sum | awk '{print $1}')"
                   if [[ "$live_meta_sha" == "$expected_meta_sha" ]]; then
                     generated_at="$live_generated_at"
                     echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=$live_attempt"
