@@ -21,6 +21,7 @@ const DATE_OR_TIME_CONTEXT_RE = /(?:\d{1,2}\s*[\/月]\s*\d{1,2}|\d{1,2}\s*日|\d
 const UNKNOWN_ARTIST_RE = /^(?:|未記載|未记载|unknown|n\/a|na|none|null|不明|なし|无|待补歌手|待補歌手|待补|待補|-)$/iu;
 const RELAY_VIDEO_TITLE_RE = /(?:リレー|\brelay\b)/iu;
 const BRACKETED_NUMERIC_RE = /^[【\[［(（「『]\s*(?:第\s*)?(?:[0-9]{1,3}|[一二三四五六七八九十百千万零〇两]{1,4})(?:\s*(?:位|番|曲目|曲|章|回))?\s*[】\]］)）」』]$/u;
+const BARE_NUMERIC_CHAPTER_RE = /^(?:第\s*)?(?:[0-9]{1,3}|[一二三四五六七八九十百千万零〇两]{1,4})(?:\s*(?:位|番|曲目|曲|章|回))?[、.．:：-]?$/u;
 const CONFIRMED_RAW_REJECTIONS = new Set([
   "empty_after_timestamp",
   "obvious_non_song_text",
@@ -170,7 +171,10 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
 
-  if ([tail, title].some(isBracketedNumericMarker)) return "bracketed_numeric_marker";
+  if (timestamp && UNKNOWN_ARTIST_RE.test(artist)) {
+    if ([tail, title].some(isBracketedNumericMarker)) return "bracketed_numeric_marker";
+    if ([tail, title].some(isBareNumericChapterMarker)) return "bare_numeric_chapter_marker";
+  }
   if (!RELAY_VIDEO_TITLE_RE.test(String(video?.title || "")) || !UNKNOWN_ARTIST_RE.test(artist)) return "";
 
   // Relay programs often use a timestamp plus a leading wave dash for participant and ceremony
@@ -185,6 +189,10 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
 
 function isBracketedNumericMarker(text) {
   return BRACKETED_NUMERIC_RE.test(String(text || "").normalize("NFKC").trim());
+}
+
+function isBareNumericChapterMarker(text) {
+  return BARE_NUMERIC_CHAPTER_RE.test(String(text || "").normalize("NFKC").trim());
 }
 
 function listJsonFiles(root) {

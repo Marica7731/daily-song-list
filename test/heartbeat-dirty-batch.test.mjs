@@ -234,10 +234,19 @@ test("dirty export finds numeric markers and relay participant chapters without 
     channelName: "fixture relay",
     publishedAt: "2026-01-01T00:00:00.000Z",
     songs: [
-      { seconds: 10, title: "～ 蜂屋ひまわり", artist: "未記載", raw: "0:10 ～ 蜂屋ひまわり", sourceId: "relay-source", sourceHash: "relay-hash" },
-      { seconds: 20, title: "【一】", artist: "未記載", raw: "0:20 【一】", sourceId: "relay-source", sourceHash: "relay-hash" },
-      { seconds: 30, title: "残酷な天使のテーゼ", artist: "高橋洋子", raw: "0:30 残酷な天使のテーゼ / 高橋洋子", sourceId: "relay-source", sourceHash: "relay-hash" },
-      { seconds: 40, title: "1", artist: "Known Artist", raw: "0:40 1 / Known Artist", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 10, title: "1", artist: "未記載", raw: "0:10 1", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 20, title: "一", artist: "未記載", raw: "0:20 一", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 30, title: "一", artist: "未記載", raw: "0:30 一、", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 40, title: "第1章", artist: "未記載", raw: "0:40 第1章", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 50, title: "第一曲", artist: "未記載", raw: "0:50 第一曲", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 60, title: "～ 蜂屋ひまわり", artist: "未記載", raw: "1:00 ～ 蜂屋ひまわり", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 70, title: "1", artist: "Known Artist", raw: "1:10 1 / Known Artist", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 80, title: "残酷な天使のテーゼ", artist: "高橋洋子", raw: "1:20 残酷な天使のテーゼ / 高橋洋子", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 90, title: "【一】", artist: "Known Artist", raw: "1:30 【一】 / Known Artist", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 100, title: "リレー", artist: "未記載", raw: "1:40 リレー", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 110, title: "【", artist: "未記載", raw: "1:50 【", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 120, title: "12", artist: "未記載", raw: "2:00 １２", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 130, title: "第2章", artist: "未記載", raw: "2:10 第２章", sourceId: "relay-source", sourceHash: "relay-hash" },
     ],
   });
   writeJson(path.join(root, "data/static/v1/sources/FG/FG123456789.json"), {
@@ -246,7 +255,7 @@ test("dirty export finds numeric markers and relay participant chapters without 
     channelName: "fixture channel",
     publishedAt: "2026-01-01T00:00:00.000Z",
     songs: [
-      { seconds: 50, title: "～ ただの曲", artist: "未記載", raw: "0:50 ～ ただの曲", sourceId: "ordinary-source", sourceHash: "ordinary-hash" },
+      { seconds: 140, title: "～ ただの曲", artist: "未記載", raw: "2:20 ～ ただの曲", sourceId: "ordinary-source", sourceHash: "ordinary-hash" },
     ],
   });
 
@@ -268,10 +277,23 @@ test("dirty export finds numeric markers and relay participant chapters without 
   assert.deepEqual(
     payload.entries.map((entry) => [entry.title, entry.classification, entry.riskReasons[0]]),
     [
+      ["1", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["一", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["一", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["第1章", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["第一曲", "confirmed_noise", "bare_numeric_chapter_marker"],
       ["～ 蜂屋ひまわり", "confirmed_noise", "relay_participant_or_ceremony_chapter"],
-      ["【一】", "confirmed_noise", "bracketed_numeric_marker"],
+      ["【", "confirmed_noise", "raw_bad_title"],
+      ["12", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["第2章", "confirmed_noise", "bare_numeric_chapter_marker"],
     ],
   );
+  assert.equal(
+    payload.entries.some((entry) => entry.artist === "Known Artist"),
+    false,
+    "credited numeric or bracket-shaped songs are preserved",
+  );
+  assert.equal(payload.entries.some((entry) => entry.title === "リレー"), false, "the relay word alone is not treated as noise");
   assert.equal(names.some((name) => name.includes("FG123456789")), false, "non-relay wave text is not removed by the relay rule");
 });
 
