@@ -1,6 +1,14 @@
 
 # Heartbeat log
 
+## 2026-10-26 06:50 +08:00
+
+- Dirty-data cleanup ran for real instead of waiting for publishers: batch `40238891561` selected `25` (`history:confirmed_noise`) and pushed `44b7f0b6`; its Pages checker correctly rejected a full-meta comparison because Pages regenerated `generatedAt`. Commit `7a28881` changed the verifier to compare the complete canonical meta content except that volatile field.
+- Verification batch `40240853890` then selected another `25` (`history:confirmed_noise`, available `319`) and pushed `8d0d0ed7`; Generate, Commit, Dispatch/Pages, and Publish evidence all succeeded, `rawHistoryTouched=false`. The all-source deterministic rotation consumed two disjoint 25-record windows rather than only recent days.
+- Live health: the Pages root returned `200`; live meta `generatedAt=2026-10-25T22:41:10.566Z` reported videos `18236`, occurrences `238273`, pending `2318`, and the artist-catalog quality gate intact. The canonical content digest matched the successful deployed descendant after excluding only Pages' regenerated timestamp.
+- Pagination/manifests/entities: all-songs reported `60046` items over `1201` pages; page 1 returned `50` items, the boundary page returned `46`, search exposed `16` shards, and sampled entity `f2cce8376bdbca6d` (`少女レイ`) returned `809` occurrences.
+- Capacity/archive: the last API size reading was `125607 KB` (about `0.120 GiB`), far below the 8 GiB reset threshold; `daily-song-list-archive/actions` returned `404`, confirming Actions stay unavailable, and `daily-song-list-archive-overquota` returned `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-26 03:56 +08:00
 
 - Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-25T19:45:57.407Z` reported videos `18194`, occurrences `237891`, processed `32594`, pending `2425`, and all-songs `59970`; the newer raw-`a1a2dc679c6` meta returned `200` at `2026-10-25T19:48:49.004Z` with pending `2305`.
@@ -493,7 +501,6 @@
 - Refreshed the missing Check gate: run `38241229985` succeeded at `cbf3aad`.
 - Heartbeat batch run `38241093052` succeeded with `25/all/confirmed_noise,parser_corruption`; log recorded `available={} selected={} skippedExisting=0`.
 - Commit and Pages steps were correctly skipped because the bounded batch was empty; no raw history paths changed.
-# Heartbeat log
 
 ## 2026-10-20 20:36 +08:00
 
