@@ -1,6 +1,16 @@
 
 # Heartbeat log
 
+## 2026-10-26 10:43 +08:00
+
+- Dirty-data cleanup ran a full-source 25-record batch through run `40256886222`, producing `ab04a8f`: `2` current and `23` history `confirmed_noise` rows across `13` videos. `rawHistoryTouched=false`, no `data/static/v1/days/**` file changed, and Pages `40257317565` published the deletion. The batch job still failed because a concurrent successor Pages deployment took over about one minute after its six-minute live poll ended.
+- Commit `6a2c774` adds a three-minute, 36-attempt successor grace only after a valid live payload is still stale; it continues to require the serving meta to match either the batch or a verified descendant. Check code `40258422309` passed.
+- Verification run `40258573342` completed successfully. Trigger `7d0b695` selected one history record, pushed `631163d`, kept `rawHistoryTouched=false`, changed no immutable day shard, and Pages `40259031374` published it. The repaired live verifier accepted the bounded successor and the workflow ended green.
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-26T02:28:00.152Z` reported videos `18276`, song occurrences `238553`, pending `2405`, processed `32693`, no-song retry pool `16675`, and all songs `60083` over `1202` pages. Current main `2d2c298` had rebuilt through `generatedAt=2026-10-26T02:33:28.640Z` with videos `18277`, occurrences `238563`, pending `2403`, processed `32694`, retry pool `16675`, and all songs `60084`; the only history gaps remain `2026-08-23` and `2026-08-30`.
+- Pagination/search/entity probes: all five range first pages returned `200` with `50` items; all-songs page `1202` returned `200` with `33` items through rank `60083`; search manifest returned `16` shards with `87824` declared items, shard `0` matched its `5461` count, and entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `809` occurrences across `806` videos.
+- Capacity/actions/archive: main is `130532 KB` (about `0.1245 GiB`), far below the 8 GiB reset threshold; `pushed_at=2026-10-26T02:37:35Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. `daily-song-list-archive/actions` and `daily-song-list-archive-overquota` both return `404`. The test-only trigger is restored to `maxRecords=25` so the normal all-source deterministic cleanup continues immediately.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-26 09:12 +08:00
 
 - Dirty-data cleanup ran twice as separate bounded 25-record batches. Run `40249738209` selected `25` (`history:confirmed_noise`, `9` videos) and pushed `7bfcace`; the data deletion published, but its Pages verifier failed because it compared live output against inherited commit metadata instead of the meta rebuilt by the batch. Fix `9c67317` captures the rebuilt `generatedAt` and canonical meta SHA before restoring derived output, while retaining the bounded descendant-deployment fallback.
