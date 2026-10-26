@@ -7700,9 +7700,22 @@
       "note": "Codex heartbeat approved confirmed_noise from sources/history-static-jPfzeMoPWic-4ce6d71eaa3c2dca8f0e.json",
       "reviewedAt": "",
       "reviewedBy": "codex-heartbeat"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "mqvoxvpgYiU",
+      "occurrenceId": "",
+      "sourceId": "description:mqvoxvpgYiU:6c5844d63dedfbcb",
+      "sourceHash": "6c5844d63dedfbcb759330752a0a81efa435e474f4fc1dc64e211ec18206ae3c",
+      "seconds": 930,
+      "rawHash": "d83733c0b11186bf7703f0a9f463eb5a2601bc474fc9327f12abc6ebf50d7294",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Codex heartbeat approved confirmed_noise from sources/history-static-mqvoxvpgYiU-6c5844d63dedfbcb7593.json",
+      "reviewedAt": "",
+      "reviewedBy": "codex-heartbeat"
     }
   ],
-  "updatedAt": "2026-10-26T02:02:47.311Z",
+  "updatedAt": "2026-10-26T02:23:23.226Z",
   "audit": [
     {
       "appliedAt": "2026-10-20T13:27:54.553Z",
@@ -7819,6 +7832,16 @@
       "patchPath": "../data/review/heartbeat-patch.json",
       "counts": {
         "added": 25,
+        "updated": 0,
+        "ignored": 0,
+        "conflicts": 0
+      }
+    },
+    {
+      "appliedAt": "2026-10-26T02:23:23.226Z",
+      "patchPath": "../data/review/heartbeat-patch.json",
+      "counts": {
+        "added": 1,
         "updated": 0,
         "ignored": 0,
         "conflicts": 0
