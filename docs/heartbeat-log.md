@@ -1,6 +1,16 @@
 
 # Heartbeat log
 
+## 2026-10-27 02:39 +08:00
+
+- Dirty-data cleanup ran immediately through `40376601565` with `25/all/confirmed_noise,parser_corruption`. It selected and published exactly `25` history `confirmed_noise` records across `4` videos, with `75` candidates available at selection time. Commit `3824623` changed only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; `rawHistoryTouched=false` and `0` files under `data/static/v1/days/**` changed.
+- Manual raw-line review confirmed that the selected rows were relay participant/ceremony chapters rather than songs: `Kc9QChUNO8A` removed `14:00〜翠匣タルタ` through `16:30〜小彩みれは`, `mqvoxvpgYiU` removed `16:00ー水篠シオン` through `20:00ー天ノ羽うゆ`, and `rO-mjtMQdBU` removed `19:30〜若魔雲ふわり` through `22:00〜蒼星すい`. The remaining video `ltV3TPkKwLA` is titled `【#ひな祭り歌枠リレー】...`, and its retained opening/closing rows bracket the removed participant chapter rows.
+- The dirty publish verifier initially saw newer static snapshots instead of the intermediate cleanup hash. It stayed bounded, accepted a verified descendant after live propagation, and finished green in `40376601565`; Pages `40377457146` succeeded. The older superseded static-update run `40374892419` was cancelled by concurrency without losing data.
+- Latest main `28caf2e` and live meta are an exact object-for-object match at `generatedAt=2026-10-26T18:27:30.581Z`: `18542` videos, `241415` song occurrences, `2230` pending, `32994` processed, `16964` no-song retry entries, and `60673` all songs over `1214` pages. Static update `40378649421` and Pages `40378643328` succeeded.
+- All six page entry points returned `200`; all `15` range/type manifests matched live meta with zero discrepancies; all-songs page `1214` returned `23` records through rank `60673`. Search exposed `16` shards with `88677` declared entities and shard `0` matched its declared `5510`; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `816` occurrences across `813` videos.
+- Capacity/actions/repair/archive: main size dropped from the prior `144427 KB` observation to `127198 KB` (about `0.121 GiB`), so capacity is non-increasing and no orphan reset was needed; `pushed_at=2026-10-26T18:38:09Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0` and `failures=0`. The archive repository's Actions setting remains `Disable actions`; `daily-song-list-archive-overquota` returns `404`. The `culua.com` custom edge still cannot establish TLS, so verification used the successful Pages deployment plus the exact raw-commit meta comparison for `28caf2e`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 02:10 +08:00
 
 - Dirty-data cleanup ran immediately through full-source batch `40368630739` and succeeded with `25` selected records: `5` current `confirmed_noise` and `20` history `confirmed_noise`, across `8` videos. Publish commit `1552675` changed only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; `rawHistoryTouched=false`, no `data/static/v1/days/**` path changed, and Pages `40369555220` succeeded.
