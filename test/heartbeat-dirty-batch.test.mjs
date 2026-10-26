@@ -337,6 +337,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /curl -fsSL --max-time 20[^\n]*https:\/\/marica7731\.github\.io/u, "live verification must follow the Pages custom-domain redirect");
   assert.match(workflow, /HEARTBEAT_PAGES_GRACE/u, "a final grace check must catch deployments that finish at the poll boundary");
   assert.match(workflow, /for live_attempt in \$\(seq 1 72\)/u, "live Pages propagation must allow a bounded six-minute edge delay");
+  assert.match(workflow, /HEARTBEAT_PAGES_OK source=descendant/u, "live verification must accept a successful descendant deployment as the serving version");
   assert.match(workflow, /Cache-Control: no-cache/u, "live verification must bypass stale edge caches");
   assert.match(workflow, /HEARTBEAT_PAGES_SHA_MISMATCH/u);
   assert.match(workflow, /HEARTBEAT_PAGES_SUPERSEDED/u);

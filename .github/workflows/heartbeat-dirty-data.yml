@@ -285,6 +285,28 @@ jobs:
             return 1
           }
 
+          find_live_descendant_meta() {
+            local rows id sha relation candidate_meta candidate_sha candidate_generated_at
+            rows="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 30 --json databaseId,status,conclusion,headSha --jq '.[] | select(.status == "completed" and .conclusion == "success") | [.databaseId,.headSha] | @tsv' 2>/dev/null || true)"
+            while IFS=$'\t' read -r id sha; do
+              [[ -n "$id" && -n "$sha" ]] || continue
+              relation="$(deploy_relation "$sha")"
+              [[ "$relation" == "ahead" || "$relation" == "identical" ]] || continue
+              candidate_meta="$(curl -fsSL --max-time 20 "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$sha/data/static/v1/meta.json" 2>/dev/null || true)"
+              [[ -n "$candidate_meta" ]] || continue
+              candidate_sha="$(printf '%s' "$candidate_meta" | jq -S -c 'del(.generatedAt)' 2>/dev/null | sha256sum | awk '{print $1}')"
+              if [[ "$candidate_sha" == "$live_meta_sha" ]]; then
+                candidate_generated_at="$(printf '%s' "$candidate_meta" | jq -er '.generatedAt' 2>/dev/null || true)"
+                [[ -n "$candidate_generated_at" ]] || continue
+                SUPERSEDING_ID="$id"
+                SUPERSEDING_SHA="$sha"
+                SUPERSEDING_GENERATED_AT="$candidate_generated_at"
+                return 0
+              fi
+            done <<< "$rows"
+            return 1
+          }
+
           failed_attempts=0
           for attempt in $(seq 1 180); do
             status="$(gh run view "$deploy_id" --repo "$GITHUB_REPOSITORY" --json status,conclusion --jq '.status + ":" + (.conclusion // "none")' 2>/dev/null || true)"
@@ -351,12 +373,32 @@ jobs:
                     exit 0
                   fi
                   echo "HEARTBEAT_PAGES_STALE attempt=$live_attempt expected=$expected_meta_sha actual=$live_meta_sha generatedAt=$live_generated_at"
+                  if (( live_attempt % 6 == 0 )) && find_live_descendant_meta; then
+                    deploy_id="$SUPERSEDING_ID"
+                    deployed_sha="$SUPERSEDING_SHA"
+                    generated_at="$SUPERSEDING_GENERATED_AT"
+                    echo "HEARTBEAT_PAGES_OK source=descendant id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=$live_attempt"
+                    echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                    echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                    echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
                 fi
               fi
               sleep 5
             done
             if [[ "$live_payload_seen" == "true" ]]; then
               if [[ "$live_meta_seen" == "true" ]]; then
+                if find_live_descendant_meta; then
+                  deploy_id="$SUPERSEDING_ID"
+                  deployed_sha="$SUPERSEDING_SHA"
+                  generated_at="$SUPERSEDING_GENERATED_AT"
+                  echo "HEARTBEAT_PAGES_OK source=descendant id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=final"
+                  echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                  echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                  echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
                 echo "HEARTBEAT_PAGES_META_MISMATCH expected=$expected_meta_sha actual=${live_meta_sha:-none}" >&2
               else
                 echo "HEARTBEAT_PAGES_META_INVALID" >&2
