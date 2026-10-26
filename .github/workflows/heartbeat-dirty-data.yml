@@ -169,6 +169,14 @@ jobs:
           node scripts/apply-curation-patch.js data/review/heartbeat-patch.json
           node scripts/static/rebuild-only.js
           npm run static:validate
+          expected_generated_at="$(jq -er '.generatedAt' data/static/v1/meta.json)"
+          expected_meta_sha="$(jq -S -c 'del(.generatedAt)' data/static/v1/meta.json | shasum -a 256 | awk '{print $1}')"
+          [[ "$expected_meta_sha" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "HEARTBEAT_INVALID_EXPECTED_META_SHA value=$expected_meta_sha" >&2
+            exit 75
+          }
+          echo "expected_generated_at=$expected_generated_at" >> "$GITHUB_OUTPUT"
+          echo "expected_meta_sha=$expected_meta_sha" >> "$GITHUB_OUTPUT"
           after_days_hash="$(
             find data/static/v1/days -type f -print0 |
               sort -z |
@@ -242,11 +250,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           DATA_COMMIT: ${{ steps.commit.outputs.commit }}
+          EXPECTED_GENERATED_AT: ${{ steps.batch.outputs.expected_generated_at }}
+          EXPECTED_META_SHA: ${{ steps.batch.outputs.expected_meta_sha }}
         run: |
           set -Eeuo pipefail
           data_commit="$DATA_COMMIT"
           [[ "$data_commit" =~ ^[0-9a-f]{40}$ ]] || {
             echo "HEARTBEAT_INVALID_DATA_COMMIT value=$data_commit" >&2
+            exit 78
+          }
+          expected_generated_at="$EXPECTED_GENERATED_AT"
+          expected_meta_sha="$EXPECTED_META_SHA"
+          [[ -n "$expected_generated_at" ]] || {
+            echo "HEARTBEAT_MISSING_EXPECTED_GENERATED_AT" >&2
+            exit 78
+          }
+          [[ "$expected_meta_sha" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "HEARTBEAT_INVALID_EXPECTED_META_SHA value=$expected_meta_sha" >&2
             exit 78
           }
           before_deploy="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-pages.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0' 2>/dev/null || printf '0')"
@@ -345,9 +365,6 @@ jobs:
               fi
               echo "HEARTBEAT_PAGES_DESCENDANT data_commit=$data_commit deployed_sha=$deployed_sha relation=$relation"
             fi
-            expected_meta="$(curl -fsSL --max-time 20 "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$deployed_sha/data/static/v1/meta.json")"
-            expected_generated_at="$(printf '%s' "$expected_meta" | jq -er '.generatedAt')"
-            expected_meta_sha="$(printf '%s' "$expected_meta" | jq -S -c 'del(.generatedAt)' | sha256sum | awk '{print $1}')"
             live_payload_seen=false
             live_meta_seen=false
             live_meta_sha=""
@@ -399,8 +416,8 @@ jobs:
               exit 78
             fi
             generated_at="$expected_generated_at"
-            echo "::warning title=Live Pages edge unavailable::Using the successful Pages deployment commit and its raw meta.json digest for bounded verification."
-            echo "HEARTBEAT_PAGES_EDGE_UNAVAILABLE id=$deploy_id generatedAt=$generated_at metaSha=$expected_meta_sha fallback=raw"
+            echo "::warning title=Live Pages edge unavailable::Using the successful Pages deployment commit and this run's rebuilt meta.json digest for bounded verification."
+            echo "HEARTBEAT_PAGES_EDGE_UNAVAILABLE id=$deploy_id generatedAt=$generated_at metaSha=$expected_meta_sha fallback=rebuilt"
             echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
             echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
             echo "meta_sha=$expected_meta_sha" >> "$GITHUB_OUTPUT"

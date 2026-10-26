@@ -320,6 +320,12 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
     "dirty review export must run after derived static sources are rebuilt",
   );
   assert.match(workflow, /rebuild-only\.js/u);
+  assert.match(workflow, /expected_generated_at="\$\(jq -er '\.generatedAt' data\/static\/v1\/meta\.json\)"/u);
+  assert.match(workflow, /expected_meta_sha="\$\(jq -S -c 'del\(\.generatedAt\)' data\/static\/v1\/meta\.json/u);
+  assert.ok(
+    workflow.indexOf('echo "expected_meta_sha=$expected_meta_sha"') < workflow.indexOf('git restore --worktree -- data/static/v1'),
+    "the rebuilt meta digest must be captured before derived output is restored",
+  );
   assert.match(workflow, /HEARTBEAT_RAW_HISTORY_CHANGED/u);
   assert.doesNotMatch(workflow, /HEARTBEAT_TRACKED_STATIC_CHANGED/u);
   assert.match(workflow, /git restore --worktree -- data\/static\/v1/u);
@@ -331,6 +337,9 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /git commit-tree "\$tree" -p "\$base"/u);
   assert.match(workflow, /git push origin "\$commit:main"/u);
   assert.match(workflow, /data_commit="\$DATA_COMMIT"/u);
+  assert.match(workflow, /EXPECTED_GENERATED_AT: \$\{\{ steps\.batch\.outputs\.expected_generated_at \}\}/u);
+  assert.match(workflow, /EXPECTED_META_SHA: \$\{\{ steps\.batch\.outputs\.expected_meta_sha \}\}/u);
+  assert.doesNotMatch(workflow, /expected_meta="\$\(curl[^\n]*data\/static\/v1\/meta\.json"\)/u);
   assert.doesNotMatch(workflow, /data_commit="\$\(git rev-parse HEAD\)"/u);
   assert.match(workflow, /HEARTBEAT_INVALID_DATA_COMMIT/u);
   assert.doesNotMatch(workflow, /git rebase origin\/main/u);
@@ -347,6 +356,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /HEARTBEAT_PAGES_META_MISMATCH/u);
   assert.match(workflow, /del\(\.generatedAt\)/u, "live verification must exclude only the volatile generatedAt field");
   assert.match(workflow, /HEARTBEAT_PAGES_EDGE_UNAVAILABLE/u);
+  assert.match(workflow, /fallback=rebuilt/u, "edge fallback must verify this run's rebuilt meta bytes, not stale commit metadata");
   assert.match(workflow, /deploy-pages\.yml/u);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh |\bjp\b/iu);
 
