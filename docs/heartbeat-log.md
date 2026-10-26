@@ -1,6 +1,14 @@
 
 # Heartbeat log
 
+## 2026-10-26 08:22 +08:00
+
+- Dirty-data classification now covers bare Arabic/full-width/Chinese numeric chapter markers and `第N章`/`第N曲` forms only when the original line has a timestamp and the artist is unknown; credited numeric songs such as `1 / Known Artist` remain. Relay programs whose video title contains `リレー` also classify explicit participant/ceremony chapters such as `～ 蜂屋ひまわり`, while the word `リレー` by itself and ordinary relay songs remain. Regression coverage is in `test/heartbeat-dirty-batch.test.mjs`.
+- Four real 25-record batches ran from the full source pool, 100 records total: run `40242952366` -> `bed02f8`, `40244671460` -> `025a142`, `40245968522` -> `3a0cbb6`, and `40247384909` -> `d8d8d0e`. Every batch had `rawHistoryTouched=false`; the last two mixed current and history pools, and selected rows included repeated relay participant chapters that had previously been published as songs.
+- The first three publish checks exposed real concurrency defects rather than data loss: Pages deployments were cancelled by newer static commits, live meta polling stopped before normal edge propagation, and the verifier accepted only its own deploy instead of any verified descendant. Commits `93da3b4`, `cdb87db`, `1f80011`, and `5675a0b` let running deployments finish, bound live propagation to six minutes, accept successful descendants, and finally compare live canonical meta against commits in `data_commit...main`.
+- Run `40247384909` completed successfully after the concurrency fixes. `Check code` run `40248977225` for final commit `5675a0b` is green. Live Pages root returned `200`; live meta at `generatedAt=2026-10-26T00:09:04.592Z` reported videos `18252`, occurrences `238397`, and pending `2344`.
+- After four batches the available history `confirmed_noise` pool fell from `297` to `224`; the latest batch also reported `4` current candidates. Repository size is `122572 KB` (about `0.117 GiB`), far below the 8 GiB reset threshold. `daily-song-list-archive/actions` and `daily-song-list-archive-overquota` both returned `404`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or history download was used.
+
 ## 2026-10-26 06:50 +08:00
 
 - Dirty-data cleanup ran for real instead of waiting for publishers: batch `40238891561` selected `25` (`history:confirmed_noise`) and pushed `44b7f0b6`; its Pages checker correctly rejected a full-meta comparison because Pages regenerated `generatedAt`. Commit `7a28881` changed the verifier to compare the complete canonical meta content except that volatile field.
