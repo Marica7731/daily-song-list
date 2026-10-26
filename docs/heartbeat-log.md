@@ -1,6 +1,16 @@
 
 # Heartbeat log
 
+## 2026-10-27 04:19 +08:00
+
+- Dirty-data cleanup ran immediately through `40392162560` with `25/all/confirmed_noise,parser_corruption`. It selected and published exactly `25` history `confirmed_noise` records across `5` videos, with `50` candidates available at selection time. Commit `420cf09` changed only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; `rawHistoryTouched=false` and `0` files under `data/static/v1/days/**` changed.
+- Manual raw-line review covered all five selected videos. `9k7JmIixe80`, `DCK797meeeM`, `k6oHc9nH95o`, `K7btEHHA5sY`, and `Kc9QChUNO8A` have relay titles and the removed rows are participant, opening, closing, or waiting-room chapters such as `19:00〜 銘兎目あう`, `17:00ー 魔法幼女えう`, and `13:30〜開会式｜ドドドメテオ`. Their genuine timestamped songs with titles or credited artists were left untouched.
+- The cleanup job completed green in `15m23s`; direct Pages deployment `40392853845` succeeded. Concurrent normal static updates moved the live snapshot forward, so the bounded verifier accepted verified descendant `bc33c8e` at `generatedAt=2026-10-26T20:09:34.339Z`. Static update `40393798948` and Pages `40393794514` also succeeded; the following `06b5b86` update/Pages pair was active when the snapshot was taken, not failed.
+- Live health: the standard Pages root and today/3d/7d/30d/all entry points all returned `200`. Live meta matches `bc33c8e`: `18558` videos, `241663` song occurrences, `2220` pending, `33017` processed, and `60730` all songs over `1215` pages. All `15` range/type manifests matched live meta with zero discrepancies; all-songs page `1215` returned `30` records through rank `60730`.
+- Search and entity probes: search has `16` shards declaring `88761` entities, shard `0` returned its declared `5517`; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `816` occurrences across `813` videos.
+- Capacity/actions/repair/archive: main size is `131860 KB` (about `0.126 GiB`), unchanged from this heartbeat's starting reading but `4662 KB` above the previous heartbeat as active packs accumulated; it remains far below the 8 GiB reset threshold, so no orphan reset was started. `pushed_at=2026-10-26T20:18:40Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0` and `failures=0`. The archive repository's Actions setting remains `Disable actions`; `daily-song-list-archive-overquota` returns `404`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 02:39 +08:00
 
 - Dirty-data cleanup ran immediately through `40376601565` with `25/all/confirmed_noise,parser_corruption`. It selected and published exactly `25` history `confirmed_noise` records across `4` videos, with `75` candidates available at selection time. Commit `3824623` changed only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; `rawHistoryTouched=false` and `0` files under `data/static/v1/days/**` changed.
