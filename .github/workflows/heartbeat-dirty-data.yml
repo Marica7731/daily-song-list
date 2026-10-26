@@ -399,6 +399,37 @@ jobs:
               fi
               sleep 5
             done
+
+            if [[ "$live_payload_seen" == "true" && "$live_meta_seen" == "true" ]]; then
+              # A concurrent Pages deployment can finish just after the six-minute live loop.
+              # Keep a bounded grace window so a verified successor is not rejected by one minute.
+              echo "HEARTBEAT_PAGES_LIVE_GRACE id=$deploy_id expected=$expected_meta_sha actual=${live_meta_sha:-none}"
+              for grace_attempt in $(seq 1 36); do
+                sleep 5
+                live_meta="$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "https://marica7731.github.io/daily-song-list/data/static/v1/meta.json?heartbeat=$data_commit&grace=$grace_attempt" 2>/dev/null || true)"
+                if [[ -n "$live_meta" ]] && printf '%s' "$live_meta" | jq -e . >/dev/null 2>&1; then
+                  live_generated_at="$(printf '%s' "$live_meta" | jq -er '.generatedAt')"
+                  live_meta_sha="$(printf '%s' "$live_meta" | jq -S -c 'del(.generatedAt)' | sha256sum | awk '{print $1}')"
+                  if [[ "$live_meta_sha" == "$expected_meta_sha" ]]; then
+                    generated_at="$live_generated_at"
+                    echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=grace$grace_attempt"
+                    echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                    echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                    echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+                  echo "HEARTBEAT_PAGES_STALE attempt=grace$grace_attempt expected=$expected_meta_sha actual=$live_meta_sha generatedAt=$live_generated_at"
+                  if (( grace_attempt % 6 == 0 )) && find_live_descendant_meta; then
+                    generated_at="$LIVE_DESCENDANT_GENERATED_AT"
+                    echo "HEARTBEAT_PAGES_OK source=descendant sha=$LIVE_DESCENDANT_SHA id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=grace$grace_attempt"
+                    echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                    echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                    echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                    exit 0
+                  fi
+                fi
+              done
+            fi
             if [[ "$live_payload_seen" == "true" ]]; then
               if [[ "$live_meta_seen" == "true" ]]; then
                 if find_live_descendant_meta; then
