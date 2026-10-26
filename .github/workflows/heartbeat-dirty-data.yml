@@ -27,7 +27,7 @@ permissions:
 
 concurrency:
   group: daily-song-list-dirty-heartbeat
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   clean:

@@ -312,6 +312,7 @@ test("heartbeat workflow and check-code gate expose the bounded publication cont
   assert.match(workflow, /Require a green Check code gate/u);
   assert.doesNotMatch(workflow, /Wait for the shared data publishers|HEARTBEAT_PUBLISHERS_BUSY/u);
   assert.match(workflow, /group: daily-song-list-dirty-heartbeat/u);
+  assert.match(workflow, /cancel-in-progress: true/u, "duplicate deliveries must collapse to the newest heartbeat run");
   assert.match(workflow, /check-code\.yml/u);
   assert.match(workflow, /static:validate/u);
   assert.match(workflow, /export-static-dirty-review\.js/u);
