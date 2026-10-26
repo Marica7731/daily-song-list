@@ -1,6 +1,14 @@
 
 # Heartbeat log
 
+## 2026-10-26 12:22 +08:00
+
+- Dirty-data cleanup ran immediately through full-source batch `40267364058` after Check code `40267364040` passed. Trigger `acda109` resolved `25/all/confirmed_noise,parser_corruption`; the batch selected `25` history `confirmed_noise` rows across `8` videos and pushed `f2066de`. Available history noise fell to `104`; `rawHistoryTouched=false`, no `data/static/v1/days/**` file changed, Pages `40267734393` succeeded, and the cleanup workflow ended green at `04:20:13Z`.
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-26T04:14:22.798Z` reported videos `18287`, song occurrences `238632`, pending `2562`, processed `32708`, no-song retry pool `16697`, and all songs `60090` over `1202` pages. The only history gaps remain `2026-08-23` and `2026-08-30`.
+- Pagination/search/entity probes: all five range first pages returned `200` with `50` items; all-songs page `1202` returned `200` with `40` items through rank `60090`; search manifest returned `16` shards with `87833` declared items, shard `0` matched its `5459` count, and entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `809` occurrences across `806` videos.
+- Actions/capacity/repair/archive: the concurrent static update `40267992582` and its Pages `40267990308` succeeded, while update `40268291955` remained active and Pages `40268290274` succeeded. Main is `129463 KB` (about `0.1235 GiB`), unchanged from the start of this heartbeat and far below the 8 GiB reset threshold; `pushed_at=2026-10-26T04:17:18Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. `daily-song-list-archive/actions` and `daily-song-list-archive-overquota` both return `404`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-26 10:43 +08:00
 
 - Dirty-data cleanup ran a full-source 25-record batch through run `40256886222`, producing `ab04a8f`: `2` current and `23` history `confirmed_noise` rows across `13` videos. `rawHistoryTouched=false`, no `data/static/v1/days/**` file changed, and Pages `40257317565` published the deletion. The batch job still failed because a concurrent successor Pages deployment took over about one minute after its six-minute live poll ended.
