@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-26T08:09:23.673Z",
+  "generatedAt": "2026-10-26T08:14:33.878Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 21116,
-  "inputOccurrences": 242483,
-  "visibleVideos": 18365,
-  "visibleOccurrences": 239446,
-  "quarantinedOccurrences": 2470,
-  "quarantinedVideos": 1709,
+  "inputVideos": 21120,
+  "inputOccurrences": 242523,
+  "visibleVideos": 18366,
+  "visibleOccurrences": 239480,
+  "quarantinedOccurrences": 2476,
+  "quarantinedVideos": 1712,
   "deduplicatedOccurrences": 554,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 60,
@@ -26,8 +26,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
-    "unrelated_livestream_listing": 47,
-    "unrelated_talk_show_listing": 39,
+    "unrelated_livestream_listing": 50,
+    "unrelated_talk_show_listing": 42,
     "reused_description_across_unrelated_channels": 138,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 32,
@@ -371,9 +371,9 @@
     {
       "sourceHash": "0ae6e666ff9e5634a447ebde5a395da869c2fb6dd937a5f2cd1af53473c679f8",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
+      "videoCount": 13,
+      "channelCount": 13,
+      "distinctVideoTitles": 13,
       "examples": [
         {
           "videoId": "6D1TIWFxz6w",
@@ -382,15 +382,15 @@
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         },
         {
-          "videoId": "0ho9ll13ozk",
-          "channelName": "花開ふりる / hanahira frill",
-          "videoTitle": "【#歌枠︎┊︎KARAOKE】真っ直ぐな歌声の私を見つけて。明日のリアルライブに向けて歌と想いを✨‬【︎#ふりるぱっかん┊︎#vsinger┊︎#Shorts】",
+          "videoId": "t6nMgbNCLB8",
+          "channelName": "グッチ1234",
+          "videoTitle": "弾き語り/sing with guitar 2026/10/25",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         },
         {
-          "videoId": "bWK8F6ukkEk",
-          "channelName": "狗尾なち",
-          "videoTitle": "【夜歌枠】今夜はしっとり行こうと思います",
+          "videoId": "0ho9ll13ozk",
+          "channelName": "花開ふりる / hanahira frill",
+          "videoTitle": "【#歌枠︎┊︎KARAOKE】真っ直ぐな歌声の私を見つけて。明日のリアルライブに向けて歌と想いを✨‬【︎#ふりるぱっかん┊︎#vsinger┊︎#Shorts】",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         }
       ]
@@ -1345,12 +1345,12 @@
       }
     },
     "2026-10-25": {
-      "quarantinedOccurrences": 39,
+      "quarantinedOccurrences": 45,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 21,
-        "unrelated_livestream_listing": 9,
-        "unrelated_talk_show_listing": 9
+        "unrelated_livestream_listing": 12,
+        "unrelated_talk_show_listing": 12
       }
     },
     "2026-10-26": {
@@ -9301,6 +9301,10 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "t6nMgbNCLB8": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "0ho9ll13ozk": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -9331,6 +9335,14 @@
     },
     "0oQQI0r5t-c": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "hcz3GguxMVc": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "B9XKdcFsUWU": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "dtvIvzox3f8": {
