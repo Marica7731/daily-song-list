@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-26T07:58:52.692Z",
+  "generatedAt": "2026-10-26T08:04:11.170Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 21105,
-  "inputOccurrences": 242424,
-  "visibleVideos": 18362,
-  "visibleOccurrences": 239403,
-  "quarantinedOccurrences": 2454,
-  "quarantinedVideos": 1701,
+  "inputVideos": 21113,
+  "inputOccurrences": 242458,
+  "visibleVideos": 18363,
+  "visibleOccurrences": 239423,
+  "quarantinedOccurrences": 2468,
+  "quarantinedVideos": 1708,
   "deduplicatedOccurrences": 554,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 60,
@@ -26,8 +26,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
-    "unrelated_livestream_listing": 39,
-    "unrelated_talk_show_listing": 31,
+    "unrelated_livestream_listing": 46,
+    "unrelated_talk_show_listing": 38,
     "reused_description_across_unrelated_channels": 138,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 32,
@@ -365,6 +365,33 @@
           "channelName": "甘萌ちろる / Chiroru Ch.",
           "videoTitle": "【歌枠】久々お歌♪るん♪ #あまもえちゅー #甘萌ちろる",
           "raw": "Santo Rosário | Sexta-feira | 04:00 | 28/02/25 | Live Ao vivo"
+        }
+      ]
+    },
+    {
+      "sourceHash": "0ae6e666ff9e5634a447ebde5a395da869c2fb6dd937a5f2cd1af53473c679f8",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 9,
+      "channelCount": 9,
+      "distinctVideoTitles": 9,
+      "examples": [
+        {
+          "videoId": "6D1TIWFxz6w",
+          "channelName": "くまのななみ",
+          "videoTitle": "【深夜配信】ギター初めて半年が経ったよ…！【歌枠配信/眠れない人どうぞ/Vtuber/#くまのななみ】",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        },
+        {
+          "videoId": "0ho9ll13ozk",
+          "channelName": "花開ふりる / hanahira frill",
+          "videoTitle": "【#歌枠︎┊︎KARAOKE】真っ直ぐな歌声の私を見つけて。明日のリアルライブに向けて歌と想いを✨‬【︎#ふりるぱっかん┊︎#vsinger┊︎#Shorts】",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        },
+        {
+          "videoId": "bWK8F6ukkEk",
+          "channelName": "狗尾なち",
+          "videoTitle": "【夜歌枠】今夜はしっとり行こうと思います",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         }
       ]
     }
@@ -1318,12 +1345,20 @@
       }
     },
     "2026-10-25": {
-      "quarantinedOccurrences": 25,
+      "quarantinedOccurrences": 37,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 21,
-        "unrelated_livestream_listing": 2,
-        "unrelated_talk_show_listing": 2
+        "unrelated_livestream_listing": 8,
+        "unrelated_talk_show_listing": 8
+      }
+    },
+    "2026-10-26": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "unrelated_livestream_listing": 1,
+        "unrelated_talk_show_listing": 1
       }
     },
     "2024-10-20": {
@@ -9266,8 +9301,28 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "0ho9ll13ozk": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "bWK8F6ukkEk": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "wpx3HfuuIo4": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "l20HHbOcqZw": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "akbURRXDuVU": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "pYWuN6ot1Mw": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "SHgD1pa0V0M": {
@@ -9276,6 +9331,10 @@
     },
     "0oQQI0r5t-c": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "dtvIvzox3f8": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "uDaLDVb9-ns": {
@@ -9353,6 +9412,10 @@
     "yNdsG22bfDE": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 1
+    },
+    "Vh2xV51MpbI": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
     },
     "ewbrnwMJUcQ": {
       "quarantinedOccurrences": 0,
