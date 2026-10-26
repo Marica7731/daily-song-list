@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-26 09:12 +08:00
+
+- Dirty-data cleanup ran twice as separate bounded 25-record batches. Run `40249738209` selected `25` (`history:confirmed_noise`, `9` videos) and pushed `7bfcace`; the data deletion published, but its Pages verifier failed because it compared live output against inherited commit metadata instead of the meta rebuilt by the batch. Fix `9c67317` captures the rebuilt `generatedAt` and canonical meta SHA before restoring derived output, while retaining the bounded descendant-deployment fallback.
+- Verification run `40251545279` completed successfully after Check code `40251545340`: it selected another `25` (`history:confirmed_noise`, `4` videos), pushed `01e945d`, kept `rawHistoryTouched=false` and changed no `data/static/v1/days/**` file. The current and `parser_corruption` pools were traversed but had no remaining candidates; the history `confirmed_noise` pool fell from `224` to `178` across the two disjoint batches. Pages run `40251984068` and the repaired live-meta verification both succeeded.
+- Live health: the Pages root returned `200`; live meta at `generatedAt=2026-10-26T00:59:44.384Z` reported videos `18257`, song occurrences `238410`, pending `2372`, processed `32669`, no-song retry pool `16651`, all songs `60066` over `1202` pages, and quarantined occurrences `2447`. The only history gaps remain `2026-08-23` and `2026-08-30`.
+- Manifest/pagination/entity probes: all five range first pages returned `200` with `50` items; all-songs page `1202` returned `200` with `16` items. Search manifest returned `200` with `16` shards, shard `0` returned `200` with `5462` items, and sampled entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `200` with `809` occurrences.
+- Actions/capacity/archive: static update `40249166530` and Pages `40249164409` succeeded; the repaired cleanup run and its Pages publish also succeeded. Main is `126505 KB` (about `0.121 GiB`), far below the 8 GiB reset threshold, so no orphan reset was needed; `pushed_at=2026-10-26T01:08:50Z`. Repair backlog is `0`, queue is `2372`, and the last failure list is empty. `daily-song-list-archive/actions` and `daily-song-list-archive-overquota` both return `404`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-26 08:22 +08:00
 
 - Dirty-data classification now covers bare Arabic/full-width/Chinese numeric chapter markers and `第N章`/`第N曲` forms only when the original line has a timestamp and the artist is unknown; credited numeric songs such as `1 / Known Artist` remain. Relay programs whose video title contains `リレー` also classify explicit participant/ceremony chapters such as `～ 蜂屋ひまわり`, while the word `リレー` by itself and ordinary relay songs remain. Regression coverage is in `test/heartbeat-dirty-batch.test.mjs`.
