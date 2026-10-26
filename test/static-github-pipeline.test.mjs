@@ -401,6 +401,9 @@ test("static update workflow is GitHub-hosted, resumable, and commits only stati
   assert.match(workflow, /git rebase origin\/main/);
   assert.match(workflow, /STATIC_UPDATE_REBASE_UNEXPECTED_PATH/);
   assert.match(workflow, /\[\[ "\$path" == data\/static\/v1\/\* \]\]/);
+  assert.match(workflow, /STATIC_UPDATE_PAGES_DISPATCHED attempt=\$dispatch_attempt/);
+  assert.match(workflow, /STATIC_UPDATE_PAGES_DISPATCH_RETRY attempt=\$dispatch_attempt/);
+  assert.match(workflow, /STATIC_UPDATE_PAGES_DISPATCH_EXHAUSTED attempts=\$dispatch_attempt/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);
 });
 

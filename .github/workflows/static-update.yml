@@ -287,7 +287,20 @@ jobs:
         if: steps.commit.outputs.updated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy-pages.yml --ref main
+        run: |
+          set -Eeuo pipefail
+          for dispatch_attempt in 1 2 3; do
+            if gh workflow run deploy-pages.yml --ref main; then
+              echo "STATIC_UPDATE_PAGES_DISPATCHED attempt=$dispatch_attempt"
+              exit 0
+            fi
+            if (( dispatch_attempt == 3 )); then
+              echo "STATIC_UPDATE_PAGES_DISPATCH_EXHAUSTED attempts=$dispatch_attempt" >&2
+              exit 1
+            fi
+            echo "STATIC_UPDATE_PAGES_DISPATCH_RETRY attempt=$dispatch_attempt"
+            sleep 2
+          done
 
       - name: Queue immediate continuation while backlog remains
         id: continuation
