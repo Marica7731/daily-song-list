@@ -73,7 +73,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     # The UI proof includes package/font setup plus three viewport passes.
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout GitHub-only delivery surface
         uses: actions/checkout@v4
