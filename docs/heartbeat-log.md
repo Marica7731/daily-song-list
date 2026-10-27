@@ -745,6 +745,17 @@
 
 # Heartbeat log
 
+## 2026-10-28 05:36 +08:00
+
+- Root cause: relay programs use rows such as `🎃 16:30〜:天色メア (あまいろめあ)`. The parser interpreted the parenthesized reading as the artist, so the chapter slipped past the earlier unknown-artist gate. Commit `e60875c` adds a high-confidence rule that requires both relay-video context and the exact `timestamp + 〜: name (reading)` structure, with the parsed artist matching the parenthesized reading. Credited songs and ordinary numeric titles remain outside this rule.
+- Six bounded `scope=all` batches processed `25 + 25 + 25 + 25 + 25 + 7 = 132` `confirmed_noise` records. Batch commits were `f8059a1`, `d07ebf3`, `8204ac4`, `0c3da69`, `ebf2df3`, and `a0ddb08`; the first four exhausted the history pool, and the final batch exhausted the remaining current pool. The final state reports `availableCounts={current:confirmed_noise:7}`, `selectedCounts={current:confirmed_noise:7}`, then no candidates remain after publication.
+- Every selected record was checked against its original `rawHash`. All 132 rows were relay participant or ceremony chapters, including the eleven reported `〜:` names and additional participants in the same videos. No parser-corruption records were selected, no credited song line was selected, and the immutable `data/static/v1/days/**` files were not modified by the cleanup commits.
+- Dirty workflow runs `85` through `90` covered the six batches. Runs `87`-`89` were superseded by the next queued batch after their selector commits had already landed; final cumulative run `90` completed successfully, including its Pages verification and evidence step.
+- Final live verification used `generatedAt=2026-10-27T21:22:30.672Z`. The default Pages root, `meta.json`, and search manifest all return `200`. All 16 search shards declare that exact generated timestamp; targeted `〜:` entities are `0`, and all relay-like `〜:` song entries are also `0`.
+- All eleven reported entity details return `404`: `8281ef41a8e83cb5`, `d8f34b83d97d5fac`, `b9e57007b17a987b`, `975ffabaadb46e85`, `9df9ed69a21e8367`, `4961dc5350f07373`, `88ddbae3e409e7cd`, `d73729020017bdb4`, `76ba9bda83679f8e`, `eb20b8b60d55c0d7`, and `9b85f0bde6d6c2d7`.
+- Preservation check: `ZiBR3GbTzHE` still publishes four real songs, including `red moon / Kalafina`, `Halloween ジャパネスク '24 / Sound Horizon`, and `夜歩き骨牡丹 / 陰陽座`, with zero relay chapter entries. The other checked relay sources no longer have a source file because their descriptions contained only participant or ceremony chapters after cleanup.
+- Verification: `node --test test/heartbeat-dirty-batch.test.mjs test/static-quality-ranges.test.js` passed `70/70`; both dirty-data scripts passed `node --check`. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-28 04:00 +08:00
 
 - `main` fast-forwarded from `1c2832b` to `91919d3`; the 22 intervening commits touched only static day shards, meta, quality, and state files. The fully probed live snapshot had `generatedAt=2026-10-27T19:51:40.061Z` and canonical meta matching `0ee7aba`: videos `18816`, song occurrences `244315`, pending `2142`, processed `33319`, no-song retry pool `17308`, and all songs `61174` over `1224` pages.
