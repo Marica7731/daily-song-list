@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-27 09:56 +08:00
+
+- Dirty-data cleanup ran immediately through `40435545927` (`#77`) with `25/all/confirmed_noise,parser_corruption` and completed green in `3m31s`. The deterministic full-source scan found `selected=0`, so `should publish=false` and no commit was created; this was a genuine all-source rescan after `#76` consumed the remaining `4` candidates, not a skipped run. `data/static/v1/days/**` was untouched.
+- Live GitHub Pages snapshot `7756dab` matches its raw-commit `meta.json` object-for-object at `generatedAt=2026-10-27T01:57:47.703Z`: `18620` videos, `242289` song occurrences, `2244` pending, `33088` processed, `17057` no-song retry entries, and `60822` all songs over `1217` pages. The root and today/3d/7d/30d/all entry points all returned `200`.
+- All `15` range/type manifests matched the live meta and passed first page, boundary page, item count, and next-page `404` checks. All-songs page `1217` returned `22` records through rank `60822`. Search has `16` shards declaring `88897` entities, and shard `0` returned its declared `5529`; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `816` occurrences across `813` videos.
+- Static update `40436117195` (`#1243`) and Pages `40436114317` (`#2544`) succeeded for `7756dab`; the immediate continuation `40436635228` (`#1244`) then started normally for `665f37d` with pending work remaining. Across the latest 100 Actions runs there were `98` successes, `1` cancelled, `1` active, and `0` failures.
+- Capacity/repair/archive: main size fell from `136967 KB` to `128314 KB` (down `8653 KB`, about `0.12237 GiB` total), so capacity is non-increasing and far below the 8 GiB reset threshold; no orphan reset was needed. `pushed_at=2026-10-27T02:07:50Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. The archive repository's Actions setting remains `Disable actions`; its newest run is still `2026-10-12`, and `daily-song-list-archive-overquota` returns `404`. The custom `culua.com` edge still returns `525`, so publication identity was verified through the direct GitHub Pages URL and the exact raw commit.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 08:13 +08:00
 
 - Dirty-data cleanup ran immediately through `40423700766` with `25/all/confirmed_noise,parser_corruption` and completed green in `7m16s`. The deterministic scan found and consumed all `4` remaining `history:confirmed_noise` records across `2` videos, then pushed `4965e73`; there were no current or parser-corruption candidates in this pass. The commit changed only `config/curation-overrides.json`, `data/review/heartbeat-state.json`, and `data/review/heartbeat-summary.json`; `rawHistoryTouched=false` and `0` files under `data/static/v1/days/**` changed.
