@@ -96,16 +96,22 @@ jobs:
       - name: Require a green Check code gate
         id: gate
         env:
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
           TARGET_SHA: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           for attempt in $(seq 1 180); do
+            run_selector=()
+            if [[ "$EVENT_NAME" == "push" ]]; then
+              run_selector+=(--commit "$TARGET_SHA")
+            fi
             conclusion="$(
               gh run list --repo "$GITHUB_REPOSITORY" \
                 --workflow check-code.yml \
                 --branch main \
                 --status completed \
+                "${run_selector[@]}" \
                 --json conclusion \
                 --jq '[.[].conclusion] | if index("success") then "success" elif index("failure") or index("cancelled") then "failed" else "pending" end' \
                 2>/dev/null || printf 'pending'
