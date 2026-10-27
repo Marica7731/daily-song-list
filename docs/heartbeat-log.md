@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-27 11:57 +08:00
+
+- Dirty-data cleanup ran immediately through `40447128009` (`#78`) with `25/all/confirmed_noise,parser_corruption` and completed green in `3m38s`. It rebuilt and scanned the full derived source pool, then generated `selected=0`; Commit and Pages verification were skipped by design, and the dirty workflow created no commit or raw-day change.
+- Live GitHub Pages snapshot `e7f9b92` matches its raw-commit `meta.json` object-for-object at `generatedAt=2026-10-27T03:56:04.315Z`: `18636` videos, `242425` song occurrences, `2253` pending, `33109` processed, `17090` no-song retry entries, and `60842` all songs over `1217` pages. The root and today/3d/7d/30d/all entry points all returned `200`.
+- All `15` range/type manifests matched the live meta and passed first page, boundary page, item count, and next-page `404` checks. All-songs page `1217` returned `42` records through rank `60842`. Search has `16` shards declaring `88923` entities, and shard `0` returned its declared `5531`; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `817` occurrences across `814` videos.
+- Check code `40447128008` (`#155`), static update `40447337386` (`#1267`), and Pages `40447334908` (`#2568`) succeeded. The following static/Pages pair `40447745595`/`40447743617` remained active and was not a failure. Across the latest 100 Actions runs there were `98` successes, `2` active, and `0` failures.
+- Capacity/repair/archive: main size is `136699 KB` (about `0.13037 GiB`), up `8385 KB` from the previous heartbeat as active packs accumulated; it remains far below the 8 GiB reset threshold, so no destructive orphan reset was started. `pushed_at=2026-10-27T04:04:53Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. The archive repository's Actions setting remains `Disable actions`; its newest run is still `2026-10-12`, and `daily-song-list-archive-overquota` returns `404`. The custom `culua.com` edge still returns `525`, so publication identity was verified through the direct GitHub Pages URL and the exact raw commit.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 09:56 +08:00
 
 - Dirty-data cleanup ran immediately through `40435545927` (`#77`) with `25/all/confirmed_noise,parser_corruption` and completed green in `3m31s`. The deterministic full-source scan found `selected=0`, so `should publish=false` and no commit was created; this was a genuine all-source rescan after `#76` consumed the remaining `4` candidates, not a skipped run. `data/static/v1/days/**` was untouched.
