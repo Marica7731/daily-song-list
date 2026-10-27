@@ -745,6 +745,16 @@
 
 # Heartbeat log
 
+## 2026-10-28 04:00 +08:00
+
+- `main` fast-forwarded from `1c2832b` to `91919d3`; the 22 intervening commits touched only static day shards, meta, quality, and state files. The fully probed live snapshot had `generatedAt=2026-10-27T19:51:40.061Z` and canonical meta matching `0ee7aba`: videos `18816`, song occurrences `244315`, pending `2142`, processed `33319`, no-song retry pool `17308`, and all songs `61174` over `1224` pages.
+- The default Pages root and all five `?range=` entry points returned `200`. All `15` range/type manifests passed first page, boundary page, declared count, item count, and next-page `404` checks. Search has `16` shards declaring `89403` entities; shard `0` matched its declared `5559` items and `3277618` bytes. Entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) still has `818` occurrences across `815` videos.
+- Live data advanced during verification to canonical `91919d3` at `generatedAt=2026-10-27T19:56:38.627Z`: videos `18819`, song occurrences `244360`, pending `2145`, processed `33322`, and no-song retry pool `17311`. The all-songs final page was `1224` with `45` items through rank `61195`, and page `1225` returned `404`.
+- Dirty cleanup ran immediately through successful batch `40574628133` (`#84`) on trigger commit `c410c46` with `25/all/confirmed_noise,parser_corruption`; same-SHA Check code `40574627859` (`#163`) passed. The full-source export log reports `scannedSources=18819 reviewSources=0 candidates=0`, the summary reports `selected=0`, `should publish=false`, `updated=false`, and `Pages run=not-dispatched`. Commit and Pages steps were therefore skipped by design, and no `data/static/v1/days/**` file changed.
+- Actions health before the cleanup trigger was `97` successes, `1` cancellation, `2` active continuations, and `0` failures across the latest 100 runs. Static update `40574214031` (`#1460`) and Pages `40574209688` (`#2759`) succeeded for `91919d3`; the following static/Pages pair for `0b0b1f8` was active without failure.
+- Capacity/repair/archive: main size is `131258 KB` (about `0.125 GiB`), down `11878 KB` from the previous `143136 KB` reading and far below the `8 GiB` reset threshold; `pushed_at=2026-10-27T20:05:40Z`. Repair `last-run.json` remains `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage; state has queue `2142`, no-song retry `17311`, processed `33322`, and no last failures. Safari shows the archive repository still has `Disable actions` selected, its newest run remains `2026-10-12`, and `daily-song-list-archive-overquota` returns `404`. The `culua.com` apex still fails TLS (`000`), while `www.culua.com` returns `200`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-28 02:00 +08:00
 
 - `main` fast-forwarded from `0912044` to `724f142` at heartbeat start; the 41 intervening commits touched only the static day shards, meta, quality, and state files. The live Pages snapshot matched `1905980` object-for-object except the volatile `generatedAt`: `generatedAt=2026-10-27T17:51:49.149Z`, videos `18791`, song occurrences `244007`, pending `2129`, processed `33290`, no-song retry pool `17264`, and all songs `61123` over `1223` pages.
