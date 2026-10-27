@@ -745,6 +745,15 @@
 
 # Heartbeat log
 
+## 2026-10-28 02:00 +08:00
+
+- `main` fast-forwarded from `0912044` to `724f142` at heartbeat start; the 41 intervening commits touched only the static day shards, meta, quality, and state files. The live Pages snapshot matched `1905980` object-for-object except the volatile `generatedAt`: `generatedAt=2026-10-27T17:51:49.149Z`, videos `18791`, song occurrences `244007`, pending `2129`, processed `33290`, no-song retry pool `17264`, and all songs `61123` over `1223` pages.
+- The default Pages root and all five `?range=` entry points returned `200`. All `15` range/type manifests passed first page, boundary page, declared count, item count, and next-page `404` checks. Search has `16` shards declaring `89333` entities; shard `0` matched its declared `5556` items and `3271526` bytes. Entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) still has `818` occurrences across `815` videos.
+- Actions health before the cleanup trigger was `96` successes, `2` cancellations, `2` active continuations, and `0` failures across the latest 100 runs. Static update `40555179524` (`#1438`) and Pages `40555175685` (`#2737`) succeeded for the verified `1905980` snapshot; Pages `#2738` for `724f142` also succeeded, while its following static update was still active.
+- Dirty cleanup ran immediately through successful batch `40556701042` (`#83`) on trigger commit `68cd61d` with `25/all/confirmed_noise,parser_corruption`; same-SHA Check code `40556701096` (`#162`) passed. The full-source export log reports `scannedSources=18791 reviewSources=0 candidates=0`, the batch reports `selected=0`, and its summary reports `should publish=false`, `updated=false`, `Pages run=not-dispatched`. Commit and Pages steps were therefore skipped by design, and no `data/static/v1/days/**` file changed.
+- Capacity/repair/archive: main size is `143136 KB` (about `0.136 GiB`), down `715 KB` from the previous `143851 KB` reading and far below the `8 GiB` reset threshold; `pushed_at=2026-10-27T18:05:33Z`. Repair `last-run.json` remains `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage; state has queue `2128`, no-song retry `17263`, processed `33291`, and no last failures. Safari shows the archive repository still has `Disable actions` selected, its newest run remains `2026-10-12`, and `daily-song-list-archive-overquota` returns `404`. The `culua.com` apex still fails TLS (`000`), while `www.culua.com` returns `200`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-19 03:53 +08:00
 
 - 36th dirty-data batch: trigger commit `73466aa027` (`25/all/confirmed_noise,parser_corruption`); Check code `39160365742` and batch `39160365846` succeeded with Generate green and Commit/Pages skipped (`selected=0`, `rawHistoryTouched=false`); trigger Pages `39160365885` succeeded.
