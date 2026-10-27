@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "offsets": {
-    "current:confirmed_noise": 43,
+    "current:confirmed_noise": 11,
     "history:confirmed_noise": 6
   },
   "batches": [
@@ -291,12 +291,24 @@
         "confirmed_noise",
         "parser_corruption"
       ]
+    },
+    {
+      "generatedAt": "2026-10-27T21:01:52.241Z",
+      "selectedCounts": {
+        "current:confirmed_noise": 25
+      },
+      "maxRecords": 25,
+      "scope": "all",
+      "types": [
+        "confirmed_noise",
+        "parser_corruption"
+      ]
     }
   ],
-  "updatedAt": "2026-10-27T20:53:26.593Z",
+  "updatedAt": "2026-10-27T21:01:52.241Z",
   "lastBatch": {
     "schemaVersion": 1,
-    "generatedAt": "2026-10-27T20:53:26.593Z",
+    "generatedAt": "2026-10-27T21:01:52.241Z",
     "requestedScope": "all",
     "requestedTypes": [
       "confirmed_noise",
@@ -304,180 +316,88 @@
     ],
     "maxRecords": 25,
     "availableCounts": {
-      "current:confirmed_noise": 74,
-      "history:confirmed_noise": 8
+      "current:confirmed_noise": 57
     },
     "selectedCounts": {
-      "current:confirmed_noise": 17,
-      "history:confirmed_noise": 8
+      "current:confirmed_noise": 25
     },
     "selected": [
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ROMZzz3zmLY",
-        "sourceId": "description:ROMZzz3zmLY:f5f3d54146ab0780",
-        "sourceHash": "f5f3d54146ab0780f6f500221c724151f54047330a1a419b234e5c8a5074537b",
-        "seconds": 1230,
-        "rawHash": "58e67dbac675c3fb578687768a7d2a2c91e89e26bb8888f18a6468d8128f6768",
-        "action": "drop_entry"
-      },
-      {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "WhzW21qdBkc",
-        "sourceId": "description:WhzW21qdBkc:613fb79e99e54694",
-        "sourceHash": "613fb79e99e546945aa2a1f6eb8fc5bce860d987806122539badb86f4b8d41f1",
-        "seconds": 1110,
-        "rawHash": "c9548da00e0c177fb7079b5add158f95d4bc766bbfa68f1cbbbe01586812ad77",
-        "action": "drop_entry"
-      },
-      {
-        "scope": "current",
-        "classification": "confirmed_noise",
-        "videoId": "ROMZzz3zmLY",
-        "sourceId": "description:ROMZzz3zmLY:f5f3d54146ab0780",
-        "sourceHash": "f5f3d54146ab0780f6f500221c724151f54047330a1a419b234e5c8a5074537b",
+        "videoId": "WwKJqrB_tzE",
+        "sourceId": "description:WwKJqrB_tzE:3db5eb6795a908ed",
+        "sourceHash": "3db5eb6795a908edb319207dcd6dcc0d540406f86a2844a30dfb7436ef1932bd",
         "seconds": 1260,
         "rawHash": "8a3709e4ce62df0fd8e98c847296fee419f7af48884f1d27b3e87446c2e88250",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "WhzW21qdBkc",
-        "sourceId": "description:WhzW21qdBkc:613fb79e99e54694",
-        "sourceHash": "613fb79e99e546945aa2a1f6eb8fc5bce860d987806122539badb86f4b8d41f1",
-        "seconds": 1140,
-        "rawHash": "9c4a6802c9cd5070bc7faf1fa509e6b80bb07e29f4429a8415b7a22eddf6c53c",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ROMZzz3zmLY",
-        "sourceId": "description:ROMZzz3zmLY:f5f3d54146ab0780",
-        "sourceHash": "f5f3d54146ab0780f6f500221c724151f54047330a1a419b234e5c8a5074537b",
+        "videoId": "WwKJqrB_tzE",
+        "sourceId": "description:WwKJqrB_tzE:3db5eb6795a908ed",
+        "sourceHash": "3db5eb6795a908edb319207dcd6dcc0d540406f86a2844a30dfb7436ef1932bd",
         "seconds": 1320,
         "rawHash": "6f3dd35f8f9d5b793c4e6b5e1cfd66de9f052435d9e3220e03b29c3e9dd60985",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "vJqoPYR2B_M",
-        "sourceId": "description:vJqoPYR2B_M:831059963f85b2bd",
-        "sourceHash": "831059963f85b2bdd6b3df3f6725e948053e627c7f14744fa6fb9b0637299549",
-        "seconds": 1260,
-        "rawHash": "f53ca7a2a091bc1ba38fa4b5ef7ef884ecb592d42a88bc38c4981e84a4aff277",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ROMZzz3zmLY",
-        "sourceId": "description:ROMZzz3zmLY:f5f3d54146ab0780",
-        "sourceHash": "f5f3d54146ab0780f6f500221c724151f54047330a1a419b234e5c8a5074537b",
+        "videoId": "WwKJqrB_tzE",
+        "sourceId": "description:WwKJqrB_tzE:3db5eb6795a908ed",
+        "sourceHash": "3db5eb6795a908edb319207dcd6dcc0d540406f86a2844a30dfb7436ef1932bd",
         "seconds": 990,
         "rawHash": "e8f8358542fb89a9f7083f63dde6c4fbabd26026da6bc63baf7f7411946f6d81",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "vJqoPYR2B_M",
-        "sourceId": "description:vJqoPYR2B_M:831059963f85b2bd",
-        "sourceHash": "831059963f85b2bdd6b3df3f6725e948053e627c7f14744fa6fb9b0637299549",
-        "seconds": 1290,
-        "rawHash": "90290168be3bf96246b93fdde02b06928f0e309957174aefa7378732f1bbcb12",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1020,
         "rawHash": "ea89b9da43621b12ad19405a3ac77067bea8b6dc076c205cd9b2d8125ea189f5",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "vJqoPYR2B_M",
-        "sourceId": "description:vJqoPYR2B_M:831059963f85b2bd",
-        "sourceHash": "831059963f85b2bdd6b3df3f6725e948053e627c7f14744fa6fb9b0637299549",
-        "seconds": 990,
-        "rawHash": "27d69abe87e373312defb0f96d29eea0eab078d9737e8e8554b6c30754d78af7",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1050,
         "rawHash": "2e13ad6a64bb195367965ed74cda94b1716a1fc815675ccf707319a4a3068a8f",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "WhzW21qdBkc",
-        "sourceId": "description:WhzW21qdBkc:613fb79e99e54694",
-        "sourceHash": "613fb79e99e546945aa2a1f6eb8fc5bce860d987806122539badb86f4b8d41f1",
-        "seconds": 1020,
-        "rawHash": "9fb5beeba4c1baee37014998bfe84a9feefb5fd18c15ef49e13871d82f0ee1a0",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1080,
         "rawHash": "cb7289603f120315cfcc04b3858282358fe943d0362c53a9a21384af3fd0b51a",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "WhzW21qdBkc",
-        "sourceId": "description:WhzW21qdBkc:613fb79e99e54694",
-        "sourceHash": "613fb79e99e546945aa2a1f6eb8fc5bce860d987806122539badb86f4b8d41f1",
-        "seconds": 1050,
-        "rawHash": "1bba7ca9da19f0bcf20429f242634d871fec63a4fcfb88f4cb7a946e4d3014d3",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1110,
         "rawHash": "bbff0f5d23d62e8f965fcc473e2e0f9f72bf3ed8607f968a871856df82944607",
         "action": "drop_entry"
       },
       {
-        "scope": "history",
-        "classification": "confirmed_noise",
-        "videoId": "WhzW21qdBkc",
-        "sourceId": "description:WhzW21qdBkc:613fb79e99e54694",
-        "sourceHash": "613fb79e99e546945aa2a1f6eb8fc5bce860d987806122539badb86f4b8d41f1",
-        "seconds": 1080,
-        "rawHash": "a722346f96f89eb5356106ec9513dcc7ab76c3304cbbfc201c62066eaec722a9",
-        "action": "drop_entry"
-      },
-      {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1140,
         "rawHash": "d93c7aaea1afd627556944d80ddd8ac2896f08e5517b41d741db2c7dcb43d990",
         "action": "drop_entry"
@@ -485,9 +405,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1170,
         "rawHash": "f89280cf492c9443cdcc3b09dcad843592eb9150f87dd912d40af84a90f52188",
         "action": "drop_entry"
@@ -495,9 +415,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1200,
         "rawHash": "83f82f747d8ef6d43d86343d8517aa2a8a1e9439489c4ad8f969f8e3ec77403e",
         "action": "drop_entry"
@@ -505,9 +425,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1230,
         "rawHash": "58e67dbac675c3fb578687768a7d2a2c91e89e26bb8888f18a6468d8128f6768",
         "action": "drop_entry"
@@ -515,9 +435,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1260,
         "rawHash": "8a3709e4ce62df0fd8e98c847296fee419f7af48884f1d27b3e87446c2e88250",
         "action": "drop_entry"
@@ -525,9 +445,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 1320,
         "rawHash": "6f3dd35f8f9d5b793c4e6b5e1cfd66de9f052435d9e3220e03b29c3e9dd60985",
         "action": "drop_entry"
@@ -535,9 +455,9 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "ScjY9VCs3OA",
-        "sourceId": "description:ScjY9VCs3OA:03b3d266d7ac061e",
-        "sourceHash": "03b3d266d7ac061e726f8cf7b4348293cb383136097e2e42468d1be863fcbc10",
+        "videoId": "ZiBR3GbTzHE",
+        "sourceId": "description:ZiBR3GbTzHE:8ff6e9dbc1513cbc",
+        "sourceHash": "8ff6e9dbc1513cbcd27435c9ad89a8d9954d54dfec6358330b89818045a120ec",
         "seconds": 990,
         "rawHash": "e8f8358542fb89a9f7083f63dde6c4fbabd26026da6bc63baf7f7411946f6d81",
         "action": "drop_entry"
@@ -545,21 +465,111 @@
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "UrKCdcS3xnw",
-        "sourceId": "description:UrKCdcS3xnw:118eca42188001da",
-        "sourceHash": "118eca42188001daa7e744583f287d822f0aa87a4aac06496d852daa7666a1b8",
-        "seconds": 1020,
-        "rawHash": "ea89b9da43621b12ad19405a3ac77067bea8b6dc076c205cd9b2d8125ea189f5",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1080,
+        "rawHash": "cb7289603f120315cfcc04b3858282358fe943d0362c53a9a21384af3fd0b51a",
         "action": "drop_entry"
       },
       {
         "scope": "current",
         "classification": "confirmed_noise",
-        "videoId": "UrKCdcS3xnw",
-        "sourceId": "description:UrKCdcS3xnw:118eca42188001da",
-        "sourceHash": "118eca42188001daa7e744583f287d822f0aa87a4aac06496d852daa7666a1b8",
-        "seconds": 1050,
-        "rawHash": "2e13ad6a64bb195367965ed74cda94b1716a1fc815675ccf707319a4a3068a8f",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1110,
+        "rawHash": "bbff0f5d23d62e8f965fcc473e2e0f9f72bf3ed8607f968a871856df82944607",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1140,
+        "rawHash": "d93c7aaea1afd627556944d80ddd8ac2896f08e5517b41d741db2c7dcb43d990",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1170,
+        "rawHash": "f89280cf492c9443cdcc3b09dcad843592eb9150f87dd912d40af84a90f52188",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1200,
+        "rawHash": "83f82f747d8ef6d43d86343d8517aa2a8a1e9439489c4ad8f969f8e3ec77403e",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1230,
+        "rawHash": "58e67dbac675c3fb578687768a7d2a2c91e89e26bb8888f18a6468d8128f6768",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1260,
+        "rawHash": "8a3709e4ce62df0fd8e98c847296fee419f7af48884f1d27b3e87446c2e88250",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1290,
+        "rawHash": "79adf4c3bc1e4e06eccd8e662138d703ee32112e7a1f7e045468a22fef8a39ce",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 1320,
+        "rawHash": "6f3dd35f8f9d5b793c4e6b5e1cfd66de9f052435d9e3220e03b29c3e9dd60985",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "CfCOomGGWAU",
+        "sourceId": "description:CfCOomGGWAU:2475f84526da96f5",
+        "sourceHash": "2475f84526da96f5b47a0d6444a0527907582ba30fad5237cb41f4d1f5d5f15b",
+        "seconds": 990,
+        "rawHash": "e8f8358542fb89a9f7083f63dde6c4fbabd26026da6bc63baf7f7411946f6d81",
+        "action": "drop_entry"
+      },
+      {
+        "scope": "current",
+        "classification": "confirmed_noise",
+        "videoId": "MgcppzzNQQk",
+        "sourceId": "description:MgcppzzNQQk:f16a24eda4e6f5d3",
+        "sourceHash": "f16a24eda4e6f5d3f9b38b8650eb24c8ab4774c65c733d8260be3fa873dbce8a",
+        "seconds": 1020,
+        "rawHash": "ea89b9da43621b12ad19405a3ac77067bea8b6dc076c205cd9b2d8125ea189f5",
         "action": "drop_entry"
       }
     ],
