@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-27T12:05:13.519Z",
-  "scannedVideoCount": 18704,
-  "scannedOccurrenceCount": 243224,
+  "generatedAt": "2026-10-27T12:10:27.537Z",
+  "scannedVideoCount": 18708,
+  "scannedOccurrenceCount": 243268,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -782,7 +782,7 @@
     },
     {
       "date": "2026-10-19",
-      "occurrences": 1724,
+      "occurrences": 1743,
       "quarantinedOccurrences": 1
     },
     {
@@ -817,18 +817,18 @@
     },
     {
       "date": "2026-10-26",
-      "occurrences": 2033,
+      "occurrences": 2034,
       "quarantinedOccurrences": 54
     },
     {
       "date": "2026-10-27",
-      "occurrences": 263,
+      "occurrences": 287,
       "quarantinedOccurrences": 4
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 556,
-    "possible_activity_chapter": 104,
+    "possible_activity_chapter": 106,
     "possible_date_as_artist": 135,
     "possible_release_metadata_as_artist": 143,
     "possible_spoken_section": 16,
@@ -2530,6 +2530,40 @@
           "videoId": "TdS3Aa2KXH4",
           "channelName": "suimin.",
           "publishedAt": "2026-10-18T03:25:15.922Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "はじめの挨拶",
+      "artist": "",
+      "raw": "⁅00:00:02⁆🦊はじめの挨拶",
+      "sourceHash": "e3f1752155fa502c9d52e137aa2856d27ce7256a608d06a8f0402c3648ed3944",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "Cl98_ZNjJYQ",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-10-19T12:07:01.955Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "終わりの挨拶 エンドロール",
+      "artist": "",
+      "raw": "⁅01:26:06⁆🦊終わりの挨拶 エンドロール",
+      "sourceHash": "e3f1752155fa502c9d52e137aa2856d27ce7256a608d06a8f0402c3648ed3944",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "Cl98_ZNjJYQ",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-10-19T12:07:01.955Z"
         }
       ],
       "videoCount": 1,
@@ -5135,40 +5169,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "Rising Hope",
-      "artist": "LiSA／アニメ『魔法科高校の劣等生』OP／2014/05/07",
-      "raw": "0:18:00　Rising Hope／LiSA／アニメ『魔法科高校の劣等生』OP／2014/05/07",
-      "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "AaaASRcaqdU",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-02T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "ADAMAS",
-      "artist": "LiSA／アニメ『ソードアート・オンライン アリシゼーション・ビギニング編』OP／2018/12/12",
-      "raw": "0:22:10　ADAMAS／LiSA／アニメ『ソードアート・オンライン アリシゼーション・ビギニング編』OP／2018/12/12",
-      "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "AaaASRcaqdU",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-02T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -6403,6 +6403,63 @@
           "title": "orion",
           "artist": "米津玄師",
           "raw": "23:11 04.orion / 米津玄師"
+        }
+      ]
+    },
+    {
+      "videoId": "yoE-bb0KnUE",
+      "channelName": "メーメントヴァニタス / MEMENTOVANITAS",
+      "publishedAt": "2026-10-27T10:59:13.928Z",
+      "sourceHash": "6c481bcc99f03719238260d7bfb0c4991f682ee0c9db91167945ffba42fabe11",
+      "total": 24,
+      "explicitNumberedSongs": 12,
+      "knownArtistRows": 17,
+      "unknownNonNumberedRows": 7,
+      "unknownExamples": [
+        {
+          "title": "(Yoake to Hotaru)",
+          "raw": "31:40 └(Yoake to Hotaru)"
+        },
+        {
+          "title": "(Koi no Superball)",
+          "raw": "48:27 └(Koi no Superball)"
+        },
+        {
+          "title": "(Silhouette)",
+          "raw": "54:14 └(Silhouette)"
+        },
+        {
+          "title": "(Naimononedari)",
+          "raw": "58:50 └(Naimononedari)"
+        },
+        {
+          "title": "(Lilac)",
+          "raw": "1:12:46 └(Lilac)"
+        },
+        {
+          "title": "(Que Sera Sera)",
+          "raw": "1:17:50 └(Que Sera Sera)"
+        },
+        {
+          "title": "(Shimauta)",
+          "raw": "1:27:27 └(Shimauta)"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "夜明けと蛍",
+          "artist": "n-buna",
+          "raw": "26:31 1.夜明けと蛍/n-buna【"
+        },
+        {
+          "title": "花に亡霊",
+          "artist": "ヨルシカ",
+          "raw": "33:01 2.花に亡霊/ヨルシカ【"
+        },
+        {
+          "title": "だから僕は音楽を辞めた",
+          "artist": "ヨルシカ",
+          "raw": "39:00 3.だから僕は音楽を辞めた/ヨルシカ【"
         }
       ]
     },
@@ -7920,17 +7977,6 @@
     }
   ],
   "descriptionsSharedAcrossTwoToFourChannels": [
-    {
-      "sourceHash": "dbce742c69ccc6674049fa28ef5963f1da778ea8f2dc3dc45a48cd2359560c0a",
-      "videoCount": 4,
-      "channelCount": 4,
-      "raw": "0:38のレオン",
-      "sample": [
-        "7REXUXLKVTI",
-        "sV2bp_nB8ww",
-        "VqVizH84Th8"
-      ]
-    },
     {
       "sourceHash": "a1a4232f9b9c8a380a9346dfd30ae62823f7c13a8f6e69b3b0f808a1c4ed7cf4",
       "videoCount": 4,
