@@ -247,6 +247,9 @@ test("dirty export finds numeric markers and relay participant chapters without 
       { seconds: 110, title: "【", artist: "未記載", raw: "1:50 【", sourceId: "relay-source", sourceHash: "relay-hash" },
       { seconds: 120, title: "12", artist: "未記載", raw: "2:00 １２", sourceId: "relay-source", sourceHash: "relay-hash" },
       { seconds: 130, title: "第2章", artist: "未記載", raw: "2:10 第２章", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 140, title: "〜:珠々宮けい", artist: "すずみやけい", raw: "🎃 18:30〜:珠々宮けい（すずみやけい）", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 150, title: "〜: suimin", artist: "すいみん", raw: "🎃 20:30〜: suimin.（すいみん）", sourceId: "relay-source", sourceHash: "relay-hash" },
+      { seconds: 160, title: "〜: 真の歌", artist: "CV. Real Artist", raw: "🎃 21:00〜: 真の歌 (CV. Real Artist)", sourceId: "relay-source", sourceHash: "relay-hash" },
     ],
   });
   writeJson(path.join(root, "data/static/v1/sources/FG/FG123456789.json"), {
@@ -286,6 +289,8 @@ test("dirty export finds numeric markers and relay participant chapters without 
       ["【", "confirmed_noise", "raw_bad_title"],
       ["12", "confirmed_noise", "bare_numeric_chapter_marker"],
       ["第2章", "confirmed_noise", "bare_numeric_chapter_marker"],
+      ["〜:珠々宮けい", "confirmed_noise", "relay_participant_or_ceremony_chapter"],
+      ["〜: suimin", "confirmed_noise", "relay_participant_or_ceremony_chapter"],
     ],
   );
   assert.equal(
@@ -294,6 +299,7 @@ test("dirty export finds numeric markers and relay participant chapters without 
     "credited numeric or bracket-shaped songs are preserved",
   );
   assert.equal(payload.entries.some((entry) => entry.title === "リレー"), false, "the relay word alone is not treated as noise");
+  assert.equal(payload.entries.some((entry) => entry.title === "〜: 真の歌"), false, "credited parenthesized relay songs are preserved");
   assert.equal(names.some((name) => name.includes("FG123456789")), false, "non-relay wave text is not removed by the relay rule");
 });
 

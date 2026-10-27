@@ -175,7 +175,11 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
     if ([tail, title].some(isBracketedNumericMarker)) return "bracketed_numeric_marker";
     if ([tail, title].some(isBareNumericChapterMarker)) return "bare_numeric_chapter_marker";
   }
-  if (!RELAY_VIDEO_TITLE_RE.test(String(video?.title || "")) || !UNKNOWN_ARTIST_RE.test(artist)) return "";
+  if (!RELAY_VIDEO_TITLE_RE.test(String(video?.title || ""))) return "";
+  if (isRelayParticipantReadingLine(normalized, timestamp, tail, title, artist)) {
+    return "relay_participant_or_ceremony_chapter";
+  }
+  if (!UNKNOWN_ARTIST_RE.test(artist)) return "";
 
   // Relay programs often use a timestamp plus a leading wave dash for participant and ceremony
   // chapters. Require both the relay video context and that explicit chapter marker so ordinary
@@ -185,6 +189,26 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
   if (!hadChapterMarker || !withoutChapterMarker || withoutChapterMarker.length > 60) return "";
   if (/[\/／|｜│]/u.test(withoutChapterMarker)) return "";
   return "relay_participant_or_ceremony_chapter";
+}
+
+function isRelayParticipantReadingLine(normalized, timestamp, tail, title, artist) {
+  if (!timestamp) return false;
+  const prefix = normalized.slice(0, timestamp.index);
+  if (/[\p{L}\p{N}]/u.test(prefix)) return false;
+
+  const match = tail.match(/^[～〜]\s*:\s*(.+?)\s*[（(]([^（）()]+)[）)]\s*$/u);
+  if (!match) return false;
+  const name = match[1].replace(/[.。]\s*$/u, "").trim();
+  const reading = match[2].trim();
+  if (!name || !reading || name.length > 60 || reading.length > 60) return false;
+  if (!/[ぁ-ゖァ-ヺ]/u.test(reading) || /[\/／|｜│]/u.test(name)) return false;
+
+  // The parsed artist is the parenthesized reading, not a song artist credit. Requiring it to
+  // match both the raw reading and the visible `〜:` title keeps credited relay songs intact.
+  const compact = (value) => String(value || "").normalize("NFKC")
+    .replace(/[～〜~]/gu, "~")
+    .replace(/\s+/gu, "");
+  return compact(title) === compact(`〜:${name}`) && compact(artist) === compact(reading);
 }
 
 function isBracketedNumericMarker(text) {
