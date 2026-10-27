@@ -1,6 +1,16 @@
 
 # Heartbeat log
 
+## 2026-10-27 18:00 +08:00
+
+- Dirty-data cleanup ran immediately through `40485566403` (`#79`) with `25/all/confirmed_noise,parser_corruption` and completed green in `3m39s`. It rebuilt and scanned the full derived source pool, then generated `selected=0`; Commit and Pages verification were skipped by design, and the dirty workflow created no commit or raw-day change.
+- At heartbeat start, `main` had moved from local `82dd28c` to a new-root history ending at `5f05d49`. Tree comparison preserved `docs/heartbeat-log.md` and the application tree while normal static commits remained present; the remote exposes only the `main` branch and no tags, so the replaced history is no longer reachable through a ref. The heartbeat did not perform a local destructive reset and continued from the new `origin/main`.
+- Live GitHub Pages snapshot `1846e5f` matches its raw-commit `meta.json` object-for-object at `generatedAt=2026-10-27T10:00:01.069Z`: `18678` videos, `242935` song occurrences, `2268` pending, `33166` processed, `17144` no-song retry entries, and `60961` all songs over `1220` pages. The root and today/3d/7d/30d/all entry points all returned `200`.
+- All `15` range/type manifests matched the live meta and passed first page, boundary page, item count, and next-page `404` checks. All-songs page `1220` returned `11` records through rank `60961`. Search has `16` shards declaring `89091` entities, and shard `0` returned its declared `5542`; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `818` occurrences across `815` videos.
+- Dirty batch `40485566403`, static update `40485690466` (`#1342`), and Pages `40485686687` (`#2642`) succeeded for the verified snapshot. Check code `40485566453` and the following static/Pages pair `40486263534`/`40486259255` remained active without failures when the snapshot was taken.
+- Capacity/repair/archive: main size is `139338 KB` (about `0.13288 GiB`), unchanged from the start of this heartbeat, so this run did not increase the reported size; it remains far below the 8 GiB reset threshold. `pushed_at=2026-10-27T10:09:06Z`. Repair `last-run.json` is `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. The archive repository's Actions setting remains `Disable actions`; its newest run is still `2026-10-12`, and `daily-song-list-archive-overquota` returns `404`. The custom `culua.com` edge still returns `525`, so publication identity was verified through the direct GitHub Pages URL and the exact raw commit.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 11:57 +08:00
 
 - Dirty-data cleanup ran immediately through `40447128009` (`#78`) with `25/all/confirmed_noise,parser_corruption` and completed green in `3m38s`. It rebuilt and scanned the full derived source pool, then generated `selected=0`; Commit and Pages verification were skipped by design, and the dirty workflow created no commit or raw-day change.
