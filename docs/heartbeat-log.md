@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-28 06:12 +08:00
+
+- Live GitHub Pages snapshot is current at `generatedAt=2026-10-27T22:02:53.109Z`: videos `18834`, song occurrences `244596`, pending `2121`, and processed `33352`. The default Pages root, `meta.json`, and search manifest all returned `200`; `www.culua.com` returned `200`, while the apex still failed TLS before HTTP (`000`).
+- All `15` range/type manifests matched the live meta at their first and last pages, declared counts matched the returned items, and the page after each boundary returned `404`. Search has `16` shards with declared/actual `89454/89454` items; entity `f2cce8376bdbca6d` (`少女レイ` / `みきとP`) returned `820` occurrences.
+- A full scan of the live search shards found `0` relay-like `〜:` entries and `0` hits for the participant names already removed in earlier relay cleanup batches. Dirty-data cleanup #91 (`40592377963`, commit `05ad722`) completed green with `25/all/confirmed_noise,parser_corruption`; the full derived-source rebuild produced no new selectors, no new commit, and no raw-day change, so there was no eligible batch to append this heartbeat.
+- Across the latest 100 Actions runs there were `91` successes, `8` cancellations, `1` active static update for `117a032`, and `0` failures. Main reports `size=139641 KB` (about `0.133 GiB`) and `pushed_at=2026-10-27T22:08:02Z`, far below the `8 GiB` reset threshold, so no orphan reset was needed.
+- Repair ledger: dropped `16161`, retry pool `16621`, retry due `16161`, metadata incomplete `5`, abandoned `0`, and unreadable shards `0`. Repair #1509 was cancelled at `2026-10-23T19:12:30Z`. `daily-song-list-archive/actions` and `daily-song-list-archive-overquota` both returned `404`, so archive Actions remain disabled and the over-quota repository remains absent.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-27 22:00 +08:00
 
 - The first dirty-data attempt exposed a real UI-proof bootstrap defect: `Check code` #159 stayed in `Capture light/dark UI proof` for `14m22s` while `apt` was downloading the `61.2 MB` Noto CJK package from `azure.archive.ubuntu.com`; the run was then superseded and cancelled at `16m38s`, and dirty run #81 failed its check gate. `check-code.yml` now uses the `1.6 MB` WenQuanYi Micro Hei package and bounds apt, font-cache, and pip steps to `120/180/30/120` seconds. Check #160 and #161 passed at `1m31s` and `42s`; the UI proof itself completed in `11s` and `9s`.
