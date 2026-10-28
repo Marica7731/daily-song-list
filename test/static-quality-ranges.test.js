@@ -1287,6 +1287,20 @@ test("latest review-only residue is source-specifically cleaned without broad de
     }),
   ];
   const result = cleanStaticVideos([video(1600, rows)]);
+  const reviewedAdTitle = "『ボイスカード』全国のAIICO自販機にて販売中9/15〜10";
+  for (const sourceHash of [
+    "3ce2889d374219c88ef71404170db724289081434d471593996f75067f4d4a59",
+    "39ba88a048b62c1a801925023363b7ac89a995e071514dd4ef0cdd0a053043d8",
+  ]) {
+    assert.equal(unambiguousNonSongReason(song(reviewedAdTitle, "31", {
+      raw: "3:20:44『ボイスカード』全国のAIICO自販機にて販売中9/15〜10/31",
+      sourceHash,
+    })), "reviewed_source_activity_chapter");
+  }
+  assert.equal(unambiguousNonSongReason(song(reviewedAdTitle, "31", {
+    raw: "3:20:44『ボイスカード』全国のAIICO自販機にて販売中9/15〜10/31",
+    sourceHash: "f".repeat(64),
+  })), null);
   assert.equal(result.audit.quarantinedOccurrences, 4);
   assert.equal(result.audit.byReason.reviewed_source_activity_chapter, 3);
   assert.equal(result.audit.byReason.reviewed_mixed_chapter_comment, 1);
@@ -1308,4 +1322,12 @@ test("latest review-only residue is source-specifically cleaned without broad de
   ])]);
   assert.equal(unrelated.audit.quarantinedOccurrences, 0);
   assert.equal(unrelated.videos[0].songs[0].title, "スプラッシュVロック振り返り");
+  const unreviewedAd = cleanStaticVideos([video(1602, [
+    song("『ボイスカード』全国のAIICO自販機にて販売中9/15〜10", "31", {
+      raw: "3:20:44『ボイスカード』全国のAIICO自販機にて販売中9/15〜10/31",
+      sourceHash: "f".repeat(64),
+    }),
+  ])]);
+  assert.equal(unreviewedAd.audit.quarantinedOccurrences, 0);
+  assert.equal(unreviewedAd.videos[0].songs[0].title, "『ボイスカード』全国のAIICO自販機にて販売中9/15〜10");
 });

@@ -55,6 +55,7 @@ const REVIEWED_ACTIVITY_TITLES_BY_HASH = new Map([
   ["58aaa6249ff779ebabbed7018a5f17a84d5847ced8d18b182296fdc18c90a291", new Set(["スプラッシュVロック振り返り"])],
   ["d81fa51c23005f45c9ebfcaec5a3563495c7a61e8c96cdbe7e28f6bd058319c5", new Set(["コラボの振り返りなど"])],
   ["3ce2889d374219c88ef71404170db724289081434d471593996f75067f4d4a59", new Set(["『ボイスカード』全国のAIICO自販機にて販売中9/15〜10"])],
+  ["39ba88a048b62c1a801925023363b7ac89a995e071514dd4ef0cdd0a053043d8", new Set(["『ボイスカード』全国のAIICO自販機にて販売中9/15〜10"])],
   ["0d63e5c4ca38df917fb58c74f1b5be81c8a54a893fdd1050b81aad849e18314d", new Set([
     "しずさん感想", "ミアさん感想", "もこさん感想", "えうさん感想", "ちびさん感想", "ミルフィさん感想", "アメリアさん感想",
   ])],
