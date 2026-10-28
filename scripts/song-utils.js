@@ -1638,7 +1638,8 @@ function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
     return false;
   }
   const rawText = String(raw || "").normalize("NFKC");
-  if (!/(?:日時|(?:19|20)\d{2}\s*[/／]|\d{1,2}\s*[/／]\s*\d{1,2})/u.test(rawText)) return false;
+  const hasDateMarker = /(?:日時|(?:19|20)\d{2}\s*[/／]|\d{1,2}\s*[/／]\s*\d{1,2})/u.test(rawText);
+  if (!hasDateMarker) return false;
   if (/日時/u.test(rawText) || /(?:19|20)\d{2}\s*[/／]\s*\d{1,2}/u.test(rawText)) return true;
   for (const match of rawText.matchAll(/(?:^|[^\d])(\d{1,2})\s*[/／]\s*(\d{1,2})(?=$|[^\d])/gu)) {
     const left = Number(match[1]);
