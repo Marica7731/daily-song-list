@@ -1331,3 +1331,36 @@ test("latest review-only residue is source-specifically cleaned without broad de
   assert.equal(unreviewedAd.audit.quarantinedOccurrences, 0);
   assert.equal(unreviewedAd.videos[0].songs[0].title, "『ボイスカード』全国のAIICO自販機にて販売中9/15〜10");
 });
+
+test("reviewed schedule residues are quarantined only for their exact source hashes", () => {
+  const reviewed = [
+    ["db95a6ca673102f233c8b5126cbe04794a674b67f4000a3e3a85e3265b47a0b1", "～2026/11", "水", "12:00～2026/11/4（水）"],
+    ["7f71d2b6a621828db84dbb4dfc806c78d08d263ea2003ad07e42f984c05d6aba", "第132回 2026/10", "15 木曜夜21:30の名曲チャンネル", "第132回 2026/10/15 木曜夜21:30の名曲チャンネル"],
+    ["453ffbb3f333ac69046cfbae76df6e025ebffd9ea33612145060f66e91af6bc0", "2026/08", "23 14:28【おんたん】海きた‼️‼️ lv351237625", "2026/08/23 14:28【おんたん】海きた‼️‼️　lv351237625"],
+    ["e9e5fb6e22c00af61f4e7d93ae588c4d87eb8ec2689eb087cdc3ab7d98a2e15b", "2026/08", "20 22:00頃まで印刷可能", "2026/08/20 22:00頃まで印刷可能🦊"],
+    ["91ebe8c94a5a25f2c5a3157efdca3e87dcd4b5c630d54ecae2329aab0fcbe9e9", "【10/31", "土", "15:00 【10/31(土)"],
+    ["e3d137912dbd6209413ebdf04293b07ddecec9fa8fb82dfc086147633406ddc5", "【10/31", "土", "15:00 【10/31(土)"],
+    ["99aced564be4e91fcff0837aac3d9cc12b7c7509ea5b6187b56ddd493381f122", "【10/31", "土", "15:00 【10/31(土)"],
+    ["b1f7f329f6b52a5a3e543eb29e4f3c58440f1da8c79d1078614fa3d0189e250b", "【10/31", "土", "15:00 【10/31(土)"],
+    ["4c0ac469ccfcffe06f69515c47984278c43c3ebfd4ba82dd76d0239abd930f46", "【10/31", "土", "15:00 【10/31(土)"],
+    ["23d8245b5bd7567b9090da66f217fae4c39cc57bb8e3c315001ede6cdd260abf", "【10/31", "土", "15:00 【10/31(土)"],
+    ["79e2f34be45e607880815f47f935409762c65d13b09ee5ff61830405f3cda5aa", "【10/31", "土", "15:00 【10/31(土)"],
+    ["1de807fbbdf69047bf4efa719de2144acd98306eda10e8ad451231d5eded6963", "2026年9月12日", "土", "✦ 2026年9月12日(土) 0:00"],
+    ["1de807fbbdf69047bf4efa719de2144acd98306eda10e8ad451231d5eded6963", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
+    ["9b5a55c2d430b43526db8b5e29fa873ae34fd1a672857ff0a24cd0036d6f5480", "2026年9月12日", "土", "✦ 2026年9月12日(土) 0:00"],
+    ["9b5a55c2d430b43526db8b5e29fa873ae34fd1a672857ff0a24cd0036d6f5480", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
+    ["ab26044edb179197145c74d09fd77e6c0f606a0a9908bba790004b3fb0afcbff", "2026年9月12日", "土", "✦ 2026年9月12日(土) 0:00"],
+    ["ab26044edb179197145c74d09fd77e6c0f606a0a9908bba790004b3fb0afcbff", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
+    ["5ce76064b2fc251e4daf240868dcf3c05ed7ccfe3da4bca3f014dd0e51785854", "2026年9月12日", "土", "✦ 2026年9月12日(土) 0:00"],
+    ["5ce76064b2fc251e4daf240868dcf3c05ed7ccfe3da4bca3f014dd0e51785854", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
+    ["a1d30a00ee2d780c6172db8a41c4db02fadeeab4594358bb22704eeb03accf8c", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
+    ["39ba88a048b62c1a801925023363b7ac89a995e071514dd4ef0cdd0a053043d8", "Gipt開設〜11", "11まで", "3:01:50 Gipt開設〜11/11まで"],
+  ];
+  for (const [sourceHash, title, artist, raw] of reviewed) {
+    assert.equal(unambiguousNonSongReason(song(title, artist, { raw, sourceHash })), "reviewed_source_activity_chapter");
+  }
+  assert.equal(unambiguousNonSongReason(song("【10/31", "土", {
+    raw: "15:00 【10/31(土)",
+    sourceHash: "f".repeat(64),
+  })), null);
+});
