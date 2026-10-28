@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-28T19:26:20.523Z",
+  "generatedAt": "2026-10-28T19:31:14.781Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 21980,
-  "inputOccurrences": 250346,
-  "visibleVideos": 18900,
-  "visibleOccurrences": 247158,
-  "quarantinedOccurrences": 2591,
-  "quarantinedVideos": 1808,
+  "inputVideos": 21982,
+  "inputOccurrences": 250356,
+  "visibleVideos": 18901,
+  "visibleOccurrences": 247167,
+  "quarantinedOccurrences": 2592,
+  "quarantinedVideos": 1809,
   "deduplicatedOccurrences": 583,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 60,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1389,
+    "prayer_broadcast_timeline": 1390,
     "reviewed_bad_description_source": 200,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 8,
@@ -208,8 +208,8 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 249,
-      "channelCount": 239,
+      "videoCount": 250,
+      "channelCount": 240,
       "distinctVideoTitles": 245,
       "examples": [
         {
@@ -1379,10 +1379,10 @@
       }
     },
     "2026-10-28": {
-      "quarantinedOccurrences": 18,
+      "quarantinedOccurrences": 19,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 16,
+        "prayer_broadcast_timeline": 17,
         "date_split_as_song_and_artist": 1,
         "unrelated_livestream_listing": 1
       }
@@ -9841,6 +9841,10 @@
       "deduplicatedOccurrences": 0
     },
     "4F1hJ1Y95eA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "VmLf2NDiJsA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
