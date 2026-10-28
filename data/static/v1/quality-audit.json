@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-10-28T20:15:38.594Z",
+  "generatedAt": "2026-10-28T20:21:15.776Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 21995,
-  "inputOccurrences": 250456,
-  "visibleVideos": 18910,
-  "visibleOccurrences": 247263,
-  "quarantinedOccurrences": 2596,
-  "quarantinedVideos": 1813,
+  "inputVideos": 21999,
+  "inputOccurrences": 250472,
+  "visibleVideos": 18889,
+  "visibleOccurrences": 247278,
+  "quarantinedOccurrences": 2597,
+  "quarantinedVideos": 1814,
   "deduplicatedOccurrences": 583,
   "artistCatalogArchivedVideos": 0,
-  "artistCatalogNormalizedOccurrences": 60,
+  "artistCatalogNormalizedOccurrences": 61,
   "artistCatalogArchivedOccurrences": 14,
   "normalizedArtistOccurrences": 449,
   "normalizedReleaseMetadataOccurrences": 1207,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1394,
+    "prayer_broadcast_timeline": 1395,
     "reviewed_bad_description_source": 200,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 8,
@@ -208,9 +208,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 252,
-      "channelCount": 242,
-      "distinctVideoTitles": 247,
+      "videoCount": 253,
+      "channelCount": 243,
+      "distinctVideoTitles": 248,
       "examples": [
         {
           "videoId": "3hfZdT3llr8",
@@ -1379,10 +1379,10 @@
       }
     },
     "2026-10-28": {
-      "quarantinedOccurrences": 21,
+      "quarantinedOccurrences": 22,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 19,
+        "prayer_broadcast_timeline": 20,
         "date_split_as_song_and_artist": 1,
         "unrelated_livestream_listing": 1
       }
@@ -9852,6 +9852,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "FrObV2xZ_4g": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "5lmTyskQov4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -12240,7 +12244,7 @@
   ],
   "artistCatalogGate": {
     "artistCount": 1,
-    "normalizedOccurrences": 60,
+    "normalizedOccurrences": 61,
     "archivedOccurrences": 14,
     "artists": [
       {
