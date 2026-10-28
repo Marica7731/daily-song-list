@@ -1367,6 +1367,7 @@ test("reviewed schedule residues are quarantined only for their exact source has
     ["5ce76064b2fc251e4daf240868dcf3c05ed7ccfe3da4bca3f014dd0e51785854", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
     ["a1d30a00ee2d780c6172db8a41c4db02fadeeab4594358bb22704eeb03accf8c", "～2026年10月31日", "土", "～2026年10月31日(土) 23:59"],
     ["39ba88a048b62c1a801925023363b7ac89a995e071514dd4ef0cdd0a053043d8", "Gipt開設〜11", "11まで", "3:01:50 Gipt開設〜11/11まで"],
+    ["08c25546ab4e5db51753a885a7f3dc2eb33268eb58e4e7f17df39e361bd374c8", "涼乃衣兎", "", "19:00 涼乃衣兎"],
   ];
   for (const [sourceHash, title, artist, raw] of reviewed) {
     assert.equal(unambiguousNonSongReason(song(title, artist, { raw, sourceHash })), "reviewed_source_activity_chapter");
