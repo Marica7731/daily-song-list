@@ -1643,7 +1643,7 @@ function isNumericAnnotationActivityEntry(title, artist, raw) {
   const normalizedArtist = String(artist || "").normalize("NFKC").trim();
   if (!/^(?:\d{1,3}|\d+(?:曲|番|回))$/u.test(normalizedArtist)) return false;
   const text = `${String(title || "").normalize("NFKC")} ${String(raw || "").normalize("NFKC")}`;
-  return /(?:マイクテスト|開演|終演|配信|雑談|告知|お知らせ|休憩|販売|発売|まで|から)/u.test(text);
+  return /(?:マイクテスト|開演|終演|配信|雑談|告知|お知らせ|休憩)/u.test(text);
 }
 
 function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
