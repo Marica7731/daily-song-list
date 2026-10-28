@@ -1628,23 +1628,6 @@ function isSpace(ch) {
   return /^[\s\u3000]$/.test(ch || "");
 }
 
-module.exports = {
-  TIMESTAMP_RE,
-  auditParsedSongForImport,
-  isTimestampCandidateText,
-  isLikelyNonSongEntry,
-  cleanArtistMetadata,
-  cleanPublishedSongTitle,
-  repairPublishedSongMetadata,
-  isTimestampOnlyArtist,
-  isNonArtistCredit,
-  normalizeCommentText,
-  normalizeParsedSong,
-  normalizeSourceAwareArtist,
-  parseTimestampSongs,
-  timeToSeconds,
-};
-
 function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
   const normalizedTitle = String(title || "").normalize("NFKC").trim();
   const normalizedArtist = String(artist || "").normalize("NFKC").trim();
@@ -1663,3 +1646,20 @@ function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
   }
   return false;
 }
+
+module.exports = {
+  TIMESTAMP_RE,
+  auditParsedSongForImport,
+  isTimestampCandidateText,
+  isLikelyNonSongEntry,
+  cleanArtistMetadata,
+  cleanPublishedSongTitle,
+  repairPublishedSongMetadata,
+  isTimestampOnlyArtist,
+  isNonArtistCredit,
+  normalizeCommentText,
+  normalizeParsedSong,
+  normalizeSourceAwareArtist,
+  parseTimestampSongs,
+  timeToSeconds,
+};
