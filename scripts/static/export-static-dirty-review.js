@@ -106,7 +106,7 @@ function collectVideoCandidates(video) {
     let classification = "";
     let replacementSuggestion = null;
     let riskReasons = [];
-    if (repaired.parserCorruption) {
+    if (repaired.parserCorruption && !isCreditedFractionTitle(song)) {
       classification = "parser_corruption";
       replacementSuggestion = { title: repaired.title, artist: repaired.artist };
       riskReasons = ["published_artist_fragment"];
@@ -171,6 +171,12 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
   const title = String(song?.title || "").normalize("NFKC").trim();
   const artist = String(song?.artist || "").normalize("NFKC").trim();
 
+  if (isEpisodeNumberMarker(video, normalized, title, artist)) return "episode_number_marker";
+  if (isDateScheduleFragment(normalized, title, artist)) return "date_fragment_as_song_and_artist";
+  if (isDatedNoticeMarker(normalized, title, artist)) return "dated_notice_marker";
+  if (isRosarioBroadcastTimeline(normalized, title, artist)) return "prayer_broadcast_timeline";
+  if (isRelayScheduleRange(video, normalized, artist)) return "relay_participant_or_ceremony_chapter";
+
   if (timestamp && UNKNOWN_ARTIST_RE.test(artist)) {
     if ([tail, title].some(isBracketedNumericMarker)) return "bracketed_numeric_marker";
     if ([tail, title].some(isBareNumericChapterMarker)) return "bare_numeric_chapter_marker";
@@ -189,6 +195,48 @@ function classifyHighConfidenceRawPattern(song, video, raw) {
   if (!hadChapterMarker || !withoutChapterMarker || withoutChapterMarker.length > 60) return "";
   if (/[\/／|｜│]/u.test(withoutChapterMarker)) return "";
   return "relay_participant_or_ceremony_chapter";
+}
+
+function isCreditedFractionTitle(song) {
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  const artist = String(song?.artist || "").normalize("NFKC").trim();
+  if (!/^\d{1,4}\s*\/\s*\d{1,4}$/u.test(title) || !/^\d{1,4}$/u.test(artist)) return false;
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const timestamp = raw.match(TIMESTAMP_RE);
+  const tail = timestamp ? raw.slice(timestamp.index + timestamp[0].length).trim() : raw;
+  return new RegExp(`^${title.split(/\s*\/\s*/u).join("\\s*[\\/／]\\s*")}\\s*[\\/／]\\s*${artist}$`, "u").test(tail);
+}
+
+function isRelayScheduleRange(video, raw, artist) {
+  if (!RELAY_VIDEO_TITLE_RE.test(String(video?.title || ""))) return false;
+  if (!UNKNOWN_ARTIST_RE.test(artist)) return false;
+  return /^\d{1,2}:\d{2}\s+\d{1,2}:\d{2}\s+【(?:進行|夏|冬|春|秋)】\S/u.test(raw);
+}
+
+function isEpisodeNumberMarker(video, raw, title, artist) {
+  if (!UNKNOWN_ARTIST_RE.test(artist)) return false;
+  const episode = String(video?.title || "").normalize("NFKC").match(/おしゃべりすずこ\s+(\d+)回目/u)?.[1];
+  if (!episode || !/^\d+$/u.test(title) || title !== episode) return false;
+  return new RegExp(`^\\d{1,2}:\\d{2}(?::\\d{2})?\\s*[-–—]\\s*${episode}$`, "u").test(raw);
+}
+
+function isDateScheduleFragment(raw, title, artist) {
+  if (!/^[月火水木金土日]$/u.test(artist)) return false;
+  if (!/^[~〜～\s]*(?:19|20)\d{2}\/[0-9]{1,2}$/u.test(title)) return false;
+  return /(?:^|\s)\d{1,2}:\d{2}\s*[~〜～]?\s*(?:19|20)\d{2}\/[0-9]{1,2}\/[0-9]{1,2}\s*\(?[月火水木金土日]\)?/u.test(raw);
+}
+
+function isDatedNoticeMarker(raw, title, artist) {
+  if (!/^お知らせ/u.test(title)) return false;
+  if (!/(?:\d{1,2}\/\d{1,2}|\d{1,2}時)/u.test(artist)) return false;
+  return raw.includes(title) && (raw.includes(artist) || /リレー/u.test(artist));
+}
+
+function isRosarioBroadcastTimeline(raw, title, artist) {
+  return /^\d{1,2}\/\d{1,2}\/\d{2,4}$/u.test(title) &&
+    /^Live Ao vivo$/iu.test(artist) &&
+    /\bRos[aá]rio da Vit[oó]ria\b/iu.test(raw) &&
+    /\d{1,2}:\d{2}\s*\|\s*\d{1,2}\/\d{1,2}\/\d{2,4}\s*\|/u.test(raw);
 }
 
 function isRelayParticipantReadingLine(normalized, timestamp, tail, title, artist) {

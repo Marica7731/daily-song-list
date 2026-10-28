@@ -252,6 +252,31 @@ test("dirty export finds numeric markers and relay participant chapters without 
       { seconds: 160, title: "〜: 真の歌", artist: "CV. Real Artist", raw: "🎃 21:00〜: 真の歌 (CV. Real Artist)", sourceId: "relay-source", sourceHash: "relay-hash" },
     ],
   });
+  writeJson(path.join(root, "data/static/v1/sources/FH/FH123456789.json"), {
+    videoId: "FH123456789",
+    title: "おしゃべりすずこ 1413回目 2026.9.24",
+    channelName: "fixture talk",
+    publishedAt: "2026-01-01T00:00:00.000Z",
+    songs: [
+      { seconds: 0, title: "1413", artist: "", raw: "00:00 - 1413", sourceId: "talk-source", sourceHash: "talk-hash" },
+      { seconds: 60, title: "1414", artist: "Known Artist", raw: "01:00 1414 / Known Artist", sourceId: "talk-source", sourceHash: "talk-hash" },
+      { seconds: 120, title: "1/2", artist: "164", raw: "02:00 1/2 / 164", sourceId: "talk-source", sourceHash: "talk-hash" },
+    ],
+  });
+  writeJson(path.join(root, "data/static/v1/sources/FI/FI123456789.json"), {
+    videoId: "FI123456789",
+    title: "【歌枠リレー】季節対抗10時間",
+    channelName: "fixture relay schedule",
+    publishedAt: "2026-01-01T00:00:00.000Z",
+    songs: [
+      { seconds: 10, title: "【進行】開会式", artist: "", raw: "0:10 0:20 【進行】開会式", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+      { seconds: 20, title: "〜2026/7", artist: "金", raw: "0:20〜2026/7/31(金)", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+      { seconds: 30, title: "お知らせ📣", artist: "11/14 19時 Vミュージカル部2歌枠リレー", raw: "0:30 お知らせ📣(11/14 19時 Vミュージカル部2歌枠リレー)", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+      { seconds: 40, title: "03/10/26", artist: "Live Ao vivo", raw: "Rosário da Vitória | 17:00 | 03/10/26 | Live Ao vivo", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+      { seconds: 50, title: "1/2", artist: "川本真琴", raw: "0:50 1/2 / 川本真琴", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+      { seconds: 60, title: "1/2", artist: "164", raw: "1:00 1/2 / 164", sourceId: "schedule-source", sourceHash: "schedule-hash" },
+    ],
+  });
   writeJson(path.join(root, "data/static/v1/sources/FG/FG123456789.json"), {
     videoId: "FG123456789",
     title: "通常の歌枠",
@@ -301,6 +326,27 @@ test("dirty export finds numeric markers and relay participant chapters without 
   assert.equal(payload.entries.some((entry) => entry.title === "リレー"), false, "the relay word alone is not treated as noise");
   assert.equal(payload.entries.some((entry) => entry.title === "〜: 真の歌"), false, "credited parenthesized relay songs are preserved");
   assert.equal(names.some((name) => name.includes("FG123456789")), false, "non-relay wave text is not removed by the relay rule");
+  const talkName = names.find((name) => name.includes("FH123456789"));
+  assert.ok(talkName, "talk episode markers become review candidates");
+  const talkPayload = JSON.parse(fs.readFileSync(path.join(root, "data/review/sources", talkName), "utf8"));
+  assert.deepEqual(
+    talkPayload.entries.map((entry) => [entry.title, entry.artist, entry.riskReasons[0]]),
+    [["1413", "", "episode_number_marker"]],
+    "only the episode marker is removed while credited numeric songs survive",
+  );
+  const scheduleName = names.find((name) => name.includes("FI123456789"));
+  assert.ok(scheduleName, "scheduled relay chapters become review candidates");
+  const schedulePayload = JSON.parse(fs.readFileSync(path.join(root, "data/review/sources", scheduleName), "utf8"));
+  assert.deepEqual(
+    schedulePayload.entries.map((entry) => [entry.title, entry.riskReasons[0]]),
+    [
+      ["【進行】開会式", "relay_participant_or_ceremony_chapter"],
+      ["〜2026/7", "date_fragment_as_song_and_artist"],
+      ["お知らせ📣", "dated_notice_marker"],
+      ["03/10/26", "prayer_broadcast_timeline"],
+    ],
+    "only schedule fragments are selected",
+  );
 });
 
 test("heartbeat batch rejects unsafe scope and type input", () => {
