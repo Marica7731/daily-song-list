@@ -545,6 +545,7 @@ function isLikelyNonSongEntry(song, source = {}) {
   if (isCustomEmojiOnlyText(title)) return true;
   if (isCalendarScheduleNoiseEntry(title, artist)) return true;
   if (isHighConfidenceNumericScheduleFragment(title, artist, raw)) return true;
+  if (isNumericAnnotationActivityEntry(title, artist, raw)) return true;
   if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
   if (
     /^(?:\d{1,2}[\/.-]\d{1,2}[\/.-](?:19|20)\d{2}|(?:19|20)\d{2}[\/.-]\d{1,2}[\/.-]\d{1,2})$/u.test(title) &&
@@ -1317,6 +1318,16 @@ function repairPublishedSongMetadata(song) {
     artist = "";
     parserCorruption = true;
   }
+  const signedKeyShift = raw.match(/[（(]\s*([+-]\d{1,2})\s*[)）]\s*$/u)?.[1] || "";
+  if (signedKeyShift && (artist === signedKeyShift || artist === signedKeyShift.replace(/^[+-]/u, ""))) {
+    artist = "";
+    parserCorruption = true;
+  }
+  const slashTail = raw.match(/[\/／]\s*(\d{3})\s*$/u)?.[1] || "";
+  if (/\d{3}/u.test(slashTail) && artist === slashTail && /[\/／]/u.test(title) && (raw.match(/[\/／]/gu) || []).length >= 2) {
+    artist = "";
+    parserCorruption = true;
+  }
   return {
     title,
     artist,
@@ -1628,12 +1639,19 @@ function isSpace(ch) {
   return /^[\s\u3000]$/.test(ch || "");
 }
 
+function isNumericAnnotationActivityEntry(title, artist, raw) {
+  const normalizedArtist = String(artist || "").normalize("NFKC").trim();
+  if (!/^(?:\d{1,3}|\d+(?:曲|番|回))$/u.test(normalizedArtist)) return false;
+  const text = `${String(title || "").normalize("NFKC")} ${String(raw || "").normalize("NFKC")}`;
+  return /(?:マイクテスト|開演|終演|配信|雑談|告知|お知らせ|休憩|販売|発売|まで|から)/u.test(text);
+}
+
 function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
   const normalizedTitle = String(title || "").normalize("NFKC").trim();
   const normalizedArtist = String(artist || "").normalize("NFKC").trim();
   if (!normalizedTitle || !normalizedArtist) return false;
-  const numericFragment = /^[~\s0-9/／年月日時:：、,.．\-–—]+$/u;
-  const compactFragment = (value) => value.replace(/日時|年|月|日|時/gu, "").trim();
+  const numericFragment = /^[~〜～\s0-9/／年月日時:：、,.．\-–—]+$/u;
+  const compactFragment = (value) => value.replace(/日時|年|月|日|時|から|まで/gu, "").trim();
   if (!numericFragment.test(compactFragment(normalizedTitle)) || !numericFragment.test(compactFragment(normalizedArtist))) {
     return false;
   }

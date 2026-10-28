@@ -919,3 +919,21 @@ test("rejects numeric dates and progress fragments while preserving numeric song
   ]) assert.equal(isLikelyNonSongEntry(song), true, JSON.stringify(song));
   assert.equal(isLikelyNonSongEntry({ title: "1/2", artist: "川本真琴", raw: "0:10 1/2 / 川本真琴" }), false);
 });
+
+test("clears key shifts and numeric metadata after a credited title", () => {
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "罠", artist: "5", raw: "0:13:29 ♪罠(-5)" }),
+    { title: "罠", artist: "", changed: true, parserCorruption: true },
+  );
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "Overdose/なとり", artist: "202", raw: "54:26 Overdose/なとり/202" }),
+    { title: "Overdose/なとり", artist: "", changed: true, parserCorruption: true },
+  );
+});
+
+test("rejects numeric activity annotations without dropping numeric artists", () => {
+  assert.equal(isLikelyNonSongEntry({ title: "〜 2026/10", artist: "31", raw: "19:00 〜 2026/10/31" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "から2026/09", artist: "30", raw: "23:30 から2026/09/30" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "なおみん式マイクテスト📢", artist: "40", raw: "1:15 なおみん式マイクテスト📢||||40" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "天ノ弱", artist: "164", raw: "0:21:50 天ノ弱/164" }), false);
+});
