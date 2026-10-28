@@ -1650,19 +1650,26 @@ function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
   const normalizedTitle = String(title || "").normalize("NFKC").trim();
   const normalizedArtist = String(artist || "").normalize("NFKC").trim();
   if (!normalizedTitle || !normalizedArtist) return false;
-  const numericFragment = /^[~〜～\s0-9/／年月日時:：、,.．\-–—]+$/u;
+  const rawText = String(raw || "").normalize("NFKC");
+  if (
+    /(?:19|20)\d{2}\s*[/／]\s*\d{1,2}\s*$/u.test(normalizedTitle) &&
+    rawText.match(/(?:19|20)\d{2}\s*[/／]\s*\d{1,2}\s*[/／]\s*(\d{1,2})\s*$/u)?.[1] === normalizedArtist
+  ) return true;
+  const numericFragment = /^[~〜～\s0-9①-⑳/／年月日時:：、,.．\-–—]+$/u;
   const compactFragment = (value) => value.replace(/日時|年|月|日|時|から|まで/gu, "").trim();
   if (!numericFragment.test(compactFragment(normalizedTitle)) || !numericFragment.test(compactFragment(normalizedArtist))) {
     return false;
   }
-  const rawText = String(raw || "").normalize("NFKC");
   const hasDateMarker = /(?:日時|(?:19|20)\d{2}\s*[/／]|\d{1,2}\s*[/／]\s*\d{1,2})/u.test(rawText);
   if (!hasDateMarker) return false;
   if (/日時/u.test(rawText) || /(?:19|20)\d{2}\s*[/／]\s*\d{1,2}/u.test(rawText)) return true;
-  for (const match of rawText.matchAll(/(?:^|[^\d])(\d{1,2})\s*[/／]\s*(\d{1,2})(?=$|[^\d])/gu)) {
+  for (const match of rawText.matchAll(/(\d{1,2})\s*[/／]\s*(\d{1,2})/gu)) {
     const left = Number(match[1]);
     const right = Number(match[2]);
-    if ((left >= 1 && left <= 12 && right >= 13 && right <= 31) || (left === right && left <= 100)) return true;
+    if (
+      (left >= 1 && left <= 12 && right >= 1 && right <= 31 && Number(normalizedArtist) === right) ||
+      (left === right && left <= 100)
+    ) return true;
   }
   return false;
 }

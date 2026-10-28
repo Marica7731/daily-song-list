@@ -916,8 +916,12 @@ test("rejects numeric dates and progress fragments while preserving numeric song
     { title: "50", artist: "50", raw: "🌺［1:35:02］50/50" },
     { title: "~ 2026/10", artist: "08", raw: "19:00 〜 2026/10/08" },
     { title: "日時:2026/9", artist: "23", raw: "17:00 日時:2026/9/23" },
+    { title: "〜 11", artist: "2", raw: "23:00 〜 11/2" },
+    { title: "～　③10", artist: "25", raw: "13:00 ～　③10/25" },
+    { title: "『(生) トークの達人大集合！#5』2026/10", artist: "3", raw: "22:00 『(生) トークの達人大集合！#5』2026/10/3" },
   ]) assert.equal(isLikelyNonSongEntry(song), true, JSON.stringify(song));
   assert.equal(isLikelyNonSongEntry({ title: "1/2", artist: "川本真琴", raw: "0:10 1/2 / 川本真琴" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "1/2", artist: "164", raw: "0:10 1/2 / 164" }), false);
 });
 
 test("clears key shifts and numeric metadata after a credited title", () => {
