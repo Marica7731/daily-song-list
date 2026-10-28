@@ -1290,6 +1290,7 @@ test("latest review-only residue is source-specifically cleaned without broad de
   const reviewedAdTitle = "『ボイスカード』全国のAIICO自販機にて販売中9/15〜10";
   for (const sourceHash of [
     "3ce2889d374219c88ef71404170db724289081434d471593996f75067f4d4a59",
+    "6da038132d03a22cd5e9b7f14dc293eae26250aa96e7a3d60b6e3a3cb23d55d9",
     "39ba88a048b62c1a801925023363b7ac89a995e071514dd4ef0cdd0a053043d8",
   ]) {
     assert.equal(unambiguousNonSongReason(song(reviewedAdTitle, "31", {
