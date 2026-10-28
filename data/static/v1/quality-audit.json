@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-28T05:32:58.658Z",
+  "generatedAt": "2026-10-28T05:38:20.844Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 21753,
-  "inputOccurrences": 248085,
+  "inputVideos": 21757,
+  "inputOccurrences": 248089,
   "visibleVideos": 18810,
   "visibleOccurrences": 244950,
-  "quarantinedOccurrences": 2547,
-  "quarantinedVideos": 1765,
+  "quarantinedOccurrences": 2551,
+  "quarantinedVideos": 1769,
   "deduplicatedOccurrences": 575,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 60,
@@ -18,7 +18,8 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1350,
+    "prayer_broadcast_timeline": 1353,
+    "reviewed_bad_description_source": 197,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 7,
     "reviewed_mixed_chapter_comment": 299,
@@ -33,7 +34,6 @@
     "confirmed_stream_start_marker": 33,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
     "outside_official_release_catalog": 13,
-    "reviewed_bad_description_source": 196,
     "dated_future_stream_announcement": 7,
     "confirmed_stream_technical_note": 1,
     "bible_verse_broadcast": 4,
@@ -208,9 +208,9 @@
     {
       "sourceHash": "6efbd19caefbbe84267c45fe34aff03890b6e31dac4e6632b7f4a862023e9bb0",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 225,
-      "channelCount": 216,
-      "distinctVideoTitles": 223,
+      "videoCount": 228,
+      "channelCount": 219,
+      "distinctVideoTitles": 226,
       "examples": [
         {
           "videoId": "3hfZdT3llr8",
@@ -404,6 +404,13 @@
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 1
+      }
+    },
+    "2024-10-28": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_bad_description_source": 1
       }
     },
     "2026-06-26": {
@@ -1361,11 +1368,11 @@
       }
     },
     "2026-10-27": {
-      "quarantinedOccurrences": 34,
+      "quarantinedOccurrences": 37,
       "deduplicatedOccurrences": 19,
       "byReason": {
         "unrelated_livestream_listing": 1,
-        "prayer_broadcast_timeline": 32,
+        "prayer_broadcast_timeline": 35,
         "reused_description_across_unrelated_channels": 1
       }
     },
@@ -1389,6 +1396,10 @@
   },
   "byVideo": {
     "4-DUe4t2C58": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "eKOv2_xRH68": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -9564,6 +9575,18 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "cftgLKZuHX0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "epH2isajscM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "TegnqAezVJM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "er1iMVnkW3U": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 14
@@ -11149,6 +11172,17 @@
       "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 12/09 | 25° Dia | Live Ao vivo"
     },
     {
+      "reason": "reviewed_bad_description_source",
+      "videoId": "eKOv2_xRH68",
+      "channelName": "葉月ショウゴ",
+      "occurrenceId": "eKOv2_xRH68:19:671",
+      "sourceId": "description:eKOv2_xRH68:508e5918d7aa133e",
+      "sourceHash": "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8",
+      "title": "God Miracles Today",
+      "artist": "",
+      "raw": "God Miracles Today 11:11"
+    },
+    {
       "reason": "spoken_fraction_split_as_artist",
       "videoId": "78SkkDdtmX0",
       "channelName": "UTANO ch. 白玖ウタノ",
@@ -12005,17 +12039,6 @@
       "title": "静と動の星導",
       "artist": "未記載",
       "raw": "49:22　静と動の星導"
-    },
-    {
-      "reason": "reviewed_mixed_chapter_comment",
-      "videoId": "8KDs7OP6_KM",
-      "channelName": "Vezalius Bandage 【NIJISANJI EN】",
-      "occurrenceId": "8KDs7OP6_KM:legacy:8KDs7OP6_KM:2990:bef635cb777a1c7d",
-      "sourceId": "legacy:8KDs7OP6_KM",
-      "sourceHash": "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
-      "title": "8年前",
-      "artist": "未記載",
-      "raw": "49:50　8年前"
     }
   ],
   "artistCatalogGate": {
