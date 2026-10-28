@@ -1,6 +1,17 @@
 
 # Heartbeat log
 
+## 2026-10-28 20:26 +08:00
+
+- The first dirty trigger (`40684434920`, #98, `c8f0a44`) failed in `Resolve bounded heartbeat input` because the trigger edit left duplicate `requestedAt` keys without a separator. No data step ran. The payload was repaired, `jq -e` passed, and corrected dirty batch #99 (`40684741604`, `7b41407`) completed green with `25/all/confirmed_noise,parser_corruption` in `18m50s`.
+- Batch #99 rebuilt all static sources and exposed `291` exact candidates; it selected the `1` current candidate and `24` of `290` history `confirmed_noise` records, leaving `266` history candidates for later capped rounds. It set `rawHistoryTouched=false` and published data commit `427452d`.
+- Raw-line review covered all `25` selectors across immutable day shards dated `2026-08-24` through `2026-10-28`: `24` were episode-number-only rows such as `00:00 - 1255`, `00:01 - 1319`, and `00:09 - 1475` from `おしゃべりすずこ`; one was the campaign date `※生誕祭グッズの受注期間は11/4(水)23:59まで！`. Three same-name/artist entities remain from other videos, but all selected video IDs have `0` live occurrences.
+- Final live GitHub Pages serves `generatedAt=2026-10-28T12:13:06.137Z` and matches raw commit `d94b601` object-for-object except `generatedAt`: `18842` videos, `245598` occurrences, `2132` pending, `33527` processed, and `17452` no-song retry entries. All `15` range/type manifests passed first/final pages, rank boundaries, `15` detail lookups, and next-page `404`; all `16` search shards returned declared/actual `89451/89451`. Numeric artist credits remain (`164`: `22`, `19`: `7`, `666`: `3`), and `少女レイ / みきとP` is `825` occurrences across `822` videos.
+- Target Pages `40685394662` succeeded for `427452d`; the following static/Pages chain advanced normally. Main reported `size=153183 KB` at heartbeat start, up `14975 KB` from the prior reading but about `0.146 GiB` and far below the `8 GiB` reset threshold, so no orphan reset was started; `pushed_at=2026-10-28T11:57:08Z`.
+- Repair recovery remains `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. Archive `/actions` returns `404`; `daily-song-list-archive-overquota` returns `404`. Direct GitHub Pages HTTPS returns `200`, while the custom edge remains `525`, so publication identity was checked against the exact deployed raw commit.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
+
 ## 2026-10-28 12:23 +08:00
 
 - Dirty batch #97 (`40630278550`, trigger `623548a`) completed green with `25/all/confirmed_noise,parser_corruption` in `12m53s`. The full-source rebuild exposed `314` exact candidates; the deterministic batch selected all `7` current and `18` of `307` history `confirmed_noise` records, left `289` history candidates for the next bounded rounds, set `rawHistoryTouched=false`, and published data commit `805c72d`.
