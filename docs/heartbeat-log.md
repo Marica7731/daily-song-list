@@ -1,6 +1,15 @@
 
 # Heartbeat log
 
+## 2026-10-28 22:27 +08:00
+
+- Dirty batch #100 (`40701844427`, trigger `db89646`) completed green with `25/all/confirmed_noise,parser_corruption`. It rebuilt all static sources, selected `25` of `266` history `confirmed_noise` candidates, left `241` history candidates for later rounds, kept `rawHistoryTouched=false`, and published data commit `64c6ec6`.
+- Raw-line review covered all `25` selectors in immutable day shards dated `2026-09-04` through `2026-10-19`. Every row was an episode-number-only marker from `おしゃべりすずこ`, including `00:00 - 1271`, `00:01 - 1390`, `00:00 - 1549`, and `00:00 - 1600`; no credited numeric song was selected.
+- Final live GitHub Pages serves `generatedAt=2026-10-28T14:13:08.866Z` and matches raw commit `82b0468` object-for-object except `generatedAt`: `18859` videos, `245996` occurrences, `2045` pending, `33570` processed, and `17499` no-song retry entries. All `15` range/type manifests passed first/final pages, rank boundaries, `15` detail lookups, and next-page `404`; all `16` search shards returned declared/actual `89569/89569`. Numeric artist credits remain (`164`: `22`, `19`: `7`, `666`: `3`), `少女レイ / みきとP` is `828` occurrences across `825` videos, and all selected video IDs have `0` live occurrences.
+- Target Pages `40702916016` succeeded for `64c6ec6`, and the following static/Pages chain advanced normally. Main size fell from `153183 KB` to `147416 KB`, a `5767 KB` decrease and about `0.141 GiB`, far below the `8 GiB` reset threshold, so no orphan reset was needed; `pushed_at=2026-10-28T13:57:38Z`.
+- The latest `100` Actions runs sampled before cleanup contained `97` successes, the known #98 malformed-trigger failure already covered by green replay #99, `0` cancellations, and `2` active normal static updates; #100 is green. Repair recovery remains `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. Archive `/actions` and `daily-song-list-archive-overquota` both return `404`.
+- Direct GitHub Pages HTTPS returns `200`, while the custom edge remains `525`, so publication identity was checked against the exact deployed raw commit. All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-28 20:26 +08:00
 
 - The first dirty trigger (`40684434920`, #98, `c8f0a44`) failed in `Resolve bounded heartbeat input` because the trigger edit left duplicate `requestedAt` keys without a separator. No data step ran. The payload was repaired, `jq -e` passed, and corrected dirty batch #99 (`40684741604`, `7b41407`) completed green with `25/all/confirmed_noise,parser_corruption` in `18m50s`.
