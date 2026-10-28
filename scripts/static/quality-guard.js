@@ -535,11 +535,20 @@ function repeatedDescriptionSources(videos) {
   return collisions;
 }
 
+const REVIEWED_ARTIST_CORRECTIONS_BY_SOURCE_HASH = new Map([
+  ["aa5ef46cc35e31639bbd383c1fa49a70e2d7ed98da94968cc3d235c5c1b86947", new Map([[":MURASAKI", "MURASAKI"]])],
+]);
+
 function normalizeConservativeArtist(song) {
   const artist = String(song?.artist || "");
   const title = String(song?.title || "").trim();
   const raw = String(song?.raw || "").normalize("NFKC");
   const trimmed = artist.normalize("NFKC").trim();
+
+  const reviewedArtist = REVIEWED_ARTIST_CORRECTIONS_BY_SOURCE_HASH
+    .get(String(song?.sourceHash || ""))
+    ?.get(trimmed);
+  if (reviewedArtist) return { ...song, artist: reviewedArtist };
 
   if (/^(?:歌えません|練習中)$/u.test(trimmed) &&
       raw.includes(title) &&

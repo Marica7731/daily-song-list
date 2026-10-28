@@ -179,13 +179,24 @@ test("repair separator-polluted artist credits without changing historical input
   assert.equal(normalizeConservativeArtist(song("盛れ！ミ・アモーレ", "／ Juice=Juice")).artist, "Juice=Juice");
   assert.equal(normalizeConservativeArtist(song("猫", "DISH//")).artist, "DISH//");
   assert.equal(normalizeConservativeArtist(song("Untouched", "/meme")).artist, "/meme");
+  const reviewedColon = song("奇々解体", ":MURASAKI", {
+    raw: "23:09 奇々解体 ／ :MURASAKI",
+    sourceHash: "aa5ef46cc35e31639bbd383c1fa49a70e2d7ed98da94968cc3d235c5c1b86947",
+  });
+  const unrelatedColon = song("奇々解体", ":MURASAKI", {
+    raw: "23:09 奇々解体 ／ :MURASAKI",
+    sourceHash: "c".repeat(64),
+  });
+  assert.equal(normalizeConservativeArtist(reviewedColon).artist, "MURASAKI");
+  assert.equal(normalizeConservativeArtist(unrelatedColon).artist, ":MURASAKI");
   const input = [video(1, [song("Butter-Fly", "/ 和田光司"), song("Butter-Fly", "和田光司")])];
+  input[0].songs.push(reviewedColon, unrelatedColon);
   const saved = JSON.stringify(input);
   const { videos, audit } = cleanStaticVideos(input);
-  assert.equal(audit.normalizedArtistOccurrences, 1);
+  assert.equal(audit.normalizedArtistOccurrences, 2);
   assert.equal(audit.quarantinedOccurrences, 0);
-  assert.equal(videos[0].songs.length, 2);
-  assert.deepEqual(videos[0].songs.map(row => row.artist), ["和田光司", "和田光司"]);
+  assert.equal(videos[0].songs.length, 4);
+  assert.deepEqual(videos[0].songs.map(row => row.artist), ["和田光司", "和田光司", "MURASAKI", ":MURASAKI"]);
   assert.equal(JSON.stringify(input), saved);
 });
 
