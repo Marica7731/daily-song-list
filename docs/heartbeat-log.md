@@ -1,6 +1,17 @@
 
 # Heartbeat log
 
+## 2026-10-29 06:30 +08:00
+
+- Dirty batch #104 (`40776500983`, trigger `d615d01`) completed green with `25/all/confirmed_noise,parser_corruption`. It rebuilt all static sources, selected `25` of `166` history `confirmed_noise` candidates, left `141` in the deterministic rotation for later rounds, kept `rawHistoryTouched=false`, and published data commit `bccd694`.
+- Raw-line review covered all `25` selectors in immutable day shards: `18` were episode-number-only markers from `おしゃべりすずこ`, `6` were participant/opening/closing chapters in the `リレー` video `0IA0b5BiuIQ`, and `1` was the relay notice `2:44 お知らせ📣(11/1419時Vミュージカル部2歌枠リレー)`. No credited numeric title or genuine relay song was selected.
+- The post-cleanup selector check passed all `25` records: `18` video source files now return `404`, and the remaining `7` sources retain their other songs but no longer contain the selected entry; failures `0`.
+- Final live GitHub Pages serves `generatedAt=2026-10-28T22:07:26.590Z` and matches raw commit `443a723` object-for-object except `generatedAt`; the canonical meta digest is `a342e8819a9a7f51f5dcbfb3e28cc92427ba4a201739b5b89457f714ad514257` on both sides. Snapshot counts are `18884` videos, `247450` occurrences, `1876` pending, `33699` processed, and `17627` no-song retry entries.
+- All `15` range/type manifests passed declared counts plus `29` first/final page and rank-boundary checks; all `16` search shards returned declared/actual `90009/90009`. Entity `少女レイ / みきとP` has `833` occurrences across `830` videos, source `-3miFLuOix4` has `20` songs, and the root plus all five range entry points return `200`. The custom edge remains `525`, so publication identity was checked against the exact deployed raw commit.
+- Check code `40776500962`, dirty batch #104, and target Pages `40777179940` for `bccd694` are green; the following deployment chain advanced normally. The latest `100` Actions runs contained `97` successes, `1` normal cancellation, `2` active normal static updates, and `0` failures.
+- Main reports `size=145033 KB` (about `0.138 GiB`) versus `139130 KB` at this heartbeat's opening, with `pushed_at=2026-10-28T22:25:26Z`; active packs increased the reported size, but it remains far below the `8 GiB` reset threshold, so no orphan reset was started. Repair recovery remains `COMPLETE` with `remaining=0`, `failures=0`, and complete source coverage. Archive `/actions` and `daily-song-list-archive-overquota` both return `404`.
+- All commands were bounded; no VPS, SSH, self-hosted runner, full clone, or repository-history download was used.
+
 ## 2026-10-29 02:22 +08:00
 
 - Dirty batch #102 (`40741127682`, trigger `98817c5`) completed green with `25/all/confirmed_noise,parser_corruption`. It rebuilt all static sources, selected `25` of `216` history `confirmed_noise` candidates, left `191` in the deterministic pool for later rounds, kept `rawHistoryTouched=false`, and published data commit `a35fce5`.
