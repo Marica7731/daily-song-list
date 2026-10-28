@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-28T01:36:29.748Z",
+  "generatedAt": "2026-10-28T01:41:53.835Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
   "inputVideos": 21705,
   "inputOccurrences": 247614,
-  "visibleVideos": 18840,
-  "visibleOccurrences": 244519,
-  "quarantinedOccurrences": 2521,
-  "quarantinedVideos": 1751,
+  "visibleVideos": 18836,
+  "visibleOccurrences": 244506,
+  "quarantinedOccurrences": 2534,
+  "quarantinedVideos": 1755,
   "deduplicatedOccurrences": 561,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 60,
@@ -22,7 +22,7 @@
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 7,
     "reviewed_mixed_chapter_comment": 299,
-    "reviewed_source_activity_chapter": 246,
+    "reviewed_source_activity_chapter": 259,
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
@@ -673,11 +673,11 @@
       }
     },
     "2026-08-23": {
-      "quarantinedOccurrences": 13,
+      "quarantinedOccurrences": 14,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "confirmed_talk_section": 2,
-        "reviewed_source_activity_chapter": 2,
+        "reviewed_source_activity_chapter": 3,
         "reviewed_non_song_chapter_in_numbered_setlist": 5,
         "date_split_as_song_and_artist": 1,
         "prayer_broadcast_timeline": 1,
@@ -706,11 +706,11 @@
       }
     },
     "2026-08-26": {
-      "quarantinedOccurrences": 19,
+      "quarantinedOccurrences": 20,
       "deduplicatedOccurrences": 4,
       "byReason": {
         "confirmed_talk_section": 2,
-        "reviewed_source_activity_chapter": 6,
+        "reviewed_source_activity_chapter": 7,
         "dated_future_stream_announcement": 2,
         "confirmed_stream_start_marker": 1,
         "prayer_broadcast_timeline": 4,
@@ -845,7 +845,7 @@
       }
     },
     "2026-09-05": {
-      "quarantinedOccurrences": 36,
+      "quarantinedOccurrences": 37,
       "deduplicatedOccurrences": 25,
       "byReason": {
         "reviewed_bad_description_source": 9,
@@ -853,7 +853,8 @@
         "dated_future_stream_announcement": 1,
         "confirmed_stream_start_marker": 1,
         "unrelated_livestream_listing": 3,
-        "unrelated_talk_show_listing": 3
+        "unrelated_talk_show_listing": 3,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-09-06": {
@@ -914,12 +915,13 @@
       }
     },
     "2026-09-11": {
-      "quarantinedOccurrences": 58,
+      "quarantinedOccurrences": 59,
       "deduplicatedOccurrences": 4,
       "byReason": {
         "prayer_broadcast_timeline": 49,
         "reused_description_across_unrelated_channels": 3,
         "confirmed_stream_start_marker": 1,
+        "reviewed_source_activity_chapter": 1,
         "unrelated_livestream_listing": 1,
         "unrelated_talk_show_listing": 1,
         "reviewed_bad_description_source": 3
@@ -1028,11 +1030,12 @@
       }
     },
     "2026-09-22": {
-      "quarantinedOccurrences": 42,
+      "quarantinedOccurrences": 43,
       "deduplicatedOccurrences": 5,
       "byReason": {
         "prayer_broadcast_timeline": 38,
-        "reviewed_bad_description_source": 4
+        "reviewed_bad_description_source": 4,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-09-23": {
@@ -1191,20 +1194,22 @@
       }
     },
     "2026-10-08": {
-      "quarantinedOccurrences": 7,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 14,
       "byReason": {
         "prayer_broadcast_timeline": 5,
+        "reviewed_source_activity_chapter": 1,
         "reused_description_across_unrelated_channels": 1,
         "unrelated_livestream_listing": 1
       }
     },
     "2026-10-09": {
-      "quarantinedOccurrences": 9,
+      "quarantinedOccurrences": 10,
       "deduplicatedOccurrences": 29,
       "byReason": {
         "reused_description_across_unrelated_channels": 5,
-        "prayer_broadcast_timeline": 4
+        "prayer_broadcast_timeline": 4,
+        "reviewed_source_activity_chapter": 1
       },
       "artistCatalogArchivedOccurrences": 1
     },
@@ -1217,20 +1222,21 @@
       }
     },
     "2026-10-11": {
-      "quarantinedOccurrences": 5,
+      "quarantinedOccurrences": 6,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 4,
-        "reviewed_source_activity_chapter": 1
+        "reviewed_source_activity_chapter": 2
       },
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-10-12": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 4,
       "deduplicatedOccurrences": 5,
       "byReason": {
         "confirmed_talk_section": 1,
-        "reused_description_across_unrelated_channels": 2
+        "reused_description_across_unrelated_channels": 2,
+        "reviewed_source_activity_chapter": 1
       }
     },
     "2026-10-13": {
@@ -1258,10 +1264,11 @@
       }
     },
     "2026-10-16": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 27,
       "byReason": {
         "prayer_broadcast_timeline": 1,
+        "reviewed_source_activity_chapter": 1,
         "reviewed_bad_description_source": 1
       },
       "artistCatalogArchivedOccurrences": 1
@@ -1293,9 +1300,10 @@
       }
     },
     "2026-10-20": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 5,
       "deduplicatedOccurrences": 5,
       "byReason": {
+        "reviewed_source_activity_chapter": 1,
         "reused_description_across_unrelated_channels": 4
       }
     },
@@ -1333,12 +1341,13 @@
       }
     },
     "2026-10-25": {
-      "quarantinedOccurrences": 61,
+      "quarantinedOccurrences": 63,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "prayer_broadcast_timeline": 23,
         "unrelated_livestream_listing": 19,
-        "unrelated_talk_show_listing": 19
+        "unrelated_talk_show_listing": 19,
+        "reviewed_source_activity_chapter": 2
       }
     },
     "2026-10-26": {
@@ -1707,6 +1716,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "if8V4T0n8TE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "kVR_-jHD1k4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -1840,6 +1853,10 @@
       "deduplicatedOccurrences": 0
     },
     "7Jc7kL1hjcE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "9FjTB_oOmOc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -2870,6 +2887,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "xb8i3qfMpyY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "xXpnerX9quQ": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -3707,6 +3728,10 @@
       "deduplicatedOccurrences": 0
     },
     "31Y5quwS8To": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "AsWWTUTq9TM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -5394,6 +5419,10 @@
     "bVSLb2a9DR8": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 5
+    },
+    "cLFa9OFCeME": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "EWieTQn7zis": {
       "quarantinedOccurrences": 1,
@@ -8257,6 +8286,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "sI5nvMcMAn8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "quKl3fIC5rU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -8298,6 +8331,10 @@
       "deduplicatedOccurrences": 5
     },
     "R4yxjCFcLp0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "e80lyVXaT1g": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -8364,7 +8401,7 @@
       "deduplicatedOccurrences": 0
     },
     "xPwvUV7uS9o": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "R9cH7A3dCMQ": {
@@ -8388,6 +8425,10 @@
       "deduplicatedOccurrences": 5
     },
     "9mKMJb1SWzc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "HLm9iFcrhkU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -8453,6 +8494,10 @@
       "deduplicatedOccurrences": 1
     },
     "_uQ6wYaIva0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "pklh5Uf9GJE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -8527,6 +8572,10 @@
       "deduplicatedOccurrences": 8
     },
     "f5qsQJsJqSM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "vqXI_Xh99NA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -9158,6 +9207,10 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "i-Dp6FIUIj8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "t6nMgbNCLB8": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -9243,6 +9296,10 @@
       "deduplicatedOccurrences": 0
     },
     "8dtzUikTftc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "WY0YoyAr4A0": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
