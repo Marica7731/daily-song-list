@@ -544,6 +544,7 @@ function isLikelyNonSongEntry(song, source = {}) {
 
   if (isCustomEmojiOnlyText(title)) return true;
   if (isCalendarScheduleNoiseEntry(title, artist)) return true;
+  if (isHighConfidenceNumericScheduleFragment(title, artist, raw)) return true;
   if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
   if (
     /^(?:\d{1,2}[\/.-]\d{1,2}[\/.-](?:19|20)\d{2}|(?:19|20)\d{2}[\/.-]\d{1,2}[\/.-]\d{1,2})$/u.test(title) &&
@@ -1299,6 +1300,23 @@ function repairPublishedSongMetadata(song) {
       parserCorruption = true;
     }
   }
+  // Karaoke scores, BPM values, and round/segment annotations are sometimes split into the
+  // artist slot. Clear only a trailing parenthetical annotation; slash-delimited numeric
+  // artists such as "天ノ弱 / 164" remain legitimate credits.
+  const trailingParenthetical = raw.match(/[（(]\s*([^()（）]{1,24})\s*[)）]\s*$/u);
+  const annotation = trailingParenthetical?.[1]?.trim() || "";
+  const decimalAnnotation = /^\d{1,3}\.\d{1,3}$/u.test(annotation);
+  const numericArtist = /^\d{1,3}$/u.test(artist);
+  const artistMatchesAnnotation = annotation && annotation === artist && (
+    /^\d{2,3}$/u.test(annotation) ||
+    /^第[0-9一二三四五六七八九十百千万零〇两]+回$/u.test(annotation) ||
+    /^[0-9一二三四五六七八九十百千万零〇两]+(?:番|曲目|曲|章|回)$/u.test(annotation) ||
+    /^[一二三四五六七八九十百千万零〇两]+$/u.test(annotation)
+  );
+  if ((decimalAnnotation && numericArtist) || artistMatchesAnnotation) {
+    artist = "";
+    parserCorruption = true;
+  }
   return {
     title,
     artist,
@@ -1626,3 +1644,22 @@ module.exports = {
   parseTimestampSongs,
   timeToSeconds,
 };
+
+function isHighConfidenceNumericScheduleFragment(title, artist, raw) {
+  const normalizedTitle = String(title || "").normalize("NFKC").trim();
+  const normalizedArtist = String(artist || "").normalize("NFKC").trim();
+  if (!normalizedTitle || !normalizedArtist) return false;
+  const numericFragment = /^[~\s0-9/／年月日時:：、,.．\-–—]+$/u;
+  const compactFragment = (value) => value.replace(/日時|年|月|日|時/gu, "").trim();
+  if (!numericFragment.test(compactFragment(normalizedTitle)) || !numericFragment.test(compactFragment(normalizedArtist))) {
+    return false;
+  }
+  const rawText = String(raw || "").normalize("NFKC");
+  if (/日時/u.test(rawText) || /(?:19|20)\d{2}\s*[/／]\s*\d{1,2}/u.test(rawText)) return true;
+  for (const match of rawText.matchAll(/(?:^|[^\d])(\d{1,2})\s*[/／]\s*(\d{1,2})(?=$|[^\d])/gu)) {
+    const left = Number(match[1]);
+    const right = Number(match[2]);
+    if ((left >= 1 && left <= 12 && right >= 13 && right <= 31) || (left === right && left <= 100)) return true;
+  }
+  return false;
+}

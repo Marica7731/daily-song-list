@@ -883,3 +883,39 @@ test("still rejects plain greeting and topic comments", () => {
 
   assert.deepEqual(songs, []);
 });
+
+test("clears karaoke score and segment annotations from the artist slot", () => {
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "アゲハ蝶", artist: "432", raw: "3:27:55 アゲハ蝶(92.432)" }),
+    { title: "アゲハ蝶", artist: "", changed: true, parserCorruption: true },
+  );
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "Lv2", artist: "100", raw: "0:00:43 Lv2 (100)" }),
+    { title: "Lv2", artist: "", changed: true, parserCorruption: true },
+  );
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "THE WINNER", artist: "第2回", raw: "58:19 THE WINNER（第2回）" }),
+    { title: "THE WINNER", artist: "", changed: true, parserCorruption: true },
+  );
+});
+
+test("preserves slash-delimited numeric and kanji artist credits", () => {
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "天ノ弱", artist: "164", raw: "5:47:50 【天ノ弱】/ 164" }),
+    { title: "天ノ弱", artist: "164", changed: false, parserCorruption: false },
+  );
+  assert.deepEqual(
+    repairPublishedSongMetadata({ title: "ゼロ", artist: "零", raw: "00:16:23 ゼロ / 零" }),
+    { title: "ゼロ", artist: "零", changed: false, parserCorruption: false },
+  );
+});
+
+test("rejects numeric dates and progress fragments while preserving numeric song titles", () => {
+  for (const song of [
+    { title: "11", artist: "22", raw: "14:00、11/22" },
+    { title: "50", artist: "50", raw: "🌺［1:35:02］50/50" },
+    { title: "~ 2026/10", artist: "08", raw: "19:00 〜 2026/10/08" },
+    { title: "日時:2026/9", artist: "23", raw: "17:00 日時:2026/9/23" },
+  ]) assert.equal(isLikelyNonSongEntry(song), true, JSON.stringify(song));
+  assert.equal(isLikelyNonSongEntry({ title: "1/2", artist: "川本真琴", raw: "0:10 1/2 / 川本真琴" }), false);
+});
