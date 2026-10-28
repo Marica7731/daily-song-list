@@ -436,8 +436,27 @@ jobs:
                 fi
               done
             fi
+            # Give a concurrent deployment one final bounded propagation window, then refresh
+            # the edge payload before validating its digest.
+            echo "HEARTBEAT_PAGES_FINAL_WAIT id=$deploy_id"
+            sleep 60
+            live_meta="$(curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "https://marica7731.github.io/daily-song-list/data/static/v1/meta.json?heartbeat=$data_commit&final=1" 2>/dev/null || true)"
+            if [[ -n "$live_meta" ]] && printf '%s' "$live_meta" | jq -e . >/dev/null 2>&1; then
+              live_payload_seen=true
+              live_meta_seen=true
+              live_generated_at="$(printf '%s' "$live_meta" | jq -er '.generatedAt')"
+              live_meta_sha="$(printf '%s' "$live_meta" | jq -S -c 'del(.generatedAt)' | sha256sum | awk '{print $1}')"
+            fi
             if [[ "$live_payload_seen" == "true" ]]; then
               if [[ "$live_meta_seen" == "true" ]]; then
+                if [[ "$live_meta_sha" == "$expected_meta_sha" ]]; then
+                  generated_at="$live_generated_at"
+                  echo "HEARTBEAT_PAGES_OK id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=final"
+                  echo "deploy_run_id=$deploy_id" >> "$GITHUB_OUTPUT"
+                  echo "generated_at=$generated_at" >> "$GITHUB_OUTPUT"
+                  echo "meta_sha=$live_meta_sha" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
                 if find_live_descendant_meta; then
                   generated_at="$LIVE_DESCENDANT_GENERATED_AT"
                   echo "HEARTBEAT_PAGES_OK source=descendant sha=$LIVE_DESCENDANT_SHA id=$deploy_id generatedAt=$generated_at metaSha=$live_meta_sha attempt=final"
