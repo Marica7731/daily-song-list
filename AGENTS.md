@@ -1,19 +1,57 @@
-# Repository agent rules
+# AGENTS.md
 
-- Use bounded commands: normal checks 10-30 seconds, tests about 60 seconds, remote probes about 30 seconds. No unbounded waits.
-- Repository size control is routine maintenance and pre-approved: keep the reported size non-increasing, and when `main` exceeds 8 GiB perform a controlled orphan reset after verifying the tree and immutable day shards. Do not leave a backup ref permanently reachable, because that prevents GitHub object collection; keep run evidence in `docs/heartbeat-log.md`.
-- Keep this project GitHub-hosted: use GitHub web editor, Actions, or approved hosted execution. Do not use the VPS or clone/download repository history.
-- Preserve immutable raw history under `data/static/v1/days/**`. Curation changes must use exact selectors and bounded batches.
-- Artist release catalogs live in `config/artist-catalogs/**`; the verified official unique-title count is the hard publication gate. Canonicalize confirmed aliases to the official artist/title, auto-archive only credited off-catalog rows to `data/static/v1/quality-artist-archive.json` as derived evidence, and never rewrite `days/**` or `state.json`.
-- Never discard a title-only row merely because its source also has many credited artists. Keep valid uncredited song titles; remove only rows that match explicit non-song, chapter, date, chat, or activity rules.
-- Persist only source inputs and control state under `data/static/v1` (`days`, `state.json`, `imports`, and `recovery`). `entities`, `rankings`, `search`, and `sources` are ignored, rebuildable outputs; the Pages workflow must generate them with `npm run static:rebuild`, and data workflows must never commit them.
-- Publication order is: green `Check code`, bounded heartbeat/recovery/static update, then Pages. Recheck live meta, manifests, pagination, and entity details after publishing.
-- Pages verification must follow the custom-domain redirect and compare a canonical digest of the full live `meta.json`, excluding only the Pages-regenerated `generatedAt`, with the successful deployment commit raw `meta.json`; timestamp equality alone is insufficient. A concurrent Pages deployment may supersede the data commit only when it is a verified descendant containing that commit; use the successful descendant `headSha` for verification. If the custom edge is unavailable (521/525), the same commit-identity rule applies; the edge outage alone is not evidence that the deployment failed.
-- Dirty-data heartbeat entrypoint: run `npm run static:rebuild` to materialize ephemeral derived data, run `scripts/static/export-static-dirty-review.js` to create `data/review/sources` candidates, then run `scripts/static/heartbeat-dirty-batch.js`. Never commit regenerated derived data or the review-source mirror.
-- Dirty-data cleanup is mandatory every heartbeat and must never wait for `static-update` or recovery idleness. Scan all `data/static/v1/sources/**`, process at most 25 exact selectors, and deterministically rotate every current/history x confirmed_noise/parser_corruption pool so old records are revisited instead of only scanning the newest days. Use `npm run static:rebuild`, `scripts/static/export-static-dirty-review.js`, then `scripts/static/heartbeat-dirty-batch.js`; never commit regenerated derived data or the review-source mirror.
-- Keep this file limited to durable project constraints, operating rules, and canonical entrypoints. Never append run logs, timestamps, commit hashes, queue counts, or transient status here; keep detailed per-run evidence in `docs/heartbeat-log.md`.
-- Heartbeat quiet window: GLM Coding Plan peak is workdays 14:00-18:00 (Asia/Shanghai); the automation schedule excludes those hours, and no heartbeat work should be started inside the window.
-- Never retire a video. A zero-song scrape only sets a cooldown: the verdict stays in `state.noSongAttempts` (the retry pool) forever, spaced by the ladder in `scripts/static/no-song-retry.js` (15m -> 45m -> 2h -> 5h -> 12h -> 24h -> 48h -> capped at 7d, plus deterministic per-video jitter). No code path may add a zero-song video to `processedVideoIds` or drop it from the retry pool.
-- Pending-drain continuity: every pending candidate remains retryable. Pending above 500 uses 120-video batches; after 96 continuation rounds, wait 600 seconds and start a new window. A round limit or repair backlog must never leave pending candidates permanently stopped.
-- Scheduled triggers for `static-update.yml` and `static-freshness-watchdog.yml` are dropped irregularly, and pushes made with the workflow `GITHUB_TOKEN` do not fan out to other workflows, so data commits cannot wake the watchdog. When the newest successful `static-update` run is older than 90 minutes and `pendingVideoCount > 0`, the heartbeat re-arms collection itself through the push-path marker in `.github/workflows/static-update.yml`; the watchdog's `stalled_collection_queue` branch only helps once it actually runs.
-- Pending candidates outrank the historical repair pool. When `pendingVideoCount > 500`, `static-update.yml` keeps a bounded continuation chain and repair yields; at or below 500, repair may resume. The chain has an internal round cap so throttling cannot loop forever.
+这份文件告诉维护者怎样安全地清洗和发布歌曲数据。改动前先读一遍。
+
+## 先记住
+
+- 用项目已有的 GitHub Actions 和发布步骤。不要把仓库搬到 VPS，也不要下载完整 Git 历史。
+- 命令要有超时：普通检查 10–30 秒，测试约 60 秒，远程检查约 30 秒。不要无限等待。
+- 不要猜这个项目用了哪个模型或付费计划。只有检查到实际运行配置或调用记录，才能这样说明。
+
+## 保护数据和配置
+
+1. `data/static/v1/days/**` 是原始历史，不能改写或删除。
+2. 不要直接改写 `data/static/v1/state.json`。
+3. 不要删除或改名配置、规则、workflow、原始数据或项目目录。只改完成当前任务需要的文件。
+4. 不要重写 Git 历史、做 orphan reset、强推或删除分支。仓库变大时先检查原因；只有用户在这次任务里明确同意，才可以考虑重写历史。
+5. 不要提交重新生成的榜单、搜索索引、实体页或 review-source 镜像。它们是可以重新生成的结果。
+
+## 清洗歌曲
+
+- 歌手目录在 `config/artist-catalogs/**`。发布前必须通过官方歌曲数量检查。
+- 只把确认过的歌名和别名改成目录里的正式写法。
+- 有明确歌手、但不在目录里的内容，可以按现有规则放进 `quality-artist-archive.json`；这是整理记录，不是原始历史。
+- 只有歌名、没有歌手的有效歌曲不能因为同一来源里有很多歌手而删掉。
+- 只删除明确不是歌曲的内容，例如章节、日期、聊天或活动文字。拿不准就保留，不要猜。
+
+## 固定数据和定时工作
+
+- `data/static/v1` 只保存原始来源和控制状态：`days`、`state.json`、`imports`、`recovery`。
+- 衍生页面和索引由 `npm run static:rebuild` 生成，不要让数据 workflow 提交这些结果。
+- 每轮清洗都要检查脏数据。先运行 `npm run static:rebuild`，再运行 `scripts/static/export-static-dirty-review.js`，最后运行 `scripts/static/heartbeat-dirty-batch.js`。
+- 每轮最多处理 25 个明确选中的项目。要轮换检查当前记录和历史记录里的确认噪声、解析损坏记录，不要总盯着最新几天。
+- 零歌曲不代表视频已处理完。按 `scripts/static/no-song-retry.js` 的间隔继续重试；不能把它加入 `processedVideoIds`，也不能从重试池移走。
+- 待处理视频要一直能继续。超过 500 条时，每批最多 120 条；连续 96 轮后最多等 600 秒，再开新一轮。不能因为轮数到顶就永久停住。
+- 待处理视频比历史修复更急。超过 500 条时先继续收集，暂停修复；降到 500 条或以下才可以恢复修复。
+- GitHub 有时会漏掉定时触发。如果最近一次成功的 `static-update` 已超过 90 分钟，而且仍有待处理视频，就用现有 push-path 标记重新启动收集。不要另造一套 workflow。
+
+## 发布和验收
+
+正常发布顺序是：
+
+1. `Check code` 通过。
+2. 按现有 heartbeat、恢复和静态更新步骤处理数据。
+3. Pages 发布完成。
+4. 检查真实网站的 meta、清单、分页和实体详情。
+
+线上检查要跟随自定义域名跳转，并把完整线上 `meta.json` 和发布 commit 的文件比较；只忽略 Pages 自动重写的 `generatedAt` 字段。只比较时间不够。
+如果另一次 Pages 发布覆盖了本次发布，只有确认它是包含本次数据 commit 的后续 commit，才能用它验收。自定义域名返回 521/525 时，先检查 Pages 部署和 commit；不能只因边缘节点报错就说数据发布失败。
+
+- 用项目已有的检查和发布门禁。不要增加与任务无关的审批步骤，挡住已经通过检查的正常发布。
+- 如果原有检查失败，修复真实问题后再走原发布流程。
+
+## 历史和文档
+
+- 详细的运行结果写在 `docs/heartbeat-log.md`，不要放进本文件。
+- 本文件只写长期有效的规则和入口。不要写时间、run id、提交 SHA、队列数字或临时故障。
+- 删除、重置或改写历史都不是例行维护，也没有预先批准。需要时必须先取得用户对这次具体操作的明确同意，并准备好可恢复的办法。
