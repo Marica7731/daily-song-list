@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-29T05:24:09.825Z",
-  "scannedVideoCount": 18957,
-  "scannedOccurrenceCount": 248236,
+  "generatedAt": "2026-10-29T05:29:34.408Z",
+  "scannedVideoCount": 18970,
+  "scannedOccurrenceCount": 248407,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -797,7 +797,7 @@
     },
     {
       "date": "2026-10-21",
-      "occurrences": 1637,
+      "occurrences": 1641,
       "quarantinedOccurrences": 3
     },
     {
@@ -817,7 +817,7 @@
     },
     {
       "date": "2026-10-25",
-      "occurrences": 2746,
+      "occurrences": 2913,
       "quarantinedOccurrences": 63
     },
     {
@@ -842,8 +842,8 @@
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 564,
-    "possible_activity_chapter": 109,
+    "possible_unparsed_credits": 565,
+    "possible_activity_chapter": 110,
     "possible_date_as_artist": 77,
     "possible_release_metadata_as_artist": 154,
     "possible_spoken_section": 16,
@@ -2782,6 +2782,23 @@
           "videoId": "DILY6Fc9ZzA",
           "channelName": "おっきーvv",
           "publishedAt": "2026-10-25T13:50:20.835Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "はじめの挨拶",
+      "artist": "",
+      "raw": "⁅00:00:04⁆🦊はじめの挨拶",
+      "sourceHash": "e47ad2c31742719d24114db988bcfb20b3a09cdef4298353186c355ed927d13b",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "QYiGr7bO7ds",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-10-25T11:06:36.086Z"
         }
       ],
       "videoCount": 1,
@@ -5132,26 +5149,86 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "シルシ",
-      "artist": "LiSA／アニメ『ソードアート・オンライン マザーズ・ロザリオ編』ED／2015/12/10",
-      "raw": "2:47:01　シルシ／LiSA／アニメ『ソードアート・オンライン マザーズ・ロザリオ編』ED／2015/12/10",
-      "sourceHash": "855e07dc70a76e86da86e2887c5c2117a528df922359ce468448cdd95375f889",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "BmZKDfe5-5M",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-23T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
+    {
+      "videoId": "ZgG3UXr6OKA",
+      "channelName": "Sena",
+      "publishedAt": "2026-10-25T11:10:05.974Z",
+      "sourceHash": "dbc8e9b0f798dcf54505e63455309ab3f6f9361a99e9977d85405294a85b5ce2",
+      "total": 62,
+      "explicitNumberedSongs": 14,
+      "knownArtistRows": 17,
+      "unknownNonNumberedRows": 45,
+      "unknownExamples": [
+        {
+          "title": "About todays SenaToUtau",
+          "raw": "7:20 About todays SenaToUtau"
+        },
+        {
+          "title": "The hand tracking is so funny XD",
+          "raw": "10:33 The hand tracking is so funny XD"
+        },
+        {
+          "title": "Sena accept request!!✨✨✨",
+          "raw": "11:12 Sena accept request!!✨✨✨"
+        },
+        {
+          "title": "That hand tracker again XD",
+          "raw": "12:09 That hand tracker again XD"
+        },
+        {
+          "title": "Chat req dangdut wkwkwk",
+          "raw": "13:11 Chat req dangdut wkwkwk"
+        },
+        {
+          "title": "Sena prefer singing standing up than sitting down",
+          "raw": "17:36 Sena prefer singing standing up than sitting down"
+        },
+        {
+          "title": "Sena doesn't want to postpone the karaoke ;w;)",
+          "raw": "29:16 Sena doesn't want to postpone the karaoke ;w;)"
+        },
+        {
+          "title": "Not rice, but oats!!!",
+          "raw": "32:05 Not rice, but oats!!!"
+        },
+        {
+          "title": "If oats doesnt work",
+          "raw": "34:03 If oats doesnt work"
+        },
+        {
+          "title": "aftertalk: Sena having fun!✨",
+          "raw": "42:06 .aftertalk: Sena having fun!✨"
+        },
+        {
+          "title": "Sena devour the oats (she's hungry)",
+          "raw": "43:02 Sena devour the oats (she's hungry)"
+        },
+        {
+          "title": "Sena prepare A LOT OF SONGS!!!",
+          "raw": "45:04 Sena prepare A LOT OF SONGS!!!"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "Haruka",
+          "artist": "YOASOBI",
+          "raw": "23:55 1. Haruka - Yoasobi🎵"
+        },
+        {
+          "title": "Gunjou",
+          "artist": "YOASOBI",
+          "raw": "37:52 2. Gunjou - Yoasobi🎵"
+        },
+        {
+          "title": "Golden Hour (Orchestral Version)",
+          "artist": "JVKE, Fujii Kaze",
+          "raw": "51:40 3. Golden Hour (Orchestral Version) - JVKE, Fujii Kaze🎵"
+        }
+      ]
+    },
     {
       "videoId": "VWnfMgDC1_w",
       "channelName": "心恋音むいる / Kokone Muiru【ベルプロ】",
