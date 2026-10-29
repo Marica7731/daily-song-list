@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-10-29T07:21:40.874Z",
+  "generatedAt": "2026-10-29T07:27:04.722Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22267,
-  "inputOccurrences": 253462,
-  "visibleVideos": 19123,
-  "visibleOccurrences": 250230,
-  "quarantinedOccurrences": 2613,
-  "quarantinedVideos": 1830,
+  "inputVideos": 22275,
+  "inputOccurrences": 253549,
+  "visibleVideos": 19130,
+  "visibleOccurrences": 250316,
+  "quarantinedOccurrences": 2614,
+  "quarantinedVideos": 1831,
   "deduplicatedOccurrences": 605,
   "artistCatalogArchivedVideos": 0,
-  "artistCatalogNormalizedOccurrences": 61,
+  "artistCatalogNormalizedOccurrences": 62,
   "artistCatalogArchivedOccurrences": 14,
   "normalizedArtistOccurrences": 449,
   "normalizedReleaseMetadataOccurrences": 1230,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1409,
+    "prayer_broadcast_timeline": 1410,
     "reviewed_bad_description_source": 202,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 8,
@@ -289,7 +289,7 @@
     {
       "sourceHash": "c84e7be650e14d761d2ce0789ee96bd3ebaef6bae0d19467c7b518ba44c8353a",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 44,
+      "videoCount": 45,
       "channelCount": 44,
       "distinctVideoTitles": 44,
       "examples": [
@@ -300,15 +300,15 @@
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 26/09 | 37° Dia | Live Ao vivo"
         },
         {
-          "videoId": "MrW_b1ABHoI",
-          "channelName": "王海ヶ音 せれ魚 -Kimigane Serena-",
-          "videoTitle": "【 #歌枠 】うたったり、はなしたり【王海ヶ音せれ魚】",
+          "videoId": "7Lv-zrcVB1c",
+          "channelName": "ほむほむ",
+          "videoTitle": "【弾語り&雑談】ほむっと微笑む配信 #弾き語り #雑談 #vrchat",
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 26/09 | 37° Dia | Live Ao vivo"
         },
         {
-          "videoId": "Md9Udsz586Q",
-          "channelName": "おこめ水産高校",
-          "videoTitle": "【ウクレレ歌枠】ウクレレを買いました",
+          "videoId": "MrW_b1ABHoI",
+          "channelName": "王海ヶ音 せれ魚 -Kimigane Serena-",
+          "videoTitle": "【 #歌枠 】うたったり、はなしたり【王海ヶ音せれ魚】",
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 26/09 | 37° Dia | Live Ao vivo"
         }
       ]
@@ -1324,10 +1324,10 @@
       }
     },
     "2026-10-22": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "prayer_broadcast_timeline": 2
+        "prayer_broadcast_timeline": 3
       }
     },
     "2026-10-23": {
@@ -8683,6 +8683,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "7Lv-zrcVB1c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "xQ5-Nb3_0U0": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -12327,7 +12331,7 @@
   ],
   "artistCatalogGate": {
     "artistCount": 1,
-    "normalizedOccurrences": 61,
+    "normalizedOccurrences": 62,
     "archivedOccurrences": 14,
     "artists": [
       {
