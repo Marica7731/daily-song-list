@@ -28,12 +28,13 @@
 
 - `data/static/v1` 只保存原始来源和控制状态：`days`、`state.json`、`imports`、`recovery`。
 - 衍生页面和索引由 `npm run static:rebuild` 生成，不要让数据 workflow 提交这些结果。
-- 每轮清洗都要检查脏数据。先运行 `npm run static:rebuild`，再运行 `scripts/static/export-static-dirty-review.js`，最后运行 `scripts/static/heartbeat-dirty-batch.js`。
-- 每轮最多处理 25 个明确选中的项目。要轮换检查当前记录和历史记录里的确认噪声、解析损坏记录，不要总盯着最新几天。
+- 脏数据维护按定期清理任务执行，不跟每次 freshness 巡检一起跑。要清理时，先运行 `npm run static:rebuild`，再运行 `scripts/static/export-static-dirty-review.js`，最后运行 `scripts/static/heartbeat-dirty-batch.js`。
+- 每次脏数据批次最多处理 25 个明确选中的项目，并轮换检查当前记录和历史记录里的确认噪声、解析损坏记录，不要总盯着最新几天。
 - 零歌曲不代表视频已处理完。按 `scripts/static/no-song-retry.js` 的间隔继续重试；不能把它加入 `processedVideoIds`，也不能从重试池移走。
 - 待处理视频要一直能继续。超过 500 条时，每批最多 120 条；连续 96 轮后最多等 600 秒，再开新一轮。不能因为轮数到顶就永久停住。
 - 待处理视频比历史修复更急。超过 500 条时先继续收集，暂停修复；降到 500 条或以下才可以恢复修复。
-- GitHub 有时会漏掉定时触发。如果最近一次成功的 `static-update` 已超过 90 分钟，而且仍有待处理视频，就用现有 push-path 标记重新启动收集。不要另造一套 workflow。
+- GitHub 的 hourly `static-update` 和 15 分钟 freshness watchdog 都可能漏跑。轻量心跳检查最新成功的 `static-update` 和待处理数量；如果成功时间已超过 90 分钟、仍有待处理视频且没有活跃更新，调用现有 `static-freshness-watchdog.yml` 的 `workflow_dispatch`，让它按现有逻辑决定是否重新启动收集。
+- `.github/dirty-heartbeat.trigger` 的 push 会同时启动 freshness watchdog 和 `heartbeat-dirty-data.yml` 脏数据批次。不要把它当成单纯的重试按钮；只有要实际执行一次有界脏数据清理时才更新并 push 这个标记。不要另造 workflow。
 
 ## 发布和验收
 
