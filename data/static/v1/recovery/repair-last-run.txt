@@ -1,38 +1,22 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-29T14:52:34Z
-[static-repair] processed=34100 published=21745 unpublished=12355 retryPool=18989 repairable=18989 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=326 [static-repair] retryDue=17258 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-29T15:04:20Z
+[static-repair] processed=34111 published=21756 unpublished=12355 retryPool=18993 repairable=18993 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=336 [static-repair] retryDue=17261 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=209 items=209 errors=0
+[mygit:success] snapshots=1/1 rawItems=238 items=238 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] video=Y968p2R3oKA result=no_timestamp_candidates songs=0
-[static-update] video=lDP1iXu1Pgo result=no_timestamp_candidates songs=0
-[static-update] video=gFZun5Sdt2g result=selected songs=18
-[static-update] video=7Cib_WcKoGM result=no_usable_song_source songs=0
-[static-update] video=b9qp-K45SsE result=no_usable_song_source songs=0
-[static-update] video=Tr_S3x0LfZM result=no_timestamp_candidates songs=0
-[static-update] video=AjsRiuJKrxY result=selected songs=20
-[static-update] video=xYK4vnlqzKw result=selected songs=15
-[static-update] video=WJbY-jRnKtU result=no_usable_song_source songs=0
-[static-update] video=pfu0pyGf-Tg result=no_timestamp_candidates songs=0
-[static-update] video=lAddzkQlTyc result=selected songs=7
-[static-update] video=Pt1l4xuWsa4 result=no_timestamp_candidates songs=0
-[static-update] video=bosz1tieJpc result=no_timestamp_candidates songs=0
-[static-update] video=AvvMi1b-cMU result=selected songs=12
-[static-update] video=9MM9JIHBvDs result=no_timestamp_candidates songs=0
-[static-update] video=JUdkZgsfuv0 result=no_usable_song_source songs=0
 [static-update] video=APnNzaL_DCc result=no_timestamp_candidates songs=0
-[static-update] snapshot=20261029T143610Z processed=22/22 pending=292 videos=19275 songs=251876
+[static-update] snapshot=20261029T144619Z processed=6/6 pending=315 videos=19281 songs=251936
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=19275 songs=251876 processed=34105 pending=292
-[static-repair] processed=34105 published=21750 unpublished=12355 retryPool=18993 repairable=18993 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=352 [static-repair] retryDue=17256 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=17256
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-29T14:57:37Z
+STATIC_DATA_OK videos=19281 songs=251936 processed=34111 pending=315
+[static-repair] processed=34111 published=21756 unpublished=12355 retryPool=18993 repairable=18993 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=375 [static-repair] retryDue=17264 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=17264
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-29T15:07:44Z
