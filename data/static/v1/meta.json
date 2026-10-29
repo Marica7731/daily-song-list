@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-10-29T05:53:43.166Z",
+  "generatedAt": "2026-10-29T05:59:14.650Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -361,16 +361,16 @@
     "selectedSnapshots": 1,
     "candidateVideos": 175
   },
-  "pendingVideoCount": 1129,
-  "noSongRetryPoolCount": 17754,
-  "processedVideoCount": 33832,
-  "videoCount": 19006,
-  "songOccurrenceCount": 248827,
+  "pendingVideoCount": 1083,
+  "noSongRetryPoolCount": 17749,
+  "processedVideoCount": 33839,
+  "videoCount": 19013,
+  "songOccurrenceCount": 248875,
   "quality": {
     "quarantinedOccurrences": 2612,
     "quarantinedVideos": 1829,
     "normalizedArtistOccurrences": 449,
-    "normalizedReleaseMetadataOccurrences": 1221,
+    "normalizedReleaseMetadataOccurrences": 1223,
     "repairedDateCreditOccurrences": 0,
     "repairedStructuredCreditOccurrences": 2891,
     "repairedKnownSourceCreditOccurrences": 154,
@@ -488,29 +488,29 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1414,
-        "songOccurrenceCount": 16029,
-        "pendingVideoCount": 477,
+        "videoCount": 1421,
+        "songOccurrenceCount": 16077,
+        "pendingVideoCount": 431,
         "quarantinedOccurrences": 357,
         "deduplicatedOccurrences": 61,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 8738,
-        "pageCount": 175,
+        "totalCount": 8753,
+        "pageCount": 176,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 3503,
+        "totalCount": 3511,
         "pageCount": 71,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 1076,
+        "totalCount": 1080,
         "pageCount": 22,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -519,29 +519,29 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6190,
-        "songOccurrenceCount": 75232,
-        "pendingVideoCount": 1129,
+        "videoCount": 6197,
+        "songOccurrenceCount": 75280,
+        "pendingVideoCount": 1083,
         "quarantinedOccurrences": 644,
         "deduplicatedOccurrences": 302,
         "artistCatalogArchivedOccurrences": 6
       },
       "songs": {
-        "totalCount": 27236,
+        "totalCount": 27249,
         "pageCount": 545,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 10411,
+        "totalCount": 10417,
         "pageCount": 209,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2729,
+        "totalCount": 2731,
         "pageCount": 55,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -550,29 +550,29 @@
     },
     "all": {
       "stats": {
-        "videoCount": 19006,
-        "songOccurrenceCount": 248827,
-        "pendingVideoCount": 1129,
+        "videoCount": 19013,
+        "songOccurrenceCount": 248875,
+        "pendingVideoCount": 1083,
         "quarantinedOccurrences": 2612,
         "deduplicatedOccurrences": 602,
         "artistCatalogArchivedOccurrences": 14
       },
       "songs": {
-        "totalCount": 62064,
+        "totalCount": 62075,
         "pageCount": 1242,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 22897,
-        "pageCount": 458,
+        "totalCount": 22901,
+        "pageCount": 459,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 5642,
+        "totalCount": 5644,
         "pageCount": 113,
         "pageSize": 50,
         "pageNumberWidth": 4,
