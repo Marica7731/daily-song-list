@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-30T21:49:05.419Z",
+  "generatedAt": "2026-10-30T21:53:31.144Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22734,
-  "inputOccurrences": 258719,
-  "visibleVideos": 19567,
-  "visibleOccurrences": 255450,
-  "quarantinedOccurrences": 2636,
-  "quarantinedVideos": 1852,
+  "inputVideos": 22739,
+  "inputOccurrences": 258724,
+  "visibleVideos": 19564,
+  "visibleOccurrences": 255447,
+  "quarantinedOccurrences": 2644,
+  "quarantinedVideos": 1860,
   "deduplicatedOccurrences": 619,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 74,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 138,
+    "reused_description_across_unrelated_channels": 146,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 33,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -445,6 +445,33 @@
           "channelName": "crystal rein Ch. クリスタル レイン",
           "videoTitle": "【ゆる雑】本日の作業枠です～💤 タイムスタンプとかとか？【#作業配信 /#vtuber 】",
           "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00"
+        }
+      ]
+    },
+    {
+      "sourceHash": "02dab1342bbe883e877731d0b42a6c51338961906440967734a74b5499569d83",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 8,
+      "channelCount": 8,
+      "distinctVideoTitles": 8,
+      "examples": [
+        {
+          "videoId": "d7QNqs_3LvU",
+          "channelName": "Poka ch. 泡ノ音ポカ",
+          "videoTitle": "〖 歌枠￤弾き語り 〗BGMにどうぞ！🎸まったり歌いたい気分！！！┊︎泡ノ音ポカ ⋰ #歌枠 #vtuber #karaoke",
+          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        },
+        {
+          "videoId": "4cPPsxyXB6Y",
+          "channelName": "まつちー",
+          "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月30日 #754𓂃٭𓈒𓏸",
+          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        },
+        {
+          "videoId": "uiyELq5yBx4",
+          "channelName": "えりぃちゃんねる",
+          "videoTitle": "【#歌枠 】【 #karaoke 】やっぱ明日の配信は厳しそーだから今日やろうかなっと Singing live stream #vsinger #vtuber",
+          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
         }
       ]
     }
@@ -1453,9 +1480,10 @@
       }
     },
     "2026-10-30": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "reused_description_across_unrelated_channels": 8,
         "unrelated_livestream_listing": 1,
         "prayer_broadcast_timeline": 2
       }
@@ -10184,6 +10212,38 @@
     "VWnfMgDC1_w": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 18
+    },
+    "d7QNqs_3LvU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "4cPPsxyXB6Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "uiyELq5yBx4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "VdZMKED8zh4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "zYnFvJp3FhI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "gQAoc4S-bHo": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "460l8hTY3DQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "X5053QlR0lk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "3kc7k1xuw5I": {
       "quarantinedOccurrences": 1,
