@@ -1,5 +1,5 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T14:54:59Z
-[static-repair] processed=34351 published=21996 unpublished=12355 retryPool=19265 repairable=19265 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=557 [static-repair] retryDue=17393 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T15:06:58Z
+[static-repair] processed=34351 published=21996 unpublished=12355 retryPool=19265 repairable=19265 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=557 [static-repair] retryDue=17396 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
@@ -16,6 +16,6 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T14:54:59Z
 > node scripts/static/validate-static.js
 
 STATIC_DATA_OK videos=19502 songs=254544 processed=34351 pending=612
-[static-repair] processed=34351 published=21996 unpublished=12355 retryPool=19265 repairable=19265 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=672 [static-repair] retryDue=17393 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=17393
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T14:58:19Z
+[static-repair] processed=34351 published=21996 unpublished=12355 retryPool=19265 repairable=19265 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=672 [static-repair] retryDue=17396 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=17396
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T15:10:19Z
