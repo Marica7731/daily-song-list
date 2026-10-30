@@ -1,4 +1,4 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T16:24:20Z
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T16:36:28Z
 [static-repair] processed=34354 published=21999 unpublished=12355 retryPool=19263 repairable=19263 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=554 [static-repair] retryDue=17400 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
@@ -16,6 +16,6 @@ STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T16:24:20Z
 > node scripts/static/validate-static.js
 
 STATIC_DATA_OK videos=19504 songs=254557 processed=34354 pending=609
-[static-repair] processed=34354 published=21999 unpublished=12355 retryPool=19263 repairable=19263 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=669 [static-repair] retryDue=17401 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=17401
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T16:27:37Z
+[static-repair] processed=34354 published=21999 unpublished=12355 retryPool=19263 repairable=19263 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=669 [static-repair] retryDue=17400 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=17400
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T16:39:34Z
