@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T13:49:54.995Z",
-  "scannedVideoCount": 19490,
-  "scannedOccurrenceCount": 254432,
+  "generatedAt": "2026-10-30T13:51:46.232Z",
+  "scannedVideoCount": 19493,
+  "scannedOccurrenceCount": 254441,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -838,17 +838,17 @@
     {
       "date": "2026-10-29",
       "occurrences": 2317,
-      "quarantinedOccurrences": 14
+      "quarantinedOccurrences": 15
     },
     {
       "date": "2026-10-30",
-      "occurrences": 275,
-      "quarantinedOccurrences": 1
+      "occurrences": 284,
+      "quarantinedOccurrences": 2
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 574,
-    "possible_activity_chapter": 121,
+    "possible_activity_chapter": 122,
     "possible_date_as_artist": 80,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 16,
@@ -3139,6 +3139,23 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "MC こんばんちゅっちゅる~",
+      "artist": "",
+      "raw": "00:11:22 　　MC こんばんちゅっちゅる～",
+      "sourceHash": "22f5d51ab2420d33d1a8723abbb7ed89d02153583866801de9d741ad6d64b82c",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "wIUCDqVOG4I",
+          "channelName": "CHIYURU ch.三日月ちゆる",
+          "publishedAt": "2026-10-30T11:37:02.776Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "風は予告なく吹く",
       "artist": "",
       "raw": "♪ 01:06:47 風は予告なく吹く / マクロスΔ ED",
@@ -5131,23 +5148,6 @@
       "title": "3月9日",
       "artist": "レミオロメン／2004/03/09",
       "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "オリビアを聴きながら",
-      "artist": "杏里／1978/11/05",
-      "raw": "2:07:13　オリビアを聴きながら／杏里／1978/11/05",
       "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
       "count": 1,
       "sample": [
