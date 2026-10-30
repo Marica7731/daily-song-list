@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-30T23:01:32.990Z",
+  "generatedAt": "2026-10-30T23:06:54.391Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22780,
-  "inputOccurrences": 259048,
+  "inputVideos": 22781,
+  "inputOccurrences": 259049,
   "visibleVideos": 19582,
   "visibleOccurrences": 255743,
-  "quarantinedOccurrences": 2667,
-  "quarantinedVideos": 1883,
+  "quarantinedOccurrences": 2668,
+  "quarantinedVideos": 1884,
   "deduplicatedOccurrences": 624,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 74,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 166,
+    "reused_description_across_unrelated_channels": 167,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 33,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -451,10 +451,16 @@
     {
       "sourceHash": "02dab1342bbe883e877731d0b42a6c51338961906440967734a74b5499569d83",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 27,
-      "channelCount": 27,
-      "distinctVideoTitles": 27,
+      "videoCount": 28,
+      "channelCount": 28,
+      "distinctVideoTitles": 28,
       "examples": [
+        {
+          "videoId": "nXYoV8JrQjM",
+          "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+          "videoTitle": "【弾き語り】路上LIVE｜はじめましてふとんちゃんです【#こたつちゃ配信中】",
+          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        },
         {
           "videoId": "CTBvvOugDwE",
           "channelName": "雨夜",
@@ -465,12 +471,6 @@
           "videoId": "d7QNqs_3LvU",
           "channelName": "Poka ch. 泡ノ音ポカ",
           "videoTitle": "〖 歌枠￤弾き語り 〗BGMにどうぞ！🎸まったり歌いたい気分！！！┊︎泡ノ音ポカ ⋰ #歌枠 #vtuber #karaoke",
-          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
-        },
-        {
-          "videoId": "4cPPsxyXB6Y",
-          "channelName": "まつちー",
-          "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月30日 #754𓂃٭𓈒𓏸",
           "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
         }
       ]
@@ -1480,11 +1480,11 @@
       }
     },
     "2026-10-30": {
-      "quarantinedOccurrences": 34,
+      "quarantinedOccurrences": 35,
       "deduplicatedOccurrences": 5,
       "byReason": {
         "prayer_broadcast_timeline": 5,
-        "reused_description_across_unrelated_channels": 28,
+        "reused_description_across_unrelated_channels": 29,
         "unrelated_livestream_listing": 1
       }
     },
@@ -10214,6 +10214,10 @@
       "deduplicatedOccurrences": 18
     },
     "9CDACT4i7vc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "nXYoV8JrQjM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
