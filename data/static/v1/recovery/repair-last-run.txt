@@ -1,22 +1,21 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T18:51:24Z
-[static-repair] processed=34382 published=22027 unpublished=12355 retryPool=19338 repairable=19338 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=545 [static-repair] retryDue=17420 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T20:56:03Z
+[static-repair] processed=34404 published=22049 unpublished=12355 retryPool=19398 repairable=19398 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=559 [static-repair] retryDue=17431 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=374 items=374 errors=0
-[static-update] retry-later video=iY3xDMELfDo: https://www.youtube.com/watch?v=iY3xDMELfDo&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=opYK0veMDys: https://www.youtube.com/watch?v=opYK0veMDys&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=omBBRaph6so: https://www.youtube.com/watch?v=omBBRaph6so&hl=ja&persist_hl=1 HTTP 429
-[static-update] retry-later video=clGY9gpI35o: YouTube HTTP 429 limit reached (10/10); stopped further inspections
-[static-update] retry-later video=CEipRAoiPLA: YouTube HTTP 429 limit reached (10/10); stopped further inspections
-[static-update] batch_degraded attempted=5 failed=5; continuing with last successful state
-[static-update] snapshot=20261030T183318Z processed=0/5 pending=603 videos=19532 songs=255002
+[mygit:success] snapshots=1/1 rawItems=543 items=543 errors=0
+[static-update] video=iY3xDMELfDo result=selected songs=11
+[static-update] video=opYK0veMDys result=selected songs=4
+[static-update] video=omBBRaph6so result=selected songs=8
+[static-update] video=clGY9gpI35o result=selected songs=1
+[static-update] video=CEipRAoiPLA result=selected songs=8
+[static-update] snapshot=20261030T204819Z processed=5/5 pending=711 videos=19554 songs=255288
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=19532 songs=255002 processed=34382 pending=603
-[static-repair] processed=34382 published=22027 unpublished=12355 retryPool=19338 repairable=19338 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=663 [static-repair] retryDue=17422 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=17422
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T19:10:46Z
+STATIC_DATA_OK videos=19554 songs=255288 processed=34404 pending=711
+[static-repair] processed=34404 published=22049 unpublished=12355 retryPool=19397 repairable=19397 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=771 [static-repair] retryDue=17431 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=17431
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T20:58:40Z
