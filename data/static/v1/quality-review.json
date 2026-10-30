@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T22:29:34.467Z",
-  "scannedVideoCount": 19574,
-  "scannedOccurrenceCount": 255651,
+  "generatedAt": "2026-10-30T22:35:21.717Z",
+  "scannedVideoCount": 19578,
+  "scannedOccurrenceCount": 255689,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -842,14 +842,14 @@
     },
     {
       "date": "2026-10-30",
-      "occurrences": 1463,
+      "occurrences": 1501,
       "quarantinedOccurrences": 16
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 575,
     "possible_activity_chapter": 122,
-    "possible_date_as_artist": 80,
+    "possible_date_as_artist": 81,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 16,
     "possible_promotion_as_song": 3
@@ -4379,6 +4379,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "11",
+      "artist": "土",
+      "raw": "11/14（土）19:00",
+      "sourceHash": "e7acf31c93af900bc98ec4acb07d2d92f711f745a5b8940b509ad31dc11cc9f8",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "W6GjyV47LM0",
+          "channelName": "おおぞらことりチャンネル",
+          "publishedAt": "2026-10-30T20:20:01.543Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5138,23 +5155,6 @@
           "videoId": "ybCApdlNpPc",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-09-13T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "3月9日",
-      "artist": "レミオロメン／2004/03/09",
-      "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
