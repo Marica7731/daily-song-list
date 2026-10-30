@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T12:45:17.954Z",
-  "scannedVideoCount": 19488,
-  "scannedOccurrenceCount": 254393,
+  "generatedAt": "2026-10-30T12:47:03.360Z",
+  "scannedVideoCount": 19484,
+  "scannedOccurrenceCount": 254389,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -837,8 +837,8 @@
     },
     {
       "date": "2026-10-29",
-      "occurrences": 2300,
-      "quarantinedOccurrences": 5
+      "occurrences": 2296,
+      "quarantinedOccurrences": 11
     },
     {
       "date": "2026-10-30",
@@ -849,57 +849,12 @@
   "byReason": {
     "possible_unparsed_credits": 574,
     "possible_activity_chapter": 121,
-    "possible_date_as_artist": 84,
+    "possible_date_as_artist": 80,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 16,
-    "possible_promotion_as_song": 3,
-    "possible_stream_poster": 4
+    "possible_promotion_as_song": 3
   },
   "candidates": [
-    {
-      "reason": "possible_date_as_artist",
-      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
-      "artist": "木",
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "count": 4,
-      "sample": [
-        {
-          "videoId": "uFTSTAvwWGk",
-          "channelName": "crystal rein Ch. クリスタル レイン",
-          "publishedAt": "2026-10-29T21:16:23.558Z"
-        },
-        {
-          "videoId": "dbxTb5u5Fh8",
-          "channelName": "あやぎみ",
-          "publishedAt": "2026-10-29T18:06:13.974Z"
-        }
-      ],
-      "videoCount": 4,
-      "channelCount": 4
-    },
-    {
-      "reason": "possible_stream_poster",
-      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
-      "artist": "木",
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "count": 4,
-      "sample": [
-        {
-          "videoId": "uFTSTAvwWGk",
-          "channelName": "crystal rein Ch. クリスタル レイン",
-          "publishedAt": "2026-10-29T21:16:23.558Z"
-        },
-        {
-          "videoId": "dbxTb5u5Fh8",
-          "channelName": "あやぎみ",
-          "publishedAt": "2026-10-29T18:06:13.974Z"
-        }
-      ],
-      "videoCount": 4,
-      "channelCount": 4
-    },
     {
       "reason": "possible_unparsed_credits",
       "title": "#歌枠",
@@ -5170,6 +5125,40 @@
       ],
       "videoCount": 1,
       "channelCount": 1
+    },
+    {
+      "reason": "possible_release_metadata_as_artist",
+      "title": "3月9日",
+      "artist": "レミオロメン／2004/03/09",
+      "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
+      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "PA-26vHWfKQ",
+          "channelName": "綾瀬 桜",
+          "publishedAt": "2026-09-16T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_release_metadata_as_artist",
+      "title": "オリビアを聴きながら",
+      "artist": "杏里／1978/11/05",
+      "raw": "2:07:13　オリビアを聴きながら／杏里／1978/11/05",
+      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "PA-26vHWfKQ",
+          "channelName": "綾瀬 桜",
+          "publishedAt": "2026-09-16T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -8947,17 +8936,6 @@
         "tHY0DEmjn7M",
         "uPuNWtdM67w",
         "52ppoedSlZI"
-      ]
-    },
-    {
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "videoCount": 4,
-      "channelCount": 4,
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sample": [
-        "uFTSTAvwWGk",
-        "dbxTb5u5Fh8",
-        "5H1dfm6qZjM"
       ]
     },
     {

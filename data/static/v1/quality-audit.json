@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-30T12:45:17.954Z",
+  "generatedAt": "2026-10-30T12:47:03.360Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22642,
-  "inputOccurrences": 257648,
-  "visibleVideos": 19488,
-  "visibleOccurrences": 254393,
-  "quarantinedOccurrences": 2622,
-  "quarantinedVideos": 1839,
+  "inputVideos": 22644,
+  "inputOccurrences": 257650,
+  "visibleVideos": 19484,
+  "visibleOccurrences": 254389,
+  "quarantinedOccurrences": 2628,
+  "quarantinedVideos": 1845,
   "deduplicatedOccurrences": 619,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1414,
+    "prayer_broadcast_timeline": 1415,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 8,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 73,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 127,
+    "reused_description_across_unrelated_channels": 132,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 33,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -391,6 +391,33 @@
           "channelName": "グッチ1234",
           "videoTitle": "弾き語り/sing with guitar 2026/10/25",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        }
+      ]
+    },
+    {
+      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "7RmC-qR5zE4",
+          "channelName": "ういちチャンネル",
+          "videoTitle": "ギター弾き語り配信",
+          "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00"
+        },
+        {
+          "videoId": "uFTSTAvwWGk",
+          "channelName": "crystal rein Ch. クリスタル レイン",
+          "videoTitle": "【ゆる雑】本日の作業枠です～💤 タイムスタンプとかとか？【#作業配信 /#vtuber 】",
+          "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00"
+        },
+        {
+          "videoId": "dbxTb5u5Fh8",
+          "channelName": "あやぎみ",
+          "videoTitle": "【歌枠】歌って雑談する枠！リクエスト・初見歓迎｜記録開始70日目【縦型】",
+          "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00"
         }
       ]
     }
@@ -1390,12 +1417,12 @@
       }
     },
     "2026-10-29": {
-      "quarantinedOccurrences": 5,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 32,
       "byReason": {
-        "prayer_broadcast_timeline": 1,
-        "reviewed_bad_description_source": 3,
-        "reused_description_across_unrelated_channels": 1
+        "reused_description_across_unrelated_channels": 6,
+        "prayer_broadcast_timeline": 2,
+        "reviewed_bad_description_source": 3
       }
     },
     "2026-10-30": {
@@ -10042,13 +10069,37 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "7RmC-qR5zE4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "uFTSTAvwWGk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "dbxTb5u5Fh8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "X47UliTgOhk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "5H1dfm6qZjM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "s_Zzj-uyOd4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "bYRAdWZeK_g": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 7
+    },
+    "C4SNDHE8_Nk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "ykT9wRibJ90": {
       "quarantinedOccurrences": 1,
