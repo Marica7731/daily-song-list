@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T12:03:59.280Z",
-  "scannedVideoCount": 19478,
-  "scannedOccurrenceCount": 254332,
+  "generatedAt": "2026-10-30T12:06:52.848Z",
+  "scannedVideoCount": 19480,
+  "scannedOccurrenceCount": 254350,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -837,7 +837,7 @@
     },
     {
       "date": "2026-10-29",
-      "occurrences": 2265,
+      "occurrences": 2283,
       "quarantinedOccurrences": 4
     },
     {
@@ -849,10 +849,11 @@
   "byReason": {
     "possible_unparsed_credits": 574,
     "possible_activity_chapter": 121,
-    "possible_date_as_artist": 80,
+    "possible_date_as_artist": 81,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 16,
-    "possible_promotion_as_song": 3
+    "possible_promotion_as_song": 3,
+    "possible_stream_poster": 1
   },
   "candidates": [
     {
@@ -4362,6 +4363,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
+      "artist": "木",
+      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
+      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "s_Zzj-uyOd4",
+          "channelName": "おっとどっこい",
+          "publishedAt": "2026-10-29T16:46:19.404Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5131,23 +5149,6 @@
       "title": "3月9日",
       "artist": "レミオロメン／2004/03/09",
       "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "オリビアを聴きながら",
-      "artist": "杏里／1978/11/05",
-      "raw": "2:07:13　オリビアを聴きながら／杏里／1978/11/05",
       "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
       "count": 1,
       "sample": [
