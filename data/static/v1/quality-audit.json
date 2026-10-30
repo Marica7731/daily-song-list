@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-30T22:51:03.750Z",
+  "generatedAt": "2026-10-30T22:56:36.561Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22774,
-  "inputOccurrences": 259027,
-  "visibleVideos": 19581,
-  "visibleOccurrences": 255727,
-  "quarantinedOccurrences": 2662,
-  "quarantinedVideos": 1878,
+  "inputVideos": 22780,
+  "inputOccurrences": 259048,
+  "visibleVideos": 19582,
+  "visibleOccurrences": 255743,
+  "quarantinedOccurrences": 2667,
+  "quarantinedVideos": 1883,
   "deduplicatedOccurrences": 624,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 74,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 161,
+    "reused_description_across_unrelated_channels": 166,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 33,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -451,10 +451,16 @@
     {
       "sourceHash": "02dab1342bbe883e877731d0b42a6c51338961906440967734a74b5499569d83",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 22,
-      "channelCount": 22,
-      "distinctVideoTitles": 22,
+      "videoCount": 27,
+      "channelCount": 27,
+      "distinctVideoTitles": 27,
       "examples": [
+        {
+          "videoId": "CTBvvOugDwE",
+          "channelName": "雨夜",
+          "videoTitle": "【#歌枠 】ハロウィンっぽい曲歌ってくぞ！！ #新人vtuber #個人vtuber",
+          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        },
         {
           "videoId": "d7QNqs_3LvU",
           "channelName": "Poka ch. 泡ノ音ポカ",
@@ -465,12 +471,6 @@
           "videoId": "4cPPsxyXB6Y",
           "channelName": "まつちー",
           "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月30日 #754𓂃٭𓈒𓏸",
-          "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
-        },
-        {
-          "videoId": "uiyELq5yBx4",
-          "channelName": "えりぃちゃんねる",
-          "videoTitle": "【#歌枠 】【 #karaoke 】やっぱ明日の配信は厳しそーだから今日やろうかなっと Singing live stream #vsinger #vtuber",
           "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
         }
       ]
@@ -1480,11 +1480,11 @@
       }
     },
     "2026-10-30": {
-      "quarantinedOccurrences": 29,
+      "quarantinedOccurrences": 34,
       "deduplicatedOccurrences": 5,
       "byReason": {
         "prayer_broadcast_timeline": 5,
-        "reused_description_across_unrelated_channels": 23,
+        "reused_description_across_unrelated_channels": 28,
         "unrelated_livestream_listing": 1
       }
     },
@@ -10217,6 +10217,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "CTBvvOugDwE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "d7QNqs_3LvU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10257,6 +10261,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "_isOf0WuIoE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "092eqMhCWNA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10270,6 +10278,18 @@
       "deduplicatedOccurrences": 0
     },
     "NIosBs1llJU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "pRful957M0o": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "njwbYVlS15Q": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "z-DSERAbkAA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
