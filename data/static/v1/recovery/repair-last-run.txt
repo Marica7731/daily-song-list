@@ -1,21 +1,21 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T13:03:05Z
-[static-repair] processed=34331 published=21976 unpublished=12355 retryPool=19251 repairable=19251 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=547 [static-repair] retryDue=17385 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-10-30T13:15:46Z
+[static-repair] processed=34332 published=21977 unpublished=12355 retryPool=19253 repairable=19253 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=547 [static-repair] retryDue=17385 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=484 items=484 errors=0
+[mygit:success] snapshots=1/1 rawItems=489 items=489 errors=0
 [static-update] video=iY3xDMELfDo result=selected songs=11
 [static-update] video=opYK0veMDys result=selected songs=4
 [static-update] video=omBBRaph6so result=selected songs=8
 [static-update] video=clGY9gpI35o result=selected songs=1
 [static-update] video=CEipRAoiPLA result=selected songs=8
-[static-update] snapshot=20261030T124528Z processed=5/5 pending=597 videos=19486 songs=254399
+[static-update] snapshot=20261030T125528Z processed=5/5 pending=600 videos=19487 songs=254404
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=19486 songs=254399 processed=34331 pending=597
-[static-repair] processed=34331 published=21976 unpublished=12355 retryPool=19251 repairable=19251 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=657 [static-repair] retryDue=17385 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_DATA_OK videos=19487 songs=254404 processed=34332 pending=600
+[static-repair] processed=34332 published=21977 unpublished=12355 retryPool=19253 repairable=19253 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=660 [static-repair] retryDue=17385 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 STATIC_REPAIR_PASS_END pass=1 dropped=17385
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T13:05:25Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-10-30T13:19:02Z
