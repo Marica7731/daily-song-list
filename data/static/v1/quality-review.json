@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T12:24:26.760Z",
-  "scannedVideoCount": 19482,
-  "scannedOccurrenceCount": 254365,
+  "generatedAt": "2026-10-30T12:27:23.670Z",
+  "scannedVideoCount": 19485,
+  "scannedOccurrenceCount": 254380,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -837,25 +837,69 @@
     },
     {
       "date": "2026-10-29",
-      "occurrences": 2298,
-      "quarantinedOccurrences": 4
+      "occurrences": 2299,
+      "quarantinedOccurrences": 5
     },
     {
       "date": "2026-10-30",
-      "occurrences": 227,
+      "occurrences": 241,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 574,
     "possible_activity_chapter": 121,
-    "possible_date_as_artist": 82,
+    "possible_date_as_artist": 83,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 16,
     "possible_promotion_as_song": 3,
-    "possible_stream_poster": 2
+    "possible_stream_poster": 3
   },
   "candidates": [
+    {
+      "reason": "possible_date_as_artist",
+      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
+      "artist": "木",
+      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
+      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "dbxTb5u5Fh8",
+          "channelName": "あやぎみ",
+          "publishedAt": "2026-10-29T18:06:13.974Z"
+        },
+        {
+          "videoId": "5H1dfm6qZjM",
+          "channelName": "RiA 復帰",
+          "publishedAt": "2026-10-29T16:56:26.279Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 3
+    },
+    {
+      "reason": "possible_stream_poster",
+      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
+      "artist": "木",
+      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
+      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "dbxTb5u5Fh8",
+          "channelName": "あやぎみ",
+          "publishedAt": "2026-10-29T18:06:13.974Z"
+        },
+        {
+          "videoId": "5H1dfm6qZjM",
+          "channelName": "RiA 復帰",
+          "publishedAt": "2026-10-29T16:56:26.279Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 3
+    },
     {
       "reason": "possible_unparsed_credits",
       "title": "#歌枠",
@@ -901,28 +945,6 @@
       "channelCount": 2
     },
     {
-      "reason": "possible_date_as_artist",
-      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
-      "artist": "木",
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "5H1dfm6qZjM",
-          "channelName": "RiA 復帰",
-          "publishedAt": "2026-10-29T16:56:26.279Z"
-        },
-        {
-          "videoId": "s_Zzj-uyOd4",
-          "channelName": "おっとどっこい",
-          "publishedAt": "2026-10-29T16:46:19.404Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 2
-    },
-    {
       "reason": "possible_release_metadata_as_artist",
       "title": "あかちゃんレベルはいはいツアー、増えてます",
       "artist": "のむらパターソン (2026/10/22",
@@ -939,28 +961,6 @@
           "videoId": "jqj-ENXQV2M",
           "channelName": "ジュウニ【セルフ受肉V】",
           "publishedAt": "2026-10-24T15:01:51.254Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 2
-    },
-    {
-      "reason": "possible_stream_poster",
-      "title": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29",
-      "artist": "木",
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "5H1dfm6qZjM",
-          "channelName": "RiA 復帰",
-          "publishedAt": "2026-10-29T16:56:26.279Z"
-        },
-        {
-          "videoId": "s_Zzj-uyOd4",
-          "channelName": "おっとどっこい",
-          "publishedAt": "2026-10-29T16:46:19.404Z"
         }
       ],
       "videoCount": 2,
@@ -8994,6 +8994,17 @@
       ]
     },
     {
+      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
+      "videoCount": 3,
+      "channelCount": 3,
+      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
+      "sample": [
+        "dbxTb5u5Fh8",
+        "5H1dfm6qZjM",
+        "s_Zzj-uyOd4"
+      ]
+    },
+    {
       "sourceHash": "3278b6ad5cf1983985563013198798f5dbd0841bec9d87ab02bc174fb2136700",
       "videoCount": 5,
       "channelCount": 2,
@@ -9204,16 +9215,6 @@
       "sample": [
         "W4eqxiPFOpY",
         "y3-BHe7XZuQ"
-      ]
-    },
-    {
-      "sourceHash": "8ce7002274ea28422961b9daacab07623a656c4006655e4be9905761282d0e66",
-      "videoCount": 2,
-      "channelCount": 2,
-      "raw": "【オンラインヨーヨーコミュニティ説明配信】2026.10.29(木) 19:00",
-      "sample": [
-        "5H1dfm6qZjM",
-        "s_Zzj-uyOd4"
       ]
     }
   ]
