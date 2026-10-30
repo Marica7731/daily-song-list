@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-10-30T21:43:33.882Z",
-  "scannedVideoCount": 19564,
-  "scannedOccurrenceCount": 255447,
+  "generatedAt": "2026-10-30T21:49:05.419Z",
+  "scannedVideoCount": 19567,
+  "scannedOccurrenceCount": 255450,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -842,12 +842,12 @@
     },
     {
       "date": "2026-10-30",
-      "occurrences": 1259,
+      "occurrences": 1262,
       "quarantinedOccurrences": 3
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 576,
+    "possible_unparsed_credits": 579,
     "possible_activity_chapter": 122,
     "possible_date_as_artist": 80,
     "possible_release_metadata_as_artist": 162,
@@ -855,6 +855,28 @@
     "possible_promotion_as_song": 3
   },
   "candidates": [
+    {
+      "reason": "possible_unparsed_credits",
+      "title": "まで】",
+      "artist": "",
+      "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】",
+      "sourceHash": "02dab1342bbe883e877731d0b42a6c51338961906440967734a74b5499569d83",
+      "count": 4,
+      "sample": [
+        {
+          "videoId": "4cPPsxyXB6Y",
+          "channelName": "まつちー",
+          "publishedAt": "2026-10-30T16:40:29.132Z"
+        },
+        {
+          "videoId": "zYnFvJp3FhI",
+          "channelName": "パンダ荘ちゃんねる",
+          "publishedAt": "2026-10-30T15:40:10.433Z"
+        }
+      ],
+      "videoCount": 4,
+      "channelCount": 4
+    },
     {
       "reason": "possible_unparsed_credits",
       "title": "#歌枠",
@@ -5142,23 +5164,6 @@
       ],
       "videoCount": 1,
       "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "3月9日",
-      "artist": "レミオロメン／2004/03/09",
-      "raw": "1:46:31　3月9日／レミオロメン／2004/03/09",
-      "sourceHash": "b10970ef68ddd806b2ee1b923a8e1adcb1e9457c301841046b083ae25da07a7b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PA-26vHWfKQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-16T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
     }
   ],
   "mixedStructuredSetlistSources": [
@@ -8989,6 +8994,17 @@
         "tHY0DEmjn7M",
         "uPuNWtdM67w",
         "52ppoedSlZI"
+      ]
+    },
+    {
+      "sourceHash": "02dab1342bbe883e877731d0b42a6c51338961906440967734a74b5499569d83",
+      "videoCount": 4,
+      "channelCount": 4,
+      "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】",
+      "sample": [
+        "4cPPsxyXB6Y",
+        "zYnFvJp3FhI",
+        "gQAoc4S-bHo"
       ]
     },
     {
