@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T15:08:20.173Z",
+  "generatedAt": "2026-10-31T15:13:38.794Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22998,
-  "inputOccurrences": 260624,
+  "inputVideos": 22999,
+  "inputOccurrences": 260625,
   "visibleVideos": 19741,
   "visibleOccurrences": 257246,
-  "quarantinedOccurrences": 2729,
-  "quarantinedVideos": 1942,
+  "quarantinedOccurrences": 2730,
+  "quarantinedVideos": 1943,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1440,
+    "prayer_broadcast_timeline": 1441,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 9,
@@ -46,9 +46,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 907,
-      "channelCount": 823,
-      "distinctVideoTitles": 888,
+      "videoCount": 908,
+      "channelCount": 824,
+      "distinctVideoTitles": 889,
       "examples": [
         {
           "videoId": "4-DUe4t2C58",
@@ -1517,11 +1517,11 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 10,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "date_split_as_song_and_artist": 1,
-        "prayer_broadcast_timeline": 4,
+        "prayer_broadcast_timeline": 5,
         "reused_description_across_unrelated_channels": 5
       }
     },
@@ -10603,6 +10603,10 @@
       "deduplicatedOccurrences": 0
     },
     "07gpZmv2WYY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "bMDyt2pb66o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
