@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T09:16:42.340Z",
+  "generatedAt": "2026-10-31T09:22:03.811Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22909,
-  "inputOccurrences": 259996,
-  "visibleVideos": 19678,
-  "visibleOccurrences": 256645,
-  "quarantinedOccurrences": 2702,
-  "quarantinedVideos": 1916,
+  "inputVideos": 22911,
+  "inputOccurrences": 259998,
+  "visibleVideos": 19679,
+  "visibleOccurrences": 256646,
+  "quarantinedOccurrences": 2703,
+  "quarantinedVideos": 1917,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1431,
+    "prayer_broadcast_timeline": 1432,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 8,
@@ -46,9 +46,9 @@
     {
       "sourceHash": "f1607090b7c35ffa81a06431d44b31ada8b4cfe97fbad30d47054539ce6fb7ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 899,
-      "channelCount": 816,
-      "distinctVideoTitles": 880,
+      "videoCount": 900,
+      "channelCount": 817,
+      "distinctVideoTitles": 881,
       "examples": [
         {
           "videoId": "4-DUe4t2C58",
@@ -1490,9 +1490,10 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "prayer_broadcast_timeline": 1,
         "reused_description_across_unrelated_channels": 1
       }
     },
@@ -10498,6 +10499,10 @@
       "deduplicatedOccurrences": 0
     },
     "3ZYmn3_fr4Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "BamF3-IrLtc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
