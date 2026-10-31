@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T09:47:05.049Z",
+  "generatedAt": "2026-10-31T09:51:24.052Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22913,
-  "inputOccurrences": 260000,
-  "visibleVideos": 19681,
-  "visibleOccurrences": 256648,
-  "quarantinedOccurrences": 2703,
-  "quarantinedVideos": 1917,
+  "inputVideos": 22914,
+  "inputOccurrences": 260001,
+  "visibleVideos": 19677,
+  "visibleOccurrences": 256644,
+  "quarantinedOccurrences": 2708,
+  "quarantinedVideos": 1922,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 187,
+    "reused_description_across_unrelated_channels": 192,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -472,6 +472,33 @@
           "channelName": "雨夜",
           "videoTitle": "【#歌枠 】ハロウィンっぽい曲歌ってくぞ！！ #新人vtuber #個人vtuber",
           "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        }
+      ]
+    },
+    {
+      "sourceHash": "0d3bb8caed5a82d18ee13017a4e3d4e1e5c629916eb1ca3679d86b7239008801",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "1NKypjklVVM",
+          "channelName": "月羽シイナ -Shiina Tsukibane-",
+          "videoTitle": "【 歌枠 】 お深夜の毎日歌枠596日目 短め5曲のお歌練 【 月羽シイナ 】 #shorts #short #縦画面配信 #karaoke #Vsinger",
+          "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
+        },
+        {
+          "videoId": "k-f2-GFaSvk",
+          "channelName": "山鼠梛のね / Yamanena None【すたユに】",
+          "videoTitle": "【歌枠】🍂秋歌つめつめ🪾ハロウィンカウントダウン配信🎃【すたユに/山鼠梛のね】",
+          "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
+        },
+        {
+          "videoId": "AHhiE8emQ_Y",
+          "channelName": "音夢(おとゆめ)ねむ",
+          "videoTitle": "【#耐久歌枠#縦型配信 】初見さん大歓迎！500人達成するまで歌います！【新人vtuber】",
+          "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
         }
       ]
     }
@@ -1480,21 +1507,21 @@
       }
     },
     "2026-10-30": {
-      "quarantinedOccurrences": 67,
+      "quarantinedOccurrences": 71,
       "deduplicatedOccurrences": 16,
       "byReason": {
         "prayer_broadcast_timeline": 17,
-        "reused_description_across_unrelated_channels": 47,
+        "reused_description_across_unrelated_channels": 51,
         "confirmed_stream_start_marker": 1,
         "unrelated_livestream_listing": 2
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "prayer_broadcast_timeline": 1,
-        "reused_description_across_unrelated_channels": 1
+        "reused_description_across_unrelated_channels": 2
       }
     },
     "2024-10-20": {
@@ -10242,6 +10269,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "1NKypjklVVM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "qWhDCATpSLw": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10278,11 +10309,19 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "k-f2-GFaSvk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "HO1Z9H5yW2o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "J7pu1erWBiQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "AHhiE8emQ_Y": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10315,6 +10354,10 @@
       "deduplicatedOccurrences": 0
     },
     "zYnFvJp3FhI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "NKEPsK1lEKY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10507,6 +10550,10 @@
       "deduplicatedOccurrences": 0
     },
     "dwaCxoifDbw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "X_JWTCiObms": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
