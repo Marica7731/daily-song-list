@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T20:25:37.917Z",
+  "generatedAt": "2026-10-31T20:31:15.718Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23043,
-  "inputOccurrences": 261152,
-  "visibleVideos": 19785,
-  "visibleOccurrences": 257773,
-  "quarantinedOccurrences": 2730,
-  "quarantinedVideos": 1943,
+  "inputVideos": 23055,
+  "inputOccurrences": 261310,
+  "visibleVideos": 19790,
+  "visibleOccurrences": 257924,
+  "quarantinedOccurrences": 2737,
+  "quarantinedVideos": 1950,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 204,
+    "reused_description_across_unrelated_channels": 211,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -499,6 +499,33 @@
           "channelName": "眩幻日すいむ‪ 𓈒𓏸mahorobi suimu",
           "videoTitle": "〖#歌枠〗✧ ハロウィンゆる歌&プチお披露目🎃 ✧〖眩幻日すいむ/#Vtuber〗",
           "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
+        }
+      ]
+    },
+    {
+      "sourceHash": "395dde4f6fa6d2c17141fdd3bc5e855aba0ca28cc5f4f42fce9fb9fcfaf06d33",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
+      "examples": [
+        {
+          "videoId": "UOMA-1LO4uI",
+          "channelName": "さかなし",
+          "videoTitle": "ゆるく弾き語ります",
+          "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
+        },
+        {
+          "videoId": "qMQYyv1anhI",
+          "channelName": "うみくる",
+          "videoTitle": "【ハロウィン歌枠】うみくると楽しいHalloween👻🌟 一緒にお菓子食べて歌おう🎶【#vtuber #初見さん大歓迎 】",
+          "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
+        },
+        {
+          "videoId": "vQwyjIfJNH4",
+          "channelName": "Hiromi Ch. 白河ひろみ",
+          "videoTitle": "【歌枠】白河ひろみの歌枠 平成レトロ・80年代90年代？・時々アニソン JOYSOUND for STREAMER",
+          "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
         }
       ]
     }
@@ -1517,12 +1544,12 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 11,
+      "quarantinedOccurrences": 18,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "reused_description_across_unrelated_channels": 12,
         "date_split_as_song_and_artist": 1,
-        "prayer_broadcast_timeline": 5,
-        "reused_description_across_unrelated_channels": 5
+        "prayer_broadcast_timeline": 5
       }
     },
     "2024-10-20": {
@@ -10602,11 +10629,39 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "UOMA-1LO4uI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "qMQYyv1anhI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "vQwyjIfJNH4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "XqMpLuaJSkU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "07gpZmv2WYY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "alKDk8dtjzI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "_vR5LohyFcI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "bMDyt2pb66o": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "ObrG9djgrHs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
