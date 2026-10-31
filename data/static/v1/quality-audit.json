@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-10-31T13:25:37.079Z",
+  "generatedAt": "2026-10-31T13:31:09.318Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 22977,
-  "inputOccurrences": 260470,
+  "inputVideos": 22978,
+  "inputOccurrences": 260471,
   "visibleVideos": 19727,
   "visibleOccurrences": 257099,
-  "quarantinedOccurrences": 2722,
-  "quarantinedVideos": 1935,
+  "quarantinedOccurrences": 2723,
+  "quarantinedVideos": 1936,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 200,
+    "reused_description_across_unrelated_channels": 201,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -478,9 +478,9 @@
     {
       "sourceHash": "0d3bb8caed5a82d18ee13017a4e3d4e1e5c629916eb1ca3679d86b7239008801",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
+      "videoCount": 11,
+      "channelCount": 11,
+      "distinctVideoTitles": 11,
       "examples": [
         {
           "videoId": "1NKypjklVVM",
@@ -489,15 +489,15 @@
           "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
         },
         {
-          "videoId": "Wpt8Z-AjS64",
-          "channelName": "眩幻日すいむ‪ 𓈒𓏸mahorobi suimu",
-          "videoTitle": "〖#歌枠〗✧ ハロウィンゆる歌&プチお披露目🎃 ✧〖眩幻日すいむ/#Vtuber〗",
+          "videoId": "-KnGLY2gs2o",
+          "channelName": "刻紫マジメ / Majime Kokushi",
+          "videoTitle": "【#縦型歌枠】【リクエスト有】初見さん１０人欲しい歌枠配信【 刻紫マジメ / #新人vtuber #初見歓迎 #歌枠 #Vsinger #Karaoke 】#shorts",
           "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
         },
         {
-          "videoId": "3_3Nx5sLcl0",
-          "channelName": "夜珀 ウラ",
-          "videoTitle": "【歌枠】歌います#2",
+          "videoId": "Wpt8Z-AjS64",
+          "channelName": "眩幻日すいむ‪ 𓈒𓏸mahorobi suimu",
+          "videoTitle": "〖#歌枠〗✧ ハロウィンゆる歌&プチお披露目🎃 ✧〖眩幻日すいむ/#Vtuber〗",
           "raw": "🎶歌枠 ｜ 18:00くらいまで歌っちゃうゲリラ🎀✨KARAOKE STREAM ｜ 春の魔女cerise(花守栞)"
         }
       ]
@@ -1507,11 +1507,11 @@
       }
     },
     "2026-10-30": {
-      "quarantinedOccurrences": 80,
+      "quarantinedOccurrences": 81,
       "deduplicatedOccurrences": 16,
       "byReason": {
         "prayer_broadcast_timeline": 20,
-        "reused_description_across_unrelated_channels": 57,
+        "reused_description_across_unrelated_channels": 58,
         "confirmed_stream_start_marker": 1,
         "unrelated_livestream_listing": 2
       }
@@ -10291,6 +10291,10 @@
       "deduplicatedOccurrences": 0
     },
     "qe2rLnctEgU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "-KnGLY2gs2o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
