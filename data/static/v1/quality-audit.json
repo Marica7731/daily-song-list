@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-01T20:41:02.744Z",
+  "generatedAt": "2026-11-01T20:46:46.962Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23355,
-  "inputOccurrences": 264483,
+  "inputVideos": 23366,
+  "inputOccurrences": 264494,
   "visibleVideos": 20059,
   "visibleOccurrences": 261057,
-  "quarantinedOccurrences": 2768,
-  "quarantinedVideos": 1981,
+  "quarantinedOccurrences": 2779,
+  "quarantinedVideos": 1992,
   "deduplicatedOccurrences": 644,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 236,
+    "reused_description_across_unrelated_channels": 247,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -503,6 +503,33 @@
       ]
     },
     {
+      "sourceHash": "e56341ba5e064b409057fa3ac90e9f9faa0fe9c0c9a7903c9d18dc61d15ca8cd",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 17,
+      "channelCount": 17,
+      "distinctVideoTitles": 17,
+      "examples": [
+        {
+          "videoId": "l3zQ0F37h1g",
+          "channelName": "小洛ろいず / Royz ch.",
+          "videoTitle": "【歌枠/karaoke】1緒にパーティーしませんか？♪ハロウィンなので騒ごうハッピな歌ったり♡Singing Stream！！【#小洛ろいず】",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
+        },
+        {
+          "videoId": "dyR_jnyxXv4",
+          "channelName": "まつちー",
+          "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月31日 #755𓂃٭𓈒𓏸",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
+        },
+        {
+          "videoId": "QTK2c4HqwcY",
+          "channelName": "VR商店街の弾き語りおねーさん",
+          "videoTitle": "■ VR商店街の弾き語りおねーさん のライブ配信 2026年10月31日",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
+        }
+      ]
+    },
+    {
       "sourceHash": "395dde4f6fa6d2c17141fdd3bc5e855aba0ca28cc5f4f42fce9fb9fcfaf06d33",
       "reason": "reused_description_across_unrelated_channels",
       "videoCount": 15,
@@ -526,33 +553,6 @@
           "channelName": "咲音しおん🌸🐰Sakune_Shion",
           "videoTitle": "【#歌枠 #耐久】Happy Halloween🎃なイラストを開けるまで終わらない!?【 #karaoke ┊︎#sakunelive 】",
           "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
-        }
-      ]
-    },
-    {
-      "sourceHash": "e56341ba5e064b409057fa3ac90e9f9faa0fe9c0c9a7903c9d18dc61d15ca8cd",
-      "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
-      "examples": [
-        {
-          "videoId": "dyR_jnyxXv4",
-          "channelName": "まつちー",
-          "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月31日 #755𓂃٭𓈒𓏸",
-          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
-        },
-        {
-          "videoId": "QTK2c4HqwcY",
-          "channelName": "VR商店街の弾き語りおねーさん",
-          "videoTitle": "■ VR商店街の弾き語りおねーさん のライブ配信 2026年10月31日",
-          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
-        },
-        {
-          "videoId": "GBSwQrWfZ4w",
-          "channelName": "八神ツクモ / Yagami Tsukumo",
-          "videoTitle": "弾き語りチルうた 【八神ツクモ／ネオポルテ】",
-          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
         }
       ]
     }
@@ -1571,19 +1571,19 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 38,
+      "quarantinedOccurrences": 39,
       "deduplicatedOccurrences": 9,
       "byReason": {
-        "reused_description_across_unrelated_channels": 29,
+        "reused_description_across_unrelated_channels": 30,
         "prayer_broadcast_timeline": 8,
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-11-01": {
-      "quarantinedOccurrences": 11,
+      "quarantinedOccurrences": 21,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 8,
+        "reused_description_across_unrelated_channels": 18,
         "prayer_broadcast_timeline": 3
       }
     },
@@ -10664,6 +10664,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "l3zQ0F37h1g": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "CI3yjyVNaBI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10824,7 +10828,19 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "j4ri64RAC6c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "-bKBWcNBl3s": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Xl_W28VBf0M": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "_XVg_nCNgVY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10832,11 +10848,39 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "4QYsfNvvOcs": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "84m0kRQ4g3Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "RURBzkFkD24": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "ZLfMj-rE_hc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "aafGht3E9lc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "MJhnkoqrIQw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "LTY_xCX8pZc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "5elcWONLuYQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "TG7I4E959BA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
