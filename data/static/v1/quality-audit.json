@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-01T06:14:20.462Z",
+  "generatedAt": "2026-11-01T06:18:44.913Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23208,
-  "inputOccurrences": 262948,
+  "inputVideos": 23209,
+  "inputOccurrences": 262949,
   "visibleVideos": 19933,
   "visibleOccurrences": 259552,
-  "quarantinedOccurrences": 2747,
-  "quarantinedVideos": 1960,
+  "quarantinedOccurrences": 2748,
+  "quarantinedVideos": 1961,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 221,
+    "reused_description_across_unrelated_channels": 222,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 65,
-      "channelCount": 64,
-      "distinctVideoTitles": 65,
+      "videoCount": 66,
+      "channelCount": 65,
+      "distinctVideoTitles": 66,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -1544,10 +1544,10 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 28,
+      "quarantinedOccurrences": 29,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 22,
+        "reused_description_across_unrelated_channels": 23,
         "date_split_as_song_and_artist": 1,
         "prayer_broadcast_timeline": 5
       }
@@ -10646,6 +10646,10 @@
       "deduplicatedOccurrences": 0
     },
     "UOMA-1LO4uI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "UYDs-RDTIoA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
