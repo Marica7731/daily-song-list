@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-01T22:33:32.163Z",
+  "generatedAt": "2026-11-01T22:39:23.714Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23400,
-  "inputOccurrences": 264788,
-  "visibleVideos": 20081,
-  "visibleOccurrences": 261339,
-  "quarantinedOccurrences": 2791,
-  "quarantinedVideos": 2004,
+  "inputVideos": 23401,
+  "inputOccurrences": 264789,
+  "visibleVideos": 20077,
+  "visibleOccurrences": 261335,
+  "quarantinedOccurrences": 2796,
+  "quarantinedVideos": 2009,
   "deduplicatedOccurrences": 644,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 259,
+    "reused_description_across_unrelated_channels": 264,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -553,6 +553,33 @@
           "channelName": "咲音しおん🌸🐰Sakune_Shion",
           "videoTitle": "【#歌枠 #耐久】Happy Halloween🎃なイラストを開けるまで終わらない!?【 #karaoke ┊︎#sakunelive 】",
           "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
+        }
+      ]
+    },
+    {
+      "sourceHash": "962bee5b9e09317c7c326f358b821444eeff574fb9f06340c0d36cd2ee48636b",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "ANbU6NSHmow",
+          "channelName": "胡桃澤もも / kurumizawamomo",
+          "videoTitle": "【歌枠/KARAOKE】ハッピーハロウィン🎃お菓子くれなきゃいたずらするぞっ🍬【#胡桃澤もも】",
+          "raw": "【10/28 20:00~】『すみぺ倶楽部 supported by あみあみ』第11回"
+        },
+        {
+          "videoId": "eLf7Hi7pFhE",
+          "channelName": "にどめ",
+          "videoTitle": "【歌枠/雑談】お歌の時間だよー！！一曲聴いてって✨",
+          "raw": "【10/28 20:00~】『すみぺ倶楽部 supported by あみあみ』第11回"
+        },
+        {
+          "videoId": "Aw22jxQnGRs",
+          "channelName": "影籠つばさ-Tsubasa Kagomori",
+          "videoTitle": "【#歌雑談】歌枠リレー主催します！！【ボイチェンバ美肉】",
+          "raw": "【10/28 20:00~】『すみぺ倶楽部 supported by あみあみ』第11回"
         }
       ]
     }
@@ -1571,19 +1598,19 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 40,
+      "quarantinedOccurrences": 43,
       "deduplicatedOccurrences": 9,
       "byReason": {
-        "reused_description_across_unrelated_channels": 31,
+        "reused_description_across_unrelated_channels": 34,
         "prayer_broadcast_timeline": 8,
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-11-01": {
-      "quarantinedOccurrences": 32,
+      "quarantinedOccurrences": 34,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 29,
+        "reused_description_across_unrelated_channels": 31,
         "prayer_broadcast_timeline": 3
       }
     },
@@ -10764,7 +10791,15 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "ANbU6NSHmow": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "alKDk8dtjzI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "eLf7Hi7pFhE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10781,6 +10816,10 @@
       "deduplicatedOccurrences": 0
     },
     "ObrG9djgrHs": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Aw22jxQnGRs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10856,6 +10895,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "lDxW2m_AfcM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "L0dyfl-Y61o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10905,6 +10948,10 @@
       "deduplicatedOccurrences": 0
     },
     "5rBqO0twWe0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "fXhmrdAEro0": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
