@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-01T09:36:33.110Z",
+  "generatedAt": "2026-11-01T09:40:14.075Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23237,
-  "inputOccurrences": 263249,
+  "inputVideos": 23238,
+  "inputOccurrences": 263250,
   "visibleVideos": 19956,
   "visibleOccurrences": 259847,
-  "quarantinedOccurrences": 2753,
-  "quarantinedVideos": 1966,
+  "quarantinedOccurrences": 2754,
+  "quarantinedVideos": 1967,
   "deduplicatedOccurrences": 635,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1443,
+    "prayer_broadcast_timeline": 1444,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 9,
@@ -289,9 +289,9 @@
     {
       "sourceHash": "c84e7be650e14d761d2ce0789ee96bd3ebaef6bae0d19467c7b518ba44c8353a",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 46,
-      "channelCount": 45,
-      "distinctVideoTitles": 45,
+      "videoCount": 47,
+      "channelCount": 46,
+      "distinctVideoTitles": 46,
       "examples": [
         {
           "videoId": "_uQ6wYaIva0",
@@ -1553,10 +1553,10 @@
       }
     },
     "2026-11-01": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 1,
+        "prayer_broadcast_timeline": 2,
         "reused_description_across_unrelated_channels": 1
       }
     },
@@ -10770,6 +10770,10 @@
       "deduplicatedOccurrences": 0
     },
     "rKhfKvaTGOk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "EsaqjV2yfhM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
