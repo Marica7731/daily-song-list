@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-01T19:46:46.758Z",
+  "generatedAt": "2026-11-01T19:52:19.076Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23342,
-  "inputOccurrences": 264356,
-  "visibleVideos": 20054,
-  "visibleOccurrences": 260938,
-  "quarantinedOccurrences": 2760,
-  "quarantinedVideos": 1973,
+  "inputVideos": 23346,
+  "inputOccurrences": 264401,
+  "visibleVideos": 20053,
+  "visibleOccurrences": 260978,
+  "quarantinedOccurrences": 2765,
+  "quarantinedVideos": 1978,
   "deduplicatedOccurrences": 644,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 75,
     "unrelated_talk_show_listing": 63,
-    "reused_description_across_unrelated_channels": 228,
+    "reused_description_across_unrelated_channels": 233,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -526,6 +526,33 @@
           "channelName": "咲音しおん🌸🐰Sakune_Shion",
           "videoTitle": "【#歌枠 #耐久】Happy Halloween🎃なイラストを開けるまで終わらない!?【 #karaoke ┊︎#sakunelive 】",
           "raw": "PROVÓCAME 100 / Jueves 29 de octubre - 21:00 horas"
+        }
+      ]
+    },
+    {
+      "sourceHash": "e56341ba5e064b409057fa3ac90e9f9faa0fe9c0c9a7903c9d18dc61d15ca8cd",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "dyR_jnyxXv4",
+          "channelName": "まつちー",
+          "videoTitle": "初潜◎初見・ROM歓迎┊︎リクエスト曲ゆるっと弾き語り♬.*ﾟ𓏸𓈒٭𓂃2026年10月31日 #755𓂃٭𓈒𓏸",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
+        },
+        {
+          "videoId": "QTK2c4HqwcY",
+          "channelName": "VR商店街の弾き語りおねーさん",
+          "videoTitle": "■ VR商店街の弾き語りおねーさん のライブ配信 2026年10月31日",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
+        },
+        {
+          "videoId": "GBSwQrWfZ4w",
+          "channelName": "八神ツクモ / Yagami Tsukumo",
+          "videoTitle": "弾き語りチルうた 【八神ツクモ／ネオポルテ】",
+          "raw": "【ご褒美タイム】稼げや祭りの報告聞きながら、みんなでお祝い/今日は111のラッキーDAYやで！/Muse使ってみた/【内緒】ウエンツに怒られた件【11/1 8:30まで】"
         }
       ]
     }
@@ -1544,20 +1571,20 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 36,
+      "quarantinedOccurrences": 38,
       "deduplicatedOccurrences": 9,
       "byReason": {
-        "reused_description_across_unrelated_channels": 27,
+        "reused_description_across_unrelated_channels": 29,
         "prayer_broadcast_timeline": 8,
         "date_split_as_song_and_artist": 1
       }
     },
     "2026-11-01": {
-      "quarantinedOccurrences": 5,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "prayer_broadcast_timeline": 3,
-        "reused_description_across_unrelated_channels": 2
+        "reused_description_across_unrelated_channels": 5,
+        "prayer_broadcast_timeline": 3
       }
     },
     "2024-10-20": {
@@ -10677,6 +10704,10 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 9
     },
+    "dyR_jnyxXv4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "UOMA-1LO4uI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -10690,6 +10721,10 @@
       "deduplicatedOccurrences": 0
     },
     "Q6FXZ2jjRS4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "QTK2c4HqwcY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -10785,7 +10820,19 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "GBSwQrWfZ4w": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "-bKBWcNBl3s": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "L0dyfl-Y61o": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "aafGht3E9lc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
