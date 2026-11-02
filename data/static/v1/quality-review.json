@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-02T01:29:39.119Z",
-  "scannedVideoCount": 20106,
-  "scannedOccurrenceCount": 261736,
+  "generatedAt": "2026-11-02T01:35:26.541Z",
+  "scannedVideoCount": 20108,
+  "scannedOccurrenceCount": 261758,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -857,14 +857,14 @@
     },
     {
       "date": "2026-11-01",
-      "occurrences": 1715,
+      "occurrences": 1737,
       "quarantinedOccurrences": 50
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 587,
     "possible_activity_chapter": 129,
-    "possible_date_as_artist": 85,
+    "possible_date_as_artist": 86,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 17,
     "possible_promotion_as_song": 3
@@ -4598,6 +4598,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "日時:2026年11月1日",
+      "artist": "日",
+      "raw": "18:30 日時:2026年11月1日（日）",
+      "sourceHash": "d852f12277abb44f742ce535a39beb62c4bdd9b543e5aa2b2ab6cff79efc0d71",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "NrDs7bgQCrc",
+          "channelName": "藤音カナデ-Fujioto Kanade-",
+          "publishedAt": "2026-11-01T13:26:45.318Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5153,23 +5170,6 @@
           "videoId": "w8S3Jioc6f8",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-09-06T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "I will",
-      "artist": "藍井エイル／アニメ『ソードアート・オンライン アリシゼーション War of Underworld アリシゼーション・アウェイクニング編』ED／2020/08/12",
-      "raw": "0:27:34　I will...／藍井エイル／アニメ『ソードアート・オンライン アリシゼーション War of Underworld アリシゼーション・アウェイクニング編』ED／2020/08/12",
-      "sourceHash": "5157bed21be0b2235a7e527c7a8acde3153c5f97cf4a3698637ba63f91e0041b",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "xkSW85wy6Dw",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-09T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
