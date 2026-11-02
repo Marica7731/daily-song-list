@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-02T20:06:52.995Z",
+  "generatedAt": "2026-11-02T20:11:23.564Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23634,
-  "inputOccurrences": 266927,
-  "visibleVideos": 20256,
-  "visibleOccurrences": 263402,
-  "quarantinedOccurrences": 2862,
-  "quarantinedVideos": 2062,
+  "inputVideos": 23638,
+  "inputOccurrences": 266980,
+  "visibleVideos": 20259,
+  "visibleOccurrences": 263453,
+  "quarantinedOccurrences": 2864,
+  "quarantinedVideos": 2063,
   "deduplicatedOccurrences": 649,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
-    "unrelated_livestream_listing": 87,
-    "unrelated_talk_show_listing": 71,
+    "unrelated_livestream_listing": 88,
+    "unrelated_talk_show_listing": 72,
     "reused_description_across_unrelated_channels": 309,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
@@ -613,9 +613,9 @@
     {
       "sourceHash": "a55fd90eab7cd5945f52c8ea04abbfcfe29678952b511bb9a110015e4bb5663e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 9,
+      "channelCount": 9,
+      "distinctVideoTitles": 9,
       "examples": [
         {
           "videoId": "I5LoexdwEpI",
@@ -624,15 +624,15 @@
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         },
         {
-          "videoId": "1GrMnaE8Yc4",
-          "channelName": "創弾き語り OHORI123（OHORI123）",
-          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 21～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
+          "videoId": "xViMmVJ__qE",
+          "channelName": "│吉田栄作カバー専門YouTubeチャンネル│筋トレ男",
+          "videoTitle": "吉田栄作カバー弾き語り筋トレ男ライブ配信",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         },
         {
-          "videoId": "NCszt4tGpwA",
-          "channelName": "仁井谷 正充",
-          "videoTitle": "MOO仁井谷のゆるうたメモリーズ ＃5 弾き語りでつなぐ昭和・平成・令和",
+          "videoId": "1GrMnaE8Yc4",
+          "channelName": "創弾き語り OHORI123（OHORI123）",
+          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 21～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         }
       ]
@@ -1688,11 +1688,11 @@
       }
     },
     "2026-11-01": {
-      "quarantinedOccurrences": 86,
+      "quarantinedOccurrences": 88,
       "deduplicatedOccurrences": 5,
       "byReason": {
-        "unrelated_livestream_listing": 9,
-        "unrelated_talk_show_listing": 5,
+        "unrelated_livestream_listing": 10,
+        "unrelated_talk_show_listing": 6,
         "reused_description_across_unrelated_channels": 68,
         "date_split_as_song_and_artist": 1,
         "prayer_broadcast_timeline": 3
@@ -10982,6 +10982,10 @@
     },
     "jUv6mflWUcI": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "xViMmVJ__qE": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "GWkpDZrMyQE": {
