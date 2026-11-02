@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-02T22:20:07.202Z",
+  "generatedAt": "2026-11-02T22:25:53.733Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23662,
-  "inputOccurrences": 267233,
+  "inputVideos": 23663,
+  "inputOccurrences": 267234,
   "visibleVideos": 20281,
   "visibleOccurrences": 263702,
-  "quarantinedOccurrences": 2868,
-  "quarantinedVideos": 2065,
+  "quarantinedOccurrences": 2869,
+  "quarantinedVideos": 2066,
   "deduplicatedOccurrences": 649,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1447,
+    "prayer_broadcast_timeline": 1448,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 10,
@@ -283,6 +283,33 @@
           "channelName": "不死鳥の来世",
           "videoTitle": "(機材歌枠) オリジナル曲歌います！",
           "raw": "【#秋を彩るバ美音祭】お気に入り星街すいせい4曲メドレー！！【若月とわ】2026/9/27(日) 17:20～#vtuber"
+        }
+      ]
+    },
+    {
+      "sourceHash": "4b1e24dab826aa4930054c4fa1526dfcd185646b7d503b7885541cd76504e10c",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "PYoaSs4Y8z4",
+          "channelName": "Vtuberグループ D--rr vision",
+          "videoTitle": "【#歌枠 】初見さんとの縁結びを兼ねてきままに歌枠✨【夜ノ葩ともえ】",
+          "raw": "Santo Rosário | Sexta-feira | 04:00 | 31/01/25 | Live Ao vivo"
+        },
+        {
+          "videoId": "f7rXM4_VQyw",
+          "channelName": "一くぉ / hazime qo",
+          "videoTitle": "今年初〖歌枠🥛〗JOYSOUNDカラオケ《#一くぉ/VTuber》",
+          "raw": "Santo Rosário | Sexta-feira | 04:00 | 31/01/25 | Live Ao vivo"
+        },
+        {
+          "videoId": "b2OY5CEwdT4",
+          "channelName": "〈木ノ華〉泉月日頃-IzukiHigoro-",
+          "videoTitle": "『歌枠』漠然と歌。『泉月日頃/Vsinger』",
+          "raw": "Santo Rosário | Sexta-feira | 04:00 | 31/01/25 | Live Ao vivo"
         }
       ]
     },
@@ -1699,9 +1726,10 @@
       }
     },
     "2026-11-02": {
-      "quarantinedOccurrences": 17,
+      "quarantinedOccurrences": 18,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "prayer_broadcast_timeline": 1,
         "unrelated_livestream_listing": 5,
         "unrelated_talk_show_listing": 5,
         "reused_description_across_unrelated_channels": 7
@@ -11297,6 +11325,10 @@
       "deduplicatedOccurrences": 0
     },
     "EsaqjV2yfhM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "xtBAqm84v3k": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
