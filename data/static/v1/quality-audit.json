@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-02T20:22:10.707Z",
+  "generatedAt": "2026-11-02T20:27:07.019Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23641,
-  "inputOccurrences": 267013,
+  "inputVideos": 23642,
+  "inputOccurrences": 267015,
   "visibleVideos": 20262,
   "visibleOccurrences": 263486,
-  "quarantinedOccurrences": 2864,
-  "quarantinedVideos": 2063,
+  "quarantinedOccurrences": 2866,
+  "quarantinedVideos": 2064,
   "deduplicatedOccurrences": 649,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 62,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
-    "unrelated_livestream_listing": 88,
-    "unrelated_talk_show_listing": 72,
+    "unrelated_livestream_listing": 89,
+    "unrelated_talk_show_listing": 73,
     "reused_description_across_unrelated_channels": 309,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
@@ -613,9 +613,9 @@
     {
       "sourceHash": "a55fd90eab7cd5945f52c8ea04abbfcfe29678952b511bb9a110015e4bb5663e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 9,
-      "channelCount": 9,
-      "distinctVideoTitles": 9,
+      "videoCount": 10,
+      "channelCount": 10,
+      "distinctVideoTitles": 10,
       "examples": [
         {
           "videoId": "I5LoexdwEpI",
@@ -1699,12 +1699,12 @@
       }
     },
     "2026-11-02": {
-      "quarantinedOccurrences": 13,
+      "quarantinedOccurrences": 15,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 7,
-        "unrelated_livestream_listing": 3,
-        "unrelated_talk_show_listing": 3
+        "unrelated_livestream_listing": 4,
+        "unrelated_talk_show_listing": 4
       }
     },
     "2024-10-20": {
@@ -11334,6 +11334,10 @@
     },
     "jQZeUFe7ADY": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "3tSjriH7FbI": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "4RrWuLXKprQ": {
