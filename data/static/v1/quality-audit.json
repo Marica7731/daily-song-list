@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T22:20:13.621Z",
+  "generatedAt": "2026-11-03T22:25:26.315Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23959,
-  "inputOccurrences": 270495,
-  "visibleVideos": 20511,
-  "visibleOccurrences": 266885,
-  "quarantinedOccurrences": 2937,
-  "quarantinedVideos": 2131,
+  "inputVideos": 23961,
+  "inputOccurrences": 270519,
+  "visibleVideos": 20512,
+  "visibleOccurrences": 266908,
+  "quarantinedOccurrences": 2938,
+  "quarantinedVideos": 2132,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 349,
+    "reused_description_across_unrelated_channels": 350,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -694,9 +694,9 @@
     {
       "sourceHash": "78e11eab2a2eeee3c5d0c0452b24bdce9a75526cdf9eff4e234ce3bb5077f9b2",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 7,
-      "channelCount": 7,
-      "distinctVideoTitles": 7,
+      "videoCount": 8,
+      "channelCount": 8,
+      "distinctVideoTitles": 8,
       "examples": [
         {
           "videoId": "S4VSnt_5C6c",
@@ -705,15 +705,15 @@
           "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         },
         {
-          "videoId": "2V7zMSgLbdw",
-          "channelName": "猫月夜さくは NekotsukiyoSakuha",
-          "videoTitle": "【#ゲリラ歌枠】今夜こそ地平線へ！サンホラ歌枠リベンジ！【Sound Horizon】",
+          "videoId": "Vt7g__mIJP8",
+          "channelName": "飲酒じめさん【hajime】",
+          "videoTitle": "【 歌枠/Karaoke 】深夜のまったり歌枠！一曲いかがですか？🦊初見さん・作業・睡眠歓迎！【#新人vtuber #hajime】",
           "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         },
         {
-          "videoId": "GulRHj0T3W4",
-          "channelName": "くすみ乙@新人Vtuber",
-          "videoTitle": "【リベンジ歌枠】カーペット系Vtuber、ボカロ歌います！【くすみ乙】",
+          "videoId": "2V7zMSgLbdw",
+          "channelName": "猫月夜さくは NekotsukiyoSakuha",
+          "videoTitle": "【#ゲリラ歌枠】今夜こそ地平線へ！サンホラ歌枠リベンジ！【Sound Horizon】",
           "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         }
       ]
@@ -1818,11 +1818,11 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 33,
+      "quarantinedOccurrences": 34,
       "deduplicatedOccurrences": 7,
       "byReason": {
-        "prayer_broadcast_timeline": 14,
-        "reused_description_across_unrelated_channels": 19
+        "reused_description_across_unrelated_channels": 20,
+        "prayer_broadcast_timeline": 14
       }
     },
     "2024-10-20": {
@@ -11603,6 +11603,10 @@
       "deduplicatedOccurrences": 0
     },
     "4RrWuLXKprQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Vt7g__mIJP8": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
