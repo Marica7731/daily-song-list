@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T15:26:17.302Z",
+  "generatedAt": "2026-11-03T15:32:11.370Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23868,
-  "inputOccurrences": 269603,
-  "visibleVideos": 20441,
-  "visibleOccurrences": 266014,
-  "quarantinedOccurrences": 2916,
-  "quarantinedVideos": 2110,
+  "inputVideos": 23871,
+  "inputOccurrences": 269621,
+  "visibleVideos": 20439,
+  "visibleOccurrences": 266027,
+  "quarantinedOccurrences": 2921,
+  "quarantinedVideos": 2115,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 334,
+    "reused_description_across_unrelated_channels": 339,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -688,6 +688,33 @@
           "channelName": "偉雷アマエ / Erai Amae",
           "videoTitle": "【歌枠】帰宅後に歌ったり話したり🧡⚡️ 【偉雷アマエ 】",
           "raw": "AKP'DE GİZLENEMEYEN FIRTINA | Canlı | 02 Kasım Pazartesi 20:00"
+        }
+      ]
+    },
+    {
+      "sourceHash": "78e11eab2a2eeee3c5d0c0452b24bdce9a75526cdf9eff4e234ce3bb5077f9b2",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "S4VSnt_5C6c",
+          "channelName": "Arara",
+          "videoTitle": "お絵かき歌枠",
+          "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
+        },
+        {
+          "videoId": "CsqWHnQcZnE",
+          "channelName": "ふみっきー君サブチャンネル",
+          "videoTitle": "音割れ注意⚠️テスト配信という名の歌枠。収益化は許可されてるけど再生数からは得られないタイプ",
+          "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
+        },
+        {
+          "videoId": "w3kP6bzg2ho",
+          "channelName": "ハグミィ・イン・スウィートハート / Hugme in Sweetheart",
+          "videoTitle": "【 #歌枠 /#雑談】祝日も楽しく歌雑🎤☀️高評価200目標！【#新人VTuber】",
+          "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         }
       ]
     },
@@ -1753,10 +1780,10 @@
       }
     },
     "2026-11-02": {
-      "quarantinedOccurrences": 50,
+      "quarantinedOccurrences": 51,
       "deduplicatedOccurrences": 3,
       "byReason": {
-        "reused_description_across_unrelated_channels": 25,
+        "reused_description_across_unrelated_channels": 26,
         "prayer_broadcast_timeline": 9,
         "confirmed_stream_start_marker": 2,
         "unrelated_livestream_listing": 7,
@@ -1764,11 +1791,11 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 15,
+      "quarantinedOccurrences": 19,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "prayer_broadcast_timeline": 8,
-        "reused_description_across_unrelated_channels": 7
+        "reused_description_across_unrelated_channels": 11
       }
     },
     "2024-10-20": {
@@ -11388,6 +11415,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "S4VSnt_5C6c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "V2jxyECXXOc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11560,6 +11591,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "CsqWHnQcZnE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "IIuwb7ixH2o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11569,6 +11604,10 @@
       "deduplicatedOccurrences": 0
     },
     "nVHrCjOIkD4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "w3kP6bzg2ho": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -11596,7 +11635,15 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "cMEacASx6qQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "QwyXViQkXu4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "rnRjBA-BSdI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
