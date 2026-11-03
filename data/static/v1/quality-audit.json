@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T21:50:24.837Z",
+  "generatedAt": "2026-11-03T21:56:45.891Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23953,
-  "inputOccurrences": 270385,
-  "visibleVideos": 20510,
-  "visibleOccurrences": 266780,
-  "quarantinedOccurrences": 2932,
-  "quarantinedVideos": 2126,
+  "inputVideos": 23955,
+  "inputOccurrences": 270387,
+  "visibleVideos": 20507,
+  "visibleOccurrences": 266777,
+  "quarantinedOccurrences": 2937,
+  "quarantinedVideos": 2131,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 344,
+    "reused_description_across_unrelated_channels": 349,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -742,6 +742,33 @@
           "channelName": "来栖らいあ RaiaKurusu",
           "videoTitle": "【歌枠】え！？11カ月ぶりの歌枠！？📛アイドル/アニソン/声優/Jポップ ＜カラオケJOYSOUND for STREAMER＞【 #来栖らいあ 】",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月2日(月)20:00〜 ／明日はおでかけ日和のところも日本海側は雨〈ウェザーニュースLiVEムーン・山岸愛梨／宇野沢達也〉"
+        }
+      ]
+    },
+    {
+      "sourceHash": "74906a607bfdb0720126d0a516c3b028dc30992e23e51fec4fad50c7e75a7927",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "0HAFTaEJKMQ",
+          "channelName": "染夜時雨-Someya Shigure-ch",
+          "videoTitle": "【#初見歓迎 】優しい夜の歌枠ーKARAOKEー【#個人vtuber 】",
+          "raw": "DEVLETİN İMAMOĞLU RAPORU İLK KEZ B YÜZÜ'NDE | B YÜZÜ | Canlı | 03 KASIM SALI 20:00"
+        },
+        {
+          "videoId": "tBEuOWYyxBo",
+          "channelName": "春空もこ ch",
+          "videoTitle": "【歌枠】 まったりたのしく歌 【個人vtuber/春空もこ】#shorts",
+          "raw": "DEVLETİN İMAMOĞLU RAPORU İLK KEZ B YÜZÜ'NDE | B YÜZÜ | Canlı | 03 KASIM SALI 20:00"
+        },
+        {
+          "videoId": "Kb7t94z16K8",
+          "channelName": "叶雨つむぐ / Kaname Tsumugu",
+          "videoTitle": "【#歌枠 & #雑談 】コルセット生活からの脱却リハビリ歌枠【叶雨つむぐ / #Vtuber】",
+          "raw": "DEVLETİN İMAMOĞLU RAPORU İLK KEZ B YÜZÜ'NDE | B YÜZÜ | Canlı | 03 KASIM SALI 20:00"
         }
       ]
     }
@@ -1791,11 +1818,11 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 28,
+      "quarantinedOccurrences": 33,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "prayer_broadcast_timeline": 14,
-        "reused_description_across_unrelated_channels": 14
+        "reused_description_across_unrelated_channels": 19
       }
     },
     "2024-10-20": {
@@ -11583,6 +11610,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "0HAFTaEJKMQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "1RQEOYCZ2ZA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11591,11 +11622,27 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "tBEuOWYyxBo": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Kb7t94z16K8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "oaZemC1VZO8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "KQpZSqWWNSA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "G1lnojxfbok": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "rICkHBvFbW8": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
