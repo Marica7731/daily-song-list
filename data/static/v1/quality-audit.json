@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T16:34:41.481Z",
+  "generatedAt": "2026-11-03T16:40:38.524Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23886,
-  "inputOccurrences": 269767,
+  "inputVideos": 23887,
+  "inputOccurrences": 269768,
   "visibleVideos": 20452,
   "visibleOccurrences": 266171,
-  "quarantinedOccurrences": 2923,
-  "quarantinedVideos": 2117,
+  "quarantinedOccurrences": 2924,
+  "quarantinedVideos": 2118,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 341,
+    "reused_description_across_unrelated_channels": 342,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -694,9 +694,9 @@
     {
       "sourceHash": "78e11eab2a2eeee3c5d0c0452b24bdce9a75526cdf9eff4e234ce3bb5077f9b2",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
         {
           "videoId": "S4VSnt_5C6c",
@@ -711,9 +711,9 @@
           "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         },
         {
-          "videoId": "CsqWHnQcZnE",
-          "channelName": "ふみっきー君サブチャンネル",
-          "videoTitle": "音割れ注意⚠️テスト配信という名の歌枠。収益化は許可されてるけど再生数からは得られないタイプ",
+          "videoId": "GulRHj0T3W4",
+          "channelName": "くすみ乙@新人Vtuber",
+          "videoTitle": "【リベンジ歌枠】カーペット系Vtuber、ボカロ歌います！【くすみ乙】",
           "raw": "【約10分更新】Librarian: Tidy Up the Arcane Library! Any% 49:48(IGT)【VOICEROID解説】"
         }
       ]
@@ -1791,10 +1791,10 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 21,
       "deduplicatedOccurrences": 7,
       "byReason": {
-        "reused_description_across_unrelated_channels": 12,
+        "reused_description_across_unrelated_channels": 13,
         "prayer_broadcast_timeline": 8
       }
     },
@@ -11576,6 +11576,10 @@
       "deduplicatedOccurrences": 0
     },
     "2V7zMSgLbdw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "GulRHj0T3W4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
