@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T01:46:02.820Z",
+  "generatedAt": "2026-11-03T01:50:59.859Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23700,
-  "inputOccurrences": 267668,
-  "visibleVideos": 20313,
-  "visibleOccurrences": 264127,
-  "quarantinedOccurrences": 2875,
-  "quarantinedVideos": 2070,
+  "inputVideos": 23701,
+  "inputOccurrences": 267669,
+  "visibleVideos": 20309,
+  "visibleOccurrences": 264123,
+  "quarantinedOccurrences": 2880,
+  "quarantinedVideos": 2075,
   "deduplicatedOccurrences": 652,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 310,
+    "reused_description_across_unrelated_channels": 315,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 34,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -661,6 +661,33 @@
           "channelName": "創弾き語り OHORI123（OHORI123）",
           "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 21～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        }
+      ]
+    },
+    {
+      "sourceHash": "10be68d7b893a5b0d8ff49a71397923b1b80f9a654b4fb9c6b9f1dff95731ea2",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "V2jxyECXXOc",
+          "channelName": "ガネル / ganel",
+          "videoTitle": "【 歌枠 】初見さん大歓迎！ガネルのカラオケ部屋🐘 Karaoke【 #ガネル / VSinger 】#ガネルの群れ #Shorts",
+          "raw": "AKP'DE GİZLENEMEYEN FIRTINA | Canlı | 02 Kasım Pazartesi 20:00"
+        },
+        {
+          "videoId": "IA_9LGbO-IQ",
+          "channelName": "偉雷アマエ / Erai Amae",
+          "videoTitle": "【歌枠】帰宅後に歌ったり話したり🧡⚡️ 【偉雷アマエ 】",
+          "raw": "AKP'DE GİZLENEMEYEN FIRTINA | Canlı | 02 Kasım Pazartesi 20:00"
+        },
+        {
+          "videoId": "jN62e8AKcvI",
+          "channelName": "下水 管",
+          "videoTitle": "【初見さん大歓迎歌枠】歌いたい歌をしたみが好きなだけ歌う歌枠♬【Vtuber／下水 管】",
+          "raw": "AKP'DE GİZLENEMEYEN FIRTINA | Canlı | 02 Kasım Pazartesi 20:00"
         }
       ]
     },
@@ -1726,11 +1753,11 @@
       }
     },
     "2026-11-02": {
-      "quarantinedOccurrences": 24,
+      "quarantinedOccurrences": 29,
       "deduplicatedOccurrences": 3,
       "byReason": {
+        "reused_description_across_unrelated_channels": 13,
         "prayer_broadcast_timeline": 2,
-        "reused_description_across_unrelated_channels": 8,
         "unrelated_livestream_listing": 7,
         "unrelated_talk_show_listing": 7
       }
@@ -11328,6 +11355,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "V2jxyECXXOc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "1NKXmOR8rQE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11337,6 +11368,14 @@
       "deduplicatedOccurrences": 0
     },
     "d9-nKql3oVI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "IA_9LGbO-IQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "jN62e8AKcvI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -11352,9 +11391,17 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "eVpraEGb-Vc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "5iNNbC667R8": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 3
+    },
+    "RvQY7Co3psw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "nqKyLQ1vqAo": {
       "quarantinedOccurrences": 2,
