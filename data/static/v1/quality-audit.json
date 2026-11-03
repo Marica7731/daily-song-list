@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-03T08:35:56.171Z",
+  "generatedAt": "2026-11-03T08:40:50.711Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23773,
-  "inputOccurrences": 268560,
+  "inputVideos": 23775,
+  "inputOccurrences": 268562,
   "visibleVideos": 20366,
   "visibleOccurrences": 264998,
-  "quarantinedOccurrences": 2896,
-  "quarantinedVideos": 2090,
+  "quarantinedOccurrences": 2898,
+  "quarantinedVideos": 2092,
   "deduplicatedOccurrences": 652,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2891,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1454,
+    "prayer_broadcast_timeline": 1455,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 10,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 324,
+    "reused_description_across_unrelated_channels": 325,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 84,
-      "channelCount": 82,
-      "distinctVideoTitles": 83,
+      "videoCount": 85,
+      "channelCount": 83,
+      "distinctVideoTitles": 84,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -289,9 +289,9 @@
     {
       "sourceHash": "4b1e24dab826aa4930054c4fa1526dfcd185646b7d503b7885541cd76504e10c",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 9,
-      "channelCount": 9,
-      "distinctVideoTitles": 9,
+      "videoCount": 10,
+      "channelCount": 10,
+      "distinctVideoTitles": 10,
       "examples": [
         {
           "videoId": "PYoaSs4Y8z4",
@@ -1764,10 +1764,11 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 1
+        "prayer_broadcast_timeline": 1,
+        "reused_description_across_unrelated_channels": 2
       }
     },
     "2024-10-20": {
@@ -11515,7 +11516,15 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "nVHrCjOIkD4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "oTnrZNZYCIY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "afwh2Jk0SoE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
