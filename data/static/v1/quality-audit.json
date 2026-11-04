@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T04:40:11.296Z",
+  "generatedAt": "2026-11-04T04:45:18.716Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24051,
-  "inputOccurrences": 271157,
-  "visibleVideos": 20557,
-  "visibleOccurrences": 267481,
-  "quarantinedOccurrences": 2991,
-  "quarantinedVideos": 2177,
+  "inputVideos": 24055,
+  "inputOccurrences": 271207,
+  "visibleVideos": 20559,
+  "visibleOccurrences": 267527,
+  "quarantinedOccurrences": 2995,
+  "quarantinedVideos": 2179,
   "deduplicatedOccurrences": 670,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 35,
     "confirmed_chat_section": 44,
-    "unrelated_livestream_listing": 100,
+    "unrelated_livestream_listing": 102,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 389,
+    "reused_description_across_unrelated_channels": 391,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -775,10 +775,16 @@
     {
       "sourceHash": "67d7e1bb7d95a4b96c3d0b3199854e040f9d15ec50275c37efb678fc6d5d133b",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 10,
+      "channelCount": 10,
+      "distinctVideoTitles": 10,
       "examples": [
+        {
+          "videoId": "QdyKEj-oUYw",
+          "channelName": "森の宇宙人 / Alien in the Forest",
+          "videoTitle": "げんきになった、おつかれさま銀河",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
         {
           "videoId": "ie8gOmZdEjg",
           "channelName": "あやんちゃんねる-Ayan channel-",
@@ -789,12 +795,6 @@
           "videoId": "lWfXMk1nj8U",
           "channelName": "みゃしーのピアノ弾き語りバー / myasea's piano bar",
           "videoTitle": "【ジャズ弾き語り】深夜のピアノライブ Vol.5 リラックス・作業用BGM・睡眠・読書［Jazz Standard］黒いオルフェ ジプシー・クイーン 中森明菜カバー Night and Day",
-          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
-        },
-        {
-          "videoId": "OorwW5lSWX4",
-          "channelName": "Rudo",
-          "videoTitle": "【歌枠】さいきんさむくなったよねえええな歌枠っ！！！！！！！！【悪魔vtuber】",
           "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         }
       ]
@@ -1899,20 +1899,21 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 86,
+      "quarantinedOccurrences": 88,
       "deduplicatedOccurrences": 17,
       "byReason": {
-        "reused_description_across_unrelated_channels": 58,
-        "unrelated_livestream_listing": 8,
+        "reused_description_across_unrelated_channels": 59,
+        "unrelated_livestream_listing": 9,
         "prayer_broadcast_timeline": 20
       },
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-04": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "reused_description_across_unrelated_channels": 1
+        "unrelated_livestream_listing": 1,
+        "reused_description_across_unrelated_channels": 2
       }
     },
     "2024-10-20": {
@@ -11708,6 +11709,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "QdyKEj-oUYw": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "-sgM6R8tm5E": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -12023,6 +12028,10 @@
     },
     "Eu5IabdMT2w": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "DeKb8aty95Q": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "1MYhsaI_Dnw": {
