@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T03:33:58.881Z",
+  "generatedAt": "2026-11-04T03:38:38.725Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24031,
-  "inputOccurrences": 271033,
+  "inputVideos": 24032,
+  "inputOccurrences": 271034,
   "visibleVideos": 20548,
   "visibleOccurrences": 267380,
-  "quarantinedOccurrences": 2972,
-  "quarantinedVideos": 2166,
+  "quarantinedOccurrences": 2973,
+  "quarantinedVideos": 2167,
   "deduplicatedOccurrences": 666,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 380,
+    "reused_description_across_unrelated_channels": 381,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -748,10 +748,16 @@
     {
       "sourceHash": "f8b43a6aa3192b129931599e0bad38e56e0b1f478810a193b21f04d256ca80ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 20,
-      "channelCount": 20,
-      "distinctVideoTitles": 20,
+      "videoCount": 21,
+      "channelCount": 21,
+      "distinctVideoTitles": 21,
       "examples": [
+        {
+          "videoId": "Y_1rvLwnIAs",
+          "channelName": "俳優 札内幸太 ゆっくりでいいから今年は好きな事、やりたい事、思いついた事を、沢山やろうぉー^_^",
+          "videoTitle": "🎼音楽70日目『口笛』Mr. Childrenさん名曲弾き語りカバー🎸練習🎶札内幸太の音楽1ヶ月チャレンジ💪#mrchildren #cover #ミスチル #ミスターチルドレン #口笛",
+          "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
+        },
         {
           "videoId": "-sgM6R8tm5E",
           "channelName": "poco_exe",
@@ -762,12 +768,6 @@
           "videoId": "hAOjf-Q6Z4k",
           "channelName": "月羽シイナ -Shiina Tsukibane-",
           "videoTitle": "【 歌枠 】 お深夜の毎日歌枠600日目 短め5曲のお歌練 【 月羽シイナ 】 #shorts #short #縦画面配信 #karaoke #Vsinger",
-          "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
-        },
-        {
-          "videoId": "aySWnjbmMxA",
-          "channelName": "Hitohira Hana",
-          "videoTitle": "まったり弾き語り #弾き語り #弾き語り女子 #vtuber",
           "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
         }
       ]
@@ -1872,10 +1872,10 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 67,
+      "quarantinedOccurrences": 68,
       "deduplicatedOccurrences": 14,
       "byReason": {
-        "reused_description_across_unrelated_channels": 49,
+        "reused_description_across_unrelated_channels": 50,
         "prayer_broadcast_timeline": 18
       },
       "artistCatalogArchivedOccurrences": 1
@@ -11665,6 +11665,10 @@
       "deduplicatedOccurrences": 0
     },
     "4RrWuLXKprQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Y_1rvLwnIAs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
