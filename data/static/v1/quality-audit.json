@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T00:17:08.132Z",
+  "generatedAt": "2026-11-04T00:22:46.775Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23985,
-  "inputOccurrences": 270784,
-  "visibleVideos": 20529,
-  "visibleOccurrences": 267165,
-  "quarantinedOccurrences": 2945,
-  "quarantinedVideos": 2139,
+  "inputVideos": 23986,
+  "inputOccurrences": 270785,
+  "visibleVideos": 20525,
+  "visibleOccurrences": 267161,
+  "quarantinedOccurrences": 2950,
+  "quarantinedVideos": 2144,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 355,
+    "reused_description_across_unrelated_channels": 360,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -769,6 +769,33 @@
           "channelName": "叶雨つむぐ / Kaname Tsumugu",
           "videoTitle": "【#歌枠 & #雑談 】コルセット生活からの脱却リハビリ歌枠【叶雨つむぐ / #Vtuber】",
           "raw": "DEVLETİN İMAMOĞLU RAPORU İLK KEZ B YÜZÜ'NDE | B YÜZÜ | Canlı | 03 KASIM SALI 20:00"
+        }
+      ]
+    },
+    {
+      "sourceHash": "cb9ef91242e104a09ed4b9eb2f9f8d3171570d4cb66250d9838ffa1fc5256dd0",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "ixJuaspBm4s",
+          "channelName": "NAYUKI_",
+          "videoTitle": "【歌枠】私は此処【個人Vtuber】2026.11.3",
+          "raw": "Midterm Elections | News 5 NOW @ 5:45pm 110326"
+        },
+        {
+          "videoId": "lswX4pI50x8",
+          "channelName": "よるむんの広浅ちゃんねる",
+          "videoTitle": "【耐久歌枠】5曲90点取るまで終われない歌枠【Vtuber】",
+          "raw": "Midterm Elections | News 5 NOW @ 5:45pm 110326"
+        },
+        {
+          "videoId": "V-3lDhexDDg",
+          "channelName": "如月ふみ(kisaragi fumi)",
+          "videoTitle": "【#歌枠】少しだけうたうのだ。今日も一日お疲れ様でした！【#如月ふみ #歌枠】",
+          "raw": "Midterm Elections | News 5 NOW @ 5:45pm 110326"
         }
       ]
     }
@@ -1818,10 +1845,10 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 41,
+      "quarantinedOccurrences": 46,
       "deduplicatedOccurrences": 7,
       "byReason": {
-        "reused_description_across_unrelated_channels": 25,
+        "reused_description_across_unrelated_channels": 30,
         "prayer_broadcast_timeline": 16
       },
       "artistCatalogArchivedOccurrences": 1
@@ -11627,6 +11654,18 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "ixJuaspBm4s": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "lswX4pI50x8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "V-3lDhexDDg": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "1RQEOYCZ2ZA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -11647,7 +11686,15 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "ydz4GvRfCRA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "tBEuOWYyxBo": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "1QAuA6SkZiA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
