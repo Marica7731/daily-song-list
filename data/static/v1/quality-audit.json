@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T03:28:39.929Z",
+  "generatedAt": "2026-11-04T03:33:58.881Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24030,
-  "inputOccurrences": 271032,
+  "inputVideos": 24031,
+  "inputOccurrences": 271033,
   "visibleVideos": 20548,
   "visibleOccurrences": 267380,
-  "quarantinedOccurrences": 2971,
-  "quarantinedVideos": 2165,
+  "quarantinedOccurrences": 2972,
+  "quarantinedVideos": 2166,
   "deduplicatedOccurrences": 666,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 379,
+    "reused_description_across_unrelated_channels": 380,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -748,10 +748,16 @@
     {
       "sourceHash": "f8b43a6aa3192b129931599e0bad38e56e0b1f478810a193b21f04d256ca80ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 19,
-      "channelCount": 19,
-      "distinctVideoTitles": 19,
+      "videoCount": 20,
+      "channelCount": 20,
+      "distinctVideoTitles": 20,
       "examples": [
+        {
+          "videoId": "-sgM6R8tm5E",
+          "channelName": "poco_exe",
+          "videoTitle": "【#55】1000人目指してます˖ ࣪⊹ | singing karaoke stream 【 #歌枠 #singing #karaoke #vtuber 】",
+          "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
+        },
         {
           "videoId": "hAOjf-Q6Z4k",
           "channelName": "月羽シイナ -Shiina Tsukibane-",
@@ -762,12 +768,6 @@
           "videoId": "aySWnjbmMxA",
           "channelName": "Hitohira Hana",
           "videoTitle": "まったり弾き語り #弾き語り #弾き語り女子 #vtuber",
-          "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
-        },
-        {
-          "videoId": "3Uw7X8c3Y_U",
-          "channelName": "にゃんこまるスヤー",
-          "videoTitle": "歌枠 木村カエラ バクナン あいみょん",
           "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
         }
       ]
@@ -1872,10 +1872,10 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 66,
+      "quarantinedOccurrences": 67,
       "deduplicatedOccurrences": 14,
       "byReason": {
-        "reused_description_across_unrelated_channels": 48,
+        "reused_description_across_unrelated_channels": 49,
         "prayer_broadcast_timeline": 18
       },
       "artistCatalogArchivedOccurrences": 1
@@ -11673,6 +11673,10 @@
       "deduplicatedOccurrences": 0
     },
     "Vt7g__mIJP8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "-sgM6R8tm5E": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
