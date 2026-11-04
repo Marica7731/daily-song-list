@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-04T06:47:57.979Z",
-  "scannedVideoCount": 20572,
-  "scannedOccurrenceCount": 267677,
+  "generatedAt": "2026-11-04T06:53:40.616Z",
+  "scannedVideoCount": 20576,
+  "scannedOccurrenceCount": 267776,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -867,7 +867,7 @@
     },
     {
       "date": "2026-11-03",
-      "occurrences": 2693,
+      "occurrences": 2792,
       "quarantinedOccurrences": 90
     },
     {
@@ -878,7 +878,7 @@
   ],
   "byReason": {
     "possible_unparsed_credits": 602,
-    "possible_activity_chapter": 131,
+    "possible_activity_chapter": 132,
     "possible_date_as_artist": 92,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 18,
@@ -3361,6 +3361,23 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "本日の感想",
+      "artist": "",
+      "raw": "00:29:24 本日の感想",
+      "sourceHash": "a3c0daacc6e155701841ecd3d1b44a6e034a8539d9c5c1d127a6e6a8a0fadbfd",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "DG_1PkMIMWw",
+          "channelName": "陽透きよ( kiyo hinata )",
+          "publishedAt": "2026-11-03T10:31:08.625Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "風は予告なく吹く",
       "artist": "",
       "raw": "♪ 01:06:47 風は予告なく吹く / マクロスΔ ED",
@@ -5166,23 +5183,6 @@
       "title": "恋心",
       "artist": "相川七瀬／1996/10/07",
       "raw": "2:32:14　恋心／相川七瀬／1996/10/07",
-      "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "AaaASRcaqdU",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-02T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "シルシ",
-      "artist": "LiSA／アニメ『ソードアート・オンライン マザーズ・ロザリオ編』ED／2015/12/10",
-      "raw": "2:48:43　シルシ／LiSA／アニメ『ソードアート・オンライン マザーズ・ロザリオ編』ED／2015/12/10",
       "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
       "count": 1,
       "sample": [
@@ -8075,6 +8075,55 @@
           "title": "Birthday Song for ミク",
           "artist": "MitchieM",
           "raw": "4. Birthday Song for ミク/MitchieM 23:51"
+        }
+      ]
+    },
+    {
+      "videoId": "aHL0wDyiYeE",
+      "channelName": "ちゆうさ - Chiyu ch.-",
+      "publishedAt": "2026-11-03T11:41:19.949Z",
+      "sourceHash": "9f7fae719079ddd95c22bccce40c28eff9ca138e913c430c303cfda023a44d2d",
+      "total": 85,
+      "explicitNumberedSongs": 80,
+      "knownArtistRows": 80,
+      "unknownNonNumberedRows": 5,
+      "unknownExamples": [
+        {
+          "title": "おかえりなさい",
+          "raw": "~01:32:33 おかえりなさい"
+        },
+        {
+          "title": "おかえりなさい",
+          "raw": "~02:26:02 おかえりなさい"
+        },
+        {
+          "title": "おかえりなさい",
+          "raw": "~03:03:01 おかえりなさい"
+        },
+        {
+          "title": "おかえりなさい",
+          "raw": "~04:40:40 おかえりなさい"
+        },
+        {
+          "title": "おかえりなさい",
+          "raw": "~05:40:35 おかえりなさい"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "EYE",
+          "artist": "Kanaria",
+          "raw": "00:16:53 01. EYE / Kanaria"
+        },
+        {
+          "title": "EYE",
+          "artist": "Kanaria",
+          "raw": "00:19:08 01. EYE / Kanaria"
+        },
+        {
+          "title": "初恋日記",
+          "artist": "香椎モイミ",
+          "raw": "00:21:44 02. 初恋日記 / 香椎モイミ"
         }
       ]
     },
