@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T00:33:24.382Z",
+  "generatedAt": "2026-11-04T00:39:24.129Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 23987,
-  "inputOccurrences": 270790,
+  "inputVideos": 23988,
+  "inputOccurrences": 270791,
   "visibleVideos": 20526,
   "visibleOccurrences": 267166,
-  "quarantinedOccurrences": 2950,
-  "quarantinedVideos": 2144,
+  "quarantinedOccurrences": 2951,
+  "quarantinedVideos": 2145,
   "deduplicatedOccurrences": 659,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2901,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1472,
+    "prayer_broadcast_timeline": 1473,
     "reviewed_bad_description_source": 205,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 10,
@@ -316,9 +316,9 @@
     {
       "sourceHash": "c84e7be650e14d761d2ce0789ee96bd3ebaef6bae0d19467c7b518ba44c8353a",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 48,
-      "channelCount": 47,
-      "distinctVideoTitles": 47,
+      "videoCount": 49,
+      "channelCount": 48,
+      "distinctVideoTitles": 48,
       "examples": [
         {
           "videoId": "_uQ6wYaIva0",
@@ -1845,11 +1845,11 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 46,
+      "quarantinedOccurrences": 47,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "reused_description_across_unrelated_channels": 30,
-        "prayer_broadcast_timeline": 16
+        "prayer_broadcast_timeline": 17
       },
       "artistCatalogArchivedOccurrences": 1
     },
@@ -11708,6 +11708,10 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "Kb7t94z16K8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Vxzw1qr93oM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
