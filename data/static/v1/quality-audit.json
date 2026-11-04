@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-04T03:11:06.217Z",
+  "generatedAt": "2026-11-04T03:16:39.033Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24015,
-  "inputOccurrences": 270973,
-  "visibleVideos": 20544,
-  "visibleOccurrences": 267332,
-  "quarantinedOccurrences": 2960,
-  "quarantinedVideos": 2154,
+  "inputVideos": 24017,
+  "inputOccurrences": 270989,
+  "visibleVideos": 20545,
+  "visibleOccurrences": 267347,
+  "quarantinedOccurrences": 2961,
+  "quarantinedVideos": 2155,
   "deduplicatedOccurrences": 666,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 44,
     "unrelated_livestream_listing": 92,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 369,
+    "reused_description_across_unrelated_channels": 370,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -748,9 +748,9 @@
     {
       "sourceHash": "f8b43a6aa3192b129931599e0bad38e56e0b1f478810a193b21f04d256ca80ef",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 9,
-      "channelCount": 9,
-      "distinctVideoTitles": 9,
+      "videoCount": 10,
+      "channelCount": 10,
+      "distinctVideoTitles": 10,
       "examples": [
         {
           "videoId": "hAOjf-Q6Z4k",
@@ -765,9 +765,9 @@
           "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
         },
         {
-          "videoId": "dh5Lmq0pe5c",
-          "channelName": "なゆ姫先生【nayuhime】",
-          "videoTitle": "歌枠リレーアンカー❣走るぞぉおおお✨",
+          "videoId": "lNL7BZ1FBbs",
+          "channelName": "小桜ザコ",
+          "videoTitle": "【初見さんコメ大歓迎】参拝者様とゆく、弾き語り曲探しの旅【雑談#15】",
           "raw": "【11月4日12:00〜 生配信】中間選挙最新分析　AI相場は崩れるか？／ジョセフ・クラフト／イェスパー・コール【PIVOT LIVE】"
         }
       ]
@@ -1872,10 +1872,10 @@
       }
     },
     "2026-11-03": {
-      "quarantinedOccurrences": 56,
+      "quarantinedOccurrences": 57,
       "deduplicatedOccurrences": 14,
       "byReason": {
-        "reused_description_across_unrelated_channels": 39,
+        "reused_description_across_unrelated_channels": 40,
         "prayer_broadcast_timeline": 17
       },
       "artistCatalogArchivedOccurrences": 1
@@ -11678,6 +11678,10 @@
       "deduplicatedOccurrences": 0
     },
     "HhtsYFpCggs": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "lNL7BZ1FBbs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
