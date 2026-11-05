@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-05T03:35:06.159Z",
-  "scannedVideoCount": 20749,
-  "scannedOccurrenceCount": 269750,
+  "generatedAt": "2026-11-05T03:39:52.954Z",
+  "scannedVideoCount": 20753,
+  "scannedOccurrenceCount": 269791,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -872,18 +872,18 @@
     },
     {
       "date": "2026-11-04",
-      "occurrences": 1631,
+      "occurrences": 1667,
       "quarantinedOccurrences": 83
     },
     {
       "date": "2026-11-05",
-      "occurrences": 0,
+      "occurrences": 5,
       "quarantinedOccurrences": 1
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 604,
-    "possible_activity_chapter": 139,
+    "possible_activity_chapter": 141,
     "possible_date_as_artist": 94,
     "possible_release_metadata_as_artist": 162,
     "possible_spoken_section": 18,
@@ -3524,6 +3524,40 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "はじめの挨拶",
+      "artist": "",
+      "raw": "⁅00:00:00⁆🦊はじめの挨拶",
+      "sourceHash": "94e5d226bb8b402c6a808d3b8c9480dc4014adda11948b9adc37aa156a53d4d0",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "_JNITsbZekk",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-11-04T12:28:26.067Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "終わりの挨拶 エンドロール",
+      "artist": "",
+      "raw": "⁅02:02:13⁆🦊終わりの挨拶 エンドロール",
+      "sourceHash": "94e5d226bb8b402c6a808d3b8c9480dc4014adda11948b9adc37aa156a53d4d0",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "_JNITsbZekk",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-11-04T12:28:26.067Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "風は予告なく吹く",
       "artist": "",
       "raw": "♪ 01:06:47 風は予告なく吹く / マクロスΔ ED",
@@ -5166,40 +5200,6 @@
           "videoId": "YQow-MOLjnQ",
           "channelName": "綾瀬 桜",
           "publishedAt": "2026-08-26T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "only my railgun",
-      "artist": "fripSide／アニメ『とある科学の超電磁砲』OP／2009/11/04",
-      "raw": "0:02:52　only my railgun／fripSide／アニメ『とある科学の超電磁砲』OP／2009/11/04",
-      "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "AaaASRcaqdU",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-02T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "sister's noise",
-      "artist": "fripSide／アニメ『とある科学の超電磁砲S』／2013/05/08",
-      "raw": "0:05:43　sister's noise／fripSide／アニメ『とある科学の超電磁砲S』／2013/05/08",
-      "sourceHash": "33d3422770337a54777817ae026b83b462b472f23310334db6824d9e0e3f332d",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "AaaASRcaqdU",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-09-02T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
