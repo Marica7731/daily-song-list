@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-05T10:39:52.266Z",
+  "generatedAt": "2026-11-05T10:44:49.629Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24452,
-  "inputOccurrences": 274140,
-  "visibleVideos": 20810,
-  "visibleOccurrences": 270291,
-  "quarantinedOccurrences": 3145,
-  "quarantinedVideos": 2325,
+  "inputVideos": 24454,
+  "inputOccurrences": 274142,
+  "visibleVideos": 20811,
+  "visibleOccurrences": 270292,
+  "quarantinedOccurrences": 3146,
+  "quarantinedVideos": 2326,
   "deduplicatedOccurrences": 688,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 47,
     "unrelated_livestream_listing": 102,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 410,
+    "reused_description_across_unrelated_channels": 411,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 106,
-      "channelCount": 102,
-      "distinctVideoTitles": 104,
+      "videoCount": 107,
+      "channelCount": 103,
+      "distinctVideoTitles": 105,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -1911,11 +1911,11 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-04": {
-      "quarantinedOccurrences": 116,
+      "quarantinedOccurrences": 117,
       "deduplicatedOccurrences": 3,
       "byReason": {
         "reviewed_bad_description_source": 92,
-        "reused_description_across_unrelated_channels": 14,
+        "reused_description_across_unrelated_channels": 15,
         "prayer_broadcast_timeline": 5,
         "date_split_as_song_and_artist": 1,
         "confirmed_chat_section": 3,
@@ -12302,6 +12302,10 @@
       "deduplicatedOccurrences": 0
     },
     "rcNU04L_YYU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "KOshESPtxy0": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
