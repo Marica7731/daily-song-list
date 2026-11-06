@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-06T20:37:55.800Z",
+  "generatedAt": "2026-11-06T20:43:00.921Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24919,
-  "inputOccurrences": 278689,
-  "visibleVideos": 21176,
-  "visibleOccurrences": 274703,
+  "inputVideos": 24924,
+  "inputOccurrences": 278765,
+  "visibleVideos": 21181,
+  "visibleOccurrences": 274778,
   "quarantinedOccurrences": 3251,
   "quarantinedVideos": 2426,
   "deduplicatedOccurrences": 719,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
-  "artistCatalogArchivedOccurrences": 16,
+  "artistCatalogArchivedOccurrences": 17,
   "normalizedArtistOccurrences": 457,
   "normalizedReleaseMetadataOccurrences": 1351,
   "repairedDateCreditOccurrences": 0,
@@ -33,7 +33,7 @@
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
-    "outside_official_release_catalog": 16,
+    "outside_official_release_catalog": 17,
     "dated_future_stream_announcement": 7,
     "confirmed_stream_technical_note": 1,
     "bible_verse_broadcast": 4,
@@ -1968,7 +1968,8 @@
         "reviewed_bad_description_source": 9,
         "confirmed_chat_section": 2,
         "reused_description_across_unrelated_channels": 2
-      }
+      },
+      "artistCatalogArchivedOccurrences": 1
     },
     "2024-10-20": {
       "quarantinedOccurrences": 0,
@@ -13081,6 +13082,11 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "0dzjHoV3S9k": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 0,
+      "artistCatalogArchivedOccurrences": 1
+    },
     "upFYCby5EVg": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -15438,15 +15444,15 @@
   "artistCatalogGate": {
     "artistCount": 1,
     "normalizedOccurrences": 63,
-    "archivedOccurrences": 16,
+    "archivedOccurrences": 17,
     "artists": [
       {
         "artistId": "kasamura-tota",
         "officialName": "傘村トータ",
         "maxUniqueTitles": 65,
         "publishedUniqueTitleCount": 28,
-        "archivedOccurrences": 16,
-        "archivedUniqueTitleCount": 11
+        "archivedOccurrences": 17,
+        "archivedUniqueTitleCount": 12
       }
     ]
   }
