@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-06T03:00:51.658Z",
+  "generatedAt": "2026-11-06T03:05:39.755Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24698,
-  "inputOccurrences": 276143,
-  "visibleVideos": 20985,
-  "visibleOccurrences": 272214,
-  "quarantinedOccurrences": 3216,
-  "quarantinedVideos": 2396,
+  "inputVideos": 24701,
+  "inputOccurrences": 276146,
+  "visibleVideos": 20981,
+  "visibleOccurrences": 272210,
+  "quarantinedOccurrences": 3223,
+  "quarantinedVideos": 2403,
   "deduplicatedOccurrences": 697,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 47,
     "unrelated_livestream_listing": 102,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 417,
+    "reused_description_across_unrelated_channels": 424,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -850,6 +850,33 @@
           "channelName": "如月ふみ(kisaragi fumi)",
           "videoTitle": "【#歌枠】少しだけうたうのだ。今日も一日お疲れ様でした！【#如月ふみ #歌枠】",
           "raw": "Midterm Elections | News 5 NOW @ 5:45pm 110326"
+        }
+      ]
+    },
+    {
+      "sourceHash": "988f113c8e6aaa41c5b3369b413b5448c94e9fe8d514c8f14aacd13ab463dc60",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
+      "examples": [
+        {
+          "videoId": "Cg8atG-NMJA",
+          "channelName": "うら飯 紺汰 - Conta Urameshi -",
+          "videoTitle": "【 #歌枠 #karaoke 】０時までに！初見様１０人と出会いたい歌枠🩵初見さん大大大歓迎🎤✨【うら飯紺汰 #vtuber #vsinger 】",
+          "raw": "【風来のシレン6 WR】 超・神髄 RTA アスカ 1:26:29【紲星あかり/ずんだもん解説】"
+        },
+        {
+          "videoId": "Jcri-HlRsSM",
+          "channelName": "海月シェル Shell Ch.",
+          "videoTitle": "【#歌枠 】アニメ主題歌歌う！初見さんもお気軽に！【#海月シェル /vtuber 】",
+          "raw": "【風来のシレン6 WR】 超・神髄 RTA アスカ 1:26:29【紲星あかり/ずんだもん解説】"
+        },
+        {
+          "videoId": "t5heKQs_be8",
+          "channelName": "Nanaru Mashiro Ch. 真城ななる 🏰🕊",
+          "videoTitle": "〖#歌枠〗燃え上がれ！ロボットアニメオンリー🎵〖 #真城ななる/ #Vtuber 〗",
+          "raw": "【風来のシレン6 WR】 超・神髄 RTA アスカ 1:26:29【紲星あかり/ずんだもん解説】"
         }
       ]
     }
@@ -1924,11 +1951,19 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-05": {
-      "quarantinedOccurrences": 53,
+      "quarantinedOccurrences": 59,
       "deduplicatedOccurrences": 7,
       "byReason": {
+        "reused_description_across_unrelated_channels": 6,
         "reviewed_bad_description_source": 51,
         "prayer_broadcast_timeline": 2
+      }
+    },
+    "2026-11-06": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1
       }
     },
     "2024-10-20": {
@@ -12742,6 +12777,18 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "Cg8atG-NMJA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Jcri-HlRsSM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "t5heKQs_be8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "tYxWAqjWx4w": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 7
@@ -12770,11 +12817,19 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "HpgAA1dqSr0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "G4G4LLziLRo": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "NxuyvBruhIA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "DoieF0Qs8tk": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -12855,6 +12910,10 @@
       "deduplicatedOccurrences": 0
     },
     "IzbPbWCtUrc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "KlurjfQHU9I": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -12955,6 +13014,10 @@
       "deduplicatedOccurrences": 0
     },
     "F-HChpBy8sE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "HO9yInQFkyA": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
