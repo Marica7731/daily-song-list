@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-06T20:32:39.383Z",
+  "generatedAt": "2026-11-06T20:37:55.800Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 24915,
-  "inputOccurrences": 278649,
-  "visibleVideos": 21173,
-  "visibleOccurrences": 274664,
-  "quarantinedOccurrences": 3250,
-  "quarantinedVideos": 2425,
+  "inputVideos": 24919,
+  "inputOccurrences": 278689,
+  "visibleVideos": 21176,
+  "visibleOccurrences": 274703,
+  "quarantinedOccurrences": 3251,
+  "quarantinedVideos": 2426,
   "deduplicatedOccurrences": 719,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 102,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 430,
+    "reused_description_across_unrelated_channels": 431,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 117,
-      "channelCount": 112,
-      "distinctVideoTitles": 115,
+      "videoCount": 118,
+      "channelCount": 113,
+      "distinctVideoTitles": 116,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -1951,12 +1951,12 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-05": {
-      "quarantinedOccurrences": 74,
+      "quarantinedOccurrences": 75,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "confirmed_talk_section": 3,
         "reviewed_bad_description_source": 55,
-        "reused_description_across_unrelated_channels": 11,
+        "reused_description_across_unrelated_channels": 12,
         "prayer_broadcast_timeline": 4,
         "dated_stream_announcement": 1
       }
@@ -12790,6 +12790,10 @@
       "deduplicatedOccurrences": 0
     },
     "1BE6pqp02Zc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "7FEz46_Sizg": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
