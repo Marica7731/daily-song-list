@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-07T21:50:28.815Z",
-  "scannedVideoCount": 21422,
-  "scannedOccurrenceCount": 277534,
+  "generatedAt": "2026-11-07T21:55:30.745Z",
+  "scannedVideoCount": 21425,
+  "scannedOccurrenceCount": 277568,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -887,14 +887,14 @@
     },
     {
       "date": "2026-11-07",
-      "occurrences": 1366,
+      "occurrences": 1400,
       "quarantinedOccurrences": 7
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 614,
     "possible_activity_chapter": 147,
-    "possible_date_as_artist": 101,
+    "possible_date_as_artist": 102,
     "possible_release_metadata_as_artist": 164,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 3
@@ -5182,6 +5182,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "~11",
+      "artist": "土",
+      "raw": "19:00～11/28(土)",
+      "sourceHash": "363406bb3a0a02a9b87bd5ec75a9c87afbbd767380fdb6bb2f72777d49b45acb",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "GvscIEC6wbs",
+          "channelName": "Usapi Ch. 桃川うさぴ",
+          "publishedAt": "2026-11-07T13:46:00.790Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5193,23 +5210,6 @@
           "videoId": "oxUZ4SmXtLU",
           "channelName": "ウエダアオイ【Ueda Aoi】",
           "publishedAt": "2026-09-06T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_promotion_as_song",
-      "title": "sayang bgt gara2 youtube jd gak mulus",
-      "artist": "",
-      "raw": "3:41 sayang bgt gara2 youtube jd gak mulus :_cry::_cry:",
-      "sourceHash": "5a069250fe598216040afcf8f37913414aa578b5ddff5eb2ae6c1f8dfe6d7e96",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "0-21K73BYWc",
-          "channelName": "Kobo Kanaeru Ch. hololive",
-          "publishedAt": "2026-10-19T13:01:35.160Z"
         }
       ],
       "videoCount": 1,
