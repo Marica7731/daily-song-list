@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-07T20:31:45.416Z",
-  "scannedVideoCount": 21408,
-  "scannedOccurrenceCount": 277329,
+  "generatedAt": "2026-11-07T20:36:31.936Z",
+  "scannedVideoCount": 21410,
+  "scannedOccurrenceCount": 277332,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -887,14 +887,14 @@
     },
     {
       "date": "2026-11-07",
-      "occurrences": 1161,
+      "occurrences": 1164,
       "quarantinedOccurrences": 7
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 613,
     "possible_activity_chapter": 147,
-    "possible_date_as_artist": 100,
+    "possible_date_as_artist": 101,
     "possible_release_metadata_as_artist": 164,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 3
@@ -5149,6 +5149,23 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "~12",
+      "artist": "木",
+      "raw": "21:00～12/31(木)",
+      "sourceHash": "41f28a8042295f46f705ac373c948fe6a44a11112fd61d6055a43acff7963702",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "SZxekJ5Fm68",
+          "channelName": "姫咲ゆめの - Himesaki Yumeno - / vortex Artist",
+          "publishedAt": "2026-11-07T18:26:04.625Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~ 11",
       "artist": "火",
       "raw": "19:00 ~ 11/17(火)",
@@ -5193,23 +5210,6 @@
           "videoId": "0-21K73BYWc",
           "channelName": "Kobo Kanaeru Ch. hololive",
           "publishedAt": "2026-10-19T13:01:35.160Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_promotion_as_song",
-      "title": "〜 LIVE配信】Netflix vs YouTube 日本の勝者はどちらか?/データで見る日本市場の競争/Netflixの課題/最強YouTubeの次の一手",
-      "artist": "今後の広告モデルは？",
-      "raw": "【28日12:00〜 LIVE配信】Netflix vs YouTube 日本の勝者はどちらか？／データで見る日本市場の競争／Netflixの課題／最強YouTubeの次の一手／今後の広告モデルは？",
-      "sourceHash": "ddde71c14c2cc30bd41910ec1e4f4cc19e8ded14280b25f78e3ac8fbb182dc84",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "-S_pAMNX-_4",
-          "channelName": "KAITOちゃんの音楽道",
-          "publishedAt": "2026-10-27T16:19:02.852Z"
         }
       ],
       "videoCount": 1,
