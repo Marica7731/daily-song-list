@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-07T08:10:52.213Z",
+  "generatedAt": "2026-11-07T08:16:21.568Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25037,
-  "inputOccurrences": 279958,
+  "inputVideos": 25038,
+  "inputOccurrences": 279959,
   "visibleVideos": 21280,
   "visibleOccurrences": 275955,
-  "quarantinedOccurrences": 3265,
-  "quarantinedVideos": 2440,
+  "quarantinedOccurrences": 3266,
+  "quarantinedVideos": 2441,
   "deduplicatedOccurrences": 721,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2903,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1494,
+    "prayer_broadcast_timeline": 1495,
     "reviewed_bad_description_source": 394,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 11,
@@ -289,9 +289,9 @@
     {
       "sourceHash": "4b1e24dab826aa4930054c4fa1526dfcd185646b7d503b7885541cd76504e10c",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 33,
-      "channelCount": 33,
-      "distinctVideoTitles": 33,
+      "videoCount": 34,
+      "channelCount": 34,
+      "distinctVideoTitles": 34,
       "examples": [
         {
           "videoId": "PYoaSs4Y8z4",
@@ -1989,11 +1989,11 @@
       }
     },
     "2026-11-06": {
-      "quarantinedOccurrences": 25,
+      "quarantinedOccurrences": 26,
       "deduplicatedOccurrences": 20,
       "byReason": {
         "reused_description_across_unrelated_channels": 12,
-        "prayer_broadcast_timeline": 1,
+        "prayer_broadcast_timeline": 2,
         "unrelated_livestream_listing": 1,
         "reviewed_bad_description_source": 9,
         "confirmed_chat_section": 2
@@ -13127,6 +13127,10 @@
       "deduplicatedOccurrences": 1
     },
     "-l9Kht24u0k": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "YPg_xseRw-A": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
