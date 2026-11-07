@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-07T18:39:07.432Z",
-  "scannedVideoCount": 21380,
-  "scannedOccurrenceCount": 277056,
+  "generatedAt": "2026-11-07T18:43:52.384Z",
+  "scannedVideoCount": 21382,
+  "scannedOccurrenceCount": 277061,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -887,14 +887,14 @@
     },
     {
       "date": "2026-11-07",
-      "occurrences": 951,
+      "occurrences": 956,
       "quarantinedOccurrences": 7
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 613,
     "possible_activity_chapter": 147,
-    "possible_date_as_artist": 99,
+    "possible_date_as_artist": 100,
     "possible_release_metadata_as_artist": 163,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 3
@@ -5148,6 +5148,23 @@
       "channelCount": 1
     },
     {
+      "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "19:00 ~ 11/17(火)",
+      "sourceHash": "ce72b86f76d39191aa34c10bdd2bd7c452915b0850b10bdb67279bb432a40f2e",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "i0faS5lpReQ",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-07T17:35:40.616Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
       "reason": "possible_promotion_as_song",
       "title": "ウエダアオイのリビアナイト、Youtubeにて放送中!",
       "artist": "",
@@ -5193,23 +5210,6 @@
           "videoId": "-S_pAMNX-_4",
           "channelName": "KAITOちゃんの音楽道",
           "publishedAt": "2026-10-27T16:19:02.852Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_release_metadata_as_artist",
-      "title": "夏祭り",
-      "artist": "White Berry／ドラマ『ふしぎな話』主題歌／2000/08/09",
-      "raw": "0:02:28 夏祭り／White Berry／ドラマ『ふしぎな話』主題歌／2000/08/09",
-      "sourceHash": "57533cde1cae897d86e323065d0fb463db162b4c780346d46994eb6bcbd45e57",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "pfLCeB8PNYQ",
-          "channelName": "綾瀬 桜",
-          "publishedAt": "2026-08-23T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
