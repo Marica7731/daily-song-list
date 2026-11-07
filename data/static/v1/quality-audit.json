@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-07T05:57:51.287Z",
+  "generatedAt": "2026-11-07T06:02:02.111Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25018,
-  "inputOccurrences": 279774,
-  "visibleVideos": 21269,
-  "visibleOccurrences": 275779,
-  "quarantinedOccurrences": 3257,
-  "quarantinedVideos": 2432,
+  "inputVideos": 25019,
+  "inputOccurrences": 279775,
+  "visibleVideos": 21265,
+  "visibleOccurrences": 275775,
+  "quarantinedOccurrences": 3262,
+  "quarantinedVideos": 2437,
   "deduplicatedOccurrences": 721,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 63,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 435,
+    "reused_description_across_unrelated_channels": 440,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -526,6 +526,33 @@
           "channelName": "雨夜",
           "videoTitle": "【#歌枠 】ハロウィンっぽい曲歌ってくぞ！！ #新人vtuber #個人vtuber",
           "raw": "【今日やって欲しいこと】アプリとOSを最新に/【買うな】ウイルスバスター等のセキュリティソフトは要らねぇ/リースバックの押し買い/偽警察官詐欺に気をつけなはれや/【10/31 8:30まで】"
+        }
+      ]
+    },
+    {
+      "sourceHash": "de6f67aa265513f522e5eff77489046452d7578652e34b70886b3bfabf935c26",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "TWo_A0gsrTQ",
+          "channelName": "魂ノ莉おんぷ",
+          "videoTitle": "🍔 #夜活 #雑談 ୨୧ お名前呼び挨拶雑談歌枠❕1oo人に挨拶させて🌟 ୨୧ #魂ノ莉おんぷ ♡ ぶいそん.Live #新人VTuber ୨୧",
+          "raw": "厚生年金保険料、最大月約9,100円増/学長が最近買ってよかった睡眠グッズ/Muse良さそう。無料プランで試すのは有り/コスパ良い自己投資の一つは本【11/6 8:30まで】"
+        },
+        {
+          "videoId": "jZFQzHQyzps",
+          "channelName": "七無野-nanashino-",
+          "videoTitle": "11/6 七無野-nanashino- 弾き語り配信",
+          "raw": "厚生年金保険料、最大月約9,100円増/学長が最近買ってよかった睡眠グッズ/Muse良さそう。無料プランで試すのは有り/コスパ良い自己投資の一つは本【11/6 8:30まで】"
+        },
+        {
+          "videoId": "ZQ8WmvB_JaE",
+          "channelName": "ねこねこきゃっとまん",
+          "videoTitle": "【#歌枠】リクエストOK！知らない曲でも合わせます【ギター弾き語り】",
+          "raw": "厚生年金保険料、最大月約9,100円増/学長が最近買ってよかった睡眠グッズ/Muse良さそう。無料プランで試すのは有り/コスパ良い自己投資の一つは本【11/6 8:30まで】"
         }
       ]
     },
@@ -1876,10 +1903,10 @@
       }
     },
     "2026-10-29": {
-      "quarantinedOccurrences": 18,
+      "quarantinedOccurrences": 19,
       "deduplicatedOccurrences": 35,
       "byReason": {
-        "reused_description_across_unrelated_channels": 13,
+        "reused_description_across_unrelated_channels": 14,
         "prayer_broadcast_timeline": 2,
         "reviewed_bad_description_source": 3
       }
@@ -1962,10 +1989,10 @@
       }
     },
     "2026-11-06": {
-      "quarantinedOccurrences": 18,
+      "quarantinedOccurrences": 22,
       "deduplicatedOccurrences": 20,
       "byReason": {
-        "reused_description_across_unrelated_channels": 5,
+        "reused_description_across_unrelated_channels": 9,
         "prayer_broadcast_timeline": 1,
         "unrelated_livestream_listing": 1,
         "reviewed_bad_description_source": 9,
@@ -10749,6 +10776,10 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 1
     },
+    "TWo_A0gsrTQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "Q6BsMSeMTlE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13112,11 +13143,27 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "jZFQzHQyzps": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "ZQ8WmvB_JaE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "mNQs26mh4tU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "T3B484g7lHU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "M4S4n_yj26M": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "WRDovx547Hs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
