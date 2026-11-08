@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-08T14:07:47.885Z",
+  "generatedAt": "2026-11-08T14:13:51.292Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25479,
-  "inputOccurrences": 284094,
-  "visibleVideos": 21610,
-  "visibleOccurrences": 279977,
-  "quarantinedOccurrences": 3378,
-  "quarantinedVideos": 2552,
+  "inputVideos": 25489,
+  "inputOccurrences": 284117,
+  "visibleVideos": 21613,
+  "visibleOccurrences": 279993,
+  "quarantinedOccurrences": 3385,
+  "quarantinedVideos": 2559,
   "deduplicatedOccurrences": 722,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 549,
+    "reused_description_across_unrelated_channels": 556,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 138,
-      "channelCount": 133,
-      "distinctVideoTitles": 136,
+      "videoCount": 139,
+      "channelCount": 134,
+      "distinctVideoTitles": 137,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -985,6 +985,33 @@
           "channelName": "kawasakia",
           "videoTitle": "激熱ハイトーン歌枠",
           "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
+        }
+      ]
+    },
+    {
+      "sourceHash": "f283b5330774b1b21d305332c1c519ffe6b954a35837f47db7aa513b79aa2561",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 6,
+      "channelCount": 6,
+      "distinctVideoTitles": 6,
+      "examples": [
+        {
+          "videoId": "MgmKYKOmwI8",
+          "channelName": "夜星起床剪片了ouo",
+          "videoTitle": "KSP 歌回 261101",
+          "raw": "Cornerstone Chapel Leesburg, Va  |  8:00 AM Service"
+        },
+        {
+          "videoId": "_A3pKh7qUQA",
+          "channelName": "ゆきか-yukika-",
+          "videoTitle": "【アルバムで弾き語る】What's flumpool!?／flumpool",
+          "raw": "Cornerstone Chapel Leesburg, Va  |  8:00 AM Service"
+        },
+        {
+          "videoId": "HXI9yKlImoc",
+          "channelName": "Marc Lowe 獅石 間阿空",
+          "videoTitle": "Marc Lowe - \"Stay-at-home\" live acoustic rehearsal「引き篭もり弾き語り」 on November 7, 2026",
+          "raw": "Cornerstone Chapel Leesburg, Va  |  8:00 AM Service"
         }
       ]
     }
@@ -2082,20 +2109,20 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-07": {
-      "quarantinedOccurrences": 89,
+      "quarantinedOccurrences": 90,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 84,
+        "reused_description_across_unrelated_channels": 85,
         "prayer_broadcast_timeline": 2,
         "date_split_as_song_and_artist": 1,
         "reviewed_bad_description_source": 2
       }
     },
     "2026-11-08": {
-      "quarantinedOccurrences": 5,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 5
+        "reused_description_across_unrelated_channels": 11
       }
     },
     "2024-10-20": {
@@ -13514,6 +13541,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "MgmKYKOmwI8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "64YicZCt5uI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13763,6 +13794,30 @@
       "deduplicatedOccurrences": 0
     },
     "TAR-cQF7RVI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "_A3pKh7qUQA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "HXI9yKlImoc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "k_wCHLBcM2w": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "f43-e-f66aQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "6lhE8rV8PeU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "uimRQIgzXqQ": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
