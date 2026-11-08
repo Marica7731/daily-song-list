@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-08T13:52:46.178Z",
+  "generatedAt": "2026-11-08T13:57:52.514Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25469,
-  "inputOccurrences": 283943,
-  "visibleVideos": 21606,
-  "visibleOccurrences": 279832,
-  "quarantinedOccurrences": 3372,
-  "quarantinedVideos": 2546,
+  "inputVideos": 25471,
+  "inputOccurrences": 283945,
+  "visibleVideos": 21602,
+  "visibleOccurrences": 279828,
+  "quarantinedOccurrences": 3378,
+  "quarantinedVideos": 2552,
   "deduplicatedOccurrences": 722,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 543,
+    "reused_description_across_unrelated_channels": 549,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 137,
-      "channelCount": 132,
-      "distinctVideoTitles": 135,
+      "videoCount": 138,
+      "channelCount": 133,
+      "distinctVideoTitles": 136,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -931,6 +931,33 @@
           "channelName": "イノイタル-ITARU-",
           "videoTitle": "【第309回】弾き語り&トーク YouTubeLIVE【イタリゴト】",
           "raw": "【ニコ生】11/4 18:00【特番】2026 アメリカ中間選挙 徹底解説【ゲスト:Kダブシャイン氏】＊前半のみ"
+        }
+      ]
+    },
+    {
+      "sourceHash": "fe8905fcafda7d76f3d6d1ffa8d574d58a71320a1a096f93083ce95c5de40a48",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "tbrcVDdVdHM",
+          "channelName": "フリースタイル🆓Freestyle",
+          "videoTitle": "雑談や歌枠🆓フリースタイルCH",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
+        },
+        {
+          "videoId": "AlgHFlBq1c8",
+          "channelName": "花街まる / Hanamachi Maru",
+          "videoTitle": "〖 歌枠 / 縦型配信 〗その…最近どうなんだ。音ズレのほうは。〖花街まる / 新人vtuber 〗",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
+        },
+        {
+          "videoId": "i_S3ghlAqHU",
+          "channelName": "幽羽 戒人 / Yuwa Kaito 【VTuber】",
+          "videoTitle": "【歌枠】残高616円になったので歌います【#vtuber /#幽羽戒人 】",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
         }
       ]
     },
@@ -1976,10 +2003,10 @@
       }
     },
     "2026-10-31": {
-      "quarantinedOccurrences": 49,
+      "quarantinedOccurrences": 50,
       "deduplicatedOccurrences": 9,
       "byReason": {
-        "reused_description_across_unrelated_channels": 40,
+        "reused_description_across_unrelated_channels": 41,
         "prayer_broadcast_timeline": 8,
         "date_split_as_song_and_artist": 1
       }
@@ -2032,22 +2059,22 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-05": {
-      "quarantinedOccurrences": 79,
+      "quarantinedOccurrences": 80,
       "deduplicatedOccurrences": 7,
       "byReason": {
         "confirmed_talk_section": 3,
         "reviewed_bad_description_source": 55,
-        "reused_description_across_unrelated_channels": 16,
+        "reused_description_across_unrelated_channels": 17,
         "prayer_broadcast_timeline": 4,
         "dated_stream_announcement": 1
       }
     },
     "2026-11-06": {
-      "quarantinedOccurrences": 29,
+      "quarantinedOccurrences": 31,
       "deduplicatedOccurrences": 20,
       "byReason": {
         "reviewed_bad_description_source": 10,
-        "reused_description_across_unrelated_channels": 14,
+        "reused_description_across_unrelated_channels": 16,
         "prayer_broadcast_timeline": 2,
         "unrelated_livestream_listing": 1,
         "confirmed_chat_section": 2
@@ -2055,20 +2082,20 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-07": {
-      "quarantinedOccurrences": 88,
+      "quarantinedOccurrences": 89,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 83,
+        "reused_description_across_unrelated_channels": 84,
         "prayer_broadcast_timeline": 2,
         "date_split_as_song_and_artist": 1,
         "reviewed_bad_description_source": 2
       }
     },
     "2026-11-08": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 5,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 4
+        "reused_description_across_unrelated_channels": 5
       }
     },
     "2024-10-20": {
@@ -11308,6 +11335,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "tyE-Qrbv5_E": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "Zh5ln7yTGVQ": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13222,6 +13253,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "tbrcVDdVdHM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "1RX3LJ0Wkq8": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13263,6 +13298,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "AlgHFlBq1c8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "jZFQzHQyzps": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13276,6 +13315,10 @@
       "deduplicatedOccurrences": 0
     },
     "ZQ8WmvB_JaE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "i_S3ghlAqHU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -13659,6 +13702,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "43kRI9Keea8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "JQlzpSs11j4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13720,6 +13767,10 @@
       "deduplicatedOccurrences": 0
     },
     "qaLWuONHoFc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "mjRyv43tTOg": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
