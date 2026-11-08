@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-08T19:51:36.308Z",
+  "generatedAt": "2026-11-08T19:56:39.381Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -361,14 +361,14 @@
     "selectedSnapshots": 1,
     "candidateVideos": 606
   },
-  "pendingVideoCount": 1708,
-  "noSongRetryPoolCount": 21046,
-  "processedVideoCount": 37261,
-  "videoCount": 21689,
-  "songOccurrenceCount": 280887,
+  "pendingVideoCount": 1707,
+  "noSongRetryPoolCount": 21043,
+  "processedVideoCount": 37265,
+  "videoCount": 21691,
+  "songOccurrenceCount": 280917,
   "quality": {
-    "quarantinedOccurrences": 3399,
-    "quarantinedVideos": 2572,
+    "quarantinedOccurrences": 3401,
+    "quarantinedVideos": 2574,
     "normalizedArtistOccurrences": 459,
     "normalizedReleaseMetadataOccurrences": 1364,
     "repairedDateCreditOccurrences": 0,
@@ -406,7 +406,7 @@
       "confirmed_chat_section": 49,
       "unrelated_livestream_listing": 103,
       "unrelated_talk_show_listing": 76,
-      "reused_description_across_unrelated_channels": 568,
+      "reused_description_across_unrelated_channels": 570,
       "confirmed_chat_segment_label": 1,
       "confirmed_stream_start_marker": 37,
       "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -459,7 +459,7 @@
       "stats": {
         "videoCount": 373,
         "songOccurrenceCount": 4521,
-        "pendingVideoCount": 431,
+        "pendingVideoCount": 449,
         "quarantinedOccurrences": 125,
         "deduplicatedOccurrences": 3,
         "artistCatalogArchivedOccurrences": 1
@@ -490,7 +490,7 @@
       "stats": {
         "videoCount": 1217,
         "songOccurrenceCount": 15013,
-        "pendingVideoCount": 1125,
+        "pendingVideoCount": 1143,
         "quarantinedOccurrences": 478,
         "deduplicatedOccurrences": 65,
         "artistCatalogArchivedOccurrences": 3
@@ -519,29 +519,29 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6549,
-        "songOccurrenceCount": 78430,
-        "pendingVideoCount": 1708,
-        "quarantinedOccurrences": 1186,
+        "videoCount": 6551,
+        "songOccurrenceCount": 78460,
+        "pendingVideoCount": 1707,
+        "quarantinedOccurrences": 1188,
         "deduplicatedOccurrences": 269,
         "artistCatalogArchivedOccurrences": 8
       },
       "songs": {
-        "totalCount": 28339,
+        "totalCount": 28345,
         "pageCount": 567,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 10468,
+        "totalCount": 10470,
         "pageCount": 210,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2598,
+        "totalCount": 2599,
         "pageCount": 52,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -550,29 +550,29 @@
     },
     "all": {
       "stats": {
-        "videoCount": 21689,
-        "songOccurrenceCount": 280887,
-        "pendingVideoCount": 1708,
-        "quarantinedOccurrences": 3399,
+        "videoCount": 21691,
+        "songOccurrenceCount": 280917,
+        "pendingVideoCount": 1707,
+        "quarantinedOccurrences": 3401,
         "deduplicatedOccurrences": 722,
         "artistCatalogArchivedOccurrences": 17
       },
       "songs": {
-        "totalCount": 67912,
+        "totalCount": 67916,
         "pageCount": 1359,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 24755,
+        "totalCount": 24756,
         "pageCount": 496,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 6102,
+        "totalCount": 6103,
         "pageCount": 123,
         "pageSize": 50,
         "pageNumberWidth": 4,
