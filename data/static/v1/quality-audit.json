@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-08T10:03:26.519Z",
+  "generatedAt": "2026-11-08T10:18:22.096Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25401,
-  "inputOccurrences": 283279,
-  "visibleVideos": 21547,
-  "visibleOccurrences": 279177,
-  "quarantinedOccurrences": 3363,
-  "quarantinedVideos": 2537,
+  "inputVideos": 25407,
+  "inputOccurrences": 283357,
+  "visibleVideos": 21552,
+  "visibleOccurrences": 279254,
+  "quarantinedOccurrences": 3364,
+  "quarantinedVideos": 2538,
   "deduplicatedOccurrences": 722,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 534,
+    "reused_description_across_unrelated_channels": 535,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -262,9 +262,9 @@
     {
       "sourceHash": "350d2df9c37e937e3d5aa1ee342690fd0127fef3678b9c080a65fb6b895f8076",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 5,
+      "videoCount": 6,
       "channelCount": 5,
-      "distinctVideoTitles": 5,
+      "distinctVideoTitles": 6,
       "examples": [
         {
           "videoId": "y-DmzGjwyeE",
@@ -2065,10 +2065,10 @@
       }
     },
     "2026-11-08": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 2
+        "reused_description_across_unrelated_channels": 3
       }
     },
     "2024-10-20": {
@@ -13688,6 +13688,10 @@
       "deduplicatedOccurrences": 0
     },
     "TAR-cQF7RVI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "qaLWuONHoFc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
