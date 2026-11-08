@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-08T00:13:02.355Z",
+  "generatedAt": "2026-11-08T00:18:00.383Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25244,
-  "inputOccurrences": 281875,
-  "visibleVideos": 21441,
-  "visibleOccurrences": 277825,
-  "quarantinedOccurrences": 3312,
-  "quarantinedVideos": 2486,
+  "inputVideos": 25251,
+  "inputOccurrences": 281907,
+  "visibleVideos": 21444,
+  "visibleOccurrences": 277853,
+  "quarantinedOccurrences": 3316,
+  "quarantinedVideos": 2490,
   "deduplicatedOccurrences": 721,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 484,
+    "reused_description_across_unrelated_channels": 488,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -910,10 +910,16 @@
     {
       "sourceHash": "fd1486f20951fbe8a8f94b3891cebf3295945b3868a56932be4f8cfa16157232",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 34,
-      "channelCount": 34,
-      "distinctVideoTitles": 34,
+      "videoCount": 38,
+      "channelCount": 38,
+      "distinctVideoTitles": 38,
       "examples": [
+        {
+          "videoId": "n_ib8BNVg94",
+          "channelName": "柏来-haku.ch-",
+          "videoTitle": "【歌枠 ✿ KARAOKE】ショートショートうたわく/初見さん・ROM大歓迎【柏来/#Vtuber】#shorts",
+          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
+        },
         {
           "videoId": "iDWEc1bdPqY",
           "channelName": "山猫ルルス / Yamaneko Lurus",
@@ -921,15 +927,9 @@
           "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
         },
         {
-          "videoId": "kr-MblUJHVU",
-          "channelName": "夢宮しぃぷ",
-          "videoTitle": "【#作業雑談】歌枠の準備していく！！【#夢宮しぃぷ/#新人vtuber】",
-          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
-        },
-        {
-          "videoId": "6LSxOuZTly0",
-          "channelName": "藍晶シアン",
-          "videoTitle": "【藍晶シアン】まったり歌枠 #シアンの宝石店 #新人vtuber #歌枠",
+          "videoId": "yIpBqppFS0U",
+          "channelName": "レラージュ",
+          "videoTitle": "「設定いじりながら歌枠」（イヤホン推奨）レラージュ",
           "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
         }
       ]
@@ -2028,10 +2028,10 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-07": {
-      "quarantinedOccurrences": 42,
+      "quarantinedOccurrences": 46,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "reused_description_across_unrelated_channels": 38,
+        "reused_description_across_unrelated_channels": 42,
         "date_split_as_song_and_artist": 1,
         "prayer_broadcast_timeline": 1,
         "reviewed_bad_description_source": 2
@@ -13285,7 +13285,15 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 19
     },
+    "n_ib8BNVg94": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "iDWEc1bdPqY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "yIpBqppFS0U": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -13321,6 +13329,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "dH0sF75qyR0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "SEej5bdzlAM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13334,6 +13346,10 @@
       "deduplicatedOccurrences": 0
     },
     "J5YQbl3QjZA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "vxggEdg9Nmw": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
