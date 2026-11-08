@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-08T04:01:59.113Z",
+  "generatedAt": "2026-11-08T04:07:30.101Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25312,
-  "inputOccurrences": 282255,
-  "visibleVideos": 21470,
-  "visibleOccurrences": 278165,
-  "quarantinedOccurrences": 3351,
-  "quarantinedVideos": 2525,
+  "inputVideos": 25317,
+  "inputOccurrences": 282265,
+  "visibleVideos": 21471,
+  "visibleOccurrences": 278171,
+  "quarantinedOccurrences": 3355,
+  "quarantinedVideos": 2529,
   "deduplicatedOccurrences": 722,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 103,
     "unrelated_talk_show_listing": 76,
-    "reused_description_across_unrelated_channels": 523,
+    "reused_description_across_unrelated_channels": 527,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 36,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -937,26 +937,26 @@
     {
       "sourceHash": "fd1486f20951fbe8a8f94b3891cebf3295945b3868a56932be4f8cfa16157232",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 67,
-      "channelCount": 67,
-      "distinctVideoTitles": 67,
+      "videoCount": 71,
+      "channelCount": 71,
+      "distinctVideoTitles": 71,
       "examples": [
+        {
+          "videoId": "aEG9MwEW_kw",
+          "channelName": "ういちチャンネル",
+          "videoTitle": "ギター弾き語り配信",
+          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
+        },
+        {
+          "videoId": "QKLm5yY6SNY",
+          "channelName": "KUBOTIN.チャンネル",
+          "videoTitle": "弾き語り。",
+          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
+        },
         {
           "videoId": "74U77IORN5k",
           "channelName": "日彩(Hiiro)",
           "videoTitle": "深夜にこっそり歌う #歌枠 #歌ってみた #cover #music",
-          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
-        },
-        {
-          "videoId": "Z_n7N6e557A",
-          "channelName": "ネモ・テルミナス",
-          "videoTitle": "【 歌枠 】ヨルシカ限定歌枠 🌤 #初見歓迎 #歌枠 #Vsinger #Karaoke #Shorts",
-          "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
-        },
-        {
-          "videoId": "n_ib8BNVg94",
-          "channelName": "柏来-haku.ch-",
-          "videoTitle": "【歌枠 ✿ KARAOKE】ショートショートうたわく/初見さん・ROM大歓迎【柏来/#Vtuber】#shorts",
           "raw": "Rosário da Vitória | 17:00 | 07/11/26 | Live Ao vivo"
         }
       ]
@@ -2055,10 +2055,10 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-07": {
-      "quarantinedOccurrences": 75,
+      "quarantinedOccurrences": 79,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 71,
+        "reused_description_across_unrelated_channels": 75,
         "date_split_as_song_and_artist": 1,
         "prayer_broadcast_timeline": 1,
         "reviewed_bad_description_source": 2
@@ -13335,6 +13335,14 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 19
     },
+    "aEG9MwEW_kw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "QKLm5yY6SNY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "jPq81E5MB5Y": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13419,6 +13427,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "QkL201H5L14": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "zrSlietSCG8": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -13448,6 +13460,10 @@
       "deduplicatedOccurrences": 0
     },
     "dH0sF75qyR0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "4NYqxm6zMiI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
