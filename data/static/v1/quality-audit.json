@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-09T14:52:08.117Z",
+  "generatedAt": "2026-11-09T14:57:52.795Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25768,
-  "inputOccurrences": 287017,
-  "visibleVideos": 21855,
-  "visibleOccurrences": 282844,
-  "quarantinedOccurrences": 3430,
-  "quarantinedVideos": 2596,
+  "inputVideos": 25771,
+  "inputOccurrences": 287069,
+  "visibleVideos": 21857,
+  "visibleOccurrences": 282895,
+  "quarantinedOccurrences": 3431,
+  "quarantinedVideos": 2597,
   "deduplicatedOccurrences": 726,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 70,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 110,
     "unrelated_talk_show_listing": 81,
-    "reused_description_across_unrelated_channels": 572,
+    "reused_description_across_unrelated_channels": 573,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 37,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 152,
-      "channelCount": 146,
-      "distinctVideoTitles": 149,
+      "videoCount": 153,
+      "channelCount": 147,
+      "distinctVideoTitles": 150,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -2153,13 +2153,13 @@
       }
     },
     "2026-11-08": {
-      "quarantinedOccurrences": 37,
+      "quarantinedOccurrences": 38,
       "deduplicatedOccurrences": 4,
       "byReason": {
         "reviewed_bad_description_source": 11,
         "unrelated_livestream_listing": 5,
         "unrelated_talk_show_listing": 3,
-        "reused_description_across_unrelated_channels": 17,
+        "reused_description_across_unrelated_channels": 18,
         "confirmed_stream_start_marker": 1
       }
     },
@@ -13913,6 +13913,10 @@
       "deduplicatedOccurrences": 0
     },
     "c13AUTE-M9c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "vCrVmSeakGQ": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
