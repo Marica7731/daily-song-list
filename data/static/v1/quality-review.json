@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-09T17:33:30.745Z",
-  "scannedVideoCount": 21893,
-  "scannedOccurrenceCount": 283321,
+  "generatedAt": "2026-11-09T17:38:51.253Z",
+  "scannedVideoCount": 21894,
+  "scannedOccurrenceCount": 283324,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -902,14 +902,14 @@
     },
     {
       "date": "2026-11-09",
-      "occurrences": 751,
+      "occurrences": 754,
       "quarantinedOccurrences": 10
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 634,
     "possible_activity_chapter": 154,
-    "possible_date_as_artist": 106,
+    "possible_date_as_artist": 107,
     "possible_release_metadata_as_artist": 172,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 3
@@ -1093,6 +1093,28 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "19:00 ~ 11/17(火)",
+      "sourceHash": "d04afd40e11e3f0015c1c66713bb00211a780d1733eaca473942b6928166d4fa",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "_y9g8wipxmA",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-10-29T15:28:23.060Z"
+        },
+        {
+          "videoId": "dQzU6-FPrvM",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-10-29T14:27:42.630Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~11",
       "artist": "土",
       "raw": "19:00～11/28(土)",
@@ -1130,28 +1152,6 @@
           "videoId": "7n8DTXePRmE",
           "channelName": "焔魔るり CH. / Ruri Enma",
           "publishedAt": "2026-11-04T00:31:50.205Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~ 11",
-      "artist": "火",
-      "raw": "19:00 ~ 11/17(火)",
-      "sourceHash": "d04afd40e11e3f0015c1c66713bb00211a780d1733eaca473942b6928166d4fa",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "_y9g8wipxmA",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-10-29T15:28:23.060Z"
-        },
-        {
-          "videoId": "dQzU6-FPrvM",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-10-29T14:27:42.630Z"
         }
       ],
       "videoCount": 2,
