@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-09T10:36:30.707Z",
+  "generatedAt": "2026-11-09T10:42:17.783Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25717,
-  "inputOccurrences": 286399,
-  "visibleVideos": 21806,
-  "visibleOccurrences": 282228,
-  "quarantinedOccurrences": 3428,
-  "quarantinedVideos": 2594,
+  "inputVideos": 25719,
+  "inputOccurrences": 286411,
+  "visibleVideos": 21807,
+  "visibleOccurrences": 282239,
+  "quarantinedOccurrences": 3429,
+  "quarantinedVideos": 2595,
   "deduplicatedOccurrences": 726,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -19,7 +19,7 @@
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
     "prayer_broadcast_timeline": 1497,
-    "reviewed_bad_description_source": 411,
+    "reviewed_bad_description_source": 412,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 12,
     "reviewed_mixed_chapter_comment": 299,
@@ -1055,6 +1055,13 @@
       }
     },
     "2024-10-28": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reviewed_bad_description_source": 1
+      }
+    },
+    "2025-11-09": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0,
       "byReason": {
@@ -2182,6 +2189,10 @@
       "deduplicatedOccurrences": 0
     },
     "eKOv2_xRH68": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "eYQPX3FTxuE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -15481,6 +15492,17 @@
       "raw": "God Miracles Today 11:11"
     },
     {
+      "reason": "reviewed_bad_description_source",
+      "videoId": "eYQPX3FTxuE",
+      "channelName": "みっけ",
+      "occurrenceId": "eYQPX3FTxuE:19:671",
+      "sourceId": "description:eYQPX3FTxuE:508e5918d7aa133e",
+      "sourceHash": "508e5918d7aa133eb0fbc4c0e16bd95e6f834cc5826b03c4b7529ef7f1fdf6b8",
+      "title": "God Miracles Today",
+      "artist": "",
+      "raw": "God Miracles Today 11:11"
+    },
+    {
       "reason": "spoken_fraction_split_as_artist",
       "videoId": "78SkkDdtmX0",
       "channelName": "UTANO ch. 白玖ウタノ",
@@ -16326,17 +16348,6 @@
       "title": "(お辞儀)",
       "artist": "未記載",
       "raw": "49:14　（お辞儀）"
-    },
-    {
-      "reason": "reviewed_mixed_chapter_comment",
-      "videoId": "8KDs7OP6_KM",
-      "channelName": "Vezalius Bandage 【NIJISANJI EN】",
-      "occurrenceId": "8KDs7OP6_KM:legacy:8KDs7OP6_KM:2962:19c41ea7d051cb3b",
-      "sourceId": "legacy:8KDs7OP6_KM",
-      "sourceHash": "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
-      "title": "静と動の星導",
-      "artist": "未記載",
-      "raw": "49:22　静と動の星導"
     }
   ],
   "artistCatalogGate": {
