@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-09T07:59:25.352Z",
+  "generatedAt": "2026-11-09T08:03:56.209Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 25689,
-  "inputOccurrences": 286174,
+  "inputVideos": 25694,
+  "inputOccurrences": 286184,
   "visibleVideos": 21788,
   "visibleOccurrences": 282018,
-  "quarantinedOccurrences": 3413,
-  "quarantinedVideos": 2584,
+  "quarantinedOccurrences": 3423,
+  "quarantinedVideos": 2589,
   "deduplicatedOccurrences": 726,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 68,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 38,
     "confirmed_chat_section": 49,
-    "unrelated_livestream_listing": 105,
-    "unrelated_talk_show_listing": 76,
+    "unrelated_livestream_listing": 110,
+    "unrelated_talk_show_listing": 81,
     "reused_description_across_unrelated_channels": 572,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 37,
@@ -1012,6 +1012,33 @@
           "channelName": "Marc Lowe 獅石 間阿空",
           "videoTitle": "Marc Lowe - \"Stay-at-home\" live acoustic rehearsal「引き篭もり弾き語り」 on November 7, 2026",
           "raw": "Cornerstone Chapel Leesburg, Va  |  8:00 AM Service"
+        }
+      ]
+    },
+    {
+      "sourceHash": "c4b174ab96c2f304d2d7b692c5f77c8a96c36cf6fe0141ac9793cdab4128f510",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "PagCupqi4M0",
+          "channelName": "京極ラク",
+          "videoTitle": "【#55 歌枠】久しぶりにちゃんとお昼に歌う【#karaoke】",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        },
+        {
+          "videoId": "RmwK1_12pUY",
+          "channelName": "YG.ch-0930",
+          "videoTitle": "【歌枠・初見様大歓迎】夜のまったり歌枠♪寝落ち・作業用にどうぞ！【VTuber】",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        },
+        {
+          "videoId": "AeMK2uwiRRg",
+          "channelName": "仁井谷 正充",
+          "videoTitle": "MOO仁井谷のゆるうたメモリーズ 第6回 弾き語りでつなぐ昭和 平成 令和 懐かしい名曲をのんびりと",
+          "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
         }
       ]
     }
@@ -2119,13 +2146,22 @@
       }
     },
     "2026-11-08": {
-      "quarantinedOccurrences": 28,
+      "quarantinedOccurrences": 34,
       "deduplicatedOccurrences": 4,
       "byReason": {
         "reviewed_bad_description_source": 8,
+        "unrelated_livestream_listing": 5,
+        "unrelated_talk_show_listing": 3,
         "reused_description_across_unrelated_channels": 17,
-        "unrelated_livestream_listing": 2,
         "confirmed_stream_start_marker": 1
+      }
+    },
+    "2026-11-09": {
+      "quarantinedOccurrences": 4,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "unrelated_livestream_listing": 2,
+        "unrelated_talk_show_listing": 2
       }
     },
     "2024-10-20": {
@@ -13848,8 +13884,16 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "PagCupqi4M0": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "ge5wFkmt6lE": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "RmwK1_12pUY": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "EEV44v6rcQQ": {
@@ -13890,6 +13934,10 @@
     },
     "ns64-BGeQSI": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "AeMK2uwiRRg": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "4XxfwzZ3uIQ": {
@@ -13958,6 +14006,14 @@
     },
     "CfF3aa8_wtI": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "JdDN2AZFEgw": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "654qb896l6k": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "ewbrnwMJUcQ": {
