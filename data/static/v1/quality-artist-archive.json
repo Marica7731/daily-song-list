@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-09T15:53:46.396Z",
+  "generatedAt": "2026-11-09T18:01:27.697Z",
   "status": "AUTO_ARCHIVED_NOT_PUBLISHED",
   "policy": "derived artist release allowlist; immutable days/* and state.json remain authoritative",
   "artists": [
@@ -10,9 +10,9 @@
       "catalogSource": "https://itunes.apple.com/lookup?id=1445379338&entity=song&limit=200&country=jp",
       "catalogRetrievedAt": "2026-10-21T00:00:00+08:00",
       "maxUniqueTitles": 65,
-      "matchedOccurrences": 310,
+      "matchedOccurrences": 311,
       "normalizedOccurrences": 70,
-      "archivedOccurrences": 18,
+      "archivedOccurrences": 19,
       "publishedTitles": [
         "15歳の主張",
         "LIFE",
@@ -56,7 +56,8 @@
         "孤独な夜をあといくつ",
         "垂直落下 feat.鏡音リン&鏡音レン",
         "生きてるだけでえらいよ",
-        "絶頂惨歌"
+        "絶頂惨歌",
+        "分かっちゃいないね"
       ],
       "occurrences": [
         {
@@ -346,10 +347,26 @@
           "artist": "傘村トータ",
           "raw": "02:21:05 [EN1] 泣かないあなたの守り方 / 傘村トータ (2019)",
           "reason": "outside_official_release_catalog"
+        },
+        {
+          "videoId": "YIsOKej3fB4",
+          "videoTitle": "【#歌枠】ちょっとだけまったり歌う｜色々変えてみたスペシャル【#vtuber 】",
+          "channelId": "UCeAkG76ei50h5fn576ye-RA",
+          "channelName": "火凍にこ Nico ch.",
+          "publishedAt": "2026-11-08T17:40:20.684Z",
+          "occurrenceId": "YIsOKej3fB4:1445:1205",
+          "sourceId": "description:YIsOKej3fB4:f68d6afbb63b8a48",
+          "sourceHash": "f68d6afbb63b8a487292d1ad68b8e93f81214aa5412e3f1db399cf2a401e7281",
+          "time": "0:20:05",
+          "seconds": 1205,
+          "title": "分かっちゃいないね",
+          "artist": "傘村トータ",
+          "raw": "20:05 分かっちゃいないね / 傘村トータ",
+          "reason": "outside_official_release_catalog"
         }
       ],
       "publishedUniqueTitleCount": 29,
-      "archivedUniqueTitleCount": 12
+      "archivedUniqueTitleCount": 13
     }
   ]
 }
