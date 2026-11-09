@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-09T07:53:53.051Z",
+  "generatedAt": "2026-11-09T07:59:25.352Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261109T073647Z",
-  "sourceCapturedAt": "2026-11-09T07:36:47.812Z",
+  "sourceSnapshotId": "20261109T074627Z",
+  "sourceCapturedAt": "2026-11-09T07:46:27.987Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 561
+    "candidateVideos": 547
   },
-  "pendingVideoCount": 1750,
-  "noSongRetryPoolCount": 21239,
-  "processedVideoCount": 37371,
-  "videoCount": 21787,
-  "songOccurrenceCount": 282017,
+  "pendingVideoCount": 1745,
+  "noSongRetryPoolCount": 21241,
+  "processedVideoCount": 37372,
+  "videoCount": 21788,
+  "songOccurrenceCount": 282018,
   "quality": {
     "quarantinedOccurrences": 3413,
     "quarantinedVideos": 2584,
@@ -426,15 +426,15 @@
   "ranges": {
     "today": {
       "stats": {
-        "videoCount": 36,
-        "songOccurrenceCount": 377,
+        "videoCount": 37,
+        "songOccurrenceCount": 378,
         "pendingVideoCount": 0,
         "quarantinedOccurrences": 5,
         "deduplicatedOccurrences": 4,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 365,
+        "totalCount": 366,
         "pageCount": 8,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -448,7 +448,7 @@
         "path": "rankings/today/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 36,
+        "totalCount": 37,
         "pageCount": 1,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -457,15 +457,15 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 445,
-        "songOccurrenceCount": 5316,
-        "pendingVideoCount": 663,
+        "videoCount": 446,
+        "songOccurrenceCount": 5317,
+        "pendingVideoCount": 659,
         "quarantinedOccurrences": 137,
         "deduplicatedOccurrences": 7,
         "artistCatalogArchivedOccurrences": 1
       },
       "songs": {
-        "totalCount": 3819,
+        "totalCount": 3820,
         "pageCount": 77,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -479,7 +479,7 @@
         "path": "rankings/3d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 419,
+        "totalCount": 420,
         "pageCount": 9,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -488,15 +488,15 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1289,
-        "songOccurrenceCount": 15808,
-        "pendingVideoCount": 1357,
+        "videoCount": 1290,
+        "songOccurrenceCount": 15809,
+        "pendingVideoCount": 1353,
         "quarantinedOccurrences": 490,
         "deduplicatedOccurrences": 69,
         "artistCatalogArchivedOccurrences": 3
       },
       "songs": {
-        "totalCount": 8674,
+        "totalCount": 8675,
         "pageCount": 174,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -519,9 +519,9 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6647,
-        "songOccurrenceCount": 79560,
-        "pendingVideoCount": 1750,
+        "videoCount": 6648,
+        "songOccurrenceCount": 79561,
+        "pendingVideoCount": 1745,
         "quarantinedOccurrences": 1200,
         "deduplicatedOccurrences": 273,
         "artistCatalogArchivedOccurrences": 8
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 21787,
-        "songOccurrenceCount": 282017,
-        "pendingVideoCount": 1750,
+        "videoCount": 21788,
+        "songOccurrenceCount": 282018,
+        "pendingVideoCount": 1745,
         "quarantinedOccurrences": 3413,
         "deduplicatedOccurrences": 726,
         "artistCatalogArchivedOccurrences": 17
