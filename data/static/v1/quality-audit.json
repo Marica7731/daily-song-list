@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-11T04:36:28.635Z",
+  "generatedAt": "2026-11-11T04:41:29.580Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 26252,
-  "inputOccurrences": 290717,
-  "visibleVideos": 22306,
-  "visibleOccurrences": 286498,
-  "quarantinedOccurrences": 3469,
-  "quarantinedVideos": 2629,
+  "inputVideos": 26253,
+  "inputOccurrences": 290719,
+  "visibleVideos": 22302,
+  "visibleOccurrences": 286494,
+  "quarantinedOccurrences": 3475,
+  "quarantinedVideos": 2634,
   "deduplicatedOccurrences": 731,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 71,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 38,
     "confirmed_chat_section": 49,
-    "unrelated_livestream_listing": 116,
+    "unrelated_livestream_listing": 117,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 589,
+    "reused_description_across_unrelated_channels": 594,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 38,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1039,6 +1039,33 @@
           "channelName": "仁井谷 正充",
           "videoTitle": "MOO仁井谷のゆるうたメモリーズ 第6回 弾き語りでつなぐ昭和 平成 令和 懐かしい名曲をのんびりと",
           "raw": "17:40【マンデーバスターズ】ほんこん×門田隆将×高橋洋一×斎藤七夏瑚"
+        }
+      ]
+    },
+    {
+      "sourceHash": "0bb5feae873664e631ac57e268362e8a83b03f637ceb4ce6a969a5cdee941b2d",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "VdYgbNCi26Y",
+          "channelName": "nμll 《INT老パイア系Vtuber》",
+          "videoTitle": "【歌枠】録音前の歌枠【縦型配信】",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "RoKOTvPvtZE",
+          "channelName": "しゃまこ",
+          "videoTitle": "【歌枠】カラオケときどき雑談🎤懐メロ💕平成🎅作業のお供に☺睡眠導入BGMにどうぞ🎅【スナックしゃまこ開店】",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "HQzb0hWbV6k",
+          "channelName": "ミラ・ルプス Mira Ch.",
+          "videoTitle": "【#歌枠 】入眠歌枠配信【ミラ・ルプス/ハコネクト】",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         }
       ]
     },
@@ -2204,11 +2231,11 @@
       }
     },
     "2026-11-10": {
-      "quarantinedOccurrences": 26,
+      "quarantinedOccurrences": 32,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "unrelated_livestream_listing": 4,
-        "reused_description_across_unrelated_channels": 13,
+        "unrelated_livestream_listing": 5,
+        "reused_description_across_unrelated_channels": 18,
         "confirmed_stream_start_marker": 1,
         "reviewed_bad_description_source": 8
       }
@@ -14156,11 +14183,15 @@
       "deduplicatedOccurrences": 0
     },
     "VdYgbNCi26Y": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "RoKOTvPvtZE": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "HQzb0hWbV6k": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "5cMITFAHuog": {
@@ -14172,7 +14203,7 @@
       "deduplicatedOccurrences": 0
     },
     "-wkFmgzaLKM": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "0RkH-Ac76n8": {
@@ -14192,7 +14223,7 @@
       "deduplicatedOccurrences": 1
     },
     "Z-9k-KNkDcw": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "i6hGDfvUHHc": {
