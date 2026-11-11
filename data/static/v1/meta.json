@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-11T11:16:36.902Z",
+  "generatedAt": "2026-11-11T11:22:14.050Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261111T110058Z",
-  "sourceCapturedAt": "2026-11-11T11:00:58.447Z",
+  "sourceSnapshotId": "20261111T111102Z",
+  "sourceCapturedAt": "2026-11-11T11:11:02.906Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 477
+    "candidateVideos": 479
   },
-  "pendingVideoCount": 1729,
-  "noSongRetryPoolCount": 21668,
-  "processedVideoCount": 37995,
-  "videoCount": 22354,
-  "songOccurrenceCount": 286968,
+  "pendingVideoCount": 1732,
+  "noSongRetryPoolCount": 21670,
+  "processedVideoCount": 37996,
+  "videoCount": 22355,
+  "songOccurrenceCount": 286969,
   "quality": {
     "quarantinedOccurrences": 3487,
     "quarantinedVideos": 2641,
@@ -426,15 +426,15 @@
   "ranges": {
     "today": {
       "stats": {
-        "videoCount": 59,
-        "songOccurrenceCount": 738,
+        "videoCount": 60,
+        "songOccurrenceCount": 739,
         "pendingVideoCount": 0,
         "quarantinedOccurrences": 15,
         "deduplicatedOccurrences": 0,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 672,
+        "totalCount": 673,
         "pageCount": 14,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -448,7 +448,7 @@
         "path": "rankings/today/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 59,
+        "totalCount": 60,
         "pageCount": 2,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -457,15 +457,15 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 544,
-        "songOccurrenceCount": 4621,
-        "pendingVideoCount": 370,
+        "videoCount": 545,
+        "songOccurrenceCount": 4622,
+        "pendingVideoCount": 373,
         "quarantinedOccurrences": 74,
         "deduplicatedOccurrences": 9,
         "artistCatalogArchivedOccurrences": 1
       },
       "songs": {
-        "totalCount": 3267,
+        "totalCount": 3268,
         "pageCount": 66,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -479,7 +479,7 @@
         "path": "rankings/3d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 506,
+        "totalCount": 507,
         "pageCount": 11,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -488,15 +488,15 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1354,
-        "songOccurrenceCount": 14376,
-        "pendingVideoCount": 1467,
+        "videoCount": 1355,
+        "songOccurrenceCount": 14377,
+        "pendingVideoCount": 1470,
         "quarantinedOccurrences": 332,
         "deduplicatedOccurrences": 40,
         "artistCatalogArchivedOccurrences": 2
       },
       "songs": {
-        "totalCount": 8112,
+        "totalCount": 8113,
         "pageCount": 163,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -519,9 +519,9 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6764,
-        "songOccurrenceCount": 78857,
-        "pendingVideoCount": 1729,
+        "videoCount": 6765,
+        "songOccurrenceCount": 78858,
+        "pendingVideoCount": 1732,
         "quarantinedOccurrences": 1264,
         "deduplicatedOccurrences": 273,
         "artistCatalogArchivedOccurrences": 9
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 22354,
-        "songOccurrenceCount": 286968,
-        "pendingVideoCount": 1729,
+        "videoCount": 22355,
+        "songOccurrenceCount": 286969,
+        "pendingVideoCount": 1732,
         "quarantinedOccurrences": 3487,
         "deduplicatedOccurrences": 731,
         "artistCatalogArchivedOccurrences": 19
