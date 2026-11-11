@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-11T16:59:55.472Z",
-  "scannedVideoCount": 22384,
-  "scannedOccurrenceCount": 287344,
+  "generatedAt": "2026-11-11T17:05:25.325Z",
+  "scannedVideoCount": 22410,
+  "scannedOccurrenceCount": 287664,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -907,19 +907,19 @@
     },
     {
       "date": "2026-11-10",
-      "occurrences": 2271,
-      "quarantinedOccurrences": 48
+      "occurrences": 2275,
+      "quarantinedOccurrences": 49
     },
     {
       "date": "2026-11-11",
-      "occurrences": 478,
+      "occurrences": 794,
       "quarantinedOccurrences": 7
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 641,
     "possible_activity_chapter": 157,
-    "possible_date_as_artist": 110,
+    "possible_date_as_artist": 111,
     "possible_release_metadata_as_artist": 181,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 3
@@ -1106,6 +1106,28 @@
       "title": "~ 11",
       "artist": "火",
       "raw": "19:00 ~ 11/17(火)",
+      "sourceHash": "752c5c07993634f3d9baa2293cc1407582deef35ff4d1bc93f24e35bfd68d0c5",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "q5UfJG204fc",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-10-28T01:19:17.123Z"
+        },
+        {
+          "videoId": "7n8DTXePRmE",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-04T00:31:50.205Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "19:00 ~ 11/17(火)",
       "sourceHash": "d04afd40e11e3f0015c1c66713bb00211a780d1733eaca473942b6928166d4fa",
       "count": 3,
       "sample": [
@@ -1140,28 +1162,6 @@
           "videoId": "L_roDORdI1Y",
           "channelName": "Usapi Ch. 桃川うさぴ",
           "publishedAt": "2026-10-20T13:04:20.900Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~ 11",
-      "artist": "火",
-      "raw": "19:00 ~ 11/17(火)",
-      "sourceHash": "752c5c07993634f3d9baa2293cc1407582deef35ff4d1bc93f24e35bfd68d0c5",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "q5UfJG204fc",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-10-28T01:19:17.123Z"
-        },
-        {
-          "videoId": "7n8DTXePRmE",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-11-04T00:31:50.205Z"
         }
       ],
       "videoCount": 2,
@@ -6537,6 +6537,75 @@
           "title": "色んなギラギラ",
           "artist": "",
           "raw": "00:31:00 03. 色んなギラギラ"
+        }
+      ]
+    },
+    {
+      "videoId": "3sY0Qnll17o",
+      "channelName": "INARI",
+      "publishedAt": "2026-11-11T14:57:13.251Z",
+      "sourceHash": "4eb83618518a6293a55871afb5b6db5ff3a639a41725f9a07912b8cc11db7f41",
+      "total": 28,
+      "explicitNumberedSongs": 18,
+      "knownArtistRows": 18,
+      "unknownNonNumberedRows": 10,
+      "unknownExamples": [
+        {
+          "title": "ギター、弾き語り",
+          "raw": "[0:15:20]  ギター、弾き語り"
+        },
+        {
+          "title": "againとポッキー",
+          "raw": "[0:23:48]  againとポッキー"
+        },
+        {
+          "title": "SUMMER SONG行きたい",
+          "raw": "[0:30:00]  SUMMER SONG行きたい"
+        },
+        {
+          "title": "いけるのかい",
+          "raw": "[0:47:25]  いけるのかい"
+        },
+        {
+          "title": "鼻歌",
+          "raw": "[1:26:40]  鼻歌"
+        },
+        {
+          "title": "Rain Snow",
+          "raw": "[1:38:14]  Rain Snow"
+        },
+        {
+          "title": "あれー",
+          "raw": "[1:44:45]  ​​あれー"
+        },
+        {
+          "title": "なんとか、なれー",
+          "raw": "[1:48:58]  なんとか、なれー"
+        },
+        {
+          "title": "これが真(",
+          "raw": "1:55:00]  これが真("
+        },
+        {
+          "title": "記事投稿した!",
+          "raw": "[2:03:51]  記事投稿した!"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "マリーゴールド",
+          "artist": "あいみょん",
+          "raw": "[0:04:48]  1.  マリーゴールド  //  あいみょん"
+        },
+        {
+          "title": "愛を伝えたいだとか",
+          "artist": "あいみょん",
+          "raw": "[0:11:24]  2.  愛を伝えたいだとか  //  あいみょん"
+        },
+        {
+          "title": "ヒカリヘ",
+          "artist": "miwa",
+          "raw": "[0:17:00]  3.  ヒカリヘ  //  miwa"
         }
       ]
     },
