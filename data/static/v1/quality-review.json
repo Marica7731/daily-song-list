@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-12T22:31:04.350Z",
-  "scannedVideoCount": 22755,
-  "scannedOccurrenceCount": 291494,
+  "generatedAt": "2026-11-12T22:36:41.465Z",
+  "scannedVideoCount": 22769,
+  "scannedOccurrenceCount": 291643,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -897,7 +897,7 @@
     },
     {
       "date": "2026-11-08",
-      "occurrences": 2719,
+      "occurrences": 2868,
       "quarantinedOccurrences": 42
     },
     {
@@ -923,7 +923,7 @@
   ],
   "byReason": {
     "possible_unparsed_credits": 658,
-    "possible_activity_chapter": 165,
+    "possible_activity_chapter": 167,
     "possible_date_as_artist": 121,
     "possible_release_metadata_as_artist": 183,
     "possible_spoken_section": 19,
@@ -3963,6 +3963,40 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "はじめの挨拶",
+      "artist": "",
+      "raw": "⁅00:00:01⁆🦊はじめの挨拶",
+      "sourceHash": "cdb5e5ea0c7b1e665ee47cd863ef1895dadf6c5f513d3725e47b166daeecbefe",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "s9ItpLYC4eA",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-11-08T12:16:10.967Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "終わりの挨拶",
+      "artist": "",
+      "raw": "⁅01:47:57⁆🦊終わりの挨拶",
+      "sourceHash": "cdb5e5ea0c7b1e665ee47cd863ef1895dadf6c5f513d3725e47b166daeecbefe",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "s9ItpLYC4eA",
+          "channelName": "狐花てん -Ten Kitsunebana-",
+          "publishedAt": "2026-11-08T12:16:10.967Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "ゴジラ新作の感想",
       "artist": "",
       "raw": "2:36:39 ゴジラ新作の感想",
@@ -5231,40 +5265,6 @@
           "videoId": "en1Tw8O3ht0",
           "channelName": "yin ║ ｲﾝ",
           "publishedAt": "2026-10-24T13:49:39.540Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~ 10",
-      "artist": "木",
-      "raw": "0:00 ～ 10/29（木）",
-      "sourceHash": "896606fd3d018db389cbff18a9fe925c81f357574e43a7949ab1b99fa4e6e27c",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "PRFgSg8M3kU",
-          "channelName": "NiBOSHI🪐💜-にぼし-",
-          "publishedAt": "2026-10-24T11:57:52.046Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "日程:2026年10月24日",
-      "artist": "土",
-      "raw": "10:30 🗓 日程:2026年10月24日（土）",
-      "sourceHash": "5f3dc154dac1f64133d0532250746a760d031f8e017c724e3d7d7734bf26e005",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "udUSgogPYxM",
-          "channelName": "MOKO ch. 恋叶モコ",
-          "publishedAt": "2026-10-24T11:08:42.761Z"
         }
       ],
       "videoCount": 1,
@@ -10699,6 +10699,47 @@
           "title": "ひゅるりらぱっぱ",
           "artist": "tuki.",
           "raw": "0:19:51 03. ひゅるりらぱっぱ/tuki."
+        }
+      ]
+    },
+    {
+      "videoId": "4c1zjtO-rnE",
+      "channelName": "夜透 遥 / Yosumi Haru",
+      "publishedAt": "2026-11-08T11:06:46.003Z",
+      "sourceHash": "a91732ecd401aa7765aed8cecaa1fe8dba01b55ac1be8d3cdf14218c84efd87c",
+      "total": 9,
+      "explicitNumberedSongs": 6,
+      "knownArtistRows": 6,
+      "unknownNonNumberedRows": 3,
+      "unknownExamples": [
+        {
+          "title": "最低最悪",
+          "raw": "32:03 ♬最低最悪(アカペラ)"
+        },
+        {
+          "title": "昔の歌みた歌い直し",
+          "raw": "43:17 昔の歌みた歌い直し"
+        },
+        {
+          "title": "締め",
+          "raw": "56:05 締め"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "夜永唄",
+          "artist": "神はサイコロを振らない",
+          "raw": "1. 07:24 夜永唄 / 神はサイコロを振らない"
+        },
+        {
+          "title": "化粧",
+          "artist": "My Hair is Bad",
+          "raw": "2. 19:10 化粧 / My Hair  is Bad"
+        },
+        {
+          "title": "最低最悪",
+          "artist": "マルシィ",
+          "raw": "3. 27:34 最低最悪 / マルシィ"
         }
       ]
     },
