@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-12T04:21:25.304Z",
+  "generatedAt": "2026-11-12T04:27:09.385Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 26510,
-  "inputOccurrences": 293085,
-  "visibleVideos": 22536,
-  "visibleOccurrences": 288828,
-  "quarantinedOccurrences": 3504,
-  "quarantinedVideos": 2657,
+  "inputVideos": 26513,
+  "inputOccurrences": 293091,
+  "visibleVideos": 22534,
+  "visibleOccurrences": 288829,
+  "quarantinedOccurrences": 3509,
+  "quarantinedVideos": 2662,
   "deduplicatedOccurrences": 733,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 71,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 122,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 616,
+    "reused_description_across_unrelated_channels": 621,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 38,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1093,6 +1093,33 @@
           "channelName": "toto.folium",
           "videoTitle": "toto.folium☘️雑談弾き語り配信",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月10日(火)20:00〜 ／明日 北日本は、日本海側を中心に雲が広がりやすい〈ウェザーニュースLiVEムーン・戸北美月／宇野沢達也〉"
+        }
+      ]
+    },
+    {
+      "sourceHash": "8c029f621b4690ef331ab65fa69ff1bfebd1a937659241bed3ad1a2797d20bda",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "jSIM4kzeHko",
+          "channelName": "もんぱか",
+          "videoTitle": "【 2割歌枠 】🐨～♪ #歌枠 #雑談",
+          "raw": "【ポッキー＆プリッツの日】11月11日11:11【ラパン・シュシュ・フレゼリーヌ/かとーふれいず】"
+        },
+        {
+          "videoId": "fhDZ9kmw_BY",
+          "channelName": "蒼星すい",
+          "videoTitle": "【歌枠】バラード特化Vsingerのピアノ伴奏限定歌枠🤍❄️Singing Stream【#蒼星すい #vtuber /#vsinger 】",
+          "raw": "【ポッキー＆プリッツの日】11月11日11:11【ラパン・シュシュ・フレゼリーヌ/かとーふれいず】"
+        },
+        {
+          "videoId": "WX3DA57et1Y",
+          "channelName": "紫水セリカ",
+          "videoTitle": "【歌枠】さむい！！【雑談】",
+          "raw": "【ポッキー＆プリッツの日】11月11日11:11【ラパン・シュシュ・フレゼリーヌ/かとーふれいず】"
         }
       ]
     }
@@ -2241,10 +2268,10 @@
       }
     },
     "2026-11-11": {
-      "quarantinedOccurrences": 12,
+      "quarantinedOccurrences": 17,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 9,
+        "reused_description_across_unrelated_channels": 14,
         "date_split_as_song_and_artist": 1,
         "unrelated_livestream_listing": 2
       },
@@ -14376,11 +14403,27 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "jSIM4kzeHko": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "fhDZ9kmw_BY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "WX3DA57et1Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "tTmqgqIhNOo": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "2n2cyEiJ960": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "7ukXRt6IK7k": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -14392,6 +14435,10 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 0,
       "artistCatalogArchivedOccurrences": 1
+    },
+    "X2CgQY6lQJM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "0kFX8PJFF8c": {
       "quarantinedOccurrences": 0,
