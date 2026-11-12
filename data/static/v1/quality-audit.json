@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-12T10:48:38.244Z",
+  "generatedAt": "2026-11-12T10:53:55.614Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 26595,
-  "inputOccurrences": 293640,
+  "inputVideos": 26596,
+  "inputOccurrences": 293641,
   "visibleVideos": 22591,
   "visibleOccurrences": 289353,
-  "quarantinedOccurrences": 3534,
-  "quarantinedVideos": 2687,
+  "quarantinedOccurrences": 3535,
+  "quarantinedVideos": 2688,
   "deduplicatedOccurrences": 733,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 71,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 49,
     "unrelated_livestream_listing": 122,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 628,
+    "reused_description_across_unrelated_channels": 629,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 38,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 189,
-      "channelCount": 176,
-      "distinctVideoTitles": 183,
+      "videoCount": 190,
+      "channelCount": 177,
+      "distinctVideoTitles": 184,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -2268,11 +2268,11 @@
       }
     },
     "2026-11-11": {
-      "quarantinedOccurrences": 39,
+      "quarantinedOccurrences": 40,
       "deduplicatedOccurrences": 2,
       "byReason": {
         "reviewed_bad_description_source": 15,
-        "reused_description_across_unrelated_channels": 21,
+        "reused_description_across_unrelated_channels": 22,
         "date_split_as_song_and_artist": 1,
         "unrelated_livestream_listing": 2
       },
@@ -14429,6 +14429,10 @@
       "deduplicatedOccurrences": 0
     },
     "WX3DA57et1Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "-OCo3baXpSI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
