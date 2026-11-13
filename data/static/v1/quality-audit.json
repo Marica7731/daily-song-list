@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-13T17:19:03.807Z",
+  "generatedAt": "2026-11-13T17:24:15.241Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27141,
-  "inputOccurrences": 298830,
-  "visibleVideos": 22999,
-  "visibleOccurrences": 294389,
-  "quarantinedOccurrences": 3684,
-  "quarantinedVideos": 2825,
+  "inputVideos": 27144,
+  "inputOccurrences": 298845,
+  "visibleVideos": 22996,
+  "visibleOccurrences": 294398,
+  "quarantinedOccurrences": 3690,
+  "quarantinedVideos": 2831,
   "deduplicatedOccurrences": 737,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 71,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 52,
     "unrelated_livestream_listing": 130,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 692,
+    "reused_description_across_unrelated_channels": 698,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 39,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1120,6 +1120,33 @@
           "channelName": "紫水セリカ",
           "videoTitle": "【歌枠】さむい！！【雑談】",
           "raw": "【ポッキー＆プリッツの日】11月11日11:11【ラパン・シュシュ・フレゼリーヌ/かとーふれいず】"
+        }
+      ]
+    },
+    {
+      "sourceHash": "660a2dd6af2fa2f6533a90f74ac3541ef2f5d1a076b6ed33612a69d2abea4c94",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 6,
+      "channelCount": 6,
+      "distinctVideoTitles": 6,
+      "examples": [
+        {
+          "videoId": "cjRkvW6PYQk",
+          "channelName": "crystal rein Ch. クリスタル レイン",
+          "videoTitle": "【ゆる雑】作業枠です～ 今日はだいぶ寝てました～💤【#作業配信 /#vtuber 】",
+          "raw": "20:00 23:00] Study with me / 独り言・雑談・カラオケもあるかも？ / pomodoro (25/5) * 6"
+        },
+        {
+          "videoId": "FrogZHefM98",
+          "channelName": "詩夜見ヌル / ウタヤミ ヌル",
+          "videoTitle": "【#縦型配信 】ぬるの歌雑 / 今日の夜更かしはここですよ【詩夜見ヌル / #vtuber 】#shorts #初見さん大歓迎 #雑談 #歌枠",
+          "raw": "20:00 23:00] Study with me / 独り言・雑談・カラオケもあるかも？ / pomodoro (25/5) * 6"
+        },
+        {
+          "videoId": "0NyZiNebJm0",
+          "channelName": "Mia Muse Channel（ミアちゃんねる）",
+          "videoTitle": "【歌枠】疲れた夜にオリジナルピアノ音源アコースティック風〜まったり癒しのバラード〜｜MiaMuse【 #Vtuber / #MMライブ】",
+          "raw": "20:00 23:00] Study with me / 独り言・雑談・カラオケもあるかも？ / pomodoro (25/5) * 6"
         }
       ]
     },
@@ -2334,10 +2361,10 @@
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-12": {
-      "quarantinedOccurrences": 62,
+      "quarantinedOccurrences": 67,
       "deduplicatedOccurrences": 2,
       "byReason": {
-        "reused_description_across_unrelated_channels": 33,
+        "reused_description_across_unrelated_channels": 38,
         "reviewed_bad_description_source": 21,
         "unrelated_livestream_listing": 4,
         "dated_stream_announcement": 1,
@@ -2345,10 +2372,10 @@
       }
     },
     "2026-11-13": {
-      "quarantinedOccurrences": 11,
+      "quarantinedOccurrences": 12,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 7,
+        "reused_description_across_unrelated_channels": 8,
         "unrelated_livestream_listing": 4
       }
     },
@@ -14971,7 +14998,15 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "cjRkvW6PYQk": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "pswBRTzM2iw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "FrogZHefM98": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -14995,6 +15030,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "0NyZiNebJm0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "yd414XDo2u4": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -15015,6 +15054,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "n4wQY10-yvg": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "dlrOEeAQNGE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -15024,6 +15067,10 @@
       "deduplicatedOccurrences": 0
     },
     "6pi2OC2hggY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "2II4D-bDMWY": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
@@ -15196,6 +15243,10 @@
       "deduplicatedOccurrences": 0
     },
     "3N_iCzareds": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "i4SO_fHkxao": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
