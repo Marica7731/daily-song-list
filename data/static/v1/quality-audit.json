@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-13T13:17:58.316Z",
+  "generatedAt": "2026-11-13T13:23:23.475Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27095,
-  "inputOccurrences": 298430,
-  "visibleVideos": 22957,
-  "visibleOccurrences": 293995,
-  "quarantinedOccurrences": 3678,
-  "quarantinedVideos": 2821,
+  "inputVideos": 27097,
+  "inputOccurrences": 298433,
+  "visibleVideos": 22958,
+  "visibleOccurrences": 293996,
+  "quarantinedOccurrences": 3680,
+  "quarantinedVideos": 2822,
   "deduplicatedOccurrences": 737,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 71,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 38,
     "confirmed_chat_section": 52,
-    "unrelated_livestream_listing": 128,
+    "unrelated_livestream_listing": 129,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 688,
+    "reused_description_across_unrelated_channels": 689,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 39,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1126,9 +1126,9 @@
     {
       "sourceHash": "838a8699add60296a5d979c3aa14369baf90f7c105622f086e956789daff70f9",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
         {
           "videoId": "yd414XDo2u4",
@@ -2345,11 +2345,11 @@
       }
     },
     "2026-11-13": {
-      "quarantinedOccurrences": 6,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "unrelated_livestream_listing": 2,
-        "reused_description_across_unrelated_channels": 4
+        "unrelated_livestream_listing": 3,
+        "reused_description_across_unrelated_channels": 5
       }
     },
     "2024-10-20": {
@@ -15205,6 +15205,10 @@
     },
     "IDXWBUny4JQ": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "54qBm4UbEzY": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "ewbrnwMJUcQ": {
