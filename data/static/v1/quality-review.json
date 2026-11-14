@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-14T10:34:46.630Z",
-  "scannedVideoCount": 23149,
-  "scannedOccurrenceCount": 296085,
+  "generatedAt": "2026-11-14T10:39:18.422Z",
+  "scannedVideoCount": 23153,
+  "scannedOccurrenceCount": 296124,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -922,19 +922,19 @@
     },
     {
       "date": "2026-11-13",
-      "occurrences": 2004,
+      "occurrences": 2017,
       "quarantinedOccurrences": 26
     },
     {
       "date": "2026-11-14",
-      "occurrences": 341,
+      "occurrences": 367,
       "quarantinedOccurrences": 1
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 663,
     "possible_activity_chapter": 174,
-    "possible_date_as_artist": 127,
+    "possible_date_as_artist": 128,
     "possible_release_metadata_as_artist": 183,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 4
@@ -1228,6 +1228,28 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "〜2026/11",
+      "artist": "日",
+      "raw": "20:00〜2026/11/8(日)",
+      "sourceHash": "307557ae07949706440b0a1d56efae3e98bd033dfce7e2ab2e7c512ca0525417",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "RVLmTrHjghE",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-09T11:20:33.358Z"
+        },
+        {
+          "videoId": "MVmE7NHCfCw",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-13T10:35:23.360Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~11",
       "artist": "土",
       "raw": "19:00～11/28(土)",
@@ -1265,28 +1287,6 @@
           "videoId": "JA8Qtgwqyuo",
           "channelName": "兎姫乃もも",
           "publishedAt": "2026-11-11T11:11:40.157Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜2026/11",
-      "artist": "日",
-      "raw": "20:00〜2026/11/8(日)",
-      "sourceHash": "307557ae07949706440b0a1d56efae3e98bd033dfce7e2ab2e7c512ca0525417",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "RVLmTrHjghE",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-09T11:20:33.358Z"
-        },
-        {
-          "videoId": "MVmE7NHCfCw",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-13T10:35:23.360Z"
         }
       ],
       "videoCount": 2,
