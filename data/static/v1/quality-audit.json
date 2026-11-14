@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-11-14T15:33:00.659Z",
+  "generatedAt": "2026-11-14T15:36:11.310Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27393,
-  "inputOccurrences": 301414,
-  "visibleVideos": 23220,
-  "visibleOccurrences": 296938,
-  "quarantinedOccurrences": 3716,
-  "quarantinedVideos": 2856,
+  "inputVideos": 27399,
+  "inputOccurrences": 301476,
+  "visibleVideos": 23225,
+  "visibleOccurrences": 296999,
+  "quarantinedOccurrences": 3717,
+  "quarantinedVideos": 2857,
   "deduplicatedOccurrences": 740,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
   "artistCatalogArchivedOccurrences": 20,
   "normalizedArtistOccurrences": 466,
-  "normalizedReleaseMetadataOccurrences": 1430,
+  "normalizedReleaseMetadataOccurrences": 1442,
   "repairedDateCreditOccurrences": 0,
   "repairedStructuredCreditOccurrences": 2923,
   "repairedKnownSourceCreditOccurrences": 154,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 52,
     "unrelated_livestream_listing": 130,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 722,
+    "reused_description_across_unrelated_channels": 723,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 39,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1207,9 +1207,9 @@
     {
       "sourceHash": "6d36b9ba50d27a91607b812f9d0b01a50974394ea9b92d6bc5b98a40366d8dd8",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 9,
+      "channelCount": 9,
+      "distinctVideoTitles": 9,
       "examples": [
         {
           "videoId": "h8eSjRJTnLA",
@@ -1224,9 +1224,9 @@
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月14日(土)20:00〜 ／明日は全国的に雨で激しく降る所も〈ウェザーニュースLiVEムーン・小林李衣奈／本田竜也〉"
         },
         {
-          "videoId": "X9xGGHBKxNY",
-          "channelName": "二色ちゃお",
-          "videoTitle": "【 歌枠 】音響つよつよになりたいのでプラグインを試してみる歌枠【 KARAOKE 】",
+          "videoId": "29U1u1gEgcE",
+          "channelName": "2013 Kazealance",
+          "videoTitle": "弾き語り練習／長渕剛さんや尾崎豊さんなど、、、",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月14日(土)20:00〜 ／明日は全国的に雨で激しく降る所も〈ウェザーニュースLiVEムーン・小林李衣奈／本田竜也〉"
         }
       ]
@@ -2408,10 +2408,10 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 9,
+      "quarantinedOccurrences": 10,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 8,
+        "reused_description_across_unrelated_channels": 9,
         "confirmed_talk_section": 1
       }
     },
@@ -15383,6 +15383,10 @@
       "deduplicatedOccurrences": 0
     },
     "R3PSQBZGsN0": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "29U1u1gEgcE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
