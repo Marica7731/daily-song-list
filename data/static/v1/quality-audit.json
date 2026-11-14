@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-14T23:50:00.208Z",
+  "generatedAt": "2026-11-14T23:57:55.903Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
   "inputVideos": 27487,
   "inputOccurrences": 302555,
-  "visibleVideos": 23309,
-  "visibleOccurrences": 298073,
-  "quarantinedOccurrences": 3721,
-  "quarantinedVideos": 2861,
+  "visibleVideos": 23308,
+  "visibleOccurrences": 298072,
+  "quarantinedOccurrences": 3722,
+  "quarantinedVideos": 2862,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 52,
     "unrelated_livestream_listing": 130,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 725,
+    "reused_description_across_unrelated_channels": 726,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 39,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -256,6 +256,33 @@
           "channelName": "まけないねこ / makenaineko",
           "videoTitle": "【歌枠】キチゲ解放するための歌ったりするお【#新人Vtuber#セルフ受肉#雑談 #歌枠 】",
           "raw": "Santo Rosário | 40 Dias com São Miguel Arcanjo 2026 | 03:40 | 09/09 | 22° Dia | Live Ao vivo"
+        }
+      ]
+    },
+    {
+      "sourceHash": "fe8905fcafda7d76f3d6d1ffa8d574d58a71320a1a096f93083ce95c5de40a48",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 11,
+      "channelCount": 11,
+      "distinctVideoTitles": 11,
+      "examples": [
+        {
+          "videoId": "clGY9gpI35o",
+          "channelName": "",
+          "videoTitle": "【コラボ歌枠】すとらてぃあちゃんといっぱい歌うぞ～🎙弾き語りソングもあり🦋〔#シオてぃあ /水篠シオン 〕",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
+        },
+        {
+          "videoId": "tbrcVDdVdHM",
+          "channelName": "フリースタイル🆓Freestyle",
+          "videoTitle": "雑談や歌枠🆓フリースタイルCH",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
+        },
+        {
+          "videoId": "AlgHFlBq1c8",
+          "channelName": "花街まる / Hanamachi Maru",
+          "videoTitle": "〖 歌枠 / 縦型配信 〗その…最近どうなんだ。音ズレのほうは。〖花街まる / 新人vtuber 〗",
+          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
         }
       ]
     },
@@ -931,33 +958,6 @@
           "channelName": "イノイタル-ITARU-",
           "videoTitle": "【第309回】弾き語り&トーク YouTubeLIVE【イタリゴト】",
           "raw": "【ニコ生】11/4 18:00【特番】2026 アメリカ中間選挙 徹底解説【ゲスト:Kダブシャイン氏】＊前半のみ"
-        }
-      ]
-    },
-    {
-      "sourceHash": "fe8905fcafda7d76f3d6d1ffa8d574d58a71320a1a096f93083ce95c5de40a48",
-      "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
-      "examples": [
-        {
-          "videoId": "tbrcVDdVdHM",
-          "channelName": "フリースタイル🆓Freestyle",
-          "videoTitle": "雑談や歌枠🆓フリースタイルCH",
-          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
-        },
-        {
-          "videoId": "AlgHFlBq1c8",
-          "channelName": "花街まる / Hanamachi Maru",
-          "videoTitle": "〖 歌枠 / 縦型配信 〗その…最近どうなんだ。音ズレのほうは。〖花街まる / 新人vtuber 〗",
-          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
-        },
-        {
-          "videoId": "i_S3ghlAqHU",
-          "channelName": "幽羽 戒人 / Yuwa Kaito 【VTuber】",
-          "videoTitle": "【歌枠】残高616円になったので歌います【#vtuber /#幽羽戒人 】",
-          "raw": "【10/25(土)17:00配信】「バクゴーTV 2025」／『僕のヒーローアカデミア FINAL SEASON』生配信特番／出演:岡本信彦"
         }
       ]
     },
@@ -1766,11 +1766,11 @@
       }
     },
     "2026-09-11": {
-      "quarantinedOccurrences": 59,
+      "quarantinedOccurrences": 60,
       "deduplicatedOccurrences": 4,
       "byReason": {
         "prayer_broadcast_timeline": 49,
-        "reused_description_across_unrelated_channels": 3,
+        "reused_description_across_unrelated_channels": 4,
         "confirmed_stream_start_marker": 1,
         "reviewed_source_activity_chapter": 1,
         "unrelated_livestream_listing": 1,
@@ -4789,6 +4789,10 @@
       "deduplicatedOccurrences": 0
     },
     "AsWWTUTq9TM": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "clGY9gpI35o": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
