@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-14T19:54:39.785Z",
+  "generatedAt": "2026-11-14T19:57:56.717Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27443,
-  "inputOccurrences": 302000,
-  "visibleVideos": 23266,
-  "visibleOccurrences": 297519,
-  "quarantinedOccurrences": 3720,
-  "quarantinedVideos": 2860,
+  "inputVideos": 27446,
+  "inputOccurrences": 302032,
+  "visibleVideos": 23268,
+  "visibleOccurrences": 297550,
+  "quarantinedOccurrences": 3721,
+  "quarantinedVideos": 2861,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 3
+    "dated_stream_announcement": 4
   },
   "repeatedDescriptionSources": [
     {
@@ -2408,11 +2408,12 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 12,
+      "quarantinedOccurrences": 13,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "reused_description_across_unrelated_channels": 11,
-        "confirmed_talk_section": 1
+        "confirmed_talk_section": 1,
+        "dated_stream_announcement": 1
       }
     },
     "2024-10-20": {
@@ -15427,6 +15428,10 @@
       "deduplicatedOccurrences": 0
     },
     "SLktxS5Xaac": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "rJbY5U16N1g": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
