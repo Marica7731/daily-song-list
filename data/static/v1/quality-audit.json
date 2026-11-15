@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T03:30:54.214Z",
+  "generatedAt": "2026-11-15T03:35:47.989Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27527,
-  "inputOccurrences": 302977,
+  "inputVideos": 27528,
+  "inputOccurrences": 302978,
   "visibleVideos": 23343,
   "visibleOccurrences": 298489,
-  "quarantinedOccurrences": 3727,
-  "quarantinedVideos": 2867,
+  "quarantinedOccurrences": 3728,
+  "quarantinedVideos": 2868,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 9
+    "dated_stream_announcement": 10
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -1191,15 +1191,15 @@
           "raw": "Hiro's Ongaku Studio Vol.113 配信 2026.11.12(木)20:30-"
         },
         {
-          "videoId": "GicCHlm8MLI",
-          "channelName": "神戸の発達障害シンガーソングライターゆきのつづき",
-          "videoTitle": "ピアノ弾き語り",
+          "videoId": "4OuWuSF_Pb0",
+          "channelName": "NAP RADIO",
+          "videoTitle": "2026.11.14 弾き語り夜/もろサマ on stage",
           "raw": "Hiro's Ongaku Studio Vol.113 配信 2026.11.12(木)20:30-"
         },
         {
-          "videoId": "3IKsrarNaI4",
-          "channelName": "柳井鹿目 - かなめは弾き語る📻",
-          "videoTitle": "【ライブ映像】夢を叶えた｜人生初の弾き語りワンマンライブ",
+          "videoId": "GicCHlm8MLI",
+          "channelName": "神戸の発達障害シンガーソングライターゆきのつづき",
+          "videoTitle": "ピアノ弾き語り",
           "raw": "Hiro's Ongaku Studio Vol.113 配信 2026.11.12(木)20:30-"
         }
       ]
@@ -2435,11 +2435,11 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 19,
+      "quarantinedOccurrences": 20,
       "deduplicatedOccurrences": 1,
       "byReason": {
+        "dated_stream_announcement": 7,
         "reviewed_bad_description_source": 1,
-        "dated_stream_announcement": 6,
         "reused_description_across_unrelated_channels": 11,
         "confirmed_talk_section": 1
       }
@@ -15413,6 +15413,10 @@
     },
     "54qBm4UbEzY": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "4OuWuSF_Pb0": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "7VaJFM9GkFs": {
