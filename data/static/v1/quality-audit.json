@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T20:58:39.601Z",
+  "generatedAt": "2026-11-15T21:01:41.483Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27779,
-  "inputOccurrences": 305915,
-  "visibleVideos": 23576,
-  "visibleOccurrences": 301402,
-  "quarantinedOccurrences": 3751,
-  "quarantinedVideos": 2886,
+  "inputVideos": 27782,
+  "inputOccurrences": 305918,
+  "visibleVideos": 23577,
+  "visibleOccurrences": 301403,
+  "quarantinedOccurrences": 3753,
+  "quarantinedVideos": 2888,
   "deduplicatedOccurrences": 742,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 130,
     "unrelated_talk_show_listing": 83,
-    "reused_description_across_unrelated_channels": 738,
+    "reused_description_across_unrelated_channels": 740,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -127,9 +127,9 @@
     {
       "sourceHash": "1b7c875f9609f9d03ef2cecbd1ac95a340777159f5e8ef07038611ce06120e40",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 250,
-      "channelCount": 228,
-      "distinctVideoTitles": 241,
+      "videoCount": 252,
+      "channelCount": 230,
+      "distinctVideoTitles": 243,
       "examples": [
         {
           "videoId": "7pO4HacjaUc",
@@ -2462,22 +2462,22 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 33,
+      "quarantinedOccurrences": 34,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "dated_stream_announcement": 10,
-        "reused_description_across_unrelated_channels": 21,
+        "reused_description_across_unrelated_channels": 22,
         "reviewed_bad_description_source": 1,
         "confirmed_talk_section": 1
       }
     },
     "2026-11-15": {
-      "quarantinedOccurrences": 10,
+      "quarantinedOccurrences": 11,
       "deduplicatedOccurrences": 1,
       "byReason": {
+        "reused_description_across_unrelated_channels": 4,
         "dated_stream_announcement": 2,
         "confirmed_chat_section": 4,
-        "reused_description_across_unrelated_channels": 3,
         "confirmed_stream_start_marker": 1
       }
     },
@@ -15460,6 +15460,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "6gq6cbx4TIY": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "enVGcoPLBEc": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -15591,6 +15595,10 @@
     "-9_CxbDsJ1k": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 1
+    },
+    "sOiGAFhOxN4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "OM90WAx17iA": {
       "quarantinedOccurrences": 1,
