@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T04:28:45.015Z",
+  "generatedAt": "2026-11-15T04:33:35.929Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27544,
-  "inputOccurrences": 303143,
+  "inputVideos": 27545,
+  "inputOccurrences": 303144,
   "visibleVideos": 23358,
   "visibleOccurrences": 298653,
-  "quarantinedOccurrences": 3729,
-  "quarantinedVideos": 2869,
+  "quarantinedOccurrences": 3730,
+  "quarantinedVideos": 2870,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 11
+    "dated_stream_announcement": 12
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 9,
+      "channelCount": 9,
+      "distinctVideoTitles": 9,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -2435,10 +2435,10 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 21,
+      "quarantinedOccurrences": 22,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "dated_stream_announcement": 8,
+        "dated_stream_announcement": 9,
         "reviewed_bad_description_source": 1,
         "reused_description_across_unrelated_channels": 11,
         "confirmed_talk_section": 1
@@ -15444,6 +15444,10 @@
       "deduplicatedOccurrences": 0
     },
     "29U1u1gEgcE": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "_yJiUGTaHsI": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
