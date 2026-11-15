@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T14:05:56.664Z",
+  "generatedAt": "2026-11-15T14:12:02.415Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27678,
-  "inputOccurrences": 304709,
+  "inputVideos": 27679,
+  "inputOccurrences": 304710,
   "visibleVideos": 23478,
   "visibleOccurrences": 300204,
-  "quarantinedOccurrences": 3744,
-  "quarantinedVideos": 2883,
+  "quarantinedOccurrences": 3745,
+  "quarantinedVideos": 2884,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 14
+    "dated_stream_announcement": 15
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 11,
-      "channelCount": 11,
-      "distinctVideoTitles": 11,
+      "videoCount": 12,
+      "channelCount": 12,
+      "distinctVideoTitles": 12,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -1197,9 +1197,9 @@
           "raw": "Hiro's Ongaku Studio Vol.113 配信 2026.11.12(木)20:30-"
         },
         {
-          "videoId": "GicCHlm8MLI",
-          "channelName": "神戸の発達障害シンガーソングライターゆきのつづき",
-          "videoTitle": "ピアノ弾き語り",
+          "videoId": "k22UanHKwEA",
+          "channelName": "創弾き語り OHORI123（OHORI123）",
+          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 24～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
           "raw": "Hiro's Ongaku Studio Vol.113 配信 2026.11.12(木)20:30-"
         }
       ]
@@ -2462,10 +2462,10 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 32,
+      "quarantinedOccurrences": 33,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "dated_stream_announcement": 9,
+        "dated_stream_announcement": 10,
         "reused_description_across_unrelated_channels": 21,
         "reviewed_bad_description_source": 1,
         "confirmed_talk_section": 1
@@ -15470,6 +15470,10 @@
     "7VaJFM9GkFs": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 1
+    },
+    "k22UanHKwEA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
     },
     "89s-1OihYVo": {
       "quarantinedOccurrences": 1,
