@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T13:59:59.166Z",
+  "generatedAt": "2026-11-15T14:05:56.664Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27676,
-  "inputOccurrences": 304702,
-  "visibleVideos": 23477,
-  "visibleOccurrences": 300198,
-  "quarantinedOccurrences": 3743,
-  "quarantinedVideos": 2882,
+  "inputVideos": 27678,
+  "inputOccurrences": 304709,
+  "visibleVideos": 23478,
+  "visibleOccurrences": 300204,
+  "quarantinedOccurrences": 3744,
+  "quarantinedVideos": 2883,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 13
+    "dated_stream_announcement": 14
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
+      "videoCount": 11,
+      "channelCount": 11,
+      "distinctVideoTitles": 11,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -2472,10 +2472,10 @@
       }
     },
     "2026-11-15": {
-      "quarantinedOccurrences": 3,
+      "quarantinedOccurrences": 4,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "dated_stream_announcement": 1,
+        "dated_stream_announcement": 2,
         "confirmed_stream_start_marker": 1,
         "reused_description_across_unrelated_channels": 1
       }
@@ -15584,6 +15584,10 @@
       "deduplicatedOccurrences": 0
     },
     "OM90WAx17iA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Tw3c0o4520U": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
