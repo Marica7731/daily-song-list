@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-15T19:31:06.379Z",
+  "generatedAt": "2026-11-15T19:39:55.000Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261115T191620Z",
-  "sourceCapturedAt": "2026-11-15T19:16:20.513Z",
+  "sourceSnapshotId": "20261115T192631Z",
+  "sourceCapturedAt": "2026-11-15T19:26:31.066Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 590
+    "candidateVideos": 599
   },
-  "pendingVideoCount": 724,
-  "noSongRetryPoolCount": 22822,
-  "processedVideoCount": 39446,
-  "videoCount": 23561,
-  "songOccurrenceCount": 301235,
+  "pendingVideoCount": 700,
+  "noSongRetryPoolCount": 22823,
+  "processedVideoCount": 39450,
+  "videoCount": 23565,
+  "songOccurrenceCount": 301296,
   "quality": {
     "quarantinedOccurrences": 3750,
     "quarantinedVideos": 2885,
@@ -428,7 +428,7 @@
       "stats": {
         "videoCount": 7,
         "songOccurrenceCount": 135,
-        "pendingVideoCount": 4,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 0,
         "deduplicatedOccurrences": 0,
         "artistCatalogArchivedOccurrences": 0
@@ -457,29 +457,29 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 446,
-        "songOccurrenceCount": 5665,
-        "pendingVideoCount": 315,
+        "videoCount": 450,
+        "songOccurrenceCount": 5726,
+        "pendingVideoCount": 291,
         "quarantinedOccurrences": 49,
         "deduplicatedOccurrences": 2,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 3606,
+        "totalCount": 3631,
         "pageCount": 73,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/3d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 1628,
+        "totalCount": 1639,
         "pageCount": 33,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/3d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 403,
+        "totalCount": 407,
         "pageCount": 9,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -488,29 +488,29 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1330,
-        "songOccurrenceCount": 14729,
-        "pendingVideoCount": 721,
+        "videoCount": 1334,
+        "songOccurrenceCount": 14790,
+        "pendingVideoCount": 697,
         "quarantinedOccurrences": 292,
         "deduplicatedOccurrences": 11,
         "artistCatalogArchivedOccurrences": 1
       },
       "songs": {
-        "totalCount": 7917,
+        "totalCount": 7934,
         "pageCount": 159,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 3301,
+        "totalCount": 3309,
         "pageCount": 67,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 986,
+        "totalCount": 990,
         "pageCount": 20,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -519,29 +519,29 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6914,
-        "songOccurrenceCount": 80021,
-        "pendingVideoCount": 724,
+        "videoCount": 6918,
+        "songOccurrenceCount": 80082,
+        "pendingVideoCount": 700,
         "quarantinedOccurrences": 1510,
         "deduplicatedOccurrences": 224,
         "artistCatalogArchivedOccurrences": 8
       },
       "songs": {
-        "totalCount": 28642,
+        "totalCount": 28650,
         "pageCount": 573,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 10558,
+        "totalCount": 10563,
         "pageCount": 212,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 2777,
+        "totalCount": 2778,
         "pageCount": 56,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -550,22 +550,22 @@
     },
     "all": {
       "stats": {
-        "videoCount": 23561,
-        "songOccurrenceCount": 301235,
-        "pendingVideoCount": 724,
+        "videoCount": 23565,
+        "songOccurrenceCount": 301296,
+        "pendingVideoCount": 700,
         "quarantinedOccurrences": 3750,
         "deduplicatedOccurrences": 742,
         "artistCatalogArchivedOccurrences": 20
       },
       "songs": {
-        "totalCount": 71675,
+        "totalCount": 71676,
         "pageCount": 1434,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 26002,
+        "totalCount": 26003,
         "pageCount": 521,
         "pageSize": 50,
         "pageNumberWidth": 4,
