@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-15T20:08:14.890Z",
-  "scannedVideoCount": 23568,
-  "scannedOccurrenceCount": 301331,
+  "generatedAt": "2026-11-15T20:14:24.315Z",
+  "scannedVideoCount": 23574,
+  "scannedOccurrenceCount": 301389,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -932,14 +932,14 @@
     },
     {
       "date": "2026-11-15",
-      "occurrences": 1958,
+      "occurrences": 2016,
       "quarantinedOccurrences": 10
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 670,
     "possible_activity_chapter": 177,
-    "possible_date_as_artist": 141,
+    "possible_date_as_artist": 142,
     "possible_release_metadata_as_artist": 183,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 4
@@ -1255,6 +1255,28 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "〜2026/11",
+      "artist": "日",
+      "raw": "20:00〜2026/11/8(日)",
+      "sourceHash": "af7c7cf6b7c15832801203cd3bf2a547b8b2442a0bd45a538228f7ca71e0b9c9",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "DElYcBO8hyY",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-08T13:26:19.908Z"
+        },
+        {
+          "videoId": "I2-83S5v6T4",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-14T14:42:02.620Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "~11",
       "artist": "土",
       "raw": "19:00～11/28(土)",
@@ -1292,28 +1314,6 @@
           "videoId": "JA8Qtgwqyuo",
           "channelName": "兎姫乃もも",
           "publishedAt": "2026-11-11T11:11:40.157Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜2026/11",
-      "artist": "日",
-      "raw": "20:00〜2026/11/8(日)",
-      "sourceHash": "af7c7cf6b7c15832801203cd3bf2a547b8b2442a0bd45a538228f7ca71e0b9c9",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "DElYcBO8hyY",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-08T13:26:19.908Z"
-        },
-        {
-          "videoId": "I2-83S5v6T4",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-14T14:42:02.620Z"
         }
       ],
       "videoCount": 2,
