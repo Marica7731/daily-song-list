@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-15T04:13:04.051Z",
+  "generatedAt": "2026-11-15T04:18:14.408Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27534,
-  "inputOccurrences": 303039,
-  "visibleVideos": 23349,
-  "visibleOccurrences": 298550,
-  "quarantinedOccurrences": 3728,
-  "quarantinedVideos": 2868,
+  "inputVideos": 27540,
+  "inputOccurrences": 303087,
+  "visibleVideos": 23354,
+  "visibleOccurrences": 298597,
+  "quarantinedOccurrences": 3729,
+  "quarantinedVideos": 2869,
   "deduplicatedOccurrences": 741,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 10
+    "dated_stream_announcement": 11
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 7,
-      "channelCount": 7,
-      "distinctVideoTitles": 7,
+      "videoCount": 8,
+      "channelCount": 8,
+      "distinctVideoTitles": 8,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -2435,10 +2435,10 @@
       }
     },
     "2026-11-14": {
-      "quarantinedOccurrences": 20,
+      "quarantinedOccurrences": 21,
       "deduplicatedOccurrences": 1,
       "byReason": {
-        "dated_stream_announcement": 7,
+        "dated_stream_announcement": 8,
         "reviewed_bad_description_source": 1,
         "reused_description_across_unrelated_channels": 11,
         "confirmed_talk_section": 1
@@ -15456,6 +15456,10 @@
       "deduplicatedOccurrences": 0
     },
     "GlKht1LRsMQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "pYVDgq7B4WE": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
