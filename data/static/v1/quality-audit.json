@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-16T18:10:21.491Z",
+  "generatedAt": "2026-11-16T18:17:00.460Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28038,
-  "inputOccurrences": 308292,
-  "visibleVideos": 23778,
-  "visibleOccurrences": 303680,
-  "quarantinedOccurrences": 3846,
-  "quarantinedVideos": 2943,
+  "inputVideos": 28042,
+  "inputOccurrences": 308320,
+  "visibleVideos": 23781,
+  "visibleOccurrences": 303707,
+  "quarantinedOccurrences": 3847,
+  "quarantinedVideos": 2944,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 168,
     "unrelated_talk_show_listing": 108,
-    "reused_description_across_unrelated_channels": 757,
+    "reused_description_across_unrelated_channels": 758,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1315,10 +1315,16 @@
     {
       "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
+        {
+          "videoId": "Jv640nYk314",
+          "channelName": "創弾き語り OHORI123（OHORI123）",
+          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 26～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
         {
           "videoId": "7qDV9Z2NYqU",
           "channelName": "大御本尊様への道・音楽人・柳井一@wainai123",
@@ -1329,12 +1335,6 @@
           "videoId": "LrnJOKbQ1u8",
           "channelName": "仁井谷 正充",
           "videoTitle": "【にょきにょき10周年】にょきにょき新作発表とダブルタワー開発状況、そして21時からは昭和・平成・令和のまったり弾き語り【MOO仁井谷】",
-          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
-        },
-        {
-          "videoId": "rF6xkv7NBTA",
-          "channelName": "宮崎奈穂子*745チャンネル*",
-          "videoTitle": "7:45〜リクエスト即興弾き語り配信 #shorts #縦型配信",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
         }
       ]
@@ -2539,10 +2539,10 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 21,
+      "quarantinedOccurrences": 22,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 6,
+        "reused_description_across_unrelated_channels": 7,
         "unrelated_livestream_listing": 7,
         "unrelated_talk_show_listing": 7,
         "dated_stream_announcement": 1
@@ -15912,6 +15912,10 @@
       "deduplicatedOccurrences": 0
     },
     "3D7iEePcjaQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Jv640nYk314": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
