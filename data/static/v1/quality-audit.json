@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-11-16T23:47:34.240Z",
+  "generatedAt": "2026-11-16T23:51:01.667Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28091,
-  "inputOccurrences": 308685,
-  "visibleVideos": 23814,
-  "visibleOccurrences": 304051,
-  "quarantinedOccurrences": 3868,
-  "quarantinedVideos": 2960,
+  "inputVideos": 28094,
+  "inputOccurrences": 308707,
+  "visibleVideos": 23816,
+  "visibleOccurrences": 304072,
+  "quarantinedOccurrences": 3869,
+  "quarantinedVideos": 2961,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
   "artistCatalogArchivedOccurrences": 20,
   "normalizedArtistOccurrences": 466,
-  "normalizedReleaseMetadataOccurrences": 1535,
+  "normalizedReleaseMetadataOccurrences": 1536,
   "repairedDateCreditOccurrences": 0,
   "repairedStructuredCreditOccurrences": 2933,
   "repairedKnownSourceCreditOccurrences": 154,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 173,
     "unrelated_talk_show_listing": 113,
-    "reused_description_across_unrelated_channels": 769,
+    "reused_description_across_unrelated_channels": 770,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -937,9 +937,9 @@
     {
       "sourceHash": "fe8905fcafda7d76f3d6d1ffa8d574d58a71320a1a096f93083ce95c5de40a48",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 12,
-      "channelCount": 12,
-      "distinctVideoTitles": 12,
+      "videoCount": 13,
+      "channelCount": 13,
+      "distinctVideoTitles": 13,
       "examples": [
         {
           "videoId": "tbrcVDdVdHM",
@@ -2539,12 +2539,12 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 39,
+      "quarantinedOccurrences": 40,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 10,
         "unrelated_talk_show_listing": 10,
-        "reused_description_across_unrelated_channels": 18,
+        "reused_description_across_unrelated_channels": 19,
         "dated_stream_announcement": 1
       }
     },
@@ -15984,6 +15984,10 @@
       "deduplicatedOccurrences": 0
     },
     "ons0VG49P0Q": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "06vqmmpcJnw": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
