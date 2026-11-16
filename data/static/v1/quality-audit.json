@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-16T15:06:16.863Z",
+  "generatedAt": "2026-11-16T15:12:11.657Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28003,
-  "inputOccurrences": 307899,
-  "visibleVideos": 23754,
-  "visibleOccurrences": 303303,
-  "quarantinedOccurrences": 3830,
-  "quarantinedVideos": 2932,
+  "inputVideos": 28005,
+  "inputOccurrences": 307908,
+  "visibleVideos": 23751,
+  "visibleOccurrences": 303307,
+  "quarantinedOccurrences": 3835,
+  "quarantinedVideos": 2937,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 163,
     "unrelated_talk_show_listing": 103,
-    "reused_description_across_unrelated_channels": 751,
+    "reused_description_across_unrelated_channels": 756,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1311,6 +1311,33 @@
           "raw": "The Legend of Zelda: Ocarina of Time Randomizer by adef in 2:46:50 - Games Done Quick Express 2026"
         }
       ]
+    },
+    {
+      "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "LrnJOKbQ1u8",
+          "channelName": "仁井谷 正充",
+          "videoTitle": "【にょきにょき10周年】にょきにょき新作発表とダブルタワー開発状況、そして21時からは昭和・平成・令和のまったり弾き語り【MOO仁井谷】",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
+        {
+          "videoId": "rF6xkv7NBTA",
+          "channelName": "宮崎奈穂子*745チャンネル*",
+          "videoTitle": "7:45〜リクエスト即興弾き語り配信 #shorts #縦型配信",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
+        {
+          "videoId": "Ka2-i3S0cqw",
+          "channelName": "唄街しの",
+          "videoTitle": "⋆ 弾き語り｜コレサワさんにお熱かも…♩ 【 #唄街観光中 】",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        }
+      ]
     }
   ],
   "reviewedBadDescriptionHashes": [
@@ -2512,9 +2539,10 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 7,
+      "quarantinedOccurrences": 12,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "reused_description_across_unrelated_channels": 5,
         "unrelated_livestream_listing": 3,
         "unrelated_talk_show_listing": 3,
         "dated_stream_announcement": 1
@@ -15883,16 +15911,36 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "LrnJOKbQ1u8": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "msjCRjATTkI": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "rF6xkv7NBTA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Ka2-i3S0cqw": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "-AgRWr4Dssw": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "ddLwb92JADg": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "03uEYXjFBgA": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "1xloFhYFuwQ": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "cabz5BqhJ0Q": {
