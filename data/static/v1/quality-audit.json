@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-16T15:34:55.935Z",
+  "generatedAt": "2026-11-16T15:38:27.571Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28008,
-  "inputOccurrences": 307960,
-  "visibleVideos": 23754,
-  "visibleOccurrences": 303359,
-  "quarantinedOccurrences": 3835,
-  "quarantinedVideos": 2937,
+  "inputVideos": 28011,
+  "inputOccurrences": 307991,
+  "visibleVideos": 23756,
+  "visibleOccurrences": 303389,
+  "quarantinedOccurrences": 3836,
+  "quarantinedVideos": 2938,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 163,
     "unrelated_talk_show_listing": 103,
-    "reused_description_across_unrelated_channels": 756,
+    "reused_description_across_unrelated_channels": 757,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1315,10 +1315,16 @@
     {
       "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 5,
-      "channelCount": 5,
-      "distinctVideoTitles": 5,
+      "videoCount": 6,
+      "channelCount": 6,
+      "distinctVideoTitles": 6,
       "examples": [
+        {
+          "videoId": "7qDV9Z2NYqU",
+          "channelName": "大御本尊様への道・音楽人・柳井一@wainai123",
+          "videoTitle": "日蓮正宗壽海寺第二回総登山御講・ギター弾き語り/ルビーの指環/長い夜/夢をあきらめないで・自分で髪カット！ざっくばらん/もっと自由に",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
         {
           "videoId": "LrnJOKbQ1u8",
           "channelName": "仁井谷 正充",
@@ -1329,12 +1335,6 @@
           "videoId": "rF6xkv7NBTA",
           "channelName": "宮崎奈穂子*745チャンネル*",
           "videoTitle": "7:45〜リクエスト即興弾き語り配信 #shorts #縦型配信",
-          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
-        },
-        {
-          "videoId": "Ka2-i3S0cqw",
-          "channelName": "唄街しの",
-          "videoTitle": "⋆ 弾き語り｜コレサワさんにお熱かも…♩ 【 #唄街観光中 】",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
         }
       ]
@@ -2539,10 +2539,10 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 12,
+      "quarantinedOccurrences": 13,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 5,
+        "reused_description_across_unrelated_channels": 6,
         "unrelated_livestream_listing": 3,
         "unrelated_talk_show_listing": 3,
         "dated_stream_announcement": 1
@@ -15908,6 +15908,10 @@
       "deduplicatedOccurrences": 0
     },
     "3D7iEePcjaQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "7qDV9Z2NYqU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
