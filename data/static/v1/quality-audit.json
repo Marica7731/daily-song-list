@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-16T03:26:35.866Z",
+  "generatedAt": "2026-11-16T03:32:25.520Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 27836,
-  "inputOccurrences": 306611,
+  "inputVideos": 27837,
+  "inputOccurrences": 306612,
   "visibleVideos": 23630,
   "visibleOccurrences": 302095,
-  "quarantinedOccurrences": 3754,
-  "quarantinedVideos": 2889,
+  "quarantinedOccurrences": 3755,
+  "quarantinedVideos": 2890,
   "deduplicatedOccurrences": 742,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 72,
@@ -40,7 +40,7 @@
     "dated_stream_challenge_result": 7,
     "dated_talk_event_announcement": 1,
     "unrelated_worship_livestream_listing": 2,
-    "dated_stream_announcement": 15
+    "dated_stream_announcement": 16
   },
   "repeatedDescriptionSources": [
     {
@@ -1180,9 +1180,9 @@
     {
       "sourceHash": "a7b96848d117f6af484f7111dccbab4dd3fb348bf6447f4eb0cac85061fa399e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 12,
-      "channelCount": 12,
-      "distinctVideoTitles": 12,
+      "videoCount": 13,
+      "channelCount": 13,
+      "distinctVideoTitles": 13,
       "examples": [
         {
           "videoId": "6pi2OC2hggY",
@@ -2472,11 +2472,11 @@
       }
     },
     "2026-11-15": {
-      "quarantinedOccurrences": 12,
+      "quarantinedOccurrences": 13,
       "deduplicatedOccurrences": 1,
       "byReason": {
         "reused_description_across_unrelated_channels": 5,
-        "dated_stream_announcement": 2,
+        "dated_stream_announcement": 3,
         "confirmed_chat_section": 4,
         "confirmed_stream_start_marker": 1
       }
@@ -15605,6 +15605,10 @@
       "deduplicatedOccurrences": 0
     },
     "Tw3c0o4520U": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "kulxilk2kpU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
