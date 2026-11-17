@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-11-17T19:31:10.051Z",
+  "generatedAt": "2026-11-17T19:36:01.503Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28304,
-  "inputOccurrences": 310343,
-  "visibleVideos": 23965,
-  "visibleOccurrences": 305608,
-  "quarantinedOccurrences": 3967,
-  "quarantinedVideos": 3022,
-  "deduplicatedOccurrences": 747,
+  "inputVideos": 28309,
+  "inputOccurrences": 310404,
+  "visibleVideos": 23969,
+  "visibleOccurrences": 305662,
+  "quarantinedOccurrences": 3969,
+  "quarantinedVideos": 3023,
+  "deduplicatedOccurrences": 752,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
   "artistCatalogArchivedOccurrences": 21,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 210,
-    "unrelated_talk_show_listing": 150,
+    "unrelated_livestream_listing": 211,
+    "unrelated_talk_show_listing": 151,
     "reused_description_across_unrelated_channels": 792,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
@@ -1315,9 +1315,9 @@
     {
       "sourceHash": "cfd96d6719c28fcae2ae0fa5cd76a2dc4bfaa7f003aa033c83916cbd5e3f442e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 35,
-      "channelCount": 34,
-      "distinctVideoTitles": 35,
+      "videoCount": 36,
+      "channelCount": 35,
+      "distinctVideoTitles": 36,
       "examples": [
         {
           "videoId": "2al9nCUecKU",
@@ -2577,11 +2577,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 42,
-      "deduplicatedOccurrences": 1,
+      "quarantinedOccurrences": 44,
+      "deduplicatedOccurrences": 6,
       "byReason": {
-        "unrelated_livestream_listing": 20,
-        "unrelated_talk_show_listing": 20,
+        "unrelated_livestream_listing": 21,
+        "unrelated_talk_show_listing": 21,
         "reused_description_across_unrelated_channels": 2
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16254,11 +16254,19 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "cRZEHCNjF4s": {
+      "quarantinedOccurrences": 0,
+      "deduplicatedOccurrences": 5
+    },
     "tatHMiFOvVg": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "lC7MJySyuF4": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "A6desoKhFws": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
