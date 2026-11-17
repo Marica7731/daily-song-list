@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-17T15:06:17.648Z",
+  "generatedAt": "2026-11-17T15:12:45.924Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261117T145319Z",
-  "sourceCapturedAt": "2026-11-17T14:53:19.293Z",
+  "sourceSnapshotId": "20261117T150324Z",
+  "sourceCapturedAt": "2026-11-17T15:03:24.201Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 288
+    "candidateVideos": 397
   },
-  "pendingVideoCount": 927,
-  "noSongRetryPoolCount": 23240,
-  "processedVideoCount": 39939,
-  "videoCount": 23925,
-  "songOccurrenceCount": 305141,
+  "pendingVideoCount": 952,
+  "noSongRetryPoolCount": 23241,
+  "processedVideoCount": 39940,
+  "videoCount": 23926,
+  "songOccurrenceCount": 305144,
   "quality": {
     "quarantinedOccurrences": 3951,
     "quarantinedVideos": 3014,
@@ -426,15 +426,15 @@
   "ranges": {
     "today": {
       "stats": {
-        "videoCount": 62,
-        "songOccurrenceCount": 776,
+        "videoCount": 63,
+        "songOccurrenceCount": 779,
         "pendingVideoCount": 0,
         "quarantinedOccurrences": 54,
         "deduplicatedOccurrences": 0,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 693,
+        "totalCount": 696,
         "pageCount": 14,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -448,7 +448,7 @@
         "path": "rankings/today/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 62,
+        "totalCount": 63,
         "pageCount": 2,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -457,15 +457,15 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 558,
-        "songOccurrenceCount": 6482,
-        "pendingVideoCount": 413,
+        "videoCount": 559,
+        "songOccurrenceCount": 6485,
+        "pendingVideoCount": 438,
         "quarantinedOccurrences": 214,
         "deduplicatedOccurrences": 6,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 4130,
+        "totalCount": 4133,
         "pageCount": 83,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -479,7 +479,7 @@
         "path": "rankings/3d/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 506,
+        "totalCount": 507,
         "pageCount": 11,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -488,15 +488,15 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1425,
-        "songOccurrenceCount": 16297,
-        "pendingVideoCount": 927,
+        "videoCount": 1426,
+        "songOccurrenceCount": 16300,
+        "pendingVideoCount": 952,
         "quarantinedOccurrences": 451,
         "deduplicatedOccurrences": 10,
         "artistCatalogArchivedOccurrences": 1
       },
       "songs": {
-        "totalCount": 8406,
+        "totalCount": 8407,
         "pageCount": 169,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -519,9 +519,9 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6977,
-        "songOccurrenceCount": 80083,
-        "pendingVideoCount": 927,
+        "videoCount": 6978,
+        "songOccurrenceCount": 80086,
+        "pendingVideoCount": 952,
         "quarantinedOccurrences": 1707,
         "deduplicatedOccurrences": 227,
         "artistCatalogArchivedOccurrences": 7
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 23925,
-        "songOccurrenceCount": 305141,
-        "pendingVideoCount": 927,
+        "videoCount": 23926,
+        "songOccurrenceCount": 305144,
+        "pendingVideoCount": 952,
         "quarantinedOccurrences": 3951,
         "deduplicatedOccurrences": 746,
         "artistCatalogArchivedOccurrences": 20
