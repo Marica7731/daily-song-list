@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-17T00:08:02.896Z",
+  "generatedAt": "2026-11-17T00:14:12.827Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28099,
-  "inputOccurrences": 308712,
-  "visibleVideos": 23817,
-  "visibleOccurrences": 304073,
-  "quarantinedOccurrences": 3873,
-  "quarantinedVideos": 2965,
+  "inputVideos": 28109,
+  "inputOccurrences": 308766,
+  "visibleVideos": 23823,
+  "visibleOccurrences": 304121,
+  "quarantinedOccurrences": 3879,
+  "quarantinedVideos": 2969,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 173,
-    "unrelated_talk_show_listing": 113,
-    "reused_description_across_unrelated_channels": 774,
+    "unrelated_livestream_listing": 175,
+    "unrelated_talk_show_listing": 115,
+    "reused_description_across_unrelated_channels": 776,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1315,26 +1315,26 @@
     {
       "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 13,
-      "channelCount": 13,
-      "distinctVideoTitles": 13,
+      "videoCount": 15,
+      "channelCount": 15,
+      "distinctVideoTitles": 15,
       "examples": [
+        {
+          "videoId": "p9am6SITlGc",
+          "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+          "videoTitle": "【弾き語り】路上LIVE｜言い訳はいいよ窓辺に置いてきて【#こたつちゃ配信中】",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
+        {
+          "videoId": "rLqt8X9PCxc",
+          "channelName": "ポパイ商店LBいよ太",
+          "videoTitle": "ポパイ商店のHOBO-RADIO 毎週更新829回目 オリジナル曲弾き語り♪ #インターネットラジオ 風邪ひいて声出ない回です。",
+          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
+        },
         {
           "videoId": "jAJzUz8bsV4",
           "channelName": "siromi",
           "videoTitle": "［弾き語り歌枠］ろしライブ！たまにセッション #cluster #VRSJK #弾き語り #vrchat #vtuber",
-          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
-        },
-        {
-          "videoId": "Jv640nYk314",
-          "channelName": "創弾き語り OHORI123（OHORI123）",
-          "videoTitle": "OHORI123 アコギ/ギター/トーク/弾き語り配信 26～リクエスト,スリーフィンガー～ #アコギ #ギター #弾き語り #ギター男子 #アコギ男子 #弾き語り男子 #長渕剛 #スリーフィンガー",
-          "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
-        },
-        {
-          "videoId": "7qDV9Z2NYqU",
-          "channelName": "大御本尊様への道・音楽人・柳井一@wainai123",
-          "videoTitle": "日蓮正宗壽海寺第二回総登山御講・ギター弾き語り/ルビーの指環/長い夜/夢をあきらめないで・自分で髪カット！ざっくばらん/もっと自由に",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
         }
       ]
@@ -2539,12 +2539,12 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 44,
+      "quarantinedOccurrences": 50,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "unrelated_livestream_listing": 10,
-        "unrelated_talk_show_listing": 10,
-        "reused_description_across_unrelated_channels": 23,
+        "unrelated_livestream_listing": 12,
+        "unrelated_talk_show_listing": 12,
+        "reused_description_across_unrelated_channels": 25,
         "dated_stream_announcement": 1
       }
     },
@@ -15927,6 +15927,14 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "p9am6SITlGc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "rLqt8X9PCxc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "jAJzUz8bsV4": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -15997,6 +16005,14 @@
     },
     "xSmldzhSXb8": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "HGGvApEitOw": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "99J8JHb6Q8Y": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "ons0VG49P0Q": {
