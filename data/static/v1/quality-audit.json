@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-17T09:42:14.282Z",
+  "generatedAt": "2026-11-17T09:48:07.229Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28198,
-  "inputOccurrences": 309344,
+  "inputVideos": 28200,
+  "inputOccurrences": 309348,
   "visibleVideos": 23882,
   "visibleOccurrences": 304655,
-  "quarantinedOccurrences": 3923,
-  "quarantinedVideos": 2999,
+  "quarantinedOccurrences": 3927,
+  "quarantinedVideos": 3001,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 189,
-    "unrelated_talk_show_listing": 129,
+    "unrelated_livestream_listing": 191,
+    "unrelated_talk_show_listing": 131,
     "reused_description_across_unrelated_channels": 790,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
@@ -1313,6 +1313,33 @@
       ]
     },
     {
+      "sourceHash": "cfd96d6719c28fcae2ae0fa5cd76a2dc4bfaa7f003aa033c83916cbd5e3f442e",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 16,
+      "channelCount": 16,
+      "distinctVideoTitles": 16,
+      "examples": [
+        {
+          "videoId": "2al9nCUecKU",
+          "channelName": "狐月凛 / Kozuki Rin",
+          "videoTitle": "【 #歌枠 / #karaoke 】朝にひっそりと歌🎤🦊 #朝活 #狐月凛",
+          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
+        },
+        {
+          "videoId": "5Vdbf6NslEM",
+          "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
+          "videoTitle": "【 #歌枠 / KARAOKE 】初見さん5人＆同接110人耐久歌枠！ROM、初見さん大歓迎◎【 #新人vtuber / #Vsinger /#天ノ羽うゆ 】",
+          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
+        },
+        {
+          "videoId": "NLWrWF52cxM",
+          "channelName": "ういちチャンネル",
+          "videoTitle": "ギター弾き語り配信",
+          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
+        }
+      ]
+    },
+    {
       "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
       "reason": "reused_description_across_unrelated_channels",
       "videoCount": 23,
@@ -1336,33 +1363,6 @@
           "channelName": "ポパイ商店LBいよ太",
           "videoTitle": "ポパイ商店のHOBO-RADIO 毎週更新829回目 オリジナル曲弾き語り♪ #インターネットラジオ 風邪ひいて声出ない回です。",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
-        }
-      ]
-    },
-    {
-      "sourceHash": "cfd96d6719c28fcae2ae0fa5cd76a2dc4bfaa7f003aa033c83916cbd5e3f442e",
-      "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 14,
-      "channelCount": 14,
-      "distinctVideoTitles": 14,
-      "examples": [
-        {
-          "videoId": "5Vdbf6NslEM",
-          "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
-          "videoTitle": "【 #歌枠 / KARAOKE 】初見さん5人＆同接110人耐久歌枠！ROM、初見さん大歓迎◎【 #新人vtuber / #Vsinger /#天ノ羽うゆ 】",
-          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
-        },
-        {
-          "videoId": "NLWrWF52cxM",
-          "channelName": "ういちチャンネル",
-          "videoTitle": "ギター弾き語り配信",
-          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
-        },
-        {
-          "videoId": "bThL1iYUpcs",
-          "channelName": "だいたいナッティ🍊",
-          "videoTitle": "【歌枠┊KARAOKE】しっぽり飲みながら🍺ちるい曲【Vsinger Vtuber】",
-          "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
         }
       ]
     }
@@ -2566,12 +2566,12 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 83,
+      "quarantinedOccurrences": 87,
       "deduplicatedOccurrences": 0,
       "byReason": {
+        "unrelated_livestream_listing": 23,
+        "unrelated_talk_show_listing": 23,
         "reused_description_across_unrelated_channels": 38,
-        "unrelated_livestream_listing": 21,
-        "unrelated_talk_show_listing": 21,
         "reviewed_bad_description_source": 1,
         "dated_stream_announcement": 2
       }
@@ -15960,6 +15960,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "2al9nCUecKU": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "Yl7HuHMr0pU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -16005,6 +16009,10 @@
       "deduplicatedOccurrences": 0
     },
     "_d68Ns77rjc": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "agoA6e2Tkic": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
