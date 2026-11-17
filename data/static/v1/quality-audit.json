@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-17T20:45:39.406Z",
+  "generatedAt": "2026-11-17T20:51:54.352Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28325,
-  "inputOccurrences": 310538,
-  "visibleVideos": 23984,
-  "visibleOccurrences": 305795,
-  "quarantinedOccurrences": 3970,
-  "quarantinedVideos": 3024,
+  "inputVideos": 28327,
+  "inputOccurrences": 310541,
+  "visibleVideos": 23985,
+  "visibleOccurrences": 305796,
+  "quarantinedOccurrences": 3972,
+  "quarantinedVideos": 3025,
   "deduplicatedOccurrences": 752,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 211,
-    "unrelated_talk_show_listing": 151,
+    "unrelated_livestream_listing": 212,
+    "unrelated_talk_show_listing": 152,
     "reused_description_across_unrelated_channels": 793,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
@@ -1315,9 +1315,9 @@
     {
       "sourceHash": "cfd96d6719c28fcae2ae0fa5cd76a2dc4bfaa7f003aa033c83916cbd5e3f442e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 36,
-      "channelCount": 35,
-      "distinctVideoTitles": 36,
+      "videoCount": 37,
+      "channelCount": 36,
+      "distinctVideoTitles": 37,
       "examples": [
         {
           "videoId": "2al9nCUecKU",
@@ -2577,11 +2577,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 45,
+      "quarantinedOccurrences": 47,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "unrelated_livestream_listing": 21,
-        "unrelated_talk_show_listing": 21,
+        "unrelated_livestream_listing": 22,
+        "unrelated_talk_show_listing": 22,
         "reused_description_across_unrelated_channels": 3
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16299,6 +16299,10 @@
       "deduplicatedOccurrences": 0
     },
     "hjhIKi03FsQ": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "DKsCd263_Is": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
