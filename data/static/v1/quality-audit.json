@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-17T09:31:09.448Z",
+  "generatedAt": "2026-11-17T09:36:16.188Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28195,
-  "inputOccurrences": 309329,
+  "inputVideos": 28196,
+  "inputOccurrences": 309331,
   "visibleVideos": 23880,
   "visibleOccurrences": 304642,
-  "quarantinedOccurrences": 3921,
-  "quarantinedVideos": 2998,
+  "quarantinedOccurrences": 3923,
+  "quarantinedVideos": 2999,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -27,8 +27,8 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 188,
-    "unrelated_talk_show_listing": 128,
+    "unrelated_livestream_listing": 189,
+    "unrelated_talk_show_listing": 129,
     "reused_description_across_unrelated_channels": 790,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
@@ -1342,9 +1342,9 @@
     {
       "sourceHash": "cfd96d6719c28fcae2ae0fa5cd76a2dc4bfaa7f003aa033c83916cbd5e3f442e",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 13,
-      "channelCount": 13,
-      "distinctVideoTitles": 13,
+      "videoCount": 14,
+      "channelCount": 14,
+      "distinctVideoTitles": 14,
       "examples": [
         {
           "videoId": "5Vdbf6NslEM",
@@ -1353,15 +1353,15 @@
           "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
         },
         {
-          "videoId": "bThL1iYUpcs",
-          "channelName": "だいたいナッティ🍊",
-          "videoTitle": "【歌枠┊KARAOKE】しっぽり飲みながら🍺ちるい曲【Vsinger Vtuber】",
+          "videoId": "NLWrWF52cxM",
+          "channelName": "ういちチャンネル",
+          "videoTitle": "ギター弾き語り配信",
           "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
         },
         {
-          "videoId": "jvRDat2aAKI",
-          "channelName": "一般男性が懐かしの曲を歌うチャンネル",
-          "videoTitle": "【深夜の弾き語り】おやすみまえの弾き語り🎸",
+          "videoId": "bThL1iYUpcs",
+          "channelName": "だいたいナッティ🍊",
+          "videoTitle": "【歌枠┊KARAOKE】しっぽり飲みながら🍺ちるい曲【Vsinger Vtuber】",
           "raw": "17:40【マンデーバスターズ】ほんこん×高橋洋一×佐波優子×平井宏治"
         }
       ]
@@ -2566,12 +2566,12 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 81,
+      "quarantinedOccurrences": 83,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "reused_description_across_unrelated_channels": 38,
-        "unrelated_livestream_listing": 20,
-        "unrelated_talk_show_listing": 20,
+        "unrelated_livestream_listing": 21,
+        "unrelated_talk_show_listing": 21,
         "reviewed_bad_description_source": 1,
         "dated_stream_announcement": 2
       }
@@ -15973,6 +15973,10 @@
       "deduplicatedOccurrences": 0
     },
     "5Vdbf6NslEM": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "NLWrWF52cxM": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
