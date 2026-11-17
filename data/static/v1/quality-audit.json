@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-17T01:04:53.173Z",
+  "generatedAt": "2026-11-17T01:10:20.216Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28119,
-  "inputOccurrences": 308788,
-  "visibleVideos": 23830,
-  "visibleOccurrences": 304140,
-  "quarantinedOccurrences": 3882,
-  "quarantinedVideos": 2972,
+  "inputVideos": 28121,
+  "inputOccurrences": 308808,
+  "visibleVideos": 23831,
+  "visibleOccurrences": 304159,
+  "quarantinedOccurrences": 3883,
+  "quarantinedVideos": 2973,
   "deduplicatedOccurrences": 746,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 73,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 175,
     "unrelated_talk_show_listing": 115,
-    "reused_description_across_unrelated_channels": 779,
+    "reused_description_across_unrelated_channels": 780,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1315,9 +1315,9 @@
     {
       "sourceHash": "8e66182816a0d5d51b953f6df6d0cb16e5c951695e50b6e613eda309407cdb69",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 17,
-      "channelCount": 17,
-      "distinctVideoTitles": 17,
+      "videoCount": 18,
+      "channelCount": 18,
+      "distinctVideoTitles": 18,
       "examples": [
         {
           "videoId": "p9am6SITlGc",
@@ -1332,9 +1332,9 @@
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
         },
         {
-          "videoId": "jAJzUz8bsV4",
-          "channelName": "siromi",
-          "videoTitle": "［弾き語り歌枠］ろしライブ！たまにセッション #cluster #VRSJK #弾き語り #vrchat #vtuber",
+          "videoId": "Ei7F-eWiEko",
+          "channelName": "音葉大也 / DAIYA Music Ch.",
+          "videoTitle": "【音系Vtuberの作業配信✨】歌枠の歌詞を準備したい！！【音葉大也】",
           "raw": "【ライブ】最新天気ニュース・地震情報 2026年11月16日(月)20:00〜 ／北海道は雨や雪で積雪増加〈ウェザーニュースLiVEムーン・小川千奈／宇野沢達也〉"
         }
       ]
@@ -2539,12 +2539,12 @@
       }
     },
     "2026-11-16": {
-      "quarantinedOccurrences": 53,
+      "quarantinedOccurrences": 54,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 12,
         "unrelated_talk_show_listing": 12,
-        "reused_description_across_unrelated_channels": 28,
+        "reused_description_across_unrelated_channels": 29,
         "dated_stream_announcement": 1
       }
     },
@@ -15932,6 +15932,10 @@
       "deduplicatedOccurrences": 0
     },
     "rLqt8X9PCxc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Ei7F-eWiEko": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
