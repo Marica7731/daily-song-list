@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-17T21:35:48.450Z",
-  "scannedVideoCount": 23994,
-  "scannedOccurrenceCount": 305919,
+  "generatedAt": "2026-11-17T21:41:18.793Z",
+  "scannedVideoCount": 23996,
+  "scannedOccurrenceCount": 305941,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -942,19 +942,41 @@
     },
     {
       "date": "2026-11-17",
-      "occurrences": 1147,
+      "occurrences": 1169,
       "quarantinedOccurrences": 55
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 677,
     "possible_activity_chapter": 189,
-    "possible_date_as_artist": 155,
+    "possible_date_as_artist": 156,
     "possible_release_metadata_as_artist": 183,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 4
   },
   "candidates": [
+    {
+      "reason": "possible_date_as_artist",
+      "title": "【外交ウィーク】高市外交/ロシア機2機が領空侵犯/消費税減税の行方/海ほたる閉鎖の背景に外国人 11",
+      "artist": "火",
+      "raw": "21:50 【外交ウィーク】高市外交／ロシア機2機が領空侵犯／消費税減税の行方／海ほたる閉鎖の背景に外国人　11/17（火）",
+      "sourceHash": "182321e17e45721336c15955a1c0a1ff2ee684812b2b0be92daa27ad471ddd6d",
+      "count": 4,
+      "sample": [
+        {
+          "videoId": "5QGg_YG4G5M",
+          "channelName": "セイヤvideo /夜9時半の温かい弾き語り🌻🎸",
+          "publishedAt": "2026-11-16T21:29:29.611Z"
+        },
+        {
+          "videoId": "7T4WScA7irU",
+          "channelName": "安斎旅人ギター弾き語り",
+          "publishedAt": "2026-11-17T15:31:11.937Z"
+        }
+      ],
+      "videoCount": 4,
+      "channelCount": 4
+    },
     {
       "reason": "possible_date_as_artist",
       "title": "【消費税減税】参院で審議入り/小渕優子氏、自民税調副会長を退任/総裁選/日中首脳会談、実現調整は不調 11",
@@ -972,28 +994,6 @@
           "videoId": "T_MYgiTWugw",
           "channelName": "氷鳥ぺる / HitoriPeru",
           "publishedAt": "2026-11-11T16:05:28.461Z"
-        }
-      ],
-      "videoCount": 3,
-      "channelCount": 3
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "【外交ウィーク】高市外交/ロシア機2機が領空侵犯/消費税減税の行方/海ほたる閉鎖の背景に外国人 11",
-      "artist": "火",
-      "raw": "21:50 【外交ウィーク】高市外交／ロシア機2機が領空侵犯／消費税減税の行方／海ほたる閉鎖の背景に外国人　11/17（火）",
-      "sourceHash": "182321e17e45721336c15955a1c0a1ff2ee684812b2b0be92daa27ad471ddd6d",
-      "count": 3,
-      "sample": [
-        {
-          "videoId": "5QGg_YG4G5M",
-          "channelName": "セイヤvideo /夜9時半の温かい弾き語り🌻🎸",
-          "publishedAt": "2026-11-16T21:29:29.611Z"
-        },
-        {
-          "videoId": "SCGMBZIS_dw",
-          "channelName": "音琴かなみ Kanami ch.",
-          "publishedAt": "2026-11-17T13:08:54.986Z"
         }
       ],
       "videoCount": 3,
@@ -11773,6 +11773,17 @@
       ]
     },
     {
+      "sourceHash": "182321e17e45721336c15955a1c0a1ff2ee684812b2b0be92daa27ad471ddd6d",
+      "videoCount": 4,
+      "channelCount": 4,
+      "raw": "21:50 【外交ウィーク】高市外交／ロシア機2機が領空侵犯／消費税減税の行方／海ほたる閉鎖の背景に外国人　11/17（火）",
+      "sample": [
+        "5QGg_YG4G5M",
+        "7T4WScA7irU",
+        "SCGMBZIS_dw"
+      ]
+    },
+    {
       "sourceHash": "6d112392197d4970fcbb90691123063d076e3affc2622915db6e244309b97414",
       "videoCount": 4,
       "channelCount": 3,
@@ -11836,17 +11847,6 @@
         "_zlznm8S74E",
         "T_MYgiTWugw",
         "enDtHbmUaNc"
-      ]
-    },
-    {
-      "sourceHash": "182321e17e45721336c15955a1c0a1ff2ee684812b2b0be92daa27ad471ddd6d",
-      "videoCount": 3,
-      "channelCount": 3,
-      "raw": "21:50 【外交ウィーク】高市外交／ロシア機2機が領空侵犯／消費税減税の行方／海ほたる閉鎖の背景に外国人　11/17（火）",
-      "sample": [
-        "5QGg_YG4G5M",
-        "SCGMBZIS_dw",
-        "DNN1f48jD1Y"
       ]
     },
     {
