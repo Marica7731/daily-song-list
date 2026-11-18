@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T04:36:06.494Z",
+  "generatedAt": "2026-11-18T04:42:10.368Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28432,
-  "inputOccurrences": 311245,
+  "inputVideos": 28433,
+  "inputOccurrences": 311247,
   "visibleVideos": 24037,
   "visibleOccurrences": 306424,
-  "quarantinedOccurrences": 4042,
-  "quarantinedVideos": 3078,
+  "quarantinedOccurrences": 4044,
+  "quarantinedVideos": 3079,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 229,
+    "unrelated_livestream_listing": 230,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 839,
+    "reused_description_across_unrelated_channels": 840,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1423,9 +1423,9 @@
     {
       "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
+      "videoCount": 11,
+      "channelCount": 11,
+      "distinctVideoTitles": 11,
       "examples": [
         {
           "videoId": "rC-h1GaU0NA",
@@ -2658,11 +2658,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 110,
+      "quarantinedOccurrences": 112,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 44,
-        "unrelated_livestream_listing": 37,
+        "reused_description_across_unrelated_channels": 45,
+        "unrelated_livestream_listing": 38,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16470,6 +16470,10 @@
     "cRZEHCNjF4s": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 5
+    },
+    "HH_T5xc0tw4": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
     },
     "OpPMmv8zjig": {
       "quarantinedOccurrences": 1,
