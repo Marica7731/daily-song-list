@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T04:53:07.754Z",
+  "generatedAt": "2026-11-18T04:58:58.191Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28435,
-  "inputOccurrences": 311270,
+  "inputVideos": 28437,
+  "inputOccurrences": 311274,
   "visibleVideos": 24038,
   "visibleOccurrences": 306446,
-  "quarantinedOccurrences": 4045,
-  "quarantinedVideos": 3080,
+  "quarantinedOccurrences": 4049,
+  "quarantinedVideos": 3082,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 230,
+    "unrelated_livestream_listing": 232,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 841,
+    "reused_description_across_unrelated_channels": 843,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1394,6 +1394,33 @@
       ]
     },
     {
+      "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 13,
+      "channelCount": 13,
+      "distinctVideoTitles": 13,
+      "examples": [
+        {
+          "videoId": "MG9d_if_KBg",
+          "channelName": "れもん🍋",
+          "videoTitle": "【 歌枠/Karaoke 】ちょびーっとお歌",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "rC-h1GaU0NA",
+          "channelName": "月羽シイナ -Shiina Tsukibane-",
+          "videoTitle": "【 歌枠 】 EQとちょっとだけ対話したかもしれない 短め5曲のお歌練 614日目 【 月羽シイナ 】 #karaoke #Vsinger",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "P_CxY8lMnMM",
+          "channelName": "如月ふみ(kisaragi fumi)",
+          "videoTitle": "【歌枠】40分くらいだけうたう バラードを歌うのだ",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        }
+      ]
+    },
+    {
       "sourceHash": "4ea309097b6f4ea13bc0bd7862b7c26559c19e2e79dfcbe3bc92bdef24988c4f",
       "reason": "reused_description_across_unrelated_channels",
       "videoCount": 21,
@@ -1417,33 +1444,6 @@
           "channelName": "Hitohira Hana",
           "videoTitle": "まったり弾き語り #弾き語り #弾き語り女子 #vtuber",
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
-        }
-      ]
-    },
-    {
-      "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
-      "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 11,
-      "channelCount": 11,
-      "distinctVideoTitles": 11,
-      "examples": [
-        {
-          "videoId": "rC-h1GaU0NA",
-          "channelName": "月羽シイナ -Shiina Tsukibane-",
-          "videoTitle": "【 歌枠 】 EQとちょっとだけ対話したかもしれない 短め5曲のお歌練 614日目 【 月羽シイナ 】 #karaoke #Vsinger",
-          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
-        },
-        {
-          "videoId": "P_CxY8lMnMM",
-          "channelName": "如月ふみ(kisaragi fumi)",
-          "videoTitle": "【歌枠】40分くらいだけうたう バラードを歌うのだ",
-          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
-        },
-        {
-          "videoId": "PE_4-jAAbA8",
-          "channelName": "がく汰 / Vシンガーソングライター",
-          "videoTitle": "【弾き語り /#karaoke】ねるまえゲリラ弾き語り",
-          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         }
       ]
     }
@@ -2658,11 +2658,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 112,
+      "quarantinedOccurrences": 116,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 45,
-        "unrelated_livestream_listing": 38,
+        "unrelated_livestream_listing": 40,
+        "reused_description_across_unrelated_channels": 47,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16330,6 +16330,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "MG9d_if_KBg": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "vkS_y5cFdMQ": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -16397,6 +16401,10 @@
     },
     "Z0WsbgQqBPo": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "63pYlSDjj-k": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "Wx2ue5GLJrc": {
