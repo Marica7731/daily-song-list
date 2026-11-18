@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T01:53:54.285Z",
+  "generatedAt": "2026-11-18T01:59:27.716Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28398,
-  "inputOccurrences": 311037,
+  "inputVideos": 28400,
+  "inputOccurrences": 311039,
   "visibleVideos": 24021,
   "visibleOccurrences": 306244,
-  "quarantinedOccurrences": 4014,
-  "quarantinedVideos": 3060,
+  "quarantinedOccurrences": 4016,
+  "quarantinedVideos": 3062,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 219,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 821,
+    "reused_description_across_unrelated_channels": 823,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1396,9 +1396,9 @@
     {
       "sourceHash": "4ea309097b6f4ea13bc0bd7862b7c26559c19e2e79dfcbe3bc92bdef24988c4f",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 16,
-      "channelCount": 16,
-      "distinctVideoTitles": 16,
+      "videoCount": 18,
+      "channelCount": 18,
+      "distinctVideoTitles": 18,
       "examples": [
         {
           "videoId": "vkS_y5cFdMQ",
@@ -1413,9 +1413,9 @@
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         },
         {
-          "videoId": "2YMrzQIJhbU",
-          "channelName": "転先 はお",
-          "videoTitle": "【縦型歌枠】気圧に勝つためのヒケツ（21）【転先はお】",
+          "videoId": "9jPVPxJ0M2E",
+          "channelName": "Hitohira Hana",
+          "videoTitle": "まったり弾き語り #弾き語り #弾き語り女子 #vtuber",
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         }
       ]
@@ -2631,19 +2631,21 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 88,
+      "quarantinedOccurrences": 89,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 30,
+        "reused_description_across_unrelated_channels": 31,
         "unrelated_livestream_listing": 29,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-18": {
-      "quarantinedOccurrences": 0,
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 6,
-      "byReason": {}
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1
+      }
     },
     "2024-10-20": {
       "quarantinedOccurrences": 0,
@@ -16308,6 +16310,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "9jPVPxJ0M2E": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "V2UArBHrfMM": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -16547,6 +16553,10 @@
     },
     "hK1dBUJlCfk": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "9DNJwpHURJ0": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "y1yS-RNw23g": {
