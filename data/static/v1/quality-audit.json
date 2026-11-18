@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T04:14:58.835Z",
+  "generatedAt": "2026-11-18T04:19:38.851Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28426,
-  "inputOccurrences": 311216,
+  "inputVideos": 28427,
+  "inputOccurrences": 311218,
   "visibleVideos": 24035,
   "visibleOccurrences": 306403,
-  "quarantinedOccurrences": 4034,
-  "quarantinedVideos": 3074,
+  "quarantinedOccurrences": 4036,
+  "quarantinedVideos": 3075,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 225,
+    "unrelated_livestream_listing": 226,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 835,
+    "reused_description_across_unrelated_channels": 836,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1423,9 +1423,9 @@
     {
       "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
         {
           "videoId": "PE_4-jAAbA8",
@@ -1440,9 +1440,9 @@
           "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         },
         {
-          "videoId": "Q5HV_EbxCnQ",
-          "channelName": "こまつばらかりん-Karin Komatsubara-🔔💞",
-          "videoTitle": "【#初見さん大歓迎 】みんなで作る3択セットリスト歌枠【#歌枠/karaoke】#vtuber #こまつばらかりん",
+          "videoId": "4Q639n33N7E",
+          "channelName": "猪頭㐂 福禄 (いずき ふくろく)",
+          "videoTitle": "福禄の歌枠 今回は１９９５年(平成７年)後半戦で御座います、この年は２０曲御用意出来ましたので前後編に分けて行きます。",
           "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         }
       ]
@@ -2658,11 +2658,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 102,
+      "quarantinedOccurrences": 104,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 40,
-        "unrelated_livestream_listing": 33,
+        "reused_description_across_unrelated_channels": 41,
+        "unrelated_livestream_listing": 34,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16369,6 +16369,10 @@
     },
     "7cQxofzYmcE": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "4Q639n33N7E": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "JLfL7q65laA": {
