@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T03:57:53.994Z",
+  "generatedAt": "2026-11-18T04:03:44.585Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28420,
-  "inputOccurrences": 311183,
-  "visibleVideos": 24037,
-  "visibleOccurrences": 306380,
-  "quarantinedOccurrences": 4024,
-  "quarantinedVideos": 3066,
+  "inputVideos": 28421,
+  "inputOccurrences": 311185,
+  "visibleVideos": 24033,
+  "visibleOccurrences": 306376,
+  "quarantinedOccurrences": 4030,
+  "quarantinedVideos": 3071,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 223,
+    "unrelated_livestream_listing": 224,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 827,
+    "reused_description_across_unrelated_channels": 832,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1419,6 +1419,33 @@
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         }
       ]
+    },
+    {
+      "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "PE_4-jAAbA8",
+          "channelName": "がく汰 / Vシンガーソングライター",
+          "videoTitle": "【弾き語り /#karaoke】ねるまえゲリラ弾き語り",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "RcMBp737dP0",
+          "channelName": "00A5ACh. / 浅葱",
+          "videoTitle": "【#歌枠 /#karaoke 】つよつよ配信画面ですよ☝️【#vtuber #00A5AC 】",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
+        {
+          "videoId": "vdGGg4Hg5BI",
+          "channelName": "凪",
+          "videoTitle": "【#歌枠 】私が名探偵だ！",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        }
+      ]
     }
   ],
   "reviewedBadDescriptionHashes": [
@@ -2631,21 +2658,21 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 96,
+      "quarantinedOccurrences": 99,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 35,
+        "reused_description_across_unrelated_channels": 38,
         "unrelated_livestream_listing": 32,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
     },
     "2026-11-18": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 5,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "unrelated_livestream_listing": 1,
-        "reused_description_across_unrelated_channels": 1
+        "unrelated_livestream_listing": 2,
+        "reused_description_across_unrelated_channels": 3
       }
     },
     "2024-10-20": {
@@ -16320,11 +16347,11 @@
       "deduplicatedOccurrences": 0
     },
     "PE_4-jAAbA8": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "RcMBp737dP0": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "diQ76SSytwo": {
@@ -16457,7 +16484,7 @@
       "deduplicatedOccurrences": 0
     },
     "vdGGg4Hg5BI": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "7D9u0HEhNlI": {
@@ -16585,7 +16612,7 @@
       "deduplicatedOccurrences": 0
     },
     "AxMFTJ0YjU4": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "9DNJwpHURJ0": {
@@ -16595,6 +16622,10 @@
     "y1yS-RNw23g": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 6
+    },
+    "8qJhm3zjTAs": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
     },
     "ewbrnwMJUcQ": {
       "quarantinedOccurrences": 0,
