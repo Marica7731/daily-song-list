@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T01:36:40.408Z",
+  "generatedAt": "2026-11-18T01:42:49.319Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28386,
-  "inputOccurrences": 310983,
-  "visibleVideos": 24017,
-  "visibleOccurrences": 306198,
-  "quarantinedOccurrences": 4006,
-  "quarantinedVideos": 3052,
+  "inputVideos": 28392,
+  "inputOccurrences": 311025,
+  "visibleVideos": 24019,
+  "visibleOccurrences": 306236,
+  "quarantinedOccurrences": 4010,
+  "quarantinedVideos": 3056,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 219,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 813,
+    "reused_description_across_unrelated_channels": 817,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1396,10 +1396,16 @@
     {
       "sourceHash": "4ea309097b6f4ea13bc0bd7862b7c26559c19e2e79dfcbe3bc92bdef24988c4f",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 12,
+      "channelCount": 12,
+      "distinctVideoTitles": 12,
       "examples": [
+        {
+          "videoId": "vkS_y5cFdMQ",
+          "channelName": "ういちチャンネル",
+          "videoTitle": "ギター弾き語り配信",
+          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
+        },
         {
           "videoId": "w5rEzP_lokM",
           "channelName": "一般男性が懐かしの曲を歌うチャンネル",
@@ -1410,12 +1416,6 @@
           "videoId": "2YMrzQIJhbU",
           "channelName": "転先 はお",
           "videoTitle": "【縦型歌枠】気圧に勝つためのヒケツ（21）【転先はお】",
-          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
-        },
-        {
-          "videoId": "RfmDmdKD0ws",
-          "channelName": "緋影ミント",
-          "videoTitle": "【ゲリラでお歌枠】日付が変わるまで歌いたい。予定変更ごめんなさい！！！",
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         }
       ]
@@ -2631,10 +2631,10 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 80,
+      "quarantinedOccurrences": 84,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 22,
+        "reused_description_across_unrelated_channels": 26,
         "unrelated_livestream_listing": 29,
         "unrelated_talk_show_listing": 29
       },
@@ -16300,6 +16300,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "vkS_y5cFdMQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "w5rEzP_lokM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -16345,6 +16349,10 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "MSxMDx_0vTo": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "7T4WScA7irU": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -16370,6 +16378,14 @@
       "deduplicatedOccurrences": 0
     },
     "Qom_Al9pGVQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "2fxlVlHK-L4": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "CkIWvw41k5Q": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
