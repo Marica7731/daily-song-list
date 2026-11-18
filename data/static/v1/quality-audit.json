@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T01:24:29.757Z",
+  "generatedAt": "2026-11-18T01:30:48.823Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28380,
-  "inputOccurrences": 310915,
-  "visibleVideos": 24014,
-  "visibleOccurrences": 306139,
-  "quarantinedOccurrences": 4003,
-  "quarantinedVideos": 3049,
+  "inputVideos": 28383,
+  "inputOccurrences": 310946,
+  "visibleVideos": 24016,
+  "visibleOccurrences": 306169,
+  "quarantinedOccurrences": 4004,
+  "quarantinedVideos": 3050,
   "deduplicatedOccurrences": 752,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 219,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 810,
+    "reused_description_across_unrelated_channels": 811,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1396,10 +1396,16 @@
     {
       "sourceHash": "4ea309097b6f4ea13bc0bd7862b7c26559c19e2e79dfcbe3bc92bdef24988c4f",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 6,
-      "channelCount": 6,
-      "distinctVideoTitles": 6,
+      "videoCount": 7,
+      "channelCount": 7,
+      "distinctVideoTitles": 7,
       "examples": [
+        {
+          "videoId": "w5rEzP_lokM",
+          "channelName": "一般男性が懐かしの曲を歌うチャンネル",
+          "videoTitle": "【深夜の弾き語り】おやすみまえの弾き語り🎸",
+          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
+        },
         {
           "videoId": "2YMrzQIJhbU",
           "channelName": "転先 はお",
@@ -1410,12 +1416,6 @@
           "videoId": "RfmDmdKD0ws",
           "channelName": "緋影ミント",
           "videoTitle": "【ゲリラでお歌枠】日付が変わるまで歌いたい。予定変更ごめんなさい！！！",
-          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
-        },
-        {
-          "videoId": "Z0WsbgQqBPo",
-          "channelName": "宙月きらら",
-          "videoTitle": "11/16火夜歌枠！雑談OK☆♯Vtuber ♯原神",
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         }
       ]
@@ -2631,12 +2631,12 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 77,
+      "quarantinedOccurrences": 78,
       "deduplicatedOccurrences": 6,
       "byReason": {
+        "reused_description_across_unrelated_channels": 20,
         "unrelated_livestream_listing": 29,
-        "unrelated_talk_show_listing": 29,
-        "reused_description_across_unrelated_channels": 19
+        "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
     },
@@ -16292,6 +16292,10 @@
       "deduplicatedOccurrences": 0
     },
     "cabz5BqhJ0Q": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "w5rEzP_lokM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
