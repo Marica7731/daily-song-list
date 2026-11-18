@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T04:30:55.257Z",
+  "generatedAt": "2026-11-18T04:36:06.494Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28429,
-  "inputOccurrences": 311228,
-  "visibleVideos": 24036,
-  "visibleOccurrences": 306411,
-  "quarantinedOccurrences": 4038,
-  "quarantinedVideos": 3076,
+  "inputVideos": 28432,
+  "inputOccurrences": 311245,
+  "visibleVideos": 24037,
+  "visibleOccurrences": 306424,
+  "quarantinedOccurrences": 4042,
+  "quarantinedVideos": 3078,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 39,
     "confirmed_chat_section": 56,
-    "unrelated_livestream_listing": 227,
+    "unrelated_livestream_listing": 229,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 837,
+    "reused_description_across_unrelated_channels": 839,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1423,10 +1423,16 @@
     {
       "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 10,
+      "channelCount": 10,
+      "distinctVideoTitles": 10,
       "examples": [
+        {
+          "videoId": "rC-h1GaU0NA",
+          "channelName": "月羽シイナ -Shiina Tsukibane-",
+          "videoTitle": "【 歌枠 】 EQとちょっとだけ対話したかもしれない 短め5曲のお歌練 614日目 【 月羽シイナ 】 #karaoke #Vsinger",
+          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
+        },
         {
           "videoId": "P_CxY8lMnMM",
           "channelName": "如月ふみ(kisaragi fumi)",
@@ -1437,12 +1443,6 @@
           "videoId": "PE_4-jAAbA8",
           "channelName": "がく汰 / Vシンガーソングライター",
           "videoTitle": "【弾き語り /#karaoke】ねるまえゲリラ弾き語り",
-          "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
-        },
-        {
-          "videoId": "RcMBp737dP0",
-          "channelName": "00A5ACh. / 浅葱",
-          "videoTitle": "【#歌枠 /#karaoke 】つよつよ配信画面ですよ☝️【#vtuber #00A5AC 】",
           "raw": "14:00【山口インテリジェンスアイ】山口 敬之×佐波優子×Sarina"
         }
       ]
@@ -2658,11 +2658,11 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 106,
+      "quarantinedOccurrences": 110,
       "deduplicatedOccurrences": 6,
       "byReason": {
-        "reused_description_across_unrelated_channels": 42,
-        "unrelated_livestream_listing": 35,
+        "reused_description_across_unrelated_channels": 44,
+        "unrelated_livestream_listing": 37,
         "unrelated_talk_show_listing": 29
       },
       "artistCatalogArchivedOccurrences": 1
@@ -16342,6 +16342,10 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "rC-h1GaU0NA": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
     "P_CxY8lMnMM": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -16413,6 +16417,10 @@
     },
     "7T4WScA7irU": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "vAglXPrGYTM": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "FHmTYPeBL0A": {
