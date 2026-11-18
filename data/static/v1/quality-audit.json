@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-18T01:21:20.866Z",
+  "generatedAt": "2026-11-18T01:24:29.757Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28375,
-  "inputOccurrences": 310910,
-  "visibleVideos": 24015,
-  "visibleOccurrences": 306140,
-  "quarantinedOccurrences": 3997,
-  "quarantinedVideos": 3043,
+  "inputVideos": 28380,
+  "inputOccurrences": 310915,
+  "visibleVideos": 24014,
+  "visibleOccurrences": 306139,
+  "quarantinedOccurrences": 4003,
+  "quarantinedVideos": 3049,
   "deduplicatedOccurrences": 752,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 56,
     "unrelated_livestream_listing": 219,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 804,
+    "reused_description_across_unrelated_channels": 810,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1392,6 +1392,33 @@
           "raw": "21:50 【外交ウィーク】高市外交／ロシア機2機が領空侵犯／消費税減税の行方／海ほたる閉鎖の背景に外国人　11/17（火）"
         }
       ]
+    },
+    {
+      "sourceHash": "4ea309097b6f4ea13bc0bd7862b7c26559c19e2e79dfcbe3bc92bdef24988c4f",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 6,
+      "channelCount": 6,
+      "distinctVideoTitles": 6,
+      "examples": [
+        {
+          "videoId": "2YMrzQIJhbU",
+          "channelName": "転先 はお",
+          "videoTitle": "【縦型歌枠】気圧に勝つためのヒケツ（21）【転先はお】",
+          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
+        },
+        {
+          "videoId": "RfmDmdKD0ws",
+          "channelName": "緋影ミント",
+          "videoTitle": "【ゲリラでお歌枠】日付が変わるまで歌いたい。予定変更ごめんなさい！！！",
+          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
+        },
+        {
+          "videoId": "Z0WsbgQqBPo",
+          "channelName": "宙月きらら",
+          "videoTitle": "11/16火夜歌枠！雑談OK☆♯Vtuber ♯原神",
+          "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
+        }
+      ]
     }
   ],
   "reviewedBadDescriptionHashes": [
@@ -2604,12 +2631,12 @@
       }
     },
     "2026-11-17": {
-      "quarantinedOccurrences": 71,
+      "quarantinedOccurrences": 77,
       "deduplicatedOccurrences": 6,
       "byReason": {
         "unrelated_livestream_listing": 29,
         "unrelated_talk_show_listing": 29,
-        "reused_description_across_unrelated_channels": 13
+        "reused_description_across_unrelated_channels": 19
       },
       "artistCatalogArchivedOccurrences": 1
     },
@@ -16293,6 +16320,18 @@
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
+    "2YMrzQIJhbU": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "RfmDmdKD0ws": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Z0WsbgQqBPo": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "Wx2ue5GLJrc": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
@@ -16317,6 +16356,14 @@
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
+    "0vXY3pFTAKw": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Qom_Al9pGVQ": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "cRZEHCNjF4s": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 5
@@ -16335,6 +16382,10 @@
     },
     "f2EP-veGTUY": {
       "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "Ab2AWNu3OzE": {
+      "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
     "tatHMiFOvVg": {
