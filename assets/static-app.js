@@ -1,7 +1,7 @@
 "use strict";
 
 const BASE = "data/static/v1/";
-const state = { meta: null, page: 1, pageCount: 1, searchIndex: null, searchResults: [] };
+const state = { meta: null, page: 1, pageCount: 1, searchIndex: null, searchIndexRequest: null, searchResults: [], viewRequest: 0 };
 // Static shards do not carry collection evidence; keep the reviewed channel allowlist explicit.
 const COLLECTED_VTUBER_IDS = new Set(["7163e7a35bf251f9"]);
 const el = Object.fromEntries(["status","range","type","keyword","search","summary","ranking","prev","next","page","page-input","page-go","page-tokens","detail","detail-body","theme-toggle"].map((id) => [id, document.getElementById(id)]));
@@ -68,17 +68,20 @@ async function start() {
   renderStatus(el.range.value);
   for (const control of [el.range, el.type]) control.addEventListener("change", () => { state.page = 1; load(); });
   el.keyword.addEventListener("input", () => {
-    if (el.search.value.trim()) {
+    if (normalize(el.search.value)) {
       state.page = 1;
-      search();
-    } else {
+      load();
+    } else if (state.current?.request === state.viewRequest) {
       renderCurrent();
     }
   });
-  el.search.addEventListener("input", debounce(() => {
+  const updateSearch = debounce(load, 180);
+  el.search.addEventListener("input", () => {
+    // Invalidate in-flight views immediately, not only after the debounce.
+    state.viewRequest += 1;
     state.page = 1;
-    return search();
-  }, 180));
+    updateSearch();
+  });
   el.prev.addEventListener("click", () => goPage(state.page - 1));
   el.next.addEventListener("click", () => goPage(state.page + 1));
   el["page-go"].addEventListener("click", submitPageJump);
@@ -95,17 +98,34 @@ async function start() {
 }
 
 async function load() {
-  if (el.search.value.trim()) return search();
+  const request = ++state.viewRequest;
+  const isCurrent = () => request === state.viewRequest;
   const range = el.range.value;
-  renderStatus(range);
   const type = el.type.value;
-  const manifest = state.meta.ranges?.[range]?.[type];
-  if (!manifest) throw new Error(`范围 ${range} 尚未生成，请选择其他范围`);
-  state.pageCount = manifest.pageCount;
-  state.page = Math.min(state.page, state.pageCount);
-  state.current = await json(`rankings/${range}/${type}/page-${String(state.page).padStart(4,"0")}.json`);
-  el.summary.textContent = `${label(type)} · ${label(range)} · ${Number(manifest.totalCount || 0).toLocaleString("zh-CN")} 项 · 第 ${state.page}/${state.pageCount} 页`;
-  renderCurrent();
+  const raw = el.search.value.trim();
+  renderStatus(range);
+  el.ranking.setAttribute("aria-busy", "true");
+  try {
+    if (normalize(raw)) {
+      await search({ range, type, raw, isCurrent });
+      return;
+    }
+    const manifest = state.meta.ranges?.[range]?.[type];
+    if (!manifest) throw new Error(`范围 ${range} 尚未生成，请选择其他范围`);
+    const pageCount = Math.max(1, manifest.pageCount);
+    const page = Math.min(state.page, pageCount);
+    const payload = await json(`rankings/${range}/${type}/page-${String(page).padStart(4,"0")}.json`);
+    if (!isCurrent()) return;
+    state.pageCount = pageCount;
+    state.page = page;
+    state.current = { request, items: payload.items };
+    el.summary.textContent = `${label(type)} · ${label(range)} · ${Number(manifest.totalCount || 0).toLocaleString("zh-CN")} 项 · 第 ${page}/${pageCount} 页`;
+    renderCurrent();
+  } catch (error) {
+    if (isCurrent()) showError(error);
+  } finally {
+    if (isCurrent()) el.ranking.setAttribute("aria-busy", "false");
+  }
 }
 
 function renderStatus(range) {
@@ -134,21 +154,25 @@ function renderCurrent() {
   renderPager();
 }
 
-async function search() {
-  renderStatus(el.range.value);
-  const raw = el.search.value.trim();
-  const query = normalize(raw);
-  if (!query) { state.page = 1; return load(); }
-  if (!state.searchIndex) {
-    const manifest = await json("search/manifest.json");
-    const shards = await Promise.all(manifest.shards.map((shard) => json(shard.path)));
-    state.searchIndex = shards.flatMap((shard) => shard.items);
+async function getSearchIndex() {
+  if (state.searchIndex) return state.searchIndex;
+  if (!state.searchIndexRequest) {
+    state.searchIndexRequest = (async () => {
+      const manifest = await json("search/manifest.json");
+      const shards = await Promise.all(manifest.shards.map((shard) => json(shard.path)));
+      state.searchIndex = shards.flatMap((shard) => shard.items);
+      return state.searchIndex;
+    })().finally(() => { state.searchIndexRequest = null; });
   }
-  const type = el.type.value;
-  const range = el.range.value;
-  const hasScopedIndex = state.searchIndex.some((item) => item.rangeMetrics);
+  return state.searchIndexRequest;
+}
+
+async function search({ range, type, raw, isCurrent }) {
+  const index = await getSearchIndex();
+  if (!isCurrent()) return;
+  const hasScopedIndex = index.some((item) => item.rangeMetrics);
   if (!globalThis.DailySongSearch?.matchSearchItems) throw new Error("搜索匹配模块未加载");
-  let results = globalThis.DailySongSearch.matchSearchItems(state.searchIndex, type, raw);
+  let results = globalThis.DailySongSearch.matchSearchItems(index, type, raw);
   if (hasScopedIndex && range !== "all") {
     results = results.flatMap((item) => {
       const metrics = item.rangeMetrics?.[range];
@@ -161,6 +185,7 @@ async function search() {
     });
   } else {
     results = await hydrateSearchMetrics(results);
+    if (!isCurrent()) return;
   }
   const keyword = normalize(el.keyword.value);
   if (keyword) results = results.filter((item) => (item.keywords || []).some((value) => normalize(value).includes(keyword)));
@@ -323,7 +348,7 @@ function goPage(target) {
   const next = Math.min(state.pageCount, Math.max(1, Number(target) || 1));
   if (next === state.page) return;
   state.page = next;
-  load().catch(showError);
+  load();
 }
 
 async function detail(item) {
