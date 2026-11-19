@@ -14356,6 +14356,87 @@
       "note": "Codex heartbeat approved confirmed_noise from sources/history-static-894VgN3w_jA-51f8d9fc83b4d561c7f4.json",
       "reviewedAt": "",
       "reviewedBy": "codex-heartbeat"
+    },
+    {
+      "action": "replace_entry",
+      "videoId": "0j4CA4Yr_0I",
+      "occurrenceId": "0j4CA4Yr_0I:9:1229",
+      "sourceId": "UgxrGCWTjehvSENhm5F4AaABAg",
+      "sourceHash": "91305821f7b2d575a266e22335557b58225a368bdc167f10106e0aa0e646d975",
+      "seconds": 1229,
+      "rawHash": "32acb2ed1737aec07834eca0f7dd2cfff8bdedb12668e6447d18ccfa98bf8bab",
+      "replacement": {
+        "title": "1 2 3 〜恋がはじまる〜"
+      },
+      "reason": "heartbeat_parser_corruption",
+      "note": "Raw timestamp and artist discography confirm the leading 1 is part of the title.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "EyDvF4DUu8w",
+      "occurrenceId": "EyDvF4DUu8w:889:549",
+      "sourceId": "UgwvJFHsgNCF439onqV4AaABAg",
+      "sourceHash": "cd4fb4b9d99a016396976254db72a241c77ef7458b99d0db8e15de565ae3bfed",
+      "seconds": 549,
+      "rawHash": "f6edbdd5760c89e78bebec12c51027820e0e966803ff06918ee2e269af375dce",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Unnumbered talk chapter distinct from the numbered setlist in the same timestamp comment.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "EyDvF4DUu8w",
+      "occurrenceId": "EyDvF4DUu8w:964:4709",
+      "sourceId": "UgwvJFHsgNCF439onqV4AaABAg",
+      "sourceHash": "cd4fb4b9d99a016396976254db72a241c77ef7458b99d0db8e15de565ae3bfed",
+      "seconds": 4709,
+      "rawHash": "db254e25aa383c13c1f6109f188b1d1eb4305fe80c217b44ccd584f6945c226f",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Unnumbered talk chapter distinct from the numbered setlist in the same timestamp comment.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "EyDvF4DUu8w",
+      "occurrenceId": "EyDvF4DUu8w:996:5600",
+      "sourceId": "UgwvJFHsgNCF439onqV4AaABAg",
+      "sourceHash": "cd4fb4b9d99a016396976254db72a241c77ef7458b99d0db8e15de565ae3bfed",
+      "seconds": 5600,
+      "rawHash": "63e3eca72b56acf25afd14fffa43deb65d2efa058691579d59c8c29264fddb40",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Unnumbered talk chapter distinct from the numbered setlist in the same timestamp comment.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "EyDvF4DUu8w",
+      "occurrenceId": "EyDvF4DUu8w:1055:10860",
+      "sourceId": "UgwvJFHsgNCF439onqV4AaABAg",
+      "sourceHash": "cd4fb4b9d99a016396976254db72a241c77ef7458b99d0db8e15de565ae3bfed",
+      "seconds": 10860,
+      "rawHash": "8a50b7dae48b8244621ba8294ff9e24763fa3f4744f5f419ec286fc0ac05c9cf",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Unnumbered talk chapter distinct from the numbered setlist in the same timestamp comment.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "drop_entry",
+      "videoId": "EyDvF4DUu8w",
+      "occurrenceId": "EyDvF4DUu8w:1069:10945",
+      "sourceId": "UgwvJFHsgNCF439onqV4AaABAg",
+      "sourceHash": "cd4fb4b9d99a016396976254db72a241c77ef7458b99d0db8e15de565ae3bfed",
+      "seconds": 10945,
+      "rawHash": "c6cb7e30611afbe9679695cdf3629fbe19f4dad849c4168df21bf2d3feeec96f",
+      "reason": "heartbeat_confirmed_noise",
+      "note": "Unnumbered talk chapter distinct from the numbered setlist in the same timestamp comment.",
+      "reviewedAt": "2026-11-19",
+      "reviewedBy": "dot"
     }
   ],
   "updatedAt": "2026-10-28T22:03:17.561Z",

@@ -113,8 +113,12 @@ function parseTimestampSongs(comments, options = {}) {
         Boolean(source.sourceId && source.sourceHash && source.videoId) && Number.isInteger(sourceStartOffset);
 
       const time = normalizeCommentTime(match[0]);
-      let tail = stripLeadingTimelineDecorations(line.slice(match.index + match[0].length));
-      tail = stripLeadingTimelineDecorations(tail.replace(INDEX_RE, "")).trim();
+      const decoration = { removedNumberedMarker: false };
+      let tail = stripLeadingTimelineDecorations(line.slice(match.index + match[0].length), decoration);
+      // Once an explicit track number is consumed, a following bare number can be part of the title.
+      if (!decoration.removedNumberedMarker || !/^\d{1,3}\s+(?=\S)/u.test(tail)) {
+        tail = stripLeadingTimelineDecorations(tail.replace(INDEX_RE, "")).trim();
+      }
       if (!tail) {
         const prefix = stripLeadingTimelineDecorations(line.slice(0, match.index).replace(INDEX_RE, "")).trim();
         if (prefix && !isObviouslyNonSongText(prefix)) tail = prefix;
@@ -1098,7 +1102,7 @@ function splitCollapsedTimelineLine(line, options = {}) {
   return result;
 }
 
-function stripLeadingTimelineDecorations(text) {
+function stripLeadingTimelineDecorations(text, decoration = null) {
   let value = normalizeTimelineChars(text).trim();
   for (let idx = 0; idx < 4; idx += 1) {
     const original = value;
@@ -1106,8 +1110,13 @@ function stripLeadingTimelineDecorations(text) {
     value = value
       .replace(/^(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?(?:[\s\u3000]*[;；,，、~～\-—–−:：]+\s*)?/u, "")
       .trim();
-    value = value.replace(/^(?:Re\s*[:：]\s*|【\s*\d{1,3}\s*】\s*|\[\s*\d{1,3}\s*\]\s*|\(\s*\d{1,3}\s*\)\s*)/iu, "").trim();
-    value = value.replace(/^\d{1,3}\s*(?:曲\s*[\/／]|[,，\-—–−:：]\s*|[.)．。、]\s+)/u, "").trim();
+    value = value.replace(/^Re\s*[:：]\s*/iu, "").trim();
+    const withoutNumberedMarker = value
+      .replace(/^(?:【\s*\d{1,3}\s*】|\[\s*\d{1,3}\s*\]|\(\s*\d{1,3}\s*\))\s*/u, "")
+      .replace(/^\d{1,3}\s*(?:曲\s*[\/／]|[,，\-—–−:：]\s*|[.)．。、]\s+)/u, "")
+      .trim();
+    if (decoration && withoutNumberedMarker !== value) decoration.removedNumberedMarker = true;
+    value = withoutNumberedMarker;
     value = stripLeadingDecorativeNumberBullet(value);
     value = value
       .replace(/^[\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒꒱⁅⁆\s]+/u, "")
