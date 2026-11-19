@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-19T23:41:20.246Z",
-  "scannedVideoCount": 24446,
-  "scannedOccurrenceCount": 310822,
+  "generatedAt": "2026-11-19T23:47:21.395Z",
+  "scannedVideoCount": 24448,
+  "scannedOccurrenceCount": 310832,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -952,14 +952,14 @@
     },
     {
       "date": "2026-11-19",
-      "occurrences": 1473,
+      "occurrences": 1483,
       "quarantinedOccurrences": 8
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 692,
     "possible_activity_chapter": 186,
-    "possible_date_as_artist": 157,
+    "possible_date_as_artist": 158,
     "possible_release_metadata_as_artist": 191,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 5
@@ -1356,6 +1356,28 @@
           "videoId": "L_roDORdI1Y",
           "channelName": "Usapi Ch. 桃川うさぴ",
           "publishedAt": "2026-10-20T13:04:20.900Z"
+        }
+      ],
+      "videoCount": 2,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "〜2026/11",
+      "artist": "日",
+      "raw": "20:00〜2026/11/8(日)",
+      "sourceHash": "0442ad99c4bb7fce64440c58d4a80875d276e3f7f86c8c68825417e469fff432",
+      "count": 2,
+      "sample": [
+        {
+          "videoId": "rp9hD9mGZVs",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-12T10:28:15.070Z"
+        },
+        {
+          "videoId": "TyF2vC3eLNc",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-19T11:26:31.356Z"
         }
       ],
       "videoCount": 2,
@@ -5321,23 +5343,6 @@
       "sample": [
         {
           "videoId": "ckhuJkC_wTc",
-          "channelName": "姫咲ゆめの - Himesaki Yumeno - / vortex Artist",
-          "publishedAt": "2026-09-30T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜9",
-      "artist": "木",
-      "raw": "22:00〜9/10(木)",
-      "sourceHash": "aab58bc4b695e8150eaf342d770e11591247515e594bcd44118462bcba4c3ce2",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "XSLosCZFKss",
           "channelName": "姫咲ゆめの - Himesaki Yumeno - / vortex Artist",
           "publishedAt": "2026-09-30T00:00:00.000Z"
         }
