@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-19T13:20:21.585Z",
+  "generatedAt": "2026-11-19T13:25:04.591Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28752,
-  "inputOccurrences": 314471,
-  "visibleVideos": 24336,
-  "visibleOccurrences": 309622,
-  "quarantinedOccurrences": 4070,
-  "quarantinedVideos": 3099,
+  "inputVideos": 28754,
+  "inputOccurrences": 314474,
+  "visibleVideos": 24337,
+  "visibleOccurrences": 309623,
+  "quarantinedOccurrences": 4072,
+  "quarantinedVideos": 3100,
   "deduplicatedOccurrences": 758,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
@@ -27,9 +27,9 @@
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 42,
     "confirmed_chat_section": 57,
-    "unrelated_livestream_listing": 232,
+    "unrelated_livestream_listing": 233,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 860,
+    "reused_description_across_unrelated_channels": 861,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 40,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1396,9 +1396,9 @@
     {
       "sourceHash": "9598a7d3dea597d7252573f274a292170e0c92fcd0769ff5da85bd82f6a2e6c1",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 13,
-      "channelCount": 13,
-      "distinctVideoTitles": 13,
+      "videoCount": 14,
+      "channelCount": 14,
+      "distinctVideoTitles": 14,
       "examples": [
         {
           "videoId": "MG9d_if_KBg",
@@ -2678,10 +2678,11 @@
       }
     },
     "2026-11-19": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 1
+        "unrelated_livestream_listing": 1,
+        "reused_description_across_unrelated_channels": 2
       }
     },
     "2024-10-20": {
@@ -16750,6 +16751,10 @@
     },
     "R9x-AdPs_XI": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "bkj_LUgQrYQ": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "FSdROpLGVJw": {
