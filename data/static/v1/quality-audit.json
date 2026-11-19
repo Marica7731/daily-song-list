@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-11-19T18:51:35.395Z",
+  "generatedAt": "2026-11-19T18:57:37.289Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28814,
-  "inputOccurrences": 315116,
-  "visibleVideos": 24395,
-  "visibleOccurrences": 310259,
-  "quarantinedOccurrences": 4075,
+  "inputVideos": 28816,
+  "inputOccurrences": 315146,
+  "visibleVideos": 24397,
+  "visibleOccurrences": 310287,
+  "quarantinedOccurrences": 4077,
   "quarantinedVideos": 3102,
   "deduplicatedOccurrences": 761,
   "artistCatalogArchivedVideos": 0,
@@ -26,7 +26,7 @@
     "reviewed_source_activity_chapter": 261,
     "confirmed_mc_break": 6,
     "confirmed_talk_section": 42,
-    "confirmed_chat_section": 57,
+    "confirmed_chat_section": 59,
     "unrelated_livestream_listing": 234,
     "unrelated_talk_show_listing": 159,
     "reused_description_across_unrelated_channels": 863,
@@ -2678,11 +2678,12 @@
       }
     },
     "2026-11-19": {
-      "quarantinedOccurrences": 6,
+      "quarantinedOccurrences": 8,
       "deduplicatedOccurrences": 0,
       "byReason": {
         "unrelated_livestream_listing": 2,
-        "reused_description_across_unrelated_channels": 4
+        "reused_description_across_unrelated_channels": 4,
+        "confirmed_chat_section": 2
       }
     },
     "2024-10-20": {
@@ -16758,6 +16759,10 @@
       "deduplicatedOccurrences": 0
     },
     "131V6KGADwI": {
+      "quarantinedOccurrences": 2,
+      "deduplicatedOccurrences": 0
+    },
+    "JlRaRo1oVtA": {
       "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
