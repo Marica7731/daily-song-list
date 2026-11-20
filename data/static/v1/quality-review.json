@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-20T13:16:04.204Z",
-  "scannedVideoCount": 24565,
-  "scannedOccurrenceCount": 312259,
+  "generatedAt": "2026-11-20T20:44:28.130Z",
+  "scannedVideoCount": 24611,
+  "scannedOccurrenceCount": 312901,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -957,14 +957,14 @@
     },
     {
       "date": "2026-11-20",
-      "occurrences": 360,
-      "quarantinedOccurrences": 0
+      "occurrences": 1002,
+      "quarantinedOccurrences": 3
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 694,
-    "possible_activity_chapter": 186,
-    "possible_date_as_artist": 159,
+    "possible_activity_chapter": 187,
+    "possible_date_as_artist": 160,
     "possible_release_metadata_as_artist": 192,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 5
@@ -1240,7 +1240,7 @@
       "artist": "日",
       "raw": "20:00〜2026/11/8(日)",
       "sourceHash": "307557ae07949706440b0a1d56efae3e98bd033dfce7e2ab2e7c512ca0525417",
-      "count": 4,
+      "count": 5,
       "sample": [
         {
           "videoId": "sIJKi6Amx4Q",
@@ -1253,7 +1253,7 @@
           "publishedAt": "2026-11-09T11:20:33.358Z"
         }
       ],
-      "videoCount": 4,
+      "videoCount": 5,
       "channelCount": 1
     },
     {
@@ -4733,6 +4733,23 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "そろそろ傷と瘡蓋も予告なしで",
+      "artist": "",
+      "raw": "02:05:27 そろそろ傷と瘡蓋も予告なしで",
+      "sourceHash": "2ba73e9f35f37767a2b9671fb8ff3fddae456304409505956428b022c6185a02",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "7lBUUHm6PMI",
+          "channelName": "MEDA",
+          "publishedAt": "2026-11-20T18:34:32.698Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "風は予告なく吹く",
       "artist": "",
       "raw": "♪ 01:06:47 風は予告なく吹く / マクロスΔ ED",
@@ -5338,23 +5355,6 @@
           "videoId": "R-N6PE2piFc",
           "channelName": "氷室カナデ",
           "publishedAt": "2026-09-25T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~10",
-      "artist": "土",
-      "raw": "19:00～10/10（土）",
-      "sourceHash": "7bd6ec740341910c3b7d52a28757836c3bcc817aaeea23640b7dc78aac0374d6",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "zARmVaYb10I",
-          "channelName": "シャーチャ / cha-cha",
-          "publishedAt": "2026-09-27T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
@@ -8297,6 +8297,63 @@
           "title": "いちごパフェが止まらない",
           "artist": "放課後ティータイム",
           "raw": "00:36:00 03. いちごパフェが止まらない/放課後ティータイム"
+        }
+      ]
+    },
+    {
+      "videoId": "7lBUUHm6PMI",
+      "channelName": "MEDA",
+      "publishedAt": "2026-11-20T18:34:32.698Z",
+      "sourceHash": "2ba73e9f35f37767a2b9671fb8ff3fddae456304409505956428b022c6185a02",
+      "total": 29,
+      "explicitNumberedSongs": 22,
+      "knownArtistRows": 21,
+      "unknownNonNumberedRows": 7,
+      "unknownExamples": [
+        {
+          "title": "デュフは冷笑",
+          "raw": "00:43:45 デュフは冷笑"
+        },
+        {
+          "title": "まーきのっ!",
+          "raw": "01:12:17 まーきのっ!"
+        },
+        {
+          "title": "昨日の後遺症が...",
+          "raw": "01:29:04 昨日の後遺症が..."
+        },
+        {
+          "title": "そろそろ傷と瘡蓋も予告なしで",
+          "raw": "02:05:27 そろそろ傷と瘡蓋も予告なしで"
+        },
+        {
+          "title": "アンドロイドの部分が濃く",
+          "raw": "02:23:34 アンドロイドの部分が濃く"
+        },
+        {
+          "title": "この咳平均何日",
+          "raw": "02:36:24 この咳平均何日"
+        },
+        {
+          "title": "北半球南半球",
+          "raw": "02:43:04 北半球南半球"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "魔法の絨毯",
+          "artist": "川崎鷹也",
+          "raw": "00:05:08 01. 魔法の絨毯/川崎鷹也"
+        },
+        {
+          "title": "エイリアンズ",
+          "artist": "キリンジ",
+          "raw": "00:21:00 02. エイリアンズ/キリンジ"
+        },
+        {
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "00:31:00 03. 怪獣の花唄/Vaundy"
         }
       ]
     },
@@ -11300,6 +11357,47 @@
           "title": "エンヴィーベイビー",
           "artist": "Kanaria feat.GUMI",
           "raw": "1:07:21 03. エンヴィーベイビー / Kanaria feat.GUMI"
+        }
+      ]
+    },
+    {
+      "videoId": "wCGtKHilFKw",
+      "channelName": "みたにみく- VTuber -",
+      "publishedAt": "2026-11-20T13:34:32.698Z",
+      "sourceHash": "0c89702446be6821b78b2d78ef271385ff225aab78c2f95cb5d64d17e420d16e",
+      "total": 17,
+      "explicitNumberedSongs": 13,
+      "knownArtistRows": 14,
+      "unknownNonNumberedRows": 3,
+      "unknownExamples": [
+        {
+          "title": "裁判所に行って・・・",
+          "raw": "0:02:56 裁判所に行って・・・"
+        },
+        {
+          "title": "人と関わりたい・・・",
+          "raw": "0:19:59 人と関わりたい・・・"
+        },
+        {
+          "title": "しどろもどろなみくちゃん",
+          "raw": "0:55:05 しどろもどろなみくちゃん"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "花束",
+          "artist": "back number",
+          "raw": "0:14:32 1.花束/back number"
+        },
+        {
+          "title": "クリスマスソング",
+          "artist": "back number",
+          "raw": "0:27:51 2.クリスマスソング/back number"
+        },
+        {
+          "title": "ねえ君のこと好きって",
+          "artist": "みたにみく",
+          "raw": "0:39:50 3.ねえ君のこと好きって/みたにみく"
         }
       ]
     },

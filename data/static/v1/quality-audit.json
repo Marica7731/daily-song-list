@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-11-20T13:16:04.204Z",
+  "generatedAt": "2026-11-20T20:44:28.130Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 28988,
-  "inputOccurrences": 317136,
-  "visibleVideos": 24565,
-  "visibleOccurrences": 312259,
-  "quarantinedOccurrences": 4079,
-  "quarantinedVideos": 3104,
+  "inputVideos": 29035,
+  "inputOccurrences": 317781,
+  "visibleVideos": 24611,
+  "visibleOccurrences": 312901,
+  "quarantinedOccurrences": 4082,
+  "quarantinedVideos": 3105,
   "deduplicatedOccurrences": 777,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 74,
   "artistCatalogArchivedOccurrences": 21,
   "normalizedArtistOccurrences": 467,
-  "normalizedReleaseMetadataOccurrences": 1575,
+  "normalizedReleaseMetadataOccurrences": 1576,
   "repairedDateCreditOccurrences": 0,
-  "repairedStructuredCreditOccurrences": 2933,
+  "repairedStructuredCreditOccurrences": 2949,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
     "prayer_broadcast_timeline": 1498,
@@ -25,13 +25,13 @@
     "reviewed_mixed_chapter_comment": 299,
     "reviewed_source_activity_chapter": 261,
     "confirmed_mc_break": 6,
-    "confirmed_talk_section": 42,
+    "confirmed_talk_section": 44,
     "confirmed_chat_section": 59,
     "unrelated_livestream_listing": 234,
     "unrelated_talk_show_listing": 159,
     "reused_description_across_unrelated_channels": 865,
     "confirmed_chat_segment_label": 1,
-    "confirmed_stream_start_marker": 40,
+    "confirmed_stream_start_marker": 41,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
     "outside_official_release_catalog": 21,
     "dated_future_stream_announcement": 7,
@@ -2687,9 +2687,12 @@
       }
     },
     "2026-11-20": {
-      "quarantinedOccurrences": 0,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 5,
-      "byReason": {}
+      "byReason": {
+        "confirmed_stream_start_marker": 1,
+        "confirmed_talk_section": 2
+      }
     },
     "2024-10-20": {
       "quarantinedOccurrences": 0,
@@ -16797,6 +16800,14 @@
     },
     "FSdROpLGVJw": {
       "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "H0RAT-RRiGc": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "NXYM8aoAaog": {
+      "quarantinedOccurrences": 2,
       "deduplicatedOccurrences": 0
     },
     "pF7jxbfZv3c": {
