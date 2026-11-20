@@ -15,6 +15,7 @@ const {
   loadCurationContext,
 } = require("../curation");
 const { cleanStaticVideos } = require("./quality-guard");
+const { inspectionEligibility, isRetryDue, retryLadderMinutes } = require("./no-song-retry");
 const { buildQualityReview } = require("./quality-review");
 const { canonicalizeStaticSong, shouldPublishStaticSong } = require("./yorushika-catalog");
 
@@ -61,9 +62,13 @@ async function main() {
 
   const statePath = path.join(DATA_ROOT, "state.json");
   const state = readJsonIfExists(statePath) || initialState(NOW);
-  enqueueSnapshot(state, source, NOW);
+  const priorityIds = requestedInspectionPriorityIds();
+  const retryOptions = { ladder: retryLadderMinutes(), retryPriorityIds: REPAIR_MODE ? priorityIds : [] };
+  enqueueSnapshot(state, source, NOW, retryOptions);
   const channelSetlistImports = reconcileChannelSetlistImports(state, DATA_ROOT);
-  const batch = selectInspectionBatch(state.queue, VIDEO_LIMIT, NOW);
+  const { readyQueue, coolingCount, unqueuedDue } = inspectionEligibility(state, NOW.getTime(), retryOptions);
+  const batch = selectInspectionBatch(readyQueue, VIDEO_LIMIT, NOW, priorityIds);
+  console.log(`[static-update] inspection_eligible=${readyQueue.length} cooling=${coolingCount} unqueued_retry_due=${unqueuedDue} selected=${batch.length}`);
   const completed = [];
   const failures = [];
   for (const candidate of batch) {
@@ -152,11 +157,14 @@ function initialState(now) {
   };
 }
 
-function enqueueSnapshot(state, source, now) {
+function enqueueSnapshot(state, source, now, { ladder = retryLadderMinutes(), retryPriorityIds = [] } = {}) {
+  const retryPriority = new Set(retryPriorityIds);
+  const retryRecords = state.noSongAttempts || {};
   const processed = new Set(state.processedVideoIds || []);
   const queued = new Set((state.queue || []).map((item) => item.videoId));
   for (const item of source.items) {
     if (!item?.videoId || processed.has(item.videoId) || queued.has(item.videoId)) continue;
+    if (!retryPriority.has(item.videoId) && !isRetryDue(retryRecords[item.videoId], item.videoId, now.getTime(), ladder)) continue;
     state.queue.push(compactCandidate(item, source));
     queued.add(item.videoId);
   }

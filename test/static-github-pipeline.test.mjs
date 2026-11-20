@@ -8,7 +8,7 @@ import { execFileSync } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const validatorPath = path.resolve("scripts/static/validate-static.js");
-const { HISTORY_GAP, REPAIR_SOURCE_GROUP, buildStaticSite, canonicalizeStaticSong, filterRange, hashId, initialState, persistCompleted, readChannelSetlistImports, reconcileChannelSetlistImports, selectInspectionBatch } = require("../scripts/static/collect-and-build.js");
+const { HISTORY_GAP, REPAIR_SOURCE_GROUP, buildStaticSite, canonicalizeStaticSong, enqueueSnapshot, filterRange, hashId, initialState, persistCompleted, readChannelSetlistImports, reconcileChannelSetlistImports, selectInspectionBatch } = require("../scripts/static/collect-and-build.js");
 const { buildChannelSetlists } = require("../scripts/static/export-channel-setlists.js");
 const { computeHistoryGaps, gitBlobSha1, importLegacyDocument, migrateRecoveryState, recoveryBudgetExpired, rejectIncompleteSource, snapshotCoverage, verifySourceBytes } = require("../scripts/static/recover-history.js");
 const { compareSearchResults, matchSearchItems, searchScore } = require("../assets/static-search-utils.js");
@@ -613,6 +613,43 @@ test("history recovery workflow is GitHub-hosted, bounded, resumable, and static
   assert.match(workflow, /git rebase origin\/main/);
   assert.match(workflow, /STATIC_RECOVERY_REBASE_UNEXPECTED_PATH/);
   assert.doesNotMatch(workflow, /self-hosted|PostgreSQL|WDC|ssh /i);
+});
+
+test("ordinary collection honors cooldown in discovery and the existing queue", () => {
+  const { inspectionEligibility, nextEligibleMs } = require("../scripts/static/no-song-retry.js");
+  const start = new Date("2026-11-20T00:00:00Z");
+  const later = new Date("2026-11-20T00:20:00Z");
+  const options = { ladder: [0, 15] };
+  const state = initialState(start);
+  const queued = "queuedretry";
+  const present = "foundretry1";
+  const absent = "absentretry";
+  const fresh = "freshvideo1";
+  const done = "alreadypubl";
+  const record = () => ({ attempts: 1, lastAttemptAt: start.toISOString() });
+  state.queue = [{ videoId: queued, title: "preserve metadata" }];
+  state.processedVideoIds = [done];
+  state.noSongAttempts = { [queued]: record(), [present]: record(), [absent]: record(), [done]: record() };
+  const originalPool = structuredClone(state.noSongAttempts);
+  const source = { snapshotId: "one", capturedAt: start.toISOString(), items: [present, fresh, done].map((videoId) => ({ videoId })) };
+  enqueueSnapshot(state, source, start, options);
+  assert.deepEqual(state.queue.map(({ videoId }) => videoId), [queued, fresh]);
+  const early = inspectionEligibility(state, start.getTime(), options);
+  assert.deepEqual(early.readyQueue.map(({ videoId }) => videoId), [fresh]);
+  assert.equal(early.coolingCount, 1);
+  assert.equal(early.unqueuedDue, 0);
+  const boundary = nextEligibleMs(state.noSongAttempts[queued], queued, options.ladder);
+  assert.equal(inspectionEligibility(state, boundary - 1, options).readyQueue.some((item) => item.videoId === queued), false);
+  assert.equal(inspectionEligibility(state, boundary, options).readyQueue.some((item) => item.videoId === queued), true);
+  assert.equal(inspectionEligibility(state, start.getTime(), { ...options, retryPriorityIds: [queued] }).readyQueue.length, 2);
+  assert.equal(inspectionEligibility(state, later.getTime(), options).unqueuedDue, 2, "due even before re-discovery");
+  enqueueSnapshot(state, source, later, options);
+  const due = inspectionEligibility(state, later.getTime(), options);
+  assert.deepEqual(due.readyQueue.map(({ videoId }) => videoId), [queued, fresh, present]);
+  assert.equal(due.unqueuedDue, 1, "absent due video stays available to the bounded recovery workflow");
+  assert.equal(state.queue[0].title, "preserve metadata");
+  assert.deepEqual(state.noSongAttempts, originalPool);
+  assert.deepEqual(state.processedVideoIds, [done]);
 });
 
 test("a zero-song inspection stays retryable and never silently disappears", () => {

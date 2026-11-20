@@ -330,6 +330,20 @@ jobs:
             echo "STATIC_UPDATE_INVALID_PENDING value=$pending" >&2
             exit 76
           }
+          read -r eligible cooling due_retries <<< "$(node -e 'const s=require("./data/static/v1/state.json"); const e=require("./scripts/static/no-song-retry").inspectionEligibility(s,Date.now()); console.log(e.readyQueue.length,e.coolingCount,e.unqueuedDue);')"
+          [[ "$eligible" =~ ^[0-9]+$ && "$cooling" =~ ^[0-9]+$ && "$due_retries" =~ ^[0-9]+$ ]] || exit 78
+          echo "due_retries=$due_retries" >> "$GITHUB_OUTPUT"
+          # The retained ledger may be older than the cooldowns that became due.
+          if (( due_retries > dropped )); then dropped="$due_retries"; fi
+          if (( eligible == 0 && pending > 0 )); then
+            # Keep the original pending-count gate. The scheduled update/watchdog will wake us
+            # again; do not hot-loop or start historical repair while the gate is closed.
+            if (( pending > STATIC_PENDING_PRIORITY_THRESHOLD )); then
+              echo "drain_pending=true" >> "$GITHUB_OUTPUT"
+            fi
+            echo "STATIC_UPDATE_COOLDOWN_ONLY pending=$pending cooling=$cooling unqueued_retry_due=$due_retries"
+            exit 0
+          fi
           if (( pending == 0 )); then
             echo "STATIC_UPDATE_DRAINED pending=0"
             exit 0
@@ -369,6 +383,7 @@ jobs:
         if: success() && steps.continuation.outputs.drain_pending != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          DUE_RETRIES: ${{ steps.continuation.outputs.due_retries }}
         run: |
           set -Eeuo pipefail
           ledger="data/static/v1/recovery/dropped-videos.json"
@@ -380,6 +395,8 @@ jobs:
             echo "STATIC_UPDATE_INVALID_DROPPED value=$dropped" >&2
             exit 79
           }
+          [[ "$DUE_RETRIES" =~ ^[0-9]+$ ]] || exit 78
+          if (( DUE_RETRIES > dropped )); then dropped="$DUE_RETRIES"; fi
           if (( dropped == 0 )); then
             echo "STATIC_UPDATE_NO_DROPPED_VIDEOS dropped=0"
             exit 0
