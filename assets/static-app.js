@@ -357,8 +357,7 @@ async function detail(item) {
   const payload = await json(item.detailPath);
   const end = new Date(state.meta.generatedAt || Date.now()).getTime();
   const range = el.range.value;
-  const start = rangeStartMs(range, new Date(end));
-  const maxEnd = end + (range === "today" || range === "3d" ? 300000 : 21600000);
+  const { start, end: maxEnd } = detailRangeBounds(range, new Date(end));
   const sorted = [...(payload.occurrences || [])]
     .filter((entry) => Date.parse(entry.publishedAt || "") >= start && Date.parse(entry.publishedAt || "") <= maxEnd)
     .sort((a,b) => String(b.publishedAt || "").localeCompare(String(a.publishedAt || "")));
@@ -388,14 +387,18 @@ async function json(relative) {
   if (!response.ok) throw new Error(`${relative}: HTTP ${response.status}`);
   return response.json();
 }
-function rangeStartMs(range, now) {
-  if (range === "all") return Number.NEGATIVE_INFINITY;
-  if (range === "7d" || range === "30d") return now.getTime() - (range === "7d" ? 7 : 30) * 86400000;
+function detailRangeBounds(range, now) {
+  const days = ({ "3d": 3, "7d": 7, "30d": 30 })[range] || 1;
+  const end = now.getTime();
+  if (range === "all") return { start: Number.NEGATIVE_INFINITY, end: end + 21600000 };
   const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit",
   }).formatToParts(now).filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
   const midnight = Date.parse(`${parts.year}-${parts.month}-${parts.day}T00:00:00+08:00`);
-  return midnight - (range === "3d" ? 2 : 0) * 86400000;
+  return {
+    start: midnight - (days - 1) * 86400000,
+    end: range === "7d" || range === "30d" ? midnight + 86400000 - 1 : end + 300000,
+  };
 }
 function label(value){return ({songs:"歌曲榜",artists:"歌手榜",vtubers:"收录榜",today:"今日","3d":"近 3 天","7d":"近 7 天","30d":"近 30 天",all:"全部"})[value]||value}
 function searchLabel(value){return value === "vtubers" ? "收录" : label(value)}
