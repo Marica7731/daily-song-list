@@ -57,7 +57,24 @@ function isRetryDue(record, videoId, nowMs, ladder = retryLadderMinutes()) {
   return nextEligibleMs(record, videoId, ladder) <= nowMs;
 }
 
+// Read-only snapshot of which work can run now; never edits the durable queue or retry pool.
+function inspectionEligibility(state, nowMs, { ladder = retryLadderMinutes(), retryPriorityIds = [] } = {}) {
+  const queue = state.queue || [];
+  const records = state.noSongAttempts || {};
+  const retryPriority = new Set(retryPriorityIds);
+  const isEligible = (videoId) => retryPriority.has(videoId) || isRetryDue(records[videoId], videoId, nowMs, ladder);
+  const readyQueue = queue.filter(({ videoId }) => isEligible(videoId));
+  const queued = new Set(queue.map(({ videoId }) => videoId));
+  const processed = new Set(state.processedVideoIds || []);
+  let unqueuedDue = 0;
+  for (const videoId of Object.keys(records)) {
+    if (!queued.has(videoId) && !processed.has(videoId) && isEligible(videoId)) unqueuedDue += 1;
+  }
+  return { readyQueue, coolingCount: queue.length - readyQueue.length, unqueuedDue, isEligible };
+}
+
 module.exports = {
+  inspectionEligibility,
   DEFAULT_RETRY_LADDER_MINUTES,
   RETRY_JITTER_RATIO,
   isRetryDue,
