@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-21T17:14:46.647Z",
-  "scannedVideoCount": 24827,
-  "scannedOccurrenceCount": 315496,
+  "generatedAt": "2026-11-21T19:28:13.245Z",
+  "scannedVideoCount": 24840,
+  "scannedOccurrenceCount": 315659,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -962,14 +962,14 @@
     },
     {
       "date": "2026-11-21",
-      "occurrences": 816,
+      "occurrences": 979,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 703,
+    "possible_unparsed_credits": 729,
     "possible_activity_chapter": 188,
-    "possible_date_as_artist": 164,
+    "possible_date_as_artist": 165,
     "possible_release_metadata_as_artist": 192,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 5
@@ -1388,6 +1388,28 @@
           "videoId": "L_roDORdI1Y",
           "channelName": "Usapi Ch. 桃川うさぴ",
           "publishedAt": "2026-10-20T13:04:20.900Z"
+        }
+      ],
+      "videoCount": 2,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "19:00 ~ 11/17(火)",
+      "sourceHash": "ce72b86f76d39191aa34c10bdd2bd7c452915b0850b10bdb67279bb432a40f2e",
+      "count": 2,
+      "sample": [
+        {
+          "videoId": "i0faS5lpReQ",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-07T17:35:40.616Z"
+        },
+        {
+          "videoId": "Z3vWnjL24_0",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-21T17:19:40.073Z"
         }
       ],
       "videoCount": 2,
@@ -5343,23 +5365,6 @@
           "videoId": "gOFxmoJyhZU",
           "channelName": "狐宵いなり - Inari Koyoi -",
           "publishedAt": "2026-09-23T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~2026年10月31日",
-      "artist": "土",
-      "raw": "～2026年10月31日(土) 23:59",
-      "sourceHash": "5ce76064b2fc251e4daf240868dcf3c05ed7ccfe3da4bca3f014dd0e51785854",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "5inCAzUgEoE",
-          "channelName": "ちゆうさ - Chiyu ch.-",
-          "publishedAt": "2026-09-25T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
@@ -10203,6 +10208,51 @@
           "title": "K",
           "artist": "BUMP OF CHICKEN",
           "raw": "[0:29:39]   3. K / BUMP OF CHICKEN"
+        }
+      ]
+    },
+    {
+      "videoId": "a6SKL3RH1u4",
+      "channelName": "燈明寺かぐら - Tomyoji Kagura -",
+      "publishedAt": "2026-11-21T15:19:40.073Z",
+      "sourceHash": "866f2b9139e8e9a0f09eae12272bd3c6f23c51e04d2fb2510896acdc663e1ccf",
+      "total": 19,
+      "explicitNumberedSongs": 14,
+      "knownArtistRows": 15,
+      "unknownNonNumberedRows": 4,
+      "unknownExamples": [
+        {
+          "title": "山登りに行ってきたよ",
+          "raw": "0:16:53 山登りに行ってきたよ"
+        },
+        {
+          "title": "山登り2",
+          "raw": "0:26:54 山登り2"
+        },
+        {
+          "title": "山登り4",
+          "raw": "0:45:27 山登り4"
+        },
+        {
+          "title": "山登り5",
+          "raw": "1:25:20 山登り5"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "妄想感傷代償連盟",
+          "artist": "DECO*27",
+          "raw": "0:11:40 01. 妄想感傷代償連盟 / DECO*27"
+        },
+        {
+          "title": "明日の私に幸あれ",
+          "artist": "ナナヲアカリ",
+          "raw": "0:22:26 02. 明日の私に幸あれ / ナナヲアカリ"
+        },
+        {
+          "title": "ひゅるりらぱっぱ",
+          "artist": "tuki.",
+          "raw": "0:29:12 03. ひゅるりらぱっぱ / tuki."
         }
       ]
     },
