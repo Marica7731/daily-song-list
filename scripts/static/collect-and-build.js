@@ -793,14 +793,48 @@ function writeSearch(dataRoot, entities, now, maxShardBytes) {
     if (!buckets.has(bucket)) buckets.set(bucket, []);
     buckets.get(bucket).push(entity);
   }
+  const payload = (items) => ({ schemaVersion: 1, generatedAt: now.toISOString(), items });
+  // Match the bytes produced by writeJson, including indentation and the final newline.
+  const serializedBytes = (value) => Buffer.byteLength(`${JSON.stringify(value, null, 2)}\n`);
+  const emptyBytes = serializedBytes(payload([]));
   const shards = [];
-  for (const [bucket, items] of [...buckets.entries()].sort()) {
-    const relative = `search/${bucket}.json`;
+  const writePart = (bucket, suffix, items) => {
+    const relative = `search/${bucket}${suffix}.json`;
+    const value = payload(items);
+    if (serializedBytes(value) > maxShardBytes) throw new Error(`search shard exceeds limit: ${relative}`);
     const file = path.join(dataRoot, relative);
-    writeJson(file, { schemaVersion: 1, generatedAt: now.toISOString(), items });
+    writeJson(file, value);
     const bytes = fs.statSync(file).size;
     if (bytes > maxShardBytes) throw new Error(`search shard exceeds limit: ${relative} bytes=${bytes}`);
     shards.push({ bucket, path: relative, itemCount: items.length, bytes });
+  };
+  for (const [bucket, items] of [...buckets.entries()].sort()) {
+    if (serializedBytes(payload(items)) <= maxShardBytes) {
+      writePart(bucket, "", items);
+      continue;
+    }
+    const parts = [];
+    let part = [];
+    let bytes = emptyBytes;
+    for (const item of items) {
+      const singletonBytes = serializedBytes(payload([item]));
+      if (singletonBytes > maxShardBytes) {
+        throw new Error(`search entity ${item.id} exceeds shard limit: bytes=${singletonBytes} limit=${maxShardBytes}`);
+      }
+      // Each singleton adds four bytes of array framing. Additional entries need
+      // only their encoded content and the comma/newline separator (two bytes).
+      const appendedBytes = singletonBytes - emptyBytes - 2;
+      if (part.length && bytes + appendedBytes > maxShardBytes) {
+        parts.push(part);
+        part = [];
+      }
+      bytes = part.length ? bytes + appendedBytes : singletonBytes;
+      part.push(item);
+    }
+    if (part.length) parts.push(part);
+    parts.forEach((part, index) => {
+      writePart(bucket, `-part-${String(index + 1).padStart(4, "0")}`, part);
+    });
   }
   writeJson(path.join(dataRoot, "search", "manifest.json"), { schemaVersion: 1, generatedAt: now.toISOString(), shards });
 }
@@ -1041,6 +1075,7 @@ module.exports = {
   HISTORY_GAP,
   REPAIR_SOURCE_GROUP,
   buildStaticSite,
+  writeSearch,
   compactCandidate,
   canonicalizeStaticSong,
   enqueueSnapshot,
