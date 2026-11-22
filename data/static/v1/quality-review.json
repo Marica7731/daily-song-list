@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-22T01:00:53.280Z",
-  "scannedVideoCount": 24921,
-  "scannedOccurrenceCount": 316679,
+  "generatedAt": "2026-11-22T08:08:56.099Z",
+  "scannedVideoCount": 24949,
+  "scannedOccurrenceCount": 317003,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -962,13 +962,18 @@
     },
     {
       "date": "2026-11-21",
-      "occurrences": 1921,
+      "occurrences": 2071,
+      "quarantinedOccurrences": 0
+    },
+    {
+      "date": "2026-11-22",
+      "occurrences": 174,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 729,
-    "possible_activity_chapter": 189,
+    "possible_activity_chapter": 190,
     "possible_date_as_artist": 168,
     "possible_release_metadata_as_artist": 192,
     "possible_spoken_section": 20,
@@ -4794,6 +4799,23 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "今度の #最強歌うま紅白 について",
+      "artist": "",
+      "raw": "0:55:23 今度の #最強歌うま紅白 について:_teteペンライト白::_teteうたう::_teteペンライトピンク:",
+      "sourceHash": "f13a89ab1ff3ad4cc3618f5091f388e5270d061c46a8bc371c0bff6268e634c8",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "wNEwfODYO-I",
+          "channelName": "アール・テテ / Are Tete",
+          "publishedAt": "2026-11-21T16:01:36.408Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "まで販売中!!",
       "artist": "",
       "raw": "📢11月30日(月)23:59まで販売中!!",
@@ -5348,23 +5370,6 @@
           "videoId": "nIhRVa4BeQI",
           "channelName": "おおぞらことりチャンネル",
           "publishedAt": "2026-09-20T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~2026年10月31日",
-      "artist": "土",
-      "raw": "～2026年10月31日(土) 23:59",
-      "sourceHash": "ab26044edb179197145c74d09fd77e6c0f606a0a9908bba790004b3fb0afcbff",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "5ZYaLz5l_lk",
-          "channelName": "ちゆうさ - Chiyu ch.-",
-          "publishedAt": "2026-09-22T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
