@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-23T00:26:41.786Z",
-  "scannedVideoCount": 25212,
-  "scannedOccurrenceCount": 320097,
+  "generatedAt": "2026-11-23T02:57:51.400Z",
+  "scannedVideoCount": 25225,
+  "scannedOccurrenceCount": 320270,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -967,13 +967,18 @@
     },
     {
       "date": "2026-11-22",
-      "occurrences": 2056,
+      "occurrences": 2191,
       "quarantinedOccurrences": 2
+    },
+    {
+      "date": "2026-11-23",
+      "occurrences": 38,
+      "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 737,
-    "possible_activity_chapter": 195,
+    "possible_activity_chapter": 196,
     "possible_date_as_artist": 173,
     "possible_release_metadata_as_artist": 192,
     "possible_spoken_section": 20,
@@ -4884,6 +4889,23 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "HPの刷新について",
+      "artist": "",
+      "raw": "1:37:56 HPの刷新について",
+      "sourceHash": "439ad2a78cf0bc1b739bae611256175489c0875fcee549befa34d9d400df20e6",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "FVDN5ClnaCo",
+          "channelName": "七藤ちはね / Nanafuji",
+          "publishedAt": "2026-11-22T16:45:13.942Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "真の達成!",
       "artist": "",
       "raw": "┗0:07:34 真の達成！",
@@ -5353,23 +5375,6 @@
           "videoId": "QXD8KYVMczU",
           "channelName": "鈴芽ちゅん(suzume chun)-個人Vtuber-",
           "publishedAt": "2026-09-18T14:09:54.994Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜 9",
-      "artist": "土",
-      "raw": "22:00 〜 9/19(土)",
-      "sourceHash": "946f62e94da0f55d78b8230daa90dca7082eb9a8f7ca6bd992270247fd1065d0",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "-uwH9YZk3_4",
-          "channelName": "伊月知世 / CHISE ITSUKI",
-          "publishedAt": "2026-09-18T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
