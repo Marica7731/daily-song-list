@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-24T14:44:26.136Z",
+  "generatedAt": "2026-11-24T14:48:13.381Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261124T142355Z",
-  "sourceCapturedAt": "2026-11-24T14:23:55.598Z",
+  "sourceSnapshotId": "20261124T143355Z",
+  "sourceCapturedAt": "2026-11-24T14:33:55.457Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 472
+    "candidateVideos": 504
   },
-  "pendingVideoCount": 541,
+  "pendingVideoCount": 478,
   "noSongRetryPoolCount": 25539,
-  "processedVideoCount": 41737,
-  "videoCount": 25625,
-  "songOccurrenceCount": 325182,
+  "processedVideoCount": 41738,
+  "videoCount": 25626,
+  "songOccurrenceCount": 325200,
   "quality": {
     "quarantinedOccurrences": 4090,
     "quarantinedVideos": 3109,
@@ -426,29 +426,29 @@
   "ranges": {
     "today": {
       "stats": {
-        "videoCount": 82,
-        "songOccurrenceCount": 1040,
-        "pendingVideoCount": 1,
+        "videoCount": 83,
+        "songOccurrenceCount": 1058,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 2,
         "deduplicatedOccurrences": 0,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 884,
+        "totalCount": 894,
         "pageCount": 18,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/today/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 468,
+        "totalCount": 472,
         "pageCount": 10,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/today/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 81,
+        "totalCount": 82,
         "pageCount": 2,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -457,22 +457,22 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 644,
-        "songOccurrenceCount": 8010,
-        "pendingVideoCount": 3,
+        "videoCount": 645,
+        "songOccurrenceCount": 8028,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 5,
         "deduplicatedOccurrences": 26,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 5005,
+        "totalCount": 5007,
         "pageCount": 101,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/3d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 2272,
+        "totalCount": 2273,
         "pageCount": 46,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -488,9 +488,9 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1493,
-        "songOccurrenceCount": 17690,
-        "pendingVideoCount": 378,
+        "videoCount": 1494,
+        "songOccurrenceCount": 17708,
+        "pendingVideoCount": 375,
         "quarantinedOccurrences": 61,
         "deduplicatedOccurrences": 56,
         "artistCatalogArchivedOccurrences": 1
@@ -519,9 +519,9 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6940,
-        "songOccurrenceCount": 80214,
-        "pendingVideoCount": 481,
+        "videoCount": 6941,
+        "songOccurrenceCount": 80232,
+        "pendingVideoCount": 478,
         "quarantinedOccurrences": 1645,
         "deduplicatedOccurrences": 247,
         "artistCatalogArchivedOccurrences": 7
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 25625,
-        "songOccurrenceCount": 325182,
-        "pendingVideoCount": 541,
+        "videoCount": 25626,
+        "songOccurrenceCount": 325200,
+        "pendingVideoCount": 478,
         "quarantinedOccurrences": 4090,
         "deduplicatedOccurrences": 812,
         "artistCatalogArchivedOccurrences": 21
