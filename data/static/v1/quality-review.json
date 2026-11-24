@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-24T20:04:25.652Z",
-  "scannedVideoCount": 25667,
-  "scannedOccurrenceCount": 325728,
+  "generatedAt": "2026-11-24T20:08:00.069Z",
+  "scannedVideoCount": 25673,
+  "scannedOccurrenceCount": 325780,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -977,14 +977,14 @@
     },
     {
       "date": "2026-11-24",
-      "occurrences": 769,
+      "occurrences": 821,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 749,
     "possible_activity_chapter": 207,
-    "possible_date_as_artist": 178,
+    "possible_date_as_artist": 179,
     "possible_release_metadata_as_artist": 202,
     "possible_spoken_section": 20,
     "possible_promotion_as_song": 5
@@ -1278,6 +1278,28 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "〜2026/11",
+      "artist": "日",
+      "raw": "20:00〜2026/11/8(日)",
+      "sourceHash": "cdec6c14d1329a154e0ff835645193207ec379a899131c890584718a8acc4191",
+      "count": 4,
+      "sample": [
+        {
+          "videoId": "atpxH897K4M",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-04T11:02:08.328Z"
+        },
+        {
+          "videoId": "JA8Qtgwqyuo",
+          "channelName": "兎姫乃もも",
+          "publishedAt": "2026-11-11T11:11:40.157Z"
+        }
+      ],
+      "videoCount": 4,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "〜7",
       "artist": "日",
       "raw": "21:00〜7/19(日)",
@@ -1337,28 +1359,6 @@
           "videoId": "dQzU6-FPrvM",
           "channelName": "焔魔るり CH. / Ruri Enma",
           "publishedAt": "2026-10-29T14:27:42.630Z"
-        }
-      ],
-      "videoCount": 3,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜2026/11",
-      "artist": "日",
-      "raw": "20:00〜2026/11/8(日)",
-      "sourceHash": "cdec6c14d1329a154e0ff835645193207ec379a899131c890584718a8acc4191",
-      "count": 3,
-      "sample": [
-        {
-          "videoId": "atpxH897K4M",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-04T11:02:08.328Z"
-        },
-        {
-          "videoId": "JA8Qtgwqyuo",
-          "channelName": "兎姫乃もも",
-          "publishedAt": "2026-11-11T11:11:40.157Z"
         }
       ],
       "videoCount": 3,
