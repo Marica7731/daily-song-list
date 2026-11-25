@@ -1645,15 +1645,16 @@ test("static intake and all public shards exclude verified channel identities, n
   const priorVersion = { videoId: "rpWpjM60eEU", channelId, channelName: "玉米羊", title: "YOASOBI 歌枠", publishedAt: now.toISOString(),
     songs: [{ occurrenceId: "rpWpjM60eEU:57:630", time: "0:10:30", seconds: 630, title: "#翡翠 #緬甸翡翠", artist: "" }] };
   const confirmedTaiwan = { ...priorVersion, videoId: "Taiwan00001", channelId: "", channelHandle: "@YukiChanCh" };
+  const verifiedLegacy = { ...priorVersion, videoId: "CWGenqi0ljY", channelId: "", channelName: "Historical source without owner metadata" };
   const unrelated = { ...priorVersion, videoId: "Control0001", channelId: "UC0000000000000000000000", channelName: "日本の別番組",
     title: "台湾旅行・玉米羊とコラボ", songs: [{ occurrenceId: "Control0001:01:42", time: "0:00:42", seconds: 42, title: "夜に駆ける", artist: "YOASOBI" }] };
   const state = initialState(now);
-  enqueueSnapshot(state, { snapshotId: "region-test", capturedAt: now.toISOString(), items: [priorVersion, confirmedTaiwan, unrelated] }, now);
+  enqueueSnapshot(state, { snapshotId: "region-test", capturedAt: now.toISOString(), items: [priorVersion, confirmedTaiwan, verifiedLegacy, unrelated] }, now);
   assert.deepEqual(state.queue.map((item) => item.videoId), [unrelated.videoId]);
-  assert.deepEqual(selectInspectionBatch([priorVersion, confirmedTaiwan, unrelated], 3, now, [priorVersion.videoId]).map((item) => item.videoId), [unrelated.videoId]);
+  assert.deepEqual(selectInspectionBatch([priorVersion, confirmedTaiwan, verifiedLegacy, unrelated], 3, now, [priorVersion.videoId]).map((item) => item.videoId), [unrelated.videoId]);
   fs.mkdirSync(path.join(dataRoot, "days"));
   const rawPath = path.join(dataRoot, "days", "2026-11-25.json");
-  const raw = JSON.stringify({ videos: [priorVersion, confirmedTaiwan, unrelated] });
+  const raw = JSON.stringify({ videos: [priorVersion, confirmedTaiwan, verifiedLegacy, unrelated] });
   fs.writeFileSync(rawPath, raw);
   const meta = buildStaticSite(dataRoot, state, now);
   assert.equal(meta.videoCount, 1);
@@ -1664,8 +1665,9 @@ test("static intake and all public shards exclude verified channel identities, n
   assert.ok(!fs.existsSync(path.join(dataRoot, "sources", "Ta", "Taiwan00001.json")));
   for (const dir of ["rankings", "entities", "search"]) {
     const paths = fs.readdirSync(path.join(dataRoot, dir), { recursive: true }).filter((p) => String(p).endsWith(".json"));
+    assert.ok(!fs.existsSync(path.join(dataRoot, "sources", "CW", "CWGenqi0ljY.json")));
     const all = paths.map((p) => fs.readFileSync(path.join(dataRoot, dir, p), "utf8")).join("\n");
     assert.match(all, /夜に駆ける/u);
-    assert.doesNotMatch(all, /翡翠|rpWpjM60eEU|Taiwan00001/u);
+    assert.doesNotMatch(all, /翡翠|rpWpjM60eEU|Taiwan00001|CWGenqi0ljY/u);
   }
 });

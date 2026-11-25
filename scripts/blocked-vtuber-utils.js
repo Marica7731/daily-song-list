@@ -118,6 +118,7 @@ function validateBlocklist(blocklist, options = {}) {
   const channelIds = new Set();
   const handles = new Set();
   const channelUrls = new Set();
+  const historicalVideoIds = new Set();
 
   for (const [index, entry] of (blocklist?.entries || []).entries()) {
     const label = entry?.id || `entries[${index}]`;
@@ -139,6 +140,17 @@ function validateBlocklist(blocklist, options = {}) {
     if (!VALID_STATUS.has(entry.status)) errors.push(`${label}: invalid status ${entry.status}`);
     for (const field of ["channelIds", "handles", "channelUrls", "aliases", "titleAliases", "unsafeBroadAliases", "evidence"]) {
       if (!Array.isArray(entry[field])) errors.push(`${label}: ${field} must be array`);
+    }
+    if (entry.historicalVideoIds !== undefined) {
+      if (!Array.isArray(entry.historicalVideoIds) || !entry.channelIds?.length) {
+        errors.push(`${label}: historicalVideoIds requires a list and verified channelId`);
+      } else {
+        for (const videoId of entry.historicalVideoIds) {
+          if (!/^[A-Za-z0-9_-]{11}$/u.test(videoId)) errors.push(`${label}: invalid historical videoId ${videoId}`);
+          if (historicalVideoIds.has(videoId)) errors.push(`${label}: duplicate historical videoId ${videoId}`);
+          historicalVideoIds.add(videoId);
+        }
+      }
     }
     for (const channelId of entry.channelIds || []) {
       if (!/^UC[A-Za-z0-9_-]{20,}$/u.test(channelId)) errors.push(`${label}: invalid channelId ${channelId}`);
