@@ -41,14 +41,17 @@ const HISTORY_GAP = Object.freeze({ from: "2026-08-23", through: "2026-08-31", s
 const generatedPaths = new Set();
 // Only apply verified channel identities to the static pipeline. Title, language,
 // region mentions, and display names are not proof of the video's owner.
-const matchStaticBlockedIdentity = createBlockedSourceMatcher({
-  entries: loadEffectiveBlocklist().entries.filter((entry) =>
-    entry.regions.includes("TW") || entry.reason === "user_confirmed_static_channel_exclusion"),
-});
+const staticBlockedChannels = loadEffectiveBlocklist().entries.filter((entry) =>
+  entry.status === "blocked" &&
+  (entry.regions.includes("TW") || entry.reason === "user_confirmed_static_channel_exclusion"));
+const matchStaticBlockedIdentity = createBlockedSourceMatcher({ entries: staticBlockedChannels });
+// Some immutable historical rows lack channel metadata. Only globally unique
+// video IDs independently verified against the official channel are eligible.
+const staticBlockedHistoricalVideoIds = new Set(staticBlockedChannels.flatMap((entry) => entry.historicalVideoIds || []));
 
 function isStaticBlockedChannel(video) {
   if (!video) return false;
-  return Boolean(matchStaticBlockedIdentity({
+  return staticBlockedHistoricalVideoIds.has(video.videoId) || Boolean(matchStaticBlockedIdentity({
     channelId: video.channelId,
     channelHandle: video.channelHandle,
     channelUrl: video.channelUrl,
