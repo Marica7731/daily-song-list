@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-25T14:45:19.434Z",
-  "scannedVideoCount": 25635,
-  "scannedOccurrenceCount": 327136,
+  "generatedAt": "2026-11-25T15:04:07.157Z",
+  "scannedVideoCount": 25642,
+  "scannedOccurrenceCount": 327203,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -947,7 +947,7 @@
     },
     {
       "date": "2026-11-18",
-      "occurrences": 2523,
+      "occurrences": 2548,
       "quarantinedOccurrences": 15
     },
     {
@@ -977,18 +977,18 @@
     },
     {
       "date": "2026-11-24",
-      "occurrences": 1806,
+      "occurrences": 1818,
       "quarantinedOccurrences": 5
     },
     {
       "date": "2026-11-25",
-      "occurrences": 422,
-      "quarantinedOccurrences": 1
+      "occurrences": 452,
+      "quarantinedOccurrences": 2
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 751,
-    "possible_activity_chapter": 211,
+    "possible_activity_chapter": 210,
     "possible_date_as_artist": 180,
     "possible_release_metadata_as_artist": 200,
     "possible_spoken_section": 20,
@@ -5210,23 +5210,6 @@
     },
     {
       "reason": "possible_activity_chapter",
-      "title": "えぺの振り返り",
-      "artist": "",
-      "raw": "6:32 えぺの振り返り",
-      "sourceHash": "9503dfe62348c0bfbb9c1fd5a104cd917e0b65b5ec8cc36faa6304e5c8ebc302",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "lDqoVxt0ZTA",
-          "channelName": "ゆらぎゆら / YuragiYura🌙🫧",
-          "publishedAt": "2026-11-25T13:08:19.951Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_activity_chapter",
       "title": "風は予告なく吹く",
       "artist": "",
       "raw": "♪ 01:06:47 風は予告なく吹く / マクロスΔ ED",
@@ -5389,6 +5372,23 @@
         {
           "videoId": "uXfyY6AE8sY",
           "channelName": "ちよみch. 千代浦蝶美 /あおぎり高校",
+          "publishedAt": "2026-08-24T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "すがわらバンドライブ 「きなこもち」バンド 菅原生涯学習センター2026/9",
+      "artist": "日",
+      "raw": "11:30 すがわらバンドライブ  「きなこもち」バンド   菅原生涯学習センター2026/9/27（日）",
+      "sourceHash": "87ee68059ac52af7e66bddcfe797871a7be7eee906ef40a6e168ddffca38fcdc",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "ybpNl_6CVp8",
+          "channelName": "ヨシタケキャスト",
           "publishedAt": "2026-08-24T00:00:00.000Z"
         }
       ],
@@ -8047,6 +8047,67 @@
           "title": "Sunday n\"AI\"ght (with BT)",
           "artist": "ロマニードットアイオー 🔷",
           "raw": "0:23:10 03. Sunday n\"AI\"ght (with BT) - ロマニードットアイオー 🔷Original Song🔷"
+        }
+      ]
+    },
+    {
+      "videoId": "llgAbDX_uLU",
+      "channelName": "MEDA",
+      "publishedAt": "2026-11-25T13:30:56.741Z",
+      "sourceHash": "ce890536dda48c58cd56b7d3822c0d7cda240547688dbdb173ac00b9fd52506d",
+      "total": 21,
+      "explicitNumberedSongs": 13,
+      "knownArtistRows": 13,
+      "unknownNonNumberedRows": 8,
+      "unknownExamples": [
+        {
+          "title": "余裕だから!",
+          "raw": "00:19:20 余裕だから!"
+        },
+        {
+          "title": "余裕余裕...",
+          "raw": "00:31:16 余裕余裕..."
+        },
+        {
+          "title": "一個気付いた事がある",
+          "raw": "00:59:45 一個気付いた事がある"
+        },
+        {
+          "title": "とんでもねぇ",
+          "raw": "01:18:05 とんでもねぇ"
+        },
+        {
+          "title": "鬼いいいいいい!",
+          "raw": "01:31:44 鬼いいいいいい!"
+        },
+        {
+          "title": "皆の笑顔が嬉しい",
+          "raw": "01:42:24 皆の笑顔が嬉しい"
+        },
+        {
+          "title": "広い会場もあれば高い会場もある",
+          "raw": "01:50:16 広い会場もあれば高い会場もある"
+        },
+        {
+          "title": "だんこーる!",
+          "raw": "01:56:49 だんこーる!"
+        }
+      ],
+      "numberedExamples": [
+        {
+          "title": "空色デイズ",
+          "artist": "中川翔子",
+          "raw": "00:15:05 01. 空色デイズ/中川翔子"
+        },
+        {
+          "title": "睡蓮花",
+          "artist": "湘南乃風",
+          "raw": "00:24:00 02. 睡蓮花/湘南乃風"
+        },
+        {
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "00:37:24 03. 怪獣の花唄/Vaundy"
         }
       ]
     },
