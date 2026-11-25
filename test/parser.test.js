@@ -941,3 +941,40 @@ test("rejects numeric activity annotations without dropping numeric artists", ()
   assert.equal(isLikelyNonSongEntry({ title: "なおみん式マイクテスト📢", artist: "40", raw: "1:15 なおみん式マイクテスト📢||||40" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "天ノ弱", artist: "164", raw: "0:21:50 天ノ弱/164" }), false);
 });
+
+test("audits the confirmed LivePocket event ticket as non-song after timestamp assembly", () => {
+  for (const text of [
+    "15:00 https://livepocket.jp/e/9ptz2",
+    "OPEN 14:30  START 15:00 \n🎫https://livepocket.jp/e/9ptz2",
+    "OPEN 14:30  START 15:00 \n🎫livepocket.jp/e/9ptz2",
+  ]) {
+    const rejects = [];
+    assert.deepEqual(parseTimestampSongs([text], { onReject: (entry) => rejects.push(entry) }), [], text);
+    assert.ok(rejects.some((entry) => entry.reason === "event_ticket_link" && timeToSeconds(entry.time) === 900), text);
+  }
+});
+
+test("a confirmed ticket between songs leaves both source positions intact", () => {
+  const text = [
+    "0:45 01. 17 / 椎名林檎",
+    "OPEN 14:30  START 15:00 ",
+    "🎫livepocket.jp/e/9ptz2",
+    "18:50 StaRt / Mrs. GREEN APPLE",
+  ].join("\n");
+  const videoId = "abcDEF_1234";
+  const rejects = [];
+  const songs = parseTimestampSongs(
+    [{ text, videoId, sourceId: "description:fixture", sourceHash: "fixture" }],
+    { onReject: (entry) => rejects.push(entry) },
+  );
+  assert.deepEqual(songs.map(({ title, seconds, occurrenceId }) => [title, seconds, occurrenceId]), [
+    ["17", 45, `${videoId}:0:45`],
+    ["StaRt", 1130, `${videoId}:${text.indexOf("18:50")}:1130`],
+  ]);
+  assert.equal(rejects.filter((entry) => entry.reason === "event_ticket_link").length, 1);
+});
+
+test("a livepocket link does not veto a real title-and-artist tail", () => {
+  const text = "12:34 花に亡霊 / ヨルシカ\nhttps://livepocket.jp/e/9ptz2";
+  assert.ok(parseTimestampSongs([text]).some((song) => song.title === "花に亡霊" && song.artist === "ヨルシカ" && song.seconds === 754));
+});
