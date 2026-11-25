@@ -1636,3 +1636,36 @@ test("standard slash setlist keeps every row through source risk selection", () 
   const workflow = fs.readFileSync(path.resolve(".github/workflows/discover-vtuber-streams.yml"), "utf8");
   assert.match(workflow, /DAILY_SONG_RETAIN_AUDIT_SOURCE_TEXT: "1"/u);
 });
+
+test("static intake and all public shards exclude verified channel identities, not region words", (t) => {
+  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "static-channel-exclusions-"));
+  t.after(() => fs.rmSync(dataRoot, { recursive: true, force: true }));
+  const now = new Date("2026-11-25T18:28:00Z");
+  const channelId = "UCW0gGQn6lAXCn6s-oGsrmAg";
+  const priorVersion = { videoId: "rpWpjM60eEU", channelId, channelName: "玉米羊", title: "YOASOBI 歌枠", publishedAt: now.toISOString(),
+    songs: [{ occurrenceId: "rpWpjM60eEU:57:630", time: "0:10:30", seconds: 630, title: "#翡翠 #緬甸翡翠", artist: "" }] };
+  const confirmedTaiwan = { ...priorVersion, videoId: "Taiwan00001", channelId: "", channelHandle: "@YukiChanCh" };
+  const unrelated = { ...priorVersion, videoId: "Control0001", channelId: "UC0000000000000000000000", channelName: "日本の別番組",
+    title: "台湾旅行・玉米羊とコラボ", songs: [{ occurrenceId: "Control0001:01:42", time: "0:00:42", seconds: 42, title: "夜に駆ける", artist: "YOASOBI" }] };
+  const state = initialState(now);
+  enqueueSnapshot(state, { snapshotId: "region-test", capturedAt: now.toISOString(), items: [priorVersion, confirmedTaiwan, unrelated] }, now);
+  assert.deepEqual(state.queue.map((item) => item.videoId), [unrelated.videoId]);
+  assert.deepEqual(selectInspectionBatch([priorVersion, confirmedTaiwan, unrelated], 3, now, [priorVersion.videoId]).map((item) => item.videoId), [unrelated.videoId]);
+  fs.mkdirSync(path.join(dataRoot, "days"));
+  const rawPath = path.join(dataRoot, "days", "2026-11-25.json");
+  const raw = JSON.stringify({ videos: [priorVersion, confirmedTaiwan, unrelated] });
+  fs.writeFileSync(rawPath, raw);
+  const meta = buildStaticSite(dataRoot, state, now);
+  assert.equal(meta.videoCount, 1);
+  assert.equal(meta.songOccurrenceCount, 1);
+  assert.equal(fs.readFileSync(rawPath, "utf8"), raw);
+  assert.ok(fs.existsSync(path.join(dataRoot, "sources", "Co", "Control0001.json")));
+  assert.ok(!fs.existsSync(path.join(dataRoot, "sources", "rp", "rpWpjM60eEU.json")));
+  assert.ok(!fs.existsSync(path.join(dataRoot, "sources", "Ta", "Taiwan00001.json")));
+  for (const dir of ["rankings", "entities", "search"]) {
+    const paths = fs.readdirSync(path.join(dataRoot, dir), { recursive: true }).filter((p) => String(p).endsWith(".json"));
+    const all = paths.map((p) => fs.readFileSync(path.join(dataRoot, dir, p), "utf8")).join("\n");
+    assert.match(all, /夜に駆ける/u);
+    assert.doesNotMatch(all, /翡翠|rpWpjM60eEU|Taiwan00001/u);
+  }
+});
