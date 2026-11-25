@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-25T13:23:56.679Z",
+  "generatedAt": "2026-11-25T13:37:25.382Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 30223,
-  "inputOccurrences": 331988,
-  "visibleVideos": 25629,
-  "visibleOccurrences": 327053,
-  "quarantinedOccurrences": 4091,
-  "quarantinedVideos": 3109,
+  "inputVideos": 30226,
+  "inputOccurrences": 331996,
+  "visibleVideos": 25626,
+  "visibleOccurrences": 327055,
+  "quarantinedOccurrences": 4097,
+  "quarantinedVideos": 3115,
   "deduplicatedOccurrences": 823,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 76,
@@ -18,7 +18,7 @@
   "repairedStructuredCreditOccurrences": 2961,
   "repairedKnownSourceCreditOccurrences": 154,
   "byReason": {
-    "prayer_broadcast_timeline": 1498,
+    "prayer_broadcast_timeline": 1499,
     "reviewed_bad_description_source": 531,
     "spoken_fraction_split_as_artist": 1,
     "date_split_as_song_and_artist": 15,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 59,
     "unrelated_livestream_listing": 234,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 869,
+    "reused_description_across_unrelated_channels": 874,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 44,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1446,6 +1446,33 @@
           "raw": "LIVE: ABC7 Eyewitness News at 6:30 p.m."
         }
       ]
+    },
+    {
+      "sourceHash": "e9d3b5a12e0ab7b7630d8f4fdf628419c0edc88938fd2af2804ba35fddb65239",
+      "reason": "reused_description_across_unrelated_channels",
+      "videoCount": 5,
+      "channelCount": 5,
+      "distinctVideoTitles": 5,
+      "examples": [
+        {
+          "videoId": "zAm1SW2ex_A",
+          "channelName": "狗甘(いぬかい)わをん",
+          "videoTitle": "【#歌枠 / #karaoke】OBSおちたぁああ！続きの歌枠！！！【狗甘わをん】",
+          "raw": "24時間 Lo-fi Radio 🎺 管楽器BGM｜作業・勉強・睡眠 / Beats to Study, Work & Relax｜Japan Live Info｜6:17 AM"
+        },
+        {
+          "videoId": "Oe_Fy8Z4AgA",
+          "channelName": "猫宮うさぎ",
+          "videoTitle": "【月1義務歌枠】鼻がむずむずするんだよ",
+          "raw": "24時間 Lo-fi Radio 🎺 管楽器BGM｜作業・勉強・睡眠 / Beats to Study, Work & Relax｜Japan Live Info｜6:17 AM"
+        },
+        {
+          "videoId": "H82HMWuFXNI",
+          "channelName": "護元かざり",
+          "videoTitle": "【歌枠】お歌練習枠！【護元かざり/Vtuber】",
+          "raw": "24時間 Lo-fi Radio 🎺 管楽器BGM｜作業・勉強・睡眠 / Beats to Study, Work & Relax｜Japan Live Info｜6:17 AM"
+        }
+      ]
     }
   ],
   "reviewedBadDescriptionHashes": [
@@ -2702,9 +2729,10 @@
       }
     },
     "2026-11-22": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 11,
       "byReason": {
+        "reused_description_across_unrelated_channels": 1,
         "date_split_as_song_and_artist": 1,
         "confirmed_stream_start_marker": 1
       }
@@ -2718,10 +2746,19 @@
       }
     },
     "2026-11-24": {
-      "quarantinedOccurrences": 1,
+      "quarantinedOccurrences": 5,
       "deduplicatedOccurrences": 7,
       "byReason": {
+        "prayer_broadcast_timeline": 1,
+        "reused_description_across_unrelated_channels": 3,
         "date_split_as_song_and_artist": 1
+      }
+    },
+    "2026-11-25": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0,
+      "byReason": {
+        "reused_description_across_unrelated_channels": 1
       }
     },
     "2024-10-20": {
@@ -16876,6 +16913,10 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 5
     },
+    "zAm1SW2ex_A": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "FWJ3Y5ql9D8": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
@@ -16924,11 +16965,31 @@
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 2
     },
+    "ZVc_heyoJ0c": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "Oe_Fy8Z4AgA": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "H82HMWuFXNI": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
     "-sccgToYjMw": {
       "quarantinedOccurrences": 0,
       "deduplicatedOccurrences": 7
     },
     "elC9PUlNVBg": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "zJ3B7CMwt3Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "qdnoVCxRbcs": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
