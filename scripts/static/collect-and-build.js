@@ -15,6 +15,7 @@ const {
   loadCurationContext,
 } = require("../curation");
 const { cleanStaticVideos } = require("./quality-guard");
+const { createBlockedSourceMatcher, loadEffectiveBlocklist } = require("../blocked-vtuber-utils");
 const { inspectionEligibility, isRetryDue, retryLadderMinutes } = require("./no-song-retry");
 const { buildQualityReview } = require("./quality-review");
 const { canonicalizeStaticSong, shouldPublishStaticSong } = require("./yorushika-catalog");
@@ -38,6 +39,22 @@ const HISTORY_GAP = Object.freeze({ from: "2026-08-23", through: "2026-08-31", s
 // Files written (or confirmed unchanged) by the current build; the generated roots are
 // pruned against this set instead of being wiped up front.
 const generatedPaths = new Set();
+// Only apply verified channel identities to the static pipeline. Title, language,
+// region mentions, and display names are not proof of the video's owner.
+const matchStaticBlockedIdentity = createBlockedSourceMatcher({
+  entries: loadEffectiveBlocklist().entries.filter((entry) =>
+    entry.regions.includes("TW") || entry.reason === "user_confirmed_static_channel_exclusion"),
+});
+
+function isStaticBlockedChannel(video) {
+  if (!video) return false;
+  return Boolean(matchStaticBlockedIdentity({
+    channelId: video.channelId,
+    channelHandle: video.channelHandle,
+    channelUrl: video.channelUrl,
+  }));
+}
+
 // Repair runs drain the historical backlog before fresh candidates; the hourly cadence
 // deliberately reserves only a small slice of each batch for older entries.
 const REPAIR_MODE = /^(?:1|true|yes|on)$/iu.test(String(process.env.STATIC_REPAIR_MODE || ""));
@@ -163,7 +180,7 @@ function enqueueSnapshot(state, source, now, { ladder = retryLadderMinutes(), re
   const processed = new Set(state.processedVideoIds || []);
   const queued = new Set((state.queue || []).map((item) => item.videoId));
   for (const item of source.items) {
-    if (!item?.videoId || processed.has(item.videoId) || queued.has(item.videoId)) continue;
+    if (!item?.videoId || processed.has(item.videoId) || queued.has(item.videoId) || isStaticBlockedChannel(item)) continue;
     if (!retryPriority.has(item.videoId) && !isRetryDue(retryRecords[item.videoId], item.videoId, now.getTime(), ladder)) continue;
     state.queue.push(compactCandidate(item, source));
     queued.add(item.videoId);
@@ -253,6 +270,7 @@ function selectInspectionBatch(queue, limit, now = NOW, priorityVideoIds = reque
 
   for (let index = 0; index < queue.length; index += 1) {
     const candidate = queue[index];
+    if (isStaticBlockedChannel(candidate)) continue;
     const entry = { candidate, index, timestamp: candidateTimestampMs(candidate) };
     if (prioritySet.has(candidate?.videoId)) explicitPriority.push(entry);
     else if (candidate?.sourceGroup !== REPAIR_SOURCE_GROUP && entry.timestamp >= cutoff) recent.push(entry);
@@ -397,7 +415,7 @@ function normalizeVideo(detail, candidate, now) {
 
 function buildStaticSite(dataRoot, state, now, options = {}) {
   const channelSetlistImports = options.channelSetlistImports || readChannelSetlistImports(dataRoot);
-  const inputVideos = readDayVideos(dataRoot, channelSetlistImports);
+  const inputVideos = readDayVideos(dataRoot, channelSetlistImports).filter((video) => !isStaticBlockedChannel(video));
   const { videos: cleanedVideos, audit, artistArchive } = cleanStaticVideos(inputVideos);
   const collectedChannels = loadCollectedChannels();
   const videos = cleanedVideos.map((video) => hydrateCollectedChannel(video, collectedChannels));
