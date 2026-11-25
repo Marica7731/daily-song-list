@@ -136,6 +136,13 @@ function parseTimestampSongs(comments, options = {}) {
         continue;
       }
 
+      // Joining a split event description can put a bare ticket URL after START's wall clock.
+      // Match only the confirmed event and only when the full candidate tail is that URL.
+      if (/^(?:https?:\/\/)?livepocket\.jp\/e\/9ptz2\/?$/iu.test(tail)) {
+        rejectTimestampLine(onReject, "event_ticket_link", { line, time, tail });
+        continue;
+      }
+
       const [title, artist] = splitTitleArtist(tail);
       const basicRejectReason =
         (isBadSongField(title) && "bad_title") ||
