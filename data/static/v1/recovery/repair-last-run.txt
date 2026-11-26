@@ -1,17 +1,17 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-26T00:43:30Z
-[static-repair] processed=42030 published=29675 unpublished=12355 retryPool=27016 repairable=27016 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=420 [static-repair] retryDue=25346 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-26T01:25:12Z
+[static-repair] processed=42035 published=29680 unpublished=12355 retryPool=27024 repairable=27024 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=415 [static-repair] retryDue=25349 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=503 items=503 errors=0
-[static-update] inspection_eligible=137 cooling=246 unqueued_retry_due=12868 selected=0
-[static-update] snapshot=20261126T003238Z processed=0/0 pending=383 videos=25593 songs=326629
+[mygit:success] snapshots=1/1 rawItems=453 items=453 errors=0
+[static-update] inspection_eligible=115 cooling=245 unqueued_retry_due=12886 selected=0
+[static-update] snapshot=20261126T011057Z processed=0/0 pending=360 videos=25598 songs=326672
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=25593 songs=326629 processed=42030 pending=383
-[static-repair] processed=42030 published=29675 unpublished=12355 retryPool=27016 repairable=27016 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=443 [static-repair] retryDue=25349 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=25349
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-26T00:46:28Z
+STATIC_DATA_OK videos=25598 songs=326672 processed=42035 pending=360
+[static-repair] processed=42035 published=29680 unpublished=12355 retryPool=27024 repairable=27024 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=420 [static-repair] retryDue=25351 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=25351
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-26T01:26:57Z
