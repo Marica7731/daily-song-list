@@ -1213,11 +1213,12 @@ async function inspectCandidates(candidates, curationContext = loadCurationConte
 async function fetchVideoSongList(candidate, curationContext = loadCurationContext()) {
   curationContext = ensureInspectionContext(curationContext);
   const html = await fetchText(`https://www.youtube.com/watch?v=${candidate.videoId}&hl=ja&persist_hl=1`);
-  candidate = mergeCandidateWithWatchMetadata(candidate, extractWatchVideoMetadata(html));
+  const player = tryExtractJsonAfter(html, "ytInitialPlayerResponse");
+  candidate = mergeCandidateWithWatchMetadata(candidate, extractWatchVideoMetadata(html, player));
   const apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
   const initialData = extractJsonAfter(html, "ytInitialData");
-  const comments = extractDescriptionCandidates(initialData).map((text, index) =>
+  const comments = extractDescriptionCandidates(initialData, player?.videoDetails, candidate.videoId).map((text, index) =>
     createSourceRecord({ videoId: candidate.videoId, sourceType: "description", text, index }),
   );
   const titleKnownSongSource = createVideoTitleKnownSongSourceRecord(candidate, curationContext);
@@ -1383,8 +1384,7 @@ function extractWatchNextMetadata(html) {
   };
 }
 
-function extractWatchVideoMetadata(html) {
-  const player = tryExtractJsonAfter(html, "ytInitialPlayerResponse");
+function extractWatchVideoMetadata(html, player = tryExtractJsonAfter(html, "ytInitialPlayerResponse")) {
   const videoDetails = player?.videoDetails || {};
   const microformat = player?.microformat?.playerMicroformatRenderer || {};
   const fallback = extractWatchNextMetadata(html);
@@ -2500,25 +2500,42 @@ function isActiveLiveOrUpcomingCandidate(item) {
   return false;
 }
 
-// YouTube's current description renderers serve the whole description as one plain
-// `content` string instead of `simpleText`/`runs`. That string is where long streams keep
-// their set list, so ignoring it yields zero candidates and silently drops the video.
-const DESCRIPTION_CONTENT_KEY = /^(?:attributedDescription|attributedDescriptionBodyText|colorSampledDescriptionBodyText)$/u;
+// Only the watched video's own description may enter the song-source ranking.
+// Related videos, cards and comments can carry clocks but have a different origin.
+function extractDescriptionCandidates(data, details, videoId) {
+  const endpoints = [
+    details?.videoId,
+    data?.currentVideoEndpoint?.watchEndpoint?.videoId,
+  ].filter(Boolean);
+  if (!videoId || !endpoints.length || endpoints.some((id) => id !== videoId)) return [];
 
-function extractDescriptionCandidates(data) {
   const texts = [];
-  for (const item of walkDicts(data)) {
-    if (typeof item.simpleText === "string" && isTimestampCandidateText(item.simpleText)) texts.push(item.simpleText);
-    if (Array.isArray(item.runs)) {
-      const joined = item.runs.map((run) => (run && typeof run.text === "string" ? run.text : "")).join("");
-      if (isTimestampCandidateText(joined)) texts.push(joined);
+  const add = (value) => {
+    const text = typeof value?.content === "string" ? value.content : textValue(value);
+    if (isTimestampCandidateText(text)) texts.push(text);
+  };
+
+  const watch = data?.contents;
+  for (const main of [watch?.twoColumnWatchNextResults, watch?.singleColumnWatchNextResults]) {
+    for (const container of main?.results?.results?.contents || []) {
+      const description = container?.videoSecondaryInfoRenderer;
+      if (!description) continue;
+      add(description.attributedDescription);
+      add(description.description);
     }
   }
-  for (const [key, value] of walkEntries(data)) {
-    if (!DESCRIPTION_CONTENT_KEY.test(key)) continue;
-    if (!value || typeof value !== "object" || typeof value.content !== "string") continue;
-    if (isTimestampCandidateText(value.content)) texts.push(value.content);
+
+  for (const panel of data?.engagementPanels || []) {
+    const section = panel?.engagementPanelSectionListRenderer;
+    if (section?.targetId !== "engagement-panel-structured-description") continue;
+    for (const item of section.content?.structuredDescriptionContentRenderer?.items || []) {
+      const description = item?.expandableVideoDescriptionBodyRenderer;
+      if (!description) continue;
+      add(description.attributedDescriptionBodyText);
+      add(description.colorSampledDescriptionBodyText);
+    }
   }
+
   return [...new Set(texts)];
 }
 
