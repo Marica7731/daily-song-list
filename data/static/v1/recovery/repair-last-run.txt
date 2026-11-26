@@ -1,19 +1,17 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-26T09:11:15Z
-[static-repair] processed=42107 published=29752 unpublished=12355 retryPool=27094 repairable=27094 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=253 [static-repair] retryDue=25392 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-26T09:49:36Z
+[static-repair] processed=42110 published=29755 unpublished=12355 retryPool=27097 repairable=27097 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=248 [static-repair] retryDue=25398 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=444 items=444 errors=0
-[static-update] inspection_eligible=5 cooling=192 unqueued_retry_due=13034 selected=1
-[static-update] retry-later video=9n77Jfx02Kg: youtubei continuation HTTP 403
-[static-update] batch_degraded attempted=1 failed=1; continuing with last successful state
-[static-update] snapshot=20261126T090334Z processed=0/1 pending=197 videos=25661 songs=327441
+[mygit:success] snapshots=1/1 rawItems=454 items=454 errors=0
+[static-update] inspection_eligible=0 cooling=188 unqueued_retry_due=13043 selected=0
+[static-update] snapshot=20261126T093907Z processed=0/0 pending=188 videos=25664 songs=327491
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=25661 songs=327441 processed=42107 pending=197
-[static-repair] processed=42107 published=29752 unpublished=12355 retryPool=27094 repairable=27094 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=257 [static-repair] retryDue=25395 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=25395
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-26T09:13:14Z
+STATIC_DATA_OK videos=25664 songs=327491 processed=42110 pending=188
+[static-repair] processed=42110 published=29755 unpublished=12355 retryPool=27097 repairable=27097 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=248 [static-repair] retryDue=25399 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=25399
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-26T09:51:47Z
