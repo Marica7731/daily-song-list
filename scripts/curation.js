@@ -75,6 +75,9 @@ function normalizeOverrideRecord(record) {
     reviewedAt: String(record?.reviewedAt || "").trim(),
     reviewedBy: String(record?.reviewedBy || "").trim(),
   };
+  if (Object.prototype.hasOwnProperty.call(record || {}, "reviewedStaticPrefilterRecovery")) {
+    normalized.reviewedStaticPrefilterRecovery = record.reviewedStaticPrefilterRecovery;
+  }
   if (action === "upsert_video") normalized.songs = normalizeUpsertSongs(record?.songs);
   return normalized;
 }
@@ -129,6 +132,20 @@ function validateCurationOverrides(value) {
         const hasSeconds = "seconds" in record.replacement && Number.isInteger(record.replacement.seconds) && record.replacement.seconds >= 0;
         if (!hasTitle && !hasArtist && !hasSeconds) errors.push(`${label}.replacement must set title, artist, or seconds`);
         if ("seconds" in record.replacement && !hasSeconds) errors.push(`${label}.replacement.seconds invalid`);
+      }
+    }
+    if ("reviewedStaticPrefilterRecovery" in record) {
+      const selectorOk = /^[-_A-Za-z0-9]{11}:\d+:\d+$/u.test(record.occurrenceId)
+        && record.occurrenceId.split(":")[0] === record.videoId
+        && Number(record.occurrenceId.split(":").at(-1)) === record.seconds
+        && Number.isInteger(record.seconds) && record.seconds >= 0
+        && Boolean(record.sourceId) && /^[a-f0-9]{64}$/u.test(record.sourceHash)
+        && /^[a-f0-9]{64}$/u.test(record.rawHash);
+      const replacementOk = record.replacement?.title && record.replacement?.artist
+        && !("seconds" in record.replacement);
+      if (record.reviewedStaticPrefilterRecovery !== true || record.action !== "replace_entry"
+        || !selectorOk || !replacementOk || !record.reason || !record.reviewedAt || !record.reviewedBy) {
+        errors.push(`${label}.reviewedStaticPrefilterRecovery requires a fully reviewed exact replacement with unchanged seconds`);
       }
     }
     if (record.action === "upsert_video") {
@@ -197,6 +214,7 @@ function stableRecordFingerprint(record) {
     seconds: record.seconds,
     rawHash: record.rawHash,
     replacement: record.replacement || null,
+    ...(record.reviewedStaticPrefilterRecovery === true ? { reviewedStaticPrefilterRecovery: true } : {}),
     songs: Array.isArray(record.songs) ? record.songs : null,
     upsertReview:
       record.action === "upsert_video"
