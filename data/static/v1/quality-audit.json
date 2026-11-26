@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-26T02:08:11.095Z",
+  "generatedAt": "2026-11-26T02:15:43.216Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 30210,
-  "inputOccurrences": 331688,
-  "visibleVideos": 25607,
-  "visibleOccurrences": 326748,
-  "quarantinedOccurrences": 4096,
-  "quarantinedVideos": 3118,
+  "inputVideos": 30220,
+  "inputOccurrences": 331762,
+  "visibleVideos": 25616,
+  "visibleOccurrences": 326821,
+  "quarantinedOccurrences": 4097,
+  "quarantinedVideos": 3119,
   "deduplicatedOccurrences": 823,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 75,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 59,
     "unrelated_livestream_listing": 234,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 877,
+    "reused_description_across_unrelated_channels": 878,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 44,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1450,9 +1450,9 @@
     {
       "sourceHash": "e9d3b5a12e0ab7b7630d8f4fdf628419c0edc88938fd2af2804ba35fddb65239",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 8,
-      "channelCount": 8,
-      "distinctVideoTitles": 8,
+      "videoCount": 9,
+      "channelCount": 9,
+      "distinctVideoTitles": 9,
       "examples": [
         {
           "videoId": "zAm1SW2ex_A",
@@ -2755,10 +2755,10 @@
       }
     },
     "2026-11-25": {
-      "quarantinedOccurrences": 4,
+      "quarantinedOccurrences": 5,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 4
+        "reused_description_across_unrelated_channels": 5
       }
     },
     "2024-10-20": {
@@ -16982,6 +16982,10 @@
       "deduplicatedOccurrences": 0
     },
     "zJ3B7CMwt3Y": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "cbBt_BvR6-I": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
