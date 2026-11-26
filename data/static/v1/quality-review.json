@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-26T19:55:16.685Z",
-  "scannedVideoCount": 25765,
-  "scannedOccurrenceCount": 328771,
+  "generatedAt": "2026-11-26T20:08:58.126Z",
+  "scannedVideoCount": 25774,
+  "scannedOccurrenceCount": 328869,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -757,17 +757,17 @@
     },
     {
       "date": "2026-10-11",
-      "occurrences": 3079,
+      "occurrences": 3078,
       "quarantinedOccurrences": 6
     },
     {
       "date": "2026-10-12",
-      "occurrences": 3110,
+      "occurrences": 3109,
       "quarantinedOccurrences": 4
     },
     {
       "date": "2026-10-13",
-      "occurrences": 1887,
+      "occurrences": 1885,
       "quarantinedOccurrences": 5
     },
     {
@@ -782,7 +782,7 @@
     },
     {
       "date": "2026-10-16",
-      "occurrences": 3194,
+      "occurrences": 3190,
       "quarantinedOccurrences": 3
     },
     {
@@ -982,18 +982,18 @@
     },
     {
       "date": "2026-11-25",
-      "occurrences": 2335,
+      "occurrences": 2338,
       "quarantinedOccurrences": 11
     },
     {
       "date": "2026-11-26",
-      "occurrences": 1258,
+      "occurrences": 1361,
       "quarantinedOccurrences": 3
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 693,
-    "possible_activity_chapter": 216,
+    "possible_unparsed_credits": 694,
+    "possible_activity_chapter": 214,
     "possible_date_as_artist": 184,
     "possible_release_metadata_as_artist": 200,
     "possible_spoken_section": 19,
@@ -2551,23 +2551,6 @@
     },
     {
       "reason": "possible_activity_chapter",
-      "title": "終わりの挨拶",
-      "artist": "",
-      "raw": "45:50 終わりの挨拶",
-      "sourceHash": "97695d9ce67c80da739f81364aae3fdc29374f354c88ca89bf703339c8365d9c",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "mJyIxJNyluo",
-          "channelName": "紅音メアリ / Akane Mary",
-          "publishedAt": "2026-10-12T20:05:20.683Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_activity_chapter",
       "title": "MC(初めて借りた初音ミクのCDの収録曲)",
       "artist": "",
       "raw": "0:24:11 MC(初めて借りた初音ミクのCDの収録曲)",
@@ -2697,23 +2680,6 @@
           "videoId": "dBN6H3A8oJA",
           "channelName": "狐花てん -Ten Kitsunebana-",
           "publishedAt": "2026-10-14T12:03:43.294Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_activity_chapter",
-      "title": "ウェブポンさんのガチャについて",
-      "artist": "",
-      "raw": "45:04 ウェブポンさんのガチャについて",
-      "sourceHash": "c474f28bb4b509feb0b6f1fd6fce78c607a9211598bb7cd93202acfeb8741180",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "0Brgq2StTQU",
-          "channelName": "ブランク・ウリカ - Blanc Ulica -",
-          "publishedAt": "2026-10-16T18:59:27.855Z"
         }
       ],
       "videoCount": 1,
@@ -5400,6 +5366,40 @@
           "videoId": "twD3OZGOs8E",
           "channelName": "甘噛ぱく【歌う格ゲーマー】-Stellarhyth",
           "publishedAt": "2026-08-22T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~ 8",
+      "artist": "月",
+      "raw": "21:30 ~ 8/31(月)",
+      "sourceHash": "f6774c29ffe16732e614ea7a698b68b16346fedfe1d2b8d383e1b83b7596a6e3",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "L_S-VFtyX40",
+          "channelName": "百瑠璃せいらん / MomoruriSeiran CH.",
+          "publishedAt": "2026-08-24T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~8",
+      "artist": "月",
+      "raw": "~8/31(月)23:59",
+      "sourceHash": "f6774c29ffe16732e614ea7a698b68b16346fedfe1d2b8d383e1b83b7596a6e3",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "L_S-VFtyX40",
+          "channelName": "百瑠璃せいらん / MomoruriSeiran CH.",
+          "publishedAt": "2026-08-24T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
