@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-26T15:11:49.130Z",
+  "generatedAt": "2026-11-26T15:19:21.249Z",
   "schemaVersion": 1,
   "policy": "quarantine/dedupe/normalize derived pages only; retain unmodified days/* and state.json",
-  "inputVideos": 30333,
-  "inputOccurrences": 333013,
-  "visibleVideos": 25717,
-  "visibleOccurrences": 328064,
-  "quarantinedOccurrences": 4105,
-  "quarantinedVideos": 3126,
+  "inputVideos": 30336,
+  "inputOccurrences": 333035,
+  "visibleVideos": 25719,
+  "visibleOccurrences": 328085,
+  "quarantinedOccurrences": 4106,
+  "quarantinedVideos": 3127,
   "deduplicatedOccurrences": 823,
   "artistCatalogArchivedVideos": 0,
   "artistCatalogNormalizedOccurrences": 75,
@@ -29,7 +29,7 @@
     "confirmed_chat_section": 59,
     "unrelated_livestream_listing": 234,
     "unrelated_talk_show_listing": 159,
-    "reused_description_across_unrelated_channels": 886,
+    "reused_description_across_unrelated_channels": 887,
     "confirmed_chat_segment_label": 1,
     "confirmed_stream_start_marker": 45,
     "reviewed_non_song_chapter_in_numbered_setlist": 29,
@@ -1450,9 +1450,9 @@
     {
       "sourceHash": "e9d3b5a12e0ab7b7630d8f4fdf628419c0edc88938fd2af2804ba35fddb65239",
       "reason": "reused_description_across_unrelated_channels",
-      "videoCount": 10,
-      "channelCount": 10,
-      "distinctVideoTitles": 10,
+      "videoCount": 11,
+      "channelCount": 11,
+      "distinctVideoTitles": 11,
       "examples": [
         {
           "videoId": "zAm1SW2ex_A",
@@ -2791,10 +2791,10 @@
       }
     },
     "2026-11-26": {
-      "quarantinedOccurrences": 2,
+      "quarantinedOccurrences": 3,
       "deduplicatedOccurrences": 0,
       "byReason": {
-        "reused_description_across_unrelated_channels": 2
+        "reused_description_across_unrelated_channels": 3
       }
     },
     "2024-10-20": {
@@ -17062,6 +17062,10 @@
       "deduplicatedOccurrences": 0
     },
     "qdnoVCxRbcs": {
+      "quarantinedOccurrences": 1,
+      "deduplicatedOccurrences": 0
+    },
+    "_fsx-JsspjM": {
       "quarantinedOccurrences": 1,
       "deduplicatedOccurrences": 0
     },
