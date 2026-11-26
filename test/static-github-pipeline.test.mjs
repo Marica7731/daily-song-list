@@ -729,7 +729,9 @@ test("modern attributed description content is read as the stream set list", () 
     },
   };
 
-  const candidates = extractDescriptionCandidates(data);
+  const videoId = "aClwk1yFZao";
+  data.currentVideoEndpoint = { watchEndpoint: { videoId } };
+  const candidates = extractDescriptionCandidates(data, { videoId }, videoId);
   assert.equal(candidates.length, 1, "the attributed description must be read as one candidate");
   const songs = parseTimestampSongs([{ videoId: "aClwk1yFZao", sourceType: "description", text: candidates[0], index: 0 }]);
   assert.deepEqual(
