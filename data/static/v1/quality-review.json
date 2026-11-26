@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-26T15:25:49.624Z",
-  "scannedVideoCount": 25719,
-  "scannedOccurrenceCount": 328085,
+  "generatedAt": "2026-11-26T15:38:23.115Z",
+  "scannedVideoCount": 25723,
+  "scannedOccurrenceCount": 328119,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -887,12 +887,12 @@
     },
     {
       "date": "2026-11-06",
-      "occurrences": 3288,
+      "occurrences": 3286,
       "quarantinedOccurrences": 31
     },
     {
       "date": "2026-11-07",
-      "occurrences": 2813,
+      "occurrences": 2812,
       "quarantinedOccurrences": 97
     },
     {
@@ -947,7 +947,7 @@
     },
     {
       "date": "2026-11-18",
-      "occurrences": 2630,
+      "occurrences": 2629,
       "quarantinedOccurrences": 16
     },
     {
@@ -987,16 +987,16 @@
     },
     {
       "date": "2026-11-26",
-      "occurrences": 599,
+      "occurrences": 637,
       "quarantinedOccurrences": 3
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 693,
-    "possible_activity_chapter": 217,
+    "possible_activity_chapter": 216,
     "possible_date_as_artist": 183,
     "possible_release_metadata_as_artist": 200,
-    "possible_spoken_section": 20,
+    "possible_spoken_section": 19,
     "possible_promotion_as_song": 5
   },
   "candidates": [
@@ -4841,23 +4841,6 @@
     },
     {
       "reason": "possible_activity_chapter",
-      "title": "締めの挨拶",
-      "artist": "",
-      "raw": "1:46:17 締めの挨拶",
-      "sourceHash": "d46aacb2baa3de7d537b7e267993e0b0b13a4c4056a5e4879469fe1ae8fa8aef",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "mwU-kJH4XFE",
-          "channelName": "藤上峰 わか / Fujigami Waka",
-          "publishedAt": "2026-11-18T11:46:09.640Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_activity_chapter",
       "title": "はじめの挨拶",
       "artist": "",
       "raw": "⁅00:00:05⁆🦊はじめの挨拶",
@@ -5395,6 +5378,23 @@
           "videoId": "twD3OZGOs8E",
           "channelName": "甘噛ぱく【歌う格ゲーマー】-Stellarhyth",
           "publishedAt": "2026-08-22T00:00:00.000Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
+      "title": "~ 8",
+      "artist": "月",
+      "raw": "21:30 ~ 8/31(月)",
+      "sourceHash": "f6774c29ffe16732e614ea7a698b68b16346fedfe1d2b8d383e1b83b7596a6e3",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "L_S-VFtyX40",
+          "channelName": "百瑠璃せいらん / MomoruriSeiran CH.",
+          "publishedAt": "2026-08-24T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
@@ -9000,59 +9000,6 @@
           "title": "群青日和",
           "artist": "東京事変",
           "raw": "00:26:49 03. 群青日和/東京事変"
-        }
-      ]
-    },
-    {
-      "videoId": "e88XNavw9lQ",
-      "channelName": "INARI",
-      "publishedAt": "2026-11-26T14:09:31.550Z",
-      "sourceHash": "67a9e74e6eb966912b62c9292296a2e6aa9b86f97a7c770f4cdeae158fed2ea8",
-      "total": 24,
-      "explicitNumberedSongs": 17,
-      "knownArtistRows": 18,
-      "unknownNonNumberedRows": 6,
-      "unknownExamples": [
-        {
-          "title": "いけんのかい",
-          "raw": "[0:21:20]  いけんのかい"
-        },
-        {
-          "title": "いなりは成長コンテンツ",
-          "raw": "[0:25:58]  いなりは成長コンテンツ"
-        },
-        {
-          "title": "笑って",
-          "raw": "[1:00:52]  笑って"
-        },
-        {
-          "title": "しみしみ",
-          "raw": "[1:09:21]  しみしみ"
-        },
-        {
-          "title": "ベテルギウス冬曲だね(11月19日",
-          "raw": "1:16:54]  ベテルギウス冬曲だね(11月19日"
-        },
-        {
-          "title": "你好~",
-          "raw": "1:28:10 [1:24:40]  你好~"
-        }
-      ],
-      "numberedExamples": [
-        {
-          "title": "踊り子",
-          "artist": "Vaundy",
-          "raw": "[0:05:07]  1.  踊り子  //  Vaundy"
-        },
-        {
-          "title": "片っぽ",
-          "artist": "eill",
-          "raw": "[0:10:29]  2.  片っぽ  //  eill"
-        },
-        {
-          "title": "水平線",
-          "artist": "back number",
-          "raw": "[0:16:34]  3.  水平線  //  back number"
         }
       ]
     },
