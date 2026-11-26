@@ -25548,6 +25548,38 @@
       "reviewedBy": "dot",
       "reviewedAt": "2026-11-26T02:30:00Z",
       "note": "Exact Shiyu channel-import timeline marker for speaking, announcement, opening, watching a video or vocal practice, not a singing performance. Preserve the raw source and all other starts."
+    },
+    {
+      "action": "replace_entry",
+      "videoId": "YEr4F-A5SUk",
+      "occurrenceId": "YEr4F-A5SUk:0:0",
+      "sourceId": "UgxoOKUocfZcyDECTXx4AaABAg",
+      "sourceHash": "4dbf75d5bae3f265ff73eb48ae3d06209d0dae21594c4e530aee42522b407bad",
+      "seconds": 0,
+      "rawHash": "7e414af724619aa2560f7454eecd639fa9c79d8125bc59ab739352e057cc35af",
+      "reason": "confirmed_creator_timestamp_correction",
+      "replacement": {
+        "seconds": 364
+      },
+      "note": "Exact creator description lists waiting at 00:00:00 and the first actual song at 0:06:04.",
+      "reviewedAt": "2026-11-26T02:30:00Z",
+      "reviewedBy": "dot"
+    },
+    {
+      "action": "replace_entry",
+      "videoId": "YEr4F-A5SUk",
+      "occurrenceId": "YEr4F-A5SUk:285:10321",
+      "sourceId": "UgxoOKUocfZcyDECTXx4AaABAg",
+      "sourceHash": "4dbf75d5bae3f265ff73eb48ae3d06209d0dae21594c4e530aee42522b407bad",
+      "seconds": 10321,
+      "rawHash": "715ecde6319775bd0e4da00946b53230d348957cdf2bd6b230054d1962ac4246",
+      "reason": "confirmed_metadata_correction",
+      "replacement": {
+        "artist": "前野曜子"
+      },
+      "note": "Exact creator description and TMS official anime credits list 前野曜子.",
+      "reviewedAt": "2026-11-26T02:30:00Z",
+      "reviewedBy": "dot"
     }
   ],
   "updatedAt": "2026-10-28T22:03:17.561Z",
