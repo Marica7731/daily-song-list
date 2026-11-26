@@ -941,9 +941,26 @@ function reconcileChannelSetlistImports(state, dataRoot = DATA_ROOT) {
   return imports;
 }
 
-function curatePublishedVideo(video, curationContext) {
+function indexReviewedStaticRecoveries(curationContext) {
+  return new Map((curationContext.overrides?.records || [])
+    .filter((record) => record.reviewedStaticPrefilterRecovery === true)
+    .map((record) => [record.occurrenceId, record]));
+}
+
+function hasReviewedStaticRecovery(video, song, reviewedRecoveries) {
+  if (!reviewedRecoveries?.size || !song.occurrenceId || !song.sourceId || !song.sourceHash
+    || typeof song.raw !== "string" || !song.raw.trim()) return false;
+  const r = reviewedRecoveries.get(song.occurrenceId);
+  return Boolean(r && r.action === "replace_entry" && r.videoId === video.videoId
+    && r.occurrenceId === song.occurrenceId && r.seconds === song.seconds
+    && r.sourceId === song.sourceId && r.sourceHash === song.sourceHash
+    && r.rawHash === hashNormalizedText(song.raw));
+}
+
+function curatePublishedVideo(video, curationContext, reviewedRecoveries) {
   const sourceContext = { channelName: video.channelName || "", title: video.title || "" };
-  const songs = (video.songs || []).filter((song) => !isLikelyNonSongEntry(song, sourceContext));
+  const songs = (video.songs || []).filter((song) => !isLikelyNonSongEntry(song, sourceContext)
+    || hasReviewedStaticRecovery(video, song, reviewedRecoveries));
   const sourceId = video.selectedSourceId || video.sourceId || `legacy:${video.videoId}`;
   const sourceHash = video.selectedSourceHash || video.sourceHash ||
     hashNormalizedText(JSON.stringify((video.songs || []).map((song) => [song.seconds, song.title, song.artist, song.raw || ""])));
@@ -973,8 +990,8 @@ function curatePublishedVideo(video, curationContext) {
   return { ...video, songs: publishedSongs };
 }
 
-function readDayVideos(dataRoot, channelSetlistImports = readChannelSetlistImports(dataRoot)) {
-  const curationContext = loadCurationContext();
+function readDayVideos(dataRoot, channelSetlistImports = readChannelSetlistImports(dataRoot), curationContext = loadCurationContext()) {
+  const reviewedRecoveries = indexReviewedStaticRecoveries(curationContext);
   const daysRoot = path.join(dataRoot, "days");
   const files = [];
   if (fs.existsSync(daysRoot)) {
@@ -989,12 +1006,12 @@ function readDayVideos(dataRoot, channelSetlistImports = readChannelSetlistImpor
   const byVideoId = new Map();
   for (const file of files) {
     for (const video of readJson(file).videos || []) {
-      byVideoId.set(video.videoId, curatePublishedVideo(video, curationContext));
+      byVideoId.set(video.videoId, curatePublishedVideo(video, curationContext, reviewedRecoveries));
     }
   }
   for (const channelImport of channelSetlistImports) {
     for (const video of channelImport.videos) {
-      byVideoId.set(video.videoId, curatePublishedVideo(video, curationContext));
+      byVideoId.set(video.videoId, curatePublishedVideo(video, curationContext, reviewedRecoveries));
     }
   }
   return [...byVideoId.values()];
