@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-27T18:55:36.828Z",
-  "scannedVideoCount": 25841,
-  "scannedOccurrenceCount": 329123,
+  "generatedAt": "2026-11-27T19:04:31.160Z",
+  "scannedVideoCount": 25850,
+  "scannedOccurrenceCount": 329266,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -982,7 +982,7 @@
     },
     {
       "date": "2026-11-25",
-      "occurrences": 2299,
+      "occurrences": 2300,
       "quarantinedOccurrences": 11
     },
     {
@@ -992,14 +992,14 @@
     },
     {
       "date": "2026-11-27",
-      "occurrences": 712,
+      "occurrences": 854,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
-    "possible_unparsed_credits": 697,
+    "possible_unparsed_credits": 695,
     "possible_activity_chapter": 206,
-    "possible_date_as_artist": 187,
+    "possible_date_as_artist": 188,
     "possible_release_metadata_as_artist": 189,
     "possible_spoken_section": 19,
     "possible_promotion_as_song": 5
@@ -1381,6 +1381,28 @@
     },
     {
       "reason": "possible_date_as_artist",
+      "title": "~ 11",
+      "artist": "火",
+      "raw": "19:00 ~ 11/17(火)",
+      "sourceHash": "ce72b86f76d39191aa34c10bdd2bd7c452915b0850b10bdb67279bb432a40f2e",
+      "count": 3,
+      "sample": [
+        {
+          "videoId": "i0faS5lpReQ",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-07T17:35:40.616Z"
+        },
+        {
+          "videoId": "Z3vWnjL24_0",
+          "channelName": "焔魔るり CH. / Ruri Enma",
+          "publishedAt": "2026-11-21T17:19:40.073Z"
+        }
+      ],
+      "videoCount": 3,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_date_as_artist",
       "title": "〜2026/11",
       "artist": "日",
       "raw": "20:00〜2026/11/8(日)",
@@ -1440,28 +1462,6 @@
           "videoId": "L_roDORdI1Y",
           "channelName": "Usapi Ch. 桃川うさぴ",
           "publishedAt": "2026-10-20T13:04:20.900Z"
-        }
-      ],
-      "videoCount": 2,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~ 11",
-      "artist": "火",
-      "raw": "19:00 ~ 11/17(火)",
-      "sourceHash": "ce72b86f76d39191aa34c10bdd2bd7c452915b0850b10bdb67279bb432a40f2e",
-      "count": 2,
-      "sample": [
-        {
-          "videoId": "i0faS5lpReQ",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-11-07T17:35:40.616Z"
-        },
-        {
-          "videoId": "Z3vWnjL24_0",
-          "channelName": "焔魔るり CH. / Ruri Enma",
-          "publishedAt": "2026-11-21T17:19:40.073Z"
         }
       ],
       "videoCount": 2,
