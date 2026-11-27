@@ -1,18 +1,20 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-27T04:19:10Z
-[static-repair] processed=42309 published=29954 unpublished=12355 retryPool=27339 repairable=27339 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=182 [static-repair] retryDue=25802 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-27T04:33:33Z
+[static-repair] processed=42309 published=29954 unpublished=12355 retryPool=27339 repairable=27339 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=204 [static-repair] retryDue=25835 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=456 items=456 errors=0
-[static-update] inspection_eligible=47 cooling=76 unqueued_retry_due=13404 selected=1
-[static-update] video=B7_WyfjaQNk result=no_usable_song_source songs=0
-[static-update] snapshot=20261127T040608Z processed=1/1 pending=122 videos=25781 songs=328512
+[mygit:success] snapshots=1/1 rawItems=445 items=445 errors=0
+[static-update] inspection_eligible=78 cooling=75 unqueued_retry_due=13408 selected=2
+[static-update] retry-later video=EHUo6ad8UxA: youtubei continuation HTTP 403
+[static-update] retry-later video=tbKb_P2XUKk: youtubei continuation HTTP 403
+[static-update] batch_degraded attempted=2 failed=2; continuing with last successful state
+[static-update] snapshot=20261127T041609Z processed=0/2 pending=153 videos=25781 songs=328511
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=25781 songs=328512 processed=42309 pending=122
-[static-repair] processed=42309 published=29954 unpublished=12355 retryPool=27339 repairable=27339 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=182 [static-repair] retryDue=25806 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
-STATIC_REPAIR_PASS_END pass=1 dropped=25806
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-27T04:21:41Z
+STATIC_DATA_OK videos=25781 songs=328511 processed=42309 pending=153
+[static-repair] processed=42309 published=29954 unpublished=12355 retryPool=27339 repairable=27339 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=213 [static-repair] retryDue=25837 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_END pass=1 dropped=25837
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-27T04:35:41Z
