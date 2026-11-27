@@ -71,7 +71,8 @@ concurrency:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # Keep the browser gate on a known LTS runner instead of inheriting OS rollouts.
+    runs-on: ubuntu-24.04
     # The UI proof includes package/font setup plus three viewport passes.
     timeout-minutes: 25
     steps:
