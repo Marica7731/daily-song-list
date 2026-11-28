@@ -1761,3 +1761,41 @@ test("an exact reviewed recovery may pin a creator import clock without weakenin
   assert.match(validate({ occurrenceId: `${videoId}:420:2`, sourceId: creatorSource }).join("\n"), /fully reviewed exact replacement/u);
   assert.match(validate({ occurrenceId: `${videoId}:421:2`, sourceId: creatorSource, rawHash: "" }).join("\n"), /fully reviewed exact replacement/u);
 });
+
+test("distinct batches from one reviewed creator add archives without replacing prior starts", (t) => {
+  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "static-reviewed-separate-batches-"));
+  t.after(() => fs.rmSync(dataRoot, { recursive: true, force: true }));
+  const importsDir = path.join(dataRoot, "imports");
+  fs.mkdirSync(importsDir);
+  const now = new Date("2026-11-28T04:15:00Z");
+  const owner = { channelId: "UCIu1rRiQLeUU8e1saN6I0eg", channelName: "ノア・ポラリス" };
+  const add = (filename, videoId, publishedAt, seconds) => {
+    const sourceText = "0:00:59 カワキヲアメク / 美波";
+    const payload = {
+      schemaVersion: 1, kind: "channel-setlists", generatedAt: now.toISOString(),
+      summary: { candidateCount: 1, inspectedCount: 1, auditCount: 1,
+        setlistVideoCount: 1, occurrenceCount: 1, noSongCount: 0, failedCount: 0, allCandidatesAccounted: true },
+      videos: [{ ...owner, videoId, publishedAt, title: "【歌枠】Reviewed replay",
+        songs: [{ index: 1, seconds, time: `0:00:${seconds}`, title: "カワキヲアメク", artist: "美波", raw: sourceText }] }],
+      audits: [{ videoId, result: "selected", selectedSongCount: 1 }],
+    };
+    fs.writeFileSync(path.join(importsDir, filename), JSON.stringify(payload));
+  };
+  const build = () => {
+    const state = initialState(now);
+    return buildStaticSite(dataRoot, state, now, { channelSetlistImports: reconcileChannelSetlistImports(state, dataRoot) });
+  };
+  add("reviewed-creator-01.json", "AAAAAAAAAAA", "2025-03-24T13:29:56.000Z", 19);
+  const first = build();
+  assert.equal(first.videoCount, 1);
+  const firstPath = path.join(dataRoot, "sources/AA/AAAAAAAAAAA.json");
+  const old = fs.readFileSync(firstPath, "utf8");
+  add("reviewed-creator-02.json", "BBBBBBBBBBB", "2024-12-14T12:30:34.000Z", 59);
+  const next = build();
+  assert.equal(next.videoCount, 2);
+  assert.equal(next.songOccurrenceCount, 2);
+  assert.equal(fs.readFileSync(firstPath, "utf8"), old);
+  const added = JSON.parse(fs.readFileSync(path.join(dataRoot, "sources/BB/BBBBBBBBBBB.json"), "utf8"));
+  assert.equal(added.publishedAt, "2024-12-14T12:30:34.000Z");
+  assert.deepEqual(added.songs.map(({ seconds }) => seconds), [59]);
+});
