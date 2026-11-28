@@ -135,9 +135,15 @@ function validateCurationOverrides(value) {
       }
     }
     if ("reviewedStaticPrefilterRecovery" in record) {
+      const [, position, last] = String(record.occurrenceId || "").split(":");
+      // Native parsed rows end in seconds; creator-reviewed imports put the
+      // seconds before the setlist index. Both layouts still pin the raw row.
+      const creatorImportClock = record.sourceId ===
+        `creator-description:${record.videoId}:${String(record.sourceHash).slice(0, 16)}`
+        && Number(position) === record.seconds && Number(last) > 0;
       const selectorOk = /^[-_A-Za-z0-9]{11}:\d+:\d+$/u.test(record.occurrenceId)
         && record.occurrenceId.split(":")[0] === record.videoId
-        && Number(record.occurrenceId.split(":").at(-1)) === record.seconds
+        && (Number(last) === record.seconds || creatorImportClock)
         && Number.isInteger(record.seconds) && record.seconds >= 0
         && Boolean(record.sourceId) && /^[a-f0-9]{64}$/u.test(record.sourceHash)
         && /^[a-f0-9]{64}$/u.test(record.rawHash);

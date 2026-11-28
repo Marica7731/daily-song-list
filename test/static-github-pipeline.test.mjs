@@ -1742,3 +1742,22 @@ test("the creator-reviewed Kyoka debut publishes both live Casket performances w
   ]);
   assert.equal(new Set(source.songs.map(({ occurrenceId }) => occurrenceId)).size, 5);
 });
+
+test("an exact reviewed recovery may pin a creator import clock without weakening native selectors", () => {
+  const { validateCurationOverrides } = require("../scripts/curation.js");
+  const videoId = "35mzBLpI3-4";
+  const sourceHash = "e".repeat(64);
+  const base = {
+    action: "replace_entry", videoId, seconds: 421, rawHash: "a".repeat(64), sourceHash,
+    replacement: { title: "曲名はまだないです", artist: "Aogumo" },
+    reason: "verified_song_title", reviewedBy: "dot", reviewedAt: "2026-11-28T03:06:00Z",
+    reviewedStaticPrefilterRecovery: true,
+  };
+  const validate = (record) => validateCurationOverrides({ schemaVersion: 1, records: [{ ...base, ...record }] }).errors;
+  const creatorSource = `creator-description:${videoId}:${sourceHash.slice(0, 16)}`;
+  assert.deepEqual(validate({ occurrenceId: `${videoId}:421:2`, sourceId: creatorSource }), []);
+  assert.deepEqual(validate({ occurrenceId: `${videoId}:17:421`, sourceId: "legacy-review" }), []);
+  assert.match(validate({ occurrenceId: `${videoId}:421:2`, sourceId: "legacy-review" }).join("\n"), /fully reviewed exact replacement/u);
+  assert.match(validate({ occurrenceId: `${videoId}:420:2`, sourceId: creatorSource }).join("\n"), /fully reviewed exact replacement/u);
+  assert.match(validate({ occurrenceId: `${videoId}:421:2`, sourceId: creatorSource, rawHash: "" }).join("\n"), /fully reviewed exact replacement/u);
+});
