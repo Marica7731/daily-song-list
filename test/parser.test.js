@@ -978,3 +978,27 @@ test("a livepocket link does not veto a real title-and-artist tail", () => {
   const text = "12:34 花に亡霊 / ヨルシカ\nhttps://livepocket.jp/e/9ptz2";
   assert.ok(parseTimestampSongs([text]).some((song) => song.title === "花に亡霊" && song.artist === "ヨルシカ" && song.seconds === 754));
 });
+
+test("uses the start of an explicitly bounded interval before its branched song line", () => {
+  const text = [
+    "00:20",
+    "  05:17~08:13",
+    "　└ 水流のロック / 日食なつこ",
+    "02. 09:54〜15:42",
+    "　└ 雨降花 / 牧野由依",
+    "57:47～1:02:02",
+    "　┗ 空想フォレスト ／ じん",
+    "1:04:31–1:08:30",
+    "　└ 空"
+  ].join("\n");
+  const result = parseTimestampSongs([{ text, sourceId: "comment", sourceHash: "hash", videoId: "uaYw2-mDrgY" }]);
+  assert.deepEqual(result.map(row => [row.seconds, row.title]), [[317, "水流のロック"], [594, "雨降花"], [3467, "空想フォレスト"], [3871, "空"]]);
+  assert.equal(result[0].sourceStartOffset, text.indexOf("05:17"));
+  assert.equal(result[3].occurrenceId, `uaYw2-mDrgY:${text.indexOf("1:04:31")}:3871`);
+});
+
+test("retains separate point clocks and translated annotations without a closed range", () => {
+  const lines = ["00:42 雑談", "03:09 └ Os-宇宙人 / エリオをかまってちゃん", "11:24 Blue Bird / いきものがかり"];
+  const rows = parseTimestampSongs([lines.join("\n")]);
+  assert.deepEqual(rows.map(row => row.seconds), [189, 684]);
+});

@@ -981,7 +981,25 @@ function splitCollapsedTimelineLineWithSourcePosition(sourceLine) {
 
 function mergeSplitTimelineLinesWithSourcePosition(text) {
   const lines = [];
-  for (const sourceLine of sourceLineRecords(text)) {
+  const sourceLines = sourceLineRecords(text);
+  const closedRange = /^(?:\d{1,3}[.、)]\s*)?([0-5]?\d:[0-5]\d|\d{1,2}:[0-5]\d:[0-5]\d)\s*[~〜～–—-]\s*([0-5]?\d:[0-5]\d|\d{1,2}:[0-5]\d:[0-5]\d)$/u;
+  for (let i = 0; i < sourceLines.length; i += 1) {
+    const sourceLine = sourceLines[i];
+    const text = normalizeTimelineChars(sourceLine.text).trim();
+    const range = closedRange.exec(text);
+    const next = normalizeTimelineChars(sourceLines[i + 1]?.text).trim();
+    const song = /^[└┗]\s*(\S.*)$/u.exec(next)?.[1];
+    // A complete standalone elapsed range plus an immediately following
+    // indented song/artist row is one performance, not two cue fragments.
+    if (range && song && !/^[（(【\[]/u.test(song)
+        && !TIMESTAMP_RE.test(song) && !isObviouslyNonSongText(song)
+        && timeToSeconds(normalizeCommentTime(range[1])) < timeToSeconds(normalizeCommentTime(range[2]))) {
+      const start = (sourceLine.sourceLineStartOffset ?? 0)
+        + sourceLine.text.length - sourceLine.text.trimStart().length + text.indexOf(range[1]);
+      lines.push({ ...sourceTimelineLine(`${range[1]} ${next}`, sourceLine, start, 1), closedRangeSong: true });
+      i += 1;
+      continue;
+    }
     lines.push(...splitCollapsedTimelineLineWithSourcePosition(sourceLine));
   }
   const lineText = (line) => String(line?.text || "").trim();
@@ -997,6 +1015,7 @@ function mergeSplitTimelineLinesWithSourcePosition(text) {
     const next3 = lineText(lines[index + 3]);
     if (
       /^\d{1,3}$/.test(line) &&
+      !lines[index + 3]?.closedRangeSong &&
       isStartTimestampMarkerLine(next) &&
       isTimestampOnlyLine(next2) &&
       next3 &&
@@ -1016,7 +1035,7 @@ function mergeSplitTimelineLinesWithSourcePosition(text) {
     }
     if (isTimestampOnlyLine(line)) {
       const timestamp = extractPrimaryTimestamp(line);
-      if (timestamp && next && !isTimestampOnlyLine(next) && !isObviouslyNonSongText(next)) {
+      if (timestamp && next && !lines[index + 1]?.closedRangeSong && !isTimestampOnlyLine(next) && !isObviouslyNonSongText(next)) {
         push(`${timestamp} ${next}`, lines[index]);
         index += 1;
         continue;
