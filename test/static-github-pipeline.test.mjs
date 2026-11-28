@@ -1698,3 +1698,25 @@ test("static intake and all public shards exclude verified channel identities, n
     assert.doesNotMatch(all, /翡翠|rpWpjM60eEU|Taiwan00001|CWGenqi0ljY/u);
   }
 });
+
+test("the creator-reviewed Kyoka debut publishes both live Casket performances without the MV preview", (t) => {
+  const fixture = path.resolve("data/static/v1/imports/kyoka-creator-review.json");
+  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "static-kyoka-debut-"));
+  t.after(() => fs.rmSync(dataRoot, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(dataRoot, "imports"));
+  fs.copyFileSync(fixture, path.join(dataRoot, "imports", path.basename(fixture)));
+  const now = new Date("2026-11-28T02:15:00Z");
+  const state = initialState(now);
+  const videoId = "JQRZwI_zSZw";
+  const imports = reconcileChannelSetlistImports(state, dataRoot);
+  const meta = buildStaticSite(dataRoot, state, now, { channelSetlistImports: imports, pageSize: 50 });
+  assert.equal(meta.videoCount, 1);
+  assert.equal(meta.songOccurrenceCount, 5);
+  const source = JSON.parse(fs.readFileSync(path.join(dataRoot, "sources/JQ", videoId + ".json"), "utf8"));
+  assert.equal(source.channelId, "UC37P2To-pPbd11ocMZ9SyWg");
+  assert.equal(source.publishedAt, "2024-10-20T10:59:24.000Z");
+  assert.deepEqual(source.songs.map(({ seconds, title }) => [seconds, title]), [
+    [52, "ピースサイン"], [1099, "月並みに輝け"], [1687, "Casket"], [3085, "ココロオドル"], [3969, "Casket"],
+  ]);
+  assert.equal(new Set(source.songs.map(({ occurrenceId }) => occurrenceId)).size, 5);
+});
