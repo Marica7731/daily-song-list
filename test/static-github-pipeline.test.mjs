@@ -1698,3 +1698,47 @@ test("static intake and all public shards exclude verified channel identities, n
     assert.doesNotMatch(all, /翡翠|rpWpjM60eEU|Taiwan00001|CWGenqi0ljY/u);
   }
 });
+
+test("the creator-reviewed Kyoka debut publishes both live Casket performances without the MV preview", (t) => {
+  const dataRoot = fs.mkdtempSync(path.join(os.tmpdir(), "static-kyoka-debut-"));
+  t.after(() => fs.rmSync(dataRoot, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(dataRoot, "imports"));
+  const now = new Date("2026-11-28T02:15:00Z");
+  const state = initialState(now);
+  const videoId = "JQRZwI_zSZw";
+  // The normal code check has a sparse checkout, so construct the reviewed
+  // import shape here without requiring production source data in CI.
+  const channelId = "UC37P2To-pPbd11ocMZ9SyWg";
+  const publishedAt = "2024-10-20T10:59:24.000Z";
+  const starts = [
+    [52, "0:00:52", "ピースサイン", "米津玄師", "00:52 ピースサイン(歌)"],
+    [1099, "0:18:19", "月並みに輝け", "結束バンド", "18:19 月並みに輝け(歌)"],
+    [1687, "0:28:07", "Casket", "響架", "28:07 Casket(オリジナル曲)"],
+    [3085, "0:51:25", "ココロオドル", "nobodyknows+", "51:25 ココロオドル(歌)"],
+    [3969, "1:06:09", "Casket", "響架", "1:06:09 自前アンコール(Casket)"],
+  ];
+  const payload = {
+    schemaVersion: 1, kind: "channel-setlists", generatedAt: now.toISOString(),
+    summary: { candidateCount: 1, inspectedCount: 1, auditCount: 1,
+      setlistVideoCount: 1, occurrenceCount: 5, noSongCount: 0, failedCount: 0,
+      allCandidatesAccounted: true },
+    videos: [{ videoId, channelId, publishedAt, channelName: "響架", title: "【初配信】Debut Stream",
+      songs: starts.map(([seconds, time, title, artist, raw], i) => ({
+        index: i + 1, seconds, time, title, artist, raw, sourceId: "creator-description",
+        sourceHash: "b".repeat(64),
+      })) }],
+    audits: [{ videoId, result: "selected", selectedSongCount: 5 }],
+  };
+  fs.writeFileSync(path.join(dataRoot, "imports", "kyoka-creator-review.json"), JSON.stringify(payload));
+  const imports = reconcileChannelSetlistImports(state, dataRoot);
+  const meta = buildStaticSite(dataRoot, state, now, { channelSetlistImports: imports, pageSize: 50 });
+  assert.equal(meta.videoCount, 1);
+  assert.equal(meta.songOccurrenceCount, 5);
+  const source = JSON.parse(fs.readFileSync(path.join(dataRoot, "sources/JQ", videoId + ".json"), "utf8"));
+  assert.equal(source.channelId, "UC37P2To-pPbd11ocMZ9SyWg");
+  assert.equal(source.publishedAt, "2024-10-20T10:59:24.000Z");
+  assert.deepEqual(source.songs.map(({ seconds, title }) => [seconds, title]), [
+    [52, "ピースサイン"], [1099, "月並みに輝け"], [1687, "Casket"], [3085, "ココロオドル"], [3969, "Casket"],
+  ]);
+  assert.equal(new Set(source.songs.map(({ occurrenceId }) => occurrenceId)).size, 5);
+});
