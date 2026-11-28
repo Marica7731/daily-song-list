@@ -1503,6 +1503,13 @@ test("verified channel setlist imports enter generated shards and clear audited 
     fs.writeFileSync(importPath, JSON.stringify(payload));
     fs.writeFileSync(path.join(importsRoot, "inspection-priority-ids.json"), JSON.stringify(["flahkQbUguU"]));
 
+    // A reviewed archive start must reach the generated source even when a
+    // previously collected shard used a rounded stream-card estimate.
+    const oldPath = path.join(dataRoot, "days/2026-10-05.json");
+    fs.mkdirSync(path.dirname(oldPath), { recursive: true });
+    const oldBytes = JSON.stringify({ videos: [{ ...importedVideo, publishedAt: "2026-10-05T00:00:00.000Z" }] });
+    fs.writeFileSync(oldPath, oldBytes);
+
     const state = initialState(now);
     state.processedVideoIds = ["DDDDDDDDDDD"];
     state.queue = [
@@ -1523,6 +1530,9 @@ test("verified channel setlist imports enter generated shards and clear audited 
     assert.equal(meta.channelSetlistImports[0].occurrenceCount, 2);
     const source = JSON.parse(fs.readFileSync(path.join(dataRoot, "sources/AA/AAAAAAAAAAA.json"), "utf8"));
     assert.deepEqual(source.songs.map((song) => song.title), ["Song A", "Song B"]);
+    assert.equal(source.publishedAt, importedVideo.publishedAt);
+    assert.deepEqual(source.songs.map((song) => song.seconds), [62, 123]);
+    assert.equal(fs.readFileSync(oldPath, "utf8"), oldBytes);
     const searchFiles = fs.readdirSync(path.join(dataRoot, "search")).filter((name) => name !== "manifest.json");
     const searchItems = searchFiles.flatMap((name) => JSON.parse(fs.readFileSync(path.join(dataRoot, "search", name), "utf8")).items);
     const channelItem = searchItems.find((item) => item.type === "vtubers" && item.occurrenceCount === 2);
