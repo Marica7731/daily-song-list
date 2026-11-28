@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-28T04:29:34.739Z",
+  "generatedAt": "2026-11-28T04:38:40.004Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261128T041244Z",
-  "sourceCapturedAt": "2026-11-28T04:12:44.520Z",
+  "sourceSnapshotId": "20261128T042242Z",
+  "sourceCapturedAt": "2026-11-28T04:22:42.981Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 463
+    "candidateVideos": 460
   },
-  "pendingVideoCount": 74,
-  "noSongRetryPoolCount": 26678,
-  "processedVideoCount": 42679,
-  "videoCount": 26121,
-  "songOccurrenceCount": 333386,
+  "pendingVideoCount": 11,
+  "noSongRetryPoolCount": 26680,
+  "processedVideoCount": 42681,
+  "videoCount": 26123,
+  "songOccurrenceCount": 333396,
   "quality": {
     "quarantinedOccurrences": 4105,
     "quarantinedVideos": 3126,
@@ -419,7 +419,7 @@
       "unrelated_worship_livestream_listing": 2,
       "dated_stream_announcement": 19
     },
-    "reviewedDayCount": 339,
+    "reviewedDayCount": 341,
     "reviewOnlyCandidateCount": 250,
     "mixedStructuredSourceCount": 117
   },
@@ -428,7 +428,7 @@
       "stats": {
         "videoCount": 33,
         "songOccurrenceCount": 531,
-        "pendingVideoCount": 1,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 0,
         "deduplicatedOccurrences": 1,
         "artistCatalogArchivedOccurrences": 0
@@ -459,7 +459,7 @@
       "stats": {
         "videoCount": 395,
         "songOccurrenceCount": 4761,
-        "pendingVideoCount": 3,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 4,
         "deduplicatedOccurrences": 2,
         "artistCatalogArchivedOccurrences": 0
@@ -490,7 +490,7 @@
       "stats": {
         "videoCount": 1329,
         "songOccurrenceCount": 16133,
-        "pendingVideoCount": 3,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 26,
         "deduplicatedOccurrences": 39,
         "artistCatalogArchivedOccurrences": 0
@@ -521,7 +521,7 @@
       "stats": {
         "videoCount": 6640,
         "songOccurrenceCount": 78567,
-        "pendingVideoCount": 14,
+        "pendingVideoCount": 11,
         "quarantinedOccurrences": 1475,
         "deduplicatedOccurrences": 208,
         "artistCatalogArchivedOccurrences": 7
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 26121,
-        "songOccurrenceCount": 333386,
-        "pendingVideoCount": 74,
+        "videoCount": 26123,
+        "songOccurrenceCount": 333396,
+        "pendingVideoCount": 11,
         "quarantinedOccurrences": 4105,
         "deduplicatedOccurrences": 825,
         "artistCatalogArchivedOccurrences": 21
@@ -637,6 +637,18 @@
       "setlistVideoCount": 9,
       "auditCount": 9,
       "occurrenceCount": 58,
+      "noSongCount": 0,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
+      "path": "imports/noa-polaris-reviewed-02.json",
+      "candidateCount": 2,
+      "inspectedCount": 2,
+      "inspectedInLatestRun": 2,
+      "setlistVideoCount": 2,
+      "auditCount": 2,
+      "occurrenceCount": 10,
       "noSongCount": 0,
       "failedCount": 0,
       "allCandidatesAccounted": true
