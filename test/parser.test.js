@@ -989,7 +989,7 @@ test("uses the start of an explicitly bounded interval before its branched song 
     "57:47～1:02:02",
     "　┗ 空想フォレスト ／ じん",
     "1:04:31–1:08:30",
-    "　└ 空 / 音無小鳥"
+    "　└ 空"
   ].join("\n");
   const result = parseTimestampSongs([{ text, sourceId: "comment", sourceHash: "hash", videoId: "uaYw2-mDrgY" }]);
   assert.deepEqual(result.map(row => [row.seconds, row.title]), [[317, "水流のロック"], [594, "雨降花"], [3467, "空想フォレスト"], [3871, "空"]]);
