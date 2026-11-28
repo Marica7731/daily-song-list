@@ -1,17 +1,17 @@
-STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-28T12:06:43Z
-[static-repair] processed=42768 published=30234 unpublished=12534 retryPool=27951 repairable=27951 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=60 [static-repair] retryDue=26570 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_REPAIR_PASS_BEGIN pass=1/1 at=2026-11-28T12:27:25Z
+[static-repair] processed=42774 published=30239 unpublished=12535 retryPool=27956 repairable=27956 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=60 [static-repair] retryDue=26572 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 
 > daily-song-list@1.0.0 static:update
 > node scripts/static/collect-and-build.js
 
-[mygit:success] snapshots=1/1 rawItems=538 items=538 errors=0
-[static-update] inspection_eligible=8 cooling=0 unqueued_retry_due=14031 selected=0
-[static-update] snapshot=20261128T115640Z processed=0/0 pending=8 videos=26203 songs=334316
+[mygit:success] snapshots=1/1 rawItems=522 items=522 errors=0
+[static-update] inspection_eligible=1 cooling=0 unqueued_retry_due=14036 selected=0
+[static-update] snapshot=20261128T121004Z processed=0/0 pending=1 videos=26209 songs=334402
 
 > daily-song-list@1.0.0 static:validate
 > node scripts/static/validate-static.js
 
-STATIC_DATA_OK videos=26203 songs=334316 processed=42768 pending=8
-[static-repair] processed=42768 published=30234 unpublished=12534 retryPool=27951 repairable=27951 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=68 [static-repair] retryDue=26573 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
+STATIC_DATA_OK videos=26209 songs=334402 processed=42774 pending=1
+[static-repair] processed=42774 published=30239 unpublished=12535 retryPool=27956 repairable=27956 abandoned=0 priority=0 noSongSchema=2 unreadable=0 seeded=60 queue=61 [static-repair] retryDue=26573 retryLadder=0,15,45,120,300,720,1440,2880,5760,8640,10080min
 STATIC_REPAIR_PASS_END pass=1 dropped=26573
-STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-28T12:09:13Z
+STATIC_REPAIR_RUN_STATUS status=ok at=2026-11-28T12:29:55Z
