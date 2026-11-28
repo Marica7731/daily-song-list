@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-28T11:16:12.903Z",
+  "generatedAt": "2026-11-28T11:25:13.285Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -352,20 +352,20 @@
     "shardCount": 57,
     "importedAt": "2026-08-31T19:54:26.743Z"
   },
-  "sourceSnapshotId": "20261128T105634Z",
-  "sourceCapturedAt": "2026-11-28T10:56:34.602Z",
+  "sourceSnapshotId": "20261128T111638Z",
+  "sourceCapturedAt": "2026-11-28T11:16:38.394Z",
   "sourceCoverage": {
     "provider": "Marica7731/mygit today snapshot",
     "status": "success",
     "fetchedSnapshots": 1,
     "selectedSnapshots": 1,
-    "candidateVideos": 523
+    "candidateVideos": 526
   },
-  "pendingVideoCount": 63,
-  "noSongRetryPoolCount": 26739,
-  "processedVideoCount": 42757,
-  "videoCount": 26192,
-  "songOccurrenceCount": 334316,
+  "pendingVideoCount": 0,
+  "noSongRetryPoolCount": 26741,
+  "processedVideoCount": 42759,
+  "videoCount": 26194,
+  "songOccurrenceCount": 334374,
   "quality": {
     "quarantinedOccurrences": 4105,
     "quarantinedVideos": 3126,
@@ -426,9 +426,9 @@
   "ranges": {
     "today": {
       "stats": {
-        "videoCount": 78,
-        "songOccurrenceCount": 1133,
-        "pendingVideoCount": 1,
+        "videoCount": 79,
+        "songOccurrenceCount": 1141,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 0,
         "deduplicatedOccurrences": 1,
         "artistCatalogArchivedOccurrences": 0
@@ -448,7 +448,7 @@
         "path": "rankings/today/artists/page-{page:04d}.json"
       },
       "vtubers": {
-        "totalCount": 78,
+        "totalCount": 79,
         "pageCount": 2,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -457,9 +457,9 @@
     },
     "3d": {
       "stats": {
-        "videoCount": 467,
-        "songOccurrenceCount": 5654,
-        "pendingVideoCount": 3,
+        "videoCount": 468,
+        "songOccurrenceCount": 5662,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 4,
         "deduplicatedOccurrences": 2,
         "artistCatalogArchivedOccurrences": 0
@@ -488,9 +488,9 @@
     },
     "7d": {
       "stats": {
-        "videoCount": 1401,
-        "songOccurrenceCount": 17026,
-        "pendingVideoCount": 3,
+        "videoCount": 1402,
+        "songOccurrenceCount": 17034,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 26,
         "deduplicatedOccurrences": 39,
         "artistCatalogArchivedOccurrences": 0
@@ -519,9 +519,9 @@
     },
     "30d": {
       "stats": {
-        "videoCount": 6711,
-        "songOccurrenceCount": 79422,
-        "pendingVideoCount": 3,
+        "videoCount": 6712,
+        "songOccurrenceCount": 79430,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 1475,
         "deduplicatedOccurrences": 208,
         "artistCatalogArchivedOccurrences": 7
@@ -550,9 +550,9 @@
     },
     "all": {
       "stats": {
-        "videoCount": 26192,
-        "songOccurrenceCount": 334316,
-        "pendingVideoCount": 63,
+        "videoCount": 26194,
+        "songOccurrenceCount": 334374,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 4105,
         "deduplicatedOccurrences": 822,
         "artistCatalogArchivedOccurrences": 21
@@ -602,6 +602,18 @@
       "auditCount": 320,
       "occurrenceCount": 1813,
       "noSongCount": 231,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
+      "path": "imports/inari-koyoi-reviewed-01.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 50,
+      "noSongCount": 0,
       "failedCount": 0,
       "allCandidatesAccounted": true
     },
