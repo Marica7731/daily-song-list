@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "architecture": "github-actions-static-shards-v1",
-  "generatedAt": "2026-11-28T16:09:05.008Z",
+  "generatedAt": "2026-11-28T16:17:14.448Z",
   "continuityStart": "2026-06-26T00:07:13.845Z",
   "historyGaps": [
     {
@@ -361,11 +361,11 @@
     "selectedSnapshots": 1,
     "candidateVideos": 567
   },
-  "pendingVideoCount": 63,
+  "pendingVideoCount": 0,
   "noSongRetryPoolCount": 26800,
   "processedVideoCount": 42811,
   "videoCount": 26247,
-  "songOccurrenceCount": 335065,
+  "songOccurrenceCount": 335027,
   "quality": {
     "quarantinedOccurrences": 4105,
     "quarantinedVideos": 3126,
@@ -458,21 +458,21 @@
     "3d": {
       "stats": {
         "videoCount": 306,
-        "songOccurrenceCount": 3816,
-        "pendingVideoCount": 3,
+        "songOccurrenceCount": 3778,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 0,
         "deduplicatedOccurrences": 1,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 2652,
-        "pageCount": 54,
+        "totalCount": 2645,
+        "pageCount": 53,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/3d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 1323,
+        "totalCount": 1309,
         "pageCount": 27,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -489,21 +489,21 @@
     "7d": {
       "stats": {
         "videoCount": 1126,
-        "songOccurrenceCount": 13710,
-        "pendingVideoCount": 3,
+        "songOccurrenceCount": 13672,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 23,
         "deduplicatedOccurrences": 30,
         "artistCatalogArchivedOccurrences": 0
       },
       "songs": {
-        "totalCount": 7192,
+        "totalCount": 7180,
         "pageCount": 144,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/7d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 2974,
+        "totalCount": 2956,
         "pageCount": 60,
         "pageSize": 50,
         "pageNumberWidth": 4,
@@ -520,22 +520,22 @@
     "30d": {
       "stats": {
         "videoCount": 6555,
-        "songOccurrenceCount": 77519,
-        "pendingVideoCount": 3,
+        "songOccurrenceCount": 77481,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 1407,
         "deduplicatedOccurrences": 185,
         "artistCatalogArchivedOccurrences": 7
       },
       "songs": {
-        "totalCount": 26684,
+        "totalCount": 26667,
         "pageCount": 534,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 9713,
-        "pageCount": 195,
+        "totalCount": 9691,
+        "pageCount": 194,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/30d/artists/page-{page:04d}.json"
@@ -551,22 +551,22 @@
     "all": {
       "stats": {
         "videoCount": 26247,
-        "songOccurrenceCount": 335065,
-        "pendingVideoCount": 63,
+        "songOccurrenceCount": 335027,
+        "pendingVideoCount": 0,
         "quarantinedOccurrences": 4105,
         "deduplicatedOccurrences": 822,
         "artistCatalogArchivedOccurrences": 21
       },
       "songs": {
-        "totalCount": 75147,
+        "totalCount": 75125,
         "pageCount": 1503,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/songs/page-{page:04d}.json"
       },
       "artists": {
-        "totalCount": 26921,
-        "pageCount": 539,
+        "totalCount": 26898,
+        "pageCount": 538,
         "pageSize": 50,
         "pageNumberWidth": 4,
         "path": "rankings/all/artists/page-{page:04d}.json"
@@ -582,6 +582,18 @@
   },
   "channelSetlistImports": [
     {
+      "path": "imports/amane-momo-pink-palette-reviewed-1128.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 7,
+      "noSongCount": 0,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
       "path": "imports/asuyumekanae-reviewed-creator-archives-1128.json",
       "candidateCount": 4,
       "inspectedCount": 4,
@@ -589,6 +601,18 @@
       "setlistVideoCount": 4,
       "auditCount": 4,
       "occurrenceCount": 130,
+      "noSongCount": 0,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
+      "path": "imports/atari-tsuzuku-pink-palette-reviewed-1128.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 5,
       "noSongCount": 0,
       "failedCount": 0,
       "allCandidatesAccounted": true
@@ -738,6 +762,30 @@
       "allCandidatesAccounted": true
     },
     {
+      "path": "imports/rily-ruru-rara-pink-palette-reviewed-1128.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 5,
+      "noSongCount": 0,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
+      "path": "imports/rimu-hoshino-pink-palette-reviewed-1128.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 5,
+      "noSongCount": 0,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
       "path": "imports/ruka-amagai-reviewed-01.json",
       "candidateCount": 1,
       "inspectedCount": 1,
@@ -782,6 +830,18 @@
       "auditCount": 231,
       "occurrenceCount": 2461,
       "noSongCount": 29,
+      "failedCount": 0,
+      "allCandidatesAccounted": true
+    },
+    {
+      "path": "imports/tsumugi-sakisaka-pink-palette-reviewed-1128.json",
+      "candidateCount": 1,
+      "inspectedCount": 1,
+      "inspectedInLatestRun": 1,
+      "setlistVideoCount": 1,
+      "auditCount": 1,
+      "occurrenceCount": 5,
+      "noSongCount": 0,
       "failedCount": 0,
       "allCandidatesAccounted": true
     }
