@@ -1538,6 +1538,21 @@ test("verified channel setlist imports enter generated shards and clear audited 
     const channelItem = searchItems.find((item) => item.type === "vtubers" && item.occurrenceCount === 2);
     assert.ok(channelItem, "imported setlist occurrences must enter search");
 
+    // A verified replacement setlist must replace an earlier bad import,
+    // not merge old clocks into the published source or touch the raw day.
+    const replacementSource = "creator-karaoke-catalog:AAAAAAAAAAA";
+    payload.videos[0].songs = [
+      { ...importedVideo.songs[0], seconds: 91, time: "0:01:31", raw: "0:01:31 Song A / Artist A", sourceId: replacementSource, sourceHash: "b".repeat(64) },
+      { ...importedVideo.songs[1], seconds: 145, time: "0:02:25", raw: "0:02:25 Song B / Artist B", sourceId: replacementSource, sourceHash: "b".repeat(64) },
+    ];
+    fs.writeFileSync(importPath, JSON.stringify(payload));
+    const correctedImports = readChannelSetlistImports(dataRoot);
+    buildStaticSite(dataRoot, state, now, { channelSetlistImports: correctedImports, pageSize: 50, maxShardBytes: 4000000 });
+    const corrected = JSON.parse(fs.readFileSync(path.join(dataRoot, "sources/AA/AAAAAAAAAAA.json"), "utf8"));
+    assert.deepEqual(corrected.songs.map((song) => [song.seconds, song.sourceId]), [[91, replacementSource], [145, replacementSource]]);
+    assert.equal(corrected.publishedAt, importedVideo.publishedAt);
+    assert.equal(fs.readFileSync(oldPath, "utf8"), oldBytes);
+
     payload.summary.occurrenceCount = 99;
     fs.writeFileSync(importPath, JSON.stringify(payload));
     assert.throws(() => readChannelSetlistImports(dataRoot), /summary mismatch/u);
