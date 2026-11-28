@@ -988,10 +988,11 @@ function mergeSplitTimelineLinesWithSourcePosition(text) {
     const text = normalizeTimelineChars(sourceLine.text).trim();
     const range = closedRange.exec(text);
     const next = normalizeTimelineChars(sourceLines[i + 1]?.text).trim();
-    const song = /^[└┗]\s*(\S.+)$/u.exec(next)?.[1];
+    const song = /^[└┗]\s*(\S.*)$/u.exec(next)?.[1];
     // A complete standalone elapsed range plus an immediately following
     // indented song/artist row is one performance, not two cue fragments.
-    if (range && song && /[/／]/u.test(song) && isSongArtistOnlyLine(song)
+    if (range && song && !/^[（(【\[]/u.test(song)
+        && !TIMESTAMP_RE.test(song) && !isObviouslyNonSongText(song)
         && timeToSeconds(normalizeCommentTime(range[1])) < timeToSeconds(normalizeCommentTime(range[2]))) {
       const start = (sourceLine.sourceLineStartOffset ?? 0)
         + sourceLine.text.length - sourceLine.text.trimStart().length + text.indexOf(range[1]);
