@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "REVIEW_ONLY_NO_AUTO_DELETION",
-  "generatedAt": "2026-11-28T01:28:14.777Z",
-  "scannedVideoCount": 26070,
-  "scannedOccurrenceCount": 332870,
+  "generatedAt": "2026-11-28T01:42:18.074Z",
+  "scannedVideoCount": 26075,
+  "scannedOccurrenceCount": 332938,
   "scannedDays": [
     {
       "date": "2022-10-13",
@@ -607,7 +607,7 @@
     },
     {
       "date": "2025-12-15",
-      "occurrences": 1,
+      "occurrences": 16,
       "quarantinedOccurrences": 0
     },
     {
@@ -1672,18 +1672,18 @@
     },
     {
       "date": "2026-11-26",
-      "occurrences": 2227,
+      "occurrences": 2261,
       "quarantinedOccurrences": 3
     },
     {
       "date": "2026-11-27",
-      "occurrences": 1477,
+      "occurrences": 1496,
       "quarantinedOccurrences": 0
     }
   ],
   "byReason": {
     "possible_unparsed_credits": 712,
-    "possible_activity_chapter": 206,
+    "possible_activity_chapter": 208,
     "possible_date_as_artist": 188,
     "possible_release_metadata_as_artist": 189,
     "possible_spoken_section": 19,
@@ -5864,6 +5864,40 @@
     },
     {
       "reason": "possible_activity_chapter",
+      "title": "MC - もう、夜なんだよね...",
+      "artist": "",
+      "raw": "∟　0:12:04　MC - もう、夜なんだよね…",
+      "sourceHash": "51f5d3aaced8178470b29cbcaf5eed8e3a7c453012b5f8b0a94c2ccf9a4044ad",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "jp-BA3aDvjU",
+          "channelName": "suimin.",
+          "publishedAt": "2026-11-27T13:13:29.728Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
+      "title": "終わりの挨拶",
+      "artist": "",
+      "raw": "3:09:58 終わりの挨拶",
+      "sourceHash": "35b65beee5164226f5090ed9b797b530a564aaa1825a4956e1e2f37f93381d9e",
+      "count": 1,
+      "sample": [
+        {
+          "videoId": "Tv7Vc_nsupU",
+          "channelName": "狼朗ハツキ - Rourou Hatsuki -",
+          "publishedAt": "2026-11-27T13:13:29.728Z"
+        }
+      ],
+      "videoCount": 1,
+      "channelCount": 1
+    },
+    {
+      "reason": "possible_activity_chapter",
       "title": "終わりの挨拶&楽器セッション",
       "artist": "",
       "raw": "01:36:44　終わりの挨拶＆楽器セッション",
@@ -6061,40 +6095,6 @@
           "videoId": "ybpNl_6CVp8",
           "channelName": "ヨシタケキャスト",
           "publishedAt": "2026-08-24T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "〜9",
-      "artist": "木",
-      "raw": "22:00〜9/10(木)",
-      "sourceHash": "42b4008b520f2859eacbdbda99ab42a42d4e8aeccf0a7b037558492985c3db80",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "mLSwea8_oms",
-          "channelName": "姫咲ゆめの - Himesaki Yumeno - / vortex Artist",
-          "publishedAt": "2026-08-25T00:00:00.000Z"
-        }
-      ],
-      "videoCount": 1,
-      "channelCount": 1
-    },
-    {
-      "reason": "possible_date_as_artist",
-      "title": "~ 9",
-      "artist": "日",
-      "raw": "19:00～ 9/13 （日）",
-      "sourceHash": "13a5c268aa9aec4c4db9c9cd1ff6459d42926d8a0c348785c441fc11e4eaa288",
-      "count": 1,
-      "sample": [
-        {
-          "videoId": "WmUK7yO6Utk",
-          "channelName": "睦月 胡桃-Mutsuki Kurumi-",
-          "publishedAt": "2026-08-28T00:00:00.000Z"
         }
       ],
       "videoCount": 1,
